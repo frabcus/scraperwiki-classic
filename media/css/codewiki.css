@@ -1,0 +1,94 @@
+h3
+{
+    background-color: black;
+    color: white;
+    margin:0 0 0 0;
+}
+h3 a
+{
+    color: #bbbbff;     
+}
+
+.difflist
+{ 
+    background-color:#bbffbb;  
+    height:200px;
+    border: thin green solid;
+    overflow:scroll;
+    margin-top:1px;
+}
+table.ddump
+{
+    border-collapse: collapse;
+}
+table.ddump td, table.ddump th
+{
+    border:thin black solid;
+}
+td.summarysmall
+{
+    font-size:50%;
+}
+
+table.dividers
+{
+    border-collapse: collapse;
+    border: thin black solid;
+}
+
+table.dividers td
+{
+    border: thin black solid;
+}
+table.dividers th
+{
+    background-color: black;
+    color: white;
+    border: thin white solid;
+}
+
+
+div.codeframebit
+{
+    border:thin black dotted;
+}
+.CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #ddd;
+        text-align: right;
+        padding: .4em;
+        margin: 0;
+        font-family: monospace;
+        font-size: 10pt;
+        line-height: 1.1em;
+      }
+
+#scrapedform 
+{ background-color:#ddeeff; }
+#codewikiform textarea
+{ background-color:#eeccff; }
+#codewikiform #fixedfields input, #scrapedform #fixedfields input
+{ width:4em; } 
+
+#codewikiform span#fixedfields
+{ margin-left:10px; }
+
+div.buttonrow
+{ background-color:black; color:white; }
+div.buttonrow a
+{ color: #bbbbff; }
+#parsepagebutton
+{ margin-left: 15px; margin-right: 5px; background-color: blue; }
+#parsepagebutton input#id_pageid
+{ width:4.5em }
+
+
+table#headlines 
+{
+    border: thin black solid;
+}
+#fixmystreet
+{
+    background-color: lightpink; 
+}

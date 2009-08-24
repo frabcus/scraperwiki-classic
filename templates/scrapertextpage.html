@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{{settings.URL_ROOT}}media/css/codewiki.css" />
+<script type="text/javascript" src="{{settings.URL_ROOT}}media/js/jquery-1.3.2.js"></script>
+<script type="text/javascript" src="{{settings.URL_ROOT}}media/js/jquery.form.js"></script>
+<script type="text/javascript" src="{{settings.URL_ROOT}}media/CodeMirror-0.62/js/codemirror.js"></script>
+
+<script type="text/javascript">
+var codeeditor;
+$(document).ready(function()
+{
+    codeeditor = CodeMirror.fromTextArea("id_code", 
+    {
+        parserfile: ["parsexml.js", "parsecss.js", "tokenizejavascript.js", "parsejavascript.js", "parsehtmlmixed.js"],
+        stylesheet: ["{{settings.URL_ROOT}}media/CodeMirror-0.62/css/xmlcolors.css", "{{settings.URL_ROOT}}media/CodeMirror-0.62/css/jscolors.css", "{{settings.URL_ROOT}}media/CodeMirror-0.62/css/csscolors.css"],
+        path: "{{settings.URL_ROOT}}media/CodeMirror-0.62/js/",
+    });
+
+    $("#id_outputtype").val("ajax"); 
+    var options = 
+    { 
+        target:        '#difflistajax', 
+        beforeSubmit:  function() { $("textarea#id_code").value = codeeditor.getCode().length; }, 
+        success:       function() { codeeditor.focus(); }
+    }; 
+    $('#codewikiform').ajaxForm(options);   // bind form using 'ajaxForm' 
+});
+
+</script>
+{% endblock %}
+
+{% block title %}Editing: {{form.data.filename}}{% endblock %}
+
+{% block content %}
+<h3>Cached file 
+  <u>{{form.data.filename}}</u> 
+  under tag <a href="{{settings.URL_ROOT}}scraped/{{form.data.dirname}}">{{form.data.dirname}}</a>
+  | <a href="{{settings.URL_ROOT}}">home</a>
+</h3>
+
+<form id="scrapedform" action="" method="POST">
+  <div class="codeframebit">{{form.code}}</div>
+  <div class="buttonrow">
+    <input type="submit" name="diff" value="Diffy" title="Show diff between your edit and what is on the server"/>
+    <input type="submit" name="save" value="Save" title="Save changes to the cached file"/>
+    <a href="{% url readingraw pageid=reading.id, fileext=reading.fileext %}">View as {{reading.fileext}}</a>
+    <input type="submit" name="rundoesapply" value="Run Does Apply (not implemented)" title="Lists the scripts that this page applies to" />
+    <span id="fixedfields">{{form.filename}} {{form.dirname}} {{form.datetime}}</span>
+    <input type="text" value="{{url}}"/>
+  </div>
+</form>
+
+<pre id="difflistajax" class="difflist">
+{% for diffline in difflist %}{{diffline}}
+{% endfor %}
+</pre>
+
+{% endblock %}
+

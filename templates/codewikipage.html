@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{{settings.URL_ROOT}}media/css/codewiki.css" />
+<script type="text/javascript" src="{{settings.URL_ROOT}}media/js/jquery-1.3.2.js"></script>
+<script type="text/javascript" src="{{settings.URL_ROOT}}media/js/jquery.form.js"></script>
+<script type="text/javascript" src="{{settings.URL_ROOT}}media/CodeMirror-0.62/js/codemirror.js"></script>
+
+<script type="text/javascript">
+var codeeditor;
+$(document).ready(function()
+{
+    codeeditor = CodeMirror.fromTextArea("id_code", 
+    {
+        {% ifequal lang 'python' %}
+            parserfile: ["../contrib/python/js/parsepython.js"],
+            stylesheet: "{{settings.URL_ROOT}}media/CodeMirror-0.62/contrib/python/css/pythoncolors.css",
+        {% endifequal %}
+        {% ifequal lang 'javascript' %}
+            parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+            stylesheet: "{{settings.URL_ROOT}}media/CodeMirror-0.62/css/jscolors.css",
+        {% endifequal %}
+        {% ifequal lang 'css' %}
+            parserfile: "parsecss.js",
+            stylesheet: "{{settings.URL_ROOT}}media/CodeMirror-0.62/css/csscolors.css",
+        {% endifequal %}
+        {% ifequal lang 'html' %}
+            parserfile: ["parsexml.js", "parsecss.js", "tokenizejavascript.js", "parsejavascript.js", "parsehtmlmixed.js"],
+            stylesheet: ["{{settings.URL_ROOT}}media/CodeMirror-0.62/css/xmlcolors.css", "{{settings.URL_ROOT}}media/CodeMirror-0.62/css/jscolors.css", "{{settings.URL_ROOT}}media/CodeMirror-0.62/css/csscolors.css"],
+        {% endifequal %}
+        {% ifequal lang 'xml' %}
+            parserfile: "parsexml.js",
+            stylesheet: "{{settings.URL_ROOT}}media/CodeMirror-0.62/css/xmlcolors.css",
+        {% endifequal %}
+
+        path: "{{settings.URL_ROOT}}media/CodeMirror-0.62/js/",
+        textWrapping: false, 
+        lineNumbers: true, 
+        indentUnit: 4, 
+        tabMode: "spaces", 
+        parserConfig: {'pythonVersion': 2, 'strictErrors': true}
+    });
+
+    $("#id_outputtype").val("ajax"); 
+    var options = 
+    { 
+        target:        '#difflistajax', 
+        beforeSubmit:  function() { $("textarea#id_code").value = codeeditor.getCode().length; }, 
+        success:       function() { codeeditor.focus(); }
+    }; 
+    $('#codewikiform').ajaxForm(options);   // bind form using 'ajaxForm' 
+});
+
+</script>
+{% endblock %}
+
+
+{% block title %}Editing: {{form.data.filename}}{% endblock %}
+
+{% block content %}
+<h3>Codewiki for <u>{{form.data.filename}}</u> in directory 
+  <a href="{% url codewikidir dirname=form.data.dirname %}">/{{form.data.dirname}}</a> |
+  {% if reading %}parsing <a href="{% url readingedit reading.id %}">pageid={{reading.id}}</a> | {% endif %}
+  <a href="{{settings.URL_ROOT}}">home</a>
+</h3>
+
+
+<form id="codewikiform" action="" method="POST">
+  <div class="codeframebit">{{form.code}}</div>
+  <div class="buttonrow">
+    <input type="submit" name="diff" value="Diffy" title="shows diff operation between text in editor and text on server"/>
+    <input type="submit" name="save" value="Save" id="savebutton" title="saves to server prior to execution"/>
+    {% ifequal form.data.dirname 'readers' %}
+      <input type="submit" name="runscrape" value="Run Scrape" title="executes scraper script"/>
+    {% endifequal %}
+    {% ifequal form.data.dirname 'detectors' %}
+      <input type="submit" name="rundoesapply" value="Run Does Apply" title="finds all pages which script does apply to"/>
+    {% endifequal %}
+    {% ifequal form.data.dirname 'collectors' %}
+      <input type="submit" name="runmakemodel" value="Run Make Model" title="generates the database tables used"/>
+      <input type="submit" name="runcollect" value="Run Make Collection" title="collects info into the database"/>
+    {% endifequal %}
+    {% ifequal form.data.dirname 'observers' %}
+      <a href="{% url observer observername %}">Observe {{observername}}</a>
+    {% endifequal %}
+    {% if reading %}
+    <span id="parsepagebutton">
+      | <input type="submit" name="runparse" value="Run Parse" title="executes on current page"/>
+      on page 
+      {{form.pageid}}
+    |</span>
+    {% endif %}
+    <span id="fixedfields"> {{form.filename}} {{form.dirname}} {{form.datetime}} {{form.outputtype}}</span>
+    </div>
+</form>
+
+<pre id="difflistajax" class="difflist">
+{% for diffline in difflist %}{{diffline}}
+{% endfor %}
+</pre>
+
+{% endblock %}
+
