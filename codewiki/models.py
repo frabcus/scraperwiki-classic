@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib import admin
+from django.core.urlresolvers import reverse
 import settings
 import codecs
 
@@ -16,6 +17,12 @@ class ScraperScript(models.Model):
     
     def __unicode__(self):
         return "%s/%s" % (self.dirname, self.filename)
+
+    def get_codewiki_url(self):
+        return reverse('codewikifile', kwargs={'dirname':self.dirname, 'filename':self.filename})
+    
+    class Meta:
+        ordering = ('-last_edit',)
 
 
 # a single scraped page here

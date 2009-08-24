@@ -1,35 +1,73 @@
 {% extends "base.html" %}
-{% block css %}<link rel="stylesheet" type="text/css" href="{{settings.URL_ROOT}}media/css/codewiki.css" />{% endblock %}
+{% block css %}{% endblock %}
 
-{% block title %}Scope index{% endblock %}
+{% block title %}Scraperwiki front page{% endblock %}
 
 {% block content %}
 
 
-<h3>Scraperwiki index page</h3>
+<h3>Scraperwiki front page</h3>
 
 {% if actionmessage %}
   <h2 style="background-color:yellow">{{actionmessage}}</h2>
 {% endif %}
 
-<ul>
-<li><a href="{% url codewikidir dirname=readers %}">Scraperwiki Readers</a> - List of Readers (webcrawlers)</li>
-<li><a href="{% url readingsall %}">List of all readings</a> - List of scraped pages</li>
-<li><a href="{% url codewikidir dirname=detectors %}">Scraperwiki Detectors</a> - List of Detectors (parsers)</li>
-<li><a href="{% url codewikidir dirname=collectors %}">Scraperwiki Collectors</a> - List of Collectors (models and collation algorithms)</li>
-<li><a href="{% url codewikidir dirname=observers %}">Scraperwiki Observers</a> - Widgets and output pages for the data</li>
-<li>(<a href="/admin">Django Admin site</a> - Log in with username 'm' and password 'm', for looking into the database)</li>
-</ul>
+<div class="frontlink">
 
+<h2><a class="modulelink" href="{% url codewikidir dirname=readers %}">Readers</a></h2>
+<p>
+  Scripts for scraping pages from the internet:
+  {% for script in readersscripts %}
+    <a href="{{script.get_codewiki_url}}">{{script.filename}}</a>
+  {% endfor %}
+  ...
+</p>
+
+<h2><a class="nonmodulelink" class="frontlink" href="{% url readingsall %}">Readings</a></h2>
+<p>At least <em>{{readingsnumber}}</em> pages scraped between <em>{{readingsfirst}}</em> and <em>{{readingslast}}</em>.</p>
+
+<h2><a class="modulelink" href="{% url codewikidir dirname=detectors %}">Detectors</a></h2>
+<p>
+  Scripts for parsing pages that have been scraped into key-value components:
+  {% for script in detectorsscripts %}
+    <a href="{{script.get_codewiki_url}}">{{script.filename}}</a>
+  {% endfor %} 
+  ...
+</p>
+
+<h2><a class="modulelink" href="{% url codewikidir dirname=collectors %}">Collectors</a></h2>
+<p>
+  Scripts for gathering raw key-value data into tables:
+  {% for script in collectorsscripts %}
+    <a href="{{script.get_codewiki_url}}">{{script.filename}}</a>
+  {% endfor %} 
+  ...
+</p>
+
+<h2><a class="modulelink" href="{% url codewikidir dirname=observers %}">Observers</a></h2>
+<p>
+  Widgets and output pages for viewing the data:
+  {% for script in collectorsscripts %}
+    <a href="{{script.get_codewiki_url}}">{{script.filename}}</a>
+  {% endfor %} 
+  ...
+</p>
+
+<h2><a class="nonmodulelink" href="/admin">Django Admin site</a></h2>
+<p>Log in with username 'm' and password 'm'</p>
+
+<h2>
 <form method="post" action="">
   <input type="submit" name="reset" value="Reset database" onClick="return window.confirm('Are you SURE you want to reformat the database?')"/>
 </form>
+</h2>
 
+</div>
 
 <h3 style="margin-top:3em">Worked example</h3>
 
-<p>For illustration, refer to the <a href="{{settings.URL_ROOT}}media/docs/codewikipipeline.odg">codewikipipline.odg</a> 
-and <a href="{{settings.URL_ROOT}}media/docs/codewikipipelineterms.odt">codewikipipelineterms.odt</a>.</p>
+<p>For illustration, refer to the <a href="{{settings.MEDIA_ROOT}}/docs/codewikipipeline.odg">codewikipipline.odg</a> 
+and <a href="{{settings.MEDIA_ROOT}}/docs/codewikipipelineterms.odt">codewikipipelineterms.odt</a>.</p>
 
 <p>Click on Scraperwiki Readers above, select missingcats.py, change the "range(40, 45)" 
 to some other pair of numbers controlling what pages are scraped, click Save button, 

@@ -31,12 +31,12 @@ USE_I18N = True
 # Example: "/home/media/media.lawrence.com/"
 
 
-MEDIA_ROOT = SCRAPERWIKI_DIR + 'media'
-MEDIA_ADMIN = SCRAPERWIKI_DIR + 'media-admin'
-
+MEDIA_DIR = SCRAPERWIKI_DIR + 'media'
+MEDIA_ADMIN_DIR = SCRAPERWIKI_DIR + 'media-admin'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a trailing slash.
-MEDIA_URL = URL_ROOT + 'media/'
+MEDIA_ROOT = URL_ROOT + 'media/'
+CODEMIRROR_ROOT = MEDIA_ROOT + "CodeMirror-0.62/"
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a trailing slash.
 ADMIN_MEDIA_PREFIX = URL_ROOT + 'media-admin/'

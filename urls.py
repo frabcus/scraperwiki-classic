@@ -1,13 +1,7 @@
 from django.conf.urls.defaults import *
 
-from codewiki.views_code import *
-from codewiki.views_scope import *
-from codewiki.views_api import *
-
 import codewiki.views_code as views_code
-import codewiki.views_scope as views_scope
-import codewiki.views_api as views_api
-
+import codewiki.views_main as views_main
 
 import settings
 
@@ -21,20 +15,20 @@ admin.autodiscover()
 
 
 urlpatterns = patterns('',
-    url(r'^admin/(.*)', admin.site.root, name="admin"),
-    url(r'^media/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': settings.MEDIA_ROOT, 'show_indexes':True}),
-    url(r'^media-admin/(?P<path>.*)$', 'django.views.static.serve',
-        {'document_root': settings.MEDIA_ADMIN, 'show_indexes':True}),
-    #(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    
-    url(r'^$', views_scope.scopeindex, name="index"), 
+    url(r'^$', views_main.frontpage, name="frontpage"), 
 
     url(r'^(?P<dirname>(?:readers|detectors|collectors|observers))(?:/(?P<subdirname>.+?))?/$', views_code.codewikidir,  name="codewikidir"),
     url(r'^(?P<dirname>(?:readers|detectors|collectors|observers))/(?P<filename>.+?\.py)$',     views_code.codewikipage, name="codewikifile"),
-    url(r'^reading/(?P<pageid>\d+)$',                           views_code.readingeditpageid, name="readingedit"),
-    url(r'^reading/(?P<pageid>\d+)(?P<fileext>\.html|\.pdf|\.xml)$',    views_code.readingrawpageid,  name="readingraw"),
-    url(r'^readings/$', views_code.readingsall, name="readingsall"),
-    url(r'^observation/(?P<observername>.+?)(?:/(?P<tail>.+?))?$', views_api.observer,           name="observer"), 
+    url(r'^reading/(?P<pageid>\d+)$',                                views_code.readingeditpageid, name="readingedit"),
+    url(r'^reading/(?P<pageid>\d+)(?P<fileext>\.html|\.pdf|\.xml)$', views_code.readingrawpageid,  name="readingraw"),
+    url(r'^readings/$',                                              views_code.readingsall,       name="readingsall"),
+    url(r'^observation/(?P<observername>.+?)(?:/(?P<tail>.+?))?$',   views_main.observer,          name="observer"), 
+
+    # these ought to be implemented by the webserver
+    url(r'^media/(?P<path>.*)$',       'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}),
+    url(r'^media-admin/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ADMIN_DIR, 'show_indexes':True}),
+    
+    # allows direct viewing of the django tables
+    url(r'^admin/(.*)', admin.site.root, name="admin"),
 )
 
