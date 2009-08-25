@@ -108,7 +108,8 @@ def codewikipage(request, dirname, filename):
                             elif brunscrape:
                                 difflistiter = runscrapers.RunFileA(exename, "scrape") 
                             elif brunmakemodel:
-                                difflistiter = runscrapers.RunFileA(exename, "makemodel") 
+                                #difflistiter = runscrapers.RunFileA(exename, "makemodel") 
+                                difflistiter = runscrapers.RunMakeModels(scraperscript)
                             elif bruncollect:
                                 difflistiter = runscrapers.RunFileA(exename, "collect") 
                             elif brunpage:

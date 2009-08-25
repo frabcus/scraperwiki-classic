@@ -112,7 +112,9 @@ def GetDetectings(detectorname):
                  yield keyvalues
             
 
-# this is immediate execution of script that outputs the values when viewing a collector
+
+
+# this is immediate execution of script that outputs the values when viewing a detector
 if __name__ == "__main__":
     if sys.argv[1] == "DoesApplyAll":
         detector = models.ScraperScript.objects.get(dirname="detectors", modulename=sys.argv[2])
@@ -124,7 +126,6 @@ if __name__ == "__main__":
                 detection.save()
                 print '<a href="?pageid=%s">%s</a>' % (reading.id, reading)
 
-    # should be entered into the database and stored
     if sys.argv[1] == "ParseSingle":
         detector = models.ScraperScript.objects.get(dirname="detectors", modulename=sys.argv[2])
         reading = models.Reading.objects.get(id=sys.argv[3])
@@ -136,7 +137,6 @@ if __name__ == "__main__":
             print i, keyvaluelist
             i += 1
 
-    # should be entered into the database and stored
     if sys.argv[1] == "ParseAll":
         detector = models.ScraperScript.objects.get(dirname="detectors", modulename=sys.argv[2])
         detectormodule = detector.get_module(["Parse"])
@@ -148,5 +148,10 @@ if __name__ == "__main__":
             detection.save()
             print detection.result
 
+    if sys.argv[1] == "MakeModel":
+        print "sssss"
+        detector = models.ScraperScript.objects.get(dirname="collectors", modulename=sys.argv[2])
+        detectormodule = detector.get_module(["MakeModels"])
+        detectormodule.MakeModels()
 
 

@@ -41,7 +41,7 @@ def RunFileA(exename, arg):
         
         ln += 1
         if ln > 1000:
-            yield "==Too many lines==\n"
+            yield "==More than 1000 lines==\n"
             break
     yield "==End==\n"
 
@@ -63,6 +63,10 @@ def RunParseAll(scraperscript):
     for ln in RunFileA(exename, "ParseAll %s" % (scraperscript.modulename)):
         yield ln
 
+def RunMakeModels(scraperscript):
+    exename = os.path.join(settings.MODULES_DIR, "detectors", "scraperutils.py")
+    for ln in RunFileA(exename, "MakeModel %s" % (scraperscript.modulename)):
+        yield ln
 
     
     

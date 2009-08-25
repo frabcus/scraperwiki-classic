@@ -72,7 +72,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'codewiki'
+    'codewiki',
+    'collectors'
 )
 
 #localsettings needs to take precedence. Call it to override any existing vars.
