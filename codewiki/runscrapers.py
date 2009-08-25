@@ -45,17 +45,23 @@ def RunFileA(exename, arg):
             break
     yield "==End==\n"
 
+
+# these are done with a call to scraperutils so they can spool their answers out when we get that bit working
 def RunDoesApply(scraperscript):
     print "scraperscript", scraperscript
     exename = os.path.join(settings.MODULES_DIR, "detectors", "scraperutils.py")
-    for ln in RunFileA(exename, "DoesApply %s.%s" % (scraperscript.dirname, scraperscript.filename[:-3])):
+    for ln in RunFileA(exename, "DoesApplyAll %s" % (scraperscript.modulename)):
         yield ln
 
-def RunParse(scraperscript, reading):
+def RunParseSingle(scraperscript, reading):
     exename = os.path.join(settings.MODULES_DIR, "detectors", "scraperutils.py")
-    for ln in RunFileA(exename, "Parse %s.%s %s" % (scraperscript.dirname, scraperscript.filename[:-3], reading.id)):
+    for ln in RunFileA(exename, "ParseSingle %s %s" % (scraperscript.modulename, reading.id)):
         yield ln
 
+def RunParseAll(scraperscript):
+    exename = os.path.join(settings.MODULES_DIR, "detectors", "scraperutils.py")
+    for ln in RunFileA(exename, "ParseAll %s" % (scraperscript.modulename)):
+        yield ln
 
 
     

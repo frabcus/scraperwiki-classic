@@ -75,6 +75,7 @@ def ResetScraperlist(dirname, subdirname):
             ResetScraperlist(dirname, os.path.join(subdirname, f))
         elif f[-3:] == ".py":
             scraperscript = models.ScraperScript(dirname=dirname, filename=f, last_edit=datetime.datetime.fromtimestamp(os.stat(fname).st_mtime))
+            scraperscript.modulename = f[:-3]
             scraperscript.save()
 
 def ResetDatabase():
@@ -97,63 +98,4 @@ def ResetDatabase():
     MakeModels()
 
 
-# functions used in scopesubmit
-
-maineventfields = ["title", "summary", "url", "source", "refid", "quantity", "evt_time", "postcode", "lat", "lon", "district", ]
-
-def AddUser(data):
-    user_name = data.get("user_name")
-    if not user_name or not re.match("[\w\d]+$", user_name):
-        return "Bad user name"
-    userswithname = models.ScopeUser.objects.filter(name=user_name)
-    if userswithname:
-        return "User name already used"
-    user_password = data.get("user_password")
-    if not user_password:
-        return "Missing password"
-    user_email = data.get("user_email")
-    user = models.ScopeUser(name=user_name, password=user_password, email=user_email)
-    user.save()
-    return user     
-
-def MatchEvent(data):
-    rfmap = { }
-    for rf in re.findall("\w+", data.get("non_replace_field", "")):
-        if rf in maineventfields:
-            rfval = data.get(rf)
-            if rfval:
-                rfmap[str(rf)] = str(rfval)
-    if rfmap:
-        return models.ScopeEvent.objects.filter(**rfmap)
-    return []    
-
-def MakeEvent(data):
-    user_name = data.get("user_name")
-    user_password = data.get("user_password")
-    userswithname = models.ScopeUser.objects.filter(name=user_name, password=user_password)
-    if not userswithname:
-        return "No matching user"
-    submitter = userswithname[0]
-
-    rfmap = { "submitter":submitter, "sub_time":datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') }
-    for rf in maineventfields:
-        rfval = data.get(rf)
-        if rfval:
-            rfmap[rf] = rfval; 
-
-    # need a function to convert postcode/district to lat lon    
-
-    related_evtid = int(data.get("related_evt") or "0")
-    if related_evtid:
-        related_evts = models.ScopeEvent.objects.filter(id=related_evt)
-        if related_evts:
-            rfmap["related_evt"] = related_evts[0]
-        
-
-    if "title" not in rfmap or "url" not in rfmap:
-        return "No title or url"
-
-    event = models.ScopeEvent(**rfmap)
-    event.save()
-    return "event saved (" + str(event.id) + ")"
 

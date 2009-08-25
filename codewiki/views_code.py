@@ -87,7 +87,6 @@ def codewikipage(request, dirname, filename):
             rcode = rform.cleaned_data['code']
             outputtype = rform.cleaned_data['outputtype']
             difflist = form.DiffCode(rcode)
-            
             assert scraperscript.filename == form.data['filename']
             assert scraperscript.dirname == form.data['dirname']
             if "revert" in rform.data:
@@ -95,9 +94,10 @@ def codewikipage(request, dirname, filename):
             brunscrape = "runscrape" in rform.data
             brundoesapply = "rundoesapply" in rform.data
             brunpage = "runparse" in rform.data
+            brunparseall = "runparseall" in rform.data
             brunmakemodel = "runmakemodel" in rform.data
             bruncollect = "runcollect" in rform.data
-            if brunscrape or brundoesapply or brunpage or brunmakemodel or bruncollect:
+            if brunscrape or brundoesapply or brunpage or brunmakemodel or bruncollect or brunparseall:
                 if not difflist:
                     if re.match(".*?.py$", filename):
                         message = "OUTPUT FROM RUNNING FILE"
@@ -112,7 +112,9 @@ def codewikipage(request, dirname, filename):
                             elif bruncollect:
                                 difflistiter = runscrapers.RunFileA(exename, "collect") 
                             elif brunpage:
-                                difflistiter = runscrapers.RunParse(scraperscript, reading) 
+                                difflistiter = runscrapers.RunParseSingle(scraperscript, reading) 
+                            elif brunparseall:
+                                difflistiter = runscrapers.RunParseAll(scraperscript) 
 
                             if outputtype == "ajax":
                                 return HttpResponse(content=difflistiter)  # should dribble the output out (see runscraper.py for more comments)

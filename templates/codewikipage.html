@@ -74,6 +74,7 @@ $(document).ready(function()
     {% endifequal %}
     {% ifequal form.data.dirname 'detectors' %}
       <input type="submit" name="rundoesapply" value="Run Does Apply" title="finds all pages which script does apply to"/>
+      <input type="submit" name="runparseall" value="Run Parse All" title="parses all pages that apply"/>
     {% endifequal %}
     {% ifequal form.data.dirname 'collectors' %}
       <input type="submit" name="runmakemodel" value="Run Make Model" title="generates the database tables used"/>

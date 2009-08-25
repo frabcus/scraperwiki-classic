@@ -5,7 +5,6 @@ import settings
 from django.core import management
 from django.db import connection
 import codewiki.models as models
-from codewiki.postdata import MakeEvent, MatchEvent, AddUser
 from django.core.urlresolvers import reverse
 
 
@@ -57,6 +56,9 @@ def SaveScraping(scraper_tag, name, url, text):
     reading = models.Reading(scraper_tag=scraper_tag, name=name, url=url, scrape_time=scrape_time)
     reading.mimetype = "text/html"   # should come from the scrape function
     text = text.encode("ascii", "ignore")  # original text
+    reading.bytelength = len(text)
+    reading.save()   # to make the id for the filepath
+    reading.filepath = os.path.join(settings.READINGS_DIR, "%d%s" % (reading.id, reading.fileext()))
     reading.SaveReading(text)
     reading.save()
     print reading
@@ -65,7 +67,7 @@ def SaveScraping(scraper_tag, name, url, text):
 def FetchCorrectedText(scraper_tag, name):
     stexts = models.Reading.objects.filter(scraper_tag=scraper_tag, name=name).order_by('-scrape_time')
     if stexts:
-        return stexts[0].gettext(), stexts[0].url
+        return stexts[0].contents(), stexts[0].url
     return "", ""
 
 def ScrapeCachedURL(scraper_tag, name, url, params=None, bforce=False):
@@ -75,7 +77,7 @@ def ScrapeCachedURL(scraper_tag, name, url, params=None, bforce=False):
         SaveScraping(scraper_tag=scraper_tag, name=name, url=url, text=text)    
         readings = models.Reading.objects.filter(scraper_tag=scraper_tag, name=name).order_by('-scrape_time')
         assert readings
-    return readings[0].gettext()
+    return readings[0].contents()
     
 def FetchNames(scraper_tag):
     res = set()
@@ -93,35 +95,7 @@ def ListWikipediaDumps():
 # submitting utils
 #
 
-def CreateScopeUser(user_name, user_password, user_email):
-    data = {"user_name":user_name, "user_password":user_password, "user_email":user_email}
-    urlout = settings.SUBMIT_URL + "?" + urllib.urlencode(data)
-    print urlout
-    fout = urllib2.urlopen(urlout)
-    print fout.read()
-    fout.close()
 
-def PostDataRemote(data):
-    urlout = settings.SUBMIT_URL + "?" + urllib.urlencode(data)
-    fout = urllib2.urlopen(urlout)
-    res = fout.read()
-    fout.close()
-    bsucc = re.search("Thanks", res)
-    return bsucc
-
-def PostData(data):
-    if data.get("user_email"):
-        message = AddUser(data)
-        return message
-
-    mevts = MatchEvent(data)
-    if mevts:
-        message = "Matching events already there: " + str(mevts)
-        models.ScopeEvent.delete(mevts[0])
-        MakeEvent(data)  # over-write
-    else:
-        message = MakeEvent(data)
-    return message
 
 
 #
@@ -129,6 +103,7 @@ def PostData(data):
 #
 
 # gets all output from detectors
+# should be removed
 def GetDetectings(detectorname):
     detector = __import__(detectorname, fromlist=["DoesApply", "Parse"])  # have to tell it which functions we want, when the import has a . in it
     for reading in models.Reading.objects.all():
@@ -139,20 +114,39 @@ def GetDetectings(detectorname):
 
 # this is immediate execution of script that outputs the values when viewing a collector
 if __name__ == "__main__":
-    if sys.argv[1] == "DoesApply":
-        detector = __import__(sys.argv[2], fromlist=["DoesApply"])  # have to tell it which functions we want, when the import has a . in it
+    if sys.argv[1] == "DoesApplyAll":
+        detector = models.ScraperScript.objects.get(dirname="detectors", modulename=sys.argv[2])
+        detector.detection_set.all().delete()
+        detectormodule = detector.get_module(["DoesApply"])
         for reading in models.Reading.objects.all():
-            if detector.DoesApply(reading):
+            if detectormodule.DoesApply(reading):
+                detection = models.Detection(detector=detector, reading=reading, status="doesapply")
+                detection.save()
                 print '<a href="?pageid=%s">%s</a>' % (reading.id, reading)
 
     # should be entered into the database and stored
-    if sys.argv[1] == "Parse":
-        detector = __import__(sys.argv[2], fromlist=["Parse"])  # have to tell it which functions we want, when the import has a . in it
+    if sys.argv[1] == "ParseSingle":
+        detector = models.ScraperScript.objects.get(dirname="detectors", modulename=sys.argv[2])
         reading = models.Reading.objects.get(id=sys.argv[3])
+        detection = models.Detection.objects.get(detector=detector, reading=reading)
+        detectormodule = detector.get_module(["Parse"])
         print 'Parsing <a href="/reading/%s">%s</a>' % (reading.id, reading)
         i = 0
-        for keyvaluelist in detector.Parse(reading):
+        for keyvaluelist in detectormodule.Parse(reading):
             print i, keyvaluelist
             i += 1
+
+    # should be entered into the database and stored
+    if sys.argv[1] == "ParseAll":
+        detector = models.ScraperScript.objects.get(dirname="detectors", modulename=sys.argv[2])
+        detectormodule = detector.get_module(["Parse"])
+        for detection in detector.detection_set.all():
+            print '<a href="?pageid=%s">%s</a>' % (detection.reading.id, detection.reading)
+            keyvaluelist = list(detectormodule.Parse(detection.reading))
+            detection.result = keyvaluelist.__repr__()
+            detection.status = "parsed"
+            detection.save()
+            print detection.result
+
 
 

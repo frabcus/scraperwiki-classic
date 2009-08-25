@@ -8,8 +8,8 @@ import settings
 from django.contrib import admin
 admin.autodiscover()
 
-# change ScrapedText to Reading and make it retrieve the data directly from the file instead of storing it
-# collectors should make django tables (difficult)
+# sort out clash between from django.db import models and codewiki.models
+# collectors should make django tables (difficult) under development
 # move hungary and pdf handling from farmsubsidy/
 # remove all log files references
 
