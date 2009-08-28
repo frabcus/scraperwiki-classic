@@ -47,7 +47,7 @@
 <h2><a class="modulelink" href="{% url codewikidir dirname=observers %}">Observers</a></h2>
 <p>
   Widgets and output pages for viewing the data:
-  {% for script in collectorsscripts %}
+  {% for script in observersscripts %}
     <a href="{{script.get_codewiki_url}}">{{script.filename}}</a>
   {% endfor %} 
   ...

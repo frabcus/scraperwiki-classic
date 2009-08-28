@@ -40,8 +40,8 @@ def RunFileA(exename, arg):
         yield txt
         
         ln += 1
-        if ln > 1000:
-            yield "==More than 1000 lines==\n"
+        if ln > 6000:
+            yield "==More than 6000 lines==\n"
             break
     yield "==End==\n"
 

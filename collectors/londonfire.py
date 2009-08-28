@@ -1,4 +1,3 @@
-
 # 
 # In process of trying to get dynamic django tables to work
 # 
@@ -56,9 +55,9 @@ def MakeModels():
 # runs the chosen scraper against all readings and produces detectings
 # these partial results would otherwise be cached in a (key-value) database for slicker access
 if "collect" in sys.argv:
-    detector = models.ScraperScript.objects.get(dirname="detectors", modulename="londonfire")
+    detector = models.ScraperScript.objects.get(dirname="detectors", modulename="wpconstituencies")
     for detection in detector.detection_set.filter(status="parsed"):
-        keyvalues = eval(detection.result)
+        keyvalues = detection.contents()
         print keyvalues
         continue
         

@@ -60,6 +60,7 @@ def codewikidir(request, dirname, subdirname):
                 fout.write("# New file")
                 fout.close()
                 newscraperscript = models.ScraperScript(dirname=dirname, filename=newfilename, last_edit=datetime.datetime.fromtimestamp(os.stat(fname).st_mtime))
+                newscraperscript.modulename = newfilename[:-3]
                 newscraperscript.save()
         else:
             newfilename = "ERROR: Bad file name"

@@ -86,7 +86,7 @@ $(document).ready(function()
     {% if reading %}
     <span id="parsepagebutton">
       | <input type="submit" name="runparse" value="Run Parse" title="executes on current page"/>
-      on page 
+      on <a href="{% url readingedit reading.id %}">page</a> 
       {{form.pageid}}
     |</span>
     {% endif %}

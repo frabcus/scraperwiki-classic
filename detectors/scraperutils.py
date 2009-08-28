@@ -51,24 +51,33 @@ def ScrapeURL(url, params=None):
     print "Scraped: %d bytes from %s" % (len(text), url[:30])
     return text
     
-def SaveScraping(scraper_tag, name, url, text):
-    scrape_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+def SaveScraping(scraper_tag, name, url, text, timestamp=None):
+    if timestamp:
+        readings = models.Reading.objects.filter(scraper_tag=scraper_tag, name=name).order_by('-scrape_time')
+        #readings.delete()
+        #readings = []
+        if readings:
+            reading = readings[0]
+            if reading.scrape_time >= timestamp:
+                if reading.scrape_time == timestamp:
+                    if reading.contents() != text:
+                        print "Mismatch text " + str(timestamp), len(reading.contents()), len(text)
+                        assert False
+                return reading
+        scrape_time = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        scrape_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
     reading = models.Reading(scraper_tag=scraper_tag, name=name, url=url, scrape_time=scrape_time)
     reading.mimetype = "text/html"   # should come from the scrape function
-    text = text.encode("ascii", "ignore")  # original text
     reading.bytelength = len(text)
     reading.save()   # to make the id for the filepath
     reading.filepath = os.path.join(settings.READINGS_DIR, "%d%s" % (reading.id, reading.fileext()))
     reading.SaveReading(text)
     reading.save()
-    print reading
-    return text
+    print "Saved:", reading
+    return reading
 
-def FetchCorrectedText(scraper_tag, name):
-    stexts = models.Reading.objects.filter(scraper_tag=scraper_tag, name=name).order_by('-scrape_time')
-    if stexts:
-        return stexts[0].contents(), stexts[0].url
-    return "", ""
 
 def ScrapeCachedURL(scraper_tag, name, url, params=None, bforce=False):
     readings = models.Reading.objects.filter(scraper_tag=scraper_tag, name=name).order_by('-scrape_time')
@@ -79,17 +88,10 @@ def ScrapeCachedURL(scraper_tag, name, url, params=None, bforce=False):
         assert readings
     return readings[0].contents()
     
-def FetchNames(scraper_tag):
-    res = set()
-    for stext in models.Reading.objects.filter(scraper_tag=scraper_tag):
-        res.add(stext.name)
-    res = list(res)
-    res.sort()
-    return res
 
 def ListWikipediaDumps():
-    return [os.path.join(settings.CODEWIKI_DIR, "wikipediadumps", f)  \
-            for f in os.listdir(os.path.join(settings.CODEWIKI_DIR, "wikipediadumps"))  \
+    return [os.path.join(settings.SCRAPERWIKI_DIR, "wikipediadumps", f)  \
+            for f in os.listdir(os.path.join(settings.SCRAPERWIKI_DIR, "wikipediadumps"))  \
             if f[-4:] == ".xml"]
 #
 # submitting utils
@@ -132,6 +134,10 @@ if __name__ == "__main__":
         detection = models.Detection.objects.get(detector=detector, reading=reading)
         detectormodule = detector.get_module(["Parse"])
         print 'Parsing <a href="/reading/%s">%s</a>' % (reading.id, reading)
+        keyvaluelist = list(detectormodule.Parse(detection.reading))
+        detection.result = keyvaluelist.__repr__()
+        detection.status = "parsed"
+        detection.save()
         i = 0
         for keyvaluelist in detectormodule.Parse(reading):
             print i, keyvaluelist

@@ -75,7 +75,11 @@ class Detection(models.Model):
     result     = models.TextField()
     status     = models.CharField(max_length=40)
     
+    def contents(self):
+        return eval(self.result)
     
+    
+# these don't work, but I would like them to be the basis of user generated models
 class DynamicModel(models.Model):
     new_since_parsing = models.BooleanField(default=False, editable=False)
     non_public = models.BooleanField(default=False)

@@ -31,6 +31,8 @@ def frontpage(request):
 
 def observer(request, observername, tail):
     exename = os.path.join(settings.MODULES_DIR, "observers", observername + ".py")
+    tail = re.sub("\(", "\(", tail)
+    tail = re.sub("\)", "\)", tail)
     ptail = tail and (" --tail " + tail) or ""
     pqs = request.META["QUERY_STRING"] and (" --query " + request.META["QUERY_STRING"]) or ""
     sparam = "render" + ptail + pqs

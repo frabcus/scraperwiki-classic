@@ -78,6 +78,10 @@ def ResetScraperlist(dirname, subdirname):
             scraperscript.modulename = f[:-3]
             scraperscript.save()
 
+
+#
+# This works for mySQL.  I have no idea how to do these functions in postgres
+#
 def ResetDatabase():
     cursor = connection.cursor()
     cursor.execute("drop database %s" % settings.DATABASE_NAME)
