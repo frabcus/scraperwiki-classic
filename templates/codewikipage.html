@@ -57,12 +57,13 @@ $(document).ready(function()
 {% block title %}Editing: {{form.data.filename}}{% endblock %}
 
 {% block content %}
-<h3>Codewiki for <u>{{form.data.filename}}</u> in directory 
+<h3>
+  <div style="float:right">{% if user.is_authenticated %}Logged in as '{{user}}'{% else %}<a href="/admin/">Please log in</a>{% endif %}</div>
+  Codewiki for <u>{{form.data.filename}}</u> in directory 
   <a href="{% url codewikidir dirname=form.data.dirname %}">/{{form.data.dirname}}</a> |
   {% if reading %}parsing <a href="{% url readingedit reading.id %}">pageid={{reading.id}}</a> | {% endif %}
   <a href="{% url frontpage %}">home</a>
 </h3>
-
 
 <form id="codewikiform" action="" method="POST">
   <div class="codeframebit">{{form.code}}</div>

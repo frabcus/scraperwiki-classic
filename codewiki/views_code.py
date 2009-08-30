@@ -1,6 +1,7 @@
 from django import forms
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
+from django.template import RequestContext
 import settings
 import codewiki.models as models
 import os
@@ -11,8 +12,6 @@ import time
 import subprocess
 
 import runscrapers
-
-bEnableExecution = True
 
 class CodeForm(forms.Form):
     dirname    = forms.CharField(widget=forms.TextInput(attrs={"readonly":True}))
@@ -81,7 +80,7 @@ def codewikipage(request, dirname, filename):
     # if the form has been returned
     difflist = [ ]
     message = ""
-
+    
     if request.method == 'POST': # If the form has been submitted...
         rform = CodeForm(request.POST) # 
         if rform.is_valid(): # All validation rules pass (how do we check it against the filename and users?)
@@ -103,6 +102,7 @@ def codewikipage(request, dirname, filename):
                     if re.match(".*?.py$", filename):
                         message = "OUTPUT FROM RUNNING FILE"
                         exename = os.path.join(settings.MODULES_DIR, form.data['dirname'], form.data['filename'])
+                        bEnableExecution = request.user.is_authenticated()
                         if bEnableExecution:
                             if brundoesapply:
                                 difflistiter = runscrapers.RunDoesApply(scraperscript)
@@ -123,7 +123,7 @@ def codewikipage(request, dirname, filename):
                             difflist = list(difflistiter)
                         
                         else:
-                            message = "RUNNING OF FILES disabled.  contact julian@goatchurch.org.uk to enable it."
+                            message = 'You must <a href="/admin/">log in</a> to RUN any scripts.  contact julian@goatchurch.org.uk.'
 
                     else:
                         message = "CANNOT RUN FILE"
@@ -157,8 +157,8 @@ def codewikipage(request, dirname, filename):
     lang = "python"  # for scraperscript
         
     # quick hack to get observername without .py  this hack is everywhere
-    params = { 'form':form, 'lang':lang, 'filenameother':filenameother, 'difflist':difflist, 'reading':reading, 'observername':filename[:-3], 'settings': settings}
-    return render_to_response('codewikipage.html', params)
+    params = { 'form':form, 'lang':lang, 'filenameother':filenameother, 'difflist':difflist, 'reading':reading, 'observername':filename[:-3], 'settings': settings, }
+    return render_to_response('codewikipage.html', params, context_instance=RequestContext(request))
 
 
 
