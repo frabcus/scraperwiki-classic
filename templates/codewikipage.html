@@ -58,7 +58,7 @@ $(document).ready(function()
 
 {% block content %}
 <h3>
-  <div style="float:right">{% if user.is_authenticated %}Logged in as '{{user}}'{% else %}<a href="/admin/">Please log in</a>{% endif %}</div>
+  <div style="float:right">{% if user.is_authenticated %}Logged in as '{{user}}'{% else %}<a href="{{settings.URL_ROOT}}admin/">Please log in</a>{% endif %}</div>
   Codewiki for <u>{{form.data.filename}}</u> in directory 
   <a href="{% url codewikidir dirname=form.data.dirname %}">/{{form.data.dirname}}</a> |
   {% if reading %}parsing <a href="{% url readingedit reading.id %}">pageid={{reading.id}}</a> | {% endif %}

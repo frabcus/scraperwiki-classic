@@ -25,15 +25,9 @@ def MakeModels():
 
     # "IF EXISTS" doesn't work to avoid exceptions
     try:
-        cursor.execute("DROP TABLE IF EXISTS election")  
         cursor.execute("DROP TABLE IF EXISTS candidate")  
     except:
         print "exception: IF table EXISTS feature doesn't work"
-
-    electionfields = [ "id integer AUTO_INCREMENT NOT NULL PRIMARY KEY", 
-                     "election varchar(200) NOT NULL",
-                     "electiondate datetime NULL" ]
-    cursor.execute("CREATE TABLE election (%s)" % ",".join(electionfields))
 
     candidatefields = ["id integer AUTO_INCREMENT NOT NULL PRIMARY KEY", 
                       "election varchar(200) NOT NULL",

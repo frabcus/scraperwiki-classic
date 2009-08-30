@@ -22,7 +22,7 @@ urlpatterns = patterns('',
     url(r'^reading/(?P<pageid>\d+)$',                                views_code.readingeditpageid, name="readingedit"),
     url(r'^reading/(?P<pageid>\d+)(?P<fileext>\.html|\.pdf|\.xml)$', views_code.readingrawpageid,  name="readingraw"),
     url(r'^readings/$',                                              views_code.readingsall,       name="readingsall"),
-    url(r'^observation/(?P<observername>.+?)(?:/(?P<tail>.+?))?$',   views_main.observer,          name="observer"), 
+    url(r'^observation/(?P<observername>.+?)/(?:(?P<tail>.+?))?$',   views_main.observer,          name="observer"), 
 
     # these ought to be implemented by the webserver
     url(r'^media/(?P<path>.*)$',       'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}),

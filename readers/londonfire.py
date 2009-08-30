@@ -34,10 +34,10 @@ def GetPagesForMonth(monthtitle, monthurl):
             print cname, urlp
             textp = ScrapeCachedURL(scraper_tag="londonfirepage", name=cname, url=urlp)
             
+print "hi there", ScrapeCachedURL
 
 # main loop
-for monthtitle, monthurl in GetMonthArchivePages():
+for monthtitle, monthurl in GetMonthArchivePages()[:2]:
     GetPagesForMonth(monthtitle, monthurl)
     
-
 

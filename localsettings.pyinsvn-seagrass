@@ -1,0 +1,13 @@
+# this file is copied from localsettings-insvn-server.py or localsettings-insvn-ubuntu.py 
+# to set you off
+
+DATABASE_ENGINE = 'mysql'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+DATABASE_NAME = 'metroscope'  # 'metroscope'             # Or path to database file if using sqlite3.
+DATABASE_USER = 'undemocracy'             # Not used with sqlite3.
+DATABASE_PASSWORD = 'aiGohsh5'         # Not used with sqlite3.
+SCRAPERWIKI_DIR = '/home/julian/scraperwiki/'
+READINGS_DIR = '/home/julian/scraperwiki-readings/'
+MODULES_DIR = SCRAPERWIKI_DIR
+
+URL_ROOT = "/scraperwiki/"
+HOME_DIR = '/home/julian/'

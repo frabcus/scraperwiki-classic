@@ -31,6 +31,7 @@ def frontpage(request):
 
 def observer(request, observername, tail):
     exename = os.path.join(settings.MODULES_DIR, "observers", observername + ".py")
+    tail = tail or ""
     tail = re.sub("\(", "\(", tail)
     tail = re.sub("\)", "\)", tail)
     ptail = tail and (" --tail " + tail) or ""
