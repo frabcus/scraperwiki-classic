@@ -14,44 +14,18 @@
 
 <div class="frontlink">
 
-<h2><a class="modulelink" href="{% url codewikidir dirname=readers %}">Readers</a></h2>
-<p>
-  Scripts for scraping pages from the internet:
-  {% for script in readersscripts %}
-    <a href="{{script.get_codewiki_url}}">{{script.filename}}</a>
-  {% endfor %}
-  ...
-</p>
+<h2><a class="modulelink" href="{% url codewikilist %}">All scraping modules</a></h2>
+
+{% for scrapermodule in scrapermodules %}
+  <p><a href="{% url codewikimodule modulename=scrapermodule.modulename %}">{{scrapermodule.modulename}}</a>
+  | <a href="{% url observer observername=scrapermodule.modulename %}">Observe</a>
+  </p>
+{% endfor %}
+
 
 <h2><a class="nonmodulelink" class="frontlink" href="{% url readingsall %}">Readings</a></h2>
 <p>At least <em>{{readingsnumber}}</em> pages scraped between <em>{{readingsfirst}}</em> and <em>{{readingslast}}</em>.</p>
 
-<h2><a class="modulelink" href="{% url codewikidir dirname=detectors %}">Detectors</a></h2>
-<p>
-  Scripts for parsing pages that have been scraped into key-value components:
-  {% for script in detectorsscripts %}
-    <a href="{{script.get_codewiki_url}}">{{script.filename}}</a>
-  {% endfor %} 
-  ...
-</p>
-
-<h2><a class="modulelink" href="{% url codewikidir dirname=collectors %}">Collectors</a></h2>
-<p>
-  Scripts for gathering raw key-value data into tables:
-  {% for script in collectorsscripts %}
-    <a href="{{script.get_codewiki_url}}">{{script.filename}}</a>
-  {% endfor %} 
-  ...
-</p>
-
-<h2><a class="modulelink" href="{% url codewikidir dirname=observers %}">Observers</a></h2>
-<p>
-  Widgets and output pages for viewing the data:
-  {% for script in observersscripts %}
-    <a href="{{script.get_codewiki_url}}">{{script.filename}}</a>
-  {% endfor %} 
-  ...
-</p>
 
 <h2><a class="nonmodulelink" href="/admin">Django Admin site</a></h2>
 <p>Log in with username 'm' and password 'm'</p>
@@ -69,42 +43,6 @@
 <p>For illustration, refer to the <a href="{{settings.MEDIA_ROOT}}/docs/codewikipipeline.odg">codewikipipline.odg</a> 
 and <a href="{{settings.MEDIA_ROOT}}/docs/codewikipipelineterms.odt">codewikipipelineterms.odt</a>.</p>
 
-<p>Click on Scraperwiki Readers above, select missingcats.py, change the "range(40, 45)" 
-to some other pair of numbers controlling what pages are scraped, click Save button, 
-click Run Scrape button.
-<em>This will be the place with the most sensitivity.</em></p>
-
-<p>Go back to index page (this page), click on List of readings, and see those pages now in the list.  
-Click on one and see the source html for it, and click on View link to see as rendered html.</p>
-
-<p>Go back to index page, click on Scraperwiki Detectors, click on missingcats.py, and click on Run Does Apply button.  
-You get a short list of readings which this Detector has claimed it can parse.  
-Click on one.  The link to the reading on the top line ("Page N") 
-takes you to the same place as the links on the List of readings page.  
-See it also in the URL as ?pageid=NN.</p>
-
-<p>There will be a new Run Parse (on page) button.  This runs the parsing output on the selected page.
-<em>This is the place where there will be the most pleasurable hacking.</em></p>
-
-<p>Go back to index page, click on Scraperwiki Collectors, click on missingcats.py.  
-There are buttons to Run Make Model and Run Make Collection.  
-For now, it's writing totally raw SQL tables and queries, but I would like this to be replaced with  
-the Django model format when someone works out how to do it.  
-In the final version there will probably be a single page for each table-model 
-shared across the entire namespace.  </p>
-
-<p>Click on Run Make Collection button and it will run the detector "detectors.missingcats" 
-against all the readings (scraped pages) and save it into the database table.  
-(Look in the collections/ukelections.py for a more complex system of tables.)  
-<em>This will be the place where there will be the most difficult refactoring.</em></p>
-
-<p>Go back to index page, click on Scraperwiki Observers, click on missingcats.py.  
-The code there will produce the monthly stats of missing cats.  
-This is a very crude implementation of a model-view-controller, 
-which should in future exactly match Django, so that any app or widget written in Django 
-can be ported into and out of the system.  
-Use their successful standards entirely; don't invent anything new.
-<em>This will be the place where there is the most creativity.</em></p>
 
 
 <p>julian@goatchurch.org.uk</p>

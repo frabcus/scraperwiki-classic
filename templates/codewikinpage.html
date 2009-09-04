@@ -61,7 +61,7 @@ $(document).ready(function()
   <div style="float:right">{% if user.is_authenticated %}Logged in as '{{user}}'{% else %}<a href="{{settings.URL_ROOT}}admin/">Please log in</a>{% endif %}</div>
   Module: <a href="{% url codewikimodule modulename=form.data.dirname %}">/{{form.data.dirname}}</a>
   File: <u>{{form.data.filename}}</u>
-  | <a href="{% url observer form.data.dirname %}">Observe</a>
+  | <a href="{% url observer observername=form.data.dirname %}">Observe</a>
   | <a href="{% url frontpage %}">Home</a>
 </h3>
 
@@ -70,7 +70,7 @@ $(document).ready(function()
   <div class="buttonrow">
     <input type="submit" name="sbutt" value="Diffy" title="shows diff operation between text in editor and text on server"/>
     <input type="submit" name="sbutt" value="Save" id="savebutton" title="saves to server prior to execution"/>
-    <input type="submit" name="sbutt" value="RunScrape" title="executes scraper script"/>
+    <input type="submit" name="sbutt" value="Scrape" title="executes scraper script"/>
     <input type="submit" name="sbutt" value="DoesApplyAll" title="finds all pages which script does apply to"/>
 
     {% if reading %}
@@ -82,8 +82,7 @@ $(document).ready(function()
     {% endif %}
 
     <input type="submit" name="sbutt" value="ParseAll" title="parses all pages that apply"/>
-    <input type="submit" name="sbutt" value="RunMakeModels" title="generates the database tables used"/>
-    <input type="submit" name="sbutt" value="RunCollect" title="collects info into the database"/>
+    <input type="submit" name="sbutt" value="Collect" title="collects info into the database"/>
     <span id="fixedfields"> {{form.filename}} {{form.dirname}} {{form.datetime}} {{form.outputtype}}</span>
     </div>
 </form>

@@ -44,6 +44,20 @@ class CodeForm(forms.Form):
         fout.close()
         return True
 
+newscrapertext = """
+
+def Scrape():
+    pass
+
+def DoesApply(reading):
+    return False
+
+def Parse(reading):
+    return [ ]
+
+def Observe(tailurl):
+    print "blank page"
+"""
 
 # generate the directory listing in the directory
 def codewikilist(request):
@@ -55,7 +69,7 @@ def codewikilist(request):
                 os.mkdir(fname)
                 fnameinit = os.path.join(fname, "__init__.py")
                 fout = open(fnameinit, "w")
-                fout.write("# New file")
+                fout.write(newscrapertext)
                 fout.close()
                 newmodule = models.ScraperModule(modulename=newmodulename, last_edit=datetime.datetime.fromtimestamp(os.stat(fname).st_mtime))
                 newmodule.save()
@@ -94,11 +108,10 @@ def codewikinfile(request, modulename, filename):
             assert scrapermodule.modulename == form.data['dirname'], (scrapermodule.modulename, form.data['dirname'])
 
             sbutt = rform.data.get("sbutt")
-            if sbutt in ["RunScrape", "DoesApplyAll", "ParseSingle", "ParseAll", "RunMakeModels", "RunCollect" ]:
+            if sbutt in ["Scrape", "DoesApplyAll", "ParseSingle", "ParseAll", "MakeModels", "Collect" ]:
                 if not difflist:
                     if re.match(".*?.py$", filename):
                         message = "OUTPUT FROM RUNNING FILE"
-                        exename = os.path.join(settings.MODULES_DIR, form.data['dirname'], form.data['filename'])
                         bEnableExecution = request.user.is_authenticated()
                         bEnableExecution = True
                         if bEnableExecution:
@@ -149,128 +162,12 @@ def codewikinfile(request, modulename, filename):
     return render_to_response('codewikinpage.html', params, context_instance=RequestContext(request))
 
 def observer(request, observername, tail):
-    exename = os.path.join(settings.MODULES_DIR, "detectors", "scraperutils.py")
+    exename = os.path.join(settings.SCRAPERWIKI_DIR, "scraperutils.py")
     tail = tail or ""
     tail = re.sub("\(", "\(", tail)
     tail = re.sub("\)", "\)", tail)
     res = runscrapers.RunFileA(exename, "%s %s %s" % (observername, "Observe", tail))
     return HttpResponse(content="".join(list(res)))
-
-
-# generate the directory listing in the directory
-def codewikidir(request, dirname, subdirname):
-    subdirname = subdirname or ""
-    dname = os.path.join(settings.MODULES_DIR, dirname, subdirname)
-    
-    newfilename = request.POST.get("newfile")
-    if newfilename:
-        if re.match("[a-z0-9A-Z_\-]+\.py", newfilename):
-            fname = os.path.join(settings.MODULES_DIR, dirname, subdirname, newfilename)
-            if not os.path.exists(fname):
-                fout = open(fname, "w")
-                fout.write("# New file")
-                fout.close()
-                newscraperscript = models.ScraperScript(dirname=dirname, filename=newfilename, last_edit=datetime.datetime.fromtimestamp(os.stat(fname).st_mtime))
-                newscraperscript.modulename = newfilename[:-3]
-                newscraperscript.save()
-        else:
-            newfilename = "ERROR: Bad file name"
-    
-    scraperscripts = models.ScraperScript.objects.filter(dirname=dirname)
-    
-    return render_to_response('codewikidir.html', { 'dirname':dirname, 'scraperscripts':scraperscripts, 'newfilename':newfilename, 'settings': settings})
-
-
-def codewikipage(request, dirname, filename):
-    scraperscript = models.ScraperScript.objects.filter(dirname=dirname, filename=filename)[0]
-    pageid = request.GET.get("pageid")   # from url
-    reading = pageid and models.Reading.objects.get(id=pageid) or None
-    nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    outputtype = "normal"
-    form = CodeForm({'filename':scraperscript.filename, 'dirname':scraperscript.dirname, 'datetime':nowtime, 'outputtype':outputtype, 'pageid':pageid}) 
-    
-    # if the form has been returned
-    difflist = [ ]
-    message = ""
-    
-    if request.method == 'POST': # If the form has been submitted...
-        rform = CodeForm(request.POST) # 
-        if rform.is_valid(): # All validation rules pass (how do we check it against the filename and users?)
-            rcode = rform.cleaned_data['code']
-            outputtype = rform.cleaned_data['outputtype']
-            difflist = form.DiffCode(rcode)
-            assert scraperscript.filename == form.data['filename']
-            assert scraperscript.dirname == form.data['dirname']
-            if "revert" in rform.data:
-                pass
-            brunscrape = "runscrape" in rform.data
-            brundoesapply = "rundoesapply" in rform.data
-            brunpage = "runparse" in rform.data
-            brunparseall = "runparseall" in rform.data
-            brunmakemodel = "runmakemodel" in rform.data
-            bruncollect = "runcollect" in rform.data
-            if brunscrape or brundoesapply or brunpage or brunmakemodel or bruncollect or brunparseall:
-                if not difflist:
-                    if re.match(".*?.py$", filename):
-                        message = "OUTPUT FROM RUNNING FILE"
-                        exename = os.path.join(settings.MODULES_DIR, form.data['dirname'], form.data['filename'])
-                        bEnableExecution = request.user.is_authenticated()
-                        if bEnableExecution:
-                            if brundoesapply:
-                                difflistiter = runscrapers.RunDoesApply(scraperscript)
-                            elif brunscrape:
-                                difflistiter = runscrapers.RunFileA(exename, "scrape") 
-                            elif brunmakemodel:
-                                #difflistiter = runscrapers.RunFileA(exename, "makemodel") 
-                                difflistiter = runscrapers.RunMakeModels(scraperscript)
-                            elif bruncollect:
-                                difflistiter = runscrapers.RunFileA(exename, "collect") 
-                            elif brunpage:
-                                difflistiter = runscrapers.RunParseSingle(scraperscript, reading) 
-                            elif brunparseall:
-                                difflistiter = runscrapers.RunParseAll(scraperscript) 
-
-                            if outputtype == "ajax":
-                                return HttpResponse(content=difflistiter)  # should dribble the output out (see runscraper.py for more comments)
-                            difflist = list(difflistiter)
-                        
-                        else:
-                            message = 'You must <a href="/admin/">log in</a> to RUN any scripts.  contact julian@goatchurch.org.uk.'
-
-                    else:
-                        message = "CANNOT RUN FILE"
-                else:
-                    message = "SAVE FILE FIRST"
-                    form.data['code'] = rcode
-            if "save" in rform.data:
-                if form.SaveCode(rcode):
-                    message = "SAVVVED"
-                    # we will reload later
-                else:
-                    message = "FAILED TO SAVE"
-                    form.data['code'] = rcode
-            if "diff" in rform.data:
-                form.data['code'] = rcode
-
-    if not difflist:
-        difflist.append("none")
-    if message:
-        difflist.insert(0, message)
-
-    if 'code' not in form.data:    
-        form.data['code'] = form.GetDiscCode()
-
-    
-    if outputtype == "ajax":
-#        return HttpResponse(content='<br/>'.join(difflist))
-        return render_to_response('difflistonly.html', { 'difflist':difflist, 'settings': settings})
-    
-    filenameother = None
-    lang = "python"  # for scraperscript
-        
-    # quick hack to get observername without .py  this hack is everywhere
-    params = { 'form':form, 'lang':lang, 'filenameother':filenameother, 'difflist':difflist, 'reading':reading, 'observername':filename[:-3], 'settings': settings, }
-    return render_to_response('codewikipage.html', params, context_instance=RequestContext(request))
 
 
 

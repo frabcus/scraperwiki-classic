@@ -117,14 +117,19 @@ class DynamicModel(models.Model):
     #class Meta:
 	#    abstract = True
     
-def installmodel(model):
-    style = color.no_style()
-    cursor = connection.cursor()
-    print help(sql.sql_create)
-    statements, pending = sql.sql_model_create(model, style)
-    for ssql in statements:
-        print "SQL:", ssql 
-        #cursor.execute(sql)
+    
+#
+# these to go in the app that is a single scraper module
+# made dynamically!!!
+#
+class DynElection(DynamicModel):
+    election     = models.CharField(max_length=200)
+    year         = models.CharField(max_length=20)
+    candidate    = models.CharField(max_length=200, blank=True)
+    party        = models.CharField(max_length=200)
+    votes        = models.IntegerField()
+    winner       = models.BooleanField()
+    constituency = models.CharField(max_length=200)
 
     
     

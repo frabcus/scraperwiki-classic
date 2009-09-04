@@ -62,7 +62,7 @@ def SaveScraping(scraper_tag, name, url, text, timestamp=None):
                 if reading.scrape_time == timestamp:
                     if reading.contents() != text:
                         print "Mismatch text " + str(timestamp), len(reading.contents()), len(text)
-                        assert False
+                        #assert False
                 return reading
         scrape_time = timestamp.strftime('%Y-%m-%d %H:%M:%S')
     else:
@@ -118,10 +118,15 @@ def GetDetectings(detectorname):
 
 # this is immediate execution of script that outputs the values when viewing a detector
 if __name__ == "__main__":
+    #print "jjj", sys.argv
     scrapermodule = models.ScraperModule.objects.get(modulename=sys.argv[1])
-    if sys.argv[2] == "RunScrape":
-        scrapermodulecode = scrapermodule.get_module(["RunScrape"])
-        scrapermodulecode.RunScrape()
+    if sys.argv[2] == "Scrape":
+        scrapermodulecode = scrapermodule.get_module(["Scrape"])
+        scrapermodulecode.Scrape()
+    
+    if sys.argv[2] == "Collect":
+        scrapermodulecode = scrapermodule.get_module(["Collect"])
+        scrapermodulecode.Collect()
     
     if sys.argv[2] == "DoesApplyAll":
         scrapermodulecode = scrapermodule.get_module(["DoesApply"])

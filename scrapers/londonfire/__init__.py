@@ -4,7 +4,7 @@ from BeautifulSoup import BeautifulSoup
 import re
 import sys
 import datetime
-from codewiki.models import Detection
+from codewiki.models import ScraperModule
 
 
 def ss(d):
@@ -82,8 +82,9 @@ def Parse(reading):
 
 def Observe(tailurl):
     allkeyvalues = [ ]
-    for detection in Detection.objects.filter(status="parsed"):
-        allkeyvalues.extend(eval(detection.result))
+    scrapermodule = ScraperModule.objects.get(modulename="londonfire") 
+    for detection in scrapermodule.detection_set.filter(status="parsed"):
+        allkeyvalues.extend(detection.contents())
     print len(allkeyvalues)
     
     print "<h1>Fire Callouts</h1>"

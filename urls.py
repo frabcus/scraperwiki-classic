@@ -32,14 +32,11 @@ urlpatterns = patterns('',
     url(r'^python/$',                                                views_code.codewikilist,   name="codewikilist"),
     url(r'^python/(?P<modulename>[\w+]+)$',                          views_code.codewikimodule, name="codewikimodule"),
     url(r'^python/(?P<modulename>[\w_]+)/(?P<filename>[\w_]+?.py)$', views_code.codewikinfile,  name="codewikinfile"),
-    
-    url(r'^(?P<dirname>(?:readers|detectors|collectors|observers))(?:/(?P<subdirname>.+?))?/$', views_code.codewikidir,  name="codewikidir"),
-    url(r'^(?P<dirname>(?:readers|detectors|collectors|observers))/(?P<filename>.+?\.py)$',     views_code.codewikipage, name="codewikifile"),
-        
+            
     url(r'^reading/(?P<pageid>\d+)$',                                views_code.readingeditpageid, name="readingedit"),
     url(r'^reading/(?P<pageid>\d+)(?P<fileext>\.html|\.pdf|\.xml)$', views_code.readingrawpageid,  name="readingraw"),
     url(r'^readings/$',                                              views_code.readingsall,       name="readingsall"),
-    url(r'^observation/(?P<observername>.+?)/(?P<tail>.*?)$',        views_code.observer,          name="observer"),
+    url(r'^observation/(?P<observername>.+?)/(?P<tail>.+?)?$',       views_code.observer,          name="observer"),
 
     url(r'^(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>\w+)/$', date_based.object_detail, dict(info_dict, slug_field='slug')),
     url(r'^(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/$', date_based.archive_day, info_dict),

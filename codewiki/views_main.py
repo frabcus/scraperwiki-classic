@@ -17,11 +17,8 @@ def frontpage(request):
         ResetDatabase()
         actionmessage = "The database has been reset"
         
-    params = {'settings':settings, 'actionmessage':actionmessage}
-    modulelist = ['detectors', 'readers', 'collectors', 'observers']
-    for key in modulelist:
-        params[key] = key   # don't know how to enter in absolute strings in the {% url %} function
-        params[key + "scripts"] = models.ScraperScript.objects.filter(dirname=key)[:3]
+    scrapermodules = models.ScraperModule.objects.all()
+    params = {'settings':settings, 'actionmessage':actionmessage, "scrapermodules":scrapermodules }
     params["readingsnumber"] = len(models.Reading.objects.all())
     if params["readingsnumber"]:
         params["readingsfirst"] = models.Reading.objects.order_by('scrape_time')[0].scrape_time

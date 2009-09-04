@@ -112,7 +112,7 @@ div.codeframebit
 #codewikiform textarea
 { background-color:#eeccff; }
 #codewikiform #fixedfields input, #scrapedform #fixedfields input
-{ width:4em; } 
+{ display:none; Dwidth:4em; } 
 
 #codewikiform span#fixedfields
 { margin-left:10px; }
