@@ -4,7 +4,7 @@ from BeautifulSoup import BeautifulSoup
 import re
 import sys
 import datetime
-import codewiki.models as models
+from codewiki.models import Detection
 
 
 def ss(d):
@@ -37,8 +37,8 @@ def GetPagesForMonth(monthtitle, monthurl):
             textp = ScrapeCachedURL(scraper_tag="londonfirepage", name=cname, url=urlp)
             
 # main loop
-def RunScrape():
-    for monthtitle, monthurl in GetMonthArchivePages()[:2]:
+def Scrape():
+    for monthtitle, monthurl in GetMonthArchivePages()[2:3]:
         GetPagesForMonth(monthtitle, monthurl)
 
         
@@ -82,7 +82,7 @@ def Parse(reading):
 
 def Observe(tailurl):
     allkeyvalues = [ ]
-    for detection in models.Detection.objects.filter(status="parsed"):
+    for detection in Detection.objects.filter(status="parsed"):
         allkeyvalues.extend(eval(detection.result))
     print len(allkeyvalues)
     
