@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{{settings.MEDIA_ROOT}}css/codewiki.css" />
+<script type="text/javascript" src="{{settings.MEDIA_ROOT}}js/jquery-1.3.2.js"></script>
+<script type="text/javascript" src="{{settings.MEDIA_ROOT}}js/jquery.form.js"></script>
+<script type="text/javascript" src="{{settings.CODEMIRROR_ROOT}}js/codemirror.js"></script>
+
+<script type="text/javascript">
+var codeeditor;
+$(document).ready(function()
+{
+    codeeditor = CodeMirror.fromTextArea("id_code", 
+    {
+        {% ifequal lang 'python' %}
+            parserfile: ["../contrib/python/js/parsepython.js"],
+            stylesheet: "{{settings.CODEMIRROR_ROOT}}contrib/python/css/pythoncolors.css",
+        {% endifequal %}
+        {% ifequal lang 'javascript' %}
+            parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+            stylesheet: "{{settings.CODEMIRROR_ROOT}}css/jscolors.css",
+        {% endifequal %}
+        {% ifequal lang 'css' %}
+            parserfile: "parsecss.js",
+            stylesheet: "{{settings.CODEMIRROR_ROOT}}css/csscolors.css",
+        {% endifequal %}
+        {% ifequal lang 'html' %}
+            parserfile: ["parsexml.js", "parsecss.js", "tokenizejavascript.js", "parsejavascript.js", "parsehtmlmixed.js"],
+            stylesheet: ["{{settings.CODEMIRROR_ROOT}}css/xmlcolors.css", "{{settings.CODEMIRROR_ROOT}}css/jscolors.css", "{{settings.CODEMIRROR_ROOT}}css/csscolors.css"],
+        {% endifequal %}
+        {% ifequal lang 'xml' %}
+            parserfile: "parsexml.js",
+            stylesheet: "{{settings.CODEMIRROR_ROOT}}css/xmlcolors.css",
+        {% endifequal %}
+
+        path: "{{settings.CODEMIRROR_ROOT}}js/",
+        textWrapping: false, 
+        lineNumbers: true, 
+        indentUnit: 4, 
+        tabMode: "spaces", 
+        parserConfig: {'pythonVersion': 2, 'strictErrors': true}
+    });
+
+    $("#id_outputtype").val("ajax"); 
+    var options = 
+    { 
+        target:        '#difflistajax', 
+        beforeSubmit:  function() { $("textarea#id_code").value = codeeditor.getCode().length; }, 
+        success:       function() { codeeditor.focus(); }
+    }; 
+    $('#codewikiform').ajaxForm(options);   // bind form using 'ajaxForm' 
+});
+
+</script>
+{% endblock %}
+
+
+{% block title %}Editing: {{form.data.filename}}{% endblock %}
+
+{% block content %}
+<h3>
+  <div style="float:right">{% if user.is_authenticated %}Logged in as '{{user}}'{% else %}<a href="{{settings.URL_ROOT}}admin/">Please log in</a>{% endif %}</div>
+  Module: <a href="{% url codewikimodule modulename=form.data.dirname %}">/{{form.data.dirname}}</a>
+  File: <u>{{form.data.filename}}</u>
+  | <a href="{% url observer form.data.dirname %}">Observe</a>
+  | <a href="{% url frontpage %}">Home</a>
+</h3>
+
+<form id="codewikiform" action="" method="POST">
+  <div class="codeframebit">{{form.code}}</div>
+  <div class="buttonrow">
+    <input type="submit" name="sbutt" value="Diffy" title="shows diff operation between text in editor and text on server"/>
+    <input type="submit" name="sbutt" value="Save" id="savebutton" title="saves to server prior to execution"/>
+    <input type="submit" name="sbutt" value="RunScrape" title="executes scraper script"/>
+    <input type="submit" name="sbutt" value="DoesApplyAll" title="finds all pages which script does apply to"/>
+
+    {% if reading %}
+    <span id="parsepagebutton">
+    | <input type="submit" name="sbutt" value="ParseSingle" title="executes on current page"/>
+      on <a href="{% url readingedit reading.id %}">page</a> 
+      {{form.pageid}}
+    |</span>
+    {% endif %}
+
+    <input type="submit" name="sbutt" value="ParseAll" title="parses all pages that apply"/>
+    <input type="submit" name="sbutt" value="RunMakeModels" title="generates the database tables used"/>
+    <input type="submit" name="sbutt" value="RunCollect" title="collects info into the database"/>
+    <span id="fixedfields"> {{form.filename}} {{form.dirname}} {{form.datetime}} {{form.outputtype}}</span>
+    </div>
+</form>
+
+<pre id="difflistajax" class="difflist">
+{% for diffline in difflist %}{{diffline}}
+{% endfor %}
+</pre>
+
+{% endblock %}
+

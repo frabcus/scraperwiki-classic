@@ -71,13 +71,25 @@ def ResetScraperlist(dirname, subdirname):
         if re.match("\.|.*?~$|.*?\.pyc$", f):
             continue
         fname = os.path.join(dname, f)
-        if os.path.isdir(os.path.join(dname, f)):
-            ResetScraperlist(dirname, os.path.join(subdirname, f))
+        if os.path.isdir(fname):
+            pass
+            #ResetScraperlist(dirname, os.path.join(subdirname, f))
+            #scrapermodule = models.ScraperModule(modulename=f, last_edit=datetime.datetime.fromtimestamp(os.stat(fname).st_mtime))
+            #scrapermodule.save()
+            
         elif f[-3:] == ".py":
             scraperscript = models.ScraperScript(dirname=dirname, filename=f, last_edit=datetime.datetime.fromtimestamp(os.stat(fname).st_mtime))
             scraperscript.modulename = f[:-3]
             scraperscript.save()
 
+def ResetModulelist():
+    for f in os.listdir(settings.SMODULES_DIR):
+        if re.match("\.|.*?~$|.*?\.pyc$", f):
+            continue
+        fname = os.path.join(settings.SMODULES_DIR, f)
+        if os.path.isdir(fname):
+            scrapermodule = models.ScraperModule(modulename=f, last_edit=datetime.datetime.fromtimestamp(os.stat(fname).st_mtime))
+            scrapermodule.save()
 
 #
 # This works for mySQL.  I have no idea how to do these functions in postgres
@@ -98,6 +110,8 @@ def ResetDatabase():
     ResetScraperlist("detectors", "")
     ResetScraperlist("collectors", "")
     ResetScraperlist("observers", "")
+    ResetModulelist()
+    
     LoadReadings()
     MakeModels()
 

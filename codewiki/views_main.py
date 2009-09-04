@@ -29,7 +29,7 @@ def frontpage(request):
     return render_to_response('frontpage.html', params)
 
 
-def observer(request, observername, tail):
+def Dobserver(request, observername, tail):
     exename = os.path.join(settings.MODULES_DIR, "observers", observername + ".py")
     tail = tail or ""
     tail = re.sub("\(", "\(", tail)

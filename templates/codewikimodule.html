@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{{settings.MEDIA_ROOT}}css/codewiki.css" />
+<script type="text/javascript" src="{{settings.MEDIA_ROOT}}js/jquery-1.3.2.js"></script>
+{% endblock %}
+
+{% block title %}Viewing files for {{scrapermodule}}{% endblock %}
+
+{% block content %}
+<p><a href="{% url frontpage %}">Home</a> | <a href="{% url codewikilist %}">Scrapers</a></p>
+
+<h1>Viewing files for {{scrapermodule}}</h1>
+
+<form method="post" action="">
+<table class="dividers">
+<tr><th>File</th><th>Last modified</th></tr>
+{% for scraperfile in scrapermodule.ListFiles %}
+<tr>
+  <td><a href="{% url codewikinfile modulename=scrapermodule.modulename filename=scraperfile %}">{{scraperfile}}</a></td>
+</tr>
+{% endfor %}
+</table>
+</form>
+
+{% endblock %}

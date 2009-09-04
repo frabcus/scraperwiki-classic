@@ -118,46 +118,45 @@ def GetDetectings(detectorname):
 
 # this is immediate execution of script that outputs the values when viewing a detector
 if __name__ == "__main__":
-    if sys.argv[1] == "DoesApplyAll":
-        detector = models.ScraperScript.objects.get(dirname="detectors", modulename=sys.argv[2])
-        detector.detection_set.all().delete()
-        detectormodule = detector.get_module(["DoesApply"])
+    scrapermodule = models.ScraperModule.objects.get(modulename=sys.argv[1])
+    if sys.argv[2] == "RunScrape":
+        scrapermodulecode = scrapermodule.get_module(["RunScrape"])
+        scrapermodulecode.RunScrape()
+    
+    if sys.argv[2] == "DoesApplyAll":
+        scrapermodulecode = scrapermodule.get_module(["DoesApply"])
+        scrapermodule.detection_set.all().delete()
         for reading in models.Reading.objects.all():
-            if detectormodule.DoesApply(reading):
-                detection = models.Detection(detector=detector, reading=reading, status="doesapply")
+            if scrapermodulecode.DoesApply(reading):
+                detection = models.Detection(scraper=scrapermodule, reading=reading, status="doesapply")
                 detection.save()
                 print '<a href="?pageid=%s">%s</a>' % (reading.id, reading)
-
-    if sys.argv[1] == "ParseSingle":
-        detector = models.ScraperScript.objects.get(dirname="detectors", modulename=sys.argv[2])
+    
+    if sys.argv[2] == "ParseSingle":
+        scrapermodulecode = scrapermodule.get_module(["Parse"])
         reading = models.Reading.objects.get(id=sys.argv[3])
-        detection = models.Detection.objects.get(detector=detector, reading=reading)
-        detectormodule = detector.get_module(["Parse"])
+        detection = models.Detection.objects.get(scraper=scrapermodule, reading=reading)
         print 'Parsing <a href="/reading/%s">%s</a>' % (reading.id, reading)
-        keyvaluelist = list(detectormodule.Parse(detection.reading))
+        keyvaluelist = [ ]
+        for keyvalue in scrapermodulecode.Parse(detection.reading):
+            print len(keyvaluelist), keyvalue
+            keyvaluelist.append(keyvalue)
         detection.result = keyvaluelist.__repr__()
         detection.status = "parsed"
         detection.save()
-        i = 0
-        for keyvaluelist in detectormodule.Parse(reading):
-            print i, keyvaluelist
-            i += 1
-
-    if sys.argv[1] == "ParseAll":
-        detector = models.ScraperScript.objects.get(dirname="detectors", modulename=sys.argv[2])
-        detectormodule = detector.get_module(["Parse"])
-        for detection in detector.detection_set.all():
+    
+    if sys.argv[2] == "ParseAll":
+        scrapermodulecode = scrapermodule.get_module(["Parse"])
+        for detection in scrapermodule.detection_set.all():
             print '<a href="?pageid=%s">%s</a>' % (detection.reading.id, detection.reading)
-            keyvaluelist = list(detectormodule.Parse(detection.reading))
+            keyvaluelist = list(scrapermodulecode.Parse(detection.reading))
             detection.result = keyvaluelist.__repr__()
             detection.status = "parsed"
             detection.save()
             print detection.result
-
-    if sys.argv[1] == "MakeModel":
-        print "sssss"
-        detector = models.ScraperScript.objects.get(dirname="collectors", modulename=sys.argv[2])
-        detectormodule = detector.get_module(["MakeModels"])
-        detectormodule.MakeModels()
+    
+    if sys.argv[2] == "Observe":
+        scrapermodulecode = scrapermodule.get_module(["Observe"])
+        scrapermodulecode.Observe(len(sys.argv) > 3 and sys.argv[3] or "")
 
 

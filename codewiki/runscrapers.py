@@ -69,6 +69,9 @@ def RunMakeModels(scraperscript):
         yield ln
 
     
-    
+def RunSButtCode(scrapermodule, sbutt, vals):
+    exename = os.path.join(settings.MODULES_DIR, "detectors", "scraperutils.py")
+    for ln in RunFileA(exename, "%s %s %s" % (scrapermodule.modulename, sbutt, vals)):
+        yield ln
         
 
