@@ -25,7 +25,7 @@ def RunFileA(exename, arg):
     
     #f1, f2 = os.popen4("python " + fname + " " + arg)
     cmd = "python %s %s" % (exename, arg)
-    env = { "DJANGO_SETTINGS_MODULE":'settings', "PYTHONPATH":"%s:%s" % (settings.MODULES_DIR, settings.SCRAPERWIKI_DIR) }
+    env = { "DJANGO_SETTINGS_MODULE":'settings', "PYTHONPATH":"%s:%s" % (settings.SMODULES_DIR, settings.SCRAPERWIKI_DIR) }
     print "RUNNING:", cmd
     p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, env=env)
     

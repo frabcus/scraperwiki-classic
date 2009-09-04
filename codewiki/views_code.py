@@ -21,15 +21,14 @@ class CodeForm(forms.Form):
     pageid     = forms.CharField(widget=forms.TextInput(attrs={"readonly":True}), required=False)
     code       = forms.CharField(widget=forms.Textarea(attrs={"cols":150, "rows":18}))
     
+    def GetScraperFile(self):
+        scrapermodule = models.ScraperModule.objects.get(modulename=self.data['dirname'])
+        scraperfile = scrapermodule.scraperfile_set.get(filename=self.data['filename'])
+        return scraperfile
+    
     def GetDiscCode(self):
-        fname = os.path.join(settings.SMODULES_DIR, self.data['dirname'], self.data['filename'])
-        if os.path.isfile(fname):
-            fin = open(fname, "r")
-            res = fin.read()
-            fin.close()
-        else:
-            res = "EEEEP"
-        return res
+        scraperfile = self.GetScraperFile()
+        return scraperfile.contents()
         
     def DiffCode(self, rcode):
         code = self.GetDiscCode()
@@ -38,13 +37,11 @@ class CodeForm(forms.Form):
         return difflist
 
     def SaveCode(self, rcode):
-        fname = os.path.join(settings.SMODULES_DIR, self.data['dirname'], self.data['filename'])
-        fout = open(fname, "w")
-        res = fout.write(rcode)
-        fout.close()
+        scraperfile = self.GetScraperFile()
+        scraperfile.SaveFile(rcode)
         return True
 
-newscrapertext = """
+newscrapertext = """# New file
 
 def Scrape():
     pass
@@ -63,7 +60,7 @@ def Observe(tailurl):
 def codewikilist(request):
     newmodulename = request.POST.get("newfile")
     if newmodulename:
-        if re.match("[a-z0-9A-Z_\-]+", newmodulename):
+        if re.match("[a-z0-9A-Z_\-]+$", newmodulename):
             fname = os.path.join(settings.SMODULES_DIR, newmodulename)
             if not os.path.exists(fname):
                 os.mkdir(fname)
@@ -71,7 +68,7 @@ def codewikilist(request):
                 fout = open(fnameinit, "w")
                 fout.write(newscrapertext)
                 fout.close()
-                newmodule = models.ScraperModule(modulename=newmodulename, last_edit=datetime.datetime.fromtimestamp(os.stat(fname).st_mtime))
+                newmodule = models.ScraperModule(modulename=newmodulename)
                 newmodule.save()
         else:
             newmodulename = "ERROR: Bad file name"
@@ -79,14 +76,29 @@ def codewikilist(request):
     scrapermodules = models.ScraperModule.objects.all()
     return render_to_response('codewikiall.html', { 'scrapermodules':scrapermodules, 'newmodulename':newmodulename, 'settings': settings})
 
+
 def codewikimodule(request, modulename):
     scrapermodule = models.ScraperModule.objects.get(modulename=modulename)
-    return render_to_response('codewikimodule.html', { 'scrapermodule':scrapermodule, 'settings': settings})
+    
+    newfilename = request.POST.get("newfile")
+    if newfilename:
+        if re.match("[a-z0-9A-Z_\-]+\.py$", newfilename):
+            ffname = os.path.join(settings.SMODULES_DIR, scrapermodule.modulename, newfilename)
+            if not os.path.exists(ffname):
+                fout = open(ffname, "w")
+                fout.write("# New file")
+                fout.close()
+                newfile = models.ScraperFile(module=scrapermodule, filename=newfilename, last_edit=datetime.datetime.fromtimestamp(os.stat(ffname).st_mtime))
+                newfile.save()
+        else:
+            newmodulename = "ERROR: Bad file name"
+    
+    return render_to_response('codewikimodule.html', { 'scrapermodule':scrapermodule, 'newfilename':newfilename, 'settings': settings})
+
 
 def codewikinfile(request, modulename, filename):
     scrapermodule = models.ScraperModule.objects.get(modulename=modulename)
-    lfiles = scrapermodule.ListFiles()
-    assert filename in lfiles, (filename, "not in", lfiles)
+    scraperfile = scrapermodule.scraperfile_set.get(filename=filename)
     
     pageid = request.GET.get("pageid")   # from url
     reading = pageid and models.Reading.objects.get(id=pageid) or None
@@ -160,6 +172,8 @@ def codewikinfile(request, modulename, filename):
     # quick hack to get observername without .py  this hack is everywhere
     params = { 'form':form, 'lang':lang, 'filenameother':filenameother, 'difflist':difflist, 'reading':reading, 'observername':modulename, 'settings': settings, }
     return render_to_response('codewikinpage.html', params, context_instance=RequestContext(request))
+
+
 
 def observer(request, observername, tail):
     exename = os.path.join(settings.SCRAPERWIKI_DIR, "scraperutils.py")

@@ -46,7 +46,7 @@ div.frontlink a.nonmodulelink
     font-style:italic
 }
 
-div.frontlink h2 a:hover
+div.frontlink h2 a:hover, div.buttonrow a:hover, h3 a:hover
 {
     background-color:#990000;
     color:white;

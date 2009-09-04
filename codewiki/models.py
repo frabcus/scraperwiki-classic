@@ -8,52 +8,55 @@ from django.core.management import sql, color
 from django.db import connection
 import settings
 import re
-
-
-class ScraperScript(models.Model):
-    dirname     = models.CharField(max_length=200)   # readers|detectors
-    filename    = models.CharField(max_length=200)
-    modulename  = models.CharField(max_length=200)   # without the py
-    last_edit   = models.DateTimeField(blank=True, null=True)
-    last_run    = models.DateTimeField(blank=True, null=True)
-    
-    def __unicode__(self):
-        return "%s/%s" % (self.dirname, self.filename)
-
-    def get_codewiki_url(self):
-        return reverse('codewikifile', kwargs={'dirname':self.dirname, 'filename':self.filename})
-    
-    def get_module(self, fromlist):
-        # fromlist is the list of functions we want available
-        return __import__("%s.%s" % (self.dirname, self.modulename), fromlist=fromlist)  
-    
-    class Meta:
-        ordering = ('-last_edit',)
+import datetime
 
 
 class ScraperModule(models.Model):
-    modulename  = models.CharField(max_length=200)   # without the py
-    last_edit   = models.DateTimeField(blank=True, null=True)
+    modulename  = models.CharField(max_length=200)
     last_run    = models.DateTimeField(blank=True, null=True)
     
     def __unicode__(self):
         return "module: %s" % (self.modulename)
 
-    def get_codewiki_url(self):
-        return reverse('codewikifile', kwargs={'dirname':self.dirname, 'filename':self.filename})
-    
     def get_module(self, fromlist):
         # fromlist is the list of functions we want available
         return __import__("scrapers." + self.modulename, fromlist=fromlist)  
     
-    def ListFiles(self):
-        fname = os.path.join(settings.SMODULES_DIR, self.modulename)
-        ld = os.listdir(fname)
-        return [ f  for f in ld  if re.search("\.py$", f) ]
+    def last_edit(self):
+        return max([f.last_edit  for f in self.scraperfile_set.all() ])
     
     class Meta:
-        ordering = ('-last_edit',)
+        ordering = ('-last_run',)
 
+
+class ScraperFile(models.Model):
+    module      = models.ForeignKey('ScraperModule') 
+    filename    = models.CharField(max_length=200)
+    last_edit   = models.DateTimeField(blank=True, null=True)
+    
+    def __unicode__(self):
+        return "file: %s/%s" % (self.module.modulename, self.filename)
+
+    def contents(self):
+        ffname = os.path.join(settings.SMODULES_DIR, self.module.modulename, self.filename)
+        fin = open(ffname, "r")
+        res = fin.read()
+        fin.close()
+        return res
+    
+    def SaveFile(self, text):
+        ffname = os.path.join(settings.SMODULES_DIR, self.module.modulename, self.filename)
+        fout = open(ffname, "w")
+        fout.write(text)
+        fout.close()
+        self.last_edit = datetime.datetime.fromtimestamp(os.stat(ffname).st_mtime)
+        self.save()
+    
+    def Dget_codewiki_url(self):
+        return reverse('codewikifile', kwargs={'dirname':self.dirname, 'filename':self.filename})
+            
+    class Meta:
+        ordering = ('-last_edit',)
 
 
 # a single scraped page here
@@ -63,7 +66,7 @@ class Reading(models.Model):
     url         = models.TextField()
     scrape_time = models.DateTimeField(blank=True, null=True)   # change to timescraped
     filepath    = models.CharField(max_length=200)
-    submitter   = models.ForeignKey('ScraperScript', null=True) # not implemented
+    submitter   = models.ForeignKey('ScraperModule', null=True) # not implemented
     mimetype    = models.CharField(max_length=40, blank=True)   # eg text/html 
     bytelength  = models.IntegerField()
     
@@ -98,7 +101,6 @@ class Reading(models.Model):
 
 # the cross product of Detectors and Readings
 class Detection(models.Model):
-    detector   = models.ForeignKey('ScraperScript', null=True) 
     scraper    = models.ForeignKey('ScraperModule', null=True) 
     reading    = models.ForeignKey('Reading') 
     result     = models.TextField()

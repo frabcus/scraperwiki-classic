@@ -57,30 +57,7 @@ def LoadReadings():
         mpf = re.match("((\d+)\.+\w+)$", f)
         if mpf:
             LoadReading(int(mpf.group(2)), mpf.group(1))
-
-def MakeModels():
-    for scraperscript in models.ScraperScript.objects.filter(dirname='collectors'):
-        exename = os.path.join(settings.MODULES_DIR, 'collectors', scraperscript.filename)
-        print "mmmmmmmMM", exename
-        difflistiter = runscrapers.RunFileA(exename, "makemodel") 
-        print list(difflistiter)
     
-def ResetScraperlist(dirname, subdirname):
-    dname = os.path.join(settings.MODULES_DIR, dirname, subdirname)
-    for f in os.listdir(dname):
-        if re.match("\.|.*?~$|.*?\.pyc$", f):
-            continue
-        fname = os.path.join(dname, f)
-        if os.path.isdir(fname):
-            pass
-            #ResetScraperlist(dirname, os.path.join(subdirname, f))
-            #scrapermodule = models.ScraperModule(modulename=f, last_edit=datetime.datetime.fromtimestamp(os.stat(fname).st_mtime))
-            #scrapermodule.save()
-            
-        elif f[-3:] == ".py":
-            scraperscript = models.ScraperScript(dirname=dirname, filename=f, last_edit=datetime.datetime.fromtimestamp(os.stat(fname).st_mtime))
-            scraperscript.modulename = f[:-3]
-            scraperscript.save()
 
 def ResetModulelist():
     for f in os.listdir(settings.SMODULES_DIR):
@@ -88,12 +65,19 @@ def ResetModulelist():
             continue
         fname = os.path.join(settings.SMODULES_DIR, f)
         if os.path.isdir(fname):
-            scrapermodule = models.ScraperModule(modulename=f, last_edit=datetime.datetime.fromtimestamp(os.stat(fname).st_mtime))
+            scrapermodule = models.ScraperModule(modulename=f)
             scrapermodule.save()
 
-#
+            ld = os.listdir(fname)
+            for f in ld:
+                if re.search("\.py$", f):
+                    ffname = os.path.join(fname, f)
+                    scraperfile = models.ScraperFile(module=scrapermodule, filename=f, last_edit=datetime.datetime.fromtimestamp(os.stat(ffname).st_mtime))
+                    scraperfile.save()
+
+
+
 # This works for mySQL.  I have no idea how to do these functions in postgres
-#
 def ResetDatabase():
     cursor = connection.cursor()
     cursor.execute("drop database %s" % settings.DATABASE_NAME)
@@ -106,14 +90,8 @@ def ResetDatabase():
     user.is_superuser = True
     user.save()
 
-    ResetScraperlist("readers", "")
-    ResetScraperlist("detectors", "")
-    ResetScraperlist("collectors", "")
-    ResetScraperlist("observers", "")
     ResetModulelist()
-    
     LoadReadings()
-    MakeModels()
 
 
 

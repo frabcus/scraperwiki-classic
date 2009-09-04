@@ -15,12 +15,19 @@
 <form method="post" action="">
 <table class="dividers">
 <tr><th>File</th><th>Last modified</th></tr>
-{% for scraperfile in scrapermodule.ListFiles %}
+{% for scraperfile in scrapermodule.scraperfile_set.all %}
 <tr>
-  <td><a href="{% url codewikinfile modulename=scrapermodule.modulename filename=scraperfile %}">{{scraperfile}}</a></td>
+  <td><a href="{% url codewikinfile modulename=scrapermodule.modulename filename=scraperfile.filename %}">{{scraperfile.filename}}</a></td>
+  <td>{{scraperfile.last_edit}}</td>
 </tr>
 {% endfor %}
 </table>
+</form>
+
+<form method="post" action="">
+  {% if newfilename %}{{newfilename}}{% endif %}
+  <input type="text" name="newfile">
+  <input type="submit" value="New scraper file"/>
 </form>
 
 {% endblock %}

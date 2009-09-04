@@ -19,8 +19,8 @@
 <tr>
   <td><a href="{% url codewikimodule modulename=scrapermodule.modulename %}">{{scrapermodule.modulename}}</a></td>
   <td>
-  {% for scraperfile in scrapermodule.ListFiles %}
-     <a href="{% url codewikinfile modulename=scrapermodule.modulename filename=scraperfile %}">{{scraperfile}}</a>
+  {% for scraperfile in scrapermodule.scraperfile_set.all %}
+     <a href="{% url codewikinfile modulename=scrapermodule.modulename filename=scraperfile.filename %}">{{scraperfile.filename}}</a>
   {% endfor %}
   </td>
   <td>{{scrapermodule.last_edit}}</td>
