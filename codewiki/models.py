@@ -71,7 +71,7 @@ class Reading(models.Model):
     bytelength  = models.IntegerField()
     
     def __unicode__(self):
-        return "%s: %s" % (self.name, self.url[:50])
+        return "reading %d" % self.id
     
     def contents(self):
         fin = open(self.filepath)
@@ -108,7 +108,6 @@ class Detection(models.Model):
     
     def contents(self):
         return eval(self.result)
-    
     
 
 # these don't work, but I would like them to be the basis of user generated models

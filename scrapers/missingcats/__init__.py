@@ -1,4 +1,10 @@
+import sys, re
+import urllib, urlparse
+import datetime
+
+from BeautifulSoup import BeautifulSoup
 from scraperutils import ScrapeCachedURL
+from codewiki.models import ScraperModule
 
 def Scrape():
     urlindex = "http://www.nationalpetregister.org/mp-cats.php?showold=yes"
@@ -8,14 +14,7 @@ def Scrape():
         text = ScrapeCachedURL(scraper_tag=scrapertag_index, name="page " + str(i), url=url)
         print i, len(text)
 
-from BeautifulSoup import BeautifulSoup
 
-import sys, re
-import urllib, urlparse
-import datetime
-
-
-#CreateScopeUser(user_name, user_password, user_email) # run once    
 
 def ss(d):
     return re.sub("<", "&lt;", str(d))
@@ -66,11 +65,17 @@ def Parse(reading):
     soup = BeautifulSoup(reading.contents())
     for tt in soup.findAll("table", ""):
         res = ParseCattable(reading.url, tt)
-        res["reading"] = reading
+        #res["reading"] = reading
         alldata.append(res)          
     return alldata
 
 
 
 def Observe(tailurl):
-    print "blank page"
+    scrapermodule = ScraperModule.objects.get(modulename="missingcats") 
+    allcats = [ "hihi" ]
+    for detection in scrapermodule.detection_set.filter(status="parsed"):
+        allcats.extend(detection.contents()) #allcats.extend(detection.contents()).
+    for cat in allcats:
+        print "<p>%s</p>" % str(cat)
+        
