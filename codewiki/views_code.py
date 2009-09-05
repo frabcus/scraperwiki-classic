@@ -64,12 +64,15 @@ def codewikilist(request):
             fname = os.path.join(settings.SMODULES_DIR, newmodulename)
             if not os.path.exists(fname):
                 os.mkdir(fname)
-                fnameinit = os.path.join(fname, "__init__.py")
+                ffname = "__init__.py"
+                fnameinit = os.path.join(fname, ffname)
                 fout = open(fnameinit, "w")
                 fout.write(newscrapertext)
                 fout.close()
                 newmodule = models.ScraperModule(modulename=newmodulename)
                 newmodule.save()
+                newfile = models.ScraperFile(filename=ffname, module=newmodule, last_edit=datetime.datetime.fromtimestamp(os.stat(fnameinit).st_mtime))
+                newfile.save()
         else:
             newmodulename = "ERROR: Bad file name"
     
