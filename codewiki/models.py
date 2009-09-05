@@ -23,7 +23,8 @@ class ScraperModule(models.Model):
         return __import__("scrapers." + self.modulename, fromlist=fromlist)  
     
     def last_edit(self):
-        return max([f.last_edit  for f in self.scraperfile_set.all() ])
+        edits = [f.last_edit  for f in self.scraperfile_set.all() ]
+        return edits and max(edits) or ""
     
     class Meta:
         ordering = ('-last_run',)
