@@ -9,7 +9,7 @@ from django.db import connection
 import settings
 import re
 import datetime
-
+from BeautifulSoup import BeautifulSoup
 
 class ScraperModule(models.Model):
     modulename  = models.CharField(max_length=200)
@@ -79,6 +79,9 @@ class Reading(models.Model):
         text = fin.read(self.bytelength)
         fin.close()
         return text
+
+    def soup(self):
+        return BeautifulSoup(self.contents())
 
     def fileext(self):
         if self.mimetype == "text/html":

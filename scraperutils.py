@@ -140,7 +140,9 @@ if __name__ == "__main__":
         detection = models.Detection.objects.get(scraper=scrapermodule, reading=reading)
         print 'Parsing <a href="/reading/%s">%s</a>' % (reading.id, reading)
         keyvaluelist = [ ]
-        for keyvalue in scrapermodulecode.Parse(detection.reading):
+        res =  scrapermodulecode.Parse(detection.reading)
+        assert res != None, "Parse() must return a list"
+        for keyvalue in res:
             print len(keyvaluelist), keyvalue
             keyvaluelist.append(keyvalue)
         detection.result = keyvaluelist.__repr__()

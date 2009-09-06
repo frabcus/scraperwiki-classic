@@ -120,20 +120,8 @@ def Parse(reading):
         elif templ[0] == "Election box end":
             electionname = None
     
-from django.db.models import Count, Sum
-
 def Collect():
-    
-    g = DynElection.objects.values('party').annotate(count=Count('party'), svotes=Sum('votes'))
-    print g[0]
-    return
-    
-    query_set = DynElection.objects.extra(select={'party':'party', 'count':'count(1)', 'svotes':'sum(votes)' }, 
-                               order_by=['-svotes']).values('party', 'count', 'svotes')
-    query_set.query.group_by = ['party']
-
-    
-    
+        
     DynElection.objects.all().delete()
     scrapermodule = ScraperModule.objects.get(modulename="wpelections") 
     i = 0
