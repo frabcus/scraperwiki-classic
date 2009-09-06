@@ -6,3 +6,5 @@ admin.site.register(ScraperFile)
 admin.site.register(Reading)
 admin.site.register(Detection)
 
+admin.site.register(DynElection)
+

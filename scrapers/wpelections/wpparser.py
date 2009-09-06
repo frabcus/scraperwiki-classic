@@ -82,7 +82,13 @@ def Parse(reading):
             melectionname = re.search("\[\[(.*?)[\|\]]", templ["title"])
             electionname = melectionname and melectionname.group(1) or templ["title"]
             electionname = re.match("(.*?)\s*(\{\{.*|http://.*)?$", electionname).group(1)
+            if electionname[:3] == "UK ":
+                electionname = "United Kingdom " + electionname[3:]
+            if electionname[:8] == "next UK ":
+                electionname = "next United Kingdom " + electionname[8:]
+                
             yield { "type":"election", "name":electionname }
+
         elif re.match("Election box candidate", templ[0]):
             svotes = re.sub("[,. ]", "", templ["votes"])
             if re.match("\d+$", svotes):
@@ -102,10 +108,17 @@ def Parse(reading):
                 party = mpartycat.group(1) + mpartycat.group(2)
             assert not re.search("\[|<", party), list(templ["party"])
                 
-            yield { "type":"candidate", "election":electionname, "constituency":reading.name, "votes":votes, "party":party }
+            candidate = templ["candidate"]
+            mcandidate = re.match("(\[\[[^\]\|]+?)\|.*?\]\]$", candidate)
+            if mcandidate:
+                candidate = mcandidate.group(1) + "]]"
+            mcandidatet = re.match("(.*?)\s*(<!.*|<ref.*)$", candidate)
+            if mcandidatet:
+                candidate = mcandidatet.group(1)
+            
+            yield { "type":"candidate", "election":electionname, "constituency":reading.name, "votes":votes, "party":party, "candidate":candidate }
         elif templ[0] == "Election box end":
             electionname = None
-    
     
 
 def Collect():
@@ -113,15 +126,25 @@ def Collect():
     scrapermodule = ScraperModule.objects.get(modulename="wpelections") 
     i = 0
     for detection in scrapermodule.detection_set.filter(status="parsed"):
+        winningcandidate = None
         for kv in detection.contents():
             if kv["type"] == "election":
-                pass
+                if winningcandidate:
+                    winningcandidate.winner = True
+                    winningcandidate.save()
+                winningcandidate = None
             if kv["type"] == "candidate":
                 myear = re.search("(\d\d\d\d)", kv["election"])
-                year = myear and myear.group(1) or "0000"
-                detection = DynElection(election=kv["election"], year=year, party=kv["party"], votes=kv["votes"] or 0, constituency=kv["constituency"], candidate="")
-                detection.save()
-                i += 1
-                if (i % 10) == 0:
-                    print kv
+                year = myear and myear.group(1) or "9999"
+                if year > "1970":
+                    detection = DynElection(election=kv["election"], year=year, party=kv["party"], votes=kv["votes"] or 0, constituency=kv["constituency"], candidate=kv["candidate"])
+                    detection.save()
+                    if not winningcandidate or winningcandidate.votes < detection.votes:
+                        winningcandidate = detection
+                    i += 1
+                    if (i % 10) == 0:
+                        print kv
+        if winningcandidate:
+            winningcandidate.winner = True
+            winningcandidate.save()
                     

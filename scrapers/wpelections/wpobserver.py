@@ -29,18 +29,38 @@ def WritePartyYears(party):
         print r([lelection, str(number), str(votes)])
     print "</table>"
 
-def WriteElection(election):
-    query_set = DynElection.objects.extra(select={'constituency':'constituency', 'count':'count(1)', 'svotes':'sum(votes)' }, 
-                                 order_by=['constituency'], where=["election='%s'" % election]).values('constituency', 'count', 'svotes')
-    query_set.query.group_by = ['constituency']
-    print "<h3>All votes cast in the election: %s</h3>" % election
+    
+def WritePartyYears(party):
+    query_set = DynElection.objects.extra(select={'election':'election', 'count':'count(1)', 'svotes':'sum(votes)' }, 
+                                  order_by=['-year'], where=["party='%s'" % party]).values('election', 'count', 'svotes')
+    query_set.query.group_by = ['election']
+    print "<h2>Results for party: %s</h2>" % party
 
     print '<table>'
-    print "<tr><th>Constituency</th><th>Candidates</th><th>Votes</th><tr>"
+    print "<tr><th>Election</th><th>Candidates</th><th>Votes</th><tr>"
     for qs in query_set.all():
-        constituency, number, votes = qs["constituency"], qs["count"], qs["svotes"]
+        election, number, votes = qs["election"], qs["count"], qs["svotes"]
+        lelection = '<a href="E-%s">%s</a>' % (urllib.quote_plus(election), election)
+        print r([lelection, str(number), str(votes)])
+    print "</table>"
+
+def WriteCandidate(candidate):
+    query_set = DynElection.objects.extra(select={'election':'election', 'constituency':'constituency', 'party':'party', 'votes':'votes', 'winner':'winner' }, 
+                                 order_by=['-year'], where=["candidate='%s'" % candidate]).values('election', 'constituency', 'party', 'votes', 'winner')
+    mwpcandidate = re.match("\[\[(.*?)\]\]", candidate)
+    if mwpcandidate:
+        wcandidate = re.sub(" ", "_", mwpcandidate.group(1))
+        candidate = '<a href="http://en.wikipedia.org/wiki/%s">%s</a>' % (wcandidate, candidate)
+    print "<h3>All votes cast for candidate: %s</h3>" % candidate
+
+    print '<table>'
+    print "<tr><th>Election</th><th>Constituency</th><th>Party</th><th>Votes</th><th>Winner</th><tr>"
+    for qs in query_set.all():
+        election, constituency, party, votes, winner = qs["election"], qs["constituency"], qs["party"], qs["votes"], qs["winner"]
+        #winner = ""
+        lelection = '<a href="E-%s">%s</a>' % (urllib.quote_plus(election), election)        
         lconstituency = '<a href="C-%s">%s</a>' % (urllib.quote_plus(constituency), constituency)
-        print r([lconstituency, str(number), str(votes)])
+        print r([lelection, lconstituency, party, str(votes), str(winner)])
     print "</table>"
     
 
@@ -60,13 +80,28 @@ def WriteConstituency(constituency):
         lelection = '<a href="E-%s">%s</a>' % (urllib.quote_plus(election), election)
         print r([lelection, str(number), str(votes)])
     print "</table>"
-      
+
+    
+def WriteElection(election):
+    query_set = DynElection.objects.extra(select={'constituency':'constituency', 'count':'count(1)', 'svotes':'sum(votes)' }, 
+                                order_by=['constituency'], where=["election='%s'" % election]).values('constituency', 'count', 'svotes')
+    query_set.query.group_by = ['constituency']
+    
+    print "<h3>All votes cast in the election: %s</h3>" % election
+    print '<table>'
+    print "<tr><th>Constituency</th><th>Candidates</th><th>Votes</th><tr>"     
+    for qs in query_set.all():
+        constituency, number, votes = qs["constituency"], qs["count"], qs["svotes"]
+        lconstituency = '<a href="C-%s">%s</a>' % (urllib.quote_plus(constituency), constituency)
+        print r([lconstituency, str(number), str(votes)])
+    print "</table>"
+    
+    
 def WriteConstituencyYears():
     query_set = DynElection.objects.extra(select={'constituency':'constituency', 'count':'count(1)', 'svotes':'sum(votes)' }, 
                                 order_by=['-svotes']).values('constituency', 'count', 'svotes')
     query_set.query.group_by = ['constituency']
 
-    print "<h3>Total number of candidates and votes cast per constituency</h3>"
     print '<table>'
     print "<tr><th>Constituency</th><th>Candidates</th><th>Votes</th><tr>"
     for qs in query_set.all():
@@ -77,13 +112,28 @@ def WriteConstituencyYears():
         print r([lconstituency, str(number), str(votes)])
     print "</table>"
 
+def WriteCandidateYears():
+    query_set = DynElection.objects.extra(select={'candidate':'candidate', 'count':'count(1)', 'constituencies':'count(DISTINCT constituency)', 'svotes':'sum(votes)' }, 
+                                order_by=['-count']).values('candidate', 'count', 'constituencies', 'svotes')
+    query_set.query.group_by = ['candidate']
+
+    print '<table>'
+    print "<tr><th>Candidate</th><th>Candidatures</th><th>Constituencies</th><th>Votes</th><tr>"
+    for qs in query_set.all():
+        candidate, number, constituencies, votes = qs["candidate"], qs["count"], qs["constituencies"], qs["svotes"]
+        scandidate = cgi.escape(candidate).encode("ascii", "xmlcharrefreplace")
+        #sconstituency = re.sub(" ", "_", constituency)
+        #lconstituency = '<a href="http://en.wikipedia.org/wiki/%s">WP: %s</a>' % (sconstituency, constituency)
+        lcandidate = '<a href="A-%s">%s</a>' % (urllib.quote_plus(scandidate), scandidate)
+        print r([lcandidate, str(number), str(constituencies), str(votes)])
+    print "</table>"
+
     
 def WriteElectionYears():
     query_set = DynElection.objects.extra(select={'election':'election', 'count':'count(1)', 'constituencies':'count(DISTINCT constituency)', 'svotes':'sum(votes)' }, 
                                order_by=['-year']).values('election', 'count', 'constituencies', 'svotes')
     query_set.query.group_by = ['election']
 
-    print "<h3>TTotal number of candidates and votes cast per election</h3>"
     print '<table>'
     print "<tr><th>Election</th><th>Constituencies</th><th>Candidates</th><th>Votes</th><tr>"
     for qs in query_set.all():
@@ -125,9 +175,19 @@ def Observe(tail):
     WriteHead()
     tail = len(sys.argv) == 4 and sys.argv[3] or ""
     if tail == "constituency":
+        print "<h3>Total number of candidates and votes cast per constituency</h3>"
+        print '<p>See <a href="party">count per party</a> or <a href="election">count per election</a> or <a href="candidate">count per candidate</a></p>'
         WriteConstituencyYears()
     if tail == "election":
+        print "<h3>Total number of candidates and votes cast per election</h3>"
+        print '<p>See <a href="constituency">count per constituency</a> or <a href="party">count per party</a> or <a href="candidate">count per candidate</a></p>'
         WriteElectionYears()
+
+    if tail == "candidate":
+        print "<h3>Total all number of candidates and votes cast per election</h3>"
+        print '<p>See <a href="constituency">count per constituency</a> or <a href="party">count per party</a> or <a href="party">count per party</a></p>'
+        WriteCandidateYears()
+
     elif tail[:2] == "P-":
         party = urllib.unquote_plus(tail[2:])
         WritePartyYears(party)
@@ -137,11 +197,14 @@ def Observe(tail):
     elif tail[:2] == "E-":
          election = urllib.unquote_plus(tail[2:])
          WriteElection(election)
+    elif tail[:2] == "A-":
+         candidate = urllib.unquote_plus(tail[2:])
+         WriteCandidate(candidate)
     else:
         if tail:
             print "<h2>tail: " + tail + "</h2>"
         print "<h3>Total number of candidates and votes fielded in all Parliamentary elections</h3>"
-        print '<p>See <a href="constituency">count per constituency</a> or <a href="election">count per election</a></p>'
+        print '<p>See <a href="constituency">count per constituency</a> or <a href="election">count per election</a> or <a href="candidate">count per candidate</a></p>'
         WritePartyVotes()
     print "</body>"
     print "</html>"

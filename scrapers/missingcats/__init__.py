@@ -65,7 +65,7 @@ def Parse(reading):
     soup = BeautifulSoup(reading.contents())
     for tt in soup.findAll("table", ""):
         res = ParseCattable(reading.url, tt)
-        #res["reading"] = reading
+        res["reading_id"] = reading.id
         alldata.append(res)          
     return alldata
 

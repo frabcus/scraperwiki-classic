@@ -11,6 +11,8 @@ def ss(d):
     return re.sub("<", "&lt;", str(d))
 
 
+
+
 def GetMonthArchivePages():
     res = [ ]
     urlfront = "http://www.london-fire.gov.uk/LatestIncidents.asp"
@@ -38,7 +40,7 @@ def GetPagesForMonth(monthtitle, monthurl):
             
 # main loop
 def Scrape():
-    for monthtitle, monthurl in GetMonthArchivePages()[2:3]:
+    for monthtitle, monthurl in GetMonthArchivePages()[3:4]:
         GetPagesForMonth(monthtitle, monthurl)
 
         

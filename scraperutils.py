@@ -45,9 +45,13 @@ urllibopener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
     
 def ScrapeURL(url, params=None):
     data = params and urllib.urlencode(params) or None
-    fin = urllibopener.open(url, data)
-    text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
-    fin.close()   # get the mimetyle here
+    try:
+        fin = urllibopener.open(url, data)
+        text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
+        fin.close()   # get the mimetyle here
+    except:
+        print "Failed: %s" % url[:30]
+        return None
     print "Scraped: %d bytes from %s" % (len(text), url[:30])
     return text
     
@@ -79,14 +83,20 @@ def SaveScraping(scraper_tag, name, url, text, timestamp=None):
     return reading
 
 
-def ScrapeCachedURL(scraper_tag, name, url, params=None, bforce=False):
+def RScrapeCachedURL(scraper_tag, name, url, params=None, bforce=False):
     readings = models.Reading.objects.filter(scraper_tag=scraper_tag, name=name).order_by('-scrape_time')
     if not readings or bforce:
         text = ScrapeURL(url=url, params=params)
+        if text == None:
+            return None
         SaveScraping(scraper_tag=scraper_tag, name=name, url=url, text=text)    
         readings = models.Reading.objects.filter(scraper_tag=scraper_tag, name=name).order_by('-scrape_time')
         assert readings
-    return readings[0].contents()
+    return readings[0]
+
+def ScrapeCachedURL(scraper_tag, name, url, params=None, bforce=False):
+    reading = RScrapeCachedURL(scraper_tag, name, url, params, bforce)
+    return reading and reading.contents() or None
     
 
 def ListWikipediaDumps():
@@ -98,22 +108,9 @@ def ListWikipediaDumps():
 #
 
 
-
-
 #
 # the execution and iteration between detectors and readings
 #
-
-# gets all output from detectors
-# should be removed
-def GetDetectings(detectorname):
-    detector = __import__(detectorname, fromlist=["DoesApply", "Parse"])  # have to tell it which functions we want, when the import has a . in it
-    for reading in models.Reading.objects.all():
-        if detector.DoesApply(reading):
-             for keyvalues in detector.Parse(reading):
-                 yield keyvalues
-            
-
 
 
 # this is immediate execution of script that outputs the values when viewing a detector

@@ -128,7 +128,6 @@ def codewikinfile(request, modulename, filename):
                     if re.match(".*?.py$", filename):
                         message = "OUTPUT FROM RUNNING FILE"
                         bEnableExecution = request.user.is_authenticated()
-                        bEnableExecution = True
                         if bEnableExecution:
                             vals = reading and str(reading.id) or ""
                             difflistiter = runscrapers.RunSButtCode(scrapermodule, sbutt, vals)

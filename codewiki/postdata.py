@@ -85,7 +85,7 @@ def ResetDatabase():
     cursor.execute("ALTER DATABASE %s CHARACTER SET=utf8" % settings.DATABASE_NAME)
     cursor.execute("USE %s" % settings.DATABASE_NAME)
     management.call_command('syncdb', interactive=False)
-    user = User.objects.create_user('m', 'm@m.com', 'm')
+    user = User.objects.create_user('pyconuk', 'm@m.com', 'Saturday')
     user.is_staff = True
     user.is_superuser = True
     user.save()

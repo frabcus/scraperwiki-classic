@@ -25,16 +25,3 @@ def frontpage(request):
         params["readingslast"] = models.Reading.objects.order_by('-scrape_time')[0].scrape_time
     return render_to_response('frontpage.html', params)
 
-
-def Dobserver(request, observername, tail):
-    exename = os.path.join(settings.MODULES_DIR, "observers", observername + ".py")
-    tail = tail or ""
-    tail = re.sub("\(", "\(", tail)
-    tail = re.sub("\)", "\)", tail)
-    ptail = tail and (" --tail " + tail) or ""
-    pqs = request.META["QUERY_STRING"] and (" --query " + request.META["QUERY_STRING"]) or ""
-    sparam = "render" + ptail + pqs
-    content = runscrapers.RunFileA(exename, sparam) 
-    return HttpResponse(content=content)
-
-
