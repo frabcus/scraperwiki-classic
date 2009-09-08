@@ -18,10 +18,11 @@ def Scrape():
 def ss(d):
     return re.sub("<", "&lt;", str(d))
 
-months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-
 def DoesApply(reading):
     return reading.scraper_tag == "missingcats_index" or reading.name[:4] == "page"
+
+months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+            
     
 
 def ParseCattable(url, tt):

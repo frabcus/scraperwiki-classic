@@ -7,6 +7,8 @@
 
 <script type="text/javascript">
 
+
+
 // adds a default setting of Save to the submitted form, for when we get here 
 // having used saveFunction (Conrol-S): submit method that doesn't give the button pressed
 // Will have to improve on this when we have other hot-keys (eg Run).
@@ -17,6 +19,10 @@ function addsbuttsavedefault(formData)
     $.each(formData, function(i, obj) { if (obj.name == "sbutt")  sbutt = obj.value });
     if (!sbutt)
         formData[formData.length] = { "name": "sbutt", "value": "Save" }; 
+    if (sbutt != "Reload")
+        return true; 
+    codeeditor.setCode($.ajax({url: $("#id_codeurl").val(), async: false}).responseText);
+    return false; 
 }
 
 var codeeditor;
@@ -25,7 +31,7 @@ $(document).ready(function()
     var ajaxformoptions = 
     { 
         target:        '#difflistajax', 
-        beforeSubmit:  function(formData) { $("textarea#id_code").value = codeeditor.getCode().length;  addsbuttsavedefault(formData); }, 
+        beforeSubmit:  function(formData) { return addsbuttsavedefault(formData); }, 
         success:       function() { codeeditor.focus(); }
     }; 
 
@@ -59,6 +65,9 @@ $(document).ready(function()
         tabMode: "spaces", 
         autoMatchParens: true,
         parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
+
+        // copies the value from the editor to the text area before submit.  
+        // triggering the submit button causes the page to reload as it bypasses the whole ajax thing
         saveFunction: function () { $("#id_code").val(codeeditor.getCode());  $("#codewikiform").submit();  }
     });
 
@@ -128,6 +137,7 @@ $(document).ready(function()
   <div class="codeframebit">{{form.code}}</div>
   <div class="buttonrow">
     <div id="midresizingragger">resize</div>
+    <input type="submit" name="sbutt" value="Reload" title="Reloads the code (doesn't work yet)"/>
     <input type="submit" name="sbutt" value="Diffy" title="shows diff operation between text in editor and text on server"/>
     <input id="sbuttsave" type="submit" name="sbutt" value="Save" id="savebutton" title="saves to server prior to execution"/>
     <input type="submit" name="sbutt" value="Scrape" title="executes scraper script"/>
@@ -144,7 +154,7 @@ $(document).ready(function()
     <input type="submit" name="sbutt" value="ParseAll" title="parses all pages that apply"/>
     <input type="submit" name="sbutt" value="Collect" title="collects info into the database"/>
     <a href="{% url observer observername=form.data.dirname %}">Observe</a>
-    <span id="fixedfields"> {{form.filename}} {{form.dirname}} {{form.datetime}} {{form.outputtype}}</span>
+    <span id="fixedfields"> {{form.filename}} {{form.dirname}} {{form.datetime}} {{form.outputtype}} {{form.codeurl}}</span>
     </div>
 </form>
 

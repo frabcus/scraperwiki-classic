@@ -2,6 +2,7 @@ from django import forms
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.core.urlresolvers import reverse
 import settings
 import codewiki.models as models
 import os
@@ -20,6 +21,8 @@ class CodeForm(forms.Form):
     outputtype = forms.CharField(widget=forms.TextInput(attrs={"readonly":True}))
     pageid     = forms.CharField(widget=forms.TextInput(attrs={"readonly":True}), required=False)
     code       = forms.CharField(widget=forms.Textarea(attrs={"cols":150, "rows":18}))
+    codeurl    = forms.CharField(widget=forms.TextInput(attrs={"readonly":True}))
+
     
     def GetScraperFile(self):
         scrapermodule = models.ScraperModule.objects.get(modulename=self.data['dirname'])
@@ -99,6 +102,16 @@ def codewikimodule(request, modulename):
     return render_to_response('codewikimodule.html', { 'scrapermodule':scrapermodule, 'newfilename':newfilename, 'settings': settings})
 
 
+def codewikinfileraw(request, modulename, filename):
+    # using CodeForm only for the GetDiscCode function
+    scrapermodule = models.ScraperModule.objects.get(modulename=modulename)
+    scraperfile = scrapermodule.scraperfile_set.get(filename=filename)
+    outputtype = "normal"
+    nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    form = CodeForm({'filename':filename, 'dirname':modulename, 'outputtype':outputtype}) 
+    return HttpResponse(form.GetDiscCode(), mimetype="text/plain")
+
+
 def codewikinfile(request, modulename, filename):
     scrapermodule = models.ScraperModule.objects.get(modulename=modulename)
     scraperfile = scrapermodule.scraperfile_set.get(filename=filename)
@@ -107,7 +120,8 @@ def codewikinfile(request, modulename, filename):
     reading = pageid and models.Reading.objects.get(id=pageid) or None
     nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     outputtype = "normal"
-    form = CodeForm({'filename':filename, 'dirname':modulename, 'datetime':nowtime, 'outputtype':outputtype, 'pageid':pageid}) 
+    codeurl = reverse('codewikinfileraw', kwargs={'modulename':modulename, 'filename':filename})
+    form = CodeForm({'filename':filename, 'dirname':modulename, 'datetime':nowtime, 'outputtype':outputtype, 'pageid':pageid, 'codeurl':codeurl}) 
     
     # if the form has been returned
     difflist = [ ]
@@ -236,6 +250,7 @@ def readingedit(request, reading):
     return render_to_response('scrapertextpage.html', { 'form':form, 'url':urlused, 'difflist':difflist, 'reading':reading, 'lang':lang, 'settings': settings})
 
 
+# use HttpResponse?
 def readingrawpageid(request, pageid, fileext):
     scrapertext = models.Reading.objects.get(id=pageid)
     scrapedcode = scrapertext.contents()
