@@ -6,9 +6,29 @@
 <script type="text/javascript" src="{{settings.CODEMIRROR_ROOT}}js/codemirror.js"></script>
 
 <script type="text/javascript">
+
+// adds a default setting of Save to the submitted form, for when we get here 
+// having used saveFunction (Conrol-S): submit method that doesn't give the button pressed
+// Will have to improve on this when we have other hot-keys (eg Run).
+// Using the ajaxForm directly you would need to save the text area from codemirror first!
+function addsbuttsavedefault(formData)
+{
+    var sbutt = null; 
+    $.each(formData, function(i, obj) { if (obj.name == "sbutt")  sbutt = obj.value });
+    if (!sbutt)
+        formData[formData.length] = { "name": "sbutt", "value": "Save" }; 
+}
+
 var codeeditor;
 $(document).ready(function()
 {
+    var ajaxformoptions = 
+    { 
+        target:        '#difflistajax', 
+        beforeSubmit:  function(formData) { $("textarea#id_code").value = codeeditor.getCode().length;  addsbuttsavedefault(formData); }, 
+        success:       function() { codeeditor.focus(); }
+    }; 
+
     codeeditor = CodeMirror.fromTextArea("id_code", 
     {
         {% ifequal lang 'python' %}
@@ -37,18 +57,58 @@ $(document).ready(function()
         lineNumbers: true, 
         indentUnit: 4, 
         tabMode: "spaces", 
-        parserConfig: {'pythonVersion': 2, 'strictErrors': true}
+        autoMatchParens: true,
+        parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
+        saveFunction: function () { $("#id_code").val(codeeditor.getCode());  $("#codewikiform").submit();  }
     });
 
     $("#id_outputtype").val("ajax"); 
-    var options = 
-    { 
-        target:        '#difflistajax', 
-        beforeSubmit:  function() { $("textarea#id_code").value = codeeditor.getCode().length; }, 
-        success:       function() { codeeditor.focus(); }
-    }; 
-    $('#codewikiform').ajaxForm(options);   // bind form using 'ajaxForm' 
+
+    $('#codewikiform').ajaxForm(ajaxformoptions);   // bind form using 'ajaxForm' 
+
+    $("#midresizingragger").bind("mousedown", startDrag);   // see below
 });
+
+
+
+    // dragging of middle bar code -- could move into own javascript library
+	var staticOffset;  
+	var iLastMousePos = 0;
+    var draggedWindow; 
+    function mouseY(e) 
+        { return e.clientY + document.documentElement.scrollTop; };
+
+    function startDrag(e) 
+    {
+        iLastMousePos = mouseY(e);
+
+        draggedWindow = $("#id_code").next().children(":first"); // this gets you to the iframe that you need to be resizing!!
+
+        staticOffset = draggedWindow.height() - iLastMousePos;
+        //$("#Dout").text("mouse ddown: " + iLastMousePos + "," + staticOffset + "  " + codeeditor.lineContent(codeeditor.nthLine(1)))
+        $(document).mousemove(performDrag).mouseup(endDrag);
+    }
+    function performDrag(e) 
+    {
+        var iThisMousePos = mouseY(e);
+        var iMousePos = staticOffset + iThisMousePos;
+        if (iLastMousePos >= (iThisMousePos)) 
+            iMousePos -= 5;
+        iLastMousePos = iThisMousePos;
+        //$("#Dout").text("mouse drag: " + iThisMousePos)
+        iMousePos = Math.max(60, iMousePos);
+        draggedWindow.height(iMousePos + 'px');
+        return false;
+    }
+    function endDrag(e) 
+    {
+        $(document).unbind('mousemove', performDrag).unbind('mouseup', endDrag);
+        staticOffset = null;
+        iLastMousePos = 0;
+        draggedWindow = null; 
+    }
+
+
 
 </script>
 {% endblock %}
@@ -67,8 +127,9 @@ $(document).ready(function()
 <form id="codewikiform" action="" method="POST">
   <div class="codeframebit">{{form.code}}</div>
   <div class="buttonrow">
+    <div id="midresizingragger">resize</div>
     <input type="submit" name="sbutt" value="Diffy" title="shows diff operation between text in editor and text on server"/>
-    <input type="submit" name="sbutt" value="Save" id="savebutton" title="saves to server prior to execution"/>
+    <input id="sbuttsave" type="submit" name="sbutt" value="Save" id="savebutton" title="saves to server prior to execution"/>
     <input type="submit" name="sbutt" value="Scrape" title="executes scraper script"/>
     <input type="submit" name="sbutt" value="DoesApplyAll" title="finds all pages which script does apply to"/>
 

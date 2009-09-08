@@ -123,6 +123,7 @@ def codewikinfile(request, modulename, filename):
             assert scrapermodule.modulename == form.data['dirname'], (scrapermodule.modulename, form.data['dirname'])
 
             sbutt = rform.data.get("sbutt")
+            #print "KKKK", rform.data.keys(), sbutt, difflist
             if sbutt in ["Scrape", "DoesApplyAll", "ParseSingle", "ParseAll", "MakeModels", "Collect" ]:
                 if not difflist:
                     if re.match(".*?.py$", filename):

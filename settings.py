@@ -36,7 +36,7 @@ MEDIA_ADMIN_DIR = SCRAPERWIKI_DIR + 'media-admin'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a trailing slash.
 MEDIA_ROOT = URL_ROOT + 'media/'
-CODEMIRROR_ROOT = MEDIA_ROOT + "CodeMirror-0.62/"
+CODEMIRROR_ROOT = MEDIA_ROOT + "CodeMirror-0.63/"
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a trailing slash.
 ADMIN_MEDIA_PREFIX = URL_ROOT + 'media-admin/'

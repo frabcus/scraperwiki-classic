@@ -109,8 +109,10 @@ div.codeframebit
 
 #scrapedform 
 { background-color:#ddeeff; }
+
 #codewikiform textarea
 { background-color:#eeccff; }
+
 #codewikiform #fixedfields input, #scrapedform #fixedfields input
 { display:none; Dwidth:4em; } 
 
@@ -126,8 +128,18 @@ div.buttonrow a
 #parsepagebutton input#id_pageid
 { width:4.5em }
 
-span#resizedragger
-{ background-color: gray; text-align:center; padding-left: 10px; padding-right: 10px; cursor:s-resize; }
+#midresizingragger
+{ 
+    float:right; 
+    background-color: gray; 
+    text-align:center; 
+    padding-left: 10px; 
+    padding-right: 10px; 
+    margin:1px; 
+    border: thin red solid; 
+    cursor:s-resize; 
+    -moz-user-select: none;
+}
 
 table#headlines 
 {

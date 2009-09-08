@@ -15,7 +15,6 @@ def Scrape():
         print i, len(text)
 
 
-
 def ss(d):
     return re.sub("<", "&lt;", str(d))
 
