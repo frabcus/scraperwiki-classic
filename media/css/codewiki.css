@@ -126,6 +126,8 @@ div.buttonrow a
 #parsepagebutton input#id_pageid
 { width:4.5em }
 
+span#resizedragger
+{ background-color: gray; text-align:center; padding-left: 10px; padding-right: 10px; cursor:s-resize; }
 
 table#headlines 
 {
