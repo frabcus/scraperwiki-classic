@@ -36,7 +36,7 @@ def WriteCandidate(candidate):
 
     print '<table>'
     print "<tr><th>Election</th><th>Constituency</th><th>Party</th><th>Votes</th><th>Winner</th><tr>"
-    for qs in DynElection.objects.filter(candidate=candidate).all():
+    for qs in DynElection.objects.filter(candidate=candidate).all().order_by('-year'):
         election, constituency, party, votes, winner = qs.election, qs.constituency, qs.party, qs.votes, qs.winner
         lelection = '<a href="E-%s">%s</a>' % (urllib.quote_plus(election), election)        
         lconstituency = '<a href="C-%s">%s</a>' % (urllib.quote_plus(constituency), constituency)

@@ -112,7 +112,7 @@ def Parse(reading):
             mcandidate = re.match("(\[\[[^\]\|]+?)\|.*?\]\]$", candidate)
             if mcandidate:
                 candidate = mcandidate.group(1) + "]]"
-            mcandidatet = re.match("(.*?)\s*(<!.*|<ref.*)$", candidate)
+            mcandidatet = re.match("(.*?)\s*(<!.*|<ref.*|\[http://.*)$", candidate)
             if mcandidatet:
                 candidate = mcandidatet.group(1)
             
@@ -121,7 +121,6 @@ def Parse(reading):
             electionname = None
     
 def Collect():
-        
     DynElection.objects.all().delete()
     scrapermodule = ScraperModule.objects.get(modulename="wpelections") 
     i = 0
