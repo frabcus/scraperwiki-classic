@@ -6,6 +6,8 @@ from codewiki.models import ScraperModule, DynElection
 from django.db.models import Count, Sum
 import urllib
 
+
+
 def ss(d):
     return re.sub("<", "&lt;", str(d))
 

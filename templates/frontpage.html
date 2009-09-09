@@ -17,7 +17,12 @@
 <h2><a class="modulelink" href="{% url codewikilist %}">All scraping modules</a></h2>
 
 {% for scrapermodule in scrapermodules %}
-  <p><a href="{% url codewikimodule modulename=scrapermodule.modulename %}">{{scrapermodule.modulename}}</a>
+  <p>
+  {% ifequal scrapermodule.scraperfile_set.all|length 1 %}
+    <a href="{% url codewikinfile modulename=scrapermodule.modulename, filename=scrapermodule.scraperfile_set.all.0.filename %}">{{scrapermodule.modulename}}</a>
+  {% else %}
+    <a href="{% url codewikimodule modulename=scrapermodule.modulename %}">{{scrapermodule.modulename}}</a>
+  {% endifequal %}
   | <a href="{% url observer observername=scrapermodule.modulename %}">Observe</a>
   </p>
 {% endfor %}

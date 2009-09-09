@@ -55,6 +55,9 @@ def DoesApply(reading):
 def Parse(reading):
     return [ ]
 
+def Collect():
+    pass
+
 def Observe(tailurl):
     print "blank page"
 """

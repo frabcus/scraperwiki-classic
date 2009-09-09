@@ -136,7 +136,7 @@ class DynElection(DynamicModel):
     votes        = models.IntegerField()
     winner       = models.BooleanField()
     constituency = models.CharField(max_length=200)
-
+    source       = models.CharField(max_length=200)  # wikipedia or partyweb
     
     
 # http://code.djangoproject.com/wiki/DynamicModels

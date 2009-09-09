@@ -136,7 +136,7 @@ def Collect():
                 myear = re.search("(\d\d\d\d)", kv["election"])
                 year = myear and myear.group(1) or "9999"
                 if year > "1970":
-                    detection = DynElection(election=kv["election"], year=year, party=kv["party"], votes=kv["votes"] or 0, constituency=kv["constituency"], candidate=kv["candidate"])
+                    detection = DynElection(election=kv["election"], year=year, party=kv["party"], votes=kv["votes"] or 0, constituency=kv["constituency"], candidate=kv["candidate"], source="wikipedia")
                     detection.save()
                     if not winningcandidate or winningcandidate.votes < detection.votes:
                         winningcandidate = detection

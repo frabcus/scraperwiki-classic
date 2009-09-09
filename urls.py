@@ -30,9 +30,9 @@ urlpatterns = patterns('',
     url(r'^$', views_main.frontpage, name="frontpage"), 
 
     url(r'^python/$',                                                views_code.codewikilist,   name="codewikilist"),
-    url(r'^python/(?P<modulename>[\w+]+)$',                          views_code.codewikimodule, name="codewikimodule"),
-    url(r'^python/(?P<modulename>[\w_]+)/(?P<filename>[\w_]+?.py)$', views_code.codewikinfile,  name="codewikinfile"),
-    url(r'^python/raw/(?P<modulename>[\w_]+)/(?P<filename>[\w_]+?.py)$', views_code.codewikinfileraw,  name="codewikinfileraw"),
+    url(r'^python/(?P<modulename>[\w_\-]+)$',                          views_code.codewikimodule, name="codewikimodule"),
+    url(r'^python/(?P<modulename>[\w_\-]+)/(?P<filename>[\w_]+?.py)$', views_code.codewikinfile,  name="codewikinfile"),
+    url(r'^python/raw/(?P<modulename>[\w_\-]+)/(?P<filename>[\w_]+?.py)$', views_code.codewikinfileraw,  name="codewikinfileraw"),
             
     url(r'^reading/(?P<pageid>\d+)$',                                views_code.readingeditpageid, name="readingedit"),
     url(r'^reading/(?P<pageid>\d+)(?P<fileext>\.html|\.pdf|\.xml)$', views_code.readingrawpageid,  name="readingraw"),

@@ -8,6 +8,8 @@ import urllib
 
 rc = 0
 
+
+
 ##########################################################################
 # This function is called when you click on the "Scrape" button.  
 # Used to crawl the pages you are going to parse in the next stage
@@ -19,7 +21,7 @@ def Scrape():
     urli = "http://www.labour.org.uk/ppc?Page=%d"
     
     #get page and put it into Reading object
-    for i in range(1, 15):
+    for i in range(1, 2):
         reading = RScrapeCachedURL(scraper_tag="labour_index", name="page_%d"%i, url=urli%i)       
         soup = reading.soup()
     
