@@ -36,6 +36,7 @@ def Scrape():
         lurl = tr.td.a["href"]
         name = "".join(tr.td.a.contents)
         constituency = "".join(tr.td.nextSibling.contents)
+        constituency = re.sub(" & ", " and ", constituency)
         print ss([lurl, name, constituency])
         urlp = urlparse.urljoin(urli, lurl)
 

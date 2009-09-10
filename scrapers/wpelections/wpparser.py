@@ -94,7 +94,7 @@ def Parse(reading):
             if re.match("\d+$", svotes):
                 votes = int(svotes)
             elif svotes in ["Unopposed", "unopposed", "Elected", "Co-opted", "''N/A''", "''(unopposed)''", "Unknown"]:
-                votes = 1
+                    votes = 1
             elif svotes == "":
                 votes = 0
             elif svotes == "Defeated":
@@ -121,7 +121,7 @@ def Parse(reading):
             electionname = None
     
 def Collect():
-    DynElection.objects.all().delete()
+    DynElection.objects.filter(source="wikipedia").delete()
     scrapermodule = ScraperModule.objects.get(modulename="wpelections") 
     i = 0
     for detection in scrapermodule.detection_set.filter(status="parsed"):
@@ -135,7 +135,7 @@ def Collect():
             if kv["type"] == "candidate":
                 myear = re.search("(\d\d\d\d)", kv["election"])
                 year = myear and myear.group(1) or "9999"
-                if year > "1970":
+                if year > "1940":
                     detection = DynElection(election=kv["election"], year=year, party=kv["party"], votes=kv["votes"] or 0, constituency=kv["constituency"], candidate=kv["candidate"], source="wikipedia")
                     detection.save()
                     if not winningcandidate or winningcandidate.votes < detection.votes:

@@ -82,7 +82,7 @@ def Parse(reading):
 
     mconstituency = re.search("<h6></h6>\s*PPC for (.*?)<br />", strmaintxt)
     assert mconstituency
-    params["constituency"] = mconstituency.group(1)
+    params["constituency"] = re.sub(" & ", " and ", mconstituency.group(1))
                              
     maddress = re.search("<strong>Write to me at:</strong><br />(.*?)<br />", strmaintxt)
     if maddress:

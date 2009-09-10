@@ -36,10 +36,12 @@ def WriteCandidate(candidate):
 
     print '<table>'
     print "<tr><th>Election</th><th>Constituency</th><th>Party</th><th>Votes</th><th>Winner</th><tr>"
-    for qs in DynElection.objects.filter(candidate=candidate).all().order_by('-year'):
+    for qs in DynElection.objects.filter(candidate=candidate, source="wikipedia").all().order_by('-year'):
         election, constituency, party, votes, winner = qs.election, qs.constituency, qs.party, qs.votes, qs.winner
         lelection = '<a href="E-%s">%s</a>' % (urllib.quote_plus(election), election)        
         lconstituency = '<a href="C-%s">%s</a>' % (urllib.quote_plus(constituency), constituency)
+        if election[:4] == "next":
+            winner = ""
         print r([lelection, lconstituency, party, str(votes), str(winner)])
     print "</table>"
     

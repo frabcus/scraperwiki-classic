@@ -138,7 +138,15 @@ class DynElection(DynamicModel):
     constituency = models.CharField(max_length=200)
     source       = models.CharField(max_length=200)  # wikipedia or partyweb
     
-    
+class DynPartyCandidate(DynamicModel):
+    candidaterow = models.ForeignKey("DynElection")
+    urlsource    = models.CharField(max_length=400)  # could be a Reading
+    email        = models.CharField(max_length=200)
+    web          = models.CharField(max_length=200)
+    phone        = models.CharField(max_length=200)
+    address      = models.CharField(max_length=400)
+
+
 # http://code.djangoproject.com/wiki/DynamicModels
 # http://www.adoleo.com/blog/2008/nov/21/djangos-dynamic-urls/
 # Django 1.1  Definitive Guide to Django Done Right   Holovaty 1.1
