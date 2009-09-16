@@ -6,11 +6,13 @@ import re
 def Scrape():
     pass
 
+def Parse(reading):
+    return [ ]
+
 def DoesApply(reading):
     return False
 
-def Parse(reading):
-    return [ ]
+
 
 def Collect():
     election, year = "next United Kingdom general election", "9999"
@@ -48,6 +50,16 @@ def Collect():
         candidate = kv["name"]    
         constituencymap.setdefault(constituency, []).append((party, candidate, kv))
         
+        scrapermodule = ScraperModule.objects.get(modulename="libdemcandidates")
+        
+    scrapermodule = ScraperModule.objects.get(modulename="plaidcymrucandidates")
+    party = "Plaid_Cymru"
+    for detection in scrapermodule.detection_set.filter(status="parsed"):
+        kvs = detection.contents()
+        kv = kvs[0]
+        constituency = kv["constituency"]
+        candidate = kv["name"]    
+        constituencymap.setdefault(constituency, []).append((party, candidate, kv))
         
     DynPartyCandidate.objects.all().delete()
     DynElection.objects.filter(source=source).delete()
@@ -98,6 +110,7 @@ def WriteSelectedCandidates():
     print '<table>'
     print "<tr><th>Constituency</th><th>Party</th><th>Candidate</th><th>Email</th><th>Web</th><tr>"
     prevconstituency = ""    
+    ntotal, nemails = 0, 0
     for qs in DynPartyCandidate.objects.all().order_by("candidaterow__constituency"):
         constituency, party, candidate = qs.candidaterow.constituency, qs.candidaterow.party, qs.candidaterow.candidate
         if (constituency != prevconstituency):
@@ -107,13 +120,17 @@ def WriteSelectedCandidates():
             lconstituency = " "
         
         lcandidate = '<a href="%s">%s</a>' % (qs.urlsource, candidate)
-        lparty = { "Labour Party (UK)":"Labour", "Conservative Party (UK)":"Tory", "Liberal Democrats (UK)":"LibDem" }[party]
+        lparty = { "Labour Party (UK)":"Labour", "Conservative Party (UK)":"Tory", "Liberal Democrats (UK)":"LibDem", "Plaid_Cymru":"PC" }[party]
         lweb = qs.web and '<a href="%s">%s</a>' % (qs.web, re.sub("http://", "", qs.web)) or ""
         print r([lconstituency, lparty, lcandidate, qs.email, lweb])
         prevconstituency = constituency
-                                                          
+        
+        ntotal += 1
+        if qs.email:
+            nemails += 1
+            
     print "</table>"
-    
+    print "<p>%f%% (%d out of %d) have emails</p>" % (nemails * 100.0 / ntotal, nemails, ntotal)
     
 def Observe(tail):
     WriteHead()
