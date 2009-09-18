@@ -10,3 +10,4 @@ SCRAPERWIKI_DIR     = '/home/goatchurch/scraperwiki/scraperwiki/'      # top lev
 READINGS_DIR        = SCRAPERWIKI_DIR + 'readings/'  # directory containing the cached webpages
 MODULES_DIR         = SCRAPERWIKI_DIR                # directory containing readers, detectors, collectors, and observers modules
 HOME_DIR = "/home/goatchurch/scraperwiki" # the parent directory of SCRAPERWIKI_DIR
+SMODULES_DIR         = HOME_DIR + 'scrapers/'                # directory containing scrapers
