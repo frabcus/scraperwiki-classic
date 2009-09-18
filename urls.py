@@ -18,8 +18,6 @@ info_dict = {
     'date_field': 'pub_date',
 }
 
-#test  
-
 # sort out clash between from django.db import models and codewiki.models
 # collectors should make django tables (difficult) under development
 # move hungary and pdf handling from farmsubsidy/
