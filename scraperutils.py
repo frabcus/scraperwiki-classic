@@ -100,8 +100,8 @@ def ScrapeCachedURL(scraper_tag, name, url, params=None, bforce=False):
     
 
 def ListWikipediaDumps():
-    return [os.path.join(settings.SCRAPERWIKI_DIR, "wikipediadumps", f)  \
-            for f in os.listdir(os.path.join(settings.SCRAPERWIKI_DIR, "wikipediadumps"))  \
+    return [os.path.join(settings.HOME_DIR, "wikipediadumps", f)  \
+            for f in os.listdir(os.path.join(settings.HOME_DIR, "wikipediadumps"))  \
             if f[-4:] == ".xml"]
 #
 # submitting utils
@@ -115,7 +115,7 @@ def ListWikipediaDumps():
 
 # this is immediate execution of script that outputs the values when viewing a detector
 if __name__ == "__main__":
-    #print "jjj", sys.argv
+    #print "jjj", sys.argv, sys.path
     scrapermodule = models.ScraperModule.objects.get(modulename=sys.argv[1])
     if sys.argv[2] == "Scrape":
         scrapermodulecode = scrapermodule.get_module(["Scrape"])

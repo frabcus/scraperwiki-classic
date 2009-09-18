@@ -20,7 +20,8 @@ class ScraperModule(models.Model):
 
     def get_module(self, fromlist):
         # fromlist is the list of functions we want available
-        return __import__("scrapers." + self.modulename, fromlist=fromlist)  
+        #return __import__("scrapers." + self.modulename, fromlist=fromlist)  
+        return __import__("" + self.modulename, fromlist=fromlist)  
     
     def last_edit(self):
         edits = [f.last_edit  for f in self.scraperfile_set.all() ]
