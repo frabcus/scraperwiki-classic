@@ -1,7 +1,5 @@
 
-#inital localsettings call so that urljoins work
-from localsettings import * 
-
+from os.path import exists
 # Django settings for scraperwiki project.
 
 DEBUG = True
@@ -15,8 +13,22 @@ MANAGERS = ADMINS
 
 # ALTER DATABASE scraperwiki CHARACTER SET=utf8;
 
-DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
+if exists('localsettings.py'):
+	#inital localsettings call so that urljoins work
+	print "Reading Local Database Setup"
+	from localsettings import * 
+else:
+    print "Global database setup"
+    DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
+    DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
+
+	# XYZZY - PRM(2009/09/19) localsettings.py sets up some paths, once these
+	# paths are finalised for the production environment, they have to be set up here.
+
+if DATABASE_HOST == '':
+	print """You do not appear to have a database setup defined, if you are running this on a development
+environment, then you need to copy localsettings.py.example to localsettings.py and edit it for your personal settings.
+If this message is displayed in a production environment, then it has not been set up correctly."""
 
 TIME_ZONE = 'London/England'
 LANGUAGE_CODE = 'en-uk'
