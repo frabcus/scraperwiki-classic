@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block css %}{% endblock %}
+
+{% block title %}Scraperwiki front page{% endblock %}
+
+{% block content %}
+
+
+<h3>Scraperwiki front page</h3>
+
+{% if actionmessage %}
+  <h2 style="background-color:yellow">{{actionmessage}}</h2>
+{% endif %}
+
+<div class="frontlink">
+
+<h2><a class="modulelink" href="{% url codewikilist %}">All scraping modules</a></h2>
+
+{% for scrapermodule in scrapermodules %}
+  <p>
+  {% ifequal scrapermodule.scraperfile_set.all|length 1 %}
+    <a href="{% url codewikinfile modulename=scrapermodule.modulename, filename=scrapermodule.scraperfile_set.all.0.filename %}">{{scrapermodule.modulename}}</a>
+  {% else %}
+    <a href="{% url codewikimodule modulename=scrapermodule.modulename %}">{{scrapermodule.modulename}}</a>
+  {% endifequal %}
+  | <a href="{% url observer observername=scrapermodule.modulename %}">Observe</a>
+  </p>
+{% endfor %}
+
+
+<h2><a class="nonmodulelink" class="frontlink" href="{% url readingsall %}">Readings</a></h2>
+<p>At least <em>{{readingsnumber}}</em> pages scraped between <em>{{readingsfirst}}</em> and <em>{{readingslast}}</em>.</p>
+
+
+<h2><a class="nonmodulelink" href="admin/">Django Admin site</a></h2>
+<p>Log in with username "pyconuk" and password from the recent unconference</p>
+
+<h2>
+<form method="post" action="">
+  <input type="submit" name="reset" value="Reset database" onClick="return window.confirm('Are you SURE you want to reformat the database?')"/>
+</form>
+</h2>
+
+</div>
+
+<h3 style="margin-top:3em">Worked example</h3>
+
+<p>For illustration, refer to the <a href="{{settings.MEDIA_ROOT}}/docs/codewikipipeline.odg">codewikipipline.odg</a> 
+and <a href="{{settings.MEDIA_ROOT}}/docs/codewikipipelineterms.odt">codewikipipelineterms.odt</a>.</p>
+
+<p>julian@goatchurch.org.uk</p>
+
+{% endblock %}
+

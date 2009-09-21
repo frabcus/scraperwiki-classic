@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{{settings.MEDIA_ROOT}}css/codewiki.css" />
+<script type="text/javascript" src="{{settings.MEDIA_ROOT}}js/jquery-1.3.2.js"></script>
+<script type="text/javascript" src="{{settings.MEDIA_ROOT}}js/jquery.form.js"></script>
+<script type="text/javascript" src="{{settings.CODEMIRROR_ROOT}}js/codemirror.js"></script>
+
+<script type="text/javascript">
+
+
+
+// adds a default setting of Save to the submitted form, for when we get here 
+// having used saveFunction (Conrol-S): submit method that doesn't give the button pressed
+// Will have to improve on this when we have other hot-keys (eg Run).
+// Using the ajaxForm directly you would need to save the text area from codemirror first!
+function addsbuttsavedefault(formData)
+{
+    var sbutt = null; 
+    $.each(formData, function(i, obj) { if (obj.name == "sbutt")  sbutt = obj.value });
+    if (!sbutt)
+        formData[formData.length] = { "name": "sbutt", "value": "Save" }; 
+    if (sbutt != "Reload")
+        return true; 
+    codeeditor.setCode($.ajax({url: $("#id_codeurl").val(), async: false}).responseText);
+    return false; 
+}
+
+var codeeditor;
+$(document).ready(function()
+{
+    var ajaxformoptions = 
+    { 
+        target:        '#difflistajax', 
+        beforeSubmit:  function(formData) { return addsbuttsavedefault(formData); }, 
+        success:       function() { codeeditor.focus(); }
+    }; 
+
+    codeeditor = CodeMirror.fromTextArea("id_code", 
+    {
+        {% ifequal lang 'python' %}
+            parserfile: ["../contrib/python/js/parsepython.js"],
+            stylesheet: "{{settings.CODEMIRROR_ROOT}}contrib/python/css/pythoncolors.css",
+        {% endifequal %}
+        {% ifequal lang 'javascript' %}
+            parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+            stylesheet: "{{settings.CODEMIRROR_ROOT}}css/jscolors.css",
+        {% endifequal %}
+        {% ifequal lang 'css' %}
+            parserfile: "parsecss.js",
+            stylesheet: "{{settings.CODEMIRROR_ROOT}}css/csscolors.css",
+        {% endifequal %}
+        {% ifequal lang 'html' %}
+            parserfile: ["parsexml.js", "parsecss.js", "tokenizejavascript.js", "parsejavascript.js", "parsehtmlmixed.js"],
+            stylesheet: ["{{settings.CODEMIRROR_ROOT}}css/xmlcolors.css", "{{settings.CODEMIRROR_ROOT}}css/jscolors.css", "{{settings.CODEMIRROR_ROOT}}css/csscolors.css"],
+        {% endifequal %}
+        {% ifequal lang 'xml' %}
+            parserfile: "parsexml.js",
+            stylesheet: "{{settings.CODEMIRROR_ROOT}}css/xmlcolors.css",
+        {% endifequal %}
+
+        path: "{{settings.CODEMIRROR_ROOT}}js/",
+        textWrapping: false, 
+        lineNumbers: true, 
+        indentUnit: 4, 
+        tabMode: "spaces", 
+        autoMatchParens: true,
+        parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
+
+        // copies the value from the editor to the text area before submit.  
+        // triggering the submit button causes the page to reload as it bypasses the whole ajax thing
+        saveFunction: function () { $("#id_code").val(codeeditor.getCode());  $("#codewikiform").submit();  }
+    });
+
+    $("#id_outputtype").val("ajax"); 
+
+    $('#codewikiform').ajaxForm(ajaxformoptions);   // bind form using 'ajaxForm' 
+
+    $("#midresizingragger").bind("mousedown", startDrag);   // see below
+});
+
+
+
+    // dragging of middle bar code -- could move into own javascript library
+	var staticOffset;  
+	var iLastMousePos = 0;
+    var draggedWindow; 
+    function mouseY(e) 
+        { return e.clientY + document.documentElement.scrollTop; };
+
+    function startDrag(e) 
+    {
+        iLastMousePos = mouseY(e);
+
+        draggedWindow = $("#id_code").next().children(":first"); // this gets you to the iframe that you need to be resizing!!
+
+        staticOffset = draggedWindow.height() - iLastMousePos;
+        //$("#Dout").text("mouse ddown: " + iLastMousePos + "," + staticOffset + "  " + codeeditor.lineContent(codeeditor.nthLine(1)))
+        $(document).mousemove(performDrag).mouseup(endDrag);
+    }
+    function performDrag(e) 
+    {
+        var iThisMousePos = mouseY(e);
+        var iMousePos = staticOffset + iThisMousePos;
+        if (iLastMousePos >= (iThisMousePos)) 
+            iMousePos -= 5;
+        iLastMousePos = iThisMousePos;
+        //$("#Dout").text("mouse drag: " + iThisMousePos)
+        iMousePos = Math.max(60, iMousePos);
+        draggedWindow.height(iMousePos + 'px');
+        return false;
+    }
+    function endDrag(e) 
+    {
+        $(document).unbind('mousemove', performDrag).unbind('mouseup', endDrag);
+        staticOffset = null;
+        iLastMousePos = 0;
+        draggedWindow = null; 
+    }
+
+
+
+</script>
+{% endblock %}
+
+
+{% block title %}Editing: {{form.data.filename}}{% endblock %}
+
+{% block content %}
+<h3>
+  <div style="float:right">{% if user.is_authenticated %}Logged in as '{{user}}'{% else %}<a href="{{settings.URL_ROOT}}admin/">Please log in</a>{% endif %}</div>
+  Module: <a href="{% url codewikimodule modulename=form.data.dirname %}">/{{form.data.dirname}}</a>
+  File: <u>{{form.data.filename}}</u>
+  | <a href="{% url frontpage %}">Home</a>
+</h3>
+
+<form id="codewikiform" action="" method="POST">
+  <div class="codeframebit">{{form.code}}</div>
+  <div class="buttonrow">
+    <div id="midresizingragger">resize</div>
+    <input type="submit" name="sbutt" value="Reload" title="Reloads the code (doesn't work yet)"/>
+    <input type="submit" name="sbutt" value="Diffy" title="shows diff operation between text in editor and text on server"/>
+    <input id="sbuttsave" type="submit" name="sbutt" value="Save" id="savebutton" title="saves to server prior to execution"/>
+    <input type="submit" name="sbutt" value="Scrape" title="executes scraper script"/>
+    <input type="submit" name="sbutt" value="DoesApplyAll" title="finds all pages which script does apply to"/>
+
+    {% if reading %}
+    <span id="parsepagebutton">
+    | <input type="submit" name="sbutt" value="ParseSingle" title="executes on current page"/>
+      on <a href="{% url readingedit reading.id %}">page</a> 
+      {{form.pageid}}
+    |</span>
+    {% endif %}
+
+    <input type="submit" name="sbutt" value="ParseAll" title="parses all pages that apply"/>
+    <input type="submit" name="sbutt" value="Collect" title="collects info into the database"/>
+    <a href="{% url observer observername=form.data.dirname %}">Observe</a>
+    <span id="fixedfields"> {{form.filename}} {{form.dirname}} {{form.datetime}} {{form.outputtype}} {{form.codeurl}}</span>
+    </div>
+</form>
+
+<pre id="difflistajax" class="difflist">
+{% for diffline in difflist %}{{diffline}}
+{% endfor %}
+</pre>
+
+{% endblock %}
+

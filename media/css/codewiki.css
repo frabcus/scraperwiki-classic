@@ -1,0 +1,151 @@
+h3
+{
+    background-color: black;
+    color: white;
+    margin:0 0 0 0;
+}
+h3 a
+{
+    color: #bbbbff;     
+}
+
+div.frontlink
+{
+    width:600px;
+    margin-left: auto; 
+    margin-right: auto; 
+    padding-top:2em;
+}
+
+div.frontlink h2
+{
+    padding-top:10px;
+    margin:0 0 0 0;
+    border:0 0 0 0; 
+    text-align: center;
+}
+div.frontlink p
+{
+    padding:0 0 0 0;
+    margin:0 0 0 0;
+    border:0 0 0 0; 
+}
+
+div.frontlink a.modulelink
+{
+    font-size:150%;
+    background-color:#eee;
+}
+div.frontlink a.modulelink
+{
+    font-size:150%;
+    background-color:#eee;
+}
+div.frontlink a.nonmodulelink
+{
+    font-style:italic
+}
+
+div.frontlink h2 a:hover, div.buttonrow a:hover, h3 a:hover
+{
+    background-color:#990000;
+    color:white;
+}
+
+.difflist
+{ 
+    background-color:#bbffbb;  
+    height:200px;
+    border: thin green solid;
+    overflow:scroll;
+    margin-top:1px;
+}
+table.ddump
+{
+    border-collapse: collapse;
+}
+table.ddump td, table.ddump th
+{
+    border:thin black solid;
+}
+td.summarysmall
+{
+    font-size:50%;
+}
+
+table.dividers
+{
+    border-collapse: collapse;
+    border: thin black solid;
+}
+
+table.dividers td
+{
+    border: thin black solid;
+}
+table.dividers th
+{
+    background-color: black;
+    color: white;
+    border: thin white solid;
+}
+
+
+div.codeframebit
+{
+    border:thin black dotted;
+}
+.CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #ddd;
+        text-align: right;
+        padding: .4em;
+        margin: 0;
+        font-family: monospace;
+        font-size: 10pt;
+        line-height: 1.1em;
+      }
+
+#scrapedform 
+{ background-color:#ddeeff; }
+
+#codewikiform textarea
+{ background-color:#eeccff; }
+
+#codewikiform #fixedfields input, #scrapedform #fixedfields input
+{ display:none; Dwidth:4em; } 
+
+#codewikiform span#fixedfields
+{ margin-left:10px; }
+
+div.buttonrow
+{ background-color:black; color:white; }
+div.buttonrow a
+{ color: #bbbbff; }
+#parsepagebutton
+{ margin-left: 15px; margin-right: 5px; background-color: blue; }
+#parsepagebutton input#id_pageid
+{ width:4.5em }
+
+#midresizingragger
+{ 
+    float:right; 
+    background-color: gray; 
+    text-align:center; 
+    padding-left: 10px; 
+    padding-right: 10px; 
+    margin:1px; 
+    border: thin red solid; 
+    cursor:s-resize; 
+    -moz-user-select: none;
+}
+
+table#headlines 
+{
+    border: thin black solid;
+}
+#fixmystreet
+{
+    background-color: lightpink; 
+}
