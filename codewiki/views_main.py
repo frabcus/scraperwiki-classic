@@ -2,7 +2,7 @@ from django import forms
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 import settings
-import codewiki.models as models
+import web.codewiki.models as models
 from codewiki.postdata import ResetDatabase
 from django.contrib.auth.models import User
 import os

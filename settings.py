@@ -1,10 +1,5 @@
 
-#inital localsettings call so that urljoins work
-
-import sys
-sys.path.append('web')
-
-from localsettings import * 
+from os.path import exists
 
 # Django settings for scraperwiki project.
 
@@ -19,8 +14,24 @@ MANAGERS = ADMINS
 
 # ALTER DATABASE scraperwiki CHARACTER SET=utf8;
 
-DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
+if exists('localsettings.py'):
+	#inital localsettings call so that urljoins work
+	from localsettings import * 
+else:
+    print "Global database setup"
+    DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
+    DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
+
+	# XYZZY - PRM(2009/09/19) localsettings.py sets up some paths, once these
+	# paths are finalised for the production environment, they have to be set up here.
+
+try:
+    dummy = DATABASE_ENGINE
+except NameError:
+    print """You do not appear to have a database setup defined, if you are running this on a development
+environment, then you need to copy localsettings.py.example to localsettings.py and edit it for your personal settings.
+If this message is displayed in a production environment, then it has not been set up correctly."""
+    exit
 
 TIME_ZONE = 'London/England'
 LANGUAGE_CODE = 'en-uk'
@@ -61,7 +72,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 
-ROOT_URLCONF = 'web.urls'
+ROOT_URLCONF = 'urls'
+
 
 TEMPLATE_DIRS = (
     SCRAPERWIKI_DIR + 'templates',
@@ -76,8 +88,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'web.codewiki',
-    'web.blog',
+    'codewiki',
+    'blog',
 )
 
 #localsettings needs to take precedence. Call it to override any existing vars.

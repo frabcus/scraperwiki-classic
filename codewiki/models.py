@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib import admin
 from django.core.urlresolvers import reverse
-import settings
+import web.settings
 import codecs
 import os, urllib
 from django.core.management import sql, color
