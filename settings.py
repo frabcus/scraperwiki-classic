@@ -92,8 +92,5 @@ INSTALLED_APPS = (
     'blog',
 )
 
-#localsettings needs to take precedence. Call it to override any existing vars.
-from localsettings import * 
-
 # Cal Henderson - youtube presentation on Django
 # rsvg-convert 
