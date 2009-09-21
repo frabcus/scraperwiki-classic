@@ -1,5 +1,9 @@
 
 #inital localsettings call so that urljoins work
+
+import sys
+sys.path.append('web')
+
 from localsettings import * 
 
 # Django settings for scraperwiki project.
@@ -57,7 +61,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'web.urls'
 
 TEMPLATE_DIRS = (
     SCRAPERWIKI_DIR + 'templates',
@@ -72,8 +76,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'codewiki',
-    'blog',
+    'web.codewiki',
+    'web.blog',
 )
 
 #localsettings needs to take precedence. Call it to override any existing vars.
