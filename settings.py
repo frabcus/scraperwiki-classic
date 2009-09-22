@@ -90,7 +90,11 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'codewiki',
     'blog',
+    'frontend',
 )
+
+# tell Django that the frontent user_profile model is to be attached to the user model in the admin side.
+AUTH_PROFILE_MODULE = 'frontend.UserProfile'
 
 # Cal Henderson - youtube presentation on Django
 # rsvg-convert 
