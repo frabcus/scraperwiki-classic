@@ -34,6 +34,9 @@ class Scraper(models.Model):
     license           = models.CharField(max_length = 100)
     created_at        = models.DateTimeField(auto_now_add = True)
     published_version = models.IntegerField()
+    disabled          = models.BooleanField()
+    deleted           = models.BooleanField()
+    status            = models.CharField(max_length = 10)
 
 class ScraperVersion(models.Model):
     """
