@@ -1,6 +1,11 @@
 
 from os.path import exists
 
+# This shouldn't be needed, however in some cases the buildout version of
+# django (in bin/django) may not make the paths correctly
+import sys
+sys.path.append('web')
+
 # Django settings for scraperwiki project.
 
 DEBUG = True
@@ -14,25 +19,14 @@ MANAGERS = ADMINS
 
 # ALTER DATABASE scraperwiki CHARACTER SET=utf8;
 
-if exists('localsettings.py'):
-	#inital localsettings call so that urljoins work
-	from localsettings import * 
-else:
-    print "Global database setup"
-    DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-    DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
-
-	# XYZZY - PRM(2009/09/19) localsettings.py sets up some paths, once these
-	# paths are finalised for the production environment, they have to be set up here.
-
 try:
-    dummy = DATABASE_ENGINE
-except NameError:
-    print """You do not appear to have a database setup defined, if you are running this on a development
-environment, then you need to copy localsettings.py.example to localsettings.py and edit it for your personal settings.
-If this message is displayed in a production environment, then it has not been set up correctly."""
-    exit
-
+  from localsettings import * 
+except:
+  print """You do not appear to have a database setup defined, if you are running this on a development
+  environment, then you need to copy localsettings.py.example to localsettings.py and edit it for your personal settings.
+  If this message is displayed in a production environment, then it has not been set up correctly."""
+  sys.exit()
+ 
 TIME_ZONE = 'London/England'
 LANGUAGE_CODE = 'en-uk'
 
@@ -73,7 +67,6 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'urls'
-
 
 TEMPLATE_DIRS = (
     SCRAPERWIKI_DIR + 'templates',
