@@ -11,10 +11,13 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
+     ('ScraperWiki Programmers List', 'scrapewiki-commits@googlegroups.com'),
+     ('ScraperWiki Bugs List', 'scraperwiki-bugs@googlegroups.com'),
 )
 
 MANAGERS = ADMINS
+
+DEFAULT_FROM_EMAIL = 'mercurial@scraperwiki.com'
 
 # ALTER DATABASE scraperwiki CHARACTER SET=utf8;
 
