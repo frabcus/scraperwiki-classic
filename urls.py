@@ -26,7 +26,7 @@ info_dict = {
 
 urlpatterns = patterns('',
     url(r'^$', views_main.frontpage, name="frontpage"), 
-
+    url(r'^comments/', include('django.contrib.comments.urls')),
     url(r'^python/$',                                                views_code.codewikilist,   name="codewikilist"),
     url(r'^python/(?P<modulename>[\w_\-]+)$',                          views_code.codewikimodule, name="codewikimodule"),
     url(r'^python/(?P<modulename>[\w_\-]+)/(?P<filename>[\w_]+?.py)$', views_code.codewikinfile,  name="codewikinfile"),

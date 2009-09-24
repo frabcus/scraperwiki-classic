@@ -163,13 +163,3 @@ class UserScraperRole(models.Model):
     scraper      = models.ForeignKey(Scraper)
     role         = models.CharField(max_length = 100)
 
-# Other models
-
-class Comment(models.Model):
-    """
-        Currently, comments are flat, and can only be 'made on' scrapers.
-    """
-    author     = models.ForeignKey(UserProfile)
-    scraper    = models.ForeignKey(Scraper)
-    created_at = models.DateTimeField(auto_now_add = True)
-    text       = models.TextField()
