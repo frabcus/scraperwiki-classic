@@ -1,4 +1,3 @@
-
 from os.path import exists
 
 # This shouldn't be needed, however in some cases the buildout version of
