@@ -1,4 +1,3 @@
-
 from os.path import exists
 
 # This shouldn't be needed, however in some cases the buildout version of
@@ -74,6 +73,8 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 )
+
+print TEMPLATE_DIRS
 
 INSTALLED_APPS = (
     'django.contrib.auth',
