@@ -1,11 +1,15 @@
 from django.conf.urls.defaults import *
 
+
+# please use "import <something> as local_name" as this removes issues of name collision.
 import codewiki.views_code as views_code
 import codewiki.views_main as views_main
+import frontend.views as frontend_views
 
 from django.contrib.syndication.views import feed as feed_view
 from django.views.generic import date_based, list_detail
 from django.contrib import admin
+import django.contrib.auth.views as auth_views
 from blog.models import Entry
 
 import settings
@@ -25,7 +29,9 @@ info_dict = {
 
 
 urlpatterns = patterns('',
-    url(r'^$', views_main.frontpage, name="frontpage"), 
+    url(r'^$', frontend_views.frontpage, name="frontpage"), 
+    url(r'^login/$', auth_views.login, name="login"), 
+    url(r'^logout/$', auth_views.logout, name="logout"), 
     url(r'^comments/', include('django.contrib.comments.urls')),
     url(r'^python/$',                                                views_code.codewikilist,   name="codewikilist"),
     url(r'^python/(?P<modulename>[\w_\-]+)$',                          views_code.codewikimodule, name="codewikimodule"),

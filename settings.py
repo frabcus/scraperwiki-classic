@@ -84,6 +84,9 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'south',
     'frontend',
+	'scraper',
+	'notification',
+	'page_cache',
 )
 #    'codewiki',
 # removed from installed apps so as to exclude them from the admin interface.

@@ -1,0 +1,23 @@
+body {
+	font-family: sans-serif;
+}
+#sitename {
+	float: left;
+	width: 300px;
+	border: 1px solid green;
+}
+#topoptions {
+	float: right;
+	width: 500px;
+	text-align: right;
+}
+#userbox {
+	width: 300px;
+	height: 100px;
+	float: right;
+	clear: right;
+	text-align: right;
+}
+#mastseparator {
+	clear: both;
+}
