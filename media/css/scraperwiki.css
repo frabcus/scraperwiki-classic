@@ -1,23 +1,227 @@
 body {
 	font-family: sans-serif;
+	background: #808080;
 }
+
+#frame-outer {
+	background: white;
+	width: 1050px;
+	border: 1px solid black;
+	border-left: 5px solid black;
+	padding: 5px;
+}
+
+#frame-inner {
+	
+}
+/* heading styles */
 #sitename {
 	float: left;
 	width: 300px;
-	border: 1px solid green;
+}
+
+#sitename a {
+	color: black;
+	text-decoration: none;
+}
+
+#sitename h1 {
+	font-size: 18pt;
+	margin: 0px;
+}
+
+#sitename h2 {
+	font-size: 11pt;
+	margin: 0px;
 }
 #topoptions {
 	float: right;
-	width: 500px;
+	width: 600px;
 	text-align: right;
+	color: #000080;
+	font-weight: bold;
+	font-size: 12pt;
 }
+
+#topoptions a {
+	color: #000080;
+	text-decoration: none;
+	padding-right: 10px;
+}
+
+#topoptions a:hover {
+	text-decoration: underline;
+	color: blue;
+}
+
 #userbox {
-	width: 300px;
-	height: 100px;
+	margin-top: 10px;
+	color: #000080;
+	font-size: 12pt;
+	font-weight: normal;
+	width: 400px;
 	float: right;
 	clear: right;
 	text-align: right;
 }
+
+#userbox a {
+	text-decoration: none;
+	color: #000080;
+}
+
+#userbox a:hover {
+	text-decoration: underline;
+	color: blue;
+}
+
 #mastseparator {
 	clear: both;
+}
+
+#mast-separator {
+	color: blue;
+}
+
+.divider {
+	clear: both;
+}
+/* logged in homepage styles */
+
+#welcome-banner h1 {
+	font-size: 18pt;
+}
+
+#welcome-banner p {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+#welcome-banner {
+	margin-bottom: 10px;
+}
+
+.left-column {
+	width: 510px;
+	float: left;
+	border-right: 1px solid black;
+	padding-right: 10px;
+}
+
+.right-column {
+	padding-left: 10px;
+	width: 510px;
+	float: left;
+	padding-top: 0px;
+}
+
+.column h1 {
+	font-size: 14pt;
+}
+
+#divider2 {
+	border-bottom: 1px dashed black;
+}
+
+#history-links {
+	float: right;
+	color: #000080;
+	font-size: 10pt;
+}
+
+#history-links a {
+	color: #000080;
+	text-decoration: none;
+}
+
+#history-links a:hover {
+	color: blue;
+	text-decoration: underline;
+}
+
+#history-list {
+	width: 510px;
+}
+
+#history-list th {
+	text-align: left;
+}
+
+#history-list tr.odd {
+	background: #c0c0c0;
+}
+
+#user-actions-list {
+	list-style-type: none;
+	list-style-position: outside;
+	padding-left: 0px;
+}
+
+#user-actions-list li {
+	padding-bottom: 5px;
+}
+
+#user-actions-list li a {
+	color: #000080;
+	text-decoration: none;
+}
+
+#user-actions-list li a:hover {
+	color: blue;
+	text-decoration: underline;
+}
+
+#divider3 {
+	border-top: 1px dashed black;
+	padding-bottom: 10px;
+}
+
+#divider6 {
+	height: 20px;
+}
+
+#divider5 {
+	height: 20px;
+}
+
+
+
+
+
+
+
+/* footer styles */
+
+#footer {
+	background: grey;
+	color: white;
+	padding: 10px;
+	height: 90px;
+	margin-top: 20px;
+}
+
+#footer a {
+	color: white;
+	text-decoration: none;
+	font-size: 12pt;
+}
+
+#footer a:hover {
+	color: blue;
+	text-decoration: underline;
+}
+
+#footer h1 {
+	display: inline;
+	font-size: 12pt;
+}
+
+#footer #foot-copyright-box {
+	width: 300px;
+	float: right;
+	text-align: right;
+}
+
+#footer #foot-scrapers-line {
+	padding-top: 40px;
 }

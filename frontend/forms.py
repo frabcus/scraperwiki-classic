@@ -1,10 +1,11 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, ChoiceField
 from frontend.models import UserProfile
-import datetime
 #from django.forms.extras.widgets import Textarea
 
 
 class UserProfileForm (ModelForm):
-  class Meta:
-    model = UserProfile
+    alert_frequency = ChoiceField(choices = ((0, 'Instant'), (3600, 'Once an hour')))
+    class Meta:
+        model = UserProfile
+        fields = ('bio', 'alert_frequency')
   

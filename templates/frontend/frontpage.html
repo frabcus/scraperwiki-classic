@@ -3,6 +3,10 @@
 
 {% block title %}Scraperwiki front page{% endblock %}
 {% block content %}
-  <p>This is where the goodness starts</p>
+	{% if user.is_authenticated %}
+		{% include 'frontend/frontpage_logged_in.html' %}
+	{% else %}
+	    {% include 'frontend/frontpage_anon.html' %}
+	{% endif %}
 {% endblock %}
 
