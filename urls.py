@@ -5,7 +5,6 @@ from django.conf.urls.defaults import *
 import codewiki.views_code as views_code
 import codewiki.views_main as views_main
 import frontend.views as frontend_views
-import frontend.forms as frontend_forms
 
 from django.contrib.syndication.views import feed as feed_view
 from django.views.generic import date_based, list_detail
@@ -31,10 +30,10 @@ info_dict = {
 
 urlpatterns = patterns('',
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
+    url(r'^', include('frontend.urls')),
     url(r'^login/$', auth_views.login, name="login"), 
     url(r'^logout/$', auth_views.logout, name="logout"), 
     url(r'^accounts/', include('registration.urls')),
-    url(r'^profiles/', include('profiles.urls'), {'form_class': frontend_forms.UserProfileForm}),
     url(r'^comments/', include('django.contrib.comments.urls')),
     url(r'^python/$',                                                views_code.codewikilist,   name="codewikilist"),
     url(r'^python/(?P<modulename>[\w_\-]+)$',                          views_code.codewikimodule, name="codewikimodule"),
@@ -60,4 +59,8 @@ urlpatterns = patterns('',
     # allows direct viewing of the django tables
     url(r'^admin/(.*)', admin.site.root, name="admin"),
 )
+
+
+
+
 
