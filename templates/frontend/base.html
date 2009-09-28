@@ -19,14 +19,12 @@
 		</div>
 		<div id='userbox'>
 			{% if user.is_authenticated %}
-			  Welcome {{user.username}}, <a href='/logout?next-page=/'>log out</a> 
+			  Welcome {{user.username}}, <a href='/logout?next_page=/'>log out</a> 
 			{% else %}
 				<a href='/login?next=/'>Sign in</a> or
-				<a href='/register?next_page=/'>create an account</a>.	
+				<a href='/accounts/register/'>create an account</a>.	
 			{% endif %}
 		</div>
-
-
 
 		<div id='mastseparator'></div>
 	    {% block content %}{% endblock %}

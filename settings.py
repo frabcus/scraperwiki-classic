@@ -82,12 +82,17 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.comments',
+    'registration',
     'south',
     'frontend',
 	'scraper',
 	'notification',
 	'page_cache',
 )
+
+
+ACCOUNT_ACTIVATION_DAYS = 14
+
 #    'codewiki',
 # removed from installed apps so as to exclude them from the admin interface.
 #    'blog',

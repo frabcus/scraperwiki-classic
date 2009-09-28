@@ -1,0 +1,23 @@
+{% extends "frontend/base.html" %}
+{% block css %}{% endblock %}
+
+{% block title %}Scraperwiki front page{% endblock %}
+{% block content %}
+	This is the registration form.
+	{% if form.errors %}
+	<p>Your username and password didn't match. Please try again.</p>
+	{% endif %}
+
+	<form method="post" action="/accounts/register/">
+	    {{ form.username.label_tag }}
+	    {{ form.username }}
+	    {{ form.email.label_tag }}
+	    {{ form.email }}
+	    {{ form.password1.label_tag }}
+	    {{ form.password1 }}
+	    {{ form.password2.label_tag }}
+	    {{ form.password2 }}
+		<input type="submit" value="register" />
+	</form>
+
+{% endblock %}

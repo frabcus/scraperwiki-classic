@@ -1,0 +1,5 @@
+You have requested to register with ScraperWiki.
+
+To activate your registration, please follow the link below.
+
+http://{{ site.url }}/accounts/activate/{{activation_key}}/
