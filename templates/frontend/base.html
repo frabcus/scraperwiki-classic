@@ -19,7 +19,9 @@
 		</div>
 		<div id='userbox'>
 			{% if user.is_authenticated %}
-			  Welcome {{user.username}}, <a href='/logout?next_page=/'>log out</a> 
+			  Welcome {{user.username}},
+			  <a href="{% url profiles_edit_profile %}">Your Profile</a>,
+			  <a href='/logout?next_page=/'>log out</a> 
 			{% else %}
 				<a href='/login?next=/'>Sign in</a> or
 				<a href='/accounts/register/'>create an account</a>.	

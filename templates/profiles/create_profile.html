@@ -1,0 +1,27 @@
+{% extends "frontend/base.html" %}
+{% block css %}{% endblock %}
+
+{% block title %}Profile Creation{% endblock %}
+{% block content %}
+	{% if form.errors %}
+		<ul>
+			{% for field in form %}
+				{% if field.errors %}
+					<li>{{ field.name }} {{ field.errors|striptags }}</li>
+				{% endif %}
+			{% endfor %}
+		</ul>	
+	{% endif %}
+
+	<form method="post" action="{% url profiles_create_profile %}">
+	    {{ form.bio.label_tag }}
+	    {{ form.bio }}
+	    
+	    {{ form.alerts_frequency.label_tag }}
+	    
+	    {{ form.alerts_frequency }} in seconds.
+		<input type="hidden" name="success_url" value="/" />
+		<input type="submit" value="Save" />
+	</form>
+
+{% endblock %}

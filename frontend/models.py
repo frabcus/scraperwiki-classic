@@ -15,11 +15,14 @@ class UserProfile(models.Model):
         instead of refactoring every place that connects to a resource/class outside of this application.
     """
     user             = models.ForeignKey(User, unique=True)
-    email_address    = models.EmailField()
-    bio              = models.TextField()
+    bio              = models.TextField(blank=True)
     created_at       = models.DateTimeField(auto_now_add = True)
     alerts_last_sent = models.DateTimeField()
     alert_frequency  = models.IntegerField()
+
+    def get_absolute_url(self):
+        return ('profiles_profile_detail', (), { 'username': self.user.username })
+    get_absolute_url = models.permalink(get_absolute_url)
 
 
 # models related to user roles

@@ -84,6 +84,7 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'registration',
     'south',
+    'profiles',
     'frontend',
 	'scraper',
 	'notification',
