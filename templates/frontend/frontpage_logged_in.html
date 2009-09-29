@@ -10,13 +10,18 @@
 	<div id='your-scrapers'>
 		<h1 id='your-scrapers-header'><span class='text'>Your scrapers</span></h1>
 		<ul id='your-scraper-list'>
-		
+		{% for scraper in my_scrapers %}
+		  {% include 'frontend/scraper_line.html' %}
+		{% endfor %}
 		</ul>
 	</div>
 	
 	<div id='following-scrapers'>
 		<h1 id='following-scrapers-header'><span class='text'>Scrapers you are watching</span></h1>
 		<ul id='watched-scrapers-list'>
+			{% for scraper in following_scrapers %}
+			  {% include 'frontend/scraper_line.html' %}
+			{% endfor %}
 
 		</ul>
 	</div>

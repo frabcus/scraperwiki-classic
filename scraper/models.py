@@ -9,6 +9,36 @@ class Scraper(models.Model):
         A 'Scraper' is the definition of all versions of a particular scraper
         that are classed as being the same, though changed over time as the data required changes
         and the page being scraped changes, thus breaking a particular version.
+
+		scrapers are related to users through the UserScraperRole table.
+		
+		you can get the owner of a scraper by....
+		
+		scraper.users.filter(userscraperrole__role='owner')
+		
+		or the people following this scraper...
+		
+		scraper.users.filter(userscraperrole__role='follow')
+		
+		from the user side, you can find a users scraper with
+		
+		user.scraper_set.filter(userscraperrole__role='owner')
+		
+		or, the scrapers a user is following by....
+		
+		user.scraper_set.filter(userscraperrole__role='follow')
+		
+		it would be really nice if we could define a custom manager for this relationship so 
+		we could do something like....
+		
+		user.scraper_set.owned()
+		scraper.users.owned_by()
+		
+		or
+		
+		user.scraper_set.following()
+		scraper.users.followed_by()
+		
     """
     title             = models.CharField(max_length = 100)
     short_name        = models.CharField(max_length = 50)
@@ -19,6 +49,7 @@ class Scraper(models.Model):
     disabled          = models.BooleanField()
     deleted           = models.BooleanField()
     status            = models.CharField(max_length = 10)
+    users             = models.ManyToManyField(User, through='UserScraperRole')
 
 class ScraperVersion(models.Model):
     """

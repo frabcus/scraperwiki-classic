@@ -4,15 +4,7 @@
 {% block title %}Profile Creation{% endblock %}
 {% block content %}
 
-	{% if form.errors %}
-		<ul>
-			{% for field in form %}
-				{% if field.errors %}
-					<li>{{ field.name }} {{ field.errors|striptags }}</li>
-				{% endif %}
-			{% endfor %}
-		</ul>	
-	{% endif %}
+	{% include 'shared/form_errors.html' %}
 
 	<form method="post" action="{% url profiles_create_profile %}">
 	    {{ form.bio.label_tag }}

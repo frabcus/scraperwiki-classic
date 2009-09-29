@@ -1,0 +1,15 @@
+The test data implements the following story.
+
+there are three users, bill, ben and andy.
+
+bill owns a scraper called 'missing_cats'
+
+ben owns a scraper called 'dead_parrot_list'
+
+andy owns no scrapers.
+
+bill follows 'dead_parrot_list'
+
+andy follows 'missing_cats' AND 'dead_parrot_list'
+
+ben follows no scrapers.

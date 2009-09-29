@@ -3,7 +3,10 @@
 
 {% block title %}Profile Edit{% endblock %}
 {% block content %}
+
 	Profile Edit Form
+	{% include 'shared/form_errors.html' %}	
+
 	<form action="" method="POST" accept-charset="utf-8">
 	 
 	{{ form.as_p }}

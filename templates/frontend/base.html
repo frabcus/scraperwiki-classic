@@ -4,6 +4,7 @@
 	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 		<script type="text/javascript" src="/media/js/jquery-1.3.2.js"></script>
 		<script type="text/javascript" src="/media/js/jquery-ui-1.7.2.custom.min.js"></script>
+		<script type="text/javascript" src="/media/js/scraperwiki.js"></script>
 	    <link rel="stylesheet" type="text/css" href="/media/css/scraperwiki.css" />
 	    <link rel="stylesheet" type="text/css" href="/media/css/jquery-ui-1.7.2.custom.css" />
 	    {% block css %}{% endblock %}
@@ -13,7 +14,7 @@
 		<div id='frame-outer'>
 			<div id='frame-inner'>	
 				<div id='topoptions'>
-					<span id='top-create-scraper-link'><a href='{% url not_implemented_yet %}'><span class='text'>Create a scraper</span></a></span>
+					<span id='top-create-scraper-link'><a onclick='create_scraper(); return false;' href='{% url not_implemented_yet %}'><span class='text'>Create a scraper</span></a></span>
 					{% if user.is_authenticated %}
 					    <span id='your-information'><a href='{% url not_implemented_yet %}'><span class='text'>You</span></a></span>
 					{% else %}
@@ -75,6 +76,9 @@
 					</div>
 			    {% endblock %}
 			</div>
+		</div>
+		<div class='popup-area'>
+			
 		</div>
 	</body>
 </html>
