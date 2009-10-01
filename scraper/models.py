@@ -51,6 +51,16 @@ class Scraper(models.Model):
     status            = models.CharField(max_length = 10)
     users             = models.ManyToManyField(User, through='UserScraperRole')
 
+    def owner(self):
+        return self.users.filter(userscraperrole__role='owner')[0]
+
+    def is_good(self):
+		# a scraper is good if its published version is good.
+		return self.published_scraper_version().is_good()
+		
+	def published_scraper_version(self):
+		return self.scraperversion_set.filter(version=self.published_version)
+
 class ScraperVersion(models.Model):
     """
         As a scraper is changed over time, it goes through multiple versions, it is still classed
@@ -65,6 +75,15 @@ class ScraperVersion(models.Model):
     scraper = models.ForeignKey(Scraper)
     version = models.IntegerField()
     code    = models.CharField(max_length = 100)
+
+	def is_good(self):
+		answer = True
+		for invocation in self.scraperinvocation_set.all():
+			if invocation.has_errors():
+				answer = False
+				
+		return answer
+			
 
 class ScraperInvocation(models.Model):
     """
@@ -87,6 +106,12 @@ class ScraperInvocation(models.Model):
     log_text        = models.TextField()
     published       = models.BooleanField()
     status          = models.CharField(max_length = 10)
+
+    # XYZZY PRM 2009/09/30 - Hmmm, this definition means a scraper breaks when there is a transient error.
+    # this needs to be discussed as obviously a transient network error should not be recorded as a broken
+    # scraper.
+    def has_errors(self):
+        return len(self.scraperexception_set.all()) > 0
 
 class ScraperException(models.Model):
     """

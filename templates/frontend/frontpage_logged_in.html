@@ -1,6 +1,6 @@
 <div id='welcome-banner'>
 	<h1><span class='text'>Welcome back {{ user.username }}</span></h1>
-	<p id='welcome-para1'><span class='text'>You are currently contributing to N scrapers, XXX of which are OK and have scraped a total of XXXXX records.</span></p>
+	<p id='welcome-para1'><span class='text'>You are currently contributing to {{ contribution_count }} scraper(s), XXX of which are OK and have scraped a total of XXXXX records.</span></p>
 	<p id='welcome-para2'><span class='text'>You are watching Q other scrapers and following P people.</span></p>
 </div>
 
@@ -97,6 +97,10 @@
 	<div id='new-scrapers'>
 		<h1 id='new-scrapers-header'></span class='text'>New scrapers from everybody</span></h1>
 		<ul id='new-scrapers-list'>
+			{% for scraper in new_scrapers %}
+			  {% include 'frontend/detailed_scraper_line.html' %}
+			{% endfor %}
+			
 		</ul>
 	</div>
 </div>
