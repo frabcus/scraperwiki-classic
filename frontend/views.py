@@ -12,19 +12,28 @@ import re
 import datetime
 
 def frontpage(request):
-    my_scrapers = request.user.scraper_set.filter(userscraperrole__role='owner')
-    following_scrapers = request.user.scraper_set.filter(userscraperrole__role='follow')
+    user = request.user
+	
+    # The following items are only used when there is a logged in user.	
+    if user.is_authenticated():
+        my_scrapers = user.scraper_set.filter(userscraperrole__role='owner')
+        following_scrapers = user.scraper_set.filter(userscraperrole__role='follow')
 
-    # needs to be expanded to include scrapers you have edit rights on.
-    contribution_scrapers = my_scrapers
+        # needs to be expanded to include scrapers you have edit rights on.
+        contribution_scrapers = my_scrapers
+    else:
+        my_scrapers = []
+        following_scrapers = []
+        contribution_scrapers = []
+			
     contribution_count = len(contribution_scrapers)
     good_contribution_scrapers = []
-    for scraper in contribution_scrapers:
-	  if scraper.is_good():
-		good_contribution_scrapers.append(scraper)
-
     # add filtering to cut this down to the most recent 10 items
     # also need to add filtering to limit to public published scrapers
+    for scraper in contribution_scrapers:
+        if scraper.is_good():
+            good_contribution_scrapers.append(scraper)
+
     new_scrapers = Scraper.objects.all()
     return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'following_scrapers': following_scrapers, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
 

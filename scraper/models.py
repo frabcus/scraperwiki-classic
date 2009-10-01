@@ -55,11 +55,11 @@ class Scraper(models.Model):
         return self.users.filter(userscraperrole__role='owner')[0]
 
     def is_good(self):
-		# a scraper is good if its published version is good.
-		return self.published_scraper_version().is_good()
+        # a scraper is good if its published version is good.
+        return self.published_scraper_version().is_good()
 		
-	def published_scraper_version(self):
-		return self.scraperversion_set.filter(version=self.published_version)
+    def published_scraper_version(self):
+        return self.scraperversion_set.filter(version=self.published_version)[0]
 
 class ScraperVersion(models.Model):
     """
@@ -76,13 +76,13 @@ class ScraperVersion(models.Model):
     version = models.IntegerField()
     code    = models.CharField(max_length = 100)
 
-	def is_good(self):
-		answer = True
-		for invocation in self.scraperinvocation_set.all():
-			if invocation.has_errors():
-				answer = False
+    def is_good(self):
+        answer = True
+        for invocation in self.scraperinvocation_set.all():
+            if invocation.has_errors():
+                answer = False
 				
-		return answer
+        return answer
 			
 
 class ScraperInvocation(models.Model):
