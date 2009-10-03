@@ -42,6 +42,8 @@ class Scraper(models.Model):
     """
     title             = models.CharField(max_length = 100)
     short_name        = models.CharField(max_length = 50)
+    source            = models.CharField(max_length = 100)
+    last_run          = models.DateTimeField(blank = True, null=True)
     description       = models.TextField()
     license           = models.CharField(max_length = 100)
     created_at        = models.DateTimeField(auto_now_add = True)
@@ -51,8 +53,28 @@ class Scraper(models.Model):
     status            = models.CharField(max_length = 10)
     users             = models.ManyToManyField(User, through='UserScraperRole')
 
+    def language(self):
+	    return "Python"
+	
+    def record_count(self):
+        return 12345
+
     def owner(self):
         return self.users.filter(userscraperrole__role='owner')[0]
+
+    def followers(self):
+        return self.users.filter(userscraperrole__role='follow')
+
+    def is_published(self):
+	    return self.status == 'Published'
+
+    def current_code(self):
+	    return """
+	# Scraper Code.
+	# Currently this is dummy data, as there is no storage of the code yet
+	
+	print "Hello World"
+	"""
 
     def is_good(self):
         # a scraper is good if its published version is good.

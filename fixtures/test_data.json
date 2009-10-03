@@ -5,6 +5,7 @@
   {"pk": 10000, 
    "model": "scraper.scraper", 
    "fields": {"title": "Missing Cats", 
+              "source": "http://missing_cats_list.org",
               "short_name": "missing_cats",
               "description": "This scraper gathers lost cat information from various sources", 
               "license": "GPL", 
