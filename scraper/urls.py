@@ -10,5 +10,8 @@ urlpatterns = patterns('',
                        url(r'^show/(?P<scraper_id>[\w_\-]+)(/(?P<selected_tab>[\w]+))?$',
                            views.show,
                            name='scraper_show'),
+                       url(r'^download/(?P<scraper_id>[\w_\-]+)$',
+                           views.download,
+                           name='scraper_download'),
                        )
 

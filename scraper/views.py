@@ -36,3 +36,10 @@ def show(request, scraper_id = 0, selected_tab = 'data'):
             tab['selected'] = False
 			
     return render_to_response('scraper/show.html', {'selected_tab': selected_tab, 'scraper': scraper, 'you_own_it': you_own_it, 'you_follow_it': you_follow_it, 'tabs': tabs, 'tab_to_show': tab_to_show}, context_instance=RequestContext(request))
+
+def download(request, scraper_id = 0):
+    user = request.user
+    scraper = models.Scraper.objects.get(id=scraper_id)
+    response = HttpResponse(scraper.current_code(), mimetype="text/plain")
+    response['Content-Disposition'] = 'attachment; filename=%s.py' % (scraper.short_name)
+    return response
