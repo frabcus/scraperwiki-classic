@@ -16,7 +16,7 @@
 				<div id='topoptions'>
 					<span id='top-create-scraper-link'><a onclick='create_scraper(); return false;' href='{% url not_implemented_yet %}'><span class='text'>Create a scraper</span></a></span>
 					{% if user.is_authenticated %}
-					    <span id='your-information'><a href='{% url not_implemented_yet %}'><span class='text'>You</span></a></span>
+					    <span id='your-information'><a href='{% url profiles_profile_detail user.username %}'><span class='text'>You</span></a></span>
 					{% else %}
 					{% endif %}
 					<span id='browser-scrapers'><a href='{% url not_implemented_yet %}'><span class='text'>Browse Scrapers &amp; Data</span></a></span>
@@ -33,7 +33,7 @@
 					{% if user.is_authenticated %}
 					  signed in as {{user.username}}<span class='link-separator'><span class='text'> | </span></span>
 					  <a href='/logout?next_page=/'>sign out</a><span class='link-separator'><span class='text'> | </span></span> 
-					  <span id='userbox-scraper-status'>X scrapers(NN ok)</span>
+					  <span id='userbox-scraper-status'>{{ user.scraper_set.owned_count }} scrapers({{ user.scraper_set.owned_good_count }} ok)</span>
 					{% else %}
 						<a href='/login?next=/'>Sign in</a> or
 						<a href='/accounts/register/'>create an account</a>.	

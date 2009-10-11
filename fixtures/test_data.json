@@ -98,6 +98,19 @@
    "fields": {"scraper": 10001,
               "user": 10001,
               "role": "owner"}
+  },
+  {"pk": 10000,
+   "model": "frontend.usertouserrole",
+   "fields": {"from_user": 10000,
+              "to_user": 10001,
+              "role": "follow"}
+  },
+  {"pk": 10001,
+   "model": "frontend.usertouserrole",
+   "fields": {"from_user": 10001,
+              "to_user": 10002,
+              "role": "follow"}
   }
+
 
 ]

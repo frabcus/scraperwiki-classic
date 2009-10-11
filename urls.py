@@ -29,6 +29,7 @@ info_dict = {
 
 
 urlpatterns = patterns('',
+    url(r'^profiles/', include('profiles.urls')),
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
     url(r'^', include('frontend.urls')),
     url(r'^login/$', auth_views.login, name="login"), 

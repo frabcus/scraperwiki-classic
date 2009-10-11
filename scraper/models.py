@@ -4,6 +4,65 @@ from django.contrib.auth.models import User
 from page_cache.models import *
 
 # models defining scrapers and their metadata.
+
+class ScraperManager(models.Manager):
+    """
+        This manager is implemented to allow you to link back to the particular scrapers through
+        names defining their relationship to the user.
+
+        So, having a user
+
+        > user
+
+        you can reference all scrapers that user has ownership of by
+
+        > user.scraper_set.owns()
+
+        and you can reference all the scrapers that user is watching by
+
+        > user.scraper_set.watching()
+
+        to check if this user owns any scrapers you can use
+
+        > user.dont_own_any()
+
+        or to check if the user is following any
+
+        > user.not_watching_any()
+
+    """
+    use_for_related_fields = True
+	
+    def owns(self):
+        return self.get_query_set().filter(userscraperrole__role='owner')
+		
+    def watching(self):
+        return self.get_query_set().filter(userscraperrole__role='follow')
+
+    # returns a list of the users own scrapers that are currently good.
+    def owned_good(self):
+        good_ones = []
+        for scraper in self.owns():
+            if scraper.is_good():
+                good_ones.append(scraper)
+                
+        return good_ones;
+
+    def owned_count(self):
+        return len(self.owns())
+        
+    def owned_good_count(self):
+        return len(self.owned_good())	
+        
+    def watching_count(self):
+        return len(self.watching())
+	
+    def not_watching_any(self):
+        return self.watching_count() == 0
+
+    def dont_own_any(self):
+        return self.owned_count() == 0
+        
 class Scraper(models.Model):
     """
         A 'Scraper' is the definition of all versions of a particular scraper
@@ -14,31 +73,20 @@ class Scraper(models.Model):
 		
 		you can get the owner of a scraper by....
 		
-		scraper.users.filter(userscraperrole__role='owner')
+		scraper.owner()
 		
 		or the people following this scraper...
 		
-		scraper.users.filter(userscraperrole__role='follow')
+		scraper.followers()
 		
 		from the user side, you can find a users scraper with
 		
-		user.scraper_set.filter(userscraperrole__role='owner')
+		user.scraper_set.owned()
 		
 		or, the scrapers a user is following by....
 		
-		user.scraper_set.filter(userscraperrole__role='follow')
-		
-		it would be really nice if we could define a custom manager for this relationship so 
-		we could do something like....
-		
-		user.scraper_set.owned()
-		scraper.users.owned_by()
-		
-		or
-		
-		user.scraper_set.following()
-		scraper.users.followed_by()
-		
+		user.scraper_set.watching()
+				
     """
     title             = models.CharField(max_length = 100)
     short_name        = models.CharField(max_length = 50)
@@ -52,6 +100,8 @@ class Scraper(models.Model):
     deleted           = models.BooleanField()
     status            = models.CharField(max_length = 10)
     users             = models.ManyToManyField(User, through='UserScraperRole')
+
+    objects = ScraperManager()
 
     def language(self):
 	    return "Python"
@@ -70,18 +120,16 @@ class Scraper(models.Model):
 
     def current_code(self):
 	    return """
-	# Scraper Code.
-	# Currently this is dummy data, as there is no storage of the code yet
+# Scraper Code.
+# Currently this is dummy data, as there is no storage of the code yet
 	
-	print "Hello World"
-	"""
+print "Hello World"
+               """
 
     def is_good(self):
-        # a scraper is good if its published version is good.
-        return self.published_scraper_version().is_good()
+        # don't know how goodness is going to be defined yet.
+        return True
 		
-    def published_scraper_version(self):
-        return self.scraperversion_set.filter(version=self.published_version)[0]
 
 class ScraperVersion(models.Model):
     """

@@ -10,6 +10,10 @@ andy owns no scrapers.
 
 bill follows 'dead_parrot_list'
 
-andy follows 'missing_cats' AND 'dead_parrot_list'
+andy follows 'missing_cats' AND 'dead_parrot_list' scrapers
 
 ben follows no scrapers.
+
+bill follows the user ben.
+
+ben follows the user andy.
