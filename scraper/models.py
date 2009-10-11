@@ -261,4 +261,5 @@ class ScraperRequest(models.Model):
         return 'no-reply@scraperwiki.org'
         
     def recipient_list(self):
-        return ('peter.morris@ntlworld.com',)
+        # XYZZY PRM 2009/10/13 - We should really move this into settings.
+        return ('team@scraperwiki',)
