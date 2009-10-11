@@ -13,5 +13,8 @@ urlpatterns = patterns('',
                        url(r'^download/(?P<scraper_id>[\w_\-]+)$',
                            views.download,
                            name='scraper_download'),
+                       url(r'^request/$',
+                           views.scraper_request,
+                           name='scraper_request'),
                        )
 

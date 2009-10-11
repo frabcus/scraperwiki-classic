@@ -58,3 +58,4 @@ class UserToUserRole(models.Model):
     from_user = models.ForeignKey(User, related_name = 'to_user')
     to_user   = models.ForeignKey(User, related_name = 'from_user')
     role      = models.CharField(max_length = 100)
+

@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 
 from page_cache.models import *
 
+from django.core.mail import send_mail
+
 # models defining scrapers and their metadata.
 
 class ScraperManager(models.Manager):
@@ -117,6 +119,10 @@ class Scraper(models.Model):
 
     def is_published(self):
 	    return self.status == 'Published'
+	    
+	# currently, the only editor we have is the owner of the scraper.
+    def editors(self):
+        return (self.owner(),)
 
     def current_code(self):
 	    return """
@@ -220,3 +226,39 @@ class UserScraperRole(models.Model):
     user    = models.ForeignKey(User)
     scraper = models.ForeignKey(Scraper)
     role    = models.CharField(max_length = 100)
+    
+class ScraperRequest(models.Model):
+    """
+       We wish to allow the users to put in their requests for what data to scrape next.
+    """
+
+    description = models.TextField()
+    source_link = models.CharField(max_length = 250)
+    created_at  = models.DateTimeField(auto_now_add = True)
+
+    def send_notice_email(self):
+        send_mail(self.email_subject(), self.email_body(), self.from_address(), self.recipient_list(), fail_silently=True)
+        
+    def email_subject(self):
+        return "Scraper Request"
+        
+    def email_body(self):
+        return """
+    Dear Scraperwiki Developers,
+    
+       A scraper has been requested.
+       
+       The description is as follows :-
+       
+       %s
+       
+       From the source
+       
+       %s
+        """ % (self.description, self.source_link)
+        
+    def from_address(self):
+        return 'no-reply@scraperwiki.org'
+        
+    def recipient_list(self):
+        return ('peter.morris@ntlworld.com',)

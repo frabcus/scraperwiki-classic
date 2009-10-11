@@ -1,0 +1,6 @@
+<p class='editors-para'><span class='text'>Add a comment or question about this scraper or the data it produces</span></p>
+<ul id='scraper-editor-list'>
+	{% for other_user in scraper.editors %}
+		{% include 'frontend/user_line_with_follow.html' %}
+	{% endfor %}
+</ul>
