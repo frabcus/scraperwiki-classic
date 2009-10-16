@@ -3,16 +3,32 @@
 
 {% block title %}Scraperwiki front page{% endblock %}
 {% block content %}
+  <div id='login-panel'>
     {% if message %}
       <div class='warning message'>{{ message }}</div>
     {% endif %}
 	<form method="post" action="{% url login %}">
-	    {{ form.username.label_tag }}
-	    {{ form.username }}
-	    {{ form.password.label_tag }}
-	    {{ form.password }}
+	    {{ login_form.username.label_tag }}
+	    {{ login_form.username }}
+	    {{ login_form.password.label_tag }}
+	    {{ login_form.password }}
 		<input type="submit" value="login" />
 		<input type="hidden" name="next" value="{{ next }}" />
 	</form>
+  </div>
 
+  <div id='registration-panel'>
+	{% include 'shared/form_errors.html' %}
+
+	<form method="post" action="/accounts/register/">
+	    {{ registration_form.username.label_tag }}
+	    {{ registration_form.username }}
+	    {{ registration_form.email.label_tag }}
+	    {{ registration_form.email }}
+	    {{ registration_form.password1.label_tag }}
+	    {{ registration_form.password1 }}
+	    {{ registration_form.password2.label_tag }}
+	    {{ registration_form.password2 }}
+		<input type="submit" value="register" />
+	</form>
 {% endblock %}

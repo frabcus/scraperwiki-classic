@@ -11,6 +11,7 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from scraper.models import Scraper
+from registration.forms import RegistrationForm
 import os
 import re
 import datetime
@@ -50,7 +51,7 @@ def not_implemented_yet(request):
     
 def login(request):
     if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
+        login_form = AuthenticationForm(data=request.POST)
         username = request.POST['username']
         password = request.POST['password']
         user = auth.authenticate(username=username, password=password)
@@ -61,14 +62,15 @@ def login(request):
                 
                 # Redirect to a success page.
             else:
-                message = "Disabled account"
+                message = "This account has not been activated, please check your email for confirmation"
                 # Return a 'disabled account' error message
         else:
             message = "Invalid Login"
             # Return an 'invalid login' error message.
     else:
-        form = AuthenticationForm()
+        login_form = AuthenticationForm()
+        registration_form = RegistrationForm()
         message = None
         
-    return render_to_response('registration/extended_login.html', {'form': form, 'message': message}, context_instance = RequestContext(request))
+    return render_to_response('registration/extended_login.html', {'login_form': login_form, 'registration_form': registration_form, 'message': message}, context_instance = RequestContext(request))
     
