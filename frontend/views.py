@@ -1,11 +1,15 @@
 from django import forms
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
+from django.contrib import auth
 import settings
+from django.contrib.auth.forms import AuthenticationForm
+
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
+from django.contrib.auth import authenticate
 from scraper.models import Scraper
 import os
 import re
@@ -43,3 +47,28 @@ def process_logout(request):
 
 def not_implemented_yet(request):
     return render_to_response('frontend/not-implemented-yet.html', {}, context_instance = RequestContext(request))	
+    
+def login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        username = request.POST['username']
+        password = request.POST['password']
+        user = auth.authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                auth.login(request, user)
+                return HttpResponseRedirect(reverse('frontpage'))
+                
+                # Redirect to a success page.
+            else:
+                message = "Disabled account"
+                # Return a 'disabled account' error message
+        else:
+            message = "Invalid Login"
+            # Return an 'invalid login' error message.
+    else:
+        form = AuthenticationForm()
+        message = None
+        
+    return render_to_response('registration/extended_login.html', {'form': form, 'message': message}, context_instance = RequestContext(request))
+    

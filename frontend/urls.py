@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import *
 from profiles import views
+import frontend.views as frontend_views
 import frontend.forms as frontend_forms
 
 urlpatterns = patterns('',
@@ -7,4 +8,5 @@ urlpatterns = patterns('',
    url(r'^profiles/edit/$', views.edit_profile, {'form_class': frontend_forms.UserProfileForm}, name='profiles_edit_profile'),
    url(r'^profiles/(?P<username>\w+)/$', views.profile_detail, name='profiles_profile_detail'),
    url(r'^profiles/$', views.profile_list, name='profiles_profile_list'),
+   url(r'^login/$', frontend_views.login, name='login'),
    )

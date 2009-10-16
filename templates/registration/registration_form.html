@@ -3,10 +3,7 @@
 
 {% block title %}Scraperwiki front page{% endblock %}
 {% block content %}
-	This is the registration form.
-	{% if form.errors %}
-	<p>Your username and password didn't match. Please try again.</p>
-	{% endif %}
+	{% include 'shared/form_errors.html' %}
 
 	<form method="post" action="/accounts/register/">
 	    {{ form.username.label_tag }}
