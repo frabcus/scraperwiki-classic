@@ -1,0 +1,17 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="{{MEDIA_URL}}css/codewiki.css" />
+    {% block css %}{% endblock %}
+    {% block js %}{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    <ul id="menu">
+      <li><a href="{% url frontpage %}">Home</a></li>
+    </ul>
+    
+    {% block content %}{% endblock %}
+</body>
+</html>
