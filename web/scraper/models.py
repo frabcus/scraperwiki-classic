@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from managers import datastore
+
 from page_cache.models import *
 
 from django.core.mail import send_mail
@@ -263,3 +265,8 @@ class ScraperRequest(models.Model):
     def recipient_list(self):
         # XYZZY PRM 2009/10/13 - We should really move this into settings.
         return ('team@scraperwiki',)
+
+
+class scraperData(models.Model):
+  managed = False
+  objects = datastore.datastore()

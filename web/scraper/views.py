@@ -17,6 +17,7 @@ def show(request, scraper_short_name = 'None', selected_tab = 'data'):
     scraper = models.Scraper.objects.get(short_name=scraper_short_name)
     you_own_it = (scraper.owner() == user)
     you_follow_it = (user in scraper.followers())
+    data = models.scraperData.objects.summary()
     tabs = [
 	  {'code': 'data', 'title': 'Data',       'template': 'scraper/data_tab.html'},
 	  {'code': 'code', 'title': 'Code',       'template': 'scraper/code_tab.html'},
@@ -36,7 +37,7 @@ def show(request, scraper_short_name = 'None', selected_tab = 'data'):
             tab['class'] = 'tab'
             tab['selected'] = False
 			
-    return render_to_response('scraper/show.html', {'selected_tab': selected_tab, 'scraper': scraper, 'you_own_it': you_own_it, 'you_follow_it': you_follow_it, 'tabs': tabs, 'tab_to_show': tab_to_show}, context_instance=RequestContext(request))
+    return render_to_response('scraper/show.html', {'data' : data, 'selected_tab': selected_tab, 'scraper': scraper, 'you_own_it': you_own_it, 'you_follow_it': you_follow_it, 'tabs': tabs, 'tab_to_show': tab_to_show}, context_instance=RequestContext(request))
 
 def download(request, scraper_id = 0):
     user = request.user
