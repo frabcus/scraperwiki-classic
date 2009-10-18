@@ -37,7 +37,7 @@ Tag Selected {{selected_tab}}
 			{% if tab.selected %}
 				{{ tab.title }}
 			{% else %}
-			  <a href='/scraper/show/{{scraper.id}}/{{ tab.code }}'>{{ tab.title }}</a>
+			  <a href='/scrapers/show/{{scraper.short_name}}/{{ tab.code }}'>{{ tab.title }}</a>
 			{% endif %}
 		  </li>
 		{% endfor %}
