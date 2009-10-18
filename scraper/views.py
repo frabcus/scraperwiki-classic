@@ -12,9 +12,9 @@ def create(request):
     else:
         return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 
 
-def show(request, scraper_id = 0, selected_tab = 'data'):
+def show(request, scraper_short_name = 'None', selected_tab = 'data'):
     user = request.user
-    scraper = models.Scraper.objects.get(id=scraper_id)
+    scraper = models.Scraper.objects.get(short_name=scraper_short_name)
     you_own_it = (scraper.owner() == user)
     you_follow_it = (user in scraper.followers())
     tabs = [

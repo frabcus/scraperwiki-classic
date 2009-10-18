@@ -1,5 +1,5 @@
 <li>
-	<a href='{% url scraper_show scraper.id %}'>{{ scraper.title }}</a>
+	<a href='{% url scraper_show scraper.short_name %}'>{{ scraper.title }}</a>
 	by
 	<a href='{% url profiles_profile_detail scraper.owner.username %}'>{{ scraper.owner.username }}</a>
 </li>
