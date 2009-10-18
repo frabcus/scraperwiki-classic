@@ -1,2 +1,12 @@
-localsettings.py
+web/localsettings.py
 \.pyc$
+bin
+develop-eggs
+eggs
+include
+lib
+parts
+pip-log.txt
+\.DS_Store
+\.Python
+\.installed.cfg
