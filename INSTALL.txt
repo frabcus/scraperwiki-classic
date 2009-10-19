@@ -1,0 +1,79 @@
+INSTALLING WITH BUILDOUT
+
+
+Requirements
+============
+
+* Working python (2.5 or greater, not python 3)
+* MySQL installed with root access
+* Mercurial
+* (optional) python's virtualenv
+
+
+Installation
+============
+
+The 'root' folder from now on will refer to the root of the mercurial checkout.
+In other words, the folder containing buildout, web, datastore etc
+
+1) Set up Virtualenv (optional, but reccomended)
+************************************************
+
+From within the root folder Run:
+
+> $ virtualenv --no-site-packages .
+
+This will create a new virtualenv with all it's folders alongside the scraperwiki code.
+
+Now activate the virtualenv:
+
+>  source bin/activate
+
+Your shell will now show the virtualenv name at the prompt:
+
+> (scraperwiki)$
+
+This indicates the virtualenv is 'active'.  You will to do this each time you open a new session in your shell.
+See http://pypi.python.org/pypi/virtualenv for more.
+
+
+2) Buildout
+***********
+
+To run the buildout, first bootstrap it:
+
+> $ python bootstrap.py
+
+Then run buildout:
+
+> $ buildout 
+
+This will download all the packages needed by scraperwiki.
+
+
+3) localsettings.py
+*******************
+
+Now edit ./web/localsettings.py and enter all the variables
+
+
+4) run django
+*************
+
+Test the install by moving in to the web directory and running 'syncdb' and 'migrate':
+
+> $ cd web
+> $ python manage.py syncdb
+> $ python manage.py migrate
+
+Now load the fixtures:
+
+> $ python manage.py loaddata fixtures/test_data.json
+
+Now try running django:
+
+> $ python manage.py runserver
+
+Assuming no errors you should be able to visit http://localhost:8000/ and see the scraperwiki home page.
+
+
