@@ -1,6 +1,5 @@
 INSTALLING WITH BUILDOUT
 
-
 Requirements
 ============
 
@@ -23,17 +22,16 @@ From within the root folder Run:
 
 > $ virtualenv --no-site-packages .
 
-This will create a new virtualenv with all it's folders alongside the scraperwiki code.
+This will create a new virtualenv with all it's folders alongside the scraperwiki code. If virtualenv is not installed, you can download it from http://www.python.org/download or install using macports if you are using OSX. Note: the macports version needs to be called using "> virtualenv2.x  --no-site-packages ."
 
 Now activate the virtualenv:
 
 >  source bin/activate
 
-Your shell will now show the virtualenv name at the prompt:
+Your shell will now show the virtualenv name "> (scraperwiki)$" at the prompt. This indicates the virtualenv is 'active'.  
 
-> (scraperwiki)$
+YOU WILL TO DO THIS EACH TIME YOU OPEN A NEW SESSION IN YOUR SHELL.
 
-This indicates the virtualenv is 'active'.  You will to do this each time you open a new session in your shell.
 See http://pypi.python.org/pypi/virtualenv for more.
 
 
@@ -54,7 +52,11 @@ This will download all the packages needed by scraperwiki.
 3) localsettings.py
 *******************
 
-Now edit ./web/localsettings.py and enter all the variables
+Now edit make a copy of the local settings file
+
+> $  cp localsettings.py-inhg  localsettings.py
+
+Then edit localsettings.py to add details of your local setup (database etc)
 
 
 4) run django

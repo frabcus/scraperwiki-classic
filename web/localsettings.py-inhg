@@ -1,4 +1,4 @@
-# local configurations for your computer.  Do not commit to SVN unless saved under 'localsettings.py-insvn'
+# local configurations for your computer.  Do not commit to Mercurial unless saved under 'localsettings.py-inhg'
 
 import os
 
@@ -13,3 +13,10 @@ SCRAPERWIKI_DIR     = HOME_DIR + '/web/'      # top level directory of the insta
 READINGS_DIR        = SCRAPERWIKI_DIR + '/readings/'  # directory containing the cached webpages
 MODULES_DIR         = SCRAPERWIKI_DIR                # directory containing readers, detectors, collectors, and observers modules
 SMODULES_DIR        = HOME_DIR + '/scrapers/'                # directory containing scrapers
+
+DATASTORE_DATABASE_ENGINE     = 'mysql'       # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+DATASTORE_DATABASE_HOST     = 'localhost'      
+DATASTORE_DATABASE_NAME       = '' # Or path to database file if using sqlite3.
+DATASTORE_DATABASE_USER       = ''   # Not used with sqlite3.
+DATASTORE_DATABASE_PASSWORD   = ''         # Not used with sqlite3.
+DATASTORE_DATABASE_PORT   = '3306'
