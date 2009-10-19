@@ -1,5 +1,7 @@
-web/localsettings.py
 \.pyc$
+\.DS_Store
+\.Python
+\.installed.cfg
 bin
 develop-eggs
 eggs
@@ -7,6 +9,4 @@ include
 lib
 parts
 pip-log.txt
-\.DS_Store
-\.Python
-\.installed.cfg
+web/localsettings.py
