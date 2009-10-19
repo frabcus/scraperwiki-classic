@@ -3,13 +3,12 @@ config.project_name = 'project_name'
 
 # environments
 def dev():
-    "Use the local virtual server"
-    config.fab_hosts = ['82.109.74.166']
-    config.path = '/var/www/scraperwiki'
-    config.tools_path = '/Users/sym/Projects/scraperwiki/bootstrap'
-    config.web_path = 'ssh://scraperwiki@scraperwiki/web'
+    "On the scrpaerwiki server, accessible from http://dev.scraperwiki.com"
+    config.fab_hosts = ['212.84.75.28']
+    config.path = '/var/www/dev.scraperwiki.com'
+    config.web_path = 'file:///home/scraperwiki/scraperwiki'
     config.activate = config.path + '/bin/activate'
-    config.fab_user = 'sym'
+    config.fab_user = raw_input('Please enter a user name that is in the sudoers file: ')
     config.virtualhost_path = "/"
 
 
@@ -18,10 +17,12 @@ def setup():
     Setup a fresh virtualenv as well as a few useful directories, then run
     a full deployment
     """
-    require('fab_hosts', provided_by=[local])
+
     require('path')
-    run('hg clone $(tools_path) $(path)', fail='ignore')
-    run('cd $(path); virtualenv2.6 --no-site-packages . ; source bin/activate')
+    sudo('chown -R %s %s' % (fab_user, config.path))
+    sudo('cd $(path); easy_install virtualenv')
+    run('hg clone $(web_path) $(path)', fail='ignore')
+    run('cd $(path); virtualenv --no-site-packages .')
     virtualenv('easy_install pip')
     deploy()
 
@@ -45,26 +46,30 @@ def deploy():
     print "Please Enter your deploy message: \r"
     message = raw_input()
 
-    require('fab_hosts', provided_by=[local])
     require('path')
     import time
     config.release = time.strftime('%Y%m%d%H%M%S')
     
-    run('cd $(path); hg pull; hg update -C')
+    sudo('cd $(path); hg pull; hg update -C')
     
     buildout()
+    migrate()
+    restart_webserver()    
     
     sudo("""
-    echo "$(message)" | mail -s "New Scraperwiki Deployment" simon.roe@talusdesign.co.uk -- -f mercurial@scraperwiki.com
-    """)
-
-    # migrate()
-    # restart_webserver()
+    echo "%s" | mail -s "New Scraperwiki Deployment" simon.roe@talusdesign.co.uk -- -f mercurial@scraperwiki.com
+    """ % message)
 
 
+    
+    
+def migrate():
+  virtualenv('cd web; python manage.py syncdb')
+  virtualenv('cd web; python manage.py migrate')
 
-
-
+def restart_webserver():
+    "Restart the web server"
+    sudo('apache2ctl restart')
 
 
 
