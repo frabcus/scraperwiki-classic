@@ -57,7 +57,7 @@ def deploy():
     restart_webserver()    
     
     sudo("""
-    echo "%s" | mail -s "New Scraperwiki Deployment" simon.roe@talusdesign.co.uk -- -f mercurial@scraperwiki.com
+    echo "%s" | mail -s "New Scraperwiki Deployment" scrapewiki-commits@googlegroups.com -- -f mercurial@scraperwiki.com
     """ % message)
 
 
