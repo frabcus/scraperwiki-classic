@@ -24,6 +24,14 @@ body {text-align:center; padding:0; margin:0; font-family:helvetica, arial, sans
 #divFooterCopyright img {}
 #divFooterCopyright p {}
 
+/* Content and columns */
+.content {padding-top:1.3em;}
+.content.left, .content.right {float:left;}
+.content.half {width:50%;}
+.content.col.left {width:60%;}
+.content.col.right {width:40%;}
+
+
 /* Links */
 a[href$='#'] {color:#ccc;}
 a[href$='#']:hover {text-decoration:line-through;}
@@ -37,5 +45,13 @@ div.page_tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; marg
         border-top:solid 1px #ccc;border-left:solid 1px #ccc;border-right:solid 1px #ccc;}
 div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
         background:#fff;}
+        
+/* meta data */
+div.metadata {background:#ffffaa; padding:0.8em 1em;}
+div.metadata dl {padding:0; margin:0;}
+div.metadata dt {float:left; font-weight:normal; font-style:italic;}
+div.metadata dd {position:relative; left:1em;}
+div.metadata dt, div.metadata dd {padding:0; margin:0;}
+
 /* Clear */
 br.clear {clear:both;}

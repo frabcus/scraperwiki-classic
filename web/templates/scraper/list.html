@@ -2,9 +2,16 @@
 
 {% block title %}All scrapers{% endblock %}
 {% block content %}
-
-    {% for scraper in scrapers %}
-        {% include 'scraper/scraper_line.html' %}
-	{% endfor %}
+    <div class="page_title">
+        <h1>Scrapers</h1>
+        <p>
+            All scrapers in ScraperWiki
+        </p>
+    </div>
+    <div class="content">
+        {% for scraper in scrapers %}
+            {% include 'scraper/scraper_line.html' %}
+    	{% endfor %}
+    </div>
 
 {% endblock %}

@@ -2,49 +2,58 @@
 
 {% block title %}{{ scraper.title }}{% endblock %}
 {% block content %}
-Tag Selected {{selected_tab}}
-  <div id='metadata-block'>
-	  <p><label>Source:</label><span id='meta-source' class='data'>{{scraper.source}}</span></p>
-	  <p><label>License:</label><span id='meta-source' class='data'>{{scraper.license}}</span></p>
-	  <p><label>Scraper created:</label><span id='meta-source' class='data'>{{scraper.created_at}}</span></p>
-	  <p><label>Last Run:</label><span id='meta-source' class='data'>{{scraper.last_run}}</span></p>
-	  <p><label>Records:</label><span id='meta-source' class='data'>{{scraper.record_count}}</span></p>
-	  <p><label>API short name:</label><span id='meta-source' class='data'>{{scraper.short_name}}</span></p>
-	  <p><label>Language:</label><span id='meta-source' class='data'>{{scraper.language}}</span></p>
-  </div>
-  <div id='description-block'>
-	  <h1>{{ scraper.title }}</h1>
-	  {% if scraper.is_published %}
-		  <p id='published'><span class='text'>Published</span></p>
-	  {% endif %}
-	  <p id='descriptiont'>{{ scraper.description }}</p>
-	  <div id='tags-area'>
-		No Tags as yet.
-	  </div>
-	  <div id='relevence-section'>
-		{% if you_own_it %}
-		  <p id='your-scraper'>You own this scraper</p>
-		{% endif %}
-		{% if you_follow_it %}
-		  <p id='followed-scraper'>You are following this scraper</p>
-		{% endif %}
-	  </div>
-  </div>
-  <div class="page_tabs">
-	<ul>
-		{% for tab in tabs %}
-		  <li class="{{ tab.class }}">
-			{% if tab.selected %}
-				{{ tab.title }}
-			{% else %}
-			  <a href="/scrapers/show/{{scraper.short_name}}/{{ tab.code }}">{{ tab.title }}</a>
-			{% endif %}
-		  </li>
-		{% endfor %}
-	</ul>
-  </div>
-  {% include tab_to_show %}
-  <div>
-	Important:If you suspect the scraper breaks our <a href="/terms_and_conditions/">Terms &amp; Conditions</a>. please, report it.
-  </div>
+    <div class="page_title">
+	    <h1>{{ scraper.title }}</h1>
+	  <p>{{ scraper.description }}</p>	    
+    </div>
+    <div class="content col left">
+  	  {% if scraper.is_published %}
+  		  <p>Published</p>
+  	  {% endif %}
+
+  	  <div>
+  		{% if you_own_it %}
+  		  <p>You own this scraper</p>
+  		{% endif %}
+  		{% if you_follow_it %}
+  		  <p>You are following this scraper</p>
+  		{% endif %}
+  	  </div>
+    </div>
+    <div class="content col right">
+        <div class="metadata">
+          <dl>
+              <dt>Source:</dt>
+              <dd>{{scraper.source}}</dd>
+        	  <dt>License:</dt><dd>{{scraper.license}}</dd>
+        	  <dt>Scraper created:</dt><dd>{{scraper.created_at}}</dd>
+        	  <dt>Last Run:</dt>
+        	  <dd>{{scraper.last_run}}</dd>
+        	  <dt>Records:</dt>
+        	  <dd>{{scraper.record_count}}</dd>
+        	  <dt>API short name:</dt>
+        	  <dd>{{scraper.short_name}}</dd>
+        	  <dt>Language:</dt>
+        	  <dd>{{scraper.language}}</dd>
+          </dl>
+        </div>
+    </div>
+    <br class="clear"/>
+    <div class="content full">
+        <div class="page_tabs">
+            <ul>
+            	{% for tab in tabs %}
+            	  <li class="{{ tab.class }}">
+            		{% if tab.selected %}
+            			{{ tab.title }}
+            		{% else %}
+            		  <a href="/scrapers/show/{{scraper.short_name}}/{{ tab.code }}">{{ tab.title }}</a>
+            		{% endif %}
+            	  </li>
+            	{% endfor %}
+            </ul>
+        </div>
+        {% include tab_to_show %}
+        Important:If you suspect the scraper breaks our <a href="/terms_and_conditions/">Terms &amp; Conditions</a>. please, report it.
+    </div>
 {% endblock %}
