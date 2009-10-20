@@ -30,7 +30,7 @@ def frontpage(request):
         my_scrapers = []
         following_scrapers = []
         contribution_scrapers = []
-			
+
     contribution_count = len(contribution_scrapers)
     good_contribution_scrapers = []
     # add filtering to cut this down to the most recent 10 items

@@ -1,0 +1,10 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}All scrapers{% endblock %}
+{% block content %}
+
+    {% for scraper in scrapers %}
+        {% include 'scraper/scraper_line.html' %}
+	{% endfor %}
+
+{% endblock %}
