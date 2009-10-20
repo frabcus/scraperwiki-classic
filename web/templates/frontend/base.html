@@ -23,7 +23,7 @@
     				        <a href="{% url scraper_list %}">Browse Scrapers &amp; Data</a>
     				    </li>
     				    <li><a href="#">Reuse the data</a></li>
-    				    <li class="helplink"><a href="#">Help</a></li>
+    				    <li class="helplink"><a href="/help/">Help</a></li>
     				</ul>
     				<ul>
     					{% if user.is_authenticated %}
@@ -67,7 +67,7 @@
 		           <dd>
 		             <ul>
 			                 <li><a href="mailto:team@scraperwiki.com">Contact us</a></li>
-			                 <li><a href="#">Help &amp; FAQs</a></li>			                 
+			                 <li><a href="/help/">Help &amp; FAQs</a></li>			                 
 			                 <li><a href="http://groups.google.com/group/scraperwiki">Developers discussion group</a></li>
 			                 <li><a href="http://blog.scraperwiki.com">Blog</a></li>			                   			                 
 			             </ul>
@@ -78,7 +78,7 @@
 					    <img src='/media/images/4ip.png'/>
 					</p>
 					<p>
-					    &copy; Scraper Wiki Ltd&nbsp;<a href="#">Terms &amp; Conditions</a>
+					    &copy; Scraper Wiki Ltd&nbsp;<a href="/terms_and_conditions/">Terms &amp; Conditions</a>
 					</p>
 				</div>
 				<br class="clear"/>
@@ -87,5 +87,9 @@
 		<div class='popup-area'>
 			
 		</div>
+		
+	    <script type="text/javascript" defer="defer">
+	        {% block run_script %}{% endblock %}
+        </script>
 	</body>
 </html>

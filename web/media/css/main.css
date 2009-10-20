@@ -28,5 +28,14 @@ body {text-align:center; padding:0; margin:0; font-family:helvetica, arial, sans
 a[href$='#'] {color:#ccc;}
 a[href$='#']:hover {text-decoration:line-through;}
 
+/* Page titles */
+div.page_title {border-bottom:dotted 1px #ccc; padding-bottom:1em;}
+
+/* Page tabs */
+div.page_tabs ul {border-bottom:solid 1px #ccc; height:1.65em; padding:0; margin:0;}
+div.page_tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
+        border-top:solid 1px #ccc;border-left:solid 1px #ccc;border-right:solid 1px #ccc;}
+div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
+        background:#fff;}
 /* Clear */
 br.clear {clear:both;}
