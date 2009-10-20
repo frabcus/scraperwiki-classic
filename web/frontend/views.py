@@ -45,9 +45,6 @@ def frontpage(request):
 def process_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('frontpage'))
-
-def not_implemented_yet(request):
-    return render_to_response('frontend/not-implemented-yet.html', {}, context_instance = RequestContext(request))	
     
 def login(request):
     if request.method == 'POST':
