@@ -23,7 +23,7 @@ def show(request, scraper_short_name = 'None', selected_tab = 'data'):
 	  {'code': 'code', 'title': 'Code',       'template': 'scraper/code_tab.html'},
 	  {'code': 'hist', 'title': 'History',    'template': 'scraper/hist_tab.html'},
 	  {'code': 'disc', 'title': 'Discussion', 'template': 'scraper/disc_tab.html'},
-	  {'code': 'edit', 'title': 'Editors',    'template': 'scraper/edit_tab.html'}
+	  {'code': 'developers', 'title': 'Developers',    'template': 'scraper/edit_tab.html'}
     ]
 
     # include a default value, just in case someone frigs the URL
