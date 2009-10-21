@@ -4,42 +4,39 @@
 {% block title %}Profile Details{% endblock %}
 {% block content %}
 
-	<div id='profile-banner'>
-		<img src='{{ profile.user.image_url }}' id='profile-image'/>
-		<h1 id='profile-user-name'><span class='text'>{{ profile.user.username }}'s profile</span></h1>
-		<p id='profile-bio'><span class='text'>{{ profile.bio }}</span></p>
+    <div class="page_title">
+		<img src="{{ profile.user.image_url }}" id='profile_image'/>
+		<h1>{{ profile.user.username }}'s profile</h1>
+		<p id="profile-bio">{{ profile.bio }}</p>
 	</div>
-	<div id='owned-scrapers-info'>
-		<h2 id='owned-scrapers-heading'><span class='text'>{{ profile.user.username }}'s scrapers</span></h2>
-		{% for scraper in profile.user.scraper_set.all %}
-		  {% include 'frontend/scraper_line.html' %}
-		{% endfor %}
-	</div>
+	<div class="content">
+    	<h2>{{ profile.user.username }}'s scrapers</h2>
+    	<ul>
+        	{% for scraper in profile.user.scraper_set.all %}
+        	  {% include 'frontend/scraper_line.html' %}
+        	{% endfor %}
+	    </ul>
 	
-	<div id='watching-info'>
-		<div id='watching-scrapers'>
-			<h2 id='watched-scrapers-heading'><span class='text'>Scrapers {{ profile.user.username }} is watching</span></h2>
-			{% if  profile.user.scraper_set.not_watching_any %}
-			  <p id='not-watching-notice'><span class='text'>You are not watching any scrapers</span></p>
-			{% else %}
-			  <ul>
-				{% for scraper in profile.user.scraper_set.watching %}	
-				  {% include 'frontend/detailed_scraper_line.html' %}
-				{% endfor %}
-			  </ul>
-			{% endif %}
-		</div>
-		<div id='watching-people'>
-			<h2 id='watched-people-heading'><span class='text'>People {{ profile.user.username }} is watching</span></h2>
-			{% if profile.user.to_user.not_following_anyone %}
-			  <p id='not-following-notice'><span class='text'>You are not following anyone</span></p>
-		    {% else %}
-	          <ul>
-		        {% for other_user in profile.user.to_user.following %}
-			      {% include 'frontend/user_line.html' %}
-			    {% endfor %}
-			  </ul>
-		    {% endif %}
-		</div>
-	</div>
+    	<h2>Scrapers {{ profile.user.username }} is watching</h2>
+    	{% if  profile.user.scraper_set.not_watching_any %}
+    	  <p id='not-watching-notice'><span class='text'>You are not watching any scrapers</span></p>
+    	{% else %}
+    	  <ul>
+    		{% for scraper in profile.user.scraper_set.watching %}	
+    		  {% include 'frontend/detailed_scraper_line.html' %}
+    		{% endfor %}
+    	  </ul>
+    	{% endif %}
+
+    	<h2>People {{ profile.user.username }} is following</h2>
+    	{% if profile.user.to_user.not_following_anyone %}
+    	  <p>You are not following anyone</p>
+        {% else %}
+          <ul>
+            {% for other_user in profile.user.to_user.following %}
+    	      {% include 'frontend/user_line.html' %}
+    	    {% endfor %}
+    	  </ul>
+        {% endif %}
+    </div>
 {% endblock %}

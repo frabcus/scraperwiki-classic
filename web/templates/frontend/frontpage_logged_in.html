@@ -1,107 +1,87 @@
-<div id='welcome-banner'>
-	<h1><span class='text'>Welcome back {{ user.username }}</span></h1>
-	<p id='welcome-para1'><span class='text'>You are currently contributing to {{ contribution_count }} scraper(s), XXX of which are OK and have scraped a total of XXXXX records.</span></p>
-	<p id='welcome-para2'><span class='text'>You are watching Q other scrapers and following P people.</span></p>
+<div class="page_title">
+	<h1><span class="text">Welcome back {{ user.username }}</span></h1>
+	<p>You are currently contributing to {{ contribution_count }} scraper(s), XXX of which are OK and have scraped a total of XXXXX records.</p>
+	<p>You are watching Q other scrapers and following P people.</p>
 </div>
 
-<div class='divider' id='divider1'></div>
+<div class="content col left">
 
-<div class='left-column column'>
-	<div id='your-scrapers'>
-		<h1 id='your-scrapers-header'><span class='text'>Your scrapers</span></h1>
-		<ul id='your-scraper-list'>
-		{% for scraper in my_scrapers %}
+	<h2>Your scrapers</h2>
+	<ul>
+    	{% for scraper in my_scrapers %}
+    	  {% include 'frontend/scraper_line.html' %}
+    	{% endfor %}
+	</ul>
+
+	<h2>Scrapers you are watching</h2>
+	<ul>
+		{% for scraper in following_scrapers %}
 		  {% include 'frontend/scraper_line.html' %}
 		{% endfor %}
-		</ul>
-	</div>
+	</ul>
 	
-	<div id='following-scrapers'>
-		<h1 id='following-scrapers-header'><span class='text'>Scrapers you are watching</span></h1>
-		<ul id='watched-scrapers-list'>
-			{% for scraper in following_scrapers %}
-			  {% include 'frontend/scraper_line.html' %}
-			{% endfor %}
 
-		</ul>
-	</div>
+	<h2>History</h2>
 	
-	<div class='divider' id='divider2'></div>
-	
-	<div id='history'>
-		<div id='history-links'>
-			<span id='history-rss-link'><a href='{% url not_implemented_yet %}'><span class='text'>RSS feed</span></a></span><span class='link-separator'><span class='text'> | </span></span>
-			<span id='history-csv-link'><a href='{% url not_implemented_yet %}'><span class='text'>Export as CSV</span></a></span>
-		</div>
-		<h1 id='history-header'><span class='text'>History</span></h1>
-		<table id='history-list'>
-			<tr>
-				<th>Scraper</th>
-				<th>Message</th>
-				<th>Date &amp; Time</th>
-			</tr>
-			<tr class='odd'>
-				<td colspan='3'>&nbsp;</td>
-			</tr>
-			<tr class='even'>
-				<td colspan='3'>&nbsp;</td>
-			</tr>
-			<tr class='odd'>
-				<td colspan='3'>&nbsp;</td>
-			</tr>
-			<tr class='even'>
-				<td colspan='3'>&nbsp;</td>
-			</tr>
-			<tr class='odd'>
-				<td colspan='3'>&nbsp;</td>
-			</tr>
-			<tr class='even'>
-				<td colspan='3'>&nbsp;</td>
-			</tr>
-			<tr class='odd'>
-				<td colspan='3'>&nbsp;</td>
-			</tr>
-			<tr class='even'>
-				<td colspan='3'>&nbsp;</td>
-			</tr>
-			<tr class='odd'>
-				<td colspan='3'>&nbsp;</td>
-			</tr>
-		</table>
-	</div>
-	<div class='divider' id='divider6'></div>
-	
+	<ul>
+		<li><a href="#">RSS feed</a></li>
+		<li><a href="#">Export as CSV</a></li>
+	</ul>
+
+
+	<table>
+		<tr>
+			<th>Scraper</th>
+			<th>Message</th>
+			<th>Date &amp; Time</th>
+		</tr>
+		<tr class="odd">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr class="even">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr class="odd">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr class="even">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr class="odd">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr class="even">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr class="odd">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr class="even">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+		<tr class="odd">
+			<td colspan="3">&nbsp;</td>
+		</tr>
+	</table>	    
 </div>
-<div class='right-column column'>
-	<div id='user-actions'>
-		<ul id='user-actions-list'>
-			<li><a href='{% url not_implemented_yet %}'>Create a new scraper</a></li>
-			<li><a href='{% url not_implemented_yet %}'>Schedule scrapers</a></li>
-			<li><a href='{% url not_implemented_yet %}'>Manage scraper alerts</a></li>
-			<li><a href='{% url not_implemented_yet %}'>Your API details</a></li>
-			<li><a href='{% url profiles_edit_profile %}'>Edit your profile</a></li>
-			<li><a href='{% url profiles_profile_detail user.username %}'>View your profile</a></li>
-		</ul>
-	</div>
-	
-	<div class='divider' id='divider3'></div>
-	
-	<div id='followed-users'>
-		<h1 id='followed-users-header'><span class='text'>People you are following</span></h1>
-		<ul id='followed-users-list'>
-		</ul>
-	</div>
-	
-	<div class='divider' id='divider4'></div>
-	
-	<div id='new-scrapers'>
-		<h1 id='new-scrapers-header'></span class='text'>New scrapers from everybody</span></h1>
-		<ul id='new-scrapers-list'>
-			{% for scraper in new_scrapers %}
-			  {% include 'frontend/detailed_scraper_line.html' %}
-			{% endfor %}
-			
-		</ul>
-	</div>
+    
+<div class="content col right">
+	<ul>
+		<li><a href="#">Create a new scraper</a></li>
+		<li><a href="#">Schedule scrapers</a></li>
+		<li><a href="#">Manage scraper alerts</a></li>
+		<li><a href="#">Your API details</a></li>
+		<li><a href="{% url profiles_edit_profile %}">Edit your profile</a></li>
+		<li><a href="{% url profiles_profile_detail user.username %}">View your profile</a></li>
+	</ul>
+
+	<h3>People you are following</h3>
+
+
+	<h3>New scrapers from everybody</h3>
+	<ul>
+		{% for scraper in new_scrapers %}
+		  {% include 'frontend/detailed_scraper_line.html' %}
+		{% endfor %}	
+	</ul>
 </div>
-<div class='divider' id='divider5'></div>

@@ -25,7 +25,7 @@ def show(request, scraper_short_name = 'None', selected_tab = 'data'):
 	  {'code': 'disc', 'title': 'Discussion', 'template': 'scraper/disc_tab.html'},
 	  {'code': 'edit', 'title': 'Editors',    'template': 'scraper/edit_tab.html'}
     ]
-	
+
     # include a default value, just in case someone frigs the URL
     tab_to_show = 'scraper/data_tab.html'
     for tab in tabs:
@@ -36,9 +36,13 @@ def show(request, scraper_short_name = 'None', selected_tab = 'data'):
         else:
             tab['class'] = 'tab'
             tab['selected'] = False
-			
+
     return render_to_response('scraper/show.html', {'data' : data, 'selected_tab': selected_tab, 'scraper': scraper, 'you_own_it': you_own_it, 'you_follow_it': you_follow_it, 'tabs': tabs, 'tab_to_show': tab_to_show}, context_instance=RequestContext(request))
 
+def list(request):
+    scrapers = models.Scraper.objects.all().order_by('-created_at')
+    return render_to_response('scraper/list.html', {'scrapers': scrapers}, context_instance = RequestContext(request))
+    
 def download(request, scraper_id = 0):
     user = request.user
     scraper = models.Scraper.objects.get(id=scraper_id)

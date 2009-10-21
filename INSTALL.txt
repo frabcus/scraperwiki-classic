@@ -70,7 +70,7 @@ Test the install by moving in to the web directory and running 'syncdb' and 'mig
 
 Now load the fixtures:
 
-> $ python manage.py loaddata fixtures/test_data.json
+> $ python manage.py loaddata ../fixtures/test_data.json
 
 Now try running django:
 

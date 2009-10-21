@@ -1,0 +1,64 @@
+/* Resets */
+h1, h2, h3, h4, h5, h6 {padding:0; margin:0;}
+
+body {text-align:center; padding:0; margin:0; font-family:helvetica, arial, sans-serif;}
+#divPage {width:94%; text-align:left; margin:0 auto; position:relative;}
+
+/* Header & menu */
+#divHeader {border-bottom:solid 1px #ccc; padding-bottom:1em; margin-bottom:1em;}
+#divLogo {padding-top:1em;}
+#divLogo p {padding:0; margin:0;}
+#divLogo p a {font-size:2em;}
+#divMenu {position:absolute; top:0; right:0; text-align:right;}
+#divMenu ul li {padding:0.3em 0.3em; list-style-type:none; display:inline;}
+
+/* Footer */
+#divFooter {background:#808080; text-align:left; padding-bottom:1em; position:relative;
+        min-height:135px; color:#fff;clear:left;}
+#divFooter a {color:#fff!important;}
+#divFooter dl {padding: 1em 150px 1em 3%;}
+#divFooter dl dt {float:left; width:9em; color:#616161;clear:left;font-weight:bold; 
+    padding:0 0 0.5em 0; margin:0;color:#fff;}
+#divFooter dl dd {float:left; width:50em; padding:0; margin:0;}
+#divFooter dl dd ul {padding:0;margin:0;}
+#divFooter dl dd ul li {padding:0 0.8em 0 0; display:inline;list-style-type:none;}
+
+#divFooterCopyright {position:absolute; right:3%; top:5px; text-align:right; }
+#divFooterCopyright img {}
+#divFooterCopyright p {}
+
+/* Content and columns */
+.content {padding-top:1.3em;}
+.content.left, .content.right {float:left;}
+.content.half {width:50%;}
+.content.col.left {width:60%;}
+.content.col.right {width:40%;}
+
+/* Errors */
+#divErrors {background:#da9da4; padding:0.8em; margin-bottom:1.3em;}
+#divErrors ul {padding:0; margin:0; list-style-type:none; line-height:1.4em;}
+#divErrors ul li {padding:0; margin:0;}
+
+/* Links */
+a[href$='#'] {color:#ccc;}
+a[href$='#']:hover {text-decoration:line-through;}
+
+/* Page titles */
+div.page_title {border-bottom:dotted 1px #ccc; padding-bottom:1em;}
+
+/* Page tabs */
+div.page_tabs ul {border-bottom:solid 1px #ccc; height:1.65em; padding:0; margin:0;}
+div.page_tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
+        border-top:solid 1px #ccc;border-left:solid 1px #ccc;border-right:solid 1px #ccc;}
+div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
+        background:#fff;}
+
+/* meta data */
+div.metadata {background:#ffffaa; padding:0.8em 1em;}
+div.metadata dl {padding:0; margin:0;}
+div.metadata dt {float:left; font-weight:normal; font-style:italic;}
+div.metadata dd {position:relative; left:1em;}
+div.metadata dt, div.metadata dd {padding:0; margin:0;}
+
+/* Clear */
+br.clear {clear:both;}
