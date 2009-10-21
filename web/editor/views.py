@@ -6,7 +6,7 @@ import forms
 from scraper.models import Scraper as ScraperModel
 from scraper import template
 
-def edit(request, scraper_id=None):
+def edit(request, short_name=None):
   """
   This is the main editor view.
   
@@ -24,8 +24,8 @@ def edit(request, scraper_id=None):
   
   """
   
-  if scraper_id:
-    scraper = get_object_or_404(ScraperModel, pk=int(scraper_id))
+  if short_name:
+    scraper = get_object_or_404(ScraperModel, short_name=short_name)
   else:
     scraper = ScraperModel(title=template.default()['title'])
     
@@ -38,13 +38,14 @@ def edit(request, scraper_id=None):
       # Commit...
       message = "Scraper Comitted"
     elif action == "Save":
-      scraperForm = form.save(commit=False)
-      scraperForm.code = request.POST['code']
-      scraperForm.pk = scraper_id
-      scraperForm.created_at = scraper.created_at
-      scraperForm.save()
-      message = "Scraper Saved"
-      return HttpResponseRedirect(reverse('editor', kwargs={'scraper_id' : scraperForm.pk}))
+      if form.is_valid():      
+        scraperForm = form.save(commit=False)
+        scraperForm.code = request.POST['code']
+        scraperForm.short_name = short_name
+        scraperForm.created_at = scraper.created_at
+        scraperForm.save()
+        message = "Scraper Saved"
+        return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : scraperForm.short_name}))
       
     elif action == "Run":
       # Run...
@@ -54,7 +55,7 @@ def edit(request, scraper_id=None):
   else:
     
     form = forms.editorForm(instance=scraper)
-    if scraper_id:
+    if short_name:
       form.fields['code'].initial = "scraper.current_code()"
     else:
       form = forms.editorForm(template.default())

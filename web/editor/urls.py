@@ -3,6 +3,6 @@ import views
 
 urlpatterns = patterns('',
   url(r'^$', views.edit, name="editor"),
-  url(r'^/(?P<scraper_id>\d+)$', views.edit, name="editor"),
+  url(r'^(?P<short_name>[-\w]+)$', views.edit, name="editor"),
   
 )

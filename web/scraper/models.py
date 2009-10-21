@@ -5,6 +5,7 @@ from managers import datastore
 from django.db.models.signals import post_save
 from page_cache.models import *
 import template
+import util
 import vc
 
 from django.core.mail import send_mail
@@ -102,7 +103,6 @@ class Scraper(models.Model):
     description       = models.TextField()
     license           = models.CharField(max_length = 100)
     created_at        = models.DateTimeField(auto_now_add = True)
-    published_version = models.IntegerField()
     disabled          = models.BooleanField()
     deleted           = models.BooleanField()
     status            = models.CharField(max_length = 10)
@@ -112,6 +112,15 @@ class Scraper(models.Model):
     
     def __unicode__(self):
       return self.short_name
+    
+    def save(self):
+        if self.short_name:
+          self.short_name = util.SlugifyUniquely(self.short_name, Scraper, slugfield='short_name')
+        else:
+          self.short_name = util.SlugifyUniquely(self.title, Scraper, slugfield='short_name')
+          
+        super(Scraper, self).save()
+    
     
     def language(self):
 	    return "Python"
@@ -141,7 +150,7 @@ class Scraper(models.Model):
         return True
 		
 def post_save_signal(sender, **kwargs):
-  vc.commit(kwargs['instance'].short_name)
+  vc.commit(kwargs['instance'])
 post_save.connect(post_save_signal, sender=Scraper)
 
 

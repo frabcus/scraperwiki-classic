@@ -18,8 +18,8 @@
 
 {% block content %}
   
-
-<form action="http://localhost:9004" method="POST" accept-charset="utf-8" target="console">
+Short name: {{ scraper.short_name }}
+<form action="" method="POST" accept-charset="utf-8" target="">
   {{ form.as_p }}
   <p><input type="submit" name="action" value="Commit">
   <input type="submit" name="action" value="Save">
