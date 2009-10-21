@@ -91,6 +91,7 @@ INSTALLED_APPS = (
   	'notification',
   	'page_cache',
   	'editor',
+  	'contact_form'
 )
 
 

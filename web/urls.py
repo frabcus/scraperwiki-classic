@@ -33,6 +33,11 @@ urlpatterns = patterns('',
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
     url(r'^', include('frontend.urls')),
     url(r'^editor/', include('editor.urls')),
+    
+    
+    url(r'^contact', include('contact_form.urls')),
+    
+    
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name="logout"), 
     url(r'^accounts/', include('registration.urls')),
     url(r'^scrapers/', include('scraper.urls')),

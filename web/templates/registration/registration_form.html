@@ -6,6 +6,9 @@
 	{% include 'shared/form_errors.html' %}
 
 	<form method="post" action="/accounts/register/">
+	    {% if form.username.errors %}
+
+	    {% endif %}
 	    {{ form.username.label_tag }}
 	    {{ form.username }}
 	    {{ form.email.label_tag }}

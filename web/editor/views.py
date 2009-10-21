@@ -29,12 +29,12 @@ def edit(request, short_name=None):
   else:
     scraper = ScraperModel(title=template.default()['title'])
     
-
+  message = ""
   
   if request.method == 'POST':
     form = forms.editorForm(request.POST)
     action = request.POST.get('action')
-    if action == "Commit":
+    if action.lower() == "commit":
       # Commit...
       message = "Scraper Comitted"
     elif action == "Save":
@@ -49,7 +49,8 @@ def edit(request, short_name=None):
       
     elif action == "Run":
       # Run...
-      message = "Scraper Run"
+      # This shouldn't happen, as 'run' should be caught by javascript in the editor
+      message = "You need JavaScript"
     else:
       message = ""
   else:
@@ -60,7 +61,7 @@ def edit(request, short_name=None):
     else:
       form = forms.editorForm(template.default())
 
-  return render_to_response('editor.html', {'scraper':scraper, 'form':form}, context_instance=RequestContext(request)) 
+  return render_to_response('editor.html', {'scraper':scraper, 'form':form, 'message' : message}, context_instance=RequestContext(request)) 
   
   
   
