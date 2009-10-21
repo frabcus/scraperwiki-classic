@@ -8,6 +8,7 @@
     {% include 'shared/form_errors.html' %}
 
 	<form method="post" action="{% url django.contrib.auth.views.login %}">
+
 	    {{ login_form.username.label_tag }}
 	    {{ login_form.username }}
 	    {{ login_form.password.label_tag }}
@@ -21,6 +22,7 @@
 	{% include 'shared/form_errors.html' %}
 
 	<form method="post" action="/accounts/register/">
+
 	    {{ registration_form.username.label_tag }}
 	    {{ registration_form.username }}
 	    {{ registration_form.email.label_tag }}

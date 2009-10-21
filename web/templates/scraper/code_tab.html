@@ -1,14 +1,40 @@
-<div id='code-action-buttons'>
+<div>
 	<form action="#">
-		<input type='submit' value='Branch'/>
-		<input type='submit' value='Edit'>
+		<input type="submit" value="Branch"/>
+		<input type="submit" value="Edit">
 	</form>
 </div>
 
-<a href='/scraper/download/{{ scraper.id }}'>Download as text</a>
+<a href="/scraper/download/{{ scraper.id }}">Download as text</a>
 
-<div id='code-display'>
-	<pre>
-{{ scraper.current_code }}
-	</pre>
+<div class="code_viewer">
+	<textarea id="txtScraperCode">
+        {{ scraper.current_code }}
+
+	</textarea>
 </div>
+<script type="text/javascript">
+
+var codeeditor;
+$(document).ready(function()
+{
+
+   codeeditor = CodeMirror.fromTextArea("txtScraperCode", 
+   {
+       parserfile: ["../contrib/python/js/parsepython.js"],
+       stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
+
+       path: "/media/CodeMirror-0.63/js/",
+       textWrapping: false, 
+       lineNumbers: true, 
+       indentUnit: 4,
+       readOnly: true,
+       tabMode: "spaces", 
+       autoMatchParens: true,
+       width: '100%',
+       parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
+
+   });
+
+});
+</script>
