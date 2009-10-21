@@ -1,6 +1,6 @@
 from django.template.defaultfilters import slugify
 
-def SlugifyUniquely(value, model, slugfield="slug"):
+def SlugifyUniquely(value, model, slugfield="slug", instance=None):
         """
         Taken from: http://code.djangoproject.com/wiki/SlugifyUniquely
         
@@ -30,7 +30,15 @@ def SlugifyUniquely(value, model, slugfield="slug"):
         while True:
                 if suffix:
                         potential = "-".join([base, str(suffix)])
-                if not model.objects.filter(**{slugfield: potential}).count():
+                matches = model.objects.filter(**{slugfield: potential})
+                print "len",len(matches)
+                if len(matches) >= 1:
+                  print "YES"
+                  print "pk", matches[0].pk
+                  print "pt",instance.pk
+                  if matches[0].pk == model.pk:
+                    return potential
+                if not matches.count():
                         return potential
                 # we hit a conflicting slug, so bump the suffix & try again
                 suffix += 1

@@ -115,13 +115,12 @@ class Scraper(models.Model):
       return self.short_name
     
     def save(self):
-      print self.pk
       if self.pk == None:
         # if the scraper doesn't exist already
         if self.short_name:
-          self.short_name = util.SlugifyUniquely(self.short_name, Scraper, slugfield='short_name')
-        else:
-          self.short_name = util.SlugifyUniquely(self.title, Scraper, slugfield='short_name')
+          self.short_name = util.SlugifyUniquely(self.short_name, Scraper, slugfield='short_name', instance=self)
+        elif self.short_name == None:
+          self.short_name = util.SlugifyUniquely(self.title, Scraper, slugfield='short_name', instance=self)
           
         super(Scraper, self).save()
     

@@ -41,7 +41,7 @@ def edit(request, short_name=None):
       if form.is_valid():      
         scraperForm = form.save(commit=False)
         scraperForm.code = request.POST['code']
-        scraperForm.short_name = short_name
+        scraperForm.short_name = scraper.short_name
         scraperForm.created_at = scraper.created_at
         scraperForm.save()
         message = "Scraper Saved"
