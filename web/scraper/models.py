@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib import admin
 
 from managers import datastore
 
@@ -122,7 +123,7 @@ class Scraper(models.Model):
     def is_published(self):
 	    return self.status == 'Published'
 	    
-	# currently, the only editor we have is the owner of the scraper.
+    # currently, the only editor we have is the owner of the scraper.
     def editors(self):
         return (self.owner(),)
 
@@ -138,6 +139,9 @@ print "Hello World"
         # don't know how goodness is going to be defined yet.
         return True
 		
+    # for previewing in the admin
+    def __unicode__(self):
+        return "scraper: %s" % (self.short_name)
 
 class ScraperVersion(models.Model):
     """
