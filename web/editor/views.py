@@ -33,11 +33,11 @@ def edit(request, short_name=None):
   
   if request.method == 'POST':
     form = forms.editorForm(request.POST)
-    action = request.POST.get('action')
-    if action.lower() == "commit":
+    action = request.POST.get('action').lower()
+    if action == "commit":
       # Commit...
       message = "Scraper Comitted"
-    elif action == "Save":
+    elif action == "save":
       if form.is_valid():      
         scraperForm = form.save(commit=False)
         scraperForm.code = request.POST['code']
@@ -47,10 +47,10 @@ def edit(request, short_name=None):
         message = "Scraper Saved"
         return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : scraperForm.short_name}))
       
-    elif action == "Run":
+    elif action == "run":
       # Run...
       # This shouldn't happen, as 'run' should be caught by javascript in the editor
-      message = "You need JavaScript"
+      message = "You need JavaScript to run script in the browser."
     else:
       message = ""
   else:
