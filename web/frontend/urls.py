@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import *
 from profiles import views
+from contact_form.views import contact_form
 import frontend.views as frontend_views
 import frontend.forms as frontend_forms
 from django.views.generic.simple import direct_to_template
