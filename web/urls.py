@@ -59,6 +59,10 @@ urlpatterns = patterns('',
     
     # allows direct viewing of the django tables
     url(r'^admin/(.*)', admin.site.root, name="admin"),
+    
+    #contact form
+    (r'^contact/', include('contact_form.urls')),
+
 )
 
 

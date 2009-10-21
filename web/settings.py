@@ -89,6 +89,7 @@ INSTALLED_APPS = (
 	'scraper',
 	'notification',
 	'page_cache',
+	'contact_form',
 )
 
 

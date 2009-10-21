@@ -1,0 +1,25 @@
+{% extends "frontend/base.html" %}
+{% block content %}
+    <div class="content left col">
+        <form action="/contact/" method="POST">
+            <ul class="form">
+                <li>
+                    {{ form.name.label }}
+                    {{ form.name }}
+                </li>
+                <li>
+                    {{ form.email.label }}                    
+                    {{ form.email }}
+                </li>
+                <li>
+                    {{ form.body.label }}                    
+                    {{ form.body }}
+                </li>
+            </ul>
+            <input type="submit" value="Send feedback" />
+        </form>
+    </div>
+    <div class="content right col">
+        fdsfdsf
+    </div>
+{% endblock %}
