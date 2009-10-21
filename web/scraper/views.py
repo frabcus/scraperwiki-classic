@@ -36,7 +36,7 @@ def show(request, scraper_short_name = 'None', selected_tab = 'data'):
         else:
             tab['class'] = 'tab'
             tab['selected'] = False
-
+    print "sss", scraper
     return render_to_response('scraper/show.html', {'data' : data, 'selected_tab': selected_tab, 'scraper': scraper, 'you_own_it': you_own_it, 'you_follow_it': you_follow_it, 'tabs': tabs, 'tab_to_show': tab_to_show}, context_instance=RequestContext(request))
 
 def list(request):
