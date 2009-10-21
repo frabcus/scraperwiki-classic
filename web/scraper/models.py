@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib import admin
 
 from managers import datastore
 from django.db.models.signals import post_save
@@ -137,7 +138,7 @@ class Scraper(models.Model):
     def is_published(self):
 	    return self.status == 'Published'
 	    
-	# currently, the only editor we have is the owner of the scraper.
+    # currently, the only editor we have is the owner of the scraper.
     def editors(self):
         return (self.owner(),)
             
