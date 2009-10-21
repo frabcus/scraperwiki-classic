@@ -2,10 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from managers import datastore
-
+from django.db.models.signals import post_save
 from page_cache.models import *
+import template
+import vc
 
 from django.core.mail import send_mail
+
 
 # models defining scrapers and their metadata.
 
@@ -125,19 +128,19 @@ class Scraper(models.Model):
 	# currently, the only editor we have is the owner of the scraper.
     def editors(self):
         return (self.owner(),)
-
+            
     def current_code(self):
-	    return """
-# Scraper Code.
-# Currently this is dummy data, as there is no storage of the code yet
-	
-print "Hello World"
-               """
+        code =  vc.get_code(self.short_name)
+        return code
 
     def is_good(self):
         # don't know how goodness is going to be defined yet.
         return True
 		
+def post_save_signal(sender, **kwargs):
+  vc.commit(kwargs['instance'].short_name)
+post_save.connect(post_save_signal, sender=Scraper)
+
 
 class ScraperVersion(models.Model):
     """

@@ -55,7 +55,7 @@ def edit(request, scraper_id=None):
     
     form = forms.editorForm(instance=scraper)
     if scraper_id:
-      form.fields['code'].initial = scraper.current_code()
+      form.fields['code'].initial = "scraper.current_code()"
     else:
       form = forms.editorForm(template.default())
 

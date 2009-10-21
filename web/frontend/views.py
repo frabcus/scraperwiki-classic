@@ -39,7 +39,7 @@ def frontpage(request):
         if scraper.is_good():
             good_contribution_scrapers.append(scraper)
 
-    new_scrapers = Scraper.objects.all()
+    new_scrapers = Scraper.objects.all().order_by('-created_at')[:5]
     return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'following_scrapers': following_scrapers, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
 
 def process_logout(request):
