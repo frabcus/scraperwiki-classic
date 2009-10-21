@@ -9,32 +9,34 @@
 		<h1>{{ profile.user.username }}'s profile</h1>
 		<p id="profile-bio">{{ profile.bio }}</p>
 	</div>
+	<div class="content">
+    	<h2>{{ profile.user.username }}'s scrapers</h2>
+    	<ul>
+        	{% for scraper in profile.user.scraper_set.all %}
+        	  {% include 'frontend/scraper_line.html' %}
+        	{% endfor %}
+	    </ul>
 	
-	<h2>{{ profile.user.username }}'s scrapers</h2>
-	{% for scraper in profile.user.scraper_set.all %}
-	  {% include 'frontend/scraper_line.html' %}
-	{% endfor %}
-	
-	<h2>Scrapers {{ profile.user.username }} is watching</h2>
-	{% if  profile.user.scraper_set.not_watching_any %}
-	  <p id='not-watching-notice'><span class='text'>You are not watching any scrapers</span></p>
-	{% else %}
-	  <ul>
-		{% for scraper in profile.user.scraper_set.watching %}	
-		  {% include 'frontend/detailed_scraper_line.html' %}
-		{% endfor %}
-	  </ul>
-	{% endif %}
+    	<h2>Scrapers {{ profile.user.username }} is watching</h2>
+    	{% if  profile.user.scraper_set.not_watching_any %}
+    	  <p id='not-watching-notice'><span class='text'>You are not watching any scrapers</span></p>
+    	{% else %}
+    	  <ul>
+    		{% for scraper in profile.user.scraper_set.watching %}	
+    		  {% include 'frontend/detailed_scraper_line.html' %}
+    		{% endfor %}
+    	  </ul>
+    	{% endif %}
 
-
-	<h2>People {{ profile.user.username }} is following</h2>
-	{% if profile.user.to_user.not_following_anyone %}
-	  <p>You are not following anyone</p>
-    {% else %}
-      <ul>
-        {% for other_user in profile.user.to_user.following %}
-	      {% include 'frontend/user_line.html' %}
-	    {% endfor %}
-	  </ul>
-    {% endif %}
+    	<h2>People {{ profile.user.username }} is following</h2>
+    	{% if profile.user.to_user.not_following_anyone %}
+    	  <p>You are not following anyone</p>
+        {% else %}
+          <ul>
+            {% for other_user in profile.user.to_user.following %}
+    	      {% include 'frontend/user_line.html' %}
+    	    {% endfor %}
+    	  </ul>
+        {% endif %}
+    </div>
 {% endblock %}

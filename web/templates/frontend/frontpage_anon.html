@@ -1,50 +1,7 @@
-<div id='frontpage-videobox'>
-	This is where the video player will be
-</div>
-
-<div id='frontpage-lefthandblurb'>
-	<p id='para1'><span class='text'>There's lots of useful data locked away on the internet. ScraperWiki lets you get at it.</span></p>
-	<p id='para2'><span class='text'>Share code, reuse data and build the project of your dreams with less hastle.</span></p>
-</div>
-
-<div id='div1' class='divider'></div>
-
-<div id='frontpage-prontobar'>
-	<img id='editor-screenshot' src='#'/>
-	<ul id='bullets'>
-		<li>Great online coding and debugging tool</li>
-		<li>Share your code with others</li>
-		<li>Full, well documented <a href="#">API</a></li>
-	</ul>
-	<div id='lets-get-busy'>
-		<form method='get' action="#">
-			<input type='submit' value='Create a scraper now!'/>
-		</form>
-		<p><a id='explore-link' href="#"><span class='text'>or explore other peoples scrapers</span></a></p>
-		<p><a id='request-link' href='{% url scraper_request %}'><span class='text'>or even request a scraper</span></a></p>
-	</div>
-</div>
-
-<div id='div2' class='divider'></div>
-
-<div id='scraper-timeline-frame'>
-	<h1><span class='text'>What's being scraped now</span></h1>
-	<div id='scraper-timeline'>
-	</div>
-</div>
-
-<div id='div3' class='divider'></div>
-
-<div id='new-scrapers-frame'>
-	<h1><span class='text'>New scrapers</span></h1>
-	<ul id='new-scrapers-list'>
-		<li>This is where new scrapers will be listed</li>
-	</ul>
-</div>
-
-<div id='external-apps-frame'>
-	<h1><span class='text'>Build apps using our API</span></h1>
-	<ul id='external-api-list'>
-		<li>This is where external APIs will be listed</li>
-	</ul>
+<div class="content">
+	<form method='get' action="#">
+	    <input type='submit' value='Create a scraper now!'/>
+	</form>
+	<p><a href="#">or explore other peoples scrapers</a></p>
+	<p><a href='{% url scraper_request %}'>or even request a scraper</a></p>
 </div>
