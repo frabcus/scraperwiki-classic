@@ -4,6 +4,10 @@ h1, h2, h3, h4, h5, h6 {padding:0; margin:0;}
 body {text-align:center; padding:0; margin:0; font-family:helvetica, arial, sans-serif;}
 #divPage {width:94%; text-align:left; margin:0 auto; position:relative;}
 
+/* Banner (feedback etc) */
+div.banner {background:#4f8dcc; color:#fff; font-size:0.8em; padding:0.6em 0;}
+div.banner a {color:#fff; font-weight:bold;}
+
 /* Header & menu */
 #divHeader {border-bottom:solid 1px #ccc; padding-bottom:1em; margin-bottom:1em;}
 #divLogo {padding-top:1em;}
