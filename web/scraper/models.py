@@ -109,7 +109,10 @@ class Scraper(models.Model):
     users             = models.ManyToManyField(User, through='UserScraperRole')
 
     objects = ScraperManager()
-
+    
+    def __unicode__(self):
+      return self.short_name
+    
     def language(self):
 	    return "Python"
 	
