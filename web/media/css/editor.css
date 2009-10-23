@@ -1,6 +1,6 @@
 #id_description {display:none;}
-
-.editor {text-align:left;}
+body{overflow:hidden; height:100%;}
+.editor {text-align:left; }
 
 /* Header */
 .editor_header {min-height:2em; background:#efefef;}

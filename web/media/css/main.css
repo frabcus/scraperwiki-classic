@@ -10,15 +10,21 @@ div.banner a {color:#fff; font-weight:bold;}
 
 /* Header & menu */
 #divHeader {border-bottom:solid 1px #ccc; padding-bottom:1em; margin-bottom:1em;}
-#divLogo {padding-top:1em;}
-#divLogo p {padding:0; margin:0;}
-#divLogo p a {font-size:2em;}
+#divLogo p a {display:block; height:80px; width:340px; background:url(../images/logo.png) no-repeat;}
 #divMenu {position:absolute; top:0; right:0; text-align:right;}
 #divMenu ul li {padding:0.3em 0.3em; list-style-type:none; display:inline;}
 
+/* Content and columns */
+#divContent {padding-bottom:10em;}
+.content {padding-top:1.3em;}
+.content.left, .content.right {float:left;}
+.content.half {width:50%;}
+.content.col.left {width:60%;}
+.content.col.right {width:40%;}
+
 /* Footer */
-#divFooter {background:#808080; text-align:left; padding-bottom:1em; position:relative;
-        min-height:135px; color:#fff;clear:left;}
+#divFooter {background:#808080; text-align:left; padding-bottom:1em; position:absolute;
+        bottom:0; left:0;min-height:135px; color:#fff;clear:left; width:100%;}
 #divFooter a {color:#fff!important;}
 #divFooter dl {padding: 1em 150px 1em 3%;}
 #divFooter dl dt {float:left; width:9em; color:#616161;clear:left;font-weight:bold; 
@@ -30,13 +36,6 @@ div.banner a {color:#fff; font-weight:bold;}
 #divFooterCopyright {position:absolute; right:3%; top:5px; text-align:right; }
 #divFooterCopyright img {}
 #divFooterCopyright p {}
-
-/* Content and columns */
-.content {padding-top:1.3em;}
-.content.left, .content.right {float:left;}
-.content.half {width:50%;}
-.content.col.left {width:60%;}
-.content.col.right {width:40%;}
 
 /* Errors */
 #divErrors, .errorlist {background:#da9da4; padding:0.8em; margin-bottom:1.3em;}
@@ -70,4 +69,7 @@ br.clear {clear:both;}
 /* Code mirror */
 .code_viewer {border:solid 1px #ccc;}
 .CodeMirror-line-numbers {width: 2.2em;color: #aaa;background-color: #ddd;text-align: right;
-        padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;line-height: 1.1em;}s
+        padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;line-height: 1.1em;}
+
+/* Hide */
+.hide {display:none;}
