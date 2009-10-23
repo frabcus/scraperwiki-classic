@@ -93,7 +93,7 @@ INSTALLED_APPS = (
   	'page_cache',
   	'editor',
   	'contact_form',
-    'debug_toolbar'
+    #'debug_toolbar'
 )
 
 
