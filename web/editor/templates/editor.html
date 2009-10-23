@@ -13,20 +13,62 @@
   <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js"></script>
 {% endblock %}
 
-{% block title %}
+{% block header %}
   {{ scraper.title }}
 {% endblock %}
 
 {% block content %}
-  
-{# Short name: {{ scraper.short_name }} #}
-<h3>{{ message }}</h3>
-<form method="POST" accept-charset="utf-8" target="console" id="editor" action="http://localhost:9004">
-  {{ form.as_p }}
-  <p><input type="submit" name="action" value="Commit" />
-  <input type="submit" name="action" value="Save" />
-  <input type="submit" name="action" value="Run" id="run_script" /></p>
-  <input type="button" name="action" value="Clear Console" id="clear" /></p>
-</form>
-<iframe name="console" id="console" style="width:100%"></iframe>
+
+<div class="editor">
+    <div class="editor_header">
+        {# Short name: {{ scraper.short_name }} #}
+    
+        <ul>
+            <li>
+                <a href="#">Keyboard shortcuts</a>
+            </li>
+            <li>
+                <a href="#">Editor settings</a>
+            </li>
+            <li class="helplink">
+                <a href="#">Code documentation</a>
+            </li>
+        </ul>
+    </div>
+    <!--<h3>{{ message }}</h3>-->
+    <form method="POST" accept-charset="utf-8" target="console" id="editor" action="http://localhost:9004">
+        <div class="editor_code">
+            {{ form.code }}
+        </div>
+        <div id="resizebar" class="resizebar">&nbsp;</div>
+        <div class="editor_controls">
+            <input type="submit" name="action" value="Run" id="run_script" />
+            <input type="submit" name="action" value="Save" />            
+            <input type="button" name="action" value="Clear Console" id="clear" />   
+            <div class="right">         
+                <a href="#">Close and discard changes</a>
+                <input type="submit" name="action" value="Commit and close" id="commit"/>            
+            </div>
+        </div>
+    </form>
+    <div class="editor_output">
+        <div class="tabs">
+            <ul>
+                <li class="selected">
+                    Console
+                </li>
+                <li>
+                    Data
+                </li>
+                <li>
+                    Sources
+                </li>
+            </ul>
+            <div>
+                <iframe name="console" id="console" style="width:100%"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

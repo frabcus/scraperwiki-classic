@@ -1,7 +1,36 @@
 #id_description {display:none;}
 
+.editor {text-align:left;}
+
+/* Header */
+.editor_header {min-height:2em; background:#efefef;}
+.editor_header ul, .editor_header ul li {margin:0; padding:0;}
+.editor_header ul {font-size:0.8em; position:absolute; right:1em; top:0.5em;}
+.editor_header ul li {list-style-type:none; display:inline;}
+
+/* Code */
+.editor_code {border-top:solid 1px #9a9a9a; padding:0;}
+
+/* Controls */
+.resizebar {height:4px;border-top:solid 1px #9a9a9a; border-bottom:solid 1px #9a9a9a; cursor:ns-resize;}
+.editor_controls {border-bottom:solid 1px #9a9a9a;
+        padding:0.35em 0.3em; position:relative;}
+.editor_controls .right  {position:absolute; right:0.3em; top:0.35em;}
+.editor_controls a {font-size:0.8em;}
+.editor_controls input {font-size:0.9em;}
+
+/* Output and tabs */
+.editor_output {padding-top:0.6em;}
+.editor_output iframe {border:none;}
+.editor_output div.tabs ul {border-bottom:solid 1px #9a9a9a; height:1.75em; padding:0 0 0 0.3em; margin:0; 
+    font-size:0.8em;}
+.editor_output div.tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
+        border:solid 1px #9a9a9a; border-bottom:none;
+        background:#efefef;}
+.editor_output div.tabs ul li.selected {border-bottom:solid 1px #fff; position:relative;
+        background:#fff;}
 
 /* Code mirror */
-.code_viewer {border:solid 1px #ccc;}
+/*.code_viewer {border:solid 1px #ccc;}*/
 .CodeMirror-line-numbers {width: 2.2em;color: #aaa;background-color: #ddd;text-align: right;
         padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;line-height: 1.1em;}
