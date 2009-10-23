@@ -65,6 +65,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -91,7 +92,8 @@ INSTALLED_APPS = (
   	'notification',
   	'page_cache',
   	'editor',
-  	'contact_form'
+  	'contact_form',
+    'debug_toolbar'
 )
 
 
@@ -106,3 +108,9 @@ AUTH_PROFILE_MODULE = 'frontend.UserProfile'
 
 # Cal Henderson - youtube presentation on Django
 # rsvg-convert 
+
+INTERNAL_IPS = ('127.0.0.1',)
+
+DEBUG_TOOLBAR_CONFIG = {
+  'INTERCEPT_REDIRECTS' : False
+}

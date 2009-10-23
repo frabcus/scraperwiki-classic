@@ -37,6 +37,13 @@ def create(scraper_name):
     os.makedirs(scraper_folder_path)
     make_file(scraper_folder_path)
 
+def save(scraper):
+  path = make_file_path(scraper.short_name)
+  create(scraper.short_name)
+  scraper_file = open(path, 'w')
+  scraper_file.write(scraper.code)
+  scraper_file.close()
+
 def commit(scraper, message="test"): 
   """
   Called each time a file is saved. At this
@@ -60,23 +67,26 @@ def commit(scraper, message="test"):
   code = ui.popbuffer()
   return ""
 
-def get_code(scraper_name=None):
+def get_code(scraper_name=None, committed=True):
   """
   Returns the committed file as a string
   """
-  ui = hgui.ui()
-  ui.setconfig('ui', 'interactive', 'off')
-  ui.setconfig('ui', 'verbose', 'on')
-
-
-  reop_path = os.path.normpath(os.path.abspath(SMODULES_DIR))
-  r = hg.repository(ui, reop_path, create=False)
-  
-
-  code = StringIO("")
   path = make_file_path(scraper_name)
-  commands.cat(ui,r,path, output=code, rev='tip')
-  return code.getvalue()
+
+  if committed:
+    ui = hgui.ui()
+    ui.setconfig('ui', 'interactive', 'off')
+    ui.setconfig('ui', 'verbose', 'on')
+
+    reop_path = os.path.normpath(os.path.abspath(SMODULES_DIR))
+    r = hg.repository(ui, reop_path, create=False)
+
+    code = StringIO("")
+    commands.cat(ui,r,path, output=code, rev='tip')
+    return code.getvalue()
+    
+  else:
+    return open(path,'rU').read()
 
 def been_edited(scraper_name=None):
   """

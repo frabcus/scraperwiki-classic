@@ -1,9 +1,13 @@
+import datetime
+import re
+
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.urlresolvers import reverse
 import forms
-from scraper.models import Scraper as ScraperModel
+from scraper.models import Scraper as ScraperModel, UserScraperRole, ScraperDraft
 from scraper import template
 
 def edit(request, short_name=None):
@@ -23,41 +27,78 @@ def edit(request, short_name=None):
     1) Crate a Scraper object with a psudo title and template code and return
   
   """
-  
-  if short_name:
-    scraper = get_object_or_404(ScraperModel, short_name=short_name)
+  if request.session.get('ScraperDraft', False):
+    scraper = ScraperModel(request.session['ScraperDraft'])
   else:
-    scraper = ScraperModel(title=template.default()['title'])
+    if short_name:
+      scraper = get_object_or_404(ScraperModel, short_name=short_name)
+    else:
+      scraper = ScraperModel(title=template.default()['title'])
     
+
   message = ""
   
-  if request.method == 'POST':
+  if request.method == 'POST' or bool(re.match('save|commit', request.GET.get('action', ""))):
+    print "asd"
     form = forms.editorForm(request.POST)
-    action = request.POST.get('action').lower()
-    if action == "commit":
-      # Commit...
-      message = "Scraper Comitted"
-    elif action == "save":
-      if form.is_valid():      
-        scraperForm = form.save(commit=False)
-        scraperForm.code = request.POST['code']
-        scraperForm.short_name = scraper.short_name
-        scraperForm.created_at = scraper.created_at
-        scraperForm.save()
+    if form.is_valid():
+      scraperForm = form.save(commit=False)
+      scraperForm.code = request.POST['code']
+      scraperForm.short_name = short_name
+      scraperForm.pk = scraper.pk
+      scraperForm.created_at = scraper.created_at
+      
+      action = request.POST.get('action').lower()
+            
+        
+      if action == "save" or action == "commit": 
+        if scraper.created_at == None:
+          scraper.created_at = datetime.datetime.today()
+      
+        if request.user.is_authenticated():
+          # User logged in, so save or commit the scraper
+
+          scraperForm.status = 'Published'
+            
+          if action == "commit":
+            message = "Scraper Comitted"
+            scraperForm.save(commit=True)
+        
+          scraperForm.save()
+          scraper = scraperForm
+          
+          if scraper.owner():
+            # Set the owner.
+            # If there is already an owner, and it is not this user, mark this user as an editor
+            # If the scraper has no owner, then the current user taken ownership
+            if scraper.owner().pk != request.user.pk:
+              scraper.add_user_role(request.user, 'editor')
+          else:
+            scraper.add_user_role(request.user, 'owner')
+          
+          # If the scraper saved, then we can delete the draft  
+          if request.session.get('ScraperDraft', False):
+            del request.session['ScraperDraft']        
+
+        else:
+          
+          # User not logged in
+          scraperForm.action = action
+          request.session['ScraperDraft'] = scraperForm
+          return HttpResponseRedirect(reverse('login'))
+          
         message = "Scraper Saved"
         return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : scraperForm.short_name}))
       
-    elif action == "run":
-      # Run...
-      # This shouldn't happen, as 'run' should be caught by javascript in the editor
-      message = "You need JavaScript to run script in the browser."
-    else:
-      message = ""
+      elif action == "run":
+        # Run...
+        # This shouldn't happen, as 'run' should be caught by javascript in the editor
+        message = "You need JavaScript to run script in the browser."
   else:
     
     form = forms.editorForm(instance=scraper)
     if short_name:
-      form.fields['code'].initial = "scraper.current_code()"
+      form.fields['code'].initial = scraper.saved_code()
     else:
       form = forms.editorForm(template.default())
 

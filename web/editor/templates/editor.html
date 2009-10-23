@@ -2,6 +2,7 @@
 
 {% block css %}
   <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/editor.css" />
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
 {% endblock %}
 
 {% block js %}
@@ -18,13 +19,14 @@
 
 {% block content %}
   
-Short name: {{ scraper.short_name }}
+{# Short name: {{ scraper.short_name }} #}
 <h3>{{ message }}</h3>
-<form action="" method="POST" accept-charset="utf-8" target="">
+<form method="POST" accept-charset="utf-8" target="console" id="editor" action="http://localhost:9004">
   {{ form.as_p }}
-  <p><input type="submit" name="action" value="Commit">
-  <input type="submit" name="action" value="Save">
-  <input type="submit" name="action" value="Run"></p>
+  <p><input type="submit" name="action" value="Commit" />
+  <input type="submit" name="action" value="Save" />
+  <input type="submit" name="action" value="Run" id="run_script" /></p>
+  <input type="button" name="action" value="Clear Console" id="clear" /></p>
 </form>
-<iframe name="console"></iframe>
+<iframe name="console" id="console" style="width:100%">asd</iframe>
 {% endblock %}

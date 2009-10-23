@@ -1,1 +1,7 @@
 #id_description {display:none;}
+
+
+/* Code mirror */
+.code_viewer {border:solid 1px #ccc;}
+.CodeMirror-line-numbers {width: 2.2em;color: #aaa;background-color: #ddd;text-align: right;
+        padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;line-height: 1.1em;}

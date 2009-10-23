@@ -3,20 +3,37 @@ $(document).ready(function()
 {
 
     codeeditor = CodeMirror.fromTextArea("id_code", 
-    {        
-      parserfile: ["../contrib/python/js/parsepython.js"],
-      stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
-      path: "/media/CodeMirror-0.63/js/",
-      textWrapping: false, 
-      lineNumbers: true, 
-      indentUnit: 4, 
-      tabMode: "spaces", 
-      autoMatchParens: true,
-      parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
+       {
+           parserfile: ["../contrib/python/js/parsepython.js"],
+           stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
 
-      // copies the value from the editor to the text area before submit.  
-      // triggering the submit button causes the page to reload as it bypasses the whole ajax thing
-      saveFunction: function () { $("#id_code").val(codeeditor.getCode());  $("#codewikiform").submit();  }
+           path: "/media/CodeMirror-0.63/js/",
+           textWrapping: false, 
+           lineNumbers: true, 
+           indentUnit: 4,
+           readOnly: false,
+           tabMode: "spaces", 
+           autoMatchParens: true,
+           width: '100%',
+           parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
+
+       });
+       
+       $('#editor #clear').click(function() {
+         $('#console').replaceWith('<iframe name="console" id="console" style="width:100%"></iframe>')
+       })
+       
+       // $("#editor #run_script").click(function() {  
+       //   // alert('asd')
+       //    $('#editor').attr({
+       //      target: "console",
+       //      action: "http://localhost:9004/",
+       //      });
+       //    // $('#editor').attr("action", "console")
+       //    // var foo = $('#editor').attr('action')
+       //    // alert(foo)
+       //    // $('#console').html('')
+       //    // return false;
+       // });  
+       
     });
-});
-

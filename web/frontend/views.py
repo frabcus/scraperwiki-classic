@@ -55,6 +55,13 @@ def login(request):
         if user is not None:
             if user.is_active:
                 auth.login(request, user)
+                
+                # ScraperDraft code, added here as contrib.auth doesn't support signals :(
+                if request.session.get('ScraperDraft', False):
+                  return HttpResponseRedirect(
+                    reverse('editor') + "?action=%s" % request.session['ScraperDraft'].action
+                    )
+                    
                 return HttpResponseRedirect(reverse('frontpage'))
                 
                 # Redirect to a success page.

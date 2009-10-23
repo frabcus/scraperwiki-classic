@@ -33,11 +33,8 @@ def SlugifyUniquely(value, model, slugfield="slug", instance=None):
                 matches = model.objects.filter(**{slugfield: potential})
                 print "len",len(matches)
                 if len(matches) >= 1:
-                  print "YES"
-                  print "pk", matches[0].pk
-                  print "pt",instance.pk
-                  if matches[0].pk == model.pk:
-                    return potential
+                  if matches[0].pk == instance.pk:
+                    return value
                 if not matches.count():
                         return potential
                 # we hit a conflicting slug, so bump the suffix & try again
