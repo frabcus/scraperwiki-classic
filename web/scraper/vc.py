@@ -16,12 +16,12 @@ SMODULES_DIR = localsettings.SMODULES_DIR
 # s.save()
 
 
-def make_file_path(scraper_name):
+def make_file_path(scraper_short_name):
   """
   Scrapers all called __init__.py and are stored in a 
   folder with the same name as the short_name.
   """
-  path = "%s%s/__init__.py" % (SMODULES_DIR, scraper_name)
+  path = "%s%s/__init__.py" % (SMODULES_DIR, scraper_short_name)
   return path
 
 def create(scraper_name):
@@ -72,8 +72,8 @@ def get_code(scraper_name=None, committed=True):
   Returns the committed file as a string
   """
   path = make_file_path(scraper_name)
-
   if committed:
+
     ui = hgui.ui()
     ui.setconfig('ui', 'interactive', 'off')
     ui.setconfig('ui', 'verbose', 'on')
@@ -83,8 +83,9 @@ def get_code(scraper_name=None, committed=True):
 
     code = StringIO("")
     commands.cat(ui,r,path, output=code, rev='tip')
+
     return code.getvalue()
-    
+
   else:
     return open(path,'rU').read()
 

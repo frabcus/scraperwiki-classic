@@ -21,8 +21,9 @@
 
 <div class="editor">
     <div class="editor_header">
-        {# Short name: {{ scraper.short_name }} #}
-    
+        <h1>
+            {{ scraper.title }}
+        </h1>
         <ul>
             <li>
                 <a href="#">Keyboard shortcuts</a>
@@ -46,7 +47,7 @@
             <input type="submit" name="action" value="Save" />            
             <input type="button" name="action" value="Clear Console" id="clear" />   
             <div class="right">         
-                <a href="#">Close and discard changes</a>
+                <a href="{% url scraper_code scraper.short_name %}">Close and discard changes</a>
                 <input type="submit" name="action" value="Commit and close" id="commit"/>            
             </div>
         </div>
@@ -71,4 +72,9 @@
     </div>
 </div>
 
+{% endblock %}
+{% block popups %}
+    <div id="test" class="popup_item">
+        Bla Bla
+    </div>
 {% endblock %}

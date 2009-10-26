@@ -96,7 +96,7 @@ class Scraper(models.Model):
 		or, the scrapers a user is following by....
 		
 		user.scraper_set.watching()
-				
+
     """
     title             = models.CharField(max_length = 100)
     short_name        = models.CharField(max_length = 50)

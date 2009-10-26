@@ -5,8 +5,8 @@ body {text-align:center; padding:0; margin:0; font-family:helvetica, arial, sans
 #divPage {width:94%; text-align:left; margin:0 auto; position:relative;}
 
 /* Banner (feedback etc) */
-div.banner {background:#4f8dcc; color:#fff; font-size:0.8em; padding:0.6em 0;}
-div.banner a {color:#fff; font-weight:bold;}
+div.banner {background:#ffffd7; font-size:0.8em; padding:0.6em 0;}
+div.banner a {font-weight:bold;}
 
 /* Header & menu */
 #divHeader {border-bottom:solid 1px #ccc; padding-bottom:1em; margin-bottom:1em;}
@@ -15,7 +15,7 @@ div.banner a {color:#fff; font-weight:bold;}
 #divMenu ul li {padding:0.3em 0.3em; list-style-type:none; display:inline;}
 
 /* Content and columns */
-#divContent {padding-bottom:10em;}
+#divContent {padding-bottom:3em;}
 .content {padding-top:1.3em;}
 .content.left, .content.right {float:left;}
 .content.half {width:50%;}
@@ -23,8 +23,8 @@ div.banner a {color:#fff; font-weight:bold;}
 .content.col.right {width:40%;}
 
 /* Footer */
-#divFooter {background:#808080; text-align:left; padding-bottom:1em; position:absolute;
-        bottom:0; left:0;min-height:135px; color:#fff;clear:left; width:100%;}
+#divFooter {background:#4f8dcc; text-align:left; padding-bottom:1em; position:relative;
+        bottom:0; left:0;min-height:135px; color:#fff;clear:left; width:100%; border-top:solid 10px #3f7ec5;}
 #divFooter a {color:#fff!important;}
 #divFooter dl {padding: 1em 150px 1em 3%;}
 #divFooter dl dt {float:left; width:9em; color:#616161;clear:left;font-weight:bold; 
@@ -55,6 +55,7 @@ div.page_tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; marg
         border-top:solid 1px #ccc;border-left:solid 1px #ccc;border-right:solid 1px #ccc;}
 div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
         background:#fff;}
+div.tab_tools {text-align:right; padding:0.2em 0.8em;}
 
 /* meta data */
 div.metadata {background:#ffffaa; padding:0.8em 1em;}

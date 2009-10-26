@@ -4,6 +4,7 @@ body{overflow:hidden; height:100%;}
 
 /* Header */
 .editor_header {min-height:2em; background:#efefef;}
+.editor_header h1 {font-weight:bold; font-size:1.2em; padding:0.4em 0 0 0.5em; color:#808080;}
 .editor_header ul, .editor_header ul li {margin:0; padding:0;}
 .editor_header ul {font-size:0.8em; position:absolute; right:1em; top:0.5em;}
 .editor_header ul li {list-style-type:none; display:inline;}
@@ -34,3 +35,10 @@ body{overflow:hidden; height:100%;}
 /*.code_viewer {border:solid 1px #ccc;}*/
 .CodeMirror-line-numbers {width: 2.2em;color: #aaa;background-color: #ddd;text-align: right;
         padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;line-height: 1.1em;}
+        
+/* Overlays and help */
+#overlay {background:black;z-index:100;position:absolute; top:0; left:0; width:100%; height:100%;
+    opacity:0.6;filter: alpha(opacity=60); display:none;}
+#popups .popup_item {border:5px solid #808080;position:absolute;width:500px;height:300px;background:#fff;
+    z-index:110; position:absolute; top:0; width:86%; margin:5%; padding:2%;
+    text-align:left; display:none;}
