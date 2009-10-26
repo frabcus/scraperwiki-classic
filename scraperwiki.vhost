@@ -1,0 +1,34 @@
+# This is a template for creating the apache setup.
+# 
+# The bulk of the template is a standard mod_wsgi vhost set up.
+# 
+# The important part of the set up is the 'location' section. It's needed to
+# enable the code running proxy that links up the FireStarter
+
+<VirtualHost *:80>
+  ServerName scraperwiki.local
+  ServerAdmin webmaster@localhost
+  DocumentRoot /var/www/scraperwiki/clean2/web
+
+  WSGIScriptAlias / /var/www/scraperwiki/clean2/scraperwiki.wsgi
+  
+  WSGIDaemonProcess farmsubsidy processes=1 threads=10
+  WSGIProcessGroup farmsubsidy
+
+  Alias /run_code /var/www/scraperwiki/UML/Server/Scripts
+  <Location /run_code>
+    SetHandler wsgi-script
+    Options +ExecCGI
+  </Location>
+  # <Directory /var/www/scraperwiki/UML/Server/Scripts>
+  #       AddType application/x-httpd-php .php
+  # </Directory>
+  
+  ErrorLog /var/log/apache2/error.log
+  
+  # Possible values include: debug, info, notice, warn, error, crit,
+  # alert, emerg.
+  LogLevel debug
+
+  CustomLog /var/log/apache2/access.log combined
+</VirtualHost>
