@@ -22,6 +22,9 @@ div.banner a {font-weight:bold;}
 .content.col.left {width:60%;}
 .content.col.right {width:40%;}
 
+/* Attention */
+div.attention {text-align:center;}
+
 /* Footer */
 #divFooter {background:#4f8dcc; text-align:left; padding-bottom:1em; position:relative;
         bottom:0; left:0;min-height:135px; color:#fff;clear:left; width:100%; border-top:solid 10px #3f7ec5;}
@@ -74,3 +77,9 @@ br.clear {clear:both;}
 
 /* Hide */
 .hide {display:none;}
+
+
+/* Forms */
+ul.form {padding:0; margin:0;}
+ul.form li {padding:0; margin:0; list-style-type:none;}
+ul.form li label {display:block; float:left; width:10em;}

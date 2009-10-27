@@ -1,22 +1,30 @@
 {% extends "frontend/base.html" %}
 {% block content %}
+    <div class="page_title">
+        <h1>Feedback</h1>
+        <p>Ask us a question or make a suggestion</p>
+    </div>
     <div class="content left col">
         <form action="/contact/" method="POST">
             <ul class="form">
                 <li>
-                    {{ form.name.label }}
+                    {{ form.name.label_tag }}
                     {{ form.name }}
                 </li>
                 <li>
-                    {{ form.email.label }}                    
+                    {{ form.email.label_tag }}
                     {{ form.email }}
                 </li>
                 <li>
-                    {{ form.subject_dropdown.label }}                    
+                    {{ form.subject_dropdown.label_tag }}
                     {{ form.subject_dropdown }}
                 </li>
                 <li>
-                    {{ form.body.label }}                    
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                </li>
+                <li>
+                    {{ form.body.label_tag }}                    
                     {{ form.body }}
                 </li>
             </ul>

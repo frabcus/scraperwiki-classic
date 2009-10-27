@@ -51,7 +51,7 @@ def commit(scraper, message="test"):
   Called each time a file is saved. At this
   point we don't know if it's a new file that needs to be added to version control, or if
   it's been added and just needs to be committed, so use the 'addremove' kwarg.
-  """ 
+  """
   
   path = make_file_path(scraper.short_name)
   if not os.path.exists(path):
