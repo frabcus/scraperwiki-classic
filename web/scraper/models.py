@@ -98,7 +98,7 @@ class Scraper(models.Model):
 		user.scraper_set.watching()
 
     """
-    title             = models.CharField(max_length = 100)
+    title             = models.CharField(max_length = 100, null=False, blank=False)
     short_name        = models.CharField(max_length = 50)
     source            = models.CharField(max_length = 100)
     last_run          = models.DateTimeField(blank = True, null=True)
@@ -118,7 +118,7 @@ class Scraper(models.Model):
     
     def save(self, commit=False):
 
-      # if the scraper doesn't exist already
+      # if the scraper doesn't exist already give it a short name (slug)
       if self.short_name:
         self.short_name = util.SlugifyUniquely(self.short_name, Scraper, slugfield='short_name', instance=self)
       elif self.short_name == None:

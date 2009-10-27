@@ -27,8 +27,10 @@ def make_file_path(scraper_short_name):
 def create(scraper_name):
   scraper_folder_path = "%s%s" % (SMODULES_DIR, scraper_name)
   def make_file(scraper_folder_path):
+    print ">>>>>>>>>>>>>"
+    print "%s/__init__.py" % scraper_folder_path
     open("%s/__init__.py" % scraper_folder_path, 'w')
-    
+
   if os.path.exists(scraper_folder_path):
     # the folder exists, but not the file
     make_file(scraper_folder_path)

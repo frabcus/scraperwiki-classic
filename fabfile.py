@@ -55,7 +55,7 @@ def deploy():
     buildout()
     migrate()
     restart_webserver()    
-    
+
     sudo("""
     echo "%s" | mail -s "New Scraperwiki Deployment" scrapewiki-commits@googlegroups.com -- -f mercurial@scraperwiki.com
     """ % message)

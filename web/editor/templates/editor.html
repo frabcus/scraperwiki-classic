@@ -39,7 +39,7 @@
 
     <!--<h3>{{ message }}</h3>-->
 
-    <form method="POST" accept-charset="utf-8" id="editor" action="/run_code/test_box.py">
+    <form method="POST" accept-charset="utf-8" id="editor" action="{% if short_name %}{% url editor scraper.short_name %}{% else %}{% url editor %}{% endif %}">
         <div class="editor_code">
             {{ form.code }}
         </div>
@@ -48,7 +48,11 @@
             <input type="submit" name="action" value="Save" />            
             <input type="button" name="action" value="Clear Console" id="clear" />   
             <div class="right">         
-                <a href="{% url scraper_code scraper.short_name %}">Close and discard changes</a>
+                {% if short_name %}
+                    <a href="{% url scraper_code scraper.short_name %}">Close and discard changes</a>
+                {% else %}
+                    <a href="/">Close and discard changes</a>                
+                {% endif %}
                 <input type="submit" name="action" value="Commit and close" id="commit"/>            
             </div>
         </div>

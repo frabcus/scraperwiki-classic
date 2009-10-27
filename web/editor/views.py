@@ -27,6 +27,7 @@ def edit(request, short_name=None):
     1) Crate a Scraper object with a psudo title and template code and return
   
   """
+
   if request.session.get('ScraperDraft', False):
     scraper = ScraperModel(request.session['ScraperDraft'])
   else:
@@ -39,7 +40,7 @@ def edit(request, short_name=None):
   message = ""
   
   if request.method == 'POST' or bool(re.match('save|commit', request.GET.get('action', ""))):
-    print "asd"
+
     form = forms.editorForm(request.POST)
     if form.is_valid():
       scraperForm = form.save(commit=False)
@@ -49,8 +50,7 @@ def edit(request, short_name=None):
       scraperForm.created_at = scraper.created_at
       
       action = request.POST.get('action').lower()
-            
-        
+
       if action == "save" or action == "commit": 
         if scraper.created_at == None:
           scraper.created_at = datetime.datetime.today()
@@ -81,7 +81,7 @@ def edit(request, short_name=None):
             del request.session['ScraperDraft']        
 
         else:
-          
+
           # User not logged in
           scraperForm.action = action
           request.session['ScraperDraft'] = scraperForm
