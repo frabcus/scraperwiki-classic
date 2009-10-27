@@ -116,6 +116,9 @@ class Scraper(models.Model):
     def __unicode__(self):
       return self.short_name
     
+    
+    # this function saves the uninitialized and undeclared .code member of the object to the disk
+    # you just have to know it's there by looking into the cryptically named vc.py module
     def save(self, commit=False):
 
       # if the scraper doesn't exist already give it a short name (slug)
@@ -128,7 +131,6 @@ class Scraper(models.Model):
       if commit:
         vc.commit(self)
       super(Scraper, self).save()
-    
     
     def language(self):
 	    return "Python"

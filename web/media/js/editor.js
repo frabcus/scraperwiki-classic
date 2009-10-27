@@ -1,45 +1,6 @@
 $(document).ready(function() {
-
-    codeeditor = CodeMirror.fromTextArea("id_code", {
-           parserfile: ["../contrib/python/js/parsepython.js"],
-           stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
-
-           path: "/media/CodeMirror-0.63/js/",
-           textWrapping: false, 
-           lineNumbers: true, 
-           indentUnit: 4,
-           readOnly: false,
-           tabMode: "spaces", 
-           autoMatchParens: true,
-           width: '100%',
-           parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
-       });
-       
-       $('#editor #clear').click(function() {
-         $('#console').replaceWith('<iframe name="console" id="console" style="width:100%"></iframe>')
-       })
-       
-       // $("#editor #run_script").click(function() {  
-       //   // alert('asd')
-       //    $('#editor').attr({
-       //      target: "console",
-       //      action: "/run_code/test_box.py",
-       //      });
-       //  alert($('#editor').attr('action'))
-       //  alert('')
-       //    // $('#editor').attr("action", "/run_code/test_box.py")
-       //    // $('#editor').attr('target', 'console')
-       //    // alert(foo)
-       //    // $('#console').html('')
-       //    // return false;
-       // });  
-       
-       
-       
-       
        //setup dragging
        $("#resizebar").bind("mousedown", startDrag);   // see below
-       
     });
 
 // dragging of middle bar code -- could move into own javascript library
