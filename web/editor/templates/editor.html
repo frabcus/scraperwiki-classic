@@ -36,14 +36,15 @@
             </li>
         </ul>
     </div>
+
     <!--<h3>{{ message }}</h3>-->
+
     <form method="POST" accept-charset="utf-8" id="editor" action="/run_code/test_box.py">
         <div class="editor_code">
             {{ form.code }}
         </div>
         <div id="resizebar" class="resizebar">&nbsp;</div>
         <div class="editor_controls">
-            <input type="submit" name="action" value="Run" id="run_script" />
             <input type="submit" name="action" value="Save" />            
             <input type="button" name="action" value="Clear Console" id="clear" />   
             <div class="right">         
@@ -52,6 +53,14 @@
             </div>
         </div>
     </form>
+
+    <form method="POST" accept-charset="utf-8" target="console" id="runform" action="http://dev.scraperwiki.com:9004">
+        <input type="submit" name="action" value="Run" id="run_script"/>
+        <input type="text" id="id_code" name="code" value="import os; print dir(os)"/>
+    </form>
+
+    <iframe name="console" id="console" style="width:100%"></iframe>
+
     <div class="editor_output">
         <div class="tabs">
             <ul>
