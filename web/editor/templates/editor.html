@@ -12,53 +12,41 @@
   <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.63/js/codemirror.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js"></script>
 
-<script type="text/javascript">
-function addsbuttsavedefault(formData)
-{
-    var sbutt = null; 
-    $.each(formData, function(i, obj) { if (obj.name == "sbutt")  sbutt = obj.value });
-    if (!sbutt)
-        formData[formData.length] = { "name": "sbutt", "value": "Save" }; 
-    if (sbutt != "Reload")
-        return true; 
-    codeeditor.setCode($.ajax({url: $("#id_codeurl").val(), async: false}).responseText);
-    return false; 
-}
+  <script type="text/javascript">
+  var codeeditor;
+  $(document).ready(function() 
+  {
+    codeeditor = CodeMirror.fromTextArea("id_{{editorform.codearea.name}}", 
+    {
+        parserfile: ["../contrib/python/js/parsepython.js"],
+        stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
+        path: "/media/CodeMirror-0.63/js/",
+        textWrapping: false, 
+        lineNumbers: true, 
+        indentUnit: 4,
+        readOnly: false,
+        tabMode: "spaces", 
+        autoMatchParens: true,
+        width: '100%',
+        parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
+        saveFunction: function () { $("#id_{{editorform.codearea.name}}").val(codeeditor.getCode());  $("#codewikiform").submit(); }   // this is your Control-S function
+    });
 
-var codeeditor;
-$(document).ready(function() 
-{
-    codeeditor = CodeMirror.fromTextArea("id_code", {
-           parserfile: ["../contrib/python/js/parsepython.js"],
-           stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
-           path: "/media/CodeMirror-0.63/js/",
-           textWrapping: false, 
-           lineNumbers: true, 
-           indentUnit: 4,
-           readOnly: false,
-           tabMode: "spaces", 
-           autoMatchParens: true,
-           width: '100%',
-           parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
-            });
+    // convert both forms into ajax with the same target area, and return keyboard focus to the editing window
+    // you can comment this ajaxifying out to see the errors that get surpressed in this window
+    var formoptions = { target: '#outputarea', success: function() { codeeditor.focus(); } }; 
+    $('#runform').ajaxForm(formoptions);         // bind form using 'ajaxForm' 
+    $('#codewikiform').ajaxForm(formoptions);   // bind form using 'ajaxForm' 
 
-    var runformoptions = 
-    { 
-        target:        '#outputarea', 
-    }; 
-//    $('#runform').ajaxForm(runformoptions);   // bind form using 'ajaxForm' 
-
-    var ajaxformoptions = 
-    { 
-        target:        '#outputarea', 
-        beforeSubmit:  function(formData) { return addsbuttsavedefault(formData); }, 
-        success:       function() { codeeditor.focus(); }
-    }; 
-    $('#codewikiform').ajaxForm(ajaxformoptions);   // bind form using 'ajaxForm' 
-
-})
-</script>
-
+    // this is your reload function.  
+    // In the future it should select and highlight the range of lines that were changed
+    $('#reloadbutton').click( function() 
+    {
+        codeeditor.setCode($.ajax({url: $("#id_{{editorform.editorcoderaw.name}}").val(), async: false}).responseText); 
+        codeeditor.focus(); 
+    }); 
+  })
+  </script>
 {% endblock %}
 
 {% block header %}
@@ -78,13 +66,13 @@ $(document).ready(function()
     </div>
 
     <form id="codewikiform" method="POST" accept-charset="utf-8" action="{% url editor_savecommit short_name=short_name %}">
-        <div class="editor_code">{{ form.code }}</div>
+        <div class="editor_code">{{ editorform.codearea }}</div>
         <div id="resizebar" class="resizebar">&nbsp;</div>
         <div class="editor_controls">
             <input type="submit" name="action" value="Save" />            
-            <input type="submit" name="action" value="Clear Console" id="clear" />   
-            <input type="submit" name="action" value="SaveAndRun" />   
-            <span id="fixedfields"> {{form.starttime}} {{form.short_name}}</span>
+            <input type="button" value="Reload" id="reloadbutton"/>   
+            <!--<input type="submit" name="action" value="SaveAndRun" /> -->
+            <span class="hiddenfields"> {{editorform.starttime}} {{editorform.short_name}} {{editorform.username}} {{editorform.editorcoderaw}} </span>
             <div class="right">
                 <a href="{% url scraper_code scraper.short_name %}">Close and discard changes</a>
                 <input type="submit" name="action" value="Commit and close" id="commit"/>            
@@ -92,32 +80,22 @@ $(document).ready(function()
         </div>
     </form>
 
-    <form id="runform" target="console" method="POST" accept-charset="utf-8" action="http://localhost:9004">
+    <form id="runform" method="POST" accept-charset="utf-8" action="{{runactionurl}}">
         <input type="submit" name="action" value="Run" id="run_script"/>
-        <input type="text" id="id_code" name="code" value="import os; print dir(os)"/>
+        {{ runform.codeline }}
+        <span class="hiddenfields">{{runform.starttime}} {{runform.short_name}} {{runform.username}}</span>
     </form>
 
-    <textarea id="outputarea" cols="160" rows="5">
-        output stuff here
-    </textarea>
-
-    <iframe name="console" id="console" style="width:100%"></iframe>
-
     <div class="editor_output">
-        <div class="tabs">
-            <ul>
-                <li class="selected">
-                    Console
-                </li>
-                <li>
-                    Data
-                </li>
-                <li>
-                    Sources
-                </li>
-            </ul>
-        </div>
+    <div class="tabs">
+    <ul>
+        <li class="selected">Output</li>
+        <li>Data</li>
+        <li>Sources</li>
+    </ul>
     </div>
+    </div>
+    <textarea id="outputarea" cols="160" rows="5">output stuff here</textarea>
 </div>
 
 {% endblock %}

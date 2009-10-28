@@ -20,6 +20,9 @@ body{overflow:hidden; height:100%;}
 .editor_controls a {font-size:0.8em;}
 .editor_controls input {font-size:0.9em;}
 
+span.hiddenfields input  { Ddisplay:none; width:4em; } 
+span.hiddenfields { margin-left:10px; } 
+
 /* Output and tabs */
 .editor_output {padding-top:0.6em;}
 .editor_output iframe {border:none;}
