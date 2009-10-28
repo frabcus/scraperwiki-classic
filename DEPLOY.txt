@@ -1,0 +1,17 @@
+DEPLOYING
+
+Requirements
+============
+
+Install fabric (fabfile.org) using easy install or pip
+
+> $ easy_install fabric
+
+
+Deploying to a server
+=====================
+
+In the root directory run
+
+> $ fab deploy [dev|live|staging]
+
