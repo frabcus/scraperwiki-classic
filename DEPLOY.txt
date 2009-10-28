@@ -11,7 +11,7 @@ Install fabric (fabfile.org) using easy install or pip
 Deploying to a server
 =====================
 
-In the root directory run
+In the root directory of your local install of ScraperWiki run
 
 > $ fab deploy [dev|live|staging]
 
