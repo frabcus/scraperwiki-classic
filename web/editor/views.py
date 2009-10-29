@@ -55,6 +55,7 @@ def localhostfireboxurlcall(scraper, codefunction):
 # the wrapper of the FireStarter called from django so we can work out what settings we're going to need to program it with
 #
 def firestartermethodcall(scraper, codefunction):
+
     # desperate measure to get to the place where the FireStarter module can be loaded
     sys.path.append(os.path.join(settings.HOME_DIR, "UML", "Server", "scripts"))
     import FireStarter
@@ -63,8 +64,13 @@ def firestartermethodcall(scraper, codefunction):
     # set lots of interesting parameters and controls here
     firestarter.setCPULimit(5)  # integer seconds
     firestarter.addAllowedSites('.*\.gov\.uk')
+    firestarter.addPaths('/scraper/scrapers')
+    firestarter.addPaths('/home/mike/ScraperWiki/scrapers')
+    firestarter.setTraceback ('html')
 
-    pythoncodeline = "import sys; sys.path.append('%s'); import %s; %s.%s" % (settings.SMODULES_DIR, scraper.short_name, scraper.short_name, codefunction)
+#    pythoncodeline = "import sys; sys.path.append('%s'); import %s; %s.%s" % (settings.SMODULES_DIR, scraper.short_name, scraper.short_name, codefunction)
+    pythoncodeline = "import %s; %s.%s" % (scraper.short_name, scraper.short_name, codefunction)
+    print pythoncodeline
     fin = firestarter.execute(pythoncodeline, True)
     
     # should encode this quickly as fin.readlines() in FireStarter itself
@@ -74,10 +80,11 @@ def firestartermethodcall(scraper, codefunction):
             line  = fin.readline()
             if not line:
                 break
-            res.append(re.sub("<", "&lt;", line))
+            res.append(re.sub("<", "&lt;", line) + '<br/>')
     except FireStarter.FireError, e :
-        res.append(str(e))
-    
+#      res.append(re.sub("<", "&lt;", str(e)))
+       res.append(str(e))
+
     return res 
 
 
@@ -132,21 +139,24 @@ def raw(request, short_name):
 # handles the running of the script when the Run button (in its own form) is pressed
 #
 def run(request, short_name):
+
   if request.method != 'POST':
     return HttpResponse(content="Error: no POST")
   
   scraper = get_object_or_404(ScraperModel, short_name=short_name)
   runform = runForm(request.POST)
+
   if not runform.is_valid(): 
     return HttpResponse(content="Error: invalid form " + re.sub("<", "&lt;", str(runform.errors)))
   
   codefunction = runform.cleaned_data['codeline']
+
   #difflist = directsubprocessruntempfile(scraper, codefunction)   # for running the prototype method
   #difflist = localhostfireboxurlcall(scraper, codefunction)       # for running with a call to the firebox through http://localhost:9004
   difflist = firestartermethodcall(scraper, codefunction)          # would require import FireStarter and to make lots of interesting settings to show what can be done
   
   # return the diff of the save in the #outputarea box 
-  return HttpResponse(content="\n".join(difflist))
+  return HttpResponse(content="".join(difflist))
   
   
 #
