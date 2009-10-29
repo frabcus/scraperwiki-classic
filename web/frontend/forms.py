@@ -5,6 +5,7 @@ from frontend.models import UserProfile
 from contact_form.forms import ContactForm
 from registration.forms import RegistrationForm
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import User
 
 
 #from django.forms.extras.widgets import Textarea
@@ -22,7 +23,7 @@ class scraperContactForm(ContactForm):
   recipient_list = ["julian@goatchurch.org.uk"] # temporary save because this isn't set [settings.FEEDBACK_EMAIL]
 
 
-class RegistrationForm(RegistrationForm):
+class CreateAccountForm(RegistrationForm):
     """
     Subclass of ``RegistrationForm`` which adds a required checkbox
     for agreeing to a site's Terms of Service and makes sure the email address is unique.
@@ -40,5 +41,5 @@ class RegistrationForm(RegistrationForm):
 
        """
        if User.objects.filter(email__iexact=self.cleaned_data['email']):
-           raise forms.ValidationError(_("This email address is already in use. Please supply a different email address."))
+           raise django.forms.ValidationError(_("This email address is already in use. Please supply a different email address."))
        return self.cleaned_data['email']

@@ -11,7 +11,7 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from scraper.models import Scraper
-from frontend.forms import RegistrationForm
+from frontend.forms import CreateAccountForm
 from registration.backends import get_backend
 
 import django.contrib.auth.views
@@ -55,7 +55,7 @@ def login(request):
 
     #Create login and registration forms
     login_form = AuthenticationForm()
-    registration_form = RegistrationForm()
+    registration_form = CreateAccountForm()
 
     if request.method == 'POST':
 
@@ -86,7 +86,7 @@ def login(request):
         #New user is registering
         elif request.POST.has_key('register'):
 
-            registration_form = RegistrationForm(data=request.POST)
+            registration_form = CreateAccountForm(data=request.POST)
 
             if registration_form.is_valid():
                 backend = get_backend("registration.backends.default.DefaultBackend")             
