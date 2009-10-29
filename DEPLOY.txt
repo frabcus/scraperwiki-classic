@@ -3,9 +3,7 @@ DEPLOYING
 Requirements
 ============
 
-Install fabric (fabfile.org) using easy install or pip
-
-> $ easy_install fabric
+fabric (fabfile.org). this should have been installed by the buildout (see INSTALL.txt)
 
 
 Deploying to a server

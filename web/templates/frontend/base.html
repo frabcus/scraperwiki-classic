@@ -52,6 +52,27 @@
     				</ul>
     			</div>
 		    </div>
+		    <div id="divInfo">
+		        {% if info_messages %}
+                     <ul>
+                         {% for info in info_messages %}
+                             <li>{{ info|escape }}</li>
+                         {% endfor %}
+                     </ul>
+                 {% endif %}	    
+    		</div>
+		    <div id="divErrors">
+		        {% if error_messages %}
+                     <ul>
+                         {% for error in error_messages %}
+                             <li>{{ error|escape }}</li>
+                         {% endfor %}
+                     </ul>
+                 {% endif %}
+    		    {% block errors %}
+		            
+    		    {% endblock %}		    
+    		</div>
 		    <div id="divContent">
 			    {% block content %}{% endblock %}
 		    </div>
@@ -95,7 +116,7 @@
 					    </a>
 					</p>
 					<p>
-					    &copy; Scraper Wiki Ltd&nbsp;<a href="/terms_and_conditions/">Terms &amp; Conditions</a>
+					    &copy; Scraper Wiki Ltd&nbsp;<a href="{% url terms %}">Terms &amp; Conditions</a>
 					</p>
 				</div>
 				<br class="clear"/>

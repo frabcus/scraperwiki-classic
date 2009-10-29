@@ -4,24 +4,22 @@
 {% block title %}Scraperwiki front page{% endblock %}
 {% block content %}
 
-  <div id='login-panel'>
+  <div>
     {% include 'shared/form_errors.html' %}
 
-	<form method="post" action="{% url django.contrib.auth.views.login %}">
-
+	<form method="post" action=".">
 	    {{ login_form.username.label_tag }}
 	    {{ login_form.username }}
 	    {{ login_form.password.label_tag }}
-	    {{ login)form.password }}
-		<input type="submit" value="login" />
-		<input type="hidden" name="next" value="{{ next }}" />
+	    {{ login_form.password }}
+		<input type="submit" name="login" value="Sign in" />
 	</form>
   </div>
 
-  <div id='registration-panel'>
+  <div>
 	{% include 'shared/form_errors.html' %}
 
-	<form method="post" action="/accounts/register/">
+	<form method="post" action=".">
 
 	    {{ registration_form.username.label_tag }}
 	    {{ registration_form.username }}
@@ -31,7 +29,7 @@
 	    {{ registration_form.password1 }}
 	    {{ registration_form.password2.label_tag }}
 	    {{ registration_form.password2 }}
-		<input type="submit" value="register" />
+		<input type="submit" name="register" value="Create an account" />
 	</form>
   </div>
 

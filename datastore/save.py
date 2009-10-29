@@ -58,7 +58,7 @@ def __save_row(unique_keys, data, **kwargs):
     if k in indexed_rows:
       item[k] = v
       del data[k]
-  
+
   c = connection.connect()
   if c.execute("SELECT item_id FROM items WHERE unique_hash='%s'" % unique_hash):  
     item_id = c.fetchone()
@@ -69,17 +69,17 @@ def __save_row(unique_keys, data, **kwargs):
   c.execute("SELECT LAST_INSERT_ID();")
   new_item_id = c.fetchone()[0]
   item['item_id'] = new_item_id
-  
+
   item_sql = """
     INSERT INTO `items` (`item_id`,`unique_hash`,`date`, `latlng`) 
     VALUES ('%s', '%s', '%s', '%s')
     ;""" % (item['item_id'], unique_hash, item['date'], item['latlng'])
   c.execute(item_sql)
-  
+
   for k,v in data.items():
     kv_sql = """INSERT INTO `kv` (`item_id`,`key`,`value`) VALUES ('%s', '%s', '%s');""" % (item['item_id'], k,v)
     c.execute(kv_sql)
-    
+
   return new_item_id 
     
     

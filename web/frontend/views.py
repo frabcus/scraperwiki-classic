@@ -11,7 +11,10 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from scraper.models import Scraper
-from registration.forms import RegistrationForm
+from frontend.forms import RegistrationForm
+from registration.backends import get_backend
+
+import django.contrib.auth.views
 import os
 import re
 import datetime
@@ -45,36 +48,51 @@ def frontpage(request):
 def process_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('frontpage'))
-    
+
 def login(request):
+
+    error_messages = []
+
+    #Create login and registration forms
+    login_form = AuthenticationForm()
+    registration_form = RegistrationForm()
+
     if request.method == 'POST':
-        login_form = AuthenticationForm(data=request.POST)
-        username = request.POST['username']
-        password = request.POST['password']
-        user = auth.authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                auth.login(request, user)
-                
-                # ScraperDraft code, added here as contrib.auth doesn't support signals :(
-                if request.session.get('ScraperDraft', False):
-                  return HttpResponseRedirect(
-                    reverse('editor') + "?action=%s" % request.session['ScraperDraft'].action
-                    )
+
+        #Existing user is logging in
+        if request.POST.has_key('login'):
+
+            login_form = AuthenticationForm(data=request.POST)
+            user = auth.authenticate(username=request.POST['username'], password=request.POST['password'])
+
+            if user is not None:
+                if user.is_active:
                     
+                    #Log in
+                    auth.login(request, user)
+
+                    # ScraperDraft code, added here as contrib.auth doesn't support signals :(
+                    if request.session.get('ScraperDraft', False):
+                      return HttpResponseRedirect(
+                        reverse('editor') + "?action=%s" % request.session['ScraperDraft'].action
+                        )
+
+                    return HttpResponseRedirect(reverse('frontpage'))
+
+                else:
+                    # Account exists, but not activated                    
+                    error_messages.append("This account has not been activated, please check your email and click on the link to confirm your account")
+
+        #New user is registering
+        elif request.POST.has_key('register'):
+
+            registration_form = RegistrationForm(data=request.POST)
+
+            if registration_form.is_valid():
+                backend = get_backend("registration.backends.default.DefaultBackend")             
+                new_user = backend.register(request, **registration_form.cleaned_data)
                 return HttpResponseRedirect(reverse('frontpage'))
                 
-                # Redirect to a success page.
-            else:
-                message = "This account has not been activated, please check your email for confirmation"
-                # Return a 'disabled account' error message
-        else:
-            message = "Invalid Login"
-            # Return an 'invalid login' error message.
-    else:
-        login_form = AuthenticationForm()
-        registration_form = RegistrationForm()
-        message = None
+    return render_to_response('registration/extended_login.html', {'registration_form': registration_form, 'login_form': login_form, 'error_messages': error_messages}, context_instance = RequestContext(request))
         
-    return render_to_response('registration/extended_login.html', {'login_form': login_form, 'registration_form': registration_form, 'message': message}, context_instance = RequestContext(request))
     
