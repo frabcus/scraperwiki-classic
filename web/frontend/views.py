@@ -67,11 +67,11 @@ def login(request):
 
             if user is not None:
                 if user.is_active:
-                    
+
                     #Log in
                     auth.login(request, user)
 
-                    # ScraperDraft code, added here as contrib.auth doesn't support signals :(
+                    #Check if scrapers pending in session - added here as contrib.auth doesn't support signals :(
                     if request.session.get('ScraperDraft', False):
                       return HttpResponseRedirect(
                         reverse('editor') + "?action=%s" % request.session['ScraperDraft'].action
@@ -89,7 +89,7 @@ def login(request):
             registration_form = CreateAccountForm(data=request.POST)
 
             if registration_form.is_valid():
-                backend = get_backend("registration.backends.default.DefaultBackend")             
+                backend = get_backend(settings.REGISTRATION_BACKEND)             
                 new_user = backend.register(request, **registration_form.cleaned_data)
                 return HttpResponseRedirect(reverse('confirm_account'))
                 
