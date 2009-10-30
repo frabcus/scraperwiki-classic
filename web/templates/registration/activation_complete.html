@@ -1,0 +1,13 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Now check your email{% endblock %}
+{% block content %}
+    <div class="content">
+        <div class="attention">
+            <h1>Your account has been created!</h1>
+            <p>
+               <a href="#">Create a scraper</a>, browse <a href="{% url scraper_list %}">other people's scrapers</a> or <a href="{% url frontpage %}">go to your home page</a>.
+            </p>
+        </div>
+    </div>
+{% endblock %}
