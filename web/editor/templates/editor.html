@@ -1,8 +1,8 @@
 {% extends "editor_base.html" %}
 
 {% block css %}
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/editor.css" />
   <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/editor.css" />
 {% endblock %}
 
 {% block js %}
@@ -18,69 +18,78 @@
 {% endblock %}
 
 {% block content %}
+<form method="POST" accept-charset="utf-8" id="editor">
+  <div class="editor">
+      <div class="editor_header">
+          {% if form.errors %}
+          <div id="form-error">
+          	<p>The operation could not be performed because one or more error(s) occurred.<br />Please resubmit the form after making the following changes:</p>
+          	<ul>
+          	{% for field in form %}
+          	<li>{{ field.errors|striptags }}</li>
+          	{% endfor %}
+          	</ul>
+          </div>
+          {% endif %}
+        
+          {{ form.title.label }}: {{ form.title }}
 
-<div class="editor">
-    <div class="editor_header">
-        <h1>
-            {{ scraper.title }}
-        </h1>
-        <ul>
-            <li>
-                <a href="#">Keyboard shortcuts</a>
-            </li>
-            <li>
-                <a href="#">Editor settings</a>
-            </li>
-            <li class="helplink">
-                <a href="#">Code documentation</a>
-            </li>
-        </ul>
-    </div>
+          <ul>
+              <li>
+                  <a href="#">Keyboard shortcuts</a>
+              </li>
+              <li>
+                  <a href="#">Editor settings</a>
+              </li>
+              <li class="helplink">
+                  <a href="#">Code documentation</a>
+              </li>
+          </ul>
+      </div>
 
-    <!--<h3>{{ message }}</h3>-->
+      <!--<h3>{{ message }}</h3>-->
+          <div class="editor_code">
+              {{ form.code }}
+          </div>
+          <div id="resizebar" class="resizebar">&nbsp;</div>
+          <div class="editor_controls">
+              <input type="submit" name="action" value="Save" />            
+              <input type="button" name="action" value="Clear Console" id="clear" />   
+              <div class="right">         
+                  {% if short_name %}
+                      <a href="{% url scraper_code scraper.short_name %}">Close and discard changes</a>
+                  {% else %}
+                      <a href="{% url frontpage %}">Close and discard changes</a>                
+                  {% endif %}
+                  <input type="submit" name="action" value="Commit and close" id="commit"/>            
+              </div>
+          </div>
 
-    <form method="POST" accept-charset="utf-8" id="editor" action="{% if short_name %}{% url editor scraper.short_name %}{% else %}{% url editor %}{% endif %}">
-        <div class="editor_code">
-            {{ form.code }}
-        </div>
-        <div id="resizebar" class="resizebar">&nbsp;</div>
-        <div class="editor_controls">
-            <input type="submit" name="action" value="Save" />            
-            <input type="button" name="action" value="Clear Console" id="clear" />   
-            <div class="right">         
-                {% if short_name %}
-                    <a href="{% url scraper_code scraper.short_name %}">Close and discard changes</a>
-                {% else %}
-                    <a href="{% url frontpage %}">Close and discard changes</a>                
-                {% endif %}
-                <input type="submit" name="action" value="Commit and close" id="commit"/>            
-            </div>
-        </div>
-    </form>
-  
-    <div class="editor_output">
-        <div class="tabs">
-            <ul>
-                <li class="selected">
-                    Console
-                </li>
-                <li>
-                    Data
-                </li>
-                <li>
-                    Sources
-                </li>
-            </ul>
-            <div>
-                <iframe name="console" id="console" style="width:100%"></iframe>
-            </div>
-        </div>
-    </div>
-</div>
+      <div class="editor_output">
+          <div class="tabs">
+              <ul>
+                  <li class="selected">
+                      Console
+                  </li>
+                  <li>
+                      Data
+                  </li>
+                  <li>
+                      Sources
+                  </li>
+              </ul>
+              <div>
+            
+                  <iframe name="console" id="console" style="width:100%"></iframe>
+              </div>
+          </div>
+      </div>
+  </div>
 
 {% endblock %}
 {% block popups %}
     <div id="test" class="popup_item">
-        Bla Bla
+
     </div>
+</form>
 {% endblock %}

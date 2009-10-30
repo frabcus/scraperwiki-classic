@@ -43,7 +43,9 @@ def save(scraper):
   path = make_file_path(scraper.short_name)
   create(scraper.short_name)
   scraper_file = open(path, 'w')
-  scraper_file.write(scraper.code)
+
+  code = scraper.code
+  scraper_file.write(code)
   scraper_file.close()
 
 def commit(scraper, message="test"): 

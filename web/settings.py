@@ -65,6 +65,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_notify.middleware.NotificationsMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
@@ -75,6 +76,15 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+  'django.core.context_processors.auth',
+  'django.core.context_processors.debug',
+  'django.core.context_processors.i18n',
+  'django.core.context_processors.media',
+  'django.core.context_processors.request',
+  'django_notify.context_processors.notifications',
 )
 
 INSTALLED_APPS = (
@@ -93,15 +103,12 @@ INSTALLED_APPS = (
   	'page_cache',
   	'editor',
   	'contact_form',
-    #'debug_toolbar'
+  	'django_notify',
+    'debug_toolbar'
 )
 
 
 ACCOUNT_ACTIVATION_DAYS = 14
-
-#    'codewiki',
-# removed from installed apps so as to exclude them from the admin interface.
-#    'blog',
 
 # tell Django that the frontent user_profile model is to be attached to the user model in the admin side.
 AUTH_PROFILE_MODULE = 'frontend.UserProfile'
@@ -114,3 +121,6 @@ INTERNAL_IPS = ('127.0.0.1',)
 DEBUG_TOOLBAR_CONFIG = {
   'INTERCEPT_REDIRECTS' : False
 }
+
+
+NOTIFICATIONS_STORAGE = 'session.SessionStorage'

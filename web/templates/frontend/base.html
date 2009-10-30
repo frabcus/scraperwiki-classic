@@ -25,7 +25,7 @@
 				
     			<div id="divMenu">
     			    <ul>
-    				    <li><a href="editor">Create a scraper</a></li>
+    				    <li><a href="{% url editor %}">Create a scraper</a></li>
     				    <li>
     				        <a href="{% url scraper_list %}">Browse Scrapers &amp; Data</a>
     				    </li>
@@ -53,7 +53,16 @@
     			</div>
 		    </div>
 		    <div id="divContent">
-			    {% block content %}{% endblock %}
+		      
+          {% if notifications %}
+          <ul class="notifications">
+                  {% for message in notifications %}
+                  <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                  {% endfor %}
+          </ul>
+          {% endif %}
+          
+  		    {% block content %}{% endblock %}
 		    </div>
 		</div>			
 		{% block footer %}

@@ -58,9 +58,15 @@ def login(request):
                 
                 # ScraperDraft code, added here as contrib.auth doesn't support signals :(
                 if request.session.get('ScraperDraft', False):
-                  return HttpResponseRedirect(
-                    reverse('editor') + "?action=%s" % request.session['ScraperDraft'].action
-                    )
+                  draft = request.session['ScraperDraft']
+                  if draft.short_name:
+                    return HttpResponseRedirect(
+                      reverse('editor', kwargs={'short_name' : draft.short_name}) + "?action=%s" % draft.action
+                      )
+                  else:
+                    return HttpResponseRedirect(
+                      reverse('editor') + "?action=%s" % draft.action
+                      )
                     
                 return HttpResponseRedirect(reverse('frontpage'))
                 

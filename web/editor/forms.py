@@ -6,8 +6,7 @@ class editorForm(django.forms.ModelForm):
     
   class Meta:
     model = scraper.models.Scraper
-    fields = ('code',)
-  
+    fields = ('title', 'code', )
   
   code = django.forms.CharField(widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'}))
 
