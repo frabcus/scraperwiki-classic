@@ -9,10 +9,48 @@
   <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.form.js"></script>
 
-  <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.63/js/codemirror.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.64/js/codemirror.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js"></script>
 
   <script type="text/javascript">
+
+
+  // function which gives sends current code in window back to server and gets updated code 
+  // with the lines and characters defining the range that's been changed so that we can highlight 
+  // in in CodeMirror, for purposes of dual coding with someone.  
+  function reloadbutton() 
+  {
+      // send current code up to the server and get a copy of new code
+      var newcode = $.ajax({url: $("#id_{{editorform.editorcoderaw.name}}").val(), 
+                         async: false, 
+                         type: 'POST', 
+                         data: ({oldcode: codeeditor.getCode()}) 
+                       }).responseText; 
+
+      // extract the (changed) select range information from the header of return data
+      var selrangedelimeter = ":::sElEcT rAnGe:::"; 
+      var iselrangedelimeter = newcode.indexOf(selrangedelimeter); 
+      var selrange = [0,0,0,0]
+      if (iselrangedelimeter != -1)
+      {
+          var selrange = newcode.substring(0, iselrangedelimeter); 
+          newcode = newcode.substring(iselrangedelimeter + selrangedelimeter.length); 
+          selrange = eval(selrange); 
+      }
+
+      codeeditor.setCode(newcode); 
+
+      // make the selection
+      if (!((selrange[2] == 0) && (selrange[3] == 0)))
+      {
+          linehandlestart = codeeditor.nthLine(selrange[0] + 1); 
+          linehandleend = codeeditor.nthLine(selrange[2] + 1); 
+          codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
+      }
+      codeeditor.focus(); 
+  }; 
+
+
   var codeeditor;
   $(document).ready(function() 
   {
@@ -20,7 +58,7 @@
     {
         parserfile: ["../contrib/python/js/parsepython.js"],
         stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
-        path: "/media/CodeMirror-0.63/js/",
+        path: "/media/CodeMirror-0.64/js/",
         textWrapping: false, 
         lineNumbers: true, 
         indentUnit: 4,
@@ -32,6 +70,15 @@
         saveFunction: function () { $("#id_{{editorform.codearea.name}}").val(codeeditor.getCode());  $("#codewikiform").submit(); }   // this is your Control-S function
     });
 
+    // we'd like to make the Control-R call reloadbutton(), but there are issues with the way the filter function 
+    // only takes keycodes, not keyevent, so you can't detect the Control-key, and this funciton fails if you don't 
+    // introduce a delay (eg an alert()) in front of it to give time for the editor to initialize.  
+    // Control-R to the browser performs reload, but we want it just to refresh the editor code so we don't lose the place
+    //codeeditor.grabKeys(
+    //    function(keyevent) { alert(keyevent.keyCode); },          
+    //    function(keycode) { return ((keycode == 82)); }   // the r key
+    //                   ); 
+
     // convert both forms into ajax with the same target area, and return keyboard focus to the editing window
     // you can comment this ajaxifying out to see the errors that get surpressed in this window
     var formoptions = { target: '#outputarea', success: function() { codeeditor.focus(); } }; 
@@ -40,11 +87,7 @@
 
     // this is your reload function.  
     // In the future it should select and highlight the range of lines that were changed
-    $('#reloadbutton').click( function() 
-    {
-        codeeditor.setCode($.ajax({url: $("#id_{{editorform.editorcoderaw.name}}").val(), async: false}).responseText); 
-        codeeditor.focus(); 
-    }); 
+    $('#reloadbutton').click(reloadbutton); 
   })
   </script>
 {% endblock %}

@@ -64,29 +64,47 @@ def firestartermethodcall(scraper, codefunction):
     # set lots of interesting parameters and controls here
     firestarter.setCPULimit(5)  # integer seconds
     firestarter.addAllowedSites('.*\.gov\.uk')
-    firestarter.addPaths('/scraper/scrapers')
-    firestarter.addPaths('/home/mike/ScraperWiki/scrapers')
+    #firestarter.addPaths('/scraper/scrapers')
+    firestarter.addPaths(settings.SMODULES_DIR)  # from localsettings.py
     firestarter.setTraceback ('html')
 
-#    pythoncodeline = "import sys; sys.path.append('%s'); import %s; %s.%s" % (settings.SMODULES_DIR, scraper.short_name, scraper.short_name, codefunction)
+    #pythoncodeline = "import sys; sys.path.append('%s'); import %s; %s.%s" % (settings.SMODULES_DIR, scraper.short_name, scraper.short_name, codefunction)
     pythoncodeline = "import %s; %s.%s" % (scraper.short_name, scraper.short_name, codefunction)
     print pythoncodeline
     fin = firestarter.execute(pythoncodeline, True)
+    if not fin:
+        yield "Total error here: Is your UML running?"
+        return
     
-    # should encode this quickly as fin.readlines() in FireStarter itself
-    res = [ ]
+    # we could be writing the results out to a log file associated to the scraper 
+    # so that someone watching and reloading can also load the output 
+    # (saved in some media/ directory, say, in a way that informs the webserver to keep the 
+    # http connection open when the scraper is still running).  
+    # if this was done by polling, then the watcher would experience streaming of a sort.  
+    # if it gave good enough results, we could use it for the main user
+    fout = None # scraper.outputlog.open()
+    
     try:
         while True:
-            line  = fin.readline()
+            line = fin.readline()
             if not line:
                 break
-            res.append(re.sub("<", "&lt;", line) + '<br/>')
+            
+            # necessary to escape the symbols and add breaks when it is outputting to a div block
+            # this is not necessary if the output is to a textarea (which might be better)
+            if fout:
+                fout.write(line)
+            yield re.sub("<", "&lt;", line) + '<br/>\n'
+    
     except FireStarter.FireError, e :
-#      res.append(re.sub("<", "&lt;", str(e)))
-       res.append(str(e))
-
-    return res 
-
+       # yield re.sub("<", "&lt;", str(e))
+       yield str(e)   # not escaped (is the exception value already marked up?)  
+       # this could also output a delimited/parsed string that javascript can decode in order to take the editor to the correct line
+       if fout:
+           fout.write(line)
+    if fout:
+        fout.close()
+        
 
 # the form that puts out and loads the code for the scraper
 class editorForm(forms.Form):   # don't know what ModelForm does
@@ -128,12 +146,23 @@ def edit(request, short_name):
   return render_to_response('editor.html', params, context_instance=RequestContext(request)) 
 
 
+
 #
 # outputs the code in a page on its own so we can do the reload button
+# and if it receives code through a POST, then it tells the browser where the differences are
 #
 def raw(request, short_name):
   scraper = get_object_or_404(ScraperModel, short_name=short_name)
-  return HttpResponse(scraper.saved_code(), mimetype="text/plain")
+  oldcodeineditor = request.POST.get('oldcode', '')
+  newcode = scraper.saved_code()
+  if oldcodeineditor:
+      sequencechange = DiffLineSequenceChanges(oldcodeineditor, newcode)
+      res = "%s:::sElEcT rAnGe:::%s" % (str(list(sequencechange)), newcode)   # a delimeter that the javascript can find, in absence of using json
+  else:
+      res = newcode
+  return HttpResponse(res, mimetype="text/plain")
+
+
 
 #
 # handles the running of the script when the Run button (in its own form) is pressed
@@ -153,12 +182,61 @@ def run(request, short_name):
 
   #difflist = directsubprocessruntempfile(scraper, codefunction)   # for running the prototype method
   #difflist = localhostfireboxurlcall(scraper, codefunction)       # for running with a call to the firebox through http://localhost:9004
-  difflist = firestartermethodcall(scraper, codefunction)          # would require import FireStarter and to make lots of interesting settings to show what can be done
+  runiter = firestartermethodcall(scraper, codefunction)      # would require import FireStarter and to make lots of interesting settings to show what can be done
   
-  # return the diff of the save in the #outputarea box 
-  return HttpResponse(content="".join(difflist))
+  # passes the iterator into django as though it can handle streaming (even though it cannot without the patch or waiting for version 1.4)
+  return HttpResponse(content=runiter)
   
   
+  
+# find the range in the code so we can show a watching user who has clicked on refresh what has just been edited
+# this involves doing sequence matching on the lines, and then sequence matching on the first and last lines that differ
+def DiffLineSequenceChanges(oldcode, newcode):
+    a = oldcode.splitlines()
+    b = newcode.splitlines()
+    sqm = difflib.SequenceMatcher(None, a, b)
+    matchingblocks = sqm.get_matching_blocks()  # [ (i, j, n) ] where  a[i:i+n] == b[j:j+n].
+    assert matchingblocks[-1] == (len(a), len(b), 0)
+    matchlinesfront = (matchingblocks[0][:2] == (0, 0) and matchingblocks[0][2] or 0)
+    
+    if (len(matchingblocks) >= 2) and (matchingblocks[-2][:2] == (len(a) - matchingblocks[-2][2], len(b) - matchingblocks[-2][2])):
+        matchlinesback = matchingblocks[-2][2]
+    else:
+        matchlinesback = 0
+    
+    matchlinesbacka = len(a) - matchlinesback - 1
+    matchlinesbackb = len(b) - matchlinesback - 1
+    
+    # no difference case
+    if matchlinesbackb == -1:
+        return (0, 0, 0, 0)  
+    
+    # lines have been cleanly deleted, so highlight first character where it happens
+    if matchlinesbackb < matchlinesfront:
+        assert matchlinesbackb == matchlinesfront - 1
+        return (matchlinesfront, 0, matchlinesfront, 1)
+    
+    # find the sequence start in first line that's different
+    sqmfront = difflib.SequenceMatcher(None, a[matchlinesfront], b[matchlinesfront])
+    matchingcblocksfront = sqmfront.get_matching_blocks()  # [ (i, j, n) ] where  a[i:i+n] == b[j:j+n].
+    matchcharsfront = (matchingcblocksfront[0][:2] == (0, 0) and matchingcblocksfront[0][2] or 0)
+    
+    # find sequence end in last line that's different
+    if (matchlinesbacka, matchlinesbackb) != (matchlinesfront, matchlinesfront):
+        sqmback = difflib.SequenceMatcher(None, a[matchlinesbacka], b[matchlinesbackb])
+        matchingcblocksback = sqmback.get_matching_blocks()  
+    else:
+        matchingcblocksback = matchingcblocksfront
+    
+    if (len(matchingcblocksback) >= 2) and (matchingcblocksback[-2][:2] == (len(a[matchlinesbacka]) - matchingcblocksback[-2][2], len(b[matchlinesbackb]) - matchingcblocksback[-2][2])):
+        matchcharsback = matchingcblocksback[-2][2]
+    else:
+        matchcharsback = 0
+    matchcharsbackb = len(b[matchlinesbackb]) - matchcharsback
+    return (matchlinesfront, matchcharsfront, matchlinesbackb, matchcharsbackb)  #, matchingcblocksback, (len(a[matchlinesbacka]) - matchingcblocksback[-2][2], len(b[matchlinesbackb]) - matchingcblocksback[-2][2]))
+  
+  
+
 #
 # the save and commit action buttons from the editor, whose output goes into the #outputarea window
 # also temporary implements a saveandrun button 
@@ -167,7 +245,9 @@ def savecommit(request, short_name):
   if request.method != 'POST':
     return HttpResponse(content="Error: no POST")
   
-  action = request.POST.get('action', 'save').lower()  # needs a default value because Control-S calls submit without any actions
+  # requires a default value because Control-S calls submit without any actions
+  action = request.POST.get('action', 'save').lower()  
+  # valid actions are 'save', 'commitandclose', 'saveandrun' (hidden)
   
   # recover the scraper we are saving to
   scraper = get_object_or_404(ScraperModel, short_name=short_name)
@@ -182,12 +262,11 @@ def savecommit(request, short_name):
   # produce the diff file to indicate to the user exactly what they changed
   submittedcode = editorform.cleaned_data['codearea']
   currentcode = scraper.saved_code()  
-  if currentcode != submittedcode:
-    difftext = difflib.unified_diff(currentcode.splitlines(), submittedcode.splitlines())
-    difflist = [ diffline  for diffline in difftext  if not re.match("\s*$", diffline) ]
-    difflist.insert(0, "SAVING:" + action)
-  else:
+  sequencechange = DiffLineSequenceChanges(currentcode, submittedcode)
+  if sequencechange == (0,0,0,0):
     difflist = [ "NO CHANGE:" + action ]
+  else:
+    difflist = [ "SAVING:" + action, str(sequencechange) ]
     
   # attach the code to the scraper and use a function in vc.py which knows about the code member value to save it
   scraper.code = submittedcode
@@ -203,6 +282,6 @@ def savecommit(request, short_name):
     
     
   # return the diff of the save in the #outputarea box 
-  return HttpResponse(content="\n".join(difflist))
+  return HttpResponse(content="<br/>\n".join(difflist))
   
   
