@@ -12,7 +12,7 @@
 	    <title>{% block title %}{% endblock %} | ScraperWiki</title>
 	</head>
 	<body>
-	    <div class="banner">
+	    <div class="banner">{{ settings.CONFIRMATION_EMAIL_TITLE }}
 	        We want to make ScraperWiki elegant, useful and fun. Please let us know what you think, good or bad. <a href="{% url contact_form %}">Send feedback</a>.
 	    </div>
 		<div id="divPage">
