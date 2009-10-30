@@ -91,7 +91,7 @@ def login(request):
             if registration_form.is_valid():
                 backend = get_backend("registration.backends.default.DefaultBackend")             
                 new_user = backend.register(request, **registration_form.cleaned_data)
-                return HttpResponseRedirect(reverse('frontpage'))
+                return HttpResponseRedirect(reverse('confirm_account'))
                 
     return render_to_response('registration/extended_login.html', {'registration_form': registration_form, 'login_form': login_form, 'error_messages': error_messages}, context_instance = RequestContext(request))
         

@@ -95,3 +95,6 @@ div.scroll {overflow-y:scroll; border:solid 1px #ccc; padding:0.5em;}
 dl.terms {padding:0; margin:0;}
 dl.terms dt {font-size:0.9em; font-weight:bold; padding-bottom:0.5em;}
 dl.terms dd {padding-left:0; margin-left:0; font-size:0.8em;}
+
+/* Highlight */
+span.highlight {background:#ffffaa; padding:0 0.4em;}
