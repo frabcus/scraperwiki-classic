@@ -34,6 +34,10 @@
         	        {% field_errors login_form.password %}        	        
         	    </li>
             </ul>
+            <p>
+                {{ login_form.remember_me }}
+    	        {{ login_form.remember_me.label_tag }}
+	        </p>
     		<input type="submit" name="login" value="Sign in" />
     	</form>
     </div>
