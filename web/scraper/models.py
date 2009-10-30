@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
@@ -113,10 +114,10 @@ class Scraper(models.Model):
 
     objects = ScraperManager()
     
-    def __init__(self, *args, **kwargs):
-      if 'code' in kwargs:
-        del kwargs['code']
-      super(Scraper, self).__init__(*args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #   if 'code' in kwargs:
+    #     del kwargs['code']
+    #   super(Scraper, self).__init__(*args, **kwargs)
       
     def __unicode__(self):
       return self.short_name
@@ -128,7 +129,10 @@ class Scraper(models.Model):
         self.short_name = util.SlugifyUniquely(self.short_name, Scraper, slugfield='short_name', instance=self)
       else:
         self.short_name = util.SlugifyUniquely(self.title, Scraper, slugfield='short_name', instance=self)
-      
+
+
+      if self.created_at == None:
+        self.created_at = datetime.datetime.today()
       
       vc.save(self)
       if commit:

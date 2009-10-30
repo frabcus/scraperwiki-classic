@@ -44,6 +44,7 @@ def edit(request, short_name=None):
     * If short_name exists, don't make a new one
   
   """
+
   draft = request.session.get('ScraperDraft', None)
   # First off, create a scraper instance somehow.
   # Drafts are seen as more 'important' than saved scrapers.
@@ -55,7 +56,7 @@ def edit(request, short_name=None):
     else:
       # This is a new scraper that has been edited, but not saved
       scraper = draft
-
+      scraper.code = draft.code
   else:
     # No drafts exist...
     if short_name:
@@ -64,14 +65,13 @@ def edit(request, short_name=None):
       scraper.code = scraper.saved_code()
     else:
       # This is a new scraper
-      scraper = ScraperModel(**template.default())
+      scraper = ScraperModel(title=template.default()['title'])
       scraper.code = template.default()['code']
 
-  form = forms.editorForm(instance=scraper)
+  form = forms.editorForm(scraper.__dict__, instance=scraper)
   form.fields['code'].initial = scraper.code
   
   if request.method == 'POST' or bool(re.match('save|commit', request.GET.get('action', ""))):
-    
     if request.POST:
     # If there is POST, then use that as the form
       form = forms.editorForm(request.POST, instance=scraper)
@@ -80,7 +80,6 @@ def edit(request, short_name=None):
       # We only reach here when the GET action is scraper or commit,
       # and that only heppens when the 'draft' feature is being used.
       if draft:
-        print "is draft"
         form = forms.editorForm(draft.__dict__, instance=draft)
         form.code = draft.code
         action = request.GET.get('action').lower()
@@ -91,26 +90,18 @@ def edit(request, short_name=None):
         else:
           return HttpResponseRedirect(reverse('editor'))
     
-    print form.errors
-    
     if form.is_valid():
-      print "form is valid"
       # Save the form without committing at first
       # (read http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
       savedForm = form.save(commit=False)
       
       # Add some more fields to the form
       savedForm.code = form.cleaned_data['code']
-      savedForm.short_name = short_name
-      
-      if hasattr(scraper, 'pk'):
-        savedForm.pk = scraper.pk
-      savedForm.created_at = scraper.created_at
-      if savedForm.created_at == None:
-        savedForm.created_at = datetime.datetime.today()
+      # savedForm.short_name = short_name
+      # if hasattr(scraper, 'pk'):
+      #   savedForm.pk = scraper.pk
 
       if request.user.is_authenticated():
-        print action
         # The user is authenticated, so we can process the form correctly
         if action == 'save':
           savedForm.save()
@@ -134,9 +125,7 @@ def edit(request, short_name=None):
           return HttpResponseRedirect(reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name}))
         message = "Scraper Saved"
         return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : savedForm.short_name}))
-          
-          
-          
+        
       else:
         # Set a message with django_notify
         request.notifications.add("You need to sign in or create an account - don't worry, your scraper is safe ")
@@ -146,111 +135,3 @@ def edit(request, short_name=None):
         
         
   return render_to_response('editor.html', {'form':form}, context_instance=RequestContext(request)) 
-  
-
-
-
-
-
-
-
-  # if request.method == 'POST' or bool(re.match('save|commit', request.GET.get('action', ""))):
-  # 
-  #   if not form:
-  #     if request.POST:
-  #       form = forms.editorForm(request.POST)
-  #       req_type = 'post'
-  #       form.code = request.POST.get('code', '')
-  #     else:
-  #       if request.session.get('ScraperDraft', False):
-  #         form = forms.editorForm(instance=request.session['ScraperDraft'])
-  #         form.code = request.session['ScraperDraft'].code
-  #       else:
-  #         return HttpResponseRedirect(reverse('editor'))
-  # 
-  #   print form.code
-  # 
-  #   if form.is_valid():
-  #     scraperForm = form.save(commit=False)
-  #     scraperForm.code = form.code
-  #     scraperForm.short_name = short_name
-  #     if 'pk' in dir(scraper):
-  #       scraperForm.pk = scraper.pk
-  #     scraperForm.created_at = scraper.created_at
-  #   
-  #     if request.POST:
-  #       action = request.POST.get('action').lower()
-  #     else:
-  #       action = request.GET.get('action').lower()
-  #   
-  #   
-  #     if action == "save" or action == "commit and close": 
-  #       if scraper.created_at == None:
-  #         scraper.created_at = datetime.datetime.today()
-  #   
-  #       if request.user.is_authenticated():
-  #         # User logged in, so save or commit the scraper
-  #       
-  #         scraperForm.status = 'Published'
-  #         
-  #         if action == "commit and close":
-  #           message = "Scraper Comitted"
-  #           scraperForm.save(commit=True)
-  #     
-  #         scraperForm.save()
-  #         scraper = scraperForm
-  #       
-  #         if scraper.owner():
-  #           # Set the owner.
-  #           # If there is already an owner, and it is not this user, mark this user as an editor
-  #           # If the scraper has no owner, then the current user taken ownership
-  #           if scraper.owner().pk != request.user.pk:
-  #             scraper.add_user_role(request.user, 'editor')
-  #         else:
-  #           scraper.add_user_role(request.user, 'owner')
-  #         
-  #         # If the scraper saved, then we can delete the draft  
-  #         if request.session.get('ScraperDraft', False):
-  #           del request.session['ScraperDraft']        
-  #       
-  #       else:
-  # 
-  #         # User not logged in
-  #         scraperForm.action = action
-  #         request.session['ScraperDraft'] = scraperForm
-  #         return HttpResponseRedirect(reverse('login'))
-  #     
-  #       if action == "commit and close":
-  #         return HttpResponseRedirect(reverse('scraper_code', kwargs={'scraper_short_name' : scraperForm.short_name}))
-  #       message = "Scraper Saved"
-  #       return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : scraperForm.short_name}))
-  #   
-  #     elif action == "run":
-  #       # Run...
-  #       # This shouldn't happen, as 'run' should be caught by javascript in the editor
-  #       message = "You need JavaScript to run script in the browser."
-  # else:
-  # 
-  # 
-  # 
-  #   if request.session.get('ScraperDraft', False):
-  #     scraper = ScraperModel(request.session['ScraperDraft'])
-  #   elif short_name:
-  #     scraper = get_object_or_404(ScraperModel, short_name=short_name)
-  #   else:
-  #     scraper = ScraperModel()
-  # 
-  #   form = forms.editorForm(scraper)
-  #   message = ""
-  # 
-  #   form = forms.editorForm(scraper)
-  #   
-  #   if short_name:
-  #     form.fields['code'].initial = scraper.saved_code()
-  #   # elif request.session.get('ScraperDraft', False):
-  #   #   form.fields['code'].initial = request.session['ScraperDraft'].code
-  #   else:
-  #     form = forms.editorForm(template.default())
-  # 
-  # # del request.session.get('ScraperDraft', False)
-  # return render_to_response('editor.html', {'form':form}, context_instance=RequestContext(request)) 
