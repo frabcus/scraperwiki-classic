@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     """
 	    This model holds the additional fields to be associated with a user in the system
-        
+
         the alerts_last_sent and alert_frequency field hold when a notification email was last sent to this user
         and the frequency of these messages(in seconds) as requested by the user.
         

@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
-
 from managers import datastore
 from django.db.models.signals import post_save
 from registration.signals import user_registered
@@ -148,7 +147,7 @@ class Scraper(models.Model):
     def add_user_role(self, user, role='owner'):
       """
       Method to add a user as either an editor or an owner to a scraper.
-      
+
       - `user`: a django.contrib.auth.User object
       - `role`: String, either 'owner' or 'editor'
       
