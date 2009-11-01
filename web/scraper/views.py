@@ -13,12 +13,20 @@ def create(request):
         return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 
 
 def data (request, scraper_short_name = 'None'):
-
+    
     user = request.user
     scraper = models.Scraper.objects.get(short_name=scraper_short_name)
+    data = models.scraperData.objects.summary()
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    return render_to_response('scraper/data.html', {'selected_tab': 'data', 'scraper': scraper, 'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it}, context_instance=RequestContext(request))
+    return render_to_response('scraper/data.html', {
+    
+      'selected_tab': 'data', 
+      'scraper': scraper, 
+      'user_owns_it': user_owns_it, 
+      'user_follows_it': user_follows_it,
+      'data' : data,
+      }, context_instance=RequestContext(request))
 
 def code (request, scraper_short_name = 'None'):
 
@@ -58,7 +66,7 @@ def show(request, scraper_short_name = 'None', selected_tab = 'data'):
     return render_to_response('scraper/show.html', {'data' : data, 'selected_tab': selected_tab, 'scraper': scraper, 'you_own_it': you_own_it, 'you_follow_it': you_follow_it, 'tabs': tabs, 'tab_to_show': tab_to_show}, context_instance=RequestContext(request))
 
 def list(request):
-    scrapers = models.Scraper.objects.filter(status='Published', revision__isnull=False).order_by('-created_at')
+    scrapers = models.Scraper.objects.filter(status='Published').order_by('-created_at')
     return render_to_response('scraper/list.html', {'scrapers': scrapers}, context_instance = RequestContext(request))
     
 def download(request, scraper_id = 0):

@@ -1,34 +1,85 @@
 {% extends "frontend/base.html" %}
-{% block css %}{% endblock %}
+
+{% load formhelper %}
 
 {% block title %}Scraperwiki front page{% endblock %}
-{% block content %}
-  <div id='login-panel'>
-    {% if message %}
-      <div class='warning message'>{{ message }}</div>
+
+{% block errors %}
+    {% if login_form.errors %}
+        <ul>
+            {% form_errors login_form %}
+        </ul>
     {% endif %}
-	<form method="post" action="{% url login %}">
-	    {{ login_form.username.label_tag }}
-	    {{ login_form.username }}
-	    {{ login_form.password.label_tag }}
-	    {{ login_form.password }}
-		<input type="submit" value="login" />
-		<input type="hidden" name="next" value="{{ next }}" />
-	</form>
-  </div>
 
-  <div id='registration-panel'>
-	{% include 'shared/form_errors.html' %}
+    {% if registration_form.errors %}
+        <ul>
+            {% form_errors registration_form %}
+        </ul>
+    {% endif %}
 
-	<form method="post" action="/accounts/register/">
-	    {{ registration_form.username.label_tag }}
-	    {{ registration_form.username }}
-	    {{ registration_form.email.label_tag }}
-	    {{ registration_form.email }}
-	    {{ registration_form.password1.label_tag }}
-	    {{ registration_form.password1 }}
-	    {{ registration_form.password2.label_tag }}
-	    {{ registration_form.password2 }}
-		<input type="submit" value="register" />
-	</form>
+{% endblock %}
+
+{% block content %}
+    <div class="content half left">
+    	<form method="post" action=".">
+    	    <ul class="form">
+    	        <li{% if login_form.username.errors %} class="error"{% endif %}>
+            	    {{ login_form.username.label_tag }}
+            	    {{ login_form.username }}
+        	        {% field_errors login_form.username %}
+    	        </li>
+    	        <li{% if login_form.password.errors %} class="error"{% endif %}>
+        	        {{ login_form.password.label_tag }}
+        	        {{ login_form.password }}
+        	        {% field_errors login_form.password %}        	        
+        	    </li>
+            </ul>
+    		<input type="submit" name="login" value="Sign in" />
+    	</form>
+    </div>
+
+    <div class="content half right">
+
+    	<form method="post" action=".">
+    	    <ul class="form">	    
+    	        <li{% if registration_form.username.errors %} class="error"{% endif %}>
+        	        {{ registration_form.username.label_tag }}
+        	        {{ registration_form.username }}
+        	        {% field_errors registration_form.username %}        	        
+        	    </li>
+    	        <li{% if registration_form.email.errors %} class="error"{% endif %}>
+        	    {{ registration_form.email.label_tag }}
+        	    {{ registration_form.email }}
+                {% field_errors registration_form.email %}        	    
+    	        </li>
+    	        <li{% if registration_form.password1.errors %} class="error"{% endif %}>
+            	    {{ registration_form.password1.label_tag }}
+            	    {{ registration_form.password1 }}
+                    {% field_errors registration_form.password1 %}            	    
+            	</li>
+    	        <li{% if registration_form.password2.errors %} class="error"{% endif %}>
+            	    {{ registration_form.password2.label_tag }}
+            	    {{ registration_form.password2 }}
+                    {% field_errors registration_form.password2 %}            	    
+            	</li>
+        	</ul>
+        	<div>
+            	<h4>Terms and conditions</h4>
+            	<p>
+            	   Please read these, as they explain the kinds of data it is ok to scrape and store using scraperwiki, and the rights and guarantees you have over the code your write.
+            	</p>
+                <div class="scroll">
+                    {% include 'shared/terms_and_conditions.html' %}
+                </div>
+                <p>
+                    <small><a href="{% url terms %}" target="_new">Open in a new window</a></small>
+                </p>
+        	    {{ registration_form.tos }}
+        	    {{ registration_form.tos.label_tag }}        	    
+        	    {% field_errors registration_form.tos %}  
+            </div>
+    		<input type="submit" name="register" value="Create your account" />
+    	</form>
+    	
+    </div>
 {% endblock %}

@@ -31,7 +31,6 @@ def SlugifyUniquely(value, model, slugfield="slug", instance=None):
                 if suffix:
                         potential = "-".join([base, str(suffix)])
                 matches = model.objects.filter(**{slugfield: potential})
-                print "len",len(matches)
                 if len(matches) >= 1:
                   if matches[0].pk == instance.pk:
                     return value

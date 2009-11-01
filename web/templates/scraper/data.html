@@ -2,4 +2,26 @@
 
 {% block tab %}
 
+
+  <table>
+    <thead>
+      {% for id, row in data.items %}
+        {% for key, value in row.items %}
+          <th>{{ key }}</th>
+        {% endfor %}
+      {% endfor %}
+    </thead>
+    <tbody>
+    {% for id, row in data.items %}
+      <tr>
+      {% for key, value in row.items %}
+        <td>{{ value }}</td>
+      {% endfor %}
+      </tr>
+    {% endfor %}    
+    </tbody>
+  </table>
+
+
 {% endblock %}
+

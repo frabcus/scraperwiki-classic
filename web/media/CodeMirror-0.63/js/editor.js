@@ -726,6 +726,7 @@ var Editor = (function(){
           select.scrollToNode(this.history.undo());
           event.stop();
         }
+        
         else if (code == 83 && this.options.saveFunction) { // S
           this.options.saveFunction();
           event.stop();

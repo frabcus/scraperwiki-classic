@@ -9,7 +9,7 @@
 	    <link rel="stylesheet" type="text/css" href="/media/css/main.css" />
 	    <link rel="stylesheet" type="text/css" href="/media/css/jquery-ui-1.7.2.custom.css" />
 	    {% block css %}{% endblock %}
-	    <title>Scraperwiki : {% block title %}{% endblock %}</title>
+	    <title>{% block title %}{% endblock %} | ScraperWiki</title>
 	</head>
 	<body>
 	    <div class="banner">
@@ -19,7 +19,7 @@
 		    <div id="divHeader">
                     
                     <div id="divLogo">
-    					<p><a href='{% url frontpage %}'><span class="hide">ScraperWiki</span></a></p>
+    					<p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
     					<p class="hide">bootstrap the web</p>
     				</div>
 				
@@ -52,6 +52,27 @@
     				</ul>
     			</div>
 		    </div>
+		    <div id="divInfo">
+		        {% if info_messages %}
+                     <ul>
+                         {% for info in info_messages %}
+                             <li>{{ info|escape }}</li>
+                         {% endfor %}
+                     </ul>
+                 {% endif %}	    
+    		</div>
+		    <div id="divErrors">
+		        {% if error_messages %}
+                     <ul>
+                         {% for error in error_messages %}
+                             <li>{{ error|escape }}</li>
+                         {% endfor %}
+                     </ul>
+                 {% endif %}
+    		    {% block errors %}
+		            
+    		    {% endblock %}		    
+    		</div>
 		    <div id="divContent">
 		      
           {% if notifications %}
@@ -104,7 +125,7 @@
 					    </a>
 					</p>
 					<p>
-					    &copy; Scraper Wiki Ltd&nbsp;<a href="/terms_and_conditions/">Terms &amp; Conditions</a>
+					    &copy; Scraper Wiki Ltd&nbsp;<a href="{% url terms %}">Terms &amp; Conditions</a>
 					</p>
 				</div>
 				<br class="clear"/>

@@ -41,9 +41,14 @@ div.attention {text-align:center;}
 #divFooterCopyright p {}
 
 /* Errors */
-#divErrors, .errorlist {background:#da9da4; padding:0.8em; margin-bottom:1.3em;}
 #divErrors ul {padding:0; margin:0; list-style-type:none; line-height:1.4em;}
-#divErrors ul li {padding:0; margin:0;}
+#divErrors ul li {background:#da9da4; padding:0.1em 0; margin:0; text-align:center;}
+.error input, .error select {border:solid 1px #da9da4;}
+small.error_hint {color:#cc0000;}
+
+/* Info */
+#divInfo ul {padding:0; margin:0; list-style-type:none; line-height:1.4em;}
+#divInfo ul li {background:#ffffd7; padding:0.1em 0; margin:0; text-align:center;}
 
 /* Links */
 a[href$='#'] {color:#ccc;}
@@ -78,8 +83,18 @@ br.clear {clear:both;}
 /* Hide */
 .hide {display:none;}
 
-
 /* Forms */
 ul.form {padding:0; margin:0;}
 ul.form li {padding:0; margin:0; list-style-type:none;}
 ul.form li label {display:block; float:left; width:10em;}
+
+/* Scroll */
+div.scroll {overflow-y:scroll; border:solid 1px #ccc; padding:0.5em;}
+
+/* Terms & conditions */
+dl.terms {padding:0; margin:0;}
+dl.terms dt {font-size:0.9em; font-weight:bold; padding-bottom:0.5em;}
+dl.terms dd {padding-left:0; margin-left:0; font-size:0.8em;}
+
+/* Highlight */
+span.highlight {background:#ffffaa; padding:0 0.4em;}

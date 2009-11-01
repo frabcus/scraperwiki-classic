@@ -3,14 +3,84 @@
 {% block css %}
   <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
   <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/editor.css" />
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.7.2.custom.css" />
 {% endblock %}
 
 {% block js %}
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.form.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.comet.js"></script>
 
   <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.63/js/codemirror.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js"></script>
+
+
+  <script type="text/javascript">
+  // Set up some varibles
+  // This is so we can extract most of the scraipt below to an external file
+  
+  var editor_id = 'id_code';
+  var short_name = '{{ short_name }}';
+  var run_type = '{{ settings.CODE_RUNNING_MODE }}';
+  
+  
+  function wirteToConsole(msg) {
+    c = $('body', $('#console').contents())
+    $('body', $('#console').contents()).append(msg+'\n');
+    $('body', $('#console').contents()).css({'white-space' : 'pre',});
+
+    // var c = $('#console');
+    // c.append(msg+'\n')
+    $('body', $('#console').contents()).animate({ scrollTop: c.height()+c[0].scrollHeight }, 0);
+  }
+  
+  
+  var codeeditor;
+  $(document).ready(function() {
+
+    codeeditor = CodeMirror.fromTextArea("id_code", {
+        parserfile: ["../contrib/python/js/parsepython.js"],
+        stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
+        path: "/media/CodeMirror-0.63/js/",
+        textWrapping: false, 
+        lineNumbers: true, 
+        indentUnit: 4,
+        readOnly: false,
+        tabMode: "spaces", 
+        autoMatchParens: true,
+        width: '100%',
+        parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
+        saveFunction: function () {    // this is your Control-S function
+          $.ajax({
+            type : 'POST',
+            URL : window.location.pathname,
+            data: ({
+              title : $('#id_title').val(),
+              code : codeeditor.getCode(),
+              action : 'save',
+              }),
+            dataType: "html",
+            success: function(){
+                    // Attempt at niceish notification, it needs work though ;)
+                     $('#notifications').fadeOut(800, function() {
+                       $('#notifications').html('saved');
+                       $('#notifications').fadeIn(800);                       
+                       wirteToConsole('Saved')
+                     });                     
+                  }
+              });
+          },
+      });
+      
+      
+      
+    });
+
+
+  </script>
+
+  <script type="text/javascript" src="{{ MEDIA_URL }}/js/editor.js"></script>  
+  
 {% endblock %}
 
 {% block header %}
@@ -18,23 +88,30 @@
 {% endblock %}
 
 {% block content %}
-<form method="POST" accept-charset="utf-8" id="editor">
+<form method="POST" accept-charset="utf-8" id="editor" action="">
   <div class="editor">
-      <div class="editor_header">
-          {% if form.errors %}
-          <div id="form-error">
-          	<p>The operation could not be performed because one or more error(s) occurred.<br />Please resubmit the form after making the following changes:</p>
-          	<ul>
-          	{% for field in form %}
-          	<li>{{ field.errors|striptags }}</li>
-          	{% endfor %}
-          	</ul>
+      <div class="editor_header">        
+          <label for="id_title">{{ form.title.label }}</label>: {{ form.title }}
+          <div id="meta_fields_mini">
+            {# for form elements that are shown in the popup #}
+            
+            <div class="field field-description">
+              <label for="id_description">{{ form.description.label}} {{ form.license.errors }}</label>
+              {{ form.description }}
+            </div>
+            
+            <div class="field field-license">
+              <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
+              {{ form.license }}
+            </div>
+            
+            <div class="field field-source">
+              <label for="id_source">{{ form.source.label}} {{ form.source.errors }}</label>
+              {{ form.source }}
+            </div>
+            
           </div>
-          {% endif %}
-        
-          {{ form.title.label }}: {{ form.title }}
-
-          <ul>
+          <ul class="help">
               <li>
                   <a href="#">Keyboard shortcuts</a>
               </li>
@@ -46,50 +123,50 @@
               </li>
           </ul>
       </div>
-
+      
       <!--<h3>{{ message }}</h3>-->
           <div class="editor_code">
               {{ form.code }}
           </div>
-          <div id="resizebar" class="resizebar">&nbsp;</div>
-          <div class="editor_controls">
-              <input type="submit" name="action" value="Save" />            
-              <input type="button" name="action" value="Clear Console" id="clear" />   
-              <div class="right">         
-                  {% if short_name %}
-                      <a href="{% url scraper_code scraper.short_name %}">Close and discard changes</a>
-                  {% else %}
-                      <a href="{% url frontpage %}">Close and discard changes</a>                
-                  {% endif %}
-                  <input type="submit" name="action" value="Commit and close" id="commit"/>            
-              </div>
-          </div>
 
-      <div class="editor_output">
-          <div class="tabs">
-              <ul>
-                  <li class="selected">
-                      Console
-                  </li>
-                  <li>
-                      Data
-                  </li>
-                  <li>
-                      Sources
-                  </li>
-              </ul>
-              <div>
-            
-                  <iframe name="console" id="console" style="width:100%"></iframe>
+            <div class="editor_controls">
+                <input type="submit" name="action" value="Save" id="save"/>            
+                <input type="button" name="action" value="Clear Console" id="clear" />   
+                <span id="notifications"></span>
+                <div class="right">         
+                    {% if short_name %}
+                        <a href="{% url scraper_code short_name %}">Close and discard changes</a>
+                    {% else %}
+                        <a href="{% url frontpage %}">Close and discard changes</a>                
+                    {% endif %}
+                    <input type="submit" name="action" value="Commit and close" id="commit"/>            
+                </div>
+            </div>
+
+            <div class="editor_output">
+                <div class="tabs">
+                    <ul>
+                        <li class="selected">
+                            Console
+                        </li>
+                        <li>
+                            Data
+                        </li>
+                        <li>
+                            Sources
+                        </li>
+                    </ul>
+                    <div>            
+                      <iframe name="console" id="console" style="width:100%;height:150px;overflow:auto;"><pre></pre></iframe>
+                    </div>
               </div>
-          </div>
+          
       </div>
   </div>
 
 {% endblock %}
 {% block popups %}
-    <div id="test" class="popup_item">
-
-    </div>
+    <div id="meta_form" class="popup_item"><a class="popupClose">x</a></div>
+    <div id="diff" class="popup_item"><a class="popupClose">x</a><pre></pre></div>
 </form>
 {% endblock %}

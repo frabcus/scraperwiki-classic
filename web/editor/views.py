@@ -1,14 +1,45 @@
-import datetime
 import re
+import sys
+import os
+import datetime
 
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.urlresolvers import reverse
-import forms
 from scraper.models import Scraper as ScraperModel, UserScraperRole, ScraperDraft
 from scraper import template
+from scraper import vc
+import forms
+import settings
+
+
+def delete_draft(request):
+  if request.session.get('ScraperDraft', None):
+    draft = request.session['ScraperDraft']
+    del request.session['ScraperDraft']
+    if draft.short_name:
+      return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : draft.short_name}))
+  return HttpResponseRedirect(reverse('editor'))
+    
+
+def save_draft(request):
+  print request.session['ScraperDraft']
+  draft_form = forms.editorForm(request.POST)
+  savedForm = draft_form.save(commit=False)
+  savedForm.code = draft_form.cleaned_data['code']
+  request.session['ScraperDraft'] = savedForm  
+  return HttpResponseRedirect(reverse('editor'))
+
+def diff(request, short_name):
+  
+  if request.POST.get('code', False):
+    code = request.POST['code']    
+    scraper = get_object_or_404(ScraperModel, short_name=short_name)
+    scraper.code = scraper.committed_code()
+    return HttpResponse(vc.diff(scraper.code, code), mimetype='text')
+    
 
 def edit(request, short_name=None):
   """
@@ -35,14 +66,12 @@ def edit(request, short_name=None):
   it's commit (and close) then they are redirected to the scrapers main page.
   
   
-  Arguements:
-  
     - `short_name` (optional) Short name of the Scraper from web.scrapers.models  
-  
+
   TODO:
     * Only load draft for the correct scraper (sniff short_name, or new)
     * If short_name exists, don't make a new one
-  
+    
   """
 
   draft = request.session.get('ScraperDraft', None)
@@ -70,6 +99,7 @@ def edit(request, short_name=None):
 
   form = forms.editorForm(scraper.__dict__, instance=scraper)
   form.fields['code'].initial = scraper.code
+  
   
   if request.method == 'POST' or bool(re.match('save|commit', request.GET.get('action', ""))):
     if request.POST:
@@ -134,4 +164,4 @@ def edit(request, short_name=None):
         return HttpResponseRedirect(reverse('login'))
         
         
-  return render_to_response('editor.html', {'form':form}, context_instance=RequestContext(request)) 
+  return render_to_response('editor.html', {'form':form, 'short_name' : short_name, 'settings' : settings }, context_instance=RequestContext(request)) 

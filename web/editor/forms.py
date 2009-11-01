@@ -1,12 +1,12 @@
-import django.forms
+from django import forms
 from django.forms import widgets
 import scraper
 
-class editorForm(django.forms.ModelForm):
+class editorForm(forms.ModelForm):
     
   class Meta:
     model = scraper.models.Scraper
-    fields = ('title', 'code', )
-  
-  code = django.forms.CharField(widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'}))
+    fields = ('title', 'code', 'description', 'source', 'license')
+    
+  code = forms.CharField(widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'}))
 

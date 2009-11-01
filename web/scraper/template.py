@@ -14,6 +14,9 @@ def default():
   title = "Untitled Scraper"
   description = None
   code = """
+from scraperwiki import datastore
+from scraperwiki import Scrape
+
 print "foo"
 """
   return locals()
