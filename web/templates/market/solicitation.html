@@ -1,0 +1,42 @@
+{% extends "frontend/base.html" %}
+{% load formhelper %}
+
+{% block title %}Scraperwiki front page{% endblock %}
+
+{% block errors %}
+    {% if form.errors %}
+        <ul>
+            {% form_errors form %}
+        </ul>
+    {% endif %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="content col left">
+    	<form method="post" action=".">
+    	    <ul class="form">
+    	        <li{% if form.title.errors %} class="error"{% endif %}>
+            	    {{ form.title.label_tag }}
+            	    {{ form.title }}
+        	        {% field_errors form.title %}
+    	        </li>
+    	        <li{% if form.link.errors %} class="error"{% endif %}>
+            	    {{ form.link.label_tag }}
+            	    {{ form.link }}
+        	        {% field_errors form.link %}
+    	        </li>
+    	        <li{% if form.details.errors %} class="error"{% endif %}>
+            	    {{ form.details.label_tag }}
+            	    {{ form.details }}
+        	        {% field_errors form.details %}
+    	        </li>    	        
+            </ul>
+    		<input type="submit" name="login" value="Submit" />
+    	</form>
+    </div>
+
+    <div class="content col right">
+        dsads
+    </div>
+{% endblock %}
