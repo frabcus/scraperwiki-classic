@@ -64,7 +64,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_notify.middleware.NotificationsMiddleware',
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -102,7 +101,6 @@ INSTALLED_APPS = (
   	'editor',
   	'contact_form',
   	'django_notify',
-    'debug_toolbar'
 )
 
 
@@ -123,28 +121,4 @@ DEBUG_TOOLBAR_CONFIG = {
 
 NOTIFICATIONS_STORAGE = 'session.SessionStorage'
 REGISTRATION_BACKEND = "registration.backends.default.DefaultBackend"
-
-
-
-# Define how scraper code should be run.
-# There are 3 available settings:
-# 
-# 1. firestarter_apache
-# 2. firestarter_django
-# 3. popen
-# 
-# The first option is prefered as it allows running code securly,
-# streaming output and killing processes.
-# 
-# The second option will work in most cases, but will not stream code.
-# 
-# The third option will only work is settings.DEBUG is true as it
-# allows code to run as the apache user on the server without 
-# any control.
-
-CODE_RUNNING_MODE = 'firestarter_django'
-
-
-
-
 
