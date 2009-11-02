@@ -259,33 +259,6 @@ class ScraperRequest(models.Model):
         return ('team@scraperwiki',)
 
 
-class ScraperDraft(models.Model):
-  """
-  Used to store information on drafts.
-  
-  At first a draft is only ever made when an annonymous user creates a scraper
-  and then has to create an account before saving.
-  
-  Later it can be used to store 'private drafts' if we want that.
-  """
-  scraper = models.ForeignKey(Scraper)
-  user = models.ForeignKey(User)
-  
-  def __init__(self, **kwags):
-    self.path = "%s/%s" % (settings.SMODULES_DIR, self.scraper.short_name)
-  
-  def save(self):
-    path = self.scrapers_path
-    draft = self.path
-    print draft
-    
-    super(ScraperDraft, self).save()
-
-def ScraperDraft_user_registered(user, request, **kwards):
-  if request.session.get('ScraperDraft', False):
-    draft = ScraperDraft(user=user, scraper=request.session['ScraperDraft'])
-    draft.save()
-user_registered.connect(ScraperDraft_user_registered)
 
 
 
@@ -364,3 +337,32 @@ class scraperData(models.Model):
 #     """
 #     cached_page        = models.ForeignKey(CachedPage)
 #     scraper_invocation = models.ForeignKey(ScraperInvocation)
+
+
+# class ScraperDraft(models.Model):
+#   """
+#   Used to store information on drafts.
+#   
+#   At first a draft is only ever made when an annonymous user creates a scraper
+#   and then has to create an account before saving.
+#   
+#   Later it can be used to store 'private drafts' if we want that.
+#   """
+#   scraper = models.ForeignKey(Scraper)
+#   user = models.ForeignKey(User)
+#   
+#   def __init__(self, **kwags):
+#     self.path = "%s/%s" % (settings.SMODULES_DIR, self.scraper.short_name)
+#   
+#   def save(self):
+#     path = self.scrapers_path
+#     draft = self.path
+#     print draft
+#     
+#     super(ScraperDraft, self).save()
+# 
+# def ScraperDraft_user_registered(user, request, **kwards):
+#   if request.session.get('ScraperDraft', False):
+#     draft = ScraperDraft(user=user, scraper=request.session['ScraperDraft'])
+#     draft.save()
+# user_registered.connect(ScraperDraft_user_registered)
