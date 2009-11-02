@@ -78,4 +78,19 @@ Now try running django:
 
 Assuming no errors you should be able to visit http://localhost:8000/ and see the scraperwiki home page.
 
+5) initiate the UML
+*******************
+
+Instructions in UML/LOCAL explains that the system 
+can run without fireboxing on a local machine for 
+development.  
+
+The FireBox subsystem can be run without UML by running 
+the command
+
+./runlocal
+
+
+
+
 

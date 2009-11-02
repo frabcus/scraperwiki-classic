@@ -97,6 +97,34 @@ def login(request):
                 new_user = backend.register(request, **registration_form.cleaned_data)
                 return HttpResponseRedirect(reverse('confirm_account'))
                 
+                
+                # ScraperDraft code, added here as contrib.auth doesn't support signals :(
+                if request.session.get('ScraperDraft', False):
+                  draft = request.session['ScraperDraft']
+                  if draft.short_name:
+                    return HttpResponseRedirect(
+                      reverse('editor', kwargs={'short_name' : draft.short_name}) + "?action=%s" % draft.action
+                      )
+                  else:
+                    return HttpResponseRedirect(
+                      reverse('editor') + "?action=%s" % draft.action
+                      )
+                    
+                return HttpResponseRedirect(reverse('frontpage'))
+                
+                # Redirect to a success page.
+            else:
+                message = "This account has not been activated, please check your email for confirmation"
+                # Return a 'disabled account' error message
+        else:
+            message = "Invalid Login"
+            # Return an 'invalid login' error message.
+    else:
+        login_form = AuthenticationForm()
+        registration_form = CreateAccountForm()
+        message = None
+
     return render_to_response('registration/extended_login.html', {'registration_form': registration_form, 'login_form': login_form, 'error_messages': error_messages}, context_instance = RequestContext(request))
+
         
     

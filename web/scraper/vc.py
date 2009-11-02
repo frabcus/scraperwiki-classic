@@ -1,5 +1,7 @@
 import sys
-# sys.path.append('../../web')
+import difflib
+import re
+sys.path.append('../../web')
 
 import os
 from StringIO import StringIO
@@ -27,8 +29,6 @@ def make_file_path(scraper_short_name):
 def create(scraper_name):
   scraper_folder_path = "%s%s" % (SMODULES_DIR, scraper_name)
   def make_file(scraper_folder_path):
-    print ">>>>>>>>>>>>>"
-    print "%s/__init__.py" % scraper_folder_path
     open("%s/__init__.py" % scraper_folder_path, 'w')
 
   if os.path.exists(scraper_folder_path):
@@ -43,8 +43,10 @@ def save(scraper):
   path = make_file_path(scraper.short_name)
   create(scraper.short_name)
   scraper_file = open(path, 'w')
-  print "saving to: ", path
-  scraper_file.write(scraper.code)
+
+  code = scraper.code
+  scraper_file.write(code)
+
   scraper_file.close()
 
 def commit(scraper, message="test"): 
@@ -70,7 +72,7 @@ def commit(scraper, message="test"):
   code = ui.popbuffer()
   return ""
 
-def get_code(scraper_name=None, committed=True):
+def get_code(scraper_name=None, committed=True, rev='tip'):
   """
   Returns the committed file as a string
   """
@@ -85,7 +87,7 @@ def get_code(scraper_name=None, committed=True):
     r = hg.repository(ui, reop_path, create=False)
 
     code = StringIO("")
-    commands.cat(ui,r,path, output=code, rev='tip')
+    commands.cat(ui,r,path, output=code, rev=rev)
 
     return code.getvalue()
 
@@ -104,8 +106,10 @@ def been_edited(scraper_name=None):
   reop_path = os.path.normpath(os.path.abspath(SMODULES_DIR))
   r = hg.repository(ui, reop_path, create=False)
   
+  path = make_file_path(scraper_name)
+  
   ui.pushbuffer()
-  commands.status(ui,r,'/tmp/hg/test.py', change='tip')
+  commands.status(ui,r,path, change='tip')
   code = ui.popbuffer() 
 
   if code != "":
@@ -113,10 +117,41 @@ def been_edited(scraper_name=None):
   else:
     return False
 
+def diff(a, b=None, rev='tip', scraper_name=None):
+  """
+  Given a scraper name, allow browsing of diffs.
+  
+  - `a`: Code to diff against.
+  - `b`: (optional) The other half of the code to diff against.
+  - `rev`: (optional) The revistion to diff against.
+  
+  `b` and `rev` are optional.  If `b` is not provided diff is performed
+  against the 'tip' revision of the code.  If 'rev' is provided then 
+  we diff against that revision.  If 'b' and 'rev' are provided then
+  'rev is ignored.
+  
+  """
+  if not b:
+    b = get_code(scraper_name, rev=rev)
+  
+  x = '\n'.join(difflib.unified_diff(a.splitlines(), b.splitlines(), lineterm=''))
+  return x
+    # yield line
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
-  path = make_file_path('missing_cats')
-  save('missing_cats2')
+  # path = make_file_path('missing_cats')
+  x = diff('missing_cats2', scraper_name='asd-1')
+  while x:
+    print dir(x)
+    x.next()
   # save(['sym'])
-  

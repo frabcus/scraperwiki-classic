@@ -1,13 +1,13 @@
-#id_description {display:none;}
+
 body{overflow:hidden; height:100%;}
 .editor {text-align:left; }
 
 /* Header */
 .editor_header {min-height:2em; background:#efefef;}
 .editor_header h1 {font-weight:bold; font-size:1.2em; padding:0.4em 0 0 0.5em; color:#808080;}
-.editor_header ul, .editor_header ul li {margin:0; padding:0;}
-.editor_header ul {font-size:0.8em; position:absolute; right:1em; top:0.5em;}
-.editor_header ul li {list-style-type:none; display:inline;}
+.editor_header ul.help, .editor_header ul.help li {margin:0; padding:0;}
+.editor_header ul.help {font-size:0.8em; position:absolute; right:1em; top:0.5em;}
+.editor_header ul.help li {list-style-type:none; display:inline;}
 
 /* Code */
 .editor_code {border-top:solid 1px #9a9a9a; padding:0;}
@@ -20,7 +20,7 @@ body{overflow:hidden; height:100%;}
 .editor_controls a {font-size:0.8em;}
 .editor_controls input {font-size:0.9em;}
 
-span.hiddenfields input  { Ddisplay:none; width:4em; } 
+span.hiddenfields input  { display:none; width:4em; } 
 span.hiddenfields { margin-left:10px; } 
 
 /* Output and tabs */
@@ -44,4 +44,25 @@ span.hiddenfields { margin-left:10px; }
     opacity:0.6;filter: alpha(opacity=60); display:none;}
 #popups .popup_item {border:5px solid #808080;position:absolute;width:500px;height:300px;background:#fff;
     z-index:110; position:absolute; top:0; width:86%; margin:5%; padding:2%;
-    text-align:left; display:none;}
+    text-align:left; display:none; overflow:auto;}
+    
+.popupClose{  
+  font-size:18px;  
+  line-height:20px;  
+  right:6px;
+  top:4px;  
+  position:absolute;  
+  color:#6fa5fd;  
+  font-weight:700;  
+  display:block;
+  cursor:pointer;
+}
+
+.editor_code {border-bottom:2px solid #999;}
+
+
+#meta_fields_mini .field { display:inline; }
+#meta_fields_mini .field input, #meta_fields_mini .field textarea {height:10px;}
+#meta_fields_mini .field ul.errorlist, #meta_fields_mini .field ul.errorlist li {display:inline; margin:0; padding:0; color:red;}
+
+#meta_fields .field-description {float:left; margin-right:10%;}

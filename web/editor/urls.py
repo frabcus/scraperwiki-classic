@@ -1,15 +1,13 @@
 from django.conf.urls.defaults import *
 import views
-
-#
-# producing the variations on the editor/<short_name> URL by appending commands on the end is not ideal
-# but works for now and can be changed by altering this file alone
-# 
+import code_runner
 
 urlpatterns = patterns('',
-  url(r'^(?P<short_name>[\-\w]*?)/RUN$',  views.run,        name="editor_run"),         # makes the call to the firebox
-  url(r'^(?P<short_name>[\-\w]*?)/SAVE$', views.savecommit, name="editor_savecommit"),  # this requires the code to be POSTed
-  url(r'^(?P<short_name>[\-\w]*?)/RAW$',  views.raw,        name="editor_raw"),         # text output of the code along for the reload feature
-  url(r'^(?P<short_name>[\-\w]*)$',       views.edit,       name="editor"),             # produces the standard editor page
-    
+  url(r'^draft/delete$', views.delete_draft, name="delete_draft"),
+  url(r'^draft/save$', views.save_draft, name="save_draft"),
+  url(r'diff/(?P<short_name>[\-\w]+)', views.diff, name="diff"),
+  url(r'^$', views.edit, name="editor"),
+  url(r'^run_code$', code_runner.run_code, name="run_code"),
+  url(r'^(?P<short_name>[\-\w]+)$', views.edit, name="editor"),
+  
 )

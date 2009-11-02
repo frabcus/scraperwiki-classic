@@ -13,12 +13,20 @@ def create(request):
         return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 
 
 def data (request, scraper_short_name = 'None'):
-
+    
     user = request.user
     scraper = models.Scraper.objects.get(short_name=scraper_short_name)
+    data = models.scraperData.objects.summary()
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    return render_to_response('scraper/data.html', {'selected_tab': 'data', 'scraper': scraper, 'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it}, context_instance=RequestContext(request))
+    return render_to_response('scraper/data.html', {
+    
+      'selected_tab': 'data', 
+      'scraper': scraper, 
+      'user_owns_it': user_owns_it, 
+      'user_follows_it': user_follows_it,
+      'data' : data,
+      }, context_instance=RequestContext(request))
 
 def code (request, scraper_short_name = 'None'):
 

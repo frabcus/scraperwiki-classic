@@ -1,23 +1,44 @@
 {% extends "editor_base.html" %}
 
 {% block css %}
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/editor.css" />
   <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/editor.css" />
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.7.2.custom.css" />
 {% endblock %}
 
 {% block js %}
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.min.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
   <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.form.js"></script>
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.comet.js"></script>
 
   <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.63/js/codemirror.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js"></script>
+
 
   <script type="text/javascript">
+  // Set up some varibles
+  // This is so we can extract most of the scraipt below to an external file
+  
+  var editor_id = 'id_code';
+  var short_name = '{{ short_name }}';
+  var run_type = '{{ settings.CODE_RUNNING_MODE }}';
+  
+  
+  function wirteToConsole(msg) {
+    c = $('body', $('#console').contents())
+    $('body', $('#console').contents()).append(msg+'\n');
+    $('body', $('#console').contents()).css({'white-space' : 'pre',});
+
+    // var c = $('#console');
+    // c.append(msg+'\n')
+    $('body', $('#console').contents()).animate({ scrollTop: c.height()+c[0].scrollHeight }, 0);
+  }
+  
+  
   var codeeditor;
-  $(document).ready(function() 
-  {
-    codeeditor = CodeMirror.fromTextArea("id_{{editorform.codearea.name}}", 
-    {
+  $(document).ready(function() {
+
+    codeeditor = CodeMirror.fromTextArea("id_code", {
         parserfile: ["../contrib/python/js/parsepython.js"],
         stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
         path: "/media/CodeMirror-0.63/js/",
@@ -29,24 +50,37 @@
         autoMatchParens: true,
         width: '100%',
         parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
-        saveFunction: function () { $("#id_{{editorform.codearea.name}}").val(codeeditor.getCode());  $("#codewikiform").submit(); }   // this is your Control-S function
+        saveFunction: function () {    // this is your Control-S function
+          $.ajax({
+            type : 'POST',
+            URL : window.location.pathname,
+            data: ({
+              title : $('#id_title').val(),
+              code : codeeditor.getCode(),
+              action : 'save',
+              }),
+            dataType: "html",
+            success: function(){
+                    // Attempt at niceish notification, it needs work though ;)
+                     $('#notifications').fadeOut(800, function() {
+                       $('#notifications').html('saved');
+                       $('#notifications').fadeIn(800);                       
+                       wirteToConsole('Saved')
+                     });                     
+                  }
+              });
+          },
+      });
+      
+      
+      
     });
 
-    // convert both forms into ajax with the same target area, and return keyboard focus to the editing window
-    // you can comment this ajaxifying out to see the errors that get surpressed in this window
-    var formoptions = { target: '#outputarea', success: function() { codeeditor.focus(); } }; 
-    $('#runform').ajaxForm(formoptions);         // bind form using 'ajaxForm' 
-    $('#codewikiform').ajaxForm(formoptions);   // bind form using 'ajaxForm' 
 
-    // this is your reload function.  
-    // In the future it should select and highlight the range of lines that were changed
-    $('#reloadbutton').click( function() 
-    {
-        codeeditor.setCode($.ajax({url: $("#id_{{editorform.editorcoderaw.name}}").val(), async: false}).responseText); 
-        codeeditor.focus(); 
-    }); 
-  })
   </script>
+
+  <script type="text/javascript" src="{{ MEDIA_URL }}/js/editor.js"></script>  
+  
 {% endblock %}
 
 {% block header %}
@@ -54,54 +88,85 @@
 {% endblock %}
 
 {% block content %}
-
-<div class="editor">
-    <div class="editor_header">
-        <h1>{{ scraper.title }}</h1>
-        <ul>
-            <li><a href="#">Keyboard shortcuts</a></li>
-            <li><a href="#">Editor settings</a></li>
-            <li class="helplink"><a href="#">Code documentation</a></li>
-        </ul>
-    </div>
-
-    <form id="codewikiform" method="POST" accept-charset="utf-8" action="{% url editor_savecommit short_name=short_name %}">
-        <div class="editor_code">{{ editorform.codearea }}</div>
-        <div id="resizebar" class="resizebar">&nbsp;</div>
-        <div class="editor_controls">
-            <input type="submit" name="action" value="Save" />            
-            <input type="button" value="Reload" id="reloadbutton"/>   
-            <!--<input type="submit" name="action" value="SaveAndRun" /> -->
-            <span class="hiddenfields"> {{editorform.starttime}} {{editorform.short_name}} {{editorform.username}} {{editorform.editorcoderaw}} </span>
-            <div class="right">
-                <a href="{% url scraper_code scraper.short_name %}">Close and discard changes</a>
-                <input type="submit" name="action" value="Commit and close" id="commit"/>            
+<form method="POST" accept-charset="utf-8" id="editor" action="">
+  <div class="editor">
+      <div class="editor_header">        
+          <label for="id_title">{{ form.title.label }}</label>: {{ form.title }}
+          <div id="meta_fields_mini">
+            {# for form elements that are shown in the popup #}
+            
+            <div class="field field-description">
+              <label for="id_description">{{ form.description.label}} {{ form.license.errors }}</label>
+              {{ form.description }}
             </div>
-        </div>
-    </form>
+            
+            <div class="field field-license">
+              <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
+              {{ form.license }}
+            </div>
+            
+            <div class="field field-source">
+              <label for="id_source">{{ form.source.label}} {{ form.source.errors }}</label>
+              {{ form.source }}
+            </div>
+            
+          </div>
+          <ul class="help">
+              <li>
+                  <a href="#">Keyboard shortcuts</a>
+              </li>
+              <li>
+                  <a href="#">Editor settings</a>
+              </li>
+              <li class="helplink">
+                  <a href="#">Code documentation</a>
+              </li>
+          </ul>
+      </div>
+      
+      <!--<h3>{{ message }}</h3>-->
+          <div class="editor_code">
+              {{ form.code }}
+          </div>
 
-    <form id="runform" method="POST" accept-charset="utf-8" action="{{runactionurl}}">
-        <input type="submit" name="action" value="Run" id="run_script"/>
-        {{ runform.codeline }}
-        <span class="hiddenfields">{{runform.starttime}} {{runform.short_name}} {{runform.username}}</span>
-    </form>
+            <div class="editor_controls">
+                <input type="submit" name="action" value="Save" id="save"/>            
+                <input type="button" name="action" value="Clear Console" id="clear" />   
+                <span id="notifications"></span>
+                <div class="right">         
+                    {% if short_name %}
+                        <a href="{% url scraper_code short_name %}">Close and discard changes</a>
+                    {% else %}
+                        <a href="{% url frontpage %}">Close and discard changes</a>                
+                    {% endif %}
+                    <input type="submit" name="action" value="Commit and close" id="commit"/>            
+                </div>
+            </div>
 
-    <div class="editor_output">
-    <div class="tabs">
-    <ul>
-        <li class="selected">Output</li>
-        <li>Data</li>
-        <li>Sources</li>
-    </ul>
-    </div>
-    </div>
-    <div style='width: 1140px; height: 400px; overflow: auto;'><span id="outputarea">output stuff here</span></div>
-</div>
+            <div class="editor_output">
+                <div class="tabs">
+                    <ul>
+                        <li class="selected">
+                            Console
+                        </li>
+                        <li>
+                            Data
+                        </li>
+                        <li>
+                            Sources
+                        </li>
+                    </ul>
+                    <div>            
+                      <iframe name="console" id="console" style="width:100%;height:150px;overflow:auto;"><pre></pre></iframe>
+                    </div>
+              </div>
+          
+      </div>
+  </div>
 
 {% endblock %}
 {% block popups %}
-    <div id="test" class="popup_item">
-        Bla Bla
-    </div>
+    <div id="meta_form" class="popup_item"><a class="popupClose">x</a></div>
+    <div id="diff" class="popup_item"><a class="popupClose">x</a><pre></pre></div>
+</form>
 {% endblock %}
-
