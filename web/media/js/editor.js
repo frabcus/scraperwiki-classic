@@ -135,6 +135,7 @@ $('.editor_controls #run').click(function() {
           target: '#console',
           action: '/editor/run_code',
       });
+
       
       return false; // <-- important!
   } else {

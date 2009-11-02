@@ -50,7 +50,7 @@ def deploy():
     import time
     config.release = time.strftime('%Y%m%d%H%M%S')
     
-    sudo('cd $(path); hg pull; hg update -C')
+    run('cd $(path); hg pull; hg update -C')
     
     buildout()
     migrate()

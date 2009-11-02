@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.urlresolvers import reverse
-from scraper.models import Scraper as ScraperModel, UserScraperRole, ScraperDraft
+from scraper.models import Scraper as ScraperModel, UserScraperRole
 from scraper import template
 from scraper import vc
 import forms
