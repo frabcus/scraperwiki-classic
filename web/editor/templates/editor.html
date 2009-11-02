@@ -24,7 +24,7 @@
   var run_type = '{{ settings.CODE_RUNNING_MODE }}';
   
   
-  function wirteToConsole(msg) {
+  function writeToConsole(msg) {
     c = $('body', $('#console').contents())
     $('body', $('#console').contents()).append(msg+'\n');
     $('body', $('#console').contents()).css({'white-space' : 'pre',});
@@ -36,6 +36,9 @@
   
   
   var codeeditor;
+  var draggedWindow; // the iframe that needs resizing
+  var draggedwindowheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
+
   $(document).ready(function() {
 
     codeeditor = CodeMirror.fromTextArea("id_code", {
@@ -65,15 +68,24 @@
                      $('#notifications').fadeOut(800, function() {
                        $('#notifications').html('saved');
                        $('#notifications').fadeIn(800);                       
-                       wirteToConsole('Saved')
+                       writeToConsole('Saved')
                      });                     
                   }
               });
           },
+        initCallback: function() { 
+                draggedWindow = $("#id_code").next().children(":first"); 
+                draggedwindowheightdiff = draggedWindow.height() - $("#codeeditordiv").height(); 
+                                 }, 
       });
       
       
-      
+      // seems unable to make the handles appear or the scroll thing a
+      $("#codeeditordiv").resizable({
+                    handles: 's',   
+                    autoHide: false, 
+                    stop: function(event, ui) { if (draggedWindow)  draggedWindow.height(($("#codeeditordiv").height() + draggedwindowheightdiff) + 'px'); }
+                                    });
     });
 
 
@@ -125,7 +137,7 @@
       </div>
       
       <!--<h3>{{ message }}</h3>-->
-          <div class="editor_code">
+          <div class="editor_code" id="codeeditordiv">
               {{ form.code }}
           </div>
 
