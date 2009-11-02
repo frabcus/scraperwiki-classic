@@ -1,9 +1,9 @@
 {% extends "editor_base.html" %}
 
 {% block css %}
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.7.2.custom.css" />
   <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
   <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/editor.css" />
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.7.2.custom.css" />
 {% endblock %}
 
 {% block js %}
@@ -35,10 +35,30 @@
   }
   
   
+
+  
   var codeeditor;
   var draggedWindow; // the iframe that needs resizing
   var draggedwindowheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
+  var previouscodeeditorheight;    // saved for the double-clicking on the drag bar
 
+  function synccodemirrorwindowsize() {
+    if (draggedWindow)  
+        draggedWindow.height(($("#codeeditordiv").height() + draggedwindowheightdiff) + 'px'); 
+  }; 
+
+  function doubleclickdragbar() {
+    var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
+    if (maxheight != $("#codeeditordiv").height())
+    {
+        previouscodeeditorheight = $("#codeeditordiv").height(); 
+        $("#codeeditordiv").animate({ height: maxheight }, 500, "swing", synccodemirrorwindowsize); 
+    }
+    else
+        $("#codeeditordiv").animate({ height: previouscodeeditorheight }, 500, "swing", synccodemirrorwindowsize); 
+  }; 
+
+  // function called when the window has finished loading
   $(document).ready(function() {
 
     codeeditor = CodeMirror.fromTextArea("id_code", {
@@ -80,12 +100,22 @@
       });
       
       
-      // seems unable to make the handles appear or the scroll thing a
+      // turn the code editor into a resizable window using standard jquery.  
       $("#codeeditordiv").resizable({
                     handles: 's',   
-                    autoHide: false, 
-                    stop: function(event, ui) { if (draggedWindow)  draggedWindow.height(($("#codeeditordiv").height() + draggedwindowheightdiff) + 'px'); }
-                                    });
+
+                    // prevent the window getting larger than the 
+                    start: function(event, ui) 
+                        { 
+                            var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
+                            codeeditor.setCode(codeeditor.getCode() + "\nkkk " + $("#codeeditordiv").height() + " kk " + maxheight); 
+                            $("#codeeditordiv").resizable('option', 'maxHeight', maxheight);
+                        }, 
+                    stop: function(event, ui)  { synccodemirrorwindowsize(); }
+                                   }); 
+
+      // bind the double-click 
+      $(".ui-resizable-s").bind("dblclick", doubleclickdragbar);
     });
 
 
@@ -141,7 +171,7 @@
               {{ form.code }}
           </div>
 
-            <div class="editor_controls">
+            <div class="editor_controls" id="controlseditordiv">
                 <input type="submit" name="action" value="Save" id="save"/>            
                 <input type="button" name="action" value="Clear Console" id="clear" />   
                 <span id="notifications"></span>
@@ -155,7 +185,7 @@
                 </div>
             </div>
 
-            <div class="editor_output">
+            <div class="editor_output" id="outputeditordiv">
                 <div class="tabs">
                     <ul>
                         <li class="selected">
