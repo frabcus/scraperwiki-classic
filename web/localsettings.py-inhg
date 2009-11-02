@@ -23,8 +23,7 @@ DATASTORE_DATABASE_PORT   = '3306'
 
 FEEDBACK_EMAIL = 'feedback@somedomain.com'
 
-<<<<<<< local
-SESSION_TIMEOUT = 1209600=======
+SESSION_TIMEOUT = 1209600
 
 
 
@@ -49,4 +48,3 @@ CODE_RUNNING_MODE = 'firestarter_django'
 
 FIREBOX_PATH = ''
 sys.path.append(FIREBOX_PATH)
->>>>>>> other

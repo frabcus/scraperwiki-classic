@@ -22,18 +22,8 @@
   var editor_id = 'id_code';
   var short_name = '{{ short_name }}';
   var run_type = '{{ settings.CODE_RUNNING_MODE }}';
-  
-  
-  function wirteToConsole(msg) {
-    c = $('body', $('#console').contents())
-    $('body', $('#console').contents()).append(msg+'\n');
-    $('body', $('#console').contents()).css({'white-space' : 'pre',});
 
-    // var c = $('#console');
-    // c.append(msg+'\n')
-    $('body', $('#console').contents()).animate({ scrollTop: c.height()+c[0].scrollHeight }, 0);
-  }
-  
+
   
   var codeeditor;
   $(document).ready(function() {
@@ -146,19 +136,32 @@
             <div class="editor_output">
                 <div class="tabs">
                     <ul>
-                        <li class="selected">
-                            Console
+                        <li class="console">
+                            <a href="#">Console</a>
                         </li>
-                        <li>
-                            Data
+                        <li class="data">
+                            <a href="#">Data</a>                            
                         </li>
-                        <li>
-                            Sources
+                        <li class="sources">
+                            <a href="#">Sources</a>                            
                         </li>
                     </ul>
-                    <div>            
-                      <iframe name="console" id="console" style="width:100%;height:150px;overflow:auto;"><pre></pre></iframe>
+                    <div class="info">
+                        <div id="output_console">
+                            <div></div>
+                        </div>
+                        <div id="output_data">
+                            <table>
+                                
+                            </table>
+                        </div>
+                        <div id="output_sources">
+                            <div></div>                        
+                        </div>
                     </div>
+          
+                      <iframe name="console" id="console" style="width:100%;height:150px;overflow:auto;"><pre></pre></iframe>
+
               </div>
           
       </div>

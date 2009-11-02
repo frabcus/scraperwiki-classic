@@ -51,8 +51,10 @@ small.error_hint {color:#cc0000;}
 #divInfo ul li {background:#ffffd7; padding:0.1em 0; margin:0; text-align:center;}
 
 /* Links */
+/*
 a[href$='#'] {color:#ccc;}
 a[href$='#']:hover {text-decoration:line-through;}
+*/
 
 /* Page titles */
 div.page_title {border-bottom:dotted 1px #ccc; padding-bottom:1em;}
