@@ -32,15 +32,23 @@
         draggedWindow.height(($("#codeeditordiv").height() + draggedwindowheightdiff) + 'px'); 
   }; 
 
+  function ensurecodeeditorlessthanmax() {
+    var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
+    if (maxheight < $("#codeeditordiv").height())
+      $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", synccodemirrorwindowsize); 
+  }; 
+
   function doubleclickdragbar() {
     var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-    if (maxheight != $("#codeeditordiv").height())
+    if (maxheight >= $("#codeeditordiv").height() + 5)
     {
         previouscodeeditorheight = $("#codeeditordiv").height(); 
         $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", synccodemirrorwindowsize); 
     }
     else
-        $("#codeeditordiv").animate({ height: previouscodeeditorheight }, 100, "swing", synccodemirrorwindowsize); 
+
+        $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", synccodemirrorwindowsize); 
+
   }; 
 
   // function called when the window has finished loading
@@ -81,6 +89,7 @@
         initCallback: function() { 
                 draggedWindow = $("#id_code").next().children(":first"); 
                 draggedwindowheightdiff = draggedWindow.height() - $("#codeeditordiv").height(); 
+                ensurecodeeditorlessthanmax(); 
                                  }, 
       });
       
@@ -116,6 +125,7 @@
       $(".ui-resizable-s").bind("dblclick", doubleclickdragbar);
     });
 
+    $(window).resize(ensurecodeeditorlessthanmax); 
 
   </script>
 

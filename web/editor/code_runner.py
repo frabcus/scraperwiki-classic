@@ -3,7 +3,7 @@ import sys
 import os
 import datetime
 import string
-import json
+import simplejson as json
 
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
