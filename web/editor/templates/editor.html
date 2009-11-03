@@ -1,235 +1,124 @@
 {% extends "editor_base.html" %}
 
 {% block css %}
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.7.2.custom.css" />
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
-  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/editor.css" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.7.2.custom.css" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/editor.css" />
 {% endblock %}
 
 {% block js %}
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.form.js"></script>
-  <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.comet.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.form.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.comet.js"></script>
 
-  <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.63/js/codemirror.js"></script>
-
-
-  <script type="text/javascript">
-  // Set up some varibles
-  // This is so we can extract most of the scraipt below to an external file
-  
-  var editor_id = 'id_code';
-  var short_name = '{{ scraper.short_name }}';
-  var run_type = '{{ settings.CODE_RUNNING_MODE }}';
-  var codeeditor;
-  var draggedWindow; // the iframe that needs resizing
-  var draggedwindowheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
-  var previouscodeeditorheight;    // saved for the double-clicking on the drag bar
-
-  function synccodemirrorwindowsize() {
-    if (draggedWindow)  
-        draggedWindow.height(($("#codeeditordiv").height() + draggedwindowheightdiff) + 'px'); 
-  }; 
-
-  function ensurecodeeditorlessthanmax() {
-    var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-    if (maxheight < $("#codeeditordiv").height())
-      $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", synccodemirrorwindowsize); 
-  }; 
-
-  function doubleclickdragbar() {
-    var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-    if (maxheight >= $("#codeeditordiv").height() + 5)
-    {
-        previouscodeeditorheight = $("#codeeditordiv").height(); 
-        $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", synccodemirrorwindowsize); 
-    }
-    else
-
-        $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", synccodemirrorwindowsize); 
-
-  }; 
-
-  // function called when the window has finished loading
-  $(document).ready(function() {
-
-    codeeditor = CodeMirror.fromTextArea("id_code", {
-        parserfile: ["../contrib/python/js/parsepython.js"],
-        stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
-        path: "/media/CodeMirror-0.63/js/",
-        textWrapping: false, 
-        lineNumbers: true, 
-        indentUnit: 4,
-        readOnly: false,
-        tabMode: "spaces", 
-        autoMatchParens: true,
-        width: '100%',
-        parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
-        saveFunction: function () {    // this is your Control-S function
-          $.ajax({
-            type : 'POST',
-            URL : window.location.pathname,
-            data: ({
-              title : $('#id_title').val(),
-              code : codeeditor.getCode(),
-              action : 'save',
-              }),
-            dataType: "html",
-            success: function(){
-                    // Attempt at niceish notification, it needs work though ;)
-                     $('#notifications').fadeOut(800, function() {
-                       $('#notifications').html('saved');
-                       $('#notifications').fadeIn(800);                       
-                       writeToConsole('Saved')
-                     });                     
-                  }
-              });
-          },
-        initCallback: function() { 
-                draggedWindow = $("#id_code").next().children(":first"); 
-                draggedwindowheightdiff = draggedWindow.height() - $("#codeeditordiv").height(); 
-                ensurecodeeditorlessthanmax(); 
-                                 }, 
-      });
-      
-      $("#codeeditordiv").resizable({
-                    handles: 's',   
-                    autoHide: false, 
-                    start: function(event, ui) 
-                        { 
-                            var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-
-                            $("#codeeditordiv").resizable('option', 'maxHeight', maxheight);
-                            
-                            //cover iframe
-                            var oFrameMask = $('<div id="framemask"></div>');
-                            oFrameMask.css({
-                                position: 'absolute',
-                                top: 0,
-                                left:0,
-                                background:'none',
-                                zindex: 200,
-                                width: '100%',
-                                height: '100%'
-                            })
-                            $(".editor_code").append(oFrameMask)
-                        }, 
-                    stop: function(event, ui)  { 
-                                synccodemirrorwindowsize(); 
-                                $('#framemask').remove();
-                            }
-                                   }); 
-
-      // bind the double-click 
-      $(".ui-resizable-s").bind("dblclick", doubleclickdragbar);
-    });
-
-    $(window).resize(ensurecodeeditorlessthanmax); 
-
-  </script>
-
-  <script type="text/javascript" src="{{ MEDIA_URL }}/js/editor.js"></script>  
-  
+    <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.63/js/codemirror.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}/js/editor.js"></script>  
 {% endblock %}
 
 {% block header %}
-  {{ scraper.title }}
+    {{ scraper.title }}
 {% endblock %}
 
 {% block content %}
 
-<form method="POST" accept-charset="utf-8" id="editor" action="">
-    <div class="editor">
+    <fieldset>
+        {# Hidden inputs for passing to js #}
+        <input type="hidden" id="scraper_short_name" value="{{ scraper.short_name|escape }}"/>
+        <input type="hidden" id="code_runningMode" value="{{ settings.CODE_RUNNING_MODE|escape }}"/>    
+    </fieldset>
 
-        {# Header #}
-        <div class="editor_header">        
-            {{ form.title }}
-            <div id="meta_fields_mini">
-                {# for form elements that are shown in the popup #}
-            
-                <div class="field field-description">
-                    <label for="id_description">{{ form.description.label}} {{ form.license.errors }}</label>
-                    {{ form.description }}
-                </div>
-            
-                <div class="field field-license">
-                    <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
-                    {{ form.license }}
-                </div>
-            
-                <div class="field field-source">
-                    <label for="id_source">{{ form.source.label}} {{ form.source.errors }}</label>
-                    {{ form.source }}
+    <form method="POST" accept-charset="utf-8" id="editor" action="">
+        <div class="editor">
 
+            {# Header #}
+            <div class="editor_header">        
+                {{ form.title }}
+                <div id="meta_fields_mini">
+                    {# for form elements that are shown in the popup #}
+
+                    <div class="field field-description">
+                        <label for="id_description">{{ form.description.label}} {{ form.license.errors }}</label>
+                        {{ form.description }}
+                    </div>
+            
+                    <div class="field field-license">
+                        <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
+                        {{ form.license }}
+                    </div>
+            
+                    <div class="field field-source">
+                        <label for="id_source">{{ form.source.label}} {{ form.source.errors }}</label>
+                        {{ form.source }}
+
+                    </div>
                 </div>
+
+                <ul class="help">
+                    <li>
+                        <a id="menu_shortcuts" href="#">Keyboard shortcuts</a>
+                    </li>
+                    <li>
+                        <a id="menu_settings" href="#">Editor settings</a>
+                    </li>
+                    <li class="helplink">
+                        <a id="menu_documentation" href="#">Code documentation</a>
+                    </li>
+                </ul>          
             </div>
-
-            <ul class="help">
-                <li>
-                    <a id="menu_shortcuts" href="#">Keyboard shortcuts</a>
-                </li>
-                <li>
-                    <a id="menu_settings" href="#">Editor settings</a>
-                </li>
-                <li class="helplink">
-                    <a id="menu_documentation" href="#">Code documentation</a>
-                </li>
-            </ul>          
-        </div>
         
-        {# Code editor #}
-        <div class="editor_code" id="codeeditordiv">
-          {{ form.code }}
-        </div>
-
-        {# Controls #}
-        <div class="editor_controls">
-            <input type="submit" name="action" value="Save" id="save"/>            
-            <input type="button" name="action" value="Clear Console" id="clear" />   
-            <span id="notifications"></span>
-
-            <div class="right">         
-                {% if short_name %}
-                    <a href="{% url scraper_code short_name %}">Close and discard changes</a>
-                {% else %}
-                    <a href="{% url frontpage %}">Close and discard changes</a>                
-                {% endif %}
-                <input type="submit" name="action" value="Commit and close" id="commit"/>            
+            {# Code editor #}
+            <div class="editor_code" id="codeeditordiv">
+                {{ form.code }}
             </div>
-        </div>
 
-        {# Consoles #}
-        <div class="editor_output" id="outputeditordiv">
-            <div class="tabs">
-                <ul>
-                    <li class="console">
-                        <a href="#">Console</a>
-                    </li>
-                    <li class="data">
-                        <a href="#">Data</a>                            
-                    </li>
-                    <li class="sources">
-                        <a href="#">Sources</a>                            
-                    </li>
-                </ul>
-            </div>
-            <div class="info">
-                <div id="output_console">
-                    <div></div>
-                </div>
-                <div id="output_data">
-                    <table>
+            {# Controls #}
+            <div class="editor_controls">
+                <input type="submit" name="action" value="Save" id="save"/>            
+                <input type="button" name="action" value="Clear Console" id="clear" />   
+                <span id="notifications"></span>
 
-                    </table>
-                </div>
-                <div id="output_sources">
-                    <div></div>                        
+                <div class="right">         
+                    {% if short_name %}
+                        <a href="{% url scraper_code short_name %}">Close and discard changes</a>
+                    {% else %}
+                        <a href="{% url frontpage %}">Close and discard changes</a>                
+                    {% endif %}
+                    <input type="submit" name="action" value="Commit and close" id="commit"/>            
                 </div>
             </div>
-            <iframe name="console" id="console" style="display:none;"><pre></pre></iframe>
-        </div>
-  </div>
+
+            {# Consoles #}
+            <div class="editor_output" id="outputeditordiv">
+                <div class="tabs">
+                    <ul>
+                        <li class="console">
+                            <a href="#">Console</a>
+                        </li>
+                        <li class="data">
+                            <a href="#">Data</a>                            
+                        </li>
+                        <li class="sources">
+                            <a href="#">Sources</a>                            
+                        </li>
+                    </ul>
+                </div>
+                <div class="info">
+                    <div id="output_console">
+                        <div></div>
+                    </div>
+                    <div id="output_data">
+                        <table>
+
+                        </table>
+                    </div>
+                    <div id="output_sources">
+                        <div></div>                        
+                    </div>
+                </div>
+                <iframe name="console" id="console" style="display:none;"><pre></pre></iframe>
+            </div>
+      </div>
 
 {% endblock %}
 

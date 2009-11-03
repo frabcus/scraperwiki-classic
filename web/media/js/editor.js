@@ -1,12 +1,65 @@
 $(document).ready(function() {
+    
+    //variables
+    var editor_id = 'id_code';
+    var codeeditor;
+    var draggedWindow; // the iframe that needs resizing
+    var draggedwindowheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
+    var previouscodeeditorheight;    // saved for the double-clicking on the drag bar
+    var short_name = $('scraper_short_name').val();
+    var run_type = $('code_running_mode').val();
 
-
+    //constructor functions
+    setupCodeEditor();
     setupMenu();
     setupTabs();
     setupPopups();
     setupToolbar()
     setupDetailsForm();
     setupAutoDraft();
+    setupResizeEvents();
+
+    //setup code editor
+    function setupCodeEditor(){
+        codeeditor = CodeMirror.fromTextArea("id_code", {
+            parserfile: ["../contrib/python/js/parsepython.js"],
+            stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
+            path: "/media/CodeMirror-0.63/js/",
+            textWrapping: false,
+            lineNumbers: true,
+            indentUnit: 4,
+            readOnly: false,
+            tabMode: "spaces", 
+            autoMatchParens: true,
+            width: '100%',
+            parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
+            saveFunction: function () {    // this is your Control-S function
+              $.ajax({
+                type : 'POST',
+                URL : window.location.pathname,
+                data: ({
+                  title : $('#id_title').val(),
+                  code : codeeditor.getCode(),
+                  action : 'save',
+                  }),
+                dataType: "html",
+                success: function(){
+                        // Attempt at niceish notification, it needs work though ;)
+                         $('#notifications').fadeOut(800, function() {
+                           $('#notifications').html('saved');
+                           $('#notifications').fadeIn(800);                       
+                           writeToConsole('Saved')
+                         });                     
+                      }
+                  });
+              },
+            initCallback: function() { 
+                    draggedWindow = $("#id_code").next().children(":first"); 
+                    draggedwindowheightdiff = draggedWindow.height() - $("#codeeditordiv").height(); 
+                    onWindowResize(); 
+                                     }, 
+          });        
+    }
 
     //Setup Menu
     function setupMenu(){
@@ -205,6 +258,10 @@ $(document).ready(function() {
         showPopup('popup_text');
     }
     
+    function setupResizeEvents(){
+        $(window).resize(onWindowResize);
+    }
+    
     //Hide popup
     function hidePopup() {
         // Hide popups
@@ -244,7 +301,7 @@ $(document).ready(function() {
           60000);    
     }
 
-
+    //Write to concole/data/sources
     function writeToConsole(sMessage) {
 
         sDisplayMessage = sMessage;
@@ -272,12 +329,73 @@ $(document).ready(function() {
         
     }
 
+    //show tab
     function showTab(sTab){
         $('.editor_output .info').children().hide();
         $('#output_' + sTab).show();
-        
+
         $('.editor_output div.tabs ul').children().removeClass('selected');
         $('.editor_output div.tabs li.' + sTab).addClass('selected');
     }
 
+    //resize code editor
+   function resizeCodeEditor(){
+      if (draggedWindow)
+          draggedWindow.height(($("#codeeditordiv").height() + draggedwindowheightdiff) + 'px'); 
+    };
+
+    //click bar to resize
+    function clickToResize() {
+      var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
+      if (maxheight >= $("#codeeditordiv").height() + 5)
+      {
+          previouscodeeditorheight = $("#codeeditordiv").height(); 
+          $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
+      }
+      else
+
+          $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
+
+    };
+      
+      $("#codeeditordiv").resizable({
+                       handles: 's',   
+                       autoHide: false, 
+                       start: function(event, ui) 
+                           {
+                               var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top;
+
+                               $("#codeeditordiv").resizable('option', 'maxHeight', maxheight);
+
+                               //cover iframe
+                               var oFrameMask = $('<div id="framemask"></div>');
+                               oFrameMask.css({
+                                   position: 'absolute',
+                                   top: 0,
+                                   left:0,
+                                   background:'none',
+                                   zindex: 200,
+                                   width: '100%',
+                                   height: '100%'
+                               })
+                               $(".editor_code").append(oFrameMask)
+                           },
+                       stop: function(event, ui)  { 
+                                   resizeCodeEditor(); 
+                                   $('#framemask').remove();
+                               }
+                           }); 
+
+         // bind the double-click 
+         $(".ui-resizable-s").bind("dblclick", clickToResize);
+
+
+       function onWindowResize() {
+           var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
+           if (maxheight < $("#codeeditordiv").height())
+             $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
+         };
+   
+   
+   
 });
