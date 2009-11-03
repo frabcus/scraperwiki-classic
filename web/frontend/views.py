@@ -120,7 +120,7 @@ def login(request):
             message = "Invalid Login"
             # Return an 'invalid login' error message.
     else:
-        login_form = AuthenticationForm()
+        login_form = SigninForm()
         registration_form = CreateAccountForm()
         message = None
 
