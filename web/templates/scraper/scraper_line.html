@@ -1,5 +1,40 @@
 <li>
-	<a href='{% url scraper_data scraper.short_name %}'>{{ scraper.title }}</a>
-	by
-	<a href='{% url profiles_profile_detail scraper.owner.username %}'>{{ scraper.owner.username }}</a>
+    <a href='{% url scraper_data scraper.short_name %}'>
+    <b>
+        {% if scraper.title %}{{ scraper.title }}{% else %}{{ scraper.short_name }}{% endif %}
+    </b>
+    </a>
+
+    <em>
+    {% if scraper.description %}
+        {{ scraper.description }}
+    {% else %}
+        This scraper has no description.
+    {% endif %}
+    </em>
+    <small>-- {{ scraper.number_of_lines}} lines of {{ scraper.language }}, created by <a href='{% url profiles_profile_detail scraper.owner.username %}'>{{ scraper.owner.username }}</a></small>
+    <br/>
+
+	There 
+    {% ifequal scraper.followers|length 0 %}
+        are no
+    {% else %}
+        {% ifequal scraper.followers|length 1 %}
+            is 1
+        {% else %}
+            are {{ scraper.followers|length }}
+        {% endifequal %}
+    {% endifequal %}
+    follower{{ scraper.followers|length|pluralize }}.
+
+	<small>
+    {% if scraper.last_run %}
+        (last run {{scraper.last_run|timesince}} ago)
+	{% else %}
+        (created {{scraper.created_at|timesince}} ago)
+	{% endif %}
+    </small>
+    
 </li>
+
+
