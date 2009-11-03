@@ -1,4 +1,3 @@
-
 body{overflow:hidden; height:100%;}
 .editor {text-align:left; }
 
@@ -13,9 +12,9 @@ body{overflow:hidden; height:100%;}
 .editor_code {border-top:solid 1px #9a9a9a; padding:0;}
 
 /* Controls */
-.resizebar {height:4px;border-top:solid 1px #9a9a9a; border-bottom:solid 1px #9a9a9a; cursor:ns-resize;}
+.ui-resizable-handle.ui-resizable-s {height:4px;border-top:solid 1px #9a9a9a; border-bottom:solid 1px #9a9a9a; cursor:ns-resize;}
 .editor_controls {border-bottom:solid 1px #9a9a9a;
-        padding:0.35em 0.3em; position:relative;}
+        padding:0.35em 0.3em; position:relative; background:#fff;}
 .editor_controls .right  {position:absolute; right:0.3em; top:0.35em;}
 .editor_controls a {font-size:0.8em;}
 .editor_controls input {font-size:0.9em;}
@@ -24,8 +23,9 @@ span.hiddenfields input  { display:none; width:4em; }
 span.hiddenfields { margin-left:10px; } 
 
 /* Output and tabs */
-.editor_output {padding-top:0.6em;}
+.editor_output {padding-top:0.6em; background:#fff;}
 .editor_output iframe {border:none;}
+.editor_output div.tabs {background:#fff;}
 .editor_output div.tabs ul {border-bottom:solid 1px #9a9a9a; height:1.75em; padding:0 0 0 0.3em; margin:0; 
     font-size:0.8em;}
 .editor_output div.tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
@@ -38,7 +38,7 @@ span.hiddenfields { margin-left:10px; }
 .editor_output .info div div {width:100%;overflow:hidden; height:5000px;}
 
 .editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.2em 1em;}
-.editor_output .info span.output_item.run_end {border-bottom:solid 1px #ccc;}
+.editor_output .info span.output_item.run_end {border-bottom:solid 1px #cfcfcf;}
 
 .editor_output div.tabs ul li.new a {color:green;}
 
@@ -47,9 +47,6 @@ span.hiddenfields { margin-left:10px; }
 .CodeMirror-line-numbers {width: 2.2em;color: #aaa;background-color: #ddd;text-align: right;
         padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;line-height: 1.1em;}
 
-.ui-resizable-s { background-color:blue; }
-
-        
 /* Overlays and help */
 #overlay {background:black;z-index:100;position:absolute; top:0; left:0; width:100%; height:100%;
     opacity:0.6;filter: alpha(opacity=60); display:none;}
@@ -69,7 +66,7 @@ span.hiddenfields { margin-left:10px; }
   cursor:pointer;
 }
 
-.editor_code {border-bottom:2px solid #999;}
+.editor_code {border-bottom:2px solid #999; position:relative;}
 
 
 #meta_fields_mini .field { display:inline; }

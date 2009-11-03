@@ -20,7 +20,7 @@
   // This is so we can extract most of the scraipt below to an external file
   
   var editor_id = 'id_code';
-  var short_name = '{{ short_name }}';
+  var short_name = '{{ scraper.short_name }}';
   var run_type = '{{ settings.CODE_RUNNING_MODE }}';
   var codeeditor;
   var draggedWindow; // the iframe that needs resizing
@@ -37,10 +37,10 @@
     if (maxheight != $("#codeeditordiv").height())
     {
         previouscodeeditorheight = $("#codeeditordiv").height(); 
-        $("#codeeditordiv").animate({ height: maxheight }, 500, "swing", synccodemirrorwindowsize); 
+        $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", synccodemirrorwindowsize); 
     }
     else
-        $("#codeeditordiv").animate({ height: previouscodeeditorheight }, 500, "swing", synccodemirrorwindowsize); 
+        $("#codeeditordiv").animate({ height: previouscodeeditorheight }, 100, "swing", synccodemirrorwindowsize); 
   }; 
 
   // function called when the window has finished loading
@@ -90,10 +90,26 @@
                     start: function(event, ui) 
                         { 
                             var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-                            codeeditor.setCode(codeeditor.getCode() + "\nkkk " + $("#codeeditordiv").height() + " kk " + maxheight); 
+
                             $("#codeeditordiv").resizable('option', 'maxHeight', maxheight);
+                            
+                            //cover iframe
+                            var oFrameMask = $('<div id="framemask"></div>');
+                            oFrameMask.css({
+                                position: 'absolute',
+                                top: 0,
+                                left:0,
+                                background:'none',
+                                zindex: 200,
+                                width: '100%',
+                                height: '100%'
+                            })
+                            $(".editor_code").append(oFrameMask)
                         }, 
-                    stop: function(event, ui)  { synccodemirrorwindowsize(); }
+                    stop: function(event, ui)  { 
+                                synccodemirrorwindowsize(); 
+                                $('#framemask').remove();
+                            }
                                    }); 
 
       // bind the double-click 
@@ -138,16 +154,16 @@
 
                 </div>
             </div>
-          
+
             <ul class="help">
                 <li>
-                    <a href="#">Keyboard shortcuts</a>
+                    <a id="menu_shortcuts" href="#">Keyboard shortcuts</a>
                 </li>
                 <li>
-                    <a href="#">Editor settings</a>
+                    <a id="menu_settings" href="#">Editor settings</a>
                 </li>
                 <li class="helplink">
-                    <a href="#">Code documentation</a>
+                    <a id="menu_documentation" href="#">Code documentation</a>
                 </li>
             </ul>          
         </div>
@@ -206,9 +222,22 @@
   </div>
 
 {% endblock %}
-    
+
 {% block popups %}    
     <div id="meta_form" class="popup_item"><a class="popupClose">x</a></div>
     <div id="diff" class="popup_item"><a class="popupClose">x</a><pre></pre></div>
+    <div id="popup_shortcuts" class="popup_item">
+        <a class="popupClose">x</a><pre></pre>
+    </div>
+    <div id="popup_settings" class="popup_item">
+        <a class="popupClose">x</a>
+    </div>    
+    <div id="popup_documentation" class="popup_item">
+        <a class="popupClose">x</a>
+        <h3>Quick help</h3>
+    </div>
+    <div id="popup_text" class="popup_item">
+        <a class="popupClose">x</a>
+    </div>            
 </form>
 {% endblock %}
