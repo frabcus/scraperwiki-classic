@@ -72,7 +72,7 @@ def __save_row(unique_keys, data, kwargs):
   item['item_id'] = new_item_id
  
   scraper_id = os.environ['SCRAPER_GUID']
-  print item['date']
+
   item_sql = """
     INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`) 
     VALUES ('%s', '%s', '%s', '%s', '%s')

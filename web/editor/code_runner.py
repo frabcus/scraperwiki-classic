@@ -40,13 +40,11 @@ def run_code(request):
     run_mode = settings.CODE_RUNNING_MODE
   
     if run_mode == 'popen':
-    
       res =  format_json(run_popen(code, guid=guid))
-      return HttpResponse(res)
-      
     if run_mode == 'firestarter_django':
       return format_json(run_firestarter_django(code))
 
+    return HttpResponse(res)
 
 def run_popen(code, guid=False):
 
