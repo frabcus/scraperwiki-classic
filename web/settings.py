@@ -1,5 +1,5 @@
 
-from os.path import exists
+from os.path import exists, join
 
 # This shouldn't be needed, however in some cases the buildout version of
 # django (in bin/django) may not make the paths correctly
@@ -37,7 +37,7 @@ USE_I18N = True
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
 
-
+ 
 MEDIA_DIR = SCRAPERWIKI_DIR + 'media'
 MEDIA_URL = '/media/'
 MEDIA_ADMIN_DIR = SCRAPERWIKI_DIR + 'media-admin'
@@ -123,4 +123,9 @@ DEBUG_TOOLBAR_CONFIG = {
 
 NOTIFICATIONS_STORAGE = 'session.SessionStorage'
 REGISTRATION_BACKEND = "registration.backends.default.DefaultBackend"
+
+
+# define default directories needed for paths to run scrapers
+SCRAPER_LIBS_DIR = join(HOME_DIR, "scraperlibs")
+
 

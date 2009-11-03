@@ -43,6 +43,19 @@ def run_code(request):
 
 
 
+# Information about paths:
+
+# settings.SCRAPERWIKI_LIB_DIR 
+#     contains scraperwiki/ so we can write "import scraperwiki.usefulmodule" at the top of a scraper
+# settings.SMODULES_DIR 
+#     points to scrapers/ so we can write "import missingcats" (another scraper), or run the process by giving the UML just the code "import missingcats; missingcats.Parse()" 
+#     rather than the entire contents of missingcats.__init__py file to execute
+#     (this one needs a new name, eg SCRAPERS_DIR)  But it's awkward to change because its set in localsettings.py because it points to a different mercurial repository
+# settings.SCRAPERWIKI_DIR 
+#     is the top level web/ directory which allows us to write "import scrapers.missingcats", 
+#     which looks better, but unfortunately allows access to other top level modules it shouldn't have access to.  
+#     We're going to need to put the scrapers/ directory in its own directory (eg scraperwikilib/) 
+#     that controls the range of the import function.  
 
 def run_popen(code):
   import tempfile
@@ -52,11 +65,16 @@ def run_popen(code):
   fout.write(code)
   fout.flush()
   cmd = "python %s" % (fout.name)
-  env = { "DJANGO_SETTINGS_MODULE":'settings', "PYTHONPATH":"%s:%s" % (settings.SMODULES_DIR, settings.SCRAPERWIKI_DIR) }
+  
+  # first one is necessary if to run codelets "import scrapers.missingcats; missingcats.Parse()"
+  #env = { "DJANGO_SETTINGS_MODULE":'settings', "PYTHONPATH":"%s:%s:%s" % (settings.SCRAPER_LIBS_DIR, settings.SMODULES_DIR, settings.SCRAPERWIKI_DIR) }
+  env = { "DJANGO_SETTINGS_MODULE":'settings', "PYTHONPATH":"%s" % (settings.SCRAPER_LIBS_DIR) }  # PYTHONPATH delimited by : character
+  print "eeee", env
   p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, env=env)
   res = p.stdout.readlines()
   fout.close()   # deletes the temporary file
   return ''.join(res)
+
 
 def run_firestarter_django(code):
   import FireStarter
