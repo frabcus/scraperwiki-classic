@@ -165,6 +165,22 @@ $(document).ready(function() {
     //Setup toolbar
     function setupToolbar(){
         
+        //commit button
+        $('#commit').click(
+            function (){
+                showPopup('meta_form')
+                return false
+            }
+        );
+        
+        //save button
+        $('#save').click(
+           function(){
+                saveScraper();
+                return false;
+           }
+        );
+        
         //clear console button
         $('#clear').click(function() {
             c = $('body', $('#console').contents())
@@ -249,7 +265,44 @@ $(document).ready(function() {
             }
 
         });
-        
+
+    }
+
+    //Save
+    function saveScraper(){
+
+        var bSuccess = false;
+
+        if(shortNameIsSet() == false){
+            var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
+
+            if(sResult != false && sResult != '' && sResult != 'Untitled Scraper'){
+                $('#id_title').val(sResult);
+                bSuccess = true;
+            }
+        }
+
+        if(bSuccess == true){
+            $.ajax({
+              type : 'POST',
+              URL : window.location.pathname,
+              data: ({
+                title : $('#id_title').val(),
+                code : codeeditor.getCode(),
+                action : 'save',
+                }),
+              dataType: "html",
+              success: function(response){
+                  console.debug(response);
+                      // Attempt at niceish notification, it needs work though ;)
+                       $('#notifications').fadeOut(800, function() {
+                         $('#notifications').html('saved');
+                         $('#notifications').fadeIn(800);                       
+                         writeToConsole('Saved')
+                       });                     
+                    }
+                });
+            }
     }
 
     //Show random text popup
@@ -261,7 +314,12 @@ $(document).ready(function() {
     function setupResizeEvents(){
         $(window).resize(onWindowResize);
     }
-    
+
+    function shortNameIsSet(){
+        var sTitle = jQuery.trim($('#id_title').val());
+        return sTitle != 'Untitled Scraper' && sTitle != '' && sTitle != undefined && sTitle != false;
+    }
+
     //Hide popup
     function hidePopup() {
         // Hide popups
@@ -305,8 +363,8 @@ $(document).ready(function() {
     function writeToConsole(sMessage) {
 
         sDisplayMessage = sMessage;
-        if(sMessage.length > 40){
-            sDisplayMessage = sMessage.substring(0, 40);
+        if(sMessage.length > 200){
+            sDisplayMessage = sMessage.substring(0, 200);
             sDisplayMessage += '&nbsp;<a href="#" onclick="showTextPopup(' + "'" + 'hello' + "'" + ')>...</a>';
         }
 

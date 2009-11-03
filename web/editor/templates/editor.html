@@ -24,7 +24,7 @@
 
     <fieldset>
         {# Hidden inputs for passing to js #}
-        <input type="hidden" id="scraper_short_name" value="{{ scraper.short_name|escape }}"/>
+        <input type="hidden" id="scraper_short_name" value="{{ scraper.short_name }}"/>
         <input type="hidden" id="code_runningMode" value="{{ settings.CODE_RUNNING_MODE|escape }}"/>    
     </fieldset>
 
@@ -32,8 +32,10 @@
         <div class="editor">
 
             {# Header #}
-            <div class="editor_header">        
-                {{ form.title }}
+            <div class="editor_header">
+                <div class="title">    
+                    {{ form.title }}
+                </div>
                 <div id="meta_fields_mini">
                     {# for form elements that are shown in the popup #}
 
@@ -74,8 +76,8 @@
 
             {# Controls #}
             <div class="editor_controls">
-                <input type="submit" name="action" value="Save" id="save"/>            
-                <input type="button" name="action" value="Clear Console" id="clear" />   
+                <input type="submit" id="save" name="action" value="Save" />            
+                <input type="button" id="clear" name="action" value="Clear Console" />   
                 <span id="notifications"></span>
 
                 <div class="right">         
@@ -84,7 +86,7 @@
                     {% else %}
                         <a href="{% url frontpage %}">Close and discard changes</a>                
                     {% endif %}
-                    <input type="submit" name="action" value="Commit and close" id="commit"/>            
+                    <input type="submit" id="commit" name="action" value="Commit and close"/>            
                 </div>
             </div>
 
