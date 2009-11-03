@@ -89,6 +89,7 @@ br.clear {clear:both;}
 ul.form {padding:0; margin:0;}
 ul.form li {padding:0; margin:0; list-style-type:none;}
 ul.form li label {display:block; float:left; width:10em;}
+fieldset {padding:0; margin:0; border:none;}
 
 /* Scroll */
 div.scroll {overflow-y:scroll; border:solid 1px #ccc; padding:0.5em;}
@@ -100,3 +101,4 @@ dl.terms dd {padding-left:0; margin-left:0; font-size:0.8em;}
 
 /* Highlight */
 span.highlight {background:#ffffaa; padding:0 0.4em;}
+

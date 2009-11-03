@@ -164,4 +164,4 @@ def edit(request, short_name=None):
         return HttpResponseRedirect(reverse('login'))
         
         
-  return render_to_response('editor.html', {'form':form, 'short_name' : short_name, 'settings' : settings }, context_instance=RequestContext(request)) 
+  return render_to_response('editor.html', {'form':form, 'scraper' : scraper, 'settings' : settings }, context_instance=RequestContext(request)) 
