@@ -1,17 +1,37 @@
 {% extends "frontend/base.html" %}
+{% load formhelper %}
+
 {% block css %}{% endblock %}
 
-{% block title %}Profile Edit{% endblock %}
+{% block title %}Profile Creation{% endblock %}
+
+{% block errors %}
+  {% if form.errors %}
+      <ul>
+          {% form_errors form %}
+      </ul>
+  {% endif %}
+  
+{% endblock %}
+
 {% block content %}
+	{% include 'shared/form_errors.html' %}
+	<form method="post">
+	  <ul class="form">
+	    <li{% if form.bio.errors %} class="error"{% endif %}>
+	      {{ form.bio.label_tag }}
+  	    {{ form.bio }}
+	    </li>
+	    
+      <li{% if form.alert_frequency %} class="error"{% endif %}>
+        {{ form.alert_frequency.label_tag }}
+        {{ form.alert_frequency }} in seconds.
+      </li>
 
-	Profile Edit Form
-	{% include 'shared/form_errors.html' %}	
-
-	<form action="" method="POST" accept-charset="utf-8">
-	 
-	{{ form.as_p }}
-	
-	 <p><input type="submit" value="Continue &rarr;"></p>
+		<input type="hidden" name="success_url" value="/" />
+		<input type="submit" value="Save" />
+		</ul>
+    
 	</form>
 
 {% endblock %}

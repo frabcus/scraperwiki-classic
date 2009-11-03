@@ -12,11 +12,11 @@ def create(request):
     else:
         return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 
 
-def data (request, scraper_short_name = 'None'):
+def data (request, scraper_short_name):
     
     user = request.user
     scraper = models.Scraper.objects.get(short_name=scraper_short_name)
-    data = models.scraperData.objects.summary()
+    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     return render_to_response('scraper/data.html', {
@@ -28,7 +28,7 @@ def data (request, scraper_short_name = 'None'):
       'data' : data,
       }, context_instance=RequestContext(request))
 
-def code (request, scraper_short_name = 'None'):
+def code (request, scraper_short_name):
 
     user = request.user
     scraper = models.Scraper.objects.get(short_name=scraper_short_name)
@@ -38,7 +38,7 @@ def code (request, scraper_short_name = 'None'):
     return render_to_response('scraper/code.html', {'selected_tab': 'code', 'scraper': scraper, 'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it}, context_instance=RequestContext(request))
 
 
-def show(request, scraper_short_name = 'None', selected_tab = 'data'):
+def show(request, scraper_short_name, selected_tab = 'data'):
     user = request.user
     scraper = models.Scraper.objects.get(short_name=scraper_short_name)
     you_own_it = (scraper.owner() == user)

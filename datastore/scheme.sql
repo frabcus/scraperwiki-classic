@@ -2,9 +2,9 @@ DROP TABLE IF EXISTS `items`;
 CREATE TABLE IF NOT EXISTS `items` (
   `item_id` bigint(20) NOT NULL,
   `unique_hash` varchar(32) NOT NULL,
-  `scraper_id` int(11) NOT NULL,
-  `date` datetime NOT NULL,
-  `latlng` float NOT NULL,
+  `scraper_id` varchar(100) NOT NULL,
+  `date` datetime NULL,
+  `latlng` varchar(100) NOT NULL,
   KEY `item_id` (`item_id`,`unique_hash`,`scraper_id`,`date`,`latlng`)
 ) ENGINE=MyISAM;
 

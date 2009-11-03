@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import sys
+import os
 import ConfigParser
 import MySQLdb
 
@@ -15,7 +16,7 @@ def load_config():
     
   """
   config = ConfigParser.ConfigParser()
-  config.readfp(open('config.cfg'))
+  config.readfp(open(os.path.split(__file__)[0] + '/config.cfg'))
   return config
 
 def connect():

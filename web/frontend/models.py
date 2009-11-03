@@ -22,9 +22,8 @@ class UserProfile(models.Model):
 
     def get_absolute_url(self):
         return ('profiles_profile_detail', (), { 'username': self.user.username })
-    get_absolute_url = models.permalink(get_absolute_url)
-
-
+    get_absolute_url = models.permalink(get_absolute_url)        
+        
 # models related to user roles
 
 class UserRoleManager(models.Manager):

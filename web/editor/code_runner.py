@@ -3,7 +3,11 @@ import sys
 import os
 import datetime
 import string
-
+try:
+    import simplejson as json
+except:
+    import json
+    
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
@@ -15,21 +19,36 @@ from scraper import vc
 import forms
 import settings
 
+def format_json(lines):
+    ret = []
+    for line in lines.splitlines():
+        if line.startswith('<message type="data">'):
+            message_type = "data"
+        elif line.startswith('<message type="sources">'):
+            message_type = "sources"
+        else:
+            message_type = "console"
+        ret.append(json.dumps({'type' : message_type, 'content' : line}))
+    return '\n'.join(ret)
+
+
 
 def run_code(request):
   code = request.POST.get('code', False)
+  guid = request.POST.get('guid', False)
   if code:
     run_mode = settings.CODE_RUNNING_MODE
   
     if run_mode == 'popen':
-      return run_popen(code)
+    
+      res =  format_json(run_popen(code, guid=guid))
+      return HttpResponse(res)
+      
     if run_mode == 'firestarter_django':
-      return run_firestarter_django(code)
+      return format_json(run_firestarter_django(code))
 
 
-
-
-def run_popen(code):
+def run_popen(code, guid=False):
   import tempfile
   import subprocess
   
@@ -37,11 +56,19 @@ def run_popen(code):
   fout.write(code)
   fout.flush()
   cmd = "python %s" % (fout.name)
-  env = { "DJANGO_SETTINGS_MODULE":'settings', "PYTHONPATH":"%s:%s" % (settings.SMODULES_DIR, settings.SCRAPERWIKI_DIR) }
+  path = sys.path
+ 
+  
+  path.append('/var/www/scraperwiki/clean2/')
+  env = { 
+    "DJANGO_SETTINGS_MODULE":'settings', 
+    "PYTHONPATH": "%s" % (':'.join(path)),
+    "SCRAPER_GUID":"%s" % (guid),
+    }
   p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, env=env)
   res = p.stdout.readlines()
   fout.close()   # deletes the temporary file
-  return HttpResponse(res, mimetype='text')
+  return ''.join(res)
 
 
 def run_firestarter_django(code):
@@ -56,7 +83,7 @@ def run_firestarter_django(code):
   while line is not None and line != '':
     lines.append(line)
     line  = res.readline()
-  return HttpResponse(lines, mimetype='text')
+  return '\n'.join(lines)
   
   
   

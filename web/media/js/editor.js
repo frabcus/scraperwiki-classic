@@ -144,6 +144,7 @@ $('.editor_controls #run').click(function() {
       url : '/editor/run_code',
       data: ({
         code : codeeditor.getCode(),
+        guid : scraper_guid,        
         }),
       dataType: "html",
       success: function(code){

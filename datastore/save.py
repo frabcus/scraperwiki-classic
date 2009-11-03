@@ -1,16 +1,17 @@
 # encoding: utf-8
 import hashlib
-
+import os
 import connection
 
-def save(unique_keys, data=None, date=None, lat=None, lng=None, **kwargs):
+def save(unique_keys, data=None, **kwargs):
   """
   Save function
   """
+  
   if not data:
     data = {}
   if isinstance(data,list):
-    if date or lat or lng or kwargs:
+    if kwargs:
       raise TypeError("""
         \tIncorrect use of arguments when saving multipul rows.  
         \tLook up 'saving multipul rows' in the suport pages for more information.
@@ -20,7 +21,7 @@ def save(unique_keys, data=None, date=None, lat=None, lng=None, **kwargs):
       ids.append(__save_row(unique_keys,row))
     return ids
   else:
-    return __save_row(unique_keys, data, **kwargs)
+    return __save_row(unique_keys, data, kwargs)
 
     
 def __create_unique(unique_keys, data):
@@ -38,26 +39,26 @@ def __create_unique(unique_keys, data):
   return hashlib.md5("%s" % ("≈≈≈".join(unique_values))).hexdigest()
 
 
-def __save_row(unique_keys, data, **kwargs):
+def __save_row(unique_keys, data, kwargs):
   """
   Takes a single row and saves it.
   """
   # Add all the kwargs in to data
   data.update(kwargs)
-  
+
   # Create a unique hash
   unique_hash = __create_unique(unique_keys, data)
-
   
   indexed_rows = ['date', 'latlng']
+  
   for k in indexed_rows:
     if k not in data.keys():
-      data[k] = ''
+      data[k] = 'Null'
   item = {'unique_hash' : unique_hash}
   for k,v in data.items():
     if k in indexed_rows:
       item[k] = v
-      del data[k]
+      # del data[k]
 
   c = connection.connect()
   if c.execute("SELECT item_id FROM items WHERE unique_hash='%s'" % unique_hash):  
@@ -69,17 +70,20 @@ def __save_row(unique_keys, data, **kwargs):
   c.execute("SELECT LAST_INSERT_ID();")
   new_item_id = c.fetchone()[0]
   item['item_id'] = new_item_id
-
+ 
+  scraper_id = os.environ['SCRAPER_GUID']
+  print item['date']
   item_sql = """
-    INSERT INTO `items` (`item_id`,`unique_hash`,`date`, `latlng`) 
-    VALUES ('%s', '%s', '%s', '%s')
-    ;""" % (item['item_id'], unique_hash, item['date'], item['latlng'])
+    INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`) 
+    VALUES ('%s', '%s', '%s', '%s', '%s')
+    ;""" % (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'])
   c.execute(item_sql)
 
   for k,v in data.items():
     kv_sql = """INSERT INTO `kv` (`item_id`,`key`,`value`) VALUES ('%s', '%s', '%s');""" % (item['item_id'], k,v)
     c.execute(kv_sql)
 
+  print '<message type="data">Item with an item_id of %s saved' % new_item_id
   return new_item_id 
 
 

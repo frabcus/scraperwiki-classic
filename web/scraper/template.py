@@ -14,9 +14,22 @@ def default():
   title = "Untitled Scraper"
   description = None
   code = """
-from scraperwiki import datastore
-from scraperwiki import Scrape
+import datastore
 
-print "foo"
+
+unique_keys = ['message_id',]
+
+data = {
+
+'message_id' : '1',
+
+'message' : 'This is an example',
+
+'sender' : 'Sym',
+
+}
+
+datastore.save(unique_keys, data, latlng=[52.38431,1.11112])
+
 """
   return locals()

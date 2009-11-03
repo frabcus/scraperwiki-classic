@@ -2,19 +2,23 @@
 
 {% block tab %}
 
-
+  
+  <pre>
+    
+    
+  </pre>
+  
   <table>
     <thead>
-      {% for id, row in data.items %}
-        {% for key, value in row.items %}
-          <th>{{ key }}</th>
-        {% endfor %}
+      {% for heading in data.headings %}
+        <th>{{ heading }}</th>
       {% endfor %}
     </thead>
     <tbody>
-    {% for id, row in data.items %}
+      
+    {% for i,row in data.rows.items %}
       <tr>
-      {% for key, value in row.items %}
+      {% for value in row %}
         <td>{{ value }}</td>
       {% endfor %}
       </tr>

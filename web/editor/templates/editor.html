@@ -20,9 +20,9 @@
   // This is so we can extract most of the scraipt below to an external file
   
   var editor_id = 'id_code';
-  var short_name = '{{ short_name }}';
+  var short_name = '{{ scraper.short_name }}';
   var run_type = '{{ settings.CODE_RUNNING_MODE }}';
-  
+  var scraper_guid = '{{ scraper.guid }}'
   
   function wirteToConsole(msg) {
     c = $('body', $('#console').contents())
