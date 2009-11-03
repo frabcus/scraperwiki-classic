@@ -34,6 +34,10 @@
         	        {% field_errors login_form.password %}        	        
         	    </li>
             </ul>
+            <p>
+                {{ login_form.remember_me }}
+    	        {{ login_form.remember_me.label_tag }}
+	        </p>
     		<input type="submit" name="login" value="Sign in" />
     	</form>
     </div>
@@ -66,7 +70,7 @@
         	<div>
             	<h4>Terms and conditions</h4>
             	<p>
-            	   Please read these, as they explain the kinds of data it is ok to scrape and store using scraperwiki, and the rights and guarantees you have over the code your write.
+            	   Please read these, as they explain the kinds of data it is ok to scrape and store using ScraperWiki, and the rights and guarantees you have over the scrapers you write.
             	</p>
                 <div class="scroll">
                     {% include 'shared/terms_and_conditions.html' %}

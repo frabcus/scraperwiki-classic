@@ -77,7 +77,7 @@ def edit(request, short_name=None):
   draft = request.session.get('ScraperDraft', None)
   # First off, create a scraper instance somehow.
   # Drafts are seen as more 'important' than saved scrapers.
-  if draft:    
+  if draft:
     if draft.short_name:
       # We're working with an existing scraper that has been edited, but not saved
       scraper = draft
@@ -124,7 +124,7 @@ def edit(request, short_name=None):
       # Save the form without committing at first
       # (read http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
       savedForm = form.save(commit=False)
-      
+
       # Add some more fields to the form
       savedForm.code = form.cleaned_data['code']
       # savedForm.short_name = short_name

@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.contrib import auth
 import settings
-from django.contrib.auth.forms import AuthenticationForm
+from frontend.forms import SigninForm
 
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
@@ -54,7 +54,7 @@ def login(request):
     error_messages = []
 
     #Create login and registration forms
-    login_form = AuthenticationForm()
+    login_form = SigninForm()
     registration_form = CreateAccountForm()
 
     if request.method == 'POST':
@@ -62,7 +62,7 @@ def login(request):
         #Existing user is logging in
         if request.POST.has_key('login'):
 
-            login_form = AuthenticationForm(data=request.POST)
+            login_form = SigninForm(data=request.POST)
             user = auth.authenticate(username=request.POST['username'], password=request.POST['password'])
 
             if user is not None:
@@ -70,6 +70,10 @@ def login(request):
 
                     #Log in
                     auth.login(request, user)
+                    
+                    #set session timeout
+                    if request.POST.has_key('remember_me'):
+                        request.session.set_expiry(settings.SESSION_TIMEOUT)
 
                     #Check if scrapers pending in session - added here as contrib.auth doesn't support signals :(
                     if request.session.get('ScraperDraft', False):
@@ -97,7 +101,7 @@ def login(request):
             message = "Invalid Login"
             # Return an 'invalid login' error message.
     else:
-        login_form = AuthenticationForm()
+        login_form = SigninForm()
         registration_form = CreateAccountForm()
         message = None
 

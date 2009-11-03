@@ -6,6 +6,7 @@ from contact_form.forms import ContactForm
 from registration.forms import RegistrationForm
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import AuthenticationForm
 
 
 #from django.forms.extras.widgets import Textarea
@@ -25,6 +26,10 @@ class scraperContactForm(ContactForm):
   subject_dropdown = django.forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('help', 'Help using ScraperWiki'), ('bug', 'A bug or error')))
   title = django.forms.CharField(widget=django.forms.TextInput(), label=u'Subject')
   recipient_list = [settings.FEEDBACK_EMAIL]
+
+class SigninForm (AuthenticationForm):
+    remember_me = django.forms.BooleanField(widget=django.forms.CheckboxInput(),
+                           label=_(u'Remember me'))
 
 
 class CreateAccountForm(RegistrationForm):

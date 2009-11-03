@@ -41,5 +41,7 @@ urlpatterns = patterns('',
     
     # allows direct viewing of the django tables
     url(r'^admin/(.*)', admin.site.root, name="admin"),
-    
+
+    #market place
+    url(r'^market/', include('market.urls')),    
 )

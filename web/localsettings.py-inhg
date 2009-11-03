@@ -23,6 +23,7 @@ DATASTORE_DATABASE_PORT   = '3306'
 
 FEEDBACK_EMAIL = 'feedback@somedomain.com'
 
+SESSION_TIMEOUT = 1209600
 
 
 

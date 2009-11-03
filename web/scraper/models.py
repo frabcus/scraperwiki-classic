@@ -108,7 +108,7 @@ class Scraper(models.Model):
     def add_user_role(self, user, role='owner'):
       """
       Method to add a user as either an editor or an owner to a scraper.
-      
+
       - `user`: a django.contrib.auth.User object
       - `role`: String, either 'owner' or 'editor'
       

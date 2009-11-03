@@ -68,7 +68,7 @@ def show(request, scraper_short_name, selected_tab = 'data'):
 def list(request):
     scrapers = models.Scraper.objects.filter(status='Published').order_by('-created_at')
     return render_to_response('scraper/list.html', {'scrapers': scrapers}, context_instance = RequestContext(request))
-    
+
 def download(request, scraper_id = 0):
     user = request.user
     scraper = models.Scraper.objects.get(id=scraper_id)
