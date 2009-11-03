@@ -66,10 +66,9 @@ def run_popen(code):
   fout.flush()
   cmd = "python %s" % (fout.name)
   
-  # first one is necessary if to run codelets "import scrapers.missingcats; missingcats.Parse()"
+  # see above for all the different PYTHONPATH elements
   #env = { "DJANGO_SETTINGS_MODULE":'settings', "PYTHONPATH":"%s:%s:%s" % (settings.SCRAPER_LIBS_DIR, settings.SMODULES_DIR, settings.SCRAPERWIKI_DIR) }
   env = { "DJANGO_SETTINGS_MODULE":'settings', "PYTHONPATH":"%s" % (settings.SCRAPER_LIBS_DIR) }  # PYTHONPATH delimited by : character
-  print "eeee", env
   p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, env=env)
   res = p.stdout.readlines()
   fout.close()   # deletes the temporary file
