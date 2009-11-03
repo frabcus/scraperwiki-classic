@@ -30,3 +30,27 @@ def ScrapeURL(url, params=None):
     print "Scraped: %d bytes from %s" % (len(text), url[:30])
     return text
 
+
+
+
+# etree has many functions that apply to an etree._Element that are not in the Element, 
+#  eg etree.tostring(element)
+import lxml.etree as etree   # can't do as from lxml.etree import etree
+
+import html5lib
+
+# the etree element object has following functions:
+#   element.findall(".//span")          finds all span objects below the element
+#   element.findall(".//span[@id]")     finds all span objects that have an id attribute (THIS DOESN'T WORK)
+#   element.tag                         the tag of an element
+#   element.getchildren()               list of children of an element
+#   element.attrib                      dict of attributes and values
+#   element.text                        plain text contents of element (for html contents, use etree.tostring(element)
+def ParseHTML(text):
+    """Turn some text into a lxml.etree object"""
+    tree = html5lib.treebuilders.getTreeBuilder("etree", etree)
+    parser = html5lib.HTMLParser(tree=tree)
+    rootelement = parser.parse(text)
+    return rootelement
+
+    
