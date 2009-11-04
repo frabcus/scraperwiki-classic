@@ -150,7 +150,7 @@ $(document).ready(function() {
     function showFeedbackMessage(sMessage){
        $('#feedback_messages').append(sMessage)
        $('#feedback_messages').slideToggle(200);
-       setTimeout('$("#feedback_messages").slideToggle();', 1500);
+       setTimeout('$("#feedback_messages").slideToggle();', 2500);
     }
     
     //Setup save / details forms
@@ -193,12 +193,7 @@ $(document).ready(function() {
         
         //clear console button
         $('#clear').click(function() {
-            c = $('body', $('#console').contents())
-            c.fadeOut("fast",
-            function(){
-                $('body', $('#console').contents()).html('')
-            })
-            c.fadeIn()
+            $('#output_console div').html('');
         });
         
         //diff button
@@ -304,13 +299,15 @@ $(document).ready(function() {
                 }),
               dataType: "html",
               success: function(response){
-                  console.debug(response);
+                    /*
                       // Attempt at niceish notification, it needs work though ;)
                        $('#notifications').fadeOut(800, function() {
                          $('#notifications').html('saved');
                          $('#notifications').fadeIn(800);                       
                          writeToConsole('Saved')
                        });                     
+                    */
+                        showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
                     }
                 });
             }
@@ -401,7 +398,9 @@ $(document).ready(function() {
     //show tab
     function showTab(sTab){
         $('.editor_output .info').children().hide();
+        $('.editor_output .controls').children().hide();        
         $('#output_' + sTab).show();
+        $('#controls_' + sTab).show();
 
         $('.editor_output div.tabs ul').children().removeClass('selected');
         $('.editor_output div.tabs li.' + sTab).addClass('selected');
