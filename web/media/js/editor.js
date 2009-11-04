@@ -65,7 +65,7 @@ $(document).ready(function() {
     //Setup Keygrabs
     function setupKeygrabs(){
         var grabkeyrun = function(event){ 
-            console.log("hiss");
+            //console.log("hiss");
             event.stopPropagation(); 
             event.preventDefault(); 
             runScraper(); 
@@ -77,7 +77,7 @@ $(document).ready(function() {
         codemirroriframe.contents().bind('keydown', 'ctrl+e', function() {}); 
 
         var grabkeyreload = function(event){ 
-            console.log("hooss");
+            //console.log("hooss");
             event.stopPropagation(); 
             event.preventDefault(); 
             reloadScraper(); 
@@ -343,6 +343,13 @@ $(document).ready(function() {
         //diff button
          $('.editor_controls #diff').click(function() {
                 viewDiff(); 
+                return false; 
+            }
+        ); 
+
+        //diff button
+         $('.editor_controls #reload').click(function() {
+                reloadScraper(); 
                 return false; 
             }
         ); 
