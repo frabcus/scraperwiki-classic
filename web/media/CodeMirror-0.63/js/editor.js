@@ -662,6 +662,7 @@ var Editor = (function(){
 
     // Intercept enter and tab, and assign their new functions.
     keyDown: function(event) {
+ 
       if (this.frozen == "leave") this.frozen = null;
       if (this.frozen && (!this.keyFilter || this.keyFilter(event.keyCode))) {
         event.stop();
@@ -679,7 +680,7 @@ var Editor = (function(){
       // The various checks for !altKey are there because AltGr sets both
       // ctrlKey and altKey to true, and should not be recognised as
       // Control.
-      if (code == 13) { // enter
+      if (code == 13) { // enter          
         if (event.ctrlKey && !event.altKey) {
           this.reparseBuffer();
         }

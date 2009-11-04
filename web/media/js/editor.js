@@ -20,6 +20,7 @@ $(document).ready(function() {
     setupAutoDraft();
     setupResizeEvents();
 
+
     //setup code editor
     function setupCodeEditor(){
         codeeditor = CodeMirror.fromTextArea("id_code", {
@@ -33,7 +34,7 @@ $(document).ready(function() {
             tabMode: "spaces", 
             autoMatchParens: true,
             width: '100%',
-            parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
+            parserConfig: {'pythonVersion': 2, 'strictErrors': true},
             saveFunction: function () {    // this is your Control-S function
               $.ajax({
                 type : 'POST',
@@ -54,11 +55,11 @@ $(document).ready(function() {
                       }
                   });
               },
-            initCallback: function() { 
+            initCallback: function() {
                     draggedWindow = $("#id_code").next().children(":first"); 
                     draggedwindowheightdiff = draggedWindow.height() - $("#codeeditordiv").height(); 
-                    onWindowResize(); 
-                                     }, 
+                    onWindowResize();
+                }, 
           });        
     }
 
@@ -144,9 +145,17 @@ $(document).ready(function() {
             }
         });
     }
+
+    //show feedback massage
+    function showFeedbackMessage(sMessage){
+       $('#feedback_messages').append(sMessage)
+       $('#feedback_messages').slideToggle(200);
+       setTimeout('$("#feedback_messages").slideToggle();', 1500);
+    }
     
     //Setup save / details forms
     function setupDetailsForm(){
+
         // Meta form
         $('#meta_fields_mini').appendTo($('#meta_form'))
         $('#meta_fields_mini').attr('id', 'meta_fields')
@@ -456,7 +465,6 @@ $(document).ready(function() {
            if (maxheight < $("#codeeditordiv").height())
              $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
          };
-   
    
    
 });
