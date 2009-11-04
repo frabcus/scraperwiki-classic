@@ -79,8 +79,8 @@
             {# Controls #}
             <div class="editor_controls">
                 <input type="submit" id="save" name="action" value="Save" />            
-                <input type="button" id="clear" name="action" value="Clear Console" />   
-                <span id="notifications"></span>
+                <input type="button" value="Diff committed version" name="diff" id="diff" />
+                <input type="button" value="Run" name="run" id="run" />                
 
                 <div class="right">         
                     {% if short_name %}
@@ -88,7 +88,7 @@
                     {% else %}
                         <a href="{% url frontpage %}">Close and discard changes</a>                
                     {% endif %}
-                    <input type="submit" id="commit" name="action" value="Commit and close"/>            
+                    <input type="submit" id="commit" name="action" value="Commit and publish"/>            
                 </div>
             </div>
 
@@ -106,6 +106,11 @@
                             <a href="#">Sources</a>                            
                         </li>
                     </ul>
+                </div>
+                <div class="controls">
+                    <div id="controls_console">
+                        <a id="clear"  href="#">Clear</a>
+                    </div>
                 </div>
                 <div class="info">
                     <div id="output_console">

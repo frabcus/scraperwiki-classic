@@ -46,12 +46,7 @@ $(document).ready(function() {
                   }),
                 dataType: "html",
                 success: function(){
-                        // Attempt at niceish notification, it needs work though ;)
-                         $('#notifications').fadeOut(800, function() {
-                           $('#notifications').html('saved');
-                           $('#notifications').fadeIn(800);                       
-                           writeToConsole('Saved')
-                         });                     
+
                       }
                   });
               },
@@ -150,7 +145,7 @@ $(document).ready(function() {
     function showFeedbackMessage(sMessage){
        $('#feedback_messages').append(sMessage)
        $('#feedback_messages').slideToggle(200);
-       setTimeout('$("#feedback_messages").slideToggle();', 1500);
+       setTimeout('$("#feedback_messages").slideToggle();', 2500);
     }
     
     //Setup save / details forms
@@ -193,16 +188,10 @@ $(document).ready(function() {
         
         //clear console button
         $('#clear').click(function() {
-            c = $('body', $('#console').contents())
-            c.fadeOut("fast",
-            function(){
-                $('body', $('#console').contents()).html('')
-            })
-            c.fadeIn()
+            $('#output_console div').html('');
         });
         
         //diff button
-         $('.editor_controls #notifications').before('<input type="button" value="Diff committed version" name="diff" id="diff" />');
          $('.editor_controls #diff').click(
              function() {
                  $.ajax({
@@ -221,7 +210,6 @@ $(document).ready(function() {
         );
         
         // run button
-        $('.editor_controls #notifications').before('<input type="button" value="Run" name="run" id="run" />');
         $('.editor_controls #run').click(function() {
 
             //reset the tabs
@@ -304,12 +292,15 @@ $(document).ready(function() {
                 }),
               dataType: "html",
               success: function(response){
+                    /*
                       // Attempt at niceish notification, it needs work though ;)
                        $('#notifications').fadeOut(800, function() {
                          $('#notifications').html('saved');
                          $('#notifications').fadeIn(800);                       
                          writeToConsole('Saved')
                        });                     
+                    */
+                        showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
                     }
                 });
             }
@@ -353,17 +344,7 @@ $(document).ready(function() {
                       code: codeeditor.getCode(),
                       action: 'save',
                   }),
-                  dataType: "html",
-                  success: function() {
-                      // Attempt at niceish notification, it needs work though ;)
-                      $('#notifications').fadeOut(800,
-                      function() {
-                          $('#notifications').html('Draft Auto Saved');
-                          $('#notifications').fadeIn(800);
-                          // wirteToConsole('Auto Saved')
-                      });
-
-                  }
+                  dataType: "html"
               })
           },
           60000);    
@@ -400,7 +381,9 @@ $(document).ready(function() {
     //show tab
     function showTab(sTab){
         $('.editor_output .info').children().hide();
+        $('.editor_output .controls').children().hide();        
         $('#output_' + sTab).show();
+        $('#controls_' + sTab).show();
 
         $('.editor_output div.tabs ul').children().removeClass('selected');
         $('.editor_output div.tabs li.' + sTab).addClass('selected');
