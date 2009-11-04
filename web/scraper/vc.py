@@ -39,6 +39,9 @@ def create(scraper_name):
     os.makedirs(scraper_folder_path)
     make_file(scraper_folder_path)
 
+
+# the text which is saved comes in as the scraper.code attribute, 
+# which doesn't appear anywhere else, and isn't even set during scraper.get_code()
 def save(scraper):
   path = make_file_path(scraper.short_name)
   create(scraper.short_name)
@@ -48,6 +51,7 @@ def save(scraper):
   scraper_file.write(code)
 
   scraper_file.close()
+
 
 def commit(scraper, message="test"): 
   """
@@ -139,7 +143,51 @@ def diff(a, b=None, rev='tip', scraper_name=None):
     # yield line
 
 
+# find the range in the code so we can show a watching user who has clicked on refresh what has just been edited
+# this involves doing sequence matching on the lines, and then sequence matching on the first and last lines that differ
+def DiffLineSequenceChanges(oldcode, newcode):
+    a = oldcode.splitlines()
+    b = newcode.splitlines()
+    sqm = difflib.SequenceMatcher(None, a, b)
+    matchingblocks = sqm.get_matching_blocks()  # [ (i, j, n) ] where  a[i:i+n] == b[j:j+n].
+    assert matchingblocks[-1] == (len(a), len(b), 0)
+    matchlinesfront = (matchingblocks[0][:2] == (0, 0) and matchingblocks[0][2] or 0)
+    
+    if (len(matchingblocks) >= 2) and (matchingblocks[-2][:2] == (len(a) - matchingblocks[-2][2], len(b) - matchingblocks[-2][2])):
+        matchlinesback = matchingblocks[-2][2]
+    else:
+        matchlinesback = 0
+    
+    matchlinesbacka = len(a) - matchlinesback - 1
+    matchlinesbackb = len(b) - matchlinesback - 1
 
+    # no difference case
+    if matchlinesbackb == -1:
+        return (0, 0, 0, 0)  
+    
+    # lines have been cleanly deleted, so highlight first character where it happens
+    if matchlinesbackb < matchlinesfront:
+        assert matchlinesbackb == matchlinesfront - 1
+        return (matchlinesfront, 0, matchlinesfront, 1)
+    
+    # find the sequence start in first line that's different
+    sqmfront = difflib.SequenceMatcher(None, a[matchlinesfront], b[matchlinesfront])
+    matchingcblocksfront = sqmfront.get_matching_blocks()  # [ (i, j, n) ] where  a[i:i+n] == b[j:j+n].
+    matchcharsfront = (matchingcblocksfront[0][:2] == (0, 0) and matchingcblocksfront[0][2] or 0)
+    
+    # find sequence end in last line that's different
+    if (matchlinesbacka, matchlinesbackb) != (matchlinesfront, matchlinesfront):
+        sqmback = difflib.SequenceMatcher(None, a[matchlinesbacka], b[matchlinesbackb])
+        matchingcblocksback = sqmback.get_matching_blocks()  
+    else:
+        matchingcblocksback = matchingcblocksfront
+    
+    if (len(matchingcblocksback) >= 2) and (matchingcblocksback[-2][:2] == (len(a[matchlinesbacka]) - matchingcblocksback[-2][2], len(b[matchlinesbackb]) - matchingcblocksback[-2][2])):
+        matchcharsback = matchingcblocksback[-2][2]
+    else:
+        matchcharsback = 0
+    matchcharsbackb = len(b[matchlinesbackb]) - matchcharsback
+    return (matchlinesfront, matchcharsfront, matchlinesbackb, matchcharsbackb)  #, matchingcblocksback, (len(a[matchlinesbacka]) - matchingcblocksback[-2][2], len(b[matchlinesbackb]) - matchingcblocksback[-2][2]))
 
 
 

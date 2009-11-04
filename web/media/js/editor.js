@@ -87,7 +87,7 @@ $(document).ready(function() {
         $(document).bind('keydown', 'ctrl+r', grabkeyreload); 
         codemirroriframe.contents().bind('keydown', 'ctrl+r', function() {}); 
 
-        // first attempt to get rid of inserted tab when changing tab events
+        // first attempt to get rid of inserted tab when changing tab events - email sent to CodeMirror list
         codemirroriframe.contents().bind('keydown', 'ctrl+t', function(event)
             { console.log("ttt"); event.stopPropagation(); event.preventDefault(); return false; }); 
     }; 
@@ -273,8 +273,16 @@ $(document).ready(function() {
 
 
     function reloadScraper(){
+        if (!short_name){
+            $('#diff pre').text("Cannot reload draft scraper");
+            showPopup('diff');
+            return; 
+        }
+
+
         // send current code up to the server and get a copy of new code
-        var newcode = $.ajax({url: $("#id_{{editorform.editorcoderaw.name}}").val(), 
+        var newcode = $.ajax({
+                         url: '/editor/raw/' + short_name, 
                          async: false, 
                          type: 'POST', 
                          data: ({oldcode: codeeditor.getCode()}) 
@@ -426,6 +434,9 @@ $(document).ready(function() {
         //hide overlay
         $('#popups #overlay').fadeOut("fast")
         popupStatus = 0;
+
+        // set focus to the code editor so we can carry on typing
+        codeeditor.focus(); 
     }
 
     function setupAutoDraft(){

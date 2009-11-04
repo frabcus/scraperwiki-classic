@@ -33,6 +33,7 @@ def format_json(lines):
         ret.append(json.dumps({'message_type' : message_type, 'content' : line}) + "@@||@@")
     return '\n'.join(ret)
 
+
 def run_code(request):
   code = request.POST.get('code', False)
   guid = request.POST.get('guid', False)
@@ -45,6 +46,9 @@ def run_code(request):
       res =  format_json(run_firestarter_django(code))
 
     return HttpResponse(res)
+
+
+
 
 def run_popen(code, guid=False):
 
