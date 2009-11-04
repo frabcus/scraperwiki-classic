@@ -15,6 +15,7 @@ body{overflow:hidden; height:100%;}
 .editor_code {border-top:solid 1px #9a9a9a; padding:0;}
 
 /* Controls */
+.ui-resizable-handle {z-index:80;}
 .ui-resizable-handle.ui-resizable-s {height:4px;border-top:solid 1px #9a9a9a; border-bottom:solid 1px #9a9a9a; cursor:ns-resize;}
 .editor_controls {border-bottom:solid 1px #9a9a9a;
         padding:0.35em 0.3em; position:relative; background:#fff;}
