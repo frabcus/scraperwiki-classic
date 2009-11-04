@@ -46,10 +46,10 @@ class Scraper(models.Model):
     """
     title             = models.CharField(max_length = 100, null=False, blank=False, verbose_name='Scraper Title')
     short_name        = models.CharField(max_length = 50)
-    source            = models.CharField(max_length = 100)
+    source            = models.CharField(max_length = 100, blank=True)
     last_run          = models.DateTimeField(blank = True, null=True)
-    description       = models.TextField()
-    license           = models.CharField(max_length = 100)
+    description       = models.TextField(blank=True)
+    license           = models.CharField(max_length = 100, blank=True)
     revision          = models.CharField(max_length = 100, null=True)
     created_at        = models.DateTimeField(auto_now_add = True)
     disabled          = models.BooleanField()
