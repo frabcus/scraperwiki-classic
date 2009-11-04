@@ -1,31 +1,33 @@
 {% extends "scraper/scraper_base.html" %}
 
 {% block tab %}
+  {% if data.headings %}
+    
 
-  
-  <pre>
-    
-    
-  </pre>
-  
-  <table>
+    <table>
     <thead>
-      {% for heading in data.headings %}
-        <th>{{ heading }}</th>
-      {% endfor %}
+    {% for heading in data.headings %}
+    <th>{{ heading }}</th>
+    {% endfor %}
     </thead>
     <tbody>
-      
+
     {% for i,row in data.rows.items %}
-      <tr>
-      {% for value in row %}
-        <td>{{ value }}</td>
-      {% endfor %}
-      </tr>
+    <tr>
+    {% for value in row %}
+    <td>{{ value }}</td>
+    {% endfor %}
+    </tr>
     {% endfor %}    
     </tbody>
-  </table>
+    </table>
 
+
+
+  {% else %}
+    
+    
+  {% endif %}
 
 {% endblock %}
 

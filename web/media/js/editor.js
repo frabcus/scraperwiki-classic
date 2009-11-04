@@ -6,8 +6,9 @@ $(document).ready(function() {
     var draggedWindow; // the iframe that needs resizing
     var draggedwindowheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight;    // saved for the double-clicking on the drag bar
-    var short_name = $('scraper_short_name').val();
-    var run_type = $('code_running_mode').val();
+    var short_name = $('#scraper_short_name').val();
+    var guid = $('#scraper_guid').val();
+    var run_type = $('#code_running_mode').val();
 
     //constructor functions
     setupCodeEditor();
@@ -244,6 +245,7 @@ $(document).ready(function() {
                     url: '/editor/run_code',
                     data: ({
                         code: codeeditor.getCode(),
+                        guid: guid,
                     }),
                     dataType: "html",
                     success: function(code) {        
