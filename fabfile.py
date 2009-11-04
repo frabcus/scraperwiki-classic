@@ -8,7 +8,16 @@ def dev():
     config.path = '/var/www/dev.scraperwiki.com'
     config.web_path = 'file:///home/scraperwiki/scraperwiki'
     config.activate = config.path + '/bin/activate'
-    config.fab_user = raw_input('Please enter a user name that is in the sudoers file: ')
+    config.fab_user = 'scraperdeploy'
+    config.virtualhost_path = "/"
+
+def alpha():
+    "On the scrpaerwiki server, accessible from http://alpha.scraperwiki.com"
+    config.fab_hosts = ['212.84.75.28']
+    config.path = '/var/www/alpha.scraperwiki.com'
+    config.web_path = 'file:///home/scraperwiki/scraperwiki'
+    config.activate = config.path + '/bin/activate'
+    config.fab_user = 'scraperdeploy'
     config.virtualhost_path = "/"
 
 
@@ -19,11 +28,13 @@ def setup():
     """
 
     require('path')
-    sudo('chown -R %s %s' % (fab_user, config.path))
+    sudo('hg clone file:///home/scraperwiki/scraperwiki $(path)')        
+    sudo('chown -R %s %s' % (config.fab_user, config.path))
     sudo('cd $(path); easy_install virtualenv')
     run('hg clone $(web_path) $(path)', fail='ignore')
     run('cd $(path); virtualenv --no-site-packages .')
     virtualenv('easy_install pip')
+
     deploy()
 
 def virtualenv(command):

@@ -77,11 +77,7 @@ class Scraper(models.Model):
         self.short_name = util.SlugifyUniquely(self.short_name, Scraper, slugfield='short_name', instance=self)
       else:
         self.short_name = util.SlugifyUniquely(self.title, Scraper, slugfield='short_name', instance=self)
-      
-      print self.published
-      # if self.published == False:
-      #   self.created_at = datetime.datetime.today()
-                  
+                        
       if not self.guid:
           import hashlib
           guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple())) ]))).hexdigest()
@@ -90,7 +86,7 @@ class Scraper(models.Model):
       vc.save(self)
       if commit:
         # Publish the scraper
-        self.published == True
+        self.published = True
         vc.commit(self)
       super(Scraper, self).save()
     

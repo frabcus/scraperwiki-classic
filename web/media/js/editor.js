@@ -276,12 +276,14 @@ $(document).ready(function() {
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
 
             if(sResult != false && sResult != '' && sResult != 'Untitled Scraper'){
+                alert('asd')
                 $('#id_title').val(sResult);
                 bSuccess = true;
             }
         }
 
         if(bSuccess == true){
+            alert('as')
             $.ajax({
               type : 'POST',
               URL : window.location.pathname,
@@ -292,6 +294,7 @@ $(document).ready(function() {
                 }),
               dataType: "html",
               success: function(response){
+                  alert(response)
                     /*
                       // Attempt at niceish notification, it needs work though ;)
                        $('#notifications').fadeOut(800, function() {
