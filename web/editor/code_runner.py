@@ -42,7 +42,7 @@ def run_code(request):
     if run_mode == 'popen':
       res =  format_json(run_popen(code, guid=guid))
     if run_mode == 'firestarter_django':
-      return format_json(run_firestarter_django(code))
+      res = format_json(run_firestarter_django(code))
 
     return HttpResponse(res)
 

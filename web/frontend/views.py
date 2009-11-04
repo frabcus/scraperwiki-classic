@@ -96,10 +96,6 @@ def login(request):
                 backend = get_backend(settings.REGISTRATION_BACKEND)             
                 new_user = backend.register(request, **registration_form.cleaned_data)
                 return HttpResponseRedirect(reverse('confirm_account'))
-
-        else:
-            message = "Invalid Login"
-            # Return an 'invalid login' error message.
     else:
         login_form = SigninForm()
         registration_form = CreateAccountForm()

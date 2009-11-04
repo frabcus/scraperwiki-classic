@@ -10,12 +10,11 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.form.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.comet.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.comet.js"></script>    
 
 
     <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.63/js/codemirror.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}/js/editor.js"></script>  
-
 {% endblock %}
 
 {% block header %}
@@ -123,6 +122,10 @@
                 <iframe name="console" id="console" style="display:none;"><pre></pre></iframe>
             </div>
       </div>
+      
+      <div id="feedback_messages">
+          
+      </div>
 
 {% endblock %}
 
@@ -134,10 +137,24 @@
     </div>
     <div id="popup_settings" class="popup_item">
         <a class="popupClose">x</a>
+        <h3>Editor settings</h3>
     </div>    
     <div id="popup_documentation" class="popup_item">
         <a class="popupClose">x</a>
         <h3>Quick help</h3>
+        <dl class="quick_help">
+            <dt><code>utils.scrape(url)</code></dt>
+            <dd>Returns the body text from a url</dd>
+            <dt>
+                <code>utils.parse_html(text)</code>
+            </dt>
+            <dd>
+                Converts an HTML string to an <a href="http://codespeak.net/lxml/" target="_new">lxml.etree</a> object
+            </dd>
+            <dt><code>datastore.save(unique_keys, data, date=None, latlng=[None, None]</code></dt>
+            <dd>Saves data to the datastore. <code>data</code> is a dict, date is a date object and lat/lng are latitude and longitude values as floats</dd>
+
+        </dl>
     </div>
     <div id="popup_text" class="popup_item">
         <a class="popupClose">x</a>

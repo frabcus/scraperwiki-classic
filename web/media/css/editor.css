@@ -58,23 +58,20 @@ span.hiddenfields { margin-left:10px; }
     z-index:110; position:absolute; top:0; width:86%; margin:5%; padding:2%;
     text-align:left; display:none; overflow:auto;}
 
-.popupClose{  
-  font-size:18px;  
-  line-height:20px;  
-  right:6px;
-  top:4px;  
-  position:absolute;  
-  color:#6fa5fd;  
-  font-weight:700;  
-  display:block;
-  cursor:pointer;
-}
+.popupClose {font-size:18px; line-height:20px; right:6px; top:4px; position:absolute; color:#6fa5fd; font-weight:700; display:block; cursor:pointer;}
 
 .editor_code {border-bottom:2px solid #999; position:relative;}
 
+dl.quick_help dt code {font-size:1.3em;}
+dl.quick_help dd {font-size:0.8em; padding:0.5em 0 1.2em 0; margin:0;}
+dl.quick_help dd code {font-size:1.3em;}
 
 #meta_fields_mini .field { display:inline; }
 #meta_fields_mini .field input, #meta_fields_mini .field textarea {height:10px;}
 #meta_fields_mini .field ul.errorlist, #meta_fields_mini .field ul.errorlist li {display:inline; margin:0; padding:0; color:red;}
 
 #meta_fields .field-description {float:left; margin-right:10%;}
+
+/* Feedback messages */
+#feedback_messages {position:absolute; bottom:0; background:url(../images/message_back.png); width:100%;
+    padding:1em 1em 2em 1em;text-align:left; color:#fff; text-shadow: 2px 2px 3px #000; display:none;}
