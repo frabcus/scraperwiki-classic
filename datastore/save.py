@@ -83,7 +83,7 @@ def __save_row(unique_keys, data, kwargs):
     kv_sql = """INSERT INTO `kv` (`item_id`,`key`,`value`) VALUES ('%s', '%s', '%s');""" % (item['item_id'], k,v)
     c.execute(kv_sql)
 
-  print '<message type="data">Item with an item_id of %s saved' % new_item_id
+  print '<scraperwiki:message type="data">Item with an item_id of %s saved' % new_item_id
   return new_item_id 
 
 
