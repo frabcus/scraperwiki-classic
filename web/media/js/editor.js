@@ -143,7 +143,7 @@ $(document).ready(function() {
 
     //show feedback massage
     function showFeedbackMessage(sMessage){
-       $('#feedback_messages').append(sMessage)
+       $('#feedback_messages').html(sMessage)
        $('#feedback_messages').slideToggle(200);
        setTimeout('$("#feedback_messages").slideToggle();', 2500);
     }
@@ -173,8 +173,8 @@ $(document).ready(function() {
         //commit button
         $('#commit').click(
             function (){
-                showPopup('meta_form')
-                return false
+                //showPopup('meta_form')
+                return commitScraper();
             }
         );
         
@@ -266,7 +266,30 @@ $(document).ready(function() {
         });
 
     }
-
+    
+    //commit
+    function commitScraper(){
+        return true;
+        /*
+        $.ajax({
+          type : 'POST',
+          URL : window.location.pathname,
+          data: ({
+            title : $('#id_title').val(),                        
+            code : codeeditor.getCode(),
+            action : 'commit',
+            }),
+          dataType: "html",
+          success: function(response){
+                showFeedbackMessage("Your changes have been committed");
+            },
+        error: function(response){
+            alert('Sorry, something went wrong committing your scraper');
+          }
+        });
+        */
+    }
+    
     //Save
     function saveScraper(){
 
@@ -279,6 +302,8 @@ $(document).ready(function() {
                 $('#id_title').val(sResult);
                 bSuccess = true;
             }
+        }else{
+            bSuccess = true;            
         }
 
         if(bSuccess == true){
@@ -292,18 +317,13 @@ $(document).ready(function() {
                 }),
               dataType: "html",
               success: function(response){
-                    /*
-                      // Attempt at niceish notification, it needs work though ;)
-                       $('#notifications').fadeOut(800, function() {
-                         $('#notifications').html('saved');
-                         $('#notifications').fadeIn(800);                       
-                         writeToConsole('Saved')
-                       });                     
-                    */
-                        showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
-                    }
-                });
-            }
+                    showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
+                },
+            error: function(response){
+                alert('Sorry, something went wrong');
+              }
+            });
+        }
     }
 
     //Show random text popup

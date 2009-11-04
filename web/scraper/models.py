@@ -60,11 +60,9 @@ class Scraper(models.Model):
     published         = models.BooleanField(default=False)
     
     objects = managers.scraper.ScraperManager()
-    
       
     def __unicode__(self):
       return self.short_name
-    
     
     def save(self, commit=False):
       """
@@ -78,9 +76,8 @@ class Scraper(models.Model):
       else:
         self.short_name = util.SlugifyUniquely(self.title, Scraper, slugfield='short_name', instance=self)
       
-      print self.published
-      # if self.published == False:
-      #   self.created_at = datetime.datetime.today()
+      if self.created_at == None:
+          self.created_at = datetime.datetime.today()
                   
       if not self.guid:
           import hashlib
@@ -90,7 +87,7 @@ class Scraper(models.Model):
       vc.save(self)
       if commit:
         # Publish the scraper
-        self.published == True
+        self.published = True
         vc.commit(self)
       super(Scraper, self).save()
     

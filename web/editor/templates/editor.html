@@ -70,7 +70,7 @@
                     </li>
                 </ul>          
             </div>
-        
+
             {# Code editor #}
             <div class="editor_code" id="codeeditordiv">
                 {{ form.code }}
@@ -80,13 +80,13 @@
             <div class="editor_controls">
                 <input type="submit" id="save" name="action" value="Save" />            
                 <input type="button" value="Diff committed version" name="diff" id="diff" />
-                <input type="button" value="Run" name="run" id="run" />                
+                <input type="button" value="Run" name="run" id="run" />
 
-                <div class="right">         
+                <div class="right">
                     {% if short_name %}
-                        <a href="{% url scraper_code short_name %}">Close and discard changes</a>
+                        <a href="{% url scraper_code short_name %}">Close editor</a>
                     {% else %}
-                        <a href="{% url frontpage %}">Close and discard changes</a>                
+                        <a href="{% url frontpage %}">Close editor</a>                
                     {% endif %}
                     <input type="submit" id="commit" name="action" value="Commit and publish"/>            
                 </div>
