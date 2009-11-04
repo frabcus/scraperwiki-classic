@@ -46,12 +46,7 @@ $(document).ready(function() {
                   }),
                 dataType: "html",
                 success: function(){
-                        // Attempt at niceish notification, it needs work though ;)
-                         $('#notifications').fadeOut(800, function() {
-                           $('#notifications').html('saved');
-                           $('#notifications').fadeIn(800);                       
-                           writeToConsole('Saved')
-                         });                     
+
                       }
                   });
               },
@@ -197,7 +192,6 @@ $(document).ready(function() {
         });
         
         //diff button
-         $('.editor_controls #notifications').before('<input type="button" value="Diff committed version" name="diff" id="diff" />');
          $('.editor_controls #diff').click(
              function() {
                  $.ajax({
@@ -216,7 +210,6 @@ $(document).ready(function() {
         );
         
         // run button
-        $('.editor_controls #notifications').before('<input type="button" value="Run" name="run" id="run" />');
         $('.editor_controls #run').click(function() {
 
             //reset the tabs
@@ -351,17 +344,7 @@ $(document).ready(function() {
                       code: codeeditor.getCode(),
                       action: 'save',
                   }),
-                  dataType: "html",
-                  success: function() {
-                      // Attempt at niceish notification, it needs work though ;)
-                      $('#notifications').fadeOut(800,
-                      function() {
-                          $('#notifications').html('Draft Auto Saved');
-                          $('#notifications').fadeIn(800);
-                          // wirteToConsole('Auto Saved')
-                      });
-
-                  }
+                  dataType: "html"
               })
           },
           60000);    
