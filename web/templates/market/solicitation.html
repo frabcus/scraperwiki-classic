@@ -16,20 +16,25 @@
     <div class="content col left">
     	<form method="post" action=".">
     	    <ul class="form">
-    	        <li{% if form.title.errors %} class="error"{% endif %}>
+    	        <li class="{% if form.title.errors %}error{% endif %}">
             	    {{ form.title.label_tag }}
             	    {{ form.title }}
         	        {% field_errors form.title %}
     	        </li>
-    	        <li{% if form.link.errors %} class="error"{% endif %}>
+    	        <li class="{% if form.link.errors %}error{% endif %}">
             	    {{ form.link.label_tag }}
             	    {{ form.link }}
         	        {% field_errors form.link %}
     	        </li>
-    	        <li{% if form.details.errors %} class="error"{% endif %}>
+    	        <li class="{% if form.details.errors %}error{% endif %}">
             	    {{ form.details.label_tag }}
             	    {{ form.details }}
         	        {% field_errors form.details %}
+    	        </li>    	        
+    	        <li class="{% if form.price.errors %}error{% endif %}" style="visibility:hidden">
+            	    {{ form.price.label_tag }}
+            	    {{ form.price }}
+        	        {% field_errors form.price %}
     	        </li>    	        
             </ul>
     		<input type="submit" name="login" value="Submit" />
