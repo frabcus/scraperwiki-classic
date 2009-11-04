@@ -5,4 +5,4 @@ from market.models import Solicitation
 class SolicitationForm (ModelForm):
     class Meta:
         model = Solicitation
-        fields = ('title', 'link', 'details')
+        fields = ('title', 'link', 'details', 'price')

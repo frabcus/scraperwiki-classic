@@ -14,7 +14,6 @@ from scraper import vc
 import forms
 import settings
 
-
 def delete_draft(request):
   if request.session.get('ScraperDraft', None):
     draft = request.session['ScraperDraft']
@@ -32,14 +31,31 @@ def save_draft(request):
   request.session['ScraperDraft'] = savedForm  
   return HttpResponseRedirect(reverse('editor'))
 
-def diff(request, short_name):
-  
-  if request.POST.get('code', False):
-    code = request.POST['code']    
+def diff(request, short_name=None):
+  if not short_name:
+    return HttpResponse("Draft scraper, nothing to diff against", mimetype='text')
+  code = request.POST.get('code', None)    
+  if code:
     scraper = get_object_or_404(ScraperModel, short_name=short_name)
     scraper.code = scraper.committed_code()
     return HttpResponse(vc.diff(scraper.code, code), mimetype='text')
+  return HttpResponse("Programme error: No code sent up to diff against", mimetype='text')
     
+    
+def raw(request, short_name=None):
+  if not short_name:
+    return HttpResponse("Draft scraper, shouldn't do reload", mimetype='text')
+  scraper = get_object_or_404(ScraperModel, short_name=short_name)
+  oldcodeineditor = request.POST.get('oldcode', None)
+  newcode = scraper.saved_code()
+  if oldcodeineditor:
+      sequencechange = vc.DiffLineSequenceChanges(oldcodeineditor, newcode)
+      res = "%s:::sElEcT rAnGe:::%s" % (str(list(sequencechange)), newcode)   # a delimeter that the javascript can find, in absence of using json
+  else:
+      res = newcode
+  return HttpResponse(res, mimetype="text/plain")
+
+
 
 def edit(request, short_name=None):
   """

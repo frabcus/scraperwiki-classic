@@ -10,11 +10,10 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.form.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.comet.js"></script>    
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys-0.7.9.js"></script>
 
-
-    <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.63/js/codemirror.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}/js/editor.js"></script>  
+    <script type="text/javascript" src="{{ settings.CODEMIRROR_URL }}js/codemirror.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js"></script>  
 {% endblock %}
 
 {% block header %}
@@ -28,6 +27,7 @@
         <input type="hidden" id="scraper_short_name" value="{{ scraper.short_name }}"/>
         <input type="hidden" id="scraper_guid" value="{{ scraper.guid }}"/>
         <input type="hidden" id="code_runningMode" value="{{ settings.CODE_RUNNING_MODE|escape }}"/>    
+        <input type="hidden" id="codemirror_url" value="{{ settings.CODEMIRROR_URL }}"/>
     </fieldset>
 
     <form method="POST" accept-charset="utf-8" id="editor" action="">
@@ -80,7 +80,9 @@
             <div class="editor_controls">
                 <input type="submit" id="save" name="action" value="Save" />            
                 <input type="button" value="Diff committed version" name="diff" id="diff" />
+                <input type="button" value="Reload" name="reload" id="reload" />
                 <input type="button" value="Run" name="run" id="run" />
+
 
                 <div class="right">
                     {% if short_name %}
@@ -140,6 +142,13 @@
     <div id="diff" class="popup_item"><a class="popupClose">x</a><pre></pre></div>
     <div id="popup_shortcuts" class="popup_item">
         <a class="popupClose">x</a><pre></pre>
+        <h3>Keyboard shortcuts</h3>
+        <ul>
+            <li>Control-S   Save</li>
+            <li>Control-E   Run</li>
+            <li>Control-R   Reload</li>
+            <li>Control-D   Diff</li>
+        </ul>
     </div>
     <div id="popup_settings" class="popup_item">
         <a class="popupClose">x</a>

@@ -9,9 +9,11 @@
         </p>
     </div>
     <div class="content">
+        <ul class="allscraperlist">
         {% for scraper in scrapers %}
             {% include 'scraper/scraper_line.html' %}
     	{% endfor %}
+        </ul>
     </div>
 
 {% endblock %}
