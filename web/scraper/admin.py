@@ -8,8 +8,8 @@ class ScraperInlines(admin.TabularInline):
 
 class ScraperAdmin(admin.ModelAdmin):
     inlines = (ScraperInlines,)
-    list_display = ('title', 'short_name', 'last_run', 'status',)
-    list_filter = ('status', 'last_run')
+    list_display = ('title', 'short_name', 'last_run', 'status','published',)
+    list_filter = ('status', 'last_run', 'published',)
     
 admin.site.register(scraper.models.Scraper, ScraperAdmin)
 # admin.site.register(scraper.models.ScraperVersion)

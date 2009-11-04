@@ -304,7 +304,6 @@ $(document).ready(function() {
                 }),
               dataType: "html",
               success: function(response){
-                  console.debug(response);
                       // Attempt at niceish notification, it needs work though ;)
                        $('#notifications').fadeOut(800, function() {
                          $('#notifications').html('saved');
