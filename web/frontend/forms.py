@@ -20,8 +20,6 @@ class UserProfileForm (ModelForm):
         fields = ('bio', 'alert_frequency')
 
 
-
-
 class scraperContactForm(ContactForm):
   subject_dropdown = django.forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('help', 'Help using ScraperWiki'), ('bug', 'A bug or error')))
   title = django.forms.CharField(widget=django.forms.TextInput(), label=u'Subject')

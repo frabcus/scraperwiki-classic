@@ -31,6 +31,25 @@ class ScraperManager(models.Manager):
         > user.not_watching_any()
 
     """
+    
+    def __init__(self, *args, **kwargs):
+
+        
+        # yuck, I have to build the database connection by hand
+        backend = django.db.load_backend(settings.DATASTORE_DATABASE_ENGINE)
+        self.datastore_connection = backend.DatabaseWrapper({
+            'DATABASE_HOST': settings.DATASTORE_DATABASE_HOST,
+            'DATABASE_NAME': settings.DATASTORE_DATABASE_NAME,
+            'DATABASE_OPTIONS': {},
+            'DATABASE_PASSWORD': settings.DATASTORE_DATABASE_PASSWORD,
+            'DATABASE_PORT': settings.DATASTORE_DATABASE_PORT,
+            'DATABASE_USER': settings.DATASTORE_DATABASE_USER,
+            'TIME_ZONE': settings.TIME_ZONE,
+        })
+        super(ScraperManager, self).__init__(*args, **kwargs)
+
+    
+    
     use_for_related_fields = True
 	
     def owns(self):
@@ -66,19 +85,6 @@ class ScraperManager(models.Manager):
 
     def data_summary(self, scraper_id=0, limit=1000):
 
-
-      # yuck, I have to build the database connection by hand
-      backend = django.db.load_backend(settings.DATASTORE_DATABASE_ENGINE)
-      connection = backend.DatabaseWrapper({
-          'DATABASE_HOST': settings.DATASTORE_DATABASE_HOST,
-          'DATABASE_NAME': settings.DATASTORE_DATABASE_NAME,
-          'DATABASE_OPTIONS': {},
-          'DATABASE_PASSWORD': settings.DATASTORE_DATABASE_PASSWORD,
-          'DATABASE_PORT': settings.DATASTORE_DATABASE_PORT,
-          'DATABASE_USER': settings.DATASTORE_DATABASE_USER,
-          'TIME_ZONE': settings.TIME_ZONE,
-      })
-
       data_sql = """
         SELECT * FROM (SELECT * FROM items LIMIT %(limit)s) as items
         JOIN kv
@@ -87,7 +93,7 @@ class ScraperManager(models.Manager):
         ORDER BY items.item_id, kv.key
       """ % locals()
 
-      cursor = connection.cursor()
+      cursor = self.datastore_connection.cursor()
       cursor.execute(data_sql)
 
 
@@ -107,7 +113,7 @@ class ScraperManager(models.Manager):
         GROUP BY kv.key;
       """ % locals()
       
-      cursor = connection.cursor()
+      cursor = self.datastore_connection.cursor()
       cursor.execute(headings_sql)
       
       
@@ -125,15 +131,8 @@ class ScraperManager(models.Manager):
           items = row.items()
           items.sort()
           rows[item_id] = [value for key, value in items]
-          print row
 
 
-      # for i,row in rows.items():
-      #     print row
-      #     print ""
-      #     print ""
-      #     print ""
-      #     print ""
       
       data = {
       'headings' : headings, 
@@ -144,3 +143,11 @@ class ScraperManager(models.Manager):
       
       return data
     
+
+
+    def item_count(self, guid):
+        sql = "SELECT COUNT(*) FROM items WHERE scraper_id='%s'" % guid
+        cursor = self.datastore_connection.cursor()
+        cursor.execute(sql)
+        return cursor.fetchone()[0]
+        

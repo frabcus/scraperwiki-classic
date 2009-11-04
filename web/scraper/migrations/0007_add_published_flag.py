@@ -1,3 +1,4 @@
+# encoding: utf-8
 
 from south.db import db
 from django.db import models
@@ -7,30 +8,24 @@ class Migration:
     
     def forwards(self, orm):
         
-        # Adding model 'scraperData'
-        db.create_table('scraper_scraperdata', (
-            ('id', orm['scraper.scraperdata:id']),
-        ))
-        db.send_create_signal('scraper', ['scraperData'])
+        # Adding field 'Scraper.published'
+        db.add_column('scraper_scraper', 'published', orm['scraper.scraper:published'])
         
-        # Adding field 'Scraper.revision'
-        db.add_column('scraper_scraper', 'revision', orm['scraper.scraper:revision'])
-        
-        # Deleting field 'Scraper.published_version'
-        db.delete_column('scraper_scraper', 'published_version')
+        # Deleting model 'scraperdata'
+        db.delete_table('scraper_scraperdata')
         
     
     
     def backwards(self, orm):
         
-        # Deleting model 'scraperData'
-        db.delete_table('scraper_scraperdata')
+        # Deleting field 'Scraper.published'
+        db.delete_column('scraper_scraper', 'published')
         
-        # Deleting field 'Scraper.revision'
-        db.delete_column('scraper_scraper', 'revision')
-        
-        # Adding field 'Scraper.published_version'
-        db.add_column('scraper_scraper', 'published_version', orm['scraper.scraper:published_version'])
+        # Adding model 'scraperdata'
+        db.create_table('scraper_scraperdata', (
+            ('id', orm['scraper.scraper:id']),
+        ))
+        db.send_create_signal('scraper', ['scraperdata'])
         
     
     
@@ -69,28 +64,16 @@ class Migration:
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'page_cache.cachedpage': {
-            'cached_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'content': ('django.db.models.fields.TextField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'method': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
-            'post_data': ('django.db.models.fields.CharField', [], {'max_length': '1000'}),
-            'time_to_live': ('django.db.models.fields.IntegerField', [], {}),
-            'url': ('django.db.models.fields.URLField', [], {'max_length': '200'})
-        },
-        'scraper.pageaccess': {
-            'cached_page': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['page_cache.CachedPage']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'scraper_invocation': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['scraper.ScraperInvocation']"})
-        },
         'scraper.scraper': {
             'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {}),
             'disabled': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
+            'guid': ('django.db.models.fields.CharField', [], {'max_length': '1000'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_run': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'license': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'published': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'revision': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True'}),
             'short_name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'source': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
@@ -98,36 +81,11 @@ class Migration:
             'title': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']"})
         },
-        'scraper.scraperdata': {
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
-        },
-        'scraper.scraperexception': {
-            'backtrace': ('django.db.models.fields.TextField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'line_number': ('django.db.models.fields.IntegerField', [], {}),
-            'message': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'scraper_invocation': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['scraper.ScraperInvocation']"})
-        },
-        'scraper.scraperinvocation': {
-            'duration': ('django.db.models.fields.FloatField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'log_text': ('django.db.models.fields.TextField', [], {}),
-            'published': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
-            'run_at': ('django.db.models.fields.DateTimeField', [], {}),
-            'scraper_version': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['scraper.ScraperVersion']"}),
-            'status': ('django.db.models.fields.CharField', [], {'max_length': '10'})
-        },
         'scraper.scraperrequest': {
             'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'source_link': ('django.db.models.fields.CharField', [], {'max_length': '250'})
-        },
-        'scraper.scraperversion': {
-            'code': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'scraper': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['scraper.Scraper']"}),
-            'version': ('django.db.models.fields.IntegerField', [], {})
         },
         'scraper.userscraperrole': {
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),

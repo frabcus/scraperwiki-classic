@@ -46,10 +46,10 @@ class Scraper(models.Model):
     """
     title             = models.CharField(max_length = 100, null=False, blank=False, verbose_name='Scraper Title')
     short_name        = models.CharField(max_length = 50)
-    source            = models.CharField(max_length = 100)
+    source            = models.CharField(max_length = 100, blank=True)
     last_run          = models.DateTimeField(blank = True, null=True)
-    description       = models.TextField()
-    license           = models.CharField(max_length = 100)
+    description       = models.TextField(blank=True)
+    license           = models.CharField(max_length = 100, blank=True)
     revision          = models.CharField(max_length = 100, null=True)
     created_at        = models.DateTimeField(auto_now_add = True)
     disabled          = models.BooleanField()
@@ -57,31 +57,28 @@ class Scraper(models.Model):
     status            = models.CharField(max_length = 10)
     users             = models.ManyToManyField(User, through='UserScraperRole')
     guid              = models.CharField(max_length = 1000)
-
-    objects = managers.scraper.ScraperManager()
+    published         = models.BooleanField(default=False)
     
-    # def __init__(self, *args, **kwargs):
-    #   if 'code' in kwargs:
-    #     del kwargs['code']
-    #   super(Scraper, self).__init__(*args, **kwargs)
+    objects = managers.scraper.ScraperManager()
       
     def __unicode__(self):
       return self.short_name
     
-    
-    # this function saves the uninitialized and undeclared .code member of the object to the disk
-    # you just have to know it's there by looking into the cryptically named vc.py module
     def save(self, commit=False):
+      """
+      this function saves the uninitialized and undeclared .code member of the object to the disk
+      you just have to know it's there by looking into the cryptically named vc.py module
+      """
 
       # if the scraper doesn't exist already give it a short name (slug)
       if self.short_name:
         self.short_name = util.SlugifyUniquely(self.short_name, Scraper, slugfield='short_name', instance=self)
       else:
         self.short_name = util.SlugifyUniquely(self.title, Scraper, slugfield='short_name', instance=self)
-
-      if self.created_at == None:
-        self.created_at = datetime.datetime.today()
       
+      if self.created_at == None:
+          self.created_at = datetime.datetime.today()
+                  
       if not self.guid:
           import hashlib
           guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple())) ]))).hexdigest()
@@ -89,6 +86,8 @@ class Scraper(models.Model):
       
       vc.save(self)
       if commit:
+        # Publish the scraper
+        self.published = True
         vc.commit(self)
       super(Scraper, self).save()
     
@@ -96,7 +95,7 @@ class Scraper(models.Model):
 	    return "Python"
 	
     def record_count(self):
-      return 12345
+      return Scraper.objects.item_count(self.guid)
 
     def owner(self):
       if self.pk:

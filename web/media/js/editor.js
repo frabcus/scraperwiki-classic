@@ -3,12 +3,13 @@ $(document).ready(function() {
     //variables
     var editor_id = 'id_code';
     var codeeditor;
-    var draggedWindow; // the iframe that needs resizing
-    var draggedwindowheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
+    var codemirroriframe; // the iframe that needs resizing
+    var codemirroriframeheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight;    // saved for the double-clicking on the drag bar
     var short_name = $('#scraper_short_name').val();
     var guid = $('#scraper_guid').val();
     var run_type = $('#code_running_mode').val();
+    var codemirror_url = $('#codemirror_url').val(); 
 
     //constructor functions
     setupCodeEditor();
@@ -25,8 +26,8 @@ $(document).ready(function() {
     function setupCodeEditor(){
         codeeditor = CodeMirror.fromTextArea("id_code", {
             parserfile: ["../contrib/python/js/parsepython.js"],
-            stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
-            path: "/media/CodeMirror-0.63/js/",
+            stylesheet: codemirror_url + "contrib/python/css/pythoncolors.css",
+            path: codemirror_url + "js/",
             textWrapping: false,
             lineNumbers: true,
             indentUnit: 4,
@@ -50,13 +51,46 @@ $(document).ready(function() {
                       }
                   });
               },
+            
+            // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
-                    draggedWindow = $("#id_code").next().children(":first"); 
-                    draggedwindowheightdiff = draggedWindow.height() - $("#codeeditordiv").height(); 
+                    codemirroriframe = $("#id_code").next().children(":first"); 
+                    codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     onWindowResize();
+                    setupKeygrabs(); 
                 }, 
           });        
     }
+
+    //Setup Keygrabs
+    function setupKeygrabs(){
+        var grabkeyrun = function(event){ 
+            console.log("hiss");
+            event.stopPropagation(); 
+            event.preventDefault(); 
+            runScraper(); 
+            return false; 
+        };
+
+        // no matter what happens in the iframe bound function, the key propagates out to document level, so we simply let it do so and handle it there
+        $(document).bind('keydown', 'ctrl+e', grabkeyrun); 
+        codemirroriframe.contents().bind('keydown', 'ctrl+e', function() {}); 
+
+        var grabkeyreload = function(event){ 
+            console.log("hooss");
+            event.stopPropagation(); 
+            event.preventDefault(); 
+            reloadScraper(); 
+            return false; 
+        };
+
+        $(document).bind('keydown', 'ctrl+r', grabkeyreload); 
+        codemirroriframe.contents().bind('keydown', 'ctrl+r', function() {}); 
+
+        // first attempt to get rid of inserted tab when changing tab events
+        codemirroriframe.contents().bind('keydown', 'ctrl+t', function(event)
+            { console.log("ttt"); event.stopPropagation(); event.preventDefault(); return false; }); 
+    }; 
 
     //Setup Menu
     function setupMenu(){
@@ -143,7 +177,7 @@ $(document).ready(function() {
 
     //show feedback massage
     function showFeedbackMessage(sMessage){
-       $('#feedback_messages').append(sMessage)
+       $('#feedback_messages').html(sMessage)
        $('#feedback_messages').slideToggle(200);
        setTimeout('$("#feedback_messages").slideToggle();', 2500);
     }
@@ -167,14 +201,114 @@ $(document).ready(function() {
         
     }
     
+    function runScraper(){
+
+        //reset the tabs
+        $('.editor_output div.tabs li').removeClass('new');
+
+        //set a dividers on the output
+        $('#output_console div :last-child').addClass("run_end")
+        $('#output_data div :last-child').addClass("run_end")
+        $('#output_sources div :last-child').addClass("run_end")                
+
+
+        //run either the firestarter or run mdoel
+        if (run_type == 'firestarter_apache') {
+
+            $('#editor').bind('form-pre-serialize', null,
+            function(foo, options) {
+                $('#editor #id_code').text(codeeditor.getCode())
+            })
+
+            $('#editor').ajaxSubmit({
+                target: '#console',
+                action: '/editor/run_code',
+            });
+
+            return false;
+            // <-- important!
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: '/editor/run_code',
+                data: ({
+                    code: codeeditor.getCode(),
+                    guid: guid,
+                }),
+                dataType: "html",
+                success: function(code) {        
+
+                    //split results
+                    var aResults = code.split("@@||@@");
+                    for (var i=0; i < aResults.length -1; i++) {
+                        var oItem = eval('(' + aResults[i] + ')')
+                        if(oItem.message_type == 'sources'){                                                        
+                            writeToSources(oItem.content);                                                            
+                        }else if (oItem.message_type == 'data'){
+                            writeToData(oItem.content);                                
+                        }else{                            
+                            writeToConsole(oItem.content);    
+                        }
+                    };
+                }
+            });
+        }
+    }
+
+
+    function viewDiff(){
+        $.ajax({
+            type: 'POST',
+            url: '/editor/diff/' + short_name,
+            data: ({
+                code: codeeditor.getCode(),
+                }),
+            dataType: "html",
+            success: function(diff) {
+                $('#diff pre').text(diff);
+                showPopup('diff');
+            }
+        });
+    }
+
+
+    function reloadScraper(){
+        // send current code up to the server and get a copy of new code
+        var newcode = $.ajax({url: $("#id_{{editorform.editorcoderaw.name}}").val(), 
+                         async: false, 
+                         type: 'POST', 
+                         data: ({oldcode: codeeditor.getCode()}) 
+                       }).responseText; 
+
+        // extract the (changed) select range information from the header of return data
+        var selrangedelimeter = ":::sElEcT rAnGe:::"; 
+        var iselrangedelimeter = newcode.indexOf(selrangedelimeter); 
+        var selrange = [0,0,0,0]
+        if (iselrangedelimeter != -1){
+            var selrange = newcode.substring(0, iselrangedelimeter); 
+            newcode = newcode.substring(iselrangedelimeter + selrangedelimeter.length); 
+            selrange = eval(selrange); 
+        }
+
+        codeeditor.setCode(newcode); 
+
+        // make the selection
+        if (!((selrange[2] == 0) && (selrange[3] == 0))){
+            linehandlestart = codeeditor.nthLine(selrange[0] + 1); 
+            linehandleend = codeeditor.nthLine(selrange[2] + 1); 
+            codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
+        }
+        codeeditor.focus(); 
+    }; 
+
     //Setup toolbar
     function setupToolbar(){
         
         //commit button
         $('#commit').click(
             function (){
-                showPopup('meta_form')
-                return false
+                //showPopup('meta_form')
+                return commitScraper();
             }
         );
         
@@ -191,82 +325,44 @@ $(document).ready(function() {
             $('#output_console div').html('');
         });
         
-        //diff button
-         $('.editor_controls #diff').click(
-             function() {
-                 $.ajax({
-                     type: 'POST',
-                     url: '/editor/diff/' + short_name,
-                     data: ({
-                         code: codeeditor.getCode(),
-                         }),
-                     dataType: "html",
-                     success: function(diff) {
-                         $('#diff pre').text(diff);
-                         showPopup('diff');
-                     }
-                 });
-            }
-        );
-        
         // run button
         $('.editor_controls #run').click(function() {
-
-            //reset the tabs
-            $('.editor_output div.tabs li').removeClass('new');
-
-            //set a dividers on the output
-            $('#output_console div :last-child').addClass("run_end")
-            $('#output_data div :last-child').addClass("run_end")
-            $('#output_sources div :last-child').addClass("run_end")                
-
-
-            //run either the firestarter or run mdoel
-            if (run_type == 'firestarter_apache') {
-
-                $('#editor').bind('form-pre-serialize', null,
-                function(foo, options) {
-                    $('#editor #id_code').text(codeeditor.getCode())
-                })
-
-                $('#editor').ajaxSubmit({
-                    target: '#console',
-                    action: '/editor/run_code',
-                });
-
-                return false;
-                // <-- important!
-            } else {
-                $.ajax({
-                    type: 'POST',
-                    url: '/editor/run_code',
-                    data: ({
-                        code: codeeditor.getCode(),
-                        guid: guid,
-                    }),
-                    dataType: "html",
-                    success: function(code) {        
-
-                        //split results
-                        var aResults = code.split("@@||@@");
-                        for (var i=0; i < aResults.length -1; i++) {
-                            var oItem = eval('(' + aResults[i] + ')')
-                            if(oItem.message_type == 'sources'){                                                        
-                                writeToSources(oItem.content);                                                            
-                            }else if (oItem.message_type == 'data'){
-                                writeToData(oItem.content);                                
-                            }else{                            
-                                writeToConsole(oItem.content);    
-                            }
-                        };
-                    }
-                });
+                runScraper(); 
+                return false; 
             }
+        ); 
 
-        });
-
+        //diff button
+         $('.editor_controls #diff').click(function() {
+                viewDiff(); 
+                return false; 
+            }
+        ); 
     }
-
+    
+    //commit
+    function commitScraper(){
+        return true;
+        /*
+        $.ajax({
+          type : 'POST',
+          URL : window.location.pathname,
+          data: ({
+            title : $('#id_title').val(),                        
+            code : codeeditor.getCode(),
+            action : 'commit',
+            }),
+          dataType: "html",
+          success: function(response){
+                showFeedbackMessage("Your changes have been committed");
+            },
+        error: function(response){
+            alert('Sorry, something went wrong committing your scraper');
+          }
+        });
+        */
+    }
+    
     //Save
     function saveScraper(){
 
@@ -276,12 +372,16 @@ $(document).ready(function() {
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
 
             if(sResult != false && sResult != '' && sResult != 'Untitled Scraper'){
+                alert('asd')
                 $('#id_title').val(sResult);
                 bSuccess = true;
             }
+        }else{
+            bSuccess = true;            
         }
 
         if(bSuccess == true){
+            alert('as')
             $.ajax({
               type : 'POST',
               URL : window.location.pathname,
@@ -292,18 +392,13 @@ $(document).ready(function() {
                 }),
               dataType: "html",
               success: function(response){
-                    /*
-                      // Attempt at niceish notification, it needs work though ;)
-                       $('#notifications').fadeOut(800, function() {
-                         $('#notifications').html('saved');
-                         $('#notifications').fadeIn(800);                       
-                         writeToConsole('Saved')
-                       });                     
-                    */
-                        showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
-                    }
-                });
-            }
+                    showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
+                },
+            error: function(response){
+                alert('Sorry, something went wrong');
+              }
+            });
+        }
     }
 
     //Show random text popup
@@ -391,8 +486,8 @@ $(document).ready(function() {
 
     //resize code editor
    function resizeCodeEditor(){
-      if (draggedWindow)
-          draggedWindow.height(($("#codeeditordiv").height() + draggedwindowheightdiff) + 'px'); 
+      if (codemirroriframe)
+          codemirroriframe.height(($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px'); 
     };
 
     //click bar to resize

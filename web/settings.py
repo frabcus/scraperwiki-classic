@@ -128,5 +128,5 @@ REGISTRATION_BACKEND = "registration.backends.default.DefaultBackend"
 
 # define default directories needed for paths to run scrapers
 SCRAPER_LIBS_DIR = join(HOME_DIR, "scraperlibs")
-
+CODEMIRROR_URL = MEDIA_URL + "CodeMirror-0.64/"
 

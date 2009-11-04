@@ -33,7 +33,8 @@ def save_draft(request):
   return HttpResponseRedirect(reverse('editor'))
 
 def diff(request, short_name):
-  
+  if not short_name:
+    return HttpResponse("Draft scraper, nothing to diff against", mimetype='text')
   if request.POST.get('code', False):
     code = request.POST['code']    
     scraper = get_object_or_404(ScraperModel, short_name=short_name)
