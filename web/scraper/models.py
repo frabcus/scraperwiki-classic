@@ -146,6 +146,10 @@ class Scraper(models.Model):
         code =  vc.get_code(self.short_name, committed=False)
         return code
 
+    def number_of_lines(self):
+        code = vc.get_code()
+        return code.count("\n")
+
     def is_good(self):
         # don't know how goodness is going to be defined yet.
         return True
