@@ -71,8 +71,6 @@ def deploy():
     echo "%s" | mail -s "New Scraperwiki Deployment" scrapewiki-commits@googlegroups.com -- -f mercurial@scraperwiki.com
     """ % message)
 
-
-    
     
 def migrate():
   virtualenv('cd web; python manage.py syncdb')

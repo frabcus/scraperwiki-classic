@@ -1,8 +1,11 @@
 body{overflow:hidden; height:100%;}
 .editor {text-align:left; }
 
+/* Draft warning */
+div.draft_warning {background:#ffffd7; text-align:center; font-size:0.7em; padding:0.3em 0 0.2em 0;}
+
 /* Header */
-.editor_header {min-height:2em; background:#efefef;}
+.editor_header {min-height:2em; background:#efefef; position:relative;}
 .editor_header div.title input {font-weight:bold; font-size:1.2em; padding:0.4em 0 0 0.5em; color:#808080;
         border:solid 2px #efefef; background:none;}
 .editor_header div.title input:focus {background:#fff; border:inset 2px;outline:none; color:#000;}

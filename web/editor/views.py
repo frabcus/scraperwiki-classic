@@ -91,9 +91,11 @@ def edit(request, short_name=None):
   """
 
   draft = request.session.get('ScraperDraft', None)
+  has_draft = False
   # First off, create a scraper instance somehow.
   # Drafts are seen as more 'important' than saved scrapers.
   if draft:
+    has_draft = True  
     if draft.short_name:
       # We're working with an existing scraper that has been edited, but not saved
       scraper = draft
@@ -183,4 +185,4 @@ def edit(request, short_name=None):
         return HttpResponseRedirect(reverse('login'))
         
         
-  return render_to_response('editor.html', {'form':form, 'scraper' : scraper, 'settings' : settings }, context_instance=RequestContext(request)) 
+  return render_to_response('editor.html', {'form':form, 'scraper' : scraper, 'settings' : settings, 'has_draft': has_draft }, context_instance=RequestContext(request)) 
