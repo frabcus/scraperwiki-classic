@@ -383,6 +383,8 @@ $(document).ready(function() {
 
             if(sResult != false && sResult != '' && sResult != 'Untitled Scraper'){
                 $('#id_title').val(sResult);
+                aPageTitle = document.title.split('|')
+                document.title = sResult + ' | ' + aPageTitle[1]
                 bSuccess = true;
             }
         }else{
