@@ -457,7 +457,7 @@ $(document).ready(function() {
                       action: 'save',
                   }),
                   dataType: "html"
-              })
+              });
           },
           60000);    
     }
