@@ -386,7 +386,6 @@ $(document).ready(function() {
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
 
             if(sResult != false && sResult != '' && sResult != 'Untitled Scraper'){
-                alert('asd')
                 $('#id_title').val(sResult);
                 bSuccess = true;
             }
@@ -395,7 +394,6 @@ $(document).ready(function() {
         }
 
         if(bSuccess == true){
-            alert('as')
             $.ajax({
               type : 'POST',
               URL : window.location.pathname,

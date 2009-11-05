@@ -22,7 +22,10 @@ DATASTORE_DATABASE_PASSWORD   = ''         # Not used with sqlite3.
 DATASTORE_DATABASE_PORT   = '3306'
 
 FEEDBACK_EMAIL = 'feedback@somedomain.com'
+FEEDBACK_EMAIL_TITLE = '[ScraperWiki Feedback]'
 
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = '1025'
 SESSION_TIMEOUT = 1209600
 
 
