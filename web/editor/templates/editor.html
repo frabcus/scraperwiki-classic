@@ -16,8 +16,8 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js"></script>  
 {% endblock %}
 
-{% block header %}
-    {{ scraper.title }}
+{% block title %}
+    {{ scraper.title }} | ScraperWiki
 {% endblock %}
 
 {% block content %}
@@ -40,7 +40,7 @@
 
             {# Header #}
             <div class="editor_header">
-                <div class="title">    
+                <div class="title">
                     {{ form.title }}
                 </div>
                 <div id="meta_fields_mini">
