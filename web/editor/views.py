@@ -151,8 +151,11 @@ def edit(request, short_name=None):
         # The user is authenticated, so we can process the form correctly
         if action == 'save':
           savedForm.save()
-        if action.startswith('commit'):
-          savedForm.save(commit=True)
+        if action.startswith('commit'):          
+          message = None
+          if request.POST.get('commit_message', False):
+            message = request.POST['commit_message']
+          savedForm.save(commit=True, message=message, user=request.user.pk)
           
         if savedForm.owner():
           # Set the owner.

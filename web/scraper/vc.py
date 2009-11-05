@@ -53,7 +53,7 @@ def save(scraper):
   scraper_file.close()
 
 
-def commit(scraper, message="test"): 
+def commit(scraper, message="changed", user="unknown"): 
   """
   Called each time a file is saved. At this
   point we don't know if it's a new file that needs to be added to version control, or if
@@ -70,9 +70,13 @@ def commit(scraper, message="test"):
 
   reop_path = os.path.normpath(os.path.abspath(SMODULES_DIR))
   r = hg.repository(ui, reop_path, create=False)
-
+  
+  # Because passing None in an optional argument means it doesn't use the default value
+  if message is None:
+    message = "changed"
+  
   ui.pushbuffer()
-  commands.commit(ui, r, path, addremove=True, message=message)
+  commands.commit(ui, r, path, addremove=True, message=message, user=str(user))
   code = ui.popbuffer()
   return ""
 

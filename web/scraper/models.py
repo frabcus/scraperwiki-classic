@@ -64,7 +64,7 @@ class Scraper(models.Model):
     def __unicode__(self):
       return self.short_name
     
-    def save(self, commit=False):
+    def save(self, commit=False, message=None, user=None):
       """
       this function saves the uninitialized and undeclared .code member of the object to the disk
       you just have to know it's there by looking into the cryptically named vc.py module
@@ -88,7 +88,7 @@ class Scraper(models.Model):
       if commit:
         # Publish the scraper
         self.published = True
-        vc.commit(self)
+        vc.commit(self, message=message, user=user)
       super(Scraper, self).save()
     
     def language(self):
@@ -147,7 +147,7 @@ class Scraper(models.Model):
         return code
 
     def number_of_lines(self):
-        code = vc.get_code()
+        code = vc.get_code(self.short_name)
         return code.count("\n")
 
     def is_good(self):

@@ -54,7 +54,11 @@
                     <div class="field field-source">
                         <label for="id_source">{{ form.source.label}} {{ form.source.errors }}</label>
                         {{ form.source }}
+                    </div>
 
+                    <div class="field field-commit_message">
+                        <label for="commit_message">Commit Message</label>
+                        <input type="text" name="commit_message" value="Changed" id="commit_message">
                     </div>
                 </div>
 

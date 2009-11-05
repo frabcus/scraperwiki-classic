@@ -37,6 +37,7 @@ def format_json(lines):
 def run_code(request):
   code = request.POST.get('code', False)
   guid = request.POST.get('guid', False)
+  
   if code:
     run_mode = settings.CODE_RUNNING_MODE
   
@@ -87,6 +88,7 @@ def run_popen(code, guid=False):
     "DJANGO_SETTINGS_MODULE":'settings', 
     "PYTHONPATH": "%s" % (':'.join(path)),
     "SCRAPER_GUID":"%s" % (guid),
+    "USER":"%s" % (guid),
     }
 
   p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, env=env)
