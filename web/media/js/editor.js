@@ -65,7 +65,6 @@ $(document).ready(function() {
     //Setup Keygrabs
     function setupKeygrabs(){
         var grabkeyrun = function(event){ 
-            //console.log("hiss");
             event.stopPropagation(); 
             event.preventDefault(); 
             runScraper(); 
@@ -89,7 +88,7 @@ $(document).ready(function() {
 
         // first attempt to get rid of inserted tab when changing tab events - email sent to CodeMirror list
         codemirroriframe.contents().bind('keydown', 'ctrl+t', function(event)
-            { console.log("ttt"); event.stopPropagation(); event.preventDefault(); return false; }); 
+            {event.stopPropagation(); event.preventDefault(); return false; }); 
     }; 
 
     //Setup Menu
