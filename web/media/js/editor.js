@@ -43,7 +43,7 @@ $(document).ready(function() {
                 data: ({
                   title : $('#id_title').val(),
                   code : codeeditor.getCode(),
-                  action : 'save',
+                  action : 'save'
                   }),
                 dataType: "html",
                 success: function(){
@@ -58,7 +58,7 @@ $(document).ready(function() {
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     onWindowResize();
                     //setupKeygrabs(); 
-                }, 
+                } 
           });        
     }
 
@@ -85,10 +85,6 @@ $(document).ready(function() {
 
         $(document).bind('keydown', 'ctrl+r', grabkeyreload); 
         codemirroriframe.contents().bind('keydown', 'ctrl+r', function() {}); 
-
-        // first attempt to get rid of inserted tab when changing tab events - email sent to CodeMirror list
-        codemirroriframe.contents().bind('keydown', 'ctrl+t', function(event)
-            {event.stopPropagation(); event.preventDefault(); return false; }); 
     }; 
 
     //Setup Menu
@@ -164,7 +160,7 @@ $(document).ready(function() {
                 //add background
                 $('#popups #overlay').css({
                     width: $(window).width(),
-                    height: $(window).height(),
+                    height: $(window).height()
                 });
                 $('#popups #overlay').fadeIn("fast")
 
@@ -221,7 +217,7 @@ $(document).ready(function() {
 
             $('#editor').ajaxSubmit({
                 target: '#console',
-                action: '/editor/run_code',
+                action: '/editor/run_code'
             });
 
             return false;
@@ -232,7 +228,7 @@ $(document).ready(function() {
                 url: '/editor/run_code',
                 data: ({
                     code: codeeditor.getCode(),
-                    guid: guid,
+                    guid: guid
                 }),
                 dataType: "html",
                 success: function(code) {        
@@ -260,7 +256,7 @@ $(document).ready(function() {
             type: 'POST',
             url: '/editor/diff/' + short_name,
             data: ({
-                code: codeeditor.getCode(),
+                code: codeeditor.getCode()
                 }),
             dataType: "html",
             success: function(diff) {
@@ -298,6 +294,7 @@ $(document).ready(function() {
         }
 
         codeeditor.setCode(newcode); 
+        codeeditor.focus(); 
 
         // make the selection
         if (!((selrange[2] == 0) && (selrange[3] == 0))){
@@ -305,7 +302,6 @@ $(document).ready(function() {
             linehandleend = codeeditor.nthLine(selrange[2] + 1); 
             codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
         }
-        codeeditor.focus(); 
     }; 
 
     //Setup toolbar
@@ -400,7 +396,7 @@ $(document).ready(function() {
               data: ({
                 title : $('#id_title').val(),
                 code : codeeditor.getCode(),
-                action : 'save',
+                action : 'save'
                 }),
               dataType: "html",
               success: function(response){
@@ -452,7 +448,7 @@ $(document).ready(function() {
                   data: ({
                       title: $('#id_title').val(),
                       code: codeeditor.getCode(),
-                      action: 'save',
+                      action: 'save'
                   }),
                   dataType: "html"
               });

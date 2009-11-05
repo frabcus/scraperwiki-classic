@@ -14,8 +14,9 @@ function setupCodeViewer(){
            tabMode: "spaces", 
            autoMatchParens: true,
            width: '100%',
-           parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
+           parserConfig: {'pythonVersion': 2, 'strictErrors': true}
 
        });
       });
 }
+
