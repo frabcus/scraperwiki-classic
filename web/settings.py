@@ -8,6 +8,7 @@ sys.path.append('web')
 
 # Django settings for scraperwiki project.
 
+
 try:
   from localsettings import * 
 except:
