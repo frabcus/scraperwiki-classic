@@ -8,15 +8,6 @@ sys.path.append('web')
 
 # Django settings for scraperwiki project.
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
-ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
-)
-
-MANAGERS = ADMINS
-
 try:
   from localsettings import * 
 except:
