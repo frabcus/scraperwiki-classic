@@ -51,6 +51,7 @@ small.error_hint {color:#cc0000;}
 #divInfo ul li {background:#ffffd7; padding:0.1em 0; margin:0; text-align:center;}
 
 /* Links */
+a {color:#2680c6;}
 /*
 a[href$='#'] {color:#ccc;}
 a[href$='#']:hover {text-decoration:line-through;}
