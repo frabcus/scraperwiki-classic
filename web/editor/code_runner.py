@@ -91,7 +91,15 @@ def run_popen(code, guid=False):
     "USER":"%s" % (guid),
     }
 
-  p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, env=env)
+  p = subprocess.Popen(
+    cmd, 
+    shell=True, 
+    stdin=subprocess.PIPE, 
+    stdout=subprocess.PIPE, 
+    stderr=subprocess.STDOUT, 
+    close_fds=True, 
+    env=env,
+    )
   res = p.stdout.readlines()
   fout.close()   # deletes the temporary file
   return ''.join(res)

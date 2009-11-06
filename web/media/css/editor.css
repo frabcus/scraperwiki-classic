@@ -42,8 +42,10 @@ span.hiddenfields { margin-left:10px; }
         background:#fff;}
 .editor_output div.tabs ul li a {text-decoration:none; color:#000;}        
 .editor_output .info {position:relative; height:200px; font-family:monaco, courier, monospace; font-size:0.7em;}
-.editor_output .info div {height:100%; overflow-y:scroll; width:100%; position:relative;}
-.editor_output .info div div {width:100%;overflow:hidden; height:5000px;}
+
+
+.editor_output .info div {height:100%;  width:100%; position:relative;}
+.editor_output .info div div {width:100%;overflow:hidden; overflow-y:scroll;}
 
 .editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.2em 1em;}
 .editor_output .info span.output_item.run_end {border-bottom:solid 1px #cfcfcf;}

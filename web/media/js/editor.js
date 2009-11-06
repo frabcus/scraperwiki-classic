@@ -467,8 +467,12 @@ $(document).ready(function() {
             sDisplayMessage += '&nbsp;<a href="#" onclick="showTextPopup(' + "'" + 'hello' + "'" + ')>...</a>';
         }
 
-        $('#output_console :first').append('<span class="output_item">' + sDisplayMessage + "</span>");
+        $('#output_console div').append('<span class="output_item">' + sDisplayMessage + "</span>");
         $('.editor_output div.tabs li.console').addClass('new');
+        
+        $('#output_console div').animate({ 
+            scrollTop: $('#output_console div').height()+$('#output_console div')[0].scrollHeight 
+        }, 0);
         
     }
     
@@ -476,14 +480,18 @@ $(document).ready(function() {
 
         $('#output_sources :first').append(sMessage);
         $('.editor_output div.tabs li.sources').addClass('new');
-        
+        /*
+            TODO Add auto scroll here
+        */
     }
     
     function writeToData(sMessage) {
 
         $('#output_data :first').append(sMessage);
         $('.editor_output div.tabs li.data').addClass('new');
-        
+        /*
+            TODO Add auto scroll here
+        */
     }
 
     //show tab
