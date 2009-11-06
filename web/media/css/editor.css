@@ -55,7 +55,7 @@ span.hiddenfields { margin-left:10px; }
 /* Output and tabs */
 .editor_output {padding-top:0.6em; background:#e3e3e3 url(../images/control_background.png);}
 .editor_output iframe {border:none;}
-.editor_output div.tabs {}
+.editor_output div.tabs { position:relative;}
 .editor_output div.tabs ul {border-bottom:solid 1px #9a9a9a; height:1.75em; padding:0 0 0 0.3em; margin:0; 
     font-size:0.8em;}
 .editor_output div.tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
@@ -63,9 +63,9 @@ span.hiddenfields { margin-left:10px; }
         background:#efefef;}
 .editor_output div.tabs ul li.selected {border-bottom:solid 1px #fff; position:relative;
         background:#fff;-webkit-box-shadow: 1px 1px 1px #aaa;box-shadow: 1px 1px 1px #aaa;-moz-box-shadow: 1px 1px 1px #aaa;}
-.editor_output div.tabs ul li a {text-decoration:none; color:#000;}        
+.editor_output div.tabs ul li a {text-decoration:none; color:#000;}
 
-.editor_output div.controls {background:#fff;}
+.editor_output div.controls {position:absolute; top:0; right:0; font-size:0.8em;}
 .editor_output .info {position:relative; height:200px; font-family:monaco, courier, monospace; font-size:0.7em;
     background:#fff;}
 
