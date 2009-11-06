@@ -20,17 +20,35 @@ from scraper import template
 from scraper import vc
 import forms
 import settings
+import cgi
 
 def format_json(lines):
     ret = []
     for line in lines.splitlines():
+
         if line.startswith('<scraperwiki:message type="data">'):
             message_type = "data"
+            offset_len = len('<scraperwiki:message type="data">')
         elif line.startswith('<scraperwiki:message type="sources">'):
             message_type = "sources"
+            offset_len = len('<scraperwiki:message type="sources">')
         else:
             message_type = "console"
-        ret.append(json.dumps({'message_type' : message_type, 'content' : line}) + "@@||@@")
+            offset_len = 0
+                
+        line_escaped = cgi.escape(line[offset_len:])
+        message_string = line[:offset_len]
+        line = message_string + line_escaped
+        
+        
+        message = {
+              'message_type' : message_type, 
+              'content' : line[:100]
+              }
+        if len(line) >= 100:
+          message['content_long'] = line
+          
+        ret.append(json.dumps(message) + "@@||@@")
     return '\n'.join(ret)
 
 

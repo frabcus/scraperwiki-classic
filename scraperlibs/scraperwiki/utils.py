@@ -1,8 +1,10 @@
 __doc__ = """ScraperWiki Utils - to be replaced by proper urllib over-riding"""
 __version__ = "ScraperWiki_0.0.1"
 
-import urllib2, cookielib
-
+import urllib2
+import urllib
+import cookielib
+import re
 
 # global object handles cookies which work within the same session for now
 # this will be formalized and made explicit when we make the urllib wrapping cache system
@@ -14,9 +16,12 @@ urllibopener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 urllibopener.addheaders = [('User-agent', 'ScraperWiki - please make your data open :)')]
 
 
+
+
+
 # should the exceptions be caught here?  
 # should the print statements  go to different streams?
-def scrape (url, params=None):
+def scrape (url, params=None, escape=True):
     '''get html text given url and parameter map'''
     data = params and urllib.urlencode(params) or None
     try:
@@ -27,7 +32,7 @@ def scrape (url, params=None):
         print '<scraperwiki:message type="sources">' + "Failed: %s" % url
         return None
     print '<scraperwiki:message type="sources">' + "%d bytes from %s" % (len(text), url)
-    return text
+    return re.sub('\n','',text)
 
 
 # etree has many functions that apply to an etree._Element that are not in the Element, 

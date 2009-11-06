@@ -242,7 +242,7 @@ $(document).ready(function() {
                         }else if (oItem.message_type == 'data'){
                             writeToData(oItem.content);                                
                         }else{                            
-                            writeToConsole(oItem.content);    
+                            writeToConsole(oItem.content, oItem.content_long);    
                         }
                     };
                 }
@@ -436,7 +436,10 @@ $(document).ready(function() {
         //hide overlay
         $('#popups #overlay').fadeOut("fast")
         popupStatus = 0;
-
+        
+        // clean up the text popups
+        $('#popup_text').html('')
+        
         // set focus to the code editor so we can carry on typing
         codeeditor.focus(); 
     }
@@ -459,23 +462,26 @@ $(document).ready(function() {
     }
 
     //Write to concole/data/sources
-    function writeToConsole(sMessage) {
-
+    function writeToConsole(sMessage, sLongMessage) {
+        
         sDisplayMessage = sMessage;
-        if(sMessage.length > 200){
-            sDisplayMessage = sMessage.substring(0, 200);
-            sDisplayMessage += '&nbsp;<a href="#" onclick="showTextPopup(' + "'" + 'hello' + "'" + ')>...</a>';
+        if(sLongMessage) {
+            sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="message_expander">...more</span>';
         }
 
-        $('#output_console div').append('<span class="output_item">' + sDisplayMessage + "</span>");
+        $('#output_console .output_content').append('<span class="output_item">' + sDisplayMessage + "</span>");
         $('.editor_output div.tabs li.console').addClass('new');
         
+        $(".message_expander").bind("click", function(e){
+            showTextPopup($(this).prev().text() )
+            });
+        
         $('#output_console div').animate({ 
-            scrollTop: $('#output_console div').height()+$('#output_console div')[0].scrollHeight 
+            scrollTop: $('#output_console .output_content').height()+$('#output_console div')[0].scrollHeight 
         }, 0);
         
-    }
-    
+    };
+        
     function writeToSources(sMessage) {
 
         $('#output_sources :first').append(sMessage);
