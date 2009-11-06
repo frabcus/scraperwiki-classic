@@ -88,9 +88,9 @@
             {# Controls #}
             <div class="editor_controls">
                 <input type="submit" id="save" name="action" value="Save" />            
-                <input type="button" value="Diff committed version" name="diff" id="diff" />
+                <input type="button" value="Diff" name="diff" id="diff" />
                 <input type="button" value="Reload" name="reload" id="reload" />
-                <input type="button" value="Run" name="run" id="run" />
+                <input type="button" class="execute" value="Run" name="run" id="run" />
 
                 <div class="right">
                     {% if short_name %}
@@ -116,11 +116,11 @@
                             <a href="#">Sources</a>                            
                         </li>
                     </ul>
-                </div>
-                <div class="controls">
-                    <div id="controls_console">
-                        <a id="clear"  href="#">Clear</a>
-                    </div>
+                    <div class="controls">
+                         <div id="controls_console">
+                             <a id="clear"  href="#">Clear console</a>
+                         </div>
+                     </div>
                 </div>
                 <div class="info">
                     <div id="output_console">
