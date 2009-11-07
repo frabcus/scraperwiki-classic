@@ -15,43 +15,47 @@
 	    <div class="banner">
 	        We want to make ScraperWiki elegant, useful and fun. Please let us know what you think, good or bad. <a href="{% url contact_form %}">Send feedback</a>.
 	    </div>
+
+	    {# Header #}
+	    <div id="divHeader">
+                
+                <div id="divLogo">
+					<p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
+					<p class="hide">bootstrap the web</p>
+				</div>
+			
+			<div id="divMenu">
+			    <ul>
+				    <li><a href="{% url editor %}">Create a scraper</a></li>
+				    <li>
+				        <a href="{% url scraper_list %}">Browse Scrapers &amp; Data</a>
+				    </li>
+				    <li class="helplink"><a href="{% url help %}">Help</a></li>
+				</ul>
+				<ul class="user_menu">
+					{% if user.is_authenticated %}
+					  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.username}}</a></li>
+					  <li>{{ user.scraper_set.owned_count }}
+					     {% ifnotequal user.scraper_set.owned_count 1 %}
+					        scrapers
+					     {% else %}
+					        scraper
+					     {% endifnotequal %}
+					     <!--
+					     {% ifnotequal user.scraper_set.owned_count 0 %}
+					        ({{user.scraper_set.owned_good_count}}) OK
+					     {% endifnotequal %}
+					     -->
+					 </li>
+					 <li><a href='{% url logout %}?next_page=/'>sign out</a></li>
+					{% else %}
+						<li><a href='{% url login %}?next=/'>Sign in or create an account</a></li>
+					{% endif %}
+				</ul>
+			</div>
+	    </div>
+	    
 		<div id="divPage">
-		    <div id="divHeader">
-                    
-                    <div id="divLogo">
-    					<p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
-    					<p class="hide">bootstrap the web</p>
-    				</div>
-				
-    			<div id="divMenu">
-    			    <ul>
-    				    <li><a href="{% url editor %}">Create a scraper</a></li>
-    				    <li>
-    				        <a href="{% url scraper_list %}">Browse Scrapers &amp; Data</a>
-    				    </li>
-    				    <li><a href="#">Reuse the data</a></li>
-    				    <li class="helplink"><a href="{% url help %}">Help</a></li>
-    				</ul>
-    				<ul>
-    					{% if user.is_authenticated %}
-    					  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.username}}</a></li>
-    					  <li>{{ user.scraper_set.owned_count }}
-    					     {% ifnotequal user.scraper_set.owned_count 1 %}
-    					        scrapers
-    					     {% else %}
-    					        scraper
-    					     {% endifnotequal %}
-    					     {% ifnotequal user.scraper_set.owned_count 0 %}
-    					        ({{user.scraper_set.owned_good_count}}) OK
-    					     {% endifnotequal %}
-    					 </li>
-    					 <li><a href='{% url logout %}?next_page=/'>sign out</a></li>
-    					{% else %}
-    						<li><a href='{% url login %}?next=/'>Sign in or create an account</a></li>
-    					{% endif %}
-    				</ul>
-    			</div>
-		    </div>
 		    <div id="divInfo">
 		        {% if info_messages %}
                      <ul>
@@ -94,6 +98,8 @@
 		             <ul>
 		                 <li><a href="{% url about %}">About ScraperWiki</a></li>
 		                 <li><a href="http://blog.scraperwiki.com">Blog</a></li>
+		                 <li><a href="{% url terms %}">Terms &amp; conditions</a></li>
+		                 <li><a href="{% url privacy %}">Privacy policy</a></li>
 		             </ul>
 		            </dd>
 		           <dt>Scrapers</dt>
@@ -119,17 +125,12 @@
 			             </ul>
 		           </dd>
 		       </dl>
-				<div id="divFooterCopyright">
-				    <p>
-				        <a href="http://www.4ip.org.uk">
-					        <img src="{{ MEDIA_URL }}images/4ip.png" title="4iP Logo" alt="4iP"/>
-					    </a>
-					</p>
-					<p>
-					    &copy; Scraper Wiki Ltd&nbsp;<a href="{% url terms %}">Terms &amp; Conditions</a>
-					</p>
+                <a id="a4IP" href="http://www.4ip.org.uk">
+			        <img src="{{ MEDIA_URL }}images/4ip.png" title="4iP Logo" alt="4iP" height="63" width="74"/>
+			    </a>
+				<div id="divCopyright">
+				        &copy; ScraperWiki Ltd, supported by 4iP
 				</div>
-				<br class="clear"/>
 			</div>
 		{% endblock %}
 		<div class='popup-area'>

@@ -1,0 +1,12 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}About{% endblock %}
+{% block content %}
+    <div class="attention">
+        <h1>Page not found</h1>
+        <p>We looked, but we could not find</p>
+    </div>
+    <div class="http_error" class="content">
+        <img src="{{ MEDIA_URL }}/images/404.png"/>
+    </div>
+{% endblock %}
