@@ -420,7 +420,8 @@ $(document).ready(function() {
                 }),
               dataType: "html",
               success: function(response){
-                    if (window.location.pathname != response) {
+                    res = eval('('+response+')');
+                    if (res.url && window.location.pathname != res.url) {
                         window.location = response;
                     };
                                         

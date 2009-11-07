@@ -2,6 +2,7 @@ import re
 import sys
 import os
 import datetime
+import json
 
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
@@ -175,9 +176,12 @@ def edit(request, short_name=None):
         if action.startswith("commit"):
           return HttpResponseRedirect(reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name}))
         message = "Scraper Saved"
-        
         if request.META['CONTENT_TYPE'].startswith('json'):
-          return HttpResponse(reverse('editor', kwargs={'short_name' : savedForm.short_name}))
+          res = json.dumps({
+          'redir' : 'true',
+          'shot_name' : reverse('editor', kwargs={'short_name' : savedForm.short_name}),
+          })
+          return HttpResponse(res)
         return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : savedForm.short_name}))
         
       else:
