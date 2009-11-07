@@ -21,7 +21,7 @@ import datetime
 
 def frontpage(request):
     user = request.user
-    test = 1/0
+    
     # The following items are only used when there is a logged in user.	
     if user.is_authenticated():
         my_scrapers = user.scraper_set.filter(userscraperrole__role='owner')
