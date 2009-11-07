@@ -43,5 +43,9 @@ urlpatterns = patterns('',
     url(r'^admin/(.*)', admin.site.root, name="admin"),
 
     #market place
-    url(r'^market/', include('market.urls')),    
+    url(r'^market/', include('market.urls')),
+    
+    #favicon
+    (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/media/images/favicon.ico'}),
+    
 )
