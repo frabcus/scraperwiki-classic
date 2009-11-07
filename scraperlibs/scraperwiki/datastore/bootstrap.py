@@ -23,12 +23,14 @@ def load_scheme():
       sys.exit()
     elif exit.lower() == "y":
       print "dumping"
-      c = connection.connect()
+      conn = connection.Connection()
+      c = conn.connect()
       f = open('scheme.sql', 'r')
       c.execute(f.read())
       c.close()
       
-      c = connection.connect()
+      conn = connection.Connection()
+      c = conn.connect()
       c.execute("""INSERT INTO `sequences` VALUES(0);""")
       c.close()
       break

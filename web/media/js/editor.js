@@ -511,8 +511,15 @@ $(document).ready(function() {
     }
     
     function writeToData(sMessage) {
-
-        $('#output_data :first').append(sMessage);
+        row = eval(sMessage.substr(33))
+        
+        html_row = "<tr>"
+        $.each(row, function(i){
+            html_row +="<td>"+row[i]+"</td>"
+        })
+        html_row += "</tr>"
+        
+        $('#output_data :first').append(html_row);
         $('.editor_output div.tabs li.data').addClass('new');
         /*
             TODO Add auto scroll here

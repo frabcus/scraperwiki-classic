@@ -10,32 +10,41 @@ import MySQLdb
 Handles the database connection
 """
 
-def load_config():
-  """
-  Create a ConfigParser, open ``config.cfg`` and return it.
-    
-  """
-  config = ConfigParser.ConfigParser()
-  config.readfp(open(os.path.split(__file__)[0] + '/config.cfg'))
-  return config
-
-def connect():
-  """
-  Open a MySQLdb connection with the information in config.cfg and return a
-  connection object.
-  """
+class Connection(object):
   
-  config = load_config()
+  
+  def __load_config(self):
+    """
+    Create a ConfigParser, open ``config.cfg`` and return it.
+    
+    """
 
-  db = MySQLdb.connect(
-    host=config.get('mysql', 'host'), 
-    user=config.get('mysql', 'user'), 
-    passwd=config.get('mysql', 'passwd'),
-    db=config.get('mysql', 'db'),
-    )
+    config = ConfigParser.ConfigParser()
+    config.readfp(open(os.path.split(__file__)[0] + '/config.cfg'))
+    return config
+
+  def __test(self):
+    print "worked"
+    
+  def connect(self):
+    """
+    Open a MySQLdb connection with the information in config.cfg and return a
+    connection object.
+    """
+  
+    config = self.__load_config()
+
+    db = MySQLdb.connect(
+      host=config.get('mysql', 'host'), 
+      user=config.get('mysql', 'user'), 
+      passwd=config.get('mysql', 'passwd'),
+      db=config.get('mysql', 'db'),
+      )
  
-  return db.cursor()
+    return db.cursor()
   
  
 if __name__ == "__main__":
-  connect()  
+  c = Connection()
+  print dir(c)
+  c.connect()
