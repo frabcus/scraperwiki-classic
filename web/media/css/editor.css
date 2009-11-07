@@ -55,24 +55,24 @@ span.hiddenfields { margin-left:10px; }
 /* Output and tabs */
 .editor_output {padding-top:0.6em; background:#e3e3e3 url(../images/control_background.png);}
 .editor_output iframe {border:none;}
-.editor_output div.tabs { position:relative;}
-.editor_output div.tabs ul {border-bottom:solid 1px #9a9a9a; height:1.75em; padding:0 0 0 0.3em; margin:0; 
+.editor_output div.tabs, #popup_text .tabs { position:relative;}
+.editor_output div.tabs ul, #popup_text .tabs ul {border-bottom:solid 1px #9a9a9a; height:1.75em; padding:0 0 0 0.3em; margin:0; 
     font-size:0.8em;}
-.editor_output div.tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
+.editor_output div.tabs ul li, #popup_text .tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
         border:solid 1px #9a9a9a; border-bottom:none;
         background:#efefef;}
-.editor_output div.tabs ul li.selected {border-bottom:solid 1px #fff; position:relative;
+.editor_output div.tabs ul li.selected, #popup_text .tabs ul li.selected {border-bottom:solid 1px #fff; position:relative;
         background:#fff;-webkit-box-shadow: 1px 1px 1px #aaa;box-shadow: 1px 1px 1px #aaa;-moz-box-shadow: 1px 1px 1px #aaa;}
-.editor_output div.tabs ul li a {text-decoration:none; color:#000;}
+.editor_output div.tabs ul li a, #popup_text .tabs ul li a {text-decoration:none; color:#000;}
 
 .editor_output div.controls {position:absolute; top:0; right:0; font-size:0.8em;}
 .editor_output .info {position:relative; height:200px; font-family:monaco, courier, monospace; font-size:0.7em;
     background:#fff;}
 
 
-.editor_output .info div {height:100%;  width:100%; position:relative;}
-.editor_output .info div div {width:100%;overflow:hidden; overflow-y:scroll;}
-.editor_output .info div div .long_message {display:none;}
+.editor_output .info div.output {height:100%;  width:100%; position:relative;}
+.editor_output .info div.output div.output_content {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
+.editor_output .info div.output div.output_content .long_message {display:none;}
 
 .editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.2em 1em;}
 .editor_output .info span.output_item.run_end {border-bottom:solid 1px #cfcfcf;}
@@ -87,6 +87,10 @@ span.hiddenfields { margin-left:10px; }
 #popups .popup_item {border: 10px solid #000;position:absolute;width:500px;height:300px;background:#fff;
     z-index:110; position:absolute; top:0; width:86%; margin:5%; padding:2%;
     text-align:left; display:none; overflow:auto;}
+
+#popup_text div.output {height:90%;}
+#popup_text div pre {overflow-y : scroll; height : 100%;}
+
 
 .popupClose {font-size:18px; line-height:20px; right:6px; top:4px; position:absolute; color:#000; font-weight:700; display:block; cursor:pointer;}
 

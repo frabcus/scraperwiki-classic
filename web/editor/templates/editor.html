@@ -11,6 +11,7 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.form.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys-0.7.9.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.htmlClean-min.js"></script>
 
     <script type="text/javascript" src="{{ settings.CODEMIRROR_URL }}js/codemirror.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js"></script>  
@@ -123,16 +124,16 @@
                      </div>
                 </div>
                 <div class="info">
-                    <div id="output_console">
+                    <div id="output_console" class="output">
                         <div class="output_content"></div>
                     </div>
-                    <div id="output_data">
-                        <table>
+                    <div id="output_data" class="output">
+                        <table class="output_content">
 
                         </table>
                     </div>
-                    <div id="output_sources">
-                        <div></div>                        
+                    <div id="output_sources" class="output">
+                        <div class="output_content"></div>
                     </div>
                 </div>
                 <iframe name="console" id="console" style="display:none;"><pre></pre></iframe>
@@ -181,6 +182,14 @@
     </div>
     <div id="popup_text" class="popup_item">
         <a class="popupClose">x</a>
+        <div class="tabs">
+          <ul>
+            <li class="raw_tab"><a href="#">RAW</a></li>
+            <li class="html_tab"><a href="#">HTML</a></li>
+          </ul>
+        </div>
+        <div class="popup_html output" style="display:none"><pre></pre></div>
+        <div class="popup_raw output"><pre></pre></div>
     </div>            
 </form>
 {% endblock %}

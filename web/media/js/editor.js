@@ -15,6 +15,7 @@ $(document).ready(function() {
     setupCodeEditor();
     setupMenu();
     setupTabs();
+    setupTextTabs();
     setupPopups();
     setupToolbar()
     setupDetailsForm();
@@ -116,6 +117,22 @@ $(document).ready(function() {
 
         //show default tab
         showTab('console'); //todo: check in cookie if tab already set.
+        
+    }
+
+    //Setup Text Popup Tabs
+    function setupTextTabs(){
+        
+        //assign events
+        $('#popup_text .tabs .html_tab a').click(function(){
+            showTextTab('html');
+        })
+        $('#popup_text .tabs .raw_tab a').click(function(){
+            showTextTab('raw');
+        })
+
+        //show default tab
+        showTextTab('raw'); //todo: check in cookie if tab already set.
         
     }
     
@@ -242,7 +259,7 @@ $(document).ready(function() {
                         }else if (oItem.message_type == 'data'){
                             writeToData(oItem.content);                                
                         }else{                            
-                            writeToConsole(oItem.content, oItem.content_long);    
+                            writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
                         }
                     };
                 }
@@ -412,8 +429,9 @@ $(document).ready(function() {
     }
 
     //Show random text popup
-    function showTextPopup(sMessage){
-        $('#popup_text').append(sMessage);
+    function showTextPopup(sMessage, sMessageType){
+        $('#popup_text .popup_raw pre').text(sMessage);
+        $('#popup_text .popup_html pre').text($.htmlClean(sMessage, {format:true}));
         showPopup('popup_text');
     }
     
@@ -436,10 +454,7 @@ $(document).ready(function() {
         //hide overlay
         $('#popups #overlay').fadeOut("fast")
         popupStatus = 0;
-        
-        // clean up the text popups
-        $('#popup_text').html('')
-        
+                
         // set focus to the code editor so we can carry on typing
         codeeditor.focus(); 
     }
@@ -468,23 +483,27 @@ $(document).ready(function() {
         if(sLongMessage) {
             sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="message_expander">...more</span>';
         }
-
-        $('#output_console .output_content').append('<span class="output_item">' + sDisplayMessage + "</span>");
+        $('#output_console .output_content')
+        .append('<span class="output_item">' + sDisplayMessage + "</span>");
+        
         $('.editor_output div.tabs li.console').addClass('new');
-        
-        $(".message_expander").bind("click", function(e){
-            showTextPopup($(this).prev().text() )
-            });
-        
         $('#output_console div').animate({ 
             scrollTop: $('#output_console .output_content').height()+$('#output_console div')[0].scrollHeight 
         }, 0);
         
     };
-        
+    
+    
+    // Needed to handle 'more' links correctly
+    $('.message_expander').live('click', function() {
+            showTextPopup( $(this).prev().text() );
+    })
+    
+    
+    
     function writeToSources(sMessage) {
 
-        $('#output_sources :first').append(sMessage);
+        $('#output_sources :first').append('<div>'+sMessage+'</div>');
         $('.editor_output div.tabs li.sources').addClass('new');
         /*
             TODO Add auto scroll here
@@ -509,6 +528,15 @@ $(document).ready(function() {
 
         $('.editor_output div.tabs ul').children().removeClass('selected');
         $('.editor_output div.tabs li.' + sTab).addClass('selected');
+    }
+
+    //show text tab
+    function showTextTab(sTab){
+        $('#popup_text .output').hide();
+        $('#popup_text .popup_' + sTab).show();
+
+        $('#popup_text div.tabs ul').children().removeClass('selected');
+        $('#popup_text div.tabs li.' + sTab+'_tab').addClass('selected');
     }
 
     //resize code editor
