@@ -2,6 +2,7 @@
 import hashlib
 import os
 import connection
+import json
 
 def save(unique_keys, data=None, **kwargs):
   """
@@ -53,18 +54,20 @@ def __save_row(unique_keys, data, kwargs):
   
   for k in indexed_rows:
     if k not in data.keys():
-      data[k] = 'Null'
+      data[k] = None
   item = {'unique_hash' : unique_hash}
   for k,v in data.items():
     if k in indexed_rows:
       item[k] = v
-      # del data[k]
-
-  c = connection.connect()
+    if v is None:
+      del data[k]
+      
+  conn = connection.Connection()
+  c = conn.connect()
   if c.execute("SELECT item_id FROM items WHERE unique_hash='%s'" % unique_hash):  
     item_id = c.fetchone()
-    c.execute("DELETE FROM kv WHERE item_id='%s'" % item_id[0])
-    c.execute("DELETE FROM items WHERE unique_hash='%s'" % unique_hash)
+    c.execute("DELETE FROM kv WHERE item_id=%s" % item_id[0])
+    c.execute("DELETE FROM items WHERE unique_hash=%s", (unique_hash,))
   
   c.execute("UPDATE sequences SET id=LAST_INSERT_ID(id+1);")
   c.execute("SELECT LAST_INSERT_ID();")
@@ -73,20 +76,20 @@ def __save_row(unique_keys, data, kwargs):
  
   scraper_id = os.environ['SCRAPER_GUID']
 
-  item_sql = """
-    INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`) 
-    VALUES ('%s', '%s', '%s', '%s', '%s')
-    ;""" % (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'])
-  c.execute(item_sql)
-
-  for k,v in data.items():
-    kv_sql = """INSERT INTO `kv` (`item_id`,`key`,`value`) VALUES ('%s', '%s', '%s');""" % (item['item_id'], k,v)
-    c.execute(kv_sql)
-
-  print '<scraperwiki:message type="data">Item with an item_id of %s saved' % new_item_id
+  c.execute("INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`) \
+    VALUES (%s, %s, %s, %s, %s);", (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'],))
+  
+  for k,v in data.items():  
+    c.execute("""INSERT INTO `kv` (`item_id`,`key`,`value`) VALUES (%s, %s, %s);""", (item['item_id'], k,v))
+    
+    
+  
+  print '<scraperwiki:message type="data">(%s)' % json.dumps(data)
   return new_item_id 
 
 
+  
+  
   
 if __name__ == "__main__":
   
