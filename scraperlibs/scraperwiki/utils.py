@@ -7,7 +7,7 @@ import cookielib
 import re
 try:
   import json
-else:
+except:
   import simplejson as json
 
 import cgi

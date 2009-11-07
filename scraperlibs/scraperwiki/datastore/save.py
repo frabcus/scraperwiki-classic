@@ -4,7 +4,7 @@ import os
 import connection
 try:
   import json
-else:
+except:
   import simplejson as json
 
 import cgi

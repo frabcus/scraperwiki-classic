@@ -4,7 +4,7 @@ import os
 import datetime
 try:
   import json
-else:
+except:
   import simplejson as json
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
