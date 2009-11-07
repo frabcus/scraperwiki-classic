@@ -180,8 +180,8 @@ def edit(request, short_name=None):
         message = "Scraper Saved"
         if request.META['CONTENT_TYPE'].startswith('json'):
           res = json.dumps({
-          'redir' : 'true',
-          'shot_name' : reverse('editor', kwargs={'short_name' : savedForm.short_name}),
+          'redirect' : 'true',
+          'url' : reverse('editor', kwargs={'short_name' : savedForm.short_name}),
           })
           return HttpResponse(res)
         return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : savedForm.short_name}))

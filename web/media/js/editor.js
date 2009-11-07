@@ -1,4 +1,4 @@
-$(document).ready(function() {
+(document).ready(function() {
     
     //variables
     var editor_id = 'id_code';
@@ -285,7 +285,7 @@ $(document).ready(function() {
 
 
     function reloadScraper(){
-        if (!short_name){
+        if (shortNameIsSet() == false){
             $('#diff pre').text("Cannot reload draft scraper");
             showPopup('diff');
             return; 
