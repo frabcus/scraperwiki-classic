@@ -1,7 +1,27 @@
 <div class="content">
-	<form method='get' action="{% url editor %}">
-	    <input type='submit' value='Create a scraper now!'/>
-	</form>
-	<p><a href="#">or explore other peoples scrapers</a></p>
-	<p><a href='{% url scraper_request %}'>or even request a scraper</a></p>
+    <div id="divWelcome">
+        <div id="divWelcomeImage" style="float:right;">
+            <img src="{{ MEDIA_URL }}/images/screengrab.png" />
+        </div>
+        <div id="divWelcomeText">
+            <p>
+                There's lots of useful data locked away 
+                on the internet. ScraperWiki helps you get 
+                at it. 
+            </p>
+            <p>
+                Share code, reuse data and build the 
+                your project with less
+                hassle.
+            </p>
+                <form method="get" action="{% url editor %}">
+            	    <input type="submit" class="button" value="Start writing a scraper now!"/>
+            	</form>
+            	<ul>
+        	        <li><a href="{% url scraper_list %}">Explore other peoples scrapers</a></li>
+        	        <li><a href="{% url scraper_request %}">Request a scraper</a></li>
+    	        </ul>
+        </div>
+    </div>
+    <br class="clear"/>
 </div>

@@ -93,6 +93,16 @@ ul.form li {padding:0; margin:0; list-style-type:none;}
 ul.form li label {display:block; float:left; width:10em;}
 fieldset {padding:0; margin:0; border:none;}
 
+input.button {font-size:1em;
+    -webkit-border-radius: 4px;-moz-border-radius: 4px; 
+    background-color:#6fb1e6; color:#fff;
+        padding:0.4em 0.6em 0.4em 0.6em;border:solid 1px #2680c6;font-weight:bold; text-transform:uppercase;}
+input.button:active {color:#2680c6;}
+
+/* Lists */
+ul {padding-left:0;}
+ul li {padding:0 0 0.5em 0; margin-left:0;list-style-type:none;}
+
 /* Scroll */
 div.scroll {overflow-y:scroll; border:solid 1px #ccc; padding:0.5em;}
 
@@ -106,3 +116,8 @@ span.highlight {background:#ffffaa; padding:0 0.4em;}
 
 /* scraper list page */
 ul.allscraperlist li {list-style-type:none; padding:0.2em; }
+
+
+/* Welcome page */
+#divWelcome {position:relative; top:-2em;}
+#divWelcomeText p {font-size:1.6em; font-weight:bold;}
