@@ -1,7 +1,20 @@
 {% extends "frontend/base.html" %}
+{% load formhelper %}
+
+{% block title %}Contact us{% endblock %}
+
+{% block errors %}
+    {% if form.errors %}
+        <ul>
+            {% form_errors form %}
+        </ul>
+    {% endif %}
+
+{% endblock %}
+
 {% block content %}
     <div class="page_title">
-        <h1>Feedback</h1>
+        <h1>Contact us</h1>
         <p>Ask us a question or make a suggestion</p>
     </div>
     <div class="content left col">
@@ -10,28 +23,33 @@
                 <li>
                     {{ form.name.label_tag }}
                     {{ form.name }}
+        	        {% field_errors form.name %}                    
                 </li>
                 <li>
                     {{ form.email.label_tag }}
                     {{ form.email }}
+        	        {% field_errors form.email %}                    
                 </li>
                 <li>
                     {{ form.subject_dropdown.label_tag }}
                     {{ form.subject_dropdown }}
+                    {% field_errors form.subject_dropdown %}
                 </li>
                 <li>
                     {{ form.title.label_tag }}
                     {{ form.title }}
+                    {% field_errors form.title %}
                 </li>
                 <li>
                     {{ form.body.label_tag }}                    
                     {{ form.body }}
+                    {% field_errors form.body %}
                 </li>
             </ul>
             <input type="submit" value="Send feedback" />
         </form>
     </div>
     <div class="content right col">
-        fdsfdsf
+        &nbsp;
     </div>
 {% endblock %}
