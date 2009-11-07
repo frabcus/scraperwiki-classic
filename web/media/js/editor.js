@@ -411,6 +411,7 @@ $(document).ready(function() {
         if(bSuccess == true){
             $.ajax({
               type : 'POST',
+              contentType : "json",
               URL : window.location.pathname,
               data: ({
                 title : $('#id_title').val(),
@@ -419,8 +420,13 @@ $(document).ready(function() {
                 }),
               dataType: "html",
               success: function(response){
+                    if (window.location.pathname != response) {
+                        window.location = response;
+                    };
+                                        
                     showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
                 },
+
             error: function(response){
                 alert('Sorry, something went wrong');
               }
