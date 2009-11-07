@@ -283,9 +283,8 @@ $(document).ready(function() {
         });
     }
 
-
     function reloadScraper(){
-        if (!short_name){
+        if (shortNameIsSet() == false){
             $('#diff pre').text("Cannot reload draft scraper");
             showPopup('diff');
             return; 
