@@ -94,8 +94,8 @@
                 <input type="button" class="execute" value="Run" name="run" id="run" />
 
                 <div class="right">
-                    {% if short_name %}
-                        <a href="{% url scraper_code short_name %}">Close editor</a>
+                    {% if scraper.short_name %}
+                        <a href="{% url scraper_code scraper.short_name %}">Close editor</a>
                     {% else %}
                         <a href="{% url frontpage %}">Close editor</a>                
                     {% endif %}
