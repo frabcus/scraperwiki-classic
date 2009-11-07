@@ -2,8 +2,10 @@ import re
 import sys
 import os
 import datetime
-import json
-
+try:
+  import json
+else:
+  import simplejson as json
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User

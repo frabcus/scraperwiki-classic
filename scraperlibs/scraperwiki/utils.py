@@ -5,7 +5,11 @@ import urllib2
 import urllib
 import cookielib
 import re
-import json
+try:
+  import json
+else:
+  import simplejson as json
+
 import cgi
 
 # global object handles cookies which work within the same session for now
