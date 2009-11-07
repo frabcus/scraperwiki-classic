@@ -3,6 +3,7 @@ import hashlib
 import os
 import connection
 import json
+import cgi
 
 def save(unique_keys, data=None, **kwargs):
   """
@@ -82,9 +83,12 @@ def __save_row(unique_keys, data, kwargs):
   for k,v in data.items():  
     c.execute("""INSERT INTO `kv` (`item_id`,`key`,`value`) VALUES (%s, %s, %s);""", (item['item_id'], k,v))
     
+    # clean for printing to the console
+    data[k] = cgi.escape(v)
+    
     
   
-  print '<scraperwiki:message type="data">(%s)' % json.dumps(data)
+  print '<scraperwiki:message type="data">%s' % json.dumps(data)
   return new_item_id 
 
 

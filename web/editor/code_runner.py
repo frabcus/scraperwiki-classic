@@ -25,30 +25,30 @@ import cgi
 def format_json(lines):
     ret = []
     for line in lines.splitlines():
+      if line.startswith('<scraperwiki:message type="data">'):
+        offset_len = len('<scraperwiki:message type="data">')
+        message = {}
+        message['content'] = json.loads(line[offset_len:])
+        message['message_type'] = "data"
+        
+      elif line.startswith('<scraperwiki:message type="sources">'):
+        offset_len = len('<scraperwiki:message type="sources">')
+        message = json.loads(line[offset_len:])
+        message['message_type'] = "sources"
 
-        if line.startswith('<scraperwiki:message type="data">'):
-            message_type = "data"
-            offset_len = len('<scraperwiki:message type="data">')
-        elif line.startswith('<scraperwiki:message type="sources">'):
-            message_type = "sources"
-            offset_len = len('<scraperwiki:message type="sources">')
-        else:
-            message_type = "console"
-            offset_len = 0
-                
-        line_escaped = cgi.escape(line[offset_len:])
-        message_string = line[:offset_len]
-        line = message_string + line_escaped
-        
-        
+      else:
+        message_type = "console"
+
+        line = cgi.escape(line)
+
         message = {
-              'message_type' : message_type, 
-              'content' : line[:100]
-              }
+        'message_type' : message_type, 
+        'content' : line[:100]
+        }
         if len(line) >= 100:
           message['content_long'] = line
-          
-        ret.append(json.dumps(message) + "@@||@@")
+      ret.append(json.dumps(message) + "@@||@@")
+
     return '\n'.join(ret)
 
 

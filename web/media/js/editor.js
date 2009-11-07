@@ -255,10 +255,10 @@ $(document).ready(function() {
                     for (var i=0; i < aResults.length -1; i++) {
                         var oItem = eval('(' + aResults[i] + ')')
                         if(oItem.message_type == 'sources'){                                                        
-                            writeToSources(oItem.content);                                                            
+                            writeToSources(oItem.content, oItem.content_long);                                                            
                         }else if (oItem.message_type == 'data'){
                             writeToData(oItem.content);                                
-                        }else{                            
+                        }else{
                             writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
                         }
                     };
@@ -478,7 +478,7 @@ $(document).ready(function() {
 
     //Write to concole/data/sources
     function writeToConsole(sMessage, sLongMessage) {
-        
+
         sDisplayMessage = sMessage;
         if(sLongMessage) {
             sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="message_expander">...more</span>';
@@ -494,24 +494,32 @@ $(document).ready(function() {
     };
     
     
-    // Needed to handle 'more' links correctly
+    // Needed to handle 'more' (.message_expander) links correctly
     $('.message_expander').live('click', function() {
             showTextPopup( $(this).prev().text() );
     })
     
     
     
-    function writeToSources(sMessage) {
+    function writeToSources(sMessage, sLongMessage) {
 
-        $('#output_sources :first').append('<div>'+sMessage+'</div>');
+
+        sDisplayMessage = sMessage;
+        if(sLongMessage) {
+            sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="message_expander">...more</span>';
+        }
+        $('#output_sources .output_content')
+        .append('<span class="output_item">' + sDisplayMessage + "</span>");
+        
+        
         $('.editor_output div.tabs li.sources').addClass('new');
-        /*
-            TODO Add auto scroll here
-        */
+        $('#output_sources div').animate({ 
+            scrollTop: $('#output_sources .output_content').height()+$('#output_sources div')[0].scrollHeight 
+        }, 0);
     }
     
     function writeToData(sMessage) {
-        row = eval(sMessage.substr(33))
+        row = eval(sMessage)
         
         html_row = "<tr>"
         $.each(row, function(i){

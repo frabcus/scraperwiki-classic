@@ -5,6 +5,8 @@ import urllib2
 import urllib
 import cookielib
 import re
+import json
+import cgi
 
 # global object handles cookies which work within the same session for now
 # this will be formalized and made explicit when we make the urllib wrapping cache system
@@ -31,8 +33,14 @@ def scrape (url, params=None, escape=True):
     except:
         print '<scraperwiki:message type="sources">' + "Failed: %s" % url
         return None
-    print '<scraperwiki:message type="sources">' + "%d bytes from %s" % (len(text), url)
-    return re.sub('\n','',text)
+    
+    print_content = {
+      'content' : "%d bytes from %s" % (len(text), url),
+      'content_long' : cgi.escape(text),
+      }
+    
+    print '<scraperwiki:message type="sources">%s' % json.dumps(print_content)
+    return text
 
 
 # etree has many functions that apply to an etree._Element that are not in the Element, 
