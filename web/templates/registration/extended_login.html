@@ -2,7 +2,7 @@
 
 {% load formhelper %}
 
-{% block title %}Scraperwiki front page{% endblock %}
+{% block title %}Sign in or create an account{% endblock %}
 
 {% block errors %}
     {% if login_form.errors %}
@@ -20,6 +20,12 @@
 {% endblock %}
 
 {% block content %}
+    <div class="page_title">
+        <h1>Sign in or create an account</h1>
+        <p>
+            If you are an existing user please sign in, if not create a new account
+        </p>
+    </div>
     <div class="content half left">
     	<form method="post" action=".">
     	    <ul class="form">
