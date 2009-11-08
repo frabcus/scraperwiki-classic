@@ -53,6 +53,12 @@ def login(request):
 
     error_messages = []
 
+    #grab the redirect URL if set
+    redirect = request.GET.get('next', False)
+    if request.POST.get('redirect', False):
+        redirect = request.POST.get('redirect', False)
+
+    
     #Create login and registration forms
     login_form = SigninForm()
     registration_form = CreateAccountForm()
@@ -81,7 +87,11 @@ def login(request):
                         reverse('editor') + "?action=%s" % request.session['ScraperDraft'].action
                         )
 
-                    return HttpResponseRedirect(reverse('frontpage'))
+                    if redirect:
+                        return HttpResponseRedirect(redirect)
+                    else:
+                        return HttpResponseRedirect(reverse('frontpage'))
+
 
                 else:
                     # Account exists, but not activated                    
@@ -95,13 +105,23 @@ def login(request):
             if registration_form.is_valid():
                 backend = get_backend(settings.REGISTRATION_BACKEND)             
                 new_user = backend.register(request, **registration_form.cleaned_data)
-                return HttpResponseRedirect(reverse('confirm_account'))
+
+                #sign straight in
+                signed_in_user = auth.authenticate(username=request.POST['username'], password=request.POST['password1'])
+                auth.login(request, signed_in_user)
+                
+                #redirect
+                if redirect:
+                    return HttpResponseRedirect(redirect)
+                else:
+                    return HttpResponseRedirect(reverse('frontpage'))
+
     else:
         login_form = SigninForm()
         registration_form = CreateAccountForm()
         message = None
 
-    return render_to_response('registration/extended_login.html', {'registration_form': registration_form, 'login_form': login_form, 'error_messages': error_messages}, context_instance = RequestContext(request))
+    return render_to_response('registration/extended_login.html', {'registration_form': registration_form, 'login_form': login_form, 'error_messages': error_messages, 'redirect': redirect}, context_instance = RequestContext(request))
 
         
     

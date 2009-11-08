@@ -28,6 +28,9 @@
     </div>
     <div class="content half left">
     	<form method="post" action=".">
+    	    <fieldset>
+    	        <input type="hidden" name="redirect" value="{{redirect}}"/>
+    	    </fieldset>
     	    <ul class="form">
     	        <li{% if login_form.username.errors %} class="error"{% endif %}>
             	    {{ login_form.username.label_tag }}
@@ -51,6 +54,9 @@
     <div class="content half right">
 
     	<form method="post" action=".">
+    	    <fieldset>
+    	       <input type="hidden" name="redirect" value="{{redirect}}"/>
+    	    </fieldset>
     	    <ul class="form">	    
     	        <li{% if registration_form.username.errors %} class="error"{% endif %}>
         	        {{ registration_form.username.label_tag }}
