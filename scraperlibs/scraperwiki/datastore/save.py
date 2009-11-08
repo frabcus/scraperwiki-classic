@@ -2,7 +2,11 @@
 import hashlib
 import os
 import connection
-import json
+try:
+  import json
+except:
+  import simplejson as json
+
 import cgi
 
 def save(unique_keys, data=None, **kwargs):
