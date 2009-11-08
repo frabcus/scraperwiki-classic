@@ -128,3 +128,6 @@ div.terms {line-height:1.5em;}
 div.terms ul dl, div.terms ul ul {padding-left:2em}
 div.terms ul dl dt {font-weight:bold;}
 div.terms ul dl dd {padding-left:0; margin-left:0; padding-bottom:0.5em;}
+
+/* Signup page */
+#divSignupTerms div.scroll {height:160px; font-size:0.7em;}
