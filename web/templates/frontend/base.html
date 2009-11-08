@@ -50,9 +50,9 @@
 					     {% endifnotequal %}
 					     -->
 					 </li>
-					 <li><a href='{% url logout %}?next_page=/'>sign out</a></li>
+					 <li><a href="{% url logout %}?next_page=/">sign out</a></li>
 					{% else %}
-						<li><a href='{% url login %}?next=/'>Sign in or create an account</a></li>
+						<li><a href="{% url login %}?next=/">Sign in or create an account</a></li>
 					{% endif %}
 				</ul>
 			</div>
@@ -81,7 +81,7 @@
     		    {% endblock %}		    
     		</div>
 		    <div id="divContent">
-		      
+
           {% if notifications %}
           <ul class="notifications">
                   {% for message in notifications %}
@@ -115,8 +115,8 @@
 		           <dt>Reuse the data</dt>
 		           <dd>
 		             <ul>
-		                 <li><a href="#">API</a></li>
-		                 <li><a href="#">Code libraries</a></li>			                 
+		                 <li><a href="{% url api %}">API</a></li>
+		                 <li><a href="{% url api %}">Code libraries</a></li>			                 
 		             </ul>
 		            </dd>
 		           <dt>Help &amp; support</dt>

@@ -1,0 +1,13 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Account confirmed{% endblock %}
+{% block content %}
+    <div class="content">
+        <div class="attention">
+            <h1>Your account has been activated</h1>
+            <p>
+                <a href="{% url login %}?next=/">Click here to sign in</a>
+            </p>
+        </div>
+    </div>
+{% endblock %}
