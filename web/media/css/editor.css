@@ -3,7 +3,7 @@ body{overflow:hidden; height:100%;}
 
 /* Draft warning */
 div.draft_warning {background:#ffce5d; text-align:center; font-size:0.7em; padding:0.3em 0 0.2em 0;
-    border-bottom:solid 1px #c38938;color:#000;display:none;}
+    border-bottom:solid 1px #c38938;color:#000;}
 
 /* Header */
 .editor_header {min-height:1.5em; background:#000 url(../images/black_bar.png) repeat-x 50% 50%; position:relative;}

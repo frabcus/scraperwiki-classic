@@ -289,7 +289,6 @@ $(document).ready(function() {
         });
     }
 
-
     function reloadScraper(){
         if (shortNameIsSet() == false){
             $('#diff pre').text("Cannot reload draft scraper");

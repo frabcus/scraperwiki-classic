@@ -5,11 +5,12 @@ body {text-align:center; padding:0; margin:0; font-family:helvetica, arial, sans
 #divPage {width:94%; text-align:left; margin:0 auto; position:relative;}
 
 /* Banner (feedback etc) */
-div.banner {background:#ffffd7; font-size:0.8em; padding:0.6em 0; display:none;}
+div.banner {background:#ffffd7; font-size:0.8em; padding:0.6em 0;}
 div.banner a {font-weight:bold;}
 
 /* Header & menu */
-#divHeader {border-bottom:solid 1px #9f9f9f; padding:0 3% 0.3em 3%; margin-bottom:1em; width:94%;}
+#divHeader {border-bottom:solid 1px #9f9f9f; padding:0 3% 0.3em 3%; margin-bottom:1em; width:94%;
+    position:relative;}
 #divLogo p a {display:block; height:60px; width:270px; background:url(../images/logo.png) no-repeat;}
 #divMenu {position:absolute; top:0; right:3%; text-align:right;}
 #divMenu ul li {padding:0.3em 0.3em; list-style-type:none; display:inline;}
@@ -121,3 +122,12 @@ ul.allscraperlist li {list-style-type:none; padding:0.2em; }
 /* Welcome page */
 #divWelcome {position:relative; top:-2em;}
 #divWelcomeText p {font-size:1.6em; font-weight:bold;}
+
+/* Terms & conditions */
+div.terms {line-height:1.5em;}
+div.terms ul dl, div.terms ul ul {padding-left:2em}
+div.terms ul dl dt {font-weight:bold;}
+div.terms ul dl dd {padding-left:0; margin-left:0; padding-bottom:0.5em;}
+
+/* Signup page */
+#divSignupTerms div.scroll {height:160px; font-size:0.7em;}

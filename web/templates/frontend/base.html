@@ -13,7 +13,7 @@
 	</head>
 	<body>
 	    <div class="banner">
-	        We want to make ScraperWiki elegant, useful and fun. Please let us know what you think, good or bad. <a href="{% url contact_form %}">Send feedback</a>.
+	        This is the alpha version of ScraperWiki. Please <a href="{% url contact_form %}">tell us what you think</a>, good or bad.
 	    </div>
 
 	    {# Header #}
@@ -29,6 +29,9 @@
 				    <li><a href="{% url editor %}">Create a scraper</a></li>
 				    <li>
 				        <a href="{% url scraper_list %}">Browse Scrapers &amp; Data</a>
+				    </li>
+				    <li>
+				        <a href="{% url api %}">API</a>
 				    </li>
 				    <li class="helplink"><a href="{% url help %}">Help</a></li>
 				</ul>
@@ -47,9 +50,9 @@
 					     {% endifnotequal %}
 					     -->
 					 </li>
-					 <li><a href='{% url logout %}?next_page=/'>sign out</a></li>
+					 <li><a href="{% url logout %}?next_page=/">sign out</a></li>
 					{% else %}
-						<li><a href='{% url login %}?next=/'>Sign in or create an account</a></li>
+						<li><a href="{% url login %}?next=/">Sign in or create an account</a></li>
 					{% endif %}
 				</ul>
 			</div>
@@ -78,7 +81,7 @@
     		    {% endblock %}		    
     		</div>
 		    <div id="divContent">
-		      
+
           {% if notifications %}
           <ul class="notifications">
                   {% for message in notifications %}
@@ -112,8 +115,8 @@
 		           <dt>Reuse the data</dt>
 		           <dd>
 		             <ul>
-		                 <li><a href="#">API</a></li>
-		                 <li><a href="#">Code libraries</a></li>			                 
+		                 <li><a href="{% url api %}">API</a></li>
+		                 <li><a href="{% url api %}">Code libraries</a></li>			                 
 		             </ul>
 		            </dd>
 		           <dt>Help &amp; support</dt>
@@ -126,10 +129,10 @@
 		           </dd>
 		       </dl>
                 <a id="a4IP" href="http://www.4ip.org.uk">
-			        <img src="{{ MEDIA_URL }}images/4ip.png" title="4iP Logo" alt="4iP" height="63" width="74"/>
+			        <img src="{{ MEDIA_URL }}images/4ip.png" title="Supported by 4iP Logo" alt="4iP" height="63" width="74"/>
 			    </a>
 				<div id="divCopyright">
-				        &copy; ScraperWiki Ltd, supported by 4iP
+				        &copy; ScraperWiki Ltd
 				</div>
 			</div>
 		{% endblock %}
