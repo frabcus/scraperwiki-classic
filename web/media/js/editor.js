@@ -1,4 +1,4 @@
-(document).ready(function() {
+$(document).ready(function() {
     
     //variables
     var editor_id = 'id_code';
@@ -240,7 +240,7 @@
             return false;
             // <-- important!
         } else {
-            $.ajax({
+            var run_request = $.ajax({
                 type: 'POST',
                 url: '/editor/run_code',
                 data: ({
@@ -248,7 +248,12 @@
                     guid: guid
                 }),
                 dataType: "html",
+                
                 success: function(code) {        
+                    
+                    $('.editor_controls #run').unbind('click.abort');
+                    $('.editor_controls #run').bind('click.run', run_abort);
+                    $('.editor_controls #run').removeClass('running').val('run');
 
                     //split results
                     var aResults = code.split("@@||@@");
@@ -264,6 +269,7 @@
                     };
                 }
             });
+            return run_request
         }
     }
 
@@ -321,6 +327,21 @@
         }
     }; 
 
+
+    function run_abort() {
+            runRequest = runScraper();
+            $('.editor_controls #run').unbind('click.run')
+            $('.editor_controls #run').addClass('running').val('Stop');
+            $('.editor_controls #run').bind('click.abort', function() {
+                runRequest.abort()
+                $('.editor_controls #run').removeClass('running').val('run');
+                $('.editor_controls #run').unbind('click.abort')                    
+                writeToConsole('Run Aborted') // Custom function that append to a div
+                $('.editor_controls #run').bind('click.run', run_abort);
+            });
+        }
+    
+    
     //Setup toolbar
     function setupToolbar(){
         
@@ -346,11 +367,7 @@
         });
         
         // run button
-        $('.editor_controls #run').click(function() {
-                runScraper(); 
-                return false; 
-            }
-        ); 
+        $('.editor_controls #run').bind('click.run', run_abort);
 
         //diff button
          $('.editor_controls #diff').click(function() {
@@ -422,7 +439,7 @@
               success: function(response){
                     res = eval('('+response+')');
                     if (res.url && window.location.pathname != res.url) {
-                        window.location = response;
+                        window.location = res;
                     };
                                         
                     showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");

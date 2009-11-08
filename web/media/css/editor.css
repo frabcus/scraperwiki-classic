@@ -40,6 +40,7 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.7em; paddi
 
 .editor_controls #save {background-image:url(../images/icons/disk.png)}
 .editor_controls #run {background-image:url(../images/icons/cog.png)}
+.editor_controls #run.running {color:red;}
 .editor_controls #reload {background-image:url(../images/icons/arrow_refresh.png)}
 .editor_controls #diff {background-image:url(../images/icons/diff.png)}
 .editor_controls #commit {background-image:url(../images/icons/database_save.png); border-color:#2680c6;

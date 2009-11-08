@@ -92,7 +92,13 @@ def edit(request, short_name=None):
     * If short_name exists, don't make a new one
     
   """
-
+  
+  # For special cases where we are calling from AJAX
+  if request.META.get('CONTENT_TYPE', '').startswith('json'):
+    is_json = True
+  else:
+    is_json = False
+  
   draft = request.session.get('ScraperDraft', None)
   has_draft = False
   # First off, create a scraper instance somehow.
@@ -178,7 +184,7 @@ def edit(request, short_name=None):
         if action.startswith("commit"):
           return HttpResponseRedirect(reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name}))
         message = "Scraper Saved"
-        if request.META.get('CONTENT_TYPE', '').startswith('json'):
+        if is_json:
           res = json.dumps({
           'redirect' : 'true',
           'url' : reverse('editor', kwargs={'short_name' : savedForm.short_name}),
@@ -187,10 +193,17 @@ def edit(request, short_name=None):
         return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : savedForm.short_name}))
         
       else:
+        # The user is not authenticated.
+        # This can happen when a user creates a scraper before logging in or registering
+        # When they hit the save button, by default an ajax call is made.  In this case we
+        # don't want to set a message or redirect them, we just return a JSON object.
+        request.session['ScraperDraft'] = savedForm
+        if is_json:
+          return HttpResponse(json.dumps({'status' : 'OK', 'draft' : 'True'}))
         # Set a message with django_notify
         request.notifications.add("You need to sign in or create an account - don't worry, your scraper is safe ")
         savedForm.action = action
-        request.session['ScraperDraft'] = savedForm
+
         return HttpResponseRedirect(reverse('login'))
         
         
