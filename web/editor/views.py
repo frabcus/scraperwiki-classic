@@ -178,7 +178,7 @@ def edit(request, short_name=None):
         if action.startswith("commit"):
           return HttpResponseRedirect(reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name}))
         message = "Scraper Saved"
-        if request.META['CONTENT_TYPE'].startswith('json'):
+        if request.META.get('CONTENT_TYPE', '').startswith('json'):
           res = json.dumps({
           'redirect' : 'true',
           'url' : reverse('editor', kwargs={'short_name' : savedForm.short_name}),
