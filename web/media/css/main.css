@@ -122,3 +122,9 @@ ul.allscraperlist li {list-style-type:none; padding:0.2em; }
 /* Welcome page */
 #divWelcome {position:relative; top:-2em;}
 #divWelcomeText p {font-size:1.6em; font-weight:bold;}
+
+/* Terms & conditions */
+div.terms {line-height:1.5em;}
+div.terms ul dl, div.terms ul ul {padding-left:2em}
+div.terms ul dl dt {font-weight:bold;}
+div.terms ul dl dd {padding-left:0; margin-left:0; padding-bottom:0.5em;}
