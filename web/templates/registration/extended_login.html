@@ -81,9 +81,18 @@
                 <p>
                     <small><a href="{% url terms %}" target="_new">Open in a new window</a></small>
                 </p>
-        	    {{ registration_form.tos }}
-        	    {{ registration_form.tos.label_tag }}        	    
-        	    {% field_errors registration_form.tos %}  
+                <ul>
+                    <li>
+                	    {{ registration_form.tos }}
+                	    {{ registration_form.tos.label_tag }}        	    
+                	    {% field_errors registration_form.tos %}
+                	</li>
+                	<li>
+                	    {{ registration_form.data_protection }}
+                	    {{ registration_form.data_protection.label_tag }}        	    
+                	    {% field_errors registration_form.data_protection %}
+                	</li>
+                </ul>
             </div>
     		<input type="submit" name="register" value="Create your account" />
     	</form>
