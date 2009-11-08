@@ -1,4 +1,4 @@
-(document).ready(function() {
+$(document).ready(function() {
     
     //variables
     var editor_id = 'id_code';
