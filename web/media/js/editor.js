@@ -438,7 +438,7 @@ $(document).ready(function() {
               success: function(response){
                     res = eval('('+response+')');
                     if (res.url && window.location.pathname != res.url) {
-                        window.location = res;
+                        window.location = res.url;
                     };
                                         
                     showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
