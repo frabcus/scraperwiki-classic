@@ -41,6 +41,7 @@ EMAIL_SUBJECT_PREFIX = "[ScraperWiki Bugs] "
 
 SESSION_TIMEOUT = 1209600
 
+QUICKCACHE_DIR      = HOME_DIR + '/quickcache/'   # leave blank to disable caching
 
 
 # Define how scraper code should be run.

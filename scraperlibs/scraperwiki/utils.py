@@ -11,6 +11,8 @@ except:
   import simplejson as json
 
 import cgi
+import os
+import settings
 
 # global object handles cookies which work within the same session for now
 # this will be formalized and made explicit when we make the urllib wrapping cache system
@@ -22,22 +24,34 @@ urllibopener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 urllibopener.addheaders = [('User-agent', 'ScraperWiki - please make your data open :)')]
 
 
-
-
-
 # should the exceptions be caught here?  
 # should the print statements  go to different streams?
 def scrape (url, params=None, escape=True):
     '''get html text given url and parameter map'''
     data = params and urllib.urlencode(params) or None
-    try:
-        fin = urllibopener.open(url, data)
-        text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
-        fin.close()   # get the mimetype here
-    except:
-        print '<scraperwiki:message type="sources">' + "Failed: %s" % url
-        return None
     
+    fname = settings.QUICKCACHE_DIR and os.path.join(settings.QUICKCACHE_DIR, urllib.quote_plus(url + (params and "?" + params or "")))
+    
+    if fname and os.path.exists(fname):
+        fin = open(fname)
+        text = fin.read()
+        fin.close()
+        
+    else:
+        try:
+            fin = urllibopener.open(url, data)
+            text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
+            fin.close()   # get the mimetype here
+            
+            if fname and os.path.exists(settings.QUICKCACHE_DIR):
+                fout = open(fname, "w")
+                fout.write(text)
+                fout.close()
+            
+        except:
+            print '<scraperwiki:message type="sources">' + "Failed: %s" % url
+            return None
+        
     print_content = {
       'content' : "%d bytes from %s" % (len(text), url),
       'content_long' : cgi.escape(text),
