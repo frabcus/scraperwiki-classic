@@ -67,7 +67,7 @@ span.hiddenfields { margin-left:10px; }
 .editor_output div.tabs ul li a, #popup_text .tabs ul li a {text-decoration:none; color:#000;}
 
 .editor_output div.controls {position:absolute; top:0; right:0; font-size:0.8em;}
-.editor_output .info {position:relative; height:200px; font-family:monaco, courier, monospace; font-size:0.7em;
+.editor_output .info {position:relative; height:200px; font-family:monaco, courier, monospace; font-size:12px;
     background:#fff;}
 
 
@@ -76,11 +76,17 @@ span.hiddenfields { margin-left:10px; }
 .editor_output .info div.output div.output_content .long_message {display:none;}
 
 .editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.2em 1em;}
+.editor_output .info span.output_item:hover {background:#ffffd7;}
 .editor_output .info span.output_item.run_end {border-bottom:solid 1px #cfcfcf;}
 
 .editor_output div.tabs ul li.new a {color:green; font-weight:bold;}
 
 .editor_output div.controls { padding:0 1em;}
+
+.editor_output table {width:100%; border-collapse:collapse;}
+.editor_output tr:nth-child(even) {background:#fafafa;}
+.editor_output tr:hover td {background:#ffffd7;}
+.editor_output td {border-bottom:dotted 1px #ccc; padding:0.3em 0.5em; line-height:1em;}
 
 /* Overlays and help */
 #overlay {background:black;z-index:100;position:absolute; top:0; left:0; width:100%; height:100%;

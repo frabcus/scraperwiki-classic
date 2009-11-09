@@ -23,7 +23,6 @@ def solicitation(request):
     return render_to_response('market/solicitation.html', {'form': form }, context_instance = RequestContext(request))
 
 
-def list(request):
-    #return render_to_response('market/list.html', {'form': form }, context_instance = RequestContext(request))
-    
-    return True
+def market_list(request):
+    solicitations = models.Solicitation.objects.filter(deleted=False).order_by('-created_at')    
+    return render_to_response('market/market_list.html', {'solicitations': solicitations}, context_instance = RequestContext(request))

@@ -66,7 +66,14 @@
                              <li>{{ info|escape }}</li>
                          {% endfor %}
                      </ul>
-                 {% endif %}	    
+                 {% endif %}
+                 {% if notifications %}
+                 <ul>
+                         {% for message in notifications %}
+                         <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                         {% endfor %}
+                 </ul>
+                 {% endif %}
     		</div>
 		    <div id="divErrors">
 		        {% if error_messages %}
@@ -81,14 +88,6 @@
     		    {% endblock %}		    
     		</div>
 		    <div id="divContent">
-
-          {% if notifications %}
-          <ul class="notifications">
-                  {% for message in notifications %}
-                  <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                  {% endfor %}
-          </ul>
-          {% endif %}
           
   		    {% block content %}{% endblock %}
 		    </div>
