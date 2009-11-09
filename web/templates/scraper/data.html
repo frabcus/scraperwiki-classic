@@ -1,6 +1,9 @@
 {% extends "scraper/scraper_base.html" %}
 
 {% block tab %}
+<div class="tab_tools">
+    <a href="{% url export_csv scraper.short_name %}">download csv</a>
+</div>
   {% if data.headings %}
     
 
