@@ -5,9 +5,9 @@
 {% block content %}
 
     <div class="page_title">
-		<img src="{{ profile.user.image_url }}" id='profile_image'/>
+		<!--<img src="{{ profile.user.image_url }}" id='profile_image'/>-->
 		<h1>{{ profile.user.username }}'s profile</h1>
-		<p id="profile-bio">{{ profile.bio }}</p>
+		<p>{{ profile.bio }}</p>
 	</div>
 	<div class="content">
     	<h2>{{ profile.user.username }}'s scrapers</h2>
@@ -19,7 +19,7 @@
 	
     	<h2>Scrapers {{ profile.user.username }} is watching</h2>
     	{% if  profile.user.scraper_set.not_watching_any %}
-    	  <p id='not-watching-notice'><span class='text'>You are not watching any scrapers</span></p>
+    	  <p>You are not watching any scrapers</p>
     	{% else %}
     	  <ul>
     		{% for scraper in profile.user.scraper_set.watching %}	

@@ -13,6 +13,12 @@
 {% endblock %}
 
 {% block content %}
+    <div class="page_title">
+        <h1>Suggest a scraper</h1>
+        <p>
+            If you know of an interesting source of data for someone to scrape, please add it here
+        </p>
+    </div>
     <div class="content col left">
     	<form method="post" action=".">
     	    <ul class="form">
@@ -31,17 +37,12 @@
             	    {{ form.details }}
         	        {% field_errors form.details %}
     	        </li>    	        
-    	        <li class="{% if form.price.errors %}error{% endif %}" style="visibility:hidden">
-            	    {{ form.price.label_tag }}
-            	    {{ form.price }}
-        	        {% field_errors form.price %}
-    	        </li>    	        
             </ul>
     		<input type="submit" name="login" value="Submit" />
     	</form>
     </div>
 
     <div class="content col right">
-        dsads
+        &nbsp;
     </div>
 {% endblock %}
