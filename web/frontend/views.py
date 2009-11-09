@@ -76,7 +76,7 @@ def login(request):
 
                     #Log in
                     auth.login(request, user)
-                    
+
                     #set session timeout
                     if request.POST.has_key('remember_me'):
                         request.session.set_expiry(settings.SESSION_TIMEOUT)
