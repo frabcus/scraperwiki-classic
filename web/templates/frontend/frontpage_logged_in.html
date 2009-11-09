@@ -1,7 +1,6 @@
 <div class="page_title">
-	<h1><span class="text">Welcome back {{ user.username }}</span></h1>
-	<p>You are currently contributing to {{ contribution_count }} scraper(s), XXX of which are OK and have scraped a total of XXXXX records.</p>
-	<p>You are watching Q other scrapers and following P people.</p>
+	<h1><span class="text">Hello {{ user.username }}</span></h1>
+	<p>You are currently contributing to {{ contribution_count }} scraper(s)</p>
 </div>
 
 <div class="content col left">
@@ -13,71 +12,30 @@
     	{% endfor %}
 	</ul>
 
+    <!--
 	<h2>Scrapers you are watching</h2>
 	<ul>
 		{% for scraper in following_scrapers %}
 		  {% include 'frontend/scraper_line.html' %}
 		{% endfor %}
 	</ul>
-	
-
-	<h2>History</h2>
-	
-	<ul>
-		<li><a href="#">RSS feed</a></li>
-		<li><a href="#">Export as CSV</a></li>
-	</ul>
-
-
-	<table>
-		<tr>
-			<th>Scraper</th>
-			<th>Message</th>
-			<th>Date &amp; Time</th>
-		</tr>
-		<tr class="odd">
-			<td colspan="3">&nbsp;</td>
-		</tr>
-		<tr class="even">
-			<td colspan="3">&nbsp;</td>
-		</tr>
-		<tr class="odd">
-			<td colspan="3">&nbsp;</td>
-		</tr>
-		<tr class="even">
-			<td colspan="3">&nbsp;</td>
-		</tr>
-		<tr class="odd">
-			<td colspan="3">&nbsp;</td>
-		</tr>
-		<tr class="even">
-			<td colspan="3">&nbsp;</td>
-		</tr>
-		<tr class="odd">
-			<td colspan="3">&nbsp;</td>
-		</tr>
-		<tr class="even">
-			<td colspan="3">&nbsp;</td>
-		</tr>
-		<tr class="odd">
-			<td colspan="3">&nbsp;</td>
-		</tr>
-	</table>	    
-</div>
+	-->
     
+    <!--
+	    <h2>History</h2>
+    -->
+</div>
 <div class="content col right">
 	<ul>
 		<li><a href="{% url editor %}">Create a new scraper</a></li>
-		<li><a href="#">Schedule scrapers</a></li>
 		<li><a href="{% url market_solicitation %}">Suggest a scraper</a></li>
-		<li><a href="#">Manage scraper alerts</a></li>
-		<li><a href="#">Your API details</a></li>
 		<li><a href="{% url profiles_edit_profile %}">Edit your profile</a></li>
 		<li><a href="{% url profiles_profile_detail user.username %}">View your profile</a></li>
 	</ul>
 
-	<h3>People you are following</h3>
-
+    <!--
+	    <h3>People you are following</h3>
+    -->
 
 	<h3>New scrapers from everybody</h3>
 	<ul>
