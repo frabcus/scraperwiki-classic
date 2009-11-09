@@ -1,0 +1,4 @@
+{% if data.headings %}"{% for heading in data.headings %}{{ heading|addslashes }}{% if not forloop.last %}","{% else %}"{% endif %}{% endfor %}
+{% for i,row in data.rows.items %}"{% for value in row %}{{ value|addslashes }}{% if not forloop.last %}","{% else %}"{% endif %}{% endfor %}
+{% endfor %}
+{% endif %}

@@ -540,7 +540,7 @@ $(document).ready(function() {
             scrollTop: $('#output_sources .output_content').height()+$('#output_sources div')[0].scrollHeight 
         }, 0);
     }
-    
+
     function writeToData(sMessage) {
         row = eval(sMessage)
         

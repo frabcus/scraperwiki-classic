@@ -693,7 +693,7 @@ var Editor = (function(){
         event.stop();
       }
       else if (code == 9 && this.options.tabMode != "default") { // tab
-        this.handleTab(!event.ctrlKey && !event.shiftKey);
+        if (!event.ctrlKey)  this.handleTab(!event.ctrlKey && !event.shiftKey);
         event.stop();
       }
       else if (code == 32 && event.shiftKey && this.options.tabMode == "default") { // space

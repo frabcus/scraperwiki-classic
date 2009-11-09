@@ -1,4 +1,4 @@
-from django.template import RequestContext
+from django.template import RequestContext, loader, Context
 from django import forms
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
@@ -20,13 +20,14 @@ def data (request, scraper_short_name):
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     return render_to_response('scraper/data.html', {
-    
+
       'selected_tab': 'data', 
       'scraper': scraper, 
       'user_owns_it': user_owns_it, 
       'user_follows_it': user_follows_it,
       'data' : data,
       }, context_instance=RequestContext(request))
+
 
 def code (request, scraper_short_name):
 
@@ -65,6 +66,19 @@ def show(request, scraper_short_name, selected_tab = 'data'):
 
     return render_to_response('scraper/show.html', {'data' : data, 'selected_tab': selected_tab, 'scraper': scraper, 'you_own_it': you_own_it, 'you_follow_it': you_follow_it, 'tabs': tabs, 'tab_to_show': tab_to_show}, context_instance=RequestContext(request))
 
+def export_csv (request, scraper_short_name):
+    scraper = models.Scraper.objects.get(short_name=scraper_short_name)
+    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid)
+
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)
+
+    template = loader.get_template('scraper/data.csv')
+    context = Context({'data': data,})
+
+    response.write(template.render(context))
+    return response
+    
 def list(request):
     scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
     return render_to_response('scraper/list.html', {'scrapers': scrapers}, context_instance = RequestContext(request))
