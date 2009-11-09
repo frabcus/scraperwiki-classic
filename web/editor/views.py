@@ -28,8 +28,14 @@ def delete_draft(request, short_name=None):
     if draft.short_name:
       return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : draft.short_name}))
   return HttpResponseRedirect(reverse('editor'))
-    
 
+def delete_all_drafts(request):
+  try:
+    del request.session['ScraperDraft']
+  except:
+    pass
+  return HttpResponseRedirect(reverse('frontpage'))
+  
 def save_draft(request, short_name=None):
   if short_name == None:
     short_name = "__new__"

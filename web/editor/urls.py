@@ -14,6 +14,7 @@ urlpatterns = patterns('',
   
   
   url(r'^draft/delete/(?P<short_name>[\-\w]+)$',                views.delete_draft, name="delete_draft"),
+  url(r'^draft/deleteall$',                                     views.delete_all_drafts, name="delete_all_drafts"),
   url(r'^draft/save/(?P<short_name>[\-\w]+)$',                  views.save_draft,   name="save_draft"),
   
   url(r'diff/$',                        views.diff,         name="diff"),   # blank name for draft scraper
