@@ -24,7 +24,7 @@ def make_file_path(scraper_short_name):
   folder with the same name as the short_name.
   """
   path = "%s%s/__init__.py" % (SMODULES_DIR, scraper_short_name)
-  return path
+  return path.encode()
 
 def create(scraper_name):
   scraper_folder_path = "%s%s" % (SMODULES_DIR, scraper_name)
@@ -76,7 +76,7 @@ def commit(scraper, message="changed", user="unknown"):
     message = "changed"
   
   ui.pushbuffer()
-  commands.commit(ui, r, path, addremove=True, message=message, user=str(user))
+  commands.commit(ui, r, path, addremove=True, message=str(message), user=str(user))
   code = ui.popbuffer()
   return ""
 
