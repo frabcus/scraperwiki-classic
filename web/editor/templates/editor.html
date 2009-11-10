@@ -35,7 +35,7 @@
         <div class="editor">
             {% if has_draft %}
             <div class="draft_warning">
-                Warning: this scraper has not been saved or committed. Click the save button or <a href="{% url delete_draft %}">discard changes</a>.
+                Warning: this scraper has not been saved or committed. Click the save button or <a href="{% url delete_draft scraper.short_name|default:"__new__" %}">discard changes</a>.
             </div>
             {% endif %}
 
@@ -190,8 +190,8 @@
             <li class="html_tab"><a href="#">HTML</a></li>
           </ul>
         </div>
-        <div class="popup_html output" style="display:none"><pre></pre></div>
-        <div class="popup_raw output"><pre></pre></div>
+        <div class="popup_html output"><iframe></iframe></div>
+        <div class="popup_raw output" style="display:none"><pre></pre></div>
     </div>            
 </form>
 {% endblock %}

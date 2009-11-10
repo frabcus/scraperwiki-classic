@@ -22,9 +22,7 @@ import forms
 import settings
 import cgi
 
-def format_json(lines):
-    ret = []
-    for line in lines.splitlines():
+def format_json(line):
       if line.startswith('<scraperwiki:message type="data">'):
         offset_len = len('<scraperwiki:message type="data">')
         message = {}
@@ -36,9 +34,14 @@ def format_json(lines):
         message = json.loads(line[offset_len:])
         message['message_type'] = "sources"
 
+      elif line.startswith(' <scraperwiki:message type="exception">'):
+        offset_len = len(' <scraperwiki:message type="exception">')
+        message = json.loads(line[offset_len:])
+        message['message_type'] = "exception"
+        message['content'] = cgi.escape(message['content'])
+
       else:
         message_type = "console"
-
         line = cgi.escape(line)
 
         message = {
@@ -47,9 +50,8 @@ def format_json(lines):
         }
         if len(line) >= 100:
           message['content_long'] = line
-      ret.append(json.dumps(message) + "@@||@@")
+      return json.dumps(message) + "@@||@@\n"
 
-    return '\n'.join(ret)
 
 
 def run_code(request):
@@ -62,7 +64,7 @@ def run_code(request):
     if run_mode == 'popen':
       res =  format_json(run_popen(code, guid=guid))
     if run_mode == 'firestarter_django':
-      res =  format_json(run_firestarter_django(code))
+      res =  run_firestarter_django(code)
 
     return HttpResponse(res)
 
@@ -130,11 +132,16 @@ def run_firestarter_django(code):
   code = string.replace (code, '\r', '')
 
   res  = fb.execute(code, True)
-  line = res.readline()
-  lines = []
-  while line is not None and line != '':
-    lines.append(line)
-    line  = res.readline()
+  try:
+    line = res.readline()
+    lines = []
+    while line is not None and line != '':
+      lines.append(format_json(line))
+      line  = res.readline()
+  except FireStarter.FireError, e :
+    tb = string.replace (str(e), '\n', ' ')
+    lines.append(format_json(tb))
+    
   return '\n'.join(lines)
   
   
