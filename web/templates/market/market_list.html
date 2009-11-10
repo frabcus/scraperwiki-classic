@@ -1,0 +1,28 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Suggested scrapers{% endblock %}
+
+{% block content %}
+<div class="page_title">
+    <h1>Scraper suggestions</h1>
+    <p>
+        Datasets people have suggested scraping
+    </p>
+</div>
+<div class="content col left">
+    <ul>
+    {% for solicitation in solicitations %}
+        <li>
+    	    <h3>{{solicitation.title}}</h3>
+    	    <p>Link: <a href="{{solicitation.link}}">{{solicitation.link}}</a></p>
+    	    <p>{{solicitation.detail}}</p>
+    	</li>
+	{% endfor %}
+    </ul>
+</div>
+<div class="content col right">
+    <ul>
+        <a href="{% url market_solicitation %}">Suggest a scraper</a>
+    </ul>
+</div>
+{% endblock %}
