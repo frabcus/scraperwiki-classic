@@ -169,15 +169,15 @@
         <a class="popupClose">x</a>
         <h3>Quick help</h3>
         <dl class="quick_help">
-            <dt><code>utils.scrape(url, params={ })</code></dt>
-            <dd>Returns the body text from a url and temporarily caches the downloaded page for the rest of the day</dd>
+            <dt><code>scraperwiki.scrape(url, params={ })</code></dt>
+            <dd>Returns the body text from a url</dd>
             <dt>
-                <code>utils.parse_html(text)</code>
+                <code>scraperwiki.parse_html(text)</code>
             </dt>
             <dd>
                 Converts an HTML string to an <a href="http://codespeak.net/lxml/" target="_new">lxml.etree</a> object
             </dd>
-            <dt><code>datastore.save(unique_keys, data, date=None, latlng=[None, None]</code></dt>
+            <dt><code>scraperwiki.datastore.save(unique_keys, data, date=None, latlng=[None, None]</code></dt>
             <dd>Saves data to the datastore. <code>data</code> is a dict, date is a date object and lat/lng are latitude and longitude values as floats</dd>
 
         </dl>
