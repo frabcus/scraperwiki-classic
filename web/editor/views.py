@@ -220,8 +220,6 @@ def edit(request, short_name=None):
         drafts = request.session['ScraperDraft']
         drafts[short_name] = savedForm
         request.session['ScraperDraft'] = drafts
-        if is_json:
-          return HttpResponse(json.dumps({'status' : 'OK', 'draft' : 'True'}))
             
         # Set a message with django_notify
         request.notifications.add("You need to sign in or create an account - don't worry, your scraper is safe ")
@@ -230,10 +228,11 @@ def edit(request, short_name=None):
           scraper_edit_url = reverse('editor', kwargs={'short_name' : savedForm.short_name}) + '?action=%s' % action
         else:
           scraper_edit_url = reverse('editor') + '?action=%s' % action
-          
-        return HttpResponseRedirect(
-        reverse('login') + "?next=%s" % scraper_edit_url
-        )
+        
+        if is_json:
+          return HttpResponse(json.dumps({'status' : 'OK', 'draft' : 'True', 'url': scraper_edit_url}))
+              
+        return HttpResponseRedirect(reverse('login') + "?next=%s" % scraper_edit_url)
         
         
   return render_to_response('editor.html', {'form':form, 'scraper' : scraper, 'settings' : settings, 'has_draft': has_draft }, context_instance=RequestContext(request)) 

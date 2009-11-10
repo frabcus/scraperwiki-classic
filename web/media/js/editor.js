@@ -539,7 +539,6 @@ $(document).ready(function() {
     })
     
     
-    
     function writeToSources(sMessage, sLongMessage) {
 
 
