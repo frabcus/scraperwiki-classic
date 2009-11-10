@@ -487,16 +487,18 @@ $(document).ready(function() {
     function setupAutoDraft(){
         // auto save a draft
           setInterval(function() {
-              $.ajax({
-                  type: 'POST',
-                  URL: window.location.pathname,
-                  data: ({
-                      title: $('#id_title').val(),
-                      code: codeeditor.getCode(),
-                      action: 'save'
-                  }),
-                  dataType: "html"
-              });
+              if (shortNameIsSet){
+                  $.ajax({
+                      type: 'POST',
+                      URL: window.location.pathname,
+                      data: ({
+                          title: $('#id_title').val(),
+                          code: codeeditor.getCode(),
+                          action: 'save'
+                      }),
+                      dataType: "html"
+                  });                  
+              }
           },
           60000);    
     }
