@@ -132,7 +132,7 @@ $(document).ready(function() {
         })
 
         //show default tab
-        showTextTab('raw'); //todo: check in cookie if tab already set.
+        showTextTab('html'); //todo: check in cookie if tab already set.
         
     }
     
@@ -263,6 +263,8 @@ $(document).ready(function() {
                             writeToSources(oItem.content, oItem.content_long);                                                            
                         }else if (oItem.message_type == 'data'){
                             writeToData(oItem.content);                                
+                        }else if (oItem.message_type == 'exception'){
+                            writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
                         }else{
                             writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
                         }
@@ -454,7 +456,7 @@ $(document).ready(function() {
     //Show random text popup
     function showTextPopup(sMessage, sMessageType){
         $('#popup_text .popup_raw pre').text(sMessage);
-        $('#popup_text .popup_html pre').text($.htmlClean(sMessage, {format:true}));
+        $('body', $('#popup_text .popup_html iframe').contents()).text(sMessage);
         showPopup('popup_text');
     }
     
@@ -500,14 +502,24 @@ $(document).ready(function() {
     }
 
     //Write to concole/data/sources
-    function writeToConsole(sMessage, sLongMessage) {
+    function writeToConsole(sMessage, sLongMessage, sMessageType) {
 
         sDisplayMessage = sMessage;
+                
         if(sLongMessage) {
-            sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="message_expander">...more</span>';
+            if (sMessageType == 'exception'){
+                sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="exception_expander">...more</span>';
+            } else {
+                sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="message_expander">...more</span>';                
+            }
         }
-        $('#output_console .output_content')
-        .append('<span class="output_item">' + sDisplayMessage + "</span>");
+        if (sMessageType == 'exception'){
+            $('#output_console .output_content')
+            .append('<span class="output_item exception">' + sDisplayMessage + "</span>");
+        } else {
+            $('#output_console .output_content')
+            .append('<span class="output_item">' + sDisplayMessage + "</span>");            
+        }
         
         $('.editor_output div.tabs li.console').addClass('new');
         $('#output_console div').animate({ 
@@ -519,6 +531,10 @@ $(document).ready(function() {
     
     // Needed to handle 'more' (.message_expander) links correctly
     $('.message_expander').live('click', function() {
+            showTextPopup( $(this).prev().text() );
+    })
+
+    $('.exception_expander').live('click', function() {
             showTextPopup( $(this).prev().text() );
     })
     

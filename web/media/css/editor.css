@@ -76,6 +76,7 @@ span.hiddenfields { margin-left:10px; }
 .editor_output .info div.output div.output_content .long_message {display:none;}
 
 .editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.2em 1em;}
+.editor_output .info span.exception {background:#FF7878;}
 .editor_output .info span.output_item:hover {background:#ffffd7;}
 .editor_output .info span.output_item.run_end {border-bottom:solid 1px #cfcfcf;}
 
@@ -96,7 +97,7 @@ span.hiddenfields { margin-left:10px; }
     text-align:left; display:none; overflow:auto;}
 
 #popup_text div.output {height:90%;}
-#popup_text div pre {overflow-y : scroll; height : 100%;}
+#popup_text div pre, #popup_text div iframe {overflow-y : scroll; height : 100%; width:100%;}
 
 
 .popupClose {font-size:18px; line-height:20px; right:6px; top:4px; position:absolute; color:#000; font-weight:700; display:block; cursor:pointer;}
