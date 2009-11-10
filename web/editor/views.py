@@ -17,25 +17,38 @@ from scraper import vc
 import forms
 import settings
 
-def delete_draft(request):
-  if request.session.get('ScraperDraft', None):
-    draft = request.session['ScraperDraft']
-    del request.session['ScraperDraft']
+def delete_draft(request, short_name=None):
+  if short_name == None:
+    short_name = "__new__"
+  if request.session['ScraperDraft'].get(short_name, None):
+    draft = request.session['ScraperDraft'][short_name]
+    all_drafts = request.session['ScraperDraft']
+    del all_drafts[short_name]
+    request.session['ScraperDraft'] = all_drafts
     if draft.short_name:
       return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : draft.short_name}))
   return HttpResponseRedirect(reverse('editor'))
-    
 
-def save_draft(request):
-  print request.session['ScraperDraft']
+def delete_all_drafts(request):
+  try:
+    del request.session['ScraperDraft']
+  except:
+    pass
+  return HttpResponseRedirect(reverse('frontpage'))
+  
+def save_draft(request, short_name=None):
+  if short_name == None:
+    short_name = "__new__"
   draft_form = forms.editorForm(request.POST)
   savedForm = draft_form.save(commit=False)
   savedForm.code = draft_form.cleaned_data['code']
-  request.session['ScraperDraft'] = savedForm  
+  request.session['ScraperDraft'][short_name] = savedForm
   return HttpResponseRedirect(reverse('editor'))
 
+
+
 def diff(request, short_name=None):
-  if not short_name:
+  if not short_name or short_name == "__new__":
     return HttpResponse("Draft scraper, nothing to diff against", mimetype='text')
   code = request.POST.get('code', None)    
   if code:
@@ -46,7 +59,7 @@ def diff(request, short_name=None):
     
     
 def raw(request, short_name=None):
-  if not short_name:
+  if not short_name or short_name == "__new__":
     return HttpResponse("Draft scraper, shouldn't do reload", mimetype='text')
   scraper = get_object_or_404(ScraperModel, short_name=short_name)
   oldcodeineditor = request.POST.get('oldcode', None)
@@ -99,12 +112,19 @@ def edit(request, short_name=None):
   else:
     is_json = False
   
-  draft = request.session.get('ScraperDraft', None)
+  if short_name == None:
+    short_name = "__new__"  
+  
+  
+  
+  if not request.session.get('ScraperDraft', None):
+    request.session['ScraperDraft'] = {}
+  draft = request.session['ScraperDraft'].get(short_name, None)
   has_draft = False
   # First off, create a scraper instance somehow.
   # Drafts are seen as more 'important' than saved scrapers.
   if draft:
-    has_draft = True  
+    has_draft = True
     if draft.short_name:
       # We're working with an existing scraper that has been edited, but not saved
       scraper = draft
@@ -115,7 +135,7 @@ def edit(request, short_name=None):
       scraper.code = draft.code
   else:
     # No drafts exist...
-    if short_name:
+    if short_name is not "__new__":
       # ...and this is an existing scraper.  Load from the database and disk
       scraper = get_object_or_404(ScraperModel, short_name=short_name)
       scraper.code = scraper.saved_code()
@@ -178,8 +198,8 @@ def edit(request, short_name=None):
           savedForm.add_user_role(request.user, 'owner')
         
         # If the scraper saved, then we can delete the draft  
-        if request.session.get('ScraperDraft', False):
-          del request.session['ScraperDraft']
+        if request.session['ScraperDraft'].get(short_name, False):
+          del request.session['ScraperDraft'][short_name]
         
         if action.startswith("commit"):
           return HttpResponseRedirect(reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name}))
@@ -197,14 +217,23 @@ def edit(request, short_name=None):
         # This can happen when a user creates a scraper before logging in or registering
         # When they hit the save button, by default an ajax call is made.  In this case we
         # don't want to set a message or redirect them, we just return a JSON object.
-        request.session['ScraperDraft'] = savedForm
+        drafts = request.session['ScraperDraft']
+        drafts[short_name] = savedForm
+        request.session['ScraperDraft'] = drafts
         if is_json:
           return HttpResponse(json.dumps({'status' : 'OK', 'draft' : 'True'}))
+            
         # Set a message with django_notify
         request.notifications.add("You need to sign in or create an account - don't worry, your scraper is safe ")
         savedForm.action = action
-
-        return HttpResponseRedirect(reverse('login'))
+        if savedForm.short_name:
+          scraper_edit_url = reverse('editor', kwargs={'short_name' : savedForm.short_name}) + '?action=%s' % action
+        else:
+          scraper_edit_url = reverse('editor') + '?action=%s' % action
+          
+        return HttpResponseRedirect(
+        reverse('login') + "?next=%s" % scraper_edit_url
+        )
         
         
   return render_to_response('editor.html', {'form':form, 'scraper' : scraper, 'settings' : settings, 'has_draft': has_draft }, context_instance=RequestContext(request)) 

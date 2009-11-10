@@ -12,7 +12,7 @@ except:
 
 import cgi
 import os
-import settings
+#import settings
 
 # global object handles cookies which work within the same session for now
 # this will be formalized and made explicit when we make the urllib wrapping cache system
@@ -30,7 +30,8 @@ def scrape (url, params=None, escape=True):
     '''get html text given url and parameter map'''
     data = params and urllib.urlencode(params) or None
     
-    fname = settings.QUICKCACHE_DIR and os.path.join(settings.QUICKCACHE_DIR, urllib.quote_plus(url + (params and "?" + params or "")))
+    #fname = settings.QUICKCACHE_DIR and os.path.join(settings.QUICKCACHE_DIR, urllib.quote_plus(url + (params and "?" + params or "")))
+    fname = False
     
     if fname and os.path.exists(fname):
         fin = open(fname)

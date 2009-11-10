@@ -57,7 +57,7 @@ def login(request):
     redirect = request.GET.get('next', False)
     if request.POST.get('redirect', False):
         redirect = request.POST.get('redirect', False)
-
+    
     
     #Create login and registration forms
     login_form = SigninForm()
@@ -81,11 +81,6 @@ def login(request):
                     if request.POST.has_key('remember_me'):
                         request.session.set_expiry(settings.SESSION_TIMEOUT)
 
-                    #Check if scrapers pending in session - added here as contrib.auth doesn't support signals :(
-                    if request.session.get('ScraperDraft', False):
-                      return HttpResponseRedirect(
-                        reverse('editor') + "?action=%s" % request.session['ScraperDraft'].action
-                        )
 
                     if redirect:
                         return HttpResponseRedirect(redirect)
@@ -108,7 +103,7 @@ def login(request):
 
                 #sign straight in
                 signed_in_user = auth.authenticate(username=request.POST['username'], password=request.POST['password1'])
-                auth.login(request, signed_in_user)
+                auth.login(request, signed_in_user)                
                 
                 #redirect
                 if redirect:
