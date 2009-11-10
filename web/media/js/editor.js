@@ -423,7 +423,7 @@ $(document).ready(function() {
                 bSuccess = true;
             }
         }else{
-            bSuccess = true;            
+            bSuccess = true;
         }
 
         if(bSuccess == true){
@@ -539,7 +539,6 @@ $(document).ready(function() {
     $('.exception_expander').live('click', function() {
             showTextPopup( $(this).prev().text() );
     })
-    
     
     
     function writeToSources(sMessage, sLongMessage) {

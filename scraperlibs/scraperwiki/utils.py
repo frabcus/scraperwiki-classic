@@ -44,10 +44,10 @@ def scrape (url, params=None, escape=True):
             text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
             fin.close()   # get the mimetype here
             
-            if fname and os.path.exists(settings.QUICKCACHE_DIR):
-                fout = open(fname, "w")
-                fout.write(text)
-                fout.close()
+            #if fname and os.path.exists(settings.QUICKCACHE_DIR):
+            #    fout = open(fname, "w")
+            #    fout.write(text)
+            #    fout.close()
             
         except:
             print '<scraperwiki:message type="sources">' + "Failed: %s" % url
