@@ -16,24 +16,24 @@ def default():
   title = "Untitled Scraper"
   description = None
   code = """
-  import scraperwiki
-  import BeautifulSoup
+import scraperwiki
+import BeautifulSoup
 
-  from scraperwiki import datastore
-  
-  # Hello World Example #
+from scraperwiki import datastore
 
-  #scrape page
-  html = scraperwiki.scrape('http://scraperwiki.com/hello_world.html')
-  page = BeautifulSoup.BeautifulSoup(html)
+# Hello World Example #
 
-  #find rows
-  for table in page.findAll('table'):
-      for row in table.findAll('tr')[1:]: 
+#scrape page
+html = scraperwiki.scrape('http://scraperwiki.com/hello_world.html')
+page = BeautifulSoup.BeautifulSoup(html)
 
-          #save to datastore
-          data = {'message' : row.td.string,}
-          datastore.save(unique_keys=['message'], data=data)
+#find rows
+for table in page.findAll('table'):
+    for row in table.findAll('tr')[1:]: 
+
+        #save to datastore
+        data = {'message' : row.td.string,}
+        datastore.save(unique_keys=['message'], data=data)
 
 
 """
