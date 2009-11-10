@@ -487,7 +487,7 @@ $(document).ready(function() {
     function setupAutoDraft(){
         // auto save a draft
           setInterval(function() {
-              if (shortNameIsSet){
+              if (shortNameIsSet()){
                   $.ajax({
                       type: 'POST',
                       URL: window.location.pathname,
