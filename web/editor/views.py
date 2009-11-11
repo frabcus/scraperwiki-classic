@@ -143,6 +143,7 @@ def edit(request, short_name=None):
       # This is a new scraper
       scraper = ScraperModel()
       scraper.code = template.default()['code']
+      scraper.commit_message = ""
 
   form = forms.editorForm(scraper.__dict__, instance=scraper)
   form.fields['code'].initial = scraper.code
@@ -199,7 +200,9 @@ def edit(request, short_name=None):
         
         # If the scraper saved, then we can delete the draft  
         if request.session['ScraperDraft'].get(short_name, False):
-          del request.session['ScraperDraft'][short_name]
+          all_drafts = request.session['ScraperDraft']
+          del all_drafts[short_name]
+          request.session['ScraperDraft'] = all_drafts
         
         if is_json:
           url = reverse('editor', kwargs={'short_name' : savedForm.short_name})

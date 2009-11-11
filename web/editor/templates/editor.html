@@ -62,9 +62,10 @@
                     </div>
 
                     <div class="field field-commit_message">
-                        <label for="commit_message">Commit Message</label>
-                        <input type="text" name="commit_message" value="Changed" id="commit_message">
+                      <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
+                      {{ form.commit_message }}
                     </div>
+
                 </div>
 
                 <ul class="help">
@@ -89,7 +90,7 @@
 
             {# Controls #}
             <div class="editor_controls">
-                <input type="submit" id="save" name="action" value="Save" />            
+                <input type="submit" class="save  button" name="action" value="Save" />            
                 <input type="button" value="Diff" name="diff" id="diff" />
                 <input type="button" value="Reload" name="reload" id="reload" />
                 <input type="button" class="execute" value="Run" name="run" id="run" />
@@ -100,7 +101,7 @@
                     {% else %}
                         <a href="{% url frontpage %}">Close editor</a>                
                     {% endif %}
-                    <input type="submit" id="commit" name="action" value="Commit and publish"/>            
+                    <input type="submit" class="commit button" name="action" value="Commit and publish"/>            
                 </div>
             </div>
 

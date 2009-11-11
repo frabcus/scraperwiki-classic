@@ -138,7 +138,7 @@ $(document).ready(function() {
     
     //Setup Popups
     function setupPopups(){
-        
+        popupStatus = 0
         //assign escape key to close popups
         $(document).keypress(function(e) {
             if (e.keyCode == 27 && popupStatus == 1) {
@@ -196,7 +196,7 @@ $(document).ready(function() {
     
     //Setup save / details forms
     function setupDetailsForm(){
-        
+
         $('#id_title').example(function() {
           return $(this).attr('title');
         });
@@ -207,14 +207,16 @@ $(document).ready(function() {
         $('#meta_fields_mini').attr('id', 'meta_fields')
         $('#id_title').after('<a href="" id="meta_form_edit">Edit scraper info</a>')
 
-        $('#meta_form_edit').click(function() {
-            // Only add the save button if it's not there already
-            if (!$('#meta_form #save').length) {
-                $('#save').clone().appendTo($('#meta_form'))
-            }
-            showPopup('meta_form')
-            return false
-        });
+
+        // Only add the save button if it's not there already
+        if (!$('#meta_form .save').length) {
+            $('.save').clone().appendTo($('#meta_form'))
+        };
+
+        // Only add the save button if it's not there already
+        if (!$('#meta_form .commit').length) {
+            $('.commit').clone().appendTo($('#meta_form'))
+        };
         
     }
     
@@ -352,22 +354,29 @@ $(document).ready(function() {
     function setupToolbar(){
         
         //commit button
-        $('#commit').click(
-            function (){
-                //showPopup('meta_form')
+        $('.commit').live('click', function (){
+            if (popupStatus == 0) {
+                showPopup('meta_form');
+                return false;     
+            }
+            if ($('#meta_form #id_commit_message').val() == ""){
+                $('#meta_form #id_commit_message').effect('highlight')
+                return false
+            } else {
                 commit = true
                 saveScraper(commit);
-                return false;
+                return false;                
+            }
+
             }
         );
         
         //save button
-        $('#save').click(
-           function(){
-                saveScraper();
-                return false;
-           }
-        );
+        $('.save').live('click', function(){
+             saveScraper();
+             return false;
+        });
+
         
         //clear console button
         $('#clear').click(function() {
@@ -479,6 +488,7 @@ $(document).ready(function() {
     }
 
     function shortNameIsSet(){
+        // Because of jquery example
         if ($('#id_title').hasClass('example')) {
             return false;
         }
