@@ -71,7 +71,9 @@ def __save_row(unique_keys, data, kwargs):
       item[k] = v
     if v is None:
       del data[k]
-      
+  
+  
+  new_item_id = None    
   if not DUMMY_RUN:
     conn = connection.Connection()
     c = conn.connect()
@@ -101,7 +103,7 @@ def __save_row(unique_keys, data, kwargs):
     
   
   print '<scraperwiki:message type="data">%s' % json.dumps(data)
-  return new_item_id 
+  return new_item_id
 
 
   

@@ -196,7 +196,12 @@ $(document).ready(function() {
     
     //Setup save / details forms
     function setupDetailsForm(){
-
+        
+        $('#id_title').example(function() {
+          return $(this).attr('title');
+        });
+        
+        
         // Meta form
         $('#meta_fields_mini').appendTo($('#meta_form'))
         $('#meta_fields_mini').attr('id', 'meta_fields')
@@ -350,7 +355,9 @@ $(document).ready(function() {
         $('#commit').click(
             function (){
                 //showPopup('meta_form')
-                return commitScraper();
+                commit = true
+                saveScraper(commit);
+                return false;
             }
         );
         
@@ -409,7 +416,7 @@ $(document).ready(function() {
     }
     
     //Save
-    function saveScraper(){
+    function saveScraper(commit){
 
         var bSuccess = false;
 
@@ -425,6 +432,11 @@ $(document).ready(function() {
         }else{
             bSuccess = true;
         }
+        
+        form_action = 'save';
+        if (commit == true) {
+            form_action = 'commit';
+        }
 
         if(bSuccess == true){
             $.ajax({
@@ -434,7 +446,7 @@ $(document).ready(function() {
               data: ({
                 title : $('#id_title').val(),
                 code : codeeditor.getCode(),
-                action : 'save'
+                action : form_action
                 }),
               dataType: "html",
               success: function(response){
@@ -442,8 +454,10 @@ $(document).ready(function() {
                     if (res.url && window.location.pathname != res.url) {
                         window.location = res.url;
                     };
-                                        
-                    showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
+                    
+                    if (commit != true){                        
+                        showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
+                    }                    
                 },
 
             error: function(response){
@@ -465,6 +479,9 @@ $(document).ready(function() {
     }
 
     function shortNameIsSet(){
+        if ($('#id_title').hasClass('example')) {
+            return false;
+        }
         var sTitle = jQuery.trim($('#id_title').val());
         return sTitle != 'Untitled Scraper' && sTitle != '' && sTitle != undefined && sTitle != false;
     }

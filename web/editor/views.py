@@ -141,7 +141,7 @@ def edit(request, short_name=None):
       scraper.code = scraper.saved_code()
     else:
       # This is a new scraper
-      scraper = ScraperModel(title=template.default()['title'])
+      scraper = ScraperModel()
       scraper.code = template.default()['code']
 
   form = forms.editorForm(scraper.__dict__, instance=scraper)
@@ -201,15 +201,18 @@ def edit(request, short_name=None):
         if request.session['ScraperDraft'].get(short_name, False):
           del request.session['ScraperDraft'][short_name]
         
-        if action.startswith("commit"):
-          return HttpResponseRedirect(reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name}))
-        message = "Scraper Saved"
         if is_json:
+          url = reverse('editor', kwargs={'short_name' : savedForm.short_name})
+          if action.startswith("commit"):
+            url = reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name})
           res = json.dumps({
           'redirect' : 'true',
-          'url' : reverse('editor', kwargs={'short_name' : savedForm.short_name}),
+          'url' : url,
           })
           return HttpResponse(res)
+          
+        if action.startswith("commit"):
+          return HttpResponseRedirect(reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name}))
         return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : savedForm.short_name}))
         
       else:
