@@ -485,6 +485,7 @@ $(document).ready(function() {
     }
 
     function setupAutoDraft(){
+        /*
         // auto save a draft
           setInterval(function() {
               if (shortNameIsSet()){
@@ -501,6 +502,7 @@ $(document).ready(function() {
               }
           },
           60000);    
+        */
     }
 
     //Write to concole/data/sources
