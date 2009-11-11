@@ -1,5 +1,4 @@
 {% extends "editor_base.html" %}
-
 {% block css %}
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.7.2.custom.css" />
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
@@ -30,7 +29,6 @@
         <input type="hidden" id="code_runningMode" value="{{ settings.CODE_RUNNING_MODE|escape }}"/>    
         <input type="hidden" id="codemirror_url" value="{{ settings.CODEMIRROR_URL }}"/>
     </fieldset>
-
     <form method="POST" accept-charset="utf-8" id="editor" action="">
         <div class="editor">
             {% if has_draft %}

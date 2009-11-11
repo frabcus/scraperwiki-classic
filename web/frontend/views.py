@@ -21,7 +21,7 @@ import datetime
 
 def frontpage(request):
     user = request.user
-    
+
     # The following items are only used when there is a logged in user.	
     if user.is_authenticated():
         my_scrapers = user.scraper_set.filter(userscraperrole__role='owner')
@@ -42,7 +42,8 @@ def frontpage(request):
         if scraper.is_good():
             good_contribution_scrapers.append(scraper)
 
-    new_scrapers = Scraper.objects.all().order_by('-created_at')[:5]
+    new_scrapers = Scraper.objects.filter(published=True).order_by('-created_at')[:5]
+    
     return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'following_scrapers': following_scrapers, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
 
 def process_logout(request):
