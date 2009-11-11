@@ -17,7 +17,7 @@ $(document).ready(function() {
     setupTabs();
     setupTextTabs();
     setupPopups();
-    setupToolbar()
+    setupToolbar();
     setupDetailsForm();
     setupAutoDraft();
     setupResizeEvents();
@@ -48,7 +48,7 @@ $(document).ready(function() {
                   }),
                 dataType: "html",
                 success: function(){
-
+                    
                       }
                   });
               },
