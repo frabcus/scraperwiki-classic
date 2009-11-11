@@ -49,6 +49,11 @@ def __save_row(unique_keys, data, kwargs):
   """
   Takes a single row and saves it.
   """
+  DUMMY_RUN = True
+  if os.environ.has_key('SCRAPER_GUID'):
+    scraper_id = os.environ['SCRAPER_GUID']
+    DUMMY_RUN = False
+  
   # Add all the kwargs in to data
   data.update(kwargs)
 
@@ -67,27 +72,30 @@ def __save_row(unique_keys, data, kwargs):
     if v is None:
       del data[k]
       
-  conn = connection.Connection()
-  c = conn.connect()
-  if c.execute("SELECT item_id FROM items WHERE unique_hash='%s'" % unique_hash):  
-    item_id = c.fetchone()
-    c.execute("DELETE FROM kv WHERE item_id=%s" % item_id[0])
-    c.execute("DELETE FROM items WHERE unique_hash=%s", (unique_hash,))
+  if not DUMMY_RUN:
+    conn = connection.Connection()
+    c = conn.connect()
+    if c.execute("SELECT item_id FROM items WHERE unique_hash='%s'" % unique_hash):  
+      item_id = c.fetchone()
+      c.execute("DELETE FROM kv WHERE item_id=%s" % item_id[0])
+      c.execute("DELETE FROM items WHERE unique_hash=%s", (unique_hash,))
   
-  c.execute("UPDATE sequences SET id=LAST_INSERT_ID(id+1);")
-  c.execute("SELECT LAST_INSERT_ID();")
-  new_item_id = c.fetchone()[0]
-  item['item_id'] = new_item_id
+    c.execute("UPDATE sequences SET id=LAST_INSERT_ID(id+1);")
+    c.execute("SELECT LAST_INSERT_ID();")
+    new_item_id = c.fetchone()[0]
+    item['item_id'] = new_item_id
  
-  scraper_id = os.environ['SCRAPER_GUID']
 
-  c.execute("INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`) \
-    VALUES (%s, %s, %s, %s, %s);", (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'],))
+
+    c.execute("INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`) \
+      VALUES (%s, %s, %s, %s, %s);", (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'],))
   
-  for k,v in data.items():  
-    c.execute("""INSERT INTO `kv` (`item_id`,`key`,`value`) VALUES (%s, %s, %s);""", (item['item_id'], k,v))
+    for k,v in data.items():  
+      c.execute("""INSERT INTO `kv` (`item_id`,`key`,`value`) VALUES (%s, %s, %s);""", (item['item_id'], k,v))
     
-    # clean for printing to the console
+      # clean for printing to the console
+
+  for k,v in data.items():  
     data[k] = cgi.escape(v)
     
     
