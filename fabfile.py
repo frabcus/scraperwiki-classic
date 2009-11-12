@@ -1,5 +1,5 @@
 # globals
-config.project_name = 'project_name'
+config.project_name = 'ScraperWiki'
 
 # environments
 def dev():
@@ -10,6 +10,7 @@ def dev():
     config.activate = config.path + '/bin/activate'
     config.fab_user = 'scraperdeploy'
     config.virtualhost_path = "/"
+    config.deploy_version = "Dev"
 
 def alpha():
     "On the scrpaerwiki server, accessible from http://alpha.scraperwiki.com"
@@ -19,14 +20,13 @@ def alpha():
     config.activate = config.path + '/bin/activate'
     config.fab_user = 'scraperdeploy'
     config.virtualhost_path = "/"
-
+    config.deploy_version = "Alpha"
 
 def setup():
     """
     Setup a fresh virtualenv as well as a few useful directories, then run
     a full deployment
     """
-
     require('path')
     sudo('hg clone file:///home/scraperwiki/scraperwiki $(path)')        
     sudo('chown -R %s %s' % (config.fab_user, config.path))
@@ -52,6 +52,7 @@ def deploy():
     required third party modules, install the virtual host and 
     then restart the webserver
     """
+
     
     print "***************** DEPLOY *****************"
     print "Please Enter your deploy message: \r"
@@ -68,7 +69,7 @@ def deploy():
     restart_webserver()   
 
     sudo("""
-    echo "%s" | mail -s "New Scraperwiki Deployment" scrapewiki-commits@googlegroups.com -- -f mercurial@scraperwiki.com
+    echo "%s" | mail -s "New Scraperwiki Deployment to $(deploy_version)" scrapewiki-commits@googlegroups.com -- -f mercurial@scraperwiki.com
     """ % message)
 
     
