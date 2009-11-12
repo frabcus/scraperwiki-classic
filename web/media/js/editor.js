@@ -232,6 +232,7 @@ $(document).ready(function() {
 
         //reset the tabs
         $('.editor_output div.tabs li').removeClass('new');
+        $('#output_data table').find('tr').remove()
 
         //set a dividers on the output
         $('#output_console div :last-child').addClass("run_end")
