@@ -1,5 +1,5 @@
 {% extends "scraper/scraper_base.html" %}
-
+{% load replace %}
 {% block tab %}
 <div class="tab_tools">
     <a href="{% url export_csv scraper.short_name %}">download csv</a>
@@ -10,7 +10,7 @@
     <table>
     <thead>
     {% for heading in data.headings %}
-    <th>{{ heading }}</th>
+    <th>{{ heading|title|replace }}</th>
     {% endfor %}
     </thead>
     <tbody>
@@ -18,7 +18,7 @@
     {% for i,row in data.rows.items %}
     <tr>
     {% for value in row %}
-    <td>{{ value }}</td>
+    <td>{{ value|urlizetrunc:15 }}</td>
     {% endfor %}
     </tr>
     {% endfor %}    
