@@ -498,7 +498,8 @@ $(document).ready(function() {
     //Show random text popup
     function showTextPopup(sMessage, sMessageType){
         $('#popup_text .popup_raw pre').text(sMessage);
-        $('body', $('#popup_text .popup_html iframe').contents()).text(sMessage);
+        $('body', $('#popup_text .popup_html iframe').contents()).html(sMessage);
+        // $('#popup_text .popup_html iframe').load(sMessage);
         showPopup('popup_text');
     }
     
@@ -597,10 +598,11 @@ $(document).ready(function() {
 
         sDisplayMessage = sMessage;
         if(sLongMessage) {
-            sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="message_expander">...more</span>';
+            $('#output_sources .output_content')
+            .append('<div class="long_message">'+sLongMessage+'</div>');
         }
         $('#output_sources .output_content')
-        .append('<span class="output_item">' + sDisplayMessage + "</span>");
+        .append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
         
         
         $('.editor_output div.tabs li.sources').addClass('new');
