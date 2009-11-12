@@ -98,7 +98,7 @@ def __save_row(unique_keys, data, kwargs):
       # clean for printing to the console
 
   for k,v in data.items():  
-    data[k] = cgi.escape(v)
+    data[k] = cgi.escape(str(v))
     
     
   

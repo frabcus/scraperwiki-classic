@@ -284,6 +284,14 @@ $(document).ready(function() {
                             writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
                         }
                     };
+                },
+                error: function(code) {
+                    alert('Sorry, there seems to be something wrong with running code at the moment, try saving your scraper and trying again later.')
+                    
+                    $('.editor_controls #run').unbind('click.abort');
+                    $('.editor_controls #run').bind('click.run', run_abort);
+                    $('.editor_controls #run').removeClass('running').val('run');
+                    
                 }
             });
             return run_request
