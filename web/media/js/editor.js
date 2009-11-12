@@ -620,9 +620,11 @@ $(document).ready(function() {
         
         $('#output_data :first').append(html_row);
         $('.editor_output div.tabs li.data').addClass('new');
-        /*
-            TODO Add auto scroll here
-        */
+        
+        
+        $('#output_data').animate({ 
+            scrollTop: $('#output_data').height()+$('#output_data')[0].scrollHeight 
+        }, 0);
     }
 
     //show tab
