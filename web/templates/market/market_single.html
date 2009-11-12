@@ -1,0 +1,32 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}{{solicitation.title}} | Suggested scrapers{% endblock %}
+
+{% block content %}
+<div class="page_title">
+    <h1>{{solicitation.title}}</h1>
+    <p>
+        Suggested scraper
+    </p>
+</div>
+<div class="content col left">
+
+    <h3>{{solicitation.title}}</h3>
+    <p>Link: <a href="{{solicitation.link}}">{{solicitation.link|urlizetrunc:30}}</a></p>
+    <p>{{solicitation.detail}}</p>
+
+</div>
+<div class="content col right">
+    <ul>
+        <a href="{% url market_solicitation %}">Suggest a scraper</a>
+    </ul>
+    <h4>More suggestions</h4>
+    <ul>
+    {% for solicitation in recent_solicitations %}
+        <li>
+    	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
+    	</li>
+	{% endfor %}
+    </ul>
+</div>
+{% endblock %}
