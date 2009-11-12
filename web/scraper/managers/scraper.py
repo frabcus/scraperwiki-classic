@@ -90,7 +90,7 @@ class ScraperManager(models.Manager):
         JOIN kv
         ON items.item_id=kv.item_id
         WHERE items.scraper_id = '%(scraper_id)s'
-        ORDER BY items.item_id, kv.key
+        ORDER BY items.date_scraped, items.item_id, kv.key
       """ % locals()
 
       cursor = self.datastore_connection.cursor()
@@ -102,7 +102,7 @@ class ScraperManager(models.Manager):
           item_id = row[0]
           if not rows.has_key(item_id):
               rows[item_id] = {}
-          rows[item_id][row[6]] = row[7]
+          rows[item_id][row[7]] = row[8]
       
       
       headings_sql = """
@@ -131,8 +131,6 @@ class ScraperManager(models.Manager):
           items = row.items()
           items.sort()
           rows[item_id] = [value for key, value in items]
-
-
       
       data = {
       'headings' : headings, 

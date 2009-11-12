@@ -1,6 +1,7 @@
 # encoding: utf-8
 import hashlib
 import os
+import datetime
 import connection
 try:
   import json
@@ -87,10 +88,13 @@ def __save_row(unique_keys, data, kwargs):
     new_item_id = c.fetchone()[0]
     item['item_id'] = new_item_id
  
-
-
-    c.execute("INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`) \
-      VALUES (%s, %s, %s, %s, %s);", (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'],))
+    
+    # for date scraped
+    now = datetime.datetime.now()
+    str_now = now.strftime("%Y-%m-%d %H:%M:%S")
+    
+    c.execute("INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`, `date_scraped`) \
+      VALUES (%s, %s, %s, %s, %s, %s);", (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'],str_now))
   
     for k,v in data.items():  
       c.execute("""INSERT INTO `kv` (`item_id`,`key`,`value`) VALUES (%s, %s, %s);""", (item['item_id'], k,v))

@@ -5,8 +5,13 @@ CREATE TABLE IF NOT EXISTS `items` (
   `scraper_id` varchar(100) NOT NULL,
   `date` datetime NULL,
   `latlng` varchar(100) NULL,
+  `date_scraped` datetime NULL,
   KEY `item_id` (`item_id`,`unique_hash`,`scraper_id`,`date`,`latlng`)
 ) ENGINE=MyISAM;
+
+-- Changes:
+-- 1:
+-- alter table `items` add column `date_scraped` datetime NULL;
 
 
 DROP TABLE IF EXISTS `kv`;
@@ -22,4 +27,6 @@ DROP TABLE IF EXISTS `sequences`;
 CREATE TABLE IF NOT EXISTS `sequences` (
   `id` bigint NOT NULL
   ) ENGINE=MyISAM;
+
+
 
