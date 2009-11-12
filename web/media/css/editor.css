@@ -80,7 +80,9 @@ span.hiddenfields { margin-left:10px; }
 .editor_output .info span.exception {background:#FF7878;}
 .editor_output .info span.output_item:hover {background:#ffffd7;}
 .editor_output .info span.output_item.run_end {border-bottom:solid 1px #cfcfcf;}
-.message_expander {cursor:pointer;}
+.message_expander {cursor:pointer;color:#2680c6; text-decoration:none;}
+.message_expander:hover {text-decoration:underline;}
+
 .editor_output div.tabs ul li.new a {color:green; font-weight:bold;}
 
 .editor_output div.controls { padding:0 1em;}
