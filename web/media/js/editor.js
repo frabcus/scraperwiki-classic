@@ -215,16 +215,16 @@ $(document).ready(function() {
         $('#meta_fields_mini').appendTo($('#meta_form'))
         $('#meta_fields_mini').attr('id', 'meta_fields')
         $('#id_title').after('<a href="" id="meta_form_edit">Edit scraper info</a>')
-        
-        // Only add the save button if it's not there already
-        if (!$('#meta_form .save').length) {
-            $('.save').clone().appendTo($('#meta_form'))
-        };
-
-        // Only add the commit button if it's not there already
-        if (!$('#meta_form .commit').length) {
-            $('.commit').clone().appendTo($('#meta_form'))
-        };
+        $('#meta_form_edit').click(function() {            
+            
+            // Only add the save button if it's not there already
+            if (!$('#meta_form .save').length) {
+                $('.save').clone().appendTo($('#meta_form'));
+            };
+            
+            showPopup('meta_form');
+            return false;
+        });
         
     }
     
@@ -372,6 +372,11 @@ $(document).ready(function() {
         //commit button
         $('.commit').live('click', function (){
             if (popupStatus == 0) {
+                // Only add the save button if it's not there already
+                if (!$('#meta_form .commit').length) {
+                    $('.commit').clone().appendTo($('#meta_form'));
+                };
+                
                 showPopup('meta_form');
                 return false;     
             }
@@ -499,7 +504,6 @@ $(document).ready(function() {
     function showTextPopup(sMessage, sMessageType){
         $('#popup_text .popup_raw pre').text(sMessage);
         $('body', $('#popup_text .popup_html iframe').contents()).html(sMessage);
-        // $('#popup_text .popup_html iframe').load(sMessage);
         showPopup('popup_text');
     }
     
@@ -520,7 +524,7 @@ $(document).ready(function() {
     function hidePopup() {
         
         $('#id_title').val($('#meta_form #id_meta_title').val())
-        
+        $('#meta_form .button').remove()
         // Hide popups
         $('#popups div.popup_item').each(function(i) {
             $(this).fadeOut("fast")
