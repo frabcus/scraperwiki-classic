@@ -452,7 +452,9 @@ $(document).ready(function() {
         var bSuccess = false;
         
         // make sure the title is the same as the popup
-        $('#id_title').val($('#id_meta_title').val())
+        if (popupStatus == 1){            
+            $('#id_title').val($('#id_meta_title').val())
+        }
         
         if(shortNameIsSet() == false){
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
