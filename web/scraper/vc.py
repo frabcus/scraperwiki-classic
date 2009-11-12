@@ -48,7 +48,7 @@ def save(scraper):
   scraper_file = open(path, 'w')
 
   code = scraper.code
-  scraper_file.write(code)
+  scraper_file.write(code.encode('utf-8'))
 
   scraper_file.close()
 

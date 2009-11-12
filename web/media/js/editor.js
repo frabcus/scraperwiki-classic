@@ -138,7 +138,7 @@ $(document).ready(function() {
     
     //Setup Popups
     function setupPopups(){
-        
+        popupStatus = 0
         //assign escape key to close popups
         $(document).keypress(function(e) {
             if (e.keyCode == 27 && popupStatus == 1) {
@@ -165,6 +165,11 @@ $(document).ready(function() {
         //show or hide the relivant block
         $('#popups div.popup_item').each(function(i) {
             if (this.id == sId) {
+                
+                if (sId == 'meta_form') {
+                    $('#id_meta_title').val($('#id_title').val())
+                }
+                
                 popupStatus = 1;
                 //show
                 $(this).css({
@@ -197,19 +202,29 @@ $(document).ready(function() {
     //Setup save / details forms
     function setupDetailsForm(){
 
+        $('#id_title').example(function() {
+          return $(this).attr('title');
+        });
+        
+        $('#id_meta_title').example(function() {
+          return $('#id_title').attr('title');
+        });
+        
+        
         // Meta form
         $('#meta_fields_mini').appendTo($('#meta_form'))
         $('#meta_fields_mini').attr('id', 'meta_fields')
         $('#id_title').after('<a href="" id="meta_form_edit">Edit scraper info</a>')
+        
+        // Only add the save button if it's not there already
+        if (!$('#meta_form .save').length) {
+            $('.save').clone().appendTo($('#meta_form'))
+        };
 
-        $('#meta_form_edit').click(function() {
-            // Only add the save button if it's not there already
-            if (!$('#meta_form #save').length) {
-                $('#save').clone().appendTo($('#meta_form'))
-            }
-            showPopup('meta_form')
-            return false
-        });
+        // Only add the commit button if it's not there already
+        if (!$('#meta_form .commit').length) {
+            $('.commit').clone().appendTo($('#meta_form'))
+        };
         
     }
     
@@ -269,6 +284,14 @@ $(document).ready(function() {
                             writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
                         }
                     };
+                },
+                error: function(code) {
+                    alert('Sorry, there seems to be something wrong with running code at the moment, try saving your scraper and trying again later.')
+                    
+                    $('.editor_controls #run').unbind('click.abort');
+                    $('.editor_controls #run').bind('click.run', run_abort);
+                    $('.editor_controls #run').removeClass('running').val('run');
+                    
                 }
             });
             return run_request
@@ -347,20 +370,29 @@ $(document).ready(function() {
     function setupToolbar(){
         
         //commit button
-        $('#commit').click(
-            function (){
-                //showPopup('meta_form')
-                return commitScraper();
+        $('.commit').live('click', function (){
+            if (popupStatus == 0) {
+                showPopup('meta_form');
+                return false;     
+            }
+            if ($('#meta_form #id_commit_message').val() == ""){
+                $('#meta_form #id_commit_message').effect('highlight')
+                return false
+            } else {
+                commit = true
+                saveScraper(commit);
+                return false;                
+            }
+
             }
         );
         
         //save button
-        $('#save').click(
-           function(){
-                saveScraper();
-                return false;
-           }
-        );
+        $('.save').live('click', function(){
+             saveScraper();
+             return false;
+        });
+
         
         //clear console button
         $('#clear').click(function() {
@@ -409,10 +441,13 @@ $(document).ready(function() {
     }
     
     //Save
-    function saveScraper(){
+    function saveScraper(commit){
 
         var bSuccess = false;
-
+        
+        // make sure the title is the same as the popup
+        $('#id_title').val($('#id_meta_title').val())
+        
         if(shortNameIsSet() == false){
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
 
@@ -425,6 +460,11 @@ $(document).ready(function() {
         }else{
             bSuccess = true;
         }
+        
+        form_action = 'save';
+        if (commit == true) {
+            form_action = 'commit';
+        }
 
         if(bSuccess == true){
             $.ajax({
@@ -434,7 +474,7 @@ $(document).ready(function() {
               data: ({
                 title : $('#id_title').val(),
                 code : codeeditor.getCode(),
-                action : 'save'
+                action : form_action
                 }),
               dataType: "html",
               success: function(response){
@@ -442,8 +482,10 @@ $(document).ready(function() {
                     if (res.url && window.location.pathname != res.url) {
                         window.location = res.url;
                     };
-                                        
-                    showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
+                    
+                    if (commit != true){                        
+                        showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
+                    }                    
                 },
 
             error: function(response){
@@ -456,7 +498,8 @@ $(document).ready(function() {
     //Show random text popup
     function showTextPopup(sMessage, sMessageType){
         $('#popup_text .popup_raw pre').text(sMessage);
-        $('body', $('#popup_text .popup_html iframe').contents()).text(sMessage);
+        $('body', $('#popup_text .popup_html iframe').contents()).html(sMessage);
+        // $('#popup_text .popup_html iframe').load(sMessage);
         showPopup('popup_text');
     }
     
@@ -465,12 +508,19 @@ $(document).ready(function() {
     }
 
     function shortNameIsSet(){
+        // Because of jquery example
+        if ($('#id_title').hasClass('example')) {
+            return false;
+        }
         var sTitle = jQuery.trim($('#id_title').val());
         return sTitle != 'Untitled Scraper' && sTitle != '' && sTitle != undefined && sTitle != false;
     }
 
     //Hide popup
     function hidePopup() {
+        
+        $('#id_title').val($('#meta_form #id_meta_title').val())
+        
         // Hide popups
         $('#popups div.popup_item').each(function(i) {
             $(this).fadeOut("fast")
@@ -548,10 +598,11 @@ $(document).ready(function() {
 
         sDisplayMessage = sMessage;
         if(sLongMessage) {
-            sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="message_expander">...more</span>';
+            $('#output_sources .output_content')
+            .append('<div class="long_message">'+sLongMessage+'</div>');
         }
         $('#output_sources .output_content')
-        .append('<span class="output_item">' + sDisplayMessage + "</span>");
+        .append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
         
         
         $('.editor_output div.tabs li.sources').addClass('new');
@@ -571,9 +622,11 @@ $(document).ready(function() {
         
         $('#output_data :first').append(html_row);
         $('.editor_output div.tabs li.data').addClass('new');
-        /*
-            TODO Add auto scroll here
-        */
+        
+        
+        $('#output_data').animate({ 
+            scrollTop: $('#output_data').height()+$('#output_data')[0].scrollHeight 
+        }, 0);
     }
 
     //show tab

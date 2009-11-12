@@ -11,6 +11,7 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.form.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys-0.7.9.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.htmlClean-min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.example.min.js"></script>
 
     <script type="text/javascript" src="{{ settings.CODEMIRROR_URL }}js/codemirror.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?a=b"></script>  
@@ -45,6 +46,11 @@
                 <div id="meta_fields_mini">
                     {# for form elements that are shown in the popup #}
 
+                    <div class="field field-title">
+                        <label for="id_meta_title">{{ form.title.label}}</label>
+                        <input type="text" name="title" value="" id="id_meta_title">
+                    </div>
+
                     <div class="field field-description">
                         <label for="id_description">{{ form.description.label}} {{ form.license.errors }}</label>
                         {{ form.description }}
@@ -61,9 +67,10 @@
                     </div>
 
                     <div class="field field-commit_message">
-                        <label for="commit_message">Commit Message</label>
-                        <input type="text" name="commit_message" value="Changed" id="commit_message">
+                      <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
+                      {{ form.commit_message }}
                     </div>
+
                 </div>
 
                 <ul class="help">
@@ -88,7 +95,7 @@
 
             {# Controls #}
             <div class="editor_controls">
-                <input type="submit" id="save" name="action" value="Save" />            
+                <input type="submit" class="save  button" name="action" value="Save" />            
                 <input type="button" value="Diff" name="diff" id="diff" />
                 <input type="button" value="Reload" name="reload" id="reload" />
                 <input type="button" class="execute" value="Run" name="run" id="run" />
@@ -99,7 +106,7 @@
                     {% else %}
                         <a href="{% url frontpage %}">Close editor</a>                
                     {% endif %}
-                    <input type="submit" id="commit" name="action" value="Commit and publish"/>            
+                    <input type="submit" class="commit button" name="action" value="Commit and publish"/>            
                 </div>
             </div>
 

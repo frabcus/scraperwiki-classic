@@ -1,4 +1,3 @@
-
 from os.path import exists, join
 
 # This shouldn't be needed, however in some cases the buildout version of

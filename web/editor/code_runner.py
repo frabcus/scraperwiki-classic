@@ -62,7 +62,7 @@ def run_code(request):
     run_mode = settings.CODE_RUNNING_MODE
   
     if run_mode == 'popen':
-      res =  format_json(run_popen(code, guid=guid))
+      res =  run_popen(code, guid=guid)
     if run_mode == 'firestarter_django':
       res =  run_firestarter_django(code)
 
@@ -120,7 +120,9 @@ def run_popen(code, guid=False):
     close_fds=True, 
     env=env,
     )
-  res = p.stdout.readlines()
+  res = []  
+  for line in p.stdout.readlines():
+    res.append(format_json(line))
   fout.close()   # deletes the temporary file
   return ''.join(res)
 
