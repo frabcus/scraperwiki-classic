@@ -1,0 +1,21 @@
+{% extends "scraper/scraper_base.html" %}
+
+{% block tab %}
+
+<h3>Owner</h3>
+<a href="{% url profiles_profile_detail scraper_owner.username %}">{{scraper_owner.username}}</a>
+
+{% if scraper_contributors %}  
+  <h3>Contributors</h3>
+  {% for contributor in scraper_contributors %}  
+    <a href="{% url profiles_profile_detail contributor.username %}">{{contributor.username}}</a>
+  {% endfor %}
+{% endif %}
+
+{% if scraper_followers %}  
+  <h3>Followers</h3>
+  {% for follower in scraper_followers %}  
+    <a href="{% url profiles_profile_detail follower.username %}">{{follower.username}}</a>
+  {% endfor %}
+{% endif %}
+{% endblock %}
