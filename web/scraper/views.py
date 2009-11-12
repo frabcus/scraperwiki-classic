@@ -39,6 +39,27 @@ def code (request, scraper_short_name):
 
     return render_to_response('scraper/code.html', {'selected_tab': 'code', 'scraper': scraper, 'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it}, context_instance=RequestContext(request))
 
+def contributors (request, scraper_short_name):
+
+    user = request.user
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    user_owns_it = (scraper.owner() == user)
+    user_follows_it = (user in scraper.followers())
+    
+    scraper_owner = scraper.owner()
+    scraper_contributors = scraper.contributors()
+    scraper_followers = scraper.followers()
+    
+    return render_to_response('scraper/contributers.html', {
+        'scraper_owner' : scraper_owner,
+        'scraper_contributors' : scraper_contributors,
+        'scraper_followers' : scraper_followers,
+        'selected_tab': 'contributors', 
+        'scraper': scraper, 
+        'user_owns_it': user_owns_it, 
+        'user_follows_it': user_follows_it
+        }, context_instance=RequestContext(request))
+
 
 def show(request, scraper_short_name, selected_tab = 'data'):
     user = request.user

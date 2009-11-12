@@ -1,14 +1,9 @@
 {% extends "scraper/scraper_base.html" %}
 
 {% block tab %}
-<div class="tab_tools">
-    <form method="get" action="{% url editor scraper.short_name %}">
-        <input type="submit" value="Edit scraper" />
-    </form>
-</div>
 <div class="code_viewer">
 	<textarea id="txtScraperCode">
-{{ scraper.committed_code }}
+    {{ scraper.committed_code }}
 	</textarea>
 </div>
 {% endblock %}

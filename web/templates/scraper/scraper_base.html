@@ -25,11 +25,12 @@
         <div class="metadata">
           <dl>
               <dt>Source:</dt>
-              <dd>{{scraper.source}}</dd>
-        	  <dt>License:</dt><dd>{{scraper.license}}</dd>
+              <dd>{{scraper.source|default:"&nbsp;"}}</dd>
+        	  <dt>License:</dt>
+        	  <dd>{{scraper.license|default:"&nbsp;"}}</dd>
         	  <dt>Scraper created:</dt><dd>{{scraper.created_at}}</dd>
         	  <dt>Last Run:</dt>
-        	  <dd>{{scraper.last_run}}</dd>
+        	  <dd>{{scraper.last_run|default:"Never"}}</dd>
         	  <dt>Records:</dt>
         	  <dd>{{ scraper.record_count }}</dd>
         	  <dt>API short name:</dt>
@@ -37,6 +38,13 @@
         	  <dt>Language:</dt>
         	  <dd>{{scraper.language}}</dd>
           </dl>
+          
+          <div class="tab_tools">
+              <form method="get" action="{% url editor scraper.short_name %}">
+                  <input type="submit" value="Edit scraper" />
+              </form>
+          </div>
+          
         </div>
     </div>
     <br class="clear"/>
@@ -49,9 +57,14 @@
                 <li{% ifequal selected_tab "code" %} class="selected"{% endifequal %}>
                     <a href="{% url scraper_code scraper.short_name %}">Code</a>
                 </li>
+                <li{% ifequal selected_tab "contributors" %} class="selected"{% endifequal %}>
+                    <a href="{% url scraper_contributors scraper.short_name %}">Contributors</a>
+                </li>
             </ul>
+            
         </div>
         <div class="page_tab_body">
+                    
             {% block tab %}
             {% endblock %}
         </div>
