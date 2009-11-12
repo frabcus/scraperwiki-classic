@@ -46,6 +46,11 @@
                 <div id="meta_fields_mini">
                     {# for form elements that are shown in the popup #}
 
+                    <div class="field field-title">
+                        <label for="id_meta_title">{{ form.title.label}}</label>
+                        <input type="text" name="title" value="" id="id_meta_title">
+                    </div>
+
                     <div class="field field-description">
                         <label for="id_description">{{ form.description.label}} {{ form.license.errors }}</label>
                         {{ form.description }}

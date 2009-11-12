@@ -165,6 +165,11 @@ $(document).ready(function() {
         //show or hide the relivant block
         $('#popups div.popup_item').each(function(i) {
             if (this.id == sId) {
+                
+                if (sId == 'meta_form') {
+                    $('#id_meta_title').val($('#id_title').val())
+                }
+                
                 popupStatus = 1;
                 //show
                 $(this).css({
@@ -201,19 +206,22 @@ $(document).ready(function() {
           return $(this).attr('title');
         });
         
+        $('#id_meta_title').example(function() {
+          return $('#id_title').attr('title');
+        });
+        
         
         // Meta form
         $('#meta_fields_mini').appendTo($('#meta_form'))
         $('#meta_fields_mini').attr('id', 'meta_fields')
         $('#id_title').after('<a href="" id="meta_form_edit">Edit scraper info</a>')
-
-
+        
         // Only add the save button if it's not there already
         if (!$('#meta_form .save').length) {
             $('.save').clone().appendTo($('#meta_form'))
         };
 
-        // Only add the save button if it's not there already
+        // Only add the commit button if it's not there already
         if (!$('#meta_form .commit').length) {
             $('.commit').clone().appendTo($('#meta_form'))
         };
@@ -428,7 +436,10 @@ $(document).ready(function() {
     function saveScraper(commit){
 
         var bSuccess = false;
-
+        
+        // make sure the title is the same as the popup
+        $('#id_title').val($('#id_meta_title').val())
+        
         if(shortNameIsSet() == false){
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
 
@@ -498,6 +509,9 @@ $(document).ready(function() {
 
     //Hide popup
     function hidePopup() {
+        
+        $('#id_title').val($('#meta_form #id_meta_title').val())
+        
         // Hide popups
         $('#popups div.popup_item').each(function(i) {
             $(this).fadeOut("fast")
