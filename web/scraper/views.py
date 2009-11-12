@@ -2,6 +2,7 @@ from django.template import RequestContext, loader, Context
 from django import forms
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
+from django.shortcuts import get_object_or_404
 
 from scraper import models
 from scraper import forms
@@ -15,7 +16,7 @@ def create(request):
 def data (request, scraper_short_name):
     
     user = request.user
-    scraper = models.Scraper.objects.get(short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     data = models.Scraper.objects.data_summary(scraper_id=scraper.guid)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
@@ -32,7 +33,7 @@ def data (request, scraper_short_name):
 def code (request, scraper_short_name):
 
     user = request.user
-    scraper = models.Scraper.objects.get(short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
 
@@ -41,7 +42,7 @@ def code (request, scraper_short_name):
 
 def show(request, scraper_short_name, selected_tab = 'data'):
     user = request.user
-    scraper = models.Scraper.objects.get(short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     you_own_it = (scraper.owner() == user)
     you_follow_it = (user in scraper.followers())
     data = models.scraperData.objects.summary()
@@ -67,7 +68,7 @@ def show(request, scraper_short_name, selected_tab = 'data'):
     return render_to_response('scraper/show.html', {'data' : data, 'selected_tab': selected_tab, 'scraper': scraper, 'you_own_it': you_own_it, 'you_follow_it': you_follow_it, 'tabs': tabs, 'tab_to_show': tab_to_show}, context_instance=RequestContext(request))
 
 def export_csv (request, scraper_short_name):
-    scraper = models.Scraper.objects.get(short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     data = models.Scraper.objects.data_summary(scraper_id=scraper.guid)
 
     response = HttpResponse(mimetype='text/csv')
@@ -85,7 +86,7 @@ def list(request):
 
 def download(request, scraper_id = 0):
     user = request.user
-    scraper = models.Scraper.objects.get(id=scraper_id)
+    scraper = get_object_or_404(models.Scraper.objects,id=scraper_id)
     response = HttpResponse(scraper.current_code(), mimetype="text/plain")
     response['Content-Disposition'] = 'attachment; filename=%s.py' % (scraper.short_name)
     return response
