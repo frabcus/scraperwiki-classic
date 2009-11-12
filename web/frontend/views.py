@@ -11,6 +11,7 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from scraper.models import Scraper
+from market.models import Solicitation
 from frontend.forms import CreateAccountForm
 from registration.backends import get_backend
 
@@ -42,9 +43,13 @@ def frontpage(request):
         if scraper.is_good():
             good_contribution_scrapers.append(scraper)
 
+    #new scrapers
     new_scrapers = Scraper.objects.filter(published=True).order_by('-created_at')[:5]
     
-    return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'following_scrapers': following_scrapers, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
+    #suggested scrapers
+    solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
+    
+    return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
 
 def process_logout(request):
     logout(request)

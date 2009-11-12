@@ -21,4 +21,22 @@
         </div>
     </div>
     <br class="clear"/>
+    <div class="content left half">
+        <h3>New scrapers from everybody</h3>
+    	<ul>
+    		{% for scraper in new_scrapers %}
+    		  {% include 'frontend/detailed_scraper_line.html' %}
+    		{% endfor %}	
+    	</ul>
+    </div>
+    <div class="content left half">
+        <h3>New scrapers from everybody</h3>
+        <ul>
+        {% for solicitation in solicitations %}
+            <li>
+        	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
+        	</li>
+    	{% endfor %}
+        </ul>
+    </div>
 </div>

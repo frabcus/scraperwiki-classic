@@ -2,6 +2,7 @@ from django.template import RequestContext
 from django import forms
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
+from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from market import models
 from market import forms
@@ -23,6 +24,13 @@ def solicitation(request):
     return render_to_response('market/solicitation.html', {'form': form }, context_instance = RequestContext(request))
 
 
+
 def market_list(request):
     solicitations = models.Solicitation.objects.filter(deleted=False).order_by('-created_at')    
     return render_to_response('market/market_list.html', {'solicitations': solicitations}, context_instance = RequestContext(request))
+
+
+def single(request, solicitation_id):
+    solicitation = get_object_or_404(models.Solicitation, id=solicitation_id)
+    recent_solicitations = models.Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]    
+    return render_to_response('market/market_single.html', {'solicitation': solicitation, 'recent_solicitations': recent_solicitations }, context_instance = RequestContext(request))
