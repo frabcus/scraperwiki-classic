@@ -27,10 +27,11 @@ def solicitation(request):
 
 def market_list(request):
     solicitations = models.Solicitation.objects.filter(deleted=False).order_by('-created_at')    
-    return render_to_response('market/market_list.html', {'solicitations': solicitations}, context_instance = RequestContext(request))
+    recent_solicitations = models.Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]        
+    return render_to_response('market/market_list.html', {'solicitations': solicitations,'recent_solicitations': recent_solicitations}, context_instance = RequestContext(request))
 
 
 def single(request, solicitation_id):
     solicitation = get_object_or_404(models.Solicitation, id=solicitation_id)
     recent_solicitations = models.Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]    
-    return render_to_response('market/market_single.html', {'solicitation': solicitation, 'recent_solicitations': recent_solicitations }, context_instance = RequestContext(request))
+    return render_to_response('market/market_single.html', {'solicitation': solicitation, 'recent_solicitations': recent_solicitations}, context_instance = RequestContext(request))
