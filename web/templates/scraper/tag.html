@@ -1,0 +1,24 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}{{ tag }}{% endblock %}
+
+{% block content %}
+  <h2>Scrapers tagged "{{ tag|title }}"</h2>
+    <div class="page_tabs">
+      <ul>
+          <li{% ifequal selected_tab "items" %} class="selected"{% endifequal %}>
+              <a href="{% url tag tag %}">Scrapers</a>
+          </li>
+          <li{% ifequal selected_tab "data" %} class="selected"{% endifequal %}>
+              <a href="{% url tag_data tag %}">Data</a>
+          </li>
+      </ul>
+      
+  </div>
+  
+  <ul>
+  {% for item in queryset %}
+    <li><a href="{% url scraper_code item.short_name %}">{{ item.title }}</a></li>
+  {% endfor %}
+  </ul>
+{% endblock %}

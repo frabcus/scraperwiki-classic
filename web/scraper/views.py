@@ -4,6 +4,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 
+from tagging.models import Tag
+
 from scraper import models
 from scraper import forms
 
@@ -20,8 +22,11 @@ def data (request, scraper_short_name):
     data = models.Scraper.objects.data_summary(scraper_id=scraper.guid)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    return render_to_response('scraper/data.html', {
 
+    scraper_tags = Tag.objects.get_for_object(scraper)
+    
+    return render_to_response('scraper/data.html', {
+      'scraper_tags' : scraper_tags,
       'selected_tab': 'data', 
       'scraper': scraper, 
       'user_owns_it': user_owns_it, 
@@ -36,8 +41,16 @@ def code (request, scraper_short_name):
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-
-    return render_to_response('scraper/code.html', {'selected_tab': 'code', 'scraper': scraper, 'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it}, context_instance=RequestContext(request))
+    
+    scraper_tags = Tag.objects.get_for_object(scraper)
+    
+    return render_to_response('scraper/code.html', {
+        'scraper_tags' : scraper_tags,
+        'selected_tab': 'code', 
+        'scraper': scraper, 
+        'user_owns_it': user_owns_it, 
+        'user_follows_it': user_follows_it
+        }, context_instance=RequestContext(request))
 
 def contributors (request, scraper_short_name):
 
@@ -50,7 +63,10 @@ def contributors (request, scraper_short_name):
     scraper_contributors = scraper.contributors()
     scraper_followers = scraper.followers()
     
+    scraper_tags = Tag.objects.get_for_object(scraper)
+    
     return render_to_response('scraper/contributers.html', {
+        'scraper_tags' : scraper_tags,
         'scraper_owner' : scraper_owner,
         'scraper_contributors' : scraper_contributors,
         'scraper_followers' : scraper_followers,
@@ -127,3 +143,47 @@ def scraper_request(request):
         form = forms.ScraperRequestForm()
 
     return render_to_response('scraper/request.html', {'form': form }, context_instance = RequestContext(request))
+
+
+def all_tags(request):
+    return render_to_response('scraper/all_tags.html', context_instance = RequestContext(request))
+    
+    
+def tag(request, tag):
+    from tagging.utils import get_tag
+    from tagging.models import Tag, TaggedItem
+    
+    tag = get_tag(tag)
+    scrapers = models.Scraper.objects.filter(published=True)    
+    queryset = TaggedItem.objects.get_by_model(scrapers, tag)
+    return render_to_response('scraper/tag.html', {
+        'queryset': queryset, 
+        'tag' : tag,
+        'selected_tab' : 'items',
+        }, context_instance = RequestContext(request))
+    
+    
+    
+def tag_data(request, tag):
+    from tagging.utils import get_tag
+    from tagging.models import Tag, TaggedItem
+    
+    tag = get_tag(tag)
+    scrapers = models.Scraper.objects.filter(published=True)
+    queryset = TaggedItem.objects.get_by_model(scrapers, tag)
+    
+    guids = []
+    for q in queryset:
+        guids.append(q.guid)
+    data = models.Scraper.objects.data_summary(scraper_id=guids)
+    count = models.Scraper.objects.item_count_for_tag(guids=guids)
+    
+    return render_to_response('scraper/tag_data.html', {
+        'data': data, 
+        'tag' : tag,
+        'selected_tab' : 'data',
+        }, context_instance = RequestContext(request))
+    
+    
+    
+    

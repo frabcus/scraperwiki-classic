@@ -1,4 +1,5 @@
 {% extends "frontend/base.html" %}
+{% load humanize %}
 
 {% block title %}{{ scraper.title }}{% endblock %}
 {% block content %}
@@ -30,13 +31,15 @@
         	  <dd>{{scraper.license|default:"&nbsp;"}}</dd>
         	  <dt>Scraper created:</dt><dd>{{scraper.created_at}}</dd>
         	  <dt>Last Run:</dt>
-        	  <dd>{{scraper.last_run|default:"Never"}}</dd>
+        	  <dd>{{scraper.last_run|naturalday|default:"never"|title}}</dd>
         	  <dt>Records:</dt>
         	  <dd>{{ scraper.record_count }}</dd>
         	  <dt>API short name:</dt>
         	  <dd>{{scraper.short_name}}</dd>
-        	  <dt>Language:</dt>
-        	  <dd>{{scraper.language}}</dd>
+            <dt>Language:</dt>
+            <dd>{{scraper.language}}</dd>
+            <dt>Tags:</dt>
+            <dd>{% for tag in scraper_tags %}<a href="{% url tag tag %}">{{ tag }}</a> {% endfor %}</dd>
           </dl>
           
           <div class="tab_tools">

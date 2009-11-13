@@ -481,6 +481,7 @@ $(document).ready(function() {
               URL : window.location.pathname,
               data: ({
                 title : $('#id_title').val(),
+                tags : $('#id_tags').val(),
                 code : codeeditor.getCode(),
                 action : form_action
                 }),

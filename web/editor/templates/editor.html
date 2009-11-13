@@ -66,6 +66,11 @@
                         {{ form.source }}
                     </div>
 
+                    <div class="field field-tags">
+                        <label for="id_tags">{{ form.tags.label}} {{ form.tags.errors }}</label>
+                        {{ form.tags }}
+                    </div>
+
                     <div class="field field-commit_message">
                       <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
                       {{ form.commit_message }}

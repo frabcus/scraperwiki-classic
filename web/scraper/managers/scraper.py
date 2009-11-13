@@ -84,17 +84,20 @@ class ScraperManager(models.Manager):
 
 
     def data_summary(self, scraper_id=0, limit=1000):
-
-      data_sql = """
-        SELECT * FROM (SELECT * FROM items LIMIT %(limit)s) as items
-        JOIN kv
-        ON items.item_id=kv.item_id
-        WHERE items.scraper_id = '%(scraper_id)s'
-        ORDER BY items.date_scraped, items.item_id, kv.key
-      """ % locals()
-
+      
+      if isinstance(scraper_id, list):
+          guids = ",".join("'%s'" % guid for guid in scraper_id)
+      else:
+          guids = "'%s'" % scraper_id
+      
       cursor = self.datastore_connection.cursor()
-      cursor.execute(data_sql)
+      cursor.execute("""
+          SELECT * FROM (SELECT * FROM items LIMIT %(limit)s) as items
+          JOIN kv
+          ON items.item_id=kv.item_id
+          WHERE items.scraper_id IN (%(guids)s)
+          ORDER BY items.date_scraped, items.item_id, kv.key
+        """, locals())
 
 
       rows = {}
@@ -109,7 +112,7 @@ class ScraperManager(models.Manager):
         SELECT `key` FROM kv 
         JOIN items 
         ON kv.item_id=items.item_id 
-        WHERE items.scraper_id='%(scraper_id)s' 
+        WHERE items.scraper_id IN (%(guids)s) 
         GROUP BY kv.key;
       """ % locals()
       
@@ -137,14 +140,21 @@ class ScraperManager(models.Manager):
       'rows' : rows,
       }
       
-      
-      
       return data
-    
+
+
+
 
 
     def item_count(self, guid):
         sql = "SELECT COUNT(*) FROM items WHERE scraper_id='%s'" % guid
+        cursor = self.datastore_connection.cursor()
+        cursor.execute(sql)
+        return cursor.fetchone()[0]
+
+    def item_count_for_tag(self, guids):
+        guids = ",".join("'%s'" % guid for guid in guids)
+        sql = "SELECT COUNT(*) FROM items WHERE scraper_id IN (%(guids)s)" % locals()
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
         return cursor.fetchone()[0]

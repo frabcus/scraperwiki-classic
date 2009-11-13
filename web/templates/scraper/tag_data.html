@@ -1,0 +1,50 @@
+{% extends "frontend/base.html" %}
+{% load replace %}
+{% block title %}{{ tag }}{% endblock %}
+
+{% block content %}
+  <h2>Data tagged "{{ tag|title }}"</h2>
+  
+    <div class="page_tabs">
+      <ul>
+          <li{% ifequal selected_tab "items" %} class="selected"{% endifequal %}>
+              <a href="{% url tag tag %}">Scrapers</a>
+          </li>
+          <li{% ifequal selected_tab "data" %} class="selected"{% endifequal %}>
+              <a href="{% url tag_data tag %}">Data</a>
+          </li>
+      </ul>
+      
+  </div>
+  
+  {% if data.headings %}
+    
+
+    <table>
+    <thead>
+    {% for heading in data.headings %}
+    <th>{{ heading|title|replace }}</th>
+    {% endfor %}
+    </thead>
+    <tbody>
+
+    {% for i,row in data.rows.items %}
+    <tr>
+    {% for value in row %}
+    <td>{{ value|urlizetrunc:15 }}</td>
+    {% endfor %}
+    </tr>
+    {% endfor %}    
+    </tbody>
+    </table>
+
+
+
+  {% else %}
+    
+    
+  {% endif %}
+
+  
+
+{% endblock %}

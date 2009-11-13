@@ -145,10 +145,11 @@ def edit(request, short_name=None):
       scraper.code = template.default()['code']
       scraper.commit_message = ""
 
+  scraper.__dict__['tags'] = ", ".join(tag.name for tag in scraper.tags)
+
   form = forms.editorForm(scraper.__dict__, instance=scraper)
   form.fields['code'].initial = scraper.code
   form.fields['title'].initial = scraper.title
-  
   
   if request.method == 'POST' or bool(re.match('save|commit', request.GET.get('action', ""))):
     if request.POST:
@@ -173,6 +174,7 @@ def edit(request, short_name=None):
       # Save the form without committing at first
       # (read http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
       savedForm = form.save(commit=False)
+      savedForm.tags = request.POST.get('tags')
 
       # Add some more fields to the form
       savedForm.code = form.cleaned_data['code']

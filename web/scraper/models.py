@@ -1,6 +1,7 @@
 # encoding: utf-8
 import datetime
 import time
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
@@ -8,6 +9,9 @@ from django.contrib import admin
 import managers.scraper
 from django.db.models.signals import post_save
 from registration.signals import user_registered
+
+import tagging
+
 from page_cache.models import *
 import template
 import util
@@ -69,7 +73,7 @@ class Scraper(models.Model):
       this function saves the uninitialized and undeclared .code member of the object to the disk
       you just have to know it's there by looking into the cryptically named vc.py module
       """
-
+      
       # if the scraper doesn't exist already give it a short name (slug)
       if self.short_name:
         self.short_name = util.SlugifyUniquely(self.short_name, Scraper, slugfield='short_name', instance=self)
@@ -84,11 +88,12 @@ class Scraper(models.Model):
           guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple())) ]))).hexdigest()
           self.guid = guid
       
-      vc.save(self)
-      if commit:
-        # Publish the scraper
-        self.published = True
-        vc.commit(self, message=message, user=user)
+      if self.__dict__.get('code'):
+          vc.save(self)
+          if commit:
+            # Publish the scraper
+            self.published = True
+            vc.commit(self, message=message, user=user)
       super(Scraper, self).save()
     
     def language(self):
@@ -163,6 +168,8 @@ class Scraper(models.Model):
     def is_good(self):
         # don't know how goodness is going to be defined yet.
         return True
+
+tagging.register(Scraper)
 		
 def post_Scraper_save_signal(sender, **kwargs):
   pass

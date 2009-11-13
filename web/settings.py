@@ -95,6 +95,8 @@ INSTALLED_APPS = (
   	'market',  	
     #'debug_toolbar',
   	'django_notify',
+  	'tagging',
+  	'django.contrib.humanize',
 )
 
 
