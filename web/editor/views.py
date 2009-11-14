@@ -115,8 +115,6 @@ def edit(request, short_name=None):
   if short_name == None:
     short_name = "__new__"  
   
-  
-  
   if not request.session.get('ScraperDraft', None):
     request.session['ScraperDraft'] = {}
   draft = request.session['ScraperDraft'].get(short_name, None)

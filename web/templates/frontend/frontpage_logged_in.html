@@ -6,7 +6,7 @@
 <div class="content col left">
 
 	<h2>Your scrapers</h2>
-	<ul>
+	<ul class="scraper_list">
     	{% for scraper in my_scrapers %}
     	  {% include 'frontend/scraper_line.html' %}
     	{% endfor %}
@@ -38,7 +38,7 @@
     -->
 
 	<h3>New scrapers from everybody</h3>
-	<ul>
+	<ul class="scraper_list">
 		{% for scraper in new_scrapers %}
 		  {% include 'frontend/detailed_scraper_line.html' %}
 		{% endfor %}	

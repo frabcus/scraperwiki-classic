@@ -115,8 +115,12 @@ dl.terms dd {padding-left:0; margin-left:0; font-size:0.8em;}
 /* Highlight */
 span.highlight {background:#ffffaa; padding:0 0.4em;}
 
-/* scraper list page */
+/* scraper lists */
 ul.allscraperlist li {list-style-type:none; padding:0.2em; }
+ul.scraper_list small {font-size:0.7em;}
+ul.scraper_list small.status {color:#fff; padding:0 0.5em;}
+ul.scraper_list small.status.unpublished {background-color:#ccc;}
+ul.scraper_list small.edit a {color:green;}
 
 
 /* Welcome page */

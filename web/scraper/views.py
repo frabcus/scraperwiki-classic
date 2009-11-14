@@ -16,7 +16,7 @@ def create(request):
         return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 
 
 def data (request, scraper_short_name):
-    
+
     user = request.user
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     data = models.Scraper.objects.data_summary(scraper_id=scraper.guid)
