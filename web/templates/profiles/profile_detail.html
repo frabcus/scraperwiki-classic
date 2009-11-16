@@ -13,10 +13,13 @@
     	<h2>{{ profile.user.username }}'s scrapers</h2>
     	<ul>
         	{% for scraper in profile.user.scraper_set.all %}
-        	  {% include 'frontend/scraper_line.html' %}
+        	    {% if scraper.published %}
+        	        {% include 'frontend/scraper_line.html' %}
+        	    {% endif %}
         	{% endfor %}
 	    </ul>
 	
+	    <!--
     	<h2>Scrapers {{ profile.user.username }} is watching</h2>
     	{% if  profile.user.scraper_set.not_watching_any %}
     	  <p>You are not watching any scrapers</p>
@@ -38,5 +41,6 @@
     	    {% endfor %}
     	  </ul>
         {% endif %}
+        -->
     </div>
 {% endblock %}
