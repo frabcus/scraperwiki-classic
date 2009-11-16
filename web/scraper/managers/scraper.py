@@ -86,10 +86,12 @@ class ScraperManager(models.Manager):
     def data_summary(self, scraper_id=0, limit=1000):
       
       if isinstance(scraper_id, list):
+          print '!!!!!!!!!!!!!!!!'
+          print scraper_id
           guids = ",".join("'%s'" % guid for guid in scraper_id)
       else:
           guids = "'%s'" % scraper_id
-      
+
       cursor = self.datastore_connection.cursor()
       cursor.execute("""
           SELECT * FROM (SELECT * FROM items LIMIT %(limit)s) as items
@@ -97,8 +99,7 @@ class ScraperManager(models.Manager):
           ON items.item_id=kv.item_id
           WHERE items.scraper_id IN (%(guids)s)
           ORDER BY items.date_scraped, items.item_id, kv.key
-        """, locals())
-
+        """ % locals())
 
       rows = {}
       for row in cursor.fetchall():
