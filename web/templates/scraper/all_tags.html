@@ -10,7 +10,7 @@
             Browsing by tag
         </p>
     </div>
-    <div class="content">    
+    <div class="content">
         {% tag_cloud_for_model scraper.Scraper as tags with steps=2 min_count=1 distribution=log %}
         {% for tag in tags %}
         <a href="{% url tag tag.name %}" style="font-size:{{tag.font_size}}em">{{tag.name}}</a>

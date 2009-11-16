@@ -25,7 +25,7 @@ def frontpage(request):
 
     # The following items are only used when there is a logged in user.	
     if user.is_authenticated():
-        my_scrapers = user.scraper_set.filter(userscraperrole__role='owner')
+        my_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
         following_scrapers = user.scraper_set.filter(userscraperrole__role='follow')
 
         # needs to be expanded to include scrapers you have edit rights on.
@@ -44,7 +44,7 @@ def frontpage(request):
             good_contribution_scrapers.append(scraper)
 
     #new scrapers
-    new_scrapers = Scraper.objects.filter(deleted=False).order_by('-created_at')[:5]
+    new_scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('-created_at')[:5]
     
     #suggested scrapers
     solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]

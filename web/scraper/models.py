@@ -108,7 +108,7 @@ class Scraper(models.Model):
         if len(owner) >= 1:
           return owner[0]
       return None
-      
+
     def contributors(self):
       if self.pk:
         contributors = self.users.filter(userscraperrole__role='editor')
