@@ -45,7 +45,7 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.7em; paddi
 .editor_controls #run.running {color:red;}
 .editor_controls #reload {background-image:url(../images/icons/arrow_refresh.png)}
 .editor_controls #diff {background-image:url(../images/icons/diff.png)}
-.editor_controls .commit, #meta_form .commit {background-image:url(../images/icons/database_save.png); border-color:#2680c6;
+.editor_controls .commit, #meta_form .button.commit {background-image:url(../images/icons/database_save.png); border-color:#2680c6;
     background-color:#6fb1e6; color:#fff;}
     
 .ui-resizable-handle {z-index:80;}

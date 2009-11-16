@@ -3,22 +3,17 @@
 {% block title %}{{ tag }}{% endblock %}
 
 {% block content %}
-  <h2>Scrapers tagged "{{ tag|title }}"</h2>
-    <div class="page_tabs">
-      <ul>
-          <li{% ifequal selected_tab "items" %} class="selected"{% endifequal %}>
-              <a href="{% url tag tag %}">Scrapers</a>
-          </li>
-          <li{% ifequal selected_tab "data" %} class="selected"{% endifequal %}>
-              <a href="{% url tag_data tag %}">Data</a>
-          </li>
-      </ul>
-      
-  </div>
-  
-  <ul>
-  {% for item in queryset %}
-    <li><a href="{% url scraper_code item.short_name %}">{{ item.title }}</a></li>
-  {% endfor %}
-  </ul>
+    <div class="page_title">
+        <h1>Scrapers tagged "{{ tag|title }}"</h1>
+        <p>
+            Browsing by tag
+        </p>
+    </div>
+    <div class="content">
+        <ul class="allscraperlist">
+        {% for scraper in queryset %}
+            {% include 'scraper/scraper_line.html' %}
+    	{% endfor %}
+        </ul>
+    </div>
 {% endblock %}
