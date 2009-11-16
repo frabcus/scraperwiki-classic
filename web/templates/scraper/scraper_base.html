@@ -39,7 +39,11 @@
             <dt>Language:</dt>
             <dd>{{scraper.language}}</dd>
             <dt>Tags:</dt>
-            <dd>{% for tag in scraper_tags %}<a href="{% url tag tag %}">{{ tag }}</a> {% endfor %}</dd>
+            {% if scraper.published %}
+                <dd>{% for tag in scraper_tags %}<a href="{% url tag tag %}">{{ tag }}</a> {% endfor %}</dd>
+            {% else %}
+                <dd>{% for tag in scraper_tags %}{{ tag }} {% endfor %}</dd>
+            {% endif %}
           </dl>
           
           <div class="tab_tools">
