@@ -214,7 +214,7 @@ $(document).ready(function() {
         // Meta form
         $('#meta_fields_mini').appendTo($('#meta_form'))
         $('#meta_fields_mini').attr('id', 'meta_fields')
-        $('#id_title').after('<a href="" id="meta_form_edit">Edit scraper info</a>')
+        $('#id_title').before('<a href="" id="meta_form_edit"><img src="/media/images/icons/information.png" alt="Edit scraper information" title="Edit scraper information"/></a>')
         $('#meta_form_edit').click(function() {            
             
             // Only add the save button if it's not there already
