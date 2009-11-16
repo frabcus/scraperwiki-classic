@@ -239,6 +239,8 @@ $(document).ready(function() {
         $('#output_data div :last-child').addClass("run_end")
         $('#output_sources div :last-child').addClass("run_end")                
 
+        //show annimation
+        $('#running_annimation').show();
 
         //run either the firestarter or run mdoel
         if (run_type == 'firestarter_apache') {
@@ -285,6 +287,10 @@ $(document).ready(function() {
                             writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
                         }
                     };
+                    
+                    //hide annimation
+                    $('#running_annimation').hide();
+                    
                 },
                 error: function(code) {
                     alert('Sorry, there seems to be something wrong with running code at the moment, try saving your scraper and trying again later.')
@@ -293,6 +299,8 @@ $(document).ready(function() {
                     $('.editor_controls #run').bind('click.run', run_abort);
                     $('.editor_controls #run').removeClass('running').val('run');
                     
+                    //hide annimation
+                    $('#running_annimation').hide();
                 }
             });
             return run_request
@@ -363,7 +371,11 @@ $(document).ready(function() {
                 $('.editor_controls #run').unbind('click.abort')                    
                 writeToConsole('Run Aborted') // Custom function that append to a div
                 $('.editor_controls #run').bind('click.run', run_abort);
+                
+                //hide annimation
+                $('#running_annimation').hide();
             });
+            
         }
     
     

@@ -104,7 +104,7 @@
                 <input type="button" value="Diff" name="diff" id="diff" />
                 <input type="button" value="Reload" name="reload" id="reload" />
                 <input type="button" class="execute" value="Run" name="run" id="run" />
-
+                <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif" />
                 <div class="right">
                     {% if scraper.short_name %}
                         <a href="{% url scraper_code scraper.short_name %}">Close editor</a>

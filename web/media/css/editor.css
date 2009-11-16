@@ -48,6 +48,8 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.7em; paddi
 .editor_controls .commit, #meta_form .button.commit {background-image:url(../images/icons/database_save.png); border-color:#2680c6;
     background-color:#6fb1e6; color:#fff;}
     
+#running_annimation {display:none;}
+    
 .ui-resizable-handle {z-index:80;}
 .ui-resizable-handle.ui-resizable-s {height:4px;cursor:ns-resize;border-top:solid 3px transparent;}
 .ui-resizable-handle.ui-resizable-s:hover {border-top:solid 3px #ffce5d;}
