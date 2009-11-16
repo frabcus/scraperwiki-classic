@@ -86,8 +86,6 @@ class ScraperManager(models.Manager):
     def data_summary(self, scraper_id=0, limit=1000):
       
       if isinstance(scraper_id, list):
-          print '!!!!!!!!!!!!!!!!'
-          print scraper_id
           guids = ",".join("'%s'" % guid for guid in scraper_id)
       else:
           guids = "'%s'" % scraper_id
