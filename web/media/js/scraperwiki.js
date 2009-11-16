@@ -1,5 +1,8 @@
-function setupCodeViewer(){
+function setupCodeViewer(iLineCount){
     var oCodeEditor;
+    if(iLineCount < 20){
+        iLineCount = 20;
+    }
     $(document).ready(function(){
 
        oCodeEditor = CodeMirror.fromTextArea("txtScraperCode", {
@@ -14,6 +17,7 @@ function setupCodeViewer(){
            tabMode: "spaces", 
            autoMatchParens: true,
            width: '100%',
+           height: iLineCount + 'em',           
            parserConfig: {'pythonVersion': 2, 'strictErrors': true}
 
        });

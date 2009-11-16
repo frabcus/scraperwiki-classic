@@ -3,11 +3,11 @@
 {% block tab %}
 <div class="code_viewer">
 	<textarea id="txtScraperCode">
-    {{ scraper.committed_code }}
+        {{ scraper.committed_code }}
 	</textarea>
 </div>
 {% endblock %}
 
 {% block run_script %}
-    setupCodeViewer();
+    setupCodeViewer({{ scraper.number_of_lines }});
 {% endblock %}
