@@ -136,3 +136,9 @@ div.terms ul dl dd {padding-left:0; margin-left:0; padding-bottom:0.5em;}
 
 /* Signup page */
 #divSignupTerms div.scroll {height:160px; font-size:0.7em;}
+
+/* FAQs */
+ul.list_of_contents {border-bottom:dotted 1px #ccc; padding-bottom:1em; margin-bottom:2em;}
+ul.list_of_contents a {font-weight:bold;}
+dl.faq dt {font-size:1.3em; font-weight:bold;}
+dl.faq dd {padding-left:0; margin-left:0; padding-bottom:1.3em;}
