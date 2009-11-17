@@ -80,7 +80,7 @@
 
                 <ul class="help">
                     <li>
-                        <a id="menu_shortcuts" href="#">Keyboard shortcuts</a>
+                        <a id="menu_shortcuts" href="#" title="Key combinations for saving, executing etc">Keyboard shortcuts</a>
                     </li>
                     <!--
                     <li>
@@ -88,7 +88,7 @@
                     </li>
                     -->
                     <li class="helplink">
-                        <a id="menu_documentation" href="#">Code documentation</a>
+                        <a id="menu_documentation" href="#" title="Quick help">Code documentation</a>
                     </li>
                 </ul>          
             </div>
@@ -100,18 +100,18 @@
 
             {# Controls #}
             <div class="editor_controls">
-                <input type="submit" class="save  button" name="action" value="Save" />            
-                <input type="button" value="Diff" name="diff" id="diff" />
-                <input type="button" value="Reload" name="reload" id="reload" />
-                <input type="button" class="execute" value="Run" name="run" id="run" />
-                <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif" />
+                <input type="submit" class="save  button" name="action" value="Save" title="Save draft version" />            
+                <input type="button" value="Diff" name="diff" id="diff" title="View diff with the committed version"/>
+                <input type="button" value="Reload" name="reload" id="reload" title="Reload the latest saved version"/>
+                <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper"/>
+                <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
                 <div class="right">
                     {% if scraper.short_name %}
-                        <a href="{% url scraper_code scraper.short_name %}">Close editor</a>
+                        <a href="{% url scraper_code scraper.short_name %}" title="Return to scraper page">Close editor</a>
                     {% else %}
-                        <a href="{% url frontpage %}">Close editor</a>                
+                        <a href="{% url frontpage %}" title="Close editor">Close editor</a>                
                     {% endif %}
-                    <input type="submit" class="commit button" name="action" value="Commit and publish"/>            
+                    <input type="submit" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>            
                 </div>
             </div>
 
@@ -120,18 +120,18 @@
                 <div class="tabs">
                     <ul>
                         <li class="console">
-                            <a href="#">Console</a>
+                            <a href="#" title="Console output from scraper">Console</a>
                         </li>
                         <li class="data">
-                            <a href="#">Data</a>                            
+                            <a href="#" title="The data that this scraper generates">Data</a>                            
                         </li>
                         <li class="sources">
-                            <a href="#">Sources</a>                            
+                            <a href="#" title="Pages you are scraping">Sources</a>                            
                         </li>
                     </ul>
                     <div class="controls">
                          <div id="controls_console">
-                             <a id="clear"  href="#">Clear console</a>
+                             <a id="clear"  href="#" title="clear the console tab">Clear console</a>
                          </div>
                      </div>
                 </div>
