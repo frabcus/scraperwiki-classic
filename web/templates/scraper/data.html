@@ -2,35 +2,62 @@
 {% load replace %}
 {% block tab %}
 <div class="tab_tools">
-    <a href="{% url export_csv scraper.short_name %}">download csv</a>
+    {% if data.headings %}
+        <a href="{% url export_csv scraper.short_name %}">download csv</a>
+    {% else %}
+        <span class="faux_link">download csv</span>
+    {% endif %}
 </div>
-  {% if data.headings %}
-    
-
-    <table>
-    <thead>
-    {% for heading in data.headings %}
-    <th>{{ heading|title|replace }}</th>
-    {% endfor %}
-    </thead>
-    <tbody>
-
-    {% for i,row in data.rows.items %}
-    <tr>
-    {% for value in row %}
-    <td>{{ value|urlizetrunc:15 }}</td>
-    {% endfor %}
-    </tr>
-    {% endfor %}    
-    </tbody>
-    </table>
 
 
+<div class="data_viewer">
+    {% if data.headings %}
 
-  {% else %}
-    
-    
-  {% endif %}
+        <table>
+            <thead>
+                <tr>
+                    {% for heading in data.headings %}
+                        <th>{{ heading|title|replace }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for i,row in data.rows.items %}
+                    <tr>
+                        {% for value in row %}
+                            <td>{{ value|urlizetrunc:15 }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}    
+            </tbody>
+        </table>
 
+    {% else %}
+        <table class="raw_data">
+            <tbody>
+                {% for dummy_row in dummy_row_count %}
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>                                                                
+                    </tr>
+                {% endfor %}    
+            </tbody>
+        </table>
+
+	    <div class="info_unpublished">
+            {% if scraper.published %}
+	            This scraper has not been run yet <br/>
+	            so there is nothing to display
+            {% else %}
+	            This scraper is being worked on <br/>but has not been published yet
+	        {% endif %}
+	    </div>
+
+
+    {% endif %}
+</div>
 {% endblock %}
 
