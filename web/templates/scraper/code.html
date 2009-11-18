@@ -3,6 +3,11 @@
 {% block tab %}
 <div class="code_viewer">
 	<textarea id="txtScraperCode">{{ scraper.committed_code }}</textarea>
+	{% if not scraper.published %}
+	    <div class="code_unpublished">
+	        This scraper is being worked on <br/>but has not been published yet
+	    </div>
+    {% endif %}
 </div>
 {% endblock %}
 
