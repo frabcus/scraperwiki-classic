@@ -166,7 +166,7 @@
         <h3>Keyboard shortcuts</h3>
         <ul>
             <li>Control-S   Save</li>
-            <li>Control-E   Run</li>
+            <li>Control-E   Execute</li>
             <li>Control-R   Reload</li>
             <li>Control-D   Diff</li>
         </ul>
@@ -187,8 +187,8 @@
             <dd>
                 Converts an HTML string to an <a href="http://codespeak.net/lxml/" target="_new">lxml.etree</a> object
             </dd>
-            <dt><code>scraperwiki.datastore.save(unique_keys=[], data={} (, date=None, latlng=(None, None) ))</code></dt>
-            <dd>Saves data to the datastore. <code>data</code> is a dict, date is a date object and lat/lng are latitude and longitude values as floats</dd>
+            <dt><code>scraperwiki.datastore.save(unique_keys, data, date=None, latlng=(None, None, "osgb36"))</code></dt>
+            <dd>Saves data to the datastore. <code>data</code> is { "key":value }, unique_keys is a sublist of keys, date is a date or datetime object and lat/lng are latitude and longitude values as floats</dd>
 
         </dl>
     </div>
