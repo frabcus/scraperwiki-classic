@@ -25,6 +25,9 @@ div.banner a {font-weight:bold;}
 .content.col.left {width:60%;}
 .content.col.right {width:40%;}
 
+/* this causes an extra line to appear, but something must be done to avoid all the code being indented by the width of the tabs */
+.code_viewer { clear:left;  }
+
 /* Attention */
 div.attention {text-align:center;}
 

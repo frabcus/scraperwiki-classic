@@ -9,6 +9,8 @@ from tagging.models import Tag
 from scraper import models
 from scraper import forms
 
+from settings import CODEMIRROR_URL
+
 def create(request):
     if request.method == 'POST':
         return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 
@@ -50,7 +52,8 @@ def code (request, scraper_short_name):
         'selected_tab': 'code', 
         'scraper': scraper, 
         'user_owns_it': user_owns_it, 
-        'user_follows_it': user_follows_it
+        'user_follows_it': user_follows_it, 
+        'CODEMIRROR_URL' : CODEMIRROR_URL
         }, context_instance=RequestContext(request))
 
 def contributors (request, scraper_short_name):
@@ -79,6 +82,7 @@ def contributors (request, scraper_short_name):
 
 
 def show(request, scraper_short_name, selected_tab = 'data'):
+    
     user = request.user
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     you_own_it = (scraper.owner() == user)
