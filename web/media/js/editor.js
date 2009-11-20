@@ -37,28 +37,16 @@ $(document).ready(function() {
             autoMatchParens: true,
             width: '100%',
             parserConfig: {'pythonVersion': 2, 'strictErrors': true},
-            saveFunction: function () {    // this is your Control-S function
-              $.ajax({
-                type : 'POST',
-                URL : window.location.pathname,
-                data: ({
-                  title : $('#id_title').val(),
-                  code : codeeditor.getCode(),
-                  action : 'save'
-                  }),
-                dataType: "html",
-                success: function(){
-                    
-                      }
-                  });
-              },
+            
+            // we don't set this, because we do the grabbing of the key globally
+            //saveFunction: function () { saveScraper(false); },  // this is your Control-S function
             
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
                     codemirroriframe = $("#id_code").next().children(":first"); 
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     onWindowResize();
-                    //setupKeygrabs(); 
+                    setupKeygrabs(); 
                 } 
           });        
     }
@@ -84,8 +72,20 @@ $(document).ready(function() {
             return false; 
         };
 
+        // UI issue -- Ctrl-R is the standard browser reload, but people may want to use it for run, rather than e for execute
         $(document).bind('keydown', 'ctrl+r', grabkeyreload); 
         codemirroriframe.contents().bind('keydown', 'ctrl+r', function() {}); 
+
+        var grabkeysave = function(event){ 
+            //console.log("hooss");
+            event.stopPropagation(); 
+            event.preventDefault(); 
+            saveScraper(false); 
+            return false; 
+        };
+
+        $(document).bind('keydown', 'ctrl+s', grabkeysave); 
+        codemirroriframe.contents().bind('keydown', 'ctrl+s', function() {}); 
     }; 
 
     //Setup Menu
@@ -433,30 +433,7 @@ $(document).ready(function() {
             }
         ); 
     }
-    
-    //commit
-    function commitScraper(){
-        return true;
-        /*
-        $.ajax({
-          type : 'POST',
-          URL : window.location.pathname,
-          data: ({
-            title : $('#id_title').val(),                        
-            code : codeeditor.getCode(),
-            action : 'commit',
-            }),
-          dataType: "html",
-          success: function(response){
-                showFeedbackMessage("Your changes have been committed");
-            },
-        error: function(response){
-            alert('Sorry, something went wrong committing your scraper');
-          }
-        });
-        */
-    }
-    
+        
     //Save
     function saveScraper(bCommit){
 
