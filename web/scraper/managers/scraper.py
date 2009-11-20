@@ -92,12 +92,16 @@ class ScraperManager(models.Manager):
 
       cursor = self.datastore_connection.cursor()
       cursor.execute("""
-          SELECT * FROM (SELECT * FROM items LIMIT %(limit)s) as items
+          SELECT * FROM 
+            (SELECT * 
+             FROM items 
+             WHERE items.scraper_id IN (%(guids)s) 
+             LIMIT %(limit)s
+             ) as items
           JOIN kv
           ON items.item_id=kv.item_id
-          WHERE items.scraper_id IN (%(guids)s)
           ORDER BY items.date_scraped, items.item_id, kv.key
-        """ % locals())
+        """ %  locals())
 
       rows = {}
       for row in cursor.fetchall():
@@ -105,18 +109,15 @@ class ScraperManager(models.Manager):
           if not rows.has_key(item_id):
               rows[item_id] = {}
           rows[item_id][row[7]] = row[8]
-      
-      
-      headings_sql = """
-        SELECT `key` FROM kv 
-        JOIN items 
-        ON kv.item_id=items.item_id 
-        WHERE items.scraper_id IN (%(guids)s) 
-        GROUP BY kv.key;
-      """ % locals()
-      
+
       cursor = self.datastore_connection.cursor()
-      cursor.execute(headings_sql)
+      cursor.execute("""
+      SELECT `key` FROM kv 
+      JOIN items 
+      ON kv.item_id=items.item_id 
+      WHERE items.scraper_id IN (%(guids)s) 
+      GROUP BY kv.key;
+      """ % {'guids' : guids})
       
       
       headings = []
