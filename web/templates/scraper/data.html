@@ -11,18 +11,19 @@
 
 
 <div class="data_viewer">
-    {% if data.headings %}
+     {% if data.headings %}
 
         <table>
             <thead>
                 <tr>
                     {% for heading in data.headings %}
-                        <th>{{ heading|title|replace }}</th>
+                        {# don't like |title filter here because it to creates an undesriable difference to the keys made by the scraper; if the author wants this output to look good (which they will!), they can use keys that have caps in them; shouldn't force it #}
+                        <th>{{ heading}}</th> 
                     {% endfor %}
                 </tr>
             </thead>
             <tbody>
-                {% for i,row in data.rows.items %}
+                {% for row in data.rows %}
                     <tr>
                         {% for value in row %}
                             <td>{{ value|urlizetrunc:15 }}</td>

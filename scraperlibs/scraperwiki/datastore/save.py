@@ -10,6 +10,13 @@ except:
 
 import cgi
 
+indexed_rows = ['date', 'latlng']  # global
+
+# the records are in table items, which are joined on item_id to keyvalue pairs of table kv and table kv32
+# the current retrieval of from these tables is in web/scraper/managers/scraper.py
+# perhaps the functions there should call this common module to keep it in one place
+# -- or we could make a 3rd interface through dedicated webserver call that could be located on a different machine
+
 def save(unique_keys, data=None, **kwargs):
   """
   Save function
@@ -49,7 +56,6 @@ def __create_unique(unique_keys, data):
   unique_values = [str(data[v]) for v in unique_keys]
   return hashlib.md5("%s" % ("≈≈≈".join(unique_values))).hexdigest()
 
-indexed_rows = ['date', 'latlng']  # global
 
 def __save_row(unique_keys, data, kwargs):
   """
@@ -85,6 +91,7 @@ def __save_row(unique_keys, data, kwargs):
     if c.execute("SELECT item_id FROM items WHERE unique_hash=%s", (unique_hash,)):  
       item_id = c.fetchone()[0]
       c.execute("DELETE FROM kv WHERE item_id=%s", (item_id,))
+      c.execute("DELETE FROM kv32 WHERE item_id=%s", (item_id,))
       c.execute("DELETE FROM items WHERE unique_hash=%s", (unique_hash,))
   
     c.execute("UPDATE sequences SET id=LAST_INSERT_ID(id+1);")
@@ -100,8 +107,13 @@ def __save_row(unique_keys, data, kwargs):
     c.execute("INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`, `date_scraped`) \
       VALUES (%s, %s, %s, %s, %s, %s);", (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'], str_now))
   
+    # save into table with long records if it doesn't fit into the fixed length records table
     for k,v in data.items():  
-      c.execute("""INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);""", (item['item_id'], k,v))
+      sk, sv = str(k), str(v)
+      if len(sv) < 32 and len(sk) < 32:
+          c.execute("INSERT INTO kv32 (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
+      else:
+          c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
     
       # clean for printing to the console
 
@@ -109,20 +121,15 @@ def __save_row(unique_keys, data, kwargs):
   for k,v in data.items():  
     ldata[k] = cgi.escape(str(v))
   
+  # output to the console
   print '<scraperwiki:message type="data">%s' % json.dumps(ldata)
+  
+  # maybe there's a more useful return value than this
   return new_item_id
 
 
 
-def load(unique_keys, data):
-  """
-  Load function
-  """
-  
-  return __load_row(unique_keys, data)
-
-
-def __load_row(unique_keys, data):
+def loadsingle(unique_keys, data):
   """
   Loads a single row matching unique keys with same data
   """
@@ -141,24 +148,113 @@ def __load_row(unique_keys, data):
     conn = connection.Connection()
     c = conn.connect()
     
-    if not c.execute("SELECT scraper_id, item_id, unique_hash, date, latlng, date_scraped FROM items WHERE unique_hash=%s", (unique_hash,)):
-      return { }
-    lscraper_id, item_id, lunique_hash, date, latlng, date_scraped = c.fetchone()
+    if c.execute("SELECT item_id FROM items WHERE unique_hash=%s", (unique_hash,)):
+      item_id = c.fetchone()[0]
+      return __load_item(c, item_id, None)
     
-    # this allows us to fetch entries from other scrapers.  
-    # we need some way to relate the SCRAPER_GUID to the scraper short_name
-    # assert lscraper_id == scraper_id
+  return None
+    
+    
+def loadallofcurrentscraper(filterdata=None):
+    """
+    Loads all rows produced by scraper of current GUID, filters by matching data
+    """
+    conn = connection.Connection()
+    c = conn.connect()
+    
+    scraper_id = os.environ['SCRAPER_GUID']
+    c.execute("SELECT item_id FROM items WHERE scraper_id=%s ORDER BY date", (scraper_id,))
+    
+    res = [ ]
+    item_idlist = c.fetchall()
+    for item_idl in item_idlist:
+        rdata = __load_item(c, item_idl[0], filterdata)
+        if rdata:
+            res.append(rdata)
+    return res
+    
+    
+def loadallwithmatchingdata(filterdata):
+    """
+    Loads everything out of the database that has matching filterdata.  
+    would like to limit by scraper, but no way to uncover the SCRAPER_GUID from the useable scraper short_name
+    """
+    conn = connection.Connection()
+    c = conn.connect()
+    
+    keyvs = [ (len(key) + (value and len(value) or 0), key, value)  for key, value in filterdata.items() ]
+    keyvs.sort()
+    assert len(keyvs) >= 1
+    
+    itemspartmatch = set()
+    
+    if keyvs[-1][2]:
+        c.execute("SELECT item_id FROM kv WHERE `key`=%s AND `value`=%s GROUP BY item_id", (keyvs[-1][1], keyvs[-1][2]))
+    else:
+        c.execute("SELECT item_id FROM kv WHERE `key`=%s GROUP BY item_id", (keyvs[-1][1],))
+    for item_idl in c.fetchall():
+        itemspartmatch.add(item_idl)
+        
+    if keyvs[-1][2]:
+        c.execute("SELECT item_id FROM kv32 WHERE `key`=%s AND `value`=%s GROUP BY item_id", (keyvs[-1][1], keyvs[-1][2]))
+    else:
+        c.execute("SELECT item_id FROM kv32 WHERE `key`=%s GROUP BY item_id", (keyvs[-1][1],))
+    for item_idl in c.fetchall():
+        itemspartmatch.add(item_idl[0])
+    
+    res = [ ]
+    item_idlist = c.fetchall()
+    for item_id in itemspartmatch:
+        rdata = __load_item(c, item_id, filterdata)
+        if rdata:
+            res.append(rdata)
+    return res
+
+    
+def __load_item(c, item_id, filterdata):
+    """
+    Loads single row given the item_id, and returns None if it doesn't match the filterdata values (where value=None means we only match existence of key)
+    """
+    
+    if not c.execute("SELECT scraper_id, date, latlng, date_scraped FROM items WHERE item_id=%s", (item_id,)):
+      return None
+    lscraper_id, date, latlng, date_scraped = c.fetchone()
+    
     
     rdata = { "date_scraped": date_scraped }  
+    if date:
+      rdata["date"] = date
+    if latlng:
+      rdata["latlng"] = latlng
   
-    # why do the columns need to be in quotes?
+    # why do these particular columns need to be in silly quotes to stop a syntax error?  doesn't happen with items table
     c.execute("SELECT `key`, `value` FROM kv WHERE item_id=%s", (item_id,))
+    
+    # discard any rows that don't match the filterdata values
     for key, value in c.fetchall():
+      fvalue = filterdata and filterdata.get(key)
+      if fvalue and str(fvalue) != value:
+        return None
       rdata[key] = value
     
-  return rdata
+    c.execute("SELECT `key`, `value` FROM kv32 WHERE item_id=%s", (item_id,))
+    for key, value in c.fetchall():
+      fvalue = filterdata and filterdata.get(key)
+      if fvalue and str(fvalue) != value:
+        return None
+      rdata[key] = value
   
+    # bail out if there is a key missing
+    if filterdata:
+      for key in filterdata:
+        if key not in rdata:
+          return None
+        
+    return rdata
   
+
+  
+# test harness
 if __name__ == "__main__":
   
   # Test one: Save a single row with a data dict passed
@@ -168,7 +264,7 @@ if __name__ == "__main__":
   'message' : 'This is an example',
   'sender' : 'Sym',
   }
-  save(unique_keys, data, date='16/10/2009', latlng=[52.38431,1.11112])
+  save(unique_keys, data, date='2009-10-16', latlng=(52.38431,1.11112))
 
   
   # test two: Save a single row without a data dict, just named arguments
