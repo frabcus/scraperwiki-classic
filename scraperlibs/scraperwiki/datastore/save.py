@@ -163,7 +163,7 @@ def loadallofcurrentscraper(filterdata=None):
     c = conn.connect()
     
     scraper_id = os.environ['SCRAPER_GUID']
-    c.execute("SELECT item_id FROM items WHERE scraper_id=%s ORDER BY date", (scraper_id,))
+    c.execute("SELECT item_id FROM items WHERE scraper_id=%s ORDER BY date, item_id", (scraper_id,))
     
     res = [ ]
     item_idlist = c.fetchall()
@@ -182,7 +182,8 @@ def loadallwithmatchingdata(filterdata):
     conn = connection.Connection()
     c = conn.connect()
     
-    keyvs = [ (len(key) + (value and len(value) or 0), key, value)  for key, value in filterdata.items() ]
+    # find the longest key and use that to initially filter the results
+    keyvs = [ (len(str(key)) + (value and len(str(value)) or 0), key, value)  for key, value in filterdata.items() ]
     keyvs.sort()
     assert len(keyvs) >= 1
     
@@ -193,7 +194,7 @@ def loadallwithmatchingdata(filterdata):
     else:
         c.execute("SELECT item_id FROM kv WHERE `key`=%s GROUP BY item_id", (keyvs[-1][1],))
     for item_idl in c.fetchall():
-        itemspartmatch.add(item_idl)
+        itemspartmatch.add(item_idl[0])
         
     if keyvs[-1][2]:
         c.execute("SELECT item_id FROM kv32 WHERE `key`=%s AND `value`=%s GROUP BY item_id", (keyvs[-1][1], keyvs[-1][2]))
@@ -215,40 +216,39 @@ def __load_item(c, item_id, filterdata):
     """
     Loads single row given the item_id, and returns None if it doesn't match the filterdata values (where value=None means we only match existence of key)
     """
-    
     if not c.execute("SELECT scraper_id, date, latlng, date_scraped FROM items WHERE item_id=%s", (item_id,)):
-      return None
+        return None
     lscraper_id, date, latlng, date_scraped = c.fetchone()
     
     
     rdata = { "date_scraped": date_scraped }  
     if date:
-      rdata["date"] = date
+        rdata["date"] = date
     if latlng:
-      rdata["latlng"] = latlng
+        rdata["latlng"] = latlng
   
     # why do these particular columns need to be in silly quotes to stop a syntax error?  doesn't happen with items table
     c.execute("SELECT `key`, `value` FROM kv WHERE item_id=%s", (item_id,))
     
     # discard any rows that don't match the filterdata values
     for key, value in c.fetchall():
-      fvalue = filterdata and filterdata.get(key)
-      if fvalue and str(fvalue) != value:
-        return None
-      rdata[key] = value
+        fvalue = filterdata and filterdata.get(key)
+        if fvalue and str(fvalue) != value:
+            return None
+        rdata[key] = value
     
     c.execute("SELECT `key`, `value` FROM kv32 WHERE item_id=%s", (item_id,))
     for key, value in c.fetchall():
-      fvalue = filterdata and filterdata.get(key)
-      if fvalue and str(fvalue) != value:
-        return None
-      rdata[key] = value
+        fvalue = filterdata and filterdata.get(key)
+        if fvalue and str(fvalue) != value:
+            return None
+        rdata[key] = value
   
     # bail out if there is a key missing
     if filterdata:
-      for key in filterdata:
-        if key not in rdata:
-          return None
+        for key in filterdata:
+            if key not in rdata:
+                return None
         
     return rdata
   

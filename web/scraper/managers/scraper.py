@@ -84,7 +84,6 @@ class ScraperManager(models.Manager):
     def dont_own_any(self):
         return self.owned_count() == 0
 
-
     def data_summary(self, scraper_id=0, limit=1000):
       
       if isinstance(scraper_id, list):
@@ -94,10 +93,10 @@ class ScraperManager(models.Manager):
 #                 kv.key AS key, kv.value AS value, kv32.key AS key32, kv32.value AS value32
 
       # we have to join to both key-value tables.  not sure this is totally efficient 
-      # as the items elements get retrieved numerous times 
+      # as the items elements get retrieved numerous times.  group by won't work unless all the keys could be concattenated
       cursor = self.datastore_connection.cursor()
       cursor.execute("""
-          SELECT `date_scraped`, 
+          SELECT items.`item_id` AS item_id, `date_scraped`, 
                  kv32.`key` AS `key32`, kv32.`value` AS `value32`,
                  kv.`key` AS `key`, kv.`value` AS `value`
           FROM (SELECT * FROM items WHERE items.scraper_id IN (%(guids)s) LIMIT %(limit)s) as items
@@ -115,11 +114,11 @@ class ScraperManager(models.Manager):
       for row in cursor.fetchall():
           item_id = row[0]
           if item_id not in allitems:
-              currentitem = { "date_scraped":row[0]}
+              currentitem = { "date_scraped":row[1]}
               allitems[item_id] = currentitem
           
-          key32, value32 = row[1], row[2]
-          key, value = row[3], row[4]
+          key32, value32 = row[2], row[3]
+          key, value = row[4], row[5]
           
           if key32:    
               currentitem[key32] = value32
@@ -140,8 +139,6 @@ class ScraperManager(models.Manager):
       }
       
       return data
-
-
 
 
 

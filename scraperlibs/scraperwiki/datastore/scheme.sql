@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS `items` (
 -- Changes:
 -- 1:
 -- alter table `items` add column `date_scraped` datetime NULL;
-
+-- 2:
+-- new kv32 table
 
 DROP TABLE IF EXISTS `kv`;
 CREATE TABLE IF NOT EXISTS `kv` (

@@ -17,7 +17,7 @@
             <thead>
                 <tr>
                     {% for heading in data.headings %}
-                        {# don't like |title filter here because it to creates an undesriable difference to the keys made by the scraper; if the author wants this output to look good (which they will!), they can use keys that have caps in them; shouldn't force it #}
+                        {# don't like |title filter here because it to creates an undesirable difference to the keys referenced in the scraper; if the author wants this output to look good (which they will!), they can use keys that have caps in them; shouldn't force it #}
                         <th>{{ heading}}</th> 
                     {% endfor %}
                 </tr>
