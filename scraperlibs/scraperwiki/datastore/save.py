@@ -27,8 +27,8 @@ def save(unique_keys, data=None, **kwargs):
   if isinstance(data,list):
     if kwargs:
       raise TypeError("""
-        \tIncorrect use of arguments when saving multipul rows.  
-        \tLook up 'saving multipul rows' in the suport pages for more information.
+        \tIncorrect use of arguments when saving multiple rows.  
+        \tLook up 'saving multiple rows' in the support pages for more information.
         """)
     ids = []
     for row in data:

@@ -46,7 +46,7 @@ $(document).ready(function() {
                     codemirroriframe = $("#id_code").next().children(":first"); 
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     onWindowResize();
-                    setupKeygrabs(); 
+                    //setupKeygrabs(); 
                 } 
           });        
     }
