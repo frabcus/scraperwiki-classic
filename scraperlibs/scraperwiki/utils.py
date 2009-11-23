@@ -42,7 +42,8 @@ def scrape (url, params=None, escape=True):
     else:
         try:
             fin = urllibopener.open(url, data)
-            text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
+            #text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
+            text = fin.read()            
             fin.close()   # get the mimetype here
             
             #if fname and os.path.exists(settings.QUICKCACHE_DIR):
