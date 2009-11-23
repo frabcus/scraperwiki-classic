@@ -91,7 +91,7 @@ def __save_row(unique_keys, data, kwargs):
     if c.execute("SELECT item_id FROM items WHERE unique_hash=%s", (unique_hash,)):  
       item_id = c.fetchone()[0]
       c.execute("DELETE FROM kv WHERE item_id=%s", (item_id,))
-      #c.execute("DELETE FROM kv32 WHERE item_id=%s", (item_id,))
+      c.execute("DELETE FROM kv32 WHERE item_id=%s", (item_id,))
       c.execute("DELETE FROM items WHERE unique_hash=%s", (unique_hash,))
   
     c.execute("UPDATE sequences SET id=LAST_INSERT_ID(id+1);")
@@ -110,12 +110,10 @@ def __save_row(unique_keys, data, kwargs):
     # save into table with long records if it doesn't fit into the fixed length records table
     for k,v in data.items():  
       sk, sv = str(k), str(v)
-      #if len(sv) < 32 and len(sk) < 32:
-      #    c.execute("INSERT INTO kv32 (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
-      #else:
-          #c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
-          
-      c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))          
+      if len(sv) < 32 and len(sk) < 32:
+          c.execute("INSERT INTO kv32 (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
+      else:
+          c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
     
       # clean for printing to the console
 
@@ -198,12 +196,12 @@ def loadallwithmatchingdata(filterdata):
     for item_idl in c.fetchall():
         itemspartmatch.add(item_idl[0])
         
-    #if keyvs[-1][2]:
-    #    c.execute("SELECT item_id FROM kv32 WHERE `key`=%s AND `value`=%s GROUP BY item_id", (keyvs[-1][1], keyvs[-1][2]))
-    #else:
-    #    c.execute("SELECT item_id FROM kv32 WHERE `key`=%s GROUP BY item_id", (keyvs[-1][1],))
-    #for item_idl in c.fetchall():
-    #    itemspartmatch.add(item_idl[0])
+    if keyvs[-1][2]:
+        c.execute("SELECT item_id FROM kv32 WHERE `key`=%s AND `value`=%s GROUP BY item_id", (keyvs[-1][1], keyvs[-1][2]))
+    else:
+        c.execute("SELECT item_id FROM kv32 WHERE `key`=%s GROUP BY item_id", (keyvs[-1][1],))
+    for item_idl in c.fetchall():
+        itemspartmatch.add(item_idl[0])
     
     res = [ ]
     item_idlist = c.fetchall()
@@ -239,12 +237,12 @@ def __load_item(c, item_id, filterdata):
             return None
         rdata[key] = value
     
-    #c.execute("SELECT `key`, `value` FROM kv32 WHERE item_id=%s", (item_id,))
-    #for key, value in c.fetchall():
-    #    fvalue = filterdata and filterdata.get(key)
-    #    if fvalue and str(fvalue) != value:
-    #        return None
-    #    rdata[key] = value
+    c.execute("SELECT `key`, `value` FROM kv32 WHERE item_id=%s", (item_id,))
+    for key, value in c.fetchall():
+        fvalue = filterdata and filterdata.get(key)
+        if fvalue and str(fvalue) != value:
+            return None
+        rdata[key] = value
   
     # bail out if there is a key missing
     if filterdata:
