@@ -2,6 +2,7 @@
 import os
 import datetime
 import connection
+import re
 
 
 def getpage(title):

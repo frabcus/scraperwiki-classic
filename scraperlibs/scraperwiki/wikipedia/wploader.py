@@ -69,8 +69,9 @@ class ParseXMLhandler(handler.ContentHandler):
             print self.pageNumber, title
             text = "".join(self.textData)
             timestamp = "".join(self.timestampData)
-            if not re.match("\s*#REDIRECT(?i)", text):
-                self.LoadPage(title, text, ttag)
+            if re.match("\s*#REDIRECT(?i)", text):
+                ttag = "REDIRECT"
+            self.LoadPage(title, text, ttag)
 
         
     def characters(self, chrs):                                 
