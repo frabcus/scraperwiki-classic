@@ -29,7 +29,7 @@ b) Now activate the virtualenv:
 
 >  source bin/activate
 
-[[In Windows, type: > Scripts\activate.bat ]]
+[[In Windows, type: > Scripts\activate.bat  ]]
 
 Your shell will now show the virtualenv name "> (scraperwiki)$" at the prompt. This indicates the virtualenv is 'active'.  
 
