@@ -6,11 +6,24 @@ from frontend.models import *
 class Migration:
     
     def forwards(self, orm):
+        
+        # Adding model 'UserProfile'
 
+        db.send_create_signal('frontend', ['UserProfile'])
+        
+        # Adding model 'UserToUserRole'
+
+        db.send_create_signal('frontend', ['UserToUserRole'])
+        
     
     
     def backwards(self, orm):
-
+        
+        # Deleting model 'UserProfile'
+        db.delete_table('frontend_userprofile')
+        
+        # Deleting model 'UserToUserRole'
+        db.delete_table('frontend_usertouserrole')
         
     
     
