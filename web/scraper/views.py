@@ -129,22 +129,6 @@ def download(request, scraper_id = 0):
     response['Content-Disposition'] = 'attachment; filename=%s.py' % (scraper.short_name)
     return response
 
-def scraper_request(request):
-    if request.method == 'POST':
-        form = forms.ScraperRequestForm(data=request.POST, files=request.FILES)
-        if form.is_valid():
-            scraper_request_obj = form.save(commit=False)
-            scraper_request_obj.save()
-            if hasattr(form, 'save_m2m'):
-                form.save_m2m()
-                
-            scraper_request_obj.send_notice_email()
-            return HttpResponseRedirect('/')
-    else:
-        form = forms.ScraperRequestForm()
-
-    return render_to_response('scraper/request.html', {'form': form }, context_instance = RequestContext(request))
-
 
 def all_tags(request):
     return render_to_response('scraper/all_tags.html', context_instance = RequestContext(request))
