@@ -88,8 +88,8 @@ class Migration:
             'source': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
             'status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']"})
-            'first_published_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),            
+            'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']"}),
+            'first_published_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
         },
         'scraper.scraperrequest': {
             'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
