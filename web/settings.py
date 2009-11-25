@@ -89,7 +89,6 @@ INSTALLED_APPS = (
     'frontend',
   	'scraper',
   	'notification',
-  	'page_cache',
   	'editor',
   	'contact_form',
   	'market',  	
