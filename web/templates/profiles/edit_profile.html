@@ -15,9 +15,16 @@
 {% endblock %}
 
 {% block content %}
+
+
 	{% include 'shared/form_errors.html' %}
 	<form method="post">
 	  <ul class="form">
+	    <li> 
+	      <label>Image</label> 
+		{% load gravatar %} {% show_gravatar profile.user.email 100 0 %} <a href="http://en.gravatar.com" target="_blank">Change profile image</a> (using Gravatar)
+<div style="clear:both;"></div>
+</li>
 	    <li{% if form.bio.errors %} class="error"{% endif %}>
 	      {{ form.bio.label_tag }}
   	    {{ form.bio }}
