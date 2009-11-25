@@ -6,36 +6,11 @@ from frontend.models import *
 class Migration:
     
     def forwards(self, orm):
-        
-        # Adding model 'UserProfile'
-        db.create_table('frontend_userprofile', (
-            ('id', orm['frontend.UserProfile:id']),
-            ('user', orm['frontend.UserProfile:user']),
-            ('bio', orm['frontend.UserProfile:bio']),
-            ('created_at', orm['frontend.UserProfile:created_at']),
-            ('alerts_last_sent', orm['frontend.UserProfile:alerts_last_sent']),
-            ('alert_frequency', orm['frontend.UserProfile:alert_frequency']),
-        ))
-        db.send_create_signal('frontend', ['UserProfile'])
-        
-        # Adding model 'UserToUserRole'
-        db.create_table('frontend_usertouserrole', (
-            ('id', orm['frontend.UserToUserRole:id']),
-            ('from_user', orm['frontend.UserToUserRole:from_user']),
-            ('to_user', orm['frontend.UserToUserRole:to_user']),
-            ('role', orm['frontend.UserToUserRole:role']),
-        ))
-        db.send_create_signal('frontend', ['UserToUserRole'])
-        
+
     
     
     def backwards(self, orm):
-        
-        # Deleting model 'UserProfile'
-        db.delete_table('frontend_userprofile')
-        
-        # Deleting model 'UserToUserRole'
-        db.delete_table('frontend_usertouserrole')
+
         
     
     
