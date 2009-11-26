@@ -32,7 +32,7 @@ def scrape (url, params=None, escape=True):
     QUICKCACHE_DIR = "/home/goatchurch/scraperwiki/quickcache/"
     fname = QUICKCACHE_DIR and os.path.join(QUICKCACHE_DIR, urllib.quote_plus(url + (params and "??" + str(params)[:50] or "")))
     #print fname, "llll"
-    #fname = False
+    fname = False
     
     if fname and os.path.exists(fname):
         fin = open(fname)
