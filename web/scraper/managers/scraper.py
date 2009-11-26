@@ -82,57 +82,54 @@ class ScraperManager(models.Manager):
     def dont_own_any(self):
         return self.owned_count() == 0
 
-
     def data_summary(self, scraper_id=0, limit=1000):
       
       if isinstance(scraper_id, list):
           guids = ",".join("'%s'" % guid for guid in scraper_id)
       else:
           guids = "'%s'" % scraper_id
+#                 kv.key AS key, kv.value AS value, kv32.key AS key32, kv32.value AS value32
 
+      # we have to join to both key-value tables.  not sure this is totally efficient 
+      # as the items elements get retrieved numerous times.  group by won't work unless all the keys could be concattenated
       cursor = self.datastore_connection.cursor()
       cursor.execute("""
-          SELECT * FROM (SELECT * FROM items LIMIT %(limit)s) as items
-          JOIN kv
-          ON items.item_id=kv.item_id
-          WHERE items.scraper_id IN (%(guids)s)
-          ORDER BY items.date_scraped, items.item_id, kv.key
+          SELECT items.`item_id` AS item_id, `date_scraped`, 
+                 kv32.`key` AS `key32`, kv32.`value` AS `value32`,
+                 kv.`key` AS `key`, kv.`value` AS `value`
+          FROM (SELECT * FROM items WHERE items.scraper_id IN (%(guids)s) LIMIT %(limit)s) as items
+          LEFT JOIN kv
+             ON items.item_id=kv.item_id
+          LEFT JOIN kv32
+             ON items.item_id=kv32.item_id
+          
+          ORDER BY items.date_scraped, items.item_id
         """ % locals())
-
-      rows = {}
+      
+      allitems = { }
+      currentitem = None
+      allkeys = set(["date_scraped"])
       for row in cursor.fetchall():
           item_id = row[0]
-          if not rows.has_key(item_id):
-              rows[item_id] = {}
-          rows[item_id][row[7]] = row[8]
-      
-      
-      headings_sql = """
-        SELECT `key` FROM kv 
-        JOIN items 
-        ON kv.item_id=items.item_id 
-        WHERE items.scraper_id IN (%(guids)s) 
-        GROUP BY kv.key;
-      """ % locals()
-      
-      cursor = self.datastore_connection.cursor()
-      cursor.execute(headings_sql)
-      
-      
-      headings = []
-      for row in cursor.fetchall():
-          headings.append(row[0])
-
-
-      
-      for item_id,row in rows.items():
-          for heading in headings:
-              if not row.has_key(heading):
-                  row[heading] = ""
+          if item_id not in allitems:
+              currentitem = { "date_scraped":row[1]}
+              allitems[item_id] = currentitem
           
-          items = row.items()
-          items.sort()
-          rows[item_id] = [value for key, value in items]
+          key32, value32 = row[2], row[3]
+          key, value = row[4], row[5]
+          
+          if key32:    
+              currentitem[key32] = value32
+              allkeys.add(key32)
+          if key:    
+              currentitem[key] = value
+              allkeys.add(key)
+      
+      headings = sorted(list(allkeys))
+      rows = [ ]
+      print allitems, headings
+      for litem in allitems.values():
+          rows.append([ str(litem.get(key))  for key in headings ])
       
       data = {
       'headings' : headings, 

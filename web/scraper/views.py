@@ -22,7 +22,7 @@ def data (request, scraper_short_name):
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     dummy_row_count = [1,2,3,4,5,6,7,8,9,10] # django templates don't do 'for $n' loops, so this is a hack
-
+    print "ddd", data
     scraper_tags = Tag.objects.get_for_object(scraper)
     
     return render_to_response('scraper/data.html', {
