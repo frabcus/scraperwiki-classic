@@ -89,7 +89,6 @@ INSTALLED_APPS = (
     'frontend',
   	'scraper',
   	'notification',
-  	'page_cache',
   	'editor',
   	'contact_form',
   	'market',  	
@@ -121,9 +120,7 @@ REGISTRATION_BACKEND = "registration.backends.default.DefaultBackend"
 
 # define default directories needed for paths to run scrapers
 SCRAPER_LIBS_DIR = join(HOME_DIR, "scraperlibs")
-
-# don't forget to change the value in media/js/scraperwiki.js!
-CODEMIRROR_URL = MEDIA_URL + "CodeMirror-0.65/"  
+CODEMIRROR_URL = MEDIA_URL + "CodeMirror-0.64/"
 
 #send broken link emails
 SEND_BROKEN_LINK_EMAILS = DEBUG == False

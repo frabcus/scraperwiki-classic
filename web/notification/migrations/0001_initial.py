@@ -6,31 +6,11 @@ from notification.models import *
 class Migration:
     
     def forwards(self, orm):
-        
-        # Adding model 'AlertType'
-        db.create_table('notification_alerttype', (
-            ('id', orm['notification.AlertType:id']),
-            ('code', orm['notification.AlertType:code']),
-            ('description', orm['notification.AlertType:description']),
-        ))
+
         db.send_create_signal('notification', ['AlertType'])
-        
-        # Adding model 'AlertInstance'
-        db.create_table('notification_alertinstance', (
-            ('id', orm['notification.AlertInstance:id']),
-            ('alert_type', orm['notification.AlertInstance:alert_type']),
-            ('user', orm['notification.AlertInstance:user']),
-            ('message', orm['notification.AlertInstance:message']),
-            ('sent', orm['notification.AlertInstance:sent']),
-        ))
+
         db.send_create_signal('notification', ['AlertInstance'])
-        
-        # Adding model 'AlertNotification'
-        db.create_table('notification_alertnotification', (
-            ('id', orm['notification.AlertNotification:id']),
-            ('alert_type', orm['notification.AlertNotification:alert_type']),
-            ('user', orm['notification.AlertNotification:user']),
-        ))
+ 
         db.send_create_signal('notification', ['AlertNotification'])
         
     

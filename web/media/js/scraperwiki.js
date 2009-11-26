@@ -1,14 +1,15 @@
-function setupCodeViewer(iLineCount, codemirror_url){
+function setupCodeViewer(iLineCount){
     var oCodeEditor;
     if(iLineCount < 20){
         iLineCount = 20;
     }
-
     $(document).ready(function(){
+
        oCodeEditor = CodeMirror.fromTextArea("txtScraperCode", {
            parserfile: ["../contrib/python/js/parsepython.js"],
-           stylesheet: codemirror_url + "contrib/python/css/pythoncolors.css",
-           path: codemirror_url + "js/",
+           stylesheet: "/media/CodeMirror-0.63/contrib/python/css/pythoncolors.css",
+
+           path: "/media/CodeMirror-0.63/js/",
            textWrapping: false, 
            lineNumbers: true, 
            indentUnit: 4,

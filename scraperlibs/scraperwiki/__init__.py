@@ -6,5 +6,3 @@ import datastore
 import wikipedia
 
 import osgb
-import geo_helper
-

@@ -16,6 +16,7 @@ class Connection(object):
   def __load_config(self):
     """
     Create a ConfigParser, open ``config.cfg`` and return it.
+    
     """
 
     config = ConfigParser.ConfigParser()
