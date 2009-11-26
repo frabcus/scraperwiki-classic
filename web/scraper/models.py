@@ -12,7 +12,6 @@ from registration.signals import user_registered
 
 import tagging
 
-from page_cache.models import *
 import template
 import util
 import vc
