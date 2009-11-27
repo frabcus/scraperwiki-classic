@@ -16,7 +16,7 @@ import os
 import sys, string
 from xml.sax import handler, make_parser
 
-
+# mark this
 class ParseXMLhandler(handler.ContentHandler):             
     def __init__(self, wpdump, c):
         self.level = 0
@@ -60,19 +60,27 @@ class ParseXMLhandler(handler.ContentHandler):
                 sys.exit(0)
             title = "".join(self.titleData)
 
+            if (self.pageNumber % 1000) == 0:
+                print "--", self.pageNumber, title
+                
             # #REDIRECT [[Norwich North (UK                         Parliament constituency)]]
             #if self.textData and re.match("\s*#REDIRECT", self.textData[0]):
             #    pass #print title, self.textData[0]
             
-            ttag = "new"
+            ttag = ""
             if re.search("\(UK Parliament constituency\)", title):
                 ttag = "UK Parliament constituency"
-                
-            print self.pageNumber, title
+            
+            # bail out for now to quicken the loading
+            else:
+                return
+            
             text = "".join(self.textData)
             timestamp = "".join(self.timestampData)
             if re.match("\s*#REDIRECT(?i)", text):
                 ttag = "REDIRECT"
+            
+            print self.pageNumber, title
             self.LoadPage(title, text, ttag)
 
         
@@ -124,7 +132,6 @@ def load_scheme():
       
       conn = connection.Connection()
       c = conn.connect()
-      c.execute("""INSERT INTO `sequences` VALUES(0);""")
       c.close()
       break
       
