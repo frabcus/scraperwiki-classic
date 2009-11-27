@@ -201,15 +201,14 @@ $(document).ready(function() {
 
     //Setup save / details forms
     function setupDetailsForm(){
-
-        $('#id_title').example(function() {
-          return $(this).attr('title');
-        });
         
-        $('#id_meta_title').example(function() {
-          return $('#id_title').attr('title');
-        });
-
+        //sync title text boxes
+        $('#id_meta_title').keyup(
+                function(){
+                    $('#id_title').val($('#meta_form #id_meta_title').val());
+                }
+            );
+        
         // Meta form
         $('#meta_fields_mini').appendTo($('#meta_form'))
         $('#meta_fields_mini').attr('id', 'meta_fields')
@@ -538,8 +537,7 @@ $(document).ready(function() {
 
     //Hide popup
     function hidePopup() {
-        
-        $('#id_title').val($('#meta_form #id_meta_title').val())
+
         $('#meta_form .button').remove()
         // Hide popups
         $('#popups div.popup_item').each(function(i) {
