@@ -1,5 +1,13 @@
+#!/usr/bin/env python
+# encoding: utf-8
 
-import xml.dom.minidom
+"""
+Does the initial loading of the databases.
+"""
+
+import connection
+import sys
+
 import xml.dom.minidom
 import datetime
 import re
@@ -8,11 +16,9 @@ import os
 import sys, string
 from xml.sax import handler, make_parser
 
-import connection
-
 
 class ParseXMLhandler(handler.ContentHandler):             
-    def __init__(self, wpdump):
+    def __init__(self, wpdump, c):
         self.level = 0
         self.pageNumber = 0
         self.charData = None
@@ -22,8 +28,7 @@ class ParseXMLhandler(handler.ContentHandler):
         self.textData = None
         self.timestampData = None
         
-        self.conn = connection.Connection()
-        self.c = self.conn.connect()
+        self.c = c
         
     def LoadPage(self, title, text, ttag):
         self.c.execute("REPLACE INTO `wikipediapages` (`title`,`text`,`ttag`) VALUES (%s, %s, %s);", 
@@ -36,9 +41,6 @@ class ParseXMLhandler(handler.ContentHandler):
         print "--------  Document End --------"
 
     def startElement(self, name, attrs):                        
-        if name == "page":
-            self.pageNumber += 1
-    
         self.level += 1
         if name == "page":
             self.pageNumber += 1
@@ -79,8 +81,8 @@ class ParseXMLhandler(handler.ContentHandler):
             self.charData.append(chrs.encode("utf8"))
 
 
-def ParseXMLintoPages(wpdump):
-    xmlhandler = ParseXMLhandler(wpdump)
+def ParseXMLintoPages(wpdump, c):
+    xmlhandler = ParseXMLhandler(wpdump, c)
     fin = open(wpdump)
     parser = make_parser()
     parser.setContentHandler(xmlhandler)
@@ -89,9 +91,47 @@ def ParseXMLintoPages(wpdump):
 
     
 # get the files
-fdir = "/home/goatchurch/scraperwiki/rawdatafiles"
-for f in os.listdir(fdir):
-    if re.search(".xml$", f):
-        ParseXMLintoPages(os.path.join(fdir, f))
+def load_wikipediapages():
+    conn = connection.Connection()
+    c = conn.connect()
+    fdir = conn.wikipedia_dir()
+    for f in os.listdir(fdir):
+        if re.search(".xml$", f):
+            ParseXMLintoPages(os.path.join(fdir, f), c)
         
 
+
+def load_scheme():
+  """Executes the SQL in scheme.sql"""
+  
+  exit = "y"
+  while exit.lower() != "n" or exit.lower() !="y":
+    if len(exit) != 0 and exit.lower() != "y":
+      print "%s IS NOT A VALID CHOICE" % exit.upper()
+    exit = raw_input("""WARNING: 
+        This will destroy any existing data that may be 
+        in the database.  Do you want to continue?\n[N/y]:""")
+    if len(exit) <= 0 or exit[0].lower() == "n":
+      print "Exiting"
+      sys.exit()
+    elif exit.lower() == "y":
+      print "dumping"
+      conn = connection.Connection()
+      c = conn.connect()
+      f = open('scheme.sql', 'r')
+      c.execute(f.read())
+      c.close()
+      
+      conn = connection.Connection()
+      c = conn.connect()
+      c.execute("""INSERT INTO `sequences` VALUES(0);""")
+      c.close()
+      break
+      
+      
+      
+      
+if __name__ == "__main__":
+  load_scheme()
+  load_wikipediapages()
+ 

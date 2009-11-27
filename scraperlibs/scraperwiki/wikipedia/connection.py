@@ -19,7 +19,8 @@ class Connection(object):
     """
 
     config = ConfigParser.ConfigParser()
-    config.readfp(open(os.path.split(__file__)[0] + '/config.cfg.local'))
+    configfile = os.path.join(os.path.split(__file__)[0], 'config.cfg.local')
+    config.readfp(open(configfile))
     return config
 
   def __test(self):
@@ -42,8 +43,12 @@ class Connection(object):
  
     return db.cursor()
   
+  def wikipedia_dir(self):
+    config = self.__load_config()
+    return config.get('wikipedia', 'dir')
  
 if __name__ == "__main__":
   c = Connection()
   print dir(c)
+  print c.wikipedia_dir()
   c.connect()
