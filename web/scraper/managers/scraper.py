@@ -127,9 +127,8 @@ class ScraperManager(models.Manager):
       
       headings = sorted(list(allkeys))
       rows = [ ]
-      print allitems, headings
       for litem in allitems.values():
-          rows.append([ str(litem.get(key))  for key in headings ])
+          rows.append([ unicode(litem.get(key))  for key in headings ])
       
       data = {
       'headings' : headings, 
