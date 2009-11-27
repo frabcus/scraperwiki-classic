@@ -100,7 +100,7 @@
 
             {# Controls #}
             <div class="editor_controls">
-                <input type="submit" class="save  button" name="action" value="Save" title="Save draft version" />            
+                <input type="submit" class="save  button" name="action" value="Save draft" title="Save draft version" />            
                 <input type="button" value="Diff" name="diff" id="diff" title="View diff with the committed version"/>
                 <input type="button" value="Reload" name="reload" id="reload" title="Reload the latest saved version"/>
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper"/>
@@ -129,11 +129,6 @@
                             <a href="#" title="Pages you are scraping">Sources</a>                            
                         </li>
                     </ul>
-                    <div class="controls">
-                         <div id="controls_console">
-                             <a id="clear"  href="#" title="clear the console tab">Clear console</a>
-                         </div>
-                     </div>
                 </div>
                 <div class="info">
                     <div id="output_console" class="output">
@@ -148,6 +143,11 @@
                         <div class="output_content"></div>
                     </div>
                 </div>
+                <div class="controls">
+                     <div id="controls_console">
+                         <a id="clear"  href="#" title="clear the console tab">Clear console</a>
+                     </div>
+                 </div>
                 <iframe name="console" id="console" style="display:none;"><pre></pre></iframe>
             </div>
       </div>

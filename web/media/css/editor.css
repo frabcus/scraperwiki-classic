@@ -70,7 +70,8 @@ span.hiddenfields { margin-left:10px; }
         background:#fff;-webkit-box-shadow: 1px 1px 1px #aaa;box-shadow: 1px 1px 1px #aaa;-moz-box-shadow: 1px 1px 1px #aaa;}
 .editor_output div.tabs ul li a, #popup_text .tabs ul li a {text-decoration:none; color:#000;}
 
-.editor_output div.controls {position:absolute; top:0; right:0; font-size:0.8em;}
+.editor_output div.controls {font-size:0.8em; text-align:left; background:#fff; position:absolute; bottom:0; left:0;
+    padding:0.3em 0 0.3em 1em!important; border-top:solid 1px #aaa; width:100%;}
 .editor_output .info {position:relative; height:200px; font-family:monaco, courier, monospace; font-size:12px;
     background:#fff;}
 
@@ -83,7 +84,7 @@ span.hiddenfields { margin-left:10px; }
 .editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.2em 1em;}
 .editor_output .info span.exception {background:#FF7878;}
 .editor_output .info span.output_item:hover {background:#ffffd7;}
-.editor_output .info span.output_item.run_end {border-bottom:solid 1px #cfcfcf;}
+.editor_output .info span.output_item.run_end {border-bottom:solid 1px #aaa;}
 .message_expander {cursor:pointer;color:#2680c6; text-decoration:none;}
 .message_expander:hover {text-decoration:underline;}
 
