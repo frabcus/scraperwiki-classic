@@ -1,3 +1,4 @@
+{% load gravatar %}
 {% extends "frontend/base.html" %}
 {% block css %}{% endblock %}
 
@@ -6,7 +7,7 @@
 
     <div class="page_title">
 		<h1>{{ profile.user.username }}'s profile</h1>
-		{% load gravatar %} {% show_gravatar profile.user.email 100 10 %} 
+		{% show_gravatar profile.user 'medium' %} 
 		<p>{{ profile.bio }}</p>
 	</div>
 	<div class="content">
