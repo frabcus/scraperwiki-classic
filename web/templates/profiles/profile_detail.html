@@ -5,8 +5,8 @@
 {% block content %}
 
     <div class="page_title">
-		<!--<img src="{{ profile.user.image_url }}" id='profile_image'/>-->
 		<h1>{{ profile.user.username }}'s profile</h1>
+		{% load gravatar %} {% show_gravatar profile.user.email 100 10 %} 
 		<p>{{ profile.bio }}</p>
 	</div>
 	<div class="content">

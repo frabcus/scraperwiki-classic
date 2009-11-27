@@ -151,3 +151,6 @@ ul.list_of_contents {border-bottom:dotted 1px #ccc; padding-bottom:1em; margin-b
 ul.list_of_contents a {font-weight:bold;}
 dl.faq dt {font-size:1.3em; font-weight:bold;}
 dl.faq dd {padding-left:0; margin-left:0; padding-bottom:1.3em;}
+
+/* Gravatar image */
+.gravatar { float: left; margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}

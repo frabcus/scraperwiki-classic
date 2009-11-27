@@ -119,9 +119,9 @@ def export_csv (request, scraper_short_name):
     return response
     
 def list(request):
-    scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
+    scrapers = models.Scraper.objects.filter(published=True).order_by('-first_published_at')
     return render_to_response('scraper/list.html', {'scrapers': scrapers}, context_instance = RequestContext(request))
-
+        
 def download(request, scraper_id = 0):
     user = request.user
     scraper = get_object_or_404(models.Scraper.objects,id=scraper_id)
