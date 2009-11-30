@@ -25,6 +25,6 @@ def show_gravatar(user, size = 'medium'):
     url += urllib.urlencode({
         'gravatar_id': hashlib.md5(user.email).hexdigest(), 
         'default': default, 
-        'size': str(size)
+        'size': str(size_px)
     })
     return {'gravatar': {'url': url, 'size': size_px, 'username': user.username}}
