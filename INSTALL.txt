@@ -101,6 +101,29 @@ the command
 ./runlocal
 
 
+6) Create the scrapers repository
+*******************
 
+First, you need to check out the scrapers. From your root scraperwiki directory, run:
 
+> hg clone scraperwiki@212.84.75.28/scrapers
 
+Next, in MySQL, create a database called scraperwiki_datastore:
+ 
+mysql> create database scraperwiki_datastore;
+
+Then change to the datastore directory, and use mysql to import the database schema, scheme.sql:
+
+(scraperwiki) C:\scraperwiki\web>cd c:\scraperwiki\scraperlibs\scraperwiki\datas
+tore
+(scraperwiki) C:\scraperwiki\scraperlibs\scraperwiki\datastore>mysql -u root -p -h localhost scraperwiki_datastore < scheme.sql
+
+Finally, edit localsettings.py to tell it about the new database:
+
+DATASTORE_DATABASE_ENGINE     = 'mysql'   
+DATASTORE_DATABASE_HOST     = 'localhost'      
+DATASTORE_DATABASE_NAME       = 'scraperwiki_datastore' 
+DATASTORE_DATABASE_USER       = 'root'   
+DATASTORE_DATABASE_PASSWORD   = 'yourpassword'  
+
+And you should be done.
