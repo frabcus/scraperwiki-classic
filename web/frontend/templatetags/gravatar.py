@@ -13,7 +13,7 @@ def show_gravatar(user, size = 'medium'):
     #work out size
     size_px = 0
     if size == 'small':
-        size_px = 25
+        size_px = 20
     elif size == 'medium':
         size_px = 75
     elif size == 'large':
@@ -27,4 +27,4 @@ def show_gravatar(user, size = 'medium'):
         #'default': default, 
         'size': str(size_px)
     })
-    return {'gravatar': {'url': url, 'size': size_px, 'username': user.username}}
+    return {'gravatar': {'url': url, 'size': size, 'size_px': size_px, 'username': user.username}}

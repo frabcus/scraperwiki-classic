@@ -22,21 +22,38 @@
     </div>
     <br class="clear"/>
     <div class="content left half">
-        <h3>New scrapers from everybody</h3>
+        <h3>New scrapers &amp; datasets</h3>
     	<ul>
     		{% for scraper in new_scrapers %}
     		  {% include 'frontend/detailed_scraper_line.html' %}
     		{% endfor %}	
     	</ul>
+    	<p class="more">
+    	   <a href="{% url scraper_list %}">Browse all &raquo;</a>
+    	</p>
     </div>
     <div class="content left half">
-        <h3>New suggestions for scrapers</h3>
+        <h3>ScraperMart - latest requests</h3>
         <ul>
         {% for solicitation in solicitations %}
             <li>
         	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
+        	    by
+              	{% load gravatar %}
+                {% show_gravatar solicitation.user_created 'small' %} 	
+                <a href='{% url profiles_profile_detail solicitation.user_created %}'>
+                    {{ solicitation.user_created.username }}
+                </a>
+                <span class="bounty">
+                    <a href="{% url market_view solicitation.id %}">
+                        &pound;{{solicitation.price}} bounty
+                    </a>
+                </span>
         	</li>
     	{% endfor %}
         </ul>
+        <p class="more">
+    	   <a href="{% url market_list %}">Browse all &raquo;</a>
+    	</p>
     </div>
 </div>

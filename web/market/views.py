@@ -104,6 +104,7 @@ def complete (request, solicitation_id):
         "notify_url": domain + reverse('paypal-ipn'),
         "return_url": domain + reverse('market_paypal_return'),
         "cancel_return": domain + reverse('market_paypal_cancel'),
+        "currency_code": "GBP",
     }
 
     # Create the instance.

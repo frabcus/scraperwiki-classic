@@ -10,13 +10,10 @@
     </p>
 </div>
 <div class="content col left">
-    <h3>{{solicitation.title}}</h3>
+    <h3>{{solicitation.title}} {% if solicitation.has_bounty %}<span class="bounty">&pound;{{solicitation.price}} bounty</span>{% endif %}</h3>
     <h4>Added by {{solicitation.user_created.username}} ({{solicitation.status.display_name}})</h4>
-    {% if solicitation.has_bounty %}
-         <h5>&pound;{{solicitation.price}} bounty</h5>
-    {% endif %}
-    <p>Link: <a href="{{solicitation.link}}">{{solicitation.link|urlizetrunc:30}}</a></p>
     <p>{{solicitation.details}}</p>
+    <p>Link: <a href="{{solicitation.link}}">{{solicitation.link|urlizetrunc:30}}</a></p>    
 </div>
 <div class="content col right">
     {% ifequal solicitation.status.status 'open' %}
