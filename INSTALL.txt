@@ -88,7 +88,7 @@ Now try running django:
 Assuming no errors you should be able to visit http://localhost:8000/ and see the scraperwiki home page.
 
 
-5) initiate the UML
+5) Initiate the UML
 *******************
 
 Instructions in UML/LOCAL explains that the system 
@@ -101,6 +101,10 @@ the command
 ./runlocal
 
 
+6) Create the scrapers repository
+*******************
+Create a directory called 'scrapers' and checkout the scrapers into that directory
 
+> hg clone scraperwiki@212.84.75.28/scrapers
 
 

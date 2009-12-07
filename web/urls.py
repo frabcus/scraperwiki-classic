@@ -20,13 +20,11 @@ admin.autodiscover()
 # move hungary and pdf handling from farmsubsidy/
 # remove all log files references
 
-
 urlpatterns = patterns('',
     url(r'^profiles/', include('profiles.urls')),
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
     url(r'^', include('frontend.urls')),
     url(r'^editor/', include('editor.urls')),
-    
     
     url(r'^scraper_data/(?P<short_name>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}, name="scraper_data"),
     
@@ -42,10 +40,14 @@ urlpatterns = patterns('',
     # allows direct viewing of the django tables
     url(r'^admin/(.*)', admin.site.root, name="admin"),
 
+    #paypal
+    (r'^paypal/notifications/56db6e2700d04e38a5d/', include('paypal.standard.ipn.urls')),
+    
     #market place
     url(r'^market/', include('market.urls')),
     
     #favicon
     (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/media/images/favicon.ico'}),
+
     
 )

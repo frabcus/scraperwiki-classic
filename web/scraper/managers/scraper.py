@@ -47,8 +47,6 @@ class ScraperManager(models.Manager):
             'TIME_ZONE': settings.TIME_ZONE,
         })
         super(ScraperManager, self).__init__(*args, **kwargs)
-
-    
     
     use_for_related_fields = True
 	

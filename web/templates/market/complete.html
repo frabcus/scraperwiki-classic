@@ -1,0 +1,22 @@
+{% extends "frontend/base.html" %}
+{% load formhelper %}
+
+{% block title %}{{solicitation.title}} | Suggested scrapers{% endblock %}
+
+{% block content %}
+<div class="content">
+    <div class="attention">
+        <h1><em>{{solicitation.title}} has been written</em></h1>
+        <p>
+            <a href="{% url scraper_data scraper.short_name %}">Click here to see the scraper</a>
+        </p>
+        {% if solicitation.has_bounty %}
+            {% if use_sandbox %}
+                {{ form.sandbox }}
+            {% else %}
+                {{ form.render }}
+            {% endif %}            
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

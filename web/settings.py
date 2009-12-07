@@ -91,11 +91,13 @@ INSTALLED_APPS = (
   	'notification',
   	'editor',
   	'contact_form',
-  	'market',  	
+  	'payment',  	
+  	'market',
     #'debug_toolbar',
   	'django_notify',
   	'tagging',
   	'django.contrib.humanize',
+  	'paypal.standard.ipn',
 )
 
 

@@ -40,8 +40,8 @@ class CreateAccountForm(RegistrationForm):
                            label=_(u'I agree to the Scraper Wiki terms and conditions'),
                            error_messages={ 'required': _("You must agree to the ScraperWiki terms and conditions") })
     data_protection = django.forms.BooleanField(widget=django.forms.CheckboxInput(),
-                          label=_(u'I will not breach anyone\'s copyright, privacy or breach any laws including the Data Protection Act 1998'),
-                          error_messages={ 'required': _("You must agree to abide by the Data Protection Act 1998") })
+                          label=_(u'I have written and tested this scraper'),
+                          error_messages={ 'required': _("Please confirm that you have written and tested this scraper") })
 
     def clean_email(self):
        """
