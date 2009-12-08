@@ -29,6 +29,6 @@ class SolicitationClaimForm (ModelForm):
 
          self.fields['confirmed'] = forms.BooleanField(widget=forms.CheckboxInput(),
                                required=True, 
-                               label= u'I will not breach anyone\'s copyright, privacy or breach any laws including the Data Protection Act 1998',
-                               error_messages={ 'required': "You must agree to abide by the Data Protection Act 1998" })                 
+                               label=_(u'I have written and tested this scraper'),
+                               error_messages={ 'required': _("Please confirm that you have written and tested this scraper") })                 
 
