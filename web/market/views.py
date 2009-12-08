@@ -68,11 +68,13 @@ def claim (request, solicitation_id):
             solicitation.claim(scraper=scraper, user=user)
 
             #email the creator telling them it is done, and to pay if nesesary
+            title = "The scraper you requested for " + solicitation.title + "has been written"
             template = loader.get_template('emails/market_claim.txt')
             context = Context({
-                'name': 'RICHARD',
+                'scraper': scraper,
+                'solicitation': solicitation,                
             })
-            send_mail('Welcome to My Project', template.render(context), settings.EMAIL_FROM, ['fdfds@fdsfd.com'], fail_silently=False)
+            send_mail(title, template.render(context), settings.EMAIL_FROM, solicitation.user_create.email, fail_silently=False)
 
             #redirect & add message
             request.notifications.add("Thanks, we've emailed " + solicitation.user_created.username + " to let them know")
@@ -93,7 +95,7 @@ def complete (request, solicitation_id):
     invoice = get_object_or_404(Invoice, parent_id=solicitation_id, item_type='solicitation', deleted = False)
     if invoice == False:
         raise Http404
-        
+
     #setup the paypal form
     domain = 'http://' + Site.objects.get_current().domain
     paypal_dict = {

@@ -126,3 +126,7 @@ CODEMIRROR_URL = MEDIA_URL + "CodeMirror-0.64/"
 
 #send broken link emails
 SEND_BROKEN_LINK_EMAILS = DEBUG == False
+
+#paypal
+PAYPAL_IMAGE = "http://www.paypal.com/en_US/i/btn/btn_paynowCC_LG.gif"
+PAYPAL_SANDBOX_IMAGE = PAYPAL_IMAGE
