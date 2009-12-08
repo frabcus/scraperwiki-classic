@@ -66,9 +66,9 @@ class Solicitation(models.Model):
         template = loader.get_template('emails/send_bounty.txt')
         context = Context({
             'solicitation': self,
-            'recipient_user': self.scraper.owner()                                 
+            'recipient_user': self.scraper.owner
         })
-        send_mail('Send Bounty', template.render(context), settings.EMAIL_FROM, [settings.PAYPAL_RECEIVER_EMAIL], fail_silently=False)
+        send_mail('Send Bounty', template.render(context), settings.EMAIL_FROM, [self.scraper.owner.email], fail_silently=False)
 
     def claim(self, scraper, user):
 

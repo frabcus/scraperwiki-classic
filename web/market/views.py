@@ -68,7 +68,7 @@ def claim (request, solicitation_id):
             solicitation.claim(scraper=scraper, user=user)
 
             #email the creator telling them it is done, and to pay if nesesary
-            title = "The scraper you requested for " + solicitation.title + "has been written"
+            title = "The scraper you requested for " + solicitation.title + " has been written"
             template = loader.get_template('emails/market_claim.txt')
             context = Context({
                 'scraper': scraper,

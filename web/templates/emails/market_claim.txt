@@ -7,7 +7,7 @@ You asked someone write you a scraper for '{{solicitation.title}}' on ScraperWik
 {% if solicitation.has_bounty %}
 You set a bounty of £{{solicitation.price}} for this scraper, when you have have made sure you are happy with the scraper {{scraper.owner}} has written for you, please go here to pay them:
 
-{% url market_claim solicitation.id %}
+{% url market_complete solicitation.id %}
 
 The ScraperWiki Team
 {% endif %}
