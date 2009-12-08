@@ -74,7 +74,7 @@ def claim (request, solicitation_id):
                 'scraper': scraper,
                 'solicitation': solicitation,                
             })
-            send_mail(title, template.render(context), settings.EMAIL_FROM, solicitation.user_created.email, fail_silently=False)
+            send_mail(title, template.render(context), settings.EMAIL_FROM, [solicitation.user_created.email], fail_silently=False)
 
             #redirect & add message
             request.notifications.add("Thanks, we've emailed " + solicitation.user_created.username + " to let them know")
