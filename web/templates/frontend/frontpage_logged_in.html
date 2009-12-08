@@ -7,20 +7,26 @@
 
 	<h2>Your scrapers</h2>
 	<ul class="scraper_list">
+	{% if my_scrapers %}
     	{% for scraper in my_scrapers %}
     	  {% include 'frontend/scraper_line.html' %}
     	{% endfor %}
+    	{% else %}
+    	 <p>No scrapers yet</p>
+    	{% endif %}
 	</ul>
 
-    <!--
+
 	<h2>Scrapers you are watching</h2>
+	{% if following_scrapers %}
 	<ul>
 		{% for scraper in following_scrapers %}
 		  {% include 'frontend/scraper_line.html' %}
 		{% endfor %}
 	</ul>
-	-->
-    
+	    {% else%}
+	    <p>You are not watching any scrapers yet</p>
+    {% endif %}
     <!--
 	    <h2>History</h2>
     -->
@@ -32,10 +38,18 @@
 		<li><a href="{% url profiles_edit_profile %}">Edit your profile</a></li>
 		<li><a href="{% url profiles_profile_detail user.username %}">View your profile</a></li>
 	</ul>
-
-    <!--
+	
 	    <h3>People you are following</h3>
-    -->
+    	{% if profile.user.to_user.not_following_anyone %}
+    	  <p>You are not following anyone yet</p>
+        {% else %}
+    	   <ul> 
+            {% for other_user in profile.user.to_user.following %}
+              {% load gravatar %} {% show_gravatar other_user.email "medium" 0 %} 
+    	      {% include 'frontend/user_line.html' %}
+    	    {% endfor %}  
+    	  </ul>  
+        {% endif %}
 
 	<h3>New scrapers from everybody</h3>
 	<ul class="scraper_list">
@@ -44,3 +58,4 @@
 		{% endfor %}	
 	</ul>
 </div>
+<div style="clear: both;"></div>

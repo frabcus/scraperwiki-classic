@@ -1,28 +1,59 @@
 {% extends "frontend/base.html" %}
-{% block css %}{% endblock %}
 
-{% block title %}Profile Details{% endblock %}
+{% block css %}{% endblock %}
+{% block title %}Profile Details: {{ profile.user.username }}{% endblock %}
+
 {% block content %}
 
     <div class="page_title">
-		<!--<img src="{{ profile.user.image_url }}" id='profile_image'/>-->
+    
+    <div style="float: left;">
 		<h1>{{ profile.user.username }}'s profile</h1>
+		{% load gravatar %} {% show_gravatar profile.user.email "large" 10 %} 
 		<p>{{ profile.bio }}</p>
 	</div>
+	
+	<div  style="float: right; text-align: right;"> 
+		 {% ifequal profile.user.username user.username %}
+	     <a href="/profiles/edit/">Edit your profile</a>
+         {% else  %}
+			{% if following %}
+			   <a href="unfollow/" style="float: right;">Unfollow this user</a>
+     	    {% else%}
+	           <a href="follow/" style="float: right;">Follow this user</a>
+     	    {% endif %}
+        {% endifequal %}
+	</div>
+	
+	<div style="clear:both;"></div>
+	
+	</div>
+
+		
 	<div class="content">
-    	<h2>{{ profile.user.username }}'s scrapers</h2>
-    	<ul>
+	<div style="float: left;">
+		    	<h2>{{ profile.user.username }}'s scrapers</h2>
+    	<ul>  
         	{% for scraper in profile.user.scraper_set.all %}
         	    {% if scraper.published %}
         	        {% include 'frontend/scraper_line.html' %}
         	    {% endif %}
         	{% endfor %}
-	    </ul>
-	
-	    <!--
-    	<h2>Scrapers {{ profile.user.username }} is watching</h2>
+	    </ul> 	
+    </div>
+    
+    <div style="float: right; ">
+
+    	<h2>Scrapers {% ifequal profile.user.username user.username %} you are {% else %} {{ profile.user.username }} is {% endifequal %} watching</h2>
+    	
     	{% if  profile.user.scraper_set.not_watching_any %}
-    	  <p>You are not watching any scrapers</p>
+    	  <p>
+        {% ifequal profile.user.username user.username %}
+          You are 
+         {% else  %}
+          {{ profile.user.username }} is
+          {% endifequal %}
+           not watching any scrapers</p>
     	{% else %}
     	  <ul>
     		{% for scraper in profile.user.scraper_set.watching %}	
@@ -30,17 +61,58 @@
     		{% endfor %}
     	  </ul>
     	{% endif %}
-
-    	<h2>People {{ profile.user.username }} is following</h2>
+    	<h2>People {% ifequal profile.user.username user.username %} you are {% else %} {{ profile.user.username }} is {% endifequal %} following</h2>
+    	
     	{% if profile.user.to_user.not_following_anyone %}
-    	  <p>You are not following anyone</p>
+    	  <p>
+    	
+		 {% ifequal profile.user.username user.username %}
+          You are 
+         {% else  %}
+          {{ profile.user.username }} is
+        {% endifequal %}
+        not following anyone</p>
+          
         {% else %}
-          <ul>
+          <ul> 
             {% for other_user in profile.user.to_user.following %}
+              {% show_gravatar profile.user.email 30 0 %} 
+              		 {% ifequal profile.user.username user.username %}
+             					{% include 'frontend/user_line_with_unfollow.html' %} 
+              		          {% else  %}
+    	      					{% include 'frontend/user_line.html' %} 
+    	          	    {% endifequal %} 
+    	    {% endfor %}
+    	  </ul>  
+        {% endif %}
+        
+            	<!-- 
+            	
+            	
+            	<h2>People who follow {% ifequal profile.user.username user.username %} you {% else %} {{ profile.user.username }} {% endifequal %}</h2>    	
+    	
+    	{% if profile.user.from_user.not_followed_by_anyone %}
+    	  <p>
+    	No-one is following
+		 {% ifequal profile.user.username user.username %}
+          you
+         {% else  %}
+          {{ profile.user.username }} 
+        {% endifequal %}
+        yet</p>
+          
+        {% else %}
+          <ul> 
+            {% for other_user in profile.user.from_user.followed_by %}
+              {% show_gravatar profile.user.email 30 0 %} 
     	      {% include 'frontend/user_line.html' %}
     	    {% endfor %}
-    	  </ul>
+    	  </ul>  
         {% endif %}
         -->
+        </div>
     </div>
-{% endblock %}
+    
+    <div style="clear:both;"></div>
+    
+    {% endblock %}

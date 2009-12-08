@@ -67,6 +67,11 @@
                 <li{% ifequal selected_tab "contributors" %} class="selected"{% endifequal %}>
                     <a href="{% url scraper_contributors scraper.short_name %}">Contributors</a>
                 </li>
+                {% load comments %}
+                <li{% ifequal selected_tab "comments" %} class="selected"{% endifequal %}>
+                    <a href="{% url scraper_comments scraper.short_name %}">Discussion 
+                       {% get_comment_count for scraper as cc %}({{ cc }})</a>
+                </li>
             </ul>
             
         </div>
@@ -75,6 +80,6 @@
             {% block tab %}
             {% endblock %}
         </div>
-        Important:If you suspect the scraper breaks our <a href="/terms_and_conditions/">Terms &amp; Conditions</a>. please, report it.
+        Important: If you suspect this scraper breaks our <a href="/terms_and_conditions/">Terms &amp; Conditions</a>, please <a href="/contact/">report it</a>.
     </div>
 {% endblock %}

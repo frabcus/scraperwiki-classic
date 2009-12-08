@@ -3,16 +3,47 @@
 {% block title %}All scrapers{% endblock %}
 {% block content %}
     <div class="page_title">
+        <span style="float: left;">
         <h1>Scrapers</h1>
         <p>
             All scrapers in ScraperWiki
+
         </p>
-    </div>
+
+  
+    </span>
+                    <span style="float: right;">
+    <form action="/scrapers/search/" method="POST">
+{{ form }}
+<input type="submit" value="Submit" />
+</form>
+
+</span>
+            <div style="clear: both;"></div>
+</div>
+
     <div class="content">
+                       <span style="float: right"><a href="/feeds/latest_scrapers/">RSS feed of all scrapers</a></span>
         <ul class="allscraperlist">
-        {% for scraper in scrapers %}
-            {% include 'scraper/scraper_line.html' %}
-    	{% endfor %}
+          {% for scraper in scrapers.object_list %}
+          {% include 'scraper/scraper_line.html' %}
+          {% endfor %}
         </ul>
+<div class="pagination" style="margin-top: 20px">
+
+    <span class="step-links">
+        {% if scrapers.has_previous %}
+            <a href="?page={{ scrapers.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ scrapers.number }} of {{ scrapers.paginator.num_pages }}
+        </span>
+
+        {% if scrapers.has_next %}
+            <a href="?page={{ scrapers.next_page_number }}">next</a>
+        {% endif %}
+    </span>
+</div>
     </div>
 {% endblock %}

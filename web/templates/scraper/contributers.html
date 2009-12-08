@@ -4,12 +4,15 @@
 
 <ul>
     <li>
-        <a href="{% url profiles_profile_detail scraper_owner.username %}">{{scraper_owner.username}}</a>
+        <a href="{% url profiles_profile_detail scraper_owner.username %}">
+        {% load gravatar %} {% show_gravatar scraper_owner.email "medium" 0 %} 
+        {{scraper_owner.username}}</a>
         <em>(creator)</em>
     </li>
     {% if scraper_contributors %}  
       {% for contributor in scraper_contributors %}  
         <li>
+        	{% load gravatar %} {% show_gravatar contributor.email "medium" 0 %} 
             <a href="{% url profiles_profile_detail contributor.username %}">{{contributor.username}}</a>
         </li>
       {% endfor %}

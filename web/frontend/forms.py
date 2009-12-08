@@ -29,7 +29,6 @@ class SigninForm (AuthenticationForm):
     remember_me = django.forms.BooleanField(widget=django.forms.CheckboxInput(),
                            label=_(u'Remember me'))
 
-
 class CreateAccountForm(RegistrationForm):
     """
     Subclass of ``RegistrationForm`` which adds a required checkbox

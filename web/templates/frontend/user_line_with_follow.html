@@ -1,4 +1,4 @@
 <li>
 	<a href='{% url profiles_profile_detail other_user.username %}'>{{ other_user.username }}</a>
-	(<a href="#">follow</a>)
+	(<a href="{% url profiles_profile_detail other_user.username %}follow">follow</a>)
 </li>

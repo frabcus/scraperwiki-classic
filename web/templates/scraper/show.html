@@ -10,14 +10,17 @@
   	  {% if scraper.is_published %}
   		  <p>Published</p>
   	  {% endif %}
-
   	  <div>
   		{% if you_own_it %}
   		  <p>You own this scraper</p>
   		{% endif %}
+  		
   		{% if you_follow_it %}
-  		  <p>You are following this scraper</p>
-  		{% endif %}
+  		  <p>You are following this scraper. <a href="/scrapers/unfollow/{{scraper.short_name}}">Unfollow it</a></p>
+  		   {% else %} 
+  		  <p><a href="/scrapers/follow/{{scraper.short_name}}">Follow this scraper</a> (you will be alerted if this scraper changes or appears to be broken)</p>
+  		{% endif %} 
+  		
   	  </div>
     </div>
     <div class="content col right">

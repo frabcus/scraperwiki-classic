@@ -1,5 +1,7 @@
+syntax: regexp
 \.pyc$
 \.pyo$
+\.orig$
 \.DS_Store
 \.Python
 \.installed.cfg
@@ -9,6 +11,11 @@
 ^eggs$
 ^include$
 ^lib$
+^Lib$
 ^parts$
+^Scripts$
 ^pip-log.txt$
+^.hgignore$
 ^web/localsettings.py$
+^web/python$
+^web/pip-log.txt$

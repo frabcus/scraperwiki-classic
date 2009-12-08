@@ -165,6 +165,10 @@ class Scraper(models.Model):
     def number_of_lines(self):
         code = vc.get_code(self.short_name)
         return code.count("\n")
+        
+    def get_absolute_url(self):
+        # used by RSS feeds - TODO
+        return "/scrapers/%i/" % self.short_name
 
     def is_good(self):
         # don't know how goodness is going to be defined yet.
