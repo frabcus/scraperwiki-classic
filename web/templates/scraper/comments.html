@@ -1,0 +1,38 @@
+{% extends "scraper/scraper_base.html" %}
+
+{% block tab %}
+{% load comments %}
+<!-- {% render_comment_form for scraper %} -->
+ <!-- {% render_comment_form for scraper.scraper scraper.pk %} -->
+ {% if user.is_authenticated %}
+ 
+{% get_comment_form for scraper as form %}
+<p>Add a comment or question about this scraper or the data it produces:</p>
+<form action="{% comment_form_target %}" method="POST"> 
+	<textarea name="comment" id="id_comment" rows="2" style="width: 90%;"></textarea>
+	{{ form.content_type }} 
+	{{ form.object_pk }} 
+	{{ form.timestamp }} 
+	{{ form.security_hash }} 
+	<!-- {{ form.honeypot }} -->
+    <input type="hidden" name="next" value="{% url  scraper_comments scraper.short_name %}" />
+	<input type="submit" value="Add" id="id_submit" /> 
+</form> 
+{% else %}
+    <p>Please <a href="/login/">log in</a> to add a comment.</p>
+{% endif %}
+
+{% get_comment_list for scraper as comment_list %}
+{% if comment_list %}
+  {% load gravatar %}
+  {% for comment in comment_list reversed %}
+  {% show_gravatar comment.email "medium" 0 %} 
+    <em><a href="{% url profiles_profile_detail comment.name %}">{{ comment.name|escape }}</a> at {{ comment.submit_date|date:"r"}}</em>
+    <p>{{ comment.comment|escape|urlizetrunc:"100"|linebreaks }}</p>
+    <hr>
+  {% endfor %}
+{% endif %}
+
+
+<br/>
+{% endblock %}

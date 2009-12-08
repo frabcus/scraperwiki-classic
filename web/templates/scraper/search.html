@@ -1,0 +1,17 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Search scrapers{% endblock %}
+{% block content %}
+    <div class="page_title">
+<h1>Search scrapers</h1>
+    </div>
+
+    <div class="content">
+    
+    <form action="/scrapers/search/" method="POST">
+{{ form }}
+<input type="submit" value="Submit" />
+</form>
+    
+    </div>
+{% endblock %}
