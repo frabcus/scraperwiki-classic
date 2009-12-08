@@ -72,7 +72,8 @@ def claim (request, solicitation_id):
             template = loader.get_template('emails/market_claim.txt')
             context = Context({
                 'scraper': scraper,
-                'solicitation': solicitation,                
+                'solicitation': solicitation,         
+                'url': 'http://' + Site.objects.get_current().domain       
             })
             send_mail(title, template.render(context), settings.EMAIL_FROM, [solicitation.user_created.email], fail_silently=False)
 
@@ -89,6 +90,10 @@ def complete (request, solicitation_id):
     solicitation = get_object_or_404(models.Solicitation, id=solicitation_id)
     status = models.SolicitationStatus.objects.get(status='pending')
     if solicitation.scraper == False or solicitation.status != status:
+        raise Http404
+
+    #make sure signed in user is the person who created the solicitation
+    if solicitation.user_created != request.user:
         raise Http404
 
     #find the invoice
