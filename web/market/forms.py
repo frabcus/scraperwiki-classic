@@ -29,6 +29,6 @@ class SolicitationClaimForm (ModelForm):
 
          self.fields['confirmed'] = forms.BooleanField(widget=forms.CheckboxInput(),
                                required=True, 
-                               label=_(u'I have written and tested this scraper'),
-                               error_messages={ 'required': _("Please confirm that you have written and tested this scraper") })                 
+                               label=u'I have written and tested this scraper',
+                               error_messages={ 'required': "Please confirm that you have written and tested this scraper" })                 
 
