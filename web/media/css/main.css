@@ -1,3 +1,4 @@
+
 /* Resets */
 h1, h2, h3, h4, h5, h6 {padding:0; margin:0; clear:both;}
 img {border:none;}
@@ -160,3 +161,7 @@ dl.faq dd {padding-left:0; margin-left:0; padding-bottom:1.3em;}
 /* bounty */
 span.bounty {padding:0.2em 0.4em; background:#faca44; font-weight:bold; font-size:0.7em; color:#fff;}
 span.bounty a {color:#fff!important;}
+
+/* Filter */
+ul.filter_list {position:abso;}
+ul.filter_list li {display:block; float:left;}
