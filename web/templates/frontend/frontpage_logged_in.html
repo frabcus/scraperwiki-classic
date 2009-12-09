@@ -15,6 +15,9 @@
     	 <p>No scrapers yet</p>
     	{% endif %}
 	</ul>
+	<p class="more">
+	   <a href="#">View all your scrapers &raquo;</a>
+	</p>
 
 
 	<h2>Scrapers you are watching</h2>
@@ -34,7 +37,7 @@
 <div class="content col right">
 	<ul>
 		<li><a href="{% url editor %}">Create a new scraper</a></li>
-		<li><a href="{% url market_solicitation %}">Suggest a scraper</a></li>
+		<li><a href="{% url market_solicitation %}">Request a scraper</a></li>
 		<li><a href="{% url profiles_edit_profile %}">Edit your profile</a></li>
 		<li><a href="{% url profiles_profile_detail user.username %}">View your profile</a></li>
 	</ul>
@@ -51,6 +54,29 @@
     	  </ul>  
         {% endif %}
 
+    <h3>ScraperMart - latest requests</h3>
+    <ul>
+    {% for solicitation in solicitations %}
+        <li>
+    	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
+    	    by
+          	{% load gravatar %}
+            {% show_gravatar solicitation.user_created 'small' %} 	
+            <a href='{% url profiles_profile_detail solicitation.user_created %}'>
+                {{ solicitation.user_created.username }}
+            </a>
+            <span class="bounty">
+                <a href="{% url market_view solicitation.id %}">
+                    &pound;{{solicitation.price}} bounty
+                </a>
+            </span>
+    	</li>
+	{% endfor %}
+    </ul>
+    <p class="more">
+	   <a href="{% url market_list %}">Browse all &raquo;</a>
+	</p>
+	
 	<h3>New scrapers from everybody</h3>
 	<ul class="scraper_list">
 		{% for scraper in new_scrapers %}

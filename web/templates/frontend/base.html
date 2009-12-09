@@ -32,6 +32,9 @@
 				        <a href="{% url scraper_list %}">Browse scrapers &amp; data</a>
 				    </li>
 				    <li>
+				        <a href="{% url market_list %}">ScraperMart</a>
+				    </li>
+				    <li>
 				        <a href="{% url api %}">API</a>
 				    </li>
 				    <li class="helplink"><a href="{% url help %}">Help</a></li>
@@ -70,9 +73,9 @@
                  {% endif %}
                  {% if notifications %}
                  <ul>
-                         {% for message in notifications %}
-                         <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                         {% endfor %}
+                     {% for message in notifications %}
+                        <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                     {% endfor %}
                  </ul>
                  {% endif %}
     		</div>
@@ -109,8 +112,7 @@
 		           <dd>
 		             <ul>
 		                 <li><a href="{% url scraper_list %}">Browse scrapers &amp; data</a></li>
-		                 <li><a href='{% url market_solicitation %}'>Suggest a scraper</a></li>
-		                 <li><a href='{% url market_list %}'>View suggested scrapers</a></li>		                 
+		                 <li><a href='{% url market_list %}'>ScraperMart</a></li>		                 
 		             </ul>
 		           </dd>
 		           <dt>Reuse the data</dt>

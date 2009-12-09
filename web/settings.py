@@ -91,11 +91,13 @@ INSTALLED_APPS = (
   	'notification',
   	'editor',
   	'contact_form',
-  	'market',  	
+  	'payment',  	
+  	'market',
     #'debug_toolbar',
   	'django_notify',
   	'tagging',
   	'django.contrib.humanize',
+  	'paypal.standard.ipn',
 )
 
 
@@ -128,5 +130,8 @@ SEND_BROKEN_LINK_EMAILS = DEBUG == False
 # number of scrapers to show per page on /scrapers/list/
 SCRAPERS_PER_PAGE = 10
 
+#paypal
+PAYPAL_IMAGE = "http://www.paypal.com/en_US/i/btn/btn_paynowCC_LG.gif"
+PAYPAL_SANDBOX_IMAGE = PAYPAL_IMAGE
 # maximum length for comments
 COMMENT_MAX_LENGTH = 3000

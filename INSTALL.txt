@@ -88,7 +88,7 @@ Now try running django:
 Assuming no errors you should be able to visit http://localhost:8000/ and see the scraperwiki home page.
 
 
-5) initiate the UML
+5) Initiate the UML
 *******************
 
 Instructions in UML/LOCAL explains that the system 
@@ -104,12 +104,9 @@ the command
 6) Create the scrapers repository
 *******************
 
-First, you need to check out the scrapers. From your root scraperwiki directory, run:
 
 > hg clone scraperwiki@212.84.75.28/scrapers
-
 Next, in MySQL, create a database called scraperwiki_datastore:
- 
 mysql> create database scraperwiki_datastore;
 
 Then change to the datastore directory, and use mysql to import the database schema, scheme.sql:

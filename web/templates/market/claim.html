@@ -1,0 +1,45 @@
+{% extends "frontend/base.html" %}
+{% load formhelper %}
+
+{% block title %}{{solicitation.title}} | Requested scrapers{% endblock %}
+
+{% block errors %}
+    {% if form.errors %}
+        <ul>
+            {% form_errors form %}
+        </ul>
+    {% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+<div class="content">
+    <div class="attention">
+        <h1>Claim <em>{{solicitation.title}}</em></h1>
+        <p>
+            If you have written a scraper for {{solicitation.title}}, please enter the details below and we'll email
+            {{solicitation.user_created.username}} who requested it letting them know.
+        </p>
+        <form method="post" action=".">
+    	    {{ form.scraper }}
+    	    <br/>
+	        {% field_errors form.scraper %}
+    	    <p>
+                {{ form.confirmed }}
+    	        {{ form.confirmed.label_tag }}
+    	        <br/>
+	            {% field_errors form.confirmed %}    	        
+	        </p>
+    	    <br/>
+    	    <input type="submit" value="Confirm you have written this scraper"/>
+        </form>
+        {% if solicitation.has_bounty %}
+            <p>This suggestion has a bounty of &pound;{{solicitation.price}}.</p>
+            <p>We'll email the person who suggested it letting them know to pay you</p>
+        {% else %}
+            This suggestion has no bounty.
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

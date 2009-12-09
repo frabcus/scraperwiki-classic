@@ -1,0 +1,13 @@
+Hello {{solicitation.user_created.username}},
+
+You asked someone write you a scraper for '{{solicitation.title}}' on ScraperWiki.com. Well, {{scraper.owner}} has done it for you!
+
+{{url}}{% url market_view solicitation.id %}
+
+{% if solicitation.has_bounty %}
+You set a bounty of £{{solicitation.price}} for this scraper, when you have have made sure you are happy with the scraper {{scraper.owner}} has written for you, please go here to pay them:
+
+{{url}}{% url market_complete solicitation.id %}
+
+The ScraperWiki Team
+{% endif %}

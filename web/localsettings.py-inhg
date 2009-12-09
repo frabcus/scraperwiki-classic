@@ -65,3 +65,8 @@ CODE_RUNNING_MODE = 'firestarter_django'
 
 FIREBOX_PATH = ''
 sys.path.append(FIREBOX_PATH)
+
+#paypal
+PAYPAL_RECEIVER_EMAIL = "your_paypal_sandbox_email@example.com"
+EMAIL_FROM = 'noreply@localhost'
+MARKET_BOUNTY_CHARGE = 6.3

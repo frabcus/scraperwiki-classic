@@ -47,8 +47,6 @@ class ScraperManager(models.Manager):
             'TIME_ZONE': settings.TIME_ZONE,
         })
         super(ScraperManager, self).__init__(*args, **kwargs)
-
-    
     
     use_for_related_fields = True
 	
@@ -127,9 +125,8 @@ class ScraperManager(models.Manager):
       
       headings = sorted(list(allkeys))
       rows = [ ]
-      print allitems, headings
       for litem in allitems.values():
-          rows.append([ str(litem.get(key))  for key in headings ])
+          rows.append([ unicode(litem.get(key))  for key in headings ])
       
       data = {
       'headings' : headings, 

@@ -102,7 +102,6 @@ def login(request):
                     else:
                         return HttpResponseRedirect(reverse('frontpage'))
 
-
                 else:
                     # Account exists, but not activated                    
                     error_messages.append("This account has not been activated, please check your email and click on the link to confirm your account")
@@ -119,7 +118,7 @@ def login(request):
                 #sign straight in
                 signed_in_user = auth.authenticate(username=request.POST['username'], password=request.POST['password1'])
                 auth.login(request, signed_in_user)                
-                
+
                 #redirect
                 if redirect:
                     return HttpResponseRedirect(redirect)

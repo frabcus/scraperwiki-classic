@@ -1,36 +1,31 @@
 {% extends "frontend/base.html" %}
 
-{% block title %}Suggested scrapers{% endblock %}
+{% block title %}Requested scrapers{% endblock %}
 
 {% block content %}
 <div class="page_title">
-    <h1>Scraper suggestions</h1>
+    <h1>ScraperMart - {{status.display_name}}</h1>
     <p>
         Datasets people have suggested scraping
     </p>
+    <ul class="filter_list">
+        <li><a href="{% url market_list %}">Open</a></li>
+        <li><a href="{% url market_list_filter 'pending' %}">Pending</a></li>
+        <li><a href="{% url market_list_filter 'completed' %}">Completed</a></li>
+    </ul>
 </div>
-<div class="content col left">
+<div class="content">
     <ul>
     {% for solicitation in solicitations %}
         <li>
-    	    <h3>{{solicitation.title}}</h3>
-    	    <p>Link: <a href="{{solicitation.link}}">{{solicitation.link|urlizetrunc:30}}</a></p>
-    	    <p>{{solicitation.detail}}</p>
+    	    <h3>
+    	        <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>{% if solicitation.has_bounty %} <span class="bounty"><a href="{% url market_view solicitation.id %}">&pound;{{solicitation.price}} bounty</a></span>{% endif %}
+    	    </h3>
+    	    <h4>Added by {{solicitation.user_created.username}} ({{solicitation.status.display_name}})</h4>
+    	    <p>{{solicitation.details}}</p>
     	</li>
 	{% endfor %}
     </ul>
 </div>
-<div class="content col right">
-    <ul>
-        <a href="{% url market_solicitation %}">Suggest a scraper</a>
-    </ul>
-    <h4>More suggestions</h4>
-    <ul>
-    {% for solicitation in recent_solicitations %}
-        <li>
-    	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
-    	</li>
-	{% endfor %}
-    </ul>
-</div>
+
 {% endblock %}

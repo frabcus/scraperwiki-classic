@@ -20,3 +20,11 @@ def show_gravatar(email, size="medium", margintop=10):
         'size': str(dimensions)
     })
     return {'gravatar': {'url': url, 'size': dimensions, 'margintop': margintop}}
+    default = domain + settings.MEDIA_URL + "/images/gravatar_default.png"
+    url = "http://www.gravatar.com/avatar.php?"
+    url += urllib.urlencode({
+        'gravatar_id': hashlib.md5(user.email).hexdigest(), 
+        #'default': default, 
+        'size': str(size_px)
+    })
+    return {'gravatar': {'url': url, 'size': size, 'size_px': size_px, 'username': user.username}}

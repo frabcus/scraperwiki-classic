@@ -14,7 +14,7 @@
 
 {% block content %}
     <div class="page_title">
-        <h1>Suggest a scraper</h1>
+        <h1>Request a scraper</h1>
         <p>
             If you know of an interesting source of data for someone to scrape, please add it here
         </p>
@@ -36,8 +36,16 @@
             	    {{ form.details.label_tag }}
             	    {{ form.details }}
         	        {% field_errors form.details %}
-    	        </li>    	        
+    	        </li>
+    	        <li class="{% if form.price.errors %}error{% endif %}">
+            	    {{ form.price.label_tag }}
+            	    {{ form.price|safe}}*
+        	        {% field_errors form.price %}
+    	        </li>
             </ul>
+            <p>
+                <small>When you pay the bounty for this scraper there is an additional charge of * {{ market_bounty_charge }}%</small>
+            </p>
     		<input type="submit" name="login" value="Submit" />
     	</form>
     </div>

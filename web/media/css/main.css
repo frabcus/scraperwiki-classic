@@ -153,4 +153,10 @@ dl.faq dt {font-size:1.3em; font-weight:bold;}
 dl.faq dd {padding-left:0; margin-left:0; padding-bottom:1.3em;}
 
 /* Gravatar image */
-.gravatar { float: left; margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}
+.gravatar.small {vertical-align:baseline;}
+.gravatar.medium { margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}
+.gravatar.large { margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}
+
+/* bounty */
+span.bounty {padding:0.2em 0.4em; background:#faca44; font-weight:bold; font-size:0.7em; color:#fff;}
+span.bounty a {color:#fff!important;}

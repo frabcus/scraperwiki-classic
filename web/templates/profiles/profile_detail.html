@@ -1,15 +1,15 @@
 {% extends "frontend/base.html" %}
 
+{% load gravatar %}
 {% block css %}{% endblock %}
 {% block title %}Profile Details: {{ profile.user.username }}{% endblock %}
 
 {% block content %}
 
     <div class="page_title">
-    
     <div style="float: left;">
 		<h1>{{ profile.user.username }}'s profile</h1>
-		{% load gravatar %} {% show_gravatar profile.user.email "large" 10 %} 
+		{% show_gravatar profile.user 'medium' %} 
 		<p>{{ profile.bio }}</p>
 	</div>
 	
