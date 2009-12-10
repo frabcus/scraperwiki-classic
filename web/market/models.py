@@ -46,8 +46,9 @@ class Solicitation(models.Model):
 
     def has_bounty(self):
         return self.price > 0
-        
+
     def total_price(self):
+        return 100
         total_price = 0
         if self.price > 0:
             bounty_charge = float(0)
@@ -97,7 +98,7 @@ class Solicitation(models.Model):
                 invoice = Invoice()
                 invoice.title = "Scraper Bounty - " + self.title
                 invoice.item_type = "solicitation"
-                invoice.price = self.total_price
+                invoice.price = self.total_price()
                 invoice.parent_id = self.pk
                 invoice.user = self.user_created
                 invoice.save()
