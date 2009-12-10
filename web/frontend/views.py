@@ -30,13 +30,13 @@ def frontpage(request, public_profile_field=None):
         following_scrapers = user.scraper_set.filter(userscraperrole__role='follow')
         # needs to be expanded to include scrapers you have edit rights on.
         contribution_scrapers = my_scrapers
-        try:
-        	profile_obj = user.get_profile()
-    	except ObjectDoesNotExist:
-        	raise Http404
-    	if public_profile_field is not None and \
-       	 not getattr(profile_obj, public_profile_field):
-        	profile_obj = None
+        #try:
+        #	profile_obj = user.get_profile()
+    	#except ObjectDoesNotExist:
+        #	raise Http404
+    	#if public_profile_field is not None and \
+       	# not getattr(profile_obj, public_profile_field):
+        #	profile_obj = None
     else:
         my_scrapers = []
         following_scrapers = []
@@ -57,7 +57,7 @@ def frontpage(request, public_profile_field=None):
     #suggested scrapers
     solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
     
-    return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'profile': profile_obj, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
+    return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
 
 def process_logout(request):
     logout(request)
