@@ -2,6 +2,7 @@
 
 {% block tab %}
 {% load comments %}
+{% load gravatar %}
 <!-- {% render_comment_form for scraper %} -->
  <!-- {% render_comment_form for scraper.scraper scraper.pk %} -->
  {% if user.is_authenticated %}
@@ -9,14 +10,23 @@
 {% get_comment_form for scraper as form %}
 <p>Add a comment or question about this scraper or the data it produces:</p>
 <form action="{% comment_form_target %}" method="POST"> 
-	<textarea name="comment" id="id_comment" rows="2" style="width: 90%;"></textarea>
+<table cellspacing="5"><tr><td valign="center" align="left">
+   {% show_gravatar user 'medium' %} 
+   </td>
+   <td width="90%" valign="center" align="left">
+	<textarea name="comment" id="id_comment" rows="2" style="width: 100%;"></textarea>
 	{{ form.content_type }} 
 	{{ form.object_pk }} 
 	{{ form.timestamp }} 
 	{{ form.security_hash }} 
 	<!-- {{ form.honeypot }} -->
     <input type="hidden" name="next" value="{% url  scraper_comments scraper.short_name %}" />
+    </td>
+    <td valign="center" align="center">
 	<input type="submit" value="Add" id="id_submit" /> 
+	   </td>
+	   </tr>
+		   </table>
 </form> 
 {% else %}
     <p>Please <a href="/login/">log in</a> to add a comment.</p>
@@ -25,7 +35,7 @@
 {% get_comment_list for scraper as comment_list %}
 
 {% if comment_list %}
-{% load gravatar %} 
+<br/>
   {% for comment in comment_list reversed %} 
   {% show_gravatar comment.user 'small' %} 
     <em><a href="{% url profiles_profile_detail comment.name %}">{{ comment.name|escape }}</a> at {{ comment.submit_date|date:"r"}}</em>

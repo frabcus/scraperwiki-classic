@@ -15,7 +15,7 @@ def show_gravatar(user, size = 'medium'):
     if size == 'small':
         size_px = 20
     elif size == 'medium':
-        size_px = 75
+        size_px = 40
     elif size == 'large':
         size_px = 125
 
