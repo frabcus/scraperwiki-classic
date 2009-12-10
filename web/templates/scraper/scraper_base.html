@@ -13,9 +13,6 @@
   	  {% endif %}
 
   	  <div>
-  		{% if user_owns_it %}
-  		  <p>You own this scraper</p>
-  		{% endif %}
   		{% if user_follows_it %}
   		  <p>You are following this scraper</p>
   		{% endif %}
@@ -25,12 +22,15 @@
     <div class="content col right">
         <div class="metadata">
           <dl>
+              <dt>Created by:</dt>
+              <dd><a href="{% url profiles_profile_detail scraper.owner.username %}">
+              {% load gravatar %} {% show_gravatar scraper.owner 'small' %}&nbsp;{{scraper.owner.username}}</a></dd>
               <dt>Source:</dt>
               <dd>{{scraper.source|default:"&nbsp;"}}</dd>
-        	  <dt>License:</dt>
+        	  <dt>Licence:</dt>
         	  <dd>{{scraper.license|default:"&nbsp;"}}</dd>
         	  <dt>Scraper created:</dt><dd>{{scraper.created_at}}</dd>
-        	  <dt>Last Run:</dt>
+        	  <dt>Last run:</dt>
         	  <dd>{{scraper.last_run|naturalday|default:"never"|title}}</dd>
         	  <dt>Records:</dt>
         	  <dd>{{ scraper.record_count }}</dd>
