@@ -28,7 +28,6 @@ USE_I18N = True
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
 
- 
 MEDIA_DIR = SCRAPERWIKI_DIR + 'media'
 MEDIA_URL = '/media/'
 MEDIA_ADMIN_DIR = SCRAPERWIKI_DIR + 'media-admin'
