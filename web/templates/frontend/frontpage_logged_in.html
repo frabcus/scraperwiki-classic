@@ -41,18 +41,7 @@
 		<li><a href="{% url profiles_edit_profile %}">Edit your profile</a></li>
 		<li><a href="{% url profiles_profile_detail user.username %}">View your profile</a></li>
 	</ul>
-	
-	    <h3>People you are following</h3>
-    	{% if profile.user.to_user.not_following_anyone %}
-    	  <p>You are not following anyone yet</p>
-        {% else %}
-    	   <ul> 
-            {% for other_user in profile.user.to_user.following %}
-              {% load gravatar %} {% show_gravatar other_user.email "medium" 0 %} 
-    	      {% include 'frontend/user_line.html' %}
-    	    {% endfor %}  
-    	  </ul>  
-        {% endif %}
+
 
     <h3>ScraperMart - latest requests</h3>
     <ul>
