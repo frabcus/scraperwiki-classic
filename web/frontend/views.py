@@ -54,7 +54,6 @@ def frontpage(request, public_profile_field=None):
     #new scrapers
     new_scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('-first_published_at')[:5]
     
-
     #suggested scrapers
     solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
     

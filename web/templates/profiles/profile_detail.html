@@ -9,7 +9,7 @@
     <div class="page_title">
     <div style="float: left;">
 		<h1>{{ profile.user.username }}'s profile</h1>
-		{% show_gravatar profile.user 'medium' %} 
+		{% show_gravatar profile.user.email 'large' 0 %} 
 		<p>{{ profile.bio }}</p>
 	</div>
 	
@@ -17,11 +17,11 @@
 		 {% ifequal profile.user.username user.username %}
 	     <a href="/profiles/edit/">Edit your profile</a>
          {% else  %}
-			{% if following %}
+			<!-- {% if following %}
 			   <a href="unfollow/" style="float: right;">Unfollow this user</a>
      	    {% else%}
 	           <a href="follow/" style="float: right;">Follow this user</a>
-     	    {% endif %}
+     	    {% endif %} -->
         {% endifequal %}
 	</div>
 	
@@ -61,7 +61,8 @@
     		{% endfor %}
     	  </ul>
     	{% endif %}
-    	<h2>People {% ifequal profile.user.username user.username %} you are {% else %} {{ profile.user.username }} is {% endifequal %} following</h2>
+    	
+    	<!-- <h2>People {% ifequal profile.user.username user.username %} you are {% else %} {{ profile.user.username }} is {% endifequal %} following</h2>
     	
     	{% if profile.user.to_user.not_following_anyone %}
     	  <p>
@@ -84,7 +85,7 @@
     	          	    {% endifequal %} 
     	    {% endfor %}
     	  </ul>  
-        {% endif %}
+        {% endif %} -->
         
             	<!-- 
             	
