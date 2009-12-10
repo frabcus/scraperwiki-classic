@@ -1,6 +1,7 @@
 {% extends "frontend/base.html" %}
 
 {% block title %}{{ tag }}{% endblock %}
+{% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/latest_scrapers_by_tag/{{ tag|title }}" />{% endblock %}
 
 {% block content %}
     <div class="page_title">
