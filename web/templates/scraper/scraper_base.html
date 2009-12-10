@@ -2,6 +2,8 @@
 {% load humanize %}
 
 {% block title %}{{ scraper.title }}{% endblock %}
+{% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/scraper_comments/{{ scraper.short_name }}" />{% endblock %}
+
 {% block content %}
     <div class="page_title">
 	    <h1>{{ scraper.title }}</h1>
