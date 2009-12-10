@@ -9,7 +9,8 @@
     <div class="page_title">
     <div style="float: left;">
 		<h1>{{ profile.user.username }}'s profile</h1>
-		{% show_gravatar profile.user.email 'large' 0 %} 
+		<br/>
+		{% show_gravatar profile.user 'large' %} 
 		<p>{{ profile.bio }}</p>
 	</div>
 	
@@ -77,7 +78,7 @@
         {% else %}
           <ul> 
             {% for other_user in profile.user.to_user.following %}
-              {% show_gravatar profile.user.email 30 0 %} 
+              {% show_gravatar profile.user 'medium' %} 
               		 {% ifequal profile.user.username user.username %}
              					{% include 'frontend/user_line_with_unfollow.html' %} 
               		          {% else  %}
@@ -105,7 +106,7 @@
         {% else %}
           <ul> 
             {% for other_user in profile.user.from_user.followed_by %}
-              {% show_gravatar profile.user.email 30 0 %} 
+              {% show_gravatar profile.user 'medium' %} 
     	      {% include 'frontend/user_line.html' %}
     	    {% endfor %}
     	  </ul>  

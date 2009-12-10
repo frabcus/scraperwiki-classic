@@ -50,7 +50,7 @@
     	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
     	    by
           	{% load gravatar %}
-            {% show_gravatar solicitation.user_created.email "small" 0 %} 	
+            {% show_gravatar solicitation.user_created 'small' %} 	
             <a href='{% url profiles_profile_detail solicitation.user_created %}'>
                 {{ solicitation.user_created.username }}
             </a>

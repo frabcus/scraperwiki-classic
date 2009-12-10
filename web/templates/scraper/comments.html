@@ -23,14 +23,15 @@
 {% endif %}
 
 {% get_comment_list for scraper as comment_list %}
+
 {% if comment_list %}
-  {% load gravatar %}
-  {% for comment in comment_list reversed %}
-  {% show_gravatar comment.email "medium" 0 %} 
+{% load gravatar %} 
+  {% for comment in comment_list reversed %} 
+  {% show_gravatar comment.user 'small' %} 
     <em><a href="{% url profiles_profile_detail comment.name %}">{{ comment.name|escape }}</a> at {{ comment.submit_date|date:"r"}}</em>
     <p>{{ comment.comment|escape|urlizetrunc:"100"|linebreaks }}</p>
-    <hr>
-  {% endfor %}
+    <hr> 
+ {% endfor %} 
 {% endif %}
 
 
