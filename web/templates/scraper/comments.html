@@ -29,7 +29,7 @@
 		   </table>
 </form> 
 {% else %}
-    <p>Please <a href="/login/">log in</a> to add a comment.</p>
+    <p>Please <a href="/login/?next={{ request.get_full_path }}">log in</a> to add a comment.</p>
 {% endif %}
 
 {% get_comment_list for scraper as comment_list %}
