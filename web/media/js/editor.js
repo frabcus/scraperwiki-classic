@@ -228,7 +228,10 @@ $(document).ready(function() {
     }
     
     function runScraper(){
-
+        
+        //change the title
+        document.title = '*' + document.title
+        
         //reset the tabs
         $('.editor_output div.tabs li').removeClass('new');
         $('#output_data table').find('tr').remove()
@@ -290,6 +293,9 @@ $(document).ready(function() {
                     //hide annimation
                     $('#running_annimation').hide();
                     
+                    //change title
+                    document.title = document.title.replace('*', '')
+                    
                 },
                 error: function(code) {
                     alert('Sorry, there seems to be something wrong with running code at the moment, try saving your scraper and trying again later.')
@@ -300,6 +306,9 @@ $(document).ready(function() {
                     
                     //hide annimation
                     $('#running_annimation').hide();
+                    
+                    //change title
+                    document.title = document.title.replace('*', '')
                 }
             });
             return run_request
@@ -373,6 +382,9 @@ $(document).ready(function() {
                 
                 //hide annimation
                 $('#running_annimation').hide();
+                
+                //change title
+                document.title = document.title.replace('*', '')
             });
             
         }
