@@ -13,12 +13,13 @@ import settings
 from django.contrib import admin
 admin.autodiscover()
 
-from frontend.feeds import LatestScrapers, LatestScrapersBySearchTerm, LatestScrapersByTag
+from frontend.feeds import LatestScrapers, LatestScrapersBySearchTerm, LatestScrapersByTag, CommentsForScraper
 
 feeds = {
-    'latest_scrapers': LatestScrapers,
+    'all_scrapers': LatestScrapers,
     'latest_scrapers_by_search_term': LatestScrapersBySearchTerm,
     'latest_scrapers_by_tag': LatestScrapersByTag,
+    'scraper_comments': CommentsForScraper,
 }
 
 # sort out clash between from django.db import models and codewiki.models

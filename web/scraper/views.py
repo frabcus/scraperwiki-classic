@@ -219,7 +219,7 @@ def tag_data(request, tag):
         
 def search(request, q=""):
     if (q != ""): 
-        form = SearchForm() # An unbound form
+        form = SearchForm(initial={'q': q})
         q = q.strip()
         scrapers = models.Scraper.objects.filter(title__icontains=q, published=True) 
         # and by tag
@@ -234,19 +234,19 @@ def search(request, q=""):
         scrapers = scrapers.order_by('-created_at')
         return render_to_response('scraper/search_results.html',
           {'scrapers': scrapers,  'form': form, 'query': q})
-    elif (request.method == 'POST'): # If the form has been submitted, or we have a search term in the URL
+    elif (request.POST): # If the form has been submitted, or we have a search term in the URL
         form = SearchForm(request.POST) 
         if form.is_valid(): 
           q = form.cleaned_data['q']
           # Process the data in form.cleaned_data
           return HttpResponseRedirect('/scrapers/search/%s/' % q) # Redirect after POST
         else:
-          form = SearchForm() # An unbound form
+          form = SearchForm() 
           return render_to_response('scraper/search.html', {
             'form': form,
           })
     else:
-        form = SearchForm() # An unbound form
+        form = SearchForm()
         return render_to_response('scraper/search.html', {
             'form': form,
         })

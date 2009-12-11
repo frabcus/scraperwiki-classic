@@ -15,11 +15,15 @@
 {% block content %}
     <div class="page_title">
         <h1>Contact us</h1>
-        <p>Ask us a question or make a suggestion</p>
+        <p>Ask us a question or make a suggestion</p>  
     </div>
     <div class="content left col">
         <form action="/contact/" method="POST">
             <ul class="form">
+				{% if request.user.is_authenticated %}
+				<input id="id_name" name="name" type="hidden" class="required" value="{{ request.user.username }}" />
+				<input id="id_email" name="email" type="hidden" value="{{ request.user.email }}" /> 
+                {% else %}
                 <li>
                     {{ form.name.label_tag }}
                     {{ form.name }}
@@ -30,6 +34,7 @@
                     {{ form.email }}
         	        {% field_errors form.email %}                    
                 </li>
+                {% endif %}               
                 <li>
                     {{ form.subject_dropdown.label_tag }}
                     {{ form.subject_dropdown }}
@@ -48,6 +53,7 @@
             </ul>
             <input type="submit" value="Send feedback" />
         </form>
+        <br />
     </div>
     <div class="content right col">
         &nbsp;
