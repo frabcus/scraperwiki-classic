@@ -173,9 +173,11 @@ def edit(request, short_name=None):
       # (read http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
       savedForm = form.save(commit=False)
       savedForm.tags = request.POST.get('tags')
+      
 
       # Add some more fields to the form
       savedForm.code = form.cleaned_data['code']
+      savedForm.description = form.cleaned_data['description']      
       # savedForm.short_name = short_name
       # if hasattr(scraper, 'pk'):
       #   savedForm.pk = scraper.pk

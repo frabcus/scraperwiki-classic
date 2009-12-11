@@ -505,6 +505,7 @@ $(document).ready(function() {
               data: ({
                 title : $('#id_title').val(),
                 tags : $('#id_tags').val(),
+                description : $('#id_description').val(),                
                 code : codeeditor.getCode(),
                 action : form_action
                 }),

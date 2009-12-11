@@ -10,6 +10,7 @@ class editorForm(forms.ModelForm):
   
   title = forms.CharField(widget=forms.TextInput(attrs={'title' : 'Untitled Scraper'}))
   commit_message = forms.CharField(required=False, widget=forms.TextInput(attrs={'title' : ''}))
+  description = forms.CharField(required=False, widget=forms.TextInput(attrs={'title' : ''}))  
   tags = forms.CharField(required=False)
   code = forms.CharField(widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'}))
   
