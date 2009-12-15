@@ -6,6 +6,7 @@ def dev():
     "On the scrpaerwiki server, accessible from http://dev.scraperwiki.com"
     config.fab_hosts = ['212.84.75.28']
     config.path = '/var/www/dev.scraperwiki.com'
+    config.branch = 'default'
     config.web_path = 'file:///home/scraperwiki/scraperwiki'
     config.activate = config.path + '/bin/activate'
     config.fab_user = 'scraperdeploy'
@@ -16,6 +17,7 @@ def alpha():
     "On the scrpaerwiki server, accessible from http://alpha.scraperwiki.com"
     config.fab_hosts = ['212.84.75.28']
     config.path = '/var/www/alpha.scraperwiki.com'
+    config.branch = 'stable'
     config.web_path = 'file:///home/scraperwiki/scraperwiki'
     config.activate = config.path + '/bin/activate'
     config.fab_user = 'scraperdeploy'
@@ -58,11 +60,11 @@ def deploy():
     print "Please Enter your deploy message: \r"
     message = raw_input()
 
-    require('path')
+    require('path','branch')
     import time
     config.release = time.strftime('%Y%m%d%H%M%S')
     
-    run('cd $(path); hg pull; hg update -C')
+    run('cd $(path); hg pull; hg update -C $(branch)')
     
     buildout()
     migrate()

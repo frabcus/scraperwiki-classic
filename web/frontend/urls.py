@@ -22,7 +22,6 @@ urlpatterns = patterns('',
     url(r'^terms_and_conditions/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/terms_and_conditions.html'}, name='terms'),   
     url(r'^privacy/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/privacy.html'}, name='privacy'),       
     url(r'^about/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/about.html'}, name='about'),       
-    url(r'^api/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/api_comming_soon.html'}, name='api'),       
     url(r'^example_data/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/example_data.html'}, name='api'),       
 
 

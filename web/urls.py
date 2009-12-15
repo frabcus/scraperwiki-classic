@@ -59,4 +59,8 @@ urlpatterns = patterns('',
     
     # RSS feeds  
     (r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}),
+
+    # API
+    (r'^api/', include('api.urls', namespace='foo', app_name='api')),
+
 )
