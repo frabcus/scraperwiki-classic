@@ -1,0 +1,75 @@
+{% extends "frontend/base.html" %}
+{% block content %}
+  <h2>API 1.0 documentation</h2>
+  <h3>API key</h3>
+  <p>To use the API, you'll need an active scraperwiki account, and an <a href="{% url api:keys %}">API key</a></p>
+  <h3 id="formats">Format</h3>
+  <p>Supported formats:</p>
+  <ul>
+    <li>JSON (default)</li>
+    <li>YAML</li>
+    <li>XML</li>untitled folder/
+
+    <li>CSV</li>
+    <li>PHP serialized</li>
+  </ul>
+
+  <h3>Get Info</h3>
+  <p>Returns information about a scraper (last run, tags, etc)</p>
+  <h4>URL</h4>
+    <p>/api/1.0/scraper/<strong>getinfo</strong>/&lt;short_name&gt;?&lt;arguments&gt;</p>
+  <h4>Arguments</h4>
+  <dl>
+    <dt><code>format</code></dt>
+    <dd>One of the valid <a href="#formats">formats</a> above</dd>
+  </dl>
+  <h4>Response (json)</h4>
+  <code>
+    <pre>
+      [
+          {
+              "license": "", 
+              "short_name": "test", 
+              "language": "Python", 
+              "tags": [
+                  "a", 
+                  "b", 
+                  "c"
+              ], 
+              "created": "2009-12-09 16:09:42", 
+              "last_run": null, 
+              "records": 2
+          }
+      ]
+      </pre>
+  
+  </code>
+  <h3>Get Data</h3>
+  <p>Returns <code>n</code> rows from the datastore</p>
+  <h4>URL</h4>
+    <p>/api/1.0/scraper/<strong>getdata</strong>/&lt;short_name&gt;?&lt;arguments&gt;</p>
+  <h4>Arguments</h4>
+  <dl>
+    <dt><code>format</code></dt>
+    <dd>One of the valid <a href="#formats">formats</a> above</dd>
+    <dt><code>limit</code></dt>
+    <dd>Limit the number of results returned.  Like SQL LIMIT</dd>
+    <dt><code>offset</code></dt>
+    <dd>The offset of the first row.  Like SQL OFFSET</dd>
+  </dl>
+  <h4>Response (json)</h4>
+  <code>
+    <pre>
+    [
+      {
+          "date_scraped": "2009-12-09 16:59:22", 
+          "message": "hello"
+      }, 
+      {
+          "date_scraped": "2009-12-09 16:59:22", 
+          "message": "world"
+      }
+  ]</pre>
+  
+  </code>
+{% endblock %}
