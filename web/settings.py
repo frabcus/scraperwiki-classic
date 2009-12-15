@@ -92,6 +92,8 @@ INSTALLED_APPS = (
   	'contact_form',
   	'payment',  	
   	'market',
+  	'piston',
+  	'api',
     #'debug_toolbar',
   	'django_notify',
   	'tagging',
