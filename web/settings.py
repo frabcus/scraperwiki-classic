@@ -92,7 +92,7 @@ INSTALLED_APPS = (
   	'contact_form',
   	'payment',  	
   	'market',
-  	'piston',
+  	'piston',      # needs 'django-piston' and 'phpserialize'
   	'api',
     #'debug_toolbar',
   	'django_notify',

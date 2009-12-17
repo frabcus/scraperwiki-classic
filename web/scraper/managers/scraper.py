@@ -86,20 +86,16 @@ class ScraperManager(models.Manager):
           guids = ",".join("'%s'" % guid for guid in scraper_id)
       else:
           guids = "'%s'" % scraper_id
-#                 kv.key AS key, kv.value AS value, kv32.key AS key32, kv32.value AS value32
 
       # we have to join to both key-value tables.  not sure this is totally efficient 
       # as the items elements get retrieved numerous times.  group by won't work unless all the keys could be concattenated
       cursor = self.datastore_connection.cursor()
       cursor.execute("""
           SELECT items.`item_id` AS item_id, `date_scraped`, 
-                 kv32.`key` AS `key32`, kv32.`value` AS `value32`,
                  kv.`key` AS `key`, kv.`value` AS `value`
           FROM (SELECT * FROM items WHERE items.scraper_id IN (%(guids)s) LIMIT %(limit)s) as items
           LEFT JOIN kv
              ON items.item_id=kv.item_id
-          LEFT JOIN kv32
-             ON items.item_id=kv32.item_id
           
           ORDER BY items.date_scraped, items.item_id
         """ % locals())
@@ -113,12 +109,7 @@ class ScraperManager(models.Manager):
               currentitem = { "date_scraped":row[1]}
               allitems[item_id] = currentitem
           
-          key32, value32 = row[2], row[3]
-          key, value = row[4], row[5]
-          
-          if key32:    
-              currentitem[key32] = value32
-              allkeys.add(key32)
+          key, value = row[2], row[3]
           if key:    
               currentitem[key] = value
               allkeys.add(key)
@@ -134,8 +125,6 @@ class ScraperManager(models.Manager):
       }
       
       return data
-
-
 
 
 

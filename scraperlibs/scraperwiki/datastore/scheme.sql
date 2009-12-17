@@ -14,15 +14,6 @@ CREATE TABLE IF NOT EXISTS `items` (
 -- alter table `items` add column `date_scraped` datetime NULL;
 
 
-DROP TABLE IF EXISTS `kv32`;
-CREATE TABLE IF NOT EXISTS `kv32` (
-  `item_id`     bigint(20)  NOT NULL,
-  `key`         varchar(32) NOT NULL,
-  `value`       varchar(32) NOT NULL,
-  KEY `item_id` (`item_id`)
-) ENGINE=MyISAM;
-
-
 DROP TABLE IF EXISTS `kv`;
 CREATE TABLE IF NOT EXISTS `kv` (
   `item_id` bigint(20) NOT NULL,

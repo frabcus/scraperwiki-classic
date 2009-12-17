@@ -12,11 +12,14 @@ import cgi
 
 indexed_rows = ['date', 'latlng']  # global
 
-# the records are in table items, which are joined on item_id to keyvalue pairs of table kv and table kv32
+# the records are in table items, which are joined on item_id to keyvalue pairs of table kv
 # the current retrieval of from these tables is in web/scraper/managers/scraper.py
 # perhaps the functions there should call this common module to keep it in one place
 # -- or we could make a 3rd interface through dedicated webserver call that could be located on a different machine
 
+# bug to fix: doesn't work work correctly for unique_keys=[] by forcing a save.  
+# the uniquehash theory may be flawed because there is no requirement that the same set of unique_keys will always be used!
+# may need a more basic filterdata value as used in __load_item
 def save(unique_keys, data=None, **kwargs):
   """
   Save function
@@ -91,7 +94,6 @@ def __save_row(unique_keys, data, kwargs):
     if c.execute("SELECT item_id FROM items WHERE unique_hash=%s", (unique_hash,)):  
       item_id = c.fetchone()[0]
       c.execute("DELETE FROM kv WHERE item_id=%s", (item_id,))
-      c.execute("DELETE FROM kv32 WHERE item_id=%s", (item_id,))
       c.execute("DELETE FROM items WHERE unique_hash=%s", (unique_hash,))
   
     c.execute("UPDATE sequences SET id=LAST_INSERT_ID(id+1);")
@@ -107,13 +109,9 @@ def __save_row(unique_keys, data, kwargs):
     c.execute("INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`, `date_scraped`) \
       VALUES (%s, %s, %s, %s, %s, %s);", (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'], str_now))
   
-    # save into table with long records if it doesn't fit into the fixed length records table
+    # the v is typed and could be, for example, padded with zeros if it is of int type
     for k,v in data.items():  
-      sk, sv = str(k), str(v)
-      if len(sv) < 32 and len(sk) < 32:
-          c.execute("INSERT INTO kv32 (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
-      else:
-          c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
+      c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
     
       # clean for printing to the console
 
@@ -131,7 +129,7 @@ def __save_row(unique_keys, data, kwargs):
 
 def loadsingle(unique_keys, data):
   """
-  Loads a single row matching unique keys with same data
+  UNDOCUMENTED: Loads a single row matching unique keys with same data
   """
   DUMMY_RUN = True
   if os.environ.has_key('SCRAPER_GUID'):
@@ -157,7 +155,7 @@ def loadsingle(unique_keys, data):
     
 def loadallofcurrentscraper(filterdata=None):
     """
-    Loads all rows produced by scraper of current GUID, filters by matching data
+    UNDOCUMENTED: Loads all rows produced by scraper of current GUID, filters by matching data
     """
     conn = connection.Connection()
     c = conn.connect()
@@ -173,10 +171,32 @@ def loadallofcurrentscraper(filterdata=None):
             res.append(rdata)
     return res
     
+
+def deleteallofcurrentscraper(filterdata=None):
+    """
+    UNDOCUMENTED: Deletes all rows produced by scraper of current GUID, filters by matching data
+    """
+    conn = connection.Connection()
+    c = conn.connect()
+    
+    scraper_id = os.environ['SCRAPER_GUID']
+    c.execute("SELECT item_id FROM items WHERE scraper_id=%s ORDER BY date, item_id", (scraper_id,))
+    
+    res = [ ]
+    item_idlist = c.fetchall()
+    for item_idl in item_idlist:
+        item_id = item_idl[0]
+        rdata = __load_item(c, item_id, filterdata)
+        if rdata:
+            c.execute("DELETE FROM kv WHERE item_id=%s", (item_id,))
+            c.execute("DELETE FROM items WHERE item_id=%s", (item_id,))
+            res.append(rdata)
+    return res
+
     
 def loadallwithmatchingdata(filterdata):
     """
-    Loads everything out of the database that has matching filterdata.  
+    UNDOCUMENTED: Loads everything out of the database that has matching filterdata.  
     would like to limit by scraper, but no way to uncover the SCRAPER_GUID from the useable scraper short_name
     """
     conn = connection.Connection()
@@ -189,17 +209,14 @@ def loadallwithmatchingdata(filterdata):
     
     itemspartmatch = set()
     
-    if keyvs[-1][2]:
-        c.execute("SELECT item_id FROM kv WHERE `key`=%s AND `value`=%s GROUP BY item_id", (keyvs[-1][1], keyvs[-1][2]))
+    longestkey, longestvalue = keyvs[-1][1], keyvs[-1][2]
+    if longestvalue:
+        c.execute("SELECT item_id FROM kv WHERE `key`=%s AND `value`=%s GROUP BY item_id", (longestkey, longestvalue))
     else:
-        c.execute("SELECT item_id FROM kv WHERE `key`=%s GROUP BY item_id", (keyvs[-1][1],))
+        c.execute("SELECT item_id FROM kv WHERE `key`=%s GROUP BY item_id", (longestkey,))
     for item_idl in c.fetchall():
         itemspartmatch.add(item_idl[0])
         
-    if keyvs[-1][2]:
-        c.execute("SELECT item_id FROM kv32 WHERE `key`=%s AND `value`=%s GROUP BY item_id", (keyvs[-1][1], keyvs[-1][2]))
-    else:
-        c.execute("SELECT item_id FROM kv32 WHERE `key`=%s GROUP BY item_id", (keyvs[-1][1],))
     for item_idl in c.fetchall():
         itemspartmatch.add(item_idl[0])
     
@@ -233,17 +250,10 @@ def __load_item(c, item_id, filterdata):
     # discard any rows that don't match the filterdata values
     for key, value in c.fetchall():
         fvalue = filterdata and filterdata.get(key)
-        if fvalue and str(fvalue) != value:
+        if fvalue != None and str(fvalue) != value:
             return None
         rdata[key] = value
-    
-    c.execute("SELECT `key`, `value` FROM kv32 WHERE item_id=%s", (item_id,))
-    for key, value in c.fetchall():
-        fvalue = filterdata and filterdata.get(key)
-        if fvalue and str(fvalue) != value:
-            return None
-        rdata[key] = value
-  
+      
     # bail out if there is a key missing
     if filterdata:
         for key in filterdata:
