@@ -80,15 +80,14 @@ class ScraperManager(models.Manager):
     def dont_own_any(self):
         return self.owned_count() == 0
 
-    def data_summary(self, scraper_id=0, limit=1000):
-      
+
+    def __data_summary_map(self, scraper_id=0, limit=1000):
+      '''map from scraper_id to dict representing row record for a particular scraper'''
       if isinstance(scraper_id, list):
           guids = ",".join("'%s'" % guid for guid in scraper_id)
       else:
           guids = "'%s'" % scraper_id
 
-      # we have to join to both key-value tables.  not sure this is totally efficient 
-      # as the items elements get retrieved numerous times.  group by won't work unless all the keys could be concattenated
       cursor = self.datastore_connection.cursor()
       cursor.execute("""
           SELECT items.`item_id` AS item_id, `date_scraped`, 
@@ -96,28 +95,39 @@ class ScraperManager(models.Manager):
           FROM (SELECT * FROM items WHERE items.scraper_id IN (%(guids)s) LIMIT %(limit)s) as items
           LEFT JOIN kv
              ON items.item_id=kv.item_id
-          
-          ORDER BY items.date_scraped, items.item_id
+          ORDER BY items.item_id, items.date_scraped
         """ % locals())
       
       allitems = { }
       currentitem = None
-      allkeys = set(["date_scraped"])
       for row in cursor.fetchall():
           item_id = row[0]
+          
+          # item_id changes; start new object
           if item_id not in allitems:
-              currentitem = { "date_scraped":row[1]}
+              currentitem = { "date_scraped":row[1] }
               allitems[item_id] = currentitem
           
-          key, value = row[2], row[3]
+          # add the value in if the key exists
+          key = row[2]
           if key:    
-              currentitem[key] = value
-              allkeys.add(key)
+              currentitem[key] = row[3]
       
+      return allitems
+           
+              
+    def data_summary(self, scraper_id=0, limit=1000):
+      '''single table of all rows for a scraper'''
+      allitems = self.__data_summary_map(scraper_id, limit)
+      
+      allkeys = set()
+      for item in allitems.values():
+        allkeys.update(item.keys())
+        
       headings = sorted(list(allkeys))
       rows = [ ]
-      for litem in allitems.values():
-          rows.append([ unicode(litem.get(key))  for key in headings ])
+      for item in allitems.values():
+        rows.append([ unicode(item.get(key))  for key in headings ])
       
       data = {
       'headings' : headings, 
@@ -126,7 +136,33 @@ class ScraperManager(models.Manager):
       
       return data
 
+    # not yet used
+    def data_summary_tables(self, scraper_id=0, limit=1000):
+      '''multiple table of rows for a scraper, indexed by the __table key'''
+      allitems = self.__data_summary_map(scraper_id, limit)
+      
+      alltables = set()
+      for item in allitems.values():
+        alltables.add(item.get("__table"))
+        
+      data = { }
+      
+      # filter for each table in order; not efficient, but simple
+      for table in alltables:
+        allkeys = set()
+        for item in allitems.values():
+          if item.get("__table") == table:
+            allkeys.update(item.keys())
+        
+        headings = sorted(list(allkeys))
+        rows = [ ]
+        for item in allitems.values():
+          if item.get("__table") == table:
+            rows.append([ unicode(item.get(key))  for key in headings ])
 
+        data[table] = { 'headings' : headings, 'rows' : rows }
+      return data
+          
 
     def item_count(self, guid):
         sql = "SELECT COUNT(*) FROM items WHERE scraper_id='%s'" % guid
@@ -134,10 +170,16 @@ class ScraperManager(models.Manager):
         cursor.execute(sql)
         return cursor.fetchone()[0]
 
+    # Is the idea to use tags to aggregate data from different scrapers?  assumes too much for their consistency.  
+    # This explains the idea of allowing multiple guids.  
+    # I think this is being very optimistic.  It really will require collector-scrapers to make the fields consistent, 
+    # because the fields from one dataset should be according to the terminology of that dataset source, 
+    # because this is not going to continually change with the fashion.  --JT
     def item_count_for_tag(self, guids):
         guids = ",".join("'%s'" % guid for guid in guids)
         sql = "SELECT COUNT(*) FROM items WHERE scraper_id IN (%(guids)s)" % locals()
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
         return cursor.fetchone()[0]
+        
         

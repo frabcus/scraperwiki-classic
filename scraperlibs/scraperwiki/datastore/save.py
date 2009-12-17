@@ -10,7 +10,6 @@ except:
 
 import cgi
 
-indexed_rows = ['date', 'latlng']  # global
 
 # the records are in table items, which are joined on item_id to keyvalue pairs of table kv
 # the current retrieval of from these tables is in web/scraper/managers/scraper.py
@@ -20,13 +19,16 @@ indexed_rows = ['date', 'latlng']  # global
 # bug to fix: doesn't work work correctly for unique_keys=[] by forcing a save.  
 # the uniquehash theory may be flawed because there is no requirement that the same set of unique_keys will always be used!
 # may need a more basic filterdata value as used in __load_item
-def save(unique_keys, data=None, **kwargs):
+# we should get rid of kwargs = date=None, latlng=[None, None] as it is not useful
+def save(unique_keys, data, **kwargs):
   """
   Save function
   """
   
-  if not data:
-    data = {}
+  # convention: always add when unique_keys are empty
+  if not unique_keys:
+    unique_keys = data.keys()
+    
   if isinstance(data,list):
     if kwargs:
       raise TypeError("""
@@ -35,10 +37,12 @@ def save(unique_keys, data=None, **kwargs):
         """)
     ids = []
     for row in data:
-      ids.append(__save_row(unique_keys,row))
+      ids.append(__save_row(unique_keys, row))
     return ids
   else:
-    return __save_row(unique_keys, data, kwargs)
+    # Add all the kwargs in to data for now
+    data.update(kwargs)   # merges two dicts for now
+    return __save_row(unique_keys, data)
 
 
 
@@ -60,7 +64,7 @@ def __create_unique(unique_keys, data):
   return hashlib.md5("%s" % ("≈≈≈".join(unique_values))).hexdigest()
 
 
-def __save_row(unique_keys, data, kwargs):
+def __save_row(unique_keys, data):
   """
   Takes a single row and saves it.
   """
@@ -69,28 +73,26 @@ def __save_row(unique_keys, data, kwargs):
     scraper_id = os.environ['SCRAPER_GUID']
     DUMMY_RUN = False
   
-  # Add all the kwargs in to data
-  data.update(kwargs)   # merges two dicts
-
   # Create a unique hash
   unique_hash = __create_unique(unique_keys, data)
   
-  for k in indexed_rows:
-    if k not in data.keys():
-      data[k] = None
-  item = {'unique_hash' : unique_hash}
-  for k,v in data.items():
-    if k in indexed_rows:
-      item[k] = v
-    if v is None:
-      del data[k]
+  item = { 'unique_hash' : unique_hash }
   
+  # copy over the primary items from the data or set their defaults
+  for k in ['date', 'latlng']:  
+    if k in data:
+      item[k] = str(data[k])
+      del data[k]
+    else:
+      item[k] = None
+      
   
   new_item_id = None    
   if not DUMMY_RUN:
     conn = connection.Connection()
     c = conn.connect()
     
+    # this won't work if the unique_keys list ever differs for the record
     if c.execute("SELECT item_id FROM items WHERE unique_hash=%s", (unique_hash,)):  
       item_id = c.fetchone()[0]
       c.execute("DELETE FROM kv WHERE item_id=%s", (item_id,))
@@ -107,11 +109,11 @@ def __save_row(unique_keys, data, kwargs):
     str_now = now.strftime("%Y-%m-%d %H:%M:%S")
     
     c.execute("INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`, `date_scraped`) \
-      VALUES (%s, %s, %s, %s, %s, %s);", (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'], str_now))
+               VALUES (%s, %s, %s, %s, %s, %s);", (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'], str_now))
   
     # the v is typed and could be, for example, padded with zeros if it is of int type
     for k,v in data.items():  
-      c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
+      c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k, str(v)))
     
       # clean for printing to the console
 

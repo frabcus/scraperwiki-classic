@@ -12,6 +12,24 @@ except:
 
 import cgi
 import os
+import traceback
+import datetime
+
+# this will be useful for profiling the code, 
+# it should return an output in json that you can click on to take you to the correct line
+# see formatting in scrape 
+def log(message=""):
+    '''send message to console and the firebox logfile with a piece of the stack trace'''
+    stack = traceback.extract_stack()
+    tail = len(stack) >= 3 and ", %s() line %d" % (stack[-3][2], stack[-3][1]) or ""  # go 2 levels up if poss
+    now = datetime.datetime.now()
+    str_now = now.strftime("%Y-%m-%d %H:%M:%S")
+    logmessage = "log( %s )\t\t %s() line %d%s : %s" % (str(message), stack[-2][2], stack[-2][1], tail, str_now)
+    print logmessage
+    
+
+# these two functions scrape and parse are pretty much redundant, because everything worthwhile 
+# is going to get done using mechanize
 
 # global object handles cookies which work within the same session for now
 # this will be formalized and made explicit when we make the urllib wrapping cache system
