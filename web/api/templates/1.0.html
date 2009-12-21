@@ -1,75 +1,152 @@
 {% extends "frontend/base.html" %}
+{% block title %}API{% endblock %}
 {% block content %}
-  <h2>API 1.0 documentation</h2>
-  <h3>API key</h3>
-  <p>To use the API, you'll need an active scraperwiki account, and an <a href="{% url api:keys %}">API key</a></p>
-  <h3 id="formats">Format</h3>
-  <p>Supported formats:</p>
-  <ul>
-    <li>JSON (default)</li>
-    <li>YAML</li>
-    <li>XML</li>untitled folder/
 
-    <li>CSV</li>
-    <li>PHP serialized</li>
-  </ul>
+<div class="page_title">
+    <h1>ScraperWiki API</h1>
+    <p>
+        Documentation for the ScraperWIki API (or how to use your computer to talk to our computer)
+    </p>
+</div>
+<div class="content col left">
+    <div class="section">
+        <h2>Overview</h2>
+        <p>
+            The ScraperWiki API lets you retrieve data from the ScraperWiki Datastore to use in your own applications.
+        </p>
+        <p>
+            {% if user.is_authenticated %}
+                To get started you need to <a href="{% url api:keys %}">request an API key</a>.
+            {% else %}
+                To get started you need to <a href="{% url login %}?next={% url api:index %}">create an account</a> and then <a href="{% url api:keys %}">request an API key</a>.        
+            {% endif %}
+        </p>
+        <p>
+            Each API function has it's own URI. You pass an API key, the format you would like the data returned in, other function specific arguments, via the query string to tell the API exactly what you are requesting:
+            <code class="api_call">
+     http://www.scraperwiki.com/api/1.0/scraper/getdata/<em>scraper_short_name</em>?key=<em>[your api key]</em>&amp;format<em>=[json | yaml | xml | csv | php]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
+            </code>
+        </p>
+    </div>
+    <div class="section">
+        <h2>Formats</h2>
+        <p>The API can return data in any of the following formats:</p>
+        <table class="api_detail">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Argument</th>
+                    <th>Description</th>                
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><a href="http://php.net/manual/en/function.serialize.php">Serialised PHP objects</a></td>
+                    <td>php</td>
+                    <td>
+                        Serialized PHP, that can be turned back into php objects using PHP's <a href="http://php.net/manual/en/function.unserialize.php">unserialize()</a> function, or using <a href="http://hurring.com/scott/code/python/serialize/">PHPUnserialize</a> in Python
+                    </td>                        
+                </tr>
+                <tr>
+                    <td><a href="http://www.yaml.org/">YAML</a></td>
+                    <td>yaml</td>
+                    <td>YAML is a human friendly data serialization
+                      standard for all programming languages with <a href="http://www.yaml.org/">lots of code libraries</a> available</td>
+                </tr>
+                <tr>
+                    <td><a href="http://www.w3.org/XML/">XML</a></td>
+                    <td>xml</td>
+                    <td><a href="http://en.wikipedia.org/w/index.php?title=XML#Example">Extensible Markup Language</a></td>                        
+                </tr>
+                <tr>
+                    <td><a href="http://en.wikipedia.org/wiki/Comma-separated_values">Comma separated values (CSV)</a></td>
+                    <td>csv</td>
+                    <td>Comma, separated, values</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>Status and error codes</h2>
+        <p>
+            API calls return the following HTTP status codes, you should check for these to see if your request was OK:
+        </p>
+        <table class="api_detail">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Description</th>                
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>200</strong> OK</td>
+                    <td>Everything went well</td>
+                </tr>    
+                <tr class="not_implemented" title="Not implemented yet">
+                    <td><strong>201</strong> Created</td>
+                    <td>Object was created</td>
+                </tr>    
+                <tr>    
+                    <td><strong>204</strong> (Empty body, as per RFC2616)</td>
+                    <td>Object was deleted</td>
+                </tr> 
+                <tr>
+                    <td><strong>400</strong> Bad Request</td>
+                    <td>Request was malformed / not understood / data not found</td>
+                </tr>    
+                <tr>    
+                    <td><strong>401</strong> Forbidden</td>
+                    <td>Permission denied / invalid API key</td>
+                </tr>
+                <tr class="not_implemented" title="Not implemented yet">
+                    <td><strong>409</strong> Conflict/Duplicate</td>
+                    <td>Object already exists</td>
+                </tr>    
+                <tr>
+                    <td><strong>410</strong> Gone</td>
+                    <td>Object does not exist</td>
+                </tr>
+                <tr>
+                    <td><strong>501</strong> Not Implemented</td>
+                    <td>Action not available</td>
+                </tr>
+                <tr>
+                    <td><strong>503</strong> Throttled</td>
+                    <td>Request was throttled</td>
+                </tr>        
+            </tbody>
+        </table>
+    </div>
+    <div class="section">
+        <h2>Code libraries</h2>
+        <p>There are currently no libraries available, please <a href="{% url contact_form %}">let us know</a> if you write one.</p>
+    </div>
+</div>
 
-  <h3>Get Info</h3>
-  <p>Returns information about a scraper (last run, tags, etc)</p>
-  <h4>URL</h4>
-    <p>/api/1.0/scraper/<strong>getinfo</strong>/&lt;short_name&gt;?&lt;arguments&gt;</p>
-  <h4>Arguments</h4>
-  <dl>
-    <dt><code>format</code></dt>
-    <dd>One of the valid <a href="#formats">formats</a> above</dd>
-  </dl>
-  <h4>Response (json)</h4>
-  <code>
-    <pre>
-      [
-          {
-              "license": "", 
-              "short_name": "test", 
-              "language": "Python", 
-              "tags": [
-                  "a", 
-                  "b", 
-                  "c"
-              ], 
-              "created": "2009-12-09 16:09:42", 
-              "last_run": null, 
-              "records": 2
-          }
-      ]
-      </pre>
-  
-  </code>
-  <h3>Get Data</h3>
-  <p>Returns <code>n</code> rows from the datastore</p>
-  <h4>URL</h4>
-    <p>/api/1.0/scraper/<strong>getdata</strong>/&lt;short_name&gt;?&lt;arguments&gt;</p>
-  <h4>Arguments</h4>
-  <dl>
-    <dt><code>format</code></dt>
-    <dd>One of the valid <a href="#formats">formats</a> above</dd>
-    <dt><code>limit</code></dt>
-    <dd>Limit the number of results returned.  Like SQL LIMIT</dd>
-    <dt><code>offset</code></dt>
-    <dd>The offset of the first row.  Like SQL OFFSET</dd>
-  </dl>
-  <h4>Response (json)</h4>
-  <code>
-    <pre>
-    [
-      {
-          "date_scraped": "2009-12-09 16:59:22", 
-          "message": "hello"
-      }, 
-      {
-          "date_scraped": "2009-12-09 16:59:22", 
-          "message": "world"
-      }
-  ]</pre>
-  
-  </code>
+<div class="content col right">
+    <p>
+        <a href="{% url api:keys %}">Manage your API keys</a>
+    </p>
+    <h4>API functions</h4>
+    <ul>
+        <li>
+            <a href="{% url api:scraper_search %}">scraperwiki.scraper.search</a>
+        </li>
+        <li>
+            <a href="">scraperwiki.scraper.getInfo</a>
+        </li>
+        <li>
+            <a href="">scraperwiki.scraper.getData</a>
+        </li>
+        <li>
+            <a href="">scraperwiki.scraper.getDataByDate</a>
+        </li>
+        <li>
+            <a href="">scraperwiki.scraper.getDataByLocation</a>
+        </li>
+    </ul>
+</div>
+
 {% endblock %}

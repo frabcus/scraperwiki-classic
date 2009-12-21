@@ -23,8 +23,9 @@ div.banner a {font-weight:bold;}
 .content {padding-top:1.3em;}
 .content.left, .content.right {float:left;}
 .content.half {width:50%;}
-.content.col.left {width:60%;}
-.content.col.right {width:40%;}
+.content.col.left {width:70%;}
+.content.col.right {width:27%; padding-left:3%; font-size:0.95em;}
+.content .section {padding-bottom:1em;}
 
 /* Attention */
 div.attention {text-align:center;}
@@ -169,3 +170,13 @@ ul.filter_list li {display:block; float:left;}
 /* Report */
 p.report {background:#f8f8f8 url(../images/icons/flag_yellow.png) no-repeat 8px 0.4em;
     font-size:0.8em; border-top:dotted 1px #ccc; border-bottom:dotted 1px #ccc; padding:0.5em 10px 0.5em 30px; margin-top:1em;}
+    
+/* API */
+code.api_call {background:white;display:block;padding:1em;border:dotted 1px #808080; word-wrap: break-word;
+    background:#f8f8f8; margin:1em 0; color:#000; font-weight:bold;}
+code.api_call em {color:#3d883b;font-style:normal;}
+
+table.api_detail {font-size:0.8em; margin-bottom:2em;}
+table.api_detail th {text-transform:uppercase; font-weight:normal;background:#f8f8f8; color:#808080;}
+table.api_detail td, table.api_detail th {border:solid 1px #ccc; padding:0.4em 0.6em;}
+table.api_detail tr.not_implemented {color:#ccc;}
