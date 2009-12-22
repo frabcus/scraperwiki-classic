@@ -28,5 +28,13 @@ CREATE TABLE IF NOT EXISTS `sequences` (
   `id` bigint NOT NULL
   ) ENGINE=MyISAM;
 
-
+-- how to add unique(scraper_id, name)?
+DROP TABLE IF EXISTS `pages`;
+CREATE TABLE IF NOT EXISTS `pages` (
+  `scraper_id` varchar(100) NOT NULL,
+  `date_saved` datetime NULL,
+  `tag` text NULL,
+  `name` text NULL,
+  `text` longtext NOT NULL
+) ENGINE=MyISAM;  
 
