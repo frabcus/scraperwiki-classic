@@ -177,20 +177,62 @@
     </div>    
     <div id="popup_documentation" class="popup_item">
         <a class="popupClose">x</a>
-        <h3>Quick help</h3>
         <dl class="quick_help">
-            <dt><code>scraperwiki.scrape(url, params={ })</code></dt>
-            <dd>Returns the body text from a url</dd>
-            <dt>
-                <code>scraperwiki.parse_html(text)</code>
-            </dt>
-            <dd>
-                Converts an HTML string to an <a href="http://codespeak.net/lxml/" target="_new">lxml.etree</a> object
-            </dd>
-            <dt><code>scraperwiki.datastore.save(unique_keys, data)</code></dt>
-            <dd>Saves the dict <code>data</code> to the datastore over-writing all records that have the same values for the keys in the list <code>unique_keys</code>.
-                Optional special values <code>data["date"]</code> must be a date object, and <code>data["latlng"]</code> must be a pair of floats <code>(latitude, longitude)</code>.</dd>
+            <h4>Recommended libraries</h4>
+            <ul>
+                <li><code><b>BeautifulSoup</b></code>
+                    For parsing html.  <a href="/editor/beautifulsoup_demo" target="_blank">demo</a>  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
+                </li>
+                <li><code><b>mechanize</b></code>
+                    For navigating form fillings.  <a href="/editor/mechanize_demo" target="_blank">demo</a>  <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
+                </li>
+                <li><code><b>lxml</b></code>
+                    For parsing html and accessing it using cssselect.  <a href="/editor/lxml_demo" target="_blank">demo</a>  docs
+                </li>
+                <li><code><b>urllib2</b></code>
+                    Standard python library for opening urls.  <a href="/editor/urllib2_demo" target="_blank">demo</a>  <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
+                </li>
+            </ul>
 
+            <h4><code>scraperwiki</code> (utils)</h4>
+            <ul>
+                <li><code><b>scrape</b>(url, params={ })</code>
+                    Returns the body text from a url
+                </li>
+                <li><code><b>parse_html</b>(text)</code>
+                    Converts an HTML string to an <a href="http://codespeak.net/lxml/" target="_new">lxml.etree</a> object
+                </li>
+                <li><code><b>pdftoxml</b>(pdfdata)</code>
+                    Converts the binary data of a PDF file into a parsable XML string
+                </li>
+            </ul>
+
+            <h4><code>scraperwiki.datastore</code> <a href="/editor/datastore_demo" target="_blank">demo</a></h4>
+            <ul>
+                <li><code><b>save</b>(unique_keys=[], data={})</code>
+                    Saves the dict data to the datastore, over-writing all records that have the same values for the keys in the list unique_keys.
+                (Optional special keys are date (should be a date object), and latlng> (should be a pair of floats (latitude, longitude).))
+                </li>
+                <li><code><b>loadallofcurrentscraper</b>(filterdata={})</code>
+                    Returns list of dicts (records) that match the key-values given by filterdata.
+                </li>
+                <li><code><b>deleteallofcurrentscraper</b>(filterdata={})</code>
+                    Deletes all records that match the key-values of filterdata.
+                </li>
+            </ul>                
+
+            <h4><code>scraperwiki.page_cache</code> <a href="/editor/page_cache_demo" target="_blank">demo</a></h4>
+            <ul>
+                <li><code><b>savepage</b>(tag, name, text)</code>  
+                    Backs up text of a scraped page under a particular name.
+                </li>
+                <li><code><b>getpagebyname</b>(name)</code>  
+                    Returns text of page that was saved earlier.
+                </li>
+                <li><code><b>getnamesfromtag</b>(tag)</code>  
+                    List of page names for a given tag.
+                </li>
+            </ul>
         </dl>
     </div>
     <div id="popup_text" class="popup_item">

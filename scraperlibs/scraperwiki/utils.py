@@ -103,3 +103,24 @@ def parse_html(text):
     rootelement = parser.parse(text)
     return rootelement
 
+
+def pdftoxml(pdfdata):
+    """converts pdf file to xml file"""
+    import tempfile
+    pdffout = tempfile.NamedTemporaryFile(suffix='.pdf')
+    print pdffout.name
+    pdffout.write(pdfdata)
+    pdffout.flush()
+
+    xmlin = tempfile.NamedTemporaryFile(mode='r', suffix='.xml')
+    tmpxml = xmlin.name # "temph.xml"
+    cmd = 'pdftohtml -xml -zoom 1.5 "%s" "%s"' % (pdffout.name, os.path.splitext(tmpxml)[0])
+    cmd = cmd + " >/dev/null 2>&1" # can't turn off output, so throw away even stderr yeuch
+    os.system(cmd)
+
+    pdffout.close()
+    #xmlfin = open(tmpxml)
+    xmldata = xmlin.read()
+    xmlin.close()
+    return xmldata
+
