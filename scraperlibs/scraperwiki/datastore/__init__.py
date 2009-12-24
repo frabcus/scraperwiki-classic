@@ -6,4 +6,4 @@ from save import save
 from save import loadallwithmatchingdata, loadsingle, loadallofcurrentscraper, deleteallofcurrentscraper
 
 # accessing the page caches
-from savepage import deletepagebyname, savepage, getpagebyname, getnamesfromtag, deletepagesbytag, gettagbyname
+#from savepage import deletepagebyname, savepage, getpagebyname, getnamesfromtag, deletepagesbytag, gettagbyname

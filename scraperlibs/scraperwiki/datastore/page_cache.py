@@ -4,6 +4,8 @@ import os
 import datetime
 import connection
 
+# this file is actually imported into scraperlibs.page_cache from the datastore directory
+
 def deletepagebyname(name):
     """Delete page function"""
     scraper_id = os.environ['SCRAPER_GUID']
