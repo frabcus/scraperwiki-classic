@@ -81,7 +81,7 @@ class ScraperManager(models.Manager):
         return self.owned_count() == 0
 
 
-    def __data_summary_map(self, scraper_id=0, limit=1000):
+    def __data_summary_map(self, scraper_id=0, limit=1000):   # should remove the defaults and disable limit if 0
       '''map from scraper_id to dict representing row record for a particular scraper'''
       if isinstance(scraper_id, list):
           guids = ",".join("'%s'" % guid for guid in scraper_id)
@@ -140,12 +140,12 @@ class ScraperManager(models.Manager):
     def data_summary_tables(self, scraper_id=0, limit=1000):
       '''multiple table of rows for a scraper, indexed by the __table key'''
       allitems = self.__data_summary_map(scraper_id, limit)
-      
+            
       alltables = set()
       for item in allitems.values():
         alltables.add(item.get("__table"))
-        
-      data = { }
+      
+      data_tables = { }
       
       # filter for each table in order; not efficient, but simple
       for table in alltables:
@@ -160,8 +160,8 @@ class ScraperManager(models.Manager):
           if item.get("__table") == table:
             rows.append([ unicode(item.get(key))  for key in headings ])
 
-        data[table] = { 'headings' : headings, 'rows' : rows }
-      return data
+        data_tables[table] = { 'headings' : headings, 'rows' : rows }
+      return data_tables
           
 
     def item_count(self, guid):
