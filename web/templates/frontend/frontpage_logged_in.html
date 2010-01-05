@@ -1,6 +1,10 @@
 <div class="page_title">
 	<h1><span class="text">Hello {{ user.username }}</span></h1>
-	<p>You are currently contributing to {{ contribution_count }} scraper(s)</p>
+	<p>You are currently contributing to {{ contribution_count }} scraper{{ contribution_count|pluralize }}{% if following_scrapers %}, 
+		and watching 
+			{% with following_scrapers.count as num %}{{ num }} 
+			scraper{{ num|pluralize }}{% endwith %}{% endif %}
+		</p>
 </div>
 
 <div class="content col left">
@@ -24,7 +28,7 @@
 	{% if following_scrapers %}
 	<ul>
 		{% for scraper in following_scrapers %}
-		  {% include 'frontend/scraper_line.html' %}
+		  {% include 'frontend/detailed_scraper_line.html' %}
 		{% endfor %}
 	</ul>
 	    {% else%}

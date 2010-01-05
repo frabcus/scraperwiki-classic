@@ -15,10 +15,29 @@
   	  {% endif %}
 
   	  <div>
+	    {% if not user_owns_it   %}
   		{% if user_follows_it %}
-  		  <p>You are following this scraper</p>
+  		  <p>You are watching this scraper, and will be alerted if it changes or appears to be broken. 
+	
+	<form method="get" action="{% url scraper_unfollow scraper.short_name %}">
+                  <input type="submit" value="Stop watching" />
+              </form>
+	</p>
+
+  		   {% else %} 
+
+             <p>
+              <form method="get" action="{% url scraper_follow scraper.short_name %}">
+                  <input type="submit" value="Watch scraper" /> (You will be alerted if this scraper changes or appears to be broken)
+              </form>
+              </p> 
+
+  		{% endif %}
+  		   {% else %} 
+You own this scraper
   		{% endif %}
   	  </div>
+
 
     </div>
     <div class="content col right">

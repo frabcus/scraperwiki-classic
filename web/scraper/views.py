@@ -252,17 +252,21 @@ def search(request, q=""):
         })
     
 def follow (request, scraper_short_name):
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    user = request.user
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
+	scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+	user = request.user
+	user_owns_it = (scraper.owner() == user)
+	user_follows_it = (user in scraper.followers())
+    # add the user to follower list
+	scraper.add_user_role(user, 'follow')
 
-    return response
+	return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name) # Redirect after POST
     
 def unfollow(request, scraper_short_name):
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    user = request.user
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
-
-    return response
+	scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+	user = request.user
+	user_owns_it = (scraper.owner() == user)
+	user_follows_it = (user in scraper.followers())
+	# remove the user from follower list
+	scraper.unfollow(user)
+ 	
+	return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name) # Redirect after POST
