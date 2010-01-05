@@ -24,11 +24,9 @@ def create(request):
 def data (request, scraper_short_name):
     user = request.user
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid)
+    data_tables = models.Scraper.objects.data_summary_tables(scraper_id=scraper.guid, limit=1000)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    dummy_row_count = [1,2,3,4,5,6,7,8,9,10] # django templates don't do 'for $n' loops, so this is a hack
-    print "ddd", data
     scraper_tags = Tag.objects.get_for_object(scraper)
     
     return render_to_response('scraper/data.html', {
@@ -37,8 +35,7 @@ def data (request, scraper_short_name):
       'scraper': scraper, 
       'user_owns_it': user_owns_it, 
       'user_follows_it': user_follows_it,
-      'data' : data,
-      'dummy_row_count' : dummy_row_count,
+      'data_tables' : data_tables,
       }, context_instance=RequestContext(request))
 
 
@@ -135,18 +132,22 @@ def show(request, scraper_short_name, selected_tab = 'data'):
 
     return render_to_response('scraper/show.html', {'data' : data, 'selected_tab': selected_tab, 'scraper': scraper, 'you_own_it': you_own_it, 'you_follow_it': you_follow_it, 'tabs': tabs, 'tab_to_show': tab_to_show}, context_instance=RequestContext(request))
 
+
+# would be better to use the python csv writer as an generator and pass it straight as a response -- without the use of a template
+# also could allow for individual tables to be output (multiple links on the data page, for example)
 def export_csv (request, scraper_short_name):
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid)
+    data_tables = models.Scraper.objects.data_summary_tables(scraper_id=scraper.guid, limit=1000000)  # maybe limit=0 should be unlimited (or add limits everywhere)
 
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)
 
     template = loader.get_template('scraper/data.csv')
-    context = Context({'data': data,})
+    context = Context({'data_tables': data_tables,})
 
     response.write(template.render(context))
     return response
+    
     
 def list(request):
     #scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
