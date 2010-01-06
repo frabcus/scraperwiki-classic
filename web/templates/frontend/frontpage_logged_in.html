@@ -1,9 +1,13 @@
+{% load gravatar %}
+
 <div class="page_title">
 	<h1><span class="text">Hello {{ user.username }}</span></h1>
-	<p>You are currently contributing to {{ contribution_count }} scraper{{ contribution_count|pluralize }}{% if following_scrapers %}, 
-		and watching 
-			{% with following_scrapers.count as num %}{{ num }} 
-			scraper{{ num|pluralize }}{% endwith %}{% endif %}
+	<p>You are contributing to {{ contribution_count }} scraper{{ contribution_count|pluralize }}{% if following_scrapers %}, 
+	 watching 
+			{% with following_scrapers.count as num %}{{ num }}
+			scraper{{ num|pluralize }}{% endwith %}{% endif %}{% if following_users %}, 
+			and following {{ following_users_count }}
+				user{{ following_users_count|pluralize }}{% endif %}
 		</p>
 </div>
 
@@ -34,6 +38,25 @@
 	    {% else%}
 	    <p>You are not watching any scrapers yet</p>
     {% endif %}
+
+	<h2>People you are following</h2>
+
+	{% if following_users%}
+	<ul> 
+			{% for other_user in following_users %}
+			<li>{% show_gravatar other_user 'small' %}
+			 <a href='{% url profiles_profile_detail other_user %}'>
+					                {{ other_user.username }}
+			 </a>	
+            </li>
+			{% endfor %}
+	  </ul>
+		{% else %}
+		</p>You are not following anyone</p>
+		{% endif %}
+
+
+
     <!--
 	    <h2>History</h2>
     -->
@@ -53,7 +76,6 @@
         <li>
     	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
     	    by
-          	{% load gravatar %}
             {% show_gravatar solicitation.user_created 'small' %} 	
             <a href='{% url profiles_profile_detail solicitation.user_created %}'>
                 {{ solicitation.user_created.username }}
@@ -66,6 +88,7 @@
     	</li>
 	{% endfor %}
     </ul>
+
     <p class="more">
 	   <a href="{% url market_list %}">Browse all &raquo;</a>
 	</p>
@@ -76,5 +99,7 @@
 		  {% include 'frontend/detailed_scraper_line.html' %}
 		{% endfor %}	
 	</ul>
+	
+
 </div>
 <div style="clear: both;"></div>

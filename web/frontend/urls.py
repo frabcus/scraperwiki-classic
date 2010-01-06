@@ -9,9 +9,9 @@ urlpatterns = patterns('',
 
     # profiles
     url(r'^create/$',                     profile_views.create_profile, {'form_class': frontend_forms.UserProfileForm}, name='profiles_create_profile'),
-    url(r'^profiles/edit/$',              profile_views.edit_profile, {'form_class': frontend_forms.UserProfileForm},   name='profiles_edit_profile'),
-    url(r'^profiles/(?P<username>\w+)/$', profile_views.profile_detail, name='profiles_profile_detail'),
-    url(r'^profiles/$',                   profile_views.profile_list, name='profiles_profile_list'),
+    #url(r'^profiles/edit/$',              profile_views.edit_profile, {'form_class': frontend_forms.UserProfileForm},   name='profiles_edit_profile'),
+    #url(r'^profiles/(?P<username>\w+)/$', frontend_views.profile_detail, name='profiles_profile_detail'),
+    #url(r'^profiles/$',                   profile_views.profile_list, name='profiles_profile_list'),
     #url(r'^profiles/(?P<username>\w+)/follow/$', profile_views.profile_follow, name='profiles_profile_follow'),
     #url(r'^profiles/(?P<username>\w+)/unfollow/$', profile_views.profile_unfollow, name='profiles_profile_unfollow'),
 

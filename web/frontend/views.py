@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.contrib import auth
 import settings
-from frontend.forms import SigninForm
+from frontend.forms import SigninForm, UserProfileForm
 
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
@@ -15,6 +15,7 @@ from market.models import Solicitation
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
 from registration.backends import get_backend
+from profiles import views as profile_views
 
 import django.contrib.auth.views
 import os
@@ -28,18 +29,15 @@ def frontpage(request, public_profile_field=None):
     if user.is_authenticated():
         my_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
         following_scrapers = user.scraper_set.filter(userscraperrole__role='follow')
+        #following_users = UserToUserRole.objects.filter(from_user=user, role='follow')
+        following_users = user.to_user.following()
+        following_users_count = len(following_users)
         # needs to be expanded to include scrapers you have edit rights on.
         contribution_scrapers = my_scrapers
-        #try:
-        #	profile_obj = user.get_profile()
-    	#except ObjectDoesNotExist:
-        #	raise Http404
-    	#if public_profile_field is not None and \
-       	# not getattr(profile_obj, public_profile_field):
-        #	profile_obj = None
     else:
         my_scrapers = []
         following_scrapers = []
+        following_users = []
         contribution_scrapers = []
         profile_obj = None
 
@@ -57,7 +55,31 @@ def frontpage(request, public_profile_field=None):
     #suggested scrapers
     solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
     
-    return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
+    return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'following_users': following_users, 'following_users_count' : following_users_count, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
+
+
+# Override default profile view to include 'follow' button
+def profile_detail(request, username):
+		user = request.user
+		try:
+			profiled_user = User.objects.get(username=username)
+		except User.DoesNotExist:
+			return HttpResponseRedirect("/404")
+		if request.method == 'POST': # if follow form has been submitted
+			if user.is_authenticated():
+				if (profiled_user in user.to_user.following()):
+					u = UserToUserRole.objects.filter(to_user=profiled_user, from_user=user, role='follow')
+					u.delete()
+					return profile_views.profile_detail(request, username=username, extra_context={ 'following': False, }, )
+				else:
+					u = UserToUserRole(to_user=profiled_user, from_user=user, role='follow')
+					u.save()
+					return profile_views.profile_detail(request, username=username, extra_context={ 'following': True, }, )
+		else:
+			following = UserToUserRole.objects.filter(to_user=profiled_user, from_user=user, role='follow')
+			return profile_views.profile_detail(request, username=username, extra_context={ 'following': following, }, )
+
+
 
 def process_logout(request):
     logout(request)
