@@ -38,6 +38,7 @@ def frontpage(request, public_profile_field=None):
         my_scrapers = []
         following_scrapers = []
         following_users = []
+        following_users_count = 0
         contribution_scrapers = []
         profile_obj = None
 

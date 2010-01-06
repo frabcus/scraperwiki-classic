@@ -15,27 +15,30 @@
   	  {% endif %}
 
   	  <div>
+					{% if user.is_authenticated %}
 	    {% if not user_owns_it   %}
-  		{% if user_follows_it %}
-  		  <p>You are watching this scraper, and will be alerted if it changes or appears to be broken. 
+  					{% if user_follows_it %}
+  		  				<p>You are watching this scraper, and will be alerted if it changes or appears to be broken. 
 	
-	<form method="get" action="{% url scraper_unfollow scraper.short_name %}">
-                  <input type="submit" value="Stop watching" />
-              </form>
-	</p>
+							<form method="get" action="{% url scraper_unfollow scraper.short_name %}">
+                  				<input type="submit" value="Stop watching" />
+              				</form>
+						</p>
 
-  		   {% else %} 
+  		   			{% else %} 
 
-             <p>
-              <form method="get" action="{% url scraper_follow scraper.short_name %}">
-                  <input type="submit" value="Watch scraper" /> (You will be alerted if this scraper changes or appears to be broken)
-              </form>
-              </p> 
+             			<p>
+              				<form method="get" action="{% url scraper_follow scraper.short_name %}">
+                  				<input type="submit" value="Watch scraper" /> (You will be alerted if this scraper changes or appears to be broken)
+              				</form>
+              			</p> 
 
-  		{% endif %}
-  		   {% else %} 
-You own this scraper
-  		{% endif %}
+  						
+					{% endif %}
+  		   				{% else %} 
+						You own this scraper
+  						{% endif %}
+  						{% endif %}
   	  </div>
 
 
