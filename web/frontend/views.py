@@ -28,7 +28,7 @@ def frontpage(request, public_profile_field=None):
     # The following items are only used when there is a logged in user.	
     if user.is_authenticated():
         my_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
-        following_scrapers = user.scraper_set.filter(userscraperrole__role='follow')
+        following_scrapers = user.scraper_set.filter(userscraperrole__role='follow', deleted=False)
         #following_users = UserToUserRole.objects.filter(from_user=user, role='follow')
         following_users = user.to_user.following()
         following_users_count = len(following_users)
@@ -57,6 +57,23 @@ def frontpage(request, public_profile_field=None):
     solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
     
     return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'following_users': following_users, 'following_users_count' : following_users_count, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
+
+
+def my_scrapers(request):
+	user = request.user
+	
+	if user.is_authenticated():
+		owned_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
+		owned_count = len(owned_scrapers) 
+		# needs to be expanded to include scrapers you have edit rights on.
+		contribution_scrapers = user.scraper_set.filter(userscraperrole__role='editor', deleted=False)
+		contribution_count = len(contribution_scrapers)
+		following_scrapers = user.scraper_set.filter(userscraperrole__role='follow', deleted=False)
+		following_count = len(following_scrapers)
+	else:
+		return HttpResponseRedirect(reverse('frontpage'))
+
+	return render_to_response('frontend/my_scrapers.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count, }, context_instance = RequestContext(request))
 
 
 # Override default profile view to include 'follow' button

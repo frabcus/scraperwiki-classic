@@ -15,7 +15,6 @@ urlpatterns = patterns('',
     #url(r'^profiles/(?P<username>\w+)/follow/$', profile_views.profile_follow, name='profiles_profile_follow'),
     #url(r'^profiles/(?P<username>\w+)/unfollow/$', profile_views.profile_unfollow, name='profiles_profile_unfollow'),
 
-
     url(r'^login/$',                      frontend_views.login, name='login'),
     url(r'^login/confirm/$', 'django.views.generic.simple.direct_to_template', {'template': 'registration/confirm_account.html'}, name='confirm_account'),          
     url(r'^help/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/help.html'}, name='help'),   
@@ -29,6 +28,8 @@ urlpatterns = patterns('',
     url(r'^contact/$',                    contact_form, {'form_class':frontend_forms.scraperContactForm},name='contact_form'),
     url(r'^contact/sent/$',               direct_to_template,{ 'template': 'contact_form/contact_form_sent.html' },name='contact_form_sent'),
     
+    # user's scrapers
+    url(r'^my-scrapers/$',                  frontend_views.my_scrapers, name='my_scrapers'),
     
     # Example pages to scrape :)
     url(r'^examples/basic_table\.html$',  direct_to_template,{ 'template': 'examples/basic_table.html' },name='example_basic_table'),

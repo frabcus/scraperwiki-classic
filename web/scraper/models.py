@@ -18,7 +18,6 @@ import vc
 
 from django.core.mail import send_mail
 
-
 # models defining scrapers and their metadata.
 
 
