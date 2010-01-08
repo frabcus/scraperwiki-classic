@@ -2,7 +2,7 @@
 {% load replace %}
 {% block tab %}
 <div class="tab_tools">
-    {% if data.headings %}
+    {% if data_tables %}
         <a href="{% url export_csv scraper.short_name %}" rel="nofollow">download csv</a>
     {% else %}
         <span class="faux_link">download csv</span>
@@ -11,8 +11,8 @@
 
 
 <div class="data_viewer">
-    {% if data.headings %}
-
+    {% if data_tables %}
+        {% for table, data in data_tables.items %}
         <table>
             <thead>
                 <tr>
@@ -31,19 +31,22 @@
                 {% endfor %}    
             </tbody>
         </table>
+        {% endfor %}
 
     {% else %}
         <table class="raw_data">
             <tbody>
-                {% for dummy_row in dummy_row_count %}
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>                                                                
-                    </tr>
-                {% endfor %}    
+                <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
             </tbody>
         </table>
 

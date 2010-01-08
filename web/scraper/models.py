@@ -18,7 +18,6 @@ import vc
 
 from django.core.mail import send_mail
 
-
 # models defining scrapers and their metadata.
 
 
@@ -143,6 +142,13 @@ class Scraper(models.Model):
       u = UserScraperRole(user=user, scraper=self, role=role)
       u.user = user
       u.save()
+
+    def unfollow(self, user):
+      """
+      Deliberately not making this generic, as you can't stop being an owner or editor
+      """
+      UserScraperRole.objects.filter(scraper=self, user=user, role='follow').delete()
+      return True
       
     def followers(self):
         return self.users.filter(userscraperrole__role='follow')

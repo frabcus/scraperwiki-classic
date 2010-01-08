@@ -277,12 +277,18 @@ $(document).ready(function() {
 
                     //split results
                     var aResults = code.split("@@||@@");
+                    var noutputdatalines = 0; 
                     for (var i=0; i < aResults.length -1; i++) {
                         var oItem = eval('(' + aResults[i] + ')')
                         if(oItem.message_type == 'sources'){                                                        
                             writeToSources(oItem.content, oItem.content_long);                                                            
                         }else if (oItem.message_type == 'data'){
-                            writeToData(oItem.content);                                
+                            // (unavoidably) too many entries crashes your browser
+                            if (noutputdatalines < 200)
+                              writeToData(oItem.content);
+                            else if (noutputdatalines == 200)
+                              writeToData('["more entries"]');
+                            noutputdatalines++
                         }else if (oItem.message_type == 'exception'){
                             writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
                         }else{

@@ -1,4 +1,4 @@
-{% if data.headings %}"{% for heading in data.headings %}{{ heading|addslashes }}{% if not forloop.last %}","{% else %}"{% endif %}{% endfor %}
+{% for table, data in data_tables.items %}"{% for heading in data.headings %}{{ heading|addslashes }}{% if not forloop.last %}","{% else %}"{% endif %}{% endfor %}
 {% for row in data.rows %}"{% for value in row %}{{ value|addslashes }}{% if not forloop.last %}","{% else %}"{% endif %}{% endfor %}
 {% endfor %}
-{% endif %}
+{% endfor %}

@@ -104,8 +104,11 @@ the command
 6) Create the scrapers repository
 *******************
 
+Create a directory called 'scrapers' and check out the scrapers into
+that directory:
 
 > hg clone scraperwiki@212.84.75.28/scrapers
+
 Next, in MySQL, create a database called scraperwiki_datastore:
 mysql> create database scraperwiki_datastore;
 

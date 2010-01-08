@@ -28,6 +28,7 @@ feeds = {
 # remove all log files references
 
 urlpatterns = patterns('',
+    url(r'^profiles/(?P<username>\w+)/$', frontend_views.profile_detail, name='profiles_profile_detail'),
     url(r'^profiles/', include('profiles.urls')),
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
     url(r'^', include('frontend.urls')),

@@ -18,11 +18,15 @@
 		 {% ifequal profile.user.username user.username %}
 	     <a href="/profiles/edit/">Edit your profile</a>
          {% else  %}
-			<!-- {% if following %}
-			   <a href="unfollow/" style="float: right;">Unfollow this user</a>
-     	    {% else%}
-	           <a href="follow/" style="float: right;">Follow this user</a>
-     	    {% endif %} -->
+			{% if user.is_authenticated %}
+			  <form method="post" action="">
+			  {% if following %}
+			   You are following {{ profile.user.username}} <input type="submit" value="Unfollow" />
+     	      {% else%}
+			   <input type="submit" value="Follow {{ profile.user.username}}" />
+     	      {% endif %} 
+               </form>
+     	    {% endif %} 
         {% endifequal %}
 	</div>
 	
@@ -35,11 +39,17 @@
 	<div style="float: left;">
 		    	<h2>{{ profile.user.username }}'s scrapers</h2>
     	<ul>  
+	{%  if profile.user.scraper_set.all %}
         	{% for scraper in profile.user.scraper_set.all %}
-        	    {% if scraper.published %}
-        	        {% include 'frontend/scraper_line.html' %}
+        	    {% if scraper.published %} 
+                    {% ifequal scraper.owner profile.user %}
+        	          {% include 'frontend/scraper_line.html' %}
+                    {% endifequal %}
         	    {% endif %}
         	{% endfor %}
+     {% else %}
+	No scrapers yet
+     {% endif %}
 	    </ul> 	
     </div>
     
@@ -63,7 +73,7 @@
     	  </ul>
     	{% endif %}
     	
-    	<!-- <h2>People {% ifequal profile.user.username user.username %} you are {% else %} {{ profile.user.username }} is {% endifequal %} following</h2>
+    	<h2>People {% ifequal profile.user.username user.username %} you are {% else %} {{ profile.user.username }} is {% endifequal %} following</h2>
     	
     	{% if profile.user.to_user.not_following_anyone %}
     	  <p>
@@ -78,15 +88,19 @@
         {% else %}
           <ul> 
             {% for other_user in profile.user.to_user.following %}
-              {% show_gravatar profile.user 'medium' %} 
-              		 {% ifequal profile.user.username user.username %}
-             					{% include 'frontend/user_line_with_unfollow.html' %} 
-              		          {% else  %}
-    	      					{% include 'frontend/user_line.html' %} 
-    	          	    {% endifequal %} 
+			<li>{% show_gravatar other_user 'small' %}
+			 <a href='{% url profiles_profile_detail other_user %}'>
+					                {{ other_user.username }}
+			 </a>	
+            </li>
     	    {% endfor %}
     	  </ul>  
-        {% endif %} -->
+
+        {% endif %} 
+
+
+
+
         
             	<!-- 
             	

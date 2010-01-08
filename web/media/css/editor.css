@@ -116,6 +116,13 @@ dl.quick_help dt code {font-size:1.3em;}
 dl.quick_help dd {font-size:0.8em; padding:0.5em 0 1.2em 0; margin:0;}
 dl.quick_help dd code {font-size:1.3em;}
 
+dl.quick_help h4 { font-size:1.3em; padding:0.5em 0 0 0;}
+dl.quick_help a { font-size:0.8em; font-style:italic;}
+dl.quick_help ul { padding:0 0 0 1em; margin: 0; }
+dl.quick_help li { padding:0 0 0 0; margin: 0; }
+dl.quick_help li code {font-size:1.1em; }
+
+
 #meta_fields_mini .field { display:inline; }
 #meta_fields_mini .field input, #meta_fields_mini .field textarea {height:10px;}
 #meta_fields_mini .field ul.errorlist, #meta_fields_mini .field ul.errorlist li {display:inline; margin:0; padding:0; color:red;}
