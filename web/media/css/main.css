@@ -19,12 +19,12 @@ div.banner a {font-weight:bold;}
 #divMenu ul.user_menu {font-size:0.8em;}
 
 /* Content and columns */
-#divContent {padding-bottom:3em;}
+#divContent {padding-bottom:3em; font-size:0.9em;}
 .content {padding-top:1.3em;}
 .content.left, .content.right {float:left;}
 .content.half {width:50%;}
 .content.col.left {width:70%;}
-.content.col.right {width:27%; padding-left:3%; font-size:0.95em;}
+.content.col.right {width:27%; padding-left:3%;}
 .content .section {padding-bottom:1em;}
 
 /* Attention */
@@ -75,6 +75,7 @@ div.page_tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; marg
 div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
         background:#fff;}
 div.tab_tools {text-align:right; padding:0.2em 0.8em;}
+div.page_tab_body {clear:left;}
 
 /* meta data */
 div.metadata {background:#ffffd7; padding:0.8em 1em;}
@@ -164,7 +165,7 @@ span.bounty {padding:0.2em 0.4em; background:#faca44; font-weight:bold; font-siz
 span.bounty a {color:#fff!important;}
 
 /* Filter */
-ul.filter_list {position:abso;}
+ul.filter_list {position:absolute;}
 ul.filter_list li {display:block; float:left;}
 
 /* Report */
@@ -176,7 +177,15 @@ code.api_call {background:white;display:block;padding:1em;border:dotted 1px #808
     background:#f8f8f8; margin:1em 0; color:#000; font-weight:bold;}
 code.api_call em {color:#3d883b;font-style:normal;}
 
-table.api_detail {font-size:0.8em; margin-bottom:2em;}
+table.api_detail {margin-bottom:2em;}
 table.api_detail th {text-transform:uppercase; font-weight:normal;background:#f8f8f8; color:#808080;}
 table.api_detail td, table.api_detail th {border:solid 1px #ccc; padding:0.4em 0.6em;}
 table.api_detail tr.not_implemented {color:#ccc;}
+
+dl.api_arguments {}
+form.api_arguments dt {border-top:solid 1px #ccc; padding-top:0.3em;}
+form.api_arguments dt code {font-weight:bold; font-size:1.1em;}
+form.api_arguments dd {padding-bottom:0.4em;position:relative;}
+form.api_arguments input { position:absolute; top:-50%; right:0; text-align:right;}
+form.api_arguments input.button {position:static;}
+form.api_arguments div {text-align:right;}

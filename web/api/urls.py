@@ -18,7 +18,8 @@ urlpatterns = patterns('',
     url(r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'index.html'}),
     url(r'^1\.0/$', 'django.views.generic.simple.direct_to_template', {'template': '1.0.html'}, name='index'),
     url(r'^1\.0/scraperwiki.scraper.search/$', 'django.views.generic.simple.direct_to_template', {'template': 'scraper_search_1.0.html'}, name='scraper_search'),
-    
+    url(r'^1\.0/scraperwiki.scraper.search/explore/$', views.explore_scraper_search, name='explore_scraper_search'),
+
     
     # API calls
     url(r'^1\.0/scraper/getinfo/(?P<short_name>[\-\w]+)$', scraperinfo_handler),

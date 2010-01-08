@@ -35,4 +35,9 @@ def keys(request):
     },
     context_instance=RequestContext(request))
     
+def explore_scraper_search(request):
+    #If we ever progress to version 2.0, then pass the version number in to this function and render a different template
+    # don't be tempted to just copy and paste it
+    return render_to_response('scraper_search_1.0.html', {'keys' : 'test'}, context_instance=RequestContext(request))
+    
     

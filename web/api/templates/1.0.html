@@ -24,7 +24,7 @@
         <p>
             Each API function has it's own URI. You pass an API key, the format you would like the data returned in, other function specific arguments, via the query string to tell the API exactly what you are requesting:
             <code class="api_call">
-     http://www.scraperwiki.com/api/1.0/scraper/getdata/<em>scraper_short_name</em>?key=<em>[your api key]</em>&amp;format<em>=[json | yaml | xml | csv | php]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
+     http://www.scraperwiki.com/api/1.0/scraper/getdata/<em>scraper_short_name</em>?key=<em>[your api key]</em>&amp;format<em>=[json | yaml | xml | php | csv]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
             </code>
         </p>
     </div>
@@ -41,11 +41,11 @@
             </thead>
             <tbody>
                 <tr>
-                    <td><a href="http://php.net/manual/en/function.serialize.php">Serialised PHP objects</a></td>
-                    <td>php</td>
+                    <td><a href="http://www.json.org/">JSON</a></td>
+                    <td>json</td>
                     <td>
-                        Serialized PHP, that can be turned back into php objects using PHP's <a href="http://php.net/manual/en/function.unserialize.php">unserialize()</a> function, or using <a href="http://hurring.com/scott/code/python/serialize/">PHPUnserialize</a> in Python
-                    </td>                        
+                        A text based representation of a Javascript object. It can be converted back into an object using the <code><a href="http://www.devguru.com/Technologies/ecmascript/quickref/eval.html">eval()</a></code> function in Javascript, and many other languages have code libraries available.
+                    </td>
                 </tr>
                 <tr>
                     <td><a href="http://www.yaml.org/">YAML</a></td>
@@ -57,6 +57,13 @@
                     <td><a href="http://www.w3.org/XML/">XML</a></td>
                     <td>xml</td>
                     <td><a href="http://en.wikipedia.org/w/index.php?title=XML#Example">Extensible Markup Language</a></td>                        
+                </tr>
+                <tr>
+                    <td><a href="http://php.net/manual/en/function.serialize.php">Serialised PHP objects</a></td>
+                    <td>php</td>
+                    <td>
+                        Serialized PHP, that can be turned back into php objects using PHP's <code><a href="http://php.net/manual/en/function.unserialize.php">unserialize()</a></code> function, or using <code><a href="http://hurring.com/scott/code/python/serialize/">PHPUnserialize</a></code> in Python
+                    </td>
                 </tr>
                 <tr>
                     <td><a href="http://en.wikipedia.org/wiki/Comma-separated_values">Comma separated values (CSV)</a></td>

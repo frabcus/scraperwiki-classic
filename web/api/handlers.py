@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse, HttpResponseNotFound
+from django.conf import settings
 
 from tagging.models import Tag
 
@@ -64,8 +65,12 @@ class GetDataHandler(BaseHandler):
             resp.write(": No scraper named '%s'" % short_name)
             return resp
         
-        limit = request.GET.get('limit', 1000)
+        limit = request.GET.get('limit', 100)
         offset = request.GET.get('offset', 0)
+
+        #check if the limit is > than the max allowed, if it is then reset it
+        if limit > MAX_API_ITEMS:
+            limit = MAX_API_ITEMS
         
         data = Scraper.objects.data_summary(scraper_id=scraper.guid, limit=limit, offset=offset)
         

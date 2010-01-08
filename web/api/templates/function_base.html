@@ -1,7 +1,34 @@
 {% extends "frontend/base.html" %}
-
 {% block content %}
-    {% block heading %}
-
-    {% endblock %}
+    <div class="page_title">
+        <h1>{% block heading %}{% endblock %}</h1>
+        <p>{% block subheading %}{% endblock %}</p>
+    </div>
+    <div class="content col left">
+        <h2>Arguments</h2>
+        <form class="api_arguments">
+            <dl>
+                {% block arguments %}
+        
+                {% endblock %}
+            </dl>
+            <div>
+                <input type="submit" class="button" value="Call method ..."/>
+            </div>
+        </form>
+        <!-- Note: Change this to 'Response' when data has been submitted -->
+        <h2>Example Response</h2>
+    </div>    
+    <div class="content col right">
+        <h3>Useful values</h3>
+        <h4>Response formats</h4>
+        <ul>
+            <li><code>json</code></li>
+            <li><code>yaml</code></li>            
+            <li><code>xml</code></li>                        
+            <li><code>php</code></li>                        
+            <li><code>csv</code></li>                                    
+        </ul>
+    </div>
+    
 {% endblock %}
