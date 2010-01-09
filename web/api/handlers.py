@@ -9,6 +9,8 @@ from piston.utils import rc
 import emitters
 from scraper.models import Scraper
 
+from settings import MAX_API_ITEMS
+
 from models import api_key
 
 
@@ -17,6 +19,8 @@ def valid_api_key(request):
     Looks at the request, checks for a valid API key or explorer_user_run key
     and returns True or False.
     
+    explorer_user_run is for the API exploer only, and should be hidden in 
+    some way!
     
     """
     
@@ -42,7 +46,8 @@ def invlaid_api_key():
 class ScraperInfoHandler(BaseHandler):
     allowed_methods = ('GET',)
 
-    def read(self, request, short_name):
+    def read(self, request):
+        short_name = request.GET.get('name', None)
         
         if not valid_api_key(request):
             return invlaid_api_key()
@@ -67,8 +72,9 @@ class ScraperInfoHandler(BaseHandler):
 class GetDataHandler(BaseHandler):
     allowed_methods = ('GET',)
 
-    def read(self, request, short_name):
-        
+    def read(self, request):
+        short_name = request.GET.get('name', None)
+            
         if not valid_api_key(request):
             return invlaid_api_key()
             
@@ -86,7 +92,7 @@ class GetDataHandler(BaseHandler):
         if limit > MAX_API_ITEMS:
             limit = MAX_API_ITEMS
         
-        data = Scraper.objects.data_summary(scraper_id=scraper.guid, limit=limit, offset=offset)
+        data = Scraper.objects.data_summary(scraper_id=scraper.guid, limit=limit)
         
         # We need to change the data format slightly
         # Now each item is a dict, in a list
