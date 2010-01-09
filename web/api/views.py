@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
+from settings import MAX_API_ITEMS
 
 from django.contrib.auth.decorators import login_required
 
@@ -24,7 +25,6 @@ def keys(request):
     key = api_key(user=user)
     form = applyForm(request.POST, instance=key)
 
-
     if request.POST:
         form.save(commit=False)
         form.save()
@@ -37,13 +37,13 @@ def keys(request):
     },
     context_instance=RequestContext(request))
 
-
 def explore_scraper_search(request):
-    #If we ever progress to version 2.0, then pass the version number in to this function and render a different template
-    # don't be tempted to just copy and paste it
-    return render_to_response('scraper_search_1.0.html', {'keys' : 'test'}, context_instance=RequestContext(request))
+    print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    return render_to_response('scraper_search_1.0.html', {'max_api_items': MAX_API_ITEMS}, context_instance=RequestContext(request))
 
-
+def explorer_example(request, method):
+    return render_to_response('explorer_example.html', {'method' : method}, context_instance=RequestContext(request))    
+    
 def explorer_user_run(request):
     
     #make sure it's a post
@@ -51,8 +51,8 @@ def explorer_user_run(request):
         raise Http404
 
     #build up the URL
-    url = request.POST['uri']
-    url += "&".join("%s=%s" % (k,v) for k,v in request.POST.__dict__.items())
-    url += '&explorer_user_run=1'
-    result= urllib.urlopen(url).read()
+    uri = request.POST['uri']
+    uri += "&".join("%s=%s" % (k,v) for k,v in request.POST.__dict__.items())
+    uri += '&explorer_user_run=1'
+    result= urllib.urlopen(uri).read()
     return render_to_response('explorer_user_run.html', {'result' : result}, context_instance=RequestContext(request))    

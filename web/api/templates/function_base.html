@@ -6,7 +6,7 @@
     </div>
     <div class="content col left">
         <h2>Arguments</h2>
-        <form class="api_arguments" target="api_response" method="post" action="{% url api:explorer_call %}">
+        <form class="api_arguments" target="iframeResponse" method="post" action="{% url api:explorer_call %}">
             <fieldset>
                 <input type="hidden" name="uri" value="http://www.scraperwiki.com/api/1.0/scraper/getdata/"/>
             </fieldset>
@@ -15,19 +15,21 @@
                 {% endblock %}
             </dl>
             <div>
-                <input type="submit" class="button" value="Call method ..."/>
+                <input type="submit" id="btnCallMethod" class="button" value="Call method ..."/>
             </div>
         </form>
-        <!-- Note: Change this to 'Response' when data has been submitted -->
-        <h2>Example Response</h2>
-        <iframe name="api_response" id="api_response" src="{% url api:explorer_example %}">
 
-        </iframe>
+        <div class="explorer_response">
+        <h2>Example Response <small>(add values above, then click 'call method' to see live data)</small></h2>
+            <iframe name="iframeResponse" id="api_response" src="{% block example_url %}{% endblock %}">
+
+            </iframe>
+        </div>
     </div>    
     <div class="content col right">
-        <h3>Useful values</h3>
+        <h3>Useful Values</h3>
         <h4>Response formats</h4>
-        <ul>
+        <ul id="ulFormats">
             <li><code>json</code></li>
             <li><code>yaml</code></li>            
             <li><code>xml</code></li>                        
@@ -37,3 +39,5 @@
     </div>
     
 {% endblock %}
+
+{% block run_script %}APISetupExploreFunction();{% endblock %}
