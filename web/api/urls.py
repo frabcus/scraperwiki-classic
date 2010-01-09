@@ -22,6 +22,6 @@ urlpatterns = patterns('',
 
     
     # API calls
-    url(r'^1\.0/scraper/getinfo/(?P<short_name>[\-\w]+)$', scraperinfo_handler),
-    url(r'^1\.0/scraper/getdata/(?P<short_name>[\-\w]+)$', data_handler),
+    url(r'^1\.0/scraper/getinfo$', scraperinfo_handler),
+    url(r'^1\.0/scraper/getdata$', data_handler),
 )
