@@ -64,4 +64,9 @@ urlpatterns = patterns('',
     # API
     (r'^api/', include('api.urls', namespace='foo', app_name='api')),
 
+
+    
+    (r'^foo/$',             'django.views.generic.simple.direct_to_template', {'template': 'test.html'}),
+
+
 )

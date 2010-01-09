@@ -130,7 +130,7 @@ def run_popen(code, guid=False):
 def run_firestarter_django(code):
   import FireStarter
   fb   = FireStarter.FireStarter()
-  fb.addPaths ('/a', '/b')
+  fb.addPaths ('/var/www/scraperwiki/alpha/scraperlib')
   code = string.replace (code, '\r', '')
 
   res  = fb.execute(code, True)
