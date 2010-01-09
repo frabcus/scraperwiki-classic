@@ -24,3 +24,31 @@ function setupCodeViewer(iLineCount){
       });
 }
 
+function APISetupExploreFunction(){
+
+    //link up the call button to change a few bits of text
+    $('#btnCallMethod').click(
+        function(){
+            //title
+            $('.explorer_response h2').html('Function response');
+
+            //link up useful values
+            return false;
+        }
+    );
+
+    //change the sidebar examples to links where useful
+    $('#ulFormats li code').each(
+        function(){
+            var sText = $(this).html();
+            var aLink = $('<a href="#">' + sText + '</a>');
+            aLink.click(
+                function (){
+                    $('#format').val(sText);
+                    $('#format').focus();
+                }
+            );
+            $(this).html(aLink);
+        }
+    );
+}

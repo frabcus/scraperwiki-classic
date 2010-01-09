@@ -18,5 +18,7 @@ syntax: regexp
 ^pip-log.txt$
 ^.hgignore$
 ^web/localsettings.py$
+^web/editor/code_runner.py$
 ^web/python$
 ^web/pip-log.txt$
+^uml$
