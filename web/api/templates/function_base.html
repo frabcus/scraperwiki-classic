@@ -6,10 +6,12 @@
     </div>
     <div class="content col left">
         <h2>Arguments</h2>
-        <form class="api_arguments">
+        <form class="api_arguments" target="api_response" method="post" action="{% url api:explorer_call %}">
+            <fieldset>
+                <input type="hidden" name="uri" value="http://www.scraperwiki.com/api/1.0/scraper/getdata/"/>
+            </fieldset>
             <dl>
                 {% block arguments %}
-        
                 {% endblock %}
             </dl>
             <div>
@@ -18,6 +20,9 @@
         </form>
         <!-- Note: Change this to 'Response' when data has been submitted -->
         <h2>Example Response</h2>
+        <iframe name="api_response" id="api_response" src="{% url api:explorer_example %}">
+
+        </iframe>
     </div>    
     <div class="content col right">
         <h3>Useful values</h3>

@@ -19,9 +19,14 @@ urlpatterns = patterns('',
     url(r'^1\.0/$', 'django.views.generic.simple.direct_to_template', {'template': '1.0.html'}, name='index'),
     url(r'^1\.0/scraperwiki.scraper.search/$', 'django.views.generic.simple.direct_to_template', {'template': 'scraper_search_1.0.html'}, name='scraper_search'),
     url(r'^1\.0/scraperwiki.scraper.search/explore/$', views.explore_scraper_search, name='explore_scraper_search'),
-
     
     # API calls
+
+    #explorer
+    url(r'^explorer_call$', views.explorer_user_run, name='explorer_call'),
+    url(r'^explorer_example$', views.explorer_example_run, name='explorer_example'),    
+
     url(r'^1\.0/scraper/getinfo$', scraperinfo_handler),
     url(r'^1\.0/scraper/getdata$', data_handler),
+
 )
