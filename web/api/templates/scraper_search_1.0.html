@@ -3,10 +3,10 @@
 {% block title %}scraperwiki.scraper.search | API{% endblock %}
 
 {% block heading %}scraperwiki.scraper.search{% endblock %}
+{% block uri %}
+    <a href="http://{{ api_domain }}{% url api:method_getinfo %}">{% url api:method_getinfo %}</a>
+{% endblock %}
 {% block subheading %}Returns a list of scrapers with matching titles or tags{% endblock %}
-<div>
-    
-</div>
 {% block arguments %}
     <dt><code>key</code> (required)</dt>
     <dd>A valid API key.</dd>
