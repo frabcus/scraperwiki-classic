@@ -11,21 +11,42 @@ from scraper.models import Scraper
 
 from models import api_key
 
+
+def valid_api_key(request):
+    """
+    Looks at the request, checks for a valid API key or explorer_user_run key
+    and returns True or False.
+    
+    
+    """
+    
+    try:
+        if request.GET.get('explorer_user_run', None) == '1':
+            request_api_key = 'explorer'
+        else:
+            request_api_key = api_key.objects.get(
+                key=request.GET.get('key', None),
+                active=True,
+                )
+        return True
+    except:
+        return False
+    
+   
+def invlaid_api_key():
+    resp = rc.FORBIDDEN
+    resp.write(": Invalid or inactive API key")
+    return resp
+    
+ 
 class ScraperInfoHandler(BaseHandler):
     allowed_methods = ('GET',)
 
     def read(self, request, short_name):
         
-        try:
-            request_api_key = api_key.objects.get(
-                key=request.GET.get('key', None),
-                active=True,
-                )
-        except:
-            resp = rc.FORBIDDEN
-            resp.write(": Invalid or inactive API key")
-            return resp
-                
+        if not valid_api_key(request):
+            return invlaid_api_key()
+        
         try:
             scraper = Scraper.objects.get(short_name=short_name)
         except Exception, e:
@@ -48,15 +69,8 @@ class GetDataHandler(BaseHandler):
 
     def read(self, request, short_name):
         
-        try:
-            request_api_key = api_key.objects.get(
-                key=request.GET.get('key', None),
-                active=True,
-                )
-        except:
-            resp = rc.FORBIDDEN
-            resp.write(": Invalid or inactive API key")
-            return resp
+        if not valid_api_key(request):
+            return invlaid_api_key()
             
         try:
             scraper = Scraper.objects.get(short_name=short_name)
