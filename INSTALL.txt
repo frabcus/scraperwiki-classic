@@ -41,7 +41,6 @@ c) Then, get the older version of pip, version 0.6 breaks some old code. Go to [
 
 
 2) Buildout
-
 ***********
 
 To run the buildout, first bootstrap it:
@@ -94,42 +93,46 @@ Now try running django:
 Assuming no errors you should be able to visit http://localhost:8000/ and see the scraperwiki home page.
 
 
-5) Initiate the UML
-*******************
+5) Initiate the Firebox
+***********************
 
-Instructions in UML/LOCAL explains that the system 
-can run without fireboxing on a local machine for 
-development.  
+Screen scrapers run inside a virtual machine "firebox" using User Mode Linux (UML).
 
-The FireBox subsystem can be run without UML by running 
-the command
+Checkout the separare UML repository. You don't want it in the scraperwiki folder, but in a parallel one.  
 
-./runlocal
+> $ hg clone ssh://scraperwiki@212.84.75.28/UML
+
+For development sites, the FireBox subsystem can be run without UML by running the command
+> $ ./runlocal
+It will spawn some magical things in the background. To stop them use killlocal. See UML/LOCAL for more information.
+
+For live sites, you will need to read UML/HOWTO. XXX It isn't up to date. Please quiz Mike and update it if you do this
 
 
-6) Create the scrapers repository
-*******************
+6) Create the scrapers' Mercurial repository
+********************************************
 
-Create a directory called 'scrapers' and check out the scrapers into
-that directory:
+Create a new repository to store the screen scrapers in.
 
-> hg clone scraperwiki@212.84.75.28/scrapers
+> $ cd scraperwiki
+> $ hg init scrapers
+
+
+7) Create the scrapers' datastore
+*********************************
 
 Next, in MySQL, create a database called scraperwiki_datastore:
 mysql> create database scraperwiki_datastore;
 
+There are two configuration files which need pointing to the database.
+
+a) In web/localsettings.py, edit the DATASTORE_DATABASE_* entries. This is access for the Django web application, for example for the API to read from the datastore. A read only database user might be enough for this.
+
+b) In ./scraperlibs/scraperwiki/datastore, copy config.cfg-inhg to config.cfg and edit it. This is the config used by the scrapers to write to the database. You need a user who can read/write to the database.
+
 Then change to the datastore directory, and use mysql to import the database schema, scheme.sql:
 
-(scraperwiki) C:\scraperwiki\web>cd c:\scraperwiki\scraperlibs\scraperwiki\datas
-tore
-(scraperwiki) C:\scraperwiki\scraperlibs\scraperwiki\datastore>mysql -u root -p -h localhost scraperwiki_datastore < scheme.sql
-
-Finally, edit localsettings.py to tell it about the new database:
-
-DATASTORE_DATABASE_ENGINE     = 'mysql'   
-DATASTORE_DATABASE_HOST     = 'localhost'      
-DATASTORE_DATABASE_NAME       = 'scraperwiki_datastore' 
-DATASTORE_DATABASE_USER       = 'root'   
-DATASTORE_DATABASE_PASSWORD   = 'yourpassword'  
+> $ cd ./scraperlibs/scraperwiki/datastore
+> $ mysql -u USERNAME -p -h localhost scraperwiki_datastore < scheme.sql
 
 And you should be done.
