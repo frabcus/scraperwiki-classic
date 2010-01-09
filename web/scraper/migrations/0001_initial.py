@@ -8,9 +8,33 @@ class Migration:
     
     def forwards(self, orm):
         
-
+        # Adding model 'Scraper'
+        db.create_table('scraper_scraper', (
+            ('id', orm['scraper.Scraper:id']),
+            ('title', orm['scraper.Scraper:title']),
+            ('short_name', orm['scraper.Scraper:short_name']),
+            ('source', orm['scraper.Scraper:source']),
+            ('last_run', orm['scraper.Scraper:last_run']),
+            ('description', orm['scraper.Scraper:description']),
+            ('license', orm['scraper.Scraper:license']),
+            ('revision', orm['scraper.Scraper:revision']),
+            ('created_at', orm['scraper.Scraper:created_at']),
+            ('disabled', orm['scraper.Scraper:disabled']),
+            ('deleted', orm['scraper.Scraper:deleted']),
+            ('status', orm['scraper.Scraper:status']),
+            ('guid', orm['scraper.Scraper:guid']),
+            ('published', orm['scraper.Scraper:published']),
+            ('first_published_at', orm['scraper.Scraper:first_published_at']),
+        ))
         db.send_create_signal('scraper', ['Scraper'])
         
+        # Adding model 'UserScraperRole'
+        db.create_table('scraper_userscraperrole', (
+            ('id', orm['scraper.UserScraperRole:id']),
+            ('user', orm['scraper.UserScraperRole:user']),
+            ('scraper', orm['scraper.UserScraperRole:scraper']),
+            ('role', orm['scraper.UserScraperRole:role']),
+        ))
         db.send_create_signal('scraper', ['UserScraperRole'])
         
     
@@ -65,6 +89,7 @@ class Migration:
             'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'disabled': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
+            'first_published_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'guid': ('django.db.models.fields.CharField', [], {'max_length': '1000'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_run': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
@@ -74,7 +99,7 @@ class Migration:
             'short_name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'source': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
             'status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'title': ('django.db.models.fields.CharField', [], {'default': "'Untitled Scraper'", 'max_length': '100'}),
             'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']"})
         },
         'scraper.userscraperrole': {

@@ -13,6 +13,7 @@ class Migration:
             ('user', orm['api.api_key:user']),
             ('key', orm['api.api_key:key']),
             ('active', orm['api.api_key:active']),
+            ('description', orm['api.api_key:description']),
         ))
         db.send_create_signal('api', ['api_key'])
         
@@ -28,6 +29,7 @@ class Migration:
     models = {
         'api.api_key': {
             'active': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'blank': 'True'}),
+            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'key': ('django.db.models.fields.CharField', [], {'max_length': '32', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
