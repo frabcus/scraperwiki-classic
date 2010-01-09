@@ -104,8 +104,14 @@ class GetDataHandler(BaseHandler):
             items.append(item)
         return items
         
+
+class ScraperSearchHandler(BaseHandler):        
+    allowed_methods = ('GET',)
+    
+class GetDataByDateHandler(BaseHandler):        
+    allowed_methods = ('GET',)
         
-        
-        
+class GetDataByLocationHandler(BaseHandler):                
+    allowed_methods = ('GET',)        
         
         
