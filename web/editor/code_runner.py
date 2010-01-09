@@ -130,7 +130,7 @@ def run_popen(code, guid=False):
 def run_firestarter_django(code):
   import FireStarter
   fb   = FireStarter.FireStarter()
-  fb.addPaths ('/a', '/b')
+  fb.addPaths ('/a', '/b', '/home/francis/keep/devel/scraperwiki/scraperlibs') # add your local path as well here, Sym will move this into config setting when changing to Comet
   code = string.replace (code, '\r', '')
 
   res  = fb.execute(code, True)
