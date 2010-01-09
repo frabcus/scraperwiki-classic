@@ -19,7 +19,7 @@ DATABASE_USER       = ''   # Not used with sqlite3.
 DATABASE_PASSWORD   = ''         # Not used with sqlite3.
 URL_ROOT            = '/'           # prefix for URLs to run not at top level of domain
 
-HOME_DIR = '${buildout:directory}' # the parent directory of SCRAPERWIKI_DIR
+HOME_DIR = '/home/.../scraperwiki' # the parent directory of SCRAPERWIKI_DIR
 SCRAPERWIKI_DIR     = HOME_DIR + '/web/'      # top level directory of the installation
 READINGS_DIR        = SCRAPERWIKI_DIR + '/readings/'  # directory containing the cached webpages
 MODULES_DIR         = SCRAPERWIKI_DIR                # directory containing readers, detectors, collectors, and observers modules
