@@ -66,11 +66,16 @@ then run this command and then try buildout again:
 3) localsettings.py
 *******************
 
-Now, in the web/ directory, edit make a copy of the local settings file
+Now, make a copy of the local settings file and edit it
 
-> $  cp localsettings.py-inhg  localsettings.py
+> $ cd web
+> $ cp localsettings.py-inhg  localsettings.py
 
-Then edit localsettings.py to add details of your local setup (database etc). Call the database 'scraperwiki'. Edit HOME_DIR to your scraperwiki home directory. [[In Windows, do use forward slashes in the directory path.]]
+Then edit localsettings.py to:
+
+a) Add details of your local setup (database etc). Call the database 'scraperwiki'. 
+
+b) Edit HOME_DIR to your scraperwiki home directory. [[In Windows, do use forward slashes in the directory path.]]
 
 
 4) run django
@@ -81,10 +86,6 @@ Test the install by moving in to the web directory and running 'syncdb' and 'mig
 > $ cd web
 > $ python manage.py syncdb
 > $ python manage.py migrate
-
-Now load the fixtures:
-
-> $ python manage.py loaddata ../fixtures/test_data.json
 
 Now try running django:
 
