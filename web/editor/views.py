@@ -203,7 +203,7 @@ def edit(request, short_name=None):
         if savedForm.owner():
           # Set the owner.
           # If there is already an owner, and it is not this user, mark this user as an editor
-          # If the scraper has no owner, then the current user taken ownership
+          # If the scraper has no owner, then the current user takes ownership
           if savedForm.owner().pk != request.user.pk:
             savedForm.add_user_role(request.user, 'editor')
         else:
