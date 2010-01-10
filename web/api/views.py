@@ -42,17 +42,25 @@ def explore_scraper_search_1_0(request):
 
 def explore_scraper_getinfo_1_0(request):
 
-    scrapers = []    
+    scrapers = []
     user = request.user
     if user.is_authenticated():
-        scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
+        scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True)[:5]
     else:    
-        scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('-first_published_at')[:5]
-      
-    return render_to_response('scraper_getinfo_1.0.html', {'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getinfo')}, context_instance=RequestContext(request))
+        scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('first_published_at')[:5]
+
+    return render_to_response('scraper_getinfo_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getinfo')}, context_instance=RequestContext(request))
 
 def explore_scraper_getdata_1_0(request):
-    return render_to_response('scraper_getdata_1.0.html', {'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdata')}, context_instance=RequestContext(request))
+
+    scrapers = []
+    user = request.user
+    if user.is_authenticated():
+        scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True)[:5]
+    else:    
+        scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('first_published_at')[:5]
+    
+    return render_to_response('scraper_getdata_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdata')}, context_instance=RequestContext(request))
 
 def explore_scraper_getdatabydate_1_0(request):
     return render_to_response('scraper_getdatabydate_1.0.html', {'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdatabydate')}, context_instance=RequestContext(request))    
