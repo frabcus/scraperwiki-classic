@@ -27,12 +27,11 @@ def frontpage(request, public_profile_field=None):
 
     # The following items are only used when there is a logged in user.	
     if user.is_authenticated():
-        my_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
-        following_scrapers = user.scraper_set.filter(userscraperrole__role='follow', deleted=False)
-        #following_users = UserToUserRole.objects.filter(from_user=user, role='follow')
+        my_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False).order_by('-created_at')
+        following_scrapers = user.scraper_set.filter(userscraperrole__role='follow', deleted=False).order_by('-created_at')
         following_users = user.to_user.following()
         following_users_count = len(following_users)
-        # needs to be expanded to include scrapers you have edit rights on.
+        # contribution_scrapers needs to be expanded to include scrapers you have edit rights on
         contribution_scrapers = my_scrapers
     else:
         my_scrapers = []
@@ -44,7 +43,8 @@ def frontpage(request, public_profile_field=None):
 
     contribution_count = len(contribution_scrapers)
     good_contribution_scrapers = []
-    # add filtering to cut this down to the most recent 10 items
+    # cut number of scrapers displayed on homepage down to the most recent 10 items
+    my_scrapers = my_scrapers[:10]
     # also need to add filtering to limit to public published scrapers
     for scraper in contribution_scrapers:
         if scraper.is_good():
