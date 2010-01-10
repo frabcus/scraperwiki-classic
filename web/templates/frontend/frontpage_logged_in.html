@@ -2,11 +2,10 @@
 
 <div class="page_title">
 	<h1><span class="text">Hello {{ user.username }}</span></h1>
-	<p>You are contributing to {{ contribution_count }} scraper{{ contribution_count|pluralize }}{% if following_scrapers %}, 
+	<p>You are contributing to {{ contribution_count }} scraper{{ contribution_count|pluralize }}{% if following_scrapers %} {% if not following_users %} and {% else %}, {% endif %}
 	 watching 
 			{% with following_scrapers.count as num %}{{ num }}
-			scraper{{ num|pluralize }}{% endwith %}{% endif %}{% if following_users %}, 
-			and following {{ following_users_count }}
+			scraper{{ num|pluralize }}{% endwith %}{% endif %}{% if following_users %}{% if not following_scrapers %} and {% else %}, and {% endif %} following {{ following_users_count }}
 				user{{ following_users_count|pluralize }}{% endif %}
 		</p>
 </div>
@@ -14,19 +13,20 @@
 <div class="content col left">
 
 	<h2>Your scrapers</h2>
-	<ul class="scraper_list">
+
 	{% if my_scrapers %}
+		<ul class="scraper_list">
     	{% for scraper in my_scrapers %}
     	  {% include 'frontend/scraper_line.html' %}
     	{% endfor %}
+	</ul>
+		<p class="more">
+		   <a href="{% url my_scrapers %}">View all your scrapers &raquo;</a>
+		</p>
+		
     	{% else %}
     	 <p>No scrapers yet</p>
     	{% endif %}
-	</ul>
-	<p class="more">
-	   <a href="{% url my_scrapers %}">View all your scrapers &raquo;</a>
-	</p>
-
 
 	<h2>Scrapers you are watching</h2>
 	{% if following_scrapers %}
@@ -36,7 +36,7 @@
 		{% endfor %}
 	</ul>
 	    {% else%}
-	    <p>You are not watching any scrapers yet</p>
+	    <p>You are not watching any scrapers</p>
     {% endif %}
 
 	<h2>People you are following</h2>

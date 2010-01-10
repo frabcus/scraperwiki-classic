@@ -1,0 +1,42 @@
+<script> document.domain = document.domain; </script>
+<script src="http://localhost:8001/static/Orbited.js"></script>
+<body>
+
+<textarea id="test">
+import time
+for i in range(10):
+ print i
+ time.sleep(1)
+</textarea>
+
+<button onclick="sendCode()">Test</button>
+<button onclick="conn.send('kill');">stop</button>
+<pre>
+<div id="console">
+
+</div></pre></body>  
+
+<script>
+TCPSocket = Orbited.TCPSocket;
+
+
+var conn = new TCPSocket()
+conn.open('localhost', '9010')
+
+  
+  
+conn.onread = function(data) { 
+      var container = document.getElementById('console');
+      container.innerHTML += data
+
+     }
+  
+function sendCode() {
+  conn.send(
+    document.getElementById('test').value
+    );
+}
+ 
+
+
+</script>
