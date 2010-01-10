@@ -5,27 +5,20 @@
 
 {% block content %}
     <div class="page_title">
-        <span style="float: left;">
         <h1>Scrapers</h1>
         <p>
             All scrapers in ScraperWiki
-
         </p>
 
-  
-    </span>
-                    <span style="float: right;">
-    <form action="/scrapers/search/" method="POST">
-{{ form }}
-<input type="submit" value="Go" />
-</form>
-
-</span>
-            <div style="clear: both;"></div>
-</div>
+        <form action="/scrapers/search/" method="post">
+            {{ form.q.label_tag }}
+            {{ form.q }}
+            <input type="submit" value="Go" />
+        </form>
+    </div>
 
     <div class="content">
-                       <span style="float: right"><a href="/feeds/all_scrapers/">RSS feed of all scrapers</a></span>
+        <a href="/feeds/all_scrapers/">RSS feed of all scrapers</a>
         <ul class="allscraperlist">
           {% for scraper in scrapers.object_list %}
           {% include 'scraper/scraper_line.html' %}
