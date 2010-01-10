@@ -37,15 +37,11 @@
 		
 	<div class="content">
 	<div style="float: left;">
-		    	<h2>{{ profile.user.username }}'s scrapers</h2>
+		    	<h2>{{ profile.user.username }}'s published scrapers</h2>
     	<ul>  
-	{%  if profile.user.scraper_set.all %}
-        	{% for scraper in profile.user.scraper_set.all %}
-        	    {% if scraper.published %} 
-                    {% ifequal scraper.owner profile.user %}
+	{%  if owned_scrapers %}
+        	{% for scraper in owned_scrapers %}
         	          {% include 'frontend/scraper_line.html' %}
-                    {% endifequal %}
-        	    {% endif %}
         	{% endfor %}
      {% else %}
 	No scrapers yet
