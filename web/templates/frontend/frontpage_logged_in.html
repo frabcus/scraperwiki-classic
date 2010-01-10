@@ -69,7 +69,6 @@
 		<li><a href="{% url profiles_profile_detail user.username %}">View your profile</a></li>
 	</ul>
 
-
     <h3>ScraperMart - latest requests</h3>
     <ul>
     {% for solicitation in solicitations %}
@@ -80,11 +79,13 @@
             <a href='{% url profiles_profile_detail solicitation.user_created %}'>
                 {{ solicitation.user_created.username }}
             </a>
-            <span class="bounty">
-                <a href="{% url market_view solicitation.id %}">
-                    &pound;{{solicitation.price}} bounty
-                </a>
-            </span>
+            {% if solicitation.has_bounty %}
+                <span class="bounty">
+                    <a href="{% url market_view solicitation.id %}">
+                        &pound;{{solicitation.price}} bounty
+                    </a>
+                </span>
+            {% endif %}
     	</li>
 	{% endfor %}
     </ul>
