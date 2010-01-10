@@ -1,0 +1,24 @@
+{% extends "frontend/base.html" %}
+{% block content %}
+    <div class="page_title">
+        <h1>{% block heading %}{% endblock %}</h1>
+        <p>{% block subheading %}{% endblock %}</p>
+    </div>
+    <div class="content full">
+        <div class="page_tabs">
+            <ul>
+                <li class="selected">
+                    <a href="#">Documentation</a>
+                </li>
+                <li>
+                    <a href="./explore/">Explore</a>
+                </li>
+            </ul>
+        </div>
+        <div class="page_tab_body">                    
+            {% block tab %}
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}
+
