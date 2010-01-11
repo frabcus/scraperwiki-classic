@@ -51,4 +51,19 @@ function APISetupExploreFunction(){
             $(this).html(aLink);
         }
     );
+    
+    $('#ulScraperShortNames li code').each(
+        function(){
+            var sText = $(this).html();
+            var aLink = $('<a href="#">' + sText + '</a>');
+            aLink.click(
+                function (){
+                    $('#name').val(sText);
+                    $('#name').focus();
+                }
+            );
+            $(this).html(aLink);
+        }
+    );
+
 }

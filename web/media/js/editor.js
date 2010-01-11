@@ -650,7 +650,7 @@ $(document).ready(function() {
 
     function writeToData(sMessage) {
         row = eval(sMessage)
-        
+
         html_row = "<tr>"
         $.each(row, function(i){
             html_row +="<td>"+row[i]+"</td>"

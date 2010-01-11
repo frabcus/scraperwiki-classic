@@ -24,7 +24,7 @@
         <p>
             Each API function has it's own URI. You pass an API key, the format you would like the data returned in, other function specific arguments, via the query string to tell the API exactly what you are requesting:
             <code class="api_call">
-     http://www.scraperwiki.com/api/1.0/scraper/getdata/<em>scraper_short_name</em>?key=<em>[your api key]</em>&amp;format<em>=[json | yaml | xml | php | csv]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
+     http://www.scraperwiki.com/api/1.0/scraper/getdata/?name=<em>[scraper short name]</em>&key=<em>[your api key]</em>&amp;format<em>=[json | yaml | xml | php | csv]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
             </code>
         </p>
     </div>
@@ -142,16 +142,16 @@
             <a href="{% url api:scraper_search %}">scraperwiki.scraper.search</a>
         </li>
         <li>
-            <a href="">scraperwiki.scraper.getInfo</a>
+            <a href="{% url api:scraper_getinfo %}">scraperwiki.scraper.getInfo</a>
         </li>
         <li>
-            <a href="">scraperwiki.scraper.getData</a>
+            <a href="{% url api:scraper_getdata %}">scraperwiki.scraper.getData</a>
         </li>
         <li>
-            <a href="">scraperwiki.scraper.getDataByDate</a>
+            <a href="{% url api:scraper_getdatabydate %}">scraperwiki.scraper.getDataByDate</a>
         </li>
         <li>
-            <a href="">scraperwiki.scraper.getDataByLocation</a>
+            <a href="{% url api:scraper_getdatabylocation %}">scraperwiki.scraper.getDataByLocation</a>
         </li>
     </ul>
 </div>

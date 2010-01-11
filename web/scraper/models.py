@@ -139,9 +139,9 @@ class Scraper(models.Model):
           %s is not a valid role.  Valid roles are:\n
           %s
           """ % (role, ", ".join(valid_roles)))
-      u = UserScraperRole(user=user, scraper=self, role=role)
-      u.user = user
-      u.save()
+
+      #check if role exists before adding 
+      u, created = UserScraperRole.objects.get_or_create(user=user, scraper=self, role=role)
 
     def unfollow(self, user):
       """

@@ -117,16 +117,18 @@ def edit(request, short_name=None):
   
   if not request.session.get('ScraperDraft', None):
     request.session['ScraperDraft'] = {}
+  # drafts are saved in session e.g. if you've been redirected to log in
   draft = request.session['ScraperDraft'].get(short_name, None)
   has_draft = False
   # First off, create a scraper instance somehow.
   # Drafts are seen as more 'important' than saved scrapers.
   if draft:
     has_draft = True
+    scraper.__dict__['commit_message'] = 'Scraper created'
     if draft.short_name:
-      # We're working with an existing scraper that has been edited, but not saved
+      # We're working with an existing (saved?) scraper that has been edited, but not saved
       scraper = draft
-      scraper.code = draft.code
+      scraper.code = draft.code   
     else:
       # This is a new scraper that has been edited, but not saved
       scraper = draft
@@ -135,17 +137,22 @@ def edit(request, short_name=None):
     # No drafts exist...
     if short_name is not "__new__":
       # ...and this is an existing scraper.  Load from the database and disk
+      # This happens after you've pressed the SAVE button
       scraper = get_object_or_404(ScraperModel, short_name=short_name)
       scraper.code = scraper.saved_code()
+      if not scraper.published:
+      	scraper.__dict__['commit_message'] = 'Scraper created'
     else:
       # This is a new scraper
       scraper = ScraperModel()
       scraper.code = template.default()['code']
-      scraper.commit_message = ""
+      scraper.__dict__['commit_message'] = 'Scraper created'
 
   scraper.__dict__['tags'] = ", ".join(tag.name for tag in scraper.tags)
-
+ 
+  # display 'scraper created' commit message if scraper hasn't been saved yet
   form = forms.editorForm(scraper.__dict__, instance=scraper)
+
   form.fields['code'].initial = scraper.code
   form.fields['title'].initial = scraper.title
   
@@ -155,9 +162,10 @@ def edit(request, short_name=None):
       form = forms.editorForm(request.POST, instance=scraper)
       action = request.POST.get('action').lower()
     else:
-      # We only reach here when the GET action is scraper or commit,
+      # We only reach here when the GET action is scraper or commit, ('save or commit'?)
       # and that only heppens when the 'draft' feature is being used.
       if draft:
+        draft.__dict__['commit_message'] = 'Scraper created - hello world'
         form = forms.editorForm(draft.__dict__, instance=draft)
         form.code = draft.code
         action = request.GET.get('action').lower()
@@ -174,10 +182,10 @@ def edit(request, short_name=None):
       savedForm = form.save(commit=False)
       savedForm.tags = request.POST.get('tags')
       
-
       # Add some more fields to the form
       savedForm.code = form.cleaned_data['code']
-      savedForm.description = form.cleaned_data['description']      
+      savedForm.description = form.cleaned_data['description']    
+      savedForm.license = form.cleaned_data['license']    
       # savedForm.short_name = short_name
       # if hasattr(scraper, 'pk'):
       #   savedForm.pk = scraper.pk
@@ -195,7 +203,7 @@ def edit(request, short_name=None):
         if savedForm.owner():
           # Set the owner.
           # If there is already an owner, and it is not this user, mark this user as an editor
-          # If the scraper has no owner, then the current user taken ownership
+          # If the scraper has no owner, then the current user takes ownership
           if savedForm.owner().pk != request.user.pk:
             savedForm.add_user_role(request.user, 'editor')
         else:

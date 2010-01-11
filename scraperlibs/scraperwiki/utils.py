@@ -114,7 +114,7 @@ def pdftoxml(pdfdata):
 
     xmlin = tempfile.NamedTemporaryFile(mode='r', suffix='.xml')
     tmpxml = xmlin.name # "temph.xml"
-    cmd = 'pdftohtml -xml -zoom 1.5 "%s" "%s"' % (pdffout.name, os.path.splitext(tmpxml)[0])
+    cmd = '/usr/bin/pdftohtml -xml -nodrm -zoom 1.5 -enc UTF-8 -noframes "%s" "%s"' % (pdffout.name, os.path.splitext(tmpxml)[0])
     cmd = cmd + " >/dev/null 2>&1" # can't turn off output, so throw away even stderr yeuch
     os.system(cmd)
 
@@ -123,4 +123,8 @@ def pdftoxml(pdfdata):
     xmldata = xmlin.read()
     xmlin.close()
     return xmldata
+
+
+
+
 

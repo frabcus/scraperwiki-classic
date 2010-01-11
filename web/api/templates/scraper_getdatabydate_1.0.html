@@ -1,0 +1,24 @@
+{% extends "function_base.html" %}
+
+{% block title %}scraperwiki.scraper.getDataByDate | API{% endblock %}
+
+{% block heading %}scraperwiki.scraper.getDataByDate{% endblock %}
+{% block subheading %}Returns the data from a scraper based on a date range{% endblock %}
+{% block arguments %}
+    <dt><code>key</code> (required)</dt>
+    <dd>A valid API key.</dd>
+    <dt><code>format</code> (required)</dt>
+    <dd>The format you would like the response in. <input type="text" name="format" id="format" size="4"/></dd>
+    <dt><code>name</code> (required)</dt>
+    <dd>The short name for a scraper. <input type="text" name="name" id="name"/></dd>
+    <dt><code>start_date</code> (required)</dt>
+    <dd>The start of the date range. <small>(e.g. 2009-01-10)</small> <input type="text" name="start_date" id="start_date" size="9"/></dd>    
+    <dt><code>end_date</code> (required)</dt>
+    <dd>The end of the date range. <small>(e.g. 2010-01-10)</small> <input type="text" name="end_date" id="end_date" size="9"/></dd>
+    <dt><code>limit</code> (optional)</dt>
+    <dd>The number of records to return, up to a maximum of {{ max_api_items }}. <input type="text" name="limit" size="4"/></dd>
+    <dt><code>offset</code> (optional)</dt>
+    <dd>Offset the limit. <input type="text" name="offset" size="4"/></dd>    
+{% endblock %}
+
+{% block example_url %}{% url api:explorer_example method='scraper.getdatabydate_1.0' %}{% endblock %}
