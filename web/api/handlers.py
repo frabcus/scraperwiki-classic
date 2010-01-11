@@ -93,8 +93,8 @@ class GetDataHandler(BaseHandler):
     allowed_methods = ('GET',)
 
     def read(self, request):
-        limit = clamp_limit(request.GET.get('limit', 100))
-        offset = request.GET.get('offset', 0)
+        limit = clamp_limit(int(request.GET.get('limit', 100)))
+        offset = int(request.GET.get('offset', 0))
         api_is_necessary = (offset != 0) or (limit > 1000) # or other stuff (maybe the apikey should say "from download CSV")
         
         scraper, error_response = get_scraper_response(request, api_is_necessary)
@@ -117,8 +117,8 @@ class GetDataByDateHandler(BaseHandler):
     allowed_methods = ('GET',)
         
     def read(self, request):
-        limit = clamp_limit(request.GET.get('limit', 100))
-        offset = request.GET.get('offset', 0)
+        limit = clamp_limit(int(request.GET.get('limit', 100)))
+        offset = int(request.GET.get('offset', 0))
         scraper, error_response = get_scraper_response(request)
         if error_response:
             return error_response
@@ -140,8 +140,8 @@ class GetDataByLocationHandler(BaseHandler):
     allowed_methods = ('GET',)        
         
     def read(self, request):
-        limit = clamp_limit(request.GET.get('limit', 100))
-        offset = request.GET.get('offset', 0)
+        limit = clamp_limit(int(request.GET.get('limit', 100)))
+        offset = int(request.GET.get('offset', 0))
         scraper, error_response = get_scraper_response(request)
         if error_response:
             return error_response
