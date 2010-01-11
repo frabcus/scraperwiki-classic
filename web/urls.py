@@ -30,7 +30,6 @@ feeds = {
 urlpatterns = patterns('',
     url(r'^profiles/', include('profiles.urls')),
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
-    url(r'^', include('frontend.urls')),
     url(r'^editor/', include('editor.urls')),
     
     url(r'^scraper_data/(?P<short_name>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}, name="scraper_data"),
@@ -64,8 +63,7 @@ urlpatterns = patterns('',
     (r'^api/', include('api.urls', namespace='foo', app_name='api')),
 
 
-    
-    (r'^foo/$',             'django.views.generic.simple.direct_to_template', {'template': 'test.html'}),
-
+    #Rest of the site
+    url(r'^', include('frontend.urls')),
 
 )
