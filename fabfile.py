@@ -1,5 +1,7 @@
+from fabric.api import *
+
 # globals
-config.project_name = 'ScraperWiki'
+PROJECT_NAME = 'ScraperWiki'
 
 # environments
 def dev():

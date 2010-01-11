@@ -34,18 +34,21 @@ guid = "test"
 var conn = new TCPSocket()
 conn.open('localhost', '9010')
 
-  
+
   
 conn.onread = function(data) { 
-      var container = document.getElementById('console');
-      container.innerHTML += data
+  var container = document.getElementById('console');
+  container.innerHTML += data
+}
 
-     }
+conn.onopen = function() {
+  alert('connected')
+}
+
 function send(json_data) {
   conn.send(
     JSON.stringify(json_data)
-    );
-  
+    );  
 }
 
 function killRun() {

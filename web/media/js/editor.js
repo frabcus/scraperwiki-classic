@@ -10,9 +10,12 @@ $(document).ready(function() {
     var guid = $('#scraper_guid').val();
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val(); 
+    var conn; // Orbited connection
+    
 
     //constructor functions
     setupCodeEditor();
+    setupOrbited()
     setupMenu();
     setupTabs();
     setupTextTabs();
@@ -63,6 +66,14 @@ $(document).ready(function() {
           });        
     }
 
+
+    
+    function setupOrbited() {
+        TCPSocket = Orbited.TCPSocket;
+        conn = new TCPSocket()
+        conn.open('localhost', '9010')
+    }
+    
     //Setup Keygrabs
     function setupKeygrabs(){
         var grabkeyrun = function(event){ 
@@ -227,99 +238,81 @@ $(document).ready(function() {
         
     }
     
-    function runScraper(){
-        
-        //change the title
-        document.title = '*' + document.title
-        
-        //reset the tabs
-        $('.editor_output div.tabs li').removeClass('new');
-        $('#output_data table').find('tr').remove()
-
-        //set a dividers on the output
-        $('#output_console div :last-child').addClass("run_end")
-        $('#output_data div :last-child').addClass("run_end")
-        $('#output_sources div :last-child').addClass("run_end")                
-
-        //show annimation
-        $('#running_annimation').show();
-
-        //run either the firestarter or run mdoel
-        if (run_type == 'firestarter_apache') {
-
-            $('#editor').bind('form-pre-serialize', null,
-            function(foo, options) {
-                $('#editor #id_code').text(codeeditor.getCode())
-            })
-
-            $('#editor').ajaxSubmit({
-                target: '#console',
-                action: '/editor/run_code'
-            });
-
-            return false;
-            // <-- important!
-        } else {
-            var run_request = $.ajax({
-                type: 'POST',
-                url: '/editor/run_code',
-                data: ({
-                    code: codeeditor.getCode(),
-                    guid: guid
-                }),
-                dataType: "html",
-                
-                success: function(code) {        
-                    
-                    $('.editor_controls #run').unbind('click.abort');
-                    $('.editor_controls #run').bind('click.run', run_abort);
-                    $('.editor_controls #run').removeClass('running').val('run');
-
-                    //split results
-                    var aResults = code.split("@@||@@");
-                    var noutputdatalines = 0; 
-                    for (var i=0; i < aResults.length -1; i++) {
-                        var oItem = eval('(' + aResults[i] + ')')
-                        if(oItem.message_type == 'sources'){                                                        
-                            writeToSources(oItem.content, oItem.content_long);                                                            
-                        }else if (oItem.message_type == 'data'){
-                            // (unavoidably) too many entries crashes your browser
-                            if (noutputdatalines < 200)
-                              writeToData(oItem.content);
-                            else if (noutputdatalines == 200)
-                              writeToData('["more entries"]');
-                            noutputdatalines++
-                        }else if (oItem.message_type == 'exception'){
-                            writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
-                        }else{
-                            writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
-                        }
-                    };
-                    
-                    //hide annimation
-                    $('#running_annimation').hide();
-                    
-                    //change title
-                    document.title = document.title.replace('*', '')
-                    
-                },
-                error: function(code) {
-                    alert('Sorry, there seems to be something wrong with running code at the moment, try saving your scraper and trying again later.')
-                    
-                    $('.editor_controls #run').unbind('click.abort');
-                    $('.editor_controls #run').bind('click.run', run_abort);
-                    $('.editor_controls #run').removeClass('running').val('run');
-                    
-                    //hide annimation
-                    $('#running_annimation').hide();
-                    
-                    //change title
-                    document.title = document.title.replace('*', '')
-                }
-            });
-            return run_request
-        }
+    
+    
+    
+    
+    conn.onread = function(data) { 
+      data = eval('('+data+')');
+      if (data.message_type == "kill") {
+          $('.editor_controls #run').removeClass('running').val('run');
+          $('.editor_controls #run').unbind('click.abort')
+          $('.editor_controls #run').bind('click.run', sendCode);
+          
+          //hide annimation
+          $('#running_annimation').hide();
+          
+          //change title
+          document.title = document.title.replace('*', '')
+          writeToConsole(data.content, data.content_long, data.message_type)
+          
+      } else if (data.message_type == "sources") {
+          writeToSources(data.content, data.content_long)
+      } else if (data.message_type == "data") {
+          writeToData(data.content)
+      } else {
+          writeToConsole(data.content, data.content_long, data.message_type)
+      }
+      // alert(data.message_type)
+      
+      // alert(data.message_type)
     }
+
+    function send(json_data) {
+      conn.send(
+        JSON.stringify(json_data)
+        );  
+    }
+
+    function killRun() {
+      data = {
+        "command" : 'kill',
+      }
+      send(data)
+    }
+
+    function sendCode() {
+      data = {
+        "command" : "run",
+        "guid" : guid,
+        "code" : codeeditor.getCode()
+      }
+      send(data)
+      
+      $('.editor_controls #run').unbind('click.run')
+      $('.editor_controls #run').addClass('running').val('Stop');
+      $('.editor_controls #run').bind('click.abort', function() {
+          killRun()
+          $('.editor_controls #run').removeClass('running').val('run');
+          $('.editor_controls #run').unbind('click.abort')
+          $('.editor_controls #run').bind('click.run', sendCode);
+          
+          //hide annimation
+          $('#running_annimation').hide();
+          
+          //change title
+          document.title = document.title.replace('*', '')
+      });
+      
+      
+      
+    }
+
+
+
+
+
+
 
 
     function viewDiff(){
@@ -380,7 +373,7 @@ $(document).ready(function() {
             $('.editor_controls #run').unbind('click.run')
             $('.editor_controls #run').addClass('running').val('Stop');
             $('.editor_controls #run').bind('click.abort', function() {
-                runRequest.abort()
+                killRun()
                 $('.editor_controls #run').removeClass('running').val('run');
                 $('.editor_controls #run').unbind('click.abort')                    
                 writeToConsole('Run Aborted') // Custom function that append to a div
@@ -434,7 +427,7 @@ $(document).ready(function() {
         });
         
         // run button
-        $('.editor_controls #run').bind('click.run', run_abort);
+        $('.editor_controls #run').bind('click.run', sendCode);
 
         //diff button
          $('.editor_controls #diff').click(function() {

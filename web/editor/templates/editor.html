@@ -6,6 +6,14 @@
 {% endblock %}
 
 {% block js %}
+    {% comment %}
+        Below needed for orbited, don't remove.  
+        See http://orbited.org/wiki/Deployment#Cross-SubdomainDeployment 
+        for more.
+    {% endcomment %}
+    <script>document.domain = document.domain;</script>
+
+    <script src="http://localhost:8001/static/Orbited.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js"></script>

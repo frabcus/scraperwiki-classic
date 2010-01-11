@@ -170,7 +170,7 @@ def list(request):
 
     form = SearchForm()
         
-    return render_to_response('scraper/list.html', {"scrapers": scrapers, "form": form, })
+    return render_to_response('scraper/list.html', {"scrapers": scrapers, "form": form, }, context_instance = RequestContext(request))
     
 def download(request, scraper_id = 0):
     user = request.user
