@@ -23,11 +23,17 @@ class geopoint:
             sheight = (self.altitude == None and 200 or self.altitude)
             lat, lng, height = turn_wgs84_into_osgb36(self.latitude, self.longitude, sheight)
         
+        elif self.coordinatesystem == "GBPostcode":
+            lat, lng = "GBPostcode", "NotDone"
+        
         else:
             lng, lat = None, None
 
-        return [lat, lng]
+        return (lat, lng)
             
+    def __str__(self):
+        return "OSGB36(%s, %s)" % self.latlng()
+    
 
 # the different type objects for quickest access
 class OSeastingnorthing(geopoint):
@@ -53,4 +59,10 @@ class WGS84(geopoint):
         self.latitude = latitude
         self.longitude = longitude
         self.altitude = altitude
+        
+# prototype version through same interface
+class GBPostcode(geopoint):
+    def __init__(self, postcode):
+        self.coordinatesystem = "GBPostcode"
+        self.postcode = postcode
         
