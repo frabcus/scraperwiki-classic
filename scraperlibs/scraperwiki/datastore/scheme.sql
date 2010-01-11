@@ -1,4 +1,4 @@
-x
+
 DROP TABLE IF EXISTS `items`;
 CREATE TABLE IF NOT EXISTS `items` (
   `item_id`         bigint(20)      NOT NULL,        -- should this an auto_increment? 
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `items` (
 --  `run_id`          varchar(255)    NOT NULL,
 --  `deleted_run_id`  varchar(255)    NULL,          -- if not NULL then this entry is deleted.  the run_id allows the deletion to be rolled-back
   `date`            datetime        NULL,            -- reconsider this one
-  `latlng`          varchar(100)    NULL,            -- this will be converted to fancy object like Point
+  `latlng`          varchar(100)    NULL,            -- this will be converted to fancy object like Point for filtering by distance (see ScraperManager.data_dictlist)
   `date_scraped`    datetime        NULL,
   KEY `item_id` (`item_id`,`unique_hash`,`scraper_id`,`date`,`latlng`)
 ) ENGINE=MyISAM;

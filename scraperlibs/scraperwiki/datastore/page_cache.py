@@ -6,6 +6,8 @@ import connection
 
 # this file is actually imported into scraperlibs.page_cache from the datastore directory
 
+# it was put here (for now) because it accesses the same database as the datastore (though a different table)
+
 def deletepagebyname(name):
     """Delete page function"""
     scraper_id = os.environ['SCRAPER_GUID']
