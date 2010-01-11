@@ -146,8 +146,7 @@ class GetDataByLocationHandler(BaseHandler):
         if error_response:
             return error_response
         
-        lat = request.GET.get('lat', None)
-        lng = request.GET.get('lng', None)
+        latlng = "%s,%s" % (request.GET.get('lat', None), request.GET.get('lng', None))
        
         # raise an error if there's no location in this request (don't see why you can't simply include these parameters in a standard getData request)
         if not lat or not lng:
@@ -155,7 +154,7 @@ class GetDataByLocationHandler(BaseHandler):
             error_response.write(": No date range selected '%s'" % short_name)
             return error_response
         
-        return Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, start_date=start_date, end_date=end_date)
+        return Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, latlng=latlng)
         
         
 class ScraperSearchHandler(BaseHandler):        

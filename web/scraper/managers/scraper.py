@@ -146,13 +146,16 @@ class ScraperManager(models.Manager):
             qquery.append("AND items.`date` < %s")
             qlist.append(end_date)
         
+        #if latlng:
+        #    qquery.append("ORDER BY items.item_id")
+        #else:
         qquery.append("ORDER BY items.item_id")
         #if locationpoint:   # don't have capability to do this yet
         #    qquery.append("ORDER BY DIST(latlng, locationpoint)")
         
-        #qquery.append("LIMIT %d")
+        qquery.append("LIMIT %s")
         #qlist.append(offset)
-        #qlist.append(limit)
+        qlist.append(2)
       
         print " ".join(qquery), qlist
         c = self.datastore_connection.cursor()
