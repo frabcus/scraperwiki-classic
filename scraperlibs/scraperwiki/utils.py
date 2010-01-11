@@ -43,7 +43,7 @@ urllibopener.addheaders = [('User-agent', 'ScraperWiki - please make your data o
 
 # should the exceptions be caught here?  
 # should the print statements  go to different streams?
-def scrape (url, params=None, escape=True):
+def scrape (url, params=None):
     '''get html text given url and parameter map'''
     data = params and urllib.urlencode(params) or None
     
