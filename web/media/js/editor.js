@@ -235,27 +235,29 @@ $(document).ready(function() {
             showPopup('meta_form');
             return false;
         });
-        
+
     }
-    
-    
-    
-    
-    
+
+    conn.onclose = function(){
+        alert('connection closed');
+    }
+
+    //read data back from twisted
     conn.onread = function(data) { 
       data = eval('('+data+')');
-      if (data.message_type == "kill") {
+      if (data.message_type == "kill" || data.message_type == "end") {
+
           $('.editor_controls #run').removeClass('running').val('run');
-          $('.editor_controls #run').unbind('click.abort')
+          $('.editor_controls #run').unbind('click.abort');
           $('.editor_controls #run').bind('click.run', sendCode);
-          
+
           //hide annimation
           $('#running_annimation').hide();
-          
+
           //change title
           document.title = document.title.replace('*', '')
           writeToConsole(data.content, data.content_long, data.message_type)
-          
+
       } else if (data.message_type == "sources") {
           writeToSources(data.content, data.content_long)
       } else if (data.message_type == "data") {
@@ -268,35 +270,46 @@ $(document).ready(function() {
       // alert(data.message_type)
     }
 
+    //send a message to the server
     function send(json_data) {
       conn.send(
         JSON.stringify(json_data)
         );  
     }
 
-    function killRun() {
+    //send a 'kill' message
+    function sendKill() {
       data = {
         "command" : 'kill',
       }
       send(data)
     }
 
+    //send code request run
     function sendCode() {
+    
+    //clear the tabs
+    clearOutput();
+    
+    //send the data
       data = {
         "command" : "run",
         "guid" : guid,
         "code" : codeeditor.getCode()
       }
       send(data)
-      
+
+      //unbind run button
       $('.editor_controls #run').unbind('click.run')
       $('.editor_controls #run').addClass('running').val('Stop');
+
+      //bind abort button
       $('.editor_controls #run').bind('click.abort', function() {
-          killRun()
+          sendKill();
           $('.editor_controls #run').removeClass('running').val('run');
           $('.editor_controls #run').unbind('click.abort')
           $('.editor_controls #run').bind('click.run', sendCode);
-          
+
           //hide annimation
           $('#running_annimation').hide();
           
@@ -307,12 +320,6 @@ $(document).ready(function() {
       
       
     }
-
-
-
-
-
-
 
 
     function viewDiff(){
@@ -328,6 +335,12 @@ $(document).ready(function() {
                 showPopup('diff');
             }
         });
+    }
+
+    function clearOutput(){
+        $('#output_console div').html('');    
+        $('#output_sources div').html('');    
+        $('#output_data div').html('');                    
     }
 
     function reloadScraper(){
@@ -373,7 +386,7 @@ $(document).ready(function() {
             $('.editor_controls #run').unbind('click.run')
             $('.editor_controls #run').addClass('running').val('Stop');
             $('.editor_controls #run').bind('click.abort', function() {
-                killRun()
+                sendKill()
                 $('.editor_controls #run').removeClass('running').val('run');
                 $('.editor_controls #run').unbind('click.abort')                    
                 writeToConsole('Run Aborted') // Custom function that append to a div
@@ -418,12 +431,6 @@ $(document).ready(function() {
         $('.save').live('click', function(){
              saveScraper(false);
              return false;
-        });
-
-
-        //clear console button
-        $('#clear').click(function() {
-            $('#output_console div').html('');
         });
         
         // run button
@@ -588,8 +595,7 @@ $(document).ready(function() {
     //Write to concole/data/sources
     function writeToConsole(sMessage, sLongMessage, sMessageType) {
 
-        sDisplayMessage = sMessage;
-                
+        sDisplayMessage = sMessage;        
         if(sLongMessage) {
             if (sMessageType == 'exception'){
                 sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="exception_expander">...more</span>';

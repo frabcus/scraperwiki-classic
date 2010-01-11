@@ -38,32 +38,35 @@ def insert(data):
     str_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     hlatlng = ""  # default blank value
         
+    
     # the v is typed and could be, for example, padded with zeros if it is of int type
     for k, v in data.items():  
         sv = (v != None and str(v) or "")  # make None go to ""
         if scraper_id:
             c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item_id, k, sv))
         
-        if sv[:7] == "OSGB36(":   # detect it is location type and upgrade it to the correct field straight away
-            hlatlng = v
+        # here we could detect if it is a latlng object and upgrade it to the latlng key
+        #if sv[:7] == "OSGB36(":
+        #    hlatlng = v
   
     # --  `run_id`          varchar(255)    NOT NULL,
     # --  `deleted_run_id`  varchar(255)    NULL,
     
     # get the special date value as long as it's of the right type
     hdate = data.get('date')
-    if hdate != None and type(hdate) != type(str_now):
-        print "Warning: date should be python.datetime"
+    if hdate != None and (type(hdate) != datetime.datetime and type(hdate) != datetime.date):
+        print "Warning: date should be python.datetime", hdate, "is", type(hdate)
         hdate = None
     
-    # latlng in the data over-rides anything we have pulled out
     if 'latlng' in data:
-        hlatlng = str(data.get('latlng'))
-    
+         hlatlng = "%f,%f" % tuple(data["latlng"])  # this will throw exception if not exactly right
+         data["latlng"] = hlatlng  # put the value back in so it's the same
+         
+            
     # should we put an try catch around here?
     if scraper_id:
         c.execute("INSERT INTO `items` (`item_id`, `unique_hash`, `scraper_id`,`date`, `latlng`, `date_scraped`) \
-                VALUES (%s, %s, %s, %s, %s, %s);", (item_id, "deletethisvalue", scraper_id, hdate, hlatlng, str_now))
+                   VALUES (%s, %s, %s, %s, %s, %s);", (item_id, "deletethisvalue", scraper_id, hdate, hlatlng, str_now))
           
     # printing to the console
     ldata = { }
@@ -81,9 +84,9 @@ def __retrieve_item(c, item_id):
     """
     Loads single row given the item_id
     """
-    if not c.execute("SELECT scraper_id, date_scraped FROM items WHERE item_id=%s", (item_id,)):
+    if not c.execute("SELECT scraper_id, date_scraped, latlng FROM items WHERE item_id=%s", (item_id,)):
         return None
-    scraper_id, date_scraped = c.fetchone()
+    scraper_id, date_scraped, latlng = c.fetchone()
     
     rdata = { "date_scraped": date_scraped }  
   
@@ -91,6 +94,10 @@ def __retrieve_item(c, item_id):
     for key, value in c.fetchall():
         rdata[key] = value
       
+    # over-write from our indexed valyue of latlng
+    if latlng:
+        rdata["latlng"] = latlng
+        
     return rdata
 
 
@@ -206,7 +213,6 @@ def save(unique_keys, data, date=None, latlng=None):   # **kwargs
         data["date"] = date
     if latlng:
         data["latlng"] = latlng
-
     
     # fill in unique keys
     matchrecord = { }

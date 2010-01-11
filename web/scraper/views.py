@@ -24,7 +24,8 @@ def create(request):
 def data (request, scraper_short_name):
     user = request.user
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    data_tables = models.Scraper.objects.data_summary_tables(scraper_id=scraper.guid, limit=1000)
+    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=1000)
+    data_tables = { "": data }   # replicates output from data_summary_tables
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
@@ -135,9 +136,11 @@ def show(request, scraper_short_name, selected_tab = 'data'):
 
 # would be better to use the python csv writer as an generator and pass it straight as a response -- without the use of a template
 # also could allow for individual tables to be output (multiple links on the data page, for example)
-def export_csv (request, scraper_short_name):
+def export_csv (request, scraper_short_name):   # to delete ??  should use the api function (subject to not needing a key)
+    # replace with a link to api/getdata on a dummy API key
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    data_tables = models.Scraper.objects.data_summary_tables(scraper_id=scraper.guid, limit=10000000)  # maybe limit=0 should be unlimited (or add limits everywhere)
+    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=1000)  # maybe limit=0 should be unlimited (or add limits everywhere)
+    data_tables = { "": data }   # replicates output from data_summary_tables
 
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)
@@ -197,7 +200,8 @@ def tag(request, tag):
         'selected_tab' : 'items',
         }, context_instance = RequestContext(request))
     
-def tag_data(request, tag):
+def tag_data(request, tag):  # to delete
+    assert False  
     from tagging.utils import get_tag
     from tagging.models import Tag, TaggedItem
     
