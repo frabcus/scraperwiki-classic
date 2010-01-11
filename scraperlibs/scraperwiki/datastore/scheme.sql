@@ -1,11 +1,11 @@
-
+x
 DROP TABLE IF EXISTS `items`;
 CREATE TABLE IF NOT EXISTS `items` (
   `item_id`         bigint(20)      NOT NULL,        -- should this an auto_increment? 
   `unique_hash`     varchar(32)     NOT NULL,        -- this needs deleting
   `scraper_id`      varchar(100)    NOT NULL,
 --  `run_id`          varchar(255)    NOT NULL,
---  `deleted_run_id`  varchar(255)    NULL,
+--  `deleted_run_id`  varchar(255)    NULL,          -- if not NULL then this entry is deleted.  the run_id allows the deletion to be rolled-back
   `date`            datetime        NULL,            -- reconsider this one
   `latlng`          varchar(100)    NULL,            -- this will be converted to fancy object like Point
   `date_scraped`    datetime        NULL,
@@ -29,23 +29,16 @@ CREATE TABLE IF NOT EXISTS `sequences` (
   ) ENGINE=MyISAM;
 
 
--- how to add unique(scraper_id, name)?
 DROP TABLE IF EXISTS `pages`;
 CREATE TABLE IF NOT EXISTS `pages` (
   `scraper_id`      varchar(100)    NOT NULL,
   `date_saved`      datetime        NULL,
+  `run_id`          varchar(255)    NOT NULL,
   `tag`             text            NULL,
   `name`            text            NULL,
   `text`            longtext        NOT NULL
+  -- KEY? how to add unique(scraper_id, name)?
 ) ENGINE=MyISAM;  
 
+-- global persistant variables can be implemented by (tag="variable", name="variablename", text="variablevalue")
 
--- key-value row of useful data stored against each scraper that persists between runs
-DROP TABLE IF EXISTS `kvmeta`;
-  `scraper_id`      varchar(100)    NOT NULL,
-  `key`             text            NOT NULL,
-  `value`           longtext        NOT NULL,
-  `type`            varchar(50)     NOT NULL,
-) ENGINE=MyISAM;
-
-  

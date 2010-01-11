@@ -191,6 +191,9 @@
         <dl class="quick_help">
             <h4>Recommended libraries</h4>
             <ul>
+                <li><code><b>urllib2</b>, <b>urlparse</b></code>
+                    Standard python libraries for opening urls.  <a href="/editor/urllib2_demo" target="_blank">demo</a>  <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
+                </li>
                 <li><code><b>BeautifulSoup</b></code>
                     For parsing html.  <a href="/editor/beautifulsoup_demo" target="_blank">demo</a>  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
                 </li>
@@ -200,19 +203,6 @@
                 <li><code><b>lxml</b></code>
                     For parsing html and accessing it using cssselect.  <a href="/editor/lxml_demo" target="_blank">demo</a>  docs
                 </li>
-                <li><code><b>urllib2</b></code>
-                    Standard python library for opening urls.  <a href="/editor/urllib2_demo" target="_blank">demo</a>  <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
-                </li>
-            </ul>
-
-            <h4><code>scraperwiki</code> (utils)</h4>
-            <ul>
-                <li><code><b>scrape</b>(url, params={ })</code>
-                    Returns the body text from a url
-                </li>
-                <li><code><b>parse_html</b>(text)</code>
-                    Converts an HTML string to an <a href="http://codespeak.net/lxml/" target="_new">lxml.etree</a> object
-                </li>
                 <li><code><b>pdftoxml</b>(pdfdata)</code>
                     Converts the binary data of a PDF file into a parsable XML string
                 </li>
@@ -220,15 +210,22 @@
 
             <h4><code>scraperwiki.datastore</code> <a href="/editor/datastore_demo" target="_blank">demo</a></h4>
             <ul>
-                <li><code><b>save</b>(unique_keys=[], data={})</code>
-                    Saves the dict data to the datastore, over-writing all records that have the same values for the keys in the list unique_keys.
-                (Optional special keys are date (should be a date object), and latlng> (should be a pair of floats (latitude, longitude).))
+                <li><code><b>save</b>(unique_keys=[], data={}, date=None, latlng=[None,None])</code>
+                    Saves to the datastore, over-writing data with the same values for unique_keys.
                 </li>
-                <li><code><b>loadallofcurrentscraper</b>(filterdata={})</code>
-                    Returns list of dicts (records) that match the key-values given by filterdata.
+                <li><code><b>retrieve</b>(matchrecord={})</code>
+                    Returns list of records (dicts) matching the keys and values in matchrecord.
                 </li>
-                <li><code><b>deleteallofcurrentscraper</b>(filterdata={})</code>
-                    Deletes all records that match the key-values of filterdata.
+            </ul>                
+
+            <h4><code>scraperwiki.geo</code> objects with latlng() function <a href="/editor/geo_demo" target="_blank">demo</a></h4>
+            <ul>
+                <li><code><b>OSeastingnorthing</b>(easting, northing)</code> the most common data form
+                </li>
+                <li><code><b>OSGB</b>(oscoord)</code> <a href="http://en.wikipedia.org/wiki/British_national_grid_reference_system">docs</a>
+                    <code><b>OSGB36</b>(latitude, longitude)</code> <a href="http://en.wikipedia.org/wiki/OSGB36">docs</a>
+                    <code><b>WGS84</b>(latitude, longitude)</code> <a href="http://en.wikipedia.org/wiki/WGS84">docs</a>
+                    <code><b>GBPostcode</b>(postcode)</code> <a href="http://en.wikipedia.org/wiki/WGS84">docs</a>
                 </li>
             </ul>                
 

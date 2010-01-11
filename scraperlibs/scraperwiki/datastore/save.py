@@ -10,6 +10,7 @@ except:
 
 import cgi
 
+
 # this sets deleted_run_id to flag a record is deleted, rather than actually deleting it
 bSaveAllDeletes = False
 
@@ -18,38 +19,60 @@ def insert(data):
     """
     Inserts a single row
     """
-    scraper_id = os.environ['SCRAPER_GUID']
-  
-    conn = connection.Connection()
-    c = conn.connect()
+    scraper_id = os.environ['SCRAPER_GUID']  # if scraper_id == '' then it's using an unsaved scraper, no GUID is allocated and should not interact with the database
+
+    if scraper_id:
+        conn = connection.Connection()
+        c = conn.connect()
     
-    # there's apparently a good reason for doing it this way, and not using auto-increment
-    c.execute("UPDATE sequences SET id=LAST_INSERT_ID(id+1);")
-    c.execute("SELECT LAST_INSERT_ID();")
-    item_id = c.fetchone()[0]
+    if scraper_id:
+        # there's apparently a good reason for doing it this way, and not using auto-increment on item_id, but it's not declared
+        # (*probably* it's to enable the datastore to be distributed across several tables)
+        c.execute("UPDATE sequences SET id=LAST_INSERT_ID(id+1);")
+        c.execute("SELECT LAST_INSERT_ID();")
+        item_id = c.fetchone()[0]
+    else:
+        item_id = 0
  
     # for date scraped
     str_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    hlatlng = ""  # default blank value
         
     # the v is typed and could be, for example, padded with zeros if it is of int type
-    for k,v in data.items():  
-        c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item_id, k, str(v)))
+    for k, v in data.items():  
+        sv = (v != None and str(v) or "")  # make None go to ""
+        if scraper_id:
+            c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item_id, k, sv))
+        
+        if sv[:7] == "OSGB36(":   # detect it is location type and upgrade it to the correct field straight away
+            hlatlng = v
   
     # --  `run_id`          varchar(255)    NOT NULL,
     # --  `deleted_run_id`  varchar(255)    NULL,
     
-    hlatlng = str(data.get('latlng'))
-    hdate = str(data.get('date'))     # this should be converted into a date object which saves natively into the database
-    c.execute("INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`, `date_scraped`) \
-               VALUES (%s, %s, %s, %s, %s, %s);", (scraper_id, item_id, "deletethisvalue", hdate, hlatlng, str_now))
-  
+    # get the special date value as long as it's of the right type
+    hdate = data.get('date')
+    if hdate != None and type(hdate) != type(str_now):
+        print "Warning: date should be python.datetime"
+        hdate = None
     
+    # latlng in the data over-rides anything we have pulled out
+    if 'latlng' in data:
+        hlatlng = str(data.get('latlng'))
+    
+    # should we put an try catch around here?
+    if scraper_id:
+        c.execute("INSERT INTO `items` (`item_id`, `unique_hash`, `scraper_id`,`date`, `latlng`, `date_scraped`) \
+                VALUES (%s, %s, %s, %s, %s, %s);", (item_id, "deletethisvalue", scraper_id, hdate, hlatlng, str_now))
+          
     # printing to the console
     ldata = { }
     for k, v in data.items():  
         ldata[cgi.escape(k)] = cgi.escape(str(v))
-    print '&lt;scraperwiki:message type="data">%s&lt;/scraperwiki:message>' % json.dumps(ldata)
-  
+    
+    # this should print < but it crashes the javascript
+    print '<scraperwiki:message type="data">%s' % json.dumps(ldata)   # don't put in the </scraperwiki:message> because it doesn't work like that!
+     
     return item_id
 
     
@@ -71,10 +94,10 @@ def __retrieve_item(c, item_id):
     return rdata
 
 
-def __build_matches(matchrecord, scraper_id="current"):
-    if scraper_id == "current":
-        scraper_id = os.environ['SCRAPER_GUID']
-        
+def __build_matches(matchrecord, scraper_id):
+    
+    # scraper_id can be None to allow matching across whole database
+    
     qquery  = ["SELECT items.item_id AS item_id FROM items"]
     qlist   = [ ]
         
@@ -111,6 +134,12 @@ def retrieve(matchrecord, scraper_id="current"):
     """
     Retrieves all records owned by scraper (of current scraper if scraper_id) filtered by matchrecord
     """
+    if scraper_id == "current":
+        scraper_id = os.environ['SCRAPER_GUID']  
+    if not scraper_id:
+        print "Warning: cannot retrieve on unsaved scraper"
+        return [ ]
+    
     conn = connection.Connection()
     c = conn.connect()
     
@@ -124,6 +153,7 @@ def retrieve(matchrecord, scraper_id="current"):
         rdata = __retrieve_item(c, item_idl[0])
         if rdata:
             result.append(rdata)
+    
     return result
     
     
@@ -140,10 +170,15 @@ def __delete_item(c, item_id):
         c.execute("DELETE FROM kv WHERE item_id=%s", (item_id,))
 
 
-def delete(matchrecord, scraper_id="current"):
+def delete(matchrecord):
     """
     Deletes all records owned by scraper (of current scraper if scraper_id) filtered by matchrecord
     """
+    scraper_id = os.environ['SCRAPER_GUID']  
+    if not scraper_id:
+        print "Warning: cannot delete on unsaved scraper"
+        return 
+    
     conn = connection.Connection()
     c = conn.connect()
     
@@ -158,12 +193,15 @@ def delete(matchrecord, scraper_id="current"):
         rdata = __delete_item(c, item_idl[0])
     
 
-def save(unique_keys, data, date=None, latlng=None):
-    """
-    Standard save function that over-writes a record that shares the same values for the unique_keys
-    """
+
+def save(unique_keys, data, date=None, latlng=None):   # **kwargs
+    # data.update(kwargs)   # merges two dicts to implement the October discussion on googlewave (not convinced it's a handy interface)
     
-    
+    """
+    Standard save function that UPserts (over-writes) a record that shares the same values for the unique_keys
+    """
+    scraper_id = os.environ['SCRAPER_GUID']  # if scraper_id == '' then it's using an unsaved scraper, no GUID is allocated and should not interact with the database
+
     if date:
         data["date"] = date
     if latlng:
@@ -176,12 +214,10 @@ def save(unique_keys, data, date=None, latlng=None):
         matchrecord[key] = str(data[key])
         
     # always insert when unique_keys are empty 
-    if unique_keys:   
+    if scraper_id and unique_keys:   
         delete(matchrecord)
     
     insert(data)
     
-
-  
 
   
