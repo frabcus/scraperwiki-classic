@@ -33,7 +33,6 @@ def solicitation (request):
     return render_to_response('market/solicitation.html', {'form': form, 'market_bounty_charge': settings.MARKET_BOUNTY_CHARGE }, context_instance = RequestContext(request))
 
 def market_list (request, mode='open'):
-
     #get all scrapers not marked deleted or 
     status = models.SolicitationStatus.objects.get(status=mode)
     solicitations = models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')    
