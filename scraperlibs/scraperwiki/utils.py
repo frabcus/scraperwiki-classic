@@ -47,31 +47,14 @@ def scrape (url, params=None, escape=True):
     '''get html text given url and parameter map'''
     data = params and urllib.urlencode(params) or None
     
-    QUICKCACHE_DIR = "/home/goatchurch/scraperwiki/quickcache/"
-    fname = QUICKCACHE_DIR and os.path.join(QUICKCACHE_DIR, urllib.quote_plus(url + (params and "??" + str(params)[:50] or "")))
-    #print fname, "llll"
-    fname = False
+    try:
+        fin = urllibopener.open(url, data)
+        text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
+        fin.close()   # get the mimetype here
+    except:
+        print '<scraperwiki:message type="sources">' + "Failed: %s" % url
+        return None
     
-    if fname and os.path.exists(fname):
-        fin = open(fname)
-        text = fin.read()
-        fin.close()
-        
-    else:
-        try:
-            fin = urllibopener.open(url, data)
-            text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
-            fin.close()   # get the mimetype here
-            
-            if fname and os.path.exists(QUICKCACHE_DIR):
-                fout = open(fname, "w")
-                fout.write(text)
-                fout.close()
-            
-        except:
-            print '<scraperwiki:message type="sources">' + "Failed: %s" % url
-            return None
-        
     print_content = {
       'content' : "%d bytes from %s" % (len(text), url),
       'content_long' : cgi.escape(text),
