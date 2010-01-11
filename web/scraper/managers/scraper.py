@@ -103,16 +103,20 @@ class ScraperManager(models.Manager):
         # Now implemented by fetching the items, and building each row separately
         
         # split the latlng into a pair
-        if latlng:
-            latlng = tuple(map(float, latlng.split(",")))
-
         # code here similar to datastore/save.py __build_matches
         
         qquery = ["SELECT items.item_id AS item_id"]
-        qquery.append("FROM items")
         qlist  = [ ]
+        
         if latlng:
-            qquery.append(", items.latlng AS latlng")
+            #qquery.append(", SUBSTR(items.latlng, 1, 20)")
+            #qquery.append(", SUBSTR(items.latlng, 21, 41)")
+            qquery.append(", ABS(SUBSTR(items.latlng, 1, 20)-%s)+ABS(SUBSTR(items.latlng, 21, 41)-%s) AS diamdist")
+            qlist.append(latlng[0])
+            qlist.append(latlng[1])
+            #qquery.append(", items.latlng AS latlng")
+        
+        qquery.append("FROM items")
         
         # filter on a key existing and value being the same in the data for the record, using INNER JOIN (see datastore.save.__build_matches)
         #     (not yet used feature)
@@ -136,8 +140,8 @@ class ScraperManager(models.Manager):
         qlist.append(scraper_id)
         
         # filter by latlng exists; (can't filter by distance with this object!)
-        if latlng:
-            qquery.append("AND items.latlng IS NOT NULL")
+        #if latlng:
+        #    qquery.append("AND items.latlng IS NOT NULL")
         
         if start_date and end_date:
             #qquery.append("AND items.`date` IS NOT NULL")
@@ -146,18 +150,16 @@ class ScraperManager(models.Manager):
             qquery.append("AND items.`date` < %s")
             qlist.append(end_date)
         
-        #if latlng:
-        #    qquery.append("ORDER BY items.item_id")
-        #else:
-        qquery.append("ORDER BY items.item_id")
-        #if locationpoint:   # don't have capability to do this yet
-        #    qquery.append("ORDER BY DIST(latlng, locationpoint)")
+        if latlng:
+            qquery.append("ORDER BY diamdist")
+        else:
+            qquery.append("ORDER BY items.item_id")
         
-        qquery.append("LIMIT %s")
-        #qlist.append(offset)
-        qlist.append(2)
+        qquery.append("LIMIT %s,%s")
+        qlist.append(offset)
+        qlist.append(limit)
       
-        print " ".join(qquery), qlist
+        #print " ".join(qquery), qlist
         c = self.datastore_connection.cursor()
         
         c.execute(" ".join(qquery), tuple(qlist))
@@ -168,6 +170,7 @@ class ScraperManager(models.Manager):
         allitems = [ ]
         for item_idl in item_idlist:
             item_id = item_idl[0]
+            #print "iiii", item_idl
             
             rdata = { }
             
@@ -178,9 +181,6 @@ class ScraperManager(models.Manager):
             
             if item[0]:
                 rdata["date"] = item[0]
-            if item[1]:
-                rdata["latlng"] = item[1]
-                latlng = map(float, item[1].split(","))
             if item[2]:
                 rdata["date_scraped"] = item[2]
                         
@@ -189,11 +189,13 @@ class ScraperManager(models.Manager):
             for key, value in c.fetchall():
                 rdata[key] = value
         
+            # over-ride any values with latlng (we could break it into two values)
+            if item[1]:
+                rdata["latlng"] = tuple(map(float, item[1].split(",")))
+        
             allitems.append(rdata)
         return allitems
            
-              
-              
               
     
     def data_summary(self, scraper_id=0, limit=1000, offset=0, start_date=None, end_date=None, latlng=None):
@@ -201,7 +203,6 @@ class ScraperManager(models.Manager):
         allitems = self.data_dictlist(scraper_id, limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
         return convert_dictlist_to_datalist(allitems)
       
-
 
     # not yet used   probably to delete
     def data_summary_tables(self, scraper_id=0, limit=1000):

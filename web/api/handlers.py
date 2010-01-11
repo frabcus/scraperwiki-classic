@@ -146,10 +146,10 @@ class GetDataByLocationHandler(BaseHandler):
         if error_response:
             return error_response
         
-        latlng = "%s,%s" % (request.GET.get('lat', None), request.GET.get('lng', None))
+        latlng = (float(request.GET.get('lat', None)), float(request.GET.get('lng', None)))
        
         # raise an error if there's no location in this request (don't see why you can't simply include these parameters in a standard getData request)
-        if not lat or not lng:
+        if not latlng:
             error_response = rc.BAD_REQUEST
             error_response.write(": No date range selected '%s'" % short_name)
             return error_response

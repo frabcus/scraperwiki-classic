@@ -59,7 +59,7 @@ def insert(data):
         hdate = None
     
     if 'latlng' in data:
-         hlatlng = "%f,%f" % tuple(data["latlng"])  # this will throw exception if not exactly right
+         hlatlng = "%020f,%020f" % tuple(data["latlng"])  # this will throw exception if not exactly right
          data["latlng"] = hlatlng  # put the value back in so it's the same
          
             
