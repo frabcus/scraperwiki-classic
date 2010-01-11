@@ -14,34 +14,42 @@
 <div class="content">
 
 		<h2>Scrapers you own</h2>
-			<ul class="scraper_list">
+		
+
 		{% if owned_scrapers %}
+					<ul class="scraper_list">
     	{% for scraper in owned_scrapers %}
     	  {% include 'frontend/scraper_line.html' %}
     	{% endfor %}
+	</ul>
+	
 	    {% else %}
 	<p>You do not own any scrapers</p>
     {% endif %}
 
 	<h2>Scrapers you are editing</h2>
+	
 	{% if contribution_scrapers %}
 	<ul class="scraper_list">
 		{% for scraper in contribution_scrapers %}
 		  {% include 'frontend/scraper_line.html' %}
 		{% endfor %}
 	</ul>
+	
 	    {% else%}
 	    <p>You are not editing any scrapers</p>
     {% endif %}
 
 
 	<h2>Scrapers you are watching</h2>
+	
 	{% if following_scrapers %}
 	<ul class="scraper_list">
 		{% for scraper in following_scrapers %}
 		  {% include 'frontend/detailed_scraper_line.html' %}
 		{% endfor %}
 	</ul>
+	
 	    {% else%}
 	    <p>You are not watching any scrapers</p>
     {% endif %}

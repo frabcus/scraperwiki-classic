@@ -82,7 +82,7 @@ def profile_detail(request, username):
 		try:
 			profiled_user = User.objects.get(username=username)
 		except User.DoesNotExist:
-			return HttpResponseRedirect("/404")
+			raise Http404
 		if request.method == 'POST': # if follow form has been submitted
 			if user.is_authenticated():
 				if (profiled_user in user.to_user.following()):
@@ -95,7 +95,8 @@ def profile_detail(request, username):
 					return profile_views.profile_detail(request, username=username, extra_context={ 'following': True, }, )
 		else:
 			following = UserToUserRole.objects.filter(to_user=profiled_user, from_user=user, role='follow')
-			return profile_views.profile_detail(request, username=username, extra_context={ 'following': following, }, )
+			owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True, deleted=False)
+			return profile_views.profile_detail(request, username=username, extra_context={ 'following': following, 'owned_scrapers' : owned_scrapers}, )
 
 
 

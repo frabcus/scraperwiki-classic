@@ -137,7 +137,7 @@ def show(request, scraper_short_name, selected_tab = 'data'):
 # also could allow for individual tables to be output (multiple links on the data page, for example)
 def export_csv (request, scraper_short_name):
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    data_tables = models.Scraper.objects.data_summary_tables(scraper_id=scraper.guid, limit=1000000)  # maybe limit=0 should be unlimited (or add limits everywhere)
+    data_tables = models.Scraper.objects.data_summary_tables(scraper_id=scraper.guid, limit=10000000)  # maybe limit=0 should be unlimited (or add limits everywhere)
 
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)
