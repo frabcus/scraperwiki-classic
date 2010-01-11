@@ -17,6 +17,7 @@ syntax: regexp
 ^Scripts$
 ^pip-log.txt$
 ^.hgignore$
+^scraperlibs/scraperwiki/datastore/config.cfg.local$
 ^web/localsettings.py$
 ^web/editor/code_runner.py$
 ^web/python$
