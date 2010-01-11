@@ -70,3 +70,5 @@ sys.path.append(FIREBOX_PATH)
 PAYPAL_RECEIVER_EMAIL = "your_paypal_sandbox_email@example.com"
 EMAIL_FROM = 'noreply@localhost'
 MARKET_BOUNTY_CHARGE = 6.3
+
+API_DOMAIN = ''

@@ -1,5 +1,5 @@
 from django import forms
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.contrib import auth
 import settings
@@ -82,7 +82,7 @@ def profile_detail(request, username):
 		try:
 			profiled_user = User.objects.get(username=username)
 		except User.DoesNotExist:
-			return HttpResponseRedirect("/404")
+			raise Http404
 		if request.method == 'POST': # if follow form has been submitted
 			if user.is_authenticated():
 				if (profiled_user in user.to_user.following()):
