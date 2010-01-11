@@ -23,6 +23,7 @@ urlpatterns = patterns('',
     url(r'^privacy/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/privacy.html'}, name='privacy'),       
     url(r'^about/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/about.html'}, name='about'),       
     url(r'^example_data/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/example_data.html'}, name='api'),       
+    url(r'^help/code_documentation/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/code_documentation.html'}, name='help_code_documentation'),   
 
 
     # contact form

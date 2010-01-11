@@ -179,6 +179,13 @@
     <div id="popup_documentation" class="popup_item">
         <a class="popupClose">x</a>
         <dl class="quick_help">
+            <h4>Storing data <a href="/editor/datastore_demo" target="_blank">demo</a></h4>
+            <ul>
+                <li><code><b>save</b>(unique_keys=[], data={}, date=None, latlng=[None,None])</code>
+                    Saves to the datastore, over-writing data with the same values for unique_keys.
+                </li>
+            </ul>                
+
             <h4>Recommended libraries</h4>
             <ul>
                 <li><code><b>urllib2</b>, <b>urlparse</b></code>
@@ -198,39 +205,8 @@
                 </li>
             </ul>
 
-            <h4><code>scraperwiki.datastore</code> <a href="/editor/datastore_demo" target="_blank">demo</a></h4>
-            <ul>
-                <li><code><b>save</b>(unique_keys=[], data={}, date=None, latlng=[None,None])</code>
-                    Saves to the datastore, over-writing data with the same values for unique_keys.
-                </li>
-                <li><code><b>retrieve</b>(matchrecord={})</code>
-                    Returns list of records (dicts) matching the keys and values in matchrecord.
-                </li>
-            </ul>                
+            <p><a href="{% url help_code_documentation %}" target="_blank">Full code documentation</a> (opens in new window).</p>
 
-            <h4><code>scraperwiki.geo</code> objects with latlng() function <a href="/editor/geo_demo" target="_blank">demo</a></h4>
-            <ul>
-                <li><code><b>OSeastingnorthing</b>(easting, northing)</code> the most common data form
-                </li>
-                <li><code><b>OSGB</b>(oscoord)</code> <a href="http://en.wikipedia.org/wiki/British_national_grid_reference_system">docs</a>
-                    <code><b>OSGB36</b>(latitude, longitude)</code> <a href="http://en.wikipedia.org/wiki/OSGB36">docs</a>
-                    <code><b>WGS84</b>(latitude, longitude)</code> <a href="http://en.wikipedia.org/wiki/WGS84">docs</a>
-                    <code><b>GBPostcode</b>(postcode)</code> <a href="http://en.wikipedia.org/wiki/WGS84">docs</a>
-                </li>
-            </ul>                
-
-            <h4><code>scraperwiki.page_cache</code> <a href="/editor/page_cache_demo" target="_blank">demo</a></h4>
-            <ul>
-                <li><code><b>savepage</b>(tag, name, text)</code>  
-                    Backs up text of a scraped page under a particular name.
-                </li>
-                <li><code><b>getpagebyname</b>(name)</code>  
-                    Returns text of page that was saved earlier.
-                </li>
-                <li><code><b>getnamesfromtag</b>(tag)</code>  
-                    List of page names for a given tag.
-                </li>
-            </ul>
         </dl>
     </div>
     <div id="popup_text" class="popup_item">
