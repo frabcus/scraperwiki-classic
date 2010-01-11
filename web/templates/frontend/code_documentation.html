@@ -1,0 +1,121 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Code documentation{% endblock %}
+{% block content %}
+    <div class="page_title">
+        <h1>Code documentation</h1>
+        <p>
+        The following libraries and function calls are available to use in your screenscraper.
+        They are all in a normal python module, called <code>scraperwiki</code>. For
+        example, you can do <code>from scraperwiki import datastore</code>, and then
+        call the function <code>datastore.save</code>.
+        </p>
+    </div>
+    <div class="content programmer_api">
+        <div class="section">
+            <h2>Scraping</h2>
+            <p>How to retrieve HTML pages from websites.
+            <h3>scraperwiki.scrape(url, [params=], )</h3>
+            <p>Downloads a web page, and returns you the HTML. The page will appear in the "sources"
+            pane in the scraper code editor, so you can easily view what was downloaded.
+                </p>
+                <dl>
+                    <dt><code>url</code></dt>
+                        <dd>The address of the web page, e.g. <code>http://www.parliament.uk/mpslordsandoffices/government_and_opposition/hmg.cfm</code>
+                        </dd>
+                    <dt><code>params</code> (optional)</dt>
+                        <dd>If present, makes the HTTP request a POST request, such as if a form
+                        had been submitted. <code>params</code> is a dictionary, whose keys are
+                        the names of the fields being posted, and values are their values.
+                        </dd>
+                 </dl>
+            <h3>Standard libraries</h3>
+            <p>You can download pages using all the standard Python functions.
+            The page will not appear in the "sources" pane).
+            </p>
+            <ul>
+                <li><code><b>urllib2</b>, <b>urlparse</b></code>
+                    Standard python libraries for opening urls.  <a href="/editor/urllib2_demo" target="_blank">demo</a>  <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
+                </li>
+                <li><code><b>BeautifulSoup</b></code>
+                    For parsing html.  <a href="/editor/beautifulsoup_demo" target="_blank">demo</a>  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
+                </li>
+                <li><code><b>mechanize</b></code>
+                    For navigating form fillings.  <a href="/editor/mechanize_demo" target="_blank">demo</a>  <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
+                </li>
+            </ul>
+        </div>
+
+
+        <div class="section">
+            <h2>Data store</h2>
+            <p>This is where you put the output from your scraper. It is a key-value database.
+            This means that you do not have to specify a structure in advance, you just add
+            the data and it stores it. You can read from the data store using the
+            <a href="{% url help_code_documentation %}">external API</a>.</p>
+
+            <div class="call">
+                <h3>scraperwiki.datastore.save(unique_keys, data, [date=], [latlng=]) </h3>
+                <p>Stores a new record in the database, or replaces an existing
+                record which has the same unique keys. The data parameter is a
+                dictionary containing all the attributes of your record and their
+                values.
+                </p>
+                <dl>
+                    <dt><code>unique_keys</code></dt>
+                        <dd>An array containing the names of the attributes in
+                        your record which are together unique. e.g. <code>['id']</code> or
+                        <code>['cattery', 'cat_number']</code>. Any existing data with
+                        the same values for those attributes as your new data
+                        will be replaced. If there is no such existing data, or
+                        if <code>unique_keys</code> is an empty array, 
+                        it always creates a new record.
+                        </dd>
+                    <dt><code>data</code></dt>
+                        <dd>A dictionary containing the data in your record.  The
+                        keys are strings, and the values are converted to strings. e.g.
+                        <code>{ 'name': 'Ruffles', 'dog_id': '9812301', 'breed': 'Alsation', 'weight': 28 }</code>,
+                        the integer <code>weight</code> will be stored as a string. A null value
+                        (e.g. <code>None</code> in Python) is stored as an empty string.
+                        As a special case, if you use a key called <code>'date'</code> or <code>'latlng'</code>,
+                        then it will be treated as if it were one of the optional arguments described below.
+                        </dd>
+                    <dt><code>date</code> (optional)</dt>
+                        <dd>Optionally, a special date/time field. You can later retrieve
+                        information according to this date using the <a href="{% url api:scraper_getdatabydate %}">getDataByDate</a>
+                        function in the external API. You can also store dates
+                        in the data field, but you should put the most important one in this field.
+                        The date can be formatted as an ISO date in a string (<code>'2009-11-02'</code>), 
+                        can include a time (<code>'2015-01-19 03:14:07'</code>) or can be
+                        a date/time object from your language (e.g. <code>datetime.datetime.now() - datetime.timedelta(weeks=2)</code>).
+                        </dd>
+                    <dt><code>latlng</code> (optional)</dt>
+                        <dd>Optionally, a location. This is a pair containing
+                        latitude and longitude coordinates, e.g. <code>(-2.983333, 53.4)</code>. The coordinates should
+                        be in the WGS84 projection. You can later retrieve
+                        information according to this location using the <a href="{% url api:scraper_getdatabylocation %}">getDataByLocation</a>.
+                        </dd>
+                </dl>
+                <p>Full example:
+                <pre>
+    data = {}
+    data['name'] = 'Ruffles'
+    data['dog_id'] = '9812301'
+    data['breed'] = 'Alsation'
+    scraperwiki.datastore.save([dog_id], data, date="2009-03-02", latlng=(-2.983333, 53.4))
+                </pre>
+            </div>
+        </div>
+
+
+        <div class="section">
+            <h2>Debugging</h2>
+            <p>
+            <h3>print</h3>
+            <p>To log what is happening, or as a general purpose tool to help
+            debugging, use your language's standard print command. The output will appear
+            in the "console" pane in the scraper code editor.
+            </p>
+        </div>
+     </div>
+{% endblock %}
