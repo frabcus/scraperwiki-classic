@@ -26,7 +26,6 @@ $(document).ready(function() {
     setupAutoDraft();
     setupResizeEvents();
 
-
     //setup code editor
     function setupCodeEditor(){
         codeeditor = CodeMirror.fromTextArea("id_code", {
@@ -473,7 +472,7 @@ $(document).ready(function() {
             }
         );
     }
-    
+
     //commit
     function commitScraper(){
         return true;
