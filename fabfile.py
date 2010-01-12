@@ -47,7 +47,6 @@ def virtualenv(command):
 
 
 def buildout():
-  virtualenv('python bootstrap.py')
   virtualenv('buildout')
 
 
