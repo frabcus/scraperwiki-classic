@@ -24,9 +24,9 @@
           {% include 'scraper/scraper_line.html' %}
           {% endfor %}
         </ul>
-<div class="pagination" style="margin-top: 20px">
+<div class="pagination">
 
-    <span class="step-links">
+    <span class="step_links">
         {% if scrapers.has_previous %}
             <a href="?page={{ scrapers.previous_page_number }}">previous</a>
         {% endif %}

@@ -238,15 +238,15 @@ $(document).ready(function() {
 
     }
 
+/*
     conn.onclose = function(){
         alert('connection closed');
     }
-
+*/
     //read data back from twisted
     conn.onread = function(data) { 
       data = eval('('+data+')');
       if (data.message_type == "kill" || data.message_type == "end") {
-
           $('.editor_controls #run').removeClass('running').val('run');
           $('.editor_controls #run').unbind('click.abort');
           $('.editor_controls #run').bind('click.run', sendCode);
@@ -288,34 +288,36 @@ $(document).ready(function() {
     //send code request run
     function sendCode() {
     
-    //clear the tabs
-    clearOutput();
+        resizeControls()
     
-    //send the data
-      data = {
-        "command" : "run",
-        "guid" : guid,
-        "code" : codeeditor.getCode()
-      }
-      send(data)
+        //clear the tabs
+        clearOutput();
+    
+        //send the data
+          data = {
+            "command" : "run",
+            "guid" : guid,
+            "code" : codeeditor.getCode()
+          }
+          send(data)
 
-      //unbind run button
-      $('.editor_controls #run').unbind('click.run')
-      $('.editor_controls #run').addClass('running').val('Stop');
+          //unbind run button
+          $('.editor_controls #run').unbind('click.run')
+          $('.editor_controls #run').addClass('running').val('Stop');
 
-      //bind abort button
-      $('.editor_controls #run').bind('click.abort', function() {
-          sendKill();
-          $('.editor_controls #run').removeClass('running').val('run');
-          $('.editor_controls #run').unbind('click.abort')
-          $('.editor_controls #run').bind('click.run', sendCode);
+          //bind abort button
+          $('.editor_controls #run').bind('click.abort', function() {
+              sendKill();
+              $('.editor_controls #run').removeClass('running').val('run');
+              $('.editor_controls #run').unbind('click.abort')
+              $('.editor_controls #run').bind('click.run', sendCode);
 
-          //hide annimation
-          $('#running_annimation').hide();
+              //hide annimation
+              $('#running_annimation').hide();
           
-          //change title
-          document.title = document.title.replace('*', '')
-      });
+              //change title
+              document.title = document.title.replace('*', '')
+          });
       
       
       
@@ -692,11 +694,10 @@ $(document).ready(function() {
     };
 
     //click bar to resize
-    function clickToResize() {
-      var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-      if (maxheight >= $("#codeeditordiv").height() + 5)
-      {
-          previouscodeeditorheight = $("#codeeditordiv").height(); 
+    function resizeControls() {
+      var maxheight = $("#codeeditordiv").height() + $(window).height() - ($(".editor_controls").position().top + 5); 
+      if (maxheight >= $("#codeeditordiv").height() + 5) {
+          previouscodeeditorheight = $("#codeeditordiv").height();
           $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
       }
       else
@@ -734,7 +735,7 @@ $(document).ready(function() {
                            }); 
 
          // bind the double-click 
-         $(".ui-resizable-s").bind("dblclick", clickToResize);
+         $(".ui-resizable-s").bind("dblclick", resizeControls);
 
 
 

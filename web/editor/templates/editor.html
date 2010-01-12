@@ -127,7 +127,7 @@
             </div>
 
             {# Consoles #}
-            <div class="editor_output" id="outputeditordiv">
+            <div id="outputeditordiv" class="editor_output">
                 <div class="tabs">
                     <ul>
                         <li class="console">
@@ -188,6 +188,16 @@
             <ul>
                 <li><code><b>save</b>(unique_keys=[], data={}, date=None, latlng=[None,None])</code>
                     Saves to the datastore, over-writing data with the same values for unique_keys.
+                </li>
+            </ul>                
+
+            <h4>Geo location <a href="/editor/datastore_demo" target="_blank">demo</a></h4>
+            <ul>
+                <li><code><b>gb_postcode_to_latlng</b>(postcode)</code>
+                    returns (lat,lng) pair for a postcode
+                </li>
+                <li><code><b>geo.os_easting_northing_to_latlng</b>(easting, northing)</code>
+                    returns (lat,lng) pair for a OS Grid easting, northing coordinates
                 </li>
             </ul>                
 
