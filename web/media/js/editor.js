@@ -129,6 +129,7 @@ $(document).ready(function() {
         //show default tab
         showTab('console'); //todo: check in cookie if tab already set.
         
+        resizeControls('up');
     }
 
     //Setup Text Popup Tabs
@@ -287,8 +288,8 @@ $(document).ready(function() {
 
     //send code request run
     function sendCode() {
-    
-        resizeControls()
+
+        resizeControls('up');
     
         //clear the tabs
         clearOutput();
@@ -692,20 +693,26 @@ $(document).ready(function() {
       if (codemirroriframe)
           codemirroriframe.height(($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px'); 
     };
+    
 
     //click bar to resize
-    function resizeControls() {
-      var maxheight = $("#codeeditordiv").height() + $(window).height() - ($(".editor_controls").position().top + 5); 
-      if (maxheight >= $("#codeeditordiv").height() + 5) {
+    function resizeControls(sDirection) {
+    
+        if (sDirection != 'up' && sDirection != 'down'){
+            sDirection = 'none';
+        }
+
+      //work out which way to go
+      var maxheight = $("#codeeditordiv").height() + $(window).height() - ($("#outputeditordiv").position().top + 5); 
+      if (maxheight >= $("#codeeditordiv").height() + 5 && (sDirection == 'none' || sDirection == 'down')) {
           previouscodeeditorheight = $("#codeeditordiv").height();
           $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
-      }
-      else
+      } else if (sDirection == 'none' || sDirection == 'up') {
 
           $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
 
-    };
-      
+      };
+
       $("#codeeditordiv").resizable({
                        handles: 's',   
                        autoHide: false, 
@@ -736,7 +743,7 @@ $(document).ready(function() {
 
          // bind the double-click 
          $(".ui-resizable-s").bind("dblclick", resizeControls);
-
+    }
 
 
        function onWindowResize() {
