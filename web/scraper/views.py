@@ -13,7 +13,9 @@ from scraper import models
 from scraper import forms
 from scraper.forms import SearchForm
 
-import re
+
+import StringIO, csv
+from django.utils.encoding import smart_str
 
 def create(request):
     if request.method == 'POST':
@@ -134,23 +136,43 @@ def show(request, scraper_short_name, selected_tab = 'data'):
     return render_to_response('scraper/show.html', {'data' : data, 'selected_tab': selected_tab, 'scraper': scraper, 'you_own_it': you_own_it, 'you_follow_it': you_follow_it, 'tabs': tabs, 'tab_to_show': tab_to_show}, context_instance=RequestContext(request))
 
 
-# would be better to use the python csv writer as an generator and pass it straight as a response -- without the use of a template
-# also could allow for individual tables to be output (multiple links on the data page, for example)
-def export_csv (request, scraper_short_name):   # to delete ??  should use the api function (subject to not needing a key)
-    # replace with a link to api/getdata on a dummy API key
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=1000)  # maybe limit=0 should be unlimited (or add limits everywhere)
-    data_tables = { "": data }   # replicates output from data_summary_tables
+# (also from scraperwiki/web/api/emitters.py CSVEmitter render() as below -- not sure what smart_str needed for)
+def stringnot(v):
+    if type(v) == float:
+        return v
+    elif type(v) == int:
+        return v
+    return smart_str(v)
 
+# this could have been done by having linked directly to the api/csvout, but difficult to make the urlreverse for something in a different app
+# code here itentical to scraperwiki/web/api/emitters.py CSVEmitter render()
+def export_csv (request, scraper_short_name):   
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=1000)
+        
+    keyset = set()
+    for row in dictlist:
+        if "latlng" in row:   # split the latlng
+            row["lat"], row["lng"] = row.pop("latlng") 
+        row.pop("date_scraped") 
+        keyset.update(row.keys())
+    allkeys = sorted(keyset)
+    
+    fout = StringIO.StringIO()
+    writer = csv.writer(fout, dialect='excel')
+    writer.writerow(allkeys)
+    for rowdict in dictlist:
+        writer.writerow([stringnot(rowdict[key])  for key in allkeys])
+    
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)
+    response.write(fout.getvalue())
 
-    template = loader.get_template('scraper/data.csv')
-    context = Context({'data_tables': data_tables,})
-
-    response.write(template.render(context))
     return response
     
+    #template = loader.get_template('scraper/data.csv')
+    #context = Context({'data_tables': data_tables,})
+
     
 def list(request):
     #scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
