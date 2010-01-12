@@ -138,9 +138,11 @@ def show(request, scraper_short_name, selected_tab = 'data'):
 
 # (also from scraperwiki/web/api/emitters.py CSVEmitter render() as below -- not sure what smart_str needed for)
 def stringnot(v):
+    if v == None:
+        return ""
     if type(v) == float:
         return v
-    elif type(v) == int:
+    if type(v) == int:
         return v
     return smart_str(v)
 
@@ -162,7 +164,7 @@ def export_csv (request, scraper_short_name):
     writer = csv.writer(fout, dialect='excel')
     writer.writerow(allkeys)
     for rowdict in dictlist:
-        writer.writerow([stringnot(rowdict[key])  for key in allkeys])
+        writer.writerow([stringnot(rowdict.get(key))  for key in allkeys])
     
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)

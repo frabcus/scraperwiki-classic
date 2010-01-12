@@ -11,12 +11,18 @@ try:
 except ImportError:
     import StringIO
 
+# The Emitter.construct() function returns a value from scraperwiki/web/scraper/managers/scraper.py data_dictlist() 
+
+
 def stringnot(v):
+    if v == None:
+        return ""
     if type(v) == float:
         return v
-    elif type(v) == int:
+    if type(v) == int:
         return v
     return smart_str(v)
+
 
 class CSVEmitter(Emitter):
     """
@@ -39,12 +45,17 @@ class CSVEmitter(Emitter):
         writer = csv.writer(fout, dialect='excel')
         writer.writerow(allkeys)
         for rowdict in dictlist:
-            writer.writerow([stringnot(rowdict[key])  for key in allkeys])
+            writer.writerow([stringnot(rowdict.get(key))  for key in allkeys])
 
         result = fout.getvalue()
         fout.close()
         return result
         
+
+def phpstringnot(v):
+    if isinstance(v, datetime.datetime):
+        return time.mktime(v.timetuple())
+    return v
 
 class PHPEmitter(Emitter):
     """
@@ -58,16 +69,18 @@ class PHPEmitter(Emitter):
         return value
         
     def render(self, request):
-        response = StringIO.StringIO()
 
-        content = self.construct()
+        dictlist = self.construct()
         return_content = []
-        for value in content:
-            return_content.append(self.format_values(value))
-        response.write(phpserialize.dumps(content))
-        res =  response.getvalue()
-        response.close
-        return res
+        for rowdict in dictlist:
+            for key in rowdict.keys():
+                # convert datetime to Epoch time
+                if isinstance(rowdict[key], datetime.datetime):
+                    rowdict[key] = time.mktime(rowdict[key].timetuple())
+            return_content.append(rowdict)
+        
+        result = phpserialize.dumps(return_content)
+        return result
         
 
 Emitter.register('csv', CSVEmitter, 'text/csv; charset=utf-8')
