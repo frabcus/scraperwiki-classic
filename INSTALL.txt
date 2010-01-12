@@ -98,21 +98,26 @@ Assuming no errors you should be able to visit http://localhost:8000/ and see th
 
 Screen scrapers run inside a virtual machine "firebox" using User Mode Linux (UML).
 
-a) Checkout the separare UML repository. You don't want it in the scraperwiki folder, but in a parallel one.  
+a) Install twisted and orbited on your machine. e.g. "apt-get install python-twisted", "easy_install orbited"
+
+b) Checkout the separare UML repository. You don't want it in the scraperwiki folder, but in a parallel one.  
 
 > $ hg clone ssh://scraperwiki@212.84.75.28/UML
 
-b) For development sites, the FireBox subsystem can be run without UML by running the command
+c) Copy Server/scripts/runner_config.py.inhg to a version without .inhg and change the paths inside.
+
+d) For development sites, the FireBox subsystem can be run without UML by running the command
 > $ ./runlocal
 It will spawn some magical things in the background. To stop them use killlocal. See UML/LOCAL for more information. 
 
 For live sites, you will need to read UML/HOWTO. XXX It isn't up to date. Please quiz Mike and update it if you do this
 
-c) In web/localsettings.py set FIREBOX_PATH to the full path of the UML/Server/scripts directory, e.g. '/home/francis/devel/UML/Server/scripts'
+e) In web/localsettings.py set FIREBOX_PATH to the full path of the UML/Server/scripts directory, e.g. '/home/francis/devel/UML/Server/scripts'
 
-d) In UML/Server/scripts copy SWConfig.py.in_hg to SWConfig.py and edit it. For now, set "host = None" to disable logging.
+f) In UML/Server/scripts copy SWConfig.py.in_hg to SWConfig.py and edit it. For now, set "host = None" to disable logging.
 You can make a MySQL database to log into another time. XXX update instructions to explain how to do that when it is
 more stable
+
 
 
 6) Create the scrapers' Mercurial repository
