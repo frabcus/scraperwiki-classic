@@ -1,68 +1,69 @@
 from osgb import eastnorth_to_osgb, osgb_to_lonlat
 from geo_helper import turn_wgs84_into_osgb36
 
+import urllib
+try:
+  import json
+except:
+  import simplejson as json
 
-class geopoint:
-    def __init__(self):
-        self.coordinatesystem == "EMPTY"
     
-    # for now converts everything into OSGB    
-    def latlng(self):
-        
-        if self.coordinatesystem == "OSeastingnorthing":
-            oscoord = eastnorth_to_osgb(self.easting, self.northing, 5)
-            lng, lat = osgb_to_lonlat(oscoord)
-        
-        elif self.coordinatesystem == "OSGB":
-            lng, lat = osgb_to_lonlat(self.oscoord)
-        
-        elif self.coordinatesystem == "OSGB36":
-            lng, lat = self.longitude, self.latitude
-        
-        elif self.coordinatesystem == "WGS84":
-            sheight = (self.altitude == None and 200 or self.altitude)
-            lat, lng, height = turn_wgs84_into_osgb36(self.latitude, self.longitude, sheight)
-        
-        elif self.coordinatesystem == "GBPostcode":
-            lat, lng = "GBPostcode", "NotDone"
-        
-        else:
-            lng, lat = None, None
+'''standardized to wgs84 (if possible)'''
 
-        return (lat, lng)
+def gb_postcode_to_latlng(postcode):
+    '''Convert postcode to latlng using google api'''
+    return GBPostcode(postcode).latlng
+
+def os_easting_northing_to_latlng(easting, northing):
+    '''Convert easting, northing to latlng assuming altitude 200m'''
+    return OSeastingnorthing(easting, northing).latlng
+
+def DEBUG_gb_postcode_to_google_response(postcode):
+    '''Use for checking what is happening when the postcode lookup is failing'''
+    return GBPostcode(postcode).response
+
+
+# implement above user functions through classes with their conversion outputs
+class GBPostcode:   # (geopoint)
+    def fetchfromgoogle(self):
+        # key for http://127.0.0.1:8000/ version
+        #apikey = "ABQIAAAAvB8NItiEo8pwItcndDdiQxTpH3CbXHjuCVmaTc5MkkU4wO1RRhSA_yE1yF9gii01shzxoGTMy56I6A"
+        
+        # key for http://alpha.scraperwiki.com version
+        apikey = "ABQIAAAAvB8NItiEo8pwItcndDdiQxS-0rhzH36yeeaqLtvzOYff_BDsWxRd8-RHcLV2SLWVG5cUzghJCde61g"
+
+        googlegeourl = "http://maps.google.com/maps/geo?q=%s&output=json&gl=uk&oe=utf8&sensor=true_or_false&key=%s" % (urllib.quote(self.postcode), apikey)
+        self.response = json.loads(urllib.urlopen(googlegeourl).read())
+    
+    
+    def __init__(self, postcode):
+        self.coordinatesystem = "GBPostcode"
+        self.postcode = postcode
+        self.latlng = None
+        try:
+            self.fetchfromgoogle()
+            coordinates = self.response['Placemark'][0]['Point']['coordinates']
+            self.latlng = (coordinates[1], coordinates[0])
+        except:
+            self.latlng = None
             
     def __str__(self):
-        return "OSGB36(%s, %s)" % self.latlng()
+        return "GBPostcode('%s')" % self.postcode
     
 
-# the different type objects for quickest access
-class OSeastingnorthing(geopoint):
+class OSeastingnorthing:
     def __init__(self, easting, northing):
         self.coordinatesystem = "OSeastingnorthing"
         self.easting = easting
         self.northing = northing
-        
-class OSGB(geopoint):
-    def __init__(self, oscoord):
-        self.coordinatesystem = "OSGB"
-        self.oscoord = oscoord
+            
+        oscoord = eastnorth_to_osgb(self.easting, self.northing, 5)
+        gb36lng, gb36lat = osgb_to_lonlat(oscoord)
+            
+        gb36height = 200  # guessed altitude of the point
+        lat, lng, height = turn_wgs84_into_osgb36(gb36lat, gb36lng, gb36height)
 
-class OSGB36(geopoint):
-    def __init__(self, latitude, longitude):
-        self.coordinatesystem = "OSGB36"
-        self.latitude = latitude
-        self.longitude = longitude
-
-class WGS84(geopoint):
-    def __init__(self, latitude, longitude, altitude=None):
-        self.coordinatesystem = "WGS84"
-        self.latitude = latitude
-        self.longitude = longitude
-        self.altitude = altitude
+        self.latlng = (lat, lng)
         
-# prototype version through same interface
-class GBPostcode(geopoint):
-    def __init__(self, postcode):
-        self.coordinatesystem = "GBPostcode"
-        self.postcode = postcode
+
         

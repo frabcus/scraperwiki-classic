@@ -189,9 +189,11 @@ class ScraperManager(models.Manager):
             for key, value in c.fetchall():
                 rdata[key] = value
         
-            # over-ride any values with latlng (we could break it into two values)
+            # over-ride any values with latlng (we could break it into two values) (may need to wrap in a try to protect)
             if item[1]:
                 rdata["latlng"] = tuple(map(float, item[1].split(",")))
+            else:
+                rdata.pop("latlng", None)  # make sure this field is always a pair of floats
         
             allitems.append(rdata)
         return allitems

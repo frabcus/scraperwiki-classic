@@ -52,7 +52,7 @@ def scrape (url, params=None):
         text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
         fin.close()   # get the mimetype here
     except:
-        print '<scraperwiki:message type="sources">' + "Failed: %s" % url
+        print '<scraperwiki:message type="sources">' + json.dumps({ 'content' : "Failed: %s" % url })
         return None
     
     print_content = {

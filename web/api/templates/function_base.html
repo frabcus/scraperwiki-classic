@@ -3,13 +3,13 @@
     <div class="page_title">
         <h1>{% block heading %}{% endblock %}</h1>
         <p>{% block subheading %}{% endblock %}</p>
-        <p><a href="http://{{ api_domain }}{{api_uri}}">{{api_uri}}</a></p>        
+        <p><a href="http://{{api_domain}}{{api_uri}}">{{api_domain}}{{api_uri}}</a></p>        
     </div>
     <div class="content col left">
         <h2>Arguments</h2>
         <form class="api_arguments" target="iframeResponse" method="post" action="{% url api:explorer_call %}">
             <fieldset>
-                <input type="hidden" name="uri" value="{{api_uri}}"/>
+                <input type="hidden" name="uri" value="http://{{api_domain}}{{api_uri}}"/>
             </fieldset>
             {% block arguments %}
             {% endblock %}
