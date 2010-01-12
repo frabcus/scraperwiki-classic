@@ -29,11 +29,8 @@ function APISetupExploreFunction(){
     //link up the call button to change a few bits of text
     $('#btnCallMethod').click(
         function(){
-            //title
             $('.explorer_response h2').html('Function response');
-
-            //link up useful values
-            return false;
+            return true;
         }
     );
 

@@ -39,7 +39,7 @@ def keys(request):
     context_instance=RequestContext(request))
 
 def explore_scraper_search_1_0(request):
-    return render_to_response('scraper_search_1.0.html', {'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getinfo')}, context_instance=RequestContext(request))
+    return render_to_response('scraper_search_1.0.html', {'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_search')}, context_instance=RequestContext(request))
 
 def explore_scraper_getinfo_1_0(request):
 
@@ -69,7 +69,7 @@ def explore_scraper_getdatabydate_1_0(request):
     user = request.user
     if user.is_authenticated():
         scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True)[:5]
-    else:    
+    else:
         scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('first_published_at')[:5]
 
     return render_to_response('scraper_getdatabydate_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdatabydate')}, context_instance=RequestContext(request))    
@@ -87,16 +87,20 @@ def explore_scraper_getdatabylocation_1_0(request):
 
 def explorer_example(request, method):
     return render_to_response('explorer_example.html', {'method' : method}, context_instance=RequestContext(request))    
-    
+
 def explorer_user_run(request):
-    
+
     #make sure it's a post
     if not request.POST:
         raise Http404
 
     #build up the URL
-    uri = request.POST['uri']
-    uri += "&".join("%s=%s" % (k,v) for k,v in request.POST.__dict__.items())
-    uri += '&explorer_user_run=1'
+    uri = request.POST['uri'] + '/?'
+    uri += 'explorer_user_run=1'    
+    post_items = request.POST.items()
+    for post_key, post_value in post_items:
+        if post_key != 'uri' and post_value:
+            uri += ('&' + post_key + '=' + urllib.quote_plus(post_value))
+
     result= urllib.urlopen(uri).read()
     return render_to_response('explorer_user_run.html', {'result' : result}, context_instance=RequestContext(request))    
