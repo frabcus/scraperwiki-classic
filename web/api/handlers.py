@@ -55,7 +55,7 @@ def get_scraper_response(request, api_is_necessary=True):
         error_response = rc.BAD_REQUEST
         error_response.write(": No scraper named '%s'" % short_name)
         return None, error_response
-        
+
     if not scraper.published:
         error_response = rc.BAD_REQUEST
         error_response.write(": Unpublished scraper named '%s'" % short_name)
