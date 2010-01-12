@@ -196,4 +196,13 @@ div.explorer_response iframe {width:100%; margin: 1em 0; background:#000; border
 /* Programmer API */
 .programmer_api {}
 
+/* Comments */
+form.add_comment {position:relative; padding-left:50px; border:solid 1px #808080; padding:8px;
+    min-height:40px; margin-bottom:2em;}
+form.add_comment img {float:left; margin-right:10px;}
+form.add_comment div {position:relative;}
+form.add_comment textarea {width:85%; height:38px;}
+form.add_comment input.button {float:right;}
 
+div.user_comment {border-bottom:dotted 1px #808080; padding-bottom:1em; margin-bottom:1em;}
+div.user_comment img {float:left; margin-right:10px;}
