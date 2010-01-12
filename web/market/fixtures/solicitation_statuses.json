@@ -1,0 +1,7 @@
+[
+{"pk": 1, "model": "market.solicitationstatus", "fields": {"status": "completed", "display_name": "Completed"}}, 
+{"pk": 2, "model": "market.solicitationstatus", "fields": {"status": "claimed", "display_name": "Claimed"}}, 
+{"pk": 3, "model": "market.solicitationstatus", "fields": {"status": "open", "display_name": "Open"}}, 
+{"pk": 4, "model": "market.solicitationstatus", "fields": {"status": "pending", "display_name": "Pending"}}
+]
+
