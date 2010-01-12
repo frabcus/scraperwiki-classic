@@ -19,7 +19,7 @@ name=$.quoteString(k);else
 continue;if(typeof o[k]=="function")
 continue;var val=$.toJSON(o[k]);pairs.push(name+":"+val);}
 return"{"+pairs.join(", ")+"}";}};$.evalJSON=function(src)
-{if(typeof(oJSON)=='object'&&JSON.parse)
+{if(typeof(oJSON)=='object'&&oJSON.parse)
 return oJSON.parse(src);return eval("("+src+")");};$.secureEvalJSON=function(src)
 {if(typeof(oJSON)=='object'&&oJSON.parse)
 return oJSON.parse(src);var filtered=src;filtered=filtered.replace(/\\["\\\/bfnrtu]/g,'@');filtered=filtered.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']');filtered=filtered.replace(/(?:^|:|,)(?:\s*\[)+/g,'');if(/^[\],:{}\s]*$/.test(filtered))
