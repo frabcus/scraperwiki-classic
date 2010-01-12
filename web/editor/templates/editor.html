@@ -17,14 +17,9 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.form.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys-0.7.9.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.htmlClean-min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.example.min.js"></script>
-
     <script type="text/javascript" src="{{ settings.CODEMIRROR_URL }}js/codemirror.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?a=b"></script>  
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?"></script>  
 {% endblock %}
 
 {% block title %}
@@ -118,16 +113,16 @@
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
                 <div class="right">
                     {% if scraper.short_name %}
-                        <a href="{% url scraper_code scraper.short_name %}" title="Return to scraper page">Close editor</a>
+                        <a id="aCloseEditor" href="{% url scraper_code scraper.short_name %}" title="Return to scraper page">Close editor</a>
                     {% else %}
-                        <a href="{% url frontpage %}" title="Close editor">Close editor</a>                
+                        <a id="aCloseEditor" href="{% url frontpage %}" title="Close editor">Close editor</a>                
                     {% endif %}
                     <input type="submit" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>            
                 </div>
             </div>
 
             {# Consoles #}
-            <div class="editor_output" id="outputeditordiv">
+            <div id="outputeditordiv" class="editor_output">
                 <div class="tabs">
                     <ul>
                         <li class="console">
