@@ -1,6 +1,7 @@
 $(document).ready(function() {
     
     //variables
+    var pageIsDirty = false;
     var editor_id = 'id_code';
     var codeeditor;
     var codemirroriframe; // the iframe that needs resizing
@@ -24,7 +25,6 @@ $(document).ready(function() {
     setupDetailsForm();
     setupAutoDraft();
     setupResizeEvents();
-
 
     //setup code editor
     function setupCodeEditor(){
@@ -55,12 +55,17 @@ $(document).ready(function() {
                       }
                   });
               },
+              
+            onChange: function (){
+                pageIsDirty = true; // note that code has changed
+            },
             
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
                     codemirroriframe = $("#id_code").next().children(":first"); 
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     onWindowResize();
+                    pageIsDirty = false; // page not dirty at this point
                     //setupKeygrabs(); 
                 } 
           });        
@@ -129,6 +134,7 @@ $(document).ready(function() {
         //show default tab
         showTab('console'); //todo: check in cookie if tab already set.
         
+        resizeControls('up');
     }
 
     //Setup Text Popup Tabs
@@ -287,8 +293,8 @@ $(document).ready(function() {
 
     //send code request run
     function sendCode() {
-    
-        resizeControls()
+
+        resizeControls('up');
     
         //clear the tabs
         clearOutput();
@@ -450,9 +456,23 @@ $(document).ready(function() {
                 reloadScraper(); 
                 return false; 
             }
-        ); 
+        );
+
+        //close editor link
+        $('#aCloseEditor').click(
+            function (){
+                var bReturn = true;
+                if (pageIsDirty){
+                    if(confirm("You have unsaved changes, close the editor anyway?") == false){
+                        bReturn = false
+                    }
+                }
+
+                return bReturn;
+            }
+        );
     }
-    
+
     //commit
     function commitScraper(){
         return true;
@@ -523,10 +543,12 @@ $(document).ready(function() {
                     if (res.url && window.location.pathname != res.url) {
                         window.location = res.url;
                     };
-                    
+
                     if (bCommit != true){                        
                         showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
-                    }                    
+                    }
+                    
+                    pageIsDirty = false; // page no longer dirty
                 },
 
             error: function(response){
@@ -692,20 +714,26 @@ $(document).ready(function() {
       if (codemirroriframe)
           codemirroriframe.height(($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px'); 
     };
+    
 
     //click bar to resize
-    function resizeControls() {
-      var maxheight = $("#codeeditordiv").height() + $(window).height() - ($(".editor_controls").position().top + 5); 
-      if (maxheight >= $("#codeeditordiv").height() + 5) {
+    function resizeControls(sDirection) {
+    
+        if (sDirection != 'up' && sDirection != 'down'){
+            sDirection = 'none';
+        }
+
+      //work out which way to go
+      var maxheight = $("#codeeditordiv").height() + $(window).height() - ($("#outputeditordiv").position().top + 5); 
+      if (maxheight >= $("#codeeditordiv").height() + 5 && (sDirection == 'none' || sDirection == 'down')) {
           previouscodeeditorheight = $("#codeeditordiv").height();
           $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
-      }
-      else
+      } else if (sDirection == 'none' || sDirection == 'up') {
 
           $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
 
-    };
-      
+      };
+
       $("#codeeditordiv").resizable({
                        handles: 's',   
                        autoHide: false, 
@@ -736,7 +764,7 @@ $(document).ready(function() {
 
          // bind the double-click 
          $(".ui-resizable-s").bind("dblclick", resizeControls);
-
+    }
 
 
        function onWindowResize() {
