@@ -118,9 +118,9 @@
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
                 <div class="right">
                     {% if scraper.short_name %}
-                        <a href="{% url scraper_code scraper.short_name %}" title="Return to scraper page">Close editor</a>
+                        <a id="aCloseEditor" href="{% url scraper_code scraper.short_name %}" title="Return to scraper page">Close editor</a>
                     {% else %}
-                        <a href="{% url frontpage %}" title="Close editor">Close editor</a>                
+                        <a id="aCloseEditor" href="{% url frontpage %}" title="Close editor">Close editor</a>                
                     {% endif %}
                     <input type="submit" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>            
                 </div>

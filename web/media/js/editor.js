@@ -1,6 +1,7 @@
 $(document).ready(function() {
     
     //variables
+    var pageIsDirty = false;
     var editor_id = 'id_code';
     var codeeditor;
     var codemirroriframe; // the iframe that needs resizing
@@ -55,12 +56,17 @@ $(document).ready(function() {
                       }
                   });
               },
+              
+            onChange: function (){
+                pageIsDirty = true; // note that code has changed
+            },
             
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
                     codemirroriframe = $("#id_code").next().children(":first"); 
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     onWindowResize();
+                    pageIsDirty = false; // page not dirty at this point
                     //setupKeygrabs(); 
                 } 
           });        
@@ -451,7 +457,21 @@ $(document).ready(function() {
                 reloadScraper(); 
                 return false; 
             }
-        ); 
+        );
+
+        //close editor link
+        $('#aCloseEditor').click(
+            function (){
+                var bReturn = true;
+                if (pageIsDirty){
+                    if(confirm("You have unsaved changes, close the editor anyway?") == false){
+                        bReturn = false
+                    }
+                }
+
+                return bReturn;
+            }
+        );
     }
     
     //commit
@@ -524,10 +544,12 @@ $(document).ready(function() {
                     if (res.url && window.location.pathname != res.url) {
                         window.location = res.url;
                     };
-                    
+
                     if (bCommit != true){                        
                         showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
-                    }                    
+                    }
+                    
+                    pageIsDirty = false; // page no longer dirty
                 },
 
             error: function(response){
