@@ -279,7 +279,7 @@ $(document).ready(function() {
     //send a message to the server
     function send(json_data) {
       conn.send(
-        JSON.stringify(json_data)
+        Orbited.JSON.stringify(json_data)
         );  
     }
 
