@@ -6,9 +6,9 @@
 <div class="page_title">
 	<h1><span class="text">Your scrapers</span></h1>
 	
-	<p>You own {{ owned_count }} scraper{{ owned_count|pluralize }}
+	<p>You are contributing to {{ owned_count }} scraper{{ owned_count|pluralize }}
 
-{% comment %} [APS: remove following/watching features for now]
+{% comment %} [APS: will need to update this text when contribution_count is defined better]
 
 , are editing  {{ contribution_count }} scraper{{ contribution_count|pluralize }} and following
 		 {{ following_count }} scraper{{ following_count|pluralize }}
@@ -34,7 +34,7 @@
 	<p>You do not own any scrapers</p>
     {% endif %}
 
-{% comment %} [APS: remove following/watching features for now]
+{% comment %} [APS: remove watching/editing features for now]
 
 	<h2>Scrapers you are editing</h2>
 	
