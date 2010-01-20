@@ -92,6 +92,10 @@ Now try running django:
 
 Assuming no errors you should be able to visit http://localhost:8000/ and see the scraperwiki home page.
 
+You should go to http://localhost:8000/admin and configure the 'sites' section.
+
+At the very least you need to change 'example.com' to 'localhost:8000'.
+
 
 5) Initiate the Firebox
 ***********************
