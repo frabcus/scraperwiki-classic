@@ -72,8 +72,8 @@ def deploy():
     restart_webserver()   
 
     sudo("""
-    echo "%s" | mail -s "New Scraperwiki Deployment to $(deploy_version)" scrapewiki-commits@googlegroups.com -- -f mercurial@scraperwiki.com
-    """ % message)
+    echo "%s" | mail -s "New Scraperwiki Deployment to %s" scrapewiki-commits@googlegroups.com -- -f mercurial@scraperwiki.com
+    """ % (message, env.deploy_version))
 
     
 def migrate():
