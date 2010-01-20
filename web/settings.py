@@ -73,6 +73,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
   'django.core.context_processors.media',
   'django.core.context_processors.request',
   'django_notify.context_processors.notifications',
+  'frontend.context_processors.site',
 )
 
 INSTALLED_APPS = (
