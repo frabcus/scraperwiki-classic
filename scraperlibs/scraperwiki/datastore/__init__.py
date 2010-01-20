@@ -1,6 +1,4 @@
-
-# authorized function
 from save import save
 
-# unauthorized functions
-from save import loadallwithmatchingdata, loadsingle, loadallofcurrentscraper
+# need these for the in-scraper unit tests
+#from save import retrieve, delete, insert

@@ -27,6 +27,13 @@ class SolicitationStatus(models.Model):
     status = models.CharField(max_length = 50)
     display_name = models.CharField(max_length = 50)    
 
+    class Meta:
+        verbose_name_plural = "SolicitationStatuses"
+
+    def __unicode__(self):
+        return self.display_name
+        
+
 class Solicitation(models.Model):
 
     """
@@ -106,4 +113,6 @@ class Solicitation(models.Model):
         else:
             #someone is messing about if we are here, throw an exception
             raise Exception("Unable to find a published scraper (for this user) to add to this solicitation")
-    
+   
+    def __unicode__(self):
+        return self.title + "(" + int(self.price) + ")"

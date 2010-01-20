@@ -9,9 +9,9 @@
     <div class="content">
     
     <form action="/scrapers/search/" method="POST">
-{{ form }}
-<input type="submit" value="Submit" />
-</form>
+        {{ form.q }}
+        <input type="submit" value="Submit" />
+    </form>
     
     </div>
 {% endblock %}

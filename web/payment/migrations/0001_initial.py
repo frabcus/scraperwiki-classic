@@ -1,40 +1,32 @@
-# encoding: utf-8
 
 from south.db import db
 from django.db import models
-from scraper.models import *
+from payment.models import *
 
 class Migration:
     
     def forwards(self, orm):
         
-        # Changing field 'Scraper.license'
-        # (to signature: django.db.models.fields.CharField(max_length=100, blank=True))
-        db.alter_column('scraper_scraper', 'license', orm['scraper.scraper:license'])
-        
-        # Changing field 'Scraper.description'
-        # (to signature: django.db.models.fields.TextField(blank=True))
-        db.alter_column('scraper_scraper', 'description', orm['scraper.scraper:description'])
-        
-        # Changing field 'Scraper.source'
-        # (to signature: django.db.models.fields.CharField(max_length=100, blank=True))
-        db.alter_column('scraper_scraper', 'source', orm['scraper.scraper:source'])
+        # Adding model 'Invoice'
+        db.create_table('payment_invoice', (
+            ('id', orm['payment.Invoice:id']),
+            ('title', orm['payment.Invoice:title']),
+            ('item_type', orm['payment.Invoice:item_type']),
+            ('price', orm['payment.Invoice:price']),
+            ('parent_id', orm['payment.Invoice:parent_id']),
+            ('created_at', orm['payment.Invoice:created_at']),
+            ('user', orm['payment.Invoice:user']),
+            ('deleted', orm['payment.Invoice:deleted']),
+            ('complete', orm['payment.Invoice:complete']),
+        ))
+        db.send_create_signal('payment', ['Invoice'])
         
     
     
     def backwards(self, orm):
         
-        # Changing field 'Scraper.license'
-        # (to signature: django.db.models.fields.CharField(max_length=100))
-        db.alter_column('scraper_scraper', 'license', orm['scraper.scraper:license'])
-        
-        # Changing field 'Scraper.description'
-        # (to signature: django.db.models.fields.TextField())
-        db.alter_column('scraper_scraper', 'description', orm['scraper.scraper:description'])
-        
-        # Changing field 'Scraper.source'
-        # (to signature: django.db.models.fields.CharField(max_length=100))
-        db.alter_column('scraper_scraper', 'source', orm['scraper.scraper:source'])
+        # Deleting model 'Invoice'
+        db.delete_table('payment_invoice')
         
     
     
@@ -73,35 +65,17 @@ class Migration:
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        'scraper.scraper': {
+        'payment.invoice': {
+            'complete': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'disabled': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
-            'guid': ('django.db.models.fields.CharField', [], {'max_length': '1000'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'last_run': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'license': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'published': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
-            'revision': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True'}),
-            'short_name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'source': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
+            'item_type': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            'parent_id': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'price': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']"})
-        },
-        'scraper.scraperrequest': {
-            'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'description': ('django.db.models.fields.TextField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'source_link': ('django.db.models.fields.CharField', [], {'max_length': '250'})
-        },
-        'scraper.userscraperrole': {
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'role': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'scraper': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['scraper.Scraper']"}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         }
     }
     
-    complete_apps = ['scraper']
+    complete_apps = ['payment']

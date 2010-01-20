@@ -1,0 +1,23 @@
+{% extends "frontend/base.html" %}
+
+{% block content %}
+  <h2>API Key</h2>
+  
+  
+  {% if keys %}
+    <h3>Your Existing Keys</h3>
+    <ul>
+    {% for key in keys %}
+      <li><h5>{{ key.key }}</h5><p>{{ key.description }}</p></li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  
+  <h3>Apply for an API key</h3>
+  <form method="POST" accept-charset="utf-8">
+    <ul>
+      {{ form.as_ul }}
+    </ul>
+    <p><input type="submit" value="Apply"></p>
+  </form>
+{% endblock %}

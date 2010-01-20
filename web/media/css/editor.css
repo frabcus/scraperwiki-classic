@@ -81,7 +81,8 @@ span.hiddenfields { margin-left:10px; }
 .editor_output .info div#output_data {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
 .editor_output .info div.output div.output_content .long_message {display:none;}
 
-.editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.2em 1em;}
+.editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.3em 1em;
+    height:1.4em;}
 .editor_output .info span.exception {background:#FF7878;}
 .editor_output .info span.output_item:hover {background:#ffffd7;}
 .editor_output .info span.output_item.run_end {border-bottom:solid 1px #aaa;}
@@ -115,6 +116,13 @@ span.hiddenfields { margin-left:10px; }
 dl.quick_help dt code {font-size:1.3em;}
 dl.quick_help dd {font-size:0.8em; padding:0.5em 0 1.2em 0; margin:0;}
 dl.quick_help dd code {font-size:1.3em;}
+
+dl.quick_help h4 { font-size:1.3em; padding:0.5em 0 0 0;}
+dl.quick_help a { font-size:0.8em; font-style:italic;}
+dl.quick_help ul { padding:0 0 0 1em; margin: 0; }
+dl.quick_help li { padding:0 0 0 0; margin: 0; }
+dl.quick_help li code {font-size:1.1em; }
+
 
 #meta_fields_mini .field { display:inline; }
 #meta_fields_mini .field input, #meta_fields_mini .field textarea {height:10px;}

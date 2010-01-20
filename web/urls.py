@@ -30,7 +30,6 @@ feeds = {
 urlpatterns = patterns('',
     url(r'^profiles/', include('profiles.urls')),
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
-    url(r'^', include('frontend.urls')),
     url(r'^editor/', include('editor.urls')),
     
     url(r'^scraper_data/(?P<short_name>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}, name="scraper_data"),
@@ -39,10 +38,6 @@ urlpatterns = patterns('',
     url(r'^accounts/', include('registration.urls')),
     url(r'^scrapers/', include('scraper.urls')),
     url(r'^comments/', include('django.contrib.comments.urls')),
-
-    # these ought to be implemented by the webserver
-    url(r'^media/(?P<path>.*)$',       'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}),
-    url(r'^media-admin/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ADMIN_DIR, 'show_indexes':True}),
     
     # allows direct viewing of the django tables
     url(r'^admin/(.*)', admin.site.root, name="admin"),
@@ -59,4 +54,15 @@ urlpatterns = patterns('',
     
     # RSS feeds  
     (r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}),
+
+    # API
+    (r'^api/', include('api.urls', namespace='foo', app_name='api')),
+
+    # static media server for the dev sites / local dev
+    url(r'^media/(?P<path>.*)$',       'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}),
+    url(r'^media-admin/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ADMIN_DIR, 'show_indexes':True}),
+
+    #Rest of the site
+    url(r'^', include('frontend.urls')),
+
 )

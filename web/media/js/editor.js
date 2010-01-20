@@ -1,6 +1,7 @@
 $(document).ready(function() {
     
     //variables
+    var pageIsDirty = false;
     var editor_id = 'id_code';
     var codeeditor;
     var codemirroriframe; // the iframe that needs resizing
@@ -10,9 +11,12 @@ $(document).ready(function() {
     var guid = $('#scraper_guid').val();
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val(); 
+    var conn; // Orbited connection
+    
 
     //constructor functions
     setupCodeEditor();
+    setupOrbited()
     setupMenu();
     setupTabs();
     setupTextTabs();
@@ -21,7 +25,6 @@ $(document).ready(function() {
     setupDetailsForm();
     setupAutoDraft();
     setupResizeEvents();
-
 
     //setup code editor
     function setupCodeEditor(){
@@ -52,17 +55,30 @@ $(document).ready(function() {
                       }
                   });
               },
+              
+            onChange: function (){
+                pageIsDirty = true; // note that code has changed
+            },
             
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
                     codemirroriframe = $("#id_code").next().children(":first"); 
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     onWindowResize();
+                    pageIsDirty = false; // page not dirty at this point
                     //setupKeygrabs(); 
                 } 
           });        
     }
 
+
+    
+    function setupOrbited() {
+        TCPSocket = Orbited.TCPSocket;
+        conn = new TCPSocket()
+        conn.open('localhost', '9010')
+    }
+    
     //Setup Keygrabs
     function setupKeygrabs(){
         var grabkeyrun = function(event){ 
@@ -118,6 +134,7 @@ $(document).ready(function() {
         //show default tab
         showTab('console'); //todo: check in cookie if tab already set.
         
+        resizeControls('up');
     }
 
     //Setup Text Popup Tabs
@@ -224,95 +241,92 @@ $(document).ready(function() {
             showPopup('meta_form');
             return false;
         });
-        
+
     }
+
+/*
+    conn.onclose = function(){
+        alert('connection closed');
+    }
+*/
+    //read data back from twisted
+    conn.onread = function(data) { 
+      data = eval('('+data+')');
+      if (data.message_type == "kill" || data.message_type == "end") {
+          $('.editor_controls #run').removeClass('running').val('run');
+          $('.editor_controls #run').unbind('click.abort');
+          $('.editor_controls #run').bind('click.run', sendCode);
+
+          //hide annimation
+          $('#running_annimation').hide();
+
+          //change title
+          document.title = document.title.replace('*', '')
+          writeToConsole(data.content, data.content_long, data.message_type)
+
+      } else if (data.message_type == "sources") {
+          writeToSources(data.content, data.content_long)
+      } else if (data.message_type == "data") {
+          writeToData(data.content)
+      } else {
+          writeToConsole(data.content, data.content_long, data.message_type)
+      }
+      // alert(data.message_type)
+      
+      // alert(data.message_type)
+    }
+
+    //send a message to the server
+    function send(json_data) {
+      conn.send(
+        JSON.stringify(json_data)
+        );  
+    }
+
+    //send a 'kill' message
+    function sendKill() {
+      data = {
+        "command" : 'kill',
+      }
+      send(data)
+    }
+
+    //send code request run
+    function sendCode() {
+
+        resizeControls('up');
     
-    function runScraper(){
-        
-        //change the title
-        document.title = '*' + document.title
-        
-        //reset the tabs
-        $('.editor_output div.tabs li').removeClass('new');
-        $('#output_data table').find('tr').remove()
+        //clear the tabs
+        clearOutput();
+    
+        //send the data
+          data = {
+            "command" : "run",
+            "guid" : guid,
+            "code" : codeeditor.getCode()
+          }
+          send(data)
 
-        //set a dividers on the output
-        $('#output_console div :last-child').addClass("run_end")
-        $('#output_data div :last-child').addClass("run_end")
-        $('#output_sources div :last-child').addClass("run_end")                
+          //unbind run button
+          $('.editor_controls #run').unbind('click.run')
+          $('.editor_controls #run').addClass('running').val('Stop');
 
-        //show annimation
-        $('#running_annimation').show();
+          //bind abort button
+          $('.editor_controls #run').bind('click.abort', function() {
+              sendKill();
+              $('.editor_controls #run').removeClass('running').val('run');
+              $('.editor_controls #run').unbind('click.abort')
+              $('.editor_controls #run').bind('click.run', sendCode);
 
-        //run either the firestarter or run mdoel
-        if (run_type == 'firestarter_apache') {
-
-            $('#editor').bind('form-pre-serialize', null,
-            function(foo, options) {
-                $('#editor #id_code').text(codeeditor.getCode())
-            })
-
-            $('#editor').ajaxSubmit({
-                target: '#console',
-                action: '/editor/run_code'
-            });
-
-            return false;
-            // <-- important!
-        } else {
-            var run_request = $.ajax({
-                type: 'POST',
-                url: '/editor/run_code',
-                data: ({
-                    code: codeeditor.getCode(),
-                    guid: guid
-                }),
-                dataType: "html",
-                
-                success: function(code) {        
-                    
-                    $('.editor_controls #run').unbind('click.abort');
-                    $('.editor_controls #run').bind('click.run', run_abort);
-                    $('.editor_controls #run').removeClass('running').val('run');
-
-                    //split results
-                    var aResults = code.split("@@||@@");
-                    for (var i=0; i < aResults.length -1; i++) {
-                        var oItem = eval('(' + aResults[i] + ')')
-                        if(oItem.message_type == 'sources'){                                                        
-                            writeToSources(oItem.content, oItem.content_long);                                                            
-                        }else if (oItem.message_type == 'data'){
-                            writeToData(oItem.content);                                
-                        }else if (oItem.message_type == 'exception'){
-                            writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
-                        }else{
-                            writeToConsole(oItem.content, oItem.content_long, oItem.message_type);
-                        }
-                    };
-                    
-                    //hide annimation
-                    $('#running_annimation').hide();
-                    
-                    //change title
-                    document.title = document.title.replace('*', '')
-                    
-                },
-                error: function(code) {
-                    alert('Sorry, there seems to be something wrong with running code at the moment, try saving your scraper and trying again later.')
-                    
-                    $('.editor_controls #run').unbind('click.abort');
-                    $('.editor_controls #run').bind('click.run', run_abort);
-                    $('.editor_controls #run').removeClass('running').val('run');
-                    
-                    //hide annimation
-                    $('#running_annimation').hide();
-                    
-                    //change title
-                    document.title = document.title.replace('*', '')
-                }
-            });
-            return run_request
-        }
+              //hide annimation
+              $('#running_annimation').hide();
+          
+              //change title
+              document.title = document.title.replace('*', '')
+          });
+      
+      
+      
     }
 
 
@@ -329,6 +343,12 @@ $(document).ready(function() {
                 showPopup('diff');
             }
         });
+    }
+
+    function clearOutput(){
+        $('#output_console div').html('');    
+        $('#output_sources div').html('');    
+        $('#output_data div').html('');                    
     }
 
     function reloadScraper(){
@@ -374,7 +394,7 @@ $(document).ready(function() {
             $('.editor_controls #run').unbind('click.run')
             $('.editor_controls #run').addClass('running').val('Stop');
             $('.editor_controls #run').bind('click.abort', function() {
-                runRequest.abort()
+                sendKill()
                 $('.editor_controls #run').removeClass('running').val('run');
                 $('.editor_controls #run').unbind('click.abort')                    
                 writeToConsole('Run Aborted') // Custom function that append to a div
@@ -420,15 +440,9 @@ $(document).ready(function() {
              saveScraper(false);
              return false;
         });
-
-
-        //clear console button
-        $('#clear').click(function() {
-            $('#output_console div').html('');
-        });
         
         // run button
-        $('.editor_controls #run').bind('click.run', run_abort);
+        $('.editor_controls #run').bind('click.run', sendCode);
 
         //diff button
          $('.editor_controls #diff').click(function() {
@@ -442,9 +456,23 @@ $(document).ready(function() {
                 reloadScraper(); 
                 return false; 
             }
-        ); 
+        );
+
+        //close editor link
+        $('#aCloseEditor').click(
+            function (){
+                var bReturn = true;
+                if (pageIsDirty){
+                    if(confirm("You have unsaved changes, close the editor anyway?") == false){
+                        bReturn = false
+                    }
+                }
+
+                return bReturn;
+            }
+        );
     }
-    
+
     //commit
     function commitScraper(){
         return true;
@@ -515,10 +543,12 @@ $(document).ready(function() {
                     if (res.url && window.location.pathname != res.url) {
                         window.location = res.url;
                     };
-                    
+
                     if (bCommit != true){                        
                         showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
-                    }                    
+                    }
+                    
+                    pageIsDirty = false; // page no longer dirty
                 },
 
             error: function(response){
@@ -589,8 +619,7 @@ $(document).ready(function() {
     //Write to concole/data/sources
     function writeToConsole(sMessage, sLongMessage, sMessageType) {
 
-        sDisplayMessage = sMessage;
-                
+        sDisplayMessage = sMessage;        
         if(sLongMessage) {
             if (sMessageType == 'exception'){
                 sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="exception_expander">...more</span>';
@@ -644,7 +673,7 @@ $(document).ready(function() {
 
     function writeToData(sMessage) {
         row = eval(sMessage)
-        
+
         html_row = "<tr>"
         $.each(row, function(i){
             html_row +="<td>"+row[i]+"</td>"
@@ -685,21 +714,26 @@ $(document).ready(function() {
       if (codemirroriframe)
           codemirroriframe.height(($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px'); 
     };
+    
 
     //click bar to resize
-    function clickToResize() {
-      var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-      if (maxheight >= $("#codeeditordiv").height() + 5)
-      {
-          previouscodeeditorheight = $("#codeeditordiv").height(); 
+    function resizeControls(sDirection) {
+    
+        if (sDirection != 'up' && sDirection != 'down'){
+            sDirection = 'none';
+        }
+
+      //work out which way to go
+      var maxheight = $("#codeeditordiv").height() + $(window).height() - ($("#outputeditordiv").position().top + 5); 
+      if (maxheight >= $("#codeeditordiv").height() + 5 && (sDirection == 'none' || sDirection == 'down')) {
+          previouscodeeditorheight = $("#codeeditordiv").height();
           $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
-      }
-      else
+      } else if (sDirection == 'none' || sDirection == 'up') {
 
           $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
 
-    };
-      
+      };
+
       $("#codeeditordiv").resizable({
                        handles: 's',   
                        autoHide: false, 
@@ -729,8 +763,8 @@ $(document).ready(function() {
                            }); 
 
          // bind the double-click 
-         $(".ui-resizable-s").bind("dblclick", clickToResize);
-
+         $(".ui-resizable-s").bind("dblclick", resizeControls);
+    }
 
 
        function onWindowResize() {

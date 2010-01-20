@@ -3,6 +3,20 @@ from django.db import models
 from django.db import connection, backend, models
 import settings
 from collections import defaultdict
+import re
+
+
+def convert_dictlist_to_datalist(allitems):
+    allkeys = set()
+    for item in allitems:
+        allkeys.update(item.keys())
+    
+    headings = sorted(list(allkeys))
+    rows = [ ]
+    for item in allitems:
+        rows.append([ (key in item and unicode(item[key]) or "")  for key in headings ])
+    
+    return { 'headings' : headings, 'rows' : rows, }
 
 
 class ScraperManager(models.Manager):
@@ -80,64 +94,145 @@ class ScraperManager(models.Manager):
     def dont_own_any(self):
         return self.owned_count() == 0
 
-    def data_summary(self, scraper_id=0, limit=1000):
-      
-      if isinstance(scraper_id, list):
-          guids = ",".join("'%s'" % guid for guid in scraper_id)
-      else:
-          guids = "'%s'" % scraper_id
-#                 kv.key AS key, kv.value AS value, kv32.key AS key32, kv32.value AS value32
+            
+    # this accesses the tables defined in scraperlibs/scraperwiki/datastore/scheme.sql and accessed in datastore/save.py
+    def data_dictlist(self, scraper_id, limit=1000, offset=0, start_date=None, end_date=None, latlng=None):   
+        '''map from scraper_id and filters to dict representing row record for a particular scraper'''
+        
+        # previously implemented with a sub-select table joined on kv.  
+        # Now implemented by fetching the items, and building each row separately
+        
+        # split the latlng into a pair
+        # code here similar to datastore/save.py __build_matches
+        
+        qquery = ["SELECT items.item_id AS item_id"]
+        qlist  = [ ]
+        
+        if latlng:
+            #qquery.append(", SUBSTR(items.latlng, 1, 20)")
+            #qquery.append(", SUBSTR(items.latlng, 21, 41)")
+            qquery.append(", ABS(SUBSTR(items.latlng, 1, 20)-%s)+ABS(SUBSTR(items.latlng, 21, 41)-%s) AS diamdist")
+            qlist.append(latlng[0])
+            qlist.append(latlng[1])
+            #qquery.append(", items.latlng AS latlng")
+        
+        qquery.append("FROM items")
+        
+        # filter on a key existing and value being the same in the data for the record, using INNER JOIN (see datastore.save.__build_matches)
+        #     (not yet used feature)
+        filterkey=None
+        filtervalue=None
+        if filterkey:
+            qquery.append("INNER JOIN")
+            qquery.append("kv AS kv0")
+            qquery.append("ON")
+            qquery.append("kv0.item_id=items.item_id")
+            qquery.append("AND")
+            qquery.append("kv0.key=%s")
+            qlist.append(filterkey)
+            if filtervalue:
+                qquery.append("AND")
+                qquery.append("kv0.value=%s")
+                qlist.append(filtervalue)
 
-      # we have to join to both key-value tables.  not sure this is totally efficient 
-      # as the items elements get retrieved numerous times.  group by won't work unless all the keys could be concattenated
-      cursor = self.datastore_connection.cursor()
-      cursor.execute("""
-          SELECT items.`item_id` AS item_id, `date_scraped`, 
-                 kv32.`key` AS `key32`, kv32.`value` AS `value32`,
-                 kv.`key` AS `key`, kv.`value` AS `value`
-          FROM (SELECT * FROM items WHERE items.scraper_id IN (%(guids)s) LIMIT %(limit)s) as items
-          LEFT JOIN kv
-             ON items.item_id=kv.item_id
-          LEFT JOIN kv32
-             ON items.item_id=kv32.item_id
+        # add the where clause
+        qquery.append("WHERE items.scraper_id=%s")
+        qlist.append(scraper_id)
+        
+        # filter by latlng exists; (can't filter by distance with this object!)
+        #if latlng:
+        #    qquery.append("AND items.latlng IS NOT NULL")
+        
+        if start_date and end_date:
+            #qquery.append("AND items.`date` IS NOT NULL")
+            qquery.append("AND items.`date` >= %s")
+            qlist.append(start_date)
+            qquery.append("AND items.`date` < %s")
+            qlist.append(end_date)
+        
+        if latlng:
+            qquery.append("ORDER BY diamdist")
+        else:
+            qquery.append("ORDER BY items.item_id")
+        
+        qquery.append("LIMIT %s,%s")
+        qlist.append(offset)
+        qlist.append(limit)
+      
+        #print " ".join(qquery), qlist
+        c = self.datastore_connection.cursor()
+        
+        c.execute(" ".join(qquery), tuple(qlist))
+        item_idlist = c.fetchall()
+        
+        # code here similar to datastore/save.py __retrieve_item
+        
+        allitems = [ ]
+        for item_idl in item_idlist:
+            item_id = item_idl[0]
+            #print "iiii", item_idl
+            
+            rdata = { }
+            
+            # header records
+            if not c.execute("SELECT `date`, latlng, `date_scraped` FROM items WHERE item_id=%s", (item_id,)):
+                continue  # shouldn't happen
+            item = c.fetchone()
+            
+            if item[0]:
+                rdata["date"] = item[0]
+            if item[2]:
+                rdata["date_scraped"] = item[2]
+                        
+            # put the key values in
+            c.execute("SELECT `key`, `value` FROM kv WHERE item_id=%s", (item_id,))
+            for key, value in c.fetchall():
+                rdata[key] = value
+        
+            # over-ride any values with latlng (we could break it into two values) (may need to wrap in a try to protect)
+            if item[1]:
+                rdata["latlng"] = tuple(map(float, item[1].split(",")))
+            else:
+                rdata.pop("latlng", None)  # make sure this field is always a pair of floats
+        
+            allitems.append(rdata)
+        return allitems
+           
+              
+    
+    def data_summary(self, scraper_id=0, limit=1000, offset=0, start_date=None, end_date=None, latlng=None):
+        '''single table of all rows for a scraper'''
+        allitems = self.data_dictlist(scraper_id, limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
+        return convert_dictlist_to_datalist(allitems)
+      
+
+    # not yet used   probably to delete
+    def data_summary_tables(self, scraper_id=0, limit=1000):
+      '''multiple table of rows for a scraper, indexed by the __table key'''
+      allitems = self.__data_summary_map(scraper_id, limit)
+            
+      alltables = set()
+      for item in allitems.values():
+        alltables.add(item.get("__table"))
+      
+      data_tables = { }
+      
+      # filter for each table in order; not efficient, but simple
+      for table in alltables:
+        allkeys = set()
+        for item in allitems.values():
+          if item.get("__table") == table:
+            allkeys.update(item.keys())
+        
+        headings = sorted(list(allkeys))
+        rows = [ ]
+        for item in allitems.values():
+          if item.get("__table") == table:
+            rows.append([ unicode(item.get(key))  for key in headings ])
+
+        data_tables[table] = { 'headings' : headings, 'rows' : rows }
+      return data_tables
           
-          ORDER BY items.date_scraped, items.item_id
-        """ % locals())
-      
-      allitems = { }
-      currentitem = None
-      allkeys = set(["date_scraped"])
-      for row in cursor.fetchall():
-          item_id = row[0]
-          if item_id not in allitems:
-              currentitem = { "date_scraped":row[1]}
-              allitems[item_id] = currentitem
-          
-          key32, value32 = row[2], row[3]
-          key, value = row[4], row[5]
-          
-          if key32:    
-              currentitem[key32] = value32
-              allkeys.add(key32)
-          if key:    
-              currentitem[key] = value
-              allkeys.add(key)
-      
-      headings = sorted(list(allkeys))
-      rows = [ ]
-      for litem in allitems.values():
-          rows.append([ unicode(litem.get(key))  for key in headings ])
-      
-      data = {
-      'headings' : headings, 
-      'rows' : rows,
-      }
-      
-      return data
-
-
-
-
 
     def item_count(self, guid):
         sql = "SELECT COUNT(*) FROM items WHERE scraper_id='%s'" % guid
@@ -145,10 +240,11 @@ class ScraperManager(models.Manager):
         cursor.execute(sql)
         return cursor.fetchone()[0]
 
-    def item_count_for_tag(self, guids):
+    def item_count_for_tag(self, guids):  # to delete
         guids = ",".join("'%s'" % guid for guid in guids)
         sql = "SELECT COUNT(*) FROM items WHERE scraper_id IN (%(guids)s)" % locals()
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
         return cursor.fetchone()[0]
+        
         

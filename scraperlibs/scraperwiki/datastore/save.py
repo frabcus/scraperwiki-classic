@@ -10,281 +10,220 @@ except:
 
 import cgi
 
-indexed_rows = ['date', 'latlng']  # global
 
-# the records are in table items, which are joined on item_id to keyvalue pairs of table kv and table kv32
-# the current retrieval of from these tables is in web/scraper/managers/scraper.py
-# perhaps the functions there should call this common module to keep it in one place
-# -- or we could make a 3rd interface through dedicated webserver call that could be located on a different machine
-
-def save(unique_keys, data=None, **kwargs):
-  """
-  Save function
-  """
-  
-  if not data:
-    data = {}
-  if isinstance(data,list):
-    if kwargs:
-      raise TypeError("""
-        \tIncorrect use of arguments when saving multipul rows.  
-        \tLook up 'saving multipul rows' in the suport pages for more information.
-        """)
-    ids = []
-    for row in data:
-      ids.append(__save_row(unique_keys,row))
-    return ids
-  else:
-    return __save_row(unique_keys, data, kwargs)
+# this sets deleted_run_id to flag a record is deleted, rather than actually deleting it
+bSaveAllDeletes = False
 
 
+def insert(data):
+    """
+    Inserts a single row
+    """
+    scraper_id = os.environ['SCRAPER_GUID']  # if scraper_id == '' then it's using an unsaved scraper, no GUID is allocated and should not interact with the database
 
-# slight issue with this method in case unique_keys are ever a different subset
-# we're almost getting the the realm where they should be part of their own table
-# with the other key values hanging off them
-def __create_unique(unique_keys, data):
-  data_set = set(data)
-  unique_keys = set(unique_keys)
-  
-  if not unique_keys.issubset(data_set):
-      raise ValueError("""
-        key(s) [%s] not in data.
-        `unique_keys` must only contain keys that exist in `data`.
-        See the support pages for more information
-        """ % ','.join( ['"%s"' % k for k in unique_keys.difference(data)] ))
-
-  unique_values = [str(data[v]) for v in unique_keys]
-  return hashlib.md5("%s" % ("≈≈≈".join(unique_values))).hexdigest()
-
-
-def __save_row(unique_keys, data, kwargs):
-  """
-  Takes a single row and saves it.
-  """
-  DUMMY_RUN = True
-  if os.environ.has_key('SCRAPER_GUID'):
-    scraper_id = os.environ['SCRAPER_GUID']
-    DUMMY_RUN = False
-  
-  # Add all the kwargs in to data
-  data.update(kwargs)   # merges two dicts
-
-  # Create a unique hash
-  unique_hash = __create_unique(unique_keys, data)
-  
-  for k in indexed_rows:
-    if k not in data.keys():
-      data[k] = None
-  item = {'unique_hash' : unique_hash}
-  for k,v in data.items():
-    if k in indexed_rows:
-      item[k] = v
-    if v is None:
-      del data[k]
-  
-  
-  new_item_id = None    
-  if not DUMMY_RUN:
-    conn = connection.Connection()
-    c = conn.connect()
+    if scraper_id:
+        conn = connection.Connection()
+        c = conn.connect()
     
-    if c.execute("SELECT item_id FROM items WHERE unique_hash=%s", (unique_hash,)):  
-      item_id = c.fetchone()[0]
-      c.execute("DELETE FROM kv WHERE item_id=%s", (item_id,))
-      c.execute("DELETE FROM kv32 WHERE item_id=%s", (item_id,))
-      c.execute("DELETE FROM items WHERE unique_hash=%s", (unique_hash,))
-  
-    c.execute("UPDATE sequences SET id=LAST_INSERT_ID(id+1);")
-    c.execute("SELECT LAST_INSERT_ID();")
-    new_item_id = c.fetchone()[0]
-    item['item_id'] = new_item_id
+    if scraper_id:
+        # there's apparently a good reason for doing it this way, and not using auto-increment on item_id, but it's not declared
+        # (*probably* it's to enable the datastore to be distributed across several tables)
+        c.execute("UPDATE sequences SET id=LAST_INSERT_ID(id+1);")
+        c.execute("SELECT LAST_INSERT_ID();")
+        item_id = c.fetchone()[0]
+    else:
+        item_id = 0
  
-    
     # for date scraped
-    now = datetime.datetime.now()
-    str_now = now.strftime("%Y-%m-%d %H:%M:%S")
-    
-    c.execute("INSERT INTO `items` (`scraper_id`,`item_id`,`unique_hash`,`date`, `latlng`, `date_scraped`) \
-      VALUES (%s, %s, %s, %s, %s, %s);", (scraper_id, item['item_id'], unique_hash, item['date'], item['latlng'], str_now))
-  
-    # save into table with long records if it doesn't fit into the fixed length records table
-    for k,v in data.items():  
-      sk, sv = str(k), str(v)
-      if len(sv) < 32 and len(sk) < 32:
-          c.execute("INSERT INTO kv32 (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
-      else:
-          c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item['item_id'], k,v))
-    
-      # clean for printing to the console
-
-  ldata = { }
-  for k,v in data.items():  
-    ldata[k] = cgi.escape(str(v))
-  
-  # output to the console
-  print '<scraperwiki:message type="data">%s' % json.dumps(ldata)
-  
-  # maybe there's a more useful return value than this
-  return new_item_id
-
-
-
-def loadsingle(unique_keys, data):
-  """
-  Loads a single row matching unique keys with same data
-  """
-  DUMMY_RUN = True
-  if os.environ.has_key('SCRAPER_GUID'):
-    scraper_id = os.environ['SCRAPER_GUID']
-    DUMMY_RUN = False
-  
-  # Create a unique hash
-  unique_hash = __create_unique(unique_keys, data)
-  
-  item = {'unique_hash' : unique_hash}
-  
-  new_item_id = None    
-  if not DUMMY_RUN:
-    conn = connection.Connection()
-    c = conn.connect()
-    
-    if c.execute("SELECT item_id FROM items WHERE unique_hash=%s", (unique_hash,)):
-      item_id = c.fetchone()[0]
-      return __load_item(c, item_id, None)
-    
-  return None
-    
-    
-def loadallofcurrentscraper(filterdata=None):
-    """
-    Loads all rows produced by scraper of current GUID, filters by matching data
-    """
-    conn = connection.Connection()
-    c = conn.connect()
-    
-    scraper_id = os.environ['SCRAPER_GUID']
-    c.execute("SELECT item_id FROM items WHERE scraper_id=%s ORDER BY date, item_id", (scraper_id,))
-    
-    res = [ ]
-    item_idlist = c.fetchall()
-    for item_idl in item_idlist:
-        rdata = __load_item(c, item_idl[0], filterdata)
-        if rdata:
-            res.append(rdata)
-    return res
-    
-    
-def loadallwithmatchingdata(filterdata):
-    """
-    Loads everything out of the database that has matching filterdata.  
-    would like to limit by scraper, but no way to uncover the SCRAPER_GUID from the useable scraper short_name
-    """
-    conn = connection.Connection()
-    c = conn.connect()
-    
-    # find the longest key and use that to initially filter the results
-    keyvs = [ (len(str(key)) + (value and len(str(value)) or 0), key, value)  for key, value in filterdata.items() ]
-    keyvs.sort()
-    assert len(keyvs) >= 1
-    
-    itemspartmatch = set()
-    
-    if keyvs[-1][2]:
-        c.execute("SELECT item_id FROM kv WHERE `key`=%s AND `value`=%s GROUP BY item_id", (keyvs[-1][1], keyvs[-1][2]))
-    else:
-        c.execute("SELECT item_id FROM kv WHERE `key`=%s GROUP BY item_id", (keyvs[-1][1],))
-    for item_idl in c.fetchall():
-        itemspartmatch.add(item_idl[0])
+    str_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    hlatlng = ""  # default blank value
         
-    if keyvs[-1][2]:
-        c.execute("SELECT item_id FROM kv32 WHERE `key`=%s AND `value`=%s GROUP BY item_id", (keyvs[-1][1], keyvs[-1][2]))
-    else:
-        c.execute("SELECT item_id FROM kv32 WHERE `key`=%s GROUP BY item_id", (keyvs[-1][1],))
-    for item_idl in c.fetchall():
-        itemspartmatch.add(item_idl[0])
     
-    res = [ ]
-    item_idlist = c.fetchall()
-    for item_id in itemspartmatch:
-        rdata = __load_item(c, item_id, filterdata)
-        if rdata:
-            res.append(rdata)
-    return res
+    # the v is typed and could be, for example, padded with zeros if it is of int type
+    for k, v in data.items():  
+        sv = (v != None and str(v) or "")  # make None go to ""
+        if scraper_id:
+            c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item_id, k, sv))
+        
+        # here we could detect if it is a latlng object and upgrade it to the latlng key
+        #if sv[:7] == "OSGB36(":
+        #    hlatlng = v
+  
+    # --  `run_id`          varchar(255)    NOT NULL,
+    # --  `deleted_run_id`  varchar(255)    NULL,
+    
+    # get the special date value as long as it's of the right type
+    hdate = data.get('date')
+    if hdate != None and (type(hdate) != datetime.datetime and type(hdate) != datetime.date):
+        print "Warning: date should be python.datetime", hdate, "is", type(hdate)
+        hdate = None
+    
+    if 'latlng' in data:
+         hlatlng = "%020f,%020f" % tuple(data["latlng"])  # this will throw exception if not exactly right
+         data["latlng"] = hlatlng  # put the value back in so it's the same
+         
+            
+    # should we put an try catch around here?
+    if scraper_id:
+        c.execute("INSERT INTO `items` (`item_id`, `unique_hash`, `scraper_id`,`date`, `latlng`, `date_scraped`) \
+                   VALUES (%s, %s, %s, %s, %s, %s);", (item_id, "deletethisvalue", scraper_id, hdate, hlatlng, str_now))
+          
+    # printing to the console
+    ldata = { }
+    for k, v in data.items():  
+        ldata[cgi.escape(k)] = cgi.escape(str(v))
+    
+    # this should print < but it crashes the javascript
+    print '<scraperwiki:message type="data">%s' % json.dumps(ldata)   # don't put in the </scraperwiki:message> because it doesn't work like that!
+     
+    return item_id
 
     
-def __load_item(c, item_id, filterdata):
+
+def __retrieve_item(c, item_id):
     """
-    Loads single row given the item_id, and returns None if it doesn't match the filterdata values (where value=None means we only match existence of key)
+    Loads single row given the item_id
     """
-    if not c.execute("SELECT scraper_id, date, latlng, date_scraped FROM items WHERE item_id=%s", (item_id,)):
+    if not c.execute("SELECT scraper_id, date_scraped, latlng FROM items WHERE item_id=%s", (item_id,)):
         return None
-    lscraper_id, date, latlng, date_scraped = c.fetchone()
-    
+    scraper_id, date_scraped, latlng = c.fetchone()
     
     rdata = { "date_scraped": date_scraped }  
-    if date:
-        rdata["date"] = date
+  
+    c.execute("SELECT `key`, `value` FROM kv WHERE item_id=%s", (item_id,))
+    for key, value in c.fetchall():
+        rdata[key] = value
+      
+    # over-write from our indexed valyue of latlng
     if latlng:
         rdata["latlng"] = latlng
-  
-    # why do these particular columns need to be in silly quotes to stop a syntax error?  doesn't happen with items table
-    c.execute("SELECT `key`, `value` FROM kv WHERE item_id=%s", (item_id,))
-    
-    # discard any rows that don't match the filterdata values
-    for key, value in c.fetchall():
-        fvalue = filterdata and filterdata.get(key)
-        if fvalue and str(fvalue) != value:
-            return None
-        rdata[key] = value
-    
-    c.execute("SELECT `key`, `value` FROM kv32 WHERE item_id=%s", (item_id,))
-    for key, value in c.fetchall():
-        fvalue = filterdata and filterdata.get(key)
-        if fvalue and str(fvalue) != value:
-            return None
-        rdata[key] = value
-  
-    # bail out if there is a key missing
-    if filterdata:
-        for key in filterdata:
-            if key not in rdata:
-                return None
         
     return rdata
-  
 
-  
-# test harness
-if __name__ == "__main__":
-  
-  # Test one: Save a single row with a data dict passed
-  unique_keys = ['message_id',]
-  data = {
-  'message_id' : '1',
-  'message' : 'This is an example',
-  'sender' : 'Sym',
-  }
-  save(unique_keys, data, date='2009-10-16', latlng=(52.38431,1.11112))
 
-  
-  # test two: Save a single row without a data dict, just named arguments
-  print save(['id'], id=3, name='Sym', something_else='foo')
-  
-  # test three: Save many rows
-  unique_keys = ['message_id']
-  data = [
-  {
-  'message_id' : '1',
-  'message' : 'This is an example',
-  'sender' : 'Sym',
-  },
-  {
-  'message_id' : '2',
-  'message' : 'This is an example reply',
-  'sender' : 'Someone Else',
-  }
-  ]
-  print save(unique_keys, data)
-  
-  
+def __build_matches(matchrecord, scraper_id):
+    
+    # scraper_id can be None to allow matching across whole database
+    
+    qquery  = ["SELECT items.item_id AS item_id FROM items"]
+    qlist   = [ ]
+        
+    i = 0
+    for key, value in matchrecord.items():
+        qquery.append("INNER JOIN")
+        qquery.append("kv AS kv%d" % i)
+        qquery.append("ON")
+        qquery.append("kv%d.item_id=items.item_id" % i)
+        qquery.append("AND")
+        qquery.append("kv%d.key=%%s" % i)
+        qlist.append(key)
+        if value:
+            qquery.append("AND")
+            qquery.append("kv%d.value=%%s" % i)
+            qlist.append(value)
+        i += 1
+            
+    # add this when the scheme gets updated
+    #qquery.append("WHERE")
+    #qquery.append("deleted_run_id IS NULL")
+    
+    if scraper_id:
+        qquery.append("WHERE")
+        qquery.append("items.scraper_id=%s")
+        qlist.append(scraper_id)
+
+
+    qquery.append("ORDER BY item_id")
+    return " ".join(qquery), tuple(qlist)
+
+
+def retrieve(matchrecord, scraper_id="current"):
+    """
+    Retrieves all records owned by scraper (of current scraper if scraper_id) filtered by matchrecord
+    """
+    if scraper_id == "current":
+        scraper_id = os.environ['SCRAPER_GUID']  
+    if not scraper_id:
+        print "Warning: cannot retrieve on unsaved scraper"
+        return [ ]
+    
+    conn = connection.Connection()
+    c = conn.connect()
+    
+    query, qlist = __build_matches(matchrecord, scraper_id)
+    #print query, qlist
+    c.execute(query, qlist)
+        
+    result = [ ]
+    item_idlist = c.fetchall()
+    for item_idl in item_idlist:
+        rdata = __retrieve_item(c, item_idl[0])
+        if rdata:
+            result.append(rdata)
+    
+    return result
+    
+    
+def __delete_item(c, item_id):
+    """
+    Deletes single row given the item_id
+    """
+    if bSaveAllDeletes:
+        run_id = os.environ['RUN_GUID']
+        c.execute("UPDATE items SET deleted_run_id=%s WHERE item_id=%s", (run_id, item_id,))
+
+    else:
+        c.execute("DELETE FROM items WHERE item_id=%s", (item_id,))
+        c.execute("DELETE FROM kv WHERE item_id=%s", (item_id,))
+
+
+def delete(matchrecord):
+    """
+    Deletes all records owned by scraper (of current scraper if scraper_id) filtered by matchrecord
+    """
+    scraper_id = os.environ['SCRAPER_GUID']  
+    if not scraper_id:
+        print "Warning: cannot delete on unsaved scraper"
+        return 
+    
+    conn = connection.Connection()
+    c = conn.connect()
+    
+    query, qlist = __build_matches(matchrecord, scraper_id)
+    #print query, qlist
+    c.execute(query, qlist)
+    
+    result = [ ]
+    item_idlist = c.fetchall()
+    for item_idl in item_idlist:
+        print "deleting", item_idl
+        rdata = __delete_item(c, item_idl[0])
+    
+
+
+def save(unique_keys, data, date=None, latlng=None):   # **kwargs
+    # data.update(kwargs)   # merges two dicts to implement the October discussion on googlewave (not convinced it's a handy interface)
+    
+    """
+    Standard save function that UPserts (over-writes) a record that shares the same values for the unique_keys
+    """
+    scraper_id = os.environ['SCRAPER_GUID']  # if scraper_id == '' then it's using an unsaved scraper, no GUID is allocated and should not interact with the database
+
+    if date:
+        data["date"] = date
+    if latlng:
+        data["latlng"] = latlng
+    
+    # fill in unique keys
+    matchrecord = { }
+    for key in unique_keys:
+        matchrecord[key] = str(data[key])
+        
+    # always insert when unique_keys are empty 
+    if scraper_id and unique_keys:   
+        delete(matchrecord)
+    
+    insert(data)
+    
+
   

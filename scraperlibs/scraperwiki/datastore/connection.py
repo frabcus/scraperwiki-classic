@@ -34,12 +34,15 @@ class Connection(object):
   
     config = self.__load_config()
 
-    db = MySQLdb.connect(
-      host=config.get('mysql', 'host'), 
-      user=config.get('mysql', 'user'), 
-      passwd=config.get('mysql', 'passwd'),
-      db=config.get('mysql', 'db'),
-      )
+    try :
+        db = MySQLdb.connect(
+          host=config.get('mysql', 'host'), 
+          user=config.get('mysql', 'user'), 
+          passwd=config.get('mysql', 'passwd'),
+          db=config.get('mysql', 'db'),
+          )
+    except :
+        raise Exception("Unable to connect to datastore")
  
     return db.cursor()
   

@@ -92,6 +92,8 @@ INSTALLED_APPS = (
   	'contact_form',
   	'payment',  	
   	'market',
+  	'piston',      # needs 'django-piston' and 'phpserialize'
+  	'api',
     #'debug_toolbar',
   	'django_notify',
   	'tagging',
@@ -132,3 +134,6 @@ PAYPAL_SANDBOX_IMAGE = PAYPAL_IMAGE
 
 #pagingation
 SCRAPERS_PER_PAGE = 60
+
+#API
+MAX_API_ITEMS = 500
