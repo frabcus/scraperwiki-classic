@@ -1,8 +1,0 @@
-{% extends "frontend/base.html" %}
-{% block css %}{% endblock %}
-
-{% block title %}Follow {{ profile.user.username }}{% endblock %}
-
-{% block content %}
-You are now following {{ profile.user.username }}. <a href="/profiles/{{ profile.user.username }}/">Back to {{ profile.user.username }}'s profile</a>.
-{% endblock %}

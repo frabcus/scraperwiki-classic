@@ -17,7 +17,10 @@
 	<div  style="float: right; text-align: right;"> 
 		 {% ifequal profile.user.username user.username %}
 	     <a href="/profiles/edit/">Edit your profile</a>
+
+{% comment %} [APS: remove following/watching features for now]
          {% else  %}
+
 			{% if user.is_authenticated %}
 			  <form method="post" action="">
 			  {% if following %}
@@ -27,6 +30,8 @@
      	      {% endif %} 
                </form>
      	    {% endif %} 
+{% endcomment %}
+
         {% endifequal %}
 	</div>
 	
@@ -48,6 +53,8 @@
      {% endif %}
 	    </ul> 	
     </div>
+
+{% comment %} [APS: remove following/watching features for now]
     
     <div style="float: right; ">
 
@@ -123,8 +130,10 @@
         {% endif %}
         -->
         </div>
-    </div>
-    
+
+{% endcomment %}
+        </div>
+
     <div style="clear:both;"></div>
     
     {% endblock %}
