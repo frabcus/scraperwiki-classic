@@ -1,29 +1,33 @@
 {% extends "frontend/base.html" %}
 
-{% block title %}Help{% endblock %}
+{% block title %}FAQs{% endblock %}
 {% block content %}
     <div class="page_title">
-        <h1>Help</h1>
+        <h1>FAQs</h1>
         <p>
-            ScraperWiki help and frequently asked questions
+            Frequently asked questions about Scraperwiki can be found below. To start writing a scraper, see our <a href="{% url help_tutorials %}">tutorials</a> and <a href="{% url help_code_documentation %}">documentation</a>. 
         </p>
     </div>
     <div class="content">
         <ul class="list_of_contents">
+            <li><strong>Getting started</strong></li>
             <li><a href="#what">What is ScraperWiki?</a></li>
             <li><a href="#who">Who is ScraperWiki for?</a></li>
+            <li><strong>Technical questions</strong></li>
             <li><a href="#languages">What programming languages can I use to write scrapers?</a></li>
             <li><a href="#libraries">What libraries are available?</a></li>
             <li><a href="#how">How do I write a screen scraper?</a></li>
             <li><a href="#saving">What's the difference between saving and committing/publishing my scraper?</a></li>
             <li><a href="#running">How do I run my scraper?</a></li>
             <li><a href="#editing">Who can edit a scraper?</a></li>
-            <li><a href="#data">How to get data out of ScraperWiki?</a></li>
+            <li><a href="#data">How can I get data out of ScraperWiki?</a></li>
             <li><a href="#errors">What happens if my scraper breaks?</a></li>
+            <li><strong>Licensing questions</strong></li>
             <li><a href="#licence">Who owns the code I write on ScraperWiki?</a></li>                                        
             <li><a href="#data_ownership">Who owns the data in ScraperWiki?</a></li>                                
-            <li><a href="data_types">What sort of data can/can't I scrape?</a></li>                                        
-            <li><a href="#security">How secure is your system? Can I try and break it?</a></li>
+            <li><a href="data_types">What sort of data can/can't I scrape?</a></li>   
+            <li><strong>Everything else</strong></li>                                     
+            <li><a href="#security">How secure is your system? Can I try to break it?</a></li>
             <li><a href="#contact">How do I get in touch with you?</a></li>
         </ul>
 
@@ -52,19 +56,24 @@
                 </p>
             </dd>
             <dt id="libraries">What libraries are available?</dt>
-            <dd>
+                   <dd>
+            
+            <p>Various libraries useful for screen scraping: </p>
                 <ul>
-                    <li><a href="http://www.python.org/doc/2.5/lib/lib.html">Standard python 2.5 libraries</a></li>
-                    <li><a href="http://www.crummy.com/software/BeautifulSoup/">BeautifulSoup</a>
-                    <li><a href="http://wwwsearch.sourceforge.net/mechanize/">mechanize</a></li>
-                    <li><a href="http://codespeak.net/lxml/">lxml</a> / <a href="http://code.google.com/p/html5lib/wiki/UserDocumentation">html5lib</a></li>
-                    <li>pdftohtml</li>
-                    <li><a href="http://www.imagemagick.org/script/convert.php">imagemagic convert</a></li>
+                    <li><a href="http://www.python.org/doc/2.5/lib/lib.html">Standard Python 2.5 libraries</a> - including re, the regular expression library</li>
+                    <li><a href="http://www.crummy.com/software/BeautifulSoup/">BeautifulSoup</a> - an HTML parser optimised for screen scraping</li>
+                    <li><a href="http://wwwsearch.sourceforge.net/mechanize/">Mechanize</a> - useful for automating interaction with websites, including dealing with cookies, redirects and forms</li>
+                    <li><a href="http://codespeak.net/lxml/">Lxml</a> and <a href="http://code.google.com/p/html5lib/wiki/UserDocumentation">Html5lib</a> - useful for parsing HTML and XML</li>
+                    <li>Pdftohtml - does what it says on the tin</li>
+                    <li><a href="http://www.imagemagick.org/script/convert.php">Imagemagick</a> - for editing and converting raster image files</li>
                 </ul>
             </dd>
 
             <dt id="how">How do I write a screen scraper?</dt>
-            <dd>
+           <dd>
+            
+            <p>See our <a href="{% url help_tutorials %}">tutorials</a> and <a href="{% url help_code_documentation %}">documentation</a>.</p>
+            <!-- 
                 <p>
                     You write a scraper using our <a href="/editor/">online editor</a>. 
                 </p>
@@ -75,35 +84,37 @@
                     <code>date</code> and <code>latlng</code> are optional indexes for date and location (these are for extracting data more efficiantly from our API).
                 </p>
                 <p>
-                    The editor has 3 tabs: <strong>console</strong> is for printing debug output from your scraper and displaying error messages; <strong>data</strong> shows the data your scraper would save to the datastore; <strong>sources</strong> shows the URLs you are scraping.
+                    The editor has 3 tabs: <strong>Console</strong> is for printing debug output from your scraper and displaying error messages; <strong>Data</strong> shows the data your scraper would save to the datastore; <strong>Sources</strong> shows the URLs you are scraping.
                 </p>
                 <p>
                     Once you have written your scraper, click 'commit and publish' to publish your scraper and schedule it to run.
-                </p>
+                </p> -->
             </dd>
 
             <dt id="saving">What's the difference between saving and committing/publishing my scraper?</dt>
 
-            <dd>
-                <p>Clicking the save button in the editor saves your work (by saving it to disk on our servers) without publishing it on ScraperWiki or changing what code is run each day. This means you can continue working on it later, or pair program with someone else on the same scraper.
+        <dd>
+                <p>Clicking the <strong>Save</strong>  button in the editor saves your work (by saving it to disk on our servers) without publishing it on ScraperWiki or changing what code is run each day. This means you can continue working on it later, or pair program with someone else on the same scraper.
                 </p>
 
-                <p>Committing your scraper creates a new version (using the <a href="http://mercurial.selenic.com/">Mercurial</a> source control system) and publishes it on ScraperWiki. The next time your scraper is called by the scheduler your committed code will be this code that gets run.
+                <p>Clicking the <strong>Publish</strong> button creates a new version (using the <a href="http://mercurial.selenic.com/">Mercurial</a> source control system) and publishes it on ScraperWiki for everyone to see. The next time your scraper is called by the scheduler, this will be the code that gets run.
                 </p>
             </dd>
+
 
             <dt id="running">How do I run my scraper?</dt>
 
             <dd>
                 <p>
-                    At the moment the committed version of each scraper in ScraperWiki is run once a day by our scheduler. We are adding extra controls so you can set how ofter your scraper needs to run. So if you know a web page only gets updated once a month on a tuesday, you can set it to run then.
+                          At the moment the published version of each scraper in ScraperWiki is run once a day by our scheduler. We are adding extra controls so you can set how often your scraper needs to run. So if you know a web page only gets updated once a month on a Tuesday, you can set it to run then.
                 </p>
             </dd>
             <dt id="editing">Who can edit a scraper?</dt>
 
             <dd>
-                <p>At the moment anyone can edit anyone else's scraper, this means other people can help extend or fix your code. We are adding email alerts so you when your scraper is edited and by who, and eventually the option to have private scrapers. If you are interested in this, please <a href="/contact/">get in touch</a>. 
+                                <p>At the moment anyone can edit anyone else's scraper; this means other people can help extend or fix your code. We are adding email alerts so you'll know when your scraper is edited and by whom. Eventually you will have the option to keep scrapers private. If you are interested in this, please <a href="/contact/">get in touch</a>. 
                 </p>
+
             </dd>
 
             <dt id="data">How to get data out of ScraperWiki?</dt>
@@ -117,7 +128,7 @@
             <dt id="errors">What happens if my scraper breaks?</dt>
 
             <dd>
-                <p>We are currently building the system that will alert you by email if your scrapers appear to be broken.
+              <p>At the moment, nothing. We are building the system that will alert you by email if your scrapers appear to be broken.
                 </p>
             </dd>
 
@@ -125,28 +136,27 @@
             <dt id="licence">Who owns the code I write on ScraperWiki?</dt>
 
             <dd>
-                <p>All scraping code hosted on ScraperWiki is licensed under the <a href="http://www.gnu.org/licenses/gpl-3.0.txt">GNU General Public License</a>. By adding your scraper to ScraperWiki you are releaseing it under the same licence. For more information please see our <a href="/terms_and_conditions/">terms and conditions</a>.
+                <p>All scraping code hosted on ScraperWiki is licensed under the <a href="http://www.gnu.org/licenses/gpl-3.0.txt">GNU General Public License</a>. By adding your scraper to ScraperWiki you are releasing it under the same licence. For more information please see our <a href="/terms_and_conditions/">terms and conditions</a>.
                 </p>
             </dd>
 
             <dt id="data_ownership">Who owns the data in ScraperWiki?</dt>
 
             <dd>
-                <p>It depends where the data originally came from and how it was derived. The source and licence of the data is declared in the details for each scraper. When creating a scraper you will be asked to enter this data.
-                </p>
+               <p>It depends where the data originally came from and how it was derived. When you create a scraper, you are asked to declare the source and licence of the data being scraped.</p>
             </dd>
 
             <dt id="data_types">What sort of data can/can't I scrape?</dt>
 
             <dd>
-                <p>The focus of ScraperWiki is opening up public data. You need to make sure that you confirm to our <a href="/terms_and_conditions/">terms and conditions</a>. In short play nice, and don't do to someone else's website what you wouldent like done to yourself.
+                 <p>The focus of ScraperWiki is opening up public data. You need to make sure that you conform to our <a href="/terms_and_conditions/">terms and conditions</a>. In short: play nice, and don't do to someone else's website what you wouldn't like done to your own.
                 </p>
             </dd>
 
-            <dt id="security">How secure is your system? Can I try and break it?</dt>
+            <dt id="security">How secure is your system? Can I try to break it?</dt>
 
             <dd>
-                <p>The code you write runs in a seperate sandboxed system with controlled resources. If you try and write malicious code (while 1=1, that kind of thing) you'll just be breaking your own scraper and annoying people, so please don't.
+                <p>The code you write runs in a separate sandboxed system with controlled resources. If you try to write malicious code (<span class="code">while 1=1</span>, that kind of thing) you'll just be breaking your own scraper and annoying people, so please don't.
                 </p>
             </dd>
 

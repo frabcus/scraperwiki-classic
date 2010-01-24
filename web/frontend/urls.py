@@ -12,9 +12,6 @@ urlpatterns = patterns('',
     url(r'^profiles/create/$',                     profile_views.create_profile, {'form_class': frontend_forms.UserProfileForm}, name='profiles_create_profile'),
     url(r'^profiles/edit/$',                       profile_views.edit_profile, {'form_class': frontend_forms.UserProfileForm},   name='profiles_edit_profile'),
     url(r'^profiles/$',                   profile_views.profile_list, name='profiles_profile_list'),
-    # May want to reinstate these next two to give people a link to follow or unfollow a user
-    #url(r'^profiles/(?P<username>\w+)/follow/$', profile_views.profile_follow, name='profiles_profile_follow'),
-    #url(r'^profiles/(?P<username>\w+)/unfollow/$', profile_views.profile_unfollow, name='profiles_profile_unfollow'),
 
     url(r'^login/$',                      frontend_views.login, name='login'),
     url(r'^login/confirm/$', 'django.views.generic.simple.direct_to_template', {'template': 'registration/confirm_account.html'}, name='confirm_account'),          
@@ -24,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^about/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/about.html'}, name='about'),       
     url(r'^example_data/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/example_data.html'}, name='api'),       
     url(r'^help/code_documentation/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/code_documentation.html'}, name='help_code_documentation'),   
+    url(r'^help/tutorials/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/tutorials.html'}, name='help_tutorials'),  
 
 
     # contact form

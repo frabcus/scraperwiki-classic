@@ -59,6 +59,11 @@ a {color:#2680c6; text-decoration:none;}
 a:hover {text-decoration:underline;}
 span.faux_link {color:#ccc;}
 
+/* Code */
+.code {font-family: 'Courier New',Courier,monospace;}
+pre.scraperoutput {background-color: aliceblue; padding: 0.5em;}
+pre.scrapercode {background-color: lemonchiffon; padding: 0.5em;}
+
 /* Tables */
 table {width:100%; border-collapse:collapse;}
 table.raw_data tr:nth-child(odd) td {background:#ffffd7;}
