@@ -268,14 +268,12 @@ $(document).ready(function() {
           writeToData(data.content)
       } else if (data.message_type == "exception") {
           sMessage = 'Line ' + data.lineno + ': ' + data.content;
-          codeeditor.nthLine(data.lineno);
+          codeeditor.selectLines(codeeditor.nthLine(data.lineno), 0);
           writeToConsole(sMessage, data.content_long, data.message_type)
       } else {
           writeToConsole(data.content, data.content_long, data.message_type)
       }
-      // alert(data.message_type)
-      
-      // alert(data.message_type)
+
     }
 
     //send a message to the server
@@ -619,33 +617,35 @@ $(document).ready(function() {
     }
 
     //Write to concole/data/sources
-    function writeToConsole(sMessage, sLongMessage, sMessageType) {
+    function writeToConsole(sMessage, sLongMessage, sMessageType, iLine) {
 
+        // if an exception set the class accordingly
+        sShortClassName = '';
+        sLongClassName = 'message_expander';
+        sExpand = '...more'
+        if (sMessageType == 'exception'){
+            sShortClassName = 'exception';
+            sLongClassName = 'exception_expander';
+            sExpand = 'view traceback'            
+        }   
+
+        //work out what to display
         sDisplayMessage = sMessage;
         if(sLongMessage) {
-            if (sMessageType == 'exception'){
-                sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="exception_expander">...more</span>';
-            } else {
-                sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="message_expander">...more</span>';                
-            }
+            sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><a href="#" class="' + sLongClassName  +  '">' + sExpand + '</a>';
         }
         
-        if (sMessageType == 'exception'){
-            $('#output_console .output_content')
-            .append('<span class="output_item exception">' + sDisplayMessage + "</span>");
-        } else {
-            $('#output_console .output_content')
-            .append('<span class="output_item">' + sDisplayMessage + "</span>");            
-        }
-        
+        //add to output
+        $('#output_console .output_content')
+        .append('<span class="output_item ' + sShortClassName + '">' + sDisplayMessage + "</span>");
+
         $('.editor_output div.tabs li.console').addClass('new');
         $('#output_console div').animate({ 
             scrollTop: $('#output_console .output_content').height()+$('#output_console div')[0].scrollHeight 
         }, 0);
         
     };
-    
-    
+
     // Needed to handle 'more' (.message_expander) links correctly
     $('.message_expander').live('click', function() {
             showTextPopup( $(this).prev().text() );
