@@ -74,6 +74,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
   'django.core.context_processors.request',
   'django_notify.context_processors.notifications',
   'frontend.context_processors.site',
+  'frontend.context_processors.template_settings',
 )
 
 INSTALLED_APPS = (
@@ -138,3 +139,14 @@ SCRAPERS_PER_PAGE = 60
 
 #API
 MAX_API_ITEMS = 500
+
+
+# Requited for the template_settings context processor. Each varible listed
+# here will be made availible in all templates that are passed the
+# RequestContext.  Be carful of listing database and other private settings 
+# here
+TEMPLATE_SETTINGS = [
+ 'API_DOMAIN',
+ 'ORBETED_PORT',
+ 'ORBETED_DOMAIN',
+]
