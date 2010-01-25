@@ -10,7 +10,7 @@ $(document).ready(function() {
     var short_name = $('#scraper_short_name').val();
     var guid = $('#scraper_guid').val();
     var run_type = $('#code_running_mode').val();
-    var codemirror_url = $('#codemirror_url').val(); 
+    var codemirror_url = $('#codemirror_url').val();
     var conn; // Orbited connection
 
     //constructor functions
@@ -24,6 +24,7 @@ $(document).ready(function() {
     setupDetailsForm();
     setupAutoDraft();
     setupResizeEvents();
+    setupKeygrabs();   
 
     //setup code editor
     function setupCodeEditor(){
@@ -65,7 +66,7 @@ $(document).ready(function() {
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     onWindowResize();
                     pageIsDirty = false; // page not dirty at this point
-                    //setupKeygrabs(); 
+                    
                 } 
           });        
     }
@@ -79,7 +80,16 @@ $(document).ready(function() {
     }
     
     //Setup Keygrabs
+
     function setupKeygrabs(){
+
+        addHotkey('ctrl+r', sendCode);       
+        addHotkey('ctrl+s', saveScraper); 
+        addHotkey('ctrl+d', viewDiff);                       
+        
+        
+
+/*        
         var grabkeyrun = function(event){ 
             event.stopPropagation(); 
             event.preventDefault(); 
@@ -101,8 +111,10 @@ $(document).ready(function() {
 
         $(document).bind('keydown', 'ctrl+r', grabkeyreload); 
         codemirroriframe.contents().bind('keydown', 'ctrl+r', function() {}); 
-    }; 
+*/        
+    };
 
+    
     //Setup Menu
     function setupMenu(){
         $('#menu_shortcuts').click(function(){
@@ -498,16 +510,15 @@ $(document).ready(function() {
     
     //Save
     function saveScraper(bCommit){
-
         var bSuccess = false;
 
         // make sure the title is the same as the popup
         if (popupStatus == 1){            
             $('#id_title').val($('#id_meta_title').val())
         }
-        
+
         //if saving then check if the title is set
-        if(shortNameIsSet() == false && bCommit == false){
+        if(shortNameIsSet() == false && bCommit != true){
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
 
             if(sResult != false && sResult != '' && sResult != 'Untitled Scraper'){
@@ -769,12 +780,26 @@ $(document).ready(function() {
          $(".ui-resizable-s").bind("dblclick", resizeControls);
     }
 
+   function onWindowResize() {
+       var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
+       if (maxheight < $("#codeeditordiv").height())
+         $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
+     };
 
-       function onWindowResize() {
-           var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-           if (maxheight < $("#codeeditordiv").height())
-             $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
-         };
+    //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
+    //which means we have to do some seemingly random binds/unbinds
+    function addHotkey(sKeyCombination, oFunction){
+
+        $(document).bind('keydown', sKeyCombination, function(){return false;});
+        $(codeeditor.win.document).unbind('keydown', sKeyCombination);
+        $(codeeditor.win.document).bind('keydown', sKeyCombination,
+            function(oEvent){
+                oFunction();
+
+                return false;                            
+            }
+        );
+    }
    
    
 });
