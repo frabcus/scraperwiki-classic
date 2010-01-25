@@ -94,7 +94,7 @@ class ScraperManager(models.Manager):
     def dont_own_any(self):
         return self.owned_count() == 0
 
-            
+
     # this accesses the tables defined in scraperlibs/scraperwiki/datastore/scheme.sql and accessed in datastore/save.py
     def data_dictlist(self, scraper_id, limit=1000, offset=0, start_date=None, end_date=None, latlng=None):   
         '''map from scraper_id and filters to dict representing row record for a particular scraper'''
