@@ -252,4 +252,8 @@ def edit(request, short_name=None):
         return HttpResponseRedirect(reverse('login') + "?next=%s" % scraper_edit_url)
         
         
-  return render_to_response('editor.html', {'form':form, 'scraper' : scraper, 'settings' : settings, 'has_draft': has_draft }, context_instance=RequestContext(request)) 
+  return render_to_response('editor.html', {
+    'form':form, 
+    'scraper' : scraper,
+    'has_draft': has_draft 
+    }, context_instance=RequestContext(request)) 
