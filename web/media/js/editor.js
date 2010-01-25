@@ -12,12 +12,11 @@ $(document).ready(function() {
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val(); 
     var conn; // Orbited connection
-    
 
     //constructor functions
     setupCodeEditor();
-    setupOrbited()
     setupMenu();
+    setupOrbited();
     setupTabs();
     setupTextTabs();
     setupPopups();
@@ -262,12 +261,15 @@ $(document).ready(function() {
 
           //change title
           document.title = document.title.replace('*', '')
-          writeToConsole(data.content, data.content_long, data.message_type)
 
       } else if (data.message_type == "sources") {
           writeToSources(data.content, data.content_long)
       } else if (data.message_type == "data") {
           writeToData(data.content)
+      } else if (data.message_type == "exception") {
+          sMessage = 'Line ' + data.lineno + ': ' + data.content;
+          codeeditor.nthLine(data.lineno);
+          writeToConsole(sMessage, data.content_long, data.message_type)
       } else {
           writeToConsole(data.content, data.content_long, data.message_type)
       }
@@ -619,7 +621,7 @@ $(document).ready(function() {
     //Write to concole/data/sources
     function writeToConsole(sMessage, sLongMessage, sMessageType) {
 
-        sDisplayMessage = sMessage;        
+        sDisplayMessage = sMessage;
         if(sLongMessage) {
             if (sMessageType == 'exception'){
                 sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="exception_expander">...more</span>';
@@ -627,6 +629,7 @@ $(document).ready(function() {
                 sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="message_expander">...more</span>';                
             }
         }
+        
         if (sMessageType == 'exception'){
             $('#output_console .output_content')
             .append('<span class="output_item exception">' + sDisplayMessage + "</span>");
