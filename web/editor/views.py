@@ -124,7 +124,6 @@ def edit(request, short_name=None):
   # Drafts are seen as more 'important' than saved scrapers.
   if draft:
     has_draft = True
-    scraper.__dict__['commit_message'] = 'Scraper created'
     if draft.short_name:
       # We're working with an existing (saved?) scraper that has been edited, but not saved
       scraper = draft
@@ -133,6 +132,7 @@ def edit(request, short_name=None):
       # This is a new scraper that has been edited, but not saved
       scraper = draft
       scraper.code = draft.code
+    scraper.__dict__['commit_message'] = 'Scraper created'
   else:
     # No drafts exist...
     if short_name is not "__new__":
