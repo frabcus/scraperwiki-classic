@@ -196,7 +196,7 @@ def delete(matchrecord):
     result = [ ]
     item_idlist = c.fetchall()
     for item_idl in item_idlist:
-        print "deleting", item_idl
+        #print "deleting", item_idl
         rdata = __delete_item(c, item_idl[0])
     
 
