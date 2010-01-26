@@ -98,7 +98,7 @@ class ScraperManager(models.Manager):
     # this accesses the tables defined in scraperlibs/scraperwiki/datastore/scheme.sql and accessed in datastore/save.py
     def data_dictlist(self, scraper_id, limit=1000, offset=0, start_date=None, end_date=None, latlng=None):   
         '''map from scraper_id and filters to dict representing row record for a particular scraper'''
-        
+
         # previously implemented with a sub-select table joined on kv.  
         # Now implemented by fetching the items, and building each row separately
         
@@ -153,6 +153,7 @@ class ScraperManager(models.Manager):
             qlist.append(end_date)
 
         if latlng:
+            qquery.append("AND not isnull(items.latlng)")            
             qquery.append("HAVING distance < %s" %(MAX_API_DISTANCE_KM))
             qquery.append("ORDER BY distance ASC")
         else:
