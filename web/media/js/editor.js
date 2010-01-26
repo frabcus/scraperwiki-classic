@@ -262,30 +262,34 @@ $(document).ready(function() {
 */
     //read data back from twisted
     conn.onread = function(data) { 
-      data = eval('('+data+')');
-      if (data.message_type == "kill" || data.message_type == "end") {
-          $('.editor_controls #run').removeClass('running').val('run');
-          $('.editor_controls #run').unbind('click.abort');
-          $('.editor_controls #run').bind('click.run', sendCode);
+      data = '{"lines": [' + data + ']}'
+      all_data = eval('('+data+')')  
+      lines = all_data.lines
+      for (var i=0, len=lines.length; i<len; ++i ) {          
+            data = lines[i];
+        if (data.message_type == "kill" || data.message_type == "end") {
+            $('.editor_controls #run').removeClass('running').val('run');
+            $('.editor_controls #run').unbind('click.abort');
+            $('.editor_controls #run').bind('click.run', sendCode);
 
-          //hide annimation
-          $('#running_annimation').hide();
+            //hide annimation
+            $('#running_annimation').hide();
 
-          //change title
-          document.title = document.title.replace('*', '')
+            //change title
+            document.title = document.title.replace('*', '')
 
-      } else if (data.message_type == "sources") {
-          writeToSources(data.content, data.content_long)
-      } else if (data.message_type == "data") {
-          writeToData(data.content)
-      } else if (data.message_type == "exception") {
-          sMessage = 'Line ' + data.lineno + ': ' + data.content;
-          codeeditor.selectLines(codeeditor.nthLine(data.lineno), 0);
-          writeToConsole(sMessage, data.content_long, data.message_type)
-      } else {
-          writeToConsole(data.content, data.content_long, data.message_type)
+        } else if (data.message_type == "sources") {
+            writeToSources(data.content, data.content_long)
+        } else if (data.message_type == "data") {
+            writeToData(data.content)
+        } else if (data.message_type == "exception") {
+            sMessage = 'Line ' + data.lineno + ': ' + data.content;
+            codeeditor.selectLines(codeeditor.nthLine(data.lineno), 0);
+            writeToConsole(sMessage, data.content_long, data.message_type)
+        } else {
+            writeToConsole(data.content, data.content_long, data.message_type)
+        }
       }
-
     }
 
     //send a message to the server
