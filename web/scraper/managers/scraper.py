@@ -98,26 +98,31 @@ class ScraperManager(models.Manager):
     # this accesses the tables defined in scraperlibs/scraperwiki/datastore/scheme.sql and accessed in datastore/save.py
     def data_dictlist(self, scraper_id, limit=1000, offset=0, start_date=None, end_date=None, latlng=None):   
         '''map from scraper_id and filters to dict representing row record for a particular scraper'''
-        
+
         # previously implemented with a sub-select table joined on kv.  
         # Now implemented by fetching the items, and building each row separately
         
         # split the latlng into a pair
         # code here similar to datastore/save.py __build_matches
-        
+
         qquery = ["SELECT items.item_id AS item_id"]
         qlist  = [ ]
-        
+
         if latlng:
             #qquery.append(", SUBSTR(items.latlng, 1, 20)")
             #qquery.append(", SUBSTR(items.latlng, 21, 41)")
-            qquery.append(", ABS(SUBSTR(items.latlng, 1, 20)-%s)+ABS(SUBSTR(items.latlng, 21, 41)-%s) AS diamdist")
+            #qquery.append(", ABS(SUBSTR(items.latlng, 1, 20)-%s)+ABS(SUBSTR(items.latlng, 21, 41)-%s) AS diamdist")
+            qquery.append(", ((ACOS(SIN(%s * PI() / 180) * SIN(ABS(SUBSTR(items.latlng, 1, 20)) * PI() / 180) + COS(%s * PI() / 180) * COS(ABS(SUBSTR(items.latlng, 1, 20)) * PI() / 180) * COS((%s - ABS(SUBSTR(items.latlng, 21, 41))) * PI() / 180)) * 180 / PI()) * 60 * 1.1515 * 1.609344) AS distance")
             qlist.append(latlng[0])
-            qlist.append(latlng[1])
+            qlist.append(latlng[0])
+            qlist.append(latlng[1])                        
+
+            #qlist.append(latlng[0])
+            #qlist.append(latlng[1])
             #qquery.append(", items.latlng AS latlng")
         
         qquery.append("FROM items")
-        
+
         # filter on a key existing and value being the same in the data for the record, using INNER JOIN (see datastore.save.__build_matches)
         #     (not yet used feature)
         filterkey=None
@@ -149,46 +154,53 @@ class ScraperManager(models.Manager):
             qlist.append(start_date)
             qquery.append("AND items.`date` < %s")
             qlist.append(end_date)
-        
+
         if latlng:
-            qquery.append("ORDER BY diamdist")
+            qquery.append("AND not isnull(items.latlng)")            
+            qquery.append("HAVING distance < %s")
+            qlist.append(settings.MAX_API_DISTANCE_KM)            
+            qquery.append("ORDER BY distance ASC")
         else:
             qquery.append("ORDER BY items.item_id")
-        
+
         qquery.append("LIMIT %s,%s")
         qlist.append(offset)
         qlist.append(limit)
-      
-        #print " ".join(qquery), qlist
+
+        #print " ".join(qquery) %tuple(qlist)
         c = self.datastore_connection.cursor()
-        
+
         c.execute(" ".join(qquery), tuple(qlist))
         item_idlist = c.fetchall()
-        
+
         # code here similar to datastore/save.py __retrieve_item
-        
+
         allitems = [ ]
         for item_idl in item_idlist:
+            
+            #get the item ID and create an object for the data to live in
             item_id = item_idl[0]
-            #print "iiii", item_idl
-            
             rdata = { }
-            
+
+            #add distance if present
+            if 1 in item_idl:
+                rdata['distance'] = item_idl[1]
+
             # header records
             if not c.execute("SELECT `date`, latlng, `date_scraped` FROM items WHERE item_id=%s", (item_id,)):
-                continue  # shouldn't happen
+                continue  #TODO: raise an exception 
             item = c.fetchone()
             
             if item[0]:
-                rdata["date"] = item[0]
+                rdata["date"] = item[0]           
             if item[2]:
                 rdata["date_scraped"] = item[2]
-                        
+
             # put the key values in
             c.execute("SELECT `key`, `value` FROM kv WHERE item_id=%s", (item_id,))
             for key, value in c.fetchall():
                 rdata[key] = value
-        
+
             # over-ride any values with latlng (we could break it into two values) (may need to wrap in a try to protect)
             if item[1]:
                 rdata["latlng"] = tuple(map(float, item[1].split(",")))

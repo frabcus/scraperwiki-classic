@@ -33,10 +33,10 @@ urlpatterns = patterns('',
     url(r'^explorer_call$', views.explorer_user_run, name='explorer_call'),
     url(r'^explorer_example/(?P<method>[\w_\-\.\_]+)/$', views.explorer_example, name='explorer_example'),    
 
-    url(r'^1\.0/scraper/search', scrapersearch_handler, name="method_search"),
-    url(r'^1\.0/scraper/getinfo', scraperinfo_handler, name="method_getinfo"),
-    url(r'^1\.0/scraper/getdata', data_handler, name="method_getdata"),
-    url(r'^1\.0/scraper/getdatabydate', getdatabydate_handler, name="method_getdatabydate"),    
-    url(r'^1\.0/scraper/getdatabylocation', getdatabylocation_handler, name="method_getdatabylocation"),        
+    url(r'^1\.0/scraper/search/$', scrapersearch_handler, name="method_search"),
+    url(r'^1\.0/scraper/getinfo/$', scraperinfo_handler, name="method_getinfo"),
+    url(r'^1\.0/scraper/getdata/$', data_handler, name="method_getdata"),
+    url(r'^1\.0/scraper/getdatabydate/$', getdatabydate_handler, name="method_getdatabydate"),    
+    url(r'^1\.0/scraper/getdatabylocation/$', getdatabylocation_handler, name="method_getdatabylocation"),        
 
 )
