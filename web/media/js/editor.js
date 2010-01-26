@@ -548,6 +548,7 @@ $(document).ready(function() {
               data: ({
                 title : $('#id_title').val(),
                 tags : $('#id_tags').val(),
+                license : $('#id_license').val(),
                 description : $('#id_description').val(),                
                 code : codeeditor.getCode(),
                 action : form_action
@@ -569,6 +570,9 @@ $(document).ready(function() {
             error: function(response){
                 alert('Sorry, something went wrong');
               }
+            //error:function (xhr, ajaxOptions, thrownError){
+             //       alert(xhr.responseText);
+              //} 
             });
         }
     }
