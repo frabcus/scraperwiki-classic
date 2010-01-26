@@ -77,7 +77,7 @@ a) Add details of your local setup (database etc). Call the database 'scraperwik
 b) Edit HOME_DIR to your scraperwiki home directory. [[In Windows, do use forward slashes in the directory path.]]
 
 
-4) run django
+4) Run Django
 *************
 
 Test the install by moving in to the web directory and running 'syncdb' and 'migrate':
@@ -96,6 +96,10 @@ You should go to http://localhost:8000/admin and configure the 'sites' section.
 
 At the very least you need to change 'example.com' to 'localhost:8000'.
 
+Make sure you visit localhost (NOT 127.0.0.1) because otherwise you'll get
+cross-site scripting errors relating to the orbited Javascript.
+
+
 
 5) Initiate the Firebox
 ***********************
@@ -112,7 +116,7 @@ c) Copy Server/scripts/runner_config.py.inhg to a version without .inhg and chan
 
 d) For development sites, the FireBox subsystem can be run without UML by running the command
 > $ ./runlocal
-It will spawn some magical things in the background. To stop them use killlocal. See UML/LOCAL for more information. 
+It will spawn some magical things in the background. To stop them use killlocal. See UML/LOCAL for more information, including debugging. 
 
 For live sites, you will need to read UML/HOWTO. XXX It isn't up to date. Please quiz Mike and update it if you do this
 
@@ -121,7 +125,6 @@ e) In web/localsettings.py set FIREBOX_PATH to the full path of the UML/Server/s
 f) In UML/Server/scripts copy SWConfig.py.in_hg to SWConfig.py and edit it. For now, set "host = None" to disable logging.
 You can make a MySQL database to log into another time. XXX update instructions to explain how to do that when it is
 more stable
-
 
 
 6) Create the scrapers' Mercurial repository
@@ -151,3 +154,5 @@ Then change to the datastore directory, and use mysql to import the database sch
 > $ mysql -u USERNAME -p -h localhost scraperwiki_datastore < scheme.sql
 
 And you should be done.
+
+

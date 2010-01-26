@@ -28,10 +28,14 @@
   	    {{ form.bio }}
 	    </li>
 	    
-      <li{% if form.alert_frequency %} class="error"{% endif %}>
+  {% comment %} 
+
+    <li{% if form.alert_frequency %} class="error"{% endif %}>
         {{ form.alert_frequency.label_tag }}
         {{ form.alert_frequency }} in seconds.
       </li>
+
+{% endcomment %} 
 
 		<input type="hidden" name="success_url" value="/" />
 		<input type="submit" value="Save" />

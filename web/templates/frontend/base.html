@@ -4,7 +4,10 @@
 	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>	    
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
-        <script type="text/javascript" src="{{ settings.CODEMIRROR_URL }}js/codemirror.js"></script>
+
+        {% comment %}CODEMIRROR_URL doesn't get into this template, unfortunately (only MEDIA_URL does){% endcomment %}
+		<script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.65/js/codemirror.js"></script>
+
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js"></script>		
 	    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
 	    {% block css %}{% endblock %}
@@ -125,7 +128,8 @@
 		           <dd>
 		             <ul>
 			                 <li><a href="{% url contact_form %}">Contact us</a></li>
-			                 <li><a href="{% url help %}">Help &amp; FAQs</a></li>			                 
+			                 <li><a href="{% url help %}">FAQs</a></li>	
+			                 <li><a href="{% url help_tutorials%}">Tutorials</a></li>	
 			                 <li><a href="{% url help_code_documentation %}">Code documentation</a></li>			                 
 			                 <li><a href="http://groups.google.com/group/scraperwiki">Developers discussion group</a></li>			                   			                 
 			             </ul>

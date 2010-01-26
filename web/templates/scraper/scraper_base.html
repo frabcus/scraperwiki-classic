@@ -17,6 +17,7 @@
   	  <div>
 					{% if user.is_authenticated %}
 	    {% if not user_owns_it   %}
+{% comment %} [APS: remove following/watching features for now]
   					{% if user_follows_it %}
   		  				<p>You are watching this scraper, and will be alerted if it changes or appears to be broken. 
 	
@@ -32,9 +33,8 @@
                   				<input type="submit" value="Watch scraper" /> (You will be alerted if this scraper changes or appears to be broken)
               				</form>
               			</p> 
-
-  						
 					{% endif %}
+{% endcomment %} 
   		   				{% else %} 
 						You own this scraper
   						{% endif %}

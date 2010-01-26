@@ -72,3 +72,6 @@ EMAIL_FROM = 'noreply@localhost'
 MARKET_BOUNTY_CHARGE = 6.3
 
 API_DOMAIN = ''
+
+ORBETED_PORT = 8001
+ORBETED_DOMAIN = 'localhost'

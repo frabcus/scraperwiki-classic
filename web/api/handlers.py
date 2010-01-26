@@ -39,15 +39,15 @@ def is_valid_api_key(request):
     
 
 
-def get_scraper_response(request, api_is_necessary=True):
+def get_scraper_response(request):
     '''gets the scraper from the request or produces an error response'''
     allowed_methods = ('GET',)
     
-    if api_is_necessary and not is_valid_api_key(request):
+    if not is_valid_api_key(request):
         error_response = rc.FORBIDDEN
         error_response.write(": Invalid or inactive API key")
         return None, error_response
-    
+
     short_name = request.GET.get('name', None)
     try:
         scraper = Scraper.objects.get(short_name=short_name)
@@ -68,7 +68,7 @@ def clamp_limit(limit):
     if limit == 0 or limit > MAX_API_ITEMS:
         limit = MAX_API_ITEMS
     return limit
-    
+
 class ScraperInfoHandler(BaseHandler):
     allowed_methods = ('GET',)
 
@@ -94,10 +94,8 @@ class GetDataHandler(BaseHandler):
 
     def read(self, request):
         limit = clamp_limit(int(request.GET.get('limit', 100)))
-        offset = int(request.GET.get('offset', 0))
-        api_is_necessary = (offset != 0) or (limit > 1000) # or other stuff (maybe the apikey should say "from download CSV")
-        
-        scraper, error_response = get_scraper_response(request, api_is_necessary)
+        offset = int(request.GET.get('offset', 0))        
+        scraper, error_response = get_scraper_response(request)
         if error_response:
             return error_response
         

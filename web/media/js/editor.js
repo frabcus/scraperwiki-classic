@@ -10,14 +10,13 @@ $(document).ready(function() {
     var short_name = $('#scraper_short_name').val();
     var guid = $('#scraper_guid').val();
     var run_type = $('#code_running_mode').val();
-    var codemirror_url = $('#codemirror_url').val(); 
+    var codemirror_url = $('#codemirror_url').val();
     var conn; // Orbited connection
-    
 
     //constructor functions
     setupCodeEditor();
-    setupOrbited()
     setupMenu();
+    setupOrbited();
     setupTabs();
     setupTextTabs();
     setupPopups();
@@ -25,6 +24,7 @@ $(document).ready(function() {
     setupDetailsForm();
     setupAutoDraft();
     setupResizeEvents();
+    setupKeygrabs();   
 
     //setup code editor
     function setupCodeEditor(){
@@ -66,7 +66,7 @@ $(document).ready(function() {
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     onWindowResize();
                     pageIsDirty = false; // page not dirty at this point
-                    //setupKeygrabs(); 
+                    
                 } 
           });        
     }
@@ -80,7 +80,16 @@ $(document).ready(function() {
     }
     
     //Setup Keygrabs
+
     function setupKeygrabs(){
+
+        addHotkey('ctrl+r', sendCode);       
+        addHotkey('ctrl+s', saveScraper); 
+        addHotkey('ctrl+d', viewDiff);                       
+        
+        
+
+/*        
         var grabkeyrun = function(event){ 
             event.stopPropagation(); 
             event.preventDefault(); 
@@ -102,8 +111,10 @@ $(document).ready(function() {
 
         $(document).bind('keydown', 'ctrl+r', grabkeyreload); 
         codemirroriframe.contents().bind('keydown', 'ctrl+r', function() {}); 
-    }; 
+*/        
+    };
 
+    
     //Setup Menu
     function setupMenu(){
         $('#menu_shortcuts').click(function(){
@@ -251,29 +262,34 @@ $(document).ready(function() {
 */
     //read data back from twisted
     conn.onread = function(data) { 
-      data = eval('('+data+')');
-      if (data.message_type == "kill" || data.message_type == "end") {
-          $('.editor_controls #run').removeClass('running').val('run');
-          $('.editor_controls #run').unbind('click.abort');
-          $('.editor_controls #run').bind('click.run', sendCode);
+      data = '{"lines": [' + data + ']}'
+      all_data = eval('('+data+')')  
+      lines = all_data.lines
+      for (var i=0, len=lines.length; i<len; ++i ) {          
+            data = lines[i];
+        if (data.message_type == "kill" || data.message_type == "end") {
+            $('.editor_controls #run').removeClass('running').val('run');
+            $('.editor_controls #run').unbind('click.abort');
+            $('.editor_controls #run').bind('click.run', sendCode);
 
-          //hide annimation
-          $('#running_annimation').hide();
+            //hide annimation
+            $('#running_annimation').hide();
 
-          //change title
-          document.title = document.title.replace('*', '')
-          writeToConsole(data.content, data.content_long, data.message_type)
+            //change title
+            document.title = document.title.replace('*', '')
 
-      } else if (data.message_type == "sources") {
-          writeToSources(data.content, data.content_long)
-      } else if (data.message_type == "data") {
-          writeToData(data.content)
-      } else {
-          writeToConsole(data.content, data.content_long, data.message_type)
+        } else if (data.message_type == "sources") {
+            writeToSources(data.content, data.content_long)
+        } else if (data.message_type == "data") {
+            writeToData(data.content)
+        } else if (data.message_type == "exception") {
+            sMessage = 'Line ' + data.lineno + ': ' + data.content;
+            codeeditor.selectLines(codeeditor.nthLine(data.lineno), 0);
+            writeToConsole(sMessage, data.content_long, data.message_type)
+        } else {
+            writeToConsole(data.content, data.content_long, data.message_type)
+        }
       }
-      // alert(data.message_type)
-      
-      // alert(data.message_type)
     }
 
     //send a message to the server
@@ -498,16 +514,15 @@ $(document).ready(function() {
     
     //Save
     function saveScraper(bCommit){
-
         var bSuccess = false;
 
         // make sure the title is the same as the popup
         if (popupStatus == 1){            
             $('#id_title').val($('#id_meta_title').val())
         }
-        
+
         //if saving then check if the title is set
-        if(shortNameIsSet() == false && bCommit == false){
+        if(shortNameIsSet() == false && bCommit != true){
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
 
             if(sResult != false && sResult != '' && sResult != 'Untitled Scraper'){
@@ -617,32 +632,35 @@ $(document).ready(function() {
     }
 
     //Write to concole/data/sources
-    function writeToConsole(sMessage, sLongMessage, sMessageType) {
+    function writeToConsole(sMessage, sLongMessage, sMessageType, iLine) {
 
-        sDisplayMessage = sMessage;        
-        if(sLongMessage) {
-            if (sMessageType == 'exception'){
-                sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="exception_expander">...more</span>';
-            } else {
-                sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><span class="message_expander">...more</span>';                
-            }
-        }
+        // if an exception set the class accordingly
+        sShortClassName = '';
+        sLongClassName = 'message_expander';
+        sExpand = '...more'
         if (sMessageType == 'exception'){
-            $('#output_console .output_content')
-            .append('<span class="output_item exception">' + sDisplayMessage + "</span>");
-        } else {
-            $('#output_console .output_content')
-            .append('<span class="output_item">' + sDisplayMessage + "</span>");            
+            sShortClassName = 'exception';
+            sLongClassName = 'exception_expander';
+            sExpand = 'view traceback'            
+        }   
+
+        //work out what to display
+        sDisplayMessage = sMessage;
+        if(sLongMessage) {
+            sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><a href="#" class="' + sLongClassName  +  '">' + sExpand + '</a>';
         }
         
+        //add to output
+        $('#output_console .output_content')
+        .append('<span class="output_item ' + sShortClassName + '">' + sDisplayMessage + "</span>");
+
         $('.editor_output div.tabs li.console').addClass('new');
         $('#output_console div').animate({ 
             scrollTop: $('#output_console .output_content').height()+$('#output_console div')[0].scrollHeight 
         }, 0);
         
     };
-    
-    
+
     // Needed to handle 'more' (.message_expander) links correctly
     $('.message_expander').live('click', function() {
             showTextPopup( $(this).prev().text() );
@@ -766,12 +784,26 @@ $(document).ready(function() {
          $(".ui-resizable-s").bind("dblclick", resizeControls);
     }
 
+   function onWindowResize() {
+       var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
+       if (maxheight < $("#codeeditordiv").height())
+         $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
+     };
 
-       function onWindowResize() {
-           var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-           if (maxheight < $("#codeeditordiv").height())
-             $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
-         };
+    //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
+    //which means we have to do some seemingly random binds/unbinds
+    function addHotkey(sKeyCombination, oFunction){
+
+        $(document).bind('keydown', sKeyCombination, function(){return false;});
+        $(codeeditor.win.document).unbind('keydown', sKeyCombination);
+        $(codeeditor.win.document).bind('keydown', sKeyCombination,
+            function(oEvent){
+                oFunction();
+
+                return false;                            
+            }
+        );
+    }
    
    
 });

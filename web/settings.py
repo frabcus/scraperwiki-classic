@@ -35,7 +35,7 @@ LOGIN_URL = '/login/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a trailing slash.
 MEDIA_ROOT = URL_ROOT + 'media/'
-CODEMIRROR_ROOT = MEDIA_ROOT + "CodeMirror-0.63/"
+CODEMIRROR_ROOT = MEDIA_ROOT + "CodeMirror-0.65/"
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a trailing slash.
 ADMIN_MEDIA_PREFIX = URL_ROOT + 'media-admin/'
@@ -74,6 +74,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
   'django.core.context_processors.request',
   'django_notify.context_processors.notifications',
   'frontend.context_processors.site',
+  'frontend.context_processors.template_settings',
 )
 
 INSTALLED_APPS = (
@@ -124,7 +125,7 @@ REGISTRATION_BACKEND = "registration.backends.default.DefaultBackend"
 
 # define default directories needed for paths to run scrapers
 SCRAPER_LIBS_DIR = join(HOME_DIR, "scraperlibs")
-CODEMIRROR_URL = MEDIA_URL + "CodeMirror-0.64/"
+CODEMIRROR_URL = MEDIA_URL + "CodeMirror-0.65/"  # this value doesn't get through into frontend/base.html, unfortunately
 
 #send broken link emails
 SEND_BROKEN_LINK_EMAILS = DEBUG == False
@@ -138,3 +139,16 @@ SCRAPERS_PER_PAGE = 60
 
 #API
 MAX_API_ITEMS = 500
+
+
+# Requited for the template_settings context processor. Each varible listed
+# here will be made availible in all templates that are passed the
+# RequestContext.  Be carful of listing database and other private settings 
+# here
+TEMPLATE_SETTINGS = [
+ 'API_DOMAIN',
+ 'ORBETED_PORT',
+ 'ORBETED_DOMAIN',
+ 'CODE_RUNNING_MODE',
+ 'CODEMIRROR_URL',
+]
