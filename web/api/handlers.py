@@ -124,7 +124,7 @@ class GetDataByDateHandler(BaseHandler):
         start_date = ConvertDate(request.GET.get('start_date', None))
         end_date = ConvertDate(request.GET.get('end_date', None))
         
-        # raise an error if there's no date range in this request (don't see why you can't simply include these parameters in a standard getData request)
+        # raise an error if there's no date range in this request
         if not start_date and not end_date:
             error_response = rc.BAD_REQUEST
             error_response.write(": No date range selected '%s'" % short_name)
@@ -138,6 +138,7 @@ class GetDataByLocationHandler(BaseHandler):
     allowed_methods = ('GET',)        
         
     def read(self, request):
+        
         limit = clamp_limit(int(request.GET.get('limit', 100)))
         offset = int(request.GET.get('offset', 0))
         scraper, error_response = get_scraper_response(request)
@@ -145,11 +146,11 @@ class GetDataByLocationHandler(BaseHandler):
             return error_response
         
         latlng = (float(request.GET.get('lat', None)), float(request.GET.get('lng', None)))
-       
-        # raise an error if there's no location in this request (don't see why you can't simply include these parameters in a standard getData request)
+
+        # raise an error if there's no location in this request
         if not latlng:
             error_response = rc.BAD_REQUEST
-            error_response.write(": No date range selected '%s'" % short_name)
+            error_response.write(": No latitude or longitude specified '%s'" % short_name)
             return error_response
         
         return Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, latlng=latlng)
