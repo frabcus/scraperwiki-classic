@@ -104,16 +104,18 @@ class ScraperManager(models.Manager):
         
         # split the latlng into a pair
         # code here similar to datastore/save.py __build_matches
-        
+
         qquery = ["SELECT items.item_id AS item_id"]
         qlist  = [ ]
-        
+
         if latlng:
             #qquery.append(", SUBSTR(items.latlng, 1, 20)")
             #qquery.append(", SUBSTR(items.latlng, 21, 41)")
-            qquery.append(", ABS(SUBSTR(items.latlng, 1, 20)-%s)+ABS(SUBSTR(items.latlng, 21, 41)-%s) AS diamdist")
-            qlist.append(latlng[0])
-            qlist.append(latlng[1])
+            #qquery.append(", ABS(SUBSTR(items.latlng, 1, 20)-%s)+ABS(SUBSTR(items.latlng, 21, 41)-%s) AS diamdist")
+            qquery.append(", ((ACOS(SIN(%s * PI() / 180) * SIN(ABS(SUBSTR(items.latlng, 1, 20)) * PI() / 180) + COS(%s * PI() / 180) * COS(ABS(SUBSTR(items.latlng, 1, 20)) * PI() / 180) * COS((%s - ABS(SUBSTR(items.latlng, 21, 41))) * PI() / 180)) * 180 / PI()) * 60 * 1.1515 * 1.609344) AS distance" %(latlng[0], latlng[1], long))
+
+            #qlist.append(latlng[0])
+            #qlist.append(latlng[1])
             #qquery.append(", items.latlng AS latlng")
         
         qquery.append("FROM items")
@@ -149,9 +151,10 @@ class ScraperManager(models.Manager):
             qlist.append(start_date)
             qquery.append("AND items.`date` < %s")
             qlist.append(end_date)
-        
+
         if latlng:
-            qquery.append("ORDER BY diamdist")
+            qquery.append("HAVING distance < %s" %(MAX_API_DISTANCE_KM))
+            qquery.append("ORDER BY distance ASC")
         else:
             qquery.append("ORDER BY items.item_id")
         
