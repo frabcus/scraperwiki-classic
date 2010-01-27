@@ -12,7 +12,7 @@
     <div class="section">
         <h2>Overview</h2>
         <p>
-            The ScraperWiki API lets you retrieve data from the ScraperWiki Datastore to use in your own applications.
+            The ScraperWiki API lets you retrieve data from the ScraperWiki datastore to use in your own applications.
         </p>
         <p>
             {% if user.is_authenticated %}
@@ -22,7 +22,7 @@
             {% endif %}
         </p>
         <p>
-            Each API function has it's own URI. You pass an API key, the format you would like the data returned in, other function specific arguments, via the query string to tell the API exactly what you are requesting:
+            Each API function has its own URI. You need to pass an API key, the format you would like the data returned in, and other function-specific arguments via the query string to tell the API exactly what you are requesting:
             <code class="api_call">
      http://www.scraperwiki.com/api/1.0/scraper/getdata/?name=<em>[scraper short name]</em>&key=<em>[your api key]</em>&amp;format<em>=[json | yaml | xml | php | csv]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
             </code>
@@ -44,7 +44,7 @@
                     <td><a href="http://www.json.org/">JSON</a></td>
                     <td>json</td>
                     <td>
-                        A text based representation of a Javascript object. It can be converted back into an object using the <code><a href="http://www.devguru.com/Technologies/ecmascript/quickref/eval.html">eval()</a></code> function in Javascript, and many other languages have code libraries available.
+                        A text-based representation of a Javascript object. It can be converted back into an object using the <code><a href="http://www.devguru.com/Technologies/ecmascript/quickref/eval.html">eval()</a></code> function in Javascript, and many other languages have code libraries available
                     </td>
                 </tr>
                 <tr>
@@ -77,7 +77,7 @@
     <div class="section">
         <h2>Status and error codes</h2>
         <p>
-            API calls return the following HTTP status codes, you should check for these to see if your request was OK:
+            API calls return the following HTTP status codes. You should check for these to see if your request was OK:
         </p>
         <table class="api_detail">
             <thead>
@@ -128,7 +128,7 @@
     </div>
     <div class="section">
         <h2>Code libraries</h2>
-        <p>There are currently no libraries available, please <a href="{% url contact_form %}">let us know</a> if you write one.</p>
+        <p>There are currently no libraries available. Please <a href="{% url contact_form %}">let us know</a> if you write one.</p>
     </div>
 </div>
 
