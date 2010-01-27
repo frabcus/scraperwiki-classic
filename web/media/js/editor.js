@@ -272,11 +272,11 @@ $(document).ready(function() {
             $('.editor_controls #run').unbind('click.abort');
             $('.editor_controls #run').bind('click.run', sendCode);
 
-            //hide annimation
-            $('#running_annimation').hide();
-
             //change title
             document.title = document.title.replace('*', '')
+            
+            //hide annimation
+            $('#running_annimation').hide();
 
         } else if (data.message_type == "sources") {
             writeToSources(data.content, data.content_long)
@@ -315,6 +315,9 @@ $(document).ready(function() {
         
         //chaneg docuemnt title
         document.title = document.title + ' *'
+        
+        //hide annimation
+        $('#running_annimation').show();
     
         //clear the tabs
         clearOutput();
