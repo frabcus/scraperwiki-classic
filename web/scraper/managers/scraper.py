@@ -183,7 +183,7 @@ class ScraperManager(models.Manager):
             rdata = { }
 
             #add distance if present
-            if 1 in item_idl:
+            if len(item_idl) > 1:
                 rdata['distance'] = item_idl[1]
 
             # header records

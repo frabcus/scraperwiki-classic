@@ -58,26 +58,20 @@
                     </div>
 
                     <div class="field field-description">
-                        <label for="id_description">{{ form.description.label}} {{ form.license.errors }}</label>
+                        <label for="id_description">{{ form.description.label}} {{ form.description.errors }}</label>
                         {{ form.description }}
                     </div>
-            
-                    <div class="field field-license">
+
+                    <div class="field field-license"> 
                         <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
                         {{ form.license }}
-
                     </div>
-            
-                    <div class="field field-source">
-                        <label for="id_source">{{ form.source.label}} {{ form.source.errors }}</label>
-                        {{ form.source }}
-                    </div>
-
+            {% if not has_draft %}
                     <div class="field field-tags">
                         <label for="id_tags">{{ form.tags.label}} {{ form.tags.errors }}</label>
                         {{ form.tags }}
                     </div>
-
+            {% endif %}
                     <div class="field field-commit_message">
                       <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
                       {{ form.commit_message }}
@@ -107,7 +101,7 @@
 
             {# Controls #}
             <div class="editor_controls">
-                <input type="submit" class="save  button" name="action" value="Save draft" title="Save draft version (Ctrl + S)" />            
+                <input type="submit" class="save  button" name="action" value="Save draft" title="Save draft version (Ctrl + S)" />  
                 <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
                 <input type="button" value="Reload" name="reload" id="reload" title="Reload the latest saved version"/>
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
@@ -205,7 +199,7 @@
                     For parsing html.  <a href="/editor/beautifulsoup_demo" target="_blank">demo</a>  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
                 </li>
                 <li><code><b>mechanize</b></code>
-                    For navigating form fillings.  <a href="/editor/mechanize_demo" target="_blank">demo</a>  <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
+                    Automates submitting forms.  <a href="/editor/mechanize_demo" target="_blank">demo</a>  <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
                 </li>
                 <li><code><b>lxml</b></code>
                     For parsing html and accessing it using cssselect.  <a href="/editor/lxml_demo" target="_blank">demo</a>  docs

@@ -71,8 +71,6 @@ def raw(request, short_name=None):
       res = newcode
   return HttpResponse(res, mimetype="text/plain")
 
-
-
 def edit(request, short_name=None):
   """
   This is the main editor view.  Made more complex by bcause of the 
@@ -117,19 +115,22 @@ def edit(request, short_name=None):
   
   if not request.session.get('ScraperDraft', None):
     request.session['ScraperDraft'] = {}
+
   # drafts are saved in session e.g. if you've been redirected to log in
   draft = request.session['ScraperDraft'].get(short_name, None)
   has_draft = False
+
   # First off, create a scraper instance somehow.
   # Drafts are seen as more 'important' than saved scrapers.
   if draft:
     has_draft = True
     if draft.short_name:
-      # We're working with an existing (saved?) scraper that has been edited, but not saved
+      # We're working with an existing scraper that has been edited, but not saved
       scraper = draft
       scraper.code = draft.code   
     else:
       # This is a new scraper that has been edited, but not saved
+      # APS - what is the distinction here? This if/else doesn't seem to do anything
       scraper = draft
       scraper.code = draft.code
     scraper.__dict__['commit_message'] = 'Scraper created'
@@ -143,18 +144,21 @@ def edit(request, short_name=None):
       if not scraper.published:
       	scraper.__dict__['commit_message'] = 'Scraper created'
     else:
-      # This is a new scraper
+      # This is a totally brand new scraper, load default code
       scraper = ScraperModel()
       scraper.code = template.default()['code']
+      scraper.license = 'Unknown'
+      # display 'scraper created' commit message if scraper hasn't been saved yet
       scraper.__dict__['commit_message'] = 'Scraper created'
 
+  # load tags into form (using dict)
   scraper.__dict__['tags'] = ", ".join(tag.name for tag in scraper.tags)
- 
-  # display 'scraper created' commit message if scraper hasn't been saved yet
+  
   form = forms.editorForm(scraper.__dict__, instance=scraper)
 
   form.fields['code'].initial = scraper.code
   form.fields['title'].initial = scraper.title
+  form.fields['license'].initial = scraper.license
   
   if request.method == 'POST' or bool(re.match('save|commit', request.GET.get('action', ""))):
     if request.POST:
@@ -180,12 +184,12 @@ def edit(request, short_name=None):
       # Save the form without committing at first
       # (read http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
       savedForm = form.save(commit=False)
-      savedForm.tags = request.POST.get('tags')
       
       # Add some more fields to the form
       savedForm.code = form.cleaned_data['code']
       savedForm.description = form.cleaned_data['description']    
       savedForm.license = form.cleaned_data['license']    
+
       # savedForm.short_name = short_name
       # if hasattr(scraper, 'pk'):
       #   savedForm.pk = scraper.pk
@@ -199,7 +203,7 @@ def edit(request, short_name=None):
           if request.POST.get('commit_message', False):
             message = request.POST['commit_message']
           savedForm.save(commit=True, message=message, user=request.user.pk)
-          
+
         if savedForm.owner():
           # Set the owner.
           # If there is already an owner, and it is not this user, mark this user as an editor
@@ -208,6 +212,10 @@ def edit(request, short_name=None):
             savedForm.add_user_role(request.user, 'editor')
         else:
           savedForm.add_user_role(request.user, 'owner')
+
+        #add any tags (note that we have to do this *after* the scraper has been saved)
+        s = get_object_or_404(ScraperModel, short_name=savedForm.short_name)
+        s.tags = request.POST.get('tags')
         
         # If the scraper saved, then we can delete the draft  
         if request.session['ScraperDraft'].get(short_name, False):
@@ -227,6 +235,7 @@ def edit(request, short_name=None):
           
         if action.startswith("commit"):
           return HttpResponseRedirect(reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name}))
+
         return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : savedForm.short_name}))
         
       else:
@@ -249,8 +258,7 @@ def edit(request, short_name=None):
         if is_json:
           return HttpResponse(json.dumps({'status' : 'OK', 'draft' : 'True', 'url': scraper_edit_url}))
               
-        return HttpResponseRedirect(reverse('login') + "?next=%s" % scraper_edit_url)
-        
+        return HttpResponseRedirect(reverse('login') + "?next=%s" % scraper_edit_url) 
         
   return render_to_response('editor.html', {
     'form':form, 
