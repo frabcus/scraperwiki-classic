@@ -28,6 +28,7 @@ def data (request, scraper_short_name):
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     data = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=1000)
     data_tables = { "": data }   # replicates output from data_summary_tables
+    has_data = len(data['rows']) > 0
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
@@ -39,6 +40,7 @@ def data (request, scraper_short_name):
       'user_owns_it': user_owns_it, 
       'user_follows_it': user_follows_it,
       'data_tables' : data_tables,
+      'has_data': has_data
       }, context_instance=RequestContext(request))
 
 
