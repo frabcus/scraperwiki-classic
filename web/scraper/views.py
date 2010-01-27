@@ -262,7 +262,7 @@ def search(request, q=""):
         scrapers = scrapers.filter(published=True)
         scrapers = scrapers.order_by('-created_at')
         return render_to_response('scraper/search_results.html',
-          {'scrapers': scrapers,  'form': form, 'query': q})
+          {'scrapers': scrapers,  'form': form, 'query': q}, context_instance = RequestContext(request))
     elif (request.POST): # If the form has been submitted, or we have a search term in the URL
         form = SearchForm(request.POST) 
         if form.is_valid(): 
@@ -273,12 +273,12 @@ def search(request, q=""):
           form = SearchForm() 
           return render_to_response('scraper/search.html', {
             'form': form,
-          })
+          }, context_instance = RequestContext(request))
     else:
         form = SearchForm()
         return render_to_response('scraper/search.html', {
             'form': form,
-        })
+        }, context_instance = RequestContext(request))
     
 def follow (request, scraper_short_name):
 	scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
