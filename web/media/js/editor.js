@@ -310,7 +310,11 @@ $(document).ready(function() {
     //send code request run
     function sendCode() {
 
+        //show the output area
         resizeControls('up');
+        
+        //chaneg docuemnt title
+        document.title = document.title + ' *'
     
         //clear the tabs
         clearOutput();
@@ -338,7 +342,7 @@ $(document).ready(function() {
               $('#running_annimation').hide();
           
               //change title
-              document.title = document.title.replace('*', '')
+              document.title = document.title.replace(' *', '')
           });
       
       
@@ -420,7 +424,7 @@ $(document).ready(function() {
                 $('#running_annimation').hide();
                 
                 //change title
-                document.title = document.title.replace('*', '')
+                document.title = document.title.replace(' *', '')
             });
             
         }

@@ -196,7 +196,7 @@ form.api_arguments input.button {position:static;}
 form.api_arguments div {text-align:right;}
 
 div.explorer_response h2 small {font-size:0.5em;}
-div.explorer_response iframe {width:100%; margin: 1em 0; background:#000; border:none;}
+div.explorer_response iframe {width:100%; margin: 1em 0; background:#000; border:none; height:400px;}
 
 ul.api_suggest a {color:#000;}
 ul.api_suggest a:hover {color:#fff; background:#000; text-decoration:none;}
