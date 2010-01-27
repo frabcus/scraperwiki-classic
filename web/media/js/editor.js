@@ -322,7 +322,7 @@ $(document).ready(function() {
         //clear the tabs
         clearOutput();
     
-        //send the data
+          //send the data
           data = {
             "command" : "run",
             "guid" : guid,
@@ -343,11 +343,11 @@ $(document).ready(function() {
 
               //hide annimation
               $('#running_annimation').hide();
-          
+  
               //change title
               document.title = document.title.replace(' *', '')
           });
-      
+  
       
       
     }
@@ -371,7 +371,7 @@ $(document).ready(function() {
     function clearOutput(){
         $('#output_console div').html('');    
         $('#output_sources div').html('');    
-        $('#output_data div').html('');                    
+        $('#output_data table').html('');                    
     }
 
     function reloadScraper(){
