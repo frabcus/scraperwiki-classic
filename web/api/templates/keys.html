@@ -1,23 +1,54 @@
 {% extends "frontend/base.html" %}
+{% load formhelper %}
+
+{% block title %}API keys{% endblock %}
+
+{% block errors %}
+    {% if form.errors %}
+        <ul>
+            {% form_errors form %}
+        </ul>
+    {% endif %}
+
+{% endblock %}
+
 
 {% block content %}
-  <h2>API Key</h2>
-  
-  
-  {% if keys %}
-    <h3>Your Existing Keys</h3>
-    <ul>
-    {% for key in keys %}
-      <li><h5>{{ key.key }}</h5><p>{{ key.description }}</p></li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-  
-  <h3>Apply for an API key</h3>
-  <form method="POST" accept-charset="utf-8">
-    <ul>
-      {{ form.as_ul }}
-    </ul>
-    <p><input type="submit" value="Apply"></p>
-  </form>
+<div class="page_title">
+    <h1>API keys</h1>
+    <p>
+        To use the ScraperWiki API you need to create a key and use it in your calls to the API
+    </p>
+</div>
+<div class="content col left">
+    <div class="section">
+        <h2>Create an API key</h2>
+        <form method="POST" accept-charset="utf-8">
+        <p>
+            Please enter the use for this API key. e.g. <em>www.myapp.com</em> or <em>general development</em>
+        </p>
+          <ul>
+              <li class="{% if form.description.errors %}error{% endif %}">
+          	    {{ form.description }}
+      	        {% field_errors form.description %}
+      	    </li>
+          </ul>
+          <p><input type="submit" class="button" value="Create a new key"></p>
+        </form>
+        
+    </div>
+</div>
+<div class="content col right">
+    {% if keys %}
+      <h2>Your API keys</h2>
+      <ul>
+      {% for key in keys %}
+        <li>
+            <code><strong>{{ key.key }}</strong></code>
+            <p>{{ key.description }}</p>
+        </li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+</div>
 {% endblock %}
