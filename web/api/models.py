@@ -9,8 +9,7 @@ class api_key(models.Model):
     user = models.ForeignKey(User)
     key = models.CharField(blank=True, max_length=32)
     active = models.BooleanField(default=True)
-    description = models.TextField(blank=True, 
-        help_text="What you plan to use the ScraperWiki API for")
+    description = models.TextField(null=False, blank=False)
     
     def __unicode__(self):
       return "%s" % self.key
