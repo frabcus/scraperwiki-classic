@@ -59,7 +59,7 @@ $(document).ready(function() {
             onChange: function (){
                 pageIsDirty = true; // note that code has changed
             },
-            
+
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
                     codemirroriframe = $("#id_code").next().children(":first"); 
@@ -737,8 +737,17 @@ $(document).ready(function() {
 
     //resize code editor
    function resizeCodeEditor(){
-      if (codemirroriframe)
-          codemirroriframe.height(($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px'); 
+      if (codemirroriframe){
+          //resize the iFrame inside the editor wrapping div
+          codemirroriframe.height(($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px');
+          //resize the output area so the console scrolls correclty
+          iWindowHeight = $(window).height();
+          iEditorHeight = $("#codeeditordiv").height();
+          iControlsHeight = $('.editor_controls').height()
+          iCodeEditorTop = parseInt($("#codeeditordiv").position().top);
+          $("#outputeditordiv").height(iWindowHeight - (iEditorHeight + iControlsHeight + iCodeEditorTop) + 'px');   
+          $("#outputeditordiv .info").height($("#outputeditordiv").height() - parseInt($("#outputeditordiv .info").position().top) + 'px');
+      }
     };
     
 
@@ -792,11 +801,13 @@ $(document).ready(function() {
          $(".ui-resizable-s").bind("dblclick", resizeControls);
     }
 
-   function onWindowResize() {
-       var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-       if (maxheight < $("#codeeditordiv").height())
-         $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
-     };
+function onWindowResize() {
+    var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
+    if (maxheight < $("#codeeditordiv").height()){
+        $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor);
+    }
+    resizeCodeEditor();
+}
 
     //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
     //which means we have to do some seemingly random binds/unbinds
