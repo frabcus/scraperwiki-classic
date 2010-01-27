@@ -173,43 +173,53 @@
     <div id="popup_documentation" class="popup_item">
         <a class="popupClose">x</a>
         <dl class="quick_help">
-            <h4>Storing data <a href="/editor/datastore_demo" target="_blank">demo</a></h4>
-            <ul>
-                <li><code><b>save</b>(unique_keys=[], data={}, date=None, latlng=[None,None])</code>
-                    Saves to the datastore, over-writing data with the same values for unique_keys.
-                </li>
-            </ul>                
+            <h4>Screen Scraping</h4>
+            <dl>
+                <dt>
+                    <code><strong>scraperwiki.scrape(url, <em>params=[]</em>)</strong></code>
+                </dt>
+                <dd>Returns the source text of a webpage as a string. This is a wrapper for urllib2 that lists extra information on the sources tab.</dd>
+            </dl>
+            <h4>Storing data</h4>
+            <dl>
+                <dt>
+                    <code><strong>scraperwiki.datastore.save(unique_keys=[], data={}, <em>date=None</em>, <em>latlng=[None,None]</em>)</strong></code>
+                </dt>
+                <dd>Saves to the datastore, either adding or over-writing data with the same values for unique_keys. <code>date</code> and <code>latlng</code> are optional special fields  for indexing each record.</dd>
+            </dl>                
 
-            <h4>Geo location <a href="/editor/datastore_demo" target="_blank">demo</a></h4>
-            <ul>
-                <li><code><b>gb_postcode_to_latlng</b>(postcode)</code>
-                    returns (lat,lng) pair for a postcode
-                </li>
-                <li><code><b>geo.os_easting_northing_to_latlng</b>(easting, northing)</code>
-                    returns (lat,lng) pair for a OS Grid easting, northing coordinates
-                </li>
-            </ul>                
+            <h4>Geocoding</h4>
+            <dl>
+                <dt>
+                    <code><strong>scraperwiki.geo.gb_postcode_to_latlng(postcode)</strong></code>
+                </dt>
+                <dd>
+                    returns (lat,lng) pair for a postcode.
+                </dd>
+                <dt><code><strong>scraperwiki.geo.os_easting_northing_to_latlng(easting, northing)</strong></code></dt>
+                <dd>returns (lat,lng) pair for an OSGB easting, northing coordinates.</dd>
+            </dl>                
 
             <h4>Recommended libraries</h4>
             <ul>
-                <li><code><b>urllib2</b>, <b>urlparse</b></code>
-                    Standard python libraries for opening urls.  <a href="/editor/urllib2_demo" target="_blank">demo</a>  <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
+                <li><code><strong>urllib2</strong>, <strong>urlparse</strong></code>
+                    Standard python libraries for opening urls. <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
                 </li>
-                <li><code><b>BeautifulSoup</b></code>
-                    For parsing html.  <a href="/editor/beautifulsoup_demo" target="_blank">demo</a>  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
+                <li><code><strong>BeautifulSoup</strong></code>
+                    For parsing html.  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
                 </li>
-                <li><code><b>mechanize</b></code>
-                    Automates submitting forms.  <a href="/editor/mechanize_demo" target="_blank">demo</a>  <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
+                <li><code><strong>mechanize</strong></code>
+                    Automates submitting forms. <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
                 </li>
-                <li><code><b>lxml</b></code>
-                    For parsing html and accessing it using cssselect.  <a href="/editor/lxml_demo" target="_blank">demo</a>  docs
+                <li><code><strong>lxml</strong></code>
+                    For parsing html and accessing it using cssselect.
                 </li>
-                <li><code><b>pdftoxml</b>(pdfdata)</code>
+                <li><code><strong>pdftoxml</strong>(pdfdata)</code>
                     Converts the binary data of a PDF file into a parsable XML string
                 </li>
             </ul>
 
-            <p><a href="{% url help_code_documentation %}" target="_blank">Full code documentation</a> (opens in new window).</p>
+            <p><a href="{% url help_code_documentation %}" target="_blank">Full code documentation</a> <small>(opens in new window)</small>.</p>
 
         </dl>
     </div>
