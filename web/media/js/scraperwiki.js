@@ -43,12 +43,13 @@ function APISetupExploreFunction(){
                 function (){
                     $('#format').val(sText);
                     $('#format').focus();
+                    rewriteApiUrl();                    
                 }
             );
             $(this).html(aLink);
         }
     );
-    
+
     $('#ulScraperShortNames li code').each(
         function(){
             var sText = $(this).html();
@@ -57,10 +58,31 @@ function APISetupExploreFunction(){
                 function (){
                     $('#name').val(sText);
                     $('#name').focus();
+                    rewriteApiUrl();
                 }
             );
             $(this).html(aLink);
         }
     );
 
+    //linkup the texboxes to rewrite the API url
+    $('.api_arguments dl input').each(
+        $(this).keyup(
+            function(){
+                rewriteApiUrl();
+            }
+        )
+    );
+}
+
+function rewriteApiUrl (){
+    sArgs = '?key=[your api key]';
+    var aControls = $('.api_arguments dl input')
+    for (var i=0; i < aControls.length; i++) {
+        if($(aControls[i]).val() != ''){
+            sArgs += ('&' + aControls[i].id + '=' + $(aControls[i]).val());
+        }
+    };
+    $('#aApiLink span').html(sArgs);
+    $('#aApiLink').attr('href', $('#uri').val() + sArgs);
 }
