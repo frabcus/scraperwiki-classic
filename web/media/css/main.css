@@ -82,7 +82,8 @@ div.page_tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; marg
         border-top:solid 1px #ccc;border-left:solid 1px #ccc;border-right:solid 1px #ccc;}
 div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
         background:#fff;}
-div.tab_tools {text-align:right; padding:0.2em 0.8em;}
+div.tab_tools {text-align:right; padding:0.8em 0.1em;}
+div.tab_tools form {float:left; padding:0;}
 div.page_tab_body {clear:left;}
 
 /* meta data */
@@ -119,7 +120,10 @@ input.button {font-size:1em;
     -webkit-border-radius: 4px;-moz-border-radius: 4px; 
     background-color:#6fb1e6; color:#fff;
         padding:0.4em 0.6em 0.4em 0.6em;border:solid 1px #2680c6;font-weight:bold; text-transform:uppercase;}
+input.button.small {font-size:0.7em;}        
+input.danger {background:#fc999c; border-color:#ec5f5e;}
 input.button:active {color:#2680c6;}
+input.button:disabled {background-color:#ddd; border-color:#ccc; }
 
 /* Lists */
 ul {padding-left:0;}
