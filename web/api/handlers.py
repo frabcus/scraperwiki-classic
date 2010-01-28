@@ -76,7 +76,7 @@ class ScraperInfoHandler(BaseHandler):
         scraper, error_response = get_scraper_response(request)
         if error_response:
             return error_response
-            
+
         info = {}
         info['license']     = scraper.license
         info['created']     = scraper.created_at
@@ -88,13 +88,12 @@ class ScraperInfoHandler(BaseHandler):
         return [info,]
 
 
-
 class GetDataHandler(BaseHandler):
     allowed_methods = ('GET',)
 
     def read(self, request):
         limit = clamp_limit(int(request.GET.get('limit', 100)))
-        offset = int(request.GET.get('offset', 0))        
+        offset = int(request.GET.get('offset', 0))
         scraper, error_response = get_scraper_response(request)
         if error_response:
             return error_response
@@ -129,7 +128,6 @@ class GetDataByDateHandler(BaseHandler):
             error_response = rc.BAD_REQUEST
             error_response.write(": No date range selected '%s'" % short_name)
             return error_response
-        
         return Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, start_date=start_date, end_date=end_date)
         
 

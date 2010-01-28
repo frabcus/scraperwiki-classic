@@ -281,7 +281,7 @@ $(document).ready(function() {
 
             //change title
             document.title = document.title.replace('*', '')
-            
+
             //hide annimation
             $('#running_annimation').hide();
 
@@ -686,15 +686,15 @@ $(document).ready(function() {
     // Needed to handle 'more' (.message_expander) links correctly
     $('.message_expander').live('click', function() {
             showTextPopup( $(this).prev().text() );
+            return false;
     })
 
     $('.exception_expander').live('click', function() {
             showTextPopup( $(this).prev().text() );
+            return false;
     })
-    
-    
-    function writeToSources(sMessage, sLongMessage) {
 
+    function writeToSources(sMessage, sLongMessage) {
 
         sDisplayMessage = sMessage;
         if(sLongMessage) {
@@ -703,8 +703,7 @@ $(document).ready(function() {
         }
         $('#output_sources .output_content')
         .append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
-        
-        
+
         $('.editor_output div.tabs li.sources').addClass('new');
         $('#output_sources div').animate({ 
             scrollTop: $('#output_sources .output_content').height()+$('#output_sources div')[0].scrollHeight 

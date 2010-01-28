@@ -59,6 +59,7 @@ function APISetupExploreFunction(){
                     $('#name').val(sText);
                     $('#name').focus();
                     rewriteApiUrl();
+                    return false;
                 }
             );
             $(this).html(aLink);
