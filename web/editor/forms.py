@@ -5,6 +5,7 @@ import scraper
 LICENSE_CHOICES = ( 
     ('Public domain', 'Public domain'),
     ('Share-alike', 'Share-alike'),
+    ('Crown copyright', 'Crown copyright'),
     ('Other', 'Other'),
     ('Unknown', 'Unknown'),
 )
@@ -19,7 +20,7 @@ class editorForm(forms.ModelForm):
   commit_message = forms.CharField(required=False, widget=forms.TextInput(attrs={'title' : ''}))
   description = forms.CharField(required=False, widget=forms.TextInput(attrs={'title' : ''}))  
   tags = forms.CharField(required=False)
-  license = forms.ChoiceField(choices=LICENSE_CHOICES)
+  license = forms.ChoiceField(choices=LICENSE_CHOICES, label='Data licence')
   code = forms.CharField(widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'}))
   
 
