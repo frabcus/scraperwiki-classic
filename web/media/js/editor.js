@@ -286,7 +286,7 @@ $(document).ready(function() {
             $('#running_annimation').hide();
 
           } else if (data.message_type == "sources") {
-              writeToSources(data.content, data.content_long)
+              writeToSources(data.content, data.url)
           } else if (data.message_type == "data") {
               writeToData(data.content)
           } else if (data.message_type == "exception") {
@@ -298,7 +298,7 @@ $(document).ready(function() {
           }
         }        
       } catch(err) {
-        console.debug(err)
+        //console.debug(err)
         buffer +=data;
       }
     }
@@ -694,15 +694,13 @@ $(document).ready(function() {
             return false;
     })
 
-    function writeToSources(sMessage, sLongMessage) {
+    function writeToSources(sMessage, sUrl) {
 
         sDisplayMessage = sMessage;
-        if(sLongMessage) {
-            $('#output_sources .output_content')
-            .append('<div class="long_message">'+sLongMessage+'</div>');
-        }
+
         $('#output_sources .output_content')
-        .append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
+        //.append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
+        .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl + '</a></span>')
 
         $('.editor_output div.tabs li.sources').addClass('new');
         $('#output_sources div').animate({ 
