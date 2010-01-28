@@ -21,6 +21,7 @@ urlpatterns = patterns('',
     # Documentation
     url(r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'index.html'}),
     url(r'^1\.0/$', 'django.views.generic.simple.direct_to_template', {'template': '1.0.html'}, name='index'),
+    url(r'^1\.0/libraries/$', 'django.views.generic.simple.direct_to_template', {'template': 'libraries.html'}, name='libraries'),
     url(r'^1\.0/explore/scraperwiki.scraper.search/$', views.explore_scraper_search_1_0, name='scraper_search'),
     url(r'^1\.0/explore/scraperwiki.scraper.getinfo/$', views.explore_scraper_getinfo_1_0, name='scraper_getinfo'),    
     url(r'^1\.0/explore/scraperwiki.scraper.getdata/$', views.explore_scraper_getdata_1_0, name='scraper_getdata'),    
