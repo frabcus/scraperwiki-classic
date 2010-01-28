@@ -45,10 +45,9 @@ class ScraperManager(models.Manager):
         > user.not_watching_any()
 
     """
-    
+
     def __init__(self, *args, **kwargs):
 
-        
         # yuck, I have to build the database connection by hand
         backend = django.db.load_backend(settings.DATASTORE_DATABASE_ENGINE)
         self.datastore_connection = backend.DatabaseWrapper({
@@ -93,6 +92,12 @@ class ScraperManager(models.Manager):
 
     def dont_own_any(self):
         return self.owned_count() == 0
+
+    def clear_datastore(self, scraper_id):
+
+        #execute
+        c = self.datastore_connection.cursor()
+        return c.execute("delete kv items from kv inner join items where items.item_id = kv.item_id and items.scraper_id=%s", (scraper_id,))
 
 
     # this accesses the tables defined in scraperlibs/scraperwiki/datastore/scheme.sql and accessed in datastore/save.py

@@ -33,7 +33,7 @@ div.attention {text-align:center;}
 /* Footer */
 #divFooter {text-align:left; padding-bottom:1em; position:relative;border-top:solid 1px #9f9f9f;
         bottom:0; left:0;min-height:135px; clear:left; width:100%; font-size:0.8em; background:#e7f5ff url(../images/footer_background.png) repeat-x top left;}
-#divFooter a {color:#000;}        
+#divFooter a {color:#000;}
 #divFooter dl {padding: 1em 150px 1em 3%;}
 #divFooter dl dt {float:left; width:9em; color:#616161;clear:left;font-weight:bold; 
     padding:0 0 0.5em 0; margin:0; color:#000;}
@@ -66,6 +66,9 @@ pre.scrapercode {background-color: lemonchiffon; padding: 0.5em;}
 
 /* Tables */
 table {width:100%; border-collapse:collapse;}
+table.raw_data {margin-top:1em; margin-bottom:1em;}
+table.raw_data th {text-transform:uppercase; font-weight:normal;background:#f8f8f8; color:#808080;padding:0.3em 0.5em;
+border-top:solid 1px #ccc; border-bottom:solid 1px #ccc;padding:0.4em 0.6em;}
 table.raw_data tr:nth-child(odd) td {background:#ffffd7;}
 table.raw_data td {border-bottom:dotted 1px #ccc; border-top:solid 1px #ffffd7;padding:0.3em 0.5em; line-height:1em;}
 table.raw_data tr:hover td {border-bottom:solid 1px #ccc;border-top:solid 1px #ccc;}
@@ -79,7 +82,8 @@ div.page_tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; marg
         border-top:solid 1px #ccc;border-left:solid 1px #ccc;border-right:solid 1px #ccc;}
 div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
         background:#fff;}
-div.tab_tools {text-align:right; padding:0.2em 0.8em;}
+div.tab_tools {text-align:right; padding:0.8em 0.1em;}
+div.tab_tools form {padding:0 0.5em; display:inline;}
 div.page_tab_body {clear:left;}
 
 /* meta data */
@@ -116,7 +120,10 @@ input.button {font-size:1em;
     -webkit-border-radius: 4px;-moz-border-radius: 4px; 
     background-color:#6fb1e6; color:#fff;
         padding:0.4em 0.6em 0.4em 0.6em;border:solid 1px #2680c6;font-weight:bold; text-transform:uppercase;}
+input.button.small {font-size:0.7em;}        
+input.danger {background:#fc999c; border-color:#ec5f5e;}
 input.button:active {color:#2680c6;}
+input.button:disabled {background-color:#ddd; border-color:#ccc; }
 
 /* Lists */
 ul {padding-left:0;}

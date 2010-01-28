@@ -12,6 +12,7 @@ $(document).ready(function() {
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
     var conn; // Orbited connection
+    var buffer = "";
 
     //constructor functions
     setupCodeEditor();
@@ -32,7 +33,7 @@ $(document).ready(function() {
             parserfile: ["../contrib/python/js/parsepython.js"],
             stylesheet: codemirror_url + "contrib/python/css/pythoncolors.css",
             path: codemirror_url + "js/",
-            textWrapping: false,
+            textWrapping: true,
             lineNumbers: true,
             indentUnit: 4,
             readOnly: false,
@@ -261,34 +262,44 @@ $(document).ready(function() {
     }
 */
     //read data back from twisted
-    conn.onread = function(data) { 
-      data = '{"lines": [' + data + ']}'
-      all_data = eval('('+data+')')  
-      lines = all_data.lines
-      for (var i=0, len=lines.length; i<len; ++i ) {          
-            data = lines[i];
-        if (data.message_type == "kill" || data.message_type == "end") {
-            $('.editor_controls #run').removeClass('running').val('run');
-            $('.editor_controls #run').unbind('click.abort');
-            $('.editor_controls #run').bind('click.run', sendCode);
+
+    conn.onread = function(data) {
+      // check if this data is valid JSON, or add it to the buffer
+      try {
+        data = buffer+data;
+        buffer = "";
+        json_data = '{"lines": [' + data + ']}';
+        all_data = eval('('+json_data+')');      
+        lines = all_data.lines
+      
+        for (var i=0, len=lines.length; i<len; ++i ) {          
+              data = lines[i];
+          if (data.message_type == "kill" || data.message_type == "end") {
+              $('.editor_controls #run').removeClass('running').val('run');
+              $('.editor_controls #run').unbind('click.abort');
+              $('.editor_controls #run').bind('click.run', sendCode);
 
             //change title
             document.title = document.title.replace('*', '')
-            
+
             //hide annimation
             $('#running_annimation').hide();
 
-        } else if (data.message_type == "sources") {
-            writeToSources(data.content, data.content_long)
-        } else if (data.message_type == "data") {
-            writeToData(data.content)
-        } else if (data.message_type == "exception") {
-            sMessage = 'Line ' + data.lineno + ': ' + data.content;
-            codeeditor.selectLines(codeeditor.nthLine(data.lineno), 0);
-            writeToConsole(sMessage, data.content_long, data.message_type)
-        } else {
-            writeToConsole(data.content, data.content_long, data.message_type)
-        }
+          } else if (data.message_type == "sources") {
+              writeToSources(data.content, data.content_long)
+          } else if (data.message_type == "data") {
+              writeToData(data.content)
+          } else if (data.message_type == "exception") {
+              sMessage = 'Line ' + data.lineno + ': ' + data.content;
+              codeeditor.selectLines(codeeditor.nthLine(data.lineno), 0);
+              writeToConsole(sMessage, data.content_long, data.message_type)
+          } else {
+              writeToConsole(data.content, data.content_long, data.message_type)
+          }
+        }        
+      } catch(err) {
+        console.debug(err)
+        buffer +=data;
       }
     }
 
@@ -322,7 +333,7 @@ $(document).ready(function() {
         //clear the tabs
         clearOutput();
     
-        //send the data
+          //send the data
           data = {
             "command" : "run",
             "guid" : guid,
@@ -343,11 +354,11 @@ $(document).ready(function() {
 
               //hide annimation
               $('#running_annimation').hide();
-          
+  
               //change title
               document.title = document.title.replace(' *', '')
           });
-      
+  
       
       
     }
@@ -371,7 +382,7 @@ $(document).ready(function() {
     function clearOutput(){
         $('#output_console div').html('');    
         $('#output_sources div').html('');    
-        $('#output_data div').html('');                    
+        $('#output_data table').html('');                    
     }
 
     function reloadScraper(){
@@ -675,15 +686,15 @@ $(document).ready(function() {
     // Needed to handle 'more' (.message_expander) links correctly
     $('.message_expander').live('click', function() {
             showTextPopup( $(this).prev().text() );
+            return false;
     })
 
     $('.exception_expander').live('click', function() {
             showTextPopup( $(this).prev().text() );
+            return false;
     })
-    
-    
-    function writeToSources(sMessage, sLongMessage) {
 
+    function writeToSources(sMessage, sLongMessage) {
 
         sDisplayMessage = sMessage;
         if(sLongMessage) {
@@ -692,8 +703,7 @@ $(document).ready(function() {
         }
         $('#output_sources .output_content')
         .append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
-        
-        
+
         $('.editor_output div.tabs li.sources').addClass('new');
         $('#output_sources div').animate({ 
             scrollTop: $('#output_sources .output_content').height()+$('#output_sources div')[0].scrollHeight 

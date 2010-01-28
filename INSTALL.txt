@@ -16,7 +16,7 @@ Installation
 The 'root' folder from now on will refer to the root of the mercurial checkout - in other words, the folder containing buildout, web, datastore etc. [In Windows, make sure there are no spaces in the folder names.]
 
 
-1) Set up Virtualenv (optional, but reccomended)
+1) Set up Virtualenv
 ************************************************
 
 a) From within the root folder, run (note the dot at the end):
@@ -35,7 +35,7 @@ Your shell will now show the virtualenv name "> (scraperwiki)$" at the prompt. T
 
 YOU WILL TO DO THIS EACH TIME YOU OPEN A NEW SESSION IN YOUR SHELL. See http://pypi.python.org/pypi/virtualenv for more.
 
-c) Then, get the older version of pip, version 0.6 breaks some old code. Go to [virtualenv]\Lib\site-packages and remove anything to with pip, then run 
+c) Then, get the older version of pip, version 0.6 breaks some old code. Go to [root]\lib\site-packages and remove anything to with pip, then run 
 
 > $ easy_install pip==0.5.1
 
@@ -61,6 +61,9 @@ then run this command and then try buildout again:
 
 > $ easy_install -U distribute
 
+Note, sometimes this causes a "SandboxViolation" error, however it's normally 
+done what it needs to do before this, so ignore the error and run buildout
+again.
 
 3) localsettings.py
 *******************

@@ -185,7 +185,7 @@ def delete(matchrecord):
     if not scraper_id:
         print "Warning: cannot delete on unsaved scraper"
         return 
-    
+
     conn = connection.Connection()
     c = conn.connect()
     

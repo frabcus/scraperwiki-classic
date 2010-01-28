@@ -10,7 +10,7 @@ function setupCodeViewer(iLineCount){
            stylesheet: "/media/CodeMirror-0.65/contrib/python/css/pythoncolors.css",
 
            path: "/media/CodeMirror-0.65/js/",
-           textWrapping: false, 
+           textWrapping: true, 
            lineNumbers: true, 
            indentUnit: 4,
            readOnly: true,
@@ -59,6 +59,7 @@ function APISetupExploreFunction(){
                     $('#name').val(sText);
                     $('#name').focus();
                     rewriteApiUrl();
+                    return false;
                 }
             );
             $(this).html(aLink);
@@ -85,4 +86,17 @@ function rewriteApiUrl (){
     };
     $('#aApiLink span').html(sArgs);
     $('#aApiLink').attr('href', $('#uri').val() + sArgs);
+}
+
+
+function setupButtonConfirmation(sId, sMessage){
+    $('#' + sId).click(
+        function(){
+            var bReturn = false;
+            if (confirm(sMessage) == true){
+                bReturn = true;
+            }
+            return bReturn
+        }    
+    );
 }
