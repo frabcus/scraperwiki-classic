@@ -166,7 +166,7 @@ class ScraperManager(models.Manager):
             qlist.append(settings.MAX_API_DISTANCE_KM)            
             qquery.append("ORDER BY distance ASC")
         else:
-            qquery.append("ORDER BY items.item_id")
+            qquery.append("ORDER BY date_scraped DESC")
 
         qquery.append("LIMIT %s,%s")
         qlist.append(offset)
