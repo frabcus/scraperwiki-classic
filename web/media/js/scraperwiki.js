@@ -10,7 +10,7 @@ function setupCodeViewer(iLineCount){
            stylesheet: "/media/CodeMirror-0.65/contrib/python/css/pythoncolors.css",
 
            path: "/media/CodeMirror-0.65/js/",
-           textWrapping: false, 
+           textWrapping: true, 
            lineNumbers: true, 
            indentUnit: 4,
            readOnly: true,
