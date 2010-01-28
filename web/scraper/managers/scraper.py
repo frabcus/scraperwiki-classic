@@ -45,10 +45,9 @@ class ScraperManager(models.Manager):
         > user.not_watching_any()
 
     """
-    
+
     def __init__(self, *args, **kwargs):
 
-        
         # yuck, I have to build the database connection by hand
         backend = django.db.load_backend(settings.DATASTORE_DATABASE_ENGINE)
         self.datastore_connection = backend.DatabaseWrapper({

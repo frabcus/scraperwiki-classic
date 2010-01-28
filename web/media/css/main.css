@@ -83,7 +83,7 @@ div.page_tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; marg
 div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
         background:#fff;}
 div.tab_tools {text-align:right; padding:0.8em 0.1em;}
-div.tab_tools form {float:left; padding:0;}
+div.tab_tools form {padding:0 0.5em; display:inline;}
 div.page_tab_body {clear:left;}
 
 /* meta data */
