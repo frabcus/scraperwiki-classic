@@ -11,9 +11,9 @@
 
 
 <div class="data_viewer">
-    {% if data_tables %}
+    {% if has_data %}
         {% for table, data in data_tables.items %}
-        <table>
+        <table class="raw_data">
             <thead>
                 <tr>
                     {% for heading in data.headings %}

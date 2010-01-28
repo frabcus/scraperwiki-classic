@@ -33,7 +33,7 @@ $(document).ready(function() {
             parserfile: ["../contrib/python/js/parsepython.js"],
             stylesheet: codemirror_url + "contrib/python/css/pythoncolors.css",
             path: codemirror_url + "js/",
-            textWrapping: false,
+            textWrapping: true,
             lineNumbers: true,
             indentUnit: 4,
             readOnly: false,
