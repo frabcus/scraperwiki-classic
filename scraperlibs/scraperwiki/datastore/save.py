@@ -47,6 +47,11 @@ def insert(data):
     # the v is typed and could be, for example, padded with zeros if it is of int type
     for k, v in data.items():  
         sv = (v != None and str(v) or "")  # make None go to ""
+        
+        # replace spaces in keys with '_'.  Chances are we'll need to replace 
+        # other characters (with re.sub maybe) at some point too.
+        k = k.replace(' ', '_')
+        
         if scraper_id:
             c.execute("INSERT INTO kv (`item_id`,`key`,`value`) VALUES (%s, %s, %s);", (item_id, k, sv))
         
