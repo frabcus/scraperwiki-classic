@@ -14,20 +14,25 @@ import cgi
 # this sets deleted_run_id to flag a record is deleted, rather than actually deleting it
 bSaveAllDeletes = False
 
+# Global connection object
+conn = connection.Connection()
 
 def insert(data):
     """
     Inserts a single row
     """
-    scraper_id = os.environ['SCRAPER_GUID']  # if scraper_id == '' then it's using an unsaved scraper, no GUID is allocated and should not interact with the database
+    # if scraper_id == '' then it's using an unsaved scraper, no GUID is 
+    # allocated and should not interact with the database
+    scraper_id = os.environ['SCRAPER_GUID']  
 
     if scraper_id:
-        conn = connection.Connection()
-        c = conn.connect()
-    
+        c = conn.cursor()
+
     if scraper_id:
-        # there's apparently a good reason for doing it this way, and not using auto-increment on item_id, but it's not declared
-        # (*probably* it's to enable the datastore to be distributed across several tables)
+        # there's apparently a good reason for doing it this way, and not 
+        # using auto-increment on item_id, but it's not declared
+        # (*probably* it's to enable the datastore to be distributed across 
+        # several tables)
         c.execute("UPDATE sequences SET id=LAST_INSERT_ID(id+1);")
         c.execute("SELECT LAST_INSERT_ID();")
         item_id = c.fetchone()[0]
@@ -147,8 +152,7 @@ def retrieve(matchrecord, scraper_id="current"):
         print "Warning: cannot retrieve on unsaved scraper"
         return [ ]
     
-    conn = connection.Connection()
-    c = conn.connect()
+    c = conn.cursor()
     
     query, qlist = __build_matches(matchrecord, scraper_id)
     #print query, qlist
@@ -186,8 +190,7 @@ def delete(matchrecord):
         print "Warning: cannot delete on unsaved scraper"
         return 
     
-    conn = connection.Connection()
-    c = conn.connect()
+    c = conn.cursor()
     
     query, qlist = __build_matches(matchrecord, scraper_id)
     #print query, qlist
