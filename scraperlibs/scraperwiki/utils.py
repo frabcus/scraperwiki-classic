@@ -54,11 +54,12 @@ def scrape (url, params=None):
     except:
         print '<scraperwiki:message type="sources">' + json.dumps({ 'content' : "Failed: %s" % url })
         return None
-    
+
     print_content = {
+      'url': url,
       'content' : "%d bytes from %s" % (len(text), url),
-      'content_long' : cgi.escape(text),
       }
+      #'content_long' : cgi.escape(text),      
     
     print '<scraperwiki:message type="sources">%s' % json.dumps(print_content)
     return text

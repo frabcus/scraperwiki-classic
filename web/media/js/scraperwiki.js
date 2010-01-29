@@ -59,6 +59,7 @@ function APISetupExploreFunction(){
                     $('#name').val(sText);
                     $('#name').focus();
                     rewriteApiUrl();
+                    return false;
                 }
             );
             $(this).html(aLink);
@@ -85,4 +86,17 @@ function rewriteApiUrl (){
     };
     $('#aApiLink span').html(sArgs);
     $('#aApiLink').attr('href', $('#uri').val() + sArgs);
+}
+
+
+function setupButtonConfirmation(sId, sMessage){
+    $('#' + sId).click(
+        function(){
+            var bReturn = false;
+            if (confirm(sMessage) == true){
+                bReturn = true;
+            }
+            return bReturn
+        }    
+    );
 }

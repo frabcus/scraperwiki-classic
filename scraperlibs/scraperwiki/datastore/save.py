@@ -194,7 +194,7 @@ def delete(matchrecord):
     if not scraper_id:
         print "Warning: cannot delete on unsaved scraper"
         return 
-    
+
     c = conn.cursor()
     
     query, qlist = __build_matches(matchrecord, scraper_id)

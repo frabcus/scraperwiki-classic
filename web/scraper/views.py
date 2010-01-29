@@ -13,7 +13,6 @@ from scraper import models
 from scraper import forms
 from scraper.forms import SearchForm
 
-
 import StringIO, csv
 from django.utils.encoding import smart_str
 
@@ -24,15 +23,25 @@ def create(request):
         return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 
 
 def data (request, scraper_short_name):
+    
+    #user details
     user = request.user
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=1000)
-    data_tables = { "": data }   # replicates output from data_summary_tables
-    has_data = len(data['rows']) > 0
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
     
+    #if user has requested a delete, **double** check they are allowed to, the do the delete
+    if request.method == 'POST':
+        delete_data = request.POST['delete_data']
+        if delete_data == '1' and user_owns_it: 
+            models.Scraper.objects.clear_datastore(scraper_id=scraper.guid)
+
+    #get data for this scaper
+    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=1000)
+    data_tables = { "": data }   # replicates output from data_summary_tables
+    has_data = len(data['rows']) > 0    
+
     return render_to_response('scraper/data.html', {
       'scraper_tags' : scraper_tags,
       'selected_tab': 'data', 

@@ -13,7 +13,6 @@ except ImportError:
 
 # The Emitter.construct() function returns a value from scraperwiki/web/scraper/managers/scraper.py data_dictlist() 
 
-
 def stringnot(v):
     if v == None:
         return ""
