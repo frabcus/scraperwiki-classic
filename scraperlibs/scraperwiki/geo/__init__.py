@@ -2,6 +2,8 @@ from osgb import eastnorth_to_osgb, osgb_to_lonlat
 from geo_helper import turn_wgs84_into_osgb36
 
 import urllib
+import re
+
 try:
   import json
 except:
@@ -18,9 +20,14 @@ def os_easting_northing_to_latlng(easting, northing):
     '''Convert easting, northing to latlng assuming altitude 200m'''
     return OSeastingnorthing(easting, northing).latlng
 
-def DEBUG_gb_postcode_to_google_response(postcode):
-    '''Use for checking what is happening when the postcode lookup is failing'''
-    return GBPostcode(postcode).response
+def extract_gb_postcode(string):
+    postcode = False
+    matches = re.findall(r'[A-Z][A-Z]?[0-9][A-Z0-9]? ?[0-9][ABDEFGHJLNPQRSTUWXYZ]{2}\b', string, re.IGNORECASE)
+
+    if len(matches) > 0:
+        postcode = matches[0]
+
+    return postcode
 
 
 # implement above user functions through classes with their conversion outputs

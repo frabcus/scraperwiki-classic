@@ -36,7 +36,6 @@ def is_valid_api_key(request):
         return True
     except:
         return False
-    
 
 
 def get_scraper_response(request):
@@ -86,7 +85,6 @@ class ScraperInfoHandler(BaseHandler):
         info['language']    = scraper.language()
         info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
         return [info,]
-
 
 class GetDataHandler(BaseHandler):
     allowed_methods = ('GET',)

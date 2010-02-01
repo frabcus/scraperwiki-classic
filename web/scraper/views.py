@@ -16,6 +16,11 @@ from scraper.forms import SearchForm
 import StringIO, csv
 from django.utils.encoding import smart_str
 
+try:
+  import json
+except:
+  import simplejson as json
+
 def create(request):
     if request.method == 'POST':
         return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 
@@ -30,6 +35,9 @@ def data (request, scraper_short_name):
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
+    
+    #has geo data
+    has_geo = models.Scraper.objects.has_geo(scraper_id=scraper.guid)
     
     #if user has requested a delete, **double** check they are allowed to, the do the delete
     if request.method == 'POST':
@@ -49,8 +57,39 @@ def data (request, scraper_short_name):
       'user_owns_it': user_owns_it, 
       'user_follows_it': user_follows_it,
       'data_tables' : data_tables,
-      'has_data': has_data
+      'has_data': has_data,
+      'has_geo': has_geo,      
       }, context_instance=RequestContext(request))
+
+def map (request, scraper_short_name):
+    
+    #user details
+    user = request.user
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    user_owns_it = (scraper.owner() == user)
+    user_follows_it = (user in scraper.followers())
+    scraper_tags = Tag.objects.get_for_object(scraper)
+
+    #get data for this scaper
+    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=250)
+    has_data = len(data['rows']) > 0
+    data = json.dumps(data)    
+    
+    #has geo data
+    has_geo = models.Scraper.objects.has_geo(scraper_id=scraper.guid)
+
+    return render_to_response('scraper/map.html', {
+    'scraper_tags' : scraper_tags,
+    'selected_tab': 'map', 
+    'scraper': scraper, 
+    'user_owns_it': user_owns_it, 
+    'user_follows_it': user_follows_it,
+    'data' : data,
+    'has_data': has_data,
+    'has_map': True,
+    'has_geo': has_geo,
+    'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
+    }, context_instance=RequestContext(request))
 
 
 def code (request, scraper_short_name):
@@ -60,6 +99,9 @@ def code (request, scraper_short_name):
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     
+    #has geo data
+    has_geo = models.Scraper.objects.has_geo(scraper_id=scraper.guid)
+    
     scraper_tags = Tag.objects.get_for_object(scraper)
     
     return render_to_response('scraper/code.html', {
@@ -67,7 +109,8 @@ def code (request, scraper_short_name):
         'selected_tab': 'code', 
         'scraper': scraper, 
         'user_owns_it': user_owns_it, 
-        'user_follows_it': user_follows_it
+        'user_follows_it': user_follows_it,
+        'has_geo': has_geo,        
         }, context_instance=RequestContext(request))
 
 def contributors (request, scraper_short_name):
@@ -81,6 +124,9 @@ def contributors (request, scraper_short_name):
     scraper_contributors = scraper.contributors()
     scraper_followers = scraper.followers()
     
+    #has geo data
+    has_geo = models.Scraper.objects.has_geo(scraper_id=scraper.guid)
+    
     scraper_tags = Tag.objects.get_for_object(scraper)
     
     return render_to_response('scraper/contributers.html', {
@@ -91,7 +137,8 @@ def contributors (request, scraper_short_name):
         'selected_tab': 'contributors', 
         'scraper': scraper, 
         'user_owns_it': user_owns_it, 
-        'user_follows_it': user_follows_it
+        'user_follows_it': user_follows_it,
+        'has_geo': has_geo,        
         }, context_instance=RequestContext(request))
         
 def comments (request, scraper_short_name):
@@ -100,6 +147,9 @@ def comments (request, scraper_short_name):
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
+    
+    #has geo data
+    has_geo = models.Scraper.objects.has_geo(scraper_id=scraper.guid)
     
     scraper_owner = scraper.owner()
     scraper_contributors = scraper.contributors()
@@ -115,7 +165,8 @@ def comments (request, scraper_short_name):
         'selected_tab': 'comments', 
         'scraper': scraper, 
         'user_owns_it': user_owns_it, 
-        'user_follows_it': user_follows_it
+        'user_follows_it': user_follows_it,
+        'has_geo': has_geo,        
         }, context_instance=RequestContext(request))
 
 

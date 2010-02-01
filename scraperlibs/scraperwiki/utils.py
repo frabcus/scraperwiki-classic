@@ -38,7 +38,7 @@ cj = cookielib.CookieJar()
 urllibopener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 
 # over-ride the default value of [('User-agent', 'Mozilla/5.0')]
-urllibopener.addheaders = [('User-agent', 'ScraperWiki - please make your data open :)')]
+urllibopener.addheaders = [('User-agent', 'ScraperWiki')]
 
 
 # should the exceptions be caught here?  
