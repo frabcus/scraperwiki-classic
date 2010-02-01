@@ -88,7 +88,6 @@ def map (request, scraper_short_name):
     'has_data': has_data,
     'has_map': True,
     'has_geo': has_geo,
-    'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
     }, context_instance=RequestContext(request))
 
 
