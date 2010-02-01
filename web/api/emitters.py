@@ -49,7 +49,7 @@ class CSVEmitter(Emitter):
         result = fout.getvalue()
         fout.close()
         return result
-        
+
 
 def phpstringnot(v):
     if isinstance(v, datetime.datetime):

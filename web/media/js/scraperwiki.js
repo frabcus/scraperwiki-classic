@@ -100,3 +100,82 @@ function setupButtonConfirmation(sId, sMessage){
         }    
     );
 }
+
+function setupDataMap(){
+
+    // Setup the map
+    oNavigation = new OpenLayers.Control.Navigation();
+    oNavigation.zoomWheelEnabled = false;
+    oPanZoomBar = new OpenLayers.Control.PanZoomBar();
+    
+    oMap = new OpenLayers.Map ("divDataMap", {
+          controls:[
+              oNavigation,
+              oPanZoomBar,
+              new OpenLayers.Control.Attribution()],
+          maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+          maxResolution: 156543.0399,
+          numZoomLevels: 10,
+          units: 'm',
+          projection: new OpenLayers.Projection("EPSG:900913"),
+          displayProjection: new OpenLayers.Projection("EPSG:4326")
+      } );
+
+
+      // Add OSM tile and marker layers
+      oMap.addLayer(new OpenLayers.Layer.OSM.Mapnik("Osmarender"));
+
+      oMarkersLayer = new OpenLayers.Layer.Markers("Markers");
+      oMap.addLayer(oMarkersLayer);      
+      
+     // Make icon
+     var oIconSize = new OpenLayers.Size(21,25);
+     var oIconOffset = new OpenLayers.Pixel(-(oIconSize.w/2), -oIconSize.h);
+     var oIcon = new OpenLayers.Icon('http://www.openstreetmap.org/openlayers/img/marker.png',oIconSize, oIconOffset);
+     
+     // Get data
+     var oData = eval('('+ $('#hidMapData').val() + ')');
+     
+     //find where the latlng field is
+     var iLatLngIndex = 0;
+     for (var i=0; i < oData.headings.length; i++) {
+         if(oData.headings[i] == 'latlng'){
+             iLatLngIndex = i;
+         }
+     };
+
+     for (var i=0; i < oData.rows.length; i++) {
+         
+         //get the lat/lng
+         iLat = oData.rows[i][iLatLngIndex].split(',')[1].replace(')', '');
+         iLng = oData.rows[i][iLatLngIndex].split(',')[0].replace('(', '');         
+         var oLngLat = new OpenLayers.LonLat(iLat, iLng).transform(new OpenLayers.Projection("EPSG:4326"), oMap.getProjectionObject());         
+
+         //work out the html to show
+         var sHtml = '<table>';
+         for (var ii=0; ii < oData.rows[i].length; ii++) {
+            sHtml += ('<tr><td>' + oData.headings[ii]   + '</td>');
+            sHtml += ('<td>' + oData.rows[i][ii] + '</td></tr>');
+         };
+         sHtml += '</table>';
+
+         //make the marker
+         var oMarker = new OpenLayers.Marker(oLngLat,oIcon.clone())
+         oMarkersLayer.addMarker(oMarker);
+         oMarker.html = sHtml;
+         
+         oMarker.events.register("mousedown", oMarker,
+            function(o, b){
+                var oPopup = new OpenLayers.Popup.AnchoredBubble("item", this.lonlat, 
+                    new OpenLayers.Size(350,250), this.html, this.icon, true);
+                oMap.addPopup(oPopup, true);
+
+            }
+        );              
+           
+     };
+     
+     //zoom to extent of the markers
+     oMap.zoomToExtent(oMarkersLayer.getDataExtent());    
+
+}

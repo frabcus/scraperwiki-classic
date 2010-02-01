@@ -221,13 +221,13 @@ class ScraperManager(models.Manager):
         '''single table of all rows for a scraper'''
         allitems = self.data_dictlist(scraper_id, limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
         return convert_dictlist_to_datalist(allitems)
-      
+
 
     # not yet used   probably to delete
     def data_summary_tables(self, scraper_id=0, limit=1000):
       '''multiple table of rows for a scraper, indexed by the __table key'''
       allitems = self.__data_summary_map(scraper_id, limit)
-            
+
       alltables = set()
       for item in allitems.values():
         alltables.add(item.get("__table"))
@@ -252,10 +252,18 @@ class ScraperManager(models.Manager):
           
 
     def item_count(self, guid):
-        sql = "SELECT COUNT(*) FROM items WHERE scraper_id='%s'" % guid
+        sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s'" % guid
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
         return cursor.fetchone()[0]
+
+    def has_geo(self, scraper_id):
+        sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s' and latlng is not null and latlng <> ''" % scraper_id
+        cursor = self.datastore_connection.cursor()
+        cursor.execute(sql)
+        print "!!!!!!!!!!!!!!!!!!!"
+        print sql
+        return cursor.fetchone()[0] > 0
 
     def item_count_for_tag(self, guids):  # to delete
         guids = ",".join("'%s'" % guid for guid in guids)

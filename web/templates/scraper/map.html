@@ -1,0 +1,8 @@
+{% extends "scraper/scraper_base.html" %}
+{% load replace %}
+{% block tab %}
+<input id="hidMapData" type="hidden" value="{{data}}" />
+<div id="divDataMap"></div>
+
+{% endblock %}
+{% block run_script %}setupDataMap();{% endblock %}
