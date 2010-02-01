@@ -211,7 +211,7 @@ def stringnot(v):
 # code here itentical to scraperwiki/web/api/emitters.py CSVEmitter render()
 def export_csv (request, scraper_short_name):   
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=1000)
+    dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=100000)
         
     keyset = set()
     for row in dictlist:
