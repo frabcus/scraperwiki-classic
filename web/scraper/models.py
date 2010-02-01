@@ -5,6 +5,7 @@ import time
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
+import settings
 
 import managers.scraper
 from django.db.models.signals import post_save
@@ -61,6 +62,13 @@ class Scraper(models.Model):
     guid              = models.CharField(max_length = 1000)
     published         = models.BooleanField(default=False)
     first_published_at   = models.DateTimeField(null=True)
+    featured          = models.BooleanField(default=False)
+    line_count        = models.IntegerField(default=0)
+    record_count      = models.IntegerField(default=0)
+    has_geo           = models.BooleanField(default=False)
+    has_temporal      = models.BooleanField(default=False)
+    scraper_sparkline_csv     = models.CharField(max_length = 255, null=True)
+
     objects = managers.scraper.ScraperManager()
       
     def __unicode__(self):
@@ -94,12 +102,17 @@ class Scraper(models.Model):
             if self.first_published_at == None:
                 self.first_published_at = datetime.datetime.today()
             vc.commit(self, message=message, user=user)
+
+      #update meta data
+      self.update_meta()
+              
+      #do the parent save
       super(Scraper, self).save()
     
     def language(self):
 	    return "Python"
 	
-    def record_count(self):
+    def count_records(self):
       return Scraper.objects.item_count(self.guid)
 
     def owner(self):
@@ -168,7 +181,7 @@ class Scraper(models.Model):
         code =  vc.get_code(self.short_name, committed=False)
         return code
 
-    def number_of_lines(self):
+    def count_number_of_lines(self):
         code = vc.get_code(self.short_name)
         return code.count("\n")
         
@@ -180,6 +193,27 @@ class Scraper(models.Model):
         # don't know how goodness is going to be defined yet.
         return True
 
+    # update scraper meta data (lines of code etc)    
+    def update_meta(self):
+        
+        #update line counts etc
+        line_count = self.count_number_of_lines()
+        self.record_count = self.count_records()
+        self.has_geo = Scraper.objects.has_geo(self.guid)
+        self.has_temporal = Scraper.objects.has_temporal(self.guid)
+        
+        #get data for sparklines
+        sparline_days = settings.SPARKLINE_MAX_DAYS
+        created_difference = datetime.datetime.now() - self.created_at
+        if (created_difference.days < settings.SPARKLINE_MAX_DAYS):
+            sparline_days = created_difference.days
+
+        #minimum of 1 day
+        if sparline_days < 1:
+            sparline_days = 1
+        recent_record_count = Scraper.objects.recent_record_count(self.guid, sparline_days)
+        self.scraper_sparkline_csv = ",".join("%d" % count for count in recent_record_count)
+        
 tagging.register(Scraper)
 		
 def post_Scraper_save_signal(sender, **kwargs):
