@@ -1,5 +1,7 @@
-from osgb import eastnorth_to_osgb, osgb_to_lonlat
-from geo_helper import turn_wgs84_into_osgb36
+from osgb import eastnorth_to_osgb, osgb_to_lonlat, lonlat_to_eastnorth
+from geo_helper import turn_osgb36_into_wgs84
+
+
 
 import urllib
 import re
@@ -65,11 +67,12 @@ class OSeastingnorthing:
         self.northing = northing
             
         oscoord = eastnorth_to_osgb(self.easting, self.northing, 5)
+        
         gb36lng, gb36lat = osgb_to_lonlat(oscoord)
             
         gb36height = 200  # guessed altitude of the point
-        lat, lng, height = turn_wgs84_into_osgb36(gb36lat, gb36lng, gb36height)
-
+        lat, lng, height = turn_osgb36_into_wgs84(gb36lat, gb36lng, gb36height)
+        
         self.latlng = (lat, lng)
         
 
