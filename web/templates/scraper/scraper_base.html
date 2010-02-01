@@ -83,7 +83,7 @@
                 <li{% ifequal selected_tab "data" %} class="selected"{% endifequal %}>
                     <a href="{% url scraper_data scraper.short_name %}">Data</a>
                 </li>
-                {% if has_geo %}
+                {% if scraper.has_geo %}
                     <li{% ifequal selected_tab "map" %} class="selected"{% endifequal %}>
                         <a href="{% url scraper_map scraper.short_name %}">Map</a>
                     </li>

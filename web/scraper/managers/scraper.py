@@ -4,7 +4,7 @@ from django.db import connection, backend, models
 import settings
 from collections import defaultdict
 import re
-
+import datetime
 
 def convert_dictlist_to_datalist(allitems):
     allkeys = set()
@@ -250,7 +250,6 @@ class ScraperManager(models.Manager):
         data_tables[table] = { 'headings' : headings, 'rows' : rows }
       return data_tables
           
-
     def item_count(self, guid):
         sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s'" % guid
         cursor = self.datastore_connection.cursor()
@@ -261,9 +260,13 @@ class ScraperManager(models.Manager):
         sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s' and latlng is not null and latlng <> ''" % scraper_id
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
-        print "!!!!!!!!!!!!!!!!!!!"
-        print sql
         return cursor.fetchone()[0] > 0
+
+    def has_temporal(self, scraper_id):
+        sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s' and date is not null" % scraper_id
+        cursor = self.datastore_connection.cursor()
+        cursor.execute(sql)
+        return cursor.fetchone()[0] > 0        
 
     def item_count_for_tag(self, guids):  # to delete
         guids = ",".join("'%s'" % guid for guid in guids)
@@ -271,5 +274,30 @@ class ScraperManager(models.Manager):
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
         return cursor.fetchone()[0]
+
+    def recent_record_count(self, scraper_id, days):
+
+        sql = "SELECT date(date_scraped) as date, count(date_scraped) as count FROM items "
+        sql += "WHERE scraper_id='%s' and date_scraped BETWEEN CURDATE() - INTERVAL %d DAY AND CURDATE() + 1 " % (scraper_id, days)
+        sql += "GROUP BY date(date_scraped)"
+
+        cursor = self.datastore_connection.cursor()
+        cursor.execute(sql)
+        date_counts = cursor.fetchall()
         
+        #make a store, 
+        return_dates = []
+        all_dates = [datetime.datetime.now() + datetime.timedelta(i)  for i in range(-days, 1)]
+        for all_date in  all_dates:
+            #try and find an entry for this date in the query results
+            count = 0
+            for date_count in date_counts:        
+                if str(date_count[0]) == all_date.strftime("%Y-%m-%d"):
+                    count = date_count[1]
+
+            #add the count to the return list
+            return_dates.append(count)
+        
+        return return_dates
+            
         
