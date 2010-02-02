@@ -87,32 +87,7 @@ $(document).ready(function() {
         addHotkey('ctrl+r', sendCode);       
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+d', viewDiff);                       
-        
-        
-
-/*        
-        var grabkeyrun = function(event){ 
-            event.stopPropagation(); 
-            event.preventDefault(); 
-            runScraper(); 
-            return false; 
-        };
-
-        // no matter what happens in the iframe bound function, the key propagates out to document level, so we simply let it do so and handle it there
-        $(document).bind('keydown', 'ctrl+e', grabkeyrun); 
-        codemirroriframe.contents().bind('keydown', 'ctrl+e', function() {}); 
-
-        var grabkeyreload = function(event){ 
-            //console.log("hooss");
-            event.stopPropagation(); 
-            event.preventDefault(); 
-            reloadScraper(); 
-            return false; 
-        };
-
-        $(document).bind('keydown', 'ctrl+r', grabkeyreload); 
-        codemirroriframe.contents().bind('keydown', 'ctrl+r', function() {}); 
-*/        
+          
     };
 
     

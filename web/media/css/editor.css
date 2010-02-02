@@ -84,8 +84,8 @@ span.hiddenfields { margin-left:10px; }
 
 .editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.3em 1em;
     height:1.4em;}
-.editor_output .info span.exception {background:#FF7878;}
-.editor_output .info span.output_item:hover {background:#ffffd7;}
+.editor_output .info span.exception {background:#fafafa url(../images/icons/bug_error.png) no-repeat 5px 3px; padding-left:25px; font-weight:bold;}
+.editor_output .info span.output_item:hover {background-color:#ffffd7;}
 .editor_output .info span.output_item.run_end {border-bottom:solid 1px #aaa;}
 .message_expander {cursor:pointer;color:#2680c6; text-decoration:none;}
 .message_expander:hover {text-decoration:underline;}

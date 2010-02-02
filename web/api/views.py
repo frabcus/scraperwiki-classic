@@ -96,5 +96,4 @@ def explorer_user_run(request):
         if post_key != 'uri' and post_value:
             uri += ('&' + post_key + '=' + urllib.quote_plus(post_value))
 
-    result= urllib.urlopen(uri).read()
     return render_to_response('explorer_user_run.html', {'result' : result}, context_instance=RequestContext(request))    
