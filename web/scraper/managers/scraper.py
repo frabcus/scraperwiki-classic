@@ -254,7 +254,7 @@ class ScraperManager(models.Manager):
         sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s'" % guid
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
-        return type(int(cursor.fetchone()[0]))
+        return int(cursor.fetchone()[0])
 
     def has_geo(self, scraper_id):
         sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s' and latlng is not null and latlng <> ''" % scraper_id
