@@ -30,7 +30,8 @@ class Command(BaseCommand):
             scrapers = Scraper.objects.get(short_name=options['short_name'], published=True, )
             self.run_scraper(scrapers)
         else:
-            scrapers = Scraper.objects.exclude(run_interval='never').filter(published=True)
+            # scrapers = Scraper.objects.exclude(run_interval='never').filter(published=True)
+            scrapers = Scraper.objects.filter(published=True)
             for scraper in scrapers:
                 self.run_scraper(scraper)
 

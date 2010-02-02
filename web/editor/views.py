@@ -159,7 +159,7 @@ def edit(request, short_name=None):
   form.fields['code'].initial = scraper.code
   form.fields['title'].initial = scraper.title
   form.fields['license'].initial = scraper.license
-  form.fields['run_interval'].initial = scraper.run_interval
+  # form.fields['run_interval'].initial = scraper.run_interval
   
   if request.method == 'POST' or bool(re.match('save|commit', request.GET.get('action', ""))):
     if request.POST:
@@ -190,7 +190,7 @@ def edit(request, short_name=None):
       savedForm.code = form.cleaned_data['code']
       savedForm.description = form.cleaned_data['description']    
       savedForm.license = form.cleaned_data['license']
-      savedForm.run_interval = form.cleaned_data['run_interval']
+      # savedForm.run_interval = form.cleaned_data['run_interval']
       
       if request.user.is_authenticated():
         # The user is authenticated, so we can process the form correctly
