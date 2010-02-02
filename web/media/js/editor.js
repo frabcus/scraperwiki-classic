@@ -685,15 +685,20 @@ $(document).ready(function() {
         $('#output_console div').animate({ 
             scrollTop: $('#output_console .output_content').height()+$('#output_console div')[0].scrollHeight 
         }, 0);
-        
-        
+
     };
 
 
     function writeToSources(sMessage, sUrl) {
 
         sDisplayMessage = sMessage;
+        
+        //remove items if over max
+        if ($('#output_sources .output_content').children().size() >= outputMaxItems){
+            $('#output_sources .output_content').children(':first').remove();
+        }
 
+        //append to sources tab
         $('#output_sources .output_content')
         //.append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
         .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl + '</a></span>')
