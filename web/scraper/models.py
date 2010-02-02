@@ -68,6 +68,7 @@ class Scraper(models.Model):
     has_geo           = models.BooleanField(default=False)
     has_temporal      = models.BooleanField(default=False)
     scraper_sparkline_csv     = models.CharField(max_length = 255, null=True)
+    run_interval      = models.CharField(max_length = 255, null=True)
 
     objects = managers.scraper.ScraperManager()
       
@@ -88,6 +89,7 @@ class Scraper(models.Model):
       
       if self.created_at == None:
           self.created_at = datetime.datetime.today()
+
                   
       if not self.guid:
           import hashlib
@@ -113,7 +115,7 @@ class Scraper(models.Model):
 	    return "Python"
 	
     def count_records(self):
-      return Scraper.objects.item_count(self.guid)
+      return int(Scraper.objects.item_count(self.guid))
 
     def owner(self):
       if self.pk:
@@ -183,7 +185,7 @@ class Scraper(models.Model):
 
     def count_number_of_lines(self):
         code = vc.get_code(self.short_name)
-        return code.count("\n")
+        return int(code.count("\n"))
         
     def get_absolute_url(self):
         # used by RSS feeds - TODO
@@ -199,8 +201,8 @@ class Scraper(models.Model):
         #update line counts etc
         line_count = self.count_number_of_lines()
         self.record_count = self.count_records()
-        self.has_geo = Scraper.objects.has_geo(self.guid)
-        self.has_temporal = Scraper.objects.has_temporal(self.guid)
+        self.has_geo = bool(Scraper.objects.has_geo(self.guid))
+        self.has_temporal = bool(Scraper.objects.has_temporal(self.guid))
         
         #get data for sparklines
         sparline_days = settings.SPARKLINE_MAX_DAYS
