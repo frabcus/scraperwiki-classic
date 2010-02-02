@@ -558,16 +558,17 @@ $(document).ready(function() {
             form_action = 'commit';
         }
 
-        if(bSuccess == true){
+        if(bSuccess == true){          
             $.ajax({
               type : 'POST',
-              contentType : "json",
+              contentType : "application/json",
               URL : window.location.pathname,
               data: ({
                 title : $('#id_title').val(),
                 tags : $('#id_tags').val(),
                 license : $('#id_license').val(),
-                description : $('#id_description').val(),                
+                description : $('#id_description').val(),
+                run_interval : $('#id_run_interval').val(),
                 code : codeeditor.getCode(),
                 action : form_action
                 }),

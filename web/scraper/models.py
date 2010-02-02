@@ -68,6 +68,7 @@ class Scraper(models.Model):
     has_geo           = models.BooleanField(default=False)
     has_temporal      = models.BooleanField(default=False)
     scraper_sparkline_csv     = models.CharField(max_length = 255, null=True)
+    run_interval      = models.CharField(max_length = 255, null=True)
 
     objects = managers.scraper.ScraperManager()
       
@@ -88,6 +89,7 @@ class Scraper(models.Model):
       
       if self.created_at == None:
           self.created_at = datetime.datetime.today()
+
                   
       if not self.guid:
           import hashlib

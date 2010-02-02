@@ -105,7 +105,7 @@ def edit(request, short_name=None):
   """
   
   # For special cases where we are calling from AJAX
-  if request.META.get('CONTENT_TYPE', '').startswith('json'):
+  if request.META.get('CONTENT_TYPE', '').startswith('application/json'):
     is_json = True
   else:
     is_json = False
@@ -159,10 +159,11 @@ def edit(request, short_name=None):
   form.fields['code'].initial = scraper.code
   form.fields['title'].initial = scraper.title
   form.fields['license'].initial = scraper.license
+  form.fields['run_interval'].initial = scraper.run_interval
   
   if request.method == 'POST' or bool(re.match('save|commit', request.GET.get('action', ""))):
     if request.POST:
-    # If there is POST, then use that as the form
+      # If there is POST, then use that as the form
       form = forms.editorForm(request.POST, instance=scraper)
       action = request.POST.get('action').lower()
     else:
@@ -179,7 +180,7 @@ def edit(request, short_name=None):
           return HttpResponseRedirect(reverse('editor', kwargs={'short_name' : short_name}))
         else:
           return HttpResponseRedirect(reverse('editor'))
-    
+
     if form.is_valid():
       # Save the form without committing at first
       # (read http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
@@ -188,12 +189,9 @@ def edit(request, short_name=None):
       # Add some more fields to the form
       savedForm.code = form.cleaned_data['code']
       savedForm.description = form.cleaned_data['description']    
-      savedForm.license = form.cleaned_data['license']    
-
-      # savedForm.short_name = short_name
-      # if hasattr(scraper, 'pk'):
-      #   savedForm.pk = scraper.pk
-
+      savedForm.license = form.cleaned_data['license']
+      savedForm.run_interval = form.cleaned_data['run_interval']
+      
       if request.user.is_authenticated():
         # The user is authenticated, so we can process the form correctly
         if action == 'save':
