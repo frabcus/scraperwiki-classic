@@ -5,13 +5,11 @@ from django.db import models
 from scraper.models import *
 
 class Migration:
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'Scraper.featured'
         db.add_column('scraper_scraper', 'featured', orm['scraper.scraper:featured'])
-        
-    
     
     def backwards(self, orm):
         

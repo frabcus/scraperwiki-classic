@@ -13,13 +13,14 @@ $(document).ready(function() {
     var codemirror_url = $('#codemirror_url').val();
     var conn; // Orbited connection
     var buffer = "";
+    var selectedTab = 'console';
+    var outputMaxItems = 400;
 
     //constructor functions
     setupCodeEditor();
     setupMenu();
     setupOrbited();
     setupTabs();
-    setupTextTabs();
     setupPopups();
     setupToolbar();
     setupDetailsForm();
@@ -87,32 +88,7 @@ $(document).ready(function() {
         addHotkey('ctrl+r', sendCode);       
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+d', viewDiff);                       
-        
-        
-
-/*        
-        var grabkeyrun = function(event){ 
-            event.stopPropagation(); 
-            event.preventDefault(); 
-            runScraper(); 
-            return false; 
-        };
-
-        // no matter what happens in the iframe bound function, the key propagates out to document level, so we simply let it do so and handle it there
-        $(document).bind('keydown', 'ctrl+e', grabkeyrun); 
-        codemirroriframe.contents().bind('keydown', 'ctrl+e', function() {}); 
-
-        var grabkeyreload = function(event){ 
-            //console.log("hooss");
-            event.stopPropagation(); 
-            event.preventDefault(); 
-            reloadScraper(); 
-            return false; 
-        };
-
-        $(document).bind('keydown', 'ctrl+r', grabkeyreload); 
-        codemirroriframe.contents().bind('keydown', 'ctrl+r', function() {}); 
-*/        
+          
     };
 
     
@@ -132,37 +108,23 @@ $(document).ready(function() {
     //Setup Tabs
     function setupTabs(){
         
-        //assign events
         $('.editor_output .console a').click(function(){
             showTab('console');
-        })
+            return false;
+        });
         $('.editor_output .data a').click(function(){
             showTab('data');
+            return false;
         })
         $('.editor_output .sources a').click(function(){
             showTab('sources');
+            return false;
         })
 
         //show default tab
         showTab('console'); //todo: check in cookie if tab already set.
         
         resizeControls('up');
-    }
-
-    //Setup Text Popup Tabs
-    function setupTextTabs(){
-        
-        //assign events
-        $('#popup_text .tabs .html_tab a').click(function(){
-            showTextTab('html');
-        })
-        $('#popup_text .tabs .raw_tab a').click(function(){
-            showTextTab('raw');
-        })
-
-        //show default tab
-        showTextTab('html'); //todo: check in cookie if tab already set.
-        
     }
     
     //Setup Popups
@@ -290,9 +252,13 @@ $(document).ready(function() {
           } else if (data.message_type == "data") {
               writeToData(data.content)
           } else if (data.message_type == "exception") {
-              sMessage = 'Line ' + data.lineno + ': ' + data.content;
-              codeeditor.selectLines(codeeditor.nthLine(data.lineno), 0);
-              writeToConsole(sMessage, data.content_long, data.message_type)
+              sMessage = data.content;
+              iLineNumber = 0;
+              if(parseInt(data.lineno) > 0){
+                 iLineNumber = data.lineno;
+                 codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0);                 
+              }
+              writeToConsole(sMessage, data.content_long, data.message_type, iLineNumber)
           } else {
               writeToConsole(data.content, data.content_long, data.message_type)
           }
@@ -598,9 +564,15 @@ $(document).ready(function() {
 
     //Show random text popup
     function showTextPopup(sMessage, sMessageType){
-        $('#popup_text .popup_raw pre').text(sMessage);
-        $('body', $('#popup_text .popup_html iframe').contents()).html(sMessage);
+        $('#popup_text .output pre').text(sMessage);
         showPopup('popup_text');
+    }
+    
+    //show exception popup
+    function showExceptionPopup(sTitle, sException){
+        $('#popup_exception h3').html(sTitle);
+        $('#popup_exception .output pre').html(sException);
+        showPopup('popup_exception');
     }
     
     function setupResizeEvents(){
@@ -664,41 +636,70 @@ $(document).ready(function() {
         if (sMessageType == 'exception'){
             sShortClassName = 'exception';
             sLongClassName = 'exception_expander';
-            sExpand = 'view traceback'            
+            sExpand = 'view traceback'
+            if(iLine){
+               sMessage = ('Line ' + iLine + ': ' +  sMessage);                
+            }
+
         }   
 
-        //work out what to display
-        sDisplayMessage = sMessage;
-        if(sLongMessage) {
-            sDisplayMessage += '&nbsp;<div class="long_message">'+sLongMessage+'</div><a href="#" class="' + sLongClassName  +  '">' + sExpand + '</a>';
+
+        //create new item
+        oConsoleItem = $('<span></span>');
+        oConsoleItem.addClass('output_item');
+        oConsoleItem.addClass(sShortClassName);
+        
+        //add text
+        oConsoleItem.html(sMessage);        
+        if(sLongMessage != undefined){
+            
+            //expand link
+            oMoreLink = $('<a href="#"></a>');
+            oMoreLink.addClass('expand_link');
+            oMoreLink.text(sExpand)
+            oMoreLink.longMessage = sLongMessage;
+            //add event
+            if (sMessageType == 'exception'){
+                oMoreLink.click(
+                        function(){
+                            showExceptionPopup(sMessage, sLongMessage);
+                        }
+                    );
+            }else{
+                oMoreLink.click(
+                        function(){
+                            showTextPopup(sLongMessage);
+                        }
+                    );                
+            }
+            oConsoleItem.append(oMoreLink);
         }
         
-        //add to output
-        $('#output_console .output_content')
-        .append('<span class="output_item ' + sShortClassName + '">' + sDisplayMessage + "</span>");
+        //remove items if over max
+        if ($('#output_console .output_content').children().size() >= outputMaxItems){
+            $('#output_console .output_content').children(':first').remove();
+        }
 
+        //append to console
+        $('#output_console .output_content').append(oConsoleItem);
         $('.editor_output div.tabs li.console').addClass('new');
         $('#output_console div').animate({ 
             scrollTop: $('#output_console .output_content').height()+$('#output_console div')[0].scrollHeight 
         }, 0);
-        
+
     };
 
-    // Needed to handle 'more' (.message_expander) links correctly
-    $('.message_expander').live('click', function() {
-            showTextPopup( $(this).prev().text() );
-            return false;
-    })
-
-    $('.exception_expander').live('click', function() {
-            showTextPopup( $(this).prev().text() );
-            return false;
-    })
 
     function writeToSources(sMessage, sUrl) {
 
         sDisplayMessage = sMessage;
+        
+        //remove items if over max
+        if ($('#output_sources .output_content').children().size() >= outputMaxItems){
+            $('#output_sources .output_content').children(':first').remove();
+        }
 
+        //append to sources tab
         $('#output_sources .output_content')
         //.append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
         .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl + '</a></span>')
@@ -728,7 +729,7 @@ $(document).ready(function() {
     }
 
     //show tab
-    function showTab(sTab){
+    function showTab(sTab, bRevert){
         $('.editor_output .info').children().hide();
         $('.editor_output .controls').children().hide();        
         $('#output_' + sTab).show();
@@ -736,8 +737,9 @@ $(document).ready(function() {
 
         $('.editor_output div.tabs ul').children().removeClass('selected');
         $('.editor_output div.tabs li.' + sTab).addClass('selected');
+        
     }
-
+    
     //show text tab
     function showTextTab(sTab){
         $('#popup_text .output').hide();
