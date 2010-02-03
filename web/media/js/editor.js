@@ -24,7 +24,6 @@ $(document).ready(function() {
     setupPopups();
     setupToolbar();
     setupDetailsForm();
-    setupAutoDraft();
     setupResizeEvents();
     setupKeygrabs();   
 
@@ -122,7 +121,7 @@ $(document).ready(function() {
         })
 
         //show default tab
-        showTab('console'); //todo: check in cookie if tab already set.
+        showTab('console'); 
         
         resizeControls('up');
     }
@@ -264,7 +263,6 @@ $(document).ready(function() {
           }
         }        
       } catch(err) {
-        //console.debug(err)
         buffer +=data;
       }
     }
@@ -541,6 +539,11 @@ $(document).ready(function() {
               dataType: "html",
               success: function(response){
                     res = eval('('+response+')');
+                    if (res.draft == 'True') {
+                        $('#divDraftSavedWarning').show();
+                    }
+                    
+                    // redirect somewhere
                     if (res.url && window.location.pathname != res.url) {
                         window.location = res.url;
                     };
@@ -553,7 +556,7 @@ $(document).ready(function() {
                 },
 
             error: function(response){
-                alert('Sorry, something went wrong');
+                alert('Sorry, something went wrong, please try copying your code and then reloading the page');
               }
             //error:function (xhr, ajaxOptions, thrownError){
              //       alert(xhr.responseText);
@@ -605,26 +608,6 @@ $(document).ready(function() {
         codeeditor.focus(); 
     }
 
-    function setupAutoDraft(){
-        /*
-        // auto save a draft
-          setInterval(function() {
-              if (shortNameIsSet()){
-                  $.ajax({
-                      type: 'POST',
-                      URL: window.location.pathname,
-                      data: ({
-                          title: $('#id_title').val(),
-                          code: codeeditor.getCode(),
-                          action: 'save'
-                      }),
-                      dataType: "html"
-                  });                  
-              }
-          },
-          60000);    
-        */
-    }
 
     //Write to concole/data/sources
     function writeToConsole(sMessage, sLongMessage, sMessageType, iLine) {
@@ -702,7 +685,7 @@ $(document).ready(function() {
         //append to sources tab
         $('#output_sources .output_content')
         //.append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
-        .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl + '</a></span>')
+        .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a></span>')
 
         $('.editor_output div.tabs li.sources').addClass('new');
         $('#output_sources div').animate({ 

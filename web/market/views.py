@@ -120,7 +120,6 @@ def complete (request, solicitation_id):
 
 
 def paypal_notify (request):
-    print "HELLO!!!!!!!!!!!!!!!!!!!!!!!!!"
     return render_to_response('market/paypal_return.html',context_instance = RequestContext(request))
     
 def paypal_return (request):

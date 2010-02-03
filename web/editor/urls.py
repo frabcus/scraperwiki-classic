@@ -5,17 +5,15 @@ import code_runner
 # urls prefixed with "/editor/"
 
 urlpatterns = patterns('',
-
-  # DO NOT MOVE THIS LINE BELOW ANY OTHER LINE UNLESS YOU KNOW WHAT YOU ARE DOING
+  #TODO: limit draft action to commit/save
+  # The order of these is very important to
   url(r'^run_code$',                    code_runner.run_code, name="run_code"),
-  
+  url(r'^handle_session_draft/(?P<action>[\-\w]+)$',     views.handle_session_draft, name="handle_session_draft"),
   url(r'^$',                            views.edit, name="editor"),    # blank name for draft scraper
   url(r'^(?P<short_name>[\-\w]+)$',     views.edit, name="editor"),
   
   
-  url(r'^draft/delete/(?P<short_name>[\-\w]+)$',                views.delete_draft, name="delete_draft"),
-  url(r'^draft/deleteall$',                                     views.delete_all_drafts, name="delete_all_drafts"),
-  url(r'^draft/save/(?P<short_name>[\-\w]+)$',                  views.save_draft,   name="save_draft"),
+  url(r'^draft/delete/$',                views.delete_draft, name="delete_draft"),
   
   url(r'diff/$',                        views.diff,         name="diff"),   # blank name for draft scraper
   url(r'diff/(?P<short_name>[\-\w]+)$', views.diff,         name="diff"),
