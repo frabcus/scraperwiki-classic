@@ -263,7 +263,6 @@ $(document).ready(function() {
           }
         }        
       } catch(err) {
-        //console.debug(err)
         buffer +=data;
       }
     }
@@ -557,7 +556,6 @@ $(document).ready(function() {
                 },
 
             error: function(response){
-                console.log(response);
                 alert('Sorry, something went wrong, please try copying your code and then reloading the page');
               }
             //error:function (xhr, ajaxOptions, thrownError){
