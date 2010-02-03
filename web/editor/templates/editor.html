@@ -38,11 +38,14 @@
     </fieldset>
     <form method="POST" accept-charset="utf-8" id="editor" action="">
         <div class="editor">
-            {% if has_draft %}
-            <div class="draft_warning">
-                Warning: this scraper has not been saved or committed. Click the save button or <a href="{% url delete_draft scraper.short_name|default:"__new__" %}">discard changes</a>.
+
+            <div id="divDraftSavedWarning" class="draft_warning" style="display:none;">
+                A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next=/{% url handle_session_draft 'save' %}">sign in or create an account</a>.
+                <!--Warning: this scraper has not been saved or committed. Click the save button or <a href="{% url delete_draft %}">discard changes</a>.-->
             </div>
-            {% endif %}
+            <div class="draft_warning"{% if not has_draft %}style="display:none;"{% endif %}>
+                Warning: this scraper has not been saved or committed. <a href="{% url login %}?next={% url handle_session_draft 'save' %}">Sign in or create an account</a> to save it permanently, or <a href="{% url delete_draft %}">discard changes</a>
+            </div>
 
             {# Header #}
             <div class="editor_header">
@@ -105,7 +108,7 @@
 
             {# Controls #}
             <div class="editor_controls">
-                <input type="submit" class="save  button" name="action" value="Save draft" title="Save draft version (Ctrl + S)" />  
+                <input type="button" class="save  button" name="action" value="Save draft" title="Save draft version (Ctrl + S)" />  
                 <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
                 <input type="button" value="Reload" name="reload" id="reload" title="Reload the latest saved version"/>
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
@@ -116,7 +119,7 @@
                     {% else %}
                         <a id="aCloseEditor" href="{% url frontpage %}" title="Close editor">Close editor</a>                
                     {% endif %}
-                    <input type="submit" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>            
+                    <input type="button" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>            
                 </div>
             </div>
 

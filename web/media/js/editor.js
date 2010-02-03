@@ -24,7 +24,6 @@ $(document).ready(function() {
     setupPopups();
     setupToolbar();
     setupDetailsForm();
-    setupAutoDraft();
     setupResizeEvents();
     setupKeygrabs();   
 
@@ -541,6 +540,11 @@ $(document).ready(function() {
               dataType: "html",
               success: function(response){
                     res = eval('('+response+')');
+                    if (res.draft == 'True') {
+                        $('#divDraftSavedWarning').show();
+                    }
+                    
+                    // redirect somewhere
                     if (res.url && window.location.pathname != res.url) {
                         window.location = res.url;
                     };
@@ -553,6 +557,7 @@ $(document).ready(function() {
                 },
 
             error: function(response){
+                console.log(response);
                 alert('Sorry, something went wrong');
               }
             //error:function (xhr, ajaxOptions, thrownError){
@@ -605,26 +610,6 @@ $(document).ready(function() {
         codeeditor.focus(); 
     }
 
-    function setupAutoDraft(){
-        /*
-        // auto save a draft
-          setInterval(function() {
-              if (shortNameIsSet()){
-                  $.ajax({
-                      type: 'POST',
-                      URL: window.location.pathname,
-                      data: ({
-                          title: $('#id_title').val(),
-                          code: codeeditor.getCode(),
-                          action: 'save'
-                      }),
-                      dataType: "html"
-                  });                  
-              }
-          },
-          60000);    
-        */
-    }
 
     //Write to concole/data/sources
     function writeToConsole(sMessage, sLongMessage, sMessageType, iLine) {
