@@ -685,7 +685,7 @@ $(document).ready(function() {
         //append to sources tab
         $('#output_sources .output_content')
         //.append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
-        .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl + '</a></span>')
+        .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a></span>')
 
         $('.editor_output div.tabs li.sources').addClass('new');
         $('#output_sources div').animate({ 
