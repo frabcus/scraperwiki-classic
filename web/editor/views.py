@@ -57,17 +57,19 @@ def handle_session_draft(request, action):
     # check if they are signed in, if no, they shouldent be here, off to the signin page
     if not request.user.is_authenticated():
         response_url =  reverse('login') + "?next=%s" % reverse('handle_session_draft', kwargs={'action': action})
-    else:                                  
-        #check if anything in the session
-        draft_scraper = request.session['ScraperDraft'].get('scraper', None)
-        draft_tags = request.session['ScraperDraft'].get('tags', '')   
-        draft_commit_message = request.session['ScraperDraft'].get('commit_message')        
+    else:
+        #check if anything in the session        
+        session_scraper_draft = request.session.get('ScraperDraft', None)
 
         success = False
-        if not draft_scraper:
+        if not session_scraper_draft:
             #Shouldent be here, go home
             response_url = reverse(frontpage)
-        else:         
+        else:
+            draft_scraper = session_scraper_draft.get('scraper', None)
+            draft_tags = session_scraper_draft.get('tags', '')   
+            draft_commit_message = session_scraper_draft.get('commit_message')
+
             #save or publish the scraper
             if action == 'save':
                 draft_scraper.save()

@@ -40,7 +40,7 @@
         <div class="editor">
 
             <div id="divDraftSavedWarning" class="draft_warning" style="display:none;">
-                A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next=/{% url handle_session_draft 'save' %}">sign in or create an account</a>.
+                A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next={% url handle_session_draft 'save' %}">sign in or create an account</a>.
                 <!--Warning: this scraper has not been saved or committed. Click the save button or <a href="{% url delete_draft %}">discard changes</a>.-->
             </div>
             <div class="draft_warning"{% if not has_draft %}style="display:none;"{% endif %}>
