@@ -579,7 +579,41 @@ $(document).ready(function() {
     }
     
     function setupResizeEvents(){
+        
+        //window
         $(window).resize(onWindowResize);
+        
+        //editor
+        $("#codeeditordiv").resizable({
+                         handles: 's',   
+                         autoHide: false, 
+                         start: function(event, ui) 
+                             {
+                                 var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top;
+
+                                 $("#codeeditordiv").resizable('option', 'maxHeight', maxheight);
+
+                                 //cover iframe
+                                 var oFrameMask = $('<div id="framemask"></div>');
+                                 oFrameMask.css({
+                                     position: 'absolute',
+                                     top: 0,
+                                     left:0,
+                                     background:'none',
+                                     zindex: 200,
+                                     width: '100%',
+                                     height: '100%'
+                                 })
+                                 $(".editor_code").append(oFrameMask)
+                             },
+                         stop: function(event, ui)  { 
+                                     resizeCodeEditor(); 
+                                     $('#framemask').remove();
+                                 }
+                             }); 
+
+           // bind the double-click 
+           $(".ui-resizable-s").bind("dblclick", resizeControls);
     }
 
     function shortNameIsSet(){
@@ -613,9 +647,9 @@ $(document).ready(function() {
     function writeToConsole(sMessage, sLongMessage, sMessageType, iLine) {
 
         // if an exception set the class accordingly
-        sShortClassName = '';
-        sLongClassName = 'message_expander';
-        sExpand = '...more'
+        var sShortClassName = '';
+        var sLongClassName = 'message_expander';
+        var sExpand = '...more'
         if (sMessageType == 'exception'){
             sShortClassName = 'exception';
             sLongClassName = 'exception_expander';
@@ -628,7 +662,7 @@ $(document).ready(function() {
 
 
         //create new item
-        oConsoleItem = $('<span></span>');
+        var oConsoleItem = $('<span></span>');
         oConsoleItem.addClass('output_item');
         oConsoleItem.addClass(sShortClassName);
         
@@ -675,7 +709,7 @@ $(document).ready(function() {
 
     function writeToSources(sMessage, sUrl) {
 
-        sDisplayMessage = sMessage;
+        var sDisplayMessage = sMessage;
         
         //remove items if over max
         if ($('#output_sources .output_content').children().size() >= outputMaxItems){
@@ -694,9 +728,9 @@ $(document).ready(function() {
     }
 
     function writeToData(sMessage) {
-        row = eval(sMessage)
+        var row = eval(sMessage)
 
-        html_row = "<tr>"
+        var html_row = "<tr>"
         $.each(row, function(i){
             html_row +="<td>"+row[i]+"</td>"
         })
@@ -766,36 +800,6 @@ $(document).ready(function() {
 
       };
 
-      $("#codeeditordiv").resizable({
-                       handles: 's',   
-                       autoHide: false, 
-                       start: function(event, ui) 
-                           {
-                               var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top;
-
-                               $("#codeeditordiv").resizable('option', 'maxHeight', maxheight);
-
-                               //cover iframe
-                               var oFrameMask = $('<div id="framemask"></div>');
-                               oFrameMask.css({
-                                   position: 'absolute',
-                                   top: 0,
-                                   left:0,
-                                   background:'none',
-                                   zindex: 200,
-                                   width: '100%',
-                                   height: '100%'
-                               })
-                               $(".editor_code").append(oFrameMask)
-                           },
-                       stop: function(event, ui)  { 
-                                   resizeCodeEditor(); 
-                                   $('#framemask').remove();
-                               }
-                           }); 
-
-         // bind the double-click 
-         $(".ui-resizable-s").bind("dblclick", resizeControls);
     }
 
 function onWindowResize() {
