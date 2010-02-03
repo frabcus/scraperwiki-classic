@@ -121,7 +121,7 @@ $(document).ready(function() {
         })
 
         //show default tab
-        showTab('console'); //todo: check in cookie if tab already set.
+        showTab('console'); 
         
         resizeControls('up');
     }
@@ -558,7 +558,7 @@ $(document).ready(function() {
 
             error: function(response){
                 console.log(response);
-                alert('Sorry, something went wrong');
+                alert('Sorry, something went wrong, please try copying your code and then reloading the page');
               }
             //error:function (xhr, ajaxOptions, thrownError){
              //       alert(xhr.responseText);
