@@ -27,8 +27,8 @@ class Command(BaseCommand):
         runner_path = "%s/Runner.py" % settings.FIREBOX_PATH
         runner = subprocess.Popen([runner_path, '-g', guid], shell=False, stdin=subprocess.PIPE)
         runner.communicate(code)
-        
-        
+
+
     def handle(self, **options):
         if options['short_name']:
             scrapers = Scraper.objects.get(short_name=options['short_name'], published=True, )
