@@ -2,7 +2,11 @@ import django
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 
-import json
+try:
+  import json
+except:
+  import simplejson as json
+
 import subprocess
 
 from scraper.models import Scraper
