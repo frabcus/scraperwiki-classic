@@ -2,7 +2,11 @@ import django
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 
-import json
+try:
+  import json
+except:
+  import simplejson as json
+
 import subprocess
 
 from scraper.models import Scraper
@@ -33,7 +37,11 @@ class Command(BaseCommand):
             # scrapers = Scraper.objects.exclude(run_interval='never').filter(published=True)
             scrapers = Scraper.objects.filter(published=True)
             for scraper in scrapers:
-                self.run_scraper(scraper)
+                try:
+                    self.run_scraper(scraper)
+                    scraper.update_meta()
+                except:
+                    print "Error running scraper: " + scraper.title
 
 
         
