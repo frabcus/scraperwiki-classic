@@ -37,7 +37,11 @@ class Command(BaseCommand):
             # scrapers = Scraper.objects.exclude(run_interval='never').filter(published=True)
             scrapers = Scraper.objects.filter(published=True)
             for scraper in scrapers:
-                self.run_scraper(scraper)
+                try:
+                    self.run_scraper(scraper)
+                    scraper.update_meta()
+                except:
+                    print "Error running scraper: " + scraper.title
 
 
         
