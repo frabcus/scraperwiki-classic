@@ -155,4 +155,4 @@ TEMPLATE_SETTINGS = [
 ]
 
 #sparklines and graphs
-SPARKLINE_MAX_DAYS = 100
+SPARKLINE_MAX_DAYS = 30
