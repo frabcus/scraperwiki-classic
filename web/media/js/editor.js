@@ -426,6 +426,10 @@ $(document).ready(function() {
                 $('#meta_form #id_commit_message').effect('highlight')
                 return false
             } else {
+               if ($('#meta_form #id_description').val() == ""){
+                   $('#meta_form #id_description').effect('highlight')
+                   return false
+            }
                 saveScraper(true);
                 return false;                
             }

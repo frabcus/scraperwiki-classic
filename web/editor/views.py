@@ -118,7 +118,7 @@ def edit(request, short_name=None):
     # 1) Get scraper
 
     if has_draft:
-        # Does a draft version exist
+        # Does a draft version exist?
         scraper = draft
         scraper.__dict__['tags'] = request.session['ScraperDraft'].get('tags', '')
         scraper.__dict__['commit_message'] = request.session['ScraperDraft'].get('commit_message', '')        

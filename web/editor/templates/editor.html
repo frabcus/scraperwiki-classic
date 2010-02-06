@@ -69,16 +69,19 @@
                         <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
                         {{ form.license }}
                     </div>
+
             {% if not has_draft %}
                     <div class="field field-tags">
                         <label for="id_tags">{{ form.tags.label}} {{ form.tags.errors }}</label>
                         {{ form.tags }}
                     </div>
             {% endif %}
+
                     <div class="field field-commit_message">
                       <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
                       {{ form.commit_message }}
                     </div>
+
                     <div class="field field-run_interval">
                       <label for="id_run_interval">{{ form.run_interval.label}} {{ form.run_interval.errors }}</label>
                       {{ form.run_interval }}

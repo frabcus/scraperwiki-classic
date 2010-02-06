@@ -29,8 +29,9 @@ class editorForm(forms.ModelForm):
     widget=forms.TextInput(attrs={'title' : ''})
     )
   description = forms.CharField(
-    required=False, 
-    widget=forms.TextInput(attrs={'title' : ''})
+    #widget=forms.TextInput(attrs={'title' : ''})
+    required=False,
+    widget=widgets.Textarea({'cols':'80', 'rows':'4', })
     )
 
   # run_interval = forms.ChoiceField(
