@@ -127,7 +127,9 @@ input.button:disabled {background-color:#ddd; border-color:#ccc; }
 
 /* Lists */
 ul {padding-left:0;}
-ul li {padding:0 0 0.5em 0; margin-left:0;list-style-type:none;}
+ul li {padding:0 0 0.5em 0; margin-left:0; list-style-type:none;}
+ul.bulleted li {padding:0 0 0 0; margin-left: 1.5em; list-style-type: disc; }
+
 
 /* Scroll */
 div.scroll {overflow-y:scroll; border:solid 1px #ccc; padding:0.5em;}
