@@ -179,3 +179,74 @@ function setupDataMap(){
      oMap.zoomToExtent(oMarkersLayer.getDataExtent());    
 
 }
+
+function setupScroller(){
+    
+    //left right buttons
+    $('.scroller a.scroll_left').click(
+        function(){
+            scrollScroller('left')
+            return false;
+        }
+    );
+    $('.scroller a.scroll_right').click(
+        function(){
+            scrollScroller('right')
+            return false;
+        }
+    );
+    
+    //resize
+    $(window).resize(
+        function(){
+            var iNewWidth = $('.scroller .scroller_wrapper').width() / 2;
+            if(iNewWidth < 250){
+                console.debug(iNewWidth)
+               iNewWidth = 250;
+            }
+            $('.scroller .scroll_item').width(iNewWidth);
+        }
+    );
+}
+
+function scrollScroller(sDirection){
+
+    //can scroll?
+    var bCanScroll = true;
+    var iCurrentLeft = parseInt($('.scroller .scroll_items').css('left'));
+    //console.debug(iCurrentLeft)
+    //console.debug(sDirection)
+    if(sDirection == 'left' && iCurrentLeft >= 0){
+        bCanScroll = false;
+    }
+    
+
+    if(bCanScroll == true){
+        //get the width of one item
+        iWidth = $('.scroller .scroll_items :first-child').outerWidth() + 18;
+        sWidth = ''
+        if(sDirection == 'right'){
+            sWidth = '-=' + iWidth
+        }else{
+            sWidth = '+=' + iWidth        
+        }
+
+        //scroll   
+        $('.scroller .scroll_items').animate({
+          left: sWidth
+        }, 500);
+    }
+    
+}
+
+function setupIntroSlideshow(){
+    $('.slide_show').cycle({
+		fx: 'fade',
+        speed:   1000, 
+        timeout: 8000, 
+        next:   '.slide_show', 
+        pause:   1,
+        pager: '.slide_nav',
+        autostop: 1
+	});
+}
