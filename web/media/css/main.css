@@ -174,13 +174,15 @@ dl.terms dd {padding-left:0; margin-left:0; font-size:0.8em;}
 span.highlight {background:#ffffaa; padding:0 0.4em;}
 
 /* scraper lists */
-ul.allscraperlist li {list-style-type:none; padding:0.8em 0.2em 1.8em 0.2em; border-bottom:dotted 1px #ccc;}
-ul.allscraperlist li img {vertical-align:baseline;}
-ul.allscraperlist li p {padding:0.5em 0;margin:0; font-size:0.9em;}
+ul.scraper_list li {list-style-type:none; padding:0.8em 0.2em 1.8em 0.2em; border-bottom:dotted 1px #ccc;
+    position:relative;}
+ul.scraper_list li img {vertical-align:baseline;}
+ul.scraper_list li p {padding:0.5em 0;margin:0; font-size:0.9em;}
 ul.scraper_list small {font-size:0.7em;}
-ul.scraper_list small.status {color:#fff; padding:0 0.5em;}
-ul.scraper_list small.status.unpublished {background-color:#ccc;}
-ul.scraper_list small.edit a {color:green;}
+ul.scraper_list span.status {color:#fff; padding:0 0.5em;}
+ul.scraper_list span.status.unpublished {background-color:#ccc;}
+ul.scraper_list span.edit a {color:green;}
+ul.scraper_list p.controls {position:absolute; top:0; right:1em;}
 
 
 /* Welcome page */

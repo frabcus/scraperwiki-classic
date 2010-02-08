@@ -45,23 +45,25 @@ def frontpage(request, public_profile_field=None):
     good_contribution_scrapers = []
     # cut number of scrapers displayed on homepage down to the most recent 10 items
     my_scrapers = my_scrapers[:10]
+    has_scrapers = len(my_scrapers) > 0
     # also need to add filtering to limit to public published scrapers
     for scraper in contribution_scrapers:
         if scraper.is_good():
             good_contribution_scrapers.append(scraper)
 
     #new scrapers
-    new_scrapers = Scraper.objects.filter(deleted=False, published=True, featured=True).order_by('-first_published_at')[:5]
+    new_scrapers = Scraper.objects.filter(deleted=False, published=True, featured=False).order_by('-first_published_at')[:5]
+    featured_scrapers = Scraper.objects.filter(deleted=False, published=True, featured=True).order_by('-first_published_at')[:5]    
     
     #suggested scrapers
     solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
     
-    return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'following_users': following_users, 'following_users_count' : following_users_count, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
+    return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'has_scrapers':has_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'following_users': following_users, 'following_users_count' : following_users_count, 'new_scrapers': new_scrapers, 'featured_scrapers': featured_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
 
 
 def my_scrapers(request):
 	user = request.user
-	
+
 	if user.is_authenticated():
 		owned_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
 		owned_count = len(owned_scrapers) 
