@@ -10,19 +10,21 @@
         <p>
             All scrapers in ScraperWiki
         </p>
-
-        <form action="/scrapers/search/" method="post">
-            {{ form.q.label_tag }}
-            {{ form.q }}
-            <input type="submit" value="Go" />
-        </form>
+        <div class="page_controls">
+            <form action="/scrapers/search/" method="post">
+                {{ form.q.label_tag }}
+                {{ form.q }}
+                <input type="submit" value="Go" />
+            </form>
+            <br/>
+            <a href="/feeds/all_scrapers/">RSS feed of all scrapers</a>            
+        </div>
     </div>
 
     <div class="content">
-        <a href="/feeds/all_scrapers/">RSS feed of all scrapers</a>
         <ul class="allscraperlist">
           {% for scraper in scrapers.object_list %}
-          {% include 'scraper/scraper_line.html' %}
+            {% include 'scraper/scraper_line.html' %}
           {% endfor %}
         </ul>
 <div class="pagination">

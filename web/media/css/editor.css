@@ -131,8 +131,8 @@ dl.quick_help li code {font-size:1.1em; }
 #meta_fields_mini .field ul.errorlist, #meta_fields_mini .field ul.errorlist li {display:inline; margin:0; padding:0; color:red;}
 
 #meta_fields .field-description {float:left; margin-right:10%;}
-#meta_fields .field-license {float:left; margin-right:10%;}
-#meta_fields .field-tags {float:left; margin-right:10%;}
+#meta_fields .field-license {clear:both; float:left; margin-right:10%;}
+#meta_fields .field-tags {clear:both; float:left; margin-right:10%;}
 
 #meta_form .field { margin-bottom:5px;}
 #meta_form .button { float:right;}

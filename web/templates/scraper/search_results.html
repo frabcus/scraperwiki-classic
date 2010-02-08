@@ -3,32 +3,30 @@
 {% block title %}Scraper search results{% endblock %}
 {% block content %}
     <div class="page_title">
-            <span style="float: left;">
-        <h1>Scrapers found for '{{ query }}'</h1></span>
-<span style="float: right;">
-    <form action="/scrapers/search/" method="POST">
-{{ form }}
-<input type="submit" value="Go" />
-</form>
-</span>
-    <div style="clear: both"></div>
+        <h1>Scrapers found for '{{ query }}'</h1>
+        <p>Found {{ scrapers|length }} published scraper{{ scrapers|pluralize }} with <em><strong>{{ query }}</strong></em> somewhere in title or tags.</p>
+        <div class="page_controls">
+            <form action="/scrapers/search/" method="POST">
+                {{ form.q.label_tag }}
+                {{ form.q }}
+                <input type="submit" value="Go" />
+            </form>
+            <br/>
+            <a href="/feeds/latest_scrapers_by_search_term/{{ query }}">RSS feed for this search term</a>            
+        </div>
     </div>
 
     <div class="content">
-    
-                <span style="float: right"><a href="/feeds/latest_scrapers_by_search_term/{{ query }}">RSS feed for this search term</a></span>
-  
-
-{% if scrapers %}
-    <p>Found {{ scrapers|length }} published scraper{{ scrapers|pluralize }} with <strong>{{ query }}</strong> somewhere in title or tags.</p>
-    <ul>
-        {% for scraper in scrapers %}
-          {% include 'scraper/scraper_line.html' %}
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>No published scrapers matched your search criteria.</p>
-{% endif %}
+ 
+        {% if scrapers %}
+            <ul>
+                {% for scraper in scrapers %}
+                    {% include 'scraper/scraper_line.html' %}
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No published scrapers matched your search criteria.</p>
+        {% endif %}
 
     </div>
 {% endblock %}

@@ -39,12 +39,13 @@
     	        </li>
     	        <li class="{% if form.price.errors %}error{% endif %}">
             	    {{ form.price.label_tag }}
-            	    {{ form.price|safe}}*
+            	    {{ form.price|safe}}<small>&dagger;</small>
         	        {% field_errors form.price %}
     	        </li>
             </ul>
             <p>
-                <small>When you pay the bounty for this scraper there is an additional charge of * {{ market_bounty_charge }}%</small>
+<small>* Required field</small><br/>
+                <small>&dagger; When you pay the bounty for this scraper there is an additional charge of {{ market_bounty_charge }}%</small>
             </p>
     		<input type="submit" name="login" value="Submit" />
     	</form>

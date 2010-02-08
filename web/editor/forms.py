@@ -22,16 +22,20 @@ class editorForm(forms.ModelForm):
     fields = ('title', 'code', 'description', 'license', 'tags',)
   
   title = forms.CharField(
-    widget=forms.TextInput(attrs={'title' : 'Untitled Scraper'})
+    widget=forms.TextInput(attrs={'title' : 'Untitled Scraper'}),
+    label = "Title*",
   )
   commit_message = forms.CharField(
     required=False, 
-    widget=forms.TextInput(attrs={'title' : ''})
+    widget=forms.TextInput(attrs={'title' : ''}),
+    label = "Commit message*",
     )
   description = forms.CharField(
-    required=False, 
-    widget=forms.TextInput(attrs={'title' : ''})
-    )
+    #widget=forms.TextInput(attrs={'title' : ''})
+    required=False,
+    widget=widgets.Textarea({'cols':'80', 'rows':'4', }),
+    label = "Description*",
+   )
 
   # run_interval = forms.ChoiceField(
   #   label="Run once a day", 
