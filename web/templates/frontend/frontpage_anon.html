@@ -1,61 +1,79 @@
 <div class="content">
     <div id="divWelcome">
-        <div id="divWelcomeImage" style="float:right;">
-            <img src="{{ MEDIA_URL }}images/screengrab.png" alt="Screenshot of ScraperWiki code editor" alt="ScraperWiki code editor"/>
+        <div id="divIntroSlideShow">
+            <div class="slide_show">
+                <img src="{{ MEDIA_URL }}images/intro_slides/intro1.png" />
+                <img src="{{ MEDIA_URL }}images/intro_slides/intro2.png" />
+                <img src="{{ MEDIA_URL }}images/intro_slides/intro3.png" />
+                <img src="{{ MEDIA_URL }}images/intro_slides/intro4.png" />                                    
+            </div>
+            <div class="slide_nav"></div>
         </div>
         <div id="divWelcomeText">
-            <p>
-                There's lots of useful data locked away 
-                on the internet. ScraperWiki helps open it up. 
-            </p>
-            <p>
-                Share code, reuse data and help bootstrap the web.
-            </p>
-                <form method="get" action="{% url editor %}">
-            	    <input type="submit" class="button" value="Start writing a scraper now!"/>
-            	</form>
-            	<ul>
-        	        <li><a href="{% url scraper_list %}">Explore other people's scrapers</a></li>
-        	        <li><a href="{% url market_solicitation %}">Request a scraper</a></li>
-    	        </ul>
+            <h1>ScraperWiki is all the tools you need for Screen Scraping &amp; Data Mining.</h1>            
+            <h2>Make Bad Data Good, Collaborate, &amp; Find Juicy New Datasets.</h2>
         </div>
     </div>
     <br class="clear"/>
-    <div class="content left half">
-        <h3>New scrapers &amp; datasets</h3>
-    	<ul>
-    		{% for scraper in new_scrapers %}
-    		  {% include 'frontend/detailed_scraper_line.html' %}
-    		{% endfor %}	
-    	</ul>
-    	<p class="more">
-    	   <a href="{% url scraper_list %}">Browse all &raquo;</a>
-    	</p>
+    <h2 id="hNewDatasets">Interesting new datasets</h2>
+    <div id="divNewScrapers" class="scroller">
+        <a href="#" class="scroll_left"></a>
+        <div class="scroller_wrapper">
+            <div class="scroll_items">
+    		    {% for scraper in new_scrapers %}    
+                    <div class="scroll_item">
+                        <h4>
+                            {{scraper.title}}
+                            {% if scraper.has_geo %}
+                                <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
+                            {% endif %}
+                            {% if scraper.has_temporal %}                        
+                                <img src="{{ MEDIA_URL }}/images/icons/date.png"/>
+                            {% endif %}                        
+                        </h4>
+                        <p>{{scraper.description}}</p>
+                        <p>
+                            {% load sparkline %}
+                            {% sparkline scraper.scraper_sparkline_csv %}
+                        </p>
+                        <p>
+                            created by
+                          	{% load gravatar %}
+                            {% show_gravatar scraper.owner 'small' %} 	
+                            <a href='{% url profiles_profile_detail scraper.owner.username %}'>{{ scraper.owner.username }}</a>
+                        </p>
+                    </div>
+        		{% endfor %}	                
+            </div>
+        </div>
+        <a href="#" class="scroll_right"></a>        
     </div>
-    <div class="content left half">
-        <h3>ScraperMart - latest requests</h3>
-        <ul>
-        {% for solicitation in solicitations %}
-            <li>
-        	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
-        	    by
-              	{% load gravatar %}
-                {% show_gravatar solicitation.user_created 'small' %} 	
-                <a href='{% url profiles_profile_detail solicitation.user_created %}'>
-                    {{ solicitation.user_created.username }}
-                </a>
-                {% if solicitation.has_bounty %}                
-                    <span class="bounty">
-                        <a href="{% url market_view solicitation.id %}">
-                            &pound;{{solicitation.price}} bounty
-                        </a>
-                    </span>
-                {% endif %}                
-        	</li>
-    	{% endfor %}
-        </ul>
-        <p class="more">
-    	   <a href="{% url market_list %}">Browse all &raquo;</a>
-    	</p>
+    
+    <!-- Features -->
+    <div class="content">
+        <div class="feature">
+            <img src="{{MEDIA_URL}}/images/screenshots/editor.png"/>              
+            <h2>Tools for developers ...</h2>            
+            <ul>
+                <li>In browser code editor, write debug and run Python in your browser <small>(more languages coming soon!)</small></li>
+                <li>ScraperWiki code libraries make scraping, parsing and geocoding simple</li>
+                <li>Store data direct to the datastore</li>
+                <li>API access to your data in XML, JSON, PHP, YAML or CSV</li>
+                <li>Schedule your scrapers to re-run so your data is always up-to-date</li>
+                <li>Email alerts if your scrapers fail</li>
+                <li>Built in source control</li>
+            </ul>             
+        </div>
+        <div class="feature">
+            <img src="{{MEDIA_URL}}/images/screenshots/map.png"/>
+            <h2>... and for journalists and researchers</h2>            
+            <ul>
+                <li>Search and browse all the datasets in ScraperWiki</li>
+                <li>Export data directly to a spreadsheet</li>
+                <li>Suggest new datasets to the community or request directly from ScraperWiki</li>
+                <li>View data by location</li>
+            </ul>             
+        </div>
     </div>
+    
 </div>

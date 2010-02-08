@@ -1,6 +1,6 @@
 
 /* Resets */
-h1, h2, h3, h4, h5, h6 {padding:0; margin:0; clear:both;}
+h1, h2, h3, h4, h5, h6 {padding:0; margin:0; }
 img {border:none;}
 
 body {text-align:center; padding:0; margin:0; font-family:helvetica, arial, sans-serif;}
@@ -26,6 +26,36 @@ div.banner a {font-weight:bold;}
 .content.col.left {width:70%;}
 .content.col.right {width:27%; padding-left:3%;}
 .content .section {padding-bottom:1em;}
+.content h2 {padding-bottom:0.6em;}
+.content h3 {padding-bottom:0.6em;}
+.content h4 {padding-bottom:0.6em;}
+
+
+/* Data scroller */
+div.scroller {background:#fafafa;}
+
+div.scroller {height:200px; border:solid 1px #ccc;position:relative; -moz-box-shadow:inset 1px 1px 1px 1px #b0b0b0;
+        -moz-border-radius: 8px; -webkit-border-radius: 8px; moz-border-radius: 8px; 
+}
+div.scroller a.scroll_left, div.scroller a.scroll_right {display:block; height:100%; width:30px;
+    position:absolute;outline: none;}
+div.scroller a.scroll_left {left:0; top:0; background:url(../images/scroll_left.png) no-repeat 10px 50%;}
+div.scroller a.scroll_right {right:0; top:0;background:url(../images/scroll_right.png) no-repeat 0 50%;}
+
+div.scroller_wrapper {margin:0 40px; padding-top:15px;overflow-x:hidden; height:100%;}
+div.scroller div.scroll_items {height:170px;position:relative; width:10000px;}
+div.scroller div.scroll_item {background:#fff;width:400px; float:left; height:150px; 
+    padding:10px;margin-right:20px;border:solid 1px #ccc;-moz-box-shadow:1px 1px 1px 1px #ccc;-webkit-box-shadow:1px 1px 1px #ccc; position:relative;}
+
+
+/* Sldieshow */
+.slide_nav {float:right; padding-top:1em;}
+.slide_nav {font-size:0.6em;}
+.slide_nav a {text-decoration: none; margin: 0 5px; padding: 3px 5px; border:solid 1px #000; color:#000;}
+.slide_nav a:hover {text-decoration:none; background:#2680c6; color:#fff;}
+.slide_nav a.activeSlide {background: #ea0; color:#fff; background: #000;}
+.slide_nav a:focus {outline: none;}
+
 
 /* Attention */
 div.attention {text-align:center;}
@@ -151,8 +181,16 @@ ul.scraper_list small.edit a {color:green;}
 
 
 /* Welcome page */
-#divWelcome {position:relative; top:-2em;}
-#divWelcomeText p {font-size:1.6em; font-weight:bold;}
+#divWelcome {position:relative;}
+#divWelcomeText {margin-right:500px;}
+#divWelcomeText h1 {font-size:2.8em; font-weight:bold; clear:none; line-height:1.1em; margin-bottom:0.5em;}
+#divWelcomeText h2 {font-size:1.8em; font-weight:bold; clear:none;line-height:1.2em;
+    padding-top:1em; border-top:solid 1px #808080;border-bottom:solid 1px #808080; background:#E1F3FF;}
+
+#divIntroSlideShow {float:right;} 
+#hNewDatasets {padding-top:1em;}
+#divNewScrapers {margin-bottom:1em;}
+div.feature img {float:left; margin-right:20px;}
 
 /* Terms & conditions */
 div.terms {line-height:1.5em;}
