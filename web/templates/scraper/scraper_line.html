@@ -3,6 +3,12 @@
         <a href="{% url scraper_data scraper.short_name %}">
             {% if scraper.title %}{{ scraper.title }}{% else %}{{ scraper.short_name }}{% endif %}
         </a>
+        {% if scraper.has_geo %}
+            <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
+        {% endif %}
+        {% if scraper.has_temporal %}                        
+            <img src="{{ MEDIA_URL }}/images/icons/date.png"/>
+        {% endif %}
         {% load sparkline %}
         {% sparkline scraper.scraper_sparkline_csv %} 
     </h3>
@@ -12,7 +18,11 @@
         </p>
     {% endif %}
     <small>
-        Created by <a href="{% url profiles_profile_detail scraper.owner.username %}">{{ scraper.owner.username }}</a> {{scraper.created_at|timesince}} ago |
+        
+        Created by
+        {% load gravatar %}
+        {% show_gravatar scraper.owner 'small' %}
+        <a href="{% url profiles_profile_detail scraper.owner.username %}">{{ scraper.owner.username }}</a> {{scraper.created_at|timesince}} ago |
     {% if scraper.last_run %}
         last run {{scraper.last_run|timesince}} ago |
     {% else %}

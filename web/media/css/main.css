@@ -105,6 +105,7 @@ table.raw_data tr:hover td {border-bottom:solid 1px #ccc;border-top:solid 1px #c
 
 /* Page titles */
 div.page_title {border-bottom:dotted 1px #ccc; padding-bottom:0.3em;}
+.page_controls {position:absolute; top:0.3em; right:0; text-align:right;}
 
 /* Page tabs */
 div.page_tabs ul {border-bottom:solid 1px #ccc; height:1.65em; padding:0; margin:0;}
@@ -173,7 +174,9 @@ dl.terms dd {padding-left:0; margin-left:0; font-size:0.8em;}
 span.highlight {background:#ffffaa; padding:0 0.4em;}
 
 /* scraper lists */
-ul.allscraperlist li {list-style-type:none; padding:0.2em; }
+ul.allscraperlist li {list-style-type:none; padding:0.8em 0.2em 1.8em 0.2em; border-bottom:dotted 1px #ccc;}
+ul.allscraperlist li img {vertical-align:baseline;}
+ul.allscraperlist li p {padding:0.5em 0;margin:0; font-size:0.9em;}
 ul.scraper_list small {font-size:0.7em;}
 ul.scraper_list small.status {color:#fff; padding:0 0.5em;}
 ul.scraper_list small.status.unpublished {background-color:#ccc;}
