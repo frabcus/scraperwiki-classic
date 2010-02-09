@@ -25,6 +25,9 @@ import datetime
 def frontpage(request, public_profile_field=None):
     user = request.user
 
+    hide_logo = False
+    grey_body = False    
+    template = 'frontend/frontpage.html'
     # The following items are only used when there is a logged in user.	
     if user.is_authenticated():
         my_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False).order_by('-created_at')
@@ -33,7 +36,10 @@ def frontpage(request, public_profile_field=None):
         following_users_count = len(following_users)
         # contribution_scrapers needs to be expanded to include scrapers you have edit rights on
         contribution_scrapers = my_scrapers
+        template = 'frontend/frontpage_logged_in.html'        
     else:
+        hide_logo = True
+        grey_body = True
         my_scrapers = []
         following_scrapers = []
         following_users = []
@@ -58,7 +64,7 @@ def frontpage(request, public_profile_field=None):
     #suggested scrapers
     solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
     
-    return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'has_scrapers':has_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'following_users': following_users, 'following_users_count' : following_users_count, 'new_scrapers': new_scrapers, 'featured_scrapers': featured_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
+    return render_to_response(template, {'grey_body': grey_body, 'hide_logo': hide_logo, 'my_scrapers': my_scrapers, 'has_scrapers':has_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'following_users': following_users, 'following_users_count' : following_users_count, 'new_scrapers': new_scrapers, 'featured_scrapers': featured_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
 
 
 def my_scrapers(request):
