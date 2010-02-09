@@ -23,7 +23,7 @@
     		    {% for scraper in featured_scrapers %}    
                     <div class="scroll_item">
                         <h4>
-                            {{scraper.title}}
+                            <a href='{% url scraper_data scraper.short_name %}'>{{scraper.title}}</a>
                             {% if scraper.has_geo %}
                                 <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
                             {% endif %}
