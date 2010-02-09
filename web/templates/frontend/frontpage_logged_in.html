@@ -1,3 +1,9 @@
+{% extends "frontend/base.html" %}
+{% block css %}{% endblock %}
+
+{% block title %}Welcome{% endblock %}
+{% block content  %}
+
 {% load gravatar %}
 
 <div class="page_title">
@@ -87,4 +93,6 @@
 	
 
 </div>
-<div style="clear: both;"></div>
+
+{% endblock %}
+{% block run_script %}setupIntroSlideshow(); setupScroller();{% endblock %}
