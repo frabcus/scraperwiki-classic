@@ -1,3 +1,3 @@
 A bounty has been paid for {{solicitation.title}} by {{solicitation.user_created.username}} to {{recipient_user.username}}.
 
-Please login into paypal and send {{recipient_user.username}} {{solicitation.price}} to {{recipient_user.email}}
+Please log in into paypal and send {{recipient_user.username}} {{solicitation.price}} to {{recipient_user.email}}
