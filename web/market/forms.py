@@ -11,7 +11,7 @@ class SolicitationForm (ModelForm):
     title = forms.CharField(max_length=150, label = "Title*")
     details = forms.CharField(widget=forms.Textarea, label = "Details*")
     link = forms.URLField(label = "Link*")
-    price = forms.ChoiceField(label="Bounty", choices=((50, mark_safe('&pound;50')),(100, mark_safe('&pound;100')), (250, mark_safe('&pound;250')), (500, mark_safe('&pound;500')), (1000, mark_safe('&pound;1000')), (0, 'Just a suggestion, no bounty')))
+    price = forms.ChoiceField(label="Bounty", choices=((0, 'Nothing'), (50, mark_safe('&pound;50')),(100, mark_safe('&pound;100')), (250, mark_safe('&pound;250')), (500, mark_safe('&pound;500')), (1000, mark_safe('&pound;1000'))))
 
     class Meta:
         model = Solicitation
