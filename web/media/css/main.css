@@ -37,8 +37,8 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 .content {padding-top:1.3em;}
 .content.left, .content.right {float:left;}
 .content.half {width:50%;}
-.content.col.left {width:70%;}
-.content.col.right {width:27%; padding-left:3%;}
+.content.col.left {width:60%;}
+.content.col.right {width:37%; padding-left:3%;}
 .content .section {padding-bottom:1em;}
 .content h2 {padding-bottom:0.6em;font-size:1.7em;}
 .content h3 {padding-bottom:0.6em;}
@@ -119,6 +119,7 @@ div.raw_data table td {border-bottom:dotted 1px #ccc; border-top:solid 1px #ffff
 div.raw_data table tr:hover td {border-bottom:solid 1px #ccc;border-top:solid 1px #ccc;}
 div.raw_data table tbody {overflow-y: scroll; overflow-x: hidden; height: 300px; width:100%;}
 
+
 /* Page titles */
 div.page_title {border-bottom:dotted 1px #ccc; border-top:solid 1px #ccc;
     padding-bottom:0.3em; padding-top:0.8em;margin-top:1em;}
@@ -135,7 +136,7 @@ div.tab_tools form {padding:0 0.5em; display:inline;}
 div.page_tab_body {clear:left;}
 
 /* meta data */
-div.metadata {background:#ffffd7; padding:0.8em 1em;}
+div.metadata {background:#ffffd7; padding:0.8em 1em;margin-bottom:1.8em;}
 div.metadata dl {padding:0; margin:0;}
 div.metadata dt {float:left; font-weight:normal; font-style:italic;}
 div.metadata dd {position:relative; left:1em;}
