@@ -65,6 +65,7 @@ $(document).ready(function() {
 
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
+                    window.frames[0].document.domain = document.domain;                
                     codemirroriframe = $("#id_code").next().children(":first"); 
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     onWindowResize();
