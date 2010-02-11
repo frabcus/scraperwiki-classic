@@ -15,6 +15,7 @@ $(document).ready(function() {
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
+    var cookieOptions = { path: '/editor', expires: 90};    
 
     //constructor functions
     setupCodeEditor();
@@ -25,7 +26,8 @@ $(document).ready(function() {
     setupToolbar();
     setupDetailsForm();
     setupResizeEvents();
-    setupKeygrabs();   
+    setupKeygrabs();
+    showIntro();
 
     //setup code editor
     function setupCodeEditor(){
@@ -216,6 +218,14 @@ $(document).ready(function() {
         });
 
     }
+    
+    function showIntro(){
+        //if($.cookie('scraperwiki.editor.intro') == null){
+            showPopup('popup_intro');
+        //}
+        $.cookie('scraperwiki.editor.intro', 1, cookieOptions);                    
+
+    }
 
 /*
     conn.onclose = function(){
@@ -347,6 +357,9 @@ $(document).ready(function() {
         $('#output_console div').html('');    
         $('#output_sources div').html('');    
         $('#output_data table').html('');                    
+        $('.editor_output div.tabs li.console').removeClass('new');
+        $('.editor_output div.tabs li.data').removeClass('new');        
+        $('.editor_output div.tabs li.sources').removeClass('new');        
     }
 
     function reloadScraper(){
