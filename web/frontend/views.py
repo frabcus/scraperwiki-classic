@@ -25,6 +25,9 @@ import datetime
 def frontpage(request, public_profile_field=None):
     user = request.user
 
+    hide_logo = False
+    grey_body = False    
+    template = 'frontend/frontpage.html'
     # The following items are only used when there is a logged in user.	
     if user.is_authenticated():
         my_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False).order_by('-created_at')
@@ -33,7 +36,10 @@ def frontpage(request, public_profile_field=None):
         following_users_count = len(following_users)
         # contribution_scrapers needs to be expanded to include scrapers you have edit rights on
         contribution_scrapers = my_scrapers
+        template = 'frontend/frontpage_logged_in.html'        
     else:
+        hide_logo = True
+        grey_body = True
         my_scrapers = []
         following_scrapers = []
         following_users = []
@@ -45,23 +51,25 @@ def frontpage(request, public_profile_field=None):
     good_contribution_scrapers = []
     # cut number of scrapers displayed on homepage down to the most recent 10 items
     my_scrapers = my_scrapers[:10]
+    has_scrapers = len(my_scrapers) > 0
     # also need to add filtering to limit to public published scrapers
     for scraper in contribution_scrapers:
         if scraper.is_good():
             good_contribution_scrapers.append(scraper)
 
     #new scrapers
-    new_scrapers = Scraper.objects.filter(deleted=False, published=True, featured=True).order_by('-first_published_at')[:5]
+    new_scrapers = Scraper.objects.filter(deleted=False, published=True, featured=False).order_by('-first_published_at')[:5]
+    featured_scrapers = Scraper.objects.filter(deleted=False, published=True, featured=True).order_by('-first_published_at')[:5]    
     
     #suggested scrapers
     solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
     
-    return render_to_response('frontend/frontpage.html', {'my_scrapers': my_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'following_users': following_users, 'following_users_count' : following_users_count, 'new_scrapers': new_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
+    return render_to_response(template, {'grey_body': grey_body, 'hide_logo': hide_logo, 'my_scrapers': my_scrapers, 'has_scrapers':has_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'following_users': following_users, 'following_users_count' : following_users_count, 'new_scrapers': new_scrapers, 'featured_scrapers': featured_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
 
 
 def my_scrapers(request):
 	user = request.user
-	
+
 	if user.is_authenticated():
 		owned_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
 		owned_count = len(owned_scrapers) 
@@ -83,22 +91,25 @@ def profile_detail(request, username):
 			profiled_user = User.objects.get(username=username)
 		except User.DoesNotExist:
 			raise Http404
+                owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True, deleted=False)
 		if request.method == 'POST': # if follow form has been submitted
 			if user.is_authenticated():
 				if (profiled_user in user.to_user.following()):
 					u = UserToUserRole.objects.filter(to_user=profiled_user, from_user=user, role='follow')
 					u.delete()
-					return profile_views.profile_detail(request, username=username, extra_context={ 'following': False, }, )
+					return profile_views.profile_detail(request, username=username, extra_context={ 'following': False, 'owned_scrapers' : owned_scrapers, }, )
 				else:
 					u = UserToUserRole(to_user=profiled_user, from_user=user, role='follow')
 					u.save()
-					return profile_views.profile_detail(request, username=username, extra_context={ 'following': True, }, )
+					return profile_views.profile_detail(request, username=username, extra_context={ 'following': True, 'owned_scrapers' : owned_scrapers, }, )
 		else:
 			following = UserToUserRole.objects.filter(to_user=profiled_user, from_user=user, role='follow')
-			owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True, deleted=False)
-			return profile_views.profile_detail(request, username=username, extra_context={ 'following': following, 'owned_scrapers' : owned_scrapers}, )
+			return profile_views.profile_detail(request, username=username, extra_context={ 'following' : following, 'owned_scrapers' : owned_scrapers, } )
 
 
+def edit_profile(request):
+                form = UserProfileForm()
+                return profile_views.edit_profile(request, form_class=form)
 
 def process_logout(request):
     logout(request)

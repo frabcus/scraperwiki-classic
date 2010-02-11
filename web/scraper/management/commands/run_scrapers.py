@@ -2,11 +2,16 @@ import django
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 
-import json
+try:
+  import json
+except:
+  import simplejson as json
+
 import subprocess
 
 from scraper.models import Scraper
 import settings
+import datetime
 
 
 class Command(BaseCommand):
@@ -23,8 +28,8 @@ class Command(BaseCommand):
         runner_path = "%s/Runner.py" % settings.FIREBOX_PATH
         runner = subprocess.Popen([runner_path, '-g', guid], shell=False, stdin=subprocess.PIPE)
         runner.communicate(code)
-        
-        
+
+
     def handle(self, **options):
         if options['short_name']:
             scrapers = Scraper.objects.get(short_name=options['short_name'], published=True, )
@@ -33,7 +38,13 @@ class Command(BaseCommand):
             # scrapers = Scraper.objects.exclude(run_interval='never').filter(published=True)
             scrapers = Scraper.objects.filter(published=True)
             for scraper in scrapers:
-                self.run_scraper(scraper)
+                try:
+                    self.run_scraper(scraper)
+                    scraper.update_meta()
+                    scraper.last_run = datetime.datetime.now()
+                    scraper.save()
+                except:
+                    print "Error running scraper: " + scraper.title
 
 
         

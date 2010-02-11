@@ -8,6 +8,8 @@
                 <script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>                                      		                                
 		{% endif %}
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>		
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>	
 
         {% comment %}CODEMIRROR_URL doesn't get into this template, unfortunately (only MEDIA_URL does){% endcomment %}
 		<script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.65/js/codemirror.js"></script>
@@ -18,58 +20,63 @@
 	    {% block rss %}{% endblock %}
 	    <title>{% block title %}{% endblock %} | ScraperWiki</title>
 	</head>
-	<body>
+	<body{% if grey_body %} class="bold_body"{% endif %}>
 	    <div class="banner">
-	        This is the alpha version of ScraperWiki. Please <a href="{% url contact_form %}">tell us what you think</a>, good or bad.
+	        <ul class="user_menu">
+				{% if user.is_authenticated %}
+				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.username}}</a></li>
+				  <li>{{ user.scraper_set.owned_count }}
+				     {% ifnotequal user.scraper_set.owned_count 1 %}
+				        scrapers
+				     {% else %}
+				        scraper
+				     {% endifnotequal %}
+				     <!--
+				     {% ifnotequal user.scraper_set.owned_count 0 %}
+				        ({{user.scraper_set.owned_good_count}}) OK
+				     {% endifnotequal %}
+				     -->
+				 </li>
+				 <li><a href="{% url logout %}?next_page=/">sign out</a></li>
+				{% else %}
+					<li><a href="{% url login %}?next=/">Sign in or create an account</a></li>
+				{% endif %}
+				<li class="helplink"><a href="{% url help %}">Help</a></li>
+			</ul>
+			<p>
+    	        Hello! This is the alpha version of ScraperWiki, please <a href="{% url contact_form %}">tell us what you think</a>.
+            </p>
 	    </div>
 
 	    {# Header #}
 	    <div id="divHeader">
                 
                 <div id="divLogo">
-					<p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
-					<p class="hide">bootstrap the web</p>
+                    {% if not hide_logo %}
+    					<p>
+    					    <a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
+    				    </p>
+				    {% endif %}
 				</div>
 			
 			<div id="divMenu">
-			    <ul>
-				    <li><a href="{% url editor %}">Create a scraper</a></li>
+			    <ul class="main_menu">
 				    <li>
-				        <a href="{% url scraper_list %}">Browse scrapers &amp; data</a>
+				        <a href="{% url editor %}" title="Create a new screen scraper">Create a scraper</a>
 				    </li>
 				    <li>
-				        <a href="{% url market_list %}">ScraperMart</a>
+				        <a href="{% url scraper_list %}" title="Browse scrapers and data">Browse data</a>
 				    </li>
 				    <li>
-				        <a href="{% url api:index %}">API</a>
+				        <a href="{% url market_list %}" title="Request a new scraper">Request data</a>
 				    </li>
-				    <li class="helplink"><a href="{% url help %}">Help</a></li>
+				    <li class="last">
+				        <a href="{% url api:index %}" title="ScraperWiki API">API</a>
+				    </li>
 				</ul>
-				<ul class="user_menu">
-					{% if user.is_authenticated %}
-					  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.username}}</a></li>
-					  <li>{{ user.scraper_set.owned_count }}
-					     {% ifnotequal user.scraper_set.owned_count 1 %}
-					        scrapers
-					     {% else %}
-					        scraper
-					     {% endifnotequal %}
-					     <!--
-					     {% ifnotequal user.scraper_set.owned_count 0 %}
-					        ({{user.scraper_set.owned_good_count}}) OK
-					     {% endifnotequal %}
-					     -->
-					 </li>
-					 <li><a href="{% url logout %}?next_page=/">sign out</a></li>
-					{% else %}
-						<li><a href="{% url login %}?next=/">Sign in or create an account</a></li>
-					{% endif %}
-				</ul>
+
 			</div>
-	    </div>
-	    
-		<div id="divPage">
-		    <div id="divInfo">
+			<div id="divInfo">
 		        {% if info_messages %}
                      <ul>
                          {% for info in info_messages %}
@@ -100,6 +107,9 @@
 		            
     		    {% endblock %}		    
     		</div>
+	    </div>
+	    {% block above_page %}{% endblock %}		    
+		<div id="divPage">
 		    <div id="divContent">
           
   		    {% block content %}{% endblock %}

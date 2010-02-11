@@ -21,6 +21,23 @@ try:
 except:
   import simplejson as json
 
+def overview(request, scraper_short_name):
+
+    user = request.user
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    user_owns_it = (scraper.owner() == user)
+    user_follows_it = (user in scraper.followers())
+    
+    scraper_tags = Tag.objects.get_for_object(scraper)
+    
+    return render_to_response('scraper/overview.html', {
+        'scraper_tags' : scraper_tags,
+        'selected_tab': 'overview', 
+        'scraper': scraper, 
+        'user_owns_it': user_owns_it, 
+        'user_follows_it': user_follows_it,
+        }, context_instance=RequestContext(request))
+    
 def create(request):
     if request.method == 'POST':
         return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 

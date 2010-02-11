@@ -1,74 +1,55 @@
+{% extends "frontend/base.html" %}
+{% block css %}{% endblock %}
+
+{% block title %}Welcome{% endblock %}
+{% block content  %}
+
 {% load gravatar %}
 
 <div class="page_title">
 	<h1><span class="text">Hello {{ user.username }}</span></h1>
 
+    <p>
+    {% if has_scrapers %}
+	    You are contributing to {{ contribution_count }} scraper{{ contribution_count|pluralize }}
+	{% else %}
+        Welcome back
+    {% endif %}
+    {% comment %} [APS: remove following/watching features for now]
+    {% if following_scrapers %} {% if not following_users %} and {% else %}, {% endif %}
+    	 watching 
+    			{% with following_scrapers.count as num %}{{ num }}
+    			scraper{{ num|pluralize }}{% endwith %}{% endif %}{% if following_users %}{% if not following_scrapers %} and {% else %}, and {% endif %} following {{ following_users_count }}
+    				user{{ following_users_count|pluralize }}{% endif %}
 
-	<p>You are contributing to {{ contribution_count }} scraper{{ contribution_count|pluralize }}
-
-{% comment %} [APS: remove following/watching features for now]
-{% if following_scrapers %} {% if not following_users %} and {% else %}, {% endif %}
-	 watching 
-			{% with following_scrapers.count as num %}{{ num }}
-			scraper{{ num|pluralize }}{% endwith %}{% endif %}{% if following_users %}{% if not following_scrapers %} and {% else %}, and {% endif %} following {{ following_users_count }}
-				user{{ following_users_count|pluralize }}{% endif %}
-
-{% endcomment %} 
-		</p>
+    {% endcomment %} 
+	</p>
 </div>
 
 <div class="content col left">
 
-	<h2>Your scrapers</h2>
+    {% if has_scrapers %}
+    	<h2>Your scrapers</h2>
 
-	{% if my_scrapers %}
-		<ul class="scraper_list">
-    	{% for scraper in my_scrapers %}
-    	  {% include 'frontend/scraper_line.html' %}
-    	{% endfor %}
-	</ul>
-		<p class="more">
-		   <a href="{% url my_scrapers %}">View all your scrapers &raquo;</a>
-		</p>
+        	<ul class="scraper_list">
+                {% for scraper in my_scrapers %}
+                    {% include 'scraper/scraper_line.html' %}
+                {% endfor %}
+            </ul>
+
+    		<p class="more">
+    		   <a href="{% url my_scrapers %}">View all your scrapers &raquo;</a>
+    		</p>
 		
-    	{% else %}
-    	 <p>No scrapers yet</p>
-    	{% endif %}
+	{% else %}
+    	<h2>Featured scrapers</h2>
+    	<ul class="scraper_list">
+    		{% for scraper in new_scrapers %}
+    		  {% include 'frontend/detailed_scraper_line.html' %}
+    		{% endfor %}	
+    	</ul> 
+	{% endif %}
 
-{% comment %} [APS: remove following/watching features for now]
-
-	<h2>Scrapers you are watching</h2>
-	{% if following_scrapers %}
-	<ul>
-		{% for scraper in following_scrapers %}
-		  {% include 'frontend/detailed_scraper_line.html' %}
-		{% endfor %}
-	</ul>
-	    {% else%}
-	    <p>You are not watching any scrapers</p>
-    {% endif %}
-
-	<h2>People you are following</h2>
-
-	{% if following_users%}
-	<ul> 
-			{% for other_user in following_users %}
-			<li>{% show_gravatar other_user 'small' %}
-			 <a href='{% url profiles_profile_detail other_user %}'>
-					                {{ other_user.username }}
-			 </a>	
-            </li>
-			{% endfor %}
-	  </ul>
-		{% else %}
-		</p>You are not following anyone</p>
-		{% endif %}
-
-{% endcomment %} 
-
-    <!--
-	    <h2>History</h2>
-    -->
 </div>
 <div class="content col right">
 	<ul>
@@ -104,12 +85,14 @@
 	</p>
 	
 	<h3>New scrapers from everybody</h3>
-	<ul class="scraper_list">
-		{% for scraper in new_scrapers %}
+	<ul>
+		{% for scraper in featured_scrapers %}
 		  {% include 'frontend/detailed_scraper_line.html' %}
-		{% endfor %}	
+		{% endfor %}
 	</ul>
 	
 
 </div>
-<div style="clear: both;"></div>
+
+{% endblock %}
+{% block run_script %}setupIntroSlideshow(); setupScroller();{% endblock %}

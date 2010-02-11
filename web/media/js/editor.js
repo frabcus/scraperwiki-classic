@@ -255,7 +255,7 @@ $(document).ready(function() {
               iLineNumber = 0;
               if(parseInt(data.lineno) > 0){
                  iLineNumber = data.lineno;
-                 codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0);                 
+                 codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0, codeeditor.nthLine(iLineNumber + 1), 0);                 
               }
               writeToConsole(sMessage, data.content_long, data.message_type, iLineNumber)
           } else {
@@ -426,6 +426,10 @@ $(document).ready(function() {
                 $('#meta_form #id_commit_message').effect('highlight')
                 return false
             } else {
+               if ($('#meta_form #id_description').val() == ""){
+                   $('#meta_form #id_description').effect('highlight')
+                   return false
+            }
                 saveScraper(true);
                 return false;                
             }
@@ -728,21 +732,27 @@ $(document).ready(function() {
     }
 
     function writeToData(sMessage) {
-        var row = eval(sMessage)
+          var aRowData = eval(sMessage)
+          var oRow = $('<tr></tr>');
 
-        var html_row = "<tr>"
-        $.each(row, function(i){
-            html_row +="<td>"+row[i]+"</td>"
-        })
-        html_row += "</tr>"
-        
-        $('#output_data :first').append(html_row);
-        $('.editor_output div.tabs li.data').addClass('new');
-        
-        
-        $('#output_data').animate({ 
-            scrollTop: $('#output_data').height()+$('#output_data')[0].scrollHeight 
-        }, 0);
+          $.each(aRowData, function(i){
+              var oCell = $('<td></td>');
+              oCell.html(aRowData[i]);
+              oRow.append(oCell);
+          })
+/*
+          if ($('#output_data .output_content').children().size() >= outputMaxItems){
+              $('#output_data .output_content').children(':first').remove();
+          }
+*/
+          
+          $('#output_data .output_content').append(oRow);
+          $('.editor_output div.tabs li.data').addClass('new');
+
+
+          $('#output_data').animate({ 
+              scrollTop: $('#output_data').height()+$('#output_data')[0].scrollHeight 
+          }, 0);
     }
 
     //show tab

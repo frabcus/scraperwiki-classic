@@ -118,7 +118,7 @@ def edit(request, short_name=None):
     # 1) Get scraper
 
     if has_draft:
-        # Does a draft version exist
+        # Does a draft version exist?
         scraper = draft
         scraper.__dict__['tags'] = request.session['ScraperDraft'].get('tags', '')
         scraper.__dict__['commit_message'] = request.session['ScraperDraft'].get('commit_message', '')        
@@ -136,7 +136,7 @@ def edit(request, short_name=None):
       scraper.license = 'Unknown'
       scraper.__dict__['commit_message'] = 'Scraper created'
 
-    #If no POST, then just render the page
+    # 2) If no POST, then just render the page
     if not request.POST:
 
         # Build the form
@@ -149,7 +149,7 @@ def edit(request, short_name=None):
         return render_to_response('editor.html', {'form':form, 'scraper' : scraper, 'has_draft': has_draft}, context_instance=RequestContext(request))        
     
     else:        
-        # If there is POST, then use that as the form
+        # 3) If there is POST, then use that
         form = forms.editorForm(request.POST, instance=scraper)
         action = request.POST.get('action').lower()
 

@@ -228,12 +228,10 @@ class Scraper(models.Model):
         #get data for sparklines
         sparline_days = settings.SPARKLINE_MAX_DAYS
         created_difference = datetime.datetime.now() - self.created_at
-        if (created_difference.days < settings.SPARKLINE_MAX_DAYS):
-            sparline_days = created_difference.days
+        #if (created_difference.days < settings.SPARKLINE_MAX_DAYS):
+        #    sparline_days = created_difference.days
 
         #minimum of 1 day
-        if sparline_days < 1:
-            sparline_days = 1
         recent_record_count = \
                 Scraper.objects.recent_record_count(self.guid, sparline_days)
         self.scraper_sparkline_csv = ",".join("%d" % count \

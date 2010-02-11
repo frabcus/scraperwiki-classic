@@ -1,28 +1,30 @@
 
 {% extends "frontend/base.html" %}
 
-{% block title %}All scrapers{% endblock %}
+{% block title %}Browse datasets{% endblock %}
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/all_scrapers/" />{% endblock %}
 
 {% block content %}
     <div class="page_title">
-        <h1>Scrapers</h1>
+        <h1>Browse datasets</h1>
         <p>
-            All scrapers in ScraperWiki
+            Browse all the datasets and scrapers contained in ScraperWiki
         </p>
-
-        <form action="/scrapers/search/" method="post">
-            {{ form.q.label_tag }}
-            {{ form.q }}
-            <input type="submit" value="Go" />
-        </form>
+        <div class="page_controls">
+            <form action="/scrapers/search/" method="post">
+                {{ form.q.label_tag }}
+                {{ form.q }}
+                <input type="submit" value="Go" />
+            </form>
+            <br/>
+            <a href="/feeds/all_scrapers/">RSS feed of all scrapers</a>            
+        </div>
     </div>
 
     <div class="content">
-        <a href="/feeds/all_scrapers/">RSS feed of all scrapers</a>
-        <ul class="allscraperlist">
+        <ul class="scraper_list">
           {% for scraper in scrapers.object_list %}
-          {% include 'scraper/scraper_line.html' %}
+            {% include 'scraper/scraper_line.html' %}
           {% endfor %}
         </ul>
 <div class="pagination">

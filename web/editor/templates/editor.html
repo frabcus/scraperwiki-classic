@@ -53,6 +53,7 @@
                     {{ form.title }}
                 </div>
                 <div id="meta_fields_mini">
+                    <p>Publishing your scraper will the code and data available to other users, allow you to access the data it generated via the API and set it to be rerun once a day (we will soon be adding a system to let you control the frequency yourself)</p>
                     {# for form elements that are shown in the popup #}
 
                     <div class="field field-title">
@@ -69,20 +70,25 @@
                         <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
                         {{ form.license }}
                     </div>
+
             {% if not has_draft %}
                     <div class="field field-tags">
                         <label for="id_tags">{{ form.tags.label}} {{ form.tags.errors }}</label>
                         {{ form.tags }}
                     </div>
             {% endif %}
+
                     <div class="field field-commit_message">
                       <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
                       {{ form.commit_message }}
                     </div>
+
                     <div class="field field-run_interval">
                       <label for="id_run_interval">{{ form.run_interval.label}} {{ form.run_interval.errors }}</label>
                       {{ form.run_interval }}
                     </div>
+
+                    <small>* Required field</small>
 
                 </div>
 
@@ -143,8 +149,7 @@
                         <div class="output_content"></div>
                     </div>
                     <div id="output_data" class="output">
-                        <table class="output_content">
-
+                        <table class="output_content">                            
                         </table>
                     </div>
                     <div id="output_sources" class="output">
@@ -162,7 +167,9 @@
 {% endblock %}
 
 {% block popups %}    
-    <div id="meta_form" class="popup_item"><a class="popupClose">x</a></div>
+    <div id="meta_form" class="popup_item">
+        <a class="popupClose">close</a>
+    </div>
     <div id="diff" class="popup_item"><a class="popupClose">x</a><pre></pre></div>
     <div id="popup_shortcuts" class="popup_item">
         <a class="popupClose">close</a><pre></pre>

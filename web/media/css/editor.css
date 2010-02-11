@@ -48,6 +48,7 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 .editor_controls #diff {background-image:url(../images/icons/diff.png)}
 .editor_controls .commit, #meta_form .button.commit {background-image:url(../images/icons/database_save.png); border-color:#2680c6;
     background-color:#6fb1e6; color:#fff;}
+#meta_form p {margin:2.5em 0 2em 0;padding:0.5em 0 0.5em 0; border-top:solid 1px #808080;border-bottom:solid 1px #808080;}
     
 #running_annimation {display:none;}
     
@@ -79,7 +80,7 @@ span.hiddenfields { margin-left:10px; }
 
 .editor_output .info div.output {height:100%;  width:100%; position:relative;}
 .editor_output .info div.output div.output_content {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
-.editor_output .info div#output_data {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
+.editor_output .info #output_data {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
 .editor_output .info div.output div.output_content .long_message {display:none;}
 
 .editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.3em 1em;
@@ -106,7 +107,7 @@ span.hiddenfields { margin-left:10px; }
     z-index:110; position:absolute; top:0; width:86%; margin:5%; padding:2%;
     text-align:left; display:none; overflow:auto;}
 
-#popup_exception, #popup_text {background:#000!important; color:#089608;overflow-y: scroll; }
+#popup_exception, #popup_text {background:#000!important; color:#3cef3b;overflow-y: scroll; }
 #popup_exception h3, #popup_text h3 {border-bottom:solid 1px #089608; padding-bottom:0.7em;}
 #popup_exception pre, #popup_text pre {white-space: pre-wrap;white-space: -moz-pre-wrap;
     white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;}
@@ -131,8 +132,8 @@ dl.quick_help li code {font-size:1.1em; }
 #meta_fields_mini .field ul.errorlist, #meta_fields_mini .field ul.errorlist li {display:inline; margin:0; padding:0; color:red;}
 
 #meta_fields .field-description {float:left; margin-right:10%;}
-#meta_fields .field-license {float:left; margin-right:10%;}
-#meta_fields .field-tags {float:left; margin-right:10%;}
+#meta_fields .field-license {clear:both; float:left; margin-right:10%;}
+#meta_fields .field-tags {clear:both; float:left; margin-right:10%;}
 
 #meta_form .field { margin-bottom:5px;}
 #meta_form .button { float:right;}

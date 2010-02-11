@@ -1,24 +1,45 @@
 <li>
     <h3>
-        <a href="{% url scraper_data scraper.short_name %}">
+        <a href="{% url scraper_overview scraper.short_name %}">
             {% if scraper.title %}{{ scraper.title }}{% else %}{{ scraper.short_name }}{% endif %}
         </a>
+        {% if scraper.has_geo %}
+            <a href="{% url scraper_map scraper.short_name %}">
+                <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
+            </a>
+        {% endif %}
+        {% if scraper.has_temporal %}                        
+            <img src="{{ MEDIA_URL }}/images/icons/date.png"/>
+        {% endif %}
         {% load sparkline %}
         {% sparkline scraper.scraper_sparkline_csv %} 
     </h3>
+    <p class="controls">
+        {% if not scraper.published %}
+            <span class="status unpublished">unpublished</span>
+        {% endif %}
+        {% ifequal scraper.owner user%}
+            <span class="edit"><a href="{% url editor scraper.short_name %}">Edit</a></span>
+        {% endifequal %}
+    </p>
     {% if scraper.description %}
         <p>
             {{ scraper.description }}            
         </p>
     {% endif %}
     <small>
-        Created by <a href="{% url profiles_profile_detail scraper.owner.username %}">{{ scraper.owner.username }}</a> {{scraper.created_at|timesince}} ago |
+        
+        Created by
+        {% load gravatar %}
+        {% show_gravatar scraper.owner 'small' %}
+        <a href="{% url profiles_profile_detail scraper.owner.username %}">{{ scraper.owner.username }}</a> {{scraper.created_at|timesince}} ago |
     {% if scraper.last_run %}
         last run {{scraper.last_run|timesince}} ago |
     {% else %}
         not run yet |
 	{% endif %}
-	    written in {{ scraper.language }}
+	    written in {{ scraper.language }} |
+	    {{ scraper.record_count }} records
     </small>
     
 </li>
