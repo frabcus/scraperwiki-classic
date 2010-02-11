@@ -1,10 +1,12 @@
 <li>
     <h3>
-        <a href="{% url scraper_data scraper.short_name %}">
+        <a href="{% url scraper_overview scraper.short_name %}">
             {% if scraper.title %}{{ scraper.title }}{% else %}{{ scraper.short_name }}{% endif %}
         </a>
         {% if scraper.has_geo %}
-            <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
+            <a href="{% url scraper_map scraper.short_name %}">
+                <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
+            </a>
         {% endif %}
         {% if scraper.has_temporal %}                        
             <img src="{{ MEDIA_URL }}/images/icons/date.png"/>
@@ -36,7 +38,8 @@
     {% else %}
         not run yet |
 	{% endif %}
-	    written in {{ scraper.language }}
+	    written in {{ scraper.language }} |
+	    {{ scraper.record_count }} records
     </small>
     
 </li>

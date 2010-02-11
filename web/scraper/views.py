@@ -21,6 +21,23 @@ try:
 except:
   import simplejson as json
 
+def overview(request, scraper_short_name):
+
+    user = request.user
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    user_owns_it = (scraper.owner() == user)
+    user_follows_it = (user in scraper.followers())
+    
+    scraper_tags = Tag.objects.get_for_object(scraper)
+    
+    return render_to_response('scraper/overview.html', {
+        'scraper_tags' : scraper_tags,
+        'selected_tab': 'overview', 
+        'scraper': scraper, 
+        'user_owns_it': user_owns_it, 
+        'user_follows_it': user_follows_it,
+        }, context_instance=RequestContext(request))
+    
 def create(request):
     if request.method == 'POST':
         return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 
@@ -292,19 +309,21 @@ def search(request, q=""):
         form = SearchForm(initial={'q': q})
         q = q.strip()
         scrapers = models.Scraper.objects.filter(title__icontains=q, published=True) 
+        scrapers_description = models.Scraper.objects.filter(description__icontains=q, published=True) 
         # and by tag
-        tag = Tag.objects.filter(name__icontains=q)
-        if tag: 
-          qs = TaggedItem.objects.get_by_model(models.Scraper, tag)
-          scrapers = scrapers | qs
-        else: 
-          qs = None
+        tag = get_tag(q)
+        if tag:
+        	scrapers_for_tag = models.Scraper.objects.filter(published=True)    
+        	qs = TaggedItem.objects.get_by_model(scrapers_for_tag, tag)
+        	scrapers = scrapers | qs
+        scrapers_all = scrapers | scrapers_description
+        #scrapers = scrapers | scrapers_description
         #Only show published scrapers, sort by creation date
-        scrapers = scrapers.filter(published=True)
-        scrapers = scrapers.order_by('-created_at')
+        scrapers_all = scrapers_all.filter(published=True)
+        scrapers_all = scrapers_all.order_by('-created_at')
         return render_to_response('scraper/search_results.html',
-          {'scrapers': scrapers,  'form': form, 'query': q}, context_instance = RequestContext(request))
-    elif (request.POST): # If the form has been submitted, or we have a search term in the URL
+          {'scrapers': scrapers_all,  'form': form, 'query': q,  }, context_instance = RequestContext(request))
+    elif (request.POST): # If the form has been submitted, or we have a search term in the URL - redirect to nice URL
         form = SearchForm(request.POST) 
         if form.is_valid(): 
           q = form.cleaned_data['q']

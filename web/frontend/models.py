@@ -18,7 +18,7 @@ class UserProfile(models.Model):
     bio              = models.TextField(blank=True)
     created_at       = models.DateTimeField(auto_now_add = True)
     alerts_last_sent = models.DateTimeField(auto_now_add = True)
-    alert_frequency  = models.IntegerField()
+    alert_frequency  = models.IntegerField(null=True, blank=True)
 
     def get_absolute_url(self):
         return ('profiles_profile_detail', (), { 'username': self.user.username })

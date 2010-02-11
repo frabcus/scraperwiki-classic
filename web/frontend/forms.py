@@ -13,14 +13,14 @@ from django.contrib.auth.forms import AuthenticationForm
 
 class UserProfileForm (ModelForm):
 
-    alert_frequency = ChoiceField(choices = ((0, 'Instant'), (3600, 'Once an hour')))
+    alert_frequency = ChoiceField(required=False, choices = ((0, 'Instant'), (3600, 'Once an hour')))
 
     class Meta:
         model = UserProfile
-        fields = ('bio', 'alert_frequency')
+        fields = ('bio',)
 
 class scraperContactForm(ContactForm):
-  subject_dropdown = django.forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))
+  subject_dropdown = django.forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request a private scraper'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))
   title = django.forms.CharField(widget=django.forms.TextInput(), label=u'Subject')
   recipient_list = [settings.FEEDBACK_EMAIL]
 

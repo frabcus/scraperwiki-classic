@@ -15,6 +15,7 @@ $(document).ready(function() {
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
+    var cookieOptions = { path: '/editor', expires: 90};    
 
     //constructor functions
     setupCodeEditor();
@@ -25,7 +26,8 @@ $(document).ready(function() {
     setupToolbar();
     setupDetailsForm();
     setupResizeEvents();
-    setupKeygrabs();   
+    setupKeygrabs();
+    showIntro();
 
     //setup code editor
     function setupCodeEditor(){
@@ -140,6 +142,13 @@ $(document).ready(function() {
         $('.popupClose').click(
             function() {
                 hidePopup();
+                return false;
+            }
+        );
+        $('.popupReady').click(
+            function() {
+                hidePopup();
+                return false;                
             }
         );
 
@@ -217,6 +226,14 @@ $(document).ready(function() {
 
     }
 
+    function showIntro(){
+        if($.cookie('scraperwiki.editor.intro') == null){
+            showPopup('popup_intro');
+        }
+        $.cookie('scraperwiki.editor.intro', 1, cookieOptions);                    
+
+    }
+
 /*
     conn.onclose = function(){
         alert('connection closed');
@@ -255,7 +272,7 @@ $(document).ready(function() {
               iLineNumber = 0;
               if(parseInt(data.lineno) > 0){
                  iLineNumber = data.lineno;
-                 codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0);                 
+                 codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0, codeeditor.nthLine(iLineNumber + 1), 0);                 
               }
               writeToConsole(sMessage, data.content_long, data.message_type, iLineNumber)
           } else {
@@ -276,10 +293,8 @@ $(document).ready(function() {
 
     //send a 'kill' message
     function sendKill() {
-      data = {
-        "command" : 'kill',
-      }
-      send(data)
+      data = {"command" : 'kill'};
+      send(data);
     }
 
     //send code request run
@@ -347,6 +362,9 @@ $(document).ready(function() {
         $('#output_console div').html('');    
         $('#output_sources div').html('');    
         $('#output_data table').html('');                    
+        $('.editor_output div.tabs li.console').removeClass('new');
+        $('.editor_output div.tabs li.data').removeClass('new');        
+        $('.editor_output div.tabs li.sources').removeClass('new');        
     }
 
     function reloadScraper(){
@@ -732,21 +750,27 @@ $(document).ready(function() {
     }
 
     function writeToData(sMessage) {
-        var row = eval(sMessage)
+          var aRowData = eval(sMessage)
+          var oRow = $('<tr></tr>');
 
-        var html_row = "<tr>"
-        $.each(row, function(i){
-            html_row +="<td>"+row[i]+"</td>"
-        })
-        html_row += "</tr>"
-        
-        $('#output_data :first').append(html_row);
-        $('.editor_output div.tabs li.data').addClass('new');
-        
-        
-        $('#output_data').animate({ 
-            scrollTop: $('#output_data').height()+$('#output_data')[0].scrollHeight 
-        }, 0);
+          $.each(aRowData, function(i){
+              var oCell = $('<td></td>');
+              oCell.html(aRowData[i]);
+              oRow.append(oCell);
+          })
+/*
+          if ($('#output_data .output_content').children().size() >= outputMaxItems){
+              $('#output_data .output_content').children(':first').remove();
+          }
+*/
+          
+          $('#output_data .output_content').append(oRow);
+          $('.editor_output div.tabs li.data').addClass('new');
+
+
+          $('#output_data').animate({ 
+              scrollTop: $('#output_data').height()+$('#output_data')[0].scrollHeight 
+          }, 0);
     }
 
     //show tab
