@@ -293,10 +293,8 @@ $(document).ready(function() {
 
     //send a 'kill' message
     function sendKill() {
-      data = {
-        "command" : 'kill',
-      }
-      send(data)
+      data = {"command" : 'kill'};
+      send(data);
     }
 
     //send code request run
