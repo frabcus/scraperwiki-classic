@@ -255,7 +255,7 @@ $(document).ready(function() {
               iLineNumber = 0;
               if(parseInt(data.lineno) > 0){
                  iLineNumber = data.lineno;
-                 codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0);                 
+                 codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0, codeeditor.nthLine(iLineNumber + 1), 0);                 
               }
               writeToConsole(sMessage, data.content_long, data.message_type, iLineNumber)
           } else {
