@@ -17,10 +17,12 @@
     <div class="page_title">
         <h1>Request a dataset</h1>
         <p>
-            If you know of an interesting source of data for someone to scrape, please add it here
+             Ask the community or ScraperWiki to scrape data
         </p>
     </div>
     <div class="content col left">
+	<h2>Ask the community</h2>
+	<p>If you've found some interesting data, or you want something specific scraped, add it here. If you're willing to pay, set a bounty</p>
     	<form method="post" action=".">
     	    <ul class="form">
     	        <li class="{% if form.title.errors %}error{% endif %}">
@@ -53,7 +55,15 @@
     </div>
 
     <div class="content col right">
-        <p><strong>Sssshh!</strong> Want to keep your data secret? <a href="{% url contact_form %}">Ask ScraperWiki</a> for a private scraper</p>
+	    <div class="highlight">
+		<h2>Private scrapers</h2>
+       <p> On the trail of a story? Want to keep your data secret for now?</p>
+       <p>Ask ScraperWiki - we may be able to write you a private scraper.</p>
+
+			<form method="get" action="{% url contact_form %}">
+	    		<input type="submit" name="login" value="Request a private scraper" />
+	    	</form>
+</div>
 
 		<h3>Latest requested datasets</h3>
 		<ul>
