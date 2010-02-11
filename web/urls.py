@@ -28,7 +28,6 @@ feeds = {
 # remove all log files references
 
 urlpatterns = patterns('',
-    url(r'^profiles/', include('profiles.urls')),
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
     url(r'^editor/', include('editor.urls')),
     

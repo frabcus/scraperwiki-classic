@@ -91,22 +91,25 @@ def profile_detail(request, username):
 			profiled_user = User.objects.get(username=username)
 		except User.DoesNotExist:
 			raise Http404
+                owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True, deleted=False)
 		if request.method == 'POST': # if follow form has been submitted
 			if user.is_authenticated():
 				if (profiled_user in user.to_user.following()):
 					u = UserToUserRole.objects.filter(to_user=profiled_user, from_user=user, role='follow')
 					u.delete()
-					return profile_views.profile_detail(request, username=username, extra_context={ 'following': False, }, )
+					return profile_views.profile_detail(request, username=username, extra_context={ 'following': False, 'owned_scrapers' : owned_scrapers, }, )
 				else:
 					u = UserToUserRole(to_user=profiled_user, from_user=user, role='follow')
 					u.save()
-					return profile_views.profile_detail(request, username=username, extra_context={ 'following': True, }, )
+					return profile_views.profile_detail(request, username=username, extra_context={ 'following': True, 'owned_scrapers' : owned_scrapers, }, )
 		else:
 			following = UserToUserRole.objects.filter(to_user=profiled_user, from_user=user, role='follow')
-			owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True, deleted=False)
-			return profile_views.profile_detail(request, username=username, extra_context={ 'following': following, 'owned_scrapers' : owned_scrapers}, )
+			return profile_views.profile_detail(request, username=username, extra_context={ 'following' : following, 'owned_scrapers' : owned_scrapers, } )
 
 
+def edit_profile(request):
+                form = UserProfileForm()
+                return profile_views.edit_profile(request, form_class=form)
 
 def process_logout(request):
     logout(request)
