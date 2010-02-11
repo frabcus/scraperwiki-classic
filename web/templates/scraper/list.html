@@ -1,14 +1,14 @@
 
 {% extends "frontend/base.html" %}
 
-{% block title %}All scrapers{% endblock %}
+{% block title %}Browse datasets{% endblock %}
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/all_scrapers/" />{% endblock %}
 
 {% block content %}
     <div class="page_title">
-        <h1>Scrapers</h1>
+        <h1>Browse datasets</h1>
         <p>
-            All scrapers in ScraperWiki
+            Browse all the datasets and scrapers contained in ScraperWiki
         </p>
         <div class="page_controls">
             <form action="/scrapers/search/" method="post">

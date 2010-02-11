@@ -34,7 +34,9 @@
                         <h4>
                             <a href='{% url scraper_data scraper.short_name %}'>{{scraper.title}}</a>
                             {% if scraper.has_geo %}
-                                <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
+                                <a href="{% url scraper_data scraper.short_name %}">                                    
+                                    <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
+                                </a>
                             {% endif %}
                             {% if scraper.has_temporal %}                        
                                 <img src="{{ MEDIA_URL }}/images/icons/date.png"/>

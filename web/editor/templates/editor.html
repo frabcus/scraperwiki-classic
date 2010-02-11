@@ -53,6 +53,7 @@
                     {{ form.title }}
                 </div>
                 <div id="meta_fields_mini">
+                    <p>Publishing your scraper will the code and data available to other users, allow you to access the data it generated via the API and set it to be rerun once a day (we will soon be adding a system to let you control the frequency yourself)</p>
                     {# for form elements that are shown in the popup #}
 
                     <div class="field field-title">
@@ -87,7 +88,7 @@
                       {{ form.run_interval }}
                     </div>
 
-<p><small>* Required field</small></p>
+                    <small>* Required field</small>
 
                 </div>
 
@@ -167,7 +168,9 @@
 {% endblock %}
 
 {% block popups %}    
-    <div id="meta_form" class="popup_item"><a class="popupClose">x</a></div>
+    <div id="meta_form" class="popup_item">
+        <a class="popupClose">close</a>
+    </div>
     <div id="diff" class="popup_item"><a class="popupClose">x</a><pre></pre></div>
     <div id="popup_shortcuts" class="popup_item">
         <a class="popupClose">close</a><pre></pre>

@@ -247,6 +247,6 @@ function setupIntroSlideshow(){
         next:   '.slide_show', 
         pause:   1,
         pager: '.slide_nav',
-        autostop: 1
+        autostop: 0
 	});
 }

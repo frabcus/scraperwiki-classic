@@ -11,6 +11,7 @@ import subprocess
 
 from scraper.models import Scraper
 import settings
+import datetime
 
 
 class Command(BaseCommand):
@@ -40,6 +41,8 @@ class Command(BaseCommand):
                 try:
                     self.run_scraper(scraper)
                     scraper.update_meta()
+                    scraper.last_run = datetime.datetime.now()
+                    scraper.save()
                 except:
                     print "Error running scraper: " + scraper.title
 
