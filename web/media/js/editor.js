@@ -142,6 +142,13 @@ $(document).ready(function() {
         $('.popupClose').click(
             function() {
                 hidePopup();
+                return false;
+            }
+        );
+        $('.popupReady').click(
+            function() {
+                hidePopup();
+                return false;                
             }
         );
 
@@ -218,11 +225,11 @@ $(document).ready(function() {
         });
 
     }
-    
+
     function showIntro(){
-        //if($.cookie('scraperwiki.editor.intro') == null){
+        if($.cookie('scraperwiki.editor.intro') == null){
             showPopup('popup_intro');
-        //}
+        }
         $.cookie('scraperwiki.editor.intro', 1, cookieOptions);                    
 
     }
