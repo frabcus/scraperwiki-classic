@@ -4,7 +4,7 @@
 {% block content %}
     <div class="page_title">
         <h1>Datasets found for '{{ query }}'</h1>
-        <p>Found {{ scrapers|length }} published scraper{{ scrapers|pluralize }} with <em><strong>{{ query }}</strong></em> somewhere in title or tags.</p>
+        <p>Found {{ scrapers|length }} published scraper{{ scrapers|pluralize }} with <em><strong>{{ query }}</strong></em> somewhere in title, description or tags.</p>
         <div class="page_controls">
             <form action="/scrapers/search/" method="POST">
                 {{ form.q.label_tag }}
@@ -17,7 +17,7 @@
     </div>
 
     <div class="content">
- 
+
         {% if scrapers %}
             <ul class="scraper_list">
                 {% for scraper in scrapers %}
