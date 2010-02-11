@@ -732,21 +732,27 @@ $(document).ready(function() {
     }
 
     function writeToData(sMessage) {
-        var row = eval(sMessage)
+          var aRowData = eval(sMessage)
+          var oRow = $('<tr></tr>');
 
-        var html_row = "<tr>"
-        $.each(row, function(i){
-            html_row +="<td>"+row[i]+"</td>"
-        })
-        html_row += "</tr>"
-        
-        $('#output_data :first').append(html_row);
-        $('.editor_output div.tabs li.data').addClass('new');
-        
-        
-        $('#output_data').animate({ 
-            scrollTop: $('#output_data').height()+$('#output_data')[0].scrollHeight 
-        }, 0);
+          $.each(aRowData, function(i){
+              var oCell = $('<td></td>');
+              oCell.html(aRowData[i]);
+              oRow.append(oCell);
+          })
+/*
+          if ($('#output_data .output_content').children().size() >= outputMaxItems){
+              $('#output_data .output_content').children(':first').remove();
+          }
+*/
+          
+          $('#output_data .output_content').append(oRow);
+          $('.editor_output div.tabs li.data').addClass('new');
+
+
+          $('#output_data').animate({ 
+              scrollTop: $('#output_data').height()+$('#output_data')[0].scrollHeight 
+          }, 0);
     }
 
     //show tab

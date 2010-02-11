@@ -80,7 +80,7 @@ span.hiddenfields { margin-left:10px; }
 
 .editor_output .info div.output {height:100%;  width:100%; position:relative;}
 .editor_output .info div.output div.output_content {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
-.editor_output .info div#output_data {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
+.editor_output .info #output_data {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
 .editor_output .info div.output div.output_content .long_message {display:none;}
 
 .editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.3em 1em;
