@@ -1,7 +1,8 @@
 {% extends "frontend/base.html" %}
 {% load formhelper %}
+{% load gravatar %}
 
-{% block title %}Scraperwiki front page{% endblock %}
+{% block title %}Request a dataset{% endblock %}
 
 {% block errors %}
     {% if form.errors %}
@@ -14,7 +15,7 @@
 
 {% block content %}
     <div class="page_title">
-        <h1>Request a scraper</h1>
+        <h1>Request a dataset</h1>
         <p>
             If you know of an interesting source of data for someone to scrape, please add it here
         </p>
@@ -52,6 +53,32 @@
     </div>
 
     <div class="content col right">
-        &nbsp;
+        <p><strong>Sssshh!</strong> Want to keep your data secret? <a href="{% url contact_form %}">Ask ScraperWiki</a> for a private scraper</p>
+
+		<h3>Latest requested datasets</h3>
+		<ul>
+		    {% for solicitation in recent_solicitations %}
+		        <li>
+		    	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
+		    	    by
+		            {% show_gravatar solicitation.user_created 'small' %} 	
+		            <a href='{% url profiles_profile_detail solicitation.user_created %}'>
+		                {{ solicitation.user_created.username }}
+		            </a>
+		            {% if solicitation.has_bounty %}
+		                <span class="bounty">
+		                    <a href="{% url market_view solicitation.id %}">
+		                        &pound;{{solicitation.price}} bounty
+		                    </a>
+		                </span>
+		            {% endif %}
+		    	</li>
+			{% endfor %}
+		</ul>
+			<p class="more">
+			   <a href="{% url market_list %}">Browse all &raquo;</a>
+			</p>
     </div>
+
+<br class="clear" />
 {% endblock %}
