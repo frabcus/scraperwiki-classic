@@ -125,7 +125,8 @@ class Scraper(models.Model):
                 history = ScraperHistory()
                 history.scraper = self
                 history.message_key = "commit"
-                history.message_value = user.id
+                history.user = User.objects.get(id=user)
+                history.save()
                 
                 
                 
@@ -258,7 +259,6 @@ class ScraperHistory(models.Model):
     Suggected conventions are:
         * 'run_success'
         * 'run_fail'
-        * 'save'
         * 'commit'
     
     """
@@ -268,6 +268,7 @@ class ScraperHistory(models.Model):
     meta = models.CharField(blank=True, max_length=1000)
     message_level = models.IntegerField(blank=True, null=True)
     datetime = models.DateTimeField(blank=False, default=datetime.datetime.now)
+    user = models.ForeignKey(User)
 
 
 class UserScraperRole(models.Model):
