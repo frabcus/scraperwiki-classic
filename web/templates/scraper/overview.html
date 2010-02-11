@@ -33,12 +33,6 @@
         <dd>{% for tag in scraper_tags %}{{ tag }} {% endfor %}</dd>
     {% endif %}
   </dl>
-
-  <div class="tab_tools">
-      <form method="get" action="{% url editor scraper.short_name %}">
-          <input type="submit" value="Edit scraper" />
-      </form>
-  </div>
 </div>
 <br class="clear"/>
 {% endblock %}
