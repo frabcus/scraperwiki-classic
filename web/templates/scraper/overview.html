@@ -8,12 +8,14 @@
     <p>{{ scraper.description }}</p>
     {% if has_data %}
         <h3>Example data</h3>
-        <dl class="example_data">        
+        <table class="raw_data">
             {% for heading, value in data %}
-                <dt>{{heading}}</dt>
-                <dd>{{value}}</dd>
+                <tr>
+                    <td>{{heading}}</td>
+                    <td>{{value}}</td>
+                </tr>
             {% endfor %}
-        </dl>
+        </table>
 
     {% endif %}
 
