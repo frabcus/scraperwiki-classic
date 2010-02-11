@@ -54,12 +54,12 @@
 <div class="content col right">
 	<ul>
 		<li><a href="{% url editor %}">Create a new scraper</a></li>
-		<li><a href="{% url market_solicitation %}">Request a scraper</a></li>
+		<li><a href="{% url market_solicitation %}">Request data</a></li>
 		<li><a href="{% url profiles_edit_profile %}">Edit your profile</a></li>
 		<li><a href="{% url profiles_profile_detail user.username %}">View your profile</a></li>
 	</ul>
 
-    <h3>ScraperMart - latest requests</h3>
+    <h3>Latest data requested</h3>
     <ul>
     {% for solicitation in solicitations %}
         <li>
