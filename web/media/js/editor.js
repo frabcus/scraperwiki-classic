@@ -15,6 +15,7 @@ $(document).ready(function() {
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
+    var cookieOptions = { path: '/editor', expires: 90};    
 
     //constructor functions
     setupCodeEditor();
@@ -25,7 +26,8 @@ $(document).ready(function() {
     setupToolbar();
     setupDetailsForm();
     setupResizeEvents();
-    setupKeygrabs();   
+    setupKeygrabs();
+    showIntro();
 
     //setup code editor
     function setupCodeEditor(){
@@ -214,6 +216,14 @@ $(document).ready(function() {
             showPopup('meta_form');
             return false;
         });
+
+    }
+    
+    function showIntro(){
+        //if($.cookie('scraperwiki.editor.intro') == null){
+            showPopup('popup_intro');
+        //}
+        $.cookie('scraperwiki.editor.intro', 1, cookieOptions);                    
 
     }
 

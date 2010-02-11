@@ -77,7 +77,7 @@ span.hiddenfields { margin-left:10px; }
 .editor_output .info {position:relative; height:100%; font-family:monaco, courier, monospace; font-size:12px;
     background:#fff;}    
 
-
+.editor_output .info {clear:left;}
 .editor_output .info div.output {height:100%;  width:100%; position:relative;}
 .editor_output .info div.output div.output_content {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
 .editor_output .info #output_data {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
