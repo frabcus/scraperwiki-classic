@@ -89,43 +89,51 @@ class Scraper(models.Model):
         into the cryptically named vc.py module
         """
       
-    # if the scraper doesn't exist already give it a short name (slug)
-    if self.short_name:
-        self.short_name = util.SlugifyUniquely(self.short_name, 
-                                               Scraper, 
-                                               slugfield='short_name', 
-                                               instance=self)
-    else:
-        self.short_name = util.SlugifyUniquely(self.title, 
-                                               Scraper, 
-                                               slugfield='short_name', 
-                                               instance=self)
-
-    if self.created_at == None:
-        self.created_at = datetime.datetime.today()
-
+        # if the scraper doesn't exist already give it a short name (slug)
+        if self.short_name:
+            self.short_name = util.SlugifyUniquely(self.short_name, 
+                                                   Scraper, 
+                                                   slugfield='short_name', 
+                                                   instance=self)
+        else:
+            self.short_name = util.SlugifyUniquely(self.title, 
+                                                   Scraper, 
+                                                   slugfield='short_name', 
+                                                   instance=self)
+     
+        if self.created_at == None:
+            self.created_at = datetime.datetime.today()
+     
+                
+        if not self.guid:
+            import hashlib
+            guid = hashlib.md5("%s" % ("**@@@".join([
+                  self.short_name, 
+                  str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
+            self.guid = guid
+     
+        if self.__dict__.get('code'):
+            vc.save(self)
+            if commit:
+                # Publish the scraper & set it's publish date
+                self.published = True
+                if self.first_published_at == None:
+                    self.first_published_at = datetime.datetime.today()
+                vc.commit(self, message=message, user=user)
+                
+                # Log this commit in the history table
+                history = ScraperHistory()
+                history.scraper = self
+                history.message_key = "commit"
+                history.message_value = user.id
+                
+                
+                
+        #update meta data
+        self.update_meta()
             
-    if not self.guid:
-        import hashlib
-        guid = hashlib.md5("%s" % ("**@@@".join([
-              self.short_name, 
-              str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
-        self.guid = guid
-
-    if self.__dict__.get('code'):
-        vc.save(self)
-        if commit:
-            # Publish the scraper & set it's publish date
-            self.published = True
-            if self.first_published_at == None:
-                self.first_published_at = datetime.datetime.today()
-            vc.commit(self, message=message, user=user)
-  
-    #update meta data
-    self.update_meta()
-        
-    #do the parent save
-    super(Scraper, self).save()
+        #do the parent save
+        super(Scraper, self).save()
   
     def language(self):
         return "Python"
@@ -241,7 +249,25 @@ tagging.register(Scraper)
 
 
 class ScraperHistory(models.Model):
-    pass
+    """
+    Stores 'history' for a scraper.  History can be anything that relates to 
+    the scraper, such as when it was run, saved, committed etc.
+    
+    'message_key' is for storing diferent types of message.  
+
+    Suggected conventions are:
+        * 'run_success'
+        * 'run_fail'
+        * 'save'
+        * 'commit'
+    
+    """
+    scraper = models.ForeignKey(Scraper)
+    message_key = models.CharField(blank=False, max_length=100)
+    message_value = models.CharField(blank=True, max_length=5000)
+    meta = models.CharField(blank=True, max_length=1000)
+    message_level = models.IntegerField(blank=True, null=True)
+    datetime = models.DateTimeField(blank=False, default=datetime.datetime.now)
 
 
 class UserScraperRole(models.Model):
