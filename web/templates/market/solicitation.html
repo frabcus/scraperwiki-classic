@@ -42,7 +42,7 @@
     	        </li>
     	        <li class="{% if form.price.errors %}error{% endif %}">
             	    {{ form.price.label_tag }}
-            	    {{ form.price|safe}}<small>&dagger;</small>
+            	    {{ form.price|safe}}<small>&dagger; (<a href="{% url help %}">what's this?</a>)</small>    
         	        {% field_errors form.price %}
     	        </li>
             </ul>
