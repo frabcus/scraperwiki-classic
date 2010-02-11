@@ -107,7 +107,7 @@ span.hiddenfields { margin-left:10px; }
     z-index:110; position:absolute; top:0; width:86%; margin:5%; padding:2%;
     text-align:left; display:none; overflow:auto;}
 
-#popup_exception, #popup_text {background:#000!important; color:#089608;overflow-y: scroll; }
+#popup_exception, #popup_text {background:#000!important; color:#3cef3b;overflow-y: scroll; }
 #popup_exception h3, #popup_text h3 {border-bottom:solid 1px #089608; padding-bottom:0.7em;}
 #popup_exception pre, #popup_text pre {white-space: pre-wrap;white-space: -moz-pre-wrap;
     white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;}
