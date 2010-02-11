@@ -19,15 +19,7 @@ $(document).ready(function() {
 
     //constructor functions
     setupCodeEditor();
-    setupMenu();
-    setupOrbited();
-    setupTabs();
-    setupPopups();
-    setupToolbar();
-    setupDetailsForm();
-    setupResizeEvents();
-    setupKeygrabs();
-    showIntro();
+
 
     //setup code editor
     function setupCodeEditor(){
@@ -69,6 +61,16 @@ $(document).ready(function() {
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     onWindowResize();
                     pageIsDirty = false; // page not dirty at this point
+                    
+                    setupMenu();
+                    setupOrbited();
+                    setupTabs();
+                    setupPopups();
+                    setupToolbar();
+                    setupDetailsForm();
+                    setupResizeEvents();
+                    setupKeygrabs();
+                    showIntro();
                     
                 } 
           });        
