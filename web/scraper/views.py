@@ -30,12 +30,18 @@ def overview(request, scraper_short_name):
     
     scraper_tags = Tag.objects.get_for_object(scraper)
     
+    table = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=1)
+    data = zip(table['headings'], table['rows'][0])
+    has_data = len(table['rows']) > 0
+    
     return render_to_response('scraper/overview.html', {
         'scraper_tags' : scraper_tags,
         'selected_tab': 'overview', 
         'scraper': scraper, 
         'user_owns_it': user_owns_it, 
         'user_follows_it': user_follows_it,
+        'has_data': has_data,
+        'data': data,
         }, context_instance=RequestContext(request))
     
 def create(request):
