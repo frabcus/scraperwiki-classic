@@ -191,6 +191,7 @@ dl.terms dd {padding-left:0; margin-left:0; font-size:0.8em;}
 
 /* Highlight */
 span.highlight {background:#ffffaa; padding:0 0.4em;}
+div.highlight {background:#ffffd7; padding:1em; margin-bottom: 0.5em;}
 
 /* scraper lists */
 ul.scraper_list li {list-style-type:none; padding:0.2em 0.2em 1em 0.2em; border-bottom:dotted 1px #ccc;
