@@ -347,6 +347,9 @@ $(document).ready(function() {
         $('#output_console div').html('');    
         $('#output_sources div').html('');    
         $('#output_data table').html('');                    
+        $('.editor_output div.tabs li.console').removeClass('new');
+        $('.editor_output div.tabs li.data').removeClass('new');        
+        $('.editor_output div.tabs li.sources').removeClass('new');        
     }
 
     function reloadScraper(){

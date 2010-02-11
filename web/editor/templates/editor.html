@@ -114,9 +114,7 @@
 
             {# Controls #}
             <div class="editor_controls">
-                <input type="button" class="save  button" name="action" value="Save draft" title="Save draft version (Ctrl + S)" />  
                 <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
-                <input type="button" value="Reload" name="reload" id="reload" title="Reload the latest saved version"/>
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
                 <div class="right">
@@ -125,6 +123,7 @@
                     {% else %}
                         <a id="aCloseEditor" href="{% url frontpage %}" title="Close editor">Close editor</a>                
                     {% endif %}
+                    &nbsp;<input type="button" class="save  button" name="action" value="Save draft" title="Save draft version (Ctrl + S)" />&nbsp;
                     <input type="button" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>            
                 </div>
             </div>
