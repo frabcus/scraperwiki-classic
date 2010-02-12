@@ -10,7 +10,8 @@
             <img src="{{ MEDIA_URL }}images/intro_slides/intro1.png" />
             <img src="{{ MEDIA_URL }}images/intro_slides/intro2.png" />
             <img src="{{ MEDIA_URL }}images/intro_slides/intro3.png" />
-            <img src="{{ MEDIA_URL }}images/intro_slides/intro4.png" />                                    
+            <img src="{{ MEDIA_URL }}images/intro_slides/intro4.png" />  
+            <img src="{{ MEDIA_URL }}images/intro_slides/intro5.png" />                                                
         </div>
         <div class="slide_nav"></div>
     </div>
@@ -32,7 +33,7 @@
     		    {% for scraper in featured_scrapers %}    
                     <div class="scroll_item">
                         <h4>
-                            <a href='{% url scraper_data scraper.short_name %}'>{{scraper.title}}</a>
+                            <a href='{% url scraper_overview scraper.short_name %}'>{{scraper.title}}</a>
                             {% if scraper.has_geo %}
                                 <a href="{% url scraper_data scraper.short_name %}">                                    
                                     <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
@@ -65,11 +66,11 @@
         <img src="{{MEDIA_URL}}/images/screenshots/editor.png"/>              
         <h2>Tools for developers ...</h2>            
         <ul>
-            <li>In browser code editor, write debug and run Python in your browser <small>(more languages coming soon!)</small></li>
+            <li>Online code editor, write debug and run Python in your browser <small>(more languages coming soon!)</small></li>
             <li>ScraperWiki code libraries make scraping, parsing and geocoding simple</li>
             <li>Store data direct to the datastore</li>
             <li>API access to data in XML, JSON, PHP, YAML or CSV</li>
-            <li>Schedule your scrapers to re-run so your data is always up-to-date</li>
+            <li>Schedule scrapers to re-run so your data is always up-to-date</li>
             <li>Email alerts if your scrapers fail</li>
             <li>Built in source control</li>
         </ul>             

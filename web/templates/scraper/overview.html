@@ -6,39 +6,50 @@
 <div class="content col left">
     <h3>Description</h3>
     <p>{{ scraper.description }}</p>
+    {% if has_data %}
+        <h3>Example data</h3>
+        <table class="raw_data">
+            {% for heading, value in data %}
+                <tr>
+                    <td>{{heading}}</td>
+                    <td>{{value}}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+    {% endif %}
+
 </div>
 
 <div class="content col right">
+    <div class="metadata">
+        <dl>
+          <dt>Created by:</dt>
+          <dd><a href="{% url profiles_profile_detail scraper.owner.username %}">
+          {% load gravatar %} {% show_gravatar scraper.owner 'small' %}&nbsp;{{scraper.owner.username}}</a></dd>
+          <dt>Data licence:</dt>
+          <dd>{{scraper.license|default:"&nbsp;"}}</dd>
+          <dt>Scraper created:</dt><dd>{{ scraper.created_at|date:"D j M Y, P" }}</dd>
+          <dt>Last run:</dt>
+          <dd>{{scraper.last_run|naturalday|default:"never"|title}}</dd>
+          <dt>Records:</dt>
+          <dd>{{ scraper.record_count }}</dd>
+          <dt>API short name:</dt>
+          <dd>{{scraper.short_name}}</dd>
+        <dt>Language:</dt>
+        <dd>{{scraper.language}}</dd>
+        <dt>Tags:</dt>
+        {% if scraper.published %}
+            <dd>{% for tag in scraper_tags %}<a href="{% url tag tag %}">{{ tag }}</a> {% endfor %}</dd>
+        {% else %}
+            <dd>{% for tag in scraper_tags %}{{ tag }} {% endfor %}</dd>
+        {% endif %}
+        </dl>
+    </div>
     <h4>Recent activity</h4>
-    {% sparkline scraper.scraper_sparkline_csv 'medium' %}    
-  <dl>
-      <dt>Created by:</dt>
-      <dd><a href="{% url profiles_profile_detail scraper.owner.username %}">
-      {% load gravatar %} {% show_gravatar scraper.owner 'small' %}&nbsp;{{scraper.owner.username}}</a></dd>
-	  <dt>Data licence:</dt>
-	  <dd>{{scraper.license|default:"&nbsp;"}}</dd>
-	  <dt>Scraper created:</dt><dd>{{ scraper.created_at|date:"D j M Y, P" }}</dd>
-	  <dt>Last run:</dt>
-	  <dd>{{scraper.last_run|naturalday|default:"never"|title}}</dd>
-	  <dt>Records:</dt>
-	  <dd>{{ scraper.record_count }}</dd>
-	  <dt>API short name:</dt>
-	  <dd>{{scraper.short_name}}</dd>
-    <dt>Language:</dt>
-    <dd>{{scraper.language}}</dd>
-    <dt>Tags:</dt>
-    {% if scraper.published %}
-        <dd>{% for tag in scraper_tags %}<a href="{% url tag tag %}">{{ tag }}</a> {% endfor %}</dd>
-    {% else %}
-        <dd>{% for tag in scraper_tags %}{{ tag }} {% endfor %}</dd>
-    {% endif %}
-  </dl>
-
-  <div class="tab_tools">
-      <form method="get" action="{% url editor scraper.short_name %}">
-          <input type="submit" value="Edit scraper" />
-      </form>
-  </div>
+    <p>
+        {% sparkline scraper.scraper_sparkline_csv 'medium' %}    
+    </p>
 </div>
 <br class="clear"/>
 {% endblock %}

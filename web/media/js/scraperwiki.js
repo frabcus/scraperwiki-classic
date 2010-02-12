@@ -243,7 +243,7 @@ function setupIntroSlideshow(){
     $('.slide_show').cycle({
 		fx: 'fade',
         speed:   1000, 
-        timeout: 8000, 
+        timeout: 7000, 
         next:   '.slide_show', 
         pause:   1,
         pager: '.slide_nav',

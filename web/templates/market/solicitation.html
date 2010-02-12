@@ -1,7 +1,8 @@
 {% extends "frontend/base.html" %}
 {% load formhelper %}
+{% load gravatar %}
 
-{% block title %}Scraperwiki front page{% endblock %}
+{% block title %}Request a dataset{% endblock %}
 
 {% block errors %}
     {% if form.errors %}
@@ -14,12 +15,14 @@
 
 {% block content %}
     <div class="page_title">
-        <h1>Request a scraper</h1>
+        <h1>Request a dataset</h1>
         <p>
-            If you know of an interesting source of data for someone to scrape, please add it here
+             Ask the community or ScraperWiki to scrape data
         </p>
     </div>
     <div class="content col left">
+	<h2>Ask the community</h2>
+	<p>If you've found some interesting data, or you want something specific scraped, add it here. If you're willing to pay, set a bounty</p>
     	<form method="post" action=".">
     	    <ul class="form">
     	        <li class="{% if form.title.errors %}error{% endif %}">
@@ -39,19 +42,53 @@
     	        </li>
     	        <li class="{% if form.price.errors %}error{% endif %}">
             	    {{ form.price.label_tag }}
-            	    {{ form.price|safe}}<small>&dagger;</small>
+            	    {{ form.price|safe}}<small>&dagger; (<a href="{% url help %}">what's this?</a>)</small>    
         	        {% field_errors form.price %}
     	        </li>
             </ul>
             <p>
 <small>* Required field</small><br/>
-                <small>&dagger; When you pay the bounty for this scraper there is an additional charge of {{ market_bounty_charge }}%</small>
+                <small>&dagger; For non-zero bounties an additional charge of {{ market_bounty_charge }}% will be added</small>
             </p>
-    		<input type="submit" name="login" value="Submit" />
+    		<input type="submit" class="button" name="login" value="Add your request" />
     	</form>
     </div>
 
     <div class="content col right">
-        &nbsp;
+	    <div class="highlight">
+		<h2>Private scrapers</h2>
+       <p> On the trail of a story? Want to keep your data secret for now?</p>
+       <p>Ask ScraperWiki - we may be able to write you a private scraper.</p>
+
+			<form method="get" action="{% url contact_form %}">
+	    		<input type="submit" class="button" name="login" value="Request a private scraper" />
+	    	</form>
+</div>
+
+		<h3>Latest requested datasets</h3>
+		<ul>
+		    {% for solicitation in recent_solicitations %}
+		        <li>
+		    	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
+		    	    by
+		            {% show_gravatar solicitation.user_created 'small' %} 	
+		            <a href='{% url profiles_profile_detail solicitation.user_created %}'>
+		                {{ solicitation.user_created.username }}
+		            </a>
+		            {% if solicitation.has_bounty %}
+		                <span class="bounty">
+		                    <a href="{% url market_view solicitation.id %}">
+		                        &pound;{{solicitation.price}} bounty
+		                    </a>
+		                </span>
+		            {% endif %}
+		    	</li>
+			{% endfor %}
+		</ul>
+			<p class="more">
+			   <a href="{% url market_list %}">Browse all &raquo;</a>
+			</p>
     </div>
+
+<br class="clear" />
 {% endblock %}

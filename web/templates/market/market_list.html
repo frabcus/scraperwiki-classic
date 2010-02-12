@@ -2,26 +2,44 @@
 
 {% block title %}Requested scrapers{% endblock %}
 
+{% load gravatar %}
+
 {% block content %}
 <div class="page_title">
-    <h1>ScraperMart - {{status.display_name}}</h1>
+    <h1>Requested scrapers - {{status.display_name}}</h1>
     <p>
         Datasets people have suggested scraping
     </p>
-    <ul class="filter_list">
-        <li><a href="{% url market_list %}">Open</a></li>
-        <li><a href="{% url market_list_filter 'pending' %}">Pending</a></li>
-        <li><a href="{% url market_list_filter 'completed' %}">Completed</a></li>
-    </ul>
 </div>
 <div class="content">
+	
+	<div class="page_tabs">
+        <ul>
+            <li{% ifequal status.display_name "Open" %} class="selected"{% endifequal %}>
+                <a href="{% url market_list %}">Open</a>
+            </li>
+                <li{% ifequal status.display_name "Pending" %} class="selected"{% endifequal %}>
+                    <a href="{% url market_list_filter 'pending' %}">Pending</a>
+                </li>
+            <li{% ifequal status.display_name "Completed" %} class="selected"{% endifequal %}>
+                <a href="{% url market_list_filter 'completed' %}">Completed</a>
+            </li>
+        </ul>
+        
+    </div>
     <ul>
     {% for solicitation in solicitations %}
         <li>
     	    <h3>
     	        <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>{% if solicitation.has_bounty %} <span class="bounty"><a href="{% url market_view solicitation.id %}">&pound;{{solicitation.price}} bounty</a></span>{% endif %}
     	    </h3>
-    	    <h4>Added by {{solicitation.user_created.username}} ({{solicitation.status.display_name}})</h4>
+
+    	    <p><em>Added by
+            {% show_gravatar solicitation.user_created 'small' %} 	
+            <a href='{% url profiles_profile_detail solicitation.user_created %}'>
+                {{ solicitation.user_created.username }}
+            </a></em></p>
+
     	    <p>{{solicitation.details}}</p>
     	</li>
 	{% endfor %}
