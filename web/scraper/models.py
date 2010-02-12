@@ -124,7 +124,7 @@ class Scraper(models.Model):
                 # Log this commit in the history table
                 history = ScraperHistory()
                 history.scraper = self
-                history.message_key = "commit"
+                history.message_type = "commit"
                 history.user = User.objects.get(id=user)
                 history.save()
                 
@@ -254,7 +254,7 @@ class ScraperHistory(models.Model):
     Stores 'history' for a scraper.  History can be anything that relates to 
     the scraper, such as when it was run, saved, committed etc.
     
-    'message_key' is for storing diferent types of message.  
+    'message_type' is for storing diferent types of message.  
 
     Suggected conventions are:
         * 'run_success'
@@ -263,7 +263,7 @@ class ScraperHistory(models.Model):
     
     """
     scraper = models.ForeignKey(Scraper)
-    message_key = models.CharField(blank=False, max_length=100)
+    message_type = models.CharField(blank=False, max_length=100)
     message_value = models.CharField(blank=True, max_length=5000)
     meta = models.CharField(blank=True, max_length=1000)
     message_level = models.IntegerField(blank=True, null=True)

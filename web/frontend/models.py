@@ -4,15 +4,19 @@ from django.contrib.auth.models import User
 # Create your models here.
 class UserProfile(models.Model):
     """
-	    This model holds the additional fields to be associated with a user in the system
-
-        the alerts_last_sent and alert_frequency field hold when a notification email was last sent to this user
-        and the frequency of these messages(in seconds) as requested by the user.
-        
-        Note, where any other model wishes to link to a user or reference a user, they should link to the
-        user profile (this class), rather than directly to the user. this ensures that if we wish to change
-        the definition of user, we only have to alter the UserProfile class to have everything continue to work
-        instead of refactoring every place that connects to a resource/class outside of this application.
+    This model holds the additional fields to be associated with a user in the
+    system
+    
+    The alerts_last_sent and alert_frequency field hold when a notification
+    email was last sent to this user and the frequency of these messages(in
+    seconds) as requested by the user.
+    
+    Note, where any other model wishes to link to a user or reference a user,
+    they should link to the user profile (this class), rather than directly to
+    the user. this ensures that if we wish to change the definition of user,
+    we only have to alter the UserProfile class to have everything continue to
+    work instead of refactoring every place that connects to a resource/class
+    outside of this application.
     """
     user             = models.ForeignKey(User, unique=True)
     bio              = models.TextField(blank=True)
@@ -24,6 +28,13 @@ class UserProfile(models.Model):
         return ('profiles_profile_detail', (), { 'username': self.user.username })
     get_absolute_url = models.permalink(get_absolute_url)        
         
+class UserAlersTypes(models.Model):
+    """
+    
+    """
+    user = models.ForeignKey(User)
+    message_type = models.CharField(blank=True, max_length=100)
+    
 # models related to user roles
 
 class UserRoleManager(models.Manager):
