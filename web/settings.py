@@ -77,7 +77,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
   'frontend.context_processors.template_settings',
 )
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -96,13 +96,22 @@ INSTALLED_APPS = (
   	'market',
   	'piston',      # needs 'django-piston' and 'phpserialize'
   	'api',
-    #'debug_toolbar',
   	'django_notify',
   	'tagging',
   	'django.contrib.humanize',
   	'paypal.standard.ipn',
-)
+]
 
+# This sort of hack will go when we use proper global settings
+try:
+    # For the excellent (reccomended) devserver: 
+    #   http://github.com/dcramer/django-devserver/blob/master/README.rst
+    # install with pip, and run with:
+    #   python manage.py rundevserver
+    import devserver
+    INSTALLED_APPS.append('devserver')
+except:
+    pass
 
 ACCOUNT_ACTIVATION_DAYS = 14
 

@@ -1,7 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
+
+class AlertTypes(models.Model):
+    """
+    Many to many relationship for defining what type of alerts a user will get
+    """
+    name = models.CharField(blank=True, max_length=100)
+    
+    def __unicode__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name_plural = "Alert Types"
+        verbose_name = "Alert Type"
+
 class UserProfile(models.Model):
     """
     This model holds the additional fields to be associated with a user in the
@@ -20,27 +33,27 @@ class UserProfile(models.Model):
     """
     user             = models.ForeignKey(User, unique=True)
     bio              = models.TextField(blank=True)
-    created_at       = models.DateTimeField(auto_now_add = True)
-    alerts_last_sent = models.DateTimeField(auto_now_add = True)
+    created_at       = models.DateTimeField(auto_now_add=True)
+    alerts_last_sent = models.DateTimeField(auto_now_add=True)
     alert_frequency  = models.IntegerField(null=True, blank=True)
+    alert_types      = models.ManyToManyField(AlertTypes)
+    
+    def __unicode__(self):
+        return unicode(self.user)
 
+    class Meta:
+        ordering = ('-created_at',)
+    
     def get_absolute_url(self):
         return ('profiles_profile_detail', (), { 'username': self.user.username })
     get_absolute_url = models.permalink(get_absolute_url)        
         
-class UserAlersTypes(models.Model):
-    """
-    
-    """
-    user = models.ForeignKey(User)
-    message_type = models.CharField(blank=True, max_length=100)
-    
-# models related to user roles
 
+# models related to user roles
 class UserRoleManager(models.Manager):
     """
-        This manager is used to decorate the collection objects on the user model
-        so as to fascilitate the easy managing of user to user relationships.    
+    This manager is used to decorate the collection objects on the user model
+    so as to fascilitate the easy managing of user to user relationships.
     """
     use_for_related_fields = True
     

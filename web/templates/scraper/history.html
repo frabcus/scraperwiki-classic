@@ -1,0 +1,30 @@
+{% extends "scraper/scraper_base.html" %}
+{% load humanize %}
+{% block tab %}
+<table>
+  <tr>
+    <th>Date</th>
+    <th>Message</th>
+  </tr>
+  {% for item in history %}
+    <tr>
+      <td>
+        {{ item.datetime|naturalday|title }}
+      </td>
+      <td>
+          {% ifequal item.message_key  "commit" %}
+            Scraper committed
+          {% endifequal %}
+          {% if item.user %}
+            by <a href="{% url profiles_profile_detail scraper.owner.username %}">
+            {% load gravatar %} {% show_gravatar scraper.owner 'small' %}&nbsp;{{scraper.owner.username}}</a>
+          {% endif %}
+        
+        </td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}
+
+{% block run_script %}
+{% endblock %}
