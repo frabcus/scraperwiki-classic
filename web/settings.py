@@ -109,9 +109,6 @@ ACCOUNT_ACTIVATION_DAYS = 14
 # tell Django that the frontent user_profile model is to be attached to the user model in the admin side.
 AUTH_PROFILE_MODULE = 'frontend.UserProfile'
 
-# Cal Henderson - youtube presentation on Django
-# rsvg-convert 
-
 INTERNAL_IPS = ('127.0.0.1',)
 
 DEBUG_TOOLBAR_CONFIG = {

@@ -166,6 +166,26 @@ def comments (request, scraper_short_name):
         }, context_instance=RequestContext(request))
 
 
+def history(request, scraper_short_name):
+
+    user = request.user
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    user_owns_it = (scraper.owner() == user)
+    user_follows_it = (user in scraper.followers())
+    
+    history = models.ScraperHistory.objects.filter(scraper=scraper).order_by('-datetime')
+    # scraper_tags = Tag.objects.get_for_object(scraper)
+
+    return render_to_response('scraper/history.html', {
+        'selected_tab': 'history', 
+        'scraper': scraper,
+        'history': history,
+        'user_owns_it': user_owns_it, 
+        'user_follows_it': user_follows_it,
+        }, context_instance=RequestContext(request))
+
+
+
 def show(request, scraper_short_name, selected_tab = 'data'):
     user = request.user
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
