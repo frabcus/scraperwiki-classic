@@ -137,7 +137,7 @@ div.page_tab_body {clear:left;}
 
 /* meta data */
 div.metadata {background:#ffffd7; padding:0.8em 1em;margin-bottom:1.8em;}
-div.metadata dl {padding:0; margin:0;}
+div.metadata dl {padding:0; margin:0; line-height:1.5em;}
 div.metadata dt {float:left; font-weight:normal; font-style:italic;}
 div.metadata dd {position:relative; left:1em;}
 div.metadata dt, div.metadata dd {padding:0; margin:0;}

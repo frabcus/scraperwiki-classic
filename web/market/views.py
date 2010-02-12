@@ -17,8 +17,8 @@ from market import models
 from market import forms
 from payment.models import Invoice
 from scraper.models import Scraper
-
-@login_required
+    
+    
 def solicitation (request):
 
     form = forms.SolicitationForm()    
@@ -26,15 +26,28 @@ def solicitation (request):
         form = forms.SolicitationForm(data=request.POST, files=request.FILES)
         if form.is_valid():
             solicitation = form.save(commit=False)
-            solicitation.user_created = request.user
-            solicitation.save()
-            return HttpResponseRedirect(reverse('market_list'))
+            if not request.user.is_authenticated():
+                request.notifications.add("You need to sign in or create an account - don't worry, your request is safe")                
+                request.session['SolicitationDraft'] = solicitation
+                return HttpResponseRedirect(reverse('login') + "?next=%s" % reverse('market_list'))    
+            else:
+                solicitation.user_created = request.user
+                solicitation.save()
+                return HttpResponseRedirect(reverse('market_list'))
     status = models.SolicitationStatus.objects.get(status='open')
     recent_solicitations = models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')[:5]  
     return render_to_response('market/solicitation.html', {'form': form, 'recent_solicitations' : recent_solicitations, 'market_bounty_charge': settings.MARKET_BOUNTY_CHARGE }, context_instance = RequestContext(request))
 
 def market_list (request, mode='open'):
-    #get all scrapers not marked deleted or 
+
+    #TODO: move this to a seperate view
+    # save any items in the session
+    session_solicitation_draft = request.session.get('SolicitationDraft', None)
+    if session_solicitation_draft:
+        session_solicitation_draft.user_created = request.user
+        session_solicitation_draft.save()
+
+    #get all scrapers not marked deleted or
     status = models.SolicitationStatus.objects.get(status=mode)
     solicitations = models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')    
     return render_to_response('market/market_list.html', {'solicitations': solicitations, 'status': status}, context_instance = RequestContext(request))
