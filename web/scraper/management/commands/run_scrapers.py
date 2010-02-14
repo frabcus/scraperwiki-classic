@@ -9,26 +9,64 @@ except:
 
 import subprocess
 
-from scraper.models import Scraper
+from scraper.models import Scraper, ScraperHistory
+import frontend
 import settings
 import datetime
-
+import time
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--short_name', '-s', dest='short_name',
-        help='Short name of the scraper to run'),
+                        help='Short name of the scraper to run'),
+        make_option('--verbose', dest='verbose', action="store_true",
+                        help='Print lots'),
     )
     help = 'Run a scraper, or all scrapers.  By default all scrapers that are published are run.'
     
     
-    def run_scraper(self, scraper):
+    def run_scraper(self, scraper, options):
         guid = scraper.guid
         code = scraper.committed_code()
         runner_path = "%s/Runner.py" % settings.FIREBOX_PATH
-        runner = subprocess.Popen([runner_path, '-g', guid], shell=False, stdin=subprocess.PIPE)
-        runner.communicate(code)
+        failed = False
+        
+        start = time.time()
+        runner = subprocess.Popen(
+            [runner_path, '-g', guid], 
+            shell=False, 
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE)
+        runner.stdin.write(code)
+        runner.stdin.close()
+        for line in runner.stdout:
+            if options.get('verbose'):
+                print line
+            try:
+                message = json.loads(line)
+                if message['message_type'] == 'fail' or message['message_type'] == 'exception':
+                    failed = True
+            except:
+                pass
+        
+        elapsed = (time.time() - start)
+        if options.get('verbose'): print elapsed
+        
+        if failed:
+            alert_type = 'run_fail'
+        else:
+            alert_type = 'run_success'
 
+        
+        # Log this run event to the history table
+        history = ScraperHistory()
+        history.scraper = scraper
+        history.message_type = alert_type
+        history.message_value = elapsed
+        history.save()
+        
+        # Update the scrapers meta information
+        scraper.update_meta()
 
     def handle(self, **options):
         if options['short_name']:
@@ -39,13 +77,13 @@ class Command(BaseCommand):
             scrapers = Scraper.objects.filter(published=True)
             for scraper in scrapers:
                 try:
-                    self.run_scraper(scraper)
+                    self.run_scraper(scraper, options)
                     scraper.update_meta()
                     scraper.last_run = datetime.datetime.now()
                     scraper.save()
-                except:
+                except Exception, e:
                     print "Error running scraper: " + scraper.title
-
+                    print e
 
         
             

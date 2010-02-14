@@ -12,7 +12,7 @@ from django.db.models.signals import post_save
 from registration.signals import user_registered
 
 import tagging
-import frontend
+from frontend import models as frontendmodels
 
 import template
 import util
@@ -64,9 +64,7 @@ class Scraper(models.Model):
     disabled          = models.BooleanField()
     deleted           = models.BooleanField()
     status            = models.CharField(max_length=10)
-    users             = models.ManyToManyField(
-                                                User, 
-                                                through='UserScraperRole')
+    users             = models.ManyToManyField(User, through='UserScraperRole')
     guid              = models.CharField(max_length=1000)
     published         = models.BooleanField(default=False)
     first_published_at   = models.DateTimeField(null=True)
@@ -123,10 +121,9 @@ class Scraper(models.Model):
                 vc.commit(self, message=message, user=user)
                 
                 # Log this commit in the history table
-                alert_type = frontend.models.AlertTypes.objects.get(name='commit')
                 history = ScraperHistory()
                 history.scraper = self
-                history.message_type = alert_type
+                history.message_type = 'commit'
                 history.user = User.objects.get(id=user)
                 history.save()
                 
@@ -265,7 +262,7 @@ class ScraperHistory(models.Model):
     
     """
     scraper = models.ForeignKey(Scraper)
-    message_type = models.ForeignKey(frontend.models.AlertTypes)
+    message_type = models.CharField(blank=False, max_length=100)
     message_value = models.CharField(blank=True, max_length=5000)
     meta = models.CharField(blank=True, max_length=1000)
     message_level = models.IntegerField(blank=True, null=True, default=0)

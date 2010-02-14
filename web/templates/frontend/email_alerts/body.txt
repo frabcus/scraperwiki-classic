@@ -1,0 +1,29 @@
+{% comment %}
+  Format the email.  This is plain text, so we have to have stupidly long 
+  lines to make it look nice.  Sorry about that.
+  
+  Also, indenting here is carried over to the email, so have a care with that 
+  too.
+  
+  TODO: Make better ;)
+  
+{% endcomment %}
+Hi {{ user.user.username|title }}, 
+
+You are getting this email because you signed up to get email alerts at http://{{ site.domain }}
+
+You can edit these alerts at http://{{ site.domain }}{% url profiles_edit_profile %}
+
+{% for scraper_type, alerts in all_alerts.items  %}
+{% ifequal scraper_type "contribute"  %}
+Scrapers I'm contributing to
+============================
+{% endifequal %}
+  {% for alert in alerts %}
+  {% ifchanged %}{{ alert.scraper }}
+  --------------------------
+  {% endifchanged %} 
+    {% ifchanged %}{{ alert.datetime|date:"M y" }}{% endifchanged %} 
+    {% ifequal alert.message_type "run_fail" %}Scraper failed to run{% endifequal %}{% ifequal alert.message_type "commit" %}{{ alert.message_value }} Updated the scraper{% endifequal %}{% ifequal alert.message_type "run_success" %}Scraper Ran, taking {{ alert.message_value }}{% endifequal %}
+  {% endfor %}
+{% endfor %}

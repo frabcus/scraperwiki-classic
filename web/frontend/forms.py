@@ -1,7 +1,7 @@
 import django.forms
 from django.conf import settings
-from django.forms import ModelForm, ChoiceField
-from frontend.models import UserProfile
+from django import forms
+from frontend.models import UserProfile, AlertTypes
 from contact_form.forms import ContactForm
 from registration.forms import RegistrationForm
 from django.utils.translation import ugettext_lazy as _
@@ -11,13 +11,22 @@ from django.contrib.auth.forms import AuthenticationForm
 
 #from django.forms.extras.widgets import Textarea
 
-class UserProfileForm (ModelForm):
+class UserProfileForm (forms.ModelForm):
+    alert_frequency = forms.ChoiceField(required=False, choices = (
+                                ('', 'Never'), 
+                                (3600*24, 'Once a day'),
+                                (3600*24*7, 'Once a week'),
+                                (3600*24*7*2, 'Once a week'),))
 
-    alert_frequency = ChoiceField(required=False, choices = ((0, 'Instant'), (3600, 'Once an hour')))
-
+    options = []
+    for item in AlertTypes.objects.all():
+        options.append((item.pk, item.label))
+        
+    alert_types = forms.MultipleChoiceField(options, widget=forms.CheckboxSelectMultiple())
+    
     class Meta:
         model = UserProfile
-        fields = ('bio',)
+        fields = ('bio','alert_frequency', 'alert_types')
 
 class scraperContactForm(ContactForm):
   subject_dropdown = django.forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request a private scraper'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))

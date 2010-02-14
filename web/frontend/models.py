@@ -4,9 +4,25 @@ from django.contrib.auth.models import User
 
 class AlertTypes(models.Model):
     """
-    Many to many relationship for defining what type of alerts a user will get
+    Model defining what type of alerts a user will get.
+    
+    `name`
+        should match the 'message_type' in scraper.models.ScraperHistory
+    `label`
+        is the default text to be displaied on the user profile form. This may
+        not be the best way of doing it, but it does make sure the form
+        options are correct.
+    `applies_to`
+        is for allowing users to get alerts from the history table for
+        different types of scrapers. For example, we want to distinguish
+        between alerts for scrapers one owns and scrapers one 'watches' (when
+        that feature is availible). By default there is no distinction between
+        'owning' and 'contributing'.
     """
+        
     name = models.CharField(blank=True, max_length=100)
+    label = models.CharField(blank=True, max_length=500)
+    applies_to = models.CharField(blank=False, max_length=100)
     
     def __unicode__(self):
         return self.name
@@ -34,7 +50,7 @@ class UserProfile(models.Model):
     user             = models.ForeignKey(User, unique=True)
     bio              = models.TextField(blank=True)
     created_at       = models.DateTimeField(auto_now_add=True)
-    alerts_last_sent = models.DateTimeField(auto_now_add=True)
+    alerts_last_sent = models.DateTimeField()
     alert_frequency  = models.IntegerField(null=True, blank=True)
     alert_types      = models.ManyToManyField(AlertTypes)
     
@@ -78,8 +94,8 @@ class UserToUserRole(models.Model):
 	
     objects = UserRoleManager()
     
-    from_user = models.ForeignKey(User, related_name = 'to_user')
-    to_user   = models.ForeignKey(User, related_name = 'from_user')
+    from_user = models.ForeignKey(User, related_name='to_user')
+    to_user   = models.ForeignKey(User, related_name='from_user')
     role      = models.CharField(max_length = 100)
 
 # Signal Registrations
@@ -89,7 +105,7 @@ from registration.signals import user_registered
 
 def create_user_profile(sender, **kwargs):
     user = kwargs['user']
-    profile = UserProfile(user = user, alert_frequency = 60*60*24)
+    profile = UserProfile(user=user, alert_frequency=60*60*24)
     profile.save()
 
 user_registered.connect(create_user_profile)

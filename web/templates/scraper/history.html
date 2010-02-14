@@ -9,12 +9,22 @@
   {% for item in history %}
     <tr>
       <td>
-        {{ item.datetime|naturalday|title }}
+        {{ item.datetime }}
       </td>
       <td>
-          {% ifequal item.message_key  "commit" %}
+
+          {% ifequal item.message_type|lower "commit" %}
             Scraper committed
           {% endifequal %}
+
+          {% ifequal item.message_type|lower "run_fail" %}
+            Scraper run failed after {{ item.message_value|floatformat }}
+          {% endifequal %}
+
+          {% ifequal item.message_type|lower "run_success" %}
+            Scraper run success after {{ item.message_value|floatformat }} seconds
+          {% endifequal %}
+          
           {% if item.user %}
             by <a href="{% url profiles_profile_detail scraper.owner.username %}">
             {% load gravatar %} {% show_gravatar scraper.owner 'small' %}&nbsp;{{scraper.owner.username}}</a>

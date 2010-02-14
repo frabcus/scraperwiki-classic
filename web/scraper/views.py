@@ -182,7 +182,6 @@ def history(request, scraper_short_name):
     user_follows_it = (user in scraper.followers())
     
     history = models.ScraperHistory.objects.filter(scraper=scraper).order_by('-datetime')
-    # scraper_tags = Tag.objects.get_for_object(scraper)
 
     return render_to_response('scraper/history.html', {
         'selected_tab': 'history', 
