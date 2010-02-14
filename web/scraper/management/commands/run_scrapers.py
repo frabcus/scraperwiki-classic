@@ -64,9 +64,6 @@ class Command(BaseCommand):
         history.message_type = alert_type
         history.message_value = elapsed
         history.save()
-        
-        # Update the scrapers meta information
-        scraper.update_meta()
 
     def handle(self, **options):
         if options['short_name']:
@@ -78,6 +75,7 @@ class Command(BaseCommand):
             for scraper in scrapers:
                 try:
                     self.run_scraper(scraper, options)
+                    # Update the scrapers meta information                    
                     scraper.update_meta()
                     scraper.last_run = datetime.datetime.now()
                     scraper.save()
