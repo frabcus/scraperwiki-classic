@@ -115,4 +115,4 @@ class Solicitation(models.Model):
             raise Exception("Unable to find a published scraper (for this user) to add to this solicitation")
    
     def __unicode__(self):
-        return self.title + "(" + str(self.price) + ")"
+        return  return "%s (%s)" % (self.title, self.price)
