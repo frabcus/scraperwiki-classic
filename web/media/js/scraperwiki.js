@@ -269,3 +269,8 @@ function setupIntroSlideshow(){
         autostop: 0
 	});
 }
+
+function setupDataViewer(){
+    $('.raw_data').flexigrid({height:250});    
+    
+}
