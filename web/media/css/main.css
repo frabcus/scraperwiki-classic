@@ -159,7 +159,6 @@ br.clear {clear:both;}
         padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;line-height: 1.1em;}
 
 .data_viewer {position:relative;}
-.data_viewer .flexigrid th, .data_viewer .flexigrid td {width:120px;}
 
 .info_unpublished {display:block; height:97%; width:100%; text-align:center; padding-top:3%;
     position:absolute; top:0; left:0; font-weight:bold; color:#ccc; text-transform:uppercase;
