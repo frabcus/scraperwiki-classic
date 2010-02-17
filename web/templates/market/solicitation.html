@@ -40,6 +40,12 @@
             	    {{ form.details }}
         	        {% field_errors form.details %}
     	        </li>
+    	        <li class="{% if form.tags.errors %}error{% endif %}">
+            	    {{ form.tags.label_tag }}
+            	    {{ form.tags }}
+        	        {% field_errors form.tags %}
+        	        <small class="hint taghint">e.g. europe<em>,</em> grants<em>,</em> transport</small>
+    	        </li>
     	        <li class="{% if form.price.errors %}error{% endif %}">
             	    {{ form.price.label_tag }}
             	    {{ form.price|safe}}<small>&dagger; (<a href="{% url help %}">what's this?</a>)</small>    

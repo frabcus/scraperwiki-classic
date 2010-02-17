@@ -171,6 +171,7 @@ br.clear {clear:both;}
 ul.form {padding:0; margin:0;}
 ul.form li {padding:0; margin:0; list-style-type:none;}
 ul.form li label {display:block; float:left; width:10em;}
+ul.form li small.taghint em {font-size:2.5em;line-height:0.5em;}
 fieldset {padding:0; margin:0; border:none;}
 
 input.button {font-size:1em;
