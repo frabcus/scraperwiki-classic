@@ -21,13 +21,12 @@ You can edit these alerts at http://{{ site.domain }}{% url profiles_edit_profil
     Scrapers I'm contributing to
     ============================
     {% endifequal %}
-
     {% for alert in alerts %}
       {% ifchanged %}
-      {{ alert.content_object }}
-      --------------------------
+  {{ alert.content_object }}
+  --------------------------
       {% endifchanged %} 
-      {% ifchanged %}{{ alert.datetime|date:"D d M Y" }}{% endifchanged %} 
+    {% ifchanged %}*{{ alert.datetime|date:"D d M Y" }}*{% endifchanged %}
       {% ifequal alert.message_type "run_fail" %}Scraper failed to run{% endifequal %}{% ifequal alert.message_type "commit" %}{{ alert.message_value }} Updated the scraper{% endifequal %}{% ifequal alert.message_type "run_success" %}Scraper Ran, taking {{ alert.message_value }}{% endifequal %}
     {% endfor %}
   {% endfor %}
@@ -35,19 +34,34 @@ You can edit these alerts at http://{{ site.domain }}{% url profiles_edit_profil
 
 
 {% if all_alerts.solicitation %}
-{% for alert_type, alerts in all_alerts.solicitation.items  %}
+{% if all_alerts.solicitation.Comments  %}
+Comments on your data requests
+==============================
+{% for comment in all_alerts.solicitation.Comments %}
+{{ comment.user }} said:
+{{ comment.comment|truncatewords:100 }}
 
-{% ifequal alert_type "contribute"  %}
+{% endfor %}
+{% endif %}
+
+
+{% if all_alerts.solicitation.new_solicitation  %}
 New Data requests in the market
 ===============================
-{% for alert in alerts %}
+{% for alert in all_alerts.solicitation.new_solicitation %}
 {{ alert.title }}: £{{ alert.price }}
 {{ alert.details|truncatewords:100 }}
 {% ifchanged %}{{ alert.content_object }}
 --------------------------
 {% endifchanged %} 
 {% endfor %}
-{% endifequal %}
-{% endfor %}
+{% endif %}
+
+
+
+
+
+
+
 {% endif %}
 {% endspaceless %}
