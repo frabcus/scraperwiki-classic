@@ -10,6 +10,8 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
+from tagging.models import Tag, TaggedItem
+from tagging.utils import get_tag
 
 from paypal.standard.forms import PayPalPaymentsForm
 
@@ -33,6 +35,7 @@ def solicitation (request):
             else:
                 solicitation.user_created = request.user
                 solicitation.save()
+                solicitation.tags = request.POST.get('tags')                
                 return HttpResponseRedirect(reverse('market_list'))
     status = models.SolicitationStatus.objects.get(status='open')
     recent_solicitations = models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')[:5]  
