@@ -68,7 +68,7 @@ def data (request, scraper_short_name):
             models.Scraper.objects.clear_datastore(scraper_id=scraper.guid)
 
     #get data for this scaper
-    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=1000)
+    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=500)
     data_tables = { "": data }   # replicates output from data_summary_tables
     has_data = len(data['rows']) > 0    
 

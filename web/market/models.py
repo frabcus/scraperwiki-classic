@@ -6,6 +6,7 @@ from django.conf import settings
 from scraper.models import Scraper
 from payment.models import Invoice
 from payment.models import payment_done
+import tagging
 
 
 def solicitation_paid(invoice, **kwargs):
@@ -32,7 +33,7 @@ class SolicitationStatus(models.Model):
 
     def __unicode__(self):
         return self.display_name
-        
+
 
 class Solicitation(models.Model):
 
@@ -117,3 +118,6 @@ class Solicitation(models.Model):
    
     def __unicode__(self):
         return "%s (%s)" % (self.title, self.price)
+
+#register tags
+tagging.register(Solicitation)

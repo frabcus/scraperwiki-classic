@@ -18,12 +18,12 @@
 <div class="data_viewer">
     {% if has_data %}
         {% for table, data in data_tables.items %}
-        <div class="raw_data">        
+        <div>
             <table class="raw_data">
                 <thead>
                     <tr>
                         {% for heading in data.headings %}
-                            <th>{{ heading }}</th>
+                            <th width="120">{{ heading }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
@@ -71,4 +71,7 @@
     {% endif %}
 </div>
 {% endblock %}
-{% block run_script %}setupButtonConfirmation("btnClearDatastore", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete all existing data for this scraper.");{% endblock %}
+{% block run_script %}
+    setupButtonConfirmation("btnClearDatastore", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete all existing data for this scraper.");
+    setupDataViewer();
+{% endblock %}

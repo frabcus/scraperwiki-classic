@@ -66,6 +66,22 @@ function APISetupExploreFunction(){
         }
     );
 
+    $('#ulApiKeys li code').each(
+        function(){
+            var sText = $(this).html();
+            var aLink = $('<a href="#">' + sText + '</a>');
+            aLink.click(
+                function (){
+                    $('#key').val(sText);
+                    $('#key').focus();
+                    rewriteApiUrl();
+                    return false;
+                }
+            );
+            $(this).html(aLink);
+        }
+    );
+
     //linkup the texboxes to rewrite the API url
     $('.api_arguments dl input').each(
         $(this).keyup(
@@ -77,11 +93,14 @@ function APISetupExploreFunction(){
 }
 
 function rewriteApiUrl (){
-    sArgs = '?key=[your api key]';
+    sArgs = '?';
     var aControls = $('.api_arguments dl input')
     for (var i=0; i < aControls.length; i++) {
         if($(aControls[i]).val() != ''){
-            sArgs += ('&' + aControls[i].id + '=' + $(aControls[i]).val());
+	        if (i > 0) {
+            	sArgs += ('&');
+        	}
+            sArgs += (aControls[i].id + '=' + $(aControls[i]).val());
         }
     };
     $('#aApiLink span').html(sArgs);
@@ -249,4 +268,9 @@ function setupIntroSlideshow(){
         pager: '.slide_nav',
         autostop: 0
 	});
+}
+
+function setupDataViewer(){
+    $('.raw_data').flexigrid({height:250});    
+    
 }

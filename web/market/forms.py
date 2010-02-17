@@ -8,14 +8,16 @@ from scraper.models import Scraper
 
 class SolicitationForm (ModelForm):
 
+    class Meta:
+        model = Solicitation
+        fields = ('title', 'link', 'details', 'price', 'tags',)
+   
     title = forms.CharField(max_length=150, label = "Title*")
     details = forms.CharField(widget=forms.Textarea, label = "Details*")
     link = forms.URLField(label = "Link*")
     price = forms.ChoiceField(label="Bounty", choices=((0, 'None'), (50, mark_safe('&pound;50')),(100, mark_safe('&pound;100')), (250, mark_safe('&pound;250')), (500, mark_safe('&pound;500')), (1000, mark_safe('&pound;1000'))))
+    tags = forms.CharField(required=False)
 
-    class Meta:
-        model = Solicitation
-        fields = ('title', 'link', 'details', 'price')
 
 class SolicitationClaimForm (ModelForm):
 
