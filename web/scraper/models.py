@@ -121,11 +121,12 @@ class Scraper(models.Model):
                 vc.commit(self, message=message, user=user)
                 
                 # Log this commit in the history table
-                history = ScraperHistory()
-                history.scraper = self
-                history.message_type = 'commit'
-                history.user = User.objects.get(id=user)
-                history.save()
+                alert = frontendmodels.Alerts()
+                alert.content_object = self
+                alert.message_type = 'commit'
+                alert.message_value = message
+                alert.user = User.objects.get(id=user)
+                alert.save()
                 
                 
                 
@@ -246,39 +247,6 @@ class Scraper(models.Model):
                                              for count in recent_record_count)
         
 tagging.register(Scraper)
-
-
-class ScraperHistory(models.Model):
-    """
-    Stores 'history' for a scraper.  History can be anything that relates to 
-    the scraper, such as when it was run, saved, committed etc.
-    
-    'message_type' is for storing diferent types of message.  
-
-    Suggected conventions are:
-        * 'run_success'
-        * 'run_fail'
-        * 'commit'
-    
-    """
-    scraper = models.ForeignKey(Scraper)
-    message_type = models.CharField(blank=False, max_length=100)
-    message_value = models.CharField(blank=True, max_length=5000)
-    meta = models.CharField(blank=True, max_length=1000)
-    message_level = models.IntegerField(blank=True, null=True, default=0)
-    datetime = models.DateTimeField(blank=False, default=datetime.datetime.now)
-    user = models.ForeignKey(User, blank=True, null=True)
-
-    def __unicode__(self):
-        return "%s: %s" % \
-                            (self.scraper, 
-                            self.message_type,)
-    
-    def __str__(self):
-        return str(self.__unicode__())
-    
-    class Meta:
-        ordering = ('-datetime',)
 
 class UserScraperRole(models.Model):
     """

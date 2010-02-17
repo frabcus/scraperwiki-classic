@@ -18,9 +18,8 @@ class CommentsForScraper(Feed):
             raise ObjectDoesNotExist
         scraper_name = bits[0]
         scraper = Scraper.objects.get(short_name__exact=scraper_name)
-        if scraper: 
-            global scraper_name 
-            scraper_name = scraper.short_name
+        if scraper:  
+            self.scraper_name = scraper.short_name
             return scraper
         else: 
             raise ObjectDoesNotExist
@@ -34,7 +33,7 @@ class CommentsForScraper(Feed):
         return '/scrapers/%s/' % obj.short_name
         
     def item_link(self, item):
-        return '/scrapers/show/%s/comments/#%s' % (scraper_name, item.id)
+        return '/scrapers/show/%s/comments/#%s' % (self.scraper_name, item.id)
 
     def description(self, obj):
         return "Comments on scraper '%s'" % obj.short_name

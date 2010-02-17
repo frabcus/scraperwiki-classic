@@ -8,22 +8,46 @@
   TODO: Make better ;)
   
 {% endcomment %}
+{% spaceless %}
 Hi {{ user.user.username|title }}, 
 
 You are getting this email because you signed up to get email alerts at http://{{ site.domain }}
 
 You can edit these alerts at http://{{ site.domain }}{% url profiles_edit_profile %}
 
-{% for scraper_type, alerts in all_alerts.items  %}
-{% ifequal scraper_type "contribute"  %}
-Scrapers I'm contributing to
-============================
-{% endifequal %}
-  {% for alert in alerts %}
-  {% ifchanged %}{{ alert.scraper }}
-  --------------------------
-  {% endifchanged %} 
-    {% ifchanged %}{{ alert.datetime|date:"M y" }}{% endifchanged %} 
-    {% ifequal alert.message_type "run_fail" %}Scraper failed to run{% endifequal %}{% ifequal alert.message_type "commit" %}{{ alert.message_value }} Updated the scraper{% endifequal %}{% ifequal alert.message_type "run_success" %}Scraper Ran, taking {{ alert.message_value }}{% endifequal %}
+{% if all_alerts.scraper %}
+  {% for alert_type, alerts in all_alerts.scraper.items  %}
+    {% ifequal alert_type "contribute"  %}
+    Scrapers I'm contributing to
+    ============================
+    {% endifequal %}
+
+    {% for alert in alerts %}
+      {% ifchanged %}
+      {{ alert.content_object }}
+      --------------------------
+      {% endifchanged %} 
+      {% ifchanged %}{{ alert.datetime|date:"D d M Y" }}{% endifchanged %} 
+      {% ifequal alert.message_type "run_fail" %}Scraper failed to run{% endifequal %}{% ifequal alert.message_type "commit" %}{{ alert.message_value }} Updated the scraper{% endifequal %}{% ifequal alert.message_type "run_success" %}Scraper Ran, taking {{ alert.message_value }}{% endifequal %}
+    {% endfor %}
   {% endfor %}
+{% endif %}
+
+
+{% if all_alerts.solicitation %}
+{% for alert_type, alerts in all_alerts.solicitation.items  %}
+
+{% ifequal alert_type "contribute"  %}
+New Data requests in the market
+===============================
+{% for alert in alerts %}
+{{ alert.title }}: £{{ alert.price }}
+{{ alert.details|truncatewords:100 }}
+{% ifchanged %}{{ alert.content_object }}
+--------------------------
+{% endifchanged %} 
 {% endfor %}
+{% endifequal %}
+{% endfor %}
+{% endif %}
+{% endspaceless %}

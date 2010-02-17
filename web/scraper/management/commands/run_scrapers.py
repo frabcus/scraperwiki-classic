@@ -9,7 +9,8 @@ except:
 
 import subprocess
 
-from scraper.models import Scraper, ScraperHistory
+from scraper.models import Scraper
+from frontend.models import Alerts
 import frontend
 import settings
 import datetime
@@ -59,11 +60,11 @@ class Command(BaseCommand):
 
         
         # Log this run event to the history table
-        history = ScraperHistory()
-        history.scraper = scraper
-        history.message_type = alert_type
-        history.message_value = elapsed
-        history.save()
+        alert = Alerts()
+        alert.content_object = scraper
+        alert.message_type = alert_type
+        alert.message_value = elapsed
+        alert.save()
 
     def handle(self, **options):
         if options['short_name']:

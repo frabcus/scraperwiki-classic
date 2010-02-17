@@ -76,8 +76,8 @@ def commit(scraper, message="changed", user="unknown"):
     message = "changed"
   
   ui.pushbuffer()
-  commands.commit(ui, r, path, addremove=True, message=str(message), user=str(user))
-  code = ui.popbuffer()
+  rev = commands.commit(ui, r, path, addremove=True, message=str(message), user=str(user))
+  code = ui.popbuffer()  
   return ""
 
 def get_code(scraper_name=None, committed=True, rev='tip'):

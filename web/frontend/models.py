@@ -1,6 +1,9 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
 
 class AlertTypes(models.Model):
     """
@@ -19,7 +22,7 @@ class AlertTypes(models.Model):
         that feature is availible). By default there is no distinction between
         'owning' and 'contributing'.
     """
-        
+    content_type = models.ForeignKey(ContentType)
     name = models.CharField(blank=True, max_length=100)
     label = models.CharField(blank=True, max_length=500)
     applies_to = models.CharField(blank=False, max_length=100)
@@ -30,6 +33,51 @@ class AlertTypes(models.Model):
     class Meta:
         verbose_name_plural = "Alert Types"
         verbose_name = "Alert Type"
+
+class Alerts(models.Model):
+    """
+    Stores 'alerts' for an object. Alerts can be anything, such as when a
+    scraper was run, saved, committed or when a comment has been added to the
+    market place.
+        
+    'message_type' is for storing diferent types of message.  
+    
+    Suggected conventions are:
+        * 'run_success'
+        * 'run_fail'
+        * 'commit'
+        
+    """
+    
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveSmallIntegerField(blank=True, null=True)
+    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    message_type = models.CharField(blank=False, max_length=100)
+    message_value = models.CharField(blank=True, max_length=5000)
+    meta = models.CharField(blank=True, max_length=1000)
+    message_level = models.IntegerField(blank=True, null=True, default=0)
+    datetime = models.DateTimeField(blank=False, default=datetime.datetime.now)
+    user = models.ForeignKey(User, blank=True, null=True)
+
+    objects = models.Manager()
+    
+    def __unicode__(self):
+        return "%s: '%s', message: %s" % \
+                            (self.content_type, 
+                            self.content_object,
+                            self.message_type,)
+
+    class Meta:
+        verbose_name_plural = "Alerts"
+        verbose_name = "Alert"
+
+    def __str__(self):
+        return str(self.__unicode__())
+
+    class Meta:
+        ordering = ('-datetime',)
+
+
 
 class UserProfile(models.Model):
     """
@@ -53,6 +101,8 @@ class UserProfile(models.Model):
     alerts_last_sent = models.DateTimeField()
     alert_frequency  = models.IntegerField(null=True, blank=True)
     alert_types      = models.ManyToManyField(AlertTypes)
+    
+    objects = models.Manager()
     
     def __unicode__(self):
         return unicode(self.user)
@@ -109,3 +159,4 @@ def create_user_profile(sender, **kwargs):
     profile.save()
 
 user_registered.connect(create_user_profile)
+

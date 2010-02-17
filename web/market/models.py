@@ -46,11 +46,12 @@ class Solicitation(models.Model):
     created_at = models.DateTimeField(auto_now_add = True)
     deleted = models.BooleanField()
     price = models.IntegerField(null=True, blank=True)
-
     user_created = models.ForeignKey(User)
-    status = models.ForeignKey(SolicitationStatus)    
+    status = models.ForeignKey(SolicitationStatus)
     scraper = models.ForeignKey(Scraper, null=True, blank=True)
 
+    objects = models.Manager()
+    
     def has_bounty(self):
         return self.price > 0
 
@@ -115,4 +116,4 @@ class Solicitation(models.Model):
             raise Exception("Unable to find a published scraper (for this user) to add to this solicitation")
    
     def __unicode__(self):
-        return self.title + "(" + int(self.price) + ")"
+        return "%s (%s)" % (self.title, self.price)

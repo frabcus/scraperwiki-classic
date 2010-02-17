@@ -3,6 +3,7 @@
         "pk": 4, 
         "model": "frontend.alerttypes", 
         "fields": {
+			"content_type" : "18",
             "name": "run_fail", 
             "applies_to": "contribute", 
             "label": "when a scraper I contribute to fails"
@@ -12,6 +13,7 @@
         "pk": 3, 
         "model": "frontend.alerttypes", 
         "fields": {
+			"content_type" : "18",
             "name": "commit", 
             "applies_to": "contribute", 
             "label": "when the code in a scraper I contribute to is changed"
@@ -21,9 +23,10 @@
         "pk": 5, 
         "model": "frontend.alerttypes", 
         "fields": {
+			"content_type" : "18",
             "name": "run_success", 
             "applies_to": "contribute", 
             "label": "when a scraper I contribute to is run"
         }
-    }, 
+    }
 ]
