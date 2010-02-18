@@ -1,210 +1,261 @@
-from django.template import RequestContext, loader, Context
-from django import forms
+from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from django.db.models import Q
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
+
 from django.conf import settings
 
 from scraper import models
 from scraper import forms
 from scraper.forms import SearchForm
+import frontend
 
 import StringIO, csv
 from django.utils.encoding import smart_str
 
 try:
-  import json
-except:
-  import simplejson as json
+    import json
+except ImportError:
+    import simplejson as json
+
 
 def overview(request, scraper_short_name):
+    """
+    Shows info on the scraper plus example data.
 
+    This is the main scraper view (default tab)
+    """
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(
+        models.Scraper.objects,
+        short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    
+
     scraper_tags = Tag.objects.get_for_object(scraper)
-    
-    table = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=1)
+
+    table = models.Scraper.objects.data_summary(
+        scraper_id=scraper.guid,
+        limit=1)
     data = None
-    has_data = len(table['rows']) > 0    
+    has_data = len(table['rows']) > 0
     if has_data:
         data = zip(table['headings'], table['rows'][0])
-    
+
     return render_to_response('scraper/overview.html', {
-        'scraper_tags' : scraper_tags,
-        'selected_tab': 'overview', 
-        'scraper': scraper, 
-        'user_owns_it': user_owns_it, 
+        'scraper_tags': scraper_tags,
+        'selected_tab': 'overview',
+        'scraper': scraper,
+        'user_owns_it': user_owns_it,
         'user_follows_it': user_follows_it,
         'has_data': has_data,
         'data': data,
         }, context_instance=RequestContext(request))
-    
-def create(request):
-    if request.method == 'POST':
-        return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 
-    else:
-        return render_to_response('scraper/create.html', {}, context_instance=RequestContext(request)) 
 
-def data (request, scraper_short_name):
-    
+
+def create(request):
+    """
+    Rendars the scraper create form
+
+    Is this unused?
+
+    TODO: delete!
+    """
+    if request.method == 'POST':
+        return render_to_response(
+            'scraper/create.html',
+            context_instance=RequestContext(request))
+    else:
+        return render_to_response(
+            'scraper/create.html',
+            context_instance=RequestContext(request))
+
+
+def scraper_data(request, scraper_short_name):
     #user details
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(
+        models.Scraper.objects, short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
-        
-    #if user has requested a delete, **double** check they are allowed to, the do the delete
+
+    #if user has requested a delete, **double** check they are allowed to,
+    # the do the delete
     if request.method == 'POST':
         delete_data = request.POST['delete_data']
-        if delete_data == '1' and user_owns_it: 
-            models.Scraper.objects.clear_datastore(scraper_id=scraper.guid)
+        if delete_data == '1' and user_owns_it:
+            models.Scraper.objects.clear_datastore(
+                scraper_id=scraper.guid)
 
     #get data for this scaper
-    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=500)
-    data_tables = { "": data }   # replicates output from data_summary_tables
-    has_data = len(data['rows']) > 0    
+    data = models.Scraper.objects.data_summary(
+                            scraper_id=scraper.guid, limit=500)
+
+    # replicates output from data_summary_tables
+    data_tables = {"": data }
+    has_data = len(data['rows']) > 0
 
     return render_to_response('scraper/data.html', {
-      'scraper_tags' : scraper_tags,
-      'selected_tab': 'data', 
-      'scraper': scraper, 
-      'user_owns_it': user_owns_it, 
+      'scraper_tags': scraper_tags,
+      'selected_tab': 'data',
+      'scraper': scraper,
+      'user_owns_it': user_owns_it,
       'user_follows_it': user_follows_it,
-      'data_tables' : data_tables,
+      'data_tables': data_tables,
       'has_data': has_data,
       }, context_instance=RequestContext(request))
 
-def map (request, scraper_short_name):
-    
+
+def scraper_map(request, scraper_short_name):
+
     #user details
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(
+        models.Scraper.objects, short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
 
     #get data for this scaper
-    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid, limit=250)
+    data = models.Scraper.objects.data_summary(
+        scraper_id=scraper.guid, limit=250)
     has_data = len(data['rows']) > 0
-    data = json.dumps(data)    
+    data = json.dumps(data)
 
     return render_to_response('scraper/map.html', {
-    'scraper_tags' : scraper_tags,
-    'selected_tab': 'map', 
-    'scraper': scraper, 
-    'user_owns_it': user_owns_it, 
+    'scraper_tags': scraper_tags,
+    'selected_tab': 'map',
+    'scraper': scraper,
+    'user_owns_it': user_owns_it,
     'user_follows_it': user_follows_it,
-    'data' : data,
+    'data': data,
     'has_data': has_data,
     'has_map': True,
     }, context_instance=RequestContext(request))
 
 
-def code (request, scraper_short_name):
+def code(request, scraper_short_name):
 
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(
+        models.Scraper.objects, short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    
+
     scraper_tags = Tag.objects.get_for_object(scraper)
-    
+
     return render_to_response('scraper/code.html', {
-        'scraper_tags' : scraper_tags,
-        'selected_tab': 'code', 
-        'scraper': scraper, 
-        'user_owns_it': user_owns_it, 
-        'user_follows_it': user_follows_it,
-        }, context_instance=RequestContext(request))
+        'scraper_tags': scraper_tags,
+        'selected_tab': 'code',
+        'scraper': scraper,
+        'user_owns_it': user_owns_it,
+        'user_follows_it': user_follows_it,},
+        context_instance=RequestContext(request))
 
-def contributors (request, scraper_short_name):
+
+def contributors(request, scraper_short_name):
 
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(
+        models.Scraper.objects, short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    
+
     scraper_owner = scraper.owner()
     scraper_contributors = scraper.contributors()
     scraper_followers = scraper.followers()
-        
+
     scraper_tags = Tag.objects.get_for_object(scraper)
-    
+
     return render_to_response('scraper/contributers.html', {
-        'scraper_tags' : scraper_tags,
-        'scraper_owner' : scraper_owner,
-        'scraper_contributors' : scraper_contributors,
-        'scraper_followers' : scraper_followers,
-        'selected_tab': 'contributors', 
-        'scraper': scraper, 
-        'user_owns_it': user_owns_it, 
+        'scraper_tags': scraper_tags,
+        'scraper_owner': scraper_owner,
+        'scraper_contributors': scraper_contributors,
+        'scraper_followers': scraper_followers,
+        'selected_tab': 'contributors',
+        'scraper': scraper,
+        'user_owns_it': user_owns_it,
         'user_follows_it': user_follows_it,
         }, context_instance=RequestContext(request))
-        
-def comments (request, scraper_short_name):
+
+
+def comments(request, scraper_short_name):
 
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(
+        models.Scraper.objects, short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    
+
     scraper_owner = scraper.owner()
     scraper_contributors = scraper.contributors()
     scraper_followers = scraper.followers()
-    
+
     scraper_tags = Tag.objects.get_for_object(scraper)
-    
+
     return render_to_response('scraper/comments.html', {
-        'scraper_tags' : scraper_tags,
-        'scraper_owner' : scraper_owner,
-        'scraper_contributors' : scraper_contributors,
-        'scraper_followers' : scraper_followers,
-        'selected_tab': 'comments', 
-        'scraper': scraper, 
-        'user_owns_it': user_owns_it, 
+        'scraper_tags': scraper_tags,
+        'scraper_owner': scraper_owner,
+        'scraper_contributors': scraper_contributors,
+        'scraper_followers': scraper_followers,
+        'selected_tab': 'comments',
+        'scraper': scraper,
+        'user_owns_it': user_owns_it,
         'user_follows_it': user_follows_it,
         }, context_instance=RequestContext(request))
 
 
-def history(request, scraper_short_name):
+def scraper_history(request, scraper_short_name):
 
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(
+        models.Scraper.objects,
+        short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    
-    history = models.ScraperHistory.objects.filter(scraper=scraper).order_by('-datetime')
+    content_type = scraper.content_type()
+    history = frontend.models.Alerts.objects.filter(
+        content_type=content_type,
+        object_id=scraper.pk).order_by('-datetime')
 
     return render_to_response('scraper/history.html', {
-        'selected_tab': 'history', 
+        'selected_tab': 'history',
         'scraper': scraper,
         'history': history,
-        'user_owns_it': user_owns_it, 
+        'user_owns_it': user_owns_it,
         'user_follows_it': user_follows_it,
         }, context_instance=RequestContext(request))
 
 
-
-def show(request, scraper_short_name, selected_tab = 'data'):
+def show(request, scraper_short_name, selected_tab='data'):
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(
+        models.Scraper.objects,
+        short_name=scraper_short_name)
     you_own_it = (scraper.owner() == user)
     you_follow_it = (user in scraper.followers())
-    data = models.scraperData.objects.summary()
+    # data = models.scraperData.objects.summary()
     tabs = [
-	  {'code': 'data', 'title': 'Data',       'template': 'scraper/data_tab.html'},
-	  {'code': 'code', 'title': 'Code',       'template': 'scraper/code_tab.html'},
-	  {'code': 'hist', 'title': 'History',    'template': 'scraper/hist_tab.html'},
-	  {'code': 'disc', 'title': 'Discussion', 'template': 'scraper/disc_tab.html'},
-	  {'code': 'developers', 'title': 'Developers',    'template': 'scraper/edit_tab.html'}
+      {'code': 'data',
+      'title': 'Data',
+      'template': 'scraper/data_tab.html'},
+      {'code': 'code',
+      'title': 'Code',
+      'template': 'scraper/code_tab.html'},
+      {'code': 'hist',
+      'title': 'History',
+      'template': 'scraper/hist_tab.html'},
+      {'code': 'disc',
+      'title':
+      'Discussion',
+      'template': 'scraper/disc_tab.html'},
+      {'code': 'developers',
+      'title': 'Developers',
+      'template': 'scraper/edit_tab.html'},
     ]
 
     # include a default value, just in case someone frigs the URL
@@ -218,11 +269,24 @@ def show(request, scraper_short_name, selected_tab = 'data'):
             tab['class'] = 'tab'
             tab['selected'] = False
 
-    return render_to_response('scraper/show.html', {'data' : data, 'selected_tab': selected_tab, 'scraper': scraper, 'you_own_it': you_own_it, 'you_follow_it': you_follow_it, 'tabs': tabs, 'tab_to_show': tab_to_show}, context_instance=RequestContext(request))
+    return render_to_response(
+        'scraper/show.html',
+        {
+            'data' : data,
+            'selected_tab': selected_tab,
+            'scraper': scraper,
+            'you_own_it': you_own_it,
+            'you_follow_it': you_follow_it,
+            'tabs': tabs,
+            'tab_to_show': tab_to_show},
+            context_instance=RequestContext(request))
 
 
-# (also from scraperwiki/web/api/emitters.py CSVEmitter render() as below -- not sure what smart_str needed for)
 def stringnot(v):
+    """
+    (also from scraperwiki/web/api/emitters.py CSVEmitter render()
+    as below -- not sure what smart_str needed for)
+    """
     if v == None:
         return ""
     if type(v) == float:
@@ -231,42 +295,58 @@ def stringnot(v):
         return v
     return smart_str(v)
 
-# this could have been done by having linked directly to the api/csvout, but difficult to make the urlreverse for something in a different app
-# code here itentical to scraperwiki/web/api/emitters.py CSVEmitter render()
-def export_csv (request, scraper_short_name):   
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=100000)
-        
+
+def export_csv(request, scraper_short_name):
+    """
+    This could have been done by having linked directly to the api/csvout, but
+    difficult to make the urlreverse for something in a different app code here
+    itentical to scraperwiki/web/api/emitters.py CSVEmitter render()
+    """
+    scraper = get_object_or_404(
+        models.Scraper.objects,
+        short_name=scraper_short_name)
+    dictlist = models.Scraper.objects.data_dictlist(
+        scraper_id=scraper.guid,
+        limit=100000)
+
     keyset = set()
     for row in dictlist:
         if "latlng" in row:   # split the latlng
-            row["lat"], row["lng"] = row.pop("latlng") 
-        row.pop("date_scraped") 
+            row["lat"], row["lng"] = row.pop("latlng")
+        row.pop("date_scraped")
         keyset.update(row.keys())
     allkeys = sorted(keyset)
-    
+
     fout = StringIO.StringIO()
     writer = csv.writer(fout, dialect='excel')
     writer.writerow(allkeys)
     for rowdict in dictlist:
         writer.writerow([stringnot(rowdict.get(key))  for key in allkeys])
-    
+
     response = HttpResponse(mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)
+    response['Content-Disposition'] = \
+        'attachment; filename=%s.csv' % (scraper_short_name)
     response.write(fout.getvalue())
 
     return response
-    
     #template = loader.get_template('scraper/data.csv')
     #context = Context({'data_tables': data_tables,})
 
-    
-def list(request):
-    #scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
-    #return render_to_response('scraper/list.html', {'scrapers': scrapers}, context_instance = RequestContext(request))
 
-    scraper_list = models.Scraper.objects.filter(published=True).order_by('-created_at')
-    paginator = Paginator(scraper_list, settings.SCRAPERS_PER_PAGE) # Number of results to show from settings
+def scraper_list(request):
+    #scrapers =
+    #   models.Scraper.objects.filter(published=True).order_by('-created_at')
+
+    # return render_to_response('scraper/list.html', {'scrapers': scrapers},
+    # context_instance = RequestContext(request))
+
+    all_scrapers = models.Scraper.objects.filter(
+        published=True).order_by('-created_at')
+
+    # Number of results to show from settings
+    paginator = Paginator(
+        all_scrapers,
+        settings.SCRAPERS_PER_PAGE)
 
     # Make sure page request is an int. If not, deliver first page.
     try:
@@ -281,108 +361,127 @@ def list(request):
         scrapers = paginator.page(paginator.num_pages)
 
     form = SearchForm()
-        
-    return render_to_response('scraper/list.html', {"scrapers": scrapers, "form": form, }, context_instance = RequestContext(request))
-    
-def download(request, scraper_id = 0):
-    user = request.user
-    scraper = get_object_or_404(models.Scraper.objects,id=scraper_id)
+
+    return render_to_response(
+        'scraper/list.html',
+        {
+            "scrapers": scrapers,
+            "form": form,},
+            context_instance=RequestContext(request))
+
+
+def download(request, scraper_id=0):
+    scraper = get_object_or_404(models.Scraper.objects, id=scraper_id)
     response = HttpResponse(scraper.current_code(), mimetype="text/plain")
-    response['Content-Disposition'] = 'attachment; filename=%s.py' % (scraper.short_name)
+    response['Content-Disposition'] = \
+        'attachment; filename=%s.py' % (scraper.short_name)
     return response
 
 
 def all_tags(request):
-    return render_to_response('scraper/all_tags.html', context_instance = RequestContext(request))
-    
-    
-def tag(request, tag):
-    from tagging.utils import get_tag
-    from tagging.models import Tag, TaggedItem
-    
-    tag = get_tag(tag)
-    scrapers = models.Scraper.objects.filter(published=True)    
-    queryset = TaggedItem.objects.get_by_model(scrapers, tag)
-    return render_to_response('scraper/tag.html', {
-        'queryset': queryset, 
-        'tag' : tag,
-        'selected_tab' : 'items',
-        }, context_instance = RequestContext(request))
-    
-def tag_data(request, tag):  # to delete
-    assert False  
-    from tagging.utils import get_tag
-    from tagging.models import Tag, TaggedItem
-    
+    return render_to_response(
+        'scraper/all_tags.html',
+        context_instance = RequestContext(request))
+
+
+def scraper_tag(request, tag):
     tag = get_tag(tag)
     scrapers = models.Scraper.objects.filter(published=True)
     queryset = TaggedItem.objects.get_by_model(scrapers, tag)
-    
+    return render_to_response('scraper/tag.html', {
+        'queryset': queryset,
+        'tag': tag,
+        'selected_tab': 'items',
+        }, context_instance=RequestContext(request))
+
+
+def tag_data(request, tag):  # to delete
+    assert False
+
+    tag = get_tag(tag)
+    scrapers = models.Scraper.objects.filter(published=True)
+    queryset = TaggedItem.objects.get_by_model(scrapers, tag)
+
     guids = []
     for q in queryset:
         guids.append(q.guid)
     data = models.Scraper.objects.data_summary(scraper_id=guids)
-    count = models.Scraper.objects.item_count_for_tag(guids=guids)
-    
+
     return render_to_response('scraper/tag_data.html', {
-        'data': data, 
-        'tag' : tag,
-        'selected_tab' : 'data',
-        }, context_instance = RequestContext(request))
-    
-        
+        'data': data,
+        'tag': tag,
+        'selected_tab': 'data',
+        }, context_instance=RequestContext(request))
+
+
 def search(request, q=""):
-    if (q != ""): 
+    if (q != ""):
         form = SearchForm(initial={'q': q})
         q = q.strip()
-        scrapers = models.Scraper.objects.filter(title__icontains=q, published=True) 
-        scrapers_description = models.Scraper.objects.filter(description__icontains=q, published=True) 
+        scrapers = models.Scraper.objects.filter(
+            title__icontains=q,
+            published=True)
+        scrapers_description = models.Scraper.objects.filter(
+            description__icontains=q, published=True)
+
         # and by tag
         tag = get_tag(q)
         if tag:
-        	scrapers_for_tag = models.Scraper.objects.filter(published=True)    
-        	qs = TaggedItem.objects.get_by_model(scrapers_for_tag, tag)
-        	scrapers = scrapers | qs
+            scrapers_for_tag = models.Scraper.objects.filter(published=True)
+            qs = TaggedItem.objects.get_by_model(scrapers_for_tag, tag)
+            scrapers = scrapers | qs
         scrapers_all = scrapers | scrapers_description
         #scrapers = scrapers | scrapers_description
         #Only show published scrapers, sort by creation date
         scrapers_all = scrapers_all.filter(published=True)
         scrapers_all = scrapers_all.order_by('-created_at')
         return render_to_response('scraper/search_results.html',
-          {'scrapers': scrapers_all,  'form': form, 'query': q,  }, context_instance = RequestContext(request))
-    elif (request.POST): # If the form has been submitted, or we have a search term in the URL - redirect to nice URL
-        form = SearchForm(request.POST) 
-        if form.is_valid(): 
-          q = form.cleaned_data['q']
-          # Process the data in form.cleaned_data
-          return HttpResponseRedirect('/scrapers/search/%s/' % q) # Redirect after POST
+            {
+                'scrapers': scrapers_all,
+                'form': form,
+                'query': q,},
+            context_instance=RequestContext(request))
+
+    # If the form has been submitted, or we have a search term in the URL
+    # - redirect to nice URL
+    elif (request.POST):
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            q = form.cleaned_data['q']
+            # Process the data in form.cleaned_data
+            # Redirect after POST
+            return HttpResponseRedirect('/scrapers/search/%s/' % q)
         else:
-          form = SearchForm() 
-          return render_to_response('scraper/search.html', {
-            'form': form,
-          }, context_instance = RequestContext(request))
+            form = SearchForm()
+            return render_to_response('scraper/search.html', {
+                'form': form,},
+                context_instance=RequestContext(request))
     else:
         form = SearchForm()
         return render_to_response('scraper/search.html', {
             'form': form,
         }, context_instance = RequestContext(request))
-    
-def follow (request, scraper_short_name):
-	scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-	user = request.user
-	user_owns_it = (scraper.owner() == user)
-	user_follows_it = (user in scraper.followers())
-    # add the user to follower list
-	scraper.add_user_role(user, 'follow')
 
-	return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name) # Redirect after POST
-    
+
+def follow (request, scraper_short_name):
+    scraper = get_object_or_404(
+        models.Scraper.objects, short_name=scraper_short_name)
+    user = request.user
+    user_owns_it = (scraper.owner() == user)
+    user_follows_it = (user in scraper.followers())
+    # add the user to follower list
+    scraper.add_user_role(user, 'follow')
+    # Redirect after POST
+    return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
+
+
 def unfollow(request, scraper_short_name):
-	scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-	user = request.user
-	user_owns_it = (scraper.owner() == user)
-	user_follows_it = (user in scraper.followers())
-	# remove the user from follower list
-	scraper.unfollow(user)
- 	
-	return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name) # Redirect after POST
+    scraper = get_object_or_404(
+        models.Scraper.objects, short_name=scraper_short_name)
+    user = request.user
+    user_owns_it = (scraper.owner() == user)
+    user_follows_it = (user in scraper.followers())
+    # remove the user from follower list
+    scraper.unfollow(user)
+    # Redirect after POST
+    return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)

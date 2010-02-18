@@ -5,6 +5,7 @@ import time
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
 import settings
 
 import managers.scraper
@@ -245,6 +246,9 @@ class Scraper(models.Model):
                 Scraper.objects.recent_record_count(self.guid, sparline_days)
         self.scraper_sparkline_csv = ",".join("%d" % count \
                                              for count in recent_record_count)
+
+    def content_type(self):
+        return ContentType.objects.get(app_label="scraper", model="Scraper")
         
 tagging.register(Scraper)
 
