@@ -78,7 +78,6 @@ class Alerts(models.Model):
         ordering = ('-datetime',)
 
 
-
 class UserProfile(models.Model):
     """
     This model holds the additional fields to be associated with a user in the
@@ -98,7 +97,7 @@ class UserProfile(models.Model):
     user             = models.ForeignKey(User, unique=True)
     bio              = models.TextField(blank=True)
     created_at       = models.DateTimeField(auto_now_add=True)
-    alerts_last_sent = models.DateTimeField()
+    alerts_last_sent = models.DateTimeField(auto_now_add=True)
     alert_frequency  = models.IntegerField(null=True, blank=True)
     alert_types      = models.ManyToManyField(AlertTypes)
     
