@@ -15,14 +15,16 @@ class UserProfileForm (forms.ModelForm):
     alert_frequency = forms.ChoiceField(required=False, choices = (
                                 ('', 'Never'), 
                                 (3600*24, 'Once a day'),
+                                (3600*24*3, 'Every couple of days'),                                
                                 (3600*24*7, 'Once a week'),
-                                (3600*24*7*2, 'Once a week'),))
+                                (3600*24*7*2, 'Every two weeks'),))
 
     options = []
     for item in AlertTypes.objects.all():
         options.append((item.pk, item.label))
-        
+
     alert_types = forms.MultipleChoiceField(options, widget=forms.CheckboxSelectMultiple())
+    bio = forms.CharField(label="A bit about you", widget=forms.Textarea())
     
     class Meta:
         model = UserProfile
