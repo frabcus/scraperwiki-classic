@@ -1,0 +1,67 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Requests tagged {{ tag|title }}{% endblock %}
+
+
+
+{% block content %}
+    <div class="page_title">
+        <h1>Requests tagged "{{ tag|title }}"</h1>
+        <p>
+            Browsing by tag: <strong>{{ tag|title }}</strong>
+        </p>
+    </div>
+
+    <div class="content col left">
+
+	<h2>Open</h2>	
+	{% if queryset_open %}
+	    <ul>
+	    {% for solicitation in queryset_open %}
+	         {% include 'market/solicitation_line.html' %}
+		{% endfor %}
+	    </ul>
+			{% else %}
+			<p>None yet</p>
+		{% endif %}
+	
+		<h2>Pending</h2>
+	{% if queryset_pending %}
+	    <ul>
+	    {% for solicitation in queryset_pending %}
+	         {% include 'market/solicitation_line.html' %}
+		{% endfor %}
+	    </ul>
+			{% else %}
+			<p>None yet</p>
+		{% endif %}
+	
+		<h2>Complete</h2>
+	{% if queryset_complete %}
+	    <ul>
+	    {% for solicitation in queryset_complete %}
+	         {% include 'market/solicitation_line.html' %}
+		{% endfor %}
+	    </ul>
+		{% else %}
+		<p>None yet</p>
+	{% endif %}
+    </div>
+
+    <div class="content col right">
+		<h4>Percentage complete</h4>
+		<img width=200 height=100 src="http://chart.apis.google.com/chart?chs=200x100&cht=gom&chd=t:{{percentage_complete}}" alt="{{percentage_complete}}% of requests have been completed" style="align: left;">
+				<p>{{ closed_count }} requests completed out of {{ total_count }} ({{ percentage_complete }}%)</p> 
+
+	{% if top_writers %}				
+ 	<h4>Top scraper writers for "{{ tag|title }}"</h4>
+
+    <ul>
+    {% for key, value in top_writers %}
+	         {% include 'frontend/user_line.html' %} ({{ value }})
+	{% endfor %}
+		{% endif %}
+    </ul>
+
+	</div>
+{% endblock %}

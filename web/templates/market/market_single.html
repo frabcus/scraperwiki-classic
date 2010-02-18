@@ -15,6 +15,7 @@
     <h3>{{solicitation.title}} {% if solicitation.has_bounty %}<span class="bounty">&pound;{{solicitation.price}} bounty</span>{% endif %}</h3>
     <h4>Added by {{solicitation.user_created.username}} ({{solicitation.status.display_name}})</h4>
     <p>{{solicitation.details}}</p>
+            <p>Tags: {% for tag in solicitation_tags %}<a href="{% url market_tag tag %}">{{ tag }}</a> {% endfor %}</p>
     <p>Link: <a href="{{solicitation.link}}">{{solicitation.link|urlizetrunc:30}}</a></p>    
 </div>
 <div class="content col right">

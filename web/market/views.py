@@ -13,6 +13,8 @@ from django.core.mail import send_mail
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
 
+from collections import defaultdict
+
 from paypal.standard.forms import PayPalPaymentsForm
 
 from market import models
@@ -58,7 +60,8 @@ def edit(request, solicitation_id):
                 solicitation.tags = request.POST.get('tags')                
                 return HttpResponseRedirect(reverse('market_view', args=(solicitation_id,)))
         else:
-            form = forms.SolicitationForm(instance=solicitation)
+            solicitation.__dict__['tags'] = ", ".join(tag.name for tag in solicitation.tags)
+            form = forms.SolicitationForm(solicitation.__dict__, instance=solicitation)
             return render_to_response('market/market_edit.html', {'form': form, 'market_bounty_charge': settings.MARKET_BOUNTY_CHARGE }, context_instance = RequestContext(request))
     else:
 	    return HttpResponseRedirect(reverse('market_view', args=(solicitation_id,)))
@@ -79,9 +82,56 @@ def market_list (request, mode='open'):
 
 def single (request, solicitation_id):
     solicitation = get_object_or_404(models.Solicitation, id=solicitation_id)
+    solicitation_tags = Tag.objects.get_for_object(solicitation)
     status = models.SolicitationStatus.objects.get(status='open')
     recent_solicitations = models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')[:5]    
-    return render_to_response('market/market_single.html', {'solicitation': solicitation, 'recent_solicitations': recent_solicitations}, context_instance = RequestContext(request))
+    return render_to_response('market/market_single.html', {'solicitation': solicitation, 'solicitation_tags': solicitation_tags, 'recent_solicitations': recent_solicitations}, context_instance = RequestContext(request))
+
+def tag(request, tag):
+    from tagging.utils import get_tag
+    from tagging.models import Tag, TaggedItem
+
+    tag = get_tag(tag)
+
+    # possibly not the best way of doing this
+    status = models.SolicitationStatus.objects.get(status='open')
+    solicitations_open = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
+    status = models.SolicitationStatus.objects.get(status='pending')
+    solicitations_pending = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
+    status = models.SolicitationStatus.objects.get(status='completed')
+    solicitations_closed = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
+    queryset_open = TaggedItem.objects.get_by_model(solicitations_open, tag)
+    queryset_pending = TaggedItem.objects.get_by_model(solicitations_pending, tag)	
+    queryset_closed = TaggedItem.objects.get_by_model(solicitations_closed, tag)
+
+    # calculate percentage complete 
+    closed_count = queryset_closed.count()
+    total_count = queryset_open.count() + queryset_pending.count() + queryset_closed.count()
+    percentage_complete = closed_count / total_count
+
+    # calculate top scraper writers, and sort
+    writers = []
+    for closed in queryset_closed:
+	    writers.append(closed.scraper.owner)
+    #top_writers = writers
+    top_writers = leaders(writers)
+
+    return render_to_response('market/tag.html', {
+        'queryset_open': queryset_open, 
+        'queryset_pending': queryset_pending, 
+        'queryset_closed': queryset_closed, 
+        'closed_count': closed_count, 
+        'total_count': total_count, 
+        'percentage_complete': percentage_complete, 
+        'top_writers': top_writers, 
+        'tag' : tag,
+    }, context_instance = RequestContext(request))
+
+def leaders(xs, top=5):
+    counts = defaultdict(int)
+    for x in xs:
+        counts[x] += 1
+        return sort(counts.items(), reverse=True, key=lambda tup: tup[1])[:top]
 
 @login_required
 def claim (request, solicitation_id):
