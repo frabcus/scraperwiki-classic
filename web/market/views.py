@@ -22,7 +22,6 @@ from scraper.models import Scraper
     
     
 def solicitation (request):
-
     form = forms.SolicitationForm()    
     if request.method == 'POST':
         form = forms.SolicitationForm(data=request.POST, files=request.FILES)
@@ -40,6 +39,29 @@ def solicitation (request):
     status = models.SolicitationStatus.objects.get(status='open')
     recent_solicitations = models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')[:5]  
     return render_to_response('market/solicitation.html', {'form': form, 'recent_solicitations' : recent_solicitations, 'market_bounty_charge': settings.MARKET_BOUNTY_CHARGE }, context_instance = RequestContext(request))
+
+@login_required
+# edit an existing soliciation - can only do this if you are the owner
+def edit(request, solicitation_id):
+    solicitation = get_object_or_404(models.Solicitation, id=solicitation_id)
+	#check if open, redirect if not
+    if solicitation.status.status != 'open':
+        return HttpResponseRedirect(reverse('market_view', args=(solicitation_id,)))
+    #check user owns it, redirect if not
+    if (solicitation.user_created == request.user):
+        if request.method == 'POST':
+            form = forms.SolicitationForm(request.POST, instance=solicitation)
+            if form.is_valid():
+                solicitation = form.save(commit=False)
+                solicitation.user_created = request.user
+                solicitation.save()
+                solicitation.tags = request.POST.get('tags')                
+                return HttpResponseRedirect(reverse('market_view', args=(solicitation_id,)))
+        else:
+            form = forms.SolicitationForm(instance=solicitation)
+            return render_to_response('market/market_edit.html', {'form': form, 'market_bounty_charge': settings.MARKET_BOUNTY_CHARGE }, context_instance = RequestContext(request))
+    else:
+	    return HttpResponseRedirect(reverse('market_view', args=(solicitation_id,)))
 
 def market_list (request, mode='open'):
 
@@ -67,7 +89,7 @@ def claim (request, solicitation_id):
     #this is a custom form, so we need to pass the user_id
     user_id = request.user.pk
     solicitation = get_object_or_404(models.Solicitation, id=solicitation_id)
-    form = forms.SolicitationClaimForm(instance = solicitation, user_id = user_id)
+    form = forms.SolicitationClaimForm(instance=solicitation, user_id=user_id)
 
     #check if open
     if solicitation.status.status != 'open':

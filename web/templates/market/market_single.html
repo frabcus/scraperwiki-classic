@@ -19,9 +19,13 @@
 </div>
 <div class="content col right">
     {% ifequal solicitation.status.status 'open' %}
+        {% ifequal solicitation.user_created user %}
+           You own this request: <a href="{% url market_edit solicitation.id %}">edit it</a>
+       {% else %}
     <form action="{% url market_claim solicitation.id %}" method="get">
         <input type="submit" value="I've written this"/>
     </form>
+       {% endifequal %}
     {% else %}
         {% ifequal solicitation.status.status 'pending' %}
             This suggestion has been claimed by <a href="{% url profiles_profile_detail solicitation.scraper.owner.username %}">{{solicitation.scraper.owner.username}}</a> and is being reviewed by <a href="{% url profiles_profile_detail solicitation.user_created.username %}">{{solicitation.user_created.username}}</a>.
