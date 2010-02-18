@@ -99,27 +99,27 @@ def tag(request, tag):
     status = models.SolicitationStatus.objects.get(status='pending')
     solicitations_pending = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
     status = models.SolicitationStatus.objects.get(status='completed')
-    solicitations_closed = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
+    solicitations_complete = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
     queryset_open = TaggedItem.objects.get_by_model(solicitations_open, tag)
     queryset_pending = TaggedItem.objects.get_by_model(solicitations_pending, tag)	
-    queryset_closed = TaggedItem.objects.get_by_model(solicitations_closed, tag)
+    queryset_complete = TaggedItem.objects.get_by_model(solicitations_complete, tag)
 
     # calculate percentage complete 
-    closed_count = queryset_closed.count()
-    total_count = queryset_open.count() + queryset_pending.count() + queryset_closed.count()
-    percentage_complete = closed_count / total_count
+    closed_count = queryset_complete.count()
+    total_count = queryset_open.count() + queryset_pending.count() + queryset_complete.count()
+    percentage_complete = (float(closed_count)/float(total_count)) * 100
 
     # calculate top scraper writers, and sort
     writers = []
-    for closed in queryset_closed:
-	    writers.append(closed.scraper.owner)
-    #top_writers = writers
+    for closed in queryset_complete:
+	    temp_user = closed.scraper.owner()
+	    writers.append(temp_user)
     top_writers = leaders(writers)
 
     return render_to_response('market/tag.html', {
         'queryset_open': queryset_open, 
         'queryset_pending': queryset_pending, 
-        'queryset_closed': queryset_closed, 
+        'queryset_complete': queryset_complete, 
         'closed_count': closed_count, 
         'total_count': total_count, 
         'percentage_complete': percentage_complete, 
@@ -131,7 +131,7 @@ def leaders(xs, top=5):
     counts = defaultdict(int)
     for x in xs:
         counts[x] += 1
-        return sort(counts.items(), reverse=True, key=lambda tup: tup[1])[:top]
+    return sorted(counts.items(), reverse=True, key=lambda tup: tup[1])[:top]
 
 @login_required
 def claim (request, solicitation_id):

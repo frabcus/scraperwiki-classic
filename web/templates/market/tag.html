@@ -2,8 +2,6 @@
 
 {% block title %}Requests tagged {{ tag|title }}{% endblock %}
 
-
-
 {% block content %}
     <div class="page_title">
         <h1>Requests tagged "{{ tag|title }}"</h1>
@@ -58,7 +56,8 @@
 
     <ul>
     {% for key, value in top_writers %}
-	         {% include 'frontend/user_line.html' %} ({{ value }})
+        {% load gravatar %} {% show_gravatar key 'small' %} 
+	         <a href="<a href="/profiles/{{ key.username }}">{{ key.username }}</a> ({{ value }})
 	{% endfor %}
 		{% endif %}
     </ul>
