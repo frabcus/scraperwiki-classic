@@ -231,57 +231,6 @@ def scraper_history(request, scraper_short_name):
         }, context_instance=RequestContext(request))
 
 
-def show(request, scraper_short_name, selected_tab='data'):
-    user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects,
-        short_name=scraper_short_name)
-    you_own_it = (scraper.owner() == user)
-    you_follow_it = (user in scraper.followers())
-    # data = models.scraperData.objects.summary()
-    tabs = [
-      {'code': 'data',
-      'title': 'Data',
-      'template': 'scraper/data_tab.html'},
-      {'code': 'code',
-      'title': 'Code',
-      'template': 'scraper/code_tab.html'},
-      {'code': 'hist',
-      'title': 'History',
-      'template': 'scraper/hist_tab.html'},
-      {'code': 'disc',
-      'title':
-      'Discussion',
-      'template': 'scraper/disc_tab.html'},
-      {'code': 'developers',
-      'title': 'Developers',
-      'template': 'scraper/edit_tab.html'},
-    ]
-
-    # include a default value, just in case someone frigs the URL
-    tab_to_show = 'scraper/data_tab.html'
-    for tab in tabs:
-        if tab['code'] == selected_tab:
-            tab['class'] = 'selected tab'
-            tab['selected'] = True
-            tab_to_show = tab['template']
-        else:
-            tab['class'] = 'tab'
-            tab['selected'] = False
-
-    return render_to_response(
-        'scraper/show.html',
-        {
-            'data' : data,
-            'selected_tab': selected_tab,
-            'scraper': scraper,
-            'you_own_it': you_own_it,
-            'you_follow_it': you_follow_it,
-            'tabs': tabs,
-            'tab_to_show': tab_to_show},
-            context_instance=RequestContext(request))
-
-
 def stringnot(v):
     """
     (also from scraperwiki/web/api/emitters.py CSVEmitter render()
@@ -370,9 +319,13 @@ def scraper_list(request):
             context_instance=RequestContext(request))
 
 
-def download(request, scraper_id=0):
-    scraper = get_object_or_404(models.Scraper.objects, id=scraper_id)
-    response = HttpResponse(scraper.current_code(), mimetype="text/plain")
+def download(request, scraper_short_name):
+    """
+    TODO: DELETE?
+    """
+    scraper = get_object_or_404(models.Scraper.objects, 
+                                short_name=scraper_short_name)
+    response = HttpResponse(scraper.committed_code(), mimetype="text/plain")
     response['Content-Disposition'] = \
         'attachment; filename=%s.py' % (scraper.short_name)
     return response
