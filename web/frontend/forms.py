@@ -12,7 +12,7 @@ from django.contrib.auth.forms import AuthenticationForm
 #from django.forms.extras.widgets import Textarea
 
 class UserProfileForm (forms.ModelForm):
-    alert_frequency = forms.ChoiceField(required=False, choices = (
+    alert_frequency = forms.ChoiceField(required=False, label="How often do you want to be emailed?", choices = (
                                 ('', 'Never'), 
                                 (3600*24, 'Once a day'),
                                 (3600*24*3, 'Every couple of days'),                                

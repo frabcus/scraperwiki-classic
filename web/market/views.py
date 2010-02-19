@@ -49,6 +49,7 @@ def market_list (request, mode='open'):
     if session_solicitation_draft:
         session_solicitation_draft.user_created = request.user
         session_solicitation_draft.save()
+        del request.session['SolicitationDraft']            
 
     #get all scrapers not marked deleted or
     status = models.SolicitationStatus.objects.get(status=mode)

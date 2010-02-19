@@ -25,24 +25,29 @@
     	<form method="post">
     	  <ul class="form">
     	    <li> 
-    	      <label>Profile picture</label> 
-    		{% load gravatar %} {% show_gravatar profile.user 'large' %} <a href="http://en.gravatar.com" target="_blank">Change profile image</a> (using Gravatar)
-    <div style="clear:both;"></div>
-    </li>
+                <label>Profile picture</label> 
+                {% load gravatar %}
+                {% show_gravatar profile.user 'large' %}
+                <a href="http://en.gravatar.com" target="_blank">Change profile image</a> (using Gravatar)
+            </li>
     	    <li{% if form.bio.errors %} class="error"{% endif %}>
     	      {{ form.bio.label_tag }}
       	      {{ form.bio }}
     	    </li>
-	        ScraperWiki can email you when to let you know if your scrapers are working, if someone else edits them, and  when they were last run.
-            You can control these emails below
+    	    <h3>Email alerts</h3>
+    	    <p>
+    	        ScraperWiki can email you when to let you know if your scrapers are working, if someone else edits them, and when they were last run. You can control the type and frequency of these below.
+    	    </p>
 
         <li{% if form.alert_frequency %} class="error"{% endif %}>
             {{ form.alert_frequency.label_tag }}
-            {{ form.alert_frequency }} in seconds.
+            {{ form.alert_frequency }}
+	        {% field_errors form.alert_frequency %}            
         </li>
         <li{% if form.alert_types %} class="error"{% endif %}>
             {{ form.alert_types.label_tag }}
             {{ form.alert_types }}
+            
         </li>
     
     		<input type="hidden" name="success_url" value="/" />
