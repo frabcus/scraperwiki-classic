@@ -1,0 +1,62 @@
+{% extends "frontend/base.html" %}
+{% load formhelper %}
+
+{% block title %}Edit request{% endblock %}
+
+{% block errors %}
+    {% if form.errors %}
+        <ul>
+            {% form_errors form %}
+        </ul>
+    {% endif %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="page_title">
+        <h1>Edit request</h1>
+        <p>
+             Update your request with new information
+        </p>
+    </div>
+    <div class="content col left">
+
+    	<form method="post" action=".">
+    	    <ul class="form">
+    	        <li class="{% if form.title.errors %}error{% endif %}">
+            	    {{ form.title.label_tag }}
+            	    {{ form.title }}
+        	        {% field_errors form.title %}
+    	        </li>
+    	        <li class="{% if form.link.errors %}error{% endif %}">
+            	    {{ form.link.label_tag }}
+            	    {{ form.link }}
+        	        {% field_errors form.link %}
+    	        </li>
+    	        <li class="{% if form.details.errors %}error{% endif %}">
+            	    {{ form.details.label_tag }}
+            	    {{ form.details }}
+        	        {% field_errors form.details %}
+    	        </li>
+    	        <li class="{% if form.tags.errors %}error{% endif %}">
+            	    {{ form.tags.label_tag }}
+            	    {{ form.tags }}
+        	        {% field_errors form.tags %}
+        	        <small class="hint taghint">e.g. europe<em>,</em> grants<em>,</em> transport</small>
+    	        </li>
+    	        <li class="{% if form.price.errors %}error{% endif %}">
+            	    {{ form.price.label_tag }}
+            	    {{ form.price|safe}}<small>&dagger; (<a href="{% url help %}">what's this?</a>)</small>    
+        	        {% field_errors form.price %}
+    	        </li>
+            </ul>
+            <p>
+<small>* Required field</small><br/>
+                <small>&dagger; For non-zero bounties an additional charge of {{ market_bounty_charge }}% will be added</small>
+            </p>
+    		<input type="submit" class="button" name="login" value="Update your request" />
+    	</form>
+    </div>
+
+<br class="clear" />
+{% endblock %}
