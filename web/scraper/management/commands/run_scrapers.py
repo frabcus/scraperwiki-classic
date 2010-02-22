@@ -52,7 +52,7 @@ class Command(BaseCommand):
         
         elapsed = (time.time() - start)
         if options.get('verbose'): print elapsed
-        
+
         if failed:
             alert_type = 'run_fail'
         else:
@@ -75,8 +75,11 @@ class Command(BaseCommand):
             scrapers = Scraper.objects.get(short_name=options['short_name'], published=True, )
             self.run_scraper(scrapers)
         else:
-            # scrapers = Scraper.objects.exclude(run_interval='never').filter(published=True)
+
+            #get all scrapers where interval > 0 and require running
             scrapers = Scraper.objects.filter(published=True)
+            scrapers = Scraper.objects.filter(interval__gt=0)
+            scrapers = scrapers.extra(where=["ADDTIME(last_run, SEC_TO_TIME(run_interval)) > NOW()"])
             for scraper in scrapers:
                 try:
                     self.run_scraper(scraper, options)

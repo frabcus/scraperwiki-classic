@@ -75,7 +75,7 @@ class Scraper(models.Model):
     has_geo           = models.BooleanField(default=False)
     has_temporal      = models.BooleanField(default=False)
     scraper_sparkline_csv     = models.CharField(max_length=255, null=True)
-    run_interval      = models.CharField(max_length=255, null=True)
+    run_interval      = models.IntegerField(default=0)
 
     objects = managers.scraper.ScraperManager()
       
