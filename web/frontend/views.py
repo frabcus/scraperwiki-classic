@@ -135,7 +135,7 @@ def login(request):
         if request.POST.has_key('login'):
 
             login_form = SigninForm(data=request.POST)
-            user = auth.authenticate(username=request.POST['username'], password=request.POST['password'])
+            user = auth.authenticate(username=request.POST['user_or_email'], password=request.POST['password'])
 
             if user is not None:
                 if user.is_active:
@@ -156,6 +156,11 @@ def login(request):
                 else:
                     # Account exists, but not activated                    
                     error_messages.append("This account has not been activated, please check your email and click on the link to confirm your account")
+
+            else:
+                # Account not found                  
+                error_messages.append("Username or email address not found!")
+
 
         #New user is registering
         elif request.POST.has_key('register'):

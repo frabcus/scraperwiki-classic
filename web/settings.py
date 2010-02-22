@@ -57,6 +57,11 @@ MIDDLEWARE_CLASSES = (
     'django_notify.middleware.NotificationsMiddleware',
 )
 
+AUTHENTICATION_BACKENDS = (
+    'frontend.email_auth.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend'
+)
+
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (

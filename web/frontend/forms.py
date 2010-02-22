@@ -35,7 +35,9 @@ class scraperContactForm(ContactForm):
   title = django.forms.CharField(widget=django.forms.TextInput(), label=u'Subject')
   recipient_list = [settings.FEEDBACK_EMAIL]
 
+
 class SigninForm (AuthenticationForm):
+    user_or_email = django.forms.CharField(label=_(u'Username or email'))
     remember_me = django.forms.BooleanField(widget=django.forms.CheckboxInput(),
                            label=_(u'Remember me'))
 
