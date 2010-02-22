@@ -6,6 +6,8 @@ from django.conf import settings
 from scraper.models import Scraper
 from payment.models import Invoice
 from payment.models import payment_done
+
+import market
 import tagging
 
 
