@@ -6,7 +6,7 @@ from frontend.models import *
 class Migration:
     
     def forwards(self, orm):
-        "Write your forwards migration here"
+        db.alter_column('frontend_userprofile', 'bio', orm['frontend.userprofile:bio'])
     
     
     def backwards(self, orm):
