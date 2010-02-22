@@ -57,6 +57,11 @@ MIDDLEWARE_CLASSES = (
     'django_notify.middleware.NotificationsMiddleware',
 )
 
+AUTHENTICATION_BACKENDS = (
+    'frontend.email_auth.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend'
+)
+
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
@@ -77,7 +82,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
   'frontend.context_processors.template_settings',
 )
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -96,21 +101,29 @@ INSTALLED_APPS = (
   	'market',
   	'piston',      # needs 'django-piston' and 'phpserialize'
   	'api',
-    #'debug_toolbar',
   	'django_notify',
   	'tagging',
   	'django.contrib.humanize',
   	'paypal.standard.ipn',
-)
+  	'mailer',
+  	#'devserver',
+]
 
+# This sort of hack will go when we use proper global settings
+try:
+    # For the excellent (reccomended) devserver: 
+    #   http://github.com/dcramer/django-devserver/blob/master/README.rst
+    # install with pip, and run with:
+    #   python manage.py rundevserver
+    import devserver
+    INSTALLED_APPS.append('devserver')
+except:
+    pass
 
 ACCOUNT_ACTIVATION_DAYS = 14
 
 # tell Django that the frontent user_profile model is to be attached to the user model in the admin side.
 AUTH_PROFILE_MODULE = 'frontend.UserProfile'
-
-# Cal Henderson - youtube presentation on Django
-# rsvg-convert 
 
 INTERNAL_IPS = ('127.0.0.1',)
 

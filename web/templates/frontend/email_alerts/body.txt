@@ -1,0 +1,67 @@
+{% comment %}
+  Format the email.  This is plain text, so we have to have stupidly long 
+  lines to make it look nice.  Sorry about that.
+  
+  Also, indenting here is carried over to the email, so have a care with that 
+  too.
+  
+  TODO: Make better ;)
+  
+{% endcomment %}
+{% spaceless %}
+Hi {{ user.user.username|title }}, 
+
+You are getting this email because you signed up to get email alerts at http://{{ site.domain }}
+
+You can edit these alerts at http://{{ site.domain }}{% url profiles_edit_profile %}
+
+{% if all_alerts.scraper %}
+  {% for alert_type, alerts in all_alerts.scraper.items  %}
+    {% ifequal alert_type "contribute"  %}
+    Scrapers I'm contributing to
+    ============================
+    {% endifequal %}
+    {% for alert in alerts %}
+      {% ifchanged %}
+  {{ alert.content_object }}
+  --------------------------
+      {% endifchanged %} 
+    {% ifchanged %}*{{ alert.datetime|date:"D d M Y" }}*{% endifchanged %}
+      {% ifequal alert.message_type "run_fail" %}Scraper failed to run{% endifequal %}{% ifequal alert.message_type "commit" %}{{ alert.message_value }} Updated the scraper{% endifequal %}{% ifequal alert.message_type "run_success" %}Scraper Ran, taking {{ alert.message_value }}{% endifequal %}
+    {% endfor %}
+  {% endfor %}
+{% endif %}
+
+
+{% if all_alerts.solicitation %}
+{% if all_alerts.solicitation.Comments  %}
+Comments on your data requests
+==============================
+{% for comment in all_alerts.solicitation.Comments %}
+{{ comment.user }} said:
+{{ comment.comment|truncatewords:100 }}
+
+{% endfor %}
+{% endif %}
+
+
+{% if all_alerts.solicitation.new_solicitation  %}
+New Data requests in the market
+===============================
+{% for alert in all_alerts.solicitation.new_solicitation %}
+{{ alert.title }}: £{{ alert.price }}
+{{ alert.details|truncatewords:100 }}
+{% ifchanged %}{{ alert.content_object }}
+--------------------------
+{% endifchanged %} 
+{% endfor %}
+{% endif %}
+
+
+
+
+
+
+
+{% endif %}
+{% endspaceless %}

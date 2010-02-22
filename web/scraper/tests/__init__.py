@@ -1,0 +1,1 @@
+from scraper.tests.views import *

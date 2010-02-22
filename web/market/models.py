@@ -6,6 +6,8 @@ from django.conf import settings
 from scraper.models import Scraper
 from payment.models import Invoice
 from payment.models import payment_done
+
+import market
 import tagging
 
 
@@ -47,11 +49,12 @@ class Solicitation(models.Model):
     created_at = models.DateTimeField(auto_now_add = True)
     deleted = models.BooleanField()
     price = models.IntegerField(null=True, blank=True)
-
     user_created = models.ForeignKey(User)
-    status = models.ForeignKey(SolicitationStatus)    
+    status = models.ForeignKey(SolicitationStatus)
     scraper = models.ForeignKey(Scraper, null=True, blank=True)
 
+    objects = models.Manager()
+    
     def has_bounty(self):
         return self.price > 0
 

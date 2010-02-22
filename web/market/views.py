@@ -13,6 +13,8 @@ from django.core.mail import send_mail
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
 
+from collections import defaultdict
+
 from paypal.standard.forms import PayPalPaymentsForm
 
 from market import models
@@ -22,7 +24,6 @@ from scraper.models import Scraper
     
     
 def solicitation (request):
-
     form = forms.SolicitationForm()    
     if request.method == 'POST':
         form = forms.SolicitationForm(data=request.POST, files=request.FILES)
@@ -41,6 +42,30 @@ def solicitation (request):
     recent_solicitations = models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')[:5]  
     return render_to_response('market/solicitation.html', {'form': form, 'recent_solicitations' : recent_solicitations, 'market_bounty_charge': settings.MARKET_BOUNTY_CHARGE }, context_instance = RequestContext(request))
 
+@login_required
+# edit an existing soliciation - can only do this if you are the owner
+def edit(request, solicitation_id):
+    solicitation = get_object_or_404(models.Solicitation, id=solicitation_id)
+	#check if open, redirect if not
+    if solicitation.status.status != 'open':
+        return HttpResponseRedirect(reverse('market_view', args=(solicitation_id,)))
+    #check user owns it, redirect if not
+    if (solicitation.user_created == request.user):
+        if request.method == 'POST':
+            form = forms.SolicitationForm(request.POST, instance=solicitation)
+            if form.is_valid():
+                solicitation = form.save(commit=False)
+                solicitation.user_created = request.user
+                solicitation.save()
+                solicitation.tags = request.POST.get('tags')                
+                return HttpResponseRedirect(reverse('market_view', args=(solicitation_id,)))
+        else:
+            solicitation.__dict__['tags'] = ", ".join(tag.name for tag in solicitation.tags)
+            form = forms.SolicitationForm(solicitation.__dict__, instance=solicitation)
+            return render_to_response('market/market_edit.html', {'form': form, 'market_bounty_charge': settings.MARKET_BOUNTY_CHARGE }, context_instance = RequestContext(request))
+    else:
+	    return HttpResponseRedirect(reverse('market_view', args=(solicitation_id,)))
+
 def market_list (request, mode='open'):
 
     #TODO: move this to a seperate view
@@ -49,6 +74,7 @@ def market_list (request, mode='open'):
     if session_solicitation_draft:
         session_solicitation_draft.user_created = request.user
         session_solicitation_draft.save()
+        del request.session['SolicitationDraft']            
 
     #get all scrapers not marked deleted or
     status = models.SolicitationStatus.objects.get(status=mode)
@@ -57,9 +83,56 @@ def market_list (request, mode='open'):
 
 def single (request, solicitation_id):
     solicitation = get_object_or_404(models.Solicitation, id=solicitation_id)
+    solicitation_tags = Tag.objects.get_for_object(solicitation)
     status = models.SolicitationStatus.objects.get(status='open')
     recent_solicitations = models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')[:5]    
-    return render_to_response('market/market_single.html', {'solicitation': solicitation, 'recent_solicitations': recent_solicitations}, context_instance = RequestContext(request))
+    return render_to_response('market/market_single.html', {'solicitation': solicitation, 'solicitation_tags': solicitation_tags, 'recent_solicitations': recent_solicitations}, context_instance = RequestContext(request))
+
+def tag(request, tag):
+    from tagging.utils import get_tag
+    from tagging.models import Tag, TaggedItem
+
+    tag = get_tag(tag)
+
+    # possibly not the best way of doing this
+    status = models.SolicitationStatus.objects.get(status='open')
+    solicitations_open = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
+    status = models.SolicitationStatus.objects.get(status='pending')
+    solicitations_pending = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
+    status = models.SolicitationStatus.objects.get(status='completed')
+    solicitations_complete = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
+    queryset_open = TaggedItem.objects.get_by_model(solicitations_open, tag)
+    queryset_pending = TaggedItem.objects.get_by_model(solicitations_pending, tag)	
+    queryset_complete = TaggedItem.objects.get_by_model(solicitations_complete, tag)
+
+    # calculate percentage complete 
+    closed_count = queryset_complete.count()
+    total_count = queryset_open.count() + queryset_pending.count() + queryset_complete.count()
+    percentage_complete = (float(closed_count)/float(total_count)) * 100
+
+    # calculate top scraper writers, and sort
+    writers = []
+    for closed in queryset_complete:
+	    temp_user = closed.scraper.owner()
+	    writers.append(temp_user)
+    top_writers = leaders(writers)
+
+    return render_to_response('market/tag.html', {
+        'queryset_open': queryset_open, 
+        'queryset_pending': queryset_pending, 
+        'queryset_complete': queryset_complete, 
+        'closed_count': closed_count, 
+        'total_count': total_count, 
+        'percentage_complete': percentage_complete, 
+        'top_writers': top_writers, 
+        'tag' : tag,
+    }, context_instance = RequestContext(request))
+
+def leaders(xs, top=5):
+    counts = defaultdict(int)
+    for x in xs:
+        counts[x] += 1
+    return sorted(counts.items(), reverse=True, key=lambda tup: tup[1])[:top]
 
 @login_required
 def claim (request, solicitation_id):
@@ -67,7 +140,7 @@ def claim (request, solicitation_id):
     #this is a custom form, so we need to pass the user_id
     user_id = request.user.pk
     solicitation = get_object_or_404(models.Solicitation, id=solicitation_id)
-    form = forms.SolicitationClaimForm(instance = solicitation, user_id = user_id)
+    form = forms.SolicitationClaimForm(instance=solicitation, user_id=user_id)
 
     #check if open
     if solicitation.status.status != 'open':

@@ -1,7 +1,7 @@
 import django.forms
 from django.conf import settings
-from django.forms import ModelForm, ChoiceField
-from frontend.models import UserProfile
+from django import forms
+from frontend.models import UserProfile, AlertTypes
 from contact_form.forms import ContactForm
 from registration.forms import RegistrationForm
 from django.utils.translation import ugettext_lazy as _
@@ -11,20 +11,33 @@ from django.contrib.auth.forms import AuthenticationForm
 
 #from django.forms.extras.widgets import Textarea
 
-class UserProfileForm (ModelForm):
+class UserProfileForm (forms.ModelForm):
+    alert_frequency = forms.ChoiceField(required=False, label="How often do you want to be emailed?", choices = (
+                                ('', 'Never'), 
+                                (3600*24, 'Once a day'),
+                                (3600*24*3, 'Every couple of days'),                                
+                                (3600*24*7, 'Once a week'),
+                                (3600*24*7*2, 'Every two weeks'),))
 
-    alert_frequency = ChoiceField(required=False, choices = ((0, 'Instant'), (3600, 'Once an hour')))
+    options = []
+    for item in AlertTypes.objects.all():
+        options.append((item.pk, item.label))
 
+    alert_types = forms.MultipleChoiceField(options, widget=forms.CheckboxSelectMultiple())
+    bio = forms.CharField(label="A bit about you", widget=forms.Textarea())
+    
     class Meta:
         model = UserProfile
-        fields = ('bio',)
+        fields = ('bio','alert_frequency', 'alert_types')
 
 class scraperContactForm(ContactForm):
   subject_dropdown = django.forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request a private scraper'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))
   title = django.forms.CharField(widget=django.forms.TextInput(), label=u'Subject')
   recipient_list = [settings.FEEDBACK_EMAIL]
 
+
 class SigninForm (AuthenticationForm):
+    user_or_email = django.forms.CharField(label=_(u'Username or email'))
     remember_me = django.forms.BooleanField(widget=django.forms.CheckboxInput(),
                            label=_(u'Remember me'))
 

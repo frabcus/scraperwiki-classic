@@ -76,8 +76,8 @@ def commit(scraper, message="changed", user="unknown"):
     message = "changed"
   
   ui.pushbuffer()
-  commands.commit(ui, r, path, addremove=True, message=str(message), user=str(user))
-  code = ui.popbuffer()
+  rev = commands.commit(ui, r, path, addremove=True, message=str(message), user=str(user))
+  code = ui.popbuffer()  
   return ""
 
 def get_code(scraper_name=None, committed=True, rev='tip'):
@@ -146,10 +146,14 @@ def diff(a, b=None, rev='tip', scraper_name=None):
   return x
     # yield line
 
-
-# find the range in the code so we can show a watching user who has clicked on refresh what has just been edited
-# this involves doing sequence matching on the lines, and then sequence matching on the first and last lines that differ
 def DiffLineSequenceChanges(oldcode, newcode):
+    """
+    Find the range in the code so we can show a watching user who has clicked
+    on refresh what has just been edited this involves doing sequence matching
+    on the lines, and then sequence matching on the first and last lines that
+    differ    
+    """
+    
     a = oldcode.splitlines()
     b = newcode.splitlines()
     sqm = difflib.SequenceMatcher(None, a, b)
@@ -191,8 +195,10 @@ def DiffLineSequenceChanges(oldcode, newcode):
     else:
         matchcharsback = 0
     matchcharsbackb = len(b[matchlinesbackb]) - matchcharsback
-    return (matchlinesfront, matchcharsfront, matchlinesbackb, matchcharsbackb)  #, matchingcblocksback, (len(a[matchlinesbacka]) - matchingcblocksback[-2][2], len(b[matchlinesbackb]) - matchingcblocksback[-2][2]))
-
+    return (matchlinesfront, matchcharsfront, matchlinesbackb, matchcharsbackb)
+      #, matchingcblocksback, (len(a[matchlinesbacka]) -
+      #  matchingcblocksback[-2][2], len(b[matchlinesbackb]) - 
+      #  matchingcblocksback[-2][2]))
 
 
 

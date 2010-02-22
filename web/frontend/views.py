@@ -71,8 +71,11 @@ def my_scrapers(request):
 	user = request.user
 
 	if user.is_authenticated():
+	    
+	    #scrapers
 		owned_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
 		owned_count = len(owned_scrapers) 
+		
 		# needs to be expanded to include scrapers you have edit rights on.
 		contribution_scrapers = user.scraper_set.filter(userscraperrole__role='editor', deleted=False)
 		contribution_count = len(contribution_scrapers)
@@ -91,7 +94,10 @@ def profile_detail(request, username):
 			profiled_user = User.objects.get(username=username)
 		except User.DoesNotExist:
 			raise Http404
-                owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True, deleted=False)
+
+        owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True, deleted=False)
+		solicitations = market.models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')[:5]        
+		
 		if request.method == 'POST': # if follow form has been submitted
 			if user.is_authenticated():
 				if (profiled_user in user.to_user.following()):
@@ -135,7 +141,7 @@ def login(request):
         if request.POST.has_key('login'):
 
             login_form = SigninForm(data=request.POST)
-            user = auth.authenticate(username=request.POST['username'], password=request.POST['password'])
+            user = auth.authenticate(username=request.POST['user_or_email'], password=request.POST['password'])
 
             if user is not None:
                 if user.is_active:
@@ -156,6 +162,11 @@ def login(request):
                 else:
                     # Account exists, but not activated                    
                     error_messages.append("This account has not been activated, please check your email and click on the link to confirm your account")
+
+            else:
+                # Account not found                  
+                error_messages.append("Sorry, but we could not find that username or email address")
+
 
         #New user is registering
         elif request.POST.has_key('register'):
