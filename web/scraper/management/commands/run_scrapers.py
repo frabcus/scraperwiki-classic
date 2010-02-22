@@ -58,7 +58,11 @@ class Command(BaseCommand):
         else:
             alert_type = 'run_success'
 
-        
+        # Update the scrapers meta information                    
+        scraper.update_meta()
+        scraper.last_run = datetime.datetime.now()
+        scraper.save()
+
         # Log this run event to the history table
         alert = Alerts()
         alert.content_object = scraper
@@ -76,10 +80,6 @@ class Command(BaseCommand):
             for scraper in scrapers:
                 try:
                     self.run_scraper(scraper, options)
-                    # Update the scrapers meta information                    
-                    scraper.update_meta()
-                    scraper.last_run = datetime.datetime.now()
-                    scraper.save()
                 except Exception, e:
                     print "Error running scraper: " + scraper.title
                     print e
