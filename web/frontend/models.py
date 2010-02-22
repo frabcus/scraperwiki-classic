@@ -95,7 +95,7 @@ class UserProfile(models.Model):
     outside of this application.
     """
     user             = models.ForeignKey(User, unique=True)
-    bio              = models.TextField(blank=True)
+    bio              = models.TextField(blank=True, null=True)
     created_at       = models.DateTimeField(auto_now_add=True)
     alerts_last_sent = models.DateTimeField(auto_now_add=True)
     alert_frequency  = models.IntegerField(null=True, blank=True)
