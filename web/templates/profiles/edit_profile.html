@@ -23,37 +23,39 @@
     </div>
     <div class="content col left">
     	<form method="post">
-    	  <ul class="form">
-    	    <li> 
-                <label>Profile picture</label> 
-                {% load gravatar %}
-                {% show_gravatar profile.user 'large' %}
-                <a href="http://en.gravatar.com" target="_blank">Change profile image</a> (using Gravatar)
-            </li>
-    	    <li{% if form.bio.errors %} class="error"{% endif %}>
-    	      {{ form.bio.label_tag }}
-      	      {{ form.bio }}
-    	    </li>
-    	    <h3>Email alerts</h3>
-    	    <p>
-    	        ScraperWiki can email you when to let you know if your scrapers are working, if someone else edits them, and when they were last run. You can control the type and frequency of these below.
-    	    </p>
-
-        <li{% if form.alert_frequency %} class="error"{% endif %}>
-            {{ form.alert_frequency.label_tag }}
-            {{ form.alert_frequency }}
-	        {% field_errors form.alert_frequency %}            
-        </li>
-        <li{% if form.alert_types %} class="error"{% endif %}>
-            {{ form.alert_types.label_tag }}
-            {{ form.alert_types }}
-            
-        </li>
-    
-    		<input type="hidden" name="success_url" value="/" />
-    		<input type="submit" class="button" value="Save" />
-    		</ul>
-    
+            <ul class="form">
+                <li> 
+                    <label>Profile picture</label> 
+                    {% load gravatar %}
+                    {% show_gravatar profile.user 'large' %}
+                    <a href="http://en.gravatar.com" target="_blank">Change profile image</a> (using Gravatar)
+                </li>
+                <li{% if form.bio.errors %} class="error"{% endif %}>
+                    {{ form.bio.label_tag }}
+                    {{ form.bio }}
+                    {% field_errors form.bio %}                      
+                </li>
+            </ul>
+            <h3>Email alerts</h3>
+            <p>
+            ScraperWiki can email you when to let you know if your scrapers are working, if someone else edits them, and when they were last run. You can control the type and frequency of these below.
+            </p>
+            <ul class="form"> 
+                <li{% if form.alert_frequency.errors %} class="error"{% endif %}>
+                    {{ form.alert_frequency.label_tag }}
+                    {{ form.alert_frequency }}
+                    {% field_errors form.alert_frequency %}            
+                </li>
+                <li class="checkboxes">
+                    {{form.alert_types}}
+                </li>
+            </ul>
+            <div class="buttons">
+                <input type="hidden" name="success_url" value="/" />
+                <input type="submit" class="button" value="Save changes" />
+            </div>
     	</form>
     </div>
+    <div class="content col right">
+    </div>    
 {% endblock %}

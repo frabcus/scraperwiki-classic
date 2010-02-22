@@ -555,6 +555,7 @@ $(document).ready(function() {
                 license : $('#id_license').val(),
                 description : $('#id_description').val(),
                 run_interval : $('#id_run_interval').val(),
+                commit_message: $('#id_commit_message').val(),
                 code : codeeditor.getCode(),
                 action : form_action
                 }),

@@ -9,7 +9,7 @@
   {% for item in history %}
     <tr>
       <td>
-        {{ item.datetime }}
+        {{ item.datetime|date:"D j M Y, H:i" }}
       </td>
       <td>
 
