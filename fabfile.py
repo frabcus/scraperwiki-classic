@@ -49,6 +49,8 @@ def virtualenv(command):
 def buildout():
   virtualenv('buildout')
 
+def install_cron():
+    run('crontab crontab')
 
 def deploy():
     """
@@ -69,6 +71,7 @@ def deploy():
     
     buildout()
     migrate()
+    install_cron()
     restart_webserver()   
 
     sudo("""
