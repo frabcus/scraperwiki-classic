@@ -7,14 +7,12 @@
 {% block content %}
 
     <div class="page_title">
-    <div style="float: left;">
 		<h1>{{ profile.user.username }}'s profile</h1>
-		<br/>
 		{% show_gravatar profile.user 'large' %} 
 		<p>{{ profile.bio }}</p>
 	</div>
 	
-	<div  style="float: right; text-align: right;"> 
+	<div class="content"> 
 		 {% ifequal profile.user.username user.username %}
 	     <a href="/profiles/edit/">Edit your profile</a>
 
@@ -34,106 +32,24 @@
 
         {% endifequal %}
 	</div>
-	
-	<div style="clear:both;"></div>
-	
-	</div>
-
 		
 	<div class="content">
-	<div style="float: left;">
-		    	<h2>{{ profile.user.username }}'s published scrapers</h2>
-    	<ul>  
-	{%  if owned_scrapers %}
-        	{% for scraper in owned_scrapers %}
-        	          {% include 'frontend/scraper_line.html' %}
-        	{% endfor %}
-     {% else %}
-	No scrapers yet 
-     {% endif %}
-	    </ul> 	
+    	{%  if owned_scrapers %}
+	        <h2>{{ profile.user.username }}'s published scrapers</h2>    	
+    	    <ul>	        
+                {% for scraper in owned_scrapers %}
+            	    {% include 'frontend/scraper_line.html' %}
+            	{% endfor %}
+	        </ul> 	            	
+         {% endif %}
+         {%  if solicitations %}
+ 	        <h2>{{ profile.user.username }}'s requests for datasets</h2>    	
+     	    <ul>	        
+                {% for solicitation in solicitations %}
+                    XX
+             	{% endfor %}
+ 	        </ul> 	            	
+          {% endif %}
     </div>
-
-{% comment %} [APS: remove following/watching features for now]
-    
-    <div style="float: right; ">
-
-    	<h2>Scrapers {% ifequal profile.user.username user.username %} you are {% else %} {{ profile.user.username }} is {% endifequal %} watching</h2>
-    	
-    	{% if  profile.user.scraper_set.not_watching_any %}
-    	  <p>
-        {% ifequal profile.user.username user.username %}
-          You are 
-         {% else  %}
-          {{ profile.user.username }} is
-          {% endifequal %}
-           not watching any scrapers</p>
-    	{% else %}
-    	  <ul>
-    		{% for scraper in profile.user.scraper_set.watching %}	
-    		  {% include 'frontend/detailed_scraper_line.html' %}
-    		{% endfor %}
-    	  </ul>
-    	{% endif %}
-    	
-    	<h2>People {% ifequal profile.user.username user.username %} you are {% else %} {{ profile.user.username }} is {% endifequal %} following</h2>
-    	
-    	{% if profile.user.to_user.not_following_anyone %}
-    	  <p>
-    	
-		 {% ifequal profile.user.username user.username %}
-          You are 
-         {% else  %}
-          {{ profile.user.username }} is
-        {% endifequal %}
-        not following anyone</p>
-          
-        {% else %}
-          <ul> 
-            {% for other_user in profile.user.to_user.following %}
-			<li>{% show_gravatar other_user 'small' %}
-			 <a href='{% url profiles_profile_detail other_user %}'>
-					                {{ other_user.username }}
-			 </a>	
-            </li>
-    	    {% endfor %}
-    	  </ul>  
-
-        {% endif %} 
-
-
-
-
-        
-            	<!-- 
-            	
-            	
-            	<h2>People who follow {% ifequal profile.user.username user.username %} you {% else %} {{ profile.user.username }} {% endifequal %}</h2>    	
-    	
-    	{% if profile.user.from_user.not_followed_by_anyone %}
-    	  <p>
-    	No-one is following
-		 {% ifequal profile.user.username user.username %}
-          you
-         {% else  %}
-          {{ profile.user.username }} 
-        {% endifequal %}
-        yet</p>
-          
-        {% else %}
-          <ul> 
-            {% for other_user in profile.user.from_user.followed_by %}
-              {% show_gravatar profile.user 'medium' %} 
-    	      {% include 'frontend/user_line.html' %}
-    	    {% endfor %}
-    	  </ul>  
-        {% endif %}
-        -->
-        </div>
-
-{% endcomment %}
-        </div>
-
-    <div style="clear:both;"></div>
     
     {% endblock %}

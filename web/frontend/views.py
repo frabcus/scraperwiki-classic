@@ -71,8 +71,11 @@ def my_scrapers(request):
 	user = request.user
 
 	if user.is_authenticated():
+	    
+	    #scrapers
 		owned_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
 		owned_count = len(owned_scrapers) 
+		
 		# needs to be expanded to include scrapers you have edit rights on.
 		contribution_scrapers = user.scraper_set.filter(userscraperrole__role='editor', deleted=False)
 		contribution_count = len(contribution_scrapers)
@@ -91,7 +94,10 @@ def profile_detail(request, username):
 			profiled_user = User.objects.get(username=username)
 		except User.DoesNotExist:
 			raise Http404
-                owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True, deleted=False)
+
+        owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True, deleted=False)
+		solicitations = market.models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')[:5]        
+		
 		if request.method == 'POST': # if follow form has been submitted
 			if user.is_authenticated():
 				if (profiled_user in user.to_user.following()):
