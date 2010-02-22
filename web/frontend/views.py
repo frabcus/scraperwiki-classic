@@ -159,7 +159,7 @@ def login(request):
 
             else:
                 # Account not found                  
-                error_messages.append("Username or email address not found!")
+                error_messages.append("Sorry, but we could not find that username or email address")
 
 
         #New user is registering
