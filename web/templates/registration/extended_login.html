@@ -33,9 +33,9 @@
     	    </fieldset>
     	    <ul class="form">
     	        <li{% if login_form.username.errors %} class="error"{% endif %}>
-            	    {{ login_form.username.label_tag }}
-            	    {{ login_form.username }}
-        	        {% field_errors login_form.username %}
+            	    {{ login_form.user_or_email.label_tag }}
+            	    {{ login_form.user_or_email }}
+        	        {% field_errors login_form.user_or_email %}
     	        </li>
     	        <li{% if login_form.password.errors %} class="error"{% endif %}>
         	        {{ login_form.password.label_tag }}
