@@ -53,7 +53,7 @@ class Alerts(models.Model):
     object_id = models.PositiveSmallIntegerField(blank=True, null=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     message_type = models.CharField(blank=False, max_length=100)
-    message_value = models.CharField(blank=True, max_length=5000)
+    message_value = models.CharField(blank=True, null=True, max_length=5000)
     meta = models.CharField(blank=True, max_length=1000)
     message_level = models.IntegerField(blank=True, null=True, default=0)
     datetime = models.DateTimeField(blank=False, default=datetime.datetime.now)

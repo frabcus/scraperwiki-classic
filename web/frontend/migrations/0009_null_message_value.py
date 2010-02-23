@@ -6,11 +6,19 @@ from frontend.models import *
 class Migration:
     
     def forwards(self, orm):
-        db.alter_column('frontend_userprofile', 'bio', orm['frontend.userprofile:bio'])
+        
+        # Changing field 'Alerts.message_value'
+        # (to signature: django.db.models.fields.CharField(max_length=5000, null=True, blank=True))
+        db.alter_column('frontend_alerts', 'message_value', orm['frontend.alerts:message_value'])
+        
     
     
     def backwards(self, orm):
-        "Write your backwards migration here"
+        
+        # Changing field 'Alerts.message_value'
+        # (to signature: django.db.models.fields.CharField(max_length=5000, blank=True))
+        db.alter_column('frontend_alerts', 'message_value', orm['frontend.alerts:message_value'])
+        
     
     
     models = {
@@ -54,7 +62,7 @@ class Migration:
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'message_level': ('django.db.models.fields.IntegerField', [], {'default': '0', 'null': 'True', 'blank': 'True'}),
             'message_type': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'message_value': ('django.db.models.fields.CharField', [], {'max_length': '5000', 'blank': 'True'}),
+            'message_value': ('django.db.models.fields.CharField', [], {'max_length': '5000', 'null': 'True', 'blank': 'True'}),
             'meta': ('django.db.models.fields.CharField', [], {'max_length': '1000', 'blank': 'True'}),
             'object_id': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'blank': 'True'})
