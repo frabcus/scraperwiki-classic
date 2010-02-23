@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.template import loader, Context
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+
 from scraper.models import Scraper
 from payment.models import Invoice
 from payment.models import payment_done
@@ -120,6 +122,10 @@ class Solicitation(models.Model):
    
     def __unicode__(self):
         return "%s (%s)" % (self.title, self.price)
+    
+    def content_type(self):
+        return ContentType.objects.get(app_label="market", model="Solicitation")
+    
 
 #register tags
 tagging.register(Solicitation)

@@ -23,7 +23,7 @@ class AlertTypes(models.Model):
         'owning' and 'contributing'.
     """
     content_type = models.ForeignKey(ContentType)
-    name = models.CharField(blank=True, max_length=100)
+    name = models.CharField(blank=True, max_length=100, unique=True)
     label = models.CharField(blank=True, max_length=500)
     applies_to = models.CharField(blank=False, max_length=100)
     
@@ -102,6 +102,26 @@ class UserProfile(models.Model):
     alert_types      = models.ManyToManyField(AlertTypes)
     
     objects = models.Manager()
+    
+
+    def save(self):
+        new = False
+        if not self.pk:
+            new = True
+        
+        #do the parent save
+        super(UserProfile, self).save()
+        
+        if new:
+            # This is a new object
+            # Create some default alerts.
+            # By default, all alerts relating to scrapers are activated.
+            from scraper.models import Scraper
+            scraper_content_type = Scraper().content_type()
+            default_alerts = AlertTypes.objects.filter(
+                                            content_type=scraper_content_type)
+            self.alert_types = default_alerts
+        
     
     def __unicode__(self):
         return unicode(self.user)
