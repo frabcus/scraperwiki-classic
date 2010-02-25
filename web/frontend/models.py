@@ -121,7 +121,9 @@ class UserProfile(models.Model):
             default_alerts = AlertTypes.objects.filter(
                                             content_type=scraper_content_type)
             self.alert_types = default_alerts
-        
+            #do the parent save again, now with default alerts
+            super(UserProfile, self).save()
+            
     
     def __unicode__(self):
         return unicode(self.user)
@@ -159,8 +161,8 @@ class UserToUserRole(models.Model):
     """
         PRM: I did not want to have many different ways of connecting one user to another, so
         this class embodies any and all connections from one user to another. Following, etc.
-	"""
-	
+    """
+
     objects = UserRoleManager()
     
     from_user = models.ForeignKey(User, related_name='to_user')
@@ -175,7 +177,7 @@ from registration.signals import user_registered
 def create_user_profile(sender, **kwargs):
     user = kwargs['user']
     profile = UserProfile(user=user, alert_frequency=60*60*24)
-    profile.save()
+    profile.save()  
 
 user_registered.connect(create_user_profile)
 
