@@ -119,10 +119,7 @@ class UserProfile(models.Model):
             # This is a new object
             # Create some default alerts.
             # By default, all alerts relating to scrapers are activated.
-            from scraper.models import Scraper
-            scraper_content_type = Scraper().content_type()
-            default_alerts = AlertTypes.objects.filter(
-                                            content_type=scraper_content_type)
+            default_alerts = AlertTypes.objects.all()
             self.alert_types = default_alerts
             #do the parent save again, now with default alerts
             super(UserProfile, self).save()

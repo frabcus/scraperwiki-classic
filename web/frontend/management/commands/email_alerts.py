@@ -155,6 +155,7 @@ class Command(BaseCommand):
         if 'solicitation' not in self.all_alerts:
             self.all_alerts['solicitation'] = {}
         if alerts:
+            self.alert_counter += len(alerts)
             self.all_alerts['solicitation'][alert_wanted.name] = alerts
 
     def handle(self, **options):
