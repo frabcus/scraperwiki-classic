@@ -36,12 +36,26 @@ The following scrapers ran successfully:
     http://{{ site.domain }}{% url scraper_history alert.content_object.short_name %}
 {% endfor %}
 {% endif %}
+{% if all_alerts.scraper.scraper_comment  %}
+Comments on your scrapers
+=========================
+{% for comment in all_alerts.scraper.scraper_comment %}
+    {% ifchanged %}{{ comment.content_object.title }}
+    http://{{ site.domain }}{% url scraper_comments comment.content_object  %}
+    {% endifchanged %}
+    - {{ comment.user }} said:
+      {{ comment.comment|truncatewords:100 }}
+{% endfor %}
+{% endif %}
 {% if all_alerts.solicitation.market_comment  %}
 Comments on your data requests:
 ===============================
 {% for comment in all_alerts.solicitation.market_comment %}
-  - {{ comment.user }} said:
-    {{ comment.comment|truncatewords:100 }}
+  {% ifchanged %}{{ comment.content_object.title }}
+  http://{{ site.domain }}{% url market_view comment.content_object.pk  %}
+  {% endifchanged %}
+    - {{ comment.user }} said:
+      {{ comment.comment|truncatewords:100 }}
 {% endfor %}
 {% endif %}
 {% if all_alerts.solicitation.new_solicitations  %}

@@ -89,7 +89,7 @@ class Command(BaseCommand):
             * contribute
             * follow
         """
-        
+
         if applies_to == "contribute":
             roles = ['owner', 'editor']
         elif applies_to == "follow":
@@ -100,13 +100,21 @@ class Command(BaseCommand):
                 self.user.user.scraper_set.filter(
                     userscraperrole__role__in=roles, deleted=False),
             'alert_type': alert_wanted.name}
-
-        alerts = Alerts.objects.filter(
-            message_type=alert_objects['alert_type'],
-            datetime__gt=self.user.alerts_last_sent,
-            content_type=content_type_id,
-            object_id__in=[i.pk for i in alert_objects['models']])\
-            .order_by('-datetime')
+        
+        if alert_wanted.name == "scraper_comment":
+            alerts = Comment.objects.filter(
+                content_type=content_type_id,
+                object_pk__in=[i.pk for i in alert_objects['models']],
+                submit_date__gt=self.user.alerts_last_sent,
+                is_public=True,
+                is_removed=False,)
+        else:
+            alerts = Alerts.objects.filter(
+                message_type=alert_objects['alert_type'],
+                datetime__gt=self.user.alerts_last_sent,
+                content_type=content_type_id,
+                object_id__in=[i.pk for i in alert_objects['models']])\
+                .order_by('-datetime')
         self.alert_counter += len(alerts)
 
         if unicode(alert_wanted) == "run_fail":
@@ -126,7 +134,8 @@ class Command(BaseCommand):
         """
 
         all_objects = Solicitation.objects.all()
-
+        alerts = None
+        
         if applies_to == "all":
             # Gets all objects creted since the alerts were last sent
             alerts = all_objects.filter(
@@ -139,11 +148,14 @@ class Command(BaseCommand):
             alerts = Comment.objects.filter(
                 content_type=content_type_id,
                 object_pk__in=[i.pk for i in all_objects],
-                submit_date__gt=self.user.alerts_last_sent)
+                submit_date__gt=self.user.alerts_last_sent,
+                is_public=True,
+                is_removed=False,)
             self.alert_counter += len(alerts)
         if 'solicitation' not in self.all_alerts:
             self.all_alerts['solicitation'] = {}
-        self.all_alerts['solicitation'][alert_wanted.name] = alerts
+        if alerts:
+            self.all_alerts['solicitation'][alert_wanted.name] = alerts
 
     def handle(self, **options):
         """

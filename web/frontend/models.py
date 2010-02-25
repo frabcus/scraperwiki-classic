@@ -23,7 +23,9 @@ class AlertTypes(models.Model):
         'owning' and 'contributing'.
     """
     content_type = models.ForeignKey(ContentType)
-    name = models.CharField(blank=True, max_length=100, unique=True)
+    name = models.CharField(blank=True, 
+                            max_length=100, 
+                            unique=True)
     label = models.CharField(blank=True, max_length=500)
     applies_to = models.CharField(blank=False, max_length=100)
     
