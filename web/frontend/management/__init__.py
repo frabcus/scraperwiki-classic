@@ -25,7 +25,7 @@ def create_alert_types(*args, **kwargs):
     if kwargs['app'] == 'frontend':
         
         # delete all old alert types
-        frontend.AlertTypes.all().delete()
+        frontend.AlertTypes.objects.all().delete()
         
         # Scraper alerts:
         content_pk = scraper.Scraper().content_type()

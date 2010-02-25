@@ -33,6 +33,7 @@ class AlertTypes(models.Model):
     class Meta:
         verbose_name_plural = "Alert Types"
         verbose_name = "Alert Type"
+        ordering = ['-content_type']
 
 class Alerts(models.Model):
     """
