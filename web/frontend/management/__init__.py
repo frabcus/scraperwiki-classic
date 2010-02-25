@@ -23,6 +23,10 @@ from market import models as market
 
 def create_alert_types(*args, **kwargs):
     if kwargs['app'] == 'frontend':
+        
+        # delete all old alert types
+        frontend.AlertTypes.all().delete()
+        
         # Scraper alerts:
         content_pk = scraper.Scraper().content_type()
 
@@ -62,12 +66,12 @@ def create_alert_types(*args, **kwargs):
             {
                 "name": "new_solicitations",
                 "applies_to": "all", 
-                "label": "New requests for data",
+                "label": "When someone requests a new dataset to be scraped",
             },
             {
                 "name": "market_comment", 
                 "applies_to": "comments", 
-                "label": "When someone comments on a date request I've made"
+                "label": "When someone comments on a data request I've made"
             },
         )
         for alert in alert_types:

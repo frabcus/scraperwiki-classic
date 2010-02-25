@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+
 # m h  dom mon dow   command
 
 # Run scrapers ar 44 minutes passed midnight every day

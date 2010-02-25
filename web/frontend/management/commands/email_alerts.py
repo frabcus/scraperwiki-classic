@@ -43,6 +43,7 @@ class Command(BaseCommand):
         self.all_alert_objects = {}
         self.all_alerts = {}
         self.alert_counter = 0
+        self.broken_scrapers = 0
         self.options = {}
         super(Command, self).__init__()
 
@@ -60,6 +61,8 @@ class Command(BaseCommand):
         # RequestContext in render_to_string, so we build it manually
         template_data = {
             'all_alerts': all_alerts,
+            'alert_counter' : self.alert_counter,
+            'broken_scrapers' : self.broken_scrapers,
             'user': user,
             'site': Site.objects.get(id=settings.SITE_ID),
         }
@@ -69,6 +72,7 @@ class Command(BaseCommand):
         email_body = render_to_string('frontend/email_alerts/body.txt',
                         template_data)
         if self.options.get('verbose'):
+            print email_subject
             print email_body
         user_email = user.user.email
         if not self.options.get('dry-run'):
@@ -85,6 +89,7 @@ class Command(BaseCommand):
             * contribute
             * follow
         """
+        
         if applies_to == "contribute":
             roles = ['owner', 'editor']
         elif applies_to == "follow":
@@ -103,6 +108,10 @@ class Command(BaseCommand):
             object_id__in=[i.pk for i in alert_objects['models']])\
             .order_by('-datetime')
         self.alert_counter += len(alerts)
+
+        if unicode(alert_wanted) == "run_fail":
+             self.broken_scrapers += len(alerts)
+             
         if 'scraper' not in self.all_alerts:
             self.all_alerts['scraper'] = {}
         self.all_alerts['scraper'][alert_wanted.name] = alerts

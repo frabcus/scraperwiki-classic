@@ -998,44 +998,14 @@
         }
     }, 
     {
-        "pk": 4, 
-        "model": "frontend.alerttypes", 
-        "fields": {
-            "applies_to": "contribute", 
-            "name": "run_fail", 
-            "content_type": 18, 
-            "label": "when a scraper I contribute to fails"
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "frontend.alerttypes", 
-        "fields": {
-            "applies_to": "contribute", 
-            "name": "commit", 
-            "content_type": 18, 
-            "label": "when the code in a scraper I contribute to is changed"
-        }
-    }, 
-    {
-        "pk": 5, 
-        "model": "frontend.alerttypes", 
-        "fields": {
-            "applies_to": "contribute", 
-            "name": "run_success", 
-            "content_type": 18, 
-            "label": "when a scraper I contribute to is run"
-        }
-    }, 
-    {
         "pk": 1, 
         "model": "frontend.userprofile", 
         "fields": {
             "bio": "Example Profile", 
             "alert_types": [
-                3, 
-                4, 
-                5
+                1, 
+                2, 
+                3
             ], 
             "alerts_last_sent": "2010-02-19 07:01:20", 
             "created_at": "2010-02-19 07:01:20", 
