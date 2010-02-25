@@ -242,6 +242,7 @@ $(document).ready(function() {
     //read data back from twisted
 
     conn.onread = function(data) {
+      console.debug(data)
       // check if this data is valid JSON, or add it to the buffer
       try {
         data = buffer+data;
@@ -256,7 +257,7 @@ $(document).ready(function() {
               $('.editor_controls #run').removeClass('running').val('run');
               $('.editor_controls #run').unbind('click.abort');
               $('.editor_controls #run').bind('click.run', sendCode);
-
+              writeToConsole(data.content, data.content_long, data.message_type)
             //change title
             document.title = document.title.replace('*', '')
 
