@@ -50,7 +50,7 @@ def buildout():
   virtualenv('buildout')
 
 def install_cron():
-    run('crontab crontab')
+    virtualenv('crontab crontab')
 
 def deploy():
     """

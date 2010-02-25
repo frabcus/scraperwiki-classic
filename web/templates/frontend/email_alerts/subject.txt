@@ -1,1 +1,1 @@
-{{ site.name }} email alerts
+[ScraperwWiki] New email alerts ({% if broken_scrapers %}{{ broken_scrapers }} broken, {% endif %}{{ alert_counter }} items)

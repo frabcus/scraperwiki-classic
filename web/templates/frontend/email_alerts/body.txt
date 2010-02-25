@@ -8,60 +8,56 @@
   TODO: Make better ;)
   
 {% endcomment %}
+{% load humanize %}
 {% spaceless %}
-Hi {{ user.user.username|title }}, 
+Hi {{ user.user.username|title }},
 
-You are getting this email because you signed up to get email alerts at http://{{ site.domain }}
+This is your every couple of days report from the ScraperWiki Alert Bot. 
 
-You can edit these alerts at http://{{ site.domain }}{% url profiles_edit_profile %}
+It found {{ alert_counter }} items that matched your alert settings.
 
-{% if all_alerts.scraper %}
-  {% for alert_type, alerts in all_alerts.scraper.items  %}
-    {% ifequal alert_type "contribute"  %}
-    Scrapers I'm contributing to
-    ============================
-    {% endifequal %}
-    {% for alert in alerts %}
-      {% ifchanged %}
-  {{ alert.content_object }}
-  --------------------------
-      {% endifchanged %} 
-    {% ifchanged %}*{{ alert.datetime|date:"D d M Y" }}*{% endifchanged %}
-      {% ifequal alert.message_type "run_fail" %}Scraper failed to run{% endifequal %}{% ifequal alert.message_type "commit" %}{{ alert.message_value }} Updated the scraper{% endifequal %}{% ifequal alert.message_type "run_success" %}Scraper Ran, taking {{ alert.message_value }}{% endifequal %}
-    {% endfor %}
-  {% endfor %}
-{% endif %}
+--------------------------------------------------------
 
+{% if all_alerts.scraper.run_fail %}
+The following scrapers failed to run:
+========================================
 
-{% if all_alerts.solicitation %}
-{% if all_alerts.solicitation.Comments  %}
-Comments on your data requests
-==============================
-{% for comment in all_alerts.solicitation.Comments %}
-{{ comment.user }} said:
-{{ comment.comment|truncatewords:100 }}
-
+{% for alert in all_alerts.scraper.run_fail %}
+  - {{ alert.content_object.title }} (Failed after {{ alert.message_value|floatformat }} seconds, {{ alert.datetime|naturalday|title }})
+    http://{{ site.domain }}{% url scraper_history alert.content_object.short_name %}
 {% endfor %}
 {% endif %}
+{% if all_alerts.scraper.run_success %}
+The following scrapers ran successfully:
+========================================
 
-
-{% if all_alerts.solicitation.new_solicitation  %}
-New Data requests in the market
+{% for alert in all_alerts.scraper.run_success %}
+  - {{ alert.content_object.title }} (run {{ alert.datetime|naturalday|title }}, taking {{ alert.message_value|floatformat }} seconds)
+    http://{{ site.domain }}{% url scraper_history alert.content_object.short_name %}
+{% endfor %}
+{% endif %}
+{% if all_alerts.solicitation.market_comment  %}
+Comments on your data requests:
 ===============================
-{% for alert in all_alerts.solicitation.new_solicitation %}
-{{ alert.title }}: £{{ alert.price }}
-{{ alert.details|truncatewords:100 }}
+{% for comment in all_alerts.solicitation.market_comment %}
+  - {{ comment.user }} said:
+    {{ comment.comment|truncatewords:100 }}
+{% endfor %}
+{% endif %}
+{% if all_alerts.solicitation.new_solicitations  %}
+New Data requests in the market:
+================================
+{% for alert in all_alerts.solicitation.new_solicitations %}
+  - {{ alert.title }}: £{{ alert.price }}
+    {{ alert.details|truncatewords:100 }}
 {% ifchanged %}{{ alert.content_object }}
---------------------------
 {% endifchanged %} 
 {% endfor %}
-{% endif %}
-
-
-
-
-
-
 
 {% endif %}
+
 {% endspaceless %}
+
+
+Information overload? You can change the frequency and type of these alerts any 
+time at http://{{ site.domain }}{% url profiles_edit_profile %}

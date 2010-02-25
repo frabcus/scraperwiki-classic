@@ -23,7 +23,7 @@ class AlertTypes(models.Model):
         'owning' and 'contributing'.
     """
     content_type = models.ForeignKey(ContentType)
-    name = models.CharField(blank=True, max_length=100)
+    name = models.CharField(blank=True, max_length=100, unique=True)
     label = models.CharField(blank=True, max_length=500)
     applies_to = models.CharField(blank=False, max_length=100)
     
@@ -53,7 +53,7 @@ class Alerts(models.Model):
     object_id = models.PositiveSmallIntegerField(blank=True, null=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     message_type = models.CharField(blank=False, max_length=100)
-    message_value = models.CharField(blank=True, max_length=5000)
+    message_value = models.CharField(blank=True, null=True, max_length=5000)
     meta = models.CharField(blank=True, max_length=1000)
     message_level = models.IntegerField(blank=True, null=True, default=0)
     datetime = models.DateTimeField(blank=False, default=datetime.datetime.now)
@@ -103,6 +103,28 @@ class UserProfile(models.Model):
     
     objects = models.Manager()
     
+
+    def save(self):
+        new = False
+        if not self.pk:
+            new = True
+        
+        #do the parent save
+        super(UserProfile, self).save()
+        
+        if new:
+            # This is a new object
+            # Create some default alerts.
+            # By default, all alerts relating to scrapers are activated.
+            from scraper.models import Scraper
+            scraper_content_type = Scraper().content_type()
+            default_alerts = AlertTypes.objects.filter(
+                                            content_type=scraper_content_type)
+            self.alert_types = default_alerts
+            #do the parent save again, now with default alerts
+            super(UserProfile, self).save()
+            
+    
     def __unicode__(self):
         return unicode(self.user)
 
@@ -139,8 +161,8 @@ class UserToUserRole(models.Model):
     """
         PRM: I did not want to have many different ways of connecting one user to another, so
         this class embodies any and all connections from one user to another. Following, etc.
-	"""
-	
+    """
+
     objects = UserRoleManager()
     
     from_user = models.ForeignKey(User, related_name='to_user')
@@ -155,7 +177,7 @@ from registration.signals import user_registered
 def create_user_profile(sender, **kwargs):
     user = kwargs['user']
     profile = UserProfile(user=user, alert_frequency=60*60*24)
-    profile.save()
+    profile.save()  
 
 user_registered.connect(create_user_profile)
 
