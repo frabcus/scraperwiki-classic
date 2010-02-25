@@ -22,67 +22,72 @@ from scraper import models as scraper
 from market import models as market
 
 def create_alert_types(*args, **kwargs):
-    if kwargs['app'] == 'frontend':
-        
-        # delete all old alert types
-        frontend.AlertTypes.all().delete()
-        
+    if kwargs['app'] == 'frontend':        
+        existing_pks = []
         # Scraper alerts:
         content_pk = scraper.Scraper().content_type()
-
-        alert_types = (
+        alert_types = [
             {
+                "content_pk" : content_pk,
                 "name": "run_fail", 
                 "applies_to": "contribute", 
                 "label": "When a scraper I contribute to fails",
             },
             {
+                "content_pk" : content_pk,
                 "name": "commit", 
                 "applies_to": "contribute", 
                 "label": "When the code in a scraper I contribute to is changed"
             },
             {
+                "content_pk" : content_pk,
                 "name": "run_success", 
                 "applies_to": "contribute", 
                 "label": "When a scraper I contribute to is run"
             },
-        )
-        for alert in alert_types:
-            try:
-                existing = frontend.AlertTypes.objects.get(name=alert['name'])
-            except frontend.AlertTypes.DoesNotExist:
-                alert_model = frontend.AlertTypes()
-                alert_model.content_type = content_pk
-                alert_model.name = alert['name']
-                alert_model.applies_to = alert['applies_to']
-                alert_model.label = alert['label']
-                alert_model.save()
-
+            {
+                "content_pk" : content_pk,
+                "name": "scraper_comment",
+                "applies_to": "contribute",
+                "label": "New comments on scrapers I contribute to"
+            },
+        ]
 
         # Market alerts:
         content_pk = market.Solicitation().content_type()
 
-        alert_types = (
+        alert_types += [
             {
+                "content_pk" : content_pk,
                 "name": "new_solicitations",
                 "applies_to": "all", 
                 "label": "When someone requests a new dataset to be scraped",
             },
             {
+                "content_pk" : content_pk,
                 "name": "market_comment", 
                 "applies_to": "comments", 
                 "label": "When someone comments on a data request I've made"
             },
-        )
+        ]
+        
         for alert in alert_types:
             try:
                 existing = frontend.AlertTypes.objects.get(name=alert['name'])
+                existing_pks.append(existing.pk)
             except frontend.AlertTypes.DoesNotExist:
                 alert_model = frontend.AlertTypes()
-                alert_model.content_type = content_pk
+                alert_model.content_type = alert['content_pk']
                 alert_model.name = alert['name']
                 alert_model.applies_to = alert['applies_to']
                 alert_model.label = alert['label']
                 alert_model.save()
+                existing_pks.append(alert_model.pk)
+        
+        # Delete all alerts that are not defined here
+        for alert in frontend.AlertTypes.objects.all():
+            if alert.pk not in existing_pks:
+                print "Deleting AlertType: %s" % alert.name
+                alert.delete()
 
 post_migrate.connect(create_alert_types)

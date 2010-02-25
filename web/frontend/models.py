@@ -23,7 +23,9 @@ class AlertTypes(models.Model):
         'owning' and 'contributing'.
     """
     content_type = models.ForeignKey(ContentType)
-    name = models.CharField(blank=True, max_length=100, unique=True)
+    name = models.CharField(blank=True, 
+                            max_length=100, 
+                            unique=True)
     label = models.CharField(blank=True, max_length=500)
     applies_to = models.CharField(blank=False, max_length=100)
     
@@ -33,6 +35,7 @@ class AlertTypes(models.Model):
     class Meta:
         verbose_name_plural = "Alert Types"
         verbose_name = "Alert Type"
+        ordering = ['content_type']
 
 class Alerts(models.Model):
     """
@@ -116,10 +119,7 @@ class UserProfile(models.Model):
             # This is a new object
             # Create some default alerts.
             # By default, all alerts relating to scrapers are activated.
-            from scraper.models import Scraper
-            scraper_content_type = Scraper().content_type()
-            default_alerts = AlertTypes.objects.filter(
-                                            content_type=scraper_content_type)
+            default_alerts = AlertTypes.objects.all()
             self.alert_types = default_alerts
             #do the parent save again, now with default alerts
             super(UserProfile, self).save()

@@ -13,7 +13,7 @@ from django.contrib.auth.forms import AuthenticationForm
 
 class UserProfileForm (forms.ModelForm):
     alert_frequency = forms.ChoiceField(required=False, label="How often do you want to be emailed?", choices = (
-                                ('', 'Never'), 
+                                (-1, 'Never'), 
                                 (3600*24, 'Once a day'),
                                 (3600*24*3, 'Every couple of days'),                                
                                 (3600*24*7, 'Once a week'),
