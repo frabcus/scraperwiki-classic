@@ -169,6 +169,7 @@ class Command(BaseCommand):
             where=["""
                 ADDTIME(alerts_last_sent,
                 SEC_TO_TIME(alert_frequency)) < NOW()
+                AND alert_frequency > 0
                 """])
         users.filter(user__is_active=True)
 
