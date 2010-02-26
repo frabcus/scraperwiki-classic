@@ -1,3 +1,5 @@
+import getpass
+
 from fabric.api import *
 
 # globals
@@ -63,11 +65,17 @@ def deploy():
     print "***************** DEPLOY *****************"
     print "Please Enter your deploy message: \r"
     message = raw_input()
-
+    hg_user = raw_input('Your kforge Username: ')
+    hg_pass = pw = getpass.getpass('Your kforge Password: ')
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
     
-    run('cd %s; hg pull; hg update -C %s' % (env.path, env.branch))
+    run("""cd %s; 
+        hg pull https://%s:%s@kforgehosting.com/scraperwiki/hg; 
+        hg update -C %s""" % (env.path,
+                              hg_user,
+                              hg_pass,
+                              env.branch))
     
     buildout()
     migrate()
