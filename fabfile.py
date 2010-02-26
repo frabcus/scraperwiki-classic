@@ -87,9 +87,3 @@ def restart_webserver():
     "Restart the web server"
     sudo('apache2ctl restart')
 
-
-
-
-
-
-
