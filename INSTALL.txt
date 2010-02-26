@@ -157,3 +157,4 @@ Then change to the datastore directory, and use mysql to import the database sch
 > $ mysql -u USERNAME -p -h localhost scraperwiki_datastore < scheme.sql
 
 And you should be done.
+
