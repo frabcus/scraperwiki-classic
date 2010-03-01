@@ -45,14 +45,15 @@ def setup():
 
 def virtualenv(command):
     temp = 'cd %s; source ' % env.path
-    run(temp + env.activate + '&&' + command)
+    return run(temp + env.activate + '&&' + command)
 
 
 def buildout():
   virtualenv('buildout')
 
 def write_changeset():
-    virtualenv("echo %s > web/changeset.txt") % env.changeset
+    changeset = virtualenv('hg log | egrep -m 1 -o "[a-zA-Z0-9]*$"')
+    virtualenv("echo %s > web/changeset.txt") % changeset
 
 def install_cron():
     virtualenv('crontab crontab')
@@ -80,8 +81,6 @@ def deploy():
                               kforge_pass,
                               env.branch))
     
-    # Yuck yuck yuck!
-    env.changeset = run('hg log | egrep -m 1 "changeset(.*)" | grep -o ":\([a-zA-z0-9]*\)$" | grep -o "[a-zA-Z0-9]*$"')
     buildout()
     migrate()
     write_changeset()
