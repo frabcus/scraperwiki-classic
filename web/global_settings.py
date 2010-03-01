@@ -10,7 +10,7 @@ particular to the install.
 Note that there are no tuples here, as they are immutable. Please use lists, so
 that in settings.py we can do list.append()
 """
-
+import os
 from os.path import exists, join
 
 # This shouldn't be needed, however in some cases the buildout version of
@@ -20,6 +20,7 @@ sys.path.append('web')
 
 # Django settings for scraperwiki project.
 
+DEBUG = False
  
 TIME_ZONE = 'London/England'
 LANGUAGE_CODE = 'en-uk'
@@ -32,13 +33,15 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-
+SCRAPERWIKI_DIR = ""
 MEDIA_DIR = SCRAPERWIKI_DIR + 'media'
 MEDIA_URL = 'http://alpha.scraperwiki.com:85/'
 MEDIA_ADMIN_DIR = SCRAPERWIKI_DIR + 'media-admin'
 LOGIN_URL = '/login/'
+HOME_DIR = ""
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a trailing slash.
+URL_ROOT = ""
 MEDIA_ROOT = URL_ROOT + 'media/'
 CODEMIRROR_ROOT = MEDIA_ROOT + "CodeMirror-0.65/"
 
@@ -162,3 +165,7 @@ TEMPLATE_SETTINGS = [
 #sparklines and graphs
 SPARKLINE_MAX_DAYS = 30
 
+try:
+    CHANGESET = open('changeset.txt').read()
+except Exception, e:
+    CHANGESET = "none"
