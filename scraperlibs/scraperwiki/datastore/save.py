@@ -43,8 +43,7 @@ def insert(data):
     # insert the key-values
     for k, v in data.items():  
         # the v is typed and could be, for example, padded with zeros if it is an int type
-        sv = (v != None and str(v) or "")  # convert None to ""
-        
+        sv = (v != None and v or "")  # convert None to ""
         #if sv[:7] == "OSGB36(":   hlatlng = v  # find latlng keys that aren't called latlng
 
         if scraper_id:
@@ -81,7 +80,7 @@ def insert(data):
     # printing to the console
     ldata = { }
     for k, v in data.items():  
-        ldata[cgi.escape(k)] = cgi.escape(str(v))
+        ldata[cgi.escape(k)] = cgi.escape(v)
     
     # this should print < but it crashes the javascript
     print '<scraperwiki:message type="data">%s' % json.dumps(ldata)   # don't put in the </scraperwiki:message> because it doesn't work like that!
@@ -130,7 +129,7 @@ def __build_matches(matchrecord, scraper_id):
         if value:
             qquery.append("AND")
             qquery.append("kv%d.value=%%s" % i)
-            qlist.append(str(value))
+            qlist.append(value)
         i += 1
             
     # add this when the scheme gets updated
@@ -224,7 +223,9 @@ def save(unique_keys, data, date=None, latlng=None):
             if k in ["date", "latlng", "date_scraped" ]:
                 sv = v  # leave these objects intact
             else:
-                sv = str(v)
+                # sv = str(v)
+                # Don't cast to string
+                sv = v
         else:
             sv = ""
         
