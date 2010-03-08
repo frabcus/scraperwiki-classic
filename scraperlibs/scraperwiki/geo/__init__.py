@@ -5,7 +5,7 @@ import urllib
 import re
 import sys
 sys.path.append('..')
-from datastore import connection
+from scraperwiki.datastore import connection
 
 try:
   import json
