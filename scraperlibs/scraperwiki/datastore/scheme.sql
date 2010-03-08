@@ -47,7 +47,7 @@ CREATE TABLE postcode_lookup (
     postcode varchar(10) NOT NULL,
     location POINT NOT NULL,
     country_code CHAR(2) NOT NULL
-) ENGINE=MyISAM; CHARACTER SET utf8;
+) ENGINE=MyISAM;
 
 ALTER TABLE `postcode_lookup` ADD UNIQUE INDEX postcode_unique(`postcode`),
  ADD INDEX country_code(`country_code`),
