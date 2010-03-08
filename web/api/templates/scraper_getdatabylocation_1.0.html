@@ -6,7 +6,7 @@
 {% block subheading %}Returns the data from a scraper based on a location{% endblock %}
 {% block arguments %}
     <dt><code>key</code> (required)</dt>
-    <dd>A valid API key.<input type="text" name="key" id="key" /></dd>
+    <dd>A valid API key.{% if user.is_authenticated and keys %} <input type="text" name="key" id="key" />{% endif %}</dd>
     <dt><code>format</code> (required)</dt>
     <dd>The format you would like the response in. <input type="text" name="format" id="format" size="4"/></dd>
     <dt><code>name</code> (required)</dt>

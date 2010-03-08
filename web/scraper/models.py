@@ -249,9 +249,14 @@ class Scraper(models.Model):
 
     def content_type(self):
         return ContentType.objects.get(app_label="scraper", model="Scraper")
-        
-tagging.register(Scraper)
 
+#register tagging for scrapers
+try:
+    tagging.register(Scraper)
+except tagging.AlreadyRegistered:
+    pass
+    
+    
 class UserScraperRole(models.Model):
     """
     This embodies the roles associated between particular users and scrapers.
