@@ -5,6 +5,8 @@ import settings
 from collections import defaultdict
 import re
 import datetime
+from tagging.utils import get_tag
+from tagging.models import Tag, TaggedItem
 
 def convert_dictlist_to_datalist(allitems):
     allkeys = set()
@@ -299,5 +301,31 @@ class ScraperManager(models.Manager):
             return_dates.append(count)
         
         return return_dates
-            
+
+    def search(self, query):
+        scrapers = self.get_query_set().filter(title__icontains=query,published=True)
+        scrapers_description = self.get_query_set().filter(description__icontains=query, published=True)
+
+        # and by tag
+        tag = get_tag(query)
+        if tag:
+            scrapers_for_tag = self.get_query_set().filter(published=True)
+            qs = TaggedItem.objects.get_by_model(scrapers_for_tag, tag)
+            scrapers = scrapers | qs
+
+        scrapers_all = scrapers | scrapers_description
+        scrapers_all = scrapers_all.filter(published=True)
+        scrapers_all = scrapers_all.order_by('-created_at')
+
+        return scrapers_all
+    
+    #for example lists    
+    def example_scrapers(self, user, count):
+        scrapers = []
+        if user.is_authenticated():
+            scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True)[:count]
+        else:
+            scrapers = self.filter(deleted=False, featured=True).order_by('first_published_at')[:count]
+        
+        return scrapers
         

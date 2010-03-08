@@ -1,17 +1,18 @@
 from osgb import eastnorth_to_osgb, osgb_to_lonlat, lonlat_to_eastnorth
 from geo_helper import turn_osgb36_into_wgs84
 
-
-
 import urllib
 import re
+import sys
+sys.path.append('..')
+import connection
 
 try:
   import json
 except:
   import simplejson as json
 
-    
+
 '''standardized to wgs84 (if possible)'''
 
 def gb_postcode_to_latlng(postcode):
@@ -31,28 +32,29 @@ def extract_gb_postcode(string):
 
     return postcode
 
+""" Represents a lat/lng (wgs32 projection) """
+class Point:
+    def __init__(self, lat, lng):
+        self.latlng = (lat = 0, lng = 0)
 
 # implement above user functions through classes with their conversion outputs
 class GBPostcode:   # (geopoint)
-    def fetchfromgoogle(self):
-        # key for http://127.0.0.1:8000/ version
-        #apikey = "ABQIAAAAvB8NItiEo8pwItcndDdiQxTpH3CbXHjuCVmaTc5MkkU4wO1RRhSA_yE1yF9gii01shzxoGTMy56I6A"
-        
-        # key for http://alpha.scraperwiki.com version
-        apikey = "ABQIAAAAvB8NItiEo8pwItcndDdiQxS-0rhzH36yeeaqLtvzOYff_BDsWxRd8-RHcLV2SLWVG5cUzghJCde61g"
-
-        googlegeourl = "http://maps.google.com/maps/geo?q=%s&output=json&gl=uk&oe=utf8&sensor=true_or_false&key=%s" % (urllib.quote(self.postcode), apikey)
-        self.response = json.loads(urllib.urlopen(googlegeourl).read())
-    
     
     def __init__(self, postcode):
         self.coordinatesystem = "GBPostcode"
         self.postcode = postcode
         self.latlng = None
         try:
-            self.fetchfromgoogle()
-            coordinates = self.response['Placemark'][0]['Point']['coordinates']
-            self.latlng = (coordinates[1], coordinates[0])
+
+            #open connection
+            conn = connection.Connection()
+            c = conn.cursor()
+            sql = " select AsText(location) from postcode_lookup where postcode = %s"
+            c.execute(sql, (postcode,))            
+            result = c.fetchone()[0]
+            if result:
+                self.latlng = result.replace('POINT(', '').replace(')', '').split(' ')
+                self.latlng = [float(self.latlng[0]), float(self.latlng[1])]
         except:
             self.latlng = None
             
@@ -70,9 +72,9 @@ class OSeastingnorthing:
         
         gb36lng, gb36lat = osgb_to_lonlat(oscoord)
             
-        gb36height = 200  # guessed altitude of the point
+        gb36height = 0  # guessed altitude of the point
         lat, lng, height = turn_osgb36_into_wgs84(gb36lat, gb36lng, gb36height)
-        
+
         self.latlng = (lat, lng)
         
 

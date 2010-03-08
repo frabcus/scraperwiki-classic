@@ -131,7 +131,7 @@ def __build_matches(matchrecord, scraper_id):
             qquery.append("kv%d.value=%%s" % i)
             qlist.append(value)
         i += 1
-            
+
     # add this when the scheme gets updated
     #qquery.append("WHERE")
     #qquery.append("deleted_run_id IS NULL")
