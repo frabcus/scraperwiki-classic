@@ -1,5 +1,5 @@
 from osgb import eastnorth_to_osgb, osgb_to_lonlat, lonlat_to_eastnorth
-from geo_helper import turn_osgb36_into_wgs84
+from geo_helper import turn_osgb36_into_wgs84, turn_eastingnorthing_into_osgb36, turn_eastingnorthing_into_osie36, turn_osie36_into_wgs84
 
 import urllib
 import re
@@ -12,16 +12,22 @@ try:
 except:
   import simplejson as json
 
-
 '''standardized to wgs84 (if possible)'''
 
 def gb_postcode_to_latlng(postcode):
     '''Convert postcode to latlng using google api'''
     return GBPostcode(postcode).latlng
 
-def os_easting_northing_to_latlng(easting, northing):
+def os_easting_northing_to_latlng(easting, northing, grid='GB'):
     '''Convert easting, northing to latlng assuming altitude 200m'''
-    return OSeastingnorthing(easting, northing).latlng
+    result = Point()
+    if grid == 'GB':
+        oscoord = turn_eastingnorthing_into_osgb36(easting, northing)
+        result.latlng = turn_osgb36_into_wgs84(oscoord[0], oscoord[1], 200)
+    elif grid == 'IE':
+        oscoord = turn_eastingnorthing_into_osie36 (easting, northing)
+        result.latlng = turn_osie36_into_wgs84(oscoord[0], oscoord[1], 200)
+    return result.latlng
 
 def extract_gb_postcode(string):
     postcode = False
@@ -32,14 +38,13 @@ def extract_gb_postcode(string):
 
     return postcode
 
-""" Represents a lat/lng (wgs32 projection) """
 class Point:
-    def __init__(self, lat, lng):
-        self.latlng = (lat = 0, lng = 0)
+    def __init__(self):    
+        self.latlng = []
 
 # implement above user functions through classes with their conversion outputs
 class GBPostcode:   # (geopoint)
-    
+
     def __init__(self, postcode):
         self.coordinatesystem = "GBPostcode"
         self.postcode = postcode
@@ -60,22 +65,6 @@ class GBPostcode:   # (geopoint)
             
     def __str__(self):
         return "GBPostcode('%s')" % self.postcode
-    
-
-class OSeastingnorthing:
-    def __init__(self, easting, northing):
-        self.coordinatesystem = "OSeastingnorthing"
-        self.easting = easting
-        self.northing = northing
-            
-        oscoord = eastnorth_to_osgb(self.easting, self.northing, 5)
-        
-        gb36lng, gb36lat = osgb_to_lonlat(oscoord)
-            
-        gb36height = 0  # guessed altitude of the point
-        lat, lng, height = turn_osgb36_into_wgs84(gb36lat, gb36lng, gb36height)
-
-        self.latlng = (lat, lng)
         
 
         

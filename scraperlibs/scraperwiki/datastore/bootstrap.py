@@ -46,39 +46,39 @@ def load_postzon():
     #get the location of the postzon file
     config = ConfigParser.ConfigParser()
     config.readfp(open(os.path.split(__file__)[0] + 'config.cfg.local'))    
-    try :
-    
-        #open connection
-        conn = connection.Connection()
-        c = conn.cursor()
 
-        #clear any existing data
-        sql = "delete from postcode_lookup"
-        c.execute(sql)
+    #open connection
+    conn = connection.Connection()
+    c = conn.cursor()
 
-        #open the postzon file
-        postzon_path = config.get('data', 'postzon_path')
-        csv_reader = csv.reader(open(postzon_path))
+    #clear any existing data
+    sql = "delete from postcode_lookup"
+    c.execute(sql)
 
-        i = 0
-        for row in csv_reader:
-            if i > 0:
+    #open the postzon file
+    postzon_path = config.get('data', 'postzon_path')
+    csv_reader = csv.reader(open(postzon_path))
 
-                #get the bits we want out of this row
-                postcode = row[0].replace('  ', ' ') #remove the random extra place 
-                easting = int(row[2].ljust(6, '0'))
-                northing = int(row[3].ljust(6, '0'))
-                country_code = 'GB'
-                latlng = geo.os_easting_northing_to_latlng(easting, northing)
+    i = 0
+    for row in csv_reader:
+        if i > 0:
 
-                #insert into database
-                sql = "insert into postcode_lookup (postcode, location, country_code) values ('%s', GeomFromText( ' POINT(%f %f) '), '%s')" % (postcode, latlng[0], latlng[1], country_code)    
+            #get the bits we want out of this row
+            postcode = row[0].replace('  ', ' ') #remove the random extra place 
+            easting = int(row[2].ljust(6, '0'))
+            northing = int(row[3].ljust(6, '0'))
+            country_code = 'GB'
+            if postcode.startswith('BT'):
+                latlng = geo.os_easting_northing_to_latlng(easting, northing, 'IE')
+            else:    
+                latlng = geo.os_easting_northing_to_latlng(easting, northing, 'GB')
 
-                c.execute(sql)
-            i = i + 1
+            #insert into database
+            sql = "insert into postcode_lookup (postcode, location, country_code) values ('%s', GeomFromText( ' POINT(%f %f) '), '%s')" % (postcode, latlng[0], latlng[1], country_code)    
 
-    except :
-        raise Exception("Unable to load postzon data")
+            c.execute(sql)
+        i = i + 1
+
 
     #close connection
     c.close()
@@ -93,8 +93,8 @@ if __name__ == "__main__":
     #work out what to run
     if method == 'kvschema':
         load_scheme()
-    elif method == 'test':
-        latlng = geo.gb_postcode_to_latlng('GU2W 4YE')
+    elif method == 'test_postcode':
+        latlng = geo.gb_postcode_to_latlng('SW9 8JX')
         print latlng
     elif method == 'postzon':        
         load_postzon()
