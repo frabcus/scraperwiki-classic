@@ -5,7 +5,7 @@ import urllib
 import re
 import sys
 sys.path.append('..')
-import connection
+from datastore import connection
 
 try:
   import json
