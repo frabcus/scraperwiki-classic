@@ -1,4 +1,10 @@
-# local configurations for your computer.  Do not commit to Mercurial unless saved under 'localsettings.py-inhg'
+"""
+This file imports all gobal settings and defined new ones.
+
+Anything imported in global_settings can be overwriten for a local install.
+
+"""
+from global_setting import *
 
 import os
 import sys
@@ -13,24 +19,24 @@ ADMINS = (
 MANAGERS = ADMINS
 
 
-DATABASE_ENGINE     = 'mysql'       # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+DATABASE_ENGINE     = ''       # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATABASE_NAME       = '' # Or path to database file if using sqlite3.
 DATABASE_USER       = ''   # Not used with sqlite3.
 DATABASE_PASSWORD   = ''         # Not used with sqlite3.
 URL_ROOT            = '/'           # prefix for URLs to run not at top level of domain
 
-HOME_DIR = '/home/.../scraperwiki' # the parent directory of SCRAPERWIKI_DIR
+HOME_DIR = '' # the parent directory of SCRAPERWIKI_DIR
 SCRAPERWIKI_DIR     = HOME_DIR + '/web/'      # top level directory of the installation
 READINGS_DIR        = SCRAPERWIKI_DIR + '/readings/'  # directory containing the cached webpages
 MODULES_DIR         = SCRAPERWIKI_DIR                # directory containing readers, detectors, collectors, and observers modules
 SMODULES_DIR        = HOME_DIR + '/scrapers/'                # directory containing scrapers
 
-DATASTORE_DATABASE_ENGINE     = 'mysql'       # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATASTORE_DATABASE_HOST     = 'localhost'      
+DATASTORE_DATABASE_ENGINE     = ''       # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+DATASTORE_DATABASE_HOST     = ''      
 DATASTORE_DATABASE_NAME       = '' # Or path to database file if using sqlite3.
 DATASTORE_DATABASE_USER       = ''   # Not used with sqlite3.
 DATASTORE_DATABASE_PASSWORD   = ''         # Not used with sqlite3.
-DATASTORE_DATABASE_PORT   = '3306'
+DATASTORE_DATABASE_PORT   = ''
 
 FEEDBACK_EMAIL = 'feedback@somedomain.com'
 FEEDBACK_EMAIL_TITLE = '[ScraperWiki Feedback]'
@@ -63,7 +69,7 @@ QUICKCACHE_DIR      = HOME_DIR + '/quickcache/'   # leave blank to disable cachi
 CODE_RUNNING_MODE = 'firestarter_django'
 
 
-FIREBOX_PATH = ''
+FIREBOX_PATH = '/var/www/scraperwiki/UML/Server/scripts'
 sys.path.append(FIREBOX_PATH)
 
 #paypal
@@ -71,8 +77,13 @@ PAYPAL_RECEIVER_EMAIL = "your_paypal_sandbox_email@example.com"
 EMAIL_FROM = 'noreply@localhost'
 MARKET_BOUNTY_CHARGE = 6.3
 
-API_DOMAIN = ''
+API_DOMAIN = 'localhost'
 
-#Orbited
+
 ORBETED_PORT = 8001
 ORBETED_DOMAIN = 'localhost'
+
+# TEST_RUNNER = 'django-test-coverage.runner.run_tests'
+
+
+MEDIA_URL = '/media/'

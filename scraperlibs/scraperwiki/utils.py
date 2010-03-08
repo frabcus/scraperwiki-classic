@@ -49,7 +49,7 @@ def scrape (url, params=None):
     
     try:
         fin = urllibopener.open(url, data)
-        text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
+        text = fin.read()
         fin.close()   # get the mimetype here
     except:
         print '<scraperwiki:message type="sources">' + json.dumps({ 'content' : "Failed: %s" % url })

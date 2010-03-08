@@ -1,3 +1,5 @@
+import getpass
+
 from fabric.api import *
 
 # globals
@@ -43,11 +45,15 @@ def setup():
 
 def virtualenv(command):
     temp = 'cd %s; source ' % env.path
-    run(temp + env.activate + '&&' + command)
+    return run(temp + env.activate + '&&' + command)
 
 
 def buildout():
   virtualenv('buildout')
+
+def write_changeset():
+    changeset = virtualenv('hg log | egrep -m 1 -o "[a-zA-Z0-9]*$"')
+    virtualenv("echo %s > web/changeset.txt") % changeset
 
 def install_cron():
     virtualenv('crontab crontab')
@@ -63,20 +69,27 @@ def deploy():
     print "***************** DEPLOY *****************"
     print "Please Enter your deploy message: \r"
     message = raw_input()
-
+    kforge_user = raw_input('Your kforge Username: ')
+    kforge_pass = pw = getpass.getpass('Your kforge Password: ')
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
     
-    run('cd %s; hg pull; hg update -C %s' % (env.path, env.branch))
+    run("""cd %s; 
+        hg pull https://%s:%s@kforgehosting.com/scraperwiki/hg; 
+        hg update -C %s""" % (env.path,
+                              kforge_user,
+                              kforge_pass,
+                              env.branch))
     
     buildout()
     migrate()
+    write_changeset()
     install_cron()
     restart_webserver()   
 
     sudo("""
-    echo "%s" | mail -s "New Scraperwiki Deployment to %s" scrapewiki-commits@googlegroups.com -- -f mercurial@scraperwiki.com
-    """ % (message, env.deploy_version))
+    echo "%s" | mail -s "New Scraperwiki Deployment to %s (deployed by %s)" scrapewiki-commits@googlegroups.com -- -f mercurial@scraperwiki.com
+    """ % (message, env.deploy_version, kforge_user))
 
     
 def migrate():
