@@ -40,12 +40,12 @@ def load_scheme():
       c.close()
       break
 
-def load_postzon():
-    """ Loads royal mail's postcode database, converting eastings/northings to latlong """
+def load_gb_postcodes():
+    """ Loads royal mail's postcode database (postzon) and postcode sector data, converting eastings/northings to latlong """
 
     #get the location of the postzon file
     config = ConfigParser.ConfigParser()
-    config.readfp(open(os.path.split(__file__)[0] + 'config.cfg.local'))    
+    config.readfp(open(os.path.split(__file__)[0] + 'config.cfg.local'))
 
     #open connection
     conn = connection.Connection()
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     elif method == 'test_postcode':
         latlng = geo.gb_postcode_to_latlng('SW9 8JX')
         print latlng
-    elif method == 'postzon':        
-        load_postzon()
+    elif method == 'postcodes':        
+        load_gb_postcodes()
     else:
-        print "Argument needs to be one of:\n 'kvschema' - drops and create the kv database tables\n 'postzon' - creats UK postcode tables and load data"
+        print "Argument needs to be one of:\n 'kvschema' - drops and create the kv database tables\n 'postcodes' - creates UK postcode tables and load data"

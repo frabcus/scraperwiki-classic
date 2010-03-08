@@ -4,7 +4,7 @@ from api.external.datastore import Datastore
 class PostcodeToLatLng(APIBase):
     required_arguments = ['postcode', 'country_code']
     cache_duration = 10
-        
+
     def validate(self, request):
         super(PostcodeToLatLng, self).validate(request)
 
