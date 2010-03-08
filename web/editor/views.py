@@ -154,7 +154,9 @@ def edit(request, short_name=None):
         action = request.POST.get('action').lower()
 
         #validate
-        if form.is_valid():
+        if not form.is_valid():
+            return HttpResponse(json.dumps({'status' : 'Failed'}))
+        else:
             # Save the form  (without committing at first - http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
             savedForm = form.save(commit=False)      
 

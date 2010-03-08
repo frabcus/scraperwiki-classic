@@ -1,15 +1,20 @@
 from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
 from piston.resource import Resource
-from handlers import ScraperInfoHandler, GetDataHandler, ScraperSearchHandler, GetDataByDateHandler, GetDataByLocationHandler
+from handlers import geo
+from handlers import scraper
+from handlers import datastore
 
 from api import views
 
-scraperinfo_handler = Resource(ScraperInfoHandler)
-data_handler = Resource(GetDataHandler)
-scrapersearch_handler = Resource(ScraperSearchHandler)
-getdatabydate_handler = Resource(GetDataByDateHandler)
-getdatabylocation_handler = Resource(GetDataByLocationHandler)
+scraperinfo_handler = Resource(scraper.GetInfo)
+scrapersearch_handler = Resource(scraper.Search)
+
+data_handler = Resource(datastore.Data)
+getdatabydate_handler = Resource(datastore.DataByDate)
+getdatabylocation_handler = Resource(datastore.DataByLocation)
+
+geo_postcode_to_latlng_handler = Resource(geo.PostcodeToLatLng)
 
 
 # Version 1.0 URLS
@@ -24,9 +29,10 @@ urlpatterns = patterns('',
     url(r'^1\.0/libraries/$', 'django.views.generic.simple.direct_to_template', {'template': 'libraries.html'}, name='libraries'),
     url(r'^1\.0/explore/scraperwiki.scraper.search/$', views.explore_scraper_search_1_0, name='scraper_search'),
     url(r'^1\.0/explore/scraperwiki.scraper.getinfo/$', views.explore_scraper_getinfo_1_0, name='scraper_getinfo'),    
-    url(r'^1\.0/explore/scraperwiki.scraper.getdata/$', views.explore_scraper_getdata_1_0, name='scraper_getdata'),    
-    url(r'^1\.0/explore/scraperwiki.scraper.getdatabydate/$', views.explore_scraper_getdatabydate_1_0, name='scraper_getdatabydate'),
-    url(r'^1\.0/explore/scraperwiki.scraper.getdatabylocation/$', views.explore_scraper_getdatabylocation_1_0, name='scraper_getdatabylocation'),    
+    url(r'^1\.0/explore/scraperwiki.datastore.getdata/$', views.explore_scraper_getdata_1_0, name='scraper_getdata'),    
+    url(r'^1\.0/explore/scraperwiki.datastore.getdatabydate/$', views.explore_scraper_getdatabydate_1_0, name='scraper_getdatabydate'),
+    url(r'^1\.0/explore/scraperwiki.datastore.getdatabylocation/$', views.explore_scraper_getdatabylocation_1_0, name='scraper_getdatabylocation'),    
+    url(r'^1\.0/explore/scraperwiki.geo.postcodetolatlng/$', views.explore_geo_postcodetolatlng_1_0, name='geo_postcodetolatlng'),    
 
     # API calls
 
@@ -40,4 +46,7 @@ urlpatterns = patterns('',
     url(r'^1\.0/scraper/getdatabydate/$', getdatabydate_handler, name="method_getdatabydate"),    
     url(r'^1\.0/scraper/getdatabylocation/$', getdatabylocation_handler, name="method_getdatabylocation"),        
 
+    url(r'^1\.0/geo/postcodetolatlng/$', geo_postcode_to_latlng_handler, name="method_geo_postcode_to_latlng"),
+    
+    
 )

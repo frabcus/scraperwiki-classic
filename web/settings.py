@@ -106,7 +106,7 @@ INSTALLED_APPS = [
   	'django.contrib.humanize',
   	'paypal.standard.ipn',
   	'mailer',
-  	#'devserver',
+  	'devserver',
 ]
 
 # This sort of hack will go when we use proper global settings

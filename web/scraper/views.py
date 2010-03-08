@@ -371,26 +371,11 @@ def search(request, q=""):
     if (q != ""):
         form = SearchForm(initial={'q': q})
         q = q.strip()
-        scrapers = models.Scraper.objects.filter(
-            title__icontains=q,
-            published=True)
-        scrapers_description = models.Scraper.objects.filter(
-            description__icontains=q, published=True)
 
-        # and by tag
-        tag = get_tag(q)
-        if tag:
-            scrapers_for_tag = models.Scraper.objects.filter(published=True)
-            qs = TaggedItem.objects.get_by_model(scrapers_for_tag, tag)
-            scrapers = scrapers | qs
-        scrapers_all = scrapers | scrapers_description
-        #scrapers = scrapers | scrapers_description
-        #Only show published scrapers, sort by creation date
-        scrapers_all = scrapers_all.filter(published=True)
-        scrapers_all = scrapers_all.order_by('-created_at')
+        scrapers = models.Scraper.objects.search(q)
         return render_to_response('scraper/search_results.html',
             {
-                'scrapers': scrapers_all,
+                'scrapers': scrapers,
                 'form': form,
                 'query': q,},
             context_instance=RequestContext(request))

@@ -95,7 +95,7 @@
                     <td><strong>201</strong> Created</td>
                     <td>Object was created</td>
                 </tr>    
-                <tr>    
+                <tr>
                     <td><strong>204</strong> (Empty body, as per RFC2616)</td>
                     <td>Object was deleted</td>
                 </tr> 
@@ -137,21 +137,31 @@
         <a href="{% url api:keys %}">Manage your API keys</a>
     </p>
     <h4>API functions</h4>
+    <h5>Scrapers</h5>
     <ul>
         <li>
-            <a href="{% url api:scraper_search %}"><strike>scraperwiki.scraper.search</strike></a>
+            <a href="{% url api:scraper_search %}">scraperwiki.scraper.search</a>
         </li>
         <li>
             <a href="{% url api:scraper_getinfo %}">scraperwiki.scraper.getInfo</a>
         </li>
+    </ul>
+    <h5>Datastore</h5>
+    <ul>
         <li>
-            <a href="{% url api:scraper_getdata %}">scraperwiki.scraper.getData</a>
+            <a href="{% url api:scraper_getdata %}">scraperwiki.datastore.getData</a>
         </li>
         <li>
-            <a href="{% url api:scraper_getdatabydate %}">scraperwiki.scraper.getDataByDate</a>
+            <a href="{% url api:scraper_getdatabydate %}">scraperwiki.datastore.getDataByDate</a>
         </li>
         <li>
-            <a href="{% url api:scraper_getdatabylocation %}">scraperwiki.scraper.getDataByLocation</a>
+            <a href="{% url api:scraper_getdatabylocation %}">scraperwiki.datastore.getDataByLocation</a>
+        </li>
+    </ul>
+    <h5>Geo</h5>    
+    <ul>
+        <li>
+            <a href="{% url api:geo_postcodetolatlng %}">scraperwiki.geo.postcodeToLocation</a>
         </li>
     </ul>
 </div>
