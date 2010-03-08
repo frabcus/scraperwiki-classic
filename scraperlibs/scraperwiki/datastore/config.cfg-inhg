@@ -3,3 +3,6 @@ host=localhost
 user=root
 passwd=""
 db=scraperwiki_datastore
+
+[data]
+postzon_path = /path/to/postzon
