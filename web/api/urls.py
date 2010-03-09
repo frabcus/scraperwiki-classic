@@ -42,9 +42,9 @@ urlpatterns = patterns('',
 
     url(r'^1\.0/scraper/search$', scrapersearch_handler, name="method_search"),
     url(r'^1\.0/scraper/getinfo$', scraperinfo_handler, name="method_getinfo"),
-    url(r'^1\.0/scraper/getdata$', data_handler, name="method_getdata"),
-    url(r'^1\.0/scraper/getdatabydate$', getdatabydate_handler, name="method_getdatabydate"),    
-    url(r'^1\.0/scraper/getdatabylocation$', getdatabylocation_handler, name="method_getdatabylocation"),        
+    url(r'^1\.0/datastore/getdata$', data_handler, name="method_getdata"),
+    url(r'^1\.0/datastore/getdatabydate$', getdatabydate_handler, name="method_getdatabydate"),    
+    url(r'^1\.0/datastore/getdatabylocation$', getdatabylocation_handler, name="method_getdatabylocation"),        
 
     url(r'^1\.0/geo/postcodetolatlng/$', geo_postcode_to_latlng_handler, name="method_geo_postcode_to_latlng"),
     

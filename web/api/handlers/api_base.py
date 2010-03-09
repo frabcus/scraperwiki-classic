@@ -3,10 +3,11 @@ from web.scraper.models import Scraper
 from piston.handler import BaseHandler
 from piston.utils import rc
 from api.models import api_key
+from settings import MAX_API_ITEMS
 import sys
 
 class APIBase(BaseHandler):
-    allowed_methods = ('GET',)        
+    allowed_methods = ('GET',)
     result = None
     error_response = False
     cache_duration = 0
@@ -91,8 +92,8 @@ class APIBase(BaseHandler):
             scraper = None
 
         return scraper
-        
-    def clamp_limit(limit):
+
+    def clamp_limit(self, limit):
         if limit == 0 or limit > MAX_API_ITEMS:
             limit = MAX_API_ITEMS
         return limit            

@@ -1,4 +1,5 @@
 from api.handlers.api_base import APIBase
+from web.scraper.models import Scraper
 
 class Data(APIBase):
 
