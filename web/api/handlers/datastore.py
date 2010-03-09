@@ -1,9 +1,10 @@
 from api.handlers.api_base import APIBase
+from web.scraper.models import Scraper
 
 class Data(APIBase):
 
     def validate(self, request):
-        super(GetInfo, self).validate(request)
+        super(Data, self).validate(request)
 
         if self.has_errors() == False:        
             limit = self.clamp_limit(int(request.GET.get('limit', 100)))
@@ -16,7 +17,7 @@ class DataByLocation(APIBase):
     required_arguments = ['lat', 'lng']
 
     def validate(self, request):
-        super(GetInfo, self).validate(request)
+        super(DataByLocation, self).validate(request)
 
         if self.has_errors() == False:        
 
@@ -31,7 +32,7 @@ class DataByDate(APIBase):
     required_arguments = ['start_date', 'end_date']
 
     def validate(self, request):
-        super(GetInfo, self).validate(request)
+        super(DataByDate, self).validate(request)
 
         if self.has_errors() == False:        
 
