@@ -103,7 +103,7 @@ class Scraper(models.Model):
      
         if self.created_at == None:
             self.created_at = datetime.datetime.today()
-     
+    
                 
         if not self.guid:
             import hashlib
@@ -195,7 +195,7 @@ class Scraper(models.Model):
                                        user=user, 
                                        role='follow').delete()
         return True
-        
+
     def followers(self):
         return self.users.filter(userscraperrole__role='follow')
 
@@ -207,7 +207,7 @@ class Scraper(models.Model):
         return (self.owner(),)
             
     def committed_code(self):
-        code = vc.get_code(self.short_name)
+        code = vc.get_code(self.short_name, committed=True)
         return code
 
     def saved_code(self):

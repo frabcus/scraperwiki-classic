@@ -23,6 +23,11 @@ urlpatterns = patterns('',
     # Standard Views
     url(r'^keys$', views.keys, name='keys'),
 
+
+    #explorer
+    url(r'^explorer_call$', views.explorer_user_run, name='explorer_call'),
+    url(r'^explorer_example(?P<method>[\w_\-\.\_]+)$', views.explorer_example, name='explorer_example'),
+    
     # Documentation
     url(r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'index.html'}),
     url(r'^1\.0$', 'django.views.generic.simple.direct_to_template', {'template': '1.0.html'}, name='index'),
@@ -35,10 +40,6 @@ urlpatterns = patterns('',
     url(r'^1\.0/explore/scraperwiki.geo.postcodetolatlng$', views.explore_geo_postcodetolatlng_1_0, name='geo_postcodetolatlng'),    
 
     # API calls
-
-    #explorer
-    url(r'^explorer_call/?$', views.explorer_user_run, name='explorer_call'),
-    url(r'^explorer_example/(?P<method>[\w_\-\.\_]+)/$', views.explorer_example, name='explorer_example'),    
 
     url(r'^1\.0/scraper/search$', scrapersearch_handler, name="method_search"),
     url(r'^1\.0/scraper/getinfo$', scraperinfo_handler, name="method_getinfo"),

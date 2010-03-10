@@ -25,17 +25,14 @@ class APIBase(BaseHandler):
         some way!
 
         """
-        try:
-            if request.GET.get('explorer_user_run', None) == '1':
-                request_api_key = 'explorer'
-            else:
-                request_api_key = api_key.objects.get(
-                    key=request.GET.get('key', None),
-                    active=True,
-                    )
-            return True
-        except:
-            return False
+        if request.GET.get('explorer_user_run', None) == '1':
+            request_api_key = 'explorer'
+        else:
+            request_api_key = api_key.objects.get(
+                key=request.GET.get('key', None),
+                active=True,
+                )
+        return True
 
     def validate(self, request):
 

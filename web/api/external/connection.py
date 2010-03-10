@@ -15,15 +15,6 @@ class Connection(object):
     def __init__(self):
         self.is_connected = False
 
-    def __load_config(self):
-        """
-        Create a ConfigParser, open ``config.cfg`` and return it.
-
-        """
-
-        config = ConfigParser.ConfigParser()
-        config.readfp(open(os.path.split(__file__)[0] + '/config.cfg.local'))
-        return config
 
     def __test(self):
         print "worked"

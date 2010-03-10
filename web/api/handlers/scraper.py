@@ -29,7 +29,7 @@ class Search(APIBase):
     required_arguments = ['query']
     
     def validate(self, request):
-        super(GetInfo, self).validate(request)
+        super(Search, self).validate(request)
 
         if self.has_errors() == False:
             self.result = Scraper.objects.search(q)
