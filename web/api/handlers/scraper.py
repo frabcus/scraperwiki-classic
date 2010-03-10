@@ -31,6 +31,6 @@ class Search(APIBase):
     def validate(self, request):
         super(Search, self).validate(request)
 
-        if self.has_errors() == False:
-            query = request.GET.get('query', None)
+        if self.has_errors() == False: 
+            query = request.GET.get('query', None) 
             self.result = Scraper.objects.search(query)
