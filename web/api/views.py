@@ -93,8 +93,8 @@ def explorer_example(request, method):
 def explorer_user_run(request):
 
     #make sure it's a post
-    #if not request.POST:
-    #    raise Http404
+    if not request.POST:
+        raise Http404
 
     #build up the URL
 
