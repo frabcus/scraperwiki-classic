@@ -99,14 +99,15 @@ def explorer_user_run(request):
     #build up the URL
     post_data = dict(request.POST)
     for k,v in post_data.items():
-        if not v: del post_data[k]
+        if not v[0]: 
+            del post_data[k]
 
     uri = "%s?" % post_data.pop('uri')[0]
     post_data['explorer_user_run'] = ['1']
 
     querystring = urllib.urlencode([(k,v[0]) for k,v in post_data.items()])
     uri += querystring
-    
+
     # Grab the API response
     result = urllib.urlopen(uri).read()
     

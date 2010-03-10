@@ -32,4 +32,5 @@ class Search(APIBase):
         super(Search, self).validate(request)
 
         if self.has_errors() == False:
-            self.result = Scraper.objects.search(q)
+            query = request.GET.get('query', None)
+            self.result = Scraper.objects.search(query)
