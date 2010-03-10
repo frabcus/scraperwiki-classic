@@ -7,7 +7,7 @@
 {% block arguments %}
     <dt><code>key</code> (required)</dt>
     <dd>A valid API key.{% if user.is_authenticated and keys %} <input type="text" name="key" id="key" />{% endif %}</dd>
-    <dt><code>format</code> (required)</dt>
+    <dt><code>format</code></dt>
     <dd>The format you would like the response in. <input type="text" name="format" id="format" size="4"/></dd>
     <dt><code>name</code> (required)</dt>
     <dd>The short name for a scraper. <input type="text" name="name" id="name"/></dd>

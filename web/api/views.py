@@ -36,7 +36,11 @@ def keys(request):
     return render_to_response('keys.html', {'keys' : users_keys,'form' : form}, context_instance=RequestContext(request))
 
 def explore_scraper_search_1_0(request):
-    return render_to_response('scraper_search_1.0.html', {'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_search')}, context_instance=RequestContext(request))
+    
+    user = request.user
+    users_keys = api_key.objects.filter(user=user)
+    
+    return render_to_response('scraper_search_1.0.html', {'keys' : users_keys, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_search')}, context_instance=RequestContext(request))
 
 def explore_scraper_getinfo_1_0(request):
 
