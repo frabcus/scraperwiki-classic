@@ -92,21 +92,23 @@ def explorer_example(request, method):
 
 def explorer_user_run(request):
 
+    print "111111111111111111111111111111"
     #make sure it's a post
     if not request.POST:
         raise Http404
 
     #build up the URL
-
+    print "222222222222222222222222222222222"
     uri = request.POST['uri'] + '/?'
     uri += 'explorer_user_run=1'    
     post_items = request.POST.items()
     for post_key, post_value in post_items:
         if post_key != 'uri' and post_value:
             uri += ('&' + post_key + '=' + urllib.quote_plus(post_value))
-
+    print "33333333333333333333333333333333333333333"
+    print uri
     # Grab the API response
     result = urllib.urlopen(uri).read()
-
+    print "444444444444444444444444444444444"
     return render_to_response('explorer_user_run.html', {'result' : result}, context_instance=RequestContext(request)) 
  
