@@ -93,18 +93,24 @@ def explorer_example(request, method):
 
 def explorer_user_run(request):
     #make sure it's a post
-     if not request.POST:
-         raise Http404
+    if not request.POST:
+        raise Http404
     
     #build up the URL
     post_data = dict(request.POST)
+    for k,v in post_data.items():
+        if not v: del post_data[k]
+
     uri = "%s?" % post_data.pop('uri')[0]
     post_data['explorer_user_run'] = ['1']
 
-    querystring = urllib.urlencode([k,v[0]) for k,v in post_data.items()])
+    querystring = urllib.urlencode([(k,v[0]) for k,v in post_data.items()])
     uri += querystring
     
     # Grab the API response
     result = urllib.urlopen(uri).read()
     
-    return render_to_response('explorer_user_run.html', {'result' : result}, context_instance=RequestContext(request))
+    return render_to_response('explorer_user_run.html', 
+                              {'result' : result}, 
+                              context_instance=RequestContext(request))
+
