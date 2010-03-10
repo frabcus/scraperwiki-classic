@@ -92,7 +92,6 @@ def explorer_example(request, method):
     return render_to_response('explorer_example.html', {'method' : method}, context_instance=RequestContext(request))    
 
 def explorer_user_run(request):
-    
     #make sure it's a post
      if not request.POST:
          raise Http404
@@ -108,4 +107,4 @@ def explorer_user_run(request):
     # Grab the API response
     result = urllib.urlopen(uri).read()
     
-    return render_to_response('explorer_user_run.html', {'result' : result}, context_instance=RequestContext(request))-
+    return render_to_response('explorer_user_run.html', {'result' : result}, context_instance=RequestContext(request))
