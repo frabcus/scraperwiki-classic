@@ -1,3 +1,5 @@
+import urllib
+
 from django.template import RequestContext, loader, Context
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response
@@ -13,7 +15,6 @@ from django.contrib.auth.decorators import login_required
 from models import api_key
 from forms import applyForm
 
-import urllib
 
 @login_required
 def keys(request):
@@ -91,22 +92,20 @@ def explorer_example(request, method):
     return render_to_response('explorer_example.html', {'method' : method}, context_instance=RequestContext(request))    
 
 def explorer_user_run(request):
-
+    
     #make sure it's a post
-    if not request.POST:
-        raise Http404
-
+     if not request.POST:
+         raise Http404
+    
     #build up the URL
+    post_data = dict(request.POST)
+    uri = "%s?" % post_data.pop('uri')[0]
+    post_data['explorer_user_run'] = ['1']
 
-    uri = request.POST['uri'] + '/?'
-    uri += 'explorer_user_run=1'    
-    post_items = request.POST.items()
-    for post_key, post_value in post_items:
-        if post_key != 'uri' and post_value:
-            uri += ('&' + post_key + '=' + urllib.quote_plus(post_value))
-
+    querystring = urllib.urlencode([k,v[0]) for k,v in post_data.items()])
+    uri += querystring
+    
     # Grab the API response
     result = urllib.urlopen(uri).read()
-
-    return render_to_response('explorer_user_run.html', {'result' : result}, context_instance=RequestContext(request)) 
- 
+    
+    return render_to_response('explorer_user_run.html', {'result' : result}, context_instance=RequestContext(request))-

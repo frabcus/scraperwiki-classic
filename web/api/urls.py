@@ -37,7 +37,7 @@ urlpatterns = patterns('',
     # API calls
 
     #explorer
-    url(r'^explorer_call$', views.explorer_user_run, name='explorer_call'),
+    url(r'^explorer_call/?$', views.explorer_user_run, name='explorer_call'),
     url(r'^explorer_example/(?P<method>[\w_\-\.\_]+)/$', views.explorer_example, name='explorer_example'),    
 
     url(r'^1\.0/scraper/search$', scrapersearch_handler, name="method_search"),
