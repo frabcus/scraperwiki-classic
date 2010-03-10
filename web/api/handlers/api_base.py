@@ -52,7 +52,7 @@ class APIBase(BaseHandler):
 
         #reset previous value, piston will persist instances of this class across calls
         self.result = None
-        self.error_response = None
+        self.error_response = False
 
         #get the result out of cache if it is there and this call is set to be cached
         if self.cache_duration > 0:

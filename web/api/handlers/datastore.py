@@ -2,7 +2,8 @@ from api.handlers.api_base import APIBase
 from web.scraper.models import Scraper
 
 class Data(APIBase):
-
+    required_arguments = ['name']
+    
     def validate(self, request):
         super(Data, self).validate(request)
 
@@ -14,7 +15,7 @@ class Data(APIBase):
 
 
 class DataByLocation(APIBase):
-    required_arguments = ['lat', 'lng']
+    required_arguments = ['name', 'lat', 'lng']
 
     def validate(self, request):
         super(DataByLocation, self).validate(request)
@@ -29,7 +30,7 @@ class DataByLocation(APIBase):
             self.result = Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, latlng=latlng)
 
 class DataByDate(APIBase):
-    required_arguments = ['start_date', 'end_date']
+    required_arguments = ['name', 'start_date', 'end_date']
 
     def validate(self, request):
         super(DataByDate, self).validate(request)
