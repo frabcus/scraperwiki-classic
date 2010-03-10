@@ -26,7 +26,7 @@ urlpatterns = patterns('',
 
     #explorer
     url(r'^explorer_call$', views.explorer_user_run, name='explorer_call'),
-    url(r'^explorer_example(?P<method>[\w_\-\.\_]+)/$', views.explorer_example, name='explorer_example'),
+    url(r'^explorer_example(?P<method>[\w_\-\.\_]+)$', views.explorer_example, name='explorer_example'),
     
     # Documentation
     url(r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'index.html'}),
