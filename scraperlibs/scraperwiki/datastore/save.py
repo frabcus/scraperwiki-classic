@@ -39,7 +39,7 @@ def insert(data):
     hlatlng = data.get("latlng", "")  
     hdate = data.get('date', None)
     hdate_scraped = data.get('date_scraped', None)
-    
+
     # insert the key-values
     for k, v in data.items():  
         # the v is typed and could be, for example, padded with zeros if it is an int type
