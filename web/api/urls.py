@@ -41,7 +41,6 @@ urlpatterns = patterns('',
 
     # API calls
 
-
     url(r'^1\.0/scraper/search$', scrapersearch_handler, name="method_search"),
     url(r'^1\.0/scraper/getinfo$', scraperinfo_handler, name="method_getinfo"),
     url(r'^1\.0/datastore/getdata$', data_handler, name="method_getdata"),
