@@ -1,6 +1,16 @@
 from api.handlers.api_base import APIBase
 from web.scraper.models import Scraper
 
+class Keys(APIBase):
+    required_arguments = ['name']
+
+    def validate(self, request):
+        super(Keys, self).validate(request)
+
+        if self.has_errors() == False:        
+            scraper = self.get_scraper(request)
+            self.result = Scraper.objects.datastore_keys(scraper_id=scraper.guid)
+
 class Data(APIBase):
     required_arguments = ['name']
     

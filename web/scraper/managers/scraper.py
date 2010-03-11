@@ -100,7 +100,16 @@ class ScraperManager(models.Manager):
         #execute
         c = self.datastore_connection.cursor()
         return c.execute("delete kv items from kv inner join items where items.item_id = kv.item_id and items.scraper_id=%s", (scraper_id,))
-
+    
+    def datastore_keys(self, scraper_id):
+        result = []
+        c = self.datastore_connection.cursor()
+        c.execute("select distinct kv.key from items inner join kv on kv.item_id=items.item_id WHERE items.scraper_id=%s", (scraper_id,))        
+        keys = c.fetchall()
+        for key in keys:
+            result.append(key[0])
+            
+        return result
 
     # this accesses the tables defined in scraperlibs/scraperwiki/datastore/scheme.sql and accessed in datastore/save.py
     def data_dictlist(self, scraper_id, limit=1000, offset=0, start_date=None, end_date=None, latlng=None):   
