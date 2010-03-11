@@ -12,6 +12,7 @@ scrapersearch_handler = Resource(scraper.Search)
 
 data_handler = Resource(datastore.Data)
 keys_handler = Resource(datastore.Keys)
+datastore_search_handler = Resource(datastore.Search)
 getdatabydate_handler = Resource(datastore.DataByDate)
 getdatabylocation_handler = Resource(datastore.DataByLocation)
 
@@ -35,6 +36,7 @@ urlpatterns = patterns('',
     url(r'^1\.0/explore/scraperwiki.scraper.search$', views.explore_scraper_search_1_0, name='scraper_search'),
     url(r'^1\.0/explore/scraperwiki.scraper.getinfo$', views.explore_scraper_getinfo_1_0, name='scraper_getinfo'),    
     url(r'^1\.0/explore/scraperwiki.datastore.getkeys$', views.explore_scraper_getkeys_1_0, name='datastore_getkeys'),    
+    url(r'^1\.0/explore/scraperwiki.datastore.search$', views.explore_datastore_search_1_0, name='datastore_search'),        
     url(r'^1\.0/explore/scraperwiki.datastore.getdata$', views.explore_scraper_getdata_1_0, name='scraper_getdata'),    
     url(r'^1\.0/explore/scraperwiki.datastore.getdatabydate$', views.explore_scraper_getdatabydate_1_0, name='scraper_getdatabydate'),
     url(r'^1\.0/explore/scraperwiki.datastore.getdatabylocation$', views.explore_scraper_getdatabylocation_1_0, name='scraper_getdatabylocation'),    
@@ -44,6 +46,7 @@ urlpatterns = patterns('',
 
     url(r'^1\.0/scraper/search$', scrapersearch_handler, name="method_search"),
     url(r'^1\.0/scraper/getinfo$', scraperinfo_handler, name="method_getinfo"),
+    url(r'^1\.0/datastore/search$', datastore_search_handler, name="method_datastore_search"),
     url(r'^1\.0/datastore/getdata$', data_handler, name="method_getdata"),
     url(r'^1\.0/datastore/getkeys$', keys_handler, name="method_getkeys"),
     url(r'^1\.0/datastore/getdatabydate$', getdatabydate_handler, name="method_getdatabydate"),    

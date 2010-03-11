@@ -60,7 +60,19 @@ def explore_scraper_getkeys_1_0(request):
         scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('first_published_at')[:5]
 
     return render_to_response('datastore_getkeys_1.0.html', {'keys' : users_keys, 'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getkeys')}, context_instance=RequestContext(request))
-    
+
+def explore_datastore_search_1_0(request):
+    scrapers = []
+    user = request.user
+    if user.is_authenticated():
+        users_keys = api_key.objects.filter(user=user)
+        scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True)[:5]
+    else: 
+        users_keys = None
+        scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('first_published_at')[:5]
+
+    return render_to_response('datastore_search_1.0.html', {'keys' : users_keys, 'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_datastore_search')}, context_instance=RequestContext(request))
+            
 def explore_scraper_getdata_1_0(request):
 
     scrapers = []

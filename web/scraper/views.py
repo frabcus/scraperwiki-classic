@@ -21,7 +21,6 @@ try:
 except ImportError:
     import simplejson as json
 
-
 def overview(request, scraper_short_name):
     """
     Shows info on the scraper plus example data.
