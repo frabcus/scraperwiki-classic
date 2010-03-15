@@ -21,7 +21,6 @@ try:
 except ImportError:
     import simplejson as json
 
-
 def overview(request, scraper_short_name):
     """
     Shows info on the scraper plus example data.
@@ -145,7 +144,7 @@ def code(request, scraper_short_name):
         models.Scraper.objects, short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-
+    committed_code = scraper.committed_code()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
     return render_to_response('scraper/code.html', {
@@ -153,6 +152,7 @@ def code(request, scraper_short_name):
         'selected_tab': 'code',
         'scraper': scraper,
         'user_owns_it': user_owns_it,
+        'committed_code': committed_code,
         'user_follows_it': user_follows_it,},
         context_instance=RequestContext(request))
 
