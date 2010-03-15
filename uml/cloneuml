@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# cloneuml
+#
+# Clone a UML. Takes one argument which should be the lower byte of the IP
+# address assigned to the UML, in the range 1 ... 99. This value formatted
+# to three zero-padded digits is used to from the UML name
+#
+test $# = 1 ||
+{
+	echo	usage: cloneuml ip
+	exit	1
+}
+
+test `id -u` = 0 ||
+{
+	echo	cloneuml: must be run as root
+	exit	1
+}
+
+test $1 -lt 1  &&
+{
+	echo	cloneuml: ip must be in range 1 ... 99
+	exit	1
+}
+test $1 -gt 99 &&
+{
+	echo	cloneuml: ip must be in range 1 ... 99
+	exit	1
+}
+
+ uip=$1
+ hip=`expr ${uip} + 100`
+name=`printf '%03d' ${uip}`
+gate=`printf '%03d' ${hip}`
+umld=uml${name}
+
+#  Check if UML aleady exists
+#
+test -e ${umld} &&
+{
+	echo	cloneuml: ip ${ip} already exists
+	exit	1
+}
+
+#  Create UML directory, and create and format image to be mounted
+#  on /addr in the UML instance. This image contains the UML instance
+#  specific configuration.
+#
+mkdir	${umld}
+dd 	if=/dev/zero of=${umld}/addr.img bs=1024 seek=100 count=1
+mke2fs	-F ${umld}/addr.img
+
+mkdir	-p mnt
+mount	-o loop ${umld}/addr.img mnt
+
+#  The network interfaces file is created to bring up a network
+#  connection on the appropriate fixed IP address.
+#
+cat <<EOF > mnt/interfaces
+auto lo
+iface lo inet loopback
+address 127.0.0.1
+netmask 255.0.0.0
+
+auto eth0
+iface eth0 inet static
+    address 192.168.254.${uip}
+    network 192.168.254.0
+    netmask 255.255.255.0
+    broadcast 192.168.254.255
+    gateway 192.168.254.${gate}
+EOF
+
+#  The resolve.conf file has a joke domain name, but uses the
+#  same nameserver as the host.
+#
+(
+	echo	domain scraperwiki.net
+	grep 	nameserver /etc/resolv.conf
+)	> mnt/resolv.conf
+
+umount	mnt

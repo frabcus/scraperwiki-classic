@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+#  Run the dispatcher, proxy, firebox, assuming that there is a UML
+#  running.
+#
+./killlocal > /dev/null
+
+rm -rf	run
+rm -rf	log
+rm -rf	allow
+mkdir	run
+mkdir	log
+mkdir	allow
+
+export PYTHONPATH=Server/scripts
+./Server/scripts/Dispatcher.py	--daemon --subproc --varDir=.
+./Server/scripts/HTTPProxy.py	--daemon --subproc --varDir=.
+./Server/scripts/run_server.py  --daemon --subproc --varDir=.
+./Server/scripts/orbiter.sh	-d -s -v .

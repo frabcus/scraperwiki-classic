@@ -1,0 +1,35 @@
+#!/usr/bin/python
+
+# Absolute path to the UML/Server/scripts folder
+scripts_path = '/home/scraperwiki/UML/Server/scripts'
+
+def config(fs):
+    """
+    Takes a FireStarter object, cahnges settings and returns it.
+    
+    For editing when deploying.
+    """
+    
+    # fs.setUser           ('nobody')
+    # fs.setGroup          ('nogroup')
+
+    fs.setTraceback    ('html')
+    fs.addPaths        ('/scraperwiki/dev/scrapers')
+    fs.addPaths        ('/scraperwiki/dev/scraperlibs')
+
+
+    fs.addAllowedSites ('.*\.uk')
+    fs.addAllowedSites ('.*\.police\.uk')
+    fs.addAllowedSites ('.*\.gov\.uk')
+    fs.addAllowedSites ('.*\.org\.uk')
+    fs.addAllowedSites ('.*\.co\.uk')
+    fs.addAllowedSites ('.*\.com')
+    fs.addAllowedSites ('.*\.eu')
+    fs.addAllowedSites ('.*\.govt\.nz')
+
+    # fs.addIPTables     ('-A OUTPUT -p tcp -d 212.84.75.28 --dport 3306 -j ACCEPT')
+    # fs.setEnvironment  ('http_proxy', 'http://192.168.254.101:9002')
+    # fs.setEnvironment  ('https_proxy', 'http://192.168.254.101:9002')
+    
+    return fs
+
