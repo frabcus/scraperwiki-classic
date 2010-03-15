@@ -88,7 +88,7 @@ class Scraper(models.Model):
         the object to the disk you just have to know it's there by looking
         into the cryptically named vc.py module
         """
-      
+        print self.run_interval
         # if the scraper doesn't exist already give it a short name (slug)
         if self.short_name:
             self.short_name = util.SlugifyUniquely(self.short_name, 
@@ -159,7 +159,7 @@ class Scraper(models.Model):
         if self.pk:
             followers = self.users.filter(userscraperrole__role='follow')
         return followers
-    
+
     def add_user_role(self, user, role='owner'):
         """
         Method to add a user as either an editor or an owner to a scraper.
