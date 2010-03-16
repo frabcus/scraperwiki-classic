@@ -38,6 +38,7 @@ class Connection(object):
 
         if not self.is_connected:
             try :
+		config.get('mysql', 'passwd')
                 self.db = MySQLdb.connect(
                   host=config.get('mysql', 'host'), 
                   user=config.get('mysql', 'user'), 
@@ -45,7 +46,8 @@ class Connection(object):
                   db=config.get('mysql', 'db'),
                   )
                 self.is_connected = True
-            except :
+            except Exception, e:
+		print e
                 raise Exception("Unable to connect to datastore")
 
         return self.is_connected

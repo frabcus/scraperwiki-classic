@@ -10,8 +10,8 @@ import connection
 import sys
 import os
 import csv
-sys.path.append('..')
-import geo
+#sys.path.append('..')
+#import geo
 
 def load_scheme():
   """Excicutes the SQL in scheme.sql"""
@@ -29,13 +29,11 @@ def load_scheme():
     elif exit.lower() == "y":
       print "dumping"
       conn = connection.Connection()
-      c = conn.connect()
+      conn.connect()
+      c = conn.cursor()
       f = open('scheme.sql', 'r')
       c.execute(f.read())
-      c.close()
-
-      conn = connection.Connection()
-      c = conn.connect()
+      c = conn.cursor()
       c.execute("""INSERT INTO `sequences` VALUES(0);""")
       c.close()
       break
