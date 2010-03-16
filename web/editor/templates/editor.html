@@ -172,98 +172,106 @@
     <div id="meta_form" class="popup_item">
         <a class="popupClose">close</a>
     </div>
-    <div id="diff" class="popup_item"><a class="popupClose">x</a><pre></pre></div>
-    <div id="popup_shortcuts" class="popup_item">
-        <a class="popupClose">close</a><pre></pre>
-        <h3>Keyboard shortcuts</h3>
-        <ul>
-            <li>Control-S   Save</li>
-            <li>Control-R   Run</li>
-            <li>Control-D   Diff</li>
-        </ul>
+    <div id="diff" class="popup_item">
+        <div class="popup_header">
+            <h2>Diff with the published version</h2>
+            <a class="popupClose">close</a>
+        </div>
+        <div class="output">
+            <pre></pre>
+        </div>
     </div>
-    <div id="popup_settings" class="popup_item">
-        <a class="popupClose">close</a>
-        <h3>Editor settings</h3>
-    </div>    
-    <div id="popup_documentation" class="popup_item">
-        <a class="popupClose">close</a>
-        <dl class="quick_help">
-            <h4>Screen Scraping</h4>
-            <dl>
-                <dt>
-                    <code><strong>scraperwiki.scrape(url, <em>params=[]</em>)</strong></code>
-                </dt>
-                <dd>Returns the source text of a webpage as a string. This is a wrapper for urllib2 that lists extra information on the sources tab.</dd>
-            </dl>
-            <h4>Storing data</h4>
-            <dl>
-                <dt>
-                    <code><strong>scraperwiki.datastore.save(unique_keys=[], data={}, <em>date=None</em>, <em>latlng=[None,None]</em>)</strong></code>
-                </dt>
-                <dd>Saves to the datastore, either adding or over-writing data with the same values for unique_keys. <code>date</code> and <code>latlng</code> are optional special fields  for indexing each record.</dd>
-            </dl>                
-
-            <h4>Geocoding</h4>
-            <dl>
-                <dt>
-                    <code><strong>scraperwiki.geo.gb_postcode_to_latlng(postcode)</strong></code>
-                </dt>
-                <dd>
-                    returns (lat,lng) pair for a postcode.
-                </dd>
-                <dt><code><strong>scraperwiki.geo.os_easting_northing_to_latlng(easting, northing)</strong></code></dt>
-                <dd>returns (lat,lng) pair for an OSGB easting, northing coordinates.</dd>
-                <dt><code><strong>scraperwiki.geo.extract_gb_postcode(string)</strong></code></dt>
-                <dd>attempts to extract a UK postcode from a string.</dd>
-            </dl>                
-
-            <h4>Recommended libraries</h4>
+    <div id="popup_shortcuts" class="popup_item">
+        <div class="popup_header">
+            <h2>Keyboard shortcuts</h2>
+            <a class="popupClose">close</a><pre></pre>
+        </div>
+        <div class="output">
             <ul>
-                <li><code><strong>urllib2</strong>, <strong>urlparse</strong></code>
-                    Standard python libraries for opening urls. <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
-                </li>
-                <li><code><strong>BeautifulSoup</strong></code>
-                    For parsing html.  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
-                </li>
-                <li><code><strong>mechanize</strong></code>
-                    Automates submitting forms. <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
-                </li>
-                <li><code><strong>lxml</strong></code>
-                    For parsing html and accessing it using cssselect.
-                </li>
-                <li><code><strong>pdftoxml</strong>(pdfdata)</code>
-                    Converts the binary data of a PDF file into a parsable XML string
-                </li>
+                <li>Control-S   Save</li>
+                <li>Control-R   Run</li>
+                <li>Control-D   Diff</li>
             </ul>
+        </div>
+    </div>
+    <div id="popup_documentation" class="popup_item">
+        <div class="popup_header">
+            <h2>Code documentation - quick help</h2>
+            <a class="popupClose">close</a>            
+        </div>
+        <div class="output">
+            <dl class="quick_help">
+                <h4>Screen Scraping</h4>
+                <dl>
+                    <dt>
+                        <code><strong>scraperwiki.scrape(url, <em>params=[]</em>)</strong></code>
+                    </dt>
+                    <dd>Returns the source text of a webpage as a string. This is a wrapper for urllib2 that lists extra information on the sources tab.</dd>
+                </dl>
+                <h4>Storing data</h4>
+                <dl>
+                    <dt>
+                        <code><strong>scraperwiki.datastore.save(unique_keys=[], data={}, <em>date=None</em>, <em>latlng=[None,None]</em>)</strong></code>
+                    </dt>
+                    <dd>Saves to the datastore, either adding or over-writing data with the same values for unique_keys. <code>date</code> and <code>latlng</code> are optional special fields  for indexing each record.</dd>
+                </dl>                
 
-            <p><a href="{% url help_code_documentation %}" target="_blank">Full code documentation</a> <small>(opens in new window)</small>.</p>
+                <h4>Geocoding</h4>
+                <dl>
+                    <dt>
+                        <code><strong>scraperwiki.geo.gb_postcode_to_latlng(postcode)</strong></code>
+                    </dt>
+                    <dd>
+                        returns (lat,lng) pair for a postcode.
+                    </dd>
+                    <dt><code><strong>scraperwiki.geo.os_easting_northing_to_latlng(easting, northing)</strong></code></dt>
+                    <dd>returns (lat,lng) pair for an OSGB easting, northing coordinates.</dd>
+                    <dt><code><strong>scraperwiki.geo.extract_gb_postcode(string)</strong></code></dt>
+                    <dd>attempts to extract a UK postcode from a string.</dd>
+                </dl>                
 
-        </dl>
+                <h4>Recommended libraries</h4>
+                <ul>
+                    <li><code><strong>urllib2</strong>, <strong>urlparse</strong></code>
+                        Standard python libraries for opening urls. <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
+                    </li>
+                    <li><code><strong>BeautifulSoup</strong></code>
+                        For parsing html.  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
+                    </li>
+                    <li><code><strong>mechanize</strong></code>
+                        Automates submitting forms. <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
+                    </li>
+                    <li><code><strong>lxml</strong></code>
+                        For parsing html and accessing it using cssselect.
+                    </li>
+                    <li><code><strong>pdftoxml</strong>(pdfdata)</code>
+                        Converts the binary data of a PDF file into a parsable XML string
+                    </li>
+                </ul>
+
+                <p><a href="{% url help_code_documentation %}" target="_blank">Full code documentation</a> <small>(opens in new window)</small>.</p>
+
+            </dl>
+        </div>
     </div>
     <div id="popup_text" class="popup_item">
-        <a class="popupClose">close</a>
+        <div class="popup_header">
+            <a class="popupClose">close</a>
+        </div>
         <div class="output"><pre></pre></div>
     </div>
     <div id="popup_exception" class="popup_item">
-        <a class="popupClose">close</a>
-        <h3>Traceback</h3>
+        <div class="popup_header">
+            <h3>Traceback</h3>            
+            <a class="popupClose">close</a>
+        </div>
         <div class="output"><pre></pre></div>
     </div>
-    <div id="popup_source" class="popup_item">
-        <div class="tabs">
-          <ul>
-            <li class="raw_tab"><a href="#">RAW</a></li>
-            <li class="html_tab"><a href="#">HTML</a></li>
-          </ul>
-        </div>
-        <div class="popup_html output"><iframe></iframe></div>
-        <div class="popup_raw output" style="display:none"><pre></pre></div>
-    </div>
     <div id="popup_intro" class="popup_item">
-        <div>
+        <div class="popup_header">
             <h2>Welcome to the ScraperWiki code editor</h2>
-
+        </div>
+        <div class="output">
             <p>
                 Here you can write, test and debug your screen scrapers using the Python programming language. If you are not familiar with Python <a href="http://docs.python.org/tutorial/" target="_new">click here to read a bit about it</a>.
             </p>
@@ -273,7 +281,6 @@
             <p>
                 Whilst you are working on your scraper click <em>Save draft</em> to back it up. When you are finished, click <em>Commit and publish</em> to share it with the world.
             </p>
-
 
             <a href="#" class="popupReady">Ready to start?</a>
         </div>
