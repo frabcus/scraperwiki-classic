@@ -3,6 +3,6 @@ db=db.sq3
 
 [mysql]
 host=localhost
-user=scraperwiki
-passwd=scraperwiki
-db=scraperwiki_datastore
+user=datastore
+passwd=3jFjLrje6dFJ7cQE
+db=datastore_live
