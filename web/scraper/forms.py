@@ -13,7 +13,6 @@ class RunIntervalForm (forms.ModelForm):
                                 (3600*24*3, 'Every three days'),                                                                
                                 (3600*24*7, 'Once a week'),
                                 (3600*24*14, 'Every two weeks'),
-                                (3600*24*21, 'Every three weeks'),
                                 (3600*24*31, 'Once a month'),
                                 (3600*24*63, 'Every two months'),
                                 (3600*24*182, 'Every six months'),

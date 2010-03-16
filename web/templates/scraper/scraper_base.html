@@ -71,12 +71,6 @@
                 <li{% ifequal selected_tab "history" %} class="selected"{% endifequal %}>
                     <a href="{% url scraper_history scraper.short_name %}">History</a>
                 </li>
-                <li{% ifequal selected_tab "contributors" %} class="selected"{% endifequal %}>
-                    <a href="{% url scraper_contributors scraper.short_name %}">Contributors
-						{% with scraper.contributors.count as count %}
-						    ({{ count|add:"1" }})
-						{% endwith %}</a>
-                </li>
                 {% load comments %}
                 <li{% ifequal selected_tab "comments" %} class="selected"{% endifequal %}>
                     <a href="{% url scraper_comments scraper.short_name %}">Notes &amp; questions 

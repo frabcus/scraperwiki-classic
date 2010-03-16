@@ -33,7 +33,7 @@ def overview(request, scraper_short_name):
         short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-
+    scraper_contributors = scraper.contributors()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
     table = models.Scraper.objects.data_summary(
@@ -52,6 +52,7 @@ def overview(request, scraper_short_name):
         'user_follows_it': user_follows_it,
         'has_data': has_data,
         'data': data,
+        'scraper_contributors': scraper_contributors,
         }, context_instance=RequestContext(request))
 
 
@@ -183,33 +184,6 @@ def code(request, scraper_short_name):
         'committed_code': committed_code,
         'user_follows_it': user_follows_it,},
         context_instance=RequestContext(request))
-
-
-def contributors(request, scraper_short_name):
-
-    user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
-
-    scraper_owner = scraper.owner()
-    scraper_contributors = scraper.contributors()
-    scraper_followers = scraper.followers()
-
-    scraper_tags = Tag.objects.get_for_object(scraper)
-
-    return render_to_response('scraper/contributers.html', {
-        'scraper_tags': scraper_tags,
-        'scraper_owner': scraper_owner,
-        'scraper_contributors': scraper_contributors,
-        'scraper_followers': scraper_followers,
-        'selected_tab': 'contributors',
-        'scraper': scraper,
-        'user_owns_it': user_owns_it,
-        'user_follows_it': user_follows_it,
-        }, context_instance=RequestContext(request))
-
 
 def comments(request, scraper_short_name):
 
