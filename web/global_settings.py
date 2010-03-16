@@ -129,6 +129,9 @@ INTERNAL_IPS = ['127.0.0.1',]
 NOTIFICATIONS_STORAGE = 'session.SessionStorage'
 REGISTRATION_BACKEND = "registration.backends.default.DefaultBackend"
 
+#tagging
+FORCE_LOWERCASE_TAGS = True
+
 
 # define default directories needed for paths to run scrapers
 SCRAPER_LIBS_DIR = join(HOME_DIR, "scraperlibs")

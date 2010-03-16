@@ -78,7 +78,7 @@ class Scraper(models.Model):
     run_interval      = models.IntegerField(default=86400)
 
     objects = managers.scraper.ScraperManager()
-      
+
     def __unicode__(self):
         return self.short_name
     
@@ -88,7 +88,7 @@ class Scraper(models.Model):
         the object to the disk you just have to know it's there by looking
         into the cryptically named vc.py module
         """
-        print self.run_interval
+
         # if the scraper doesn't exist already give it a short name (slug)
         if self.short_name:
             self.short_name = util.SlugifyUniquely(self.short_name, 

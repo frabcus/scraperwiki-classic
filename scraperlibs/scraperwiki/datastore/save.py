@@ -80,7 +80,8 @@ def insert(data):
           
     # printing to the console
     ldata = { }
-    for k, v in data.items():  
+    for k, v in data.items():
+        if isinstance(v, )
         ldata[cgi.escape(k)] = cgi.escape(v)
     
     # this should print < but it crashes the javascript
