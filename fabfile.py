@@ -65,7 +65,7 @@ def deploy():
     then restart the webserver
     """
 
-    
+
     print "***************** DEPLOY *****************"
     print "Please Enter your deploy message: \r"
     message = raw_input()
@@ -73,7 +73,7 @@ def deploy():
     kforge_pass = pw = getpass.getpass('Your kforge Password: ')
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
-    
+
     run("""cd %s; 
         hg pull https://%s:%s@kforgehosting.com/scraperwiki/hg; 
         hg update -C %s""" % (env.path,
@@ -83,7 +83,7 @@ def deploy():
     
     buildout()
     migrate()
-    write_changeset()
+    #write_changeset()
     install_cron()
     restart_webserver()   
 

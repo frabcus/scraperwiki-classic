@@ -82,6 +82,11 @@
                     <a href="{% url scraper_comments scraper.short_name %}">Notes &amp; questions 
                        {% get_comment_count for scraper as cc %}({{ cc }})</a>
                 </li>
+                {% if user_owns_it %}
+                    <li{% ifequal selected_tab "admin" %} class="selected"{% endifequal %}>
+                        <a href="{% url scraper_admin scraper.short_name %}">Admin</a>
+                    </li>
+                {% endif %}
             </ul>
             
         </div>

@@ -1,8 +1,41 @@
 from api.handlers.api_base import APIBase
 from web.scraper.models import Scraper
 
-class Data(APIBase):
+class Keys(APIBase):
+    required_arguments = ['name']
 
+    def validate(self, request):
+        super(Keys, self).validate(request)
+
+        if self.has_errors() == False:        
+            scraper = self.get_scraper(request)
+            self.result = Scraper.objects.datastore_keys(scraper_id=scraper.guid)
+
+class Search(APIBase):
+    required_arguments = ['name']
+    required_arguments = ['filter']
+
+    def validate(self, request):
+        super(Search, self).validate(request)
+
+        if self.has_errors() == False:        
+
+            key_values = []
+            kv_string = request.GET.get('filter', None)
+            kv_split = kv_string.split('|') 
+            for item in kv_split:
+                item_split = item.split(',')
+                key_values.append((item_split[0], item_split[1]))
+            
+            limit = self.clamp_limit(int(request.GET.get('limit', 100)))
+            offset = int(request.GET.get('offset', 0))
+            scraper = self.get_scraper(request)
+            self.result = Scraper.objects.data_search(scraper_id=scraper.guid, key_values=key_values, limit=limit, offset=offset)
+    
+
+class Data(APIBase):
+    required_arguments = ['name']
+    
     def validate(self, request):
         super(Data, self).validate(request)
 
@@ -14,7 +47,7 @@ class Data(APIBase):
 
 
 class DataByLocation(APIBase):
-    required_arguments = ['lat', 'lng']
+    required_arguments = ['name', 'lat', 'lng']
 
     def validate(self, request):
         super(DataByLocation, self).validate(request)
@@ -29,7 +62,7 @@ class DataByLocation(APIBase):
             self.result = Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, latlng=latlng)
 
 class DataByDate(APIBase):
-    required_arguments = ['start_date', 'end_date']
+    required_arguments = ['name', 'start_date', 'end_date']
 
     def validate(self, request):
         super(DataByDate, self).validate(request)
@@ -49,7 +82,7 @@ class DataByDate(APIBase):
                 scraper = self.get_scraper(request)                
                 self.result = Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, latlng=latlng)
 
-    def convert_date(dateform):
+    def convert_date(self, dateform):
         if not dateform:
             return None
         mdateform = re.match("(\d\d\d\d)-(\d\d)-(\d\d)", dateform)

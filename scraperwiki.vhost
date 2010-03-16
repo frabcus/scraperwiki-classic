@@ -8,27 +8,25 @@
 <VirtualHost *:80>
   ServerName scraperwiki.local
   ServerAdmin webmaster@localhost
-  DocumentRoot /var/www/scraperwiki/clean2/web
+  DocumentRoot /var/www/scraperwiki/web
 
-  WSGIScriptAlias / /var/www/scraperwiki/clean2/scraperwiki.wsgi
+  WSGIScriptAlias / /var/www/scraperwiki/scraperwiki.wsgi
   
-  WSGIDaemonProcess farmsubsidy processes=1 threads=10
-  WSGIProcessGroup farmsubsidy
-
-  Alias /run_code /var/www/scraperwiki/UML/Server/Scripts
-  <Location /run_code>
-    SetHandler wsgi-script
-    Options +ExecCGI
-  </Location>
-  # <Directory /var/www/scraperwiki/UML/Server/Scripts>
-  #       AddType application/x-httpd-php .php
-  # </Directory>
-  
-  ErrorLog /var/log/apache2/error.log
-  
+  WSGIDaemonProcess scraperwiki processes=2 threads=10
+  WSGIProcessGroup scraperwiki
+    
   # Possible values include: debug, info, notice, warn, error, crit,
   # alert, emerg.
   LogLevel debug
+</VirtualHost>
 
-  CustomLog /var/log/apache2/access.log combined
+<VirtualHost *:80>
+  ServerAdmin webmaster@media.scraperwiki.talusdesign.co.uk
+  ServerName media.scraperwiki.talusdesign.co.uk
+  
+  ProxyRequests Off
+  ProxyPreserveHost On
+  ProxyPass / http://127.0.0.1:81/
+  ProxyPassReverse / http://127.0.0.1:81/
+  
 </VirtualHost>

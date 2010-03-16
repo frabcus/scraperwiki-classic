@@ -71,6 +71,8 @@ NEW REQUESTS FOR DATA
 {% endif %}
 
 {% endspaceless %}
+
+
 --------------------------------------------------------
 Information overload? You can change the frequency and type of these alerts any 
 time at http://{{ site.domain }}{% url profiles_edit_profile %}

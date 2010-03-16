@@ -25,17 +25,15 @@ class APIBase(BaseHandler):
         some way!
 
         """
-        try:
-            if request.GET.get('explorer_user_run', None) == '1':
-                request_api_key = 'explorer'
-            else:
-                request_api_key = api_key.objects.get(
-                    key=request.GET.get('key', None),
-                    active=True,
-                    )
-            return True
-        except:
-            return False
+        result = False
+        if request.GET.get('explorer_user_run', None) == '1':
+            request_api_key = 'explorer'
+            result = True
+        else:
+            key = request.GET.get('key', None)
+            if key and api_key.objects.get(key=key,active=True,):
+                result = True
+        return result
 
     def validate(self, request):
 
@@ -55,6 +53,7 @@ class APIBase(BaseHandler):
 
         #reset previous value, piston will persist instances of this class across calls
         self.result = None
+        self.error_response = False
 
         #get the result out of cache if it is there and this call is set to be cached
         if self.cache_duration > 0:

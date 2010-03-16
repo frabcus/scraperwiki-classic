@@ -75,7 +75,7 @@ class Scraper(models.Model):
     has_geo           = models.BooleanField(default=False)
     has_temporal      = models.BooleanField(default=False)
     scraper_sparkline_csv     = models.CharField(max_length=255, null=True)
-    run_interval      = models.IntegerField(default=0)
+    run_interval      = models.IntegerField(default=86400)
 
     objects = managers.scraper.ScraperManager()
       
@@ -88,7 +88,7 @@ class Scraper(models.Model):
         the object to the disk you just have to know it's there by looking
         into the cryptically named vc.py module
         """
-      
+        print self.run_interval
         # if the scraper doesn't exist already give it a short name (slug)
         if self.short_name:
             self.short_name = util.SlugifyUniquely(self.short_name, 
@@ -103,7 +103,7 @@ class Scraper(models.Model):
      
         if self.created_at == None:
             self.created_at = datetime.datetime.today()
-     
+    
                 
         if not self.guid:
             import hashlib
@@ -159,7 +159,7 @@ class Scraper(models.Model):
         if self.pk:
             followers = self.users.filter(userscraperrole__role='follow')
         return followers
-    
+
     def add_user_role(self, user, role='owner'):
         """
         Method to add a user as either an editor or an owner to a scraper.
@@ -195,7 +195,7 @@ class Scraper(models.Model):
                                        user=user, 
                                        role='follow').delete()
         return True
-        
+
     def followers(self):
         return self.users.filter(userscraperrole__role='follow')
 
@@ -207,7 +207,7 @@ class Scraper(models.Model):
         return (self.owner(),)
             
     def committed_code(self):
-        code = vc.get_code(self.short_name)
+        code = vc.get_code(self.short_name, committed=True)
         return code
 
     def saved_code(self):

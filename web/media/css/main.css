@@ -38,7 +38,7 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 .content.half {width:50%;}
 .content.col.left {width:60%;}
 .content.col.right {width:37%; padding-left:3%;}
-.content .section {padding-bottom:1em;}
+.content .section {padding:1em 0; border-bottom:dotted 1px #ccc;}
 .content h2 {padding-bottom:0.6em;font-size:1.7em;}
 .content h3 {padding-bottom:0.6em;}
 .content h4 {padding-bottom:0.6em;}

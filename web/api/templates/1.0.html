@@ -24,7 +24,7 @@
         <p>
             Each API function has its own URI. You need to pass an API key, the format you would like the data returned in, and other function-specific arguments via the query string to tell the API exactly what you are requesting:
             <code class="api_call">
-     http://www.scraperwiki.com/api/1.0/scraper/getdata/?name=<em>[scraper short name]</em>&key=<em>[your api key]</em>&amp;format<em>=[json | yaml | xml | php | csv]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
+     http://www.scraperwiki.com/api/1.0/datastore/getdata/?name=<em>[scraper short name]</em>&key=<em>[your api key]</em>&amp;format<em>=[json | yaml | xml | php | csv]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
             </code>
         </p>
     </div>
@@ -149,6 +149,9 @@
     <h5>Datastore</h5>
     <ul>
         <li>
+            <a href="{% url api:datastore_getkeys %}">scraperwiki.datastore.getKeys</a>
+        </li>
+        <li>
             <a href="{% url api:scraper_getdata %}">scraperwiki.datastore.getData</a>
         </li>
         <li>
@@ -156,6 +159,9 @@
         </li>
         <li>
             <a href="{% url api:scraper_getdatabylocation %}">scraperwiki.datastore.getDataByLocation</a>
+        </li>
+        <li>
+            <a href="{% url api:datastore_search %}">scraperwiki.datastore.search</a>
         </li>
     </ul>
     <h5>Geo</h5>    

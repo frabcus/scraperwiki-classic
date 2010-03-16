@@ -78,8 +78,8 @@ class Command(BaseCommand):
 
             #get all scrapers where interval > 0 and require running
             scrapers = Scraper.objects.filter(published=True)
-            scrapers = Scraper.objects.filter(interval__gt=0)
-            scrapers = scrapers.extra(where=["ADDTIME(last_run, SEC_TO_TIME(run_interval)) > NOW()"])
+            scrapers = Scraper.objects.filter(run_interval__gt=0)
+            scrapers = scrapers.extra(where=["ADDTIME(last_run, SEC_TO_TIME(run_interval)) > NOW() or last_run is null"])
             for scraper in scrapers:
                 try:
                     self.run_scraper(scraper, options)
