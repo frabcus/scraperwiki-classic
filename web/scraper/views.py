@@ -61,8 +61,6 @@ def create(request):
     Rendars the scraper create form
 
     Is this unused?
-
-    TODO: delete!
     """
     if request.method == 'POST':
         return render_to_response(
@@ -90,7 +88,7 @@ def scraper_admin(request, scraper_short_name):
         delete_data = request.POST.get('delete_data', None)
         scheduler_update = request.POST.get('scheduler_update', None)
         delete_scraper = request.POST.get('delete_scraper', None)
-        
+
         #if user has requested a delete, **double** check they are allowed to,
         # the do the delete
         if delete_data == '1' and user_owns_it:
@@ -106,6 +104,8 @@ def scraper_admin(request, scraper_short_name):
         if delete_scraper == '1' and user_owns_it:
             scraper.deleted = True
             scraper.save()
+            request.notifications.add("Your scraper has been deleted")
+            return HttpResponseRedirect('/')
 
     return render_to_response('scraper/admin.html', {
       'selected_tab': 'admin',

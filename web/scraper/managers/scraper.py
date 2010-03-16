@@ -64,7 +64,11 @@ class ScraperManager(models.Manager):
         super(ScraperManager, self).__init__(*args, **kwargs)
     
     use_for_related_fields = True
-	
+
+    def get_query_set(self):
+        return super(ScraperManager, self).get_query_set().filter(deleted=False)
+        
+        	
     def owns(self):
         return self.get_query_set().filter(userscraperrole__role='owner')
 		
@@ -382,4 +386,3 @@ class ScraperManager(models.Manager):
             scrapers = self.filter(deleted=False, featured=True).order_by('first_published_at')[:count]
         
         return scrapers
-        
