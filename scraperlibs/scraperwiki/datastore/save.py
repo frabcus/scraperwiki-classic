@@ -211,7 +211,6 @@ def save (unique_keys, data, date = None, latlng = None) :
 
     ds = DataStore.DataStore()
     rc, arg = ds.save (unique_keys, data, date, latlng)
-    print "SAVE:", rc, arg
 
 def saveX(unique_keys, data, date=None, latlng=None):
     """

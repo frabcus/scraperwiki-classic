@@ -318,8 +318,9 @@ class TestOf_FireStarter (unittest.TestCase) :
         fs.setScraperID    ('test_scrape')
         fs.addAllowedSites ('.*\.com')
         fs.setEnvironment  ('http_proxy', proxy)
-        fs.addPaths        ('/scraperwiki/dev/scraperlibs')
+        fs.addPaths        ('/scraperwiki/live/scraperlibs')
         res = fs.execute   (scraperTest)
+        print res
         self.assertTrue    (re.search ('447 bytes from http://scraperwiki.com/hello_world.html', res, re.DOTALL))
         self.assertTrue    (re.search ('SCRAPE_OK',    res, re.DOTALL))
 

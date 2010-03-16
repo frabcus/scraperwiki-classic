@@ -16,7 +16,7 @@ class DataStoreClass :
     def connect (self) :
 
         self.m_socket    = socket.socket()
-        self.m_socket.connect (('192.168.1.66', 9003))
+        self.m_socket.connect (('89.16.177.176', 9003))
         self.m_socket.send ('GET / HTTP/1.1\n\n')
         self.m_socket.recv (1024)
 
