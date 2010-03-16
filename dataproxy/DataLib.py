@@ -166,6 +166,8 @@ def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
     #   cursor = execute (string.join (query,  ' '), values)
     #   idlist = [ str(row[0]) for row in cursor.fetchall() ]
 
+    if scraperID in [ None, '' ] :
+        return  [ True, 'Data OK to save' ]
 
     #  Look for existing values via the unique hash on the values of the unique
     #  keys.
