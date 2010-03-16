@@ -89,6 +89,7 @@ def scraper_admin(request, scraper_short_name):
     if request.method == 'POST':
         delete_data = request.POST.get('delete_data', None)
         scheduler_update = request.POST.get('scheduler_update', None)
+        delete_scraper = request.POST.get('delete_scraper', None)
         
         #if user has requested a delete, **double** check they are allowed to,
         # the do the delete
@@ -99,6 +100,11 @@ def scraper_admin(request, scraper_short_name):
         #change the run interval for this scraper?
         if scheduler_update == '1' and user_owns_it:
             scraper.run_interval = request.POST.get('run_interval', -1)
+            scraper.save()
+
+        #delete the entire scraper (marked as delete)
+        if delete_scraper == '1' and user_owns_it:
+            scraper.deleted = True
             scraper.save()
 
     return render_to_response('scraper/admin.html', {

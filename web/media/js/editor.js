@@ -242,7 +242,6 @@ $(document).ready(function() {
     //read data back from twisted
 
     conn.onread = function(data) {
-      console.debug(data)
       // check if this data is valid JSON, or add it to the buffer
       try {
         data = buffer+data;
