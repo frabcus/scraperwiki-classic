@@ -24,7 +24,7 @@ class UserProfileForm (forms.ModelForm):
         options.append((item.pk, item.label))
 
     alert_types = forms.MultipleChoiceField(options, widget=forms.CheckboxSelectMultiple())
-    bio = forms.CharField(label="A bit about you", widget=forms.Textarea())
+    bio = forms.CharField(label="A bit about you", widget=forms.Textarea(), required=False)
     
     class Meta:
         model = UserProfile
