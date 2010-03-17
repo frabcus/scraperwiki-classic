@@ -1,6 +1,6 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides:          dataproxy
+# Provides:          httpproxy
 # Required-Start:    $local_fs
 # Default-Start:     2
 # Short-Description: Start controller
@@ -16,12 +16,13 @@ NOGROUP=`grep nogroup /etc/group | cut -d: -f3`
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="DataProxy"
-NAME=dataproxy
+DESC="HTTPProxy"
+NAME=httpproxy
 DAEMON=/usr/bin/python
-DAEMON_ARGS="/var/www/scraperwiki/dataproxy/DataProxy.py --daemon --subproc --uid=$NOBODY --gid=$NOGROUP"
+DAEMON_ARGS="/var/www/scraperwiki/uml/Server/scripts/HTTPProxy.py --daemon --subproc --uid=$NOBODY --gid=$NOGROUP"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
+
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
