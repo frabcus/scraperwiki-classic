@@ -175,6 +175,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             statusLock.release ()
 
         DataLib.connection()
+        print "CONN", DataLib.connection()
         self.connection.send ('READY\n')
         startat = time.strftime ('%Y-%m-%d %H:%M:%S')
 
@@ -205,7 +206,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
 class ProxyHTTPServer \
-        (   SocketServer.ThreadingMixIn,
+        (   SocketServer.ForkingMixIn,
             BaseHTTPServer.HTTPServer
         ) :
     pass
