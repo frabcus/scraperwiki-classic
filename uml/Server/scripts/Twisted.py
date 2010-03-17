@@ -112,7 +112,7 @@ class RunnerProtocol(protocol.Protocol):
                     code = code.encode('utf8')
                     
                     guid = parsed_data['guid']
-                    args = ['./Server/scripts/Runner.py']
+                    args = ['/var/www/scraperwiki/uml/Server/scripts/Runner.py']
                     args.append('-g %s' % guid)
                     
                     # args must be an ancoded string, not a unicode object
@@ -120,7 +120,7 @@ class RunnerProtocol(protocol.Protocol):
 
                     self.running = reactor.spawnProcess(
                         spawnRunner(self, code), \
-                        './Server/scripts/Runner.py', args
+                        '/var/www/scraperwiki/uml/Server/scripts/Runner.py', args
                             )
 
                 else:
@@ -176,7 +176,7 @@ def sigTerm (signum, frame) :
 
     try    : os.kill (child, signal.SIGTERM)
     except : pass
-    try    : os.remove (varDir + '/run/run_server.pid')
+    try    : os.remove (varDir + '/run/twisted.pid')
     except : pass
     sys.exit (1)
 
@@ -216,7 +216,7 @@ if __name__ == "__main__":
         if os.fork() == 0 :
             os .setsid()
             sys.stdin  = open ('/dev/null')
-            sys.stdout = open (options.varDir + '/log/run_server', 'w', 0)
+            sys.stdout = open (options.varDir + '/log/twisted', 'w', 0)
             sys.stderr = sys.stdout
             if os.fork() == 0 :
                 ppid = os.getppid()
@@ -229,7 +229,7 @@ if __name__ == "__main__":
             os.wait()
             sys.exit (1)
 
-        pf = open (options.varDir + '/run/run_server.pid', 'w')
+        pf = open (options.varDir + '/run/twisted.pid', 'w')
         pf.write  ('%d\n' % os.getpid())
         pf.close  ()
 

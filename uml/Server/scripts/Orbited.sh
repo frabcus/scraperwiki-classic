@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  Script to run orbiter. Supports options to run as a subprocess and/or as
+#  Script to run orbited. Supports options to run as a subprocess and/or as
 #  a daemon.
 #
 subproc=
@@ -30,7 +30,10 @@ done
 #  Contains the actual command to run
 #
 execute(){
-    exec orbited --config ./Server/scripts/run_server.cfg
+
+    cd /var/www/scraperwiki/uml
+    . /var/www/scraperwiki/bin/activate
+    exec orbited --config ./Server/scripts/orbited.cfg
 }
 
 #  process
@@ -46,7 +49,7 @@ process(){
 		while true
 		do
 			execute &
-			trap    "kill $! ; rm -f $vardir/run/orbiter.pid ; exit" INT TERM
+			trap    "kill $! ; rm -f $vardir/run/orbited.pid ; exit" INT TERM
 			wait    $!
 		done
 	else
@@ -62,8 +65,8 @@ process(){
 if [ "$daemon" = "-d" ]
 then
 	(
-        process > $vardir/log/orbiter 2>&1 <&- &
-		echo $! > $vardir/run/orbiter.pid
+        process > $vardir/log/orbited 2>&1 <&- &
+		echo $! > $vardir/run/orbited.pid
 	)
 else
 	process

@@ -22,7 +22,7 @@ except:
     sys.exit()
 
 
-sys.path.append	(runner_config.scripts_path)
+#sys.path.append	(runner_config.scripts_path)
 
 
 # Make sure stdout doesn't buffer anything
