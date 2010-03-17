@@ -211,6 +211,15 @@ def save (unique_keys, data, date = None, latlng = None) :
 
     ds = DataStore.DataStore()
     rc, arg = ds.save (unique_keys, data, date, latlng)
+    if not rc :
+        raise Exception (arg) 
+
+    pdata = {}
+    for key, value in data.items():
+        pdata[cgi.escape(key)] = cgi.escape(value)
+    
+    print '<scraperwiki:message type="data">%s' % json.dumps(pdata)
+    return arg
 
 def saveX(unique_keys, data, date=None, latlng=None):
     """
