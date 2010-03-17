@@ -16,6 +16,7 @@ $(document).ready(function() {
     var selectedTab = 'console';
     var outputMaxItems = 400;
     var cookieOptions = { path: '/editor', expires: 90};    
+    var popupStatus = 0
 
     //constructor functions
     setupCodeEditor();
@@ -160,6 +161,8 @@ $(document).ready(function() {
     }
 
     function showPopup(sId) {
+
+        $('.popup_error').hide();
 
         //show or hide the relivant block
         $('#popups div.popup_item').each(function(i) {
@@ -428,32 +431,53 @@ $(document).ready(function() {
     
     //Setup toolbar
     function setupToolbar(){
-        
-        //commit button
-        $('.commit').live('click', function (){
+
+        //commit popup button
+        $('#btnCommitPopup').live('click', function (){
+            var bValid = true;
             if (popupStatus == 0) {
-                // Only add the save button if it's not there already
-                if (!$('#meta_form .commit').length) {
-                    $('.commit').clone().appendTo($('#meta_form'));
-                };
-                
                 showPopup('meta_form');
-                return false;     
+                bValid = false;     
+                if (shortNameIsSet() == false){
+                    $('#meta_form #id_meta_title').val('');
+                }
+            }
+        });
+        
+        $('#btnCommitPublish').live('click', function (){
+
+            var bValid = true;
+            //validate
+            if ($('#meta_form #id_meta_title').val() == ""){
+                   $('#meta_form #id_meta_title').parent().addClass('error');
+                   bValid = false
+            }else{
+                   $('#meta_form #id_meta_title').parent().removeClass('error');                
             }
             if ($('#meta_form #id_commit_message').val() == ""){
-                $('#meta_form #id_commit_message').effect('highlight')
-                return false
-            } else {
-               if ($('#meta_form #id_description').val() == ""){
-                   $('#meta_form #id_description').effect('highlight')
-                   return false
+                $('#meta_form #id_commit_message').parent().addClass('error');
+                bValid = false
+            }else{
+                $('#meta_form #id_commit_message').parent().removeClass('error');                
             }
-                saveScraper(true);
-                return false;                
+            if ($('#meta_form #id_description').val() == ""){
+                   $('#meta_form #id_description').parent().addClass('error');
+                   bValid = false
+            }else{
+                   $('#meta_form #id_description').parent().removeClass('error');                
             }
 
+            //if valid, save it
+            if (bValid == true){
+                saveScraper(true);                
+            }else{
+                $('#meta_form .popup_error').show();
+                $('#meta_form .popup_error').html("Please make sure you have entered a title, a description and a commit message");
             }
-        );
+            
+            //return false
+            return false;
+        });
         
         //save button
         $('.save').live('click', function(){
@@ -520,11 +544,6 @@ $(document).ready(function() {
     function saveScraper(bCommit){
         var bSuccess = false;
 
-        // make sure the title is the same as the popup
-        if (popupStatus == 1){            
-            $('#id_title').val($('#id_meta_title').val())
-        }
-
         //if saving then check if the title is set
         if(shortNameIsSet() == false && bCommit != true){
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
@@ -562,28 +581,34 @@ $(document).ready(function() {
               dataType: "html",
               success: function(response){
                     res = eval('('+response+')');
-                    if (res.draft == 'True') {
-                        $('#divDraftSavedWarning').show();
-                    }
-                    
-                    // redirect somewhere
-                    if (res.url && window.location.pathname != res.url) {
-                        window.location = res.url;
-                    };
 
-                    if (bCommit != true){                        
-                        showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
-                    }
+                    //failed
+                    if (res.status == 'Failed'){
+                        $('#meta_form .popup_error').show();
+                        $('#meta_form .popup_error').html("Failed to save, please make sure you have entered a title, a description and a commit message");
+                    //success    
+                    }else{
                     
-                    pageIsDirty = false; // page no longer dirty
+                        if (res.draft == 'True') {
+                            $('#divDraftSavedWarning').show();
+                        }
+                    
+                        // redirect somewhere
+                        if (res.url && window.location.pathname != res.url) {
+                            window.location = res.url;
+                        };
+
+                        if (bCommit != true){                        
+                            showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
+                        }
+                    
+                        pageIsDirty = false; // page no longer dirty
+                    }
                 },
 
             error: function(response){
                 alert('Sorry, something went wrong, please try copying your code and then reloading the page');
               }
-            //error:function (xhr, ajaxOptions, thrownError){
-             //       alert(xhr.responseText);
-              //} 
             });
         }
     }
@@ -640,10 +665,6 @@ $(document).ready(function() {
     }
 
     function shortNameIsSet(){
-        // Because of jquery example
-        if ($('#id_title').hasClass('example')) {
-            return false;
-        }
         var sTitle = jQuery.trim($('#id_title').val());
         return sTitle != 'Untitled Scraper' && sTitle != '' && sTitle != undefined && sTitle != false;
     }
@@ -651,7 +672,6 @@ $(document).ready(function() {
     //Hide popup
     function hidePopup() {
 
-        $('#meta_form .button').remove()
         // Hide popups
         $('#popups div.popup_item').each(function(i) {
             $(this).fadeOut("fast")

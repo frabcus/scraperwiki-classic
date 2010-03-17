@@ -55,46 +55,7 @@
                 <div class="title">
                     {{ form.title }}
                 </div>
-                <div id="meta_fields_mini">
-                    <p>Publishing your scraper will the code and data available to other users, allow you to access the data it generated via the API and set it to be rerun once a day (we will soon be adding a system to let you control the frequency yourself)</p>
-                    {# for form elements that are shown in the popup #}
-
-                    <div class="field field-title">
-                        <label for="id_meta_title">{{ form.title.label}}</label>
-                        <input type="text" name="title" value="" id="id_meta_title">
-                    </div>
-
-                    <div class="field field-description">
-                        <label for="id_description">{{ form.description.label}} {{ form.description.errors }}</label>
-                        {{ form.description }}
-                    </div>
-
-                    <div class="field field-license"> 
-                        <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
-                        {{ form.license }}
-                    </div>
-
-            {% if not has_draft %}
-                    <div class="field field-tags">
-                        <label for="id_tags">{{ form.tags.label}} {{ form.tags.errors }}</label>
-                        {{ form.tags }}
-                    </div>
-            {% endif %}
-
-                    <div class="field field-commit_message">
-                      <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
-                      {{ form.commit_message }}
-                    </div>
-
-                    <div class="field field-run_interval">
-                      <label for="id_run_interval">{{ form.run_interval.label}} {{ form.run_interval.errors }}</label>
-                      {{ form.run_interval }}
-                    </div>
-
-                    <small>* Required field</small>
-
-                </div>
-
+                
                 <ul class="help">
                     <li>
                         <a id="menu_shortcuts" href="#" title="Key combinations for saving, executing etc">Keyboard shortcuts</a>
@@ -127,7 +88,7 @@
                         <a id="aCloseEditor" href="{% url frontpage %}" title="Close editor">Close editor</a>                
                     {% endif %}
                     &nbsp;<input type="button" class="save  button" name="action" value="Save draft" title="Save draft version (Ctrl + S)" />&nbsp;
-                    <input type="button" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>            
+                    <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>
                 </div>
             </div>
 
@@ -170,7 +131,44 @@
 
 {% block popups %}    
     <div id="meta_form" class="popup_item">
-        <a class="popupClose">close</a>
+            <p>Publishing your scraper will the code and data available to other users, allow you to access the data it generated via the API and set it to be rerun once a day (we will soon be adding a system to let you control the frequency yourself)</p>
+            <div class="popup_error"></div>            
+            <ul class="form">
+                <li>
+                    <label for="id_meta_title">{{ form.title.label}}</label>
+                    <input type="text" name="title" value="" id="id_meta_title">
+                </li>
+                <li>
+                    <label for="id_description">{{ form.description.label}} {{ form.description.errors }}</label>
+                    {{ form.description }}
+                </li>
+                <li> 
+                    <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
+                    {{ form.license }}
+                </li>
+                {% if not has_draft %}
+                    <li>
+                        <label for="id_tags">{{ form.tags.label}} {{ form.tags.errors }}</label>
+                        {{ form.tags }}
+                        <small class="hint taghint">e.g. europe<em>,</em> grants<em>,</em> transport</small>
+                    </li>
+                {% endif %}
+                <li>
+                  <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
+                  {{ form.commit_message }}
+                </li>
+                <li>
+                  <label for="id_run_interval">{{ form.run_interval.label}} {{ form.run_interval.errors }}</label>
+                  {{ form.run_interval }}
+                </li>
+            </ul>
+            <div class="popup_controls">
+                <small>* Required field</small>
+                <div class="right">
+                    <a class="popupReady">cancel</a>&nbsp;&nbsp;
+                    <input type="button" id="btnCommitPublish" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>
+                </div>
+            </div>
     </div>
     <div id="diff" class="popup_item">
         <div class="popup_header">

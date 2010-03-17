@@ -88,8 +88,8 @@ div.attention {text-align:center;}
 
 /* Errors */
 #divErrors ul {padding:0; margin:0; list-style-type:none; line-height:1.4em;}
-#divErrors ul li {background:#da9da4; padding:0.1em 0; margin:0; text-align:center;}
-.error input, .error select {border:solid 1px #da9da4;}
+#divErrors ul li {background:#a22424; padding:0.1em 0; margin:0; text-align:center; color:#fff;}
+.error textarea, .error input, .error select {border:solid 1px red;}
 small.error_hint {color:#cc0000;}
 .http_error {text-align:center; padding-top:1em;}
 
