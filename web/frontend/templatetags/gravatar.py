@@ -24,7 +24,7 @@ def show_gravatar(user, size = 'medium'):
     url = "http://www.gravatar.com/avatar.php?"
     url += urllib.urlencode({
         'gravatar_id': hashlib.md5(user.email).hexdigest(), 
-        #'default': default, 
+        'default': default, 
         'size': str(size_px)
     })
     return {'gravatar': {'url': url, 'size': size, 'size_px': size_px, 'username': user.username}}
