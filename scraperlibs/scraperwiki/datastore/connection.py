@@ -4,7 +4,6 @@
 import sys
 import os
 import ConfigParser
-import MySQLdb
 
 """
 Handles the database connection
@@ -39,6 +38,7 @@ class Connection(object):
         if not self.is_connected:
             try :
 		config.get('mysql', 'passwd')
+                import MySQLdb
                 self.db = MySQLdb.connect(
                   host=config.get('mysql', 'host'), 
                   user=config.get('mysql', 'user'), 
