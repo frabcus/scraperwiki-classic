@@ -92,7 +92,6 @@ def deploy():
                               kforge_pass,
                               env.branch))
     
-    buildout()
     migrate()
     #write_changeset()
     install_cron()

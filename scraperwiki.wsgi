@@ -2,7 +2,7 @@ import sys
 import site
 import os
 
-root_path = ''
+root_path = '/var/www/scraperwiki/'
 
 vepath = root_path + 'lib/python2.6/site-packages'
 
