@@ -162,7 +162,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if path == '' or path is None :
             path = '/'
 
-        print "scm=%s, netloc=%s, path=%s, params=%s, query=%s, fragment=%s" % (scm, netloc, path, params, query, fragment)
+        #  print "scm=%s, netloc=%s, path=%s, params=%s, query=%s, fragment=%s" % (scm, netloc, path, params, query, fragment)
 
         if scm not in [ 'http', 'https' ] or fragment :
             self.send_error (400, "Malformed URL %s" % self.path)
@@ -175,7 +175,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             statusLock.release ()
 
         DataLib.connection()
-        print "CONN", DataLib.connection()
         self.connection.send ('READY\n')
         startat = time.strftime ('%Y-%m-%d %H:%M:%S')
 
