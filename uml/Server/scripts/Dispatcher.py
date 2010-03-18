@@ -787,10 +787,14 @@ if __name__ == '__main__' :
             os.wait()
 
     if len(umlAddr) == 0 :
-        umlAddr.append ('umlA:9001:89.16.177.195:25')
-        umlAddr.append ('umlB:9001:89.16.177.195:25')
-        umlAddr.append ('umlC:9001:89.16.177.195:25')
-        umlAddr.append ('umlD:9001:89.16.177.195:25')
+        umlAddr.append ('uml001:9001:89.16.177.195:25')
+        umlAddr.append ('uml002:9001:89.16.177.195:25')
+        umlAddr.append ('uml003:9001:89.16.177.195:25')
+        umlAddr.append ('uml004:9001:89.16.177.195:25')
+#        umlAddr.append ('uml001:9101:89.16.177.195:25')
+#        umlAddr.append ('uml002:9102:89.16.177.195:25')
+#        umlAddr.append ('uml003:9103:89.16.177.195:25')
+#        umlAddr.append ('uml004:9104:89.16.177.195:25')
 
 
     for e in umlAddr :
