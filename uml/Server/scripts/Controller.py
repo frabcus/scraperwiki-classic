@@ -455,10 +455,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    : runID      = self.headers['x-runid'     ]
         except : runID      = ''
 
-        import SWLogger
-        swl = SWLogger.SWLogger()
-        swl.connect ()
-        swl.log     (scraperID, runID, 'C.START')
+#       import SWLogger
+#       swl = SWLogger.SWLogger()
+#       swl.connect ()
+#       swl.log     (scraperID, runID, 'C.START')
 
         idents = []
         if scraperID is not None : idents.append ('scraperid=%s' % scraperID)
@@ -494,7 +494,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             sys.stdout = self.wfile
             sys.stderr = self.wfile
             times2 = os.times()
-            swl.log     (scraperID, runID, 'C.END',   arg1 = times2[0] - times1[0], arg2 = times2[1] - times1[1])
+#           swl.log     (scraperID, runID, 'C.END',   arg1 = times2[0] - times1[0], arg2 = times2[1] - times1[1])
         except Exception, e :
             import ErrorMapper
             sys.stdout.flush()
@@ -513,7 +513,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 			}
                 )   )
             sys.stdout.flush ()
-            swl.log     (scraperID, runID, 'C.ERROR', arg1 = etext, arg2 = trace)
+#           swl.log     (scraperID, runID, 'C.ERROR', arg1 = etext, arg2 = trace)
 
         try    : os.remove ('/tmp/scraper.%d' % os.getpid())
         except : pass
