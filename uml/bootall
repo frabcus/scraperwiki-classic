@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+#  Boot all non-running UML instances. Note that there is a 10 second
+#  pause between each to avoid resource contention problems.
+#
+test `id -u` = 0 ||
+{
+	echo	bootall: must be run as root
+	exit	1
+}
+
+for umldir in uml???
+do
+	if [ -f ${umldir}/running ]
+	then
+		continue
+	fi
+
+	i=`expr ${umldir} : 'uml\([0-9]*\)' + 0`
+	echo "Booting uml $i ..."
+
+	./bootuml $i
+	sleep	  10
+done

@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+#  Run the dispatcher, proxy, firebox and controller servers locally, .ie.,
+#  without using a real UML
+#
+
+./killlocal > /dev/null
+
+rm -rf	run  > /dev/null
+rm -rf	log  > /dev/null
+rm -rf	allow  > /dev/null
+mkdir	run
+mkdir	log
+mkdir	allow
+
+export PYTHONPATH=Server/scripts
+./Server/scripts/Dispatcher.py  --umlAddr=9001@127.0.0.1 --daemon --subproc --varDir=.
+./Server/scripts/HTTPProxy.py	--daemon --subproc --varDir=. --allowedDir=allow
+./Server/scripts/Controller.py	--daemon --subproc --varDir=.
+./Server/scripts/run_server.py  --daemon --subproc --varDir=.
+./Server/scripts/orbiter.sh	-d -s -v .
