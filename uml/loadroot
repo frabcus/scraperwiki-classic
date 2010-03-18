@@ -1,0 +1,32 @@
+#!/bin/bash
+#
+#  This script loads the content of the jaunty.img root image
+#  from a bzip2'd tar file. Note that this assumes that the
+#  tarball has all content within a single top-level directory
+#  called "jaunty".
+#
+test $# = 1 ||
+{
+	echo	usage: loadroot file
+	exit	1
+}
+
+test `id -u` = 0 ||
+{
+	echo	loadroot: must be run as root
+	exit	1
+}
+
+[ -f jaunty.img ] &&
+{
+	echo	loadroot: jaunty.img already exists
+	exit	1
+}
+
+dd	if=/dev/zero of=jaunty.img bs=1024 seek=$[ 1024 * 1024 ] count=1
+mke2fs	-F jaunty.img
+
+mkdir	-p			jaunty
+mount	-o loop jaunty.img	jaunty
+tar	-xjvf   $1		jaunty
+umount				jaunty

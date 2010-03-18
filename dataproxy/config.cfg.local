@@ -1,0 +1,8 @@
+[sqlite3]
+db=db.sq3
+
+[mysql]
+host=localhost
+user=datastore
+passwd=3jFjLrje6dFJ7cQE
+db=datastore_live

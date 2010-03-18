@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+#  Halt all running UML instances. This relies on the controller
+#  process running. Otherwise, halting will either mean logging
+#  into the UML, or killing it stone dead.
+#
+for umldir in uml???
+do
+	if [ -f ${umldir}/running ]
+	then
+		i=`expr ${umldir} : 'uml\([0-9]*\)' + 0`
+		echo "Halting uml $i ..."
+
+		curl -F command=/sbin/halt http://192.168.254.$i:9001/Command
+	fi
+done

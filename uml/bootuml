@@ -1,0 +1,40 @@
+#!/bin/bash
+#
+# bootuml
+#
+# Boot a UML into an instance of screen. Takes one argument, which should be the
+# UML number in thae range 1 ... 99
+#
+test $# = 1 ||
+{
+	echo	usage: bootuml ip
+	exit	1
+}
+
+test `id -u` = 0 ||
+{
+	echo	bootuml: must be run as root
+	exit	1
+}
+
+ uip=$1
+ hip=`expr ${uip} + 100`
+name=`printf '%03d' ${uip}`
+gate=`printf '%03d' ${hip}`
+umld=uml${name}
+
+test -e ${umld} ||
+{
+	echo	bootuml: uml ${ip} does not exist
+	exit	1
+}
+
+test -e ${umld}/running &&
+{
+	echo	bootuml: uml ${ip} is already running
+	exit	1
+}
+
+screen -dmS uml${name} \
+	./runuml	uml${name} ${gate}
+

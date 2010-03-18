@@ -1,0 +1,37 @@
+#!/bin/bash
+#
+#  Run a specified UML instance. The arguments are the UML instance
+#  directory and the bottom quad of the gateway address (ie., the host
+#  end address of the network connection. A file 'running' exists in
+#  the UML instance directory for the duration.
+#
+test $# = 2 ||
+{
+	echo	usage: runuml umldir gateway
+	exit	1
+}
+
+test `id -u` = 0 ||
+{
+	echo	runuml: must be run as root
+	exit	1
+}
+
+umldir=$1
+  gate=$2
+
+date	> ${umldir}/running
+
+./linux	\
+	ubda=${umldir}/jaunty.cow,jaunty.img			\
+	ubdb=${umldir}/addr.cow,${umldir}/addr.img		\
+	ubdc=${umldir}/home.cow,home.img			\
+	ubdd=${umldir}/scraper.cow,scraper.img			\
+	ubde=${umldir}/swap.cow,swap.img			\
+	eth0=tuntap,,,192.168.254.${gate}			\
+	mem=128M						\
+	con0=fd:0,fd:1						\
+	con=pts							\
+	umid="$name"
+
+rm -f	${umldir}/running

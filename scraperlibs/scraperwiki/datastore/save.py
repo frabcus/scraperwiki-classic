@@ -10,12 +10,13 @@ except:
 
 import cgi
 import re
+import  DataStore
 
 # this sets deleted_run_id to flag a record is deleted, rather than actually deleting it
 bSaveAllDeletes = False
 
 # Global connection object
-conn = connection.Connection()
+#conn = connection.Connection()
 
 def insert(data):
     """
@@ -80,7 +81,6 @@ def insert(data):
     # printing to the console
     ldata = { }
     for k, v in data.items():
-        if isinstance(v, )
         ldata[cgi.escape(k)] = cgi.escape(v)
     
     # this should print < but it crashes the javascript
@@ -207,7 +207,21 @@ def delete(matchrecord):
     return result
 
 
-def save(unique_keys, data, date=None, latlng=None):
+def save (unique_keys, data, date = None, latlng = None) :
+
+    ds = DataStore.DataStore()
+    rc, arg = ds.save (unique_keys, data, date, latlng)
+    if not rc :
+        raise Exception (arg) 
+
+    pdata = {}
+    for key, value in data.items():
+        pdata[cgi.escape(key)] = cgi.escape(value)
+    
+    print '<scraperwiki:message type="data">%s' % json.dumps(pdata)
+    return arg
+
+def saveX(unique_keys, data, date=None, latlng=None):
     """
     Standard save function that UPserts (over-writes) a record that shares the same values for the unique_keys
     as long as it is new (does not overwrite same record, so leaves date_scraped the same 

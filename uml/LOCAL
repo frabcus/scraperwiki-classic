@@ -1,0 +1,26 @@
+The FireBox and Twisted subsystem can be run without a UML by running the
+command:
+
+./runlocal
+
+This will run the Dispatcher, the Proxy, the Controller and the orbited and
+twisted servers on the host system, such that they will function as run with a
+UML except that there will be no fireboxing.
+
+This should be all that's needed to run code in the editor.
+
+The orbited daemon will listen on port 8001, you need to not be using that port
+for anything else.
+
+DEBUGGING:
+
+* If things go wrong look for exceptions in the various UML/log directories.
+
+* You can run the runner by itself. In UML/Server/scripts run "Runner.py".
+Then type in a short Python program (e.g. "print 1") on the command line,
+and press Ctrl+D. You will get an error, or the output of the short
+Python program in a structure.
+
+To stop the processes:
+
+./killlocal
