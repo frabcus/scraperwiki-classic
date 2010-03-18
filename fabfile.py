@@ -60,11 +60,14 @@ def virtualenv(command):
 
 
 def buildout():
-  virtualenv('buildout')
+    virtualenv('buildout')
 
 def write_changeset():
-    changeset = virtualenv('hg log | egrep -m 1 -o "[a-zA-Z0-9]*$"')
-    virtualenv("echo %s > web/changeset.txt" % changeset)
+    try:
+        env.changeset = virtualenv('hg log | egrep -m 1 -o "[a-zA-Z0-9]*$"')
+        virtualenv("echo %s > web/changeset.txt" % env.changeset)
+    except:
+        env.changeset = ""
 
 def install_cron():
     virtualenv('crontab crontab')
@@ -80,7 +83,7 @@ def deploy():
     print "***************** DEPLOY *****************"
     print "Please Enter your deploy message: \r"
     message = raw_input()
-    kforge_user = raw_input('Your kforge Username: ')
+    env.kforge_user = raw_input('Your kforge Username: ')
     kforge_pass = pw = getpass.getpass('Your kforge Password: ')
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
@@ -88,19 +91,35 @@ def deploy():
     run("""cd %s; 
         hg pull https://%s:%s@kforgehosting.com/scraperwiki/hg; 
         hg update -C %s""" % (env.path,
-                              kforge_user,
+                              env.kforge_user,
                               kforge_pass,
                               env.branch))
     
     migrate()
-    #write_changeset()
+    write_changeset()
     install_cron()
     restart_webserver()   
+    email(message)
 
-    sudo("""
-    echo "%s" | mail -s "New Scraperwiki Deployment to %s (deployed by %s)" scrapewiki-commits@googlegroups.com -- -f mercurial@scraperwiki.com
-    """ % (message, env.deploy_version, kforge_user))
+def email(message_body):
+    if not message_body:
+        print "Please Enter your deploy message: \r"
+        message_body = raw_input()
+    
+    message = """From: mercurial@scraperwiki.com
+Subject: New Scraperwiki Deployment to %(version)s (deployed by %(user)s)
 
+%(user)s deployed changeset %(changeset)s, with the following comment:
+
+%(message_body)s
+
+""" % {
+        'version' : env.deploy_version,
+        'user' : env.kforge_user,
+        'changeset' : env.changeset,
+        'message_body' : message_body,
+        }
+    sudo("""echo "%s" | sendmail scrapewiki-commits@googlegroups.com """ % message)
     
 def migrate():
   virtualenv('cd web; python manage.py syncdb')
