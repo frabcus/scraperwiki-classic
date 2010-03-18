@@ -37,6 +37,8 @@ iptables	-A INPUT	-i lo						-j ACCEPT
 iptables	-A INPUT	-p tcp -s 89.16.177.212 	--dport 9001	-j ACCEPT
 iptables	-A INPUT	-p tcp -s 89.16.177.176 	--dport 9001	-j ACCEPT
 
+iptables	-A INPUT	-p tcp -s 89.16.177.176		--sport 3306	-j ACCEPT
+
 # Allow incoming replies from nameservers, etc.
 #
 iptables	-A INPUT	-p udp				--sport 53	-j ACCEPT
