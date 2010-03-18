@@ -101,12 +101,12 @@ def deploy():
     restart_webserver()   
     email(message)
 
-def email(message_body):
+def email(message_body=None):
     if not message_body:
         print "Please Enter your deploy message: \r"
         message_body = raw_input()
     
-    message = """From: mercurial@scraperwiki.com
+    message = """From: ScraperWiki <mercurial@scraperwiki.com>
 Subject: New Scraperwiki Deployment to %(version)s (deployed by %(user)s)
 
 %(user)s deployed changeset %(changeset)s, with the following comment:
