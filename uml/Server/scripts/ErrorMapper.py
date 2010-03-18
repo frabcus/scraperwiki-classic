@@ -7,7 +7,8 @@ etmap = \
 	"ZeroDivisionError"					: "Division by zero",
 	"IndexError"						: "List index error",
 	"NameError"						: "Variable name error",
-	"TypeError"						: "Value type error"
+	"TypeError"						: "Value type error",
+	"CPUTimeExceeded"					: "CPU time limit exceeded"
 	}
 
 eimap = \

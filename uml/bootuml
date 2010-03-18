@@ -35,6 +35,8 @@ test -e ${umld}/running &&
 	exit	1
 }
 
+rm	-f uml${name}/*.cow
+
 screen -dmS uml${name} \
 	./runuml	uml${name} ${gate}
 

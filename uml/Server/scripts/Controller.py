@@ -483,6 +483,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         sys.stdout = TaggedStream (self.wfile)
         sys.stderr = TaggedStream (self.wfile)
 
+        def sigXCPU (signum, frame) :
+            raise Exception ("CPUTimeExceeded")
+
+        signal.signal (signal.SIGXCPU, sigXCPU)
+
         try :
             import imp
             times1 = os.times()
