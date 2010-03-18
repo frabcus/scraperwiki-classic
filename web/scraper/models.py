@@ -230,7 +230,7 @@ class Scraper(models.Model):
     def update_meta(self):
         
         #update line counts etc
-        line_count = self.count_number_of_lines()
+        self.line_count = self.count_number_of_lines()
         self.record_count = self.count_records()
         self.has_geo = bool(Scraper.objects.has_geo(self.guid))
         self.has_temporal = bool(Scraper.objects.has_temporal(self.guid))
