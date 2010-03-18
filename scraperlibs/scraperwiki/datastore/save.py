@@ -216,7 +216,7 @@ def save (unique_keys, data, date = None, latlng = None) :
 
     pdata = {}
     for key, value in data.items():
-        pdata[cgi.escape(key)] = cgi.escape(value)
+        pdata[cgi.escape(key)] = cgi.escape(str(value))
     
     print '<scraperwiki:message type="data">%s' % json.dumps(pdata)
     return arg
