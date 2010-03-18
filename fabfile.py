@@ -28,6 +28,17 @@ def alpha():
     env.virtualhost_path = "/"
     env.deploy_version = "Alpha"
 
+def www():
+    "The main www server (horsell)"
+    env.hosts = ['89.16.177.212:7822']
+    env.path = '/var/www/scraperwiki'
+    env.branch = 'stable'
+    env.web_path = 'file:///home/scraperwiki/scraperwiki'
+    env.activate = env.path + '/bin/activate'
+    env.user = 'scraperdeploy'
+    env.virtualhost_path = "/"
+    env.deploy_version = "www"
+
 def setup():
     """
     Setup a fresh virtualenv as well as a few useful directories, then run
@@ -53,7 +64,7 @@ def buildout():
 
 def write_changeset():
     changeset = virtualenv('hg log | egrep -m 1 -o "[a-zA-Z0-9]*$"')
-    virtualenv("echo %s > web/changeset.txt") % changeset
+    virtualenv("echo %s > web/changeset.txt" % changeset)
 
 def install_cron():
     virtualenv('crontab crontab')
