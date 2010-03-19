@@ -20,12 +20,14 @@ import sys
 import time
 import string
 import uuid
+import ConfigParser
 
-USAGE      = " [--port=port] [--umlAddr=port@addr] [--varDir=dir] [--enqueue] [--subproc] [--daemon]"
+USAGE      = " [--varDir=dir] [--enqueue] [--subproc] [--daemon] [--config=file] [--name=name]"
 child      = None
-port       = 9000
 umlAddr    = []
 varDir	   = '/var'
+config	   = 'uml.cfg'
+name   	   = 'dispatcher'
 enqueue	   = False
 uid	   = None
 gid	   = None
@@ -338,8 +340,8 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     def swlog (self) :
 
         if self.m_swlog is None :
-            import SWLogger
-            self.m_swlog = SWLogger.SWLogger()
+            import swlogger
+            self.m_swlog = swlogger.SWLogger(config)
             self.m_swlog.connect ()
 
         return self.m_swlog
@@ -705,20 +707,16 @@ if __name__ == '__main__' :
             gid      = arg[ 6:]
             continue
 
-        if arg[:7] == '--port=' :
-            port = int(arg[7:])
-            continue
-
-        if arg[:10] == '--umlAddr=' :
-            umlAddr += arg[10:].split(',')
-            continue
-
-        if arg[:10] == '--umlPort=' :
-            umlPort = int(arg[10:])
-            continue
-
         if arg[ :9] == '--varDir='  :
             varDir  = arg[ 9:]
+            continue
+
+        if arg[ :9] == '--config='  :
+            config  = arg[ 9:]
+            continue
+
+        if arg[ :7] == '--name='  :
+            name    = arg[ 7:]
             continue
 
         if arg == '--subproc' :
@@ -786,20 +784,18 @@ if __name__ == '__main__' :
     
             os.wait()
 
-    if len(umlAddr) == 0 :
-        umlAddr.append ('uml001:9001:89.16.177.195:25')
-        umlAddr.append ('uml002:9001:89.16.177.195:25')
-        umlAddr.append ('uml003:9001:89.16.177.195:25')
-        umlAddr.append ('uml004:9001:89.16.177.195:25')
-#        umlAddr.append ('uml001:9101:89.16.177.195:25')
-#        umlAddr.append ('uml002:9102:89.16.177.195:25')
-#        umlAddr.append ('uml003:9103:89.16.177.195:25')
-#        umlAddr.append ('uml004:9104:89.16.177.195:25')
+    #  The dispatcher section of the config file contains the port number
+    #  and the list of UMLs that this dispatcher controls; the access details
+    #  for the UMLs is taken from the corresponding UML sections.
+    #
+    conf = ConfigParser.ConfigParser()
+    conf.readfp (open(config))
 
-
-    for e in umlAddr :
-        uname, uport, uaddr, count = e.split(':')
-        UMLList.append (UML(uname, uaddr, int(uport), int(count)))
+    for uml in conf.get (name, 'umllist').split(',') :
+        host  = conf.get    (uml, 'host' )
+        via   = conf.getint (uml, 'via'  )
+        count = conf.getint (uml, 'count')
+        UMLList.append (UML(uml, host, via, count))
 
     for i in range(len(UMLList)) :
         UMLList[i].setNextUML(UMLList[(i+1) % len(UMLList)])
@@ -807,4 +803,4 @@ if __name__ == '__main__' :
     UMLPtr  = UMLList[0]
     UMLLock = threading.Lock()
 
-    execute (port)
+    execute (conf.getint (name, 'port'))

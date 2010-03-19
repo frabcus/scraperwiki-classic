@@ -17,10 +17,11 @@ import time
 import threading
 import string 
 import urllib
+import ConfigParser
 
-USAGE      = " [--port=port] [--allowAll] [--varDir=dir] [--subproc] [--daemon]"
+USAGE      = " [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file]"
 child      = None
-port       = 9002
+config	   = 'uml.cfg'
 varDir	   = '/var'
 uid	   = None
 gid	   = None
@@ -56,8 +57,8 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     def swlog (self) :
 
         if self.m_swlog is None :
-            import SWLogger
-            self.m_swlog = SWLogger.SWLogger()
+            import swlogger
+            self.m_swlog = swlogger.SWLogger(config)
             self.m_swlog.connect ()
 
         return self.m_swlog
@@ -379,12 +380,12 @@ if __name__ == '__main__' :
             gid      = arg[ 6:]
             continue
 
-        if arg[:7] == '--port=' :
-            port = int(arg[7:])
-            continue
-
         if arg[ :9] == '--varDir='  :
             varDir  = arg[ 9:]
+            continue
+
+        if arg[ :9] == '--config='  :
+            config  = arg[ 9:]
             continue
 
         if arg == '--allowAll' :
@@ -453,4 +454,7 @@ if __name__ == '__main__' :
 
     statusLock = threading.Lock()
 
-    execute (port)
+    conf = ConfigParser.ConfigParser()
+    conf.readfp (open(config))
+
+    execute (conf.getint ('httpproxy', 'port'))

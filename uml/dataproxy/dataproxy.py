@@ -17,17 +17,18 @@ import time
 import threading
 import string 
 import hashlib
-import DataLib
+import datalib
+import ConfigParser
 
 try   : import json
 except: import simplejson as json
 
-USAGE      = " [--port=port] [--varDir=dir] [--subproc] [--daemon]"
+USAGE      = " [--varDir=dir] [--subproc] [--daemon] [--config=file]"
 child      = None
-port       = 9003
+config	   = 'uml.cfg'
 varDir     = '/var'
-uid    = None
-gid    = None
+uid	   = None
+gid        = None
 statusLock = None
 statusInfo = {}
 
@@ -127,7 +128,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             try    : statusInfo[runID]['action'] = 'save'
             except : pass
 
-        rc, arg = DataLib.save (scraperID, unique, data, date, latlng)
+        rc, arg = datalib.save (scraperID, unique, data, date, latlng)
         self.connection.send (json.dumps ((rc, arg)) + '\n')
 
         if runID is not None :
@@ -174,7 +175,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             except : pass
             statusLock.release ()
 
-        DataLib.connection()
+        datalib.connection()
         self.connection.send ('READY\n')
         startat = time.strftime ('%Y-%m-%d %H:%M:%S')
 
@@ -250,12 +251,12 @@ if __name__ == '__main__' :
             gid      = arg[ 6:]
             continue
 
-        if arg[:7] == '--port=' :
-            port = int(arg[7:])
-            continue
-
         if arg[ :9] == '--varDir='  :
             varDir  = arg[ 9:]
+            continue
+
+        if arg[ :9] == '--config='  :
+            config  = arg[ 9:]
             continue
 
         if arg == '--subproc' :
@@ -320,4 +321,7 @@ if __name__ == '__main__' :
 
     statusLock = threading.Lock()
 
-    execute (port)
+    conf = ConfigParser.ConfigParser()
+    conf.readfp (open(config))
+
+    execute (conf.getint ('dataproxy', 'port'))
