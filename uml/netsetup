@@ -22,7 +22,7 @@ iptables -t nat	-F
 
 # Allow ssh access which is on port 7822
 #
-iptables 	-A INPUT	-p tcp				--dport 7822	-j ACCEPT
+iptables 	-A INPUT	-p tcp			--dport 7822		-j ACCEPT
 
 # Allow access for any traffic originating locally, ie., on the UML subnet and on
 # the loopback device
@@ -34,20 +34,24 @@ iptables	-A INPUT	-i lo						-j ACCEPT
 # web server (for requests from the dispatcher) and from the database server
 # (for ident requests from the data proxy)
 #
-iptables	-A INPUT	-p tcp -s 89.16.177.212 	--dport 9001	-j ACCEPT
-iptables	-A INPUT	-p tcp -s 89.16.177.176 	--dport 9001	-j ACCEPT
+iptables	-A INPUT	-p tcp -s 89.16.177.212 --dport 9001		-j ACCEPT
+iptables	-A INPUT	-p tcp -s 89.16.177.212 --dport 9101:9104	-j ACCEPT
+iptables	-A INPUT	-p tcp -s 89.16.177.176 --dport 9001		-j ACCEPT
+iptables	-A INPUT	-p tcp -s 89.16.177.176 --dport 9101:9104	-j ACCEPT
 
-iptables	-A INPUT	-p tcp -s 89.16.177.176		--sport 3306	-j ACCEPT
+# Allow incoming replies from the MySQL server, used for logging
+#
+iptables	-A INPUT	-p tcp -s 89.16.177.176	--sport 3306		-j ACCEPT
 
 # Allow incoming replies from nameservers, etc.
 #
-iptables	-A INPUT	-p udp				--sport 53	-j ACCEPT
-iptables	-A INPUT	-p tcp				--sport 80	-j ACCEPT
-iptables	-A INPUT	-p tcp				--sport 443	-j ACCEPT
+iptables	-A INPUT	-p udp			--sport 53		-j ACCEPT
+iptables	-A INPUT	-p tcp			--sport 80		-j ACCEPT
+iptables	-A INPUT	-p tcp			--sport 443		-j ACCEPT
 
 # Allow incoming replies from the data proxy
 #
-iptables	-A INPUT	-p tcp -s 89.16.177.176		--sport 9003	-j ACCEPT
+iptables	-A INPUT	-p tcp -s 89.16.177.176	--sport 9003		-j ACCEPT
 
 # All other input traffic is rejected
 #

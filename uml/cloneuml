@@ -2,13 +2,12 @@
 #
 # cloneuml
 #
-# Clone a UML. Takes one argument which should be the lower byte of the IP
-# address assigned to the UML, in the range 1 ... 99. This value formatted
-# to three zero-padded digits is used to from the UML name
+# Clone a UML. Takes one argument which should be the name of a UML in the
+# uml.cfg file.
 #
 test $# = 1 ||
 {
-	echo	usage: cloneuml ip
+	echo	usage: cloneuml name
 	exit	1
 }
 
@@ -18,28 +17,47 @@ test `id -u` = 0 ||
 	exit	1
 }
 
-test $1 -lt 1  &&
-{
-	echo	cloneuml: ip must be in range 1 ... 99
-	exit	1
-}
-test $1 -gt 99 &&
-{
-	echo	cloneuml: ip must be in range 1 ... 99
-	exit	1
+unm=$1
+
+get(){
+	sed -n "/^\[${unm}\]/,/^\[/ s/^[ \t]*${1}[ \t]*=[ \t]*\(.*\)/\1/ p" uml.cfg.mike
 }
 
- uip=$1
- hip=`expr ${uip} + 100`
-name=`printf '%03d' ${uip}`
-gate=`printf '%03d' ${hip}`
-umld=uml${name}
+ tap=`get tap `
+ eth=`get eth `
+ via=`get via `
+port=`get port`
+
+ net=`echo $eth | sed 's/[0-9]*$/0/'`
+
+#  Check for required settings
+#
+test "$eth" = '' &&
+{
+	echo	cloneuml: no eth address: does the UML exist
+	exit	1
+}
+test "$tap" = '' &&
+{
+	echo	cloneuml: no tap address: does the UML exist
+	exit	1
+}
+test "$via" = '' &&
+{
+	echo	cloneuml: no via port: does the UML exist
+	exit	1
+}
+test "$port" = '' &&
+{
+	echo	cloneuml: no controller port: does the UML exist
+	exit	1
+}
 
 #  Check if UML aleady exists
 #
-test -e ${umld} &&
+test -e ${unm} &&
 {
-	echo	cloneuml: ip ${ip} already exists
+	echo	cloneuml: uml ${unm} already exists
 	exit	1
 }
 
@@ -47,30 +65,28 @@ test -e ${umld} &&
 #  on /addr in the UML instance. This image contains the UML instance
 #  specific configuration.
 #
-mkdir	${umld}
-dd 	if=/dev/zero of=${umld}/addr.img bs=1024 seek=100 count=1
-mke2fs	-F ${umld}/addr.img
+mkdir	${unm}
+dd 	if=/dev/zero of=${unm}/addr.img bs=1024 seek=100 count=1
+mke2fs	-F ${unm}/addr.img
 
 mkdir	-p mnt
-mount	-o loop ${umld}/addr.img mnt
+mount	-o loop ${unm}/addr.img mnt
 
 #  The network interfaces file is created to bring up a network
 #  connection on the appropriate fixed IP address.
 #
-cat <<EOF > mnt/interfaces
-auto lo
-iface lo inet loopback
-address 127.0.0.1
-netmask 255.0.0.0
+sed	-e "s/%{eth}/${eth}/"	\
+	-e "s/%{net}/${net}/"	\
+	-e "s/%{tap}/${tap}/"	template/interfaces > mnt/interfaces
 
-auto eth0
-iface eth0 inet static
-    address 192.168.254.${uip}
-    network 192.168.254.0
-    netmask 255.255.255.0
-    broadcast 192.168.254.255
-    gateway 192.168.254.${gate}
-EOF
+#  The xinetd file is created to allow port-based routing from the
+#  outside world to the controller rulling in the UML
+#
+sed	-e "s/%{unm}/${unm}/"	\
+	-e "s/%{eth}/${eth}/"	\
+	-e "s/%{port}/${port}/"	\
+	-e "s/%{via}/${via}/"	template/xinetd > ${unm}/xinetd
+
 
 #  The resolve.conf file has a joke domain name, but uses the
 #  same nameserver as the host.
@@ -79,5 +95,11 @@ EOF
 	echo	domain scraperwiki.net
 	grep 	nameserver /etc/resolv.conf
 )	> mnt/resolv.conf
+
+#  Copy the interfaces and resolv.conf files so they can be
+#  easily eyeballed.
+#
+cp	mnt/interfaces	${unm}/interfaces
+cp	mnt/resolv.conf	${unm}/resolv.conf
 
 umount	mnt

@@ -17,21 +17,23 @@ import os
 import sys
 import time
 import signal
+import socket
 import string
 import StringIO
 import resource
 import subprocess
 import re
 import cgi
-
+import ConfigParser
 
 try    : import json
 except : import simplejson as json
 
-USAGE      = " [--port=port]  [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--nofirewall]"
+USAGE      = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--nofirewall] [--config=file] [--name=name]"
 child      = None
-port       = 9001
 varDir	   = '/var'
+config	   = 'uml.cfg'
+name	   = None
 firewall   = True
 re_resolv  = re.compile ('nameserver\s+([0-9.]+)')
 
@@ -428,11 +430,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         if self.traceback() == 'text' :
-            import TraceBack
-            return TraceBack.traceBack ('text', code, context = 10)
+            import backtrace
+            return backtrace.backtrace ('text', code, context = 10)
         if self.traceback() == 'html' :
-            import TraceBack
-            return TraceBack.traceBack ('html', code, context = 10)
+            import backtrace
+            return backtrace.backtrace ('html', code, context = 10)
 
         import traceback
         tb = [ \
@@ -455,8 +457,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    : runID      = self.headers['x-runid'     ]
         except : runID      = ''
 
-        import SWLogger
-        swl = SWLogger.SWLogger()
+        import swlogger
+        swl = swlogger.SWLogger(config)
         swl.connect ()
         swl.log     (scraperID, runID, 'C.START')
 
@@ -501,12 +503,12 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             times2 = os.times()
             swl.log     (scraperID, runID, 'C.END',   arg1 = times2[0] - times1[0], arg2 = times2[1] - times1[1])
         except Exception, e :
-            import ErrorMapper
+            import errormapper
             sys.stdout.flush()
             sys.stderr.flush()
             sys.stdout = self.wfile
             sys.stderr = self.wfile
-            emsg = ErrorMapper.mapException (e)
+            emsg = errormapper.mapException (e)
             etext, trace, infile, atline = self.getTraceback (code)
             sys.stdout.write \
 		(   '<scraperwiki:message type="exception">%s\n' % \
@@ -720,12 +722,16 @@ if __name__ == '__main__' :
             print "usage: " + sys.argv[0] + USAGE
             sys.exit (1)
 
-        if arg[: 7] == '--port='    :
-            port = int(arg[7:])
-            continue
-
         if arg[: 9] == '--varDir='  :
             varDir  = arg[ 9:]
+            continue
+
+        if arg[ :9] == '--config='  :
+            config  = arg[ 9:]
+            continue
+
+        if arg[ :7] == '--name='  :
+            name    = arg[ 7:]
             continue
 
         if arg[:10] == '--addPath=' :
@@ -792,4 +798,9 @@ if __name__ == '__main__' :
     
             os.wait()
 
-    execute (port)
+    conf = ConfigParser.ConfigParser()
+    conf.readfp (open(config))
+
+    if name is None :
+        name = socket.gethostname()
+    execute (conf.getint (name, 'port'))

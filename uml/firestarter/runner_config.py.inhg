@@ -1,8 +1,5 @@
 #!/usr/bin/python
 
-# Absolute path to the UML/Server/scripts folder
-scripts_path = '/home/scraperwiki/UML/Server/scripts'
-
 def config(fs):
     """
     Takes a FireStarter object, cahnges settings and returns it.
