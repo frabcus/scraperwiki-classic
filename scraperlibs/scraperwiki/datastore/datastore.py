@@ -3,25 +3,38 @@ import  socket
 import  urllib
 import  datetime
 import  types
+import	socket
+import	ConfigParser
 
 try   : import json
 except: import simplejson as json
 
 class DataStoreClass :
 
-    def __init__ (self) :
+    def __init__ (self, config) :
 
         self.m_socket    = None
+        self.m_config    = config
 
     def connect (self) :
 
-        self.m_socket    = socket.socket()
-        self.m_socket.connect (('89.16.177.176', 9003))
-        self.m_socket.send ('GET / HTTP/1.1\n\n')
-        self.m_socket.recv (1024)
+        if not self.m_socket :
+            if type(self.m_config) == types.StringType :
+                conf = ConfigParser.ConfigParser()
+                conf.readfp (open(self.m_config))
+            else :
+                conf = self.m_config
+            host = conf.get    ('dataproxy', 'host')
+            port = conf.getint ('dataproxy', 'port')
+            self.m_socket    = socket.socket()
+            self.m_socket.connect ((host, port))
+            self.m_socket.send ('GET /?uml=%s HTTP/1.1\n\n' % (socket.gethostname()))
+            rc, arg = json.loads (self.m_socket.recv (1024))
+            if not rc : raise Exception (arg)
 
     def request (self, req) :
 
+        self.connect ()
         self.m_socket.send (json.dumps (req) + '\n')
         rc = self.m_socket.recv (1024)
         return json.loads (rc)
@@ -62,12 +75,11 @@ class DataStoreClass :
         self.m_socket.close()
         self.m_socket = None
 
-datastore = None
+ds = None
 
-def DataStore () :
+def DataStore (config) :
 
-    global datastore
-    if datastore is None :
-        datastore = DataStoreClass()
-        datastore.connect ()
-    return datastore
+    global ds
+    if ds is None :
+        ds = DataStoreClass(config)
+    return ds

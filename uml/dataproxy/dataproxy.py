@@ -23,9 +23,11 @@ import ConfigParser
 try   : import json
 except: import simplejson as json
 
+global config
+
 USAGE      = " [--varDir=dir] [--subproc] [--daemon] [--config=file]"
 child      = None
-config	   = 'uml.cfg'
+config	   = None
 varDir     = '/var'
 uid	   = None
 gid        = None
@@ -96,7 +98,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  (string.join(status, '\n'))
         self.connection.send  ('\n')
 
-    def ident (self) :
+    def ident (self, uml) :
 
         """
         Request scraper and run identifiers, and host permissions from the UML.
@@ -109,7 +111,8 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
-        ident     = urllib.urlopen ('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], loc[1])).read()
+        via       = config.get (uml, 'via')
+        ident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (rem[0], via, rem[1], loc[1])).read()
 
         for line in string.split (ident, '\n') :
             key, value = string.split (line, '=')
@@ -142,6 +145,9 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if request[0] == 'save' :
             self.save (scraperID, runID, request[1], request[2], request[3], request[4])
+            return
+
+        self.connection.send (json.dumps ((False, 'Unknown datastore command: %s' % request[0])) + '\n')
 
     def do_GET (self) :
 
@@ -158,16 +164,23 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
             return
 
-        scraperID, runID = self.ident ()
+        scraperID, runID = self.ident (urlparse.parse_qs(query)['uml'][0])
 
         if path == '' or path is None :
             path = '/'
 
-        #  print "scm=%s, netloc=%s, path=%s, params=%s, query=%s, fragment=%s" % (scm, netloc, path, params, query, fragment)
-
         if scm not in [ 'http', 'https' ] or fragment :
             self.send_error (400, "Malformed URL %s" % self.path)
             return
+
+        datalib.connection   (config)
+        try    :
+            datalib.connection   (config)
+        except :
+            self.connection.send (json.dumps ((False, 'Cannot connect to datastore')) + '\n')
+            return
+
+        self.connection.send (json.dumps ((True, 'OK')) + '\n')
 
         if runID is not None :
             statusLock.acquire ()
@@ -175,8 +188,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             except : pass
             statusLock.release ()
 
-        datalib.connection()
-        self.connection.send ('READY\n')
         startat = time.strftime ('%Y-%m-%d %H:%M:%S')
 
         try :
@@ -236,6 +247,7 @@ if __name__ == '__main__' :
 
     subproc = False
     daemon  = False
+    confnam = 'uml.cfg'
 
     for arg in sys.argv[1:] :
 
@@ -256,7 +268,7 @@ if __name__ == '__main__' :
             continue
 
         if arg[ :9] == '--config='  :
-            config  = arg[ 9:]
+            confnam = arg[ 9:]
             continue
 
         if arg == '--subproc' :
@@ -321,7 +333,7 @@ if __name__ == '__main__' :
 
     statusLock = threading.Lock()
 
-    conf = ConfigParser.ConfigParser()
-    conf.readfp (open(config))
+    config = ConfigParser.ConfigParser()
+    config.readfp (open(confnam))
 
-    execute (conf.getint ('dataproxy', 'port'))
+    execute (config.getint ('dataproxy', 'port'))

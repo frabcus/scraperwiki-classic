@@ -22,11 +22,13 @@ import string
 import uuid
 import ConfigParser
 
+global config
+
 USAGE      = " [--varDir=dir] [--enqueue] [--subproc] [--daemon] [--config=file] [--name=name]"
 child      = None
 umlAddr    = []
 varDir	   = '/var'
-config	   = 'uml.cfg'
+config	   = None
 name   	   = 'dispatcher'
 enqueue	   = False
 uid	   = None
@@ -692,6 +694,7 @@ if __name__ == '__main__' :
 
     subproc = False
     daemon  = False
+    confnam = 'uml.cfg'
 
     for arg in sys.argv[1:] :
 
@@ -712,7 +715,7 @@ if __name__ == '__main__' :
             continue
 
         if arg[ :9] == '--config='  :
-            config  = arg[ 9:]
+            confnam = arg[ 9:]
             continue
 
         if arg[ :7] == '--name='  :
@@ -788,13 +791,13 @@ if __name__ == '__main__' :
     #  and the list of UMLs that this dispatcher controls; the access details
     #  for the UMLs is taken from the corresponding UML sections.
     #
-    conf = ConfigParser.ConfigParser()
-    conf.readfp (open(config))
+    config = ConfigParser.ConfigParser()
+    config.readfp (open(confnam))
 
-    for uml in conf.get (name, 'umllist').split(',') :
-        host  = conf.get    (uml, 'host' )
-        via   = conf.getint (uml, 'via'  )
-        count = conf.getint (uml, 'count')
+    for uml in config.get (name, 'umllist').split(',') :
+        host  = config.get    (uml, 'host' )
+        via   = config.getint (uml, 'via'  )
+        count = config.getint (uml, 'count')
         UMLList.append (UML(uml, host, via, count))
 
     for i in range(len(UMLList)) :
@@ -803,4 +806,4 @@ if __name__ == '__main__' :
     UMLPtr  = UMLList[0]
     UMLLock = threading.Lock()
 
-    execute (conf.getint (name, 'port'))
+    execute (config.getint (name, 'port'))

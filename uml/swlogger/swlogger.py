@@ -1,5 +1,6 @@
 import	time
 import	ConfigParser
+import	types
 
 class SWLogger :
 
@@ -14,8 +15,11 @@ class SWLogger :
         Class constructor. Picks up database connection configuration.
         """
 
-        conf = ConfigParser.ConfigParser()
-        conf.readfp (open(config))
+        if type(config) == types.StringType :
+            conf = ConfigParser.ConfigParser()
+            conf.readfp (open(config))
+        else :
+            conf = config
 
         self.m_host	= conf.get ('swlogger', 'host'  )
         self.m_db	= conf.get ('swlogger', 'db'    )

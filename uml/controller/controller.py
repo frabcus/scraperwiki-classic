@@ -29,10 +29,12 @@ import ConfigParser
 try    : import json
 except : import simplejson as json
 
+global config
+
 USAGE      = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--nofirewall] [--config=file] [--name=name]"
 child      = None
 varDir	   = '/var'
-config	   = 'uml.cfg'
+config	   = None
 name	   = None
 firewall   = True
 re_resolv  = re.compile ('nameserver\s+([0-9.]+)')
@@ -462,6 +464,12 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         swl.connect ()
         swl.log     (scraperID, runID, 'C.START')
 
+        tap  = config.get (socket.gethostname(), 'tap')
+        port = config.get ('httpproxy', 'port')
+
+        os.environ['http_proxy' ] = 'http://%s:%s' % (tap, port)
+        os.environ['https_proxy'] = 'http://%s:%s' % (tap, port)
+
         idents = []
         if scraperID is not None : idents.append ('scraperid=%s' % scraperID)
         if runID     is not None : idents.append ('runid=%s'     % runID    )
@@ -478,6 +486,13 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    : open ('/tmp/scraper.%d' % os.getpid(), 'w').write(code)
         except : pass
 
+        #  Pass the configuration to the datastore. At this stage no connection
+        #  is made; a connection will be made on demand if the scraper tries
+        #  to save anything.
+        #
+        from   scraperwiki import datastore
+        datastore.DataStore (config)
+
         #  Stdout and stderr are replaced by TaggedStream objects which
         #  tags output with <scraperwiki:message type="console">. By
         #  experiment this works with print as well as sys.stdout.write().
@@ -485,6 +500,9 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         sys.stdout = TaggedStream (self.wfile)
         sys.stderr = TaggedStream (self.wfile)
 
+        #  Set up a CPU time limit handler which simply throws a python
+        #  exception.
+        #
         def sigXCPU (signum, frame) :
             raise Exception ("CPUTimeExceeded")
 
@@ -522,10 +540,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             sys.stdout.flush ()
             swl.log     (scraperID, runID, 'C.ERROR', arg1 = etext, arg2 = trace)
 
-        try    : os.remove ('/tmp/scraper.%d' % os.getpid())
-        except : pass
-        try    : os.remove ('/tmp/ident.%d'   % os.getpid())
-        except : pass
+#        try    : os.remove ('/tmp/scraper.%d' % os.getpid())
+#        except : pass
+#        try    : os.remove ('/tmp/ident.%d'   % os.getpid())
+#        except : pass
 
 class ScraperController (BaseController) :
 
@@ -715,6 +733,7 @@ if __name__ == '__main__' :
 
     subproc = False
     daemon  = False
+    confnam = 'uml.cfg'
 
     for arg in sys.argv[1:] :
 
@@ -727,7 +746,7 @@ if __name__ == '__main__' :
             continue
 
         if arg[ :9] == '--config='  :
-            config  = arg[ 9:]
+            confnam = arg[ 9:]
             continue
 
         if arg[ :7] == '--name='  :
@@ -798,9 +817,9 @@ if __name__ == '__main__' :
     
             os.wait()
 
-    conf = ConfigParser.ConfigParser()
-    conf.readfp (open(config))
+    config = ConfigParser.ConfigParser()
+    config.readfp (open(confnam))
 
     if name is None :
         name = socket.gethostname()
-    execute (conf.getint (name, 'port'))
+    execute (config.getint (name, 'port'))
