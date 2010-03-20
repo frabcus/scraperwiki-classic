@@ -35,8 +35,8 @@ USE_I18N = True
 # Example: "/home/media/media.lawrence.com/"
 SCRAPERWIKI_DIR = ""
 MEDIA_DIR = SCRAPERWIKI_DIR + 'media'
-MEDIA_URL = 'http://alpha.scraperwiki.com:85/'
-MEDIA_ADMIN_DIR = SCRAPERWIKI_DIR + 'media-admin'
+MEDIA_URL = 'http://media.scraperwiki.com/'
+MEDIA_ADMIN_DIR = SCRAPERWIKI_DIR + '/media-admin'
 LOGIN_URL = '/login/'
 HOME_DIR = ""
 
@@ -46,7 +46,7 @@ MEDIA_ROOT = URL_ROOT + 'media/'
 CODEMIRROR_ROOT = MEDIA_ROOT + "CodeMirror-0.65/"
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a trailing slash.
-ADMIN_MEDIA_PREFIX = URL_ROOT + 'media-admin/'
+ADMIN_MEDIA_PREFIX = URL_ROOT + '/media-admin/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'x*#sb54li2y_+b-ibgyl!lnd^*#=bzv7bj_ypr2jvon9mwii@z'
