@@ -1,6 +1,6 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides:          controller
+# Provides:          dataproxy
 # Required-Start:    $local_fs
 # Default-Start:     2
 # Short-Description: Start controller
@@ -11,13 +11,16 @@
 
 # Do NOT "set -e"
 
+NOBODY=`grep nobody /etc/passwd | cut -d: -f3`
+NOGROUP=`grep nogroup /etc/group | cut -d: -f3`
+
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="Controller"
-NAME=controller
-DAEMON=/scraperwiki/scripts/Controller.py
-DAEMON_PATH=/scraperwiki/scripts
-DAEMON_ARGS="--daemon --subproc --addPath=$DAEMON_PATH"
+DESC="DataProxy"
+NAME=dataproxy
+CONFIG=/var/www/scraperwiki/uml/uml.cfg
+DAEMON=/usr/bin/python
+DAEMON_ARGS="/var/www/scraperwiki/uml/dataproxy/dataproxy.py --daemon --subproc --uid=$NOBODY --gid=$NOGROUP --config=$CONFIG"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 

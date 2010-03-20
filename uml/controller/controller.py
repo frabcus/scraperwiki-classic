@@ -30,14 +30,75 @@ try    : import json
 except : import simplejson as json
 
 global config
+global firewall
 
-USAGE      = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--nofirewall] [--config=file] [--name=name]"
+USAGE      = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--firewall=option] [--config=file] [--name=name]"
 child      = None
 varDir	   = '/var'
 config	   = None
 name	   = None
-firewall   = True
+firewall   = None
 re_resolv  = re.compile ('nameserver\s+([0-9.]+)')
+
+
+def firewallBegin (rules) :
+
+    """
+    Append initial firewall (iptables) rules. These allow traffic to
+    the host (both the host's own address and and the tap address),
+    to HTTPProxy and DataProxy, and to the logging database. Also add
+    a rule for each nameserver.
+    """
+
+    rules.append ('*filter')
+    rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'host')))
+    rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'tap' )))
+    rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('httpproxy', 'host'), config.get ('httpproxy', 'port')))
+    rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('dataproxy', 'host'), config.get ('dataproxy', 'port')))
+    rules.append ('-A OUTPUT -p tcp -d %s --dport 3306 -j ACCEPT' % (config.get ('dataproxy', 'host')))
+    for line in open ('/etc/resolv.conf').readlines() :
+        m = re_resolv.match (line)
+        if m :
+            rules.append ('-A OUTPUT -p udp -d %s --dport 53 -j ACCEPT' % m.group(1))
+
+
+def firewallEnd (rules) :
+
+    """
+    Append final filewall (iptables) rules. These reject anything
+    not explicitely allowed, then commit.
+    """
+
+    rules.append ('-A OUTPUT -j REJECT')
+    rules.append ('COMMIT')
+
+
+def firewallSetup (rules, stdout, stderr) :
+
+    """
+    Set up firewall rules. The actual setup is skipped unless we are
+    running as root, so that the controller can be run outside of a
+    UML instance.
+    """
+
+    rname = '/tmp/iptables.%s' % os.getpid()
+    rfile = open (rname, 'w')
+    rfile.write  (string.join (rules, '\n') + '\n')
+    rfile.close  ()
+
+    if os.getuid() == 0 :
+
+        p = subprocess.Popen \
+                (    'iptables-restore < %s' % rname,
+                     shell	= True,
+                     stdin	= open('/dev/null'),
+                     stdout	= stdout,
+                     stderr	= stderr
+		)
+        p.wait ()
+
+    os.remove   (rname)
+
 
 class TaggedStream :
 
@@ -261,48 +322,16 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
         if 'x-noiptables' in self.headers :
             return
+        if firewall != 'request' :
+            return
 
-        rname = '/tmp/iptables.%s' % os.getpid()
-
-        rfile = open (rname, 'w')
-        rfile.write ('*filter' + '\n')
-
-        #  Allow all traffic over the internal network on the hosts
-        #
-        rfile.write ('-A OUTPUT -d 192.168.0.0/16 -j ACCEPT' + '\n')
-
-        #  Add all rules passed from the FireStarter interface
-        #
+        rules = []
+        firewallBegin (rules)
         for name, value in self.headers.items() :
             if name[:11] == 'x-iptables-' :
                 rfile.write (value + '\n')
-
-        #  Add a rule for each nameserver in the /etc/resolv.conf so that
-        #  names can still be resolved.
-        #
-        for line in open ('/etc/resolv.conf').readlines() :
-            m = re_resolv.match (line)
-            if m :
-                rfile.write ('-A OUTPUT -p udp -d %s --dport 53 -j ACCEPT' % m.group(1) + '\n')
-
-        #  Finally, anything else is rejected out of hand!
-        #
-        rfile.write ('-A OUTPUT -j REJECT' + '\n')
-        rfile.write ('COMMIT' + '\n')
-        rfile.close ()
-
-        if firewall :
-
-            p = subprocess.Popen \
-		(	'iptables-restore < %s' % rname,
-			shell	= True,
-			stdin	= open('/dev/null'),
-			stdout	= self.wfile,
-			stderr	= self.wfile
-		)
-            p.wait ()
-
-        os.remove   (rname)
+        firewallEnd   (rules)
+        firewallSetup (rules, self.wfile. self.wfile)
 
     def addPaths (self) :
 
@@ -370,9 +399,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 	for line in lsof.split('\n') :
 	    m = p.match (line)
             if m :
+                self.log_request('Ident', '(%s,%s) is pid %s' % (lport, rport, m.group(1)))
                 try    : self.connection.send (open('/tmp/ident.%s' % m.group(1)).read())
-                except : pass
-                break
+                except : self.log_request('Ident', '(%s,%s) send failed' % (lport, rport))
+                return
+        self.log_request('Ident', '(%s,%s) not found' % (lport, rport))
 
     def execute (self, path) :
 
@@ -710,6 +741,17 @@ def execute (port) :
     httpd.serve_forever()
 
 
+def autoFirewall () :
+
+    """
+    Setup firewall when the firewall=auto option is selected.
+    """
+
+    rules = []
+    firewallBegin (rules)
+    firewallEnd   (rules)
+    firewallSetup (rules, sys.stdout, sys.stderr)
+
 def sigTerm (signum, frame) :
 
     """
@@ -757,6 +799,10 @@ if __name__ == '__main__' :
             sys.path.append (arg[10:])
             continue
 
+        if arg[:11] == '--firewall=' :
+            firewall = arg[11:]
+            continue
+
         if arg == '--subproc' :
             subproc = True
             continue
@@ -765,9 +811,6 @@ if __name__ == '__main__' :
             daemon = True
             continue
 
-        if arg == '--nofirewall' :
-            firewall = False
-            continue
 
         print "usage: " + sys.argv[0] + USAGE
         sys.exit (1)
@@ -819,6 +862,9 @@ if __name__ == '__main__' :
 
     config = ConfigParser.ConfigParser()
     config.readfp (open(confnam))
+
+    if firewall == 'auto' :
+        autoFirewall ()
 
     if name is None :
         name = socket.gethostname()

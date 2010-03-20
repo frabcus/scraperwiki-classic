@@ -1,13 +1,12 @@
 #!/bin/bash
 #
-#  Run a specified UML instance. The arguments are the UML instance
-#  directory and the bottom quad of the gateway address (ie., the host
-#  end address of the network connection. A file 'running' exists in
-#  the UML instance directory for the duration.
+#  Run a specified UML instance. The arguments is the UML name
+#  A file 'running' exists in the UML instance directory for the
+#  duration.
 #
-test $# = 2 ||
+test $# = 1 ||
 {
-	echo	usage: runuml umldir gateway
+	echo	usage: runuml umlname
 	exit	1
 }
 
@@ -17,21 +16,27 @@ test `id -u` = 0 ||
 	exit	1
 }
 
-umldir=$1
-  gate=$2
+unm=$1
+echo $unm
+get(){
+	sed -n "/^\[${unm}\]/,/^\[/ s/^[ \t]*${1}[ \t]*=[ \t]*\(.*\)/\1/ p" uml.cfg
+}
+echo XXXX
+date	> ${unm}/running
 
-date	> ${umldir}/running
+mem=`get mem`
+tap=`get tap`
 
 ./linux	\
 	ubda=${umldir}/jaunty.cow,jaunty.img			\
-	ubdb=${umldir}/addr.cow,${umldir}/addr.img		\
+	ubdb=${umldir}/addr.cow,${unm}/addr.img			\
 	ubdc=${umldir}/home.cow,home.img			\
 	ubdd=${umldir}/scraper.cow,scraper.img			\
 	ubde=${umldir}/swap.cow,swap.img			\
-	eth0=tuntap,,,192.168.254.${gate}			\
-	mem=1048M						\
+	eth0=tuntap,,,${tap}					\
+	mem=${mem}						\
 	con0=fd:0,fd:1						\
 	con=pts							\
-	umid="$name"
+	umid="${unm}"
 
-rm -f	${umldir}/running
+rm -f	${unm}/running

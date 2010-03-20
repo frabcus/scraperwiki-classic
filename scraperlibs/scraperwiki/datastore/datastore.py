@@ -18,6 +18,13 @@ class DataStoreClass :
 
     def connect (self) :
 
+        """
+        Connect to the data proxy. The data proxy will need to make an Ident call
+        back to get the scraperID. Since the data proxy may be on another machine
+        and the peer address it sees will have been subject to NAT or masquerading,
+        send the UML name and the socket port number in the request.
+        """
+
         if not self.m_socket :
             if type(self.m_config) == types.StringType :
                 conf = ConfigParser.ConfigParser()
@@ -28,7 +35,7 @@ class DataStoreClass :
             port = conf.getint ('dataproxy', 'port')
             self.m_socket    = socket.socket()
             self.m_socket.connect ((host, port))
-            self.m_socket.send ('GET /?uml=%s HTTP/1.1\n\n' % (socket.gethostname()))
+            self.m_socket.send ('GET /?uml=%s&port=%d HTTP/1.1\n\n' % (socket.gethostname(), self.m_socket.getsockname()[1]))
             rc, arg = json.loads (self.m_socket.recv (1024))
             if not rc : raise Exception (arg)
 

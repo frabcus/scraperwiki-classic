@@ -20,7 +20,7 @@ test `id -u` = 0 ||
 unm=$1
 
 get(){
-	sed -n "/^\[${unm}\]/,/^\[/ s/^[ \t]*${1}[ \t]*=[ \t]*\(.*\)/\1/ p" uml.cfg.mike
+	sed -n "/^\[${unm}\]/,/^\[/ s/^[ \t]*${1}[ \t]*=[ \t]*\(.*\)/\1/ p" uml.cfg
 }
 
  tap=`get tap `

@@ -98,7 +98,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  (string.join(status, '\n'))
         self.connection.send  ('\n')
 
-    def ident (self, uml) :
+    def ident (self, uml, port) :
 
         """
         Request scraper and run identifiers, and host permissions from the UML.
@@ -109,10 +109,17 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         scraperID = None
         runID     = None
 
+        #  Determin the caller host address and the port to call on that host from
+        #  the configuration since the request will be from UML running inside that
+        #  host (and note actually from the peer host). Similarly use the port
+        #  supplied in the request since the peer port will have been subject to
+        #  NAT or masquerading.
+        #
+        host      = config.get (uml, 'host')
+        via       = config.get (uml, 'via' )
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
-        via       = config.get (uml, 'via')
-        ident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (rem[0], via, rem[1], loc[1])).read()
+        ident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()
 
         for line in string.split (ident, '\n') :
             key, value = string.split (line, '=')
@@ -164,7 +171,8 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
             return
 
-        scraperID, runID = self.ident (urlparse.parse_qs(query)['uml'][0])
+        params = urlparse.parse_qs(query)
+        scraperID, runID = self.ident (params['uml'][0], params['port'][0])
 
         if path == '' or path is None :
             path = '/'

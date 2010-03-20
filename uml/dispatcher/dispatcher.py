@@ -361,6 +361,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         @return         : True if connected
         """
 
+        print (server, port)
         try :
             soc.connect((server, port))
         except socket.error, arg:
