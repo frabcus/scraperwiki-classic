@@ -541,16 +541,26 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         try :
             import imp
-            times1 = os.times()
-            mod    = imp.new_module ('scraper')
+            ostimes1   = os.times ()
+            cltime1    = time.time()
+            mod        = imp.new_module ('scraper')
             exec code in mod.__dict__
+            ostimes2   = os.times ()
+            cltime2    = time.time()
+            try    :
+                sys.stdout.write \
+			(	'%d seconds elapsed, used %d CPU seconds' % 
+				(	int(cltime2 - cltime1),
+					int(ostimes2[0] - ostimes1[0])
+			)	)
+            except :
+                pass
             etext, trace, infile, atline = None, None, None, None
             sys.stdout.flush()
             sys.stderr.flush()
             sys.stdout = self.wfile
             sys.stderr = self.wfile
-            times2 = os.times()
-            swl.log     (scraperID, runID, 'C.END',   arg1 = times2[0] - times1[0], arg2 = times2[1] - times1[1])
+            swl.log     (scraperID, runID, 'C.END',   arg1 = ostimes2[0] - ostimes1[0], arg2 = ostimes2[1] - ostimes1[1])
         except Exception, e :
             import errormapper
             sys.stdout.flush()
