@@ -235,7 +235,6 @@ function scrollScroller(sDirection){
     if(sDirection == 'left' && iCurrentLeft >= 0){
         bCanScroll = false;
     }
-    
 
     if(bCanScroll == true){
         //get the width of one item
