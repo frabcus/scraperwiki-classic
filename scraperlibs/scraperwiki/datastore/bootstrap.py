@@ -10,8 +10,7 @@ import connection
 import sys
 import os
 import csv
-#sys.path.append('..')
-#import geo
+sys.path.append('..')
 
 def load_scheme():
   """Excicutes the SQL in scheme.sql"""
@@ -40,6 +39,8 @@ def load_scheme():
 
 def load_gb_postcodes():
     """ Loads royal mail's postcode database (postzon) and postcode sector data, converting eastings/northings to latlong """
+
+    import geo
 
     #get the location of the postzon file
     config = ConfigParser.ConfigParser()
