@@ -45,7 +45,16 @@ class DataStoreClass :
         if latlng is not None :
             latlng = '%010.6f,%010.6f' % tuple(latlng)
 
-        return self.request (('save', unique_keys, scraper_data, date, latlng))
+        #  Data must be JSON-encodable. Brute force attack, try each data value
+        #  in turn and stringify any that bork.
+        #
+        js_data = {}
+        for key, value in scraper_data.items() :
+            try    : json.dumps (value)
+            except : value = str(value)
+            js_data[key] = value
+
+        return self.request (('save', unique_keys, js_data, date, latlng))
 
     def close (self) :
 

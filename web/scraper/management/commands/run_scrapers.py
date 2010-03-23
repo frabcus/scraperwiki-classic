@@ -73,7 +73,7 @@ class Command(BaseCommand):
     def handle(self, **options):
         if options['short_name']:
             scrapers = Scraper.objects.get(short_name=options['short_name'], published=True, )
-            self.run_scraper(scrapers)
+            self.run_scraper(scrapers, options)
         else:
 
             #get all scrapers where interval > 0 and require running
