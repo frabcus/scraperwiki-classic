@@ -30,7 +30,7 @@ def alpha():
 
 def www():
     "The main www server (horsell)"
-    env.hosts = ['89.16.177.212:22']
+    env.hosts = ['89.16.177.212:7822']
     env.path = '/var/www/scraperwiki'
     env.branch = 'stable'
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
