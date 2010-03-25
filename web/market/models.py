@@ -61,7 +61,6 @@ class Solicitation(models.Model):
         return self.price > 0
 
     def total_price(self):
-        return 100
         total_price = 0
         if self.price > 0:
             bounty_charge = float(0)

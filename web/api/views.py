@@ -105,11 +105,13 @@ def explore_scraper_getdatabylocation_1_0(request):
     user = request.user
     if user.is_authenticated():
         users_keys = api_key.objects.filter(user=user)
-        scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True)[:5]
+        scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True, has_geo=True)[:5]                    
     else:    
         users_keys = None
-        scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('first_published_at')[:5]    
 
+    if scrapers == []:
+        scrapers = Scraper.objects.filter(deleted=False, published=True, has_geo=True).order_by('first_published_at')[:5]    
+        
     return render_to_response('scraper_getdatabylocation_1.0.html', {'keys' : users_keys, 'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdatabylocation')}, context_instance=RequestContext(request))    
 
 def explore_geo_postcodetolatlng_1_0(request):

@@ -9,7 +9,7 @@ def process_payment(sender, **kwargs):
     ipn = sender
 
     #find the invoice, raise an exception if it doesnt exist
-    invoice = Invoice.objects.get(id=ipn.invoice, delete=False)
+    invoice = Invoice.objects.get(id=ipn.invoice, deleted=False)
     if not invoice:
         raise Exception("Unable to find invoice for ID: " + ipn.invoice)
 

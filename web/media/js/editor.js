@@ -41,6 +41,7 @@ $(document).ready(function() {
             indentUnit: 4,
             readOnly: false,
             tabMode: "spaces", 
+            disableSpellcheck: true,
             autoMatchParens: true,
             width: '100%',
             parserConfig: {'pythonVersion': 2, 'strictErrors': true},
@@ -517,28 +518,6 @@ $(document).ready(function() {
         );
     }
 
-    //commit
-    function commitScraper(){
-        return true;
-        /*
-        $.ajax({
-          type : 'POST',
-          URL : window.location.pathname,
-          data: ({
-            title : $('#id_title').val(),                        
-            code : codeeditor.getCode(),
-            action : 'commit',
-            }),
-          dataType: "html",
-          success: function(response){
-                showFeedbackMessage("Your changes have been committed");
-            },
-        error: function(response){
-            alert('Sorry, something went wrong committing your scraper');
-          }
-        });
-        */
-    }
     
     //Save
     function saveScraper(bCommit){

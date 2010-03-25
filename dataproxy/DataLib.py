@@ -93,7 +93,10 @@ def uniqueHash (unique, data) :
     #  ordered by key name; these are then joined into a single string with
     #  a suitable separator, and then hashed.
     #
-    ulist  = [ str(data[key]) for key in set(unique) ]
+    ulist = []
+    for key in set(unique) :
+        try    : ulist.append (str(data[key]))
+        except : ulist.append (data[key].encode('utf-8'))
     return hashlib.md5(string.join(ulist, '\0342\0211\0210\0342\0211\0210\0342\0211\0210')).hexdigest()
 
 def nextItemID () :
@@ -143,7 +146,7 @@ def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
         if   value is None  : value = ""
         elif value is True  : value = "1"
         elif value is False : value = "0"
-        else                : value = str(value)
+#       else                : value = str(value)
         insert_data[fixKVKey(key)] = value
 
     #   This is the Julian/Francis code. Reverted back to Sym's because this

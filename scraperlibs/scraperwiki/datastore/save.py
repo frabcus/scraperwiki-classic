@@ -207,7 +207,7 @@ def delete(matchrecord):
     return result
 
 
-def save (unique_keys, data, date = None, latlng = None) :
+def save (unique_keys, data, date = None, latlng = None, silent = False) :
 
     ds = DataStore.DataStore()
     rc, arg = ds.save (unique_keys, data, date, latlng)
@@ -216,9 +216,14 @@ def save (unique_keys, data, date = None, latlng = None) :
 
     pdata = {}
     for key, value in data.items():
+        try    : key   = str(key)
+        except : key   = key  .encode('utf-8')
+        try    : value = str(value)
+        except : value = value.encode('utf-8')
         pdata[cgi.escape(key)] = cgi.escape(value)
-    
-    print '<scraperwiki:message type="data">%s' % json.dumps(pdata)
+
+    if not silent :
+        print '<scraperwiki:message type="data">%s' % json.dumps(pdata)
     return arg
 
 def saveX(unique_keys, data, date=None, latlng=None):
