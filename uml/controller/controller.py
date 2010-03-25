@@ -46,14 +46,13 @@ def firewallBegin (rules) :
     """
     Append initial firewall (iptables) rules. These allow traffic to
     the host (both the host's own address and and the tap address),
-    to HTTPProxy and DataProxy, and to the logging database. Also add
-    a rule for each nameserver.
+    to the DataProxy, and to the logging database. Also add a rule for
+    each nameserver.
     """
 
     rules.append ('*filter')
     rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'host')))
     rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'tap' )))
-    rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('httpproxy', 'host'), config.get ('httpproxy', 'port')))
     rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('dataproxy', 'host'), config.get ('dataproxy', 'port')))
     rules.append ('-A OUTPUT -p tcp -d %s --dport 3306 -j ACCEPT' % (config.get ('dataproxy', 'host')))
     for line in open ('/etc/resolv.conf').readlines() :
@@ -495,11 +494,19 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         swl.connect ()
         swl.log     (scraperID, runID, 'C.START')
 
-        tap  = config.get (socket.gethostname(), 'tap')
-        port = config.get ('httpproxy', 'port')
+        tap      = config.get (socket.gethostname(), 'tap')
+        httpport = config.get ('httpproxy', 'port')
+        ftpport  = config.get ('ftpproxy',  'port')
 
-        os.environ['http_proxy' ] = 'http://%s:%s' % (tap, port)
-        os.environ['https_proxy'] = 'http://%s:%s' % (tap, port)
+#       os.environ['http_proxy' ] = 'http://%s:%s' % (tap, port)
+#       os.environ['https_proxy'] = 'http://%s:%s' % (tap, port)
+
+        import urllib2
+        import scraperwiki.utils
+        HTTPProxy   = urllib2.ProxyHandler ({'http':  'http://%s:%s' % (tap, httpport)})
+        HTTPSProxy  = urllib2.ProxyHandler ({'https': 'http://%s:%s' % (tap, httpport)})
+        FTPProxy    = urllib2.ProxyHandler ({'ftp':   'ftp://%s:%s'  % (tap, ftpport )})
+        scraperwiki.utils.setupHandlers (HTTPProxy, HTTPSProxy, FTPProxy)
 
         idents = []
         if scraperID is not None : idents.append ('scraperid=%s' % scraperID)

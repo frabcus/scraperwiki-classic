@@ -32,7 +32,7 @@ statusLock = None
 statusInfo = {}
 blockmsg   = """Scraperwiki has blocked you from accessing "%s" because it is not allowed according to the rules"""
 
-class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
+class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     """
     Proxy handler class. Overrides the base handler to implement
@@ -88,7 +88,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         from the IP address of the caller.
 
         @type   netloc   : String
-        @param  netloc   : Hostname or hostname:port
+        @param  netloc   : Hostname
         @type   scraperID: String
         @param  scraperID: Scraper identifier or None
         @return          : True if access is allowed
@@ -336,7 +336,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     do_DELETE = do_GET
 
 
-class ProxyHTTPServer \
+class HTTPProxyServer \
         (   SocketServer.ThreadingMixIn,
             BaseHTTPServer.HTTPServer
         ) :
@@ -345,9 +345,9 @@ class ProxyHTTPServer \
 
 def execute (port) :
 
-    ProxyHandler.protocol_version = "HTTP/1.0"
+    HTTPProxyHandler.protocol_version = "HTTP/1.0"
 
-    httpd = ProxyHTTPServer(('', port), ProxyHandler)
+    httpd = HTTPProxyServer(('', port), HTTPProxyHandler)
     sa    = httpd.socket.getsockname()
     print "Serving HTTP on", sa[0], "port", sa[1], "..."
 

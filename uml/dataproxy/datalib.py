@@ -37,7 +37,8 @@ def connection (config) :
                         (    host       = conf.get ('dataproxy', 'host'  ), 
                              user       = conf.get ('dataproxy', 'user'  ), 
                              passwd     = conf.get ('dataproxy', 'passwd'),
-                             db         = conf.get ('dataproxy', 'db'    )
+                             db         = conf.get ('dataproxy', 'db'    ),
+                             charset	= 'utf8'
                         )
                 place   = '%s'
             except :
