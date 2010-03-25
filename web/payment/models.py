@@ -31,7 +31,7 @@ class Invoice(models.Model):
     """
     title   = models.CharField(max_length = 100, null=False, blank=False)
     item_type = models.CharField(max_length = 50, null=False, blank=False)
-    price = models.IntegerField(null=True, blank=True)
+    price = models.FloatField()
     parent_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add = True)
     user = models.ForeignKey(User)
