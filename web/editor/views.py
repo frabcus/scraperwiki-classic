@@ -19,7 +19,8 @@ import settings
 
 # Delete the draft
 def delete_draft(request):
-    del request.session['ScraperDraft']    
+    if  request.session.get('ScraperDraft', False):
+        del request.session['ScraperDraft']    
     return HttpResponseRedirect(reverse('editor'))
 
 # Diff
