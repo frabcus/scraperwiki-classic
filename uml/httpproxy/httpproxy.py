@@ -17,10 +17,13 @@ import time
 import threading
 import string 
 import urllib
+import ConfigParser
 
-USAGE      = " [--port=port] [--allowAll] [--varDir=dir] [--subproc] [--daemon]"
+global config
+
+USAGE      = " [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file]"
 child      = None
-port       = 9002
+config	   = None
 varDir	   = '/var'
 uid	   = None
 gid	   = None
@@ -29,7 +32,7 @@ statusLock = None
 statusInfo = {}
 blockmsg   = """Scraperwiki has blocked you from accessing "%s" because it is not allowed according to the rules"""
 
-class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
+class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     """
     Proxy handler class. Overrides the base handler to implement
@@ -56,8 +59,8 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     def swlog (self) :
 
         if self.m_swlog is None :
-            import SWLogger
-            self.m_swlog = SWLogger.SWLogger()
+            import swlogger
+            self.m_swlog = swlogger.SWLogger(config)
             self.m_swlog.connect ()
 
         return self.m_swlog
@@ -85,7 +88,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         from the IP address of the caller.
 
         @type   netloc   : String
-        @param  netloc   : Hostname or hostname:port
+        @param  netloc   : Hostname
         @type   scraperID: String
         @param  scraperID: Scraper identifier or None
         @return          : True if access is allowed
@@ -333,7 +336,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     do_DELETE = do_GET
 
 
-class ProxyHTTPServer \
+class HTTPProxyServer \
         (   SocketServer.ThreadingMixIn,
             BaseHTTPServer.HTTPServer
         ) :
@@ -342,9 +345,9 @@ class ProxyHTTPServer \
 
 def execute (port) :
 
-    ProxyHandler.protocol_version = "HTTP/1.0"
+    HTTPProxyHandler.protocol_version = "HTTP/1.0"
 
-    httpd = ProxyHTTPServer(('', port), ProxyHandler)
+    httpd = HTTPProxyServer(('', port), HTTPProxyHandler)
     sa    = httpd.socket.getsockname()
     print "Serving HTTP on", sa[0], "port", sa[1], "..."
 
@@ -364,6 +367,7 @@ if __name__ == '__main__' :
 
     subproc = False
     daemon  = False
+    confnam = 'uml.cfg'
 
     for arg in sys.argv[1:] :
 
@@ -379,12 +383,12 @@ if __name__ == '__main__' :
             gid      = arg[ 6:]
             continue
 
-        if arg[:7] == '--port=' :
-            port = int(arg[7:])
-            continue
-
         if arg[ :9] == '--varDir='  :
             varDir  = arg[ 9:]
+            continue
+
+        if arg[ :9] == '--config='  :
+            confnam = arg[ 9:]
             continue
 
         if arg == '--allowAll' :
@@ -453,4 +457,7 @@ if __name__ == '__main__' :
 
     statusLock = threading.Lock()
 
-    execute (port)
+    config = ConfigParser.ConfigParser()
+    config.readfp (open(confnam))
+
+    execute (config.getint ('httpproxy', 'port'))

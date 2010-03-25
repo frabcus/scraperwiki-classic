@@ -3,11 +3,17 @@
 # bootuml
 #
 # Boot a UML into an instance of screen. Takes one argument, which should be the
-# UML number in thae range 1 ... 99
+# UML name
 #
 test $# = 1 ||
 {
-	echo	usage: bootuml ip
+	echo	usage: bootuml name
+	exit	1
+}
+
+test -e uml.cfg ||
+{
+	echo	"bootuml: no uml.cfg file"
 	exit	1
 }
 
@@ -17,26 +23,35 @@ test `id -u` = 0 ||
 	exit	1
 }
 
- uip=$1
- hip=`expr ${uip} + 100`
-name=`printf '%03d' ${uip}`
-gate=`printf '%03d' ${hip}`
-umld=uml${name}
+unm=$1
 
-test -e ${umld} ||
+test -e ${unm} ||
 {
-	echo	bootuml: uml ${ip} does not exist
+	echo	bootuml: uml ${unm} does not exist
 	exit	1
 }
 
-test -e ${umld}/running &&
+test -e ${unm}/running &&
 {
-	echo	bootuml: uml ${ip} is already running
+	echo	bootuml: uml ${unm} is already running
 	exit	1
 }
 
-rm	-f uml${name}/*.cow
+cmp -s uml.cfg controller/uml.cfg ||
+{
+	rm -f controller/uml.cfg
+	cfg=uml.cfg
+	test -L uml.cfg && cfg=`ls -l uml.cfg | awk '{ print $10 }'`
+	ln $cfg controller/uml.cfg
+}
 
-screen -dmS uml${name} \
-	./runuml	uml${name} ${gate}
+cmp -s swlogger/swlogger.py controller/swlogger.py ||
+{
+	rm -f controller/swlogger.py
+	ln swlogger/swlogger.py controller/swlogger.py
+}
+
+rm	-f ${unm}/*.cow
+
+screen -dmS ${unm} ./runuml ${unm}
 

@@ -3,25 +3,45 @@ import  socket
 import  urllib
 import  datetime
 import  types
+import	socket
+import	ConfigParser
 
 try   : import json
 except: import simplejson as json
 
 class DataStoreClass :
 
-    def __init__ (self) :
+    def __init__ (self, config) :
 
         self.m_socket    = None
+        self.m_config    = config
 
     def connect (self) :
 
-        self.m_socket    = socket.socket()
-        self.m_socket.connect (('89.16.177.176', 9003))
-        self.m_socket.send ('GET / HTTP/1.1\n\n')
-        self.m_socket.recv (1024)
+        """
+        Connect to the data proxy. The data proxy will need to make an Ident call
+        back to get the scraperID. Since the data proxy may be on another machine
+        and the peer address it sees will have been subject to NAT or masquerading,
+        send the UML name and the socket port number in the request.
+        """
+
+        if not self.m_socket :
+            if type(self.m_config) == types.StringType :
+                conf = ConfigParser.ConfigParser()
+                conf.readfp (open(self.m_config))
+            else :
+                conf = self.m_config
+            host = conf.get    ('dataproxy', 'host')
+            port = conf.getint ('dataproxy', 'port')
+            self.m_socket    = socket.socket()
+            self.m_socket.connect ((host, port))
+            self.m_socket.send ('GET /?uml=%s&port=%d HTTP/1.1\n\n' % (socket.gethostname(), self.m_socket.getsockname()[1]))
+            rc, arg = json.loads (self.m_socket.recv (1024))
+            if not rc : raise Exception (arg)
 
     def request (self, req) :
 
+        self.connect ()
         self.m_socket.send (json.dumps (req) + '\n')
         rc = self.m_socket.recv (1024)
         return json.loads (rc)
@@ -62,12 +82,11 @@ class DataStoreClass :
         self.m_socket.close()
         self.m_socket = None
 
-datastore = None
+ds = None
 
-def DataStore () :
+def DataStore (config) :
 
-    global datastore
-    if datastore is None :
-        datastore = DataStoreClass()
-        datastore.connect ()
-    return datastore
+    global ds
+    if ds is None :
+        ds = DataStoreClass(config)
+    return ds

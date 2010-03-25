@@ -10,7 +10,7 @@ except:
 
 import cgi
 import re
-import  DataStore
+import  datastore
 
 # this sets deleted_run_id to flag a record is deleted, rather than actually deleting it
 bSaveAllDeletes = False
@@ -209,7 +209,7 @@ def delete(matchrecord):
 
 def save (unique_keys, data, date = None, latlng = None, silent = False) :
 
-    ds = DataStore.DataStore()
+    ds = datastore.DataStore(None)
     rc, arg = ds.save (unique_keys, data, date, latlng)
     if not rc :
         raise Exception (arg) 

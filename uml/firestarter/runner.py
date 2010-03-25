@@ -7,7 +7,7 @@ import fcntl
 import select
 import cgi
 import string
-from optparse import OptionParser
+from  optparse import OptionParser
 
 
 try:
@@ -22,13 +22,10 @@ except:
     sys.exit()
 
 
-#sys.path.append	(runner_config.scripts_path)
-
-
 # Make sure stdout doesn't buffer anything
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 10000000)
 
-import FireStarter
+import firestarter
 
 
 def execute (code, guid = None) :
@@ -70,7 +67,7 @@ def execute (code, guid = None) :
 
         return json.dumps(message)
 
-    fs  = FireStarter.FireStarter()    
+    fs  = firestarter.FireStarter('/var/www/scraperwiki/uml/uml.cfg')
     
     fs.setTestName     ('Runner')
     fs.setScraperID    (guid)

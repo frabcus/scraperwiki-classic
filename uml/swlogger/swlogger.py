@@ -1,4 +1,6 @@
 import	time
+import	ConfigParser
+import	types
 
 class SWLogger :
 
@@ -7,17 +9,22 @@ class SWLogger :
     and the FireStarter module to log events,
     """
 
-    def __init__ (self) :
+    def __init__ (self, config) :
 
         """
         Class constructor. Picks up database connection configuration.
         """
 
-        import SWConfig
-        self.m_host	= SWConfig.host
-        self.m_db	= SWConfig.db
-        self.m_user	= SWConfig.user
-        self.m_passwd	= SWConfig.passwd
+        if type(config) == types.StringType :
+            conf = ConfigParser.ConfigParser()
+            conf.readfp (open(config))
+        else :
+            conf = config
+
+        self.m_host	= conf.get ('swlogger', 'host'  )
+        self.m_db	= conf.get ('swlogger', 'db'    )
+        self.m_user	= conf.get ('swlogger', 'user'  )
+        self.m_passwd	= conf.get ('swlogger', 'passwd')
         self.m_mysql	= None
 
     def setHost (self, host) :

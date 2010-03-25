@@ -5,7 +5,7 @@ import	time
 import	inspect
 import	os
 import	sha
-
+import	ConfigParser
 
 class FireWrapper :
 
@@ -89,13 +89,17 @@ class FireStarter :
     box.
     """
 
-    def __init__ (self) :
+    def __init__ (self, config) :
 
         """
         Class constructor.
         """
 
-        self.m_dispatcher  = '127.0.0.1:9000'
+        conf = ConfigParser.ConfigParser()
+        conf.readfp (open(config))
+
+
+        self.m_dispatcher  = None
         self.m_path        = ''
         self.m_parameters  = {}
         self.m_environment = {}
@@ -118,8 +122,10 @@ class FireStarter :
         s.update(str(time.time (  )))
         self.m_runID	   = '%.6f_%s' % (time.time(), s.hexdigest())
 
-        import SWLogger
-        self.m_swlog = SWLogger.SWLogger()
+        self.setDispatcher	('%s:%d' % (conf.get('dispatcher', 'host'), conf.getint('dispatcher', 'port')))
+
+        import swlogger
+        self.m_swlog = swlogger.SWLogger(config)
         self.m_swlog.connect ()
         self.m_swlog.log     (self.m_scraperID, self.m_runID, 'F.START')
 

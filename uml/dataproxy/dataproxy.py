@@ -17,17 +17,20 @@ import time
 import threading
 import string 
 import hashlib
-import DataLib
+import datalib
+import ConfigParser
 
 try   : import json
 except: import simplejson as json
 
-USAGE      = " [--port=port] [--varDir=dir] [--subproc] [--daemon]"
+global config
+
+USAGE      = " [--varDir=dir] [--subproc] [--daemon] [--config=file]"
 child      = None
-port       = 9003
+config	   = None
 varDir     = '/var'
-uid    = None
-gid    = None
+uid	   = None
+gid        = None
 statusLock = None
 statusInfo = {}
 
@@ -95,7 +98,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  (string.join(status, '\n'))
         self.connection.send  ('\n')
 
-    def ident (self) :
+    def ident (self, uml, port) :
 
         """
         Request scraper and run identifiers, and host permissions from the UML.
@@ -106,9 +109,17 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         scraperID = None
         runID     = None
 
+        #  Determin the caller host address and the port to call on that host from
+        #  the configuration since the request will be from UML running inside that
+        #  host (and note actually from the peer host). Similarly use the port
+        #  supplied in the request since the peer port will have been subject to
+        #  NAT or masquerading.
+        #
+        host      = config.get (uml, 'host')
+        via       = config.get (uml, 'via' )
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
-        ident     = urllib.urlopen ('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], loc[1])).read()
+        ident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()
 
         for line in string.split (ident, '\n') :
             key, value = string.split (line, '=')
@@ -127,7 +138,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             try    : statusInfo[runID]['action'] = 'save'
             except : pass
 
-        rc, arg = DataLib.save (scraperID, unique, data, date, latlng)
+        rc, arg = datalib.save (scraperID, unique, data, date, latlng)
         self.connection.send (json.dumps ((rc, arg)) + '\n')
 
         if runID is not None :
@@ -141,6 +152,9 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if request[0] == 'save' :
             self.save (scraperID, runID, request[1], request[2], request[3], request[4])
+            return
+
+        self.connection.send (json.dumps ((False, 'Unknown datastore command: %s' % request[0])) + '\n')
 
     def do_GET (self) :
 
@@ -157,16 +171,24 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
             return
 
-        scraperID, runID = self.ident ()
+        params = urlparse.parse_qs(query)
+        scraperID, runID = self.ident (params['uml'][0], params['port'][0])
 
         if path == '' or path is None :
             path = '/'
 
-        #  print "scm=%s, netloc=%s, path=%s, params=%s, query=%s, fragment=%s" % (scm, netloc, path, params, query, fragment)
-
         if scm not in [ 'http', 'https' ] or fragment :
             self.send_error (400, "Malformed URL %s" % self.path)
             return
+
+        datalib.connection   (config)
+        try    :
+            datalib.connection   (config)
+        except :
+            self.connection.send (json.dumps ((False, 'Cannot connect to datastore')) + '\n')
+            return
+
+        self.connection.send (json.dumps ((True, 'OK')) + '\n')
 
         if runID is not None :
             statusLock.acquire ()
@@ -174,8 +196,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             except : pass
             statusLock.release ()
 
-        DataLib.connection()
-        self.connection.send ('READY\n')
         startat = time.strftime ('%Y-%m-%d %H:%M:%S')
 
         try :
@@ -235,6 +255,7 @@ if __name__ == '__main__' :
 
     subproc = False
     daemon  = False
+    confnam = 'uml.cfg'
 
     for arg in sys.argv[1:] :
 
@@ -250,12 +271,12 @@ if __name__ == '__main__' :
             gid      = arg[ 6:]
             continue
 
-        if arg[:7] == '--port=' :
-            port = int(arg[7:])
-            continue
-
         if arg[ :9] == '--varDir='  :
             varDir  = arg[ 9:]
+            continue
+
+        if arg[ :9] == '--config='  :
+            confnam = arg[ 9:]
             continue
 
         if arg == '--subproc' :
@@ -320,4 +341,7 @@ if __name__ == '__main__' :
 
     statusLock = threading.Lock()
 
-    execute (port)
+    config = ConfigParser.ConfigParser()
+    config.readfp (open(confnam))
+
+    execute (config.getint ('dataproxy', 'port'))

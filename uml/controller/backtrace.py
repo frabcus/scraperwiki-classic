@@ -341,11 +341,11 @@ def text ((etype, evalue, etb), context=5) :
     return etext, head + ''.join(frames) + ''.join(exception) + '\n', infile, atline
 
 
-#  traceback
+#  backtrace
 #  ---------
 #  Generate traceback in requested format.
 #
-def traceBack (format, code, info = None, context = 5) :
+def backtrace (format, code, info = None, context = 5) :
 
     global scraper
     scraper   = string.split ('\n' + code + '\n', '\n')

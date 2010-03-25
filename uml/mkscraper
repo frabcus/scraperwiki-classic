@@ -23,18 +23,21 @@ test `id -u` = 0 ||
 	exit	1
 }
 
-sed	\
-	-e "s?__MOUNTS__?${MOUNTS}?" 			\
-		FireBox/etc/init.d/scraperwiki.in_hg > FireBox/etc/init.d/scraperwiki
-chmod	+x FireBox/etc/init.d/scraperwiki
-
 rm	-f scraper.img
 dd	if=/dev/zero of=scraper.img bs=1024 seek=$[ 1024 * 1024 ] count=1
 mke2fs	-F scraper.img
 mkdir	-p mnt
 mount	-o loop scraper.img mnt
 
-cp	-a	FireBox/etc	mnt
+mkdir	-p mnt/etc/init.d
+
+sed	\
+	-e "s?__MOUNTS__?${MOUNTS}?" 			\
+		template/scraperwiki > mnt/etc/init.d/scraperwiki
+cp	etc/init.d/controller mnt/etc/init.d/controller
+
+chmod	+x mnt/etc/init.d/scraperwiki
+chmod	+x mnt/etc/init.d/controller
 
 for mount in ${MOUNTS}
 do

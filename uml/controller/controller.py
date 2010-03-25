@@ -17,23 +17,87 @@ import os
 import sys
 import time
 import signal
+import socket
 import string
 import StringIO
 import resource
 import subprocess
 import re
 import cgi
-
+import ConfigParser
 
 try    : import json
 except : import simplejson as json
 
-USAGE      = " [--port=port]  [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--nofirewall]"
+global config
+global firewall
+
+USAGE      = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--firewall=option] [--config=file] [--name=name]"
 child      = None
-port       = 9001
 varDir	   = '/var'
-firewall   = True
+config	   = None
+name	   = None
+firewall   = None
 re_resolv  = re.compile ('nameserver\s+([0-9.]+)')
+
+
+def firewallBegin (rules) :
+
+    """
+    Append initial firewall (iptables) rules. These allow traffic to
+    the host (both the host's own address and and the tap address),
+    to the DataProxy, and to the logging database. Also add a rule for
+    each nameserver.
+    """
+
+    rules.append ('*filter')
+    rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'host')))
+    rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'tap' )))
+    rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('dataproxy', 'host'), config.get ('dataproxy', 'port')))
+    rules.append ('-A OUTPUT -p tcp -d %s --dport 3306 -j ACCEPT' % (config.get ('dataproxy', 'host')))
+    for line in open ('/etc/resolv.conf').readlines() :
+        m = re_resolv.match (line)
+        if m :
+            rules.append ('-A OUTPUT -p udp -d %s --dport 53 -j ACCEPT' % m.group(1))
+
+
+def firewallEnd (rules) :
+
+    """
+    Append final filewall (iptables) rules. These reject anything
+    not explicitely allowed, then commit.
+    """
+
+    rules.append ('-A OUTPUT -j REJECT')
+    rules.append ('COMMIT')
+
+
+def firewallSetup (rules, stdout, stderr) :
+
+    """
+    Set up firewall rules. The actual setup is skipped unless we are
+    running as root, so that the controller can be run outside of a
+    UML instance.
+    """
+
+    rname = '/tmp/iptables.%s' % os.getpid()
+    rfile = open (rname, 'w')
+    rfile.write  (string.join (rules, '\n') + '\n')
+    rfile.close  ()
+
+    if os.getuid() == 0 :
+
+        p = subprocess.Popen \
+                (    'iptables-restore < %s' % rname,
+                     shell	= True,
+                     stdin	= open('/dev/null'),
+                     stdout	= stdout,
+                     stderr	= stderr
+		)
+        p.wait ()
+
+    os.remove   (rname)
+
 
 class TaggedStream :
 
@@ -257,48 +321,16 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
         if 'x-noiptables' in self.headers :
             return
+        if firewall != 'request' :
+            return
 
-        rname = '/tmp/iptables.%s' % os.getpid()
-
-        rfile = open (rname, 'w')
-        rfile.write ('*filter' + '\n')
-
-        #  Allow all traffic over the internal network on the hosts
-        #
-        rfile.write ('-A OUTPUT -d 192.168.0.0/16 -j ACCEPT' + '\n')
-
-        #  Add all rules passed from the FireStarter interface
-        #
+        rules = []
+        firewallBegin (rules)
         for name, value in self.headers.items() :
             if name[:11] == 'x-iptables-' :
                 rfile.write (value + '\n')
-
-        #  Add a rule for each nameserver in the /etc/resolv.conf so that
-        #  names can still be resolved.
-        #
-        for line in open ('/etc/resolv.conf').readlines() :
-            m = re_resolv.match (line)
-            if m :
-                rfile.write ('-A OUTPUT -p udp -d %s --dport 53 -j ACCEPT' % m.group(1) + '\n')
-
-        #  Finally, anything else is rejected out of hand!
-        #
-        rfile.write ('-A OUTPUT -j REJECT' + '\n')
-        rfile.write ('COMMIT' + '\n')
-        rfile.close ()
-
-        if firewall :
-
-            p = subprocess.Popen \
-		(	'iptables-restore < %s' % rname,
-			shell	= True,
-			stdin	= open('/dev/null'),
-			stdout	= self.wfile,
-			stderr	= self.wfile
-		)
-            p.wait ()
-
-        os.remove   (rname)
+        firewallEnd   (rules)
+        firewallSetup (rules, self.wfile. self.wfile)
 
     def addPaths (self) :
 
@@ -366,9 +398,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 	for line in lsof.split('\n') :
 	    m = p.match (line)
             if m :
+                self.log_request('Ident', '(%s,%s) is pid %s' % (lport, rport, m.group(1)))
                 try    : self.connection.send (open('/tmp/ident.%s' % m.group(1)).read())
-                except : pass
-                break
+                except : self.log_request('Ident', '(%s,%s) send failed' % (lport, rport))
+                return
+        self.log_request('Ident', '(%s,%s) not found' % (lport, rport))
 
     def execute (self, path) :
 
@@ -428,11 +462,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         if self.traceback() == 'text' :
-            import TraceBack
-            return TraceBack.traceBack ('text', code, context = 10)
+            import backtrace
+            return backtrace.backtrace ('text', code, context = 10)
         if self.traceback() == 'html' :
-            import TraceBack
-            return TraceBack.traceBack ('html', code, context = 10)
+            import backtrace
+            return backtrace.backtrace ('html', code, context = 10)
 
         import traceback
         tb = [ \
@@ -455,10 +489,24 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    : runID      = self.headers['x-runid'     ]
         except : runID      = ''
 
-        import SWLogger
-        swl = SWLogger.SWLogger()
+        import swlogger
+        swl = swlogger.SWLogger(config)
         swl.connect ()
         swl.log     (scraperID, runID, 'C.START')
+
+        tap      = config.get (socket.gethostname(), 'tap')
+        httpport = config.get ('httpproxy', 'port')
+        ftpport  = config.get ('ftpproxy',  'port')
+
+#       os.environ['http_proxy' ] = 'http://%s:%s' % (tap, port)
+#       os.environ['https_proxy'] = 'http://%s:%s' % (tap, port)
+
+        import urllib2
+        import scraperwiki.utils
+        HTTPProxy   = urllib2.ProxyHandler ({'http':  'http://%s:%s' % (tap, httpport)})
+        HTTPSProxy  = urllib2.ProxyHandler ({'https': 'http://%s:%s' % (tap, httpport)})
+        FTPProxy    = urllib2.ProxyHandler ({'ftp':   'ftp://%s:%s'  % (tap, ftpport )})
+        scraperwiki.utils.setupHandlers (HTTPProxy, HTTPSProxy, FTPProxy)
 
         idents = []
         if scraperID is not None : idents.append ('scraperid=%s' % scraperID)
@@ -476,6 +524,13 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    : open ('/tmp/scraper.%d' % os.getpid(), 'w').write(code)
         except : pass
 
+        #  Pass the configuration to the datastore. At this stage no connection
+        #  is made; a connection will be made on demand if the scraper tries
+        #  to save anything.
+        #
+        from   scraperwiki import datastore
+        datastore.DataStore (config)
+
         #  Stdout and stderr are replaced by TaggedStream objects which
         #  tags output with <scraperwiki:message type="console">. By
         #  experiment this works with print as well as sys.stdout.write().
@@ -483,6 +538,9 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         sys.stdout = TaggedStream (self.wfile)
         sys.stderr = TaggedStream (self.wfile)
 
+        #  Set up a CPU time limit handler which simply throws a python
+        #  exception.
+        #
         def sigXCPU (signum, frame) :
             raise Exception ("CPUTimeExceeded")
 
@@ -490,23 +548,33 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         try :
             import imp
-            times1 = os.times()
-            mod    = imp.new_module ('scraper')
+            ostimes1   = os.times ()
+            cltime1    = time.time()
+            mod        = imp.new_module ('scraper')
             exec code in mod.__dict__
+            ostimes2   = os.times ()
+            cltime2    = time.time()
+            try    :
+                sys.stdout.write \
+			(	'%d seconds elapsed, used %d CPU seconds' % 
+				(	int(cltime2 - cltime1),
+					int(ostimes2[0] - ostimes1[0])
+			)	)
+            except :
+                pass
             etext, trace, infile, atline = None, None, None, None
             sys.stdout.flush()
             sys.stderr.flush()
             sys.stdout = self.wfile
             sys.stderr = self.wfile
-            times2 = os.times()
-            swl.log     (scraperID, runID, 'C.END',   arg1 = times2[0] - times1[0], arg2 = times2[1] - times1[1])
+            swl.log     (scraperID, runID, 'C.END',   arg1 = ostimes2[0] - ostimes1[0], arg2 = ostimes2[1] - ostimes1[1])
         except Exception, e :
-            import ErrorMapper
+            import errormapper
             sys.stdout.flush()
             sys.stderr.flush()
             sys.stdout = self.wfile
             sys.stderr = self.wfile
-            emsg = ErrorMapper.mapException (e)
+            emsg = errormapper.mapException (e)
             etext, trace, infile, atline = self.getTraceback (code)
             sys.stdout.write \
 		(   '<scraperwiki:message type="exception">%s\n' % \
@@ -520,10 +588,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             sys.stdout.flush ()
             swl.log     (scraperID, runID, 'C.ERROR', arg1 = etext, arg2 = trace)
 
-        try    : os.remove ('/tmp/scraper.%d' % os.getpid())
-        except : pass
-        try    : os.remove ('/tmp/ident.%d'   % os.getpid())
-        except : pass
+#        try    : os.remove ('/tmp/scraper.%d' % os.getpid())
+#        except : pass
+#        try    : os.remove ('/tmp/ident.%d'   % os.getpid())
+#        except : pass
 
 class ScraperController (BaseController) :
 
@@ -690,6 +758,17 @@ def execute (port) :
     httpd.serve_forever()
 
 
+def autoFirewall () :
+
+    """
+    Setup firewall when the firewall=auto option is selected.
+    """
+
+    rules = []
+    firewallBegin (rules)
+    firewallEnd   (rules)
+    firewallSetup (rules, sys.stdout, sys.stderr)
+
 def sigTerm (signum, frame) :
 
     """
@@ -713,6 +792,7 @@ if __name__ == '__main__' :
 
     subproc = False
     daemon  = False
+    confnam = 'uml.cfg'
 
     for arg in sys.argv[1:] :
 
@@ -720,16 +800,24 @@ if __name__ == '__main__' :
             print "usage: " + sys.argv[0] + USAGE
             sys.exit (1)
 
-        if arg[: 7] == '--port='    :
-            port = int(arg[7:])
-            continue
-
         if arg[: 9] == '--varDir='  :
             varDir  = arg[ 9:]
             continue
 
+        if arg[ :9] == '--config='  :
+            confnam = arg[ 9:]
+            continue
+
+        if arg[ :7] == '--name='  :
+            name    = arg[ 7:]
+            continue
+
         if arg[:10] == '--addPath=' :
             sys.path.append (arg[10:])
+            continue
+
+        if arg[:11] == '--firewall=' :
+            firewall = arg[11:]
             continue
 
         if arg == '--subproc' :
@@ -740,9 +828,6 @@ if __name__ == '__main__' :
             daemon = True
             continue
 
-        if arg == '--nofirewall' :
-            firewall = False
-            continue
 
         print "usage: " + sys.argv[0] + USAGE
         sys.exit (1)
@@ -792,4 +877,12 @@ if __name__ == '__main__' :
     
             os.wait()
 
-    execute (port)
+    config = ConfigParser.ConfigParser()
+    config.readfp (open(confnam))
+
+    if firewall == 'auto' :
+        autoFirewall ()
+
+    if name is None :
+        name = socket.gethostname()
+    execute (config.getint (name, 'port'))

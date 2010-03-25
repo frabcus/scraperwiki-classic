@@ -2,7 +2,7 @@
 #
 # rawuml
 #
-# Boot UML 0 without the copy-on-write file. This is used when configuring the
+# Boot UML uml001 without the copy-on-write file. This is used when configuring the
 # base jaunty.img image. Note that all copy-on-write files will be removed.
 #
 test $# = 0 ||
@@ -31,7 +31,7 @@ esac
 
 test -d uml001 ||
 {
-	echo	bootuml: uml 1 does not exist
+	echo	bootuml: uml uml001 does not exist
 	exit	1
 }
 

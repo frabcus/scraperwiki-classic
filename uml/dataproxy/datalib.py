@@ -4,12 +4,13 @@ import  types
 import  os
 import  string
 import  time
+import	types
 
 dbtype  = 'mysql'
 place   = '%s'
 db      = None
 
-def connection () :
+def connection (config) :
 
     """
     Get a database connection. Creates one if it does not already exists,
@@ -21,17 +22,23 @@ def connection () :
 
     if db is None :
 
-        config = ConfigParser.ConfigParser()
-        config.readfp (open (os.path.split (__file__)[0] + '/config.cfg.local'))
+        if type(config) == types.StringType :
+            conf = ConfigParser.ConfigParser()
+            conf.readfp (open(config))
+        else :
+            conf = config
+
+        dbtype = conf.get ('dataproxy', 'dbtype')
 
         if dbtype == 'mysql'   :
             try    :
                 import MySQLdb
                 db      = MySQLdb.connect \
-                        (    host       = config.get ('mysql', 'host'  ), 
-                             user       = config.get ('mysql', 'user'  ), 
-                             passwd     = config.get ('mysql', 'passwd'),
-                             db         = config.get ('mysql', 'db'    )
+                        (    host       = conf.get ('dataproxy', 'host'  ), 
+                             user       = conf.get ('dataproxy', 'user'  ), 
+                             passwd     = conf.get ('dataproxy', 'passwd'),
+                             db         = conf.get ('dataproxy', 'db'    ),
+                             charset	= 'utf8'
                         )
                 place   = '%s'
             except :
@@ -40,7 +47,7 @@ def connection () :
         if dbtype == 'sqlite3' :
             try :
                 from pysqlite2 import dbapi2 as sqlite
-                db      = sqlite.connect (config.get ('sqlite3', 'db'))
+                db      = sqlite.connect (conf.get ('dataproxy', 'db'))
                 place   = '?'
             except :
                 raise Exception("Unable to connect to datastore")
