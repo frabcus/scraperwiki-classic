@@ -207,25 +207,6 @@ def delete(matchrecord):
     return result
 
 
-def save (unique_keys, data, date = None, latlng = None, silent = False) :
-
-    ds = datastore.DataStore(None)
-    rc, arg = ds.save (unique_keys, data, date, latlng)
-    if not rc :
-        raise Exception (arg) 
-
-    pdata = {}
-    for key, value in data.items():
-        try    : key   = str(key)
-        except : key   = key  .encode('utf-8')
-        try    : value = str(value)
-        except : value = value.encode('utf-8')
-        pdata[cgi.escape(key)] = cgi.escape(value)
-
-    if not silent :
-        print '<scraperwiki:message type="data">%s' % json.dumps(pdata)
-    return arg
-
 def saveX(unique_keys, data, date=None, latlng=None):
     """
     Standard save function that UPserts (over-writes) a record that shares the same values for the unique_keys
@@ -297,3 +278,30 @@ def saveX(unique_keys, data, date=None, latlng=None):
     return "%d records deleted, 1 inserted" % nrecordsoverwritten
 
   
+def fetch (unique_keys) :
+
+    ds = datastore.DataStore(None)
+    rc, arg = ds.fetch (unique_keys) :
+    if not rc :
+        raise Exception (arg) 
+
+    return arg
+
+def save (unique_keys, data, date = None, latlng = None, silent = False) :
+
+    ds = datastore.DataStore(None)
+    rc, arg = ds.save (unique_keys, data, date, latlng)
+    if not rc :
+        raise Exception (arg) 
+
+    pdata = {}
+    for key, value in data.items():
+        try    : key   = str(key)
+        except : key   = key  .encode('utf-8')
+        try    : value = str(value)
+        except : value = value.encode('utf-8')
+        pdata[cgi.escape(key)] = cgi.escape(value)
+
+    if not silent :
+        print '<scraperwiki:message type="data">%s' % json.dumps(pdata)
+    return arg

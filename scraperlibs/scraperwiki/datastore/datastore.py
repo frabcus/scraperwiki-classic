@@ -43,11 +43,30 @@ class DataStoreClass :
 
         self.connect ()
         self.m_socket.send (json.dumps (req) + '\n')
-        rc = self.m_socket.recv (1024)
-        return json.loads (rc)
+
+        text = ''
+        while True :
+            data = self.m_socket.recv (1024)
+            if len(data) == 0 :
+                break
+            text += data
+            if text[-1] == '\n' :
+                break
+
+        return json.loads (text)
+
+    def fetch (self, unique_keys) :
+
+        if type(unique_keys) not in [ types.NoneType, types.DictType ] :
+            return [ False, 'unique_keys must be None, or a dictionary' ]
+
+        return self.request (('fetch', unique_keys))
 
     def save (self, unique_keys, scraper_data, date = None, latlng = None) :
 
+        if type(unique_keys) not in [ types.NoneType, types.ListType, types.TupleType ] :
+            return [ False, 'unique_keys must be None, or a list or tuple' ]
+ 
         if date   is not None :
             if type(date) not in [ datetime.datetime, datetime.date ] :
                 return [ False, 'date should be a python.datetime (not %s)' % type(date) ]
