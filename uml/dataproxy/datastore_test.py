@@ -19,10 +19,10 @@ def nullRequest (self, req) :
 
     return [ True, req]
 
-realConnect                         = datastore.DataStoreClass.connect
-realRequest                         = datastore.DataStoreClass.request
-datastore.DataStoreClass.connect    = nullConnect
-datastore.DataStoreClass.request    = nullRequest
+realConnect                               = datastore.datastore.DataStoreClass.connect
+realRequest                               = datastore.datastore.DataStoreClass.request
+datastore.datastore.DataStoreClass.connect    = nullConnect
+datastore.datastore.DataStoreClass.request    = nullRequest
 
 class TestOf_datastore (unittest.TestCase) :
 

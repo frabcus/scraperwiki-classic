@@ -278,15 +278,6 @@ def saveX(unique_keys, data, date=None, latlng=None):
     return "%d records deleted, 1 inserted" % nrecordsoverwritten
 
   
-def fetch (unique_keys) :
-
-    ds = datastore.DataStore(None)
-    rc, arg = ds.fetch (unique_keys) :
-    if not rc :
-        raise Exception (arg) 
-
-    return arg
-
 def save (unique_keys, data, date = None, latlng = None, silent = False) :
 
     ds = datastore.DataStore(None)

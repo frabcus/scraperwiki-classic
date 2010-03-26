@@ -4,7 +4,7 @@ import  types
 import  os
 import  string
 import  time
-import	types
+import  types
 
 dbtype  = 'mysql'
 place   = '%s'
@@ -38,7 +38,7 @@ def connection (config) :
                              user       = conf.get ('dataproxy', 'user'  ), 
                              passwd     = conf.get ('dataproxy', 'passwd'),
                              db         = conf.get ('dataproxy', 'db'    ),
-                             charset	= 'utf8'
+                             charset    = 'utf8'
                         )
                 place   = '%s'
             except :
@@ -119,7 +119,7 @@ def nextItemID () :
         cursor = execute ('UPDATE `sequences` SET `id` = LAST_INSERT_ID(`id`+1)')
         return cursor.lastrowid
     if dbtype == 'sqlite3' :
-        cursor = execute ('UPDATE `sequences` SET `id` = `id`')
+        cursor = execute ('UPDATE `sequences` SET `id` = `id` + 1')
         return execute('SELECT `id` FROM `sequences`').fetchone()[0]
     raise Exception("Unrecognised datastore type '%s'" % dbtype)
 
@@ -134,18 +134,27 @@ def fetch (scraperID, unique_keys) :
     if type(unique_keys) not in [ types.NoneType, types.DictType ] :
         return [ False, 'unique_keys must be None, or a dictionary' ]
 
-    uhash   = uniqueHash (unique_keys.keys(), unique_keys)
-    cursor1 = execute \
-		(	'SELECT `item_id`, `date`, `latlng`, `date_scraped` FROM items WHERE scraper_id = %s AND unique_hash = %s',
-			(scraperID, uhash)
-		)
+    if scraperID in [ None, '' ] :
+        return [ False, 'cannot fetch data without a scraper ID' ]
+
+    if unique_keys is not None and len(unique_keys) > 0 :
+        uhash   = uniqueHash (unique_keys.keys(), unique_keys)
+        cursor1 = execute \
+            (   'SELECT `item_id`, `date`, `latlng`, `date_scraped` FROM items WHERE scraper_id = %s AND unique_hash = %s',
+                [ scraperID, uhash ]
+            )
+    else :
+        cursor1 = execute \
+            (   'SELECT `item_id`, `date`, `latlng`, `date_scraped` FROM items WHERE scraper_id = %s',
+                [ scraperID ]
+            )
     res     = []
-    for row in cursor.fetchall() :
+    for row in cursor1.fetchall() :
         data   = {}
-        cursor2 = execute ('SELECT `key`, `value` FROM `kv` where `item_id` = %s', (row[0]))
+        cursor2 = execute ('SELECT `key`, `value` FROM `kv` where `item_id` = %s', [ row[0] ])
         for pair in cursor2.fetchall() :
             data[pair[0]] = pair[1]
-        res.append ([ [ row[1], row[2], row[3] ], data ])
+        res.append ({ 'date' : str(row[1]), 'latlng' : row[2], 'date_scraped' : str(row[3]), 'data' : data })
 
     return [ True, res ]
 
@@ -176,10 +185,10 @@ def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
     #
     insert_data = {}
     for key, value in scraped_data.items() :
-        if   value is None			: value = ""
-        elif value is True			: value = "1"
-        elif value is False			: value = "0"
-        elif type(value) != types.UnicodeType	: value = str(value)
+        if   value is None          : value = ""
+        elif value is True          : value = "1"
+        elif value is False         : value = "0"
+        elif type(value) != types.UnicodeType   : value = str(value)
         insert_data[fixKVKey(key)] = value
 
     #   This is the Julian/Francis code. Reverted back to Sym's because this

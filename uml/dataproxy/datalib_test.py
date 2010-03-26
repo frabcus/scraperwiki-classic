@@ -19,7 +19,7 @@ class TestOf_datalib (unittest.TestCase) :
         fd = open('db.sq3', 'w')
         fd.write(open('db_init.sq3', 'r').read())
         fd.close ()
-        assert datalib.connection() is not None
+        assert datalib.connection('config.test') is not None
 
     def tearDown (self) :
 
@@ -168,6 +168,55 @@ class TestOf_datalib (unittest.TestCase) :
         assert datalib.execute ('select value   from kv where key = %s', ('k_2',)).fetchone()[0] == 'K2'
         assert datalib.execute ('select value   from kv where key = %s', ('v_1',)).fetchone()[0] == 'V1'
         assert datalib.execute ('select item_id from kv where key = %s', ('k_1',)).fetchone()[0] == seq
+
+    def test_fetch1 (self) :
+
+        rc, arg = datalib.save ('__scraperid__', [ 'k 1', 'k 2' ], { 'k 1' : 'K1', 'k 2' : 'K2', 'v 1' : 'V1' })
+        assert rc
+        assert arg == 'Data record inserted'
+        rc, arg = datalib.fetch('__scraperid__', { 'k 1' : 'K1', 'k 2' : 'K2' })
+        assert rc
+        assert len(arg) == 1
+        assert arg[0]['date'  ] is None
+        assert arg[0]['latlng'] is None
+        assert arg[0]['data'  ][u'k_1'] == u'K1'
+        assert arg[0]['data'  ][u'k_2'] == u'K2'
+        assert arg[0]['data'  ][u'v_1'] == u'V1'
+
+    def test_fetch2 (self) :
+
+        rc, arg = datalib.save ('__scraperid__', [ 'k 1', 'k 2' ], { 'k 1' : 'K1', 'k 2' : 'K2', 'v 1' : 'V1' })
+        rc, arg = datalib.save ('__scraperid__', [ 'k 1', 'k 2' ], { 'k 1' : 'L1', 'k 2' : 'L2', 'v 1' : 'W1' })
+        assert rc
+        assert arg == 'Data record inserted'
+        rc, arg = datalib.fetch('__scraperid__', { 'k 1' : 'L1', 'k 2' : 'L2' })
+        assert rc
+        assert len(arg) == 1
+        assert arg[0]['date'  ] is None
+        assert arg[0]['latlng'] is None
+        assert arg[0]['data'  ][u'k_1'] == u'L1'
+        assert arg[0]['data'  ][u'k_2'] == u'L2'
+        assert arg[0]['data'  ][u'v_1'] == u'W1'
+
+    def test_fetch3 (self) :
+
+        rc, arg = datalib.save ('__scraperid__', [ 'k 1', 'k 2' ], { 'k 1' : 'K1', 'k 2' : 'K2', 'v 1' : 'V1' })
+        rc, arg = datalib.save ('__scraperid__', [ 'k 1', 'k 2' ], { 'k 1' : 'L1', 'k 2' : 'L2', 'v 1' : 'W1' })
+        assert rc
+        assert arg == 'Data record inserted'
+        rc, arg = datalib.fetch('__scraperid__', {})
+        assert rc
+        assert len(arg) == 2
+        assert arg[0]['date'  ] is None
+        assert arg[0]['latlng'] is None
+        assert arg[0]['data'  ][u'k_1'] == u'K1'
+        assert arg[0]['data'  ][u'k_2'] == u'K2'
+        assert arg[0]['data'  ][u'v_1'] == u'V1'
+        assert arg[1]['date'  ] is None
+        assert arg[1]['latlng'] is None
+        assert arg[1]['data'  ][u'k_1'] == u'L1'
+        assert arg[1]['data'  ][u'k_2'] == u'L2'
+        assert arg[1]['data'  ][u'v_1'] == u'W1'
 
 def testSuite () :
 
