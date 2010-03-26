@@ -1032,7 +1032,7 @@
             "source": "", 
             "featured": 0, 
             "line_count": 0, 
-            "run_interval": "-", 
+            "run_interval": 0, 
             "published": 1, 
             "first_published_at": "2010-02-19 07:08:53", 
             "guid": "0", 
