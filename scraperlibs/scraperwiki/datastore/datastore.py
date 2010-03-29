@@ -3,8 +3,8 @@ import  socket
 import  urllib
 import  datetime
 import  types
-import	socket
-import	ConfigParser
+import  socket
+import  ConfigParser
 
 try   : import json
 except: import simplejson as json
@@ -57,8 +57,8 @@ class DataStoreClass :
 
     def fetch (self, unique_keys) :
 
-        if type(unique_keys) not in [ types.NoneType, types.DictType ] :
-            return [ False, 'unique_keys must be None, or a dictionary' ]
+        if type(unique_keys) not in [ types.DictType ] or len(unique_keys) == 0 :
+            return [ False, 'unique_keys must a non-empty dictionary' ]
 
         return self.request (('fetch', unique_keys))
 

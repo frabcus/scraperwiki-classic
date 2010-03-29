@@ -131,23 +131,18 @@ def fetch (scraperID, unique_keys) :
 
     #  Sanity checks
     #
-    if type(unique_keys) not in [ types.NoneType, types.DictType ] :
-        return [ False, 'unique_keys must be None, or a dictionary' ]
+    if type(unique_keys) not in [ types.DictType ] or len(unique_keys) == 0 :
+        return [ False, 'unique_keys must be a non-empty dictionary' ]
 
     if scraperID in [ None, '' ] :
         return [ False, 'cannot fetch data without a scraper ID' ]
 
-    if unique_keys is not None and len(unique_keys) > 0 :
-        uhash   = uniqueHash (unique_keys.keys(), unique_keys)
-        cursor1 = execute \
-            (   'SELECT `item_id`, `date`, `latlng`, `date_scraped` FROM items WHERE scraper_id = %s AND unique_hash = %s',
-                [ scraperID, uhash ]
-            )
-    else :
-        cursor1 = execute \
-            (   'SELECT `item_id`, `date`, `latlng`, `date_scraped` FROM items WHERE scraper_id = %s',
-                [ scraperID ]
-            )
+    uhash   = uniqueHash (unique_keys.keys(), unique_keys)
+    cursor1 = execute \
+        (   'SELECT `item_id`, `date`, `latlng`, `date_scraped` FROM items WHERE scraper_id = %s AND unique_hash = %s',
+            [ scraperID, uhash ]
+        )
+
     res     = []
     for row in cursor1.fetchall() :
         data   = {}

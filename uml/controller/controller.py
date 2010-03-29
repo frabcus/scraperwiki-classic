@@ -34,9 +34,9 @@ global firewall
 
 USAGE      = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--firewall=option] [--config=file] [--name=name]"
 child      = None
-varDir	   = '/var'
-config	   = None
-name	   = None
+varDir     = '/var'
+config     = None
+name       = None
 firewall   = None
 re_resolv  = re.compile ('nameserver\s+([0-9.]+)')
 
@@ -89,11 +89,11 @@ def firewallSetup (rules, stdout, stderr) :
 
         p = subprocess.Popen \
                 (    'iptables-restore < %s' % rname,
-                     shell	= True,
-                     stdin	= open('/dev/null'),
-                     stdout	= stdout,
-                     stderr	= stderr
-		)
+                     shell  = True,
+                     stdin  = open('/dev/null'),
+                     stdout = stdout,
+                     stderr = stderr
+        )
         p.wait ()
 
     os.remove   (rname)
@@ -183,8 +183,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.m_cgi_headers  = None
         self.m_cgi_env      = None
         self.m_fs           = None
-        self.m_stdout	    = sys.stdout
-        self.m_stderr	    = sys.stderr
+        self.m_stdout       = sys.stdout
+        self.m_stderr       = sys.stderr
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
@@ -193,10 +193,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Override this method so that we can flush stderr
 
-        @type	format	: String
-        @param	format	: Format string
-        @type	args	: List
-        @param	args	: Arguments to format string
+        @type   format  : String
+        @param  format  : Format string
+        @type   args    : List
+        @param  args    : Arguments to format string
         """
 
         BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
@@ -300,7 +300,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Set resource limits. Scans headers for headers starting 'x-setrlimit'.
         The header should contain three comma-separated numbers, which are
-	respectively the limit code, the soft limit and the hard limit.
+    respectively the limit code, the soft limit and the hard limit.
         """
 
         for name, value in self.headers.items() :
@@ -360,8 +360,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Get the traceback mode, defaults to I{text}
 
-        @rtype		: String
-        @return		: Traceback mode
+        @rtype      : String
+        @return     : Traceback mode
         """
 
         for name, value in self.headers.items() :
@@ -375,8 +375,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         Send ident information, specifically the scraper and run identifiers for a
         specified connection to the proxy.
 
-        @type	query	: String
-        @param	query	: (remote:local) ports from the proxy's viewpoint
+        @type   query   : String
+        @param  query   : (remote:local) ports from the proxy's viewpoint
         """
 
         self.connection.send  ('HTTP/1.0 200 OK\n')
@@ -392,11 +392,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         #  process number; this is used to open the /tmp/ident.PID file which contains
         #  the scraper and run identifiers.
         #
-	(lport, rport) = string.split (query, ':')
-	p = re.compile ('python *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
+        (lport, rport) = string.split (query, ':')
+        p    = re.compile ('python *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
         lsof = subprocess.Popen([ 'lsof', '-n', '-P' ], stdout = subprocess.PIPE).communicate()[0]
-	for line in lsof.split('\n') :
-	    m = p.match (line)
+        for line in lsof.split('\n') :
+            m = p.match (line)
             if m :
                 self.log_request('Ident', '(%s,%s) is pid %s' % (lport, rport, m.group(1)))
                 try    : self.connection.send (open('/tmp/ident.%s' % m.group(1)).read())
@@ -556,10 +556,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             cltime2    = time.time()
             try    :
                 sys.stdout.write \
-			(	'%d seconds elapsed, used %d CPU seconds' % 
-				(	int(cltime2 - cltime1),
-					int(ostimes2[0] - ostimes1[0])
-			)	)
+            (   '%d seconds elapsed, used %d CPU seconds' % 
+                (   int(cltime2 - cltime1),
+                    int(ostimes2[0] - ostimes1[0])
+            )   )
             except :
                 pass
             etext, trace, infile, atline = None, None, None, None
@@ -577,13 +577,13 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             emsg = errormapper.mapException (e)
             etext, trace, infile, atline = self.getTraceback (code)
             sys.stdout.write \
-		(   '<scraperwiki:message type="exception">%s\n' % \
+        (   '<scraperwiki:message type="exception">%s\n' % \
                     json.dumps \
-                    (	{	'content'	: emsg,
-                          	'content_long'	: trace,
-			  	'filename'	: infile,
-			  	'lineno'	: atline
-			}
+                    (   {   'content'   : emsg,
+                            'content_long'  : trace,
+                'filename'  : infile,
+                'lineno'    : atline
+            }
                 )   )
             sys.stdout.flush ()
             swl.log     (scraperID, runID, 'C.ERROR', arg1 = etext, arg2 = trace)
@@ -617,13 +617,13 @@ class ScraperController (BaseController) :
         self.setRunID       ()
 
         p = subprocess.Popen \
-		(	command,
-			shell	= True,
-			stdin	= open('/dev/null'),
-			stdout	= self.wfile,
-			stderr	= self.wfile
-		)
-	p.wait ()
+        (   command,
+            shell   = True,
+            stdin   = open('/dev/null'),
+            stdout  = self.wfile,
+            stderr  = self.wfile
+        )
+        p.wait ()
 
     def fnExecute (self, path) :
 
