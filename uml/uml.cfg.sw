@@ -15,9 +15,9 @@ port	= 9004
 dbtype	= mysql
 host	= 89.16.177.176
 port	= 9003
-user	= user
-passwd	= passwd
-db	= datastore
+user	= datastore
+passwd	= 3jFjLrje6dFJ7cQE
+db	= datastore_live
 
 [swlogger]
 host    = 89.16.177.176
