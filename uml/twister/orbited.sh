@@ -33,7 +33,7 @@ execute(){
 
     cd /var/www/scraperwiki/uml
     . /var/www/scraperwiki/bin/activate
-    exec orbited --config ./Server/scripts/orbited.cfg
+    exec orbited --config ./twister/orbited.cfg
 }
 
 #  process

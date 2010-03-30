@@ -5,32 +5,34 @@ __doc__ = """ScraperWiki HTTP Proxy"""
 
 __version__ = "ScraperWiki_0.0.1"
 
-import BaseHTTPServer
-import SocketServer
-import select
-import socket
-import urlparse
-import signal
-import os
-import sys
-import time
-import threading
-import string 
-import urllib
-import ConfigParser
+import  BaseHTTPServer
+import  SocketServer
+import  select
+import  socket
+import  urlparse
+import  signal
+import  os
+import  sys
+import  time
+import  threading
+import  string 
+import  urllib
+import  ConfigParser
+import  hashlib
 
 global config
 
-USAGE      = " [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file]"
-child      = None
-config	   = None
-varDir	   = '/var'
-uid	   = None
-gid	   = None
-allowAll   = False
-statusLock = None
-statusInfo = {}
-blockmsg   = """Scraperwiki has blocked you from accessing "%s" because it is not allowed according to the rules"""
+USAGE       = " [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file] [--cacheDir=dir]"
+child       = None
+config      = None
+varDir      = '/var'
+cacheDir    = None
+uid         = None
+gid         = None
+allowAll    = False
+statusLock  = None
+statusInfo  = {}
+blockmsg    = """Scraperwiki has blocked you from accessing "%s" because it is not allowed according to the rules"""
 
 class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
@@ -70,10 +72,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Override this method so that we can flush stderr
 
-        @type	format	: String
-        @param	format	: Format string
-        @type	args	: List
-        @param	args	: Arguments to format string
+        @type   format  : String
+        @param  format  : Format string
+        @type   args    : List
+        @param  args    : Arguments to format string
         """
 
         BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
@@ -116,8 +118,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         @type   netloc  : String
         @param  netloc  : Hostname or hostname:port
-        @type   soc	: Socket
-        @param	soc	: Socket on which to connect
+        @type   soc : Socket
+        @param  soc : Socket on which to connect
         @return         : True if connected
         """
 
@@ -215,17 +217,17 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                                  " 200 Connection established\r\n")
                 self.wfile.write("Proxy-agent: %s\r\n" % self.version_string())
                 self.wfile.write("\r\n")
-                self._read_write(soc)
+                self._read_write(soc, None)
         finally:
             soc.close()
             self.connection.close()
 
         self.swlog().log (scraperID, runID, 'P.DONE', arg1 = self.path)
 
-    def do_GET (self) :
+    def retrieve (self, method) :
 
         """
-        Handle GET request.
+        Handle GET and POST requests.
         """
 
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
@@ -238,7 +240,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
 
         scraperID, runID = self.ident ()
-
         self.swlog().log (scraperID, runID, 'P.GET', arg1 = self.path)
 
         if path == '' or path is None :
@@ -259,31 +260,55 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             except : pass
             statusLock.release ()
 
-        startat = time.strftime ('%Y-%m-%d %H:%M:%S')
-        soc     = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        cpath = None
+        cfile = None
+        used  = None
 
-        try :
-            if self._connect_to (netloc, soc) :
-                self.log_request()
-                soc.send \
-                    (   "%s %s %s\r\n" %
-                        (   self.command,
-                            urlparse.urlunparse (('', '', path, params, query, '')),
-                            self.request_version
-                    )   )
-                self.headers['Connection'] = 'close'
-                for key, value in self.headers.items() :
-                    if key == 'Proxy-Connection' :
-                        continue
-                    if key == 'x-scraperid' :
-                        continue
-                    if key == 'x-runid'     :
-                        continue
-                    soc.send ("%s: %s\r\n" % (key, value))
-                soc.send ("\r\n")
-                self._read_write(soc)
+        if 'x-cache' in self.headers and self.headers['x-cache'] == 'on' :
+            if method == "GET" and cacheDir is not None :
+                mangled = hashlib.md5(self.path).hexdigest()
+                mbits   = [ mangled[0:2], mangled[2:4], mangled[4:] ]
+                cdir    = '%s/%s/%s' % (cacheDir, mbits[0], mbits[1])
+                if not os.path.exists (cdir) :
+                    try    : os.makedirs (cdir)
+                    except : pass
+                cpath   = '%s/%s/%s/%s' % (cacheDir, mbits[0], mbits[1], mbits[2])
+
+        try    :
+            cfile = open (cpath, 'r')
+            self.connection.send(cfile.read())
+            used = 'CACHED'
+        except :
+            startat = time.strftime ('%Y-%m-%d %H:%M:%S')
+            soc     = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            if cpath : cfile = open (cpath, 'w')
+
+            try :
+                if self._connect_to (netloc, soc) :
+                    self.log_request()
+                    soc.send \
+                        (   "%s %s %s\r\n" %
+                            (   self.command,
+                                urlparse.urlunparse (('', '', path, params, query, '')),
+                                self.request_version
+                        )   )
+                    self.headers['Connection'] = 'close'
+                    for key, value in self.headers.items() :
+                        if key == 'Proxy-Connection' :
+                            continue
+                        if key == 'x-scraperid' :
+                            continue
+                        if key == 'x-runid'     :
+                            continue
+                        if key == 'x-cache'     :
+                            continue
+                        soc.send ("%s: %s\r\n" % (key, value))
+                    soc.send ("\r\n")
+                    self._read_write(soc, cfile)
+            finally :
+                soc  .close()
+                if cfile : cfile.close()
         finally :
-            soc            .close()
             self.connection.close()
 
         if runID is not None :
@@ -292,9 +317,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             except : pass
             statusLock.release ()
 
-        self.swlog().log (scraperID, runID, 'P.DONE', arg1 = self.path)
+        self.swlog().log (scraperID, runID, 'P.DONE', arg1 = self.path, arg2 = used)
 
-    def _read_write (self, soc, idle = 0x7ffffff) :
+    def _read_write (self, soc, cfile, idle = 0x7ffffff) :
 
         """
         Copy data backl and forth between the client and the server.
@@ -302,7 +327,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         @type   soc     : Socket
         @param  soc     : Socket to server
         @type   idle    : Integer
-        @param  idel	: Maximum idling time between data
+        @param  idel    : Maximum idling time between data
         """
 
         iw    = [self.connection, soc]
@@ -324,16 +349,25 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     if data :
                         out.send(data)
                         count = 0
+                        if i is soc and cfile is not None :
+                            cfile.write (data)
                     else :
                         busy = False
                         break
             if count >= idle : 
                 break
 
-    do_HEAD   = do_GET
-    do_POST   = do_GET
-    do_PUT    = do_GET
-    do_DELETE = do_GET
+    def do_GET (self) :
+
+        self.retrieve ("GET" )
+
+    def do_POST (self) :
+
+        self.retrieve ("POST")
+
+#   do_HEAD   = do_GET
+#   do_PUT    = do_GET
+#   do_DELETE = do_GET
 
 
 class HTTPProxyServer \
@@ -375,20 +409,24 @@ if __name__ == '__main__' :
             print "usage: " + sys.argv[0] + USAGE
             sys.exit (1)
 
-        if arg[: 6] == '--uid='	:
+        if arg[: 6] == '--uid=' :
             uid      = arg[ 6:]
             continue
 
-        if arg[: 6] == '--gid='	:
+        if arg[: 6] == '--gid=' :
             gid      = arg[ 6:]
             continue
 
         if arg[ :9] == '--varDir='  :
-            varDir  = arg[ 9:]
+            varDir   = arg[ 9:]
+            continue
+
+        if arg[:11] == '--cacheDir='  :
+            cacheDir = arg[11:]
             continue
 
         if arg[ :9] == '--config='  :
-            confnam = arg[ 9:]
+            confnam  = arg[ 9:]
             continue
 
         if arg == '--allowAll' :
@@ -396,11 +434,11 @@ if __name__ == '__main__' :
             continue
 
         if arg == '--subproc' :
-            subproc = True
+            subproc  = True
             continue
 
         if arg == '--daemon' :
-            daemon = True
+            daemon   = True
             continue
 
         print "usage: " + sys.argv[0] + USAGE

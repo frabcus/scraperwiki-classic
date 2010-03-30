@@ -71,7 +71,6 @@ def execute (code, guid = None) :
     
     fs.setTestName     ('Runner')
     fs.setScraperID    (guid)
-    
     fs = runner_config.config(fs)
     
     res = fs.execute (string.replace (code, '\r', ''), True)

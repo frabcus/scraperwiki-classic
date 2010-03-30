@@ -29,7 +29,7 @@ class Command(BaseCommand):
     def run_scraper(self, scraper, options):
         guid = scraper.guid
         code = scraper.committed_code()
-        runner_path = "%s/Runner.py" % settings.FIREBOX_PATH
+        runner_path = "%s/runner.py" % settings.FIREBOX_PATH
         failed = False
         
         start = time.time()

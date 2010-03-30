@@ -33,6 +33,7 @@ def log(message=""):
 #
 cj           = None
 urllibopener = None
+canCache     = False
 
 #  The "setupHandlers" function is called with zero or more handlers. An opener
 #  is constructed using these, plus a cookie processor, and is installed as the
@@ -47,16 +48,31 @@ def setupHandlers (*handlers) :
     urllibopener.addheaders = [('User-agent', 'ScraperWiki')]
     urllib2.install_opener (urllibopener)
 
-# should the exceptions be caught here?  
-# should the print statements  go to different streams?
+#  "allowCache" is called to allow (or disallow) caching; this will typically be
+#  set True for running from the editor, and False when the scraped is cron'd
+#
+def allowCache (enable) :
 
+    global canCache
+    canCache = enable
+
+#  API call from the scraper to enable caching, provided that it is allowed as in
+#  the previous method.
+#
+def cache (enable = True) :
+
+    if cj is None :
+        setupHandlers ()
+    urllibopener.addheaders = [('x-cache', (enable and canCache) and "on" or "off")]
+
+#  Scrape a URL optionally with parameters. This is effectively a wrapper around
+#  urllib2.orlopen().
+#
 def scrape (url, params = None) :
 
-    '''get html text given url and parameter map'''
-
     #  Normally the "setupHandlers" function would have been called from
-    #  the controller to specify http, https and ftp proxies, however
-    #  check in case not and call without any handlers.
+    #  the controller to specify http, https and ftp proxies, however check
+    #  in case not and call without any handlers.
     #
     global cj
     global urllibopener

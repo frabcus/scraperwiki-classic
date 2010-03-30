@@ -19,7 +19,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Orbited"
 NAME=orbited
 DAEMON=/bin/sh
-DAEMON_ARGS="/var/www/scraperwiki/uml/Server/scripts/Orbited.sh -d -s -u $NOBODY -g $NOGROUP"
+DAEMON_ARGS="/var/www/scraperwiki/uml/twister/orbited.sh -d -s -u $NOBODY -g $NOGROUP"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 

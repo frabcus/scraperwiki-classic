@@ -10,7 +10,6 @@ client.  This can be anything
 
 """
 
-
 import sys
 import os
 import signal
@@ -112,7 +111,7 @@ class RunnerProtocol(protocol.Protocol):
                     code = code.encode('utf8')
                     
                     guid = parsed_data['guid']
-                    args = ['/var/www/scraperwiki/uml/Server/scripts/Runner.py']
+                    args = ['./firestarter/runner.py']
                     args.append('-g %s' % guid)
                     
                     # args must be an ancoded string, not a unicode object
@@ -120,7 +119,7 @@ class RunnerProtocol(protocol.Protocol):
 
                     self.running = reactor.spawnProcess(
                         spawnRunner(self, code), \
-                        '/var/www/scraperwiki/uml/Server/scripts/Runner.py', args
+                        './firestarter/runner.py', args
                             )
 
                 else:
@@ -176,7 +175,7 @@ def sigTerm (signum, frame) :
 
     try    : os.kill (child, signal.SIGTERM)
     except : pass
-    try    : os.remove (varDir + '/run/twisted.pid')
+    try    : os.remove (varDir + '/run/twister.pid')
     except : pass
     sys.exit (1)
 
@@ -216,7 +215,7 @@ if __name__ == "__main__":
         if os.fork() == 0 :
             os .setsid()
             sys.stdin  = open ('/dev/null')
-            sys.stdout = open (options.varDir + '/log/twisted', 'w', 0)
+            sys.stdout = open (options.varDir + '/log/twister', 'w', 0)
             sys.stderr = sys.stdout
             if os.fork() == 0 :
                 ppid = os.getppid()
@@ -229,7 +228,7 @@ if __name__ == "__main__":
             os.wait()
             sys.exit (1)
 
-        pf = open (options.varDir + '/run/twisted.pid', 'w')
+        pf = open (options.varDir + '/run/twister.pid', 'w')
         pf.write  ('%d\n' % os.getpid())
         pf.close  ()
 

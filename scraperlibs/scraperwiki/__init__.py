@@ -1,6 +1,6 @@
 
 # main scraping function 
-from utils import log, scrape, parse_html, pdftoxml
+from utils import log, scrape, cache, parse_html, pdftoxml
 
 # sub-libraries
 import geo

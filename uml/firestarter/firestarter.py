@@ -1,11 +1,11 @@
-import	sys
-import	resource
-import	string
-import	time
-import	inspect
-import	os
-import	sha
-import	ConfigParser
+import  sys
+import  resource
+import  string
+import  time
+import  inspect
+import  os
+import  sha
+import  ConfigParser
 
 class FireWrapper :
 
@@ -19,8 +19,8 @@ class FireWrapper :
         """
         Class constructor
 
-        @type	resp	: Python HTTP response object
-        @param	resp	: Python HTTP response object
+        @type   resp    : Python HTTP response object
+        @param  resp    : Python HTTP response object
         """
 
         ###
@@ -42,11 +42,11 @@ class FireWrapper :
         Bug: If the read limit is set and the exception marker text is
         split, then the exception will be lost.
 
-        @type	n	: Integer
-        @param	n	: Read limit or None for unlimited
+        @type   n   : Integer
+        @param  n   : Read limit or None for unlimited
         """
 
-        data	= self.m_resp.read (n)
+        data    = self.m_resp.read (n)
         return data
 
     def readline (self) :
@@ -56,8 +56,8 @@ class FireWrapper :
         an empty at the end of the file. May thrown an exception if one is
         passed back from the controller.
 
-        @rtype		: String
-        @return		: Line of data or empty and end of file
+        @rtype      : String
+        @return     : Line of data or empty and end of file
         """
 
         ###
@@ -105,24 +105,25 @@ class FireStarter :
         self.m_environment = {}
         self.m_user        = None
         self.m_group       = None
-        self.m_limits	   = {}
-        self.m_allowed	   = []
-        self.m_blocked	   = []
-        self.m_iptables	   = []
-        self.m_paths	   = []
-        self.m_testName	   = None
-        self.m_runID	   = None
+        self.m_limits      = {}
+        self.m_allowed     = []
+        self.m_blocked     = []
+        self.m_iptables    = []
+        self.m_paths       = []
+        self.m_testName    = None
+        self.m_runID       = None
         self.m_scraperID   = None
         self.m_traceback   = None
-        self.m_error	   = None
+        self.m_error       = None
+        self.m_cache       = False
 
         s = sha.new()
         s.update(str(os.urandom(16)))
         s.update(str(os.getpid (  )))
         s.update(str(time.time (  )))
-        self.m_runID	   = '%.6f_%s' % (time.time(), s.hexdigest())
+        self.m_runID       = '%.6f_%s' % (time.time(), s.hexdigest())
 
-        self.setDispatcher	('%s:%d' % (conf.get('dispatcher', 'host'), conf.getint('dispatcher', 'port')))
+        self.setDispatcher  ('%s:%d' % (conf.get('dispatcher', 'host'), conf.getint('dispatcher', 'port')))
 
         import swlogger
         self.m_swlog = swlogger.SWLogger(config)
@@ -138,8 +139,8 @@ class FireStarter :
         """
         Return error string
 
-        @rtype		: String
-        @return		: Error string or None if no error
+        @rtype      : String
+        @return     : Error string or None if no error
         """
 
         return self.m_error
@@ -149,8 +150,8 @@ class FireStarter :
         """
         Set the dispatcher address as I{host:port}.
 
-        @type	dispatcher	: String
-        @param	dispatcher	: Dispatcher address as I{host:port}
+        @type   dispatcher  : String
+        @param  dispatcher  : Dispatcher address as I{host:port}
         """
 
         self.m_dispatcher = dispatcher
@@ -162,8 +163,8 @@ class FireStarter :
         determin what sort of action to run. See the L{command} and
         L{execute} methods.
 
-        @type	path	: String
-        @param	path	: URL path, used by controller to determin action
+        @type   path    : String
+        @param  path    : URL path, used by controller to determin action
         """
 
         self.m_path = path
@@ -174,10 +175,10 @@ class FireStarter :
         Set a parameter to be passed through (as a CGI encoded parameter)
         to the UML controller.
 
-        @type	name	: String
-        @param	name	: Parameter name
-        @type	value	: String
-        @param	value	: Parameter value
+        @type   name    : String
+        @param  name    : Parameter name
+        @type   value   : String
+        @param  value   : Parameter value
         """
 
         self.m_parameters[name] = value
@@ -187,8 +188,8 @@ class FireStarter :
         """
         Set multiple parameters passed as one or more keyed arguments.
 
-        @type	params	: Dictionary
-        @param	params	: Dictionary of name,value pairs
+        @type   params  : Dictionary
+        @param  params  : Dictionary of name,value pairs
         """
 
         for name, value in params.items() :
@@ -200,10 +201,10 @@ class FireStarter :
         Set an environment setting to be passed through
         to the UML controller.
 
-        @type	name	: String
-        @param	name	: Environment name
-        @type	value	: String
-        @param	value	: Environment value
+        @type   name    : String
+        @param  name    : Environment name
+        @type   value   : String
+        @param  value   : Environment value
         """
 
         self.m_environment[name] = value
@@ -213,8 +214,8 @@ class FireStarter :
         """
         Set the scraper identifier
 
-        @type	scraperID : String
-	@param	scraperID : Scraper identifier
+        @type   scraperID : String
+        @param  scraperID : Scraper identifier
         """
 
         self.m_scraperID = scraperID
@@ -224,8 +225,8 @@ class FireStarter :
         """
         Set user that command or script will execute as
 
-        @type	user	: String
-        @param	user	: User name
+        @type   user    : String
+        @param  user    : User name
         """
 
         self.m_user = user
@@ -235,8 +236,8 @@ class FireStarter :
         """
         Set group that command or script will execute as
 
-        @type	user	: String
-        @param	user	: Group name
+        @type   user    : String
+        @param  user    : Group name
         """
 
         self.m_group = group
@@ -248,12 +249,12 @@ class FireStarter :
         resources to be controlled are defined in the I{resource}
         module, for instance I{resource.RLIMIT_CPU}
 
-        @type	resource	: Integer
-	@param	resource	: Resource to be controlled
-        @type	soft		: Integer
-        @param	soft		: Soft limit
-        @type	hard		: Integer
-        @param	hard		: Hard limit, defaults to soft limit
+        @type   resource    : Integer
+        @param  resource    : Resource to be controlled
+        @type   soft        : Integer
+        @param  soft        : Soft limit
+        @type   hard        : Integer
+        @param  hard        : Hard limit, defaults to soft limit
         """
 
         if hard is None : hard = soft
@@ -266,12 +267,23 @@ class FireStarter :
         as keyed arguments, in the form resource = [ soft, hard ] (or
         resource = [ soft ] to default the hard limit).
 
-        @type	limits	: Dictionary
-        @param	limits	: Dictionary of resource limits, keyed on resource
+        @type   limits  : Dictionary
+        @param  limits  : Dictionary of resource limits, keyed on resource
         """
 
         for resource, limit in limits :
             self.setLimit (resource, *limit)
+
+    def setCache (self, cache) :
+
+        """
+        Set whether to allow URL caching or not
+
+        @type   cache   : Bool
+        @param  cache   : True to allow caching
+        """
+
+        self.m_cache = cache
 
     def addAllowedSites (self, *sites) :
 
@@ -281,8 +293,8 @@ class FireStarter :
         for instance I{.*\.org\.uk} will allow all .org.uk sites.
         Multiple sites can be added as multiple arguments.
 
-        @type	sites	: List
-        @param	sites	: List of regular expressions matching sites
+        @type   sites   : List
+        @param  sites   : List of regular expressions matching sites
         """
 
         for site in sites :
@@ -296,8 +308,8 @@ class FireStarter :
         for instance I{.*\.org\.uk} will block all .org.uk sites.
         Multiple sites can be added as multiple arguments.
 
-        @type	sites	: List
-        @param	sites	: List of regular expressions matching sites
+        @type   sites   : List
+        @param  sites   : List of regular expressions matching sites
         """
 
         for site in sites :
@@ -310,8 +322,8 @@ class FireStarter :
         or script runs. The rules are arguments to the I{iptables}
         command. Multiple rules can be added as multiple arguments.
 
-        @type	rules	: List
-        @param	rules	: List of iptables firewall rules
+        @type   rules   : List
+        @param  rules   : List of iptables firewall rules
         """
 
         for rule in rules :
@@ -333,10 +345,10 @@ class FireStarter :
         Set the active set limit for the executed command or script. This
         method is a shortcut to the L{setLimit} method.
 
-        @type	soft	: Integer
-        @param	soft	: Active set limit in bytes
-        @type	hard	: Integer
-        @param	hard	: Active set limit in bytes, defaults to soft limit
+        @type   soft    : Integer
+        @param  soft    : Active set limit in bytes
+        @type   hard    : Integer
+        @param  hard    : Active set limit in bytes, defaults to soft limit
         """
 
         self.setLimit (resource.RLIMIT_AS, soft, hard)
@@ -347,10 +359,10 @@ class FireStarter :
         Set the CPU limit for the executed command or script. This
         method is a shortcut to the L{setLimit} method.
 
-        @type	soft	: Integer
-        @param	soft	: Soft CPU limit in seconds
-        @type	hard	: Integer
-        @param	hard	: Hard CPU limit in seconds, defaults to soft limit
+        @type   soft    : Integer
+        @param  soft    : Soft CPU limit in seconds
+        @type   hard    : Integer
+        @param  hard    : Hard CPU limit in seconds, defaults to soft limit
         """
 
         self.setLimit (resource.RLIMIT_CPU, soft, hard)
@@ -364,8 +376,8 @@ class FireStarter :
           - I{text} for a text traceback
           - otherwise a minimal text traceback is generated
 
-        @type	traceback : String
-        @param	traceback : Traceback mode
+        @type   traceback : String
+        @param  traceback : Traceback mode
         """
 
         self.m_traceback = traceback
@@ -376,8 +388,8 @@ class FireStarter :
         Set a test name. This is mainly useful for tests, will be passed
         through in headers and can be logged elsewhere.
 
-        @type	testName: String
-        @param	testName: Test name
+        @type   testName: String
+        @param  testName: Test name
         """
 
         self.m_testName = testName
@@ -388,8 +400,8 @@ class FireStarter :
         Set HTTP headers. This is factored out as a separate routine for
         ease of testing.
 
-        @type	setter	: Closure or function
-        @param	setter	: Callable to set header
+        @type   setter  : Closure or function
+        @param  setter  : Callable to set header
         """
 
         if self.m_user       is not None :
@@ -404,6 +416,8 @@ class FireStarter :
             setter ('x-testname',   self.m_testName )
         if self.m_runID      is not None :
             setter ('x-runid',      self.m_runID    )
+
+        setter ('x-cache', self.m_cache and "on" or "off")
 
         for resource, limit in self.m_limits.items() :
             setter ('x-setrlimit-%d' % resource, '%s,%s' % (limit[0], limit[1]))
@@ -430,10 +444,10 @@ class FireStarter :
         Call the dispatcher to execute the command or script. This is an
         internal method would not normally be called directly.
 
-        @type	stream	: Bool
-        @param	stream	: Return object for streamed data
-        @rtype		: String
-        @return		: Output from command or script
+        @type   stream  : Bool
+        @param  stream  : Return object for streamed data
+        @rtype      : String
+        @return     : Output from command or script
         """
 
         import urllib
@@ -468,12 +482,12 @@ class FireStarter :
         Execute a specified command. The command is passed to the
         I{subprocess.Popen} function.
 
-        @type	command	: String
-        @param	command	: Command to execute
-        @type	stream	: Bool
-        @param	stream	: Return object for streamed data
-        @rtype		: String
-        @return		: Output from command
+        @type   command : String
+        @param  command : Command to execute
+        @type   stream  : Bool
+        @param  stream  : Return object for streamed data
+        @rtype      : String
+        @return     : Output from command
         """
 
         self.setPath      ('Command')
@@ -485,12 +499,12 @@ class FireStarter :
         """
         Execute a specified script.
 
-        @type	command	: String
-        @param	command	: Text of script to execute
-        @type	stream	: Bool
-        @param	stream	: Return object for streamed data
-        @rtype		: String
-        @return		: Output from script
+        @type   command : String
+        @param  command : Text of script to execute
+        @type   stream  : Bool
+        @param  stream  : Return object for streamed data
+        @rtype      : String
+        @return     : Output from script
         """
 
         self.setPath      ('Execute')

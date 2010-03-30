@@ -27,16 +27,16 @@ global config
 USAGE      = " [--varDir=dir] [--enqueue] [--subproc] [--daemon] [--config=file] [--name=name]"
 child      = None
 umlAddr    = []
-varDir	   = '/var'
-config	   = None
-name   	   = 'dispatcher'
-enqueue	   = False
-uid	   = None
-gid	   = None
+varDir     = '/var'
+config     = None
+name       = 'dispatcher'
+enqueue    = False
+uid    = None
+gid    = None
 
 UMLList    = []
 UMLLock    = None
-UMLPtr	   = None
+UMLPtr     = None
 
 class UML :
 
@@ -50,14 +50,14 @@ class UML :
         Class constructor. Passed the server name, address, port and
         scraper count.
 
-        @type	name	: String
-	@param	name	: Server name
-        @type	server	: String
-	@param	server	: Server address
-        @type	port	: Integer
-	@param	port	: Port number
-        @type	count	: Integer
-	@param	count	: Scraper count
+        @type   name    : String
+    @param  name    : Server name
+        @type   server  : String
+    @param  server  : Server address
+        @type   port    : Integer
+    @param  port    : Port number
+        @type   count   : Integer
+    @param  count   : Scraper count
         """
 
         self.m_name    = name
@@ -92,8 +92,8 @@ class UML :
         """
         Get server address
 
-        @rtype		: String
-        @return		: Server address as machine:port
+        @rtype      : String
+        @return     : Server address as machine:port
         """
 
         return self.m_server
@@ -103,8 +103,8 @@ class UML :
         """
         Get port number
 
-        @rtype		: Integer
-        @return		: Port number
+        @rtype      : Integer
+        @return     : Port number
         """
 
         return self.m_port
@@ -115,8 +115,8 @@ class UML :
         Test if the server is acceptable for a specific request.
         Currently a stub.
 
-        @rtype		: Bool
-        @return		: True if server is acceptable
+        @rtype      : Bool
+        @return     : True if server is acceptable
         """
 
         return not self.m_closing 
@@ -126,8 +126,8 @@ class UML :
         """
         Check if the server is free.
 
-        @rtype		: Bool
-        @return		: True if server is free
+        @rtype      : Bool
+        @return     : True if server is free
         """
 
         return self.m_free > 0
@@ -145,10 +145,10 @@ class UML :
         against a unique random UUD - the request identifier - which is
         returned. 
 
-        @type	status	: Dictionary
-	@param	status	: Status information
-        @rtype		: UUID
-        @return		: Request identifier
+        @type   status  : Dictionary
+    @param  status  : Status information
+        @rtype      : UUID
+        @return     : Request identifier
         """
 
         #  The status is marked as state=W(aiting) before the UML
@@ -172,9 +172,9 @@ class UML :
         Release (ie., unlock) a UML server. If another thread is hung on
         the lock then it will proceed. The status information is removed.
 
-        @type	id	: UUID
-	@param	id	: Status identifier
-        @return	Bool	: True if UML should be closed
+        @type   id  : UUID
+    @param  id  : Status identifier
+        @return Bool    : True if UML should be closed
         """
 
         self.m_lock.release()
@@ -189,20 +189,20 @@ class UML :
         Append configuration information for this UML. Each configuration is
         appended as a line in the form \em key1=value1;key2=value2;...
 
-        @type	config	: List
-	@param	config	: Configuration list
+        @type   config  : List
+    @param  config  : Configuration list
         """
 
         config.append \
                 (       "name=%s;server=%s;port=%d;count=%d;free=%d;closing=%s" % \
                         (       self.m_name,
-				self.m_server,
+                self.m_server,
                                 self.m_port,
                                 self.m_count,
                                 self.m_free,
                                 self.m_closing
                 )       )
-				
+                
 
     def status (self, status) :
 
@@ -210,8 +210,8 @@ class UML :
         Append status information for this UML. Each request is appended
         as a line in the form \em key1=value1;key2=value2;...
 
-        @type	status	: List
-	@param	status	: Status list
+        @type   status  : List
+    @param  status  : Status list
         """
 
         for key, value in self.m_status.items() :
@@ -229,12 +229,12 @@ def allocateUML (queue = False, **status) :
     the \em queue argument is true, then the thread may hang until a UML is
     free. The function returns (None,None) if the allocation is refused.
 
-    @type	queue	: Bool
-    @param	queue	: Queue request if no UML is immediately free
-    @type	status	: Dictionary (gathered keyed arguments)
-    @param	status	: Request status information
-    @rtype		: UML, UUID
-    @return		: Allocated UML and request identifier
+    @type   queue   : Bool
+    @param  queue   : Queue request if no UML is immediately free
+    @type   status  : Dictionary (gathered keyed arguments)
+    @param  status  : Request status information
+    @rtype      : UML, UUID
+    @return     : Allocated UML and request identifier
     """
 
     global UMLPtr
@@ -285,10 +285,10 @@ def releaseUML (uml, id) :
     """
     Release a UML
 
-    @type	uml	: UML
-    @param	uml	: UML to release
-    @type	id	: UUID
-    @param	id	: Request identifier
+    @type   uml : UML
+    @param  uml : UML to release
+    @type   id  : UUID
+    @param  id  : Request identifier
     """
 
     global UMLList
@@ -324,8 +324,8 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         the base class constructor.
         """
 
-        self.m_toRemove	= []
-        self.m_swlog	= None
+        self.m_toRemove = []
+        self.m_swlog    = None
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
@@ -354,14 +354,13 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         Connect to host. If the connection fails then a 404 error will have been
         sent back to the client.
 
-        @type	server	: String
-	@param	server	: Server address
-        @type	port	: Integer
-	@param	port	: Port number
+        @type   server  : String
+        @param  server  : Server address
+        @type   port    : Integer
+        @param  port    : Port number
         @return         : True if connected
         """
 
-        print (server, port)
         try :
             soc.connect((server, port))
         except socket.error, arg:
@@ -377,10 +376,10 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Override this method so that we can flush stderr
 
-        @type	format	: String
-        @param	format	: Format string
-        @type	args	: List
-        @param	args	: Arguments to format string
+        @type   format  : String
+        @param  format  : Format string
+        @type   args    : List
+        @param  args    : Arguments to format string
         """
 
         BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
@@ -392,10 +391,10 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         Add a file name to a list of names to remove, and return the name.
         These files will be removed when the connection closes down.
 
-        @type	name	: String
-	@param	name	: File name
-	@rtype		: String
-	@return		: File name
+        @type   name    : String
+    @param  name    : File name
+    @rtype      : String
+    @return     : File name
         """
 
         self.m_toRemove.append (name)
@@ -476,8 +475,8 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Add a new UML
 
-        @type	info	: String
-	@param	info	: New UML as name:port:address:count
+        @type   info    : String
+    @param  info    : New UML as name:port:address:count
         """
 
         uname, uport, uaddr, count = info.split(':')
@@ -500,8 +499,8 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Remove a UML or mark closing if in use
 
-        @type	name	: String
-        @param	name	: Name of UML to remove
+        @type   name    : String
+        @param  name    : Name of UML to remove
         """
 
         global UMLList
@@ -629,7 +628,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         @type   soc     : Socket
         @param  soc     : Socket to server
         @type   idle    : Integer
-        @param  idel	: Maximum idling time between data
+        @param  idel    : Maximum idling time between data
         """
 
         iw    = [self.connection, soc]
@@ -703,11 +702,11 @@ if __name__ == '__main__' :
             print "usage: " + sys.argv[0] + USAGE
             sys.exit (1)
 
-        if arg[: 6] == '--uid='	:
+        if arg[: 6] == '--uid=' :
             uid      = arg[ 6:]
             continue
 
-        if arg[: 6] == '--gid='	:
+        if arg[: 6] == '--gid=' :
             gid      = arg[ 6:]
             continue
 

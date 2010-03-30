@@ -2,7 +2,10 @@
 #
 #  Kill locally running servers. See the 'runlocal' command.
 #
-for pf in run/*.pid
-do
-	kill -TERM `cat $pf`
-done
+./etc/local.d/controller	stop
+./etc/local.d/dataproxy		stop
+./etc/local.d/dispatcher	stop
+./etc/local.d/ftpproxy		stop
+./etc/local.d/httpproxy		stop
+./etc/local.d/orbited		stop
+./etc/local.d/twister		stop

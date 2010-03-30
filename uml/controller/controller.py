@@ -507,6 +507,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         HTTPSProxy  = urllib2.ProxyHandler ({'https': 'http://%s:%s' % (tap, httpport)})
         FTPProxy    = urllib2.ProxyHandler ({'ftp':   'ftp://%s:%s'  % (tap, ftpport )})
         scraperwiki.utils.setupHandlers (HTTPProxy, HTTPSProxy, FTPProxy)
+        scraperwiki.utils.allowCache    ('x-cache' in self.headers and self.headers['x-cache'] == 'on')
 
         idents = []
         if scraperID is not None : idents.append ('scraperid=%s' % scraperID)

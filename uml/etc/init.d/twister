@@ -1,6 +1,6 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides:          twisted
+# Provides:          twister
 # Required-Start:    $local_fs
 # Default-Start:     2
 # Short-Description: Start controller
@@ -16,10 +16,10 @@ NOGROUP=`grep nogroup /etc/group | cut -d: -f3`
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="Twisted"
-NAME=twisted
+DESC="Twister"
+NAME=twister
 DAEMON=/bin/sh
-DAEMON_ARGS="/var/www/scraperwiki/uml/Server/scripts/Twisted.sh --daemon --subproc --uid=$NOBODY --gid=$NOGROUP"
+DAEMON_ARGS="/var/www/scraperwiki/uml/twister/twister.sh --daemon --subproc --uid=$NOBODY --gid=$NOGROUP"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
