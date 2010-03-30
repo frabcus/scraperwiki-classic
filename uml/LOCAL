@@ -1,10 +1,10 @@
 The FireBox and Twisted subsystem can be run without a UML.
 
-Create a symbolic link /var/www/scraperwiki/uml to the uml subdirectory.
+Create a symbolic link /var/www/scraperwiki to the top directory.
 This is needed as the installation path is written into a lot of places.
 For instance on my machine (as root):
 
-ln -s /home/mike/ScraperWiki/scraperwiki/uml /var/www/scraperwiki
+ln -s /home/mike/ScraperWiki/scraperwiki /var/www/scraperwiki
 
 Create the following symlinks
 
