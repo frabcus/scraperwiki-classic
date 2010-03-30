@@ -76,7 +76,7 @@ def my_scrapers(request):
 	user = request.user
 
 	if user.is_authenticated():
-		owned_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
+		owned_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False).order_by('-created_at')
 		owned_count = len(owned_scrapers) 
 		# needs to be expanded to include scrapers you have edit rights on.
 		contribution_scrapers = user.scraper_set.filter(userscraperrole__role='editor', deleted=False)
