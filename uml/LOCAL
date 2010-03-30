@@ -1,26 +1,48 @@
-The FireBox and Twisted subsystem can be run without a UML by running the
-command:
+The FireBox and Twisted subsystem can be run without a UML.
 
-./runlocal
+Create a symbolic link /var/www/scraperwiki/uml to the uml subdirectory.
+This is needed as the installation path is written into a lot of places.
+For instance on my machine (as root):
 
-This will run the Dispatcher, the Proxy, the Controller and the orbited and
-twisted servers on the host system, such that they will function as run with a
-UML except that there will be no fireboxing.
+ln -s /home/mike/ScraperWiki/scraperwiki/uml /var/www/scraperwiki
 
-This should be all that's needed to run code in the editor.
+Create the following symlinks
 
-The orbited daemon will listen on port 8001, you need to not be using that port
-for anything else.
+( cd dispatcher	 ; ln -s ../swlogger/swlogger.py dispatcher/swlogger.py  ) 
+( cd firestarter ; ln -s ../swlogger/swlogger.py firestarter/swlogger.py ) 
+( cd ftpproxy	 ; ln -s ../swlogger/swlogger.py ftpproxy/swlogger.py	 ) 
+( cd httpproxy	 ; ln -s ../swlogger/swlogger.py httpproxy/swlogger.py	 ) 
 
-DEBUGGING:
+Edit settings.py in your web subdirectory to have:
 
-* If things go wrong look for exceptions in the various UML/log directories.
+ORBETED_PORT = 8001
+ORBETED_DOMAIN = 'localhost:8001'
 
-* You can run the runner by itself. In UML/Server/scripts run "Runner.py".
-Then type in a short Python program (e.g. "print 1") on the command line,
-and press Ctrl+D. You will get an error, or the output of the short
-Python program in a structure.
+Create a mysql database called "scraperwiki_log" and grant access to user
+"scraperlog" with password "scr4p3rl0g"; best bet is to grant access from 
+everywhere and anywhere, ie:
 
-To stop the processes:
+create database scraperwiki_log ;
+grant all on scraperwiki_log.* to 'scraperlog'@'localhost' identified by 'scr4p3rl0g' ;
+grant all on scraperwiki_log.* to 'scraperlog'@'%' identified by 'scr4p3rl0g' ;
 
-./killlocal
+You should now be able to run the pretend UML system:
+
+To start (or restart)	:	./runlocal
+To stop			:	./killlocal
+
+These scripts start (restart) or stop using the scripts in ./etc/local.d; these
+are stand-alone analogues of the init.d scripts. Process identifiers will be
+written to files in ./var/run; log files will appeara in ./var/log
+
+When started, services should be running for
+
+	orbited
+	twisted
+	dispatcher
+	controller
+	httpproxy
+	ftpproxy
+	dataproxy
+
+Run django as normal.
