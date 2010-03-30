@@ -4,7 +4,7 @@ Create a symbolic link /var/www/scraperwiki/uml to the uml subdirectory.
 This is needed as the installation path is written into a lot of places.
 For instance on my machine (as root):
 
-ln -s /home/mike/ScraperWiki/scraperwiki/uml /var/www/scraperwiki
+ln -s /home/mike/ScraperWiki/scraperwiki/uml /var/www/scraperwiki/uml
 
 Create the following symlinks
 
