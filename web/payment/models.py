@@ -9,7 +9,7 @@ def process_payment(sender, **kwargs):
     ipn = sender
 
     #find the invoice, raise an exception if it doesnt exist
-    invoice = Invoice.objects.get(id=ipn.invoice, delete=False)
+    invoice = Invoice.objects.get(id=ipn.invoice, deleted=False)
     if not invoice:
         raise Exception("Unable to find invoice for ID: " + ipn.invoice)
 
@@ -31,7 +31,7 @@ class Invoice(models.Model):
     """
     title   = models.CharField(max_length = 100, null=False, blank=False)
     item_type = models.CharField(max_length = 50, null=False, blank=False)
-    price = models.IntegerField(null=True, blank=True)
+    price = models.FloatField()
     parent_id = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add = True)
     user = models.ForeignKey(User)

@@ -30,7 +30,7 @@ def alpha():
 
 def www():
     "The main www server (horsell)"
-    env.hosts = ['89.16.177.212:22']
+    env.hosts = ['89.16.177.212:7822']
     env.path = '/var/www/scraperwiki'
     env.branch = 'stable'
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
@@ -101,12 +101,12 @@ def deploy():
     restart_webserver()   
     email(message)
 
-def email(message_body):
+def email(message_body=None):
     if not message_body:
         print "Please Enter your deploy message: \r"
         message_body = raw_input()
     
-    message = """From: mercurial@scraperwiki.com
+    message = """From: ScraperWiki <mercurial@scraperwiki.com>
 Subject: New Scraperwiki Deployment to %(version)s (deployed by %(user)s)
 
 %(user)s deployed changeset %(changeset)s, with the following comment:

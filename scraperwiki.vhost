@@ -17,10 +17,15 @@
 
   
   # RewriteEngine on
-  #   RewriteCond %{HTTP_HOST} ^scraperwiki.com$ [NC]
-  #   RewriteCond %{REQUEST_URI} ^/media/(.*)
-  #   RewriteRule ^/media(.*)$ http://media\.scraperwiki\.com$1 [L,R=301]-
-  
+  # RewriteCond %{HTTP_HOST} ^scraperwiki.com$ [NC]
+  # RewriteCond %{REQUEST_URI} ^/media/(.*)
+  # RewriteRule ^/media(.*)$ http://media\.scraperwiki\.com$1 [L,R=301]-
+
+
+  # RewriteCond %{HTTP_HOST} ^api\.scraperwiki\.com$ [NC]
+  # RewriteCond %{REQUEST_URI} !^/api.*
+  # RewriteRule ^(.*)$ http://horsell.scraperwiki\.talusdesign\.co\.uk$1 [L,R=301]
+
     
   # Possible values include: debug, info, notice, warn, error, crit,
   # alert, emerg.
