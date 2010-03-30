@@ -7,23 +7,19 @@ umllist	= uml001,uml002,uml003,uml004
 host	= 89.16.177.195
 port	= 9002
 
-[ftpproxy]
-host	= 89.16.177.195
-port	= 9004
-
 [dataproxy]
-dbtype	= mysql
-host	= 89.16.177.176
-port	= 9003
-user	= datastore
-passwd	= 3jFjLrje6dFJ7cQE
-db	= datastore_live
+dbtype  = mysql                                                                                                                             
+host    = 89.16.177.176
+port    = 9003
+user    = datastore
+passwd  = 3jFjLrje6dFJ7cQE
+db      = datastore_live
 
 [swlogger]
-host    = 89.16.177.176
-user    = scraperlog
-passwd  = scr4p3rl0g
-db      = swlog_live
+host	= 89.16.177.176
+user	= scraperlog
+passwd	= scr4p3rl0g
+db	= swlog_live
 
 [uml001]
 host	= 89.16.177.195
