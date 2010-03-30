@@ -47,11 +47,17 @@ iptables	-A INPUT	-p tcp -s 89.16.177.176	--sport 3306		-j ACCEPT
 #
 iptables	-A INPUT	-p udp			--sport 53		-j ACCEPT
 iptables	-A INPUT	-p tcp			--sport 80		-j ACCEPT
+iptables	-A INPUT	-p tcp			--sport 21		-j ACCEPT
 iptables	-A INPUT	-p tcp			--sport 443		-j ACCEPT
 
 # Allow incoming replies from the data proxy
 #
 iptables	-A INPUT	-p tcp -s 89.16.177.176	--sport 9003		-j ACCEPT
+
+# Allow passive FTP
+#
+iptables	-A INPUT  -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED	  -j ACCEPT
+iptables	-A OUTPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 # All other input traffic is rejected
 #

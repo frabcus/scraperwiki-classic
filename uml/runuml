@@ -28,11 +28,11 @@ mem=`get mem`
 tap=`get tap`
 
 ./linux	\
-	ubda=${umldir}/jaunty.cow,jaunty.img			\
-	ubdb=${umldir}/addr.cow,${unm}/addr.img			\
-	ubdc=${umldir}/home.cow,home.img			\
-	ubdd=${umldir}/scraper.cow,scraper.img			\
-	ubde=${umldir}/swap.cow,swap.img			\
+	ubda=${unm}/jaunty.cow,jaunty.img			\
+	ubdb=${unm}/addr.cow,${unm}/addr.img			\
+	ubdc=${unm}/home.cow,home.img				\
+	ubdd=${unm}/scraper.cow,scraper.img			\
+	ubde=${unm}/swap.cow,swap.img				\
 	eth0=tuntap,,,${tap}					\
 	mem=${mem}						\
 	con0=fd:0,fd:1						\

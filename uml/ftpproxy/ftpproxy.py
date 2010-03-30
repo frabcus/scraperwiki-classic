@@ -186,7 +186,7 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                     scraperID, runID = self.ident ()
                     if not self.hostAllowed (self.m_cwd[2], scraperID, runID) :
                         self.request.send (blockmsg % self.m_cwd[2])
-                        self.swlog().log (scraperID, runID, 'T.ERROR', arg1 = 'Denied', arg2 = url.path)
+                        self.swlog().log (scraperID, runID, 'T.ERROR', arg1 = 'Denied', arg2 = url)
                         continue
 
                     self.request.send ("150 File follows.\n")

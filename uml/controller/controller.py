@@ -369,6 +369,23 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 return value
         return 'text'
 
+    def sendWhoAmI (self, query) :
+
+        """
+        Send controller information, useful for debugging.
+
+        @type   query   : String
+        @param  query   : 
+        """
+
+        self.connection.send  ('HTTP/1.0 200 OK\n')
+        self.connection.send  ('Connection: Close\n')
+        self.connection.send  ('Pragma: no-cache\n')
+        self.connection.send  ('Cache-Control: no-cache\n')
+        self.connection.send  ('Content-Type: text/text\n')
+        self.connection.send  ('\n')
+        self.connection.send  ('hostname=%s\n' % socket.gethostname())
+
     def sendIdent (self, query) :
 
         """
@@ -444,8 +461,13 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
 
+        if path == '/WhoAmI' :
+            self.sendWhoAmI (query)
+            self.connection.close()
+            return
+
         if path == '/Ident' :
-            self.sendIdent (query)
+            self.sendIdent  (query)
             self.connection.close()
             return
 
@@ -498,9 +520,13 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         httpport = config.get ('httpproxy', 'port')
         ftpport  = config.get ('ftpproxy',  'port')
 
-#       os.environ['http_proxy' ] = 'http://%s:%s' % (tap, port)
-#       os.environ['https_proxy'] = 'http://%s:%s' % (tap, port)
+        #  These seem to be needed for urllib.urlopen()
+        #
+        os.environ['http_proxy' ] = 'http://%s:%s' % (tap, httpport)
+        os.environ['https_proxy'] = 'http://%s:%s' % (tap, httpport)
 
+        #  This is for urllib2.urlopen() and scraperwiki.scrape()
+        #
         import urllib2
         import scraperwiki.utils
         HTTPProxy   = urllib2.ProxyHandler ({'http':  'http://%s:%s' % (tap, httpport)})
