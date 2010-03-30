@@ -17,5 +17,7 @@ export PYTHONPATH=Server/scripts
 ./Server/scripts/Dispatcher.py  --umlAddr=9001@127.0.0.1 --daemon --subproc --varDir=.
 ./Server/scripts/HTTPProxy.py	--daemon --subproc --varDir=. --allowedDir=allow
 ./Server/scripts/Controller.py	--daemon --subproc --varDir=.
-./Server/scripts/run_server.py  --daemon --subproc --varDir=.
-./Server/scripts/orbiter.sh	-d -s -v .
+./Server/scripts/Twisted.py  --daemon --subproc --varDir=.
+#./Server/scripts/orbiter.sh	-d -s -v .
+orbited --config ./Server/scripts/orbited.cfg
+
