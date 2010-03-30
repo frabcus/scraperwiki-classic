@@ -524,8 +524,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         #
         os.environ['http_proxy' ] = 'http://%s:%s' % (tap, httpport)
         os.environ['https_proxy'] = 'http://%s:%s' % (tap, httpport)
+        os.environ['ftp_proxy'  ] = 'ftp://%s:%s'  % (tap, ftpport )
 
-        #  This is for urllib2.urlopen() and scraperwiki.scrape()
+        #  This is for urllib2.urlopen() (and hance scraperwiki.scrape()) where
+        #  we can set explicit handlers.
         #
         import urllib2
         import scraperwiki.utils
