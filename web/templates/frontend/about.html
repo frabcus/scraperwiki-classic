@@ -5,11 +5,11 @@
     <div class="page_title">
         <h1>About</h1>
         <p>
-            All about the technology and people behind ScraperWiki
+            All about the technology and people behind ScraperWiki. For technical questions, see <a href="{% url help %}">the FAQ</a>
         </p>
     </div>
 
-<div class="content half left">
+<div class="content">
 
 <h2>What is ScraperWiki?</h2>
 	
@@ -20,39 +20,35 @@
 		<p>But getting at it isn't always easy. There's a table here, a report
 		there, web pages, PDFs, spreadsheets... And it can be scattered over
 		thousands of different places on the web, making it hard to see the whole
-		picture and the story behind it.</p>
-
-		<p>It's like trying to build something from Lego when someone has
+		picture and the story behind it. It's like trying to build something from Lego when someone has
 		hidden the bricks all over town and you have to find them before
 		you can start building!</p>
 
 		<p>To get at data, programmers write bits of code called 'screen
 		scrapers', which extract the useful bits so they can be reused in other apps, or
-		rummaged through by journalists and researchers.</p>
-		
-		<p>But these bits of code
+		rummaged through by journalists and researchers. But these bits of code
 		tend to break,  get thrown away or forgotten once they have been
 		used, and so the data is lost again. Which is bad.</p>
 
 		<p>ScraperWiki is an online tool to make that process simpler and more
 		collaborative. Anyone can write a screen scraper using the online
-		editor, and the code and data are shared with the world.</p>
-		
-		<p>Because it's a wiki, other programmers can
+		editor, and the code and data are shared with the world. Because it's a wiki, other programmers can
 		contribute to and improve the code. And, if you're not a programmer
 		yourself, you can <a href="{% url market_solicitation %}">request a scraper</a> or ask the
 		ScraperWiki team to <a href="{% url contact_form %}">write one for you</a>.</p>
 		
 <h2>People</h2>
 
-				<p>The original idea for ScraperWiki was Julian Todd's. Developers Richard Pope, Sym Roe, Anna Powell-Smith and Mike Richardson helped to build it.</p> 
+				<p>The original idea for ScraperWiki was Julian Todd's. Richard Pope ran the project. Sym Roe, Anna Powell-Smith and Mike Richardson helped to build it (when not <a href="http://www.youtube.com/watch?v=HNGc8gKFkDs">building igloos</a>).</p> 
 				
-				<p>Aidan McGuire and Aine McGuire managed it all, and our mentors were Francis Irving and Tom Steinberg. Thanks also to Francis Davey for the legal advice.</p>
+				<p>Aidan McGuire and Aine McGuire managed it all. Thanks to Francis Irving and Tom Steinberg for mentoring, and Francis Davey for legal advice.</p>
 
-				<h2>Code</h2>
+				<h2>Code licence</h2>
+				
+				<p>ScraperWiki will shortly be released under the open source Affero GPL licence. Apologies for the delay, but we are currently working on making the code stable enough to be worth releasing.</p>
 
-				<p>ScraperWiki is built in Django and is available under the Affero GPL open source licence. You can find the code (in Mercurial) <a href="https://kforgehosting.com/project/scraperwiki/">here</a>.</p>
-
+				<p>Scraperwiki is already 99% open source by weight, using as it does <a href="http://www.python.org/">Python, <a href="http://www.apache.org/">Apache, <a href="http://user-mode-linux.sourceforge.net/">User Mode Linux</a>, <a href="http://twistedmatrix.com/">Twisted</a>, <a href="http://orbited.org/">Orbited</a>, <a href="http://nginx.net/">nginx</a>, and <a href="http://marijn.haverbeke.nl/codemirror/">CodeMirror</a>, among other things.
+		
 				<h2>Funding</h2>
 
 				<p>ScraperWiki was created with support from <a href="http://www.4ip.org.uk/">4iP</a>, Channel 4's web development fund.</p>
@@ -63,11 +59,6 @@
 		        </p>
 
 </div>
-				
-<div class="content half right">
-&nbsp;&nbsp;
- 
 
-</div>
 
 {% endblock %}

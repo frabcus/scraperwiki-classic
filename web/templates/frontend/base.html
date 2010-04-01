@@ -27,12 +27,12 @@
 	        <ul class="user_menu">
 				{% if user.is_authenticated %}
 				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.username}}</a></li>
-				  <li>{{ user.scraper_set.owned_count }}
+				  <li><a href="{% url my_scrapers %}">{{ user.scraper_set.owned_count }}
 				     {% ifnotequal user.scraper_set.owned_count 1 %}
 				        scrapers
 				     {% else %}
 				        scraper
-				     {% endifnotequal %}
+				     {% endifnotequal %}</a>
 				     <!--
 				     {% ifnotequal user.scraper_set.owned_count 0 %}
 				        ({{user.scraper_set.owned_good_count}}) OK
