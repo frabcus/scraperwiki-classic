@@ -83,10 +83,7 @@ class DataByDate(APIBase):
                 self.result = Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, latlng=latlng)
 
     def convert_date(self, dateform):
-        if not dateform:
+        try:
+            return datetime.datetime.strptime(date_str, '%Y-%m-%d')
+        except ValueError:
             return None
-        mdateform = re.match("(\d\d\d\d)-(\d\d)-(\d\d)", dateform)
-        if not mdateform:
-            return None
-            
-        return datetime.datetime(int(mdateform.group(1)), int(mdateform.group(2)), int(mdateform.group(3)))
