@@ -2,12 +2,6 @@
 {% load replace %}
 {% block tab %}
 <div class="tab_tools">
-    {% if user_owns_it %}
-        <form action="." method="post">
-            <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
-            <input type="submit" id="btnClearDatastore" class="button small danger" value="Clear the datastore?" {% if not has_data %}disabled="disabled"{% endif %}/>
-        </form>
-    {% endif %}
     {% if data_tables %}
         <a href="{% url export_csv scraper.short_name %}" rel="nofollow">download csv</a>
     {% else %}
@@ -71,7 +65,4 @@
     {% endif %}
 </div>
 {% endblock %}
-{% block run_script %}
-    setupButtonConfirmation("btnClearDatastore", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete all existing data for this scraper.");
-    setupDataViewer();
-{% endblock %}
+{% block run_script %}//setupDataViewer();{% endblock %}

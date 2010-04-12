@@ -10,12 +10,13 @@ except:
 
 import cgi
 import re
+import  datastore
 
 # this sets deleted_run_id to flag a record is deleted, rather than actually deleting it
 bSaveAllDeletes = False
 
 # Global connection object
-conn = connection.Connection()
+#conn = connection.Connection()
 
 def insert(data):
     """
@@ -39,12 +40,11 @@ def insert(data):
     hlatlng = data.get("latlng", "")  
     hdate = data.get('date', None)
     hdate_scraped = data.get('date_scraped', None)
-    
+
     # insert the key-values
     for k, v in data.items():  
         # the v is typed and could be, for example, padded with zeros if it is an int type
-        sv = (v != None and str(v) or "")  # convert None to ""
-        
+        sv = (v != None and v or "")  # convert None to ""
         #if sv[:7] == "OSGB36(":   hlatlng = v  # find latlng keys that aren't called latlng
 
         if scraper_id:
@@ -80,8 +80,8 @@ def insert(data):
           
     # printing to the console
     ldata = { }
-    for k, v in data.items():  
-        ldata[cgi.escape(k)] = cgi.escape(str(v))
+    for k, v in data.items():
+        ldata[cgi.escape(k)] = cgi.escape(v)
     
     # this should print < but it crashes the javascript
     print '<scraperwiki:message type="data">%s' % json.dumps(ldata)   # don't put in the </scraperwiki:message> because it doesn't work like that!
@@ -130,9 +130,9 @@ def __build_matches(matchrecord, scraper_id):
         if value:
             qquery.append("AND")
             qquery.append("kv%d.value=%%s" % i)
-            qlist.append(str(value))
+            qlist.append(value)
         i += 1
-            
+
     # add this when the scheme gets updated
     #qquery.append("WHERE")
     #qquery.append("deleted_run_id IS NULL")
@@ -207,7 +207,7 @@ def delete(matchrecord):
     return result
 
 
-def save(unique_keys, data, date=None, latlng=None):
+def saveX(unique_keys, data, date=None, latlng=None):
     """
     Standard save function that UPserts (over-writes) a record that shares the same values for the unique_keys
     as long as it is new (does not overwrite same record, so leaves date_scraped the same 
@@ -224,7 +224,9 @@ def save(unique_keys, data, date=None, latlng=None):
             if k in ["date", "latlng", "date_scraped" ]:
                 sv = v  # leave these objects intact
             else:
-                sv = str(v)
+                # sv = str(v)
+                # Don't cast to string
+                sv = v
         else:
             sv = ""
         
@@ -276,3 +278,21 @@ def save(unique_keys, data, date=None, latlng=None):
     return "%d records deleted, 1 inserted" % nrecordsoverwritten
 
   
+def save (unique_keys, data, date = None, latlng = None, silent = False) :
+
+    ds = datastore.DataStore(None)
+    rc, arg = ds.save (unique_keys, data, date, latlng)
+    if not rc :
+        raise Exception (arg) 
+
+    pdata = {}
+    for key, value in data.items():
+        try    : key   = str(key)
+        except : key   = key  .encode('utf-8')
+        try    : value = str(value)
+        except : value = value.encode('utf-8')
+        pdata[cgi.escape(key)] = cgi.escape(value)
+
+    if not silent :
+        print '<scraperwiki:message type="data">%s' % json.dumps(pdata)
+    return arg

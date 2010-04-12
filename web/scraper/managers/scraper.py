@@ -5,6 +5,8 @@ import settings
 from collections import defaultdict
 import re
 import datetime
+from tagging.utils import get_tag
+from tagging.models import Tag, TaggedItem
 
 def convert_dictlist_to_datalist(allitems):
     allkeys = set()
@@ -62,7 +64,11 @@ class ScraperManager(models.Manager):
         super(ScraperManager, self).__init__(*args, **kwargs)
     
     use_for_related_fields = True
-	
+
+    def get_query_set(self):
+        return super(ScraperManager, self).get_query_set().filter(deleted=False)
+        
+        	
     def owns(self):
         return self.get_query_set().filter(userscraperrole__role='owner')
 		
@@ -99,6 +105,77 @@ class ScraperManager(models.Manager):
         c = self.datastore_connection.cursor()
         return c.execute("delete kv items from kv inner join items where items.item_id = kv.item_id and items.scraper_id=%s", (scraper_id,))
 
+    def datastore_keys(self, scraper_id):
+        result = []
+        c = self.datastore_connection.cursor()
+        c.execute("select distinct kv.key from items inner join kv on kv.item_id=items.item_id WHERE items.scraper_id=%s", (scraper_id,))        
+        keys = c.fetchall()
+        for key in keys:
+            result.append(key[0])
+
+        return result
+
+    def data_search(self, scraper_id, key_values, limit=1000, offset=0):   
+
+        qquery = ["SELECT items.item_id AS item_id"]
+        qlist  = [ ]
+
+        qquery.append("FROM items")
+        qquery.append("inner join kv on items.item_id = kv.item_id")        
+        
+        # add the where clause
+        qquery.append("WHERE items.scraper_id=%s")
+        qlist.append(scraper_id)
+        
+        for key_value in key_values:
+            qquery.append("and kv.key = %s and kv.value = %s")
+            qlist.append(key_value[0])
+            qlist.append(key_value[1])            			
+
+        qquery.append("LIMIT %s,%s")
+        qlist.append(offset)
+        qlist.append(limit)
+
+        #execute
+        c = self.datastore_connection.cursor()
+        print " ".join(qquery)
+        c.execute(" ".join(qquery), tuple(qlist))
+        item_idlist = c.fetchall()
+
+        allitems = [ ]
+        for item_idl in item_idlist:
+
+            #get the item ID and create an object for the data to live in
+            item_id = item_idl[0]
+            rdata = { }
+
+            #add distance if present
+            if len(item_idl) > 1:
+                rdata['distance'] = item_idl[1]
+
+            # header records
+            if not c.execute("SELECT `date`, latlng, `date_scraped` FROM items WHERE item_id=%s", (item_id,)):
+                continue  #TODO: raise an exception 
+            item = c.fetchone()
+
+            if item[0]:
+                rdata["date"] = item[0]           
+            if item[2]:
+                rdata["date_scraped"] = item[2]
+
+            # put the key values in
+            c.execute("SELECT `key`, `value` FROM kv WHERE item_id=%s", (item_id,))
+            for key, value in c.fetchall():
+                rdata[key] = value
+
+            # over-ride any values with latlng (we could break it into two values) (may need to wrap in a try to protect)
+            if item[1]:
+                rdata["latlng"] = tuple(map(float, item[1].split(",")))
+            else:
+                rdata.pop("latlng", None)  # make sure this field is always a pair of floats
+
+            allitems.append(rdata)
+        return allitems
 
     # this accesses the tables defined in scraperlibs/scraperwiki/datastore/scheme.sql and accessed in datastore/save.py
     def data_dictlist(self, scraper_id, limit=1000, offset=0, start_date=None, end_date=None, latlng=None):   
@@ -127,23 +204,6 @@ class ScraperManager(models.Manager):
             #qquery.append(", items.latlng AS latlng")
         
         qquery.append("FROM items")
-
-        # filter on a key existing and value being the same in the data for the record, using INNER JOIN (see datastore.save.__build_matches)
-        #     (not yet used feature)
-        filterkey=None
-        filtervalue=None
-        if filterkey:
-            qquery.append("INNER JOIN")
-            qquery.append("kv AS kv0")
-            qquery.append("ON")
-            qquery.append("kv0.item_id=items.item_id")
-            qquery.append("AND")
-            qquery.append("kv0.key=%s")
-            qlist.append(filterkey)
-            if filtervalue:
-                qquery.append("AND")
-                qquery.append("kv0.value=%s")
-                qlist.append(filtervalue)
 
         # add the where clause
         qquery.append("WHERE items.scraper_id=%s")
@@ -299,5 +359,30 @@ class ScraperManager(models.Manager):
             return_dates.append(count)
         
         return return_dates
-            
+
+    def search(self, query):
+        scrapers = self.get_query_set().filter(title__icontains=query,published=True)
+        scrapers_description = self.get_query_set().filter(description__icontains=query, published=True)
+
+        # and by tag
+        tag = get_tag(query)
+        if tag:
+            scrapers_for_tag = self.get_query_set().filter(published=True)
+            qs = TaggedItem.objects.get_by_model(scrapers_for_tag, tag)
+            scrapers = scrapers | qs
+
+        scrapers_all = scrapers | scrapers_description
+        scrapers_all = scrapers_all.filter(published=True)
+        scrapers_all = scrapers_all.order_by('-created_at')
+
+        return scrapers_all
+    
+    #for example lists    
+    def example_scrapers(self, user, count):
+        scrapers = []
+        if user.is_authenticated():
+            scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True)[:count]
+        else:
+            scrapers = self.filter(deleted=False, featured=True).order_by('first_published_at')[:count]
         
+        return scrapers

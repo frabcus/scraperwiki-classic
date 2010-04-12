@@ -28,28 +28,62 @@ def log(message=""):
     print logmessage
     
 
-# these two functions scrape and parse are pretty much redundant, because everything worthwhile 
-# is going to get done using mechanize
+#  The code will install a set of specific handlers to be used when a URL
+#  is opened. See the "setupHandlers" function below.
+#
+cj           = None
+urllibopener = None
+canCache     = False
 
-# global object handles cookies which work within the same session for now
-# this will be formalized and made explicit when we make the urllib wrapping cache system
-# that archives all the cookies for re-running the scraper code against
-cj = cookielib.CookieJar()
-urllibopener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+#  The "setupHandlers" function is called with zero or more handlers. An opener
+#  is constructed using these, plus a cookie processor, and is installed as the
+#  urllib2 opener. The opener also overrides the user-agent header.
+#
+def setupHandlers (*handlers) :
 
-# over-ride the default value of [('User-agent', 'Mozilla/5.0')]
-urllibopener.addheaders = [('User-agent', 'ScraperWiki')]
+    global cj
+    global urllibopener
+    cj = cookielib.CookieJar()
+    urllibopener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj), *handlers)
+    urllibopener.addheaders = [('User-agent', 'ScraperWiki')]
+    urllib2.install_opener (urllibopener)
 
+#  "allowCache" is called to allow (or disallow) caching; this will typically be
+#  set True for running from the editor, and False when the scraped is cron'd
+#
+def allowCache (enable) :
 
-# should the exceptions be caught here?  
-# should the print statements  go to different streams?
-def scrape (url, params=None):
-    '''get html text given url and parameter map'''
+    global canCache
+    canCache = enable
+
+#  API call from the scraper to enable caching, provided that it is allowed as in
+#  the previous method.
+#
+def cache (enable = True) :
+
+    if cj is None :
+        setupHandlers ()
+    urllibopener.addheaders = [('x-cache', (enable and canCache) and "on" or "off")]
+
+#  Scrape a URL optionally with parameters. This is effectively a wrapper around
+#  urllib2.orlopen().
+#
+def scrape (url, params = None) :
+
+    #  Normally the "setupHandlers" function would have been called from
+    #  the controller to specify http, https and ftp proxies, however check
+    #  in case not and call without any handlers.
+    #
+    global cj
+    global urllibopener
+    if cj is None :
+        setupHandlers ()
+
     data = params and urllib.urlencode(params) or None
     
     try:
         fin = urllibopener.open(url, data)
-        text = unicode(fin.read(), errors="replace").encode("ascii", "ignore")
+        text = fin.read()
         fin.close()   # get the mimetype here
     except:
         print '<scraperwiki:message type="sources">' + json.dumps({ 'content' : "Failed: %s" % url })
@@ -60,7 +94,7 @@ def scrape (url, params=None):
       'content' : "%d bytes from %s" % (len(text), url),
       }
       #'content_long' : cgi.escape(text),      
-    
+
     print '<scraperwiki:message type="sources">%s' % json.dumps(print_content)
     return text
 

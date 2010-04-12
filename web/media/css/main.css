@@ -38,7 +38,7 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 .content.half {width:50%;}
 .content.col.left {width:60%;}
 .content.col.right {width:37%; padding-left:3%;}
-.content .section {padding-bottom:1em;}
+.content .section {padding:1em 0; border-bottom:dotted 1px #ccc;}
 .content h2 {padding-bottom:0.6em;font-size:1.7em;}
 .content h3 {padding-bottom:0.6em;}
 .content h4 {padding-bottom:0.6em;}
@@ -88,8 +88,8 @@ div.attention {text-align:center;}
 
 /* Errors */
 #divErrors ul {padding:0; margin:0; list-style-type:none; line-height:1.4em;}
-#divErrors ul li {background:#da9da4; padding:0.1em 0; margin:0; text-align:center;}
-.error input, .error select {border:solid 1px #da9da4;}
+#divErrors ul li {background:#a22424; padding:0.1em 0; margin:0; text-align:center; color:#fff;}
+.error textarea, .error input, .error select {border:solid 1px red;}
 small.error_hint {color:#cc0000;}
 .http_error {text-align:center; padding-top:1em;}
 
@@ -110,12 +110,12 @@ pre.scrapercode {background-color: lemonchiffon; padding: 0.5em;}
 
 /* Tables */
 table {width:100%; border-collapse:collapse;}
-table {margin-top:1em; margin-bottom:1em;}
-table th {text-transform:uppercase; font-weight:normal;background:#f8f8f8; color:#808080;padding:0.3em 0.5em;
+table.data {margin-top:1em; margin-bottom:1em;}
+table.data th {text-transform:uppercase; font-weight:normal;background:#f8f8f8; color:#808080;padding:0.3em 0.5em;
 border-top:solid 1px #ccc; border-bottom:solid 1px #ccc;padding:0.4em 0.6em;}
-table tr:nth-child(odd) td {background:#ffffd7;}
-table td {border-bottom:dotted 1px #ccc; border-top:solid 1px #ffffd7;padding:0.3em 0.5em; line-height:1em;}
-table tr:hover td {border-bottom:solid 1px #ccc;border-top:solid 1px #ccc;}
+table.data tr:nth-child(odd) td {background:#ffffd7;}
+table.data td {border-bottom:dotted 1px #ccc; border-top:solid 1px #ffffd7;padding:0.3em 0.5em; line-height:1em;}
+table.data tr:hover td {border-bottom:solid 1px #ccc;border-top:solid 1px #ccc;}
 
 /* Flexigrid override */
 .flexigrid table {width:auto;}

@@ -21,7 +21,6 @@ try:
 except ImportError:
     import simplejson as json
 
-
 def overview(request, scraper_short_name):
     """
     Shows info on the scraper plus example data.
@@ -34,7 +33,7 @@ def overview(request, scraper_short_name):
         short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-
+    scraper_contributors = scraper.contributors()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
     table = models.Scraper.objects.data_summary(
@@ -53,6 +52,7 @@ def overview(request, scraper_short_name):
         'user_follows_it': user_follows_it,
         'has_data': has_data,
         'data': data,
+        'scraper_contributors': scraper_contributors,
         }, context_instance=RequestContext(request))
 
 
@@ -61,8 +61,6 @@ def create(request):
     Rendars the scraper create form
 
     Is this unused?
-
-    TODO: delete!
     """
     if request.method == 'POST':
         return render_to_response(
@@ -73,6 +71,50 @@ def create(request):
             'scraper/create.html',
             context_instance=RequestContext(request))
 
+def scraper_admin(request, scraper_short_name):
+    #user details
+    user = request.user
+    scraper = get_object_or_404(
+        models.Scraper.objects, short_name=scraper_short_name)
+    user_owns_it = (scraper.owner() == user)
+    user_follows_it = (user in scraper.followers())
+    form = forms.RunIntervalForm(instance=scraper)
+
+    #you can only get here if you are signed in and own the scraper. v important
+    if user_owns_it == False:
+          raise Http404
+
+    if request.method == 'POST':
+        delete_data = request.POST.get('delete_data', None)
+        scheduler_update = request.POST.get('scheduler_update', None)
+        delete_scraper = request.POST.get('delete_scraper', None)
+
+        #if user has requested a delete, **double** check they are allowed to,
+        # the do the delete
+        if delete_data == '1' and user_owns_it:
+            models.Scraper.objects.clear_datastore(
+                scraper_id=scraper.guid)
+
+        #change the run interval for this scraper?
+        if scheduler_update == '1' and user_owns_it:
+            scraper.run_interval = request.POST.get('run_interval', -1)
+            scraper.save()
+
+        #delete the entire scraper (marked as delete)
+        if delete_scraper == '1' and user_owns_it:
+            scraper.deleted = True
+            scraper.save()
+            request.notifications.add("Your scraper has been deleted")
+            return HttpResponseRedirect('/')
+
+    return render_to_response('scraper/admin.html', {
+      'selected_tab': 'admin',
+      'scraper': scraper,
+      'user_owns_it': user_owns_it,
+      'user_follows_it': user_follows_it,
+      'form': form,
+      }, context_instance=RequestContext(request))
+      
 
 def scraper_data(request, scraper_short_name):
     #user details
@@ -82,14 +124,6 @@ def scraper_data(request, scraper_short_name):
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
-
-    #if user has requested a delete, **double** check they are allowed to,
-    # the do the delete
-    if request.method == 'POST':
-        delete_data = request.POST['delete_data']
-        if delete_data == '1' and user_owns_it:
-            models.Scraper.objects.clear_datastore(
-                scraper_id=scraper.guid)
 
     #get data for this scaper
     data = models.Scraper.objects.data_summary(
@@ -145,7 +179,7 @@ def code(request, scraper_short_name):
         models.Scraper.objects, short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-
+    committed_code = scraper.committed_code()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
     return render_to_response('scraper/code.html', {
@@ -153,35 +187,9 @@ def code(request, scraper_short_name):
         'selected_tab': 'code',
         'scraper': scraper,
         'user_owns_it': user_owns_it,
+        'committed_code': committed_code,
         'user_follows_it': user_follows_it,},
         context_instance=RequestContext(request))
-
-
-def contributors(request, scraper_short_name):
-
-    user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
-
-    scraper_owner = scraper.owner()
-    scraper_contributors = scraper.contributors()
-    scraper_followers = scraper.followers()
-
-    scraper_tags = Tag.objects.get_for_object(scraper)
-
-    return render_to_response('scraper/contributers.html', {
-        'scraper_tags': scraper_tags,
-        'scraper_owner': scraper_owner,
-        'scraper_contributors': scraper_contributors,
-        'scraper_followers': scraper_followers,
-        'selected_tab': 'contributors',
-        'scraper': scraper,
-        'user_owns_it': user_owns_it,
-        'user_follows_it': user_follows_it,
-        }, context_instance=RequestContext(request))
-
 
 def comments(request, scraper_short_name):
 
@@ -371,26 +379,11 @@ def search(request, q=""):
     if (q != ""):
         form = SearchForm(initial={'q': q})
         q = q.strip()
-        scrapers = models.Scraper.objects.filter(
-            title__icontains=q,
-            published=True)
-        scrapers_description = models.Scraper.objects.filter(
-            description__icontains=q, published=True)
 
-        # and by tag
-        tag = get_tag(q)
-        if tag:
-            scrapers_for_tag = models.Scraper.objects.filter(published=True)
-            qs = TaggedItem.objects.get_by_model(scrapers_for_tag, tag)
-            scrapers = scrapers | qs
-        scrapers_all = scrapers | scrapers_description
-        #scrapers = scrapers | scrapers_description
-        #Only show published scrapers, sort by creation date
-        scrapers_all = scrapers_all.filter(published=True)
-        scrapers_all = scrapers_all.order_by('-created_at')
+        scrapers = models.Scraper.objects.search(q)
         return render_to_response('scraper/search_results.html',
             {
-                'scrapers': scrapers_all,
+                'scrapers': scrapers,
                 'form': form,
                 'query': q,},
             context_instance=RequestContext(request))

@@ -220,7 +220,6 @@ function setupScroller(){
         function(){
             var iNewWidth = $('.scroller .scroller_wrapper').width() / 2;
             if(iNewWidth < 250){
-                console.debug(iNewWidth)
                iNewWidth = 250;
             }
             $('.scroller .scroll_item').width(iNewWidth);
@@ -233,12 +232,9 @@ function scrollScroller(sDirection){
     //can scroll?
     var bCanScroll = true;
     var iCurrentLeft = parseInt($('.scroller .scroll_items').css('left'));
-    //console.debug(iCurrentLeft)
-    //console.debug(sDirection)
     if(sDirection == 'left' && iCurrentLeft >= 0){
         bCanScroll = false;
     }
-    
 
     if(bCanScroll == true){
         //get the width of one item

@@ -27,12 +27,12 @@
 	        <ul class="user_menu">
 				{% if user.is_authenticated %}
 				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.username}}</a></li>
-				  <li>{{ user.scraper_set.owned_count }}
+				  <li><a href="{% url my_scrapers %}">{{ user.scraper_set.owned_count }}
 				     {% ifnotequal user.scraper_set.owned_count 1 %}
 				        scrapers
 				     {% else %}
 				        scraper
-				     {% endifnotequal %}
+				     {% endifnotequal %}</a>
 				     <!--
 				     {% ifnotequal user.scraper_set.owned_count 0 %}
 				        ({{user.scraper_set.owned_good_count}}) OK
@@ -46,7 +46,7 @@
 				<li class="helplink"><a href="{% url help %}">Help</a></li>
 			</ul>
 			<p>
-    	        Hello! This is the alpha version of ScraperWiki, please <a href="{% url contact_form %}">tell us what you think</a>.
+    	        Hello! This is the beta version of ScraperWiki, please <a href="{% url contact_form %}">tell us what you think</a>.
             </p>
 	    </div>
 
@@ -167,5 +167,17 @@
 	    <script type="text/javascript" defer="defer">
 	        {% block run_script %}{% endblock %}
         </script>
+        {% if not debug %}
+            <script type="text/javascript">
+                var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+                document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+            </script>
+            <script type="text/javascript">
+                try {
+                    var pageTracker = _gat._getTracker("UA-321882-15");
+                    pageTracker._trackPageview();
+                } catch(err) {}
+            </script>
+        {% endif %}
 	</body>
 </html>

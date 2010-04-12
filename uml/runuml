@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+#  Run a specified UML instance. The arguments is the UML name
+#  A file 'running' exists in the UML instance directory for the
+#  duration.
+#
+test $# = 1 ||
+{
+	echo	usage: runuml umlname
+	exit	1
+}
+
+test `id -u` = 0 ||
+{
+	echo	runuml: must be run as root
+	exit	1
+}
+
+unm=$1
+echo $unm
+get(){
+	sed -n "/^\[${unm}\]/,/^\[/ s/^[ \t]*${1}[ \t]*=[ \t]*\(.*\)/\1/ p" uml.cfg
+}
+echo XXXX
+date	> ${unm}/running
+
+mem=`get mem`
+tap=`get tap`
+
+./linux	\
+	ubda=${unm}/jaunty.cow,jaunty.img			\
+	ubdb=${unm}/addr.cow,${unm}/addr.img			\
+	ubdc=${unm}/home.cow,home.img				\
+	ubdd=${unm}/scraper.cow,scraper.img			\
+	ubde=${unm}/swap.cow,swap.img				\
+	eth0=tuntap,,,${tap}					\
+	mem=${mem}						\
+	con0=fd:0,fd:1						\
+	con=pts							\
+	umid="${unm}"
+
+rm -f	${unm}/running

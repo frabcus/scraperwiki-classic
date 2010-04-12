@@ -15,7 +15,8 @@
         document.domain = document.domain;
     </script>
 
-    <script src="http://{{ settings.ORBETED_DOMAIN }}:{{ settings.ORBETED_PORT }}/static/Orbited.js"></script>
+    <script src="http://{{ settings.ORBETED_DOMAIN }}/static/Orbited.js"></script>
+    <script>Orbited.settings.streaming = false</script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys.js"></script>
@@ -55,46 +56,7 @@
                 <div class="title">
                     {{ form.title }}
                 </div>
-                <div id="meta_fields_mini">
-                    <p>Publishing your scraper will the code and data available to other users, allow you to access the data it generated via the API and set it to be rerun once a day (we will soon be adding a system to let you control the frequency yourself)</p>
-                    {# for form elements that are shown in the popup #}
-
-                    <div class="field field-title">
-                        <label for="id_meta_title">{{ form.title.label}}</label>
-                        <input type="text" name="title" value="" id="id_meta_title">
-                    </div>
-
-                    <div class="field field-description">
-                        <label for="id_description">{{ form.description.label}} {{ form.description.errors }}</label>
-                        {{ form.description }}
-                    </div>
-
-                    <div class="field field-license"> 
-                        <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
-                        {{ form.license }}
-                    </div>
-
-            {% if not has_draft %}
-                    <div class="field field-tags">
-                        <label for="id_tags">{{ form.tags.label}} {{ form.tags.errors }}</label>
-                        {{ form.tags }}
-                    </div>
-            {% endif %}
-
-                    <div class="field field-commit_message">
-                      <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
-                      {{ form.commit_message }}
-                    </div>
-
-                    <div class="field field-run_interval">
-                      <label for="id_run_interval">{{ form.run_interval.label}} {{ form.run_interval.errors }}</label>
-                      {{ form.run_interval }}
-                    </div>
-
-                    <small>* Required field</small>
-
-                </div>
-
+                
                 <ul class="help">
                     <li>
                         <a id="menu_shortcuts" href="#" title="Key combinations for saving, executing etc">Keyboard shortcuts</a>
@@ -127,7 +89,7 @@
                         <a id="aCloseEditor" href="{% url frontpage %}" title="Close editor">Close editor</a>                
                     {% endif %}
                     &nbsp;<input type="button" class="save  button" name="action" value="Save draft" title="Save draft version (Ctrl + S)" />&nbsp;
-                    <input type="button" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>            
+                    <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>
                 </div>
             </div>
 
@@ -170,100 +132,145 @@
 
 {% block popups %}    
     <div id="meta_form" class="popup_item">
-        <a class="popupClose">close</a>
-    </div>
-    <div id="diff" class="popup_item"><a class="popupClose">x</a><pre></pre></div>
-    <div id="popup_shortcuts" class="popup_item">
-        <a class="popupClose">close</a><pre></pre>
-        <h3>Keyboard shortcuts</h3>
-        <ul>
-            <li>Control-S   Save</li>
-            <li>Control-R   Run</li>
-            <li>Control-D   Diff</li>
-        </ul>
-    </div>
-    <div id="popup_settings" class="popup_item">
-        <a class="popupClose">close</a>
-        <h3>Editor settings</h3>
-    </div>    
-    <div id="popup_documentation" class="popup_item">
-        <a class="popupClose">close</a>
-        <dl class="quick_help">
-            <h4>Screen Scraping</h4>
-            <dl>
-                <dt>
-                    <code><strong>scraperwiki.scrape(url, <em>params=[]</em>)</strong></code>
-                </dt>
-                <dd>Returns the source text of a webpage as a string. This is a wrapper for urllib2 that lists extra information on the sources tab.</dd>
-            </dl>
-            <h4>Storing data</h4>
-            <dl>
-                <dt>
-                    <code><strong>scraperwiki.datastore.save(unique_keys=[], data={}, <em>date=None</em>, <em>latlng=[None,None]</em>)</strong></code>
-                </dt>
-                <dd>Saves to the datastore, either adding or over-writing data with the same values for unique_keys. <code>date</code> and <code>latlng</code> are optional special fields  for indexing each record.</dd>
-            </dl>                
-
-            <h4>Geocoding</h4>
-            <dl>
-                <dt>
-                    <code><strong>scraperwiki.geo.gb_postcode_to_latlng(postcode)</strong></code>
-                </dt>
-                <dd>
-                    returns (lat,lng) pair for a postcode.
-                </dd>
-                <dt><code><strong>scraperwiki.geo.os_easting_northing_to_latlng(easting, northing)</strong></code></dt>
-                <dd>returns (lat,lng) pair for an OSGB easting, northing coordinates.</dd>
-                <dt><code><strong>scraperwiki.geo.extract_gb_postcode(string)</strong></code></dt>
-                <dd>attempts to extract a UK postcode from a string.</dd>
-            </dl>                
-
-            <h4>Recommended libraries</h4>
-            <ul>
-                <li><code><strong>urllib2</strong>, <strong>urlparse</strong></code>
-                    Standard python libraries for opening urls. <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
+            <p>Publishing your scraper will the code and data available to other users, allow you to access the data it generated via the API and set it to be rerun once a day (we will soon be adding a system to let you control the frequency yourself)</p>
+            <div class="popup_error"></div>            
+            <ul class="form">
+                <li>
+                    <label for="id_meta_title">{{ form.title.label}}</label>
+                    <input type="text" name="title" value="" id="id_meta_title">
                 </li>
-                <li><code><strong>BeautifulSoup</strong></code>
-                    For parsing html.  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
+                <li>
+                    <label for="id_description">{{ form.description.label}} {{ form.description.errors }}</label>
+                    {{ form.description }}
                 </li>
-                <li><code><strong>mechanize</strong></code>
-                    Automates submitting forms. <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
+                <li> 
+                    <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
+                    {{ form.license }}
                 </li>
-                <li><code><strong>lxml</strong></code>
-                    For parsing html and accessing it using cssselect.
+                {% if not has_draft %}
+                    <li>
+                        <label for="id_tags">{{ form.tags.label}} {{ form.tags.errors }}</label>
+                        {{ form.tags }}
+                        <small class="hint taghint">e.g. europe<em>,</em> grants<em>,</em> transport</small>
+                    </li>
+                {% endif %}
+                <li>
+                  <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
+                  {{ form.commit_message }}
                 </li>
-                <li><code><strong>pdftoxml</strong>(pdfdata)</code>
-                    Converts the binary data of a PDF file into a parsable XML string
+                <li>
+                  <label for="id_run_interval">{{ form.run_interval.label}} {{ form.run_interval.errors }}</label>
+                  {{ form.run_interval }}
                 </li>
             </ul>
+            <div class="popup_controls">
+                <small>* Required field</small>
+                <div class="right">
+                    <a class="popupReady">cancel</a>&nbsp;&nbsp;
+                    <input type="button" id="btnCommitPublish" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>
+                </div>
+            </div>
+    </div>
+    <div id="diff" class="popup_item">
+        <div class="popup_header">
+            <h2>Diff with the published version</h2>
+            <a class="popupClose">close</a>
+        </div>
+        <div class="output">
+            <pre></pre>
+        </div>
+    </div>
+    <div id="popup_shortcuts" class="popup_item">
+        <div class="popup_header">
+            <h2>Keyboard shortcuts</h2>
+            <a class="popupClose">close</a><pre></pre>
+        </div>
+        <div class="output">
+            <ul>
+                <li>Control-S   Save</li>
+                <li>Control-R   Run</li>
+                <li>Control-D   Diff</li>
+            </ul>
+        </div>
+    </div>
+    <div id="popup_documentation" class="popup_item">
+        <div class="popup_header">
+            <h2>Code documentation - quick help</h2>
+            <a class="popupClose">close</a>            
+        </div>
+        <div class="output">
+            <dl class="quick_help">
+                <h4>Screen Scraping</h4>
+                <dl>
+                    <dt>
+                        <code><strong>scraperwiki.scrape(url, <em>params=[]</em>)</strong></code>
+                    </dt>
+                    <dd>Returns the source text of a webpage as a string. This is a wrapper for urllib2 that lists extra information on the sources tab.</dd>
+                </dl>
+                <h4>Storing data</h4>
+                <dl>
+                    <dt>
+                        <code><strong>scraperwiki.datastore.save(unique_keys=[], data={}, <em>date=None</em>, <em>latlng=[None,None]</em>)</strong></code>
+                    </dt>
+                    <dd>Saves to the datastore, either adding or over-writing data with the same values for unique_keys. <code>date</code> and <code>latlng</code> are optional special fields  for indexing each record.</dd>
+                </dl>                
 
-            <p><a href="{% url help_code_documentation %}" target="_blank">Full code documentation</a> <small>(opens in new window)</small>.</p>
+                <h4>Geocoding</h4>
+                <dl>
+                    <dt>
+                        <code><strong>scraperwiki.geo.gb_postcode_to_latlng(postcode)</strong></code>
+                    </dt>
+                    <dd>
+                        returns (lat,lng) pair for a postcode.
+                    </dd>
+                    <dt><code><strong>scraperwiki.geo.os_easting_northing_to_latlng(easting, northing)</strong></code></dt>
+                    <dd>returns (lat,lng) pair for an OSGB easting, northing coordinates.</dd>
+                    <dt><code><strong>scraperwiki.geo.extract_gb_postcode(string)</strong></code></dt>
+                    <dd>attempts to extract a UK postcode from a string.</dd>
+                </dl>                
 
-        </dl>
+                <h4>Recommended libraries</h4>
+                <ul>
+                    <li><code><strong>urllib2</strong>, <strong>urlparse</strong></code>
+                        Standard python libraries for opening urls. <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
+                    </li>
+                    <li><code><strong>BeautifulSoup</strong></code>
+                        For parsing html.  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
+                    </li>
+                    <li><code><strong>mechanize</strong></code>
+                        Automates submitting forms. <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
+                    </li>
+                    <li><code><strong>lxml</strong></code>
+                        For parsing html and accessing it using cssselect.
+                    </li>
+                    <li><code><strong>pdftoxml</strong>(pdfdata)</code>
+                        Converts the binary data of a PDF file into a parsable XML string
+                    </li>
+                </ul>
+
+                <p><a href="{% url help_code_documentation %}" target="_blank">Full code documentation</a> <small>(opens in new window)</small>.</p>
+
+            </dl>
+        </div>
     </div>
     <div id="popup_text" class="popup_item">
-        <a class="popupClose">close</a>
+        <div class="popup_header">
+            <a class="popupClose">close</a>
+        </div>
         <div class="output"><pre></pre></div>
     </div>
     <div id="popup_exception" class="popup_item">
-        <a class="popupClose">close</a>
-        <h3>Traceback</h3>
+        <div class="popup_header">
+            <h3>Traceback</h3>            
+            <a class="popupClose">close</a>
+        </div>
         <div class="output"><pre></pre></div>
     </div>
-    <div id="popup_source" class="popup_item">
-        <div class="tabs">
-          <ul>
-            <li class="raw_tab"><a href="#">RAW</a></li>
-            <li class="html_tab"><a href="#">HTML</a></li>
-          </ul>
-        </div>
-        <div class="popup_html output"><iframe></iframe></div>
-        <div class="popup_raw output" style="display:none"><pre></pre></div>
-    </div>
     <div id="popup_intro" class="popup_item">
-        <div>
+        <div class="popup_header">
             <h2>Welcome to the ScraperWiki code editor</h2>
-
+        </div>
+        <div class="output">
             <p>
                 Here you can write, test and debug your screen scrapers using the Python programming language. If you are not familiar with Python <a href="http://docs.python.org/tutorial/" target="_new">click here to read a bit about it</a>.
             </p>
@@ -273,7 +280,6 @@
             <p>
                 Whilst you are working on your scraper click <em>Save draft</em> to back it up. When you are finished, click <em>Commit and publish</em> to share it with the world.
             </p>
-
 
             <a href="#" class="popupReady">Ready to start?</a>
         </div>

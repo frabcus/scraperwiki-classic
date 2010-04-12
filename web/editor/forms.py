@@ -17,35 +17,36 @@ LICENSE_CHOICES = (
 
 class editorForm(forms.ModelForm):
     
-  class Meta:
-    model = scraper.models.Scraper
-    fields = ('title', 'code', 'description', 'license', 'tags',)
-  
-  title = forms.CharField(
-    widget=forms.TextInput(attrs={'title' : 'Untitled Scraper'}),
-    label = "Title*",
-  )
-  commit_message = forms.CharField(
-    required=False, 
-    widget=forms.TextInput(attrs={'title' : ''}),
-    label = "Commit message*",
-    )
-  description = forms.CharField(
-    #widget=forms.TextInput(attrs={'title' : ''})
-    required=False,
-    widget=widgets.Textarea({'cols':'80', 'rows':'4', }),
-    label = "Description*",
-   )
+    class Meta:
+        model = scraper.models.Scraper
+        fields = ('title', 'code', 'description', 'license', 'tags',)
 
-  # run_interval = forms.ChoiceField(
-  #   label="Run once a day", 
-  #   choices=RUN_INTERVAL_CHOICES,
-  #   )
+    title = forms.CharField(
+        widget=forms.TextInput(attrs={'title' : 'Untitled Scraper'}),
+        label = "Title*",
+    )
+    commit_message = forms.CharField(
+        required=False, 
+        widget=forms.Textarea(attrs={'title' : ''}),
+        label = "Commit message*",
+    )
     
-  tags = forms.CharField(required=False)
-  license = forms.ChoiceField(choices=LICENSE_CHOICES, label='Data licence')
-  code = forms.CharField(
-    widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'})
+    description = forms.CharField(
+        #widget=forms.TextInput(attrs={'title' : ''})
+        required=False,
+        widget=widgets.Textarea({'cols':'80', 'rows':'4', }),
+        label = "Description*",
     )
-  
+    
+    tags = forms.CharField(required=False)
+    license = forms.ChoiceField(choices=LICENSE_CHOICES, label='Data licence')
+    code = forms.CharField(
+        widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'})
+    )
 
+
+    def clean_title(self):
+        title = self.cleaned_data['title']
+        if not title or title == '' or title.lower() == 'untitled scraper':
+            raise forms.ValidationError("Scraper needs a title")
+        return title

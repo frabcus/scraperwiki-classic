@@ -20,7 +20,6 @@
     {% endif %}
 
 </div>
-
 <div class="content col right">
     <div class="metadata">
         <dl>
@@ -50,6 +49,23 @@
     <p>
         {% sparkline scraper.scraper_sparkline_csv 'medium' %}    
     </p>
+    <h4>Contributors</h4>
+    <ul>
+        <li>
+            <a href="{% url profiles_profile_detail scraper.owner.username %}">
+            {% load gravatar %} {% show_gravatar scraper.owner 'small' %} 
+            {{scraper.owner.username}}</a>
+            <em>(creator)</em>
+        </li>
+        {% if scraper_contributors %}  
+          {% for contributor in scraper_contributors %}  
+            <li>
+            	{% load gravatar %} {% show_gravatar contributor 'small' %} 
+                <a href="{% url profiles_profile_detail contributor.username %}">{{contributor.username}}</a>
+            </li>
+          {% endfor %}
+        {% endif %}
+    </ul>
 </div>
 <br class="clear"/>
 {% endblock %}

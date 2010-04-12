@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# bootuml
+#
+# Boot a UML into an instance of screen. Takes one argument, which should be the
+# UML name
+#
+test $# = 1 ||
+{
+	echo	usage: bootuml name
+	exit	1
+}
+
+test -e uml.cfg ||
+{
+	echo	"bootuml: no uml.cfg file"
+	exit	1
+}
+
+test `id -u` = 0 ||
+{
+	echo	bootuml: must be run as root
+	exit	1
+}
+
+unm=$1
+
+test -e ${unm} ||
+{
+	echo	bootuml: uml ${unm} does not exist
+	exit	1
+}
+
+test -e ${unm}/running &&
+{
+	echo	bootuml: uml ${unm} is already running
+	exit	1
+}
+
+cmp -s uml.cfg controller/uml.cfg ||
+{
+	rm -f controller/uml.cfg
+	cfg=uml.cfg
+	test -L uml.cfg && cfg=`ls -l uml.cfg | awk '{ print $10 }'`
+	ln $cfg controller/uml.cfg
+}
+
+cmp -s swlogger/swlogger.py controller/swlogger.py ||
+{
+	rm -f controller/swlogger.py
+	ln swlogger/swlogger.py controller/swlogger.py
+}
+
+rm	-f ${unm}/*.cow
+
+screen -dmS ${unm} ./runuml ${unm}
+

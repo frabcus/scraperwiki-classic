@@ -22,7 +22,6 @@ from market import forms
 from payment.models import Invoice
 from scraper.models import Scraper
     
-    
 def solicitation (request):
     form = forms.SolicitationForm()    
     if request.method == 'POST':
@@ -36,7 +35,7 @@ def solicitation (request):
             else:
                 solicitation.user_created = request.user
                 solicitation.save()
-                solicitation.tags = request.POST.get('tags')                
+                solicitation.tags = request.POST.get('tags')
                 return HttpResponseRedirect(reverse('market_list'))
     status = models.SolicitationStatus.objects.get(status='open')
     recent_solicitations = models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')[:5]  

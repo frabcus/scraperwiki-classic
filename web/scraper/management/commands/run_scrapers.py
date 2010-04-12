@@ -29,7 +29,7 @@ class Command(BaseCommand):
     def run_scraper(self, scraper, options):
         guid = scraper.guid
         code = scraper.committed_code()
-        runner_path = "%s/Runner.py" % settings.FIREBOX_PATH
+        runner_path = "%s/runner.py" % settings.FIREBOX_PATH
         failed = False
         
         start = time.time()
@@ -73,13 +73,13 @@ class Command(BaseCommand):
     def handle(self, **options):
         if options['short_name']:
             scrapers = Scraper.objects.get(short_name=options['short_name'], published=True, )
-            self.run_scraper(scrapers)
+            self.run_scraper(scrapers, options)
         else:
 
             #get all scrapers where interval > 0 and require running
             scrapers = Scraper.objects.filter(published=True)
-            scrapers = Scraper.objects.filter(interval__gt=0)
-            scrapers = scrapers.extra(where=["ADDTIME(last_run, SEC_TO_TIME(run_interval)) > NOW()"])
+            scrapers = Scraper.objects.filter(run_interval__gt=0)
+            scrapers = scrapers.extra(where=["ADDTIME(last_run, SEC_TO_TIME(run_interval)) > NOW() or last_run is null"])
             for scraper in scrapers:
                 try:
                     self.run_scraper(scraper, options)

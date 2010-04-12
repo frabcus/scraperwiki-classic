@@ -97,7 +97,10 @@ def get_code(scraper_name=None, committed=True, rev='tip'):
     code = StringIO("")
     commands.cat(ui,r,path, output=code, rev=rev)
 
-    return code.getvalue()
+    code_str =  code.getvalue()
+    print code_str
+    return code_str
+
 
   else:
     return open(path,'rU').read()

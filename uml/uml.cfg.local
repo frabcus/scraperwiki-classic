@@ -1,0 +1,45 @@
+[dispatcher]
+host	= 127.0.0.1
+port	= 9000
+umllist	= uml001
+
+[httpproxy]
+host	= 127.0.0.1
+port	= 9002
+
+[ftpproxy]
+host	= 127.0.0.1
+port	= 9004
+
+[dataproxy]
+dbtype	= mysql
+host	= 127.0.0.1
+port	= 9003
+user	= scraperwiki
+passwd	= scraperwiki
+db	= scraperwiki_datastore
+
+[swlogger]
+host	= 127.0.0.1
+user	= scraperlog
+passwd	= scr4p3rl0g
+db	= scraperwiki_log
+
+[ubuntu]
+host	= 127.0.0.1
+tap	= 127.0.0.1
+eth	= 127.0.0.1
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 25
+
+[uml001]
+host	= 127.0.0.1
+tap	= 192.168.254.101
+eth	= 192.168.254.1
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 25
+

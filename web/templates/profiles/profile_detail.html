@@ -46,7 +46,7 @@
  	        <h2>{{ profile.user.username }}'s requests for datasets</h2>    	
      	    <ul>	        
                 {% for solicitation in solicitations %}
-                    XX
+                    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>{% if solicitation.has_bounty %} <span class="bounty"><a href="{% url market_view solicitation.id %}">&pound;{{solicitation.price}} bounty</a></span>{% endif %}
              	{% endfor %}
  	        </ul> 	            	
           {% endif %}

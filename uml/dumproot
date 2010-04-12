@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+#  This script dumps the content of the jaunty.img root image
+#  into a bzip2'd tar file. Although it should not normally be
+#  neccesary, this can safely be done while UML instances are
+#  running, since jaunty.img is not written: but, it is not safe
+#  while running the rawuml script.
+#
+test $# = 0 ||
+{
+	echo	usage: dumproot
+	exit	1
+}
+
+test `id -u` = 0 ||
+{
+	echo	dumproot: must be run as root
+	exit	1
+}
+
+mkdir	-p jaunty
+mount	-o loop,ro jaunty.img		    jaunty
+tar	-cjvf   jaunty.`date +%d-%b-%y`.bz2 jaunty
+umount	jaunty

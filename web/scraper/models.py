@@ -75,10 +75,10 @@ class Scraper(models.Model):
     has_geo           = models.BooleanField(default=False)
     has_temporal      = models.BooleanField(default=False)
     scraper_sparkline_csv     = models.CharField(max_length=255, null=True)
-    run_interval      = models.IntegerField(default=0)
+    run_interval      = models.IntegerField(default=86400)
 
     objects = managers.scraper.ScraperManager()
-      
+
     def __unicode__(self):
         return self.short_name
     
@@ -88,7 +88,7 @@ class Scraper(models.Model):
         the object to the disk you just have to know it's there by looking
         into the cryptically named vc.py module
         """
-      
+
         # if the scraper doesn't exist already give it a short name (slug)
         if self.short_name:
             self.short_name = util.SlugifyUniquely(self.short_name, 
@@ -103,7 +103,7 @@ class Scraper(models.Model):
      
         if self.created_at == None:
             self.created_at = datetime.datetime.today()
-     
+    
                 
         if not self.guid:
             import hashlib
@@ -159,7 +159,7 @@ class Scraper(models.Model):
         if self.pk:
             followers = self.users.filter(userscraperrole__role='follow')
         return followers
-    
+
     def add_user_role(self, user, role='owner'):
         """
         Method to add a user as either an editor or an owner to a scraper.
@@ -195,7 +195,7 @@ class Scraper(models.Model):
                                        user=user, 
                                        role='follow').delete()
         return True
-        
+
     def followers(self):
         return self.users.filter(userscraperrole__role='follow')
 
@@ -207,7 +207,7 @@ class Scraper(models.Model):
         return (self.owner(),)
             
     def committed_code(self):
-        code = vc.get_code(self.short_name)
+        code = vc.get_code(self.short_name, committed=True)
         return code
 
     def saved_code(self):
@@ -230,7 +230,7 @@ class Scraper(models.Model):
     def update_meta(self):
         
         #update line counts etc
-        line_count = self.count_number_of_lines()
+        self.line_count = self.count_number_of_lines()
         self.record_count = self.count_records()
         self.has_geo = bool(Scraper.objects.has_geo(self.guid))
         self.has_temporal = bool(Scraper.objects.has_temporal(self.guid))
@@ -249,9 +249,14 @@ class Scraper(models.Model):
 
     def content_type(self):
         return ContentType.objects.get(app_label="scraper", model="Scraper")
-        
-tagging.register(Scraper)
 
+#register tagging for scrapers
+try:
+    tagging.register(Scraper)
+except tagging.AlreadyRegistered:
+    pass
+    
+    
 class UserScraperRole(models.Model):
     """
     This embodies the roles associated between particular users and scrapers.

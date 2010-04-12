@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+#  Construct the base home and swap images. When the UML runs, these will have
+#  associated COW files. The images are created as sparse files and then
+#  formatted.
+#
+test $# = 0 ||
+{
+	echo	usage: mkimages
+	exit	1
+}
+
+test `id -u` = 0 ||
+{
+	echo	mkimages: must be run as root
+	exit	1
+}
+
+dd 	if=/dev/zero of=home.img bs=1024 seek=$[ 1024 * 1024 ] count=1
+dd	if=/dev/zero of=swap.img bs=1024 seek=$[ 1024 * 1024 ] count=1
+
+mke2fs	-F home.img
+mkswap	swap.img

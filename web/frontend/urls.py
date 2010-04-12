@@ -13,7 +13,7 @@ urlpatterns = patterns('',
     #url(r'^profiles/', include('profiles.urls')), 
 
     url(r'^login/$',frontend_views.login, name='login'),
-    url(r'^login/confirm/$', 'django.views.generic.simple.direct_to_template', {'template': 'registration/confirm_account.html'}, name='confirm_account'),          
+    url(r'^login/confirm/$', 'django.views.generic.simple.direct_to_template', {'template': 'registration/confirm_account.html'}, name='confirm_account'),
     url(r'^help/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/help.html'}, name='help'),   
     url(r'^terms_and_conditions/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/terms_and_conditions.html'}, name='terms'),
     url(r'^privacy/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/privacy.html'}, name='privacy'),
@@ -21,7 +21,9 @@ urlpatterns = patterns('',
     url(r'^example_data/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/example_data.html'}, name='api'),
     url(r'^help/code_documentation/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/code_documentation.html'}, name='help_code_documentation'),
     url(r'^help/tutorials/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/tutorials.html'}, name='help_tutorials'),  
-
+    
+    #hello world
+    url(r'^hello_world.html', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/hello_world.html'}, name='help_hello_world'),
 
     # contact form
     url(r'^contact/$',                    contact_form, {'form_class':frontend_forms.scraperContactForm},name='contact_form'),

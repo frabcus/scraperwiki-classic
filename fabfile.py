@@ -1,3 +1,5 @@
+import getpass
+
 from fabric.api import *
 
 # globals
@@ -26,6 +28,17 @@ def alpha():
     env.virtualhost_path = "/"
     env.deploy_version = "Alpha"
 
+def www():
+    "The main www server (horsell)"
+    env.hosts = ['89.16.177.212:7822']
+    env.path = '/var/www/scraperwiki'
+    env.branch = 'stable'
+    env.web_path = 'file:///home/scraperwiki/scraperwiki'
+    env.activate = env.path + '/bin/activate'
+    env.user = 'scraperdeploy'
+    env.virtualhost_path = "/"
+    env.deploy_version = "www"
+
 def setup():
     """
     Setup a fresh virtualenv as well as a few useful directories, then run
@@ -43,11 +56,18 @@ def setup():
 
 def virtualenv(command):
     temp = 'cd %s; source ' % env.path
-    run(temp + env.activate + '&&' + command)
+    return run(temp + env.activate + '&&' + command)
 
 
 def buildout():
-  virtualenv('buildout')
+    virtualenv('buildout')
+
+def write_changeset():
+    try:
+        env.changeset = virtualenv('hg log | egrep -m 1 -o "[a-zA-Z0-9]*$"')
+        virtualenv("echo %s > web/changeset.txt" % env.changeset)
+    except:
+        env.changeset = ""
 
 def install_cron():
     virtualenv('crontab crontab')
@@ -59,25 +79,47 @@ def deploy():
     then restart the webserver
     """
 
-    
+
     print "***************** DEPLOY *****************"
     print "Please Enter your deploy message: \r"
     message = raw_input()
-
+    env.kforge_user = raw_input('Your kforge Username: ')
+    kforge_pass = pw = getpass.getpass('Your kforge Password: ')
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
+
+    run("""cd %s; 
+        hg pull https://%s:%s@kforgehosting.com/scraperwiki/hg; 
+        hg update -C %s""" % (env.path,
+                              env.kforge_user,
+                              kforge_pass,
+                              env.branch))
     
-    run('cd %s; hg pull; hg update -C %s' % (env.path, env.branch))
-    
-    buildout()
     migrate()
+    write_changeset()
     install_cron()
     restart_webserver()   
+    email(message)
 
-    sudo("""
-    echo "%s" | mail -s "New Scraperwiki Deployment to %s" scrapewiki-commits@googlegroups.com -- -f mercurial@scraperwiki.com
-    """ % (message, env.deploy_version))
+def email(message_body=None):
+    if not message_body:
+        print "Please Enter your deploy message: \r"
+        message_body = raw_input()
+    
+    message = """From: ScraperWiki <mercurial@scraperwiki.com>
+Subject: New Scraperwiki Deployment to %(version)s (deployed by %(user)s)
 
+%(user)s deployed changeset %(changeset)s, with the following comment:
+
+%(message_body)s
+
+""" % {
+        'version' : env.deploy_version,
+        'user' : env.kforge_user,
+        'changeset' : env.changeset,
+        'message_body' : message_body,
+        }
+    sudo("""echo "%s" | sendmail scrapewiki-commits@googlegroups.com """ % message)
     
 def migrate():
   virtualenv('cd web; python manage.py syncdb')
@@ -86,10 +128,5 @@ def migrate():
 def restart_webserver():
     "Restart the web server"
     sudo('apache2ctl restart')
-
-
-
-
-
 
 

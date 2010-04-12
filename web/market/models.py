@@ -50,7 +50,7 @@ class Solicitation(models.Model):
     link    = models.URLField(verify_exists=True, max_length=200, null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add = True)
     deleted = models.BooleanField()
-    price = models.IntegerField(null=True, blank=True)
+    price = models.FloatField()
     user_created = models.ForeignKey(User)
     status = models.ForeignKey(SolicitationStatus)
     scraper = models.ForeignKey(Scraper, null=True, blank=True)
@@ -61,7 +61,6 @@ class Solicitation(models.Model):
         return self.price > 0
 
     def total_price(self):
-        return 100
         total_price = 0
         if self.price > 0:
             bounty_charge = float(0)

@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# netsetup
+#
+# UML boxes run on an private subnet within the machine. This isolates
+# them from the outside world so that it is not possible for an incoming
+# network connection to reach them other that from the host. To allow
+# outgoing connections to the outside world, the host's iptables NAT chain
+# MASQUERADEs packets as they go out.
+#
+# The script also sets up minimal access for the host itself.
+#
+
+test `id -u` = 0 ||
+{
+	echo	netsetup: must be run as root
+	exit	1
+}
+
+iptables	-F
+iptables -t nat	-F
+
+# Allow ssh access which is on port 7822
+#
+iptables 	-A INPUT	-p tcp			--dport 7822		-j ACCEPT
+
+# Allow access for any traffic originating locally, ie., on the UML subnet and on
+# the loopback device
+#
+iptables	-A INPUT	-p tcp -s 192.168.254.0/24			-j ACCEPT
+iptables	-A INPUT	-i lo						-j ACCEPT
+
+# Allow access to the UML controller (actually via xinetd on the host) from the
+# web server (for requests from the dispatcher) and from the database server
+# (for ident requests from the data proxy)
+#
+iptables	-A INPUT	-p tcp -s 89.16.177.212 --dport 9001		-j ACCEPT
+iptables	-A INPUT	-p tcp -s 89.16.177.212 --dport 9101:9104	-j ACCEPT
+iptables	-A INPUT	-p tcp -s 89.16.177.176 --dport 9001		-j ACCEPT
+iptables	-A INPUT	-p tcp -s 89.16.177.176 --dport 9101:9104	-j ACCEPT
+
+# Allow incoming replies from the MySQL server, used for logging
+#
+iptables	-A INPUT	-p tcp -s 89.16.177.176	--sport 3306		-j ACCEPT
+
+# Allow incoming replies from nameservers, etc.
+#
+iptables	-A INPUT	-p udp			--sport 53		-j ACCEPT
+iptables	-A INPUT	-p tcp			--sport 80		-j ACCEPT
+iptables	-A INPUT	-p tcp			--sport 21		-j ACCEPT
+iptables	-A INPUT	-p tcp			--sport 443		-j ACCEPT
+
+# Allow incoming replies from the data proxy
+#
+iptables	-A INPUT	-p tcp -s 89.16.177.176	--sport 9003		-j ACCEPT
+
+# Allow passive FTP
+#
+iptables	-A INPUT  -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED	  -j ACCEPT
+iptables	-A OUTPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# All other input traffic is rejected
+#
+iptables 	-A INPUT							-j REJECT
+
+# NAT/Masquerade for the UML
+#
+iptables -t nat -A POSTROUTING	-o eth0						-j MASQUERADE
+
+exit	0

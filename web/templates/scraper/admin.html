@@ -1,0 +1,39 @@
+{% extends "scraper/scraper_base.html" %}
+{% load humanize %}
+{% load sparkline %}
+
+{% block tab %}
+    <div class="content">        
+        <div class="section">
+            <h3>Scheduler</h3>
+            <form action="." method="post">
+                <input type="hidden" name="scheduler_update" value="1" />
+    	        {{ form.run_interval.label_tag }}                
+                {{ form.run_interval }}
+                <br/>
+                <input type="submit" class="button small" value="Save changes" />
+            </form>
+        </div>
+        <div class="section">        
+            <h3>Datastore</h3>
+            <form action="." method="post">
+                <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
+                <input type="submit" id="btnClearDatastore" class="button small danger" value="Clear the datastore" />
+                Removes all data for this scraper. There is no undo.
+            </form>
+        </div>
+        <div class="section">                
+            <h3>Status</h3>
+            <form action="." method="post">
+                <input type="hidden" name="delete_scraper" value="1" />
+                <input type="submit" id="btnDeleteScraper" class="button small danger" value="Delete this scraper" />
+                Deletes this scraper and all it's data. There is no undo.
+            </form>
+        </div>
+        
+    </div>
+{% endblock %}
+{% block run_script %}
+    setupButtonConfirmation("btnClearDatastore", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete all existing data for this scraper.");
+    setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this scraper and it's data.");    
+{% endblock %}

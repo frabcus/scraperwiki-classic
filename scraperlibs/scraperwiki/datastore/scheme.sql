@@ -42,3 +42,14 @@ CREATE TABLE IF NOT EXISTS `pages` (
 
 -- global persistant variables can be implemented by (tag="variable", name="variablename", text="variablevalue")
 
+DROP TABLE IF EXISTS `postcode_lookup`;
+CREATE TABLE postcode_lookup (
+    postcode varchar(10) NOT NULL,
+    location POINT NOT NULL,
+    country_code CHAR(2) NOT NULL
+) ENGINE=MyISAM;
+
+ALTER TABLE `postcode_lookup` ADD UNIQUE INDEX postcode_unique(`postcode`),
+ ADD INDEX country_code(`country_code`),
+ ADD INDEX postcode(`postcode`);
+

@@ -200,7 +200,8 @@ class Command(BaseCommand):
 
             # Count of all alerts
             self.alert_counter = 0
-
+            self.broken_scrapers = 0
+            
             # Step 2: List of alerts the user wants
             alerts_wanted = user.alert_types.all()
 

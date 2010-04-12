@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# rawuml
+#
+# Boot UML uml001 without the copy-on-write file. This is used when configuring the
+# base jaunty.img image. Note that all copy-on-write files will be removed.
+#
+test $# = 0 ||
+{
+	echo	usage: rawuml
+	exit	1
+}
+
+test `id -u` = 0 ||
+{
+	echo	rawuml: must be run as root
+	exit	1
+}
+
+echo	-n "This will destroy all COW files: continue [y/N]: "
+read	resp
+case "$resp"
+in
+	y|Y|yes|YES)
+		;;
+
+	*)
+		exit
+		;;
+esac
+
+test -d uml001 ||
+{
+	echo	bootuml: uml uml001 does not exist
+	exit	1
+}
+
+rm	-f uml???/*.cow
+
+./linux	ubda=jaunty.img				\
+	ubdb=uml001/addr.img			\
+	ubdc=home.img,uml001/home.cow		\
+	ubdd=scraper.img			\
+	ubde=swap.img,uml001/swap.cow		\
+	eth0=tuntap,,,192.168.254.101		\
+	mem=128M con0=fd:0,fd:1			\
+	con=pts
+	umid="001"

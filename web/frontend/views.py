@@ -2,6 +2,7 @@ from django import forms
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.contrib import auth
+from django.shortcuts import get_object_or_404
 import settings
 from frontend.forms import SigninForm, UserProfileForm
 
@@ -21,6 +22,10 @@ import django.contrib.auth.views
 import os
 import re
 import datetime
+
+from utilities import location
+location.is_gb_postcode('sw98JX')
+
 
 def frontpage(request, public_profile_field=None):
     user = request.user
@@ -71,7 +76,7 @@ def my_scrapers(request):
 	user = request.user
 
 	if user.is_authenticated():
-		owned_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False)
+		owned_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False).order_by('-created_at')
 		owned_count = len(owned_scrapers) 
 		# needs to be expanded to include scrapers you have edit rights on.
 		contribution_scrapers = user.scraper_set.filter(userscraperrole__role='editor', deleted=False)
@@ -83,28 +88,14 @@ def my_scrapers(request):
 
 	return render_to_response('frontend/my_scrapers.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count, }, context_instance = RequestContext(request))
 
-
-# Override default profile view to include 'follow' button
 def profile_detail(request, username):
-		user = request.user
-		try:
-			profiled_user = User.objects.get(username=username)
-		except User.DoesNotExist:
-			raise Http404
-                owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True, deleted=False)
-		if request.method == 'POST': # if follow form has been submitted
-			if user.is_authenticated():
-				if (profiled_user in user.to_user.following()):
-					u = UserToUserRole.objects.filter(to_user=profiled_user, from_user=user, role='follow')
-					u.delete()
-					return profile_views.profile_detail(request, username=username, extra_context={ 'following': False, 'owned_scrapers' : owned_scrapers, }, )
-				else:
-					u = UserToUserRole(to_user=profiled_user, from_user=user, role='follow')
-					u.save()
-					return profile_views.profile_detail(request, username=username, extra_context={ 'following': True, 'owned_scrapers' : owned_scrapers, }, )
-		else:
-			following = UserToUserRole.objects.filter(to_user=profiled_user, from_user=user, role='follow')
-			return profile_views.profile_detail(request, username=username, extra_context={ 'following' : following, 'owned_scrapers' : owned_scrapers, } )
+    
+    user = request.user
+    profiled_user = get_object_or_404(User, username=username)
+    owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True)
+    solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
+
+    return profile_views.profile_detail(request, username=username, extra_context={ 'solicitations' : solicitations, 'owned_scrapers' : owned_scrapers, } )
 
 
 def edit_profile(request):
