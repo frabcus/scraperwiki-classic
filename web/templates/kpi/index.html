@@ -1,0 +1,42 @@
+<html>
+<head><title>Key Performance Indicators</title></head>
+<body>
+<h1>Key Performance Indicators</h1>
+
+{% for year in data %}
+  <h2>{{year.year}}</h2>
+  <table border="1">
+    <tr>
+       <th>&nbsp;</th>
+     {% for month in year.months %}
+       <th>{{month.month}}</th>
+     {% endfor %}
+    </tr>
+    <tr>
+       <th>This Month's Scrapers</th>
+     {% for month in year.months %}
+       <th>{{month.this_months_scrapers}}</th>
+     {% endfor %}
+    </tr>
+    <tr>
+       <th>Total Scrapers</th>
+     {% for month in year.months %}
+       <th>{{month.total_scrapers}}</th>
+     {% endfor %}
+    </tr>
+    <tr>
+       <th>This Month's Users</th>
+     {% for month in year.months %}
+       <th>{{month.this_months_users}}</th>
+     {% endfor %}
+    </tr>
+    <tr>
+       <th>Total Users</th>
+     {% for month in year.months %}
+       <th>{{month.total_users}}</th>
+     {% endfor %}
+    </tr>
+  </table>
+{% endfor %}
+</body>
+</html>

@@ -59,6 +59,9 @@ urlpatterns = patterns('',
 
     # Robots.txt
     (r'^robots.txt$', direct_to_template, {'template': 'robots.txt', 'mimetype': 'text/plain'}),
+
+    # Key Performance Indicators
+    (r'^kpi/', include('kpi.urls')),
     
     # static media server for the dev sites / local dev
     url(r'^media/(?P<path>.*)$',       'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}),
