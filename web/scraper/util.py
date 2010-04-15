@@ -26,8 +26,8 @@ def SlugifyUniquely(value, model, slugfield="slug", instance=None):
     http://www.b-list.org/weblog/2006/11/02/django-tips-auto-populated-fields
     """
     suffix = 0
-    potential = base = slugify(value)
     max_length = model._meta.get_field(slugfield).max_length
+    potential = base = slugify(value)[:max_length]
     while True:
         if suffix:
             prefix = base[:max_length - (len(str(suffix)) + 1)]
@@ -35,7 +35,6 @@ def SlugifyUniquely(value, model, slugfield="slug", instance=None):
                 prefix = prefix[:-1]
 
             potential = "-".join([prefix, str(suffix)])
-            return potential
 
         matches = model.objects.filter(**{slugfield: potential})
         if matches.count() == 0 or (instance and matches[0].pk == instance.pk):
