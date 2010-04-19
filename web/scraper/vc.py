@@ -9,8 +9,8 @@ import mercurial
 from mercurial import ui as hgui, hg, commands, util, cmdutil
 from mercurial.match import always, exact
 
-import localsettings
-SMODULES_DIR = localsettings.SMODULES_DIR
+from django.conf import settings
+SMODULES_DIR = settings.SMODULES_DIR
 
 
 # from scraper.models import Scraper
