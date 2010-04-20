@@ -9,7 +9,7 @@ Note: Commands need to be run as root, log in as root or use sudo.
    The loadroot command will build a root disc image called jaunty.img
    from a bzip2'd tarball.
 
-   sudo ./loadroot jaunty.18-Sep-09.bz2
+   sudo ./loadroot data/jaunty.19-Apr-10.bz2
 
 3. Create home and swap images.
    These images are shared between all UML instances using copy-on-write
@@ -21,7 +21,7 @@ Note: Commands need to be run as root, log in as root or use sudo.
    Kernels are stored in the "kernels" directory. The current kernel is
    linux-2.6.30.5.
 
-   ln -s kernels/linux-2.6.30.5 linux
+   ln -s data/kernels/linux-2.6.30.5 linux
 
 5. Assembling a scraper disc image.
    UML instances run with the scraper.img disc image mounted read-only on
@@ -33,20 +33,22 @@ Note: Commands need to be run as root, log in as root or use sudo.
    This script will need extending as changes are made to the scraper
    system.
 
-6. Create a UML instance. The argument is used to construct the UML's IP
-   address, and should be in the range 1...99. The UML will get IP address
-   192.168.254.X; when running the host will get a tap interface with
-   address 192.168.254.Y where Y=X+100. The files for the UML box will
-   appear in a directory "umlZZZ" where ZZZ is N left-zero-padded. The
-   script checks that the UML instance does not currently exist.
+6. Configure the UML system
+   There are a number of uml.cfg.xxx files, use an appropriate one or
+   create your own.
 
-   sudo ./cloneuml 1
+   ln -s uml.cfg.sw uml.cfg
+
+7. Create a UML instance. The argument is the name of a UML from the
+   uml.cfg file.
+
+   sudo ./cloneuml uml001
 
 7. Boot the UML instance
    The UML instance is run inside a screen session, so control will return
    to the shell. Use the screen command to connect to the session.
 
-   sudo ./bootuml 1
+   sudo ./bootuml uml001
    sudo screen -r
 
    If there are multiple UML instances running, they can be identified using
@@ -64,6 +66,9 @@ Note: Commands need to be run as root, log in as root or use sudo.
    type ctrl-A. To shutdown a UML instance use the halt command and wait
    for the instance to halt, whence the screen will terminate and control
    returns to the shell.
+
+   NOTE: If the UML does not run the "./rawuml" will start uml001 without
+   using screen so that output is immediately visible.
 
 8. Boot all UML instances
    All non-running UML instance can be booted with the bootall command. There

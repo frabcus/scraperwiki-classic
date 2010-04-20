@@ -5,6 +5,7 @@ import frontend.views as frontend_views
 
 from django.contrib.syndication.views import feed as feed_view
 from django.views.generic import date_based, list_detail
+from django.views.generic.simple import direct_to_template
 from django.contrib import admin
 import django.contrib.auth.views as auth_views
 
@@ -55,6 +56,12 @@ urlpatterns = patterns('',
 
     # API
     (r'^api/', include('api.urls', namespace='foo', app_name='api')),
+
+    # Robots.txt
+    (r'^robots.txt$', direct_to_template, {'template': 'robots.txt', 'mimetype': 'text/plain'}),
+
+    # Key Performance Indicators
+    (r'^kpi/', include('kpi.urls')),
     
     # static media server for the dev sites / local dev
     url(r'^media/(?P<path>.*)$',       'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}),
