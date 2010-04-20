@@ -1,5 +1,6 @@
 from api.handlers.api_base import APIBase
 from web.scraper.models import Scraper
+import datetime
 
 class Keys(APIBase):
     required_arguments = ['name']
@@ -80,9 +81,9 @@ class DataByDate(APIBase):
                 
             if self.has_errors() == False:        
                 scraper = self.get_scraper(request)                
-                self.result = Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, latlng=latlng)
+                self.result = Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, start_date=start_date, end_date=end_date)
 
-    def convert_date(self, dateform):
+    def convert_date(self, date_str):
         try:
             return datetime.datetime.strptime(date_str, '%Y-%m-%d')
         except ValueError:
