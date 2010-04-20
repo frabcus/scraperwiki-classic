@@ -9,6 +9,7 @@ import BaseHTTPServer
 import SocketServer
 import urllib
 import urlparse
+import cgi
 import select
 import signal
 import os
@@ -188,7 +189,8 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
             return
 
-        params = urlparse.parse_qs(query)
+        try    : params = urlparse.parse_qs(query)
+        except : params = cgi     .parse_qs(query)
         scraperID, runID = self.ident (params['uml'][0], params['port'][0])
 
         if path == '' or path is None :
