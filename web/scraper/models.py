@@ -55,7 +55,7 @@ class Scraper(models.Model):
                                         blank=False, 
                                         verbose_name='Scraper Title', 
                                         default='Untitled Scraper')
-    short_name        = models.CharField(max_length=50, unique=True)
+    short_name        = models.CharField(max_length=50)
     source            = models.CharField(max_length=100, blank=True)
     last_run          = models.DateTimeField(blank=True, null=True)
     description       = models.TextField(blank=True)
