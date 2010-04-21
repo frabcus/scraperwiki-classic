@@ -485,6 +485,9 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         @param  info    : Name of UML to add
         """
 
+        global UMLPtr
+        global UMLList
+
         #  Check that the named UML exists, if not then report an
         #  error.
         #
@@ -524,6 +527,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         @param  name    : Name of UML to remove
         """
 
+        global UMLPtr
         global UMLList
 
         #  Can UML list for the named UML, report an error it it is
