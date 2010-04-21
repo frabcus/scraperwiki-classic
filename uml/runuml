@@ -21,7 +21,7 @@ echo $unm
 get(){
 	sed -n "/^\[${unm}\]/,/^\[/ s/^[ \t]*${1}[ \t]*=[ \t]*\(.*\)/\1/ p" uml.cfg
 }
-echo XXXX
+
 date	> ${unm}/running
 
 mem=`get mem`
