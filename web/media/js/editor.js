@@ -98,14 +98,18 @@ $(document).ready(function() {
     //Setup Menu
     function setupMenu(){
         $('#menu_shortcuts').click(function(){
-           showPopup('popup_shortcuts'); 
+            showPopup('popup_shortcuts'); 
         });
         $('#menu_settings').click(function(){
-           showPopup('popup_settings'); 
+            showPopup('popup_settings'); 
         });
         $('#menu_documentation').click(function(){
-           showPopup('popup_documentation'); 
+            showPopup('popup_documentation'); 
         });        
+        $('form#editor').submit(function() { 
+            saveScraper(false); 
+            return false; 
+        })
     }
     
     //Setup Tabs
