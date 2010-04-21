@@ -35,14 +35,16 @@
           <dd>{{ scraper.record_count }}</dd>
           <dt>API short name:</dt>
           <dd>{{scraper.short_name}}</dd>
-        <dt>Language:</dt>
-        <dd>{{scraper.language}}</dd>
-        <dt>Tags:</dt>
-        {% if scraper.published %}
-            <dd>{% for tag in scraper_tags %}<a href="{% url tag tag %}">{{ tag }}</a> {% endfor %}</dd>
-        {% else %}
-            <dd>{% for tag in scraper_tags %}{{ tag }} {% endfor %}</dd>
-        {% endif %}
+          <dt>Language:</dt>
+          <dd>{{scraper.language}}</dd>
+          <dt>Data:</dt>
+          <dd><a href="{% url export_csv scraper.short_name %}" rel="nofollow">download csv</a></dd>
+          <dt>Tags:</dt>
+          {% if scraper.published %}
+              <dd>{% for tag in scraper_tags %}<a href="{% url tag tag %}">{{ tag }}</a> {% endfor %}</dd>
+          {% else %}
+              <dd>{% for tag in scraper_tags %}{{ tag }} {% endfor %}</dd>
+          {% endif %}
         </dl>
     </div>
     <h4>Recent activity</h4>
