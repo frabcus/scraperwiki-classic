@@ -245,6 +245,12 @@ def allocateUML (queue = False, **status) :
     #
     UMLLock.acquire()
 
+    #  Special case, no UMLs available at all
+    #
+    if UMLPtr is None :
+        UMLLock.release()
+        return None, None
+
     #  First scan for a UML which is both acceptable and free. If found
     #  the acquire it and return it. The main lock is released.
     #
@@ -300,7 +306,7 @@ def releaseUML (uml, id) :
         UMLList = [ u for u in UMLList if u is not uml ]
         for i in range(len(UMLList)) :
             UMLList[i].setNextUML(UMLList[(i+1) % len(UMLList)])
-        UMLPtr  = UMLList[0]
+        UMLPtr  = len(UMLList) > 0 and UMLList[0] or None
 
     UMLLock.release ()
 
@@ -470,28 +476,43 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  (string.join(status, '\n'))
         self.connection.send  ('\n')
 
-    def addUML (self, info) :
+    def addUML (self, name) :
 
         """
         Add a new UML
 
         @type   info    : String
-    @param  info    : New UML as name:port:address:count
+        @param  info    : Name of UML to add
         """
 
-        uname, uport, uaddr, count = info.split(':')
+        #  Check that the named UML exists, if not then report an
+        #  error.
+        #
+        if not config.has_section (name) :
+            self.sendOK ()
+            self.connection.send  ('UML %s not found' % name)
+            self.connection.send  ('\n')
+            return
+
+        #  Get the UML details and add to the list; the next UML
+        #  pointer is arbitrarily reset to the first UML in the list
+        #
+        host  = config.get    (name, 'host' )
+        via   = config.getint (name, 'via'  )
+        count = config.getint (name, 'count')
 
         UMLLock.acquire()
 
-        try :
-            UMLList.append (UML(uname, uaddr, int(uport), int(count)))
-            for i in range(len(UMLList)) :
-                UMLList[i].setNextUML(UMLList[(i+1) % len(UMLList)])
-            UMLPtr  = UMLList[0]
-        except :
-            pass
+        UMLList.append (UML(uml, host, via, count))
+        for i in range(len(UMLList)) :
+            UMLList[i].setNextUML(UMLList[(i+1) % len(UMLList)])
+        UMLPtr  = UMLList[0]
 
         UMLLock.release()
+
+        #  On successful addition pass back the new configuration
+        #  information.
+        #
         self.sendConfig()
 
     def removeUML (self, name) :
@@ -529,7 +550,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             UMLList = [ u for u in UMLList if u is not uml ]
             for i in range(len(UMLList)) :
                 UMLList[i].setNextUML(UMLList[(i+1) % len(UMLList)])
-            UMLPtr  = UMLList[0]
+            UMLPtr  = len(UMLList) > 0 and UMLList[0] or None
             UMLLock.release()
             self.sendOK ()
             self.connection.send  ('UML %s removed' % name)
@@ -803,7 +824,7 @@ if __name__ == '__main__' :
     for i in range(len(UMLList)) :
         UMLList[i].setNextUML(UMLList[(i+1) % len(UMLList)])
 
-    UMLPtr  = UMLList[0]
+    UMLPtr  = len(UMLList) > 0 and UMLList[0] or None
     UMLLock = threading.Lock()
 
     execute (config.getint (name, 'port'))
