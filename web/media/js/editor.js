@@ -598,7 +598,7 @@ $(document).ready(function() {
 
     //Show random text popup
     function showTextPopup(sMessage, sMessageType){
-        $('#popup_text .output pre').text(sMessage);
+        $('#popup_text .output pre').html(sMessage);
         showPopup('popup_text');
     }
     
