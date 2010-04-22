@@ -29,9 +29,11 @@
        {% endifequal %}
     {% else %}
         {% ifequal solicitation.status.status 'pending' %}
-            This suggestion has been claimed by <a href="{% url profiles_profile_detail solicitation.scraper.owner.username %}">{{solicitation.scraper.owner.username}}</a> and is being reviewed by <a href="{% url profiles_profile_detail solicitation.user_created.username %}">{{solicitation.user_created.username}}</a>.
+            <p>This suggestion has been claimed by <a href="{% url profiles_profile_detail solicitation.scraper.owner.username %}">{{solicitation.scraper.owner.username}}</a> and is being reviewed by <a href="{% url profiles_profile_detail solicitation.user_created.username %}">{{solicitation.user_created.username}}</a>.</p>
+            <p>The suggested scraper is: <a href="{% url scraper_overview solicitation.scraper.short_name %}">{{solicitation.scraper.title}}</a></p>
         {% else %}
-            This suggestion turned into a scraper by <a href="{% url profiles_profile_detail solicitation.scraper.owner.username %}">{{solicitation.scraper.owner.username}}</a>!
+            <p>This suggestion has been turned into a scraper by <a href="{% url profiles_profile_detail solicitation.scraper.owner.username %}">{{solicitation.scraper.owner.username}}</a>!</p>
+            <p>The successful scraper is: <a href="{% url scraper_overview solicitation.scraper.short_name %}">{{solicitation.scraper.title}}</a></p>
         {% endifequal %}
     {% endifequal %}
     <ul>
