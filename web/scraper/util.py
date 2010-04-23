@@ -36,7 +36,7 @@ def SlugifyUniquely(value, model, slugfield="slug", instance=None):
 
             potential = "-".join([prefix, str(suffix)])
 
-        matches = model.objects.filter(**{slugfield: potential})
+        matches = model.unfiltered.filter(**{slugfield: potential})
         if matches.count() == 0 or (instance and matches[0].pk == instance.pk):
             return potential
 
