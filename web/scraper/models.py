@@ -78,6 +78,7 @@ class Scraper(models.Model):
     run_interval      = models.IntegerField(default=86400)
 
     objects = managers.scraper.ScraperManager()
+    unfiltered = models.Manager()
 
     def __unicode__(self):
         return self.short_name
