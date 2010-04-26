@@ -26,7 +26,7 @@
           {% endifequal %}
           
           {% if item.user %}
-            by <a href="{% url profiles_profile_detail scraper.owner.username %}">
+            by <a href="{% url profiles_profile_detail item.user.username %}">
             {% load gravatar %} {% show_gravatar item.user 'small' %}&nbsp;{{item.user.username}}</a>
           {% endif %}
         
