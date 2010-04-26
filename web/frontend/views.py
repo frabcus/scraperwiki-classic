@@ -111,10 +111,7 @@ def login(request):
     error_messages = []
 
     #grab the redirect URL if set
-    redirect = request.GET.get('next', False)
-    if request.POST.get('redirect', False):
-        redirect = request.POST.get('redirect', False)
-    
+    redirect = request.GET.get('next') or request.POST.get('redirect', '')
     
     #Create login and registration forms
     login_form = SigninForm()
