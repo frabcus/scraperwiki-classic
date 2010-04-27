@@ -72,14 +72,10 @@ class Command(BaseCommand):
 
     def handle(self, **options):
         if options['short_name']:
-            scrapers = Scraper.objects.get(short_name=options['short_name'], published=True, )
+            scrapers = Scraper.objects.get(short_name=options['short_name'], published=True)
             self.run_scraper(scrapers, options)
         else:
-
-            #get all scrapers where interval > 0 and require running
-            scrapers = Scraper.objects.filter(published=True)
-            scrapers = Scraper.objects.filter(run_interval__gt=0)
-            scrapers = scrapers.extra(where=["ADDTIME(last_run, SEC_TO_TIME(run_interval)) > NOW() or last_run is null"])
+            scrapers = self.get_overdue_scrapers()
             for scraper in scrapers:
                 try:
                     self.run_scraper(scraper, options)
@@ -87,6 +83,8 @@ class Command(BaseCommand):
                     print "Error running scraper: " + scraper.short_name
                     print e
 
-        
-            
-
+    def get_overdue_scrapers(self):
+        #get all scrapers where interval > 0 and require running
+        scrapers = Scraper.objects.filter(published=True).filter(run_interval__gt=0)
+        scrapers = scrapers.extra(where=["(ADDTIME(last_run, SEC_TO_TIME(run_interval)) < NOW() or last_run is null)"])
+        return scrapers
