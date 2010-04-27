@@ -84,7 +84,7 @@ class Command(BaseCommand):
                 try:
                     self.run_scraper(scraper, options)
                 except Exception, e:
-                    print "Error running scraper: " + scraper.title
+                    print "Error running scraper: " + scraper.short_name
                     print e
 
         
