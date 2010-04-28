@@ -4,7 +4,7 @@ This file imports all gobal settings and defined new ones.
 Anything imported in global_settings can be overwriten for a local install.
 
 """
-from global_setting import *
+from global_settings import *
 
 import os
 import sys

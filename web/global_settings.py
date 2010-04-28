@@ -99,21 +99,25 @@ INSTALLED_APPS = [
     'django.contrib.comments',
     'registration',
     'south',
+    
     'profiles',
+  	'django.contrib.humanize',
+  	'paypal.standard.ipn',
+  	'django_notify',
+  	'tagging',
+  	'mailer',
+  	'contact_form',
+  	'piston',      # needs 'django-piston' and 'phpserialize'
+    
+    # the following are scraperwiki apps
     'frontend',
   	'scraper',
   	'notification',
   	'editor',
-  	'contact_form',
   	'payment',  	
   	'market',
-  	'piston',      # needs 'django-piston' and 'phpserialize'
   	'api',
-  	'django_notify',
-  	'tagging',
-  	'django.contrib.humanize',
-  	'paypal.standard.ipn',
-  	'mailer',
+    'whitelist',
 ]
 
 
