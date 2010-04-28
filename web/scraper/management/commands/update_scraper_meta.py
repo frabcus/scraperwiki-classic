@@ -11,7 +11,7 @@ class Command(BaseCommand):
     )
     help = 'Update various meta data for a scraper or all scrapers.'
     
-    def update_meta(scraper):
+    def update_meta(self, scraper):
         """
         Takes a scraper object for manipulating.
         
