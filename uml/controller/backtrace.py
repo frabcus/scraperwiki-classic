@@ -2,27 +2,27 @@
 #   reformatted somewhat, and modified for ScraperWiki. Many thanks to
 #   Ka-Ping Yee for this code.
 #
-import	os
-import	types
-import	time
-import	traceback
-import	linecache
-import	inspect
-import	pydoc
-import	sys
-import	string
+import  os
+import  types
+import  time
+import  traceback
+import  linecache
+import  inspect
+import  pydoc
+import  sys
+import  string
 
 __UNDEF__ = []                          # a special sentinel object
 
-scraper	  = None
+scraper   = None
 
 def strong (text) :
 
     """
     Format text within the "strong" tag
 
-    @type	text	: String
-    @param	text	: Text to format
+    @type   text    : String
+    @param  text    : Text to format
     """
 
     if text :
@@ -34,8 +34,8 @@ def small (text) :
     """
     Format text within the "small" tag
 
-    @type	text	: String
-    @param	text	: Text to format
+    @type   text    : String
+    @param  text    : Text to format
     """
 
     if text :
@@ -48,8 +48,8 @@ def grey (text) :
     """
     Format text as grey
 
-    @type	text	: String
-    @param	text	: Text to format
+    @type   text    : String
+    @param  text    : Text to format
     """
 
     if text :
@@ -62,12 +62,12 @@ def lookup (name, frame, locals) :
     """
     Look up a variable in the specified frame and locals.
 
-    @type	name	: String
-    @param	name	: Variable to look up
-    @type	frame	: Frame
-    @param	frame	: Frame to search
-    @type	locals	: Dictionary
-    @param	locals	: Local varaiables
+    @type   name    : String
+    @param  name    : Variable to look up
+    @type   frame   : Frame
+    @param  frame   : Frame to search
+    @type   locals  : Dictionary
+    @param  locals  : Local varaiables
     """
 
     if name in locals :
@@ -140,24 +140,30 @@ def html ((etype, evalue, etb), context = 5) :
     pyver   = 'Python ' + sys.version.split()[0] + ': ' + sys.executable
     date    = time.ctime (time.time())
     head    = '<span class="scraper_traceback">' + \
-			pydoc.html.heading \
-			(
-				'<big><big>%s</big></big>' % strong(pydoc.html.escape(etext)),
-				'#ffffff',
-				'#6622aa',
-				pyver + '<br>' + date
-			) + \
-			'<p></p>'
+            pydoc.html.heading \
+            (
+                '<big><big>%s</big></big>' % strong(pydoc.html.escape(etext)),
+                '#ffffff',
+                '#6622aa',
+                pyver + '<br>' + date
+            ) + \
+            '<p></p>'
 
     indent  = '<tt>' + small('&nbsp;' * 5) + '&nbsp;</tt>'
     infile  = None
     atline  = None
     frames  = []
+    showing = False
 
     records = inspect.getinnerframes (etb, context)
     for frame, file, lnum, func, lines, index in records :
 
         file, lines, index = checkScraper (file, lines, index, lnum, context)
+
+        if file == 'Scraper' :
+            showing = True
+        if not showing :
+            continue
 
         link   = pydoc.html.escape(file)
         call   = ''
@@ -166,13 +172,13 @@ def html ((etype, evalue, etb), context = 5) :
 
         if func != '?' :
             call = 'in ' + strong(func) + \
-			inspect.formatargvalues \
-			(	args,
-				varargs,
-				varkw,
-				locals,
-				formatvalue = lambda value: '=' + pydoc.html.repr(value)
-			)
+            inspect.formatargvalues \
+            (   args,
+                varargs,
+                varkw,
+                locals,
+                formatvalue = lambda value: '=' + pydoc.html.repr(value)
+            )
 
         hilite = {}
 
@@ -210,8 +216,8 @@ def html ((etype, evalue, etb), context = 5) :
             if value is not __UNDEF__ :
                 if   where == 'global'  : name = '<em>global</em> '  + strong(name)
                 elif where == 'builtin' : name = '<em>builtin</em> ' + strong(name)
-                elif where == 'local'	: name = strong(name)
-                else			: name = where + strong(name.split('.')[-1])
+                elif where == 'local'   : name = strong(name)
+                else            : name = where + strong(name.split('.')[-1])
                 dump.append('%s&nbsp;= %s' % (name, pydoc.html.repr(value)))
                 continue
 
@@ -219,12 +225,12 @@ def html ((etype, evalue, etb), context = 5) :
 
         rows  .append ('<tr><td>%s</td></tr>' % small(grey(', '.join(dump))))
         frames.append \
-		(	'''
-			<table width="100%%" cellspacing=0 cellpadding=0 border=0>
-			  %s
-			</table>
-			''' % '\n'.join(rows)
-		)
+        (   '''
+            <table width="100%%" cellspacing=0 cellpadding=0 border=0>
+              %s
+            </table>
+            ''' % '\n'.join(rows)
+        )
 
         if infile is None :
             if file[:4] != '/usr' and file.find('/scripts/') < 0 :
@@ -232,9 +238,9 @@ def html ((etype, evalue, etb), context = 5) :
                 atline = lnum
 
         exception = \
-		[	'<p>%s: %s' % (strong(pydoc.html.escape(etext)),
+        [   '<p>%s: %s' % (strong(pydoc.html.escape(etext)),
                          pydoc.html.escape(str(evalue)))
-		]
+        ]
 
     if type(evalue) is types.InstanceType :
         for name in dir(evalue) :
@@ -261,25 +267,30 @@ def text ((etype, evalue, etb), context=5) :
     infile  = None
     atline  = None
     frames  = []
+    showing = False
 
     records = inspect.getinnerframes (etb, context)
     for frame, file, lnum, func, lines, index in records :
 
         file, lines, index = checkScraper (file, lines, index, lnum, context)
 
-        call   = ''
+        if file == 'Scraper' :
+            showing = True
+        if not showing :
+            continue
 
+        call   = ''
         args, varargs, varkw, locals = inspect.getargvalues(frame)
 
         if func != '?' :
             call = 'in ' + func + \
-			inspect.formatargvalues \
-			(	args,
-				varargs,
-				varkw,
-				locals,
-				formatvalue = lambda value: '=' + pydoc.text.repr(value)
-			)
+            inspect.formatargvalues \
+            (   args,
+                varargs,
+                varkw,
+                locals,
+                formatvalue = lambda value: '=' + pydoc.text.repr(value)
+            )
 
         hilite = {}
 

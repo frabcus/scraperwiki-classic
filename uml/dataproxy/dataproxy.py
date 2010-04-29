@@ -28,9 +28,9 @@ global config
 
 USAGE      = " [--varDir=dir] [--subproc] [--daemon] [--config=file]"
 child      = None
-config	   = None
+config     = None
 varDir     = '/var'
-uid	   = None
+uid        = None
 gid        = None
 statusLock = None
 statusInfo = {}

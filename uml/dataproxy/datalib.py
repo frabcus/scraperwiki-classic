@@ -17,6 +17,7 @@ def connection (config) :
     otherwise returns the extant one.
     """
 
+    global dbtype
     global db
     global place
 

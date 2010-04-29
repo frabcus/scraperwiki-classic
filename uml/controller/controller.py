@@ -1,5 +1,5 @@
 #!/bin/sh -
-"exec" "python" "-O" "$0" "$@"
+"exec" "python" "$0" "$@"
 
 __doc__ = """ScraperWiki Controller
 
@@ -520,22 +520,27 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         httpport = config.get ('httpproxy', 'port')
         ftpport  = config.get ('ftpproxy',  'port')
 
-        #  These seem to be needed for urllib.urlopen()
+        import scraperwiki.utils
+
+        #  These seem to be needed for urllib.urlopen() to support proxying, though
+        #  FTP doesn't actually work.
         #
         os.environ['http_proxy' ] = 'http://%s:%s' % (tap, httpport)
         os.environ['https_proxy'] = 'http://%s:%s' % (tap, httpport)
         os.environ['ftp_proxy'  ] = 'ftp://%s:%s'  % (tap, ftpport )
+        scraperwiki.utils.urllibSetup   ()
 
         #  This is for urllib2.urlopen() (and hance scraperwiki.scrape()) where
         #  we can set explicit handlers.
         #
         import urllib2
-        import scraperwiki.utils
         HTTPProxy   = urllib2.ProxyHandler ({'http':  'http://%s:%s' % (tap, httpport)})
         HTTPSProxy  = urllib2.ProxyHandler ({'https': 'http://%s:%s' % (tap, httpport)})
         FTPProxy    = urllib2.ProxyHandler ({'ftp':   'ftp://%s:%s'  % (tap, ftpport )})
-        scraperwiki.utils.setupHandlers (HTTPProxy, HTTPSProxy, FTPProxy)
-        scraperwiki.utils.allowCache    ('x-cache' in self.headers and self.headers['x-cache'] == 'on')
+        scraperwiki.utils.urllib2Setup  (HTTPProxy, HTTPSProxy, FTPProxy)
+
+        try    : scraperwiki.utils.allowCache   (int(self.headers['x-cache']))
+        except : pass
 
         idents = []
         if scraperID is not None : idents.append ('scraperid=%s' % scraperID)
@@ -606,13 +611,13 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             emsg = errormapper.mapException (e)
             etext, trace, infile, atline = self.getTraceback (code)
             sys.stdout.write \
-        (   '<scraperwiki:message type="exception">%s\n' % \
+                (   '<scraperwiki:message type="exception">%s\n' % \
                     json.dumps \
                     (   {   'content'   : emsg,
                             'content_long'  : trace,
-                'filename'  : infile,
-                'lineno'    : atline
-            }
+                            'filename'  : infile,
+                            'lineno'    : atline
+                    }
                 )   )
             sys.stdout.flush ()
             swl.log     (scraperID, runID, 'C.ERROR', arg1 = etext, arg2 = trace)

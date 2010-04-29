@@ -1,0 +1,69 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Whitelist and Blacklist{% endblock %}
+
+{% block content %}
+<div class="page_title">
+
+<p>
+  In order to maintain some discipline round here, ScraperWiki filters the http requests 
+  your scapers can make according to whether they match any of the domains in the <b>white list</b> 
+  and do not match anything in the <b>black list</b>.
+  This list can be changed by request.
+</p>
+
+{% if url %}
+<p class="report">
+  The url <b>{{url}}</b> is 
+  {% if urlinwhitelist %}
+    in <b>white list</b>
+    {% if urlinblacklist %}
+      but rejected by the <b>black list</b>.
+    {% else %}
+      and should be <b>accepted</b>.
+    {% endif %}
+  {% else %}
+    not in white list.
+  {% endif %}
+</p>
+{% endif %}
+
+<h2>Whitelist</h2>
+<ul class="bulleted">
+  {% for whitelistobj in whitelist %}
+    <li>
+    {{whitelistobj.0.urlregexname}}  
+    {% if whitelistobj.1 %}
+      <b>MATCHED</b>
+    {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+
+<h2>Blacklist</h2>
+<ul class="bulleted">
+  {% for blacklistobj in blacklist %}
+    <li>{{blacklistobj.0.urlregexname}}  
+    {% if blacklistobj.1 %}
+      <b>MATCHED</b>
+    {% endif %}
+    </li>
+  {% endfor %}
+  {% if blacklistunlisted %}
+    <li>
+      and {{blacklistunlisted}} ex-directory ones
+      {% if blacklistunlistedrejected %}
+        (which matches) 
+      {% endif %}
+    </li>
+  {% endif %}
+</ul>
+
+<p>
+  If you have any queries or suggested changes to these lists, 
+  please do not hesitate to <a href="{% url contact_form %}">contact us</a>.
+</p>
+
+
+</div>
+{% endblock %} 

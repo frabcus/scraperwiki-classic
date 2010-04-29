@@ -51,13 +51,13 @@ class UML :
         scraper count.
 
         @type   name    : String
-    @param  name    : Server name
+        @param  name    : Server name
         @type   server  : String
-    @param  server  : Server address
+        @param  server  : Server address
         @type   port    : Integer
-    @param  port    : Port number
+        @param  port    : Port number
         @type   count   : Integer
-    @param  count   : Scraper count
+        @param  count   : Scraper count
         """
 
         self.m_name    = name
@@ -146,7 +146,7 @@ class UML :
         returned. 
 
         @type   status  : Dictionary
-    @param  status  : Status information
+        @param  status  : Status information
         @rtype      : UUID
         @return     : Request identifier
         """
@@ -173,7 +173,7 @@ class UML :
         the lock then it will proceed. The status information is removed.
 
         @type   id  : UUID
-    @param  id  : Status identifier
+        @param  id  : Status identifier
         @return Bool    : True if UML should be closed
         """
 
@@ -190,7 +190,7 @@ class UML :
         appended as a line in the form \em key1=value1;key2=value2;...
 
         @type   config  : List
-    @param  config  : Configuration list
+        @param  config  : Configuration list
         """
 
         config.append \
@@ -211,7 +211,7 @@ class UML :
         as a line in the form \em key1=value1;key2=value2;...
 
         @type   status  : List
-    @param  status  : Status list
+        @param  status  : Status list
         """
 
         for key, value in self.m_status.items() :
@@ -233,8 +233,8 @@ def allocateUML (queue = False, **status) :
     @param  queue   : Queue request if no UML is immediately free
     @type   status  : Dictionary (gathered keyed arguments)
     @param  status  : Request status information
-    @rtype      : UML, UUID
-    @return     : Allocated UML and request identifier
+    @rtype          : UML, UUID
+    @return         : Allocated UML and request identifier
     """
 
     global UMLPtr
@@ -398,28 +398,12 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         These files will be removed when the connection closes down.
 
         @type   name    : String
-    @param  name    : File name
-    @rtype      : String
-    @return     : File name
+        @param  name    : File name
+        @rtype          : String
+        @return         : File name
         """
 
         self.m_toRemove.append (name)
-
-#    def allowed (self) :
-#
-#        allowed = ''
-#        for name, value in self.headers.items() :
-#            if name[:17] == 'x-addallowedsite-' :
-#                allowed += value + '\n'
-#        return allowed
-#
-#    def blocked (self) :
-#
-#        blocked = ''
-#        for name, value in self.headers.items() :
-#            if name[:17] == 'x-addblockedsite-' :
-#                blocked += '!' + value + '\n'
-#        return blocked
 
     def sendOK (self) :
 
@@ -485,6 +469,9 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         @param  info    : Name of UML to add
         """
 
+        global UMLPtr
+        global UMLList
+
         #  Check that the named UML exists, if not then report an
         #  error.
         #
@@ -524,6 +511,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         @param  name    : Name of UML to remove
         """
 
+        global UMLPtr
         global UMLList
 
         #  Can UML list for the named UML, report an error it it is

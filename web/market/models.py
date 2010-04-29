@@ -13,7 +13,7 @@ import market
 import tagging
 
 
-def solicitation_paid(invoice, **kwargs):
+def solicitation_paid(sender, invoice, **kwargs):
 
     solicitation = Solicitation.objects.get(id=invoice.parent_id, delete=False)
     if not solicitation:

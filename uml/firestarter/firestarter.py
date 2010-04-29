@@ -115,7 +115,7 @@ class FireStarter :
         self.m_scraperID   = None
         self.m_traceback   = None
         self.m_error       = None
-        self.m_cache       = False
+        self.m_cache       = 0
 
         s = sha.new()
         s.update(str(os.urandom(16)))
@@ -277,10 +277,10 @@ class FireStarter :
     def setCache (self, cache) :
 
         """
-        Set whether to allow URL caching or not
+        Set time for which cached pages are valid
 
-        @type   cache   : Bool
-        @param  cache   : True to allow caching
+        @type   cache   : Integer
+        @param  cache   : Time for which pages are valid, zero means no caching
         """
 
         self.m_cache = cache
@@ -416,8 +416,8 @@ class FireStarter :
             setter ('x-testname',   self.m_testName )
         if self.m_runID      is not None :
             setter ('x-runid',      self.m_runID    )
-
-        setter ('x-cache', self.m_cache and "on" or "off")
+        if self.m_cache      is not None :
+            setter ('x-cache',      self.m_cache    )
 
         for resource, limit in self.m_limits.items() :
             setter ('x-setrlimit-%d' % resource, '%s,%s' % (limit[0], limit[1]))
