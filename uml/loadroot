@@ -26,7 +26,9 @@ test `id -u` = 0 ||
 dd	if=/dev/zero of=jaunty.img bs=1024 seek=$[ 1024 * 1024 ] count=1
 mke2fs	-F jaunty.img
 
+echo	'Loading root filesystem image, please wait  ....'
+
 mkdir	-p			jaunty
 mount	-o loop jaunty.img	jaunty
-tar	-xjvf   $1		jaunty
+tar	-xjf    $1		jaunty
 umount				jaunty
