@@ -6,6 +6,10 @@ umllist	= uml001,uml002,uml003,uml004
 [httpproxy]
 host	= 89.16.177.195
 port	= 9002
+dbhost	= 89.16.177.176
+user	= cache
+passwd	= 4dlk4eaaA44A1gTx
+db	= swcache_live
 
 [dataproxy]
 dbtype  = mysql                                                                                                                             

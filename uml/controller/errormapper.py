@@ -1,20 +1,21 @@
-import	sys
-import	re
+import  sys
+import  re
 
 etmap = \
-	{
-	"ImportError"						: "Import failed",
-	"ZeroDivisionError"					: "Division by zero",
-	"IndexError"						: "List index error",
-	"NameError"						: "Variable name error",
-	"TypeError"						: "Value type error",
-	"CPUTimeExceeded"					: "CPU time limit exceeded"
-	}
+    {
+    "ImportError"                       : "Import failed",
+    "ZeroDivisionError"                 : "Division by zero",
+    "IndexError"                        : "List index error",
+    "NameError"                         : "Variable name error",
+    "TypeError"                         : "Value type error",
+    "AssertionError"                    : "Assertion failed",
+    "CPUTimeExceeded"                   : "CPU time limit exceeded"
+    }
 
 eimap = \
-	{
-	"not all arguments converted during string formatting"	: "Formatting error"
-	}
+    {
+    "not all arguments converted during string formatting"  : "Formatting error"
+    }
 
 def mapExceptionType (etype, einfo) :
 
@@ -51,6 +52,9 @@ def mapException (e) :
     m = re.search (r"(.*)\((.*),\)", etext)
     if m :
         return mapExceptionType(m.group(1), m.group(2))
+    m = re.search (r"(.*)\(\)", etext)
+    if m :
+        return mapExceptionType(m.group(1), "")
     return etext
 
 

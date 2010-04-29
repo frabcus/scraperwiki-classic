@@ -22,11 +22,11 @@ import  hashlib
 
 global config
 
-USAGE       = " [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file] [--cacheDir=dir]"
+USAGE       = " [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file] [--useCache]"
 child       = None
 config      = None
 varDir      = '/var'
-cacheDir    = None
+useCache    = False
 uid         = None
 gid         = None
 allowAll    = False
@@ -217,7 +217,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                                  " 200 Connection established\r\n")
                 self.wfile.write("Proxy-agent: %s\r\n" % self.version_string())
                 self.wfile.write("\r\n")
-                self._read_write(soc, None)
+                self._read_write(soc)
         finally:
             soc.close()
             self.connection.close()
@@ -260,29 +260,91 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             except : pass
             statusLock.release ()
 
-        cpath = None
-        cfile = None
-        used  = None
+        ctag    = None
+        used    = None
+        content = None
+        cache   = 0
+        try    : cache = int(self.headers['x-cache'])
+        except : pass
 
-        if 'x-cache' in self.headers and self.headers['x-cache'] == 'on' :
-            if method == "GET" and cacheDir is not None :
-                mangled = hashlib.md5(self.path).hexdigest()
-                mbits   = [ mangled[0:2], mangled[2:4], mangled[4:] ]
-                cdir    = '%s/%s/%s' % (cacheDir, mbits[0], mbits[1])
-                if not os.path.exists (cdir) :
-                    try    : os.makedirs (cdir)
-                    except : pass
-                cpath   = '%s/%s/%s/%s' % (cacheDir, mbits[0], mbits[1], mbits[2])
+        #  Check if caching might be possible. This is the case if
+        #   * Caching has been enabled
+        #   * The x-cache header is greater than zero
+        #
+        if useCache and cache > 0 :
 
+            #  "cbits" will be set to a 3-element list comprising the path (including
+            #  query bits), the url-encoded content if any, and the cookie string, if any.
+            #
+            cbits = None
+
+            #  GET is easy, note the path, the content is empty. Cookies will be set
+            #  later.
+            #
+            if method == "GET" :
+
+                cbits = [ self.path, '', '' ]
+
+            #  For POST, check that 'content-type' is 'application/x-www-form-urlencoded'
+            #  and that we have a content length. If so then the content is read and
+            #  noted along with the path. The content will be passed on later.
+            #
+            if method == "POST" \
+                and 'content-length' in self.headers \
+                and 'content-type'   in self.headers \
+                and self.headers['content-type'] == 'application/x-www-form-urlencoded' :
+
+                clen    = int(self.headers['content-length'])
+                content = ''
+                while len(content) < clen :
+                    data = self.connection.recv (clen - len(content))
+                    if data is None or data == '' :
+                        break
+                    content += data
+
+                cbits = [ self.path, content, '' ]
+
+            #  If we can cache then add cookies if any, and calculate a hash on
+            #  the path, content and cookies. Hive off the first two digit pairs
+            #  for directories (which are created if needed) and generate a
+            #  path name.
+            #
+            if cbits is not None :
+
+                if 'cookie' in self.headers :
+                    cbits[2] = self.headers['cookie']
+
+                ctag = hashlib.sha1(string.join (cbits, '____')).hexdigest()
+
+        db = None
+        if ctag :
+            try :
+                import MySQLdb
+                db      = MySQLdb.connect \
+                        (    host       = config.get ('httpproxy', 'dbhost'), 
+                             user       = config.get ('httpproxy', 'user'  ), 
+                             passwd     = config.get ('httpproxy', 'passwd'),
+                             db         = config.get ('httpproxy', 'db'    ),
+                             charset    = 'utf8'
+                        )
+            except :
+                pass
+
+        #  Try opening a possible cache file. If this succeeds then we can
+        #  simply send the content as the reply. If not then we go to the real
+        #  server, possibly storing results in the cacahe.
+        #
         try    :
-            cfile = open (cpath, 'r')
-            self.connection.send(cfile.read())
+            cursor    = db.cursor()
+            cursor.execute ('select id, page from httpcache where tag = %s and time_to_sec(timediff(now(), stamp)) < %s', [ ctag, cache ])
+            id, page  = cursor.fetchone()
+            cursor    = db.cursor()
+            cursor.execute ('update httpcache set stamp = now(), hits = hits + 1 where tag = %s', [ ctag ])
+            self.connection.send(page)
             used = 'CACHED'
         except :
             startat = time.strftime ('%Y-%m-%d %H:%M:%S')
             soc     = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            if cpath : cfile = open (cpath, 'w')
-
             try :
                 if self._connect_to (netloc, soc) :
                     self.log_request()
@@ -304,10 +366,27 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                             continue
                         soc.send ("%s: %s\r\n" % (key, value))
                     soc.send ("\r\n")
-                    self._read_write(soc, cfile)
+                    if content :
+                        soc.send (content)
+                    resp = self._read_write(soc)
+                    if db :
+                        cursor = db.cursor()
+                        cursor.execute \
+                            (   '''
+                                insert  into    httpcache
+                                        (       tag,
+                                                url,
+                                                page,
+                                                hits,
+                                                scraperid,
+                                                runid
+                                        )
+                                values  ( %s, %s, %s, %s, %s, %s )
+                                ''',
+                                [   ctag, self.path, resp, 1, scraperID, runID    ]
+                            )
             finally :
                 soc  .close()
-                if cfile : cfile.close()
         finally :
             self.connection.close()
 
@@ -319,22 +398,25 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         self.swlog().log (scraperID, runID, 'P.DONE', arg1 = self.path, arg2 = used)
 
-    def _read_write (self, soc, cfile, idle = 0x7ffffff) :
+    def _read_write (self, soc, idle = 0x7ffffff) :
 
         """
-        Copy data backl and forth between the client and the server.
+        Copy data back and forth between the client and the server.
 
         @type   soc     : Socket
         @param  soc     : Socket to server
         @type   idle    : Integer
         @param  idel    : Maximum idling time between data
+        @return String  : Text received from server
         """
 
+        resp  = []
         iw    = [self.connection, soc]
         ow    = []
         count = 0
         pause = 5
         busy  = True
+
         while busy :
             count        += pause
             (ins, _, exs) = select.select(iw, ow, iw, pause)
@@ -349,13 +431,15 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     if data :
                         out.send(data)
                         count = 0
-                        if i is soc and cfile is not None :
-                            cfile.write (data)
+                        if i is soc :
+                            resp.append (data)
                     else :
                         busy = False
                         break
             if count >= idle : 
                 break
+
+        return string.join (resp, '')
 
     def do_GET (self) :
 
@@ -421,12 +505,16 @@ if __name__ == '__main__' :
             varDir   = arg[ 9:]
             continue
 
-        if arg[:11] == '--cacheDir='  :
-            cacheDir = arg[11:]
-            continue
+#        if arg[:11] == '--cacheDir='  :
+#            cacheDir = arg[11:]
+#            continue
 
         if arg[ :9] == '--config='  :
             confnam  = arg[ 9:]
+            continue
+
+        if arg == '--useCache' :
+            useCache = True
             continue
 
         if arg == '--allowAll' :
