@@ -20,7 +20,7 @@ def process_payment(sender, **kwargs):
     #TODO: save all details in a new transactions table
 
     #send a signal
-    payment_done.send(invoice)
+    payment_done.send(sender=None, invoice=invoice)
 
 #pickup PayPal signals
 payment_was_successful.connect(process_payment)
