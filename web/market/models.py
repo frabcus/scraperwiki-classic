@@ -15,7 +15,7 @@ import tagging
 
 def solicitation_paid(sender, invoice, **kwargs):
 
-    solicitation = Solicitation.objects.get(id=invoice.parent_id, delete=False)
+    solicitation = Solicitation.objects.get(id=invoice.parent_id, deleted=False)
     if not solicitation:
         raise Exception("Unable to find solicitation for ID")
 
@@ -78,9 +78,9 @@ class Solicitation(models.Model):
 
         super(Solicitation, self).save()
 
-    def complete():
+    def complete(self):
         #update status
-        status = SolicitationStatus.objects.get(status='complete')
+        status = SolicitationStatus.objects.get(status='completed')
         self.status = status
         self.save()
 
@@ -88,9 +88,9 @@ class Solicitation(models.Model):
         template = loader.get_template('emails/send_bounty.txt')
         context = Context({
             'solicitation': self,
-            'recipient_user': self.scraper.owner
+            'recipient_user': self.scraper.owner()
         })
-        send_mail('Send Bounty', template.render(context), settings.EMAIL_FROM, [self.scraper.owner.email], fail_silently=False)
+        send_mail('Send Bounty', template.render(context), settings.EMAIL_FROM, [settings.TEAM_EMAIL], fail_silently=False)
 
     def claim(self, scraper, user):
 
