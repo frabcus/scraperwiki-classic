@@ -193,7 +193,7 @@ def complete (request, solicitation_id):
     domain = 'http://' + Site.objects.get_current().domain
     paypal_dict = {
         "business": settings.PAYPAL_RECEIVER_EMAIL,
-        "amount": invoice.price,
+        "amount": "%.2f" % invoice.price,
         "item_name": invoice.title,
         "invoice": invoice.pk,
         "notify_url": domain + reverse('paypal-ipn'),
