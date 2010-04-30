@@ -2,9 +2,14 @@ from django.core.cache import cache
 from web.scraper.models import Scraper
 from piston.handler import BaseHandler
 from piston.utils import rc
+from piston.emitters import Emitter
 from api.models import api_key
+from api.emitters import CSVEmitter, PHPEmitter
 from settings import MAX_API_ITEMS
 import sys
+
+Emitter.register('csv', CSVEmitter, 'text/csv; charset=utf-8')
+Emitter.register('php', PHPEmitter, 'text/plain; charset=utf-8')
 
 class APIBase(BaseHandler):
     allowed_methods = ('GET',)

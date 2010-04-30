@@ -80,8 +80,3 @@ class PHPEmitter(Emitter):
         
         result = phpserialize.dumps(return_content)
         return result
-        
-
-Emitter.register('csv', CSVEmitter, 'text/csv; charset=utf-8')
-Emitter.register('php', PHPEmitter, 'text/plain; charset=utf-8')
-
