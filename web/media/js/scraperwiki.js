@@ -164,6 +164,9 @@ function setupDataMap(){
      };
 
      for (var i=0; i < oData.rows.length; i++) {
+         if(oData.rows[i][iLatLngIndex] == ""){
+             continue;
+         }
          
          //get the lat/lng
          iLat = oData.rows[i][iLatLngIndex].split(',')[1].replace(')', '');
