@@ -4,7 +4,7 @@ from market import views
 urlpatterns = patterns('',
    url(r'^$', views.market_list, name="market_list"),
    url(r'^(?P<mode>completed|pending)/$', views.market_list, name="market_list_filter"),
-   url(r'^request/$', views.solicitation, name='market_solicitation'),
+   url(r'^request/$', views.request_solicitation, name='market_solicitation'),
    url(r'^view/(?P<solicitation_id>\w+)/$', views.single, name='market_view'),
    url(r'^edit/(?P<solicitation_id>\w+)/$', views.edit, name='market_edit'),
    url(r'^claim/(?P<solicitation_id>\w+)/$', views.claim, name='market_claim'),

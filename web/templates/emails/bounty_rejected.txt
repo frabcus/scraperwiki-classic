@@ -1,0 +1,5 @@
+Hello {{developer.username}},
+
+Unfortunately the scraper you wrote for '{{solicitation.title}}' on ScraperWiki.com has been rejected.
+
+The ScraperWiki Team
