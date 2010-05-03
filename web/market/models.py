@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 from django.template import loader, Context
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 
 from scraper.models import Scraper
 from payment.models import Invoice
@@ -84,13 +85,36 @@ class Solicitation(models.Model):
         self.status = status
         self.save()
 
-        #send an email to the team saying that money needs to be sent to the developer of the scraper
-        template = loader.get_template('emails/send_bounty.txt')
+        if self.has_bounty():
+            #send an email to the team saying that money needs to be sent to the developer of the scraper
+            template = loader.get_template('emails/send_bounty.txt')
+            context = Context({
+                'solicitation': self,
+                'recipient_user': self.scraper.owner()
+            })
+            send_mail('Send Bounty', template.render(context), settings.EMAIL_FROM, [settings.TEAM_EMAIL], fail_silently=False)
+
+        #send an email to scraper owner to tell them they have been accepted and if bounty to expect an email about payment
+        template = loader.get_template('emails/bounty_accepted.txt')
         context = Context({
             'solicitation': self,
-            'recipient_user': self.scraper.owner()
+            'developer': self.scraper.owner()
         })
-        send_mail('Send Bounty', template.render(context), settings.EMAIL_FROM, [settings.TEAM_EMAIL], fail_silently=False)
+        send_mail('Your scraper has been accepted', template.render(context), settings.EMAIL_FROM, [self.scraper.owner().email], fail_silently=False)
+
+    def reject(self):
+        #send email to scraper owner to tell them they have been rejected
+        template = loader.get_template('emails/bounty_rejected.txt')
+        context = Context({
+            'solicitation': self,
+            'developer': self.scraper.owner()
+        })
+        send_mail('Your scraper has been rejected', template.render(context), settings.EMAIL_FROM, [self.scraper.owner().email], fail_silently=False)
+
+        status = SolicitationStatus.objects.get(status='open')
+        self.status = status
+        self.scraper = None
+        self.save()
 
     def claim(self, scraper, user):
 
@@ -114,7 +138,16 @@ class Solicitation(models.Model):
                 invoice.parent_id = self.pk
                 invoice.user = self.user_created
                 invoice.save()
-                        
+
+            #email the creator telling them it is done, and to pay if nesesary
+            title = "The scraper you requested for " + self.title + " has been written"
+            template = loader.get_template('emails/market_claim.txt')
+            context = Context({
+                'scraper': scraper,
+                'solicitation': self,
+                'url': 'http://' + Site.objects.get_current().domain
+            })
+            send_mail(title, template.render(context), settings.EMAIL_FROM, [self.user_created.email], fail_silently=False)
         else:
             #someone is messing about if we are here, throw an exception
             raise Exception("Unable to find a published scraper (for this user) to add to this solicitation")

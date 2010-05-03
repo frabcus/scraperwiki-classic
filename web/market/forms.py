@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import ModelForm, ChoiceField
+from django.forms import ModelForm, ChoiceField, Form
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
 
@@ -19,7 +19,7 @@ class SolicitationForm (ModelForm):
     tags = forms.CharField(required=False)
 
 
-class SolicitationClaimForm (ModelForm):
+class SolicitationClaimForm (Form):
 
     def __init__(self, *args, **kwargs):
          user = User.objects.get(id=kwargs.pop('user_id'))
@@ -34,3 +34,5 @@ class SolicitationClaimForm (ModelForm):
                                label=u'I have written and tested this scraper',
                                error_messages={ 'required': "Please confirm that you have written and tested this scraper" })                 
 
+class SolicitationAcceptForm(Form):
+     choice = forms.ChoiceField(choices=[('accept', 'Accept'), ('reject', 'Reject')], label='I would like to')
