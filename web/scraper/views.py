@@ -31,6 +31,11 @@ def overview(request, scraper_short_name):
     scraper = get_object_or_404(
         models.Scraper.objects,
         short_name=scraper_short_name)
+
+    # Only logged in users should be able to see unpublished scrapers
+    if not scraper.published and not user.is_authenticated():
+        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_contributors = scraper.contributors()
@@ -121,6 +126,11 @@ def scraper_data(request, scraper_short_name):
     user = request.user
     scraper = get_object_or_404(
         models.Scraper.objects, short_name=scraper_short_name)
+
+    # Only logged in users should be able to see unpublished scrapers
+    if not scraper.published and not user.is_authenticated():
+        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
@@ -145,11 +155,15 @@ def scraper_data(request, scraper_short_name):
 
 
 def scraper_map(request, scraper_short_name):
-
     #user details
     user = request.user
     scraper = get_object_or_404(
         models.Scraper.objects, short_name=scraper_short_name)
+
+    # Only logged in users should be able to see unpublished scrapers
+    if not scraper.published and not user.is_authenticated():
+        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
@@ -173,10 +187,14 @@ def scraper_map(request, scraper_short_name):
 
 
 def code(request, scraper_short_name):
-
     user = request.user
     scraper = get_object_or_404(
         models.Scraper.objects, short_name=scraper_short_name)
+
+    # Only logged in users should be able to see unpublished scrapers
+    if not scraper.published and not user.is_authenticated():
+        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     committed_code = scraper.committed_code()
@@ -196,6 +214,11 @@ def comments(request, scraper_short_name):
     user = request.user
     scraper = get_object_or_404(
         models.Scraper.objects, short_name=scraper_short_name)
+
+    # Only logged in users should be able to see unpublished scrapers
+    if not scraper.published and not user.is_authenticated():
+        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
 
@@ -223,6 +246,11 @@ def scraper_history(request, scraper_short_name):
     scraper = get_object_or_404(
         models.Scraper.objects,
         short_name=scraper_short_name)
+
+    # Only logged in users should be able to see unpublished scrapers
+    if not scraper.published and not user.is_authenticated():
+        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     content_type = scraper.content_type()
