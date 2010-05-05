@@ -6,7 +6,7 @@
 {% block content %}
 <div class="content">
     <div class="attention">
-        <h1><em>{{solicitation.title}} has been written</em></h1>
+        <h1><em>"{{solicitation.title}}"</em> has been written</h1>
         <p>
             <a href="{% url scraper_data scraper.short_name %}">Click here to see the scraper</a>
         </p>
@@ -16,6 +16,11 @@
             {% else %}
                 {{ form.render }}
             {% endif %}            
+        {% else %}
+            <form action="" method="post">
+              {{form}}
+              <input type="submit" value="Submit">
+            </form>
         {% endif %}
     </div>
 </div>

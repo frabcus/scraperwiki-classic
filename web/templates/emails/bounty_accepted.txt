@@ -1,0 +1,9 @@
+Hello {{developer.username}},
+
+Congratulations! The scraper you wrote for '{{solicitation.title}}' on ScraperWiki.com has been accepted.
+
+{% if solicitation.has_bounty %}
+The ScraperWiki team will be contacting you shortly about transfering the bounty money into your PayPal account.
+{% endif %}
+
+The ScraperWiki Team

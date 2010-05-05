@@ -147,7 +147,7 @@ def edit(request, short_name=None):
         form.fields['license'].initial = scraper.license
         #form.fields['run_interval'].initial = scraper.run_interval
     
-        return render_to_response('editor.html', {'form':form, 'scraper' : scraper, 'has_draft': has_draft}, context_instance=RequestContext(request))        
+        return render_to_response('editor/editor.html', {'form':form, 'scraper' : scraper, 'has_draft': has_draft}, context_instance=RequestContext(request))        
     
     else:        
         # 3) If there is POST, then use that

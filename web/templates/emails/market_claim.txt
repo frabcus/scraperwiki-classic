@@ -6,12 +6,14 @@ You asked someone write you a scraper for '{{solicitation.title}}' on ScraperWik
 
 Well, {{scraper.owner}} has done it for you!
 
-{{url}}{% url market_view solicitation.id %}
+{{url}}{% url scraper_overview scraper.id %}
 
 {% if solicitation.has_bounty %}
 You set a bounty of £{{solicitation.price}} for this scraper. When you have have made sure you are happy with the scraper {{scraper.owner}} has written for you, please go here to pay them:
 
 {{url}}{% url market_complete solicitation.id %}
 
-The ScraperWiki Team
+If you are not satisfied with this scraper please contact the ScaperWiki team all@scraperwiki.com
 {% endif %}
+
+The ScraperWiki Team
