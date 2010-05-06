@@ -36,11 +36,9 @@ def whitelist_user(request):
             'url':url, 'urlinwhitelist':urlinwhitelist, 'urlinblacklist':urlinblacklist }
     return render_to_response('whitelist/index.html', data, context_instance=RequestContext(request))
 
-def whitelist_white(request):
+def whitelist_config(request):
     whitelist = models.Whitelist.objects.filter(urlcolour="white")
-    return HttpResponse("\n".join([ obj.urlregex  for obj in whitelist]))
-
-def whitelist_black(request):
-    whitelist = models.Whitelist.objects.filter(urlcolour="black")
-    return HttpResponse("\n".join([ obj.urlregex  for obj in whitelist]))
-            
+    white_string = "\n".join([ "white=%s" % obj.urlregex  for obj in whitelist])
+    blacklist = models.Whitelist.objects.filter(urlcolour="black")
+    black_string = "\n".join([ "black=%s" % obj.urlregex  for obj in blacklist])
+    return HttpResponse(white_string + '\n' +black_string)

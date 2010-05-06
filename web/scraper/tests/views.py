@@ -50,11 +50,6 @@ class ScraperViewsTests(TestCase):
     def test_scraper_stringnot(self):
         self.assertEqual(scraper.views.stringnot('test'), 'test')
     
-    def test_scraper_contributors(self):
-        response = self.client.get(reverse('scraper_contributors',
-                            kwargs={'scraper_short_name': 'test_scraper'}))
-        self.assertEqual(response.status_code, 200)
-    
     def test_scraper_comments(self):
         response = self.client.get(reverse('scraper_comments',
                             kwargs={'scraper_short_name': 'test_scraper'}))
