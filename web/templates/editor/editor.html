@@ -59,6 +59,9 @@
                 
                 <ul class="help">
                     <li>
+                        <a id="menu_tutorials" href="#" title="Load a helpful tutorial">Tutorials</a>
+                    </li>
+                    <li>
                         <a id="menu_shortcuts" href="#" title="Key combinations for saving, executing etc">Keyboard shortcuts</a>
                     </li>
                     <!--
@@ -282,6 +285,22 @@
             </p>
 
             <a href="#" class="popupReady">Ready to start?</a>
+        </div>
+    </div>
+    <div id="popup_tutorials" class="popup_item">
+        <div class="popup_header">
+          <h3>Available tutorials</h3>            
+          <a class="popupClose">close</a>
+          <dl>
+            {% for scraper in tutorial_scrapers %}
+            <dt>
+              <a href="#" class="scraper-tutorial-link">{{scraper.short_name}}</a>
+            </dt>
+            <dd>
+              {{scraper.description}}
+            </dd>
+            {% endfor %}
+          </dl>
         </div>
     </div>
 </form>

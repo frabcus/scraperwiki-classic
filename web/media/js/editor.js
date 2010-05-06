@@ -21,6 +21,7 @@ $(document).ready(function() {
     //constructor functions
     setupCodeEditor();
     setupMenu();
+    setupTutorial(); 
     setupOrbited();
     setupTabs();
     setupPopups();
@@ -93,8 +94,22 @@ $(document).ready(function() {
         addHotkey('ctrl+d', viewDiff);                       
           
     };
-
     
+    //Setup tutorials
+    function setupTutorial(){
+        $('a.scraper-tutorial-link').each(function(){
+            $(this).click(function() { 
+                jQuery.get('/editor/raw/'+$(this).text(), function(data) {
+                    //codeeditor.setCode(data);  // use replaceSelection to preserve the undo history so we can go back
+                    codeeditor.selectLines(codeeditor.firstLine(), 0, codeeditor.lastLine(), 0); 
+                    codeeditor.replaceSelection(data);
+                    codeeditor.selectLines(codeeditor.firstLine(), 0);   // set cursor to start
+                    hidePopup();
+                });
+            })
+        })
+    }
+
     //Setup Menu
     function setupMenu(){
         $('#menu_shortcuts').click(function(){
@@ -105,6 +120,9 @@ $(document).ready(function() {
         });
         $('#menu_documentation').click(function(){
             showPopup('popup_documentation'); 
+        });        
+        $('#menu_tutorials').click(function(){
+            showPopup('popup_tutorials'); 
         });        
         $('form#editor').submit(function() { 
             saveScraper(false); 
