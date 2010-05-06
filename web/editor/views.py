@@ -2,6 +2,7 @@ import re
 import sys
 import os
 import datetime
+import random
 try:
   import json
 except:
@@ -126,7 +127,7 @@ def edit(request, short_name=None):
         # Does a draft version exist?
         scraper = draft
         scraper.__dict__['tags'] = request.session['ScraperDraft'].get('tags', '')
-        scraper.__dict__['commit_message'] = request.session['ScraperDraft'].get('commit_message', '')        
+        scraper.commit_message = request.session['ScraperDraft'].get('commit_message', '')        
     
     elif short_name is not "__new__":
         # Try and load an existing scraper
@@ -134,14 +135,27 @@ def edit(request, short_name=None):
         scraper.code = scraper.saved_code()
         scraper.__dict__['tags'] = ", ".join(tag.name for tag in scraper.tags)
         if not scraper.published:
-          scraper.__dict__['commit_message'] = 'Scraper created'
+            scraper.commit_message = 'Scraper created'
     
     else:
         # Create a new scraper
         scraper = ScraperModel()
-        scraper.code = template.default()['code']
+        
+        # select a startup scraper value randomly from those with the right name (or flag)
+        # in the future we should have an isstartup flag on the scraper
+        lstartup_scrapers = ScraperModel.objects.filter(deleted=False, published=True)
+        startup_scrapers = [ scraper  for scraper in lstartup_scrapers  if re.match("startup-", scraper.short_name) ]
+        if not startup_scrapers:  # quick hack to make dev versions more interesting
+            startup_scrapers = lstartup_scrapers
+        if startup_scrapers:
+            print dir(startup_scrapers[0])
+            startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
+        else:
+            startupcode = "for i in range(10):\n    print i"
+        
+        scraper.code = startupcode
         scraper.license = 'Unknown'
-        scraper.__dict__['commit_message'] = 'Scraper created'
+        scraper.commit_message = 'Scraper created'
 
     # 2) If no POST, then just render the page
     if not request.POST:
@@ -210,16 +224,13 @@ def edit(request, short_name=None):
                     url = reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name})
 
                 # Build the JSON object and return it
-                res = json.dumps({
-                'redirect' : 'true',
-                'url' : url,
-                })    
+                res = json.dumps({'redirect':'true', 'url':url,})    
                 return HttpResponse(res)
 
             else:
 
                 # User is not logged in, save the scraper to the session
-                draft_session_scraper = {'scraper': savedForm, 'tags': request.POST.get('tags'), 'commit_message': request.POST.get('commit_message')}
+                draft_session_scraper = { 'scraper':savedForm, 'tags': request.POST.get('tags'), 'commit_message': request.POST.get('commit_message')}
                 request.session['ScraperDraft'] = draft_session_scraper
 
                 # Set a message with django_notify telling the user their scraper is safe
