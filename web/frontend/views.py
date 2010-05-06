@@ -30,11 +30,11 @@ location.is_gb_postcode('sw98JX')
 def frontpage(request, public_profile_field=None):
     user = request.user
 
-    hide_logo = False
-    grey_body = False    
-    template = 'frontend/frontpage.html'
+    
     # The following items are only used when there is a logged in user.	
     if user.is_authenticated():
+        hide_logo = False
+        grey_body = False    
         my_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False).order_by('-created_at')
         following_scrapers = user.scraper_set.filter(userscraperrole__role='follow', deleted=False).order_by('-created_at')
         following_users = user.to_user.following()
@@ -42,6 +42,8 @@ def frontpage(request, public_profile_field=None):
         # contribution_scrapers needs to be expanded to include scrapers you have edit rights on
         contribution_scrapers = my_scrapers
         template = 'frontend/frontpage_logged_in.html'        
+    
+    # the following is for an anonymous user
     else:
         hide_logo = True
         grey_body = True
@@ -51,7 +53,8 @@ def frontpage(request, public_profile_field=None):
         following_users_count = 0
         contribution_scrapers = []
         profile_obj = None
-
+        template = 'frontend/frontpage.html'
+        
     contribution_count = len(contribution_scrapers)
     good_contribution_scrapers = []
     # cut number of scrapers displayed on homepage down to the most recent 10 items
@@ -69,7 +72,10 @@ def frontpage(request, public_profile_field=None):
     #suggested scrapers
     solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
     
-    return render_to_response(template, {'grey_body': grey_body, 'hide_logo': hide_logo, 'my_scrapers': my_scrapers, 'has_scrapers':has_scrapers, 'solicitations': solicitations, 'following_scrapers': following_scrapers, 'following_users': following_users, 'following_users_count' : following_users_count, 'new_scrapers': new_scrapers, 'featured_scrapers': featured_scrapers, 'contribution_count': contribution_count}, context_instance = RequestContext(request))
+    data = {'grey_body': grey_body, 'hide_logo': hide_logo, 'my_scrapers': my_scrapers, 'has_scrapers':has_scrapers, 
+            'solicitations': solicitations, 'following_scrapers': following_scrapers, 'following_users': following_users, 'following_users_count' : following_users_count, 
+            'new_scrapers': new_scrapers, 'featured_scrapers': featured_scrapers, 'contribution_count': contribution_count, }
+    return render_to_response(template, data, context_instance=RequestContext(request))
 
 
 def my_scrapers(request):

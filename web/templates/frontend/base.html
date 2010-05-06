@@ -46,7 +46,7 @@
 				<li class="helplink"><a href="{% url help %}">Help</a></li>
 			</ul>
 			<p>
-    	        Hello! This is the beta version of ScraperWiki, please <a href="{% url contact_form %}">tell us what you think</a>.
+    	        Hello! This is the beta version of ScraperWiki, <span id="feedbackmess">please <a href="{% url contact_form %}">tell us what you think</a></span>.
             </p>
 	    </div>
 
@@ -166,6 +166,7 @@
 		
 	    <script type="text/javascript" defer="defer">
 	        {% block run_script %}{% endblock %}
+             AlertBrowser(); 
         </script>
         {% if not debug %}
             <script type="text/javascript">
