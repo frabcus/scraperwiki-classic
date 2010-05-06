@@ -1,0 +1,50 @@
+[dispatcher]
+host	= 212.84.75.28
+port	= 9000
+umllist	= uml001
+confurl	= http://dev.scraperwiki.com/whitelist/config
+
+[httpproxy]
+host	= 212.84.75.28
+port	= 9002
+dbhost	= 212.84.75.28
+user	= cache
+passwd	= 4dlk4eaaA44A1gTx
+db	= scraperwiki_cache
+
+[ftpproxy]
+host	= 212.84.75.28
+port	= 9004
+
+[dataproxy]
+dbtype	= mysql
+host	= 212.84.75.28
+port	= 9003
+user	= datastore
+passwd	= 3jFjLrje6dFJ7cQE
+db	= scraperwiki_datastore_dev
+
+[swlogger]
+host	= 212.84.75.28
+user	= scraperlog
+passwd	= scr4p3rl0g
+db	= scraperwiki_log
+
+[ubuntu]
+host	= 212.84.75.28
+tap	= 212.84.75.28
+eth	= 212.84.75.28
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 25
+
+[uml001]
+host	= 192.168.254.1
+tap	= 192.168.254.101
+eth	= 192.168.254.1
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 25
+
