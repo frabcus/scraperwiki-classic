@@ -15,11 +15,11 @@ try:
 except:
     import json
 
-try: 
-    import runner_config
-except:
-    print "Error: You need to set up runner_config before you can use runner."
-    sys.exit()
+#try: 
+#    import runner_config
+#except:
+#    print "Error: You need to set up runner_config before you can use runner."
+#    sys.exit()
 
 
 # Make sure stdout doesn't buffer anything
@@ -69,9 +69,19 @@ def execute (code, guid = None) :
 
     fs  = firestarter.FireStarter('/var/www/scraperwiki/uml/uml.cfg')
     
-    fs.setTestName     ('Runner')
-    fs.setScraperID    (guid)
-    fs = runner_config.config(fs)
+    fs.setTestName      ('Runner')
+    fs.setScraperID     (guid)
+    fs.setUser          ('nobody')
+    fs.setGroup         ('nogroup')
+
+    fs.setTraceback     ('text')
+    fs.addPaths         ('/scraperwiki/live/scrapers')
+    fs.addPaths         ('/scraperwiki/live/scraperlibs')
+    fs.setCache         (3600 * 12)
+
+    fs.loadConfiguration()
+
+#   fs = runner_config.config(fs)
     
     res = fs.execute (string.replace (code, '\r', ''), True)
     if res is None :
