@@ -81,7 +81,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
         sys.stderr.flush ()
 
-    def hostAllowed (self, netloc, scraperID, runID) :
+    def hostAllowed (self, path, scraperID, runID) :
 
         """
         See if access to a specified host is allowed. These are specified as a list
@@ -89,8 +89,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         both start and finish so they must match the entire host. The file is named
         from the IP address of the caller.
 
-        @type   netloc   : String
-        @param  netloc   : Hostname
+        @type   path     : String
+        @param  path     : Hostname
         @type   scraperID: String
         @param  scraperID: Scraper identifier or None
         @return          : True if access is allowed
@@ -102,10 +102,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return True
 
         for block in self.m_blocked :
-            if re.match('^' + block + '$', netloc) :
+            if re.search(block, path) :
                 return False
         for allow in self.m_allowed :
-            if re.match('^' + allow + '$', netloc) :
+            if re.search(allow, path) :
                 return True
 
         return False
@@ -204,7 +204,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         self.swlog().log (scraperID, runID, 'P.CONNECT', arg1 = self.path)
 
-        if not self.hostAllowed (netloc, scraperID, runID) :
+        if not self.hostAllowed (self.path, scraperID, runID) :
             self.send_error (403, blockmsg % self.path)
             self.swlog().log (scraperID, runID, 'P.ERROR', arg1 = 'Denied',  arg2 = self.path)
             return
@@ -249,7 +249,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.send_error (400, "Malformed URL %s" % self.path)
             self.swlog().log (scraperID, runID, 'P.ERROR', arg1 = 'Bad URL', arg2 = self.path)
             return
-        if not self.hostAllowed (netloc, scraperID, runID) :
+        if not self.hostAllowed (self.path, scraperID, runID) :
             self.swlog().log (scraperID, runID, 'P.ERROR', arg1 = 'Denied',  arg2 = self.path)
             self.send_error (403, blockmsg % self.path)
             return
