@@ -16,7 +16,7 @@ import  sys
 import  time
 import  threading
 import  string 
-import  urllib
+import  urllib   # should this be urllib2? -- JGT
 import  ConfigParser
 import  hashlib
 
@@ -32,7 +32,7 @@ gid         = None
 allowAll    = False
 statusLock  = None
 statusInfo  = {}
-blockmsg    = """Scraperwiki has blocked you from accessing "%s" because it is not allowed according to the rules"""
+
 
 class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
@@ -101,14 +101,19 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if allowAll :
             return True
 
-        for block in self.m_blocked :
-            if re.search(block, path) :
-                return False
+        allowed = False
+        
+        # first if it is the white-list
         for allow in self.m_allowed :
-            if re.search(allow, path) :
-                return True
+            if re.match(allow, path) :
+                allowed = True
+        
+        # but not if it is in the black-list
+        for block in self.m_blocked :
+            if re.match(block, path) :
+                allowed = False
 
-        return False
+        return allowed
 
     def _connect_to (self, netloc, soc) :
 
@@ -197,6 +202,11 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         return scraperID, runID
 
+    def blockmessage(self, url):
+        qurl = urllib.quote(url)
+        return """Scraperwiki blocked access to "%s".  Click <a href="/whitelist/url=%s">here</a> for details.""" % (url, qurl)
+
+
     def do_CONNECT (self) :
 
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
@@ -205,7 +215,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.swlog().log (scraperID, runID, 'P.CONNECT', arg1 = self.path)
 
         if not self.hostAllowed (self.path, scraperID, runID) :
-            self.send_error (403, blockmsg % self.path)
+            self.send_error (403, self.blockmessage(self.path))
             self.swlog().log (scraperID, runID, 'P.ERROR', arg1 = 'Denied',  arg2 = self.path)
             return
 
@@ -251,7 +261,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
         if not self.hostAllowed (self.path, scraperID, runID) :
             self.swlog().log (scraperID, runID, 'P.ERROR', arg1 = 'Denied',  arg2 = self.path)
-            self.send_error (403, blockmsg % self.path)
+            self.send_error (403, self.blockmessage(self.path))
             return
 
         if runID is not None :
