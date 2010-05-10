@@ -158,7 +158,7 @@ function setupDataMap(){
      for (var i=0; i < markers.length; i++) {
         var oIconSize = new OpenLayers.Size(21,25);
         var oIconOffset = new OpenLayers.Pixel(-(oIconSize.w/2), -oIconSize.h);
-        var oIcon = new OpenLayers.Icon('/media/images/mapmarkers/' + markers[i] + '/marker.png', oIconSize, oIconOffset);
+        var oIcon = new OpenLayers.Icon('/media/images/mapmarkers/' + markers[i] + 'marker.png', oIconSize, oIconOffset);
         oIcons[markers[i]] = oIcon;
      }
      
@@ -196,7 +196,7 @@ function setupDataMap(){
             sdata = oData.rows[i][ii]
             if (sdata.substring(0, 5) == "http:") 
                sdata = ('<a href="' + sdata + '">' + sdata + '</a>');
-            sHtml += ('<td>' + oData.rows[i][ii] + '</td></tr>');
+            sHtml += ('<td>' + sdata + '</td></tr>');
          };
          sHtml += '</table>';
 
