@@ -8,15 +8,15 @@ ln -s /home/mike/ScraperWiki/scraperwiki /var/www/scraperwiki
 
 Create the following symlinks
 
-( cd dispatcher	 ; ln -s ../swlogger/swlogger.py dispatcher/swlogger.py  ) 
-( cd firestarter ; ln -s ../swlogger/swlogger.py firestarter/swlogger.py ) 
-( cd ftpproxy	 ; ln -s ../swlogger/swlogger.py ftpproxy/swlogger.py	 ) 
-( cd httpproxy	 ; ln -s ../swlogger/swlogger.py httpproxy/swlogger.py	 ) 
+( cd dispatcher	 ; ln -s ../swlogger/swlogger.py swlogger.py ) 
+( cd firestarter ; ln -s ../swlogger/swlogger.py swlogger.py ) 
+( cd ftpproxy	 ; ln -s ../swlogger/swlogger.py swlogger.py ) 
+( cd httpproxy	 ; ln -s ../swlogger/swlogger.py swlogger.py ) 
 
 Edit settings.py in your web subdirectory to have:
 
 ORBETED_PORT = 8001
-ORBETED_DOMAIN = 'localhost:8001'
+ORBETED_DOMAIN = 'localhost'
 
 Create a mysql database called "scraperwiki_log" and grant access to user
 "scraperlog" with password "scr4p3rl0g"; best bet is to grant access from 
