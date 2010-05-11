@@ -16,7 +16,6 @@ from django.core.urlresolvers import reverse
 from scraper.models import Scraper as ScraperModel  # is this renaming necessary?
 from scraper.models import UserScraperRole
 
-from scraper import template
 from scraper import vc
 import forms
 import settings

@@ -15,7 +15,6 @@ from registration.signals import user_registered
 import tagging
 from frontend import models as frontendmodels
 
-import template
 import util
 import vc
 
