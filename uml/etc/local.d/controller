@@ -10,6 +10,8 @@ PIDFILE=./var/run/$NAME.pid
 
 do_start()
 {
+	mkdir -p ./var/run
+	mkdir -p ./var/log
 	$DAEMON $DAEMON_ARGS
 }
 
