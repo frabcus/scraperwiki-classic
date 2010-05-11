@@ -460,7 +460,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.retrieve ("POST")
 
 #   do_HEAD   = do_GET
-#   do_PUT    = do_GET
+    do_PUT    = do_GET
 #   do_DELETE = do_GET
 
 
