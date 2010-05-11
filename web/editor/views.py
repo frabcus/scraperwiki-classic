@@ -82,7 +82,7 @@ def handle_session_draft(request, action):
                 draft_scraper.save(commit=True, message=draft_commit_message, user=request.user.pk)
 
             # Add tags
-            draft_scraper.__dict__['tags'] = request.session['ScraperDraft'].get('tags', '')
+            draft_scraper.tags = request.session['ScraperDraft'].get('tags', '')
 
             # Add user roles
             # TODO: MOVE TO MODEL, THIS IS BUSINESS LOGIC
@@ -107,11 +107,7 @@ def handle_session_draft(request, action):
 
 
 #Editor form
-def edit(request, short_name=None):
-
-    #if no short name, assign a tempory one
-    if short_name == None:
-      short_name = "__new__" 
+def edit(request, short_name='__new__'):
 
     #have we got an existing draft?
     has_draft = False
@@ -125,14 +121,14 @@ def edit(request, short_name=None):
     if has_draft:
         # Does a draft version exist?
         scraper = draft
-        scraper.__dict__['tags'] = request.session['ScraperDraft'].get('tags', '')
+        scraper.tags = request.session['ScraperDraft'].get('tags', '')
         scraper.commit_message = request.session['ScraperDraft'].get('commit_message', '')        
     
     elif short_name is not "__new__":
         # Try and load an existing scraper
         scraper = get_object_or_404(ScraperModel, short_name=short_name)
         scraper.code = scraper.saved_code()
-        scraper.__dict__['tags'] = ", ".join(tag.name for tag in scraper.tags)
+        scraper.tags = ", ".join(tag.name for tag in scraper.tags)
         if not scraper.published:
             scraper.commit_message = 'Scraper created'
     
@@ -143,11 +139,10 @@ def edit(request, short_name=None):
         # select a startup scraper value randomly from those with the right name (or flag)
         # in the future we should have an isstartup flag on the scraper
         lstartup_scrapers = ScraperModel.objects.filter(deleted=False, published=True)
-        startup_scrapers = [ scraper  for scraper in lstartup_scrapers  if re.match("startup-", scraper.short_name) ]
+        startup_scrapers = [ s for s in lstartup_scrapers  if re.match("startup-", s.short_name) ]
         if not startup_scrapers:  # quick hack to make dev versions more interesting
             startup_scrapers = lstartup_scrapers
         if startup_scrapers:
-            print dir(startup_scrapers[0])
             startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
         else:
             startupcode = "for i in range(10):\n    print i"
@@ -168,7 +163,7 @@ def edit(request, short_name=None):
     
         # in the future we should have an istutorial flag on the scraper
         ltutorial_scrapers = ScraperModel.objects.filter(deleted=False, published=True)
-        tutorial_scrapers = [ scraper  for scraper in ltutorial_scrapers  if re.match("tutorial-", scraper.short_name) ]
+        tutorial_scrapers = [ s for s in ltutorial_scrapers  if re.match("tutorial-", s.short_name) ]
         if not tutorial_scrapers:  # quick hack to make dev versions more interesting
             tutorial_scrapers = ltutorial_scrapers[:5]
             
