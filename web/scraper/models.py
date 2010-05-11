@@ -275,3 +275,12 @@ class UserScraperRole(models.Model):
     def __unicode__(self):
         return "Scraper_id: %s -> User: %s (%s)" % \
                                         (self.scraper, self.user, self.role)
+
+class ScraperMetadata(models.Model):
+    """
+    Allows named metadata to be associated with a scraper
+    """
+    name = models.CharField(max_length=100, null=False, blank=False)
+    scraper = models.ForeignKey(Scraper, null=False)
+    run_id = models.CharField(max_length=100, null=False, blank=False)
+    value = models.TextField()

@@ -21,5 +21,5 @@ urlpatterns = patterns('',
    url(r'^search/(?P<q>.+)/$', views.search, name='search'),
    url(r'^follow/(?P<scraper_short_name>[\w_\-]+)/$', views.follow, name='scraper_follow'),
    url(r'^unfollow/(?P<scraper_short_name>[\w_\-]+)/$', views.unfollow, name='scraper_unfollow'),                   
+   url(r'^metadata_api/', include('scraper.metadata_api.urls')),
 )
-
