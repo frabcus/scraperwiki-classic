@@ -36,7 +36,7 @@ class CSVEmitter(Emitter):
         for row in dictlist:
             if "latlng" in row:   # split the latlng
                 row["lat"], row["lng"] = row.pop("latlng") 
-            row.pop("date_scraped") 
+            row.pop("date_scraped", None) 
             keyset.update(row.keys())
         allkeys = sorted(keyset)
         
