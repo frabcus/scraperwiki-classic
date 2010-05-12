@@ -100,9 +100,15 @@ $(document).ready(function() {
         $('a.scraper-tutorial-link').each(function(){
             $(this).click(function() { 
                 jQuery.get('/editor/raw/'+$(this).text(), function(data) {
-                    //codeeditor.setCode(data);  // use replaceSelection to preserve the undo history so we can go back
-                    codeeditor.selectLines(codeeditor.firstLine(), 0, codeeditor.lastLine(), 0); 
-                    codeeditor.replaceSelection(data);
+                    if($.browser.mozilla){
+                        // I cannot work out why this only affects firefox
+                        // would be nice if we could use selectLines/replaceSelection
+                        // instead as this allows CTRL z to work. TODO Get rid of this
+                        codeeditor.setCode(data);
+                    }else{
+                        codeeditor.selectLines(codeeditor.firstLine(), 0, codeeditor.lastLine(), 0); 
+                        codeeditor.replaceSelection(data);
+                    }
                     codeeditor.selectLines(codeeditor.firstLine(), 0);   // set cursor to start
                     hidePopup();
                 });
