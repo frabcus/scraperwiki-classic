@@ -126,7 +126,7 @@ def nextItemID () :
         return execute('SELECT `id` FROM `sequences`').fetchone()[0]
     raise Exception("Unrecognised datastore type '%s'" % dbtype)
 
-def fetch (scraperID, unique_keys) :
+def fetch (scraperID, unique_keys) :   # note: unique_keys is a dict in the function, whereas elsewhere it is a list!
 
     """
     Fetch values from the datastore.

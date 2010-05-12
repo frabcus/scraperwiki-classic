@@ -91,7 +91,7 @@ class DataStoreClass :
         for key, value in scraper_data.items() :
             try    : json.dumps (value)
             except : value = unicode(value)
-            ukey = key.replace(' ', '_')  # was previously mangled in dataproxy/datalib.fixKVKey()
+            ukey = key.replace(' ', '_')  # was previously mangled in dataproxy/datalib.fixKVKey()  kept for compatibility, to allow in future a function save_no_mangling()
             js_data[ukey] = value
 
         if unique_keys:
@@ -100,17 +100,48 @@ class DataStoreClass :
             uunique_keys = unique_keys
         return self.request (('save', uunique_keys, js_data, date, latlng))
 
+
     def close (self) :
 
         self.m_socket.send ('.\n')
         self.m_socket.close()
         self.m_socket = None
 
+
+# manage local copy of the above class in the global space of this module
 ds = None
-
 def DataStore (config) :
-
     global ds
     if ds is None :
         ds = DataStoreClass(config)
     return ds
+
+
+# functions moved from the out of date code into here to manage their development
+def save (unique_keys, data, date = None, latlng = None, silent = False) :
+    ds = DataStore(None)
+    rc, arg = ds.save (unique_keys, data, date, latlng)
+    if not rc :
+        raise Exception (arg) 
+
+    pdata = {}
+    for key, value in data.items():
+        try    : key   = str(key)
+        except : key   = key  .encode('utf-8')
+        try    : value = str(value)
+        except : value = value.encode('utf-8')
+        pdata[cgi.escape(key)] = cgi.escape(value)
+
+    if not silent :
+        print '<scraperwiki:message type="data">%s' % json.dumps(pdata)
+    return arg
+
+
+# undocumented fetch function
+def fetch (unique_keys) :
+    ds = DataStore(None)
+    rc, arg = ds.fetch (unique_keys)
+    if not rc :
+        raise Exception (arg) 
+
+    return arg
