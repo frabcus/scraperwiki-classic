@@ -76,9 +76,8 @@ class Scraper(models.Model):
     scraper_sparkline_csv     = models.CharField(max_length=255, null=True)
     run_interval      = models.IntegerField(default=86400)   # to go
 
-    #for future (might be a sort of setting string)
-    #istutorial        = models.BooleanField(default=False)
-    #isstartup         = models.BooleanField(default=False)
+    istutorial        = models.BooleanField(default=False)
+    isstartup         = models.BooleanField(default=False)
     
     objects = managers.scraper.ScraperManager()
     unfiltered = models.Manager()
