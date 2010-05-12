@@ -90,10 +90,15 @@ class DataStoreClass :
         js_data = {}
         for key, value in scraper_data.items() :
             try    : json.dumps (value)
-            except : value = str(value)
-            js_data[key] = value
+            except : value = unicode(value)
+            ukey = key.replace(' ', '_')  # was previously mangled in dataproxy/datalib.fixKVKey()
+            js_data[ukey] = value
 
-        return self.request (('save', unique_keys, js_data, date, latlng))
+        if unique_keys:
+            uunique_keys = [ key.replace(' ', '_')  for key in unique_keys ]
+        else:
+            uunique_keys = unique_keys
+        return self.request (('save', uunique_keys, js_data, date, latlng))
 
     def close (self) :
 

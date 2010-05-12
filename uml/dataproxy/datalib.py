@@ -87,9 +87,11 @@ def fixKVKey (key) :
 
     """
     Replace characters in a key such that it is a valid XML tag.
+    (except that this can't work if there are other invalidities such as leading numbers -- 
+    this mangling has been moved into datastore.save)
     """
-
-    return key.replace (' ', '_')
+    return key
+    # was return key.replace (' ', '_')
 
 def uniqueHash (unique, data) :
 
