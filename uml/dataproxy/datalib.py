@@ -176,17 +176,10 @@ def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
     if not unique_s.issubset(data_s) :
         return [ False, 'Unique keys must be a subset of the data keys' ]
 
-    #  Map the scraped data to data to be stored. None, True and False are
-    #  mapped to the empty string, one and zero respectively; anything else
-    #  is turned into a string. The value is stored against a fixed key
-    #  value.
-    #
+
+    # now doesn't do anything because the conversion of the key/values happens in scraperlibs/datastore
     insert_data = {}
     for key, value in scraped_data.items() :
-        if   value is None          : value = ""
-        elif value is True          : value = "1"
-        elif value is False         : value = "0"
-        elif type(value) != types.UnicodeType   : value = str(value)
         insert_data[fixKVKey(key)] = value
 
     #   This is the Julian/Francis code. Reverted back to Sym's because this

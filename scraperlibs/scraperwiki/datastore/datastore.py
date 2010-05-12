@@ -1,6 +1,7 @@
 import  string
 import  socket
 import  urllib
+import  cgi
 import  datetime
 import  types
 import  socket
@@ -8,6 +9,49 @@ import  ConfigParser
 
 try   : import json
 except: import simplejson as json
+
+
+
+def mangleflattendict(data):
+    rdata = { }
+    for key, value in data.items() :
+        
+        # was previously mangled in dataproxy/datalib.fixKVKey()  kept for compatibility, 
+        # but moved here to allow in future a function save_no_mangling()
+        # or optional filtering that prevents invalid keys getting into scrapers that are intended to have xml output, 
+        # so those that will never have xml output can avoid damage
+        rkey = key.replace(' ', '_')  
+        
+        # in future this could be json.dumps or something that is better able to manage the 
+        # confusion between unicode and str types (and mark them all up to unicode)
+        if value == None:
+            rvalue = u""
+        elif value == True:
+            rvalue = u"1"
+        elif value == False:
+            rvalue = u"0"
+        elif isinstance(value, datetime.date):
+            rvalue = value.isoformat()
+        elif isinstance(value, datetime.datetime):
+            rvalue = value.isoformat()
+        elif type(value) == types.UnicodeType:
+            rvalue = value
+        elif type(value) == types.StringType:
+            rvalue = value   # if we knew this was utf8 or latin-1 we'd be able to decode it into unicode!
+        else:
+            rvalue = unicode(value)   #
+            
+        rdata[rkey] = rvalue
+    return rdata
+        
+
+def mangleflattenkeys(keys):
+    rkeys = [ ]
+    for key in keys:
+        rkey = key.replace(' ', '_')  
+        rkeys.append(rkey)
+    return rkeys
+
 
 class DataStoreClass :
 
@@ -55,12 +99,13 @@ class DataStoreClass :
 
         return json.loads (text)
 
-    def fetch (self, unique_keys) :
+    def fetch (self, unique_keys_dict) :
 
-        if type(unique_keys) not in [ types.DictType ] or len(unique_keys) == 0 :
+        if type(unique_keys_dict) not in [ types.DictType ] or len(unique_keys_dict) == 0 :
             return [ False, 'unique_keys must a non-empty dictionary' ]
 
-        return self.request (('fetch', unique_keys))
+        uunique_keys_dict = mangleflattendict(unique_keys_dict)
+        return self.request (('fetch', uunique_keys_dict))
 
     def save (self, unique_keys, scraper_data, date = None, latlng = None) :
 
@@ -86,18 +131,13 @@ class DataStoreClass :
 
         #  Data must be JSON-encodable. Brute force attack, try each data value
         #  in turn and stringify any that bork.
-        #
-        js_data = {}
-        for key, value in scraper_data.items() :
-            try    : json.dumps (value)
-            except : value = unicode(value)
-            ukey = key.replace(' ', '_')  # was previously mangled in dataproxy/datalib.fixKVKey()  kept for compatibility, to allow in future a function save_no_mangling()
-            js_data[ukey] = value
+        
+        # flatten everything into strings here rather than in the dataproxy/datalib where 
+        js_data = mangleflattendict(scraper_data)
 
-        if unique_keys:
-            uunique_keys = [ key.replace(' ', '_')  for key in unique_keys ]
-        else:
-            uunique_keys = unique_keys
+        # unique_keys need to be mangled too so that they match
+        uunique_keys = mangleflattenkeys(unique_keys)
+        
         return self.request (('save', uunique_keys, js_data, date, latlng))
 
 
