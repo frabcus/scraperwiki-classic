@@ -139,7 +139,9 @@ def edit(request, short_name='__new__'):
         # select a startup scraper value randomly from those with the right flag
         startup_scrapers = ScraperModel.objects.filter(published=True, isstartup=True)
 
-        startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
+        startupcode = "# blank"
+        if len(startup_scrapers):
+            startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
         
         scraper.code = startupcode
         scraper.license = 'Unknown'
