@@ -136,19 +136,10 @@ def edit(request, short_name='__new__'):
         # Create a new scraper
         scraper = ScraperModel()
         
-        # select a startup scraper value randomly from those with the right name (or flag)
-        # in the future we should have an isstartup flag on the scraper
-        lstartup_scrapers = ScraperModel.objects.filter(deleted=False, published=True)
-        startup_scrapers = [ s for s in lstartup_scrapers  if re.match("startup-", s.short_name) ]
+        # select a startup scraper value randomly from those with the right flag
+        startup_scrapers = ScraperModel.objects.filter(published=True, isstartup=True)
 
-        # TODO Remove these two lines
-        if not startup_scrapers:  # quick hack to make dev versions more interesting
-            startup_scrapers = lstartup_scrapers
-
-        if startup_scrapers:
-            startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
-        else:
-            startupcode = "for i in range(10):\n    print i"
+        startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
         
         scraper.code = startupcode
         scraper.license = 'Unknown'
@@ -164,14 +155,8 @@ def edit(request, short_name='__new__'):
         form.fields['license'].initial = scraper.license
         #form.fields['run_interval'].initial = scraper.run_interval
     
-        # in the future we should have an istutorial flag on the scraper
-        ltutorial_scrapers = ScraperModel.objects.filter(deleted=False, published=True)
-        tutorial_scrapers = [ s for s in ltutorial_scrapers  if re.match("tutorial-", s.short_name) ]
+        tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True)
 
-        # TODO Remove these two lines
-        if not tutorial_scrapers:  # quick hack to make dev versions more interesting
-            tutorial_scrapers = ltutorial_scrapers[:5]
-            
         return render_to_response('editor/editor.html', {'form':form, 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft}, context_instance=RequestContext(request))        
     
     else:        
