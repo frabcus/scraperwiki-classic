@@ -156,6 +156,43 @@ def fetch (scraperID, unique_keys) :   # note: unique_keys is a dict in the func
 
     return [ True, res ]
 
+
+def retrieve (scraperID, matchrecord) :   
+
+    """
+    Retrieve matched values ignoring hashcode technology
+    """
+
+    query  = []
+    values = []
+    slot   = 1
+    query.append('SELECT items.`item_id`, `date`, `latlng`, `date_scraped` FROM items')
+    for key, value in matchrecord.items():
+        query.append(' INNER JOIN kv AS kv%03d ON kv%03d.item_id = items.item_id AND kv%03d.key = %%s' % (slot, slot, slot))
+        values.append(key)
+        if value != "":
+        #if value is not None:  # can't transfer None through at the moment
+            query.append(' AND kv%03d.value = %%s'   % (slot))
+            values.append(value)
+        slot += 1
+    query.append(' WHERE items.scraper_id = %s')
+    values.append(scraperID)
+    
+    #print "qqq", query, values
+    cursor1 = execute("".join(query), values)
+    
+    # same code as in retrieve
+    res     = []
+    for row in cursor1.fetchall() :
+        data   = {}
+        cursor2 = execute ('SELECT `key`, `value` FROM `kv` where `item_id` = %s', [ row[0] ])
+        for pair in cursor2.fetchall() :
+            data[pair[0]] = pair[1]
+        res.append ({ 'date' : str(row[1]), 'latlng' : row[2], 'date_scraped' : str(row[3]), 'data' : data })
+
+    return [ True, res ]
+
+
 def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
 
     """
@@ -181,26 +218,6 @@ def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
     insert_data = {}
     for key, value in scraped_data.items() :
         insert_data[fixKVKey(key)] = value
-
-    #   This is the Julian/Francis code. Reverted back to Sym's because this
-    #   is horribly expensive.
-    #
-    #   query  = []
-    #   values = []
-    #   slot   = 1
-    #   query.append ('SELECT items.item_id AS item_id FROM items')
-    #   for key in unique :
-    #       query .append ('INNER JOIN kv kv%03d ON kv%03d.item_id = items.item_id AND kv%03d.key = %%s' % (slot, slot, slot))
-    #       values.append (key)
-    #       if data.has_key(key) :
-    #           if data[key] is not None :
-    #                  query .append ('AND kv%03d.value = %%s'   % (slot))
-    #                  values.append (data[key])
-    #           else : query .append ('AND kv%30d.value is null' % (slot))
-    #   query .append ('WHERE items.scraper_id = %s')
-    #   values.append (scraperID)
-    #   cursor = execute (string.join (query,  ' '), values)
-    #   idlist = [ str(row[0]) for row in cursor.fetchall() ]
 
     if scraperID in [ None, '' ] :
         return  [ True, 'Data OK to save' ]

@@ -141,7 +141,7 @@ def edit(request, short_name='__new__'):
 
         startupcode = "# blank"
         if len(startup_scrapers):
-            startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
+            startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
         
         scraper.code = startupcode
         scraper.license = 'Unknown'

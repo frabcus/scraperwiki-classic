@@ -107,6 +107,14 @@ class DataStoreClass :
         uunique_keys_dict = mangleflattendict(unique_keys_dict)
         return self.request (('fetch', uunique_keys_dict))
 
+    def retrieve (self, unique_keys_dict) :
+
+        if type(unique_keys_dict) not in [ types.DictType ] or len(unique_keys_dict) == 0 :
+            return [ False, 'unique_keys must a non-empty dictionary' ]
+
+        uunique_keys_dict = mangleflattendict(unique_keys_dict)
+        return self.request (('retrieve', uunique_keys_dict))
+    
     def save (self, unique_keys, scraper_data, date = None, latlng = None) :
 
         if type(unique_keys) not in [ types.NoneType, types.ListType, types.TupleType ] :
@@ -185,3 +193,14 @@ def fetch (unique_keys) :
         raise Exception (arg) 
 
     return arg
+
+
+# undocumented retrieve function
+def retrieve (unique_keys) :
+    ds = DataStore(None)
+    rc, arg = ds.retrieve (unique_keys)
+    if not rc :
+        raise Exception (arg) 
+
+    return arg
+

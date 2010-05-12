@@ -10,6 +10,7 @@ Create the following symlinks
 
 ( cd dispatcher	 ; ln -s ../swlogger/swlogger.py swlogger.py ) 
 ( cd firestarter ; ln -s ../swlogger/swlogger.py swlogger.py ) 
+( cd controller  ; ln -s ../swlogger/swlogger.py swlogger.py ) 
 ( cd ftpproxy	 ; ln -s ../swlogger/swlogger.py swlogger.py ) 
 ( cd httpproxy	 ; ln -s ../swlogger/swlogger.py swlogger.py ) 
 
