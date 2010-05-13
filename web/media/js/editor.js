@@ -118,9 +118,6 @@ $(document).ready(function() {
 
     //Setup Menu
     function setupMenu(){
-        $('#menu_shortcuts').click(function(){
-            showPopup('popup_shortcuts'); 
-        });
         $('#menu_settings').click(function(){
             showPopup('popup_settings'); 
         });
@@ -205,7 +202,8 @@ $(document).ready(function() {
                 //show
                 $(this).css({
                     // display:'block',
-                    height: $(window).height() - 200,
+                    height: $(window).height() - 100,
+                    "margin-top": 50,
                     position: 'absolute'
                 });
                 $(this).fadeIn("fast")
