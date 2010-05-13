@@ -241,6 +241,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
+        isSW = netloc[:-16] == '.scraperwiki.com'
 
         #  Path /Status returns status information.
         #
@@ -281,7 +282,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #   * Caching has been enabled
         #   * The x-cache header is greater than zero
         #
-        if useCache and cache > 0 :
+        if not isSW and useCache and cache > 0 :
 
             #  "cbits" will be set to a 3-element list comprising the path (including
             #  query bits), the url-encoded content if any, and the cookie string, if any.
@@ -374,7 +375,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                             continue
                         if key == 'x-cache'     :
                             continue
-                        soc.send ("%s: %s\r\n" % (key, value))
+                        soc.send ('%s: %s\r\n' % (key, value))
+                    if isSW :
+                        soc.send ("%s: %s\r\n" % ('x-scraperid', scraperID and scraperID or ''))
+                        soc.send ("%s: %s\r\n" % ('x-runid',     runID     and runID     or ''))
                     soc.send ("\r\n")
                     if content :
                         soc.send (content)
