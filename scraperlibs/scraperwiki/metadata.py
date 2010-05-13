@@ -12,7 +12,13 @@ class MetadataClient(object):
         self.scraper_guid = os.environ['SCRAPER_GUID']
         self.run_id = os.environ['RUNID']
 
-    def get(self, metadata_name, default=None):
+    def _check_scraper_guid(self):
+        if not self.scraper_guid:
+            raise Exception('Metadata cannot be accessed before the scraper has been saved')
+
+    def _get_metadata(self, metadata_name):
+        self._check_scraper_guid()
+
         self.connection.connect()
         self.connection.request(url='http://metadata.scraperwiki.com/scrapers/metadata_api/%s/%s/' % (self.scraper_guid, urllib.quote(metadata_name)), method='GET')
         resp = self.connection.getresponse()
@@ -21,11 +27,24 @@ class MetadataClient(object):
             result['value'] = json.loads(result['value'])
             return result
         else:
-            print resp.msg
-            return default
+            return None
         self.connection.close()
 
+    def get(self, metadata_name, default=None):
+        metadata = self._get_metadata(metadata_name)
+        if metadata:
+            return metadata['value']
+        else:
+            return default
+
+    def get_run_id(self, metadata_name):
+        metadata = self._get_metadata(metadata_name)
+        if metadata:
+            return metadata['run_id']
+
     def put(self, metadata_name, value):
+        self._check_scraper_guid()
+
         if self.get(metadata_name):
             method = 'PUT'
         else:
@@ -47,6 +66,9 @@ class MetadataClient(object):
 client = MetadataClient()
 
 def get(metadata_name, default=None):
+    return client.get(metadata_name, default)
+
+def get_run_id(metadata_name, default=None):
     return client.get(metadata_name, default)
 
 def put(metadata_name, value):
