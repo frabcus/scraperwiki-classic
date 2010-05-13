@@ -241,7 +241,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-        isSW = netloc[:-16] == '.scraperwiki.com'
+        isSW = netloc[-16:] == '.scraperwiki.com'
 
         #  Path /Status returns status information.
         #
