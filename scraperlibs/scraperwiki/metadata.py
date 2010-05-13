@@ -20,14 +20,13 @@ class MetadataClient(object):
         self._check_scraper_guid()
 
         self.connection.connect()
-        self.connection.request(url='http://dev.scraperwiki.com/scrapers/metadata_api/%s/%s/' % (self.scraper_guid, urllib.quote(metadata_name)), method='GET', headers={'x-scraperid': self.scraper_guid})
+        self.connection.request(url='http://metadata.scraperwiki.com/scrapers/metadata_api/%s/%s/' % (self.scraper_guid, urllib.quote(metadata_name)), method='GET')
         resp = self.connection.getresponse()
         if resp.status == 200:
             result = json.loads(resp.read())
             result['value'] = json.loads(result['value'])
             return result
         else:
-            print resp.read()
             return None
         self.connection.close()
 
@@ -56,10 +55,10 @@ class MetadataClient(object):
         parameters['value'] = json.dumps(value)
 
         self.connection.connect()
-        self.connection.request(url='http://dev.scraperwiki.com/scrapers/metadata_api/%s/%s/' % (self.scraper_guid, urllib.quote(metadata_name)), 
+        self.connection.request(url='http://metadata.scraperwiki.com/scrapers/metadata_api/%s/%s/' % (self.scraper_guid, urllib.quote(metadata_name)), 
                                 method=method,
                                 body=urllib.urlencode(parameters),
-                                headers={'Content-Type': 'application/x-www-form-urlencoded', 'x-scraperid': self.scraper_guid})
+                                headers={'Content-Type': 'application/x-www-form-urlencoded'})
         self.connection.getresponse() # Make sure we have a response before closing the connection!
         self.connection.close()
 

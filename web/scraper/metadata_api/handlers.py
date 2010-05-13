@@ -12,13 +12,10 @@ def check_scraperid_header(fn):
         This allows us to check that metadata is only edited by
         the scraper it belongs to.
         """
-        raise Exception(str(request.META.keys()))
-        #if request.META['x-scraperid'] != scraper_guid:
         if request.META['HTTP_X_SCRAPERID'] != scraper_guid:
             return rc.FORBIDDEN
         else:
             return fn(self, request, scraper_guid, metadata_name)
-        #return fn(self, request, scraper_guid, metadata_name)
     return inner
 
 class ScraperMetadataHandler(BaseHandler):
