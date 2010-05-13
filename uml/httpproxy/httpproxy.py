@@ -204,7 +204,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     def blockmessage(self, url):
         qurl = urllib.quote(url)
-        return """Scraperwiki blocked access to "%s".  Click <a href="/whitelist/url=%s">here</a> for details.""" % (url, qurl)
+        return """Scraperwiki blocked access to "%s".  Click <a href="/whitelist/?url=%s">here</a> for details.""" % (url, qurl)
 
 
     def do_CONNECT (self) :
