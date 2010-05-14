@@ -6,6 +6,7 @@ import  inspect
 import  os
 import  sha
 import  ConfigParser
+import  urllib2
 
 class FireWrapper :
 
@@ -95,8 +96,8 @@ class FireStarter :
         Class constructor.
         """
 
-        conf = ConfigParser.ConfigParser()
-        conf.readfp (open(config))
+        self.m_conf        = ConfigParser.ConfigParser()
+        self.m_conf.readfp (open(config))
 
 
         self.m_dispatcher  = None
@@ -123,7 +124,7 @@ class FireStarter :
         s.update(str(time.time (  )))
         self.m_runID       = '%.6f_%s' % (time.time(), s.hexdigest())
 
-        self.setDispatcher  ('%s:%d' % (conf.get('dispatcher', 'host'), conf.getint('dispatcher', 'port')))
+        self.setDispatcher  ('%s:%d' % (self.m_conf.get('dispatcher', 'host'), self.m_conf.getint('dispatcher', 'port')))
 
         import swlogger
         self.m_swlog = swlogger.SWLogger(config)
@@ -314,6 +315,26 @@ class FireStarter :
 
         for site in sites :
             self.m_blocked.append (site)
+
+    def loadConfiguration (self) :
+
+        """
+        Load configuration as retrieved from the configuration URL.
+        """
+
+        confurl = self.m_conf.get('dispatcher', 'confurl')
+        conftxt = urllib2.urlopen(confurl).read().replace('\r', '')
+        for line in conftxt.split('\n') :
+            try :
+                key, value = line.split('=')
+                if key == 'white' :
+                    self.addAllowedSites (value)
+                    continue
+                if key == 'black' :
+                    self.addBlockedSites (value)
+                    continue
+            except :
+                pass
 
     def addIPTables (self, *rules) :
 

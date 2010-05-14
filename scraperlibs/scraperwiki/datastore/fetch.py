@@ -1,5 +1,8 @@
 #  encoding: utf-8
 #
+
+# DEAD FILE
+
 import  datastore
 
 #  Fetch from the data store for the current scraper. The argument

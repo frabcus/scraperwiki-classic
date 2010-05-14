@@ -3,6 +3,9 @@
 #  Run the dispatcher, proxy, firebox and controller servers locally, .ie.,
 #  without using a real UML
 #
+mkdir -p ./var/log
+mkdir -p ./var/run
+
 ./etc/local.d/controller	restart
 ./etc/local.d/dataproxy		restart
 ./etc/local.d/dispatcher	restart

@@ -21,6 +21,7 @@ $(document).ready(function() {
     //constructor functions
     setupCodeEditor();
     setupMenu();
+    setupTutorial(); 
     setupOrbited();
     setupTabs();
     setupPopups();
@@ -93,18 +94,38 @@ $(document).ready(function() {
         addHotkey('ctrl+d', viewDiff);                       
           
     };
-
     
+    //Setup tutorials
+    function setupTutorial(){
+        $('a.scraper-tutorial-link').each(function(){
+            $(this).click(function() { 
+                jQuery.get('/editor/raw/'+$(this).text(), function(data) {
+                    if($.browser.mozilla){
+                        // I cannot work out why this only affects firefox
+                        // would be nice if we could use selectLines/replaceSelection
+                        // instead as this allows CTRL z to work. TODO Get rid of this
+                        codeeditor.setCode(data);
+                    }else{
+                        codeeditor.selectLines(codeeditor.firstLine(), 0, codeeditor.lastLine(), 0); 
+                        codeeditor.replaceSelection(data);
+                    }
+                    codeeditor.selectLines(codeeditor.firstLine(), 0);   // set cursor to start
+                    hidePopup();
+                });
+            })
+        })
+    }
+
     //Setup Menu
     function setupMenu(){
-        $('#menu_shortcuts').click(function(){
-            showPopup('popup_shortcuts'); 
-        });
         $('#menu_settings').click(function(){
             showPopup('popup_settings'); 
         });
         $('#menu_documentation').click(function(){
             showPopup('popup_documentation'); 
+        });        
+        $('#menu_tutorials').click(function(){
+            showPopup('popup_tutorials'); 
         });        
         $('form#editor').submit(function() { 
             saveScraper(false); 
@@ -181,7 +202,8 @@ $(document).ready(function() {
                 //show
                 $(this).css({
                     // display:'block',
-                    height: $(window).height() - 200,
+                    height: $(window).height() - 100,
+                    "margin-top": 50,
                     position: 'absolute'
                 });
                 $(this).fadeIn("fast")

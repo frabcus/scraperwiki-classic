@@ -24,6 +24,11 @@ function setupCodeViewer(iLineCount){
       });
 }
 
+function AlertBrowser(){
+    if ($.browser.msie)
+        $('#feedbackmess').html(' --- <span class="incompatible-browser">Your browser might not be compatible</span>, please see <a href="/help#browsers">FAQ</a>');
+}
+
 function APISetupExploreFunction(){
 
     //link up the call button to change a few bits of text
@@ -147,21 +152,32 @@ function setupDataMap(){
       oMarkersLayer = new OpenLayers.Layer.Markers("Markers");
       oMap.addLayer(oMarkersLayer);      
       
-     // Make icon
-     var oIconSize = new OpenLayers.Size(21,25);
-     var oIconOffset = new OpenLayers.Pixel(-(oIconSize.w/2), -oIconSize.h);
-     var oIcon = new OpenLayers.Icon('http://www.openstreetmap.org/openlayers/img/marker.png',oIconSize, oIconOffset);
+     // Make icon (derived from http://www.openstreetmap.org/openlayers/img/marker.png -- could later include variations on markers)
+     markers = ["red", "blue", "purple", "green", "white", "black"];
+     oIcons = { }
+     for (var i=0; i < markers.length; i++) {
+        var oIconSize = new OpenLayers.Size(21,25);
+        var oIconOffset = new OpenLayers.Pixel(-(oIconSize.w/2), -oIconSize.h);
+        var oIcon = new OpenLayers.Icon('/media/images/mapmarkers/' + markers[i] + 'marker.png', oIconSize, oIconOffset);
+        oIcons[markers[i]] = oIcon;
+     }
      
      // Get data
      var oData = eval('('+ $('#hidMapData').val() + ')');
      
      //find where the latlng field is
-     var iLatLngIndex = 0;
+     var iLatLngIndex = -1;
+     var iColourIndex = -1; 
      for (var i=0; i < oData.headings.length; i++) {
          if(oData.headings[i] == 'latlng'){
              iLatLngIndex = i;
          }
+         if(oData.headings[i] == 'colour'){
+             iColourIndex = i;
+         }
      };
+     if (iLatLngIndex == -1)
+        return; // nothing more to look for
 
      for (var i=0; i < oData.rows.length; i++) {
          if(oData.rows[i][iLatLngIndex] == ""){
@@ -176,13 +192,19 @@ function setupDataMap(){
          //work out the html to show
          var sHtml = '<table>';
          for (var ii=0; ii < oData.rows[i].length; ii++) {
-            sHtml += ('<tr><td>' + oData.headings[ii]   + '</td>');
-            sHtml += ('<td>' + oData.rows[i][ii] + '</td></tr>');
+            sHtml += ('<tr><td>' + oData.headings[ii] + '</td>');
+            sdata = oData.rows[i][ii]
+            if (sdata.substring(0, 5) == "http:") 
+               sdata = ('<a href="' + sdata + '">' + sdata + '</a>');
+            sHtml += ('<td>' + sdata + '</td></tr>');
          };
          sHtml += '</table>';
 
          //make the marker
-         var oMarker = new OpenLayers.Marker(oLngLat,oIcon.clone())
+         colour = "red"; 
+         if ((iColourIndex != -1) && (oData.rows[i][iColourIndex] in oIcons))
+            colour = oData.rows[i][iColourIndex]
+         var oMarker = new OpenLayers.Marker(oLngLat, oIcons[colour].clone())
          oMarkersLayer.addMarker(oMarker);
          oMarker.html = sHtml;
          

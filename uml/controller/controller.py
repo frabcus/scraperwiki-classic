@@ -39,7 +39,7 @@ config     = None
 name       = None
 firewall   = None
 re_resolv  = re.compile ('nameserver\s+([0-9.]+)')
-
+setuid     = True
 
 def firewallBegin (rules) :
 
@@ -252,7 +252,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         effective user.
         """
 
-        if 'x-setuser'  in self.headers :
+        if setuid and 'x-setuser'  in self.headers :
             import pwd
             try    :
                 user  = pwd.getpwnam (self.headers['x-setuser' ])
@@ -268,7 +268,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         effective group.
         """
 
-        if 'x-setgroup' in self.headers :
+        if setuid and 'x-setgroup' in self.headers :
             import grp
             try    :
                 group = grp.getgrnam (self.headers['x-setgroup'])
@@ -585,7 +585,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             ostimes1   = os.times ()
             cltime1    = time.time()
             mod        = imp.new_module ('scraper')
-            exec code in mod.__dict__
+            exec code.rstrip() in mod.__dict__
             ostimes2   = os.times ()
             cltime2    = time.time()
             try    :
@@ -860,6 +860,10 @@ if __name__ == '__main__' :
 
         if arg == '--daemon'  :
             daemon = True
+            continue
+
+        if arg == '--nosetuid':
+            setuid = False
             continue
 
 

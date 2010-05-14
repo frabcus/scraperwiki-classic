@@ -5,7 +5,7 @@ NAME=controller
 CONFIG=/var/www/scraperwiki/uml/uml.cfg.local
 DAEMON=/var/www/scraperwiki/uml/controller/controller.py
 DAEMON_PATH=/var/www/scraperwiki/scraperlibs/
-DAEMON_ARGS="--daemon --subproc --addPath=$DAEMON_PATH --varDir=./var --firewall=none --config=$CONFIG"
+DAEMON_ARGS="--daemon --subproc --addPath=$DAEMON_PATH --varDir=./var --firewall=none --config=$CONFIG --nosetuid"
 PIDFILE=./var/run/$NAME.pid
 
 do_start()

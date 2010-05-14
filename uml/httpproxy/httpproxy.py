@@ -16,7 +16,7 @@ import  sys
 import  time
 import  threading
 import  string 
-import  urllib
+import  urllib   # should this be urllib2? -- JGT
 import  ConfigParser
 import  hashlib
 
@@ -32,7 +32,7 @@ gid         = None
 allowAll    = False
 statusLock  = None
 statusInfo  = {}
-blockmsg    = """Scraperwiki has blocked you from accessing "%s" because it is not allowed according to the rules"""
+
 
 class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
@@ -81,7 +81,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
         sys.stderr.flush ()
 
-    def hostAllowed (self, netloc, scraperID, runID) :
+    def hostAllowed (self, path, scraperID, runID) :
 
         """
         See if access to a specified host is allowed. These are specified as a list
@@ -89,8 +89,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         both start and finish so they must match the entire host. The file is named
         from the IP address of the caller.
 
-        @type   netloc   : String
-        @param  netloc   : Hostname
+        @type   path     : String
+        @param  path     : Hostname
         @type   scraperID: String
         @param  scraperID: Scraper identifier or None
         @return          : True if access is allowed
@@ -101,14 +101,19 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if allowAll :
             return True
 
-        for block in self.m_blocked :
-            if re.match('^' + block + '$', netloc) :
-                return False
+        allowed = False
+        
+        # first if it is the white-list
         for allow in self.m_allowed :
-            if re.match('^' + allow + '$', netloc) :
-                return True
+            if re.match(allow, path) :
+                allowed = True
+        
+        # but not if it is in the black-list
+        for block in self.m_blocked :
+            if re.match(block, path) :
+                allowed = False
 
-        return False
+        return allowed
 
     def _connect_to (self, netloc, soc) :
 
@@ -197,6 +202,11 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         return scraperID, runID
 
+    def blockmessage(self, url):
+        qurl = urllib.quote(url)
+        return """Scraperwiki blocked access to "%s".  Click <a href="/whitelist/?url=%s">here</a> for details.""" % (url, qurl)
+
+
     def do_CONNECT (self) :
 
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
@@ -204,8 +214,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         self.swlog().log (scraperID, runID, 'P.CONNECT', arg1 = self.path)
 
-        if not self.hostAllowed (netloc, scraperID, runID) :
-            self.send_error (403, blockmsg % self.path)
+        if not self.hostAllowed (self.path, scraperID, runID) :
+            self.send_error (403, self.blockmessage(self.path))
             self.swlog().log (scraperID, runID, 'P.ERROR', arg1 = 'Denied',  arg2 = self.path)
             return
 
@@ -231,6 +241,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
+        isSW = netloc[-16:] == '.scraperwiki.com'
 
         #  Path /Status returns status information.
         #
@@ -249,9 +260,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.send_error (400, "Malformed URL %s" % self.path)
             self.swlog().log (scraperID, runID, 'P.ERROR', arg1 = 'Bad URL', arg2 = self.path)
             return
-        if not self.hostAllowed (netloc, scraperID, runID) :
+        if not self.hostAllowed (self.path, scraperID, runID) :
             self.swlog().log (scraperID, runID, 'P.ERROR', arg1 = 'Denied',  arg2 = self.path)
-            self.send_error (403, blockmsg % self.path)
+            self.send_error (403, self.blockmessage(self.path))
             return
 
         if runID is not None :
@@ -271,7 +282,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #   * Caching has been enabled
         #   * The x-cache header is greater than zero
         #
-        if useCache and cache > 0 :
+        if not isSW and useCache and cache > 0 :
 
             #  "cbits" will be set to a 3-element list comprising the path (including
             #  query bits), the url-encoded content if any, and the cookie string, if any.
@@ -364,7 +375,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                             continue
                         if key == 'x-cache'     :
                             continue
-                        soc.send ("%s: %s\r\n" % (key, value))
+                        soc.send ('%s: %s\r\n' % (key, value))
+                    if isSW :
+                        soc.send ("%s: %s\r\n" % ('x-scraperid', scraperID and scraperID or ''))
+                        soc.send ("%s: %s\r\n" % ('x-runid',     runID     and runID     or ''))
                     soc.send ("\r\n")
                     if content :
                         soc.send (content)
@@ -450,7 +464,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.retrieve ("POST")
 
 #   do_HEAD   = do_GET
-#   do_PUT    = do_GET
+    do_PUT    = do_POST
 #   do_DELETE = do_GET
 
 

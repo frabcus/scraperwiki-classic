@@ -87,9 +87,11 @@ def fixKVKey (key) :
 
     """
     Replace characters in a key such that it is a valid XML tag.
+    (except that this can't work if there are other invalidities such as leading numbers -- 
+    this mangling has been moved into datastore.save)
     """
-
-    return key.replace (' ', '_')
+    return key
+    # was return key.replace (' ', '_')
 
 def uniqueHash (unique, data) :
 
@@ -124,7 +126,7 @@ def nextItemID () :
         return execute('SELECT `id` FROM `sequences`').fetchone()[0]
     raise Exception("Unrecognised datastore type '%s'" % dbtype)
 
-def fetch (scraperID, unique_keys) :
+def fetch (scraperID, unique_keys) :   # note: unique_keys is a dict in the function, whereas elsewhere it is a list!
 
     """
     Fetch values from the datastore.
@@ -154,6 +156,43 @@ def fetch (scraperID, unique_keys) :
 
     return [ True, res ]
 
+
+def retrieve (scraperID, matchrecord) :   
+
+    """
+    Retrieve matched values ignoring hashcode technology
+    """
+
+    query  = []
+    values = []
+    slot   = 1
+    query.append('SELECT items.`item_id`, `date`, `latlng`, `date_scraped` FROM items')
+    for key, value in matchrecord.items():
+        query.append(' INNER JOIN kv AS kv%03d ON kv%03d.item_id = items.item_id AND kv%03d.key = %%s' % (slot, slot, slot))
+        values.append(key)
+        if value != "":
+        #if value is not None:  # can't transfer None through at the moment
+            query.append(' AND kv%03d.value = %%s'   % (slot))
+            values.append(value)
+        slot += 1
+    query.append(' WHERE items.scraper_id = %s')
+    values.append(scraperID)
+    
+    #print "qqq", query, values
+    cursor1 = execute("".join(query), values)
+    
+    # same code as in retrieve
+    res     = []
+    for row in cursor1.fetchall() :
+        data   = {}
+        cursor2 = execute ('SELECT `key`, `value` FROM `kv` where `item_id` = %s', [ row[0] ])
+        for pair in cursor2.fetchall() :
+            data[pair[0]] = pair[1]
+        res.append ({ 'date' : str(row[1]), 'latlng' : row[2], 'date_scraped' : str(row[3]), 'data' : data })
+
+    return [ True, res ]
+
+
 def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
 
     """
@@ -174,38 +213,11 @@ def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
     if not unique_s.issubset(data_s) :
         return [ False, 'Unique keys must be a subset of the data keys' ]
 
-    #  Map the scraped data to data to be stored. None, True and False are
-    #  mapped to the empty string, one and zero respectively; anything else
-    #  is turned into a string. The value is stored against a fixed key
-    #  value.
-    #
+
+    # now doesn't do anything because the conversion of the key/values happens in scraperlibs/datastore
     insert_data = {}
     for key, value in scraped_data.items() :
-        if   value is None          : value = ""
-        elif value is True          : value = "1"
-        elif value is False         : value = "0"
-        elif type(value) != types.UnicodeType   : value = str(value)
         insert_data[fixKVKey(key)] = value
-
-    #   This is the Julian/Francis code. Reverted back to Sym's because this
-    #   is horribly expensive.
-    #
-    #   query  = []
-    #   values = []
-    #   slot   = 1
-    #   query.append ('SELECT items.item_id AS item_id FROM items')
-    #   for key in unique :
-    #       query .append ('INNER JOIN kv kv%03d ON kv%03d.item_id = items.item_id AND kv%03d.key = %%s' % (slot, slot, slot))
-    #       values.append (key)
-    #       if data.has_key(key) :
-    #           if data[key] is not None :
-    #                  query .append ('AND kv%03d.value = %%s'   % (slot))
-    #                  values.append (data[key])
-    #           else : query .append ('AND kv%30d.value is null' % (slot))
-    #   query .append ('WHERE items.scraper_id = %s')
-    #   values.append (scraperID)
-    #   cursor = execute (string.join (query,  ' '), values)
-    #   idlist = [ str(row[0]) for row in cursor.fetchall() ]
 
     if scraperID in [ None, '' ] :
         return  [ True, 'Data OK to save' ]

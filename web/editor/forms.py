@@ -10,11 +10,6 @@ LICENSE_CHOICES = (
     ('Unknown', 'Unknown'),
 )
 
-# RUN_INTERVAL_CHOICES = (
-#     ('once', 'Once a day'),
-#     ('never', 'Never'),
-#     )
-
 class editorForm(forms.ModelForm):
     
     class Meta:
@@ -43,7 +38,6 @@ class editorForm(forms.ModelForm):
     code = forms.CharField(
         widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'})
     )
-
 
     def clean_title(self):
         title = self.cleaned_data['title']

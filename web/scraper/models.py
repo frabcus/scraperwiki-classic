@@ -15,7 +15,6 @@ from registration.signals import user_registered
 import tagging
 from frontend import models as frontendmodels
 
-import template
 import util
 import vc
 
@@ -60,23 +59,26 @@ class Scraper(models.Model):
     last_run          = models.DateTimeField(blank=True, null=True)
     description       = models.TextField(blank=True)
     license           = models.CharField(max_length=100, blank=True)
-    revision          = models.CharField(max_length=100, null=True)
+    revision          = models.CharField(max_length=100, blank=True)
     created_at        = models.DateTimeField(auto_now_add=True)
     disabled          = models.BooleanField()
     deleted           = models.BooleanField()
-    status            = models.CharField(max_length=10)
+    status            = models.CharField(max_length=10, blank=True)
     users             = models.ManyToManyField(User, through='UserScraperRole')
     guid              = models.CharField(max_length=1000)
     published         = models.BooleanField(default=False)
-    first_published_at   = models.DateTimeField(null=True)
+    first_published_at   = models.DateTimeField(null=True, blank=True)
     featured          = models.BooleanField(default=False)
     line_count        = models.IntegerField(default=0)
     record_count      = models.IntegerField(default=0)
     has_geo           = models.BooleanField(default=False)
     has_temporal      = models.BooleanField(default=False)
     scraper_sparkline_csv     = models.CharField(max_length=255, null=True)
-    run_interval      = models.IntegerField(default=86400)
+    run_interval      = models.IntegerField(default=86400)   # to go
 
+    istutorial        = models.BooleanField(default=False)
+    isstartup         = models.BooleanField(default=False)
+    
     objects = managers.scraper.ScraperManager()
     unfiltered = models.Manager()
 
@@ -271,3 +273,12 @@ class UserScraperRole(models.Model):
     def __unicode__(self):
         return "Scraper_id: %s -> User: %s (%s)" % \
                                         (self.scraper, self.user, self.role)
+
+class ScraperMetadata(models.Model):
+    """
+    Allows named metadata to be associated with a scraper
+    """
+    name = models.CharField(max_length=100, null=False, blank=False)
+    scraper = models.ForeignKey(Scraper, null=False)
+    run_id = models.CharField(max_length=100, null=False, blank=False)
+    value = models.TextField()

@@ -2,6 +2,7 @@
 host	= 89.16.177.212
 port	= 9000
 umllist	= uml001,uml002,uml003,uml004
+confurl	= http://localhost:8080/whitelist/config
 
 [httpproxy]
 host	= 89.16.177.195

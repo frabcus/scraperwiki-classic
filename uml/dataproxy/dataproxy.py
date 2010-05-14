@@ -146,6 +146,20 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             try    : statusInfo[runID]['action'] = None
             except : pass
 
+    def retrieve (self, scraperID, runID, unique) :
+
+        if runID is not None :
+            try    : statusInfo[runID]['action'] = 'retrieve'
+            except : pass
+
+        rc, arg = datalib.retrieve (scraperID, unique)
+        self.connection.send (json.dumps ((rc, arg)) + '\n')
+
+        if runID is not None :
+            try    : statusInfo[runID]['action'] = None
+            except : pass
+
+
     def save (self, scraperID, runID, unique, data, date, latlng) :
 
         if runID is not None :
@@ -172,6 +186,10 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.fetch (scraperID, runID, request[1])
             return
 
+        if request[0] == 'retrieve' :
+            self.retrieve (scraperID, runID, request[1])
+            return
+        
         self.connection.send (json.dumps ((False, 'Unknown datastore command: %s' % request[0])) + '\n')
 
     def do_GET (self) :

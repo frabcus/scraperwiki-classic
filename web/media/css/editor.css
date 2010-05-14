@@ -48,6 +48,7 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 .editor_controls #diff {background-image:url(../images/icons/diff.png)}
 .editor_controls .commit, #meta_form .button.commit {background-image:url(../images/icons/database_save.png); border-color:#2680c6;
     background-color:#6fb1e6; color:#fff;}
+#meta_form {overflow: auto;}
 #meta_form p {margin:2.5em 0 2em 0;padding:0.5em 0 0.5em 0; border-top:solid 1px #808080;border-bottom:solid 1px #808080;}
     
 #running_annimation {display:none;}
@@ -104,12 +105,13 @@ span.hiddenfields { margin-left:10px; }
 #overlay {background:black;z-index:100;position:absolute; top:0; left:0; width:100%; height:100%;
     opacity:0.6;filter: alpha(opacity=60); display:none;}
 
+/* note that height of popup is set from editor.js showPopup() */
 #popups .popup_item {border: 10px solid #000;position:absolute;width:500px;height:300px;background:#fff;
-    z-index:110; position:absolute; top:0; width:86%; margin:5%; padding:0 2%;
+    z-index:110; position:absolute; top:0; width:86%; margin:4%; padding:0 2%;
     text-align:left; display:none; }
 
-.popup_item .popup_header {margin:2% 0 0 0;height:4%; position:relative;}
-.popup_item .output {overflow-y:scroll; height:88%;}
+.popup_item .popup_header {margin:0% 0 0 0;height:4%; position:relative;}
+.popup_item .output {overflow-y:auto; height:88%;}
 .popup_item .popup_error {background:#a22424; padding:0.1em 0; margin:0; text-align:center; position:relative; top:-1em;color:#fff;}
 
 #popup_exception, #popup_text {background:#000!important; color:#3cef3b;}
@@ -118,12 +120,11 @@ span.hiddenfields { margin-left:10px; }
     white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;}
 #popup_exception a.popupClose, #popup_text a.popupClose {color:#fff;}
 
-.popupClose {font-size:1em; line-height:20px; right:0; top:0; position:absolute; color:#000; font-weight:700; display:block; cursor:pointer;}
+.popupClose {font-size:1em; line-height:20px; right:0; top:0; position:absolute; color:#000; background-color:#fcc; font-weight:700; display:block; cursor:pointer;}
 .popupReady {font-weight:bold;}
 
 .popup_controls {padding-top:1em; margin-top:1em;border-top:solid 1px #808080;position:relative;}
-.popup_controls .right {position:absolute; right:0; top:1em;
-    }
+.popup_controls .right {position:absolute; right:0; top:1em; }
 
 dl.quick_help dt code {font-size:1.3em;}
 dl.quick_help dd {font-size:0.8em; padding:0.5em 0 1.2em 0; margin:0;}
@@ -134,6 +135,25 @@ dl.quick_help a { font-size:0.8em; font-style:italic;}
 dl.quick_help ul { padding:0 0 0 1em; margin: 0; }
 dl.quick_help li { padding:0 0 0 0; margin: 0; }
 dl.quick_help li code {font-size:1.1em; }
+
+
+/* note that height of popup is set from editor.js showPopup() */
+#popups .popup_item {border: 10px solid #000;position:absolute;width:500px;height:300px;background:#fff;
+    z-index:110; position:absolute; top:0; width:86%; margin:4%; padding:0 2%;
+    text-align:left; display:none; }
+
+/* tutorial page.  needs specify exactly the popup_item case in order to overload the padding */
+#popups .popup_item#popup_tutorials { padding:0 0 0 0; overflow:auto;}
+#popup_tutorials .popupClose {font-size:1em; line-height:20px; float:right; color:#000; background-color:#fcc; font-weight:700; display:block; cursor:pointer;}
+#popup_tutorials h3 { text-align: center; padding:0.1em;}
+#popup_tutorials p.descr { margin:0 0.2em; text-align:center; font-size:0.8em; font-style:italic; }
+#popup_tutorials td.bicolumn { width:50%; vertical-align:top; }
+#popup_tutorials h4 { padding: 0.2em 0 0 0.1em;}
+#popup_tutorials td.bicolumn dl { margin:0.1em 1.2em;}
+#popup_tutorials td.bicolumn table {width:auto; margin:0 1.2em; }
+#popup_tutorials td.bicolumn dt.code { font-weight:bold; font-family: monaco, monospace; font-size:0.8em;}
+#popup_tutorials td.bicolumn dd { padding:0.0em 0 0.2em 0.8em; margin:0;}
+
 /*
 #meta_fields_mini .field { display:inline; }
 #meta_fields_mini .field input, #meta_fields_mini .field textarea {height:10px;}
