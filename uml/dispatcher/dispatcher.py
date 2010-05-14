@@ -196,7 +196,7 @@ class UML :
         config.append \
                 (       "name=%s;server=%s;port=%d;count=%d;free=%d;closing=%s" % \
                         (       self.m_name,
-                self.m_server,
+                                self.m_server,
                                 self.m_port,
                                 self.m_count,
                                 self.m_free,
@@ -597,7 +597,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.swlog().log (scraperID, runID, 'D.ERROR', arg1 = 'Bad URL', arg2 = self.path)
             return
 
-        uml, id = allocateUML (enqueue, scraperID = scraperID, testName = testName)
+        uml, id = allocateUML (enqueue, scraperID = scraperID, runID = runID, testName = testName)
         if uml is None :
             self.send_error (400, "No server free to run your scraper, please try again in a few minutes")
             self.swlog().log (scraperID, runID, 'D.ERROR', arg1 = 'No UML', arg2 = '%s' % (self.path))
