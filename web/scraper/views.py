@@ -50,9 +50,9 @@ def overview(request, scraper_short_name):
         data = zip(table['headings'], table['rows'][0])
 
     try:
-        chart = scraper.scrapermetadata_set.get(name='chart')
-        if chart.value.startswith('http://chart.apis.google.com/chart?'):
-            chart_url = chart.value
+        chart_value = json.loads(scraper.scrapermetadata_set.get(name='chart').value)
+        if chart_value.startswith('http://chart.apis.google.com/chart?'):
+            chart_url = chart_value
         else:
             chart_url = None
     except ObjectDoesNotExist:
