@@ -47,11 +47,12 @@
           {% endif %}
         </dl>
     </div>
-    <h4>Recent activity</h4>
     <p>
         {% if chart_url %}
-            <img src='{{chart_url}}'/>
+            <h4>Chart</h4>
+            <img src='{{chart_url}}' height=400 width=400/>
         {% else %}
+            <h4>Recent activity</h4>
             {% sparkline scraper.scraper_sparkline_csv 'medium' %}    
         {% endif %}
     </p>
