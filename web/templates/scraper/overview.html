@@ -50,7 +50,7 @@
     <p>
         {% if chart_url %}
             <h4>Chart</h4>
-            <img src='{{chart_url}}' height=400 width=400/>
+            <a href='{{chart_url}}'><img src='{{chart_url}}' height=400 width=400/></a>
         {% else %}
             <h4>Recent activity</h4>
             {% sparkline scraper.scraper_sparkline_csv 'medium' %}    
