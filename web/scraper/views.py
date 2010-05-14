@@ -49,6 +49,15 @@ def overview(request, scraper_short_name):
     if has_data:
         data = zip(table['headings'], table['rows'][0])
 
+    try:
+        chart = scraper.scrapermetadata_set.get(name='chart')
+        if chart.value.startswith('http://chart.apis.google.com/chart?'):
+            chart_url = chart.value
+        else:
+            chart_url = None
+    except ObjectDoesNotExist:
+        pass
+
     return render_to_response('scraper/overview.html', {
         'scraper_tags': scraper_tags,
         'selected_tab': 'overview',
@@ -58,6 +67,7 @@ def overview(request, scraper_short_name):
         'has_data': has_data,
         'data': data,
         'scraper_contributors': scraper_contributors,
+        'chart_url': chart_url,
         }, context_instance=RequestContext(request))
 
 
