@@ -72,5 +72,4 @@ urlpatterns = patterns('',
 
     #Rest of the site
     url(r'^', include('frontend.urls')),
-
 )
