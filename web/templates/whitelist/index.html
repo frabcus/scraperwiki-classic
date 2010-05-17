@@ -6,10 +6,12 @@
 <div class="page_title">
 
 <p>
-  In order to maintain some discipline round here, ScraperWiki filters the http requests 
-  your scapers can make according to whether they match any of the domains in the <b>white list</b> 
-  and do not match anything in the <b>black list</b>.
-  This list can be changed by request.
+  To keep a sense of control, ScraperWiki limits the webpages
+  your scapers can access to those that match any of the domains in the <b>white list</b>, 
+  but do not match anything in the <b>black list</b>.
+</p>
+<p>
+  If you have any questions or need something added to this list, do not hesitate to <a href="{% url contact_form %}">contact us</a>.
 </p>
 
 {% if url %}
@@ -60,8 +62,7 @@
 </ul>
 
 <p>
-  If you have any queries or suggested changes to these lists, 
-  please do not hesitate to <a href="{% url contact_form %}">contact us</a>.
+  <a href="{% url contact_form %}">Contact us</a>.
 </p>
 
 
