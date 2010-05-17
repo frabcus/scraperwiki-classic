@@ -14,7 +14,7 @@
     <div class="content programmer_api">
         <div class="section">
             <h2>Scraping</h2>
-            <p>How to retrieve HTML pages from websites.
+            <p>How to retrieve HTML pages from websites.</p>
             <h3>scraperwiki.scrape(url, [params=], )</h3>
             <p>Downloads a web page, and returns you the HTML. The page will appear in the "sources"
             pane in the scraper code editor, so you can easily view what was downloaded.
@@ -49,7 +49,6 @@
                 </li>
             </ul>
         </div>
-
 
         <div class="section">
             <h2>Data store</h2>
@@ -98,6 +97,8 @@
                         latitude and longitude coordinates, e.g. <code>(-2.983333, 53.4)</code>. The coordinates should
                         be in the WGS84 projection. You can later retrieve
                         information according to this location using the <a href="{% url api:scraper_getdatabylocation %}">getDataByLocation</a>.
+                        Scrapers for which latitude and longitude coordinates have been added will have a map showing the points displayed
+                        on the its page on the site.
                         </dd>
                 </dl>
                 <p>Full example:
@@ -111,10 +112,88 @@
             </div>
         </div>
 
+        <div class="section">
+	    <h2>Geographic Data</h2>
+            <p>There are a number of functions provided to help with processing geographic data.</p>
+            <h3>scraperwiki.geo.gb_postcode_to_latlng(postcode)</h3>
+            <p>Find the latitude and longitude for a given postcode.</p>
+            <dl>
+              <dt><code>postcode</code></dt>
+              <dd>
+                The postcode for which the latitude and longitude will be returned. This
+                function is typically used for obtaining a value to send to the
+                <code>scraperwiki.datastore.save</code> function to associate a geographic
+                location with the record.
+              </dd>
+            </dl>
+            <h3>scraperwiki.geo.os_easting_northing_to_latlng(easting, northing)</h3>
+            <p>
+              Convert <a href="http://en.wikipedia.org/wiki/British_national_grid_reference_system">OSGB</a>
+              easting, northing coordinate to latitude and longitude. Again this function is typically used to
+              obtain a value to send to the <code>scraperwiki.datastore.save</code> function.
+            </p>
+            <dl>
+              <dt><code>easting</code></dt>
+              <dd>The easting of the point to be converted.</dd>
+              <dt><code>northing</code></dt>
+              <dd>The northing of the point to be converted.</dd>
+            </dl>
+            <h3>scraperwiki.geo.extract_gb_postcode(string)</h3>
+            <p>Attempts to extract a UK postcode from a given string.</p>
+            <dl>
+              <dt><code>string</code></dt>
+              <dd>The string that will be searched for a postcode.</dd>
+            </dl>
+        </div>
+
+        <div class="section">
+	    <h2>Metadata</h2> 
+            <p>
+              Scrapers can store and retrieve items of metadata that are persisted between
+              runs. These can either be used internally by the scraper or as a means of
+              communicating information about the scraper (such as the url of a google chart
+              made from the scraped data) to the site.
+            </p>
+            <h3>scraperwiki.metadata.put(key, value)</h3>
+            <p>Stores an item of metadata that can later be retrieved using the <code>scraperwiki.metadata.get</code> function.</p>
+            <dl>
+              <dt><code>key</code></dt>
+              <dd>
+                This is a unique identifier for the data being stored. Multiple put requests
+                with the same key will overwrite any existing value associated with the key.
+              </dd>
+              <dt><code>value</code></dt>
+              <dd>The value to be stored.</dd>
+            </dl>
+            <h3>scraperwiki.metadata.get(key, [default=])</h3>
+            <p>Retrieves an item of metadata that has previously been stored using the <code>scraperwiki.metadata.put</code> function.</p>
+            <dl>
+              <dt><code>key</code></dt>
+              <dd>The unique identifier that was used when storing the data.</dd>
+              <dt><code>default</code> (optional)</dt>
+              <dd>The value to be returned if no value is found to be associated with this key. Defaults to <code>None</code>.</dd>
+            </dl>
+            <h3>Special Keys</h3>
+            <p>
+              As described above storing metadata may be used as a means of communicating
+              information about the scraper to the ScraperWiki site. Below is a table of keys
+              that may be used for this purpose and the intended outcome.
+            </p>
+            <table class='data'>
+              <tr><th>Key</th><th>Outcome</th></tr>
+              <tr>
+                <td>chart</td>
+                <td>
+                  If a valid Google Charts url (starting with
+                  http://chart.apis.google.com/chart?) is associated with this key then the chart
+                  will be displayed on the scraper overview page.
+                </td>
+              </tr>
+            </table>
+        </div>
 
         <div class="section">
             <h2>Debugging</h2>
-            <p>
             <h3>print</h3>
             <p>To log what is happening, or as a general purpose tool to help
             debugging, use your language's standard print command. The output will appear
