@@ -57,7 +57,7 @@ def overview(request, scraper_short_name):
         else:
             chart_url = None
     except ObjectDoesNotExist:
-        pass
+        chart_url = None
 
     return render_to_response('scraper/overview.html', {
         'scraper_tags': scraper_tags,
