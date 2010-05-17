@@ -50,7 +50,6 @@
             </ul>
         </div>
 
-
         <div class="section">
             <h2>Data store</h2>
             <p>This is where you put the output from your scraper. It is a key-value database.
@@ -98,6 +97,8 @@
                         latitude and longitude coordinates, e.g. <code>(-2.983333, 53.4)</code>. The coordinates should
                         be in the WGS84 projection. You can later retrieve
                         information according to this location using the <a href="{% url api:scraper_getdatabylocation %}">getDataByLocation</a>.
+                        Scrapers for which latitude and longitude coordinates have been added will have a map showing the points displayed
+                        on the its page on the site.
                         </dd>
                 </dl>
                 <p>Full example:
@@ -109,6 +110,40 @@
     scraperwiki.datastore.save([dog_id], data, date="2009-03-02", latlng=(-2.983333, 53.4))
                 </pre>
             </div>
+        </div>
+
+        <div class="section">
+	    <h2>Geographic Data</h2>
+            <p>There are a number of functions provided to help with processing geographic data.</p>
+            <h3>scraperwiki.geo.gb_postcode_to_latlng(postcode)</h3>
+            <p>Find the latitude and longitude for a given postcode.</p>
+            <dl>
+              <dt><code>postcode</code></dt>
+              <dd>
+                The postcode for which the latitude and longitude will be returned. This
+                function is typically used for obtaining a value to send to the
+                <code>scraperwiki.datastore.save</code> function to associate a geographic
+                location with the record.
+              </dd>
+            </dl>
+            <h3>scraperwiki.geo.os_easting_northing_to_latlng(easting, northing)</h3>
+            <p>
+              Convert <a href="http://en.wikipedia.org/wiki/British_national_grid_reference_system">OSGB</a>
+              easting, northing coordinate to latitude and longitude. Again this function is typically used to
+              obtain a value to send to the <code>scraperwiki.datastore.save</code> function.
+            </p>
+            <dl>
+              <dt><code>easting</code></dt>
+              <dd>The easting of the point to be converted.</dd>
+              <dt><code>northing</code></dt>
+              <dd>The northing of the point to be converted.</dd>
+            </dl>
+            <h3>scraperwiki.geo.extract_gb_postcode(string)</h3>
+            <p>Attempts to extract a UK postcode from a given string.</p>
+            <dl>
+              <dt><code>string</code></dt>
+              <dd>The string that will be searched for a postcode.</dd>
+            </dl>
         </div>
 
         <div class="section">
