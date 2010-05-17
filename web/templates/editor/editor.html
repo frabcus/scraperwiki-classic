@@ -58,17 +58,14 @@
                 </div>
                 
                 <ul class="help">
-                    <li>
-                        <a id="menu_tutorials" href="#" title="Load a helpful tutorial">Tutorials</a>
+                    <li class="helplink">
+                        <a id="menu_tutorials" href="#" title="Load a helpful tutorial">Tutorials and help</a>
                     </li>
                     <!--
                     <li>
                         <a id="menu_settings" href="#">Editor settings</a>
                     </li>
                     -->
-                    <li class="helplink">
-                        <a id="menu_documentation" href="#" title="Quick help">Code documentation</a>
-                    </li>
                 </ul>          
             </div>
 
@@ -180,66 +177,6 @@
             <pre></pre>
         </div>
     </div>
-    <div id="popup_documentation" class="popup_item">
-        <div class="popup_header">
-            <h2>Code documentation - quick help</h2>
-            <a class="popupClose">close</a>            
-        </div>
-        <div class="output">
-            <dl class="quick_help">
-                <h4>Screen Scraping</h4>
-                <dl>
-                    <dt>
-                        <code><strong>scraperwiki.scrape(url, <em>params=[]</em>)</strong></code>
-                    </dt>
-                    <dd>Returns the source text of a webpage as a string. This is a wrapper for urllib2 that lists extra information on the sources tab.</dd>
-                </dl>
-                <h4>Storing data</h4>
-                <dl>
-                    <dt>
-                        <code><strong>scraperwiki.datastore.save(unique_keys=[], data={}, <em>date=None</em>, <em>latlng=[None,None]</em>)</strong></code>
-                    </dt>
-                    <dd>Saves to the datastore, either adding or over-writing data with the same values for unique_keys. <code>date</code> and <code>latlng</code> are optional special fields  for indexing each record.</dd>
-                </dl>                
-
-                <h4>Geocoding</h4>
-                <dl>
-                    <dt>
-                        <code><strong>scraperwiki.geo.gb_postcode_to_latlng(postcode)</strong></code>
-                    </dt>
-                    <dd>
-                        returns (lat,lng) pair for a postcode.
-                    </dd>
-                    <dt><code><strong>scraperwiki.geo.os_easting_northing_to_latlng(easting, northing)</strong></code></dt>
-                    <dd>returns (lat,lng) pair for an OSGB easting, northing coordinates.</dd>
-                    <dt><code><strong>scraperwiki.geo.extract_gb_postcode(string)</strong></code></dt>
-                    <dd>attempts to extract a UK postcode from a string.</dd>
-                </dl>                
-
-                <h4>Recommended libraries</h4>
-                <ul>
-                    <li><code><strong>urllib2</strong>, <strong>urlparse</strong></code>
-                        Standard python libraries for opening urls. <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
-                    </li>
-                    <li><code><strong>BeautifulSoup</strong></code>
-                        For parsing html.  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
-                    </li>
-                    <li><code><strong>mechanize</strong></code>
-                        Automates submitting forms. <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
-                    </li>
-                    <li><code><strong>lxml</strong></code>
-                        For parsing html and accessing it using cssselect.
-                    </li>
-                    <li><code><strong>pdftoxml</strong>(pdfdata)</code>
-                        Converts the binary data of a PDF file into a parsable XML string
-                    </li>
-                </ul>
-
-                <p><a href="{% url help_code_documentation %}" target="_blank">Full code documentation</a> <small>(opens in new window)</small>.</p>
-
-            </dl>
-        </div>
-    </div>
     <div id="popup_text" class="popup_item">
         <div class="popup_header">
             <a class="popupClose">close</a>
@@ -288,6 +225,8 @@
       <tr><td>Control-S</td><td>Save</td></tr>
       <tr><td>Control-R</td><td>Run</td></tr>
       <tr><td>Control-D</td><td>Diff</td></tr>
+      <tr><td>Control-Z</td><td>Undo</td></tr>
+      <tr><td>Control-Y</td><td>Redo</td></tr>
     </table>
     </div>
 
@@ -357,19 +296,17 @@
     </td><td class="bicolumn">
 
     <h4>Handy tutorials</h4>
-    <p class="descr">Click on the name to load it up.</p>
+    <p class="descr">Click on one to load it up.</p>
     <dl>
       {% for scraper in tutorial_scrapers %}
       <dt>
-        <a href="#" class="scraper-tutorial-link">{{scraper.short_name}}</a>
+        <a href="#" class="scraper-tutorial-link"><b>{{scraper.short_name}}</b></a>
       </dt>
       <dd>
         {{scraper.description}}
       </dd>
       {% endfor %}
     </dl>
-
-    <p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p><p>...</p>
 </td></tr>
 </table>
         <div class="popup_header">

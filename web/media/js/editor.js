@@ -121,9 +121,6 @@ $(document).ready(function() {
         $('#menu_settings').click(function(){
             showPopup('popup_settings'); 
         });
-        $('#menu_documentation').click(function(){
-            showPopup('popup_documentation'); 
-        });        
         $('#menu_tutorials').click(function(){
             showPopup('popup_tutorials'); 
         });        
