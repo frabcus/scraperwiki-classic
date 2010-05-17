@@ -14,7 +14,7 @@
     <div class="content programmer_api">
         <div class="section">
             <h2>Scraping</h2>
-            <p>How to retrieve HTML pages from websites.
+            <p>How to retrieve HTML pages from websites.</p>
             <h3>scraperwiki.scrape(url, [params=], )</h3>
             <p>Downloads a web page, and returns you the HTML. The page will appear in the "sources"
             pane in the scraper code editor, so you can easily view what was downloaded.
@@ -111,10 +111,54 @@
             </div>
         </div>
 
+        <div class="section">
+	    <h2>Metadata</h2> 
+            <p>
+              Scrapers can store and retrieve items of metadata that are persisted between
+              runs. These can either be used internally by the scraper or as a means of
+              communicating information about the scraper (such as the url of a google chart
+              made from the scraped data) to the site.
+            </p>
+            <h3>scraperwiki.metadata.put(key, value)</h3>
+            <p>Stores an item of metadata that can later be retrieved using the <code>scraperwiki.metadata.get</code> function.</p>
+            <dl>
+              <dt><code>key</code></dt>
+              <dd>
+                This is a unique identifier for the data being stored. Multiple put requests
+                with the same key will overwrite any existing value associated with the key.
+              </dd>
+              <dt><code>value</code></dt>
+              <dd>The value to be stored.</dd>
+            </dl>
+            <h3>scraperwiki.metadata.get(key, [default=])</h3>
+            <p>Retrieves an item of metadata that has previously been stored using the <code>scraperwiki.metadata.put</code> function.</p>
+            <dl>
+              <dt><code>key</code></dt>
+              <dd>The unique identifier that was used when storing the data.</dd>
+              <dt><code>default</code> (optional)</dt>
+              <dd>The value to be returned if no value is found to be associated with this key. Defaults to <code>None</code>.</dd>
+            </dl>
+            <h3>Special Keys</h3>
+            <p>
+              As described above storing metadata may be used as a means of communicating
+              information about the scraper to the ScraperWiki site. Below is a table of keys
+              that may be used for this purpose and the intended outcome.
+            </p>
+            <table class='data'>
+              <tr><th>Key</th><th>Outcome</th></tr>
+              <tr>
+                <td>chart</td>
+                <td>
+                  If a valid Google Charts url (starting with
+                  http://chart.apis.google.com/chart?) is associated with this key then the chart
+                  will be displayed on the scraper overview page.
+                </td>
+              </tr>
+            </table>
+        </div>
 
         <div class="section">
             <h2>Debugging</h2>
-            <p>
             <h3>print</h3>
             <p>To log what is happening, or as a general purpose tool to help
             debugging, use your language's standard print command. The output will appear
