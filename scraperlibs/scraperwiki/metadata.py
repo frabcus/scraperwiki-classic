@@ -3,7 +3,9 @@
 import httplib
 import urllib
 import os
-import json
+
+try   : import json
+except: import simplejson as json
 
 class MetadataClient(object):
     def __init__(self):
@@ -63,13 +65,20 @@ class MetadataClient(object):
         self.connection.close()
 
 
-client = MetadataClient()
-
+# defer construction of client
+client = None
+def get_client():
+    global client
+    if not client:
+        client = MetadataClient()
+    return client
+    
+    
 def get(metadata_name, default=None):
-    return client.get(metadata_name, default)
+    return get_client().get(metadata_name, default)
 
 def get_run_id(metadata_name, default=None):
-    return client.get(metadata_name, default)
+    return get_client().get(metadata_name, default)
 
 def put(metadata_name, value):
-    return client.put(metadata_name, value)
+    return get_client().put(metadata_name, value)
