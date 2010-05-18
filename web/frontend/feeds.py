@@ -60,7 +60,7 @@ class LatestScrapersByTag(Feed):
         return '/scrapers/tags/%s/' % obj.name
         
     def item_link(self, item):
-        return '/scrapers/%s/' % item.short_name
+        return '/scrapers/show/%s/' % item.short_name
 
     def description(self, obj):
         return "Scrapers recently published on ScraperWiki with tag '%s'" % obj.name
@@ -78,7 +78,7 @@ class LatestScrapers(Feed):
    
         
     def item_link(self, item):
-        return '/scrapers/%s/' % item.short_name
+        return '/scrapers/show/%s/' % item.short_name
         
     def items(self):
         return Scraper.objects.filter(published=True).order_by('-created_at')[:10]
@@ -103,7 +103,7 @@ class LatestScrapersBySearchTerm(Feed):
         return '/scrapers/tags/%s/' % obj
         
     def item_link(self, item):
-        return '/scrapers/%s/' % item.short_name
+        return '/scrapers/show/%s/' % item.short_name
 
     def description(self, obj):
         return "Scrapers published with '%s' somewhere in title or tags" % obj
