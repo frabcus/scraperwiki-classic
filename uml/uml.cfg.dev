@@ -25,7 +25,7 @@ passwd	= 3jFjLrje6dFJ7cQE
 db	= scraperwiki_datastore_dev
 
 [metadata]
-host    = 212.84.75.28
+host    = dev.scraperwiki.com
 
 [swlogger]
 host	= 212.84.75.28
