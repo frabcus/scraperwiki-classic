@@ -1,0 +1,95 @@
+    <h4>Keyboard Shortcuts</h4>
+    <div class="h4content">
+    <table>
+      <tr><td>Control-S</td><td>Save</td></tr>
+      <tr><td>Control-R</td><td>Run</td></tr>
+      <tr><td>Control-D</td><td>Diff</td></tr>
+      <tr><td>Control-Z</td><td>Undo</td></tr>
+      <tr><td>Control-Y</td><td>Redo</td></tr>
+    </table>
+    </div>
+
+    <h4>scraperwiki functions</h4>
+    <dl>
+      <dt class="code">
+        scrape(url, <em>params=[]</em>)
+      </dt>
+      <dd>Returns the source text of a webpage as a string. This is a wrapper for urllib2 that lists extra information on the sources tab.</dd>
+    </dl>
+
+    <h4>scraperwiki.datastore functions</h4>
+    <dl>
+      <dt class="code">
+        save(unique_keys=[], data={}, <em>date=None</em>, <em>latlng=[None,None]</em>)
+      </dt>
+      <dd>Saves to the datastore, either adding or over-writing data with the same values for unique_keys. 
+        <code>date</code> and <code>latlng</code> are optional special fields  for indexing each record.</dd>
+    </dl>                
+
+    <h4>scraperwiki.geo functions</h4>
+    <dl>
+      <dt class="code">
+        gb_postcode_to_latlng(postcode)
+      </dt>
+      <dd>
+        returns (lat,lng) pair for a postcode.
+      </dd>
+      <dt class="code">
+        os_easting_northing_to_latlng(easting, northing)
+      </dt>
+      <dd>returns (lat,lng) pair for an OSGB easting, northing coordinates.</dd>
+      <dt class="code">
+        extract_gb_postcode(string)
+      </dt>
+      <dd>attempts to extract a UK postcode from a string.</dd>
+    </dl>                
+
+    <h4>scraperwiki.metadata functions</h4>
+    <dl>
+      <dt class="code">
+        put(key, value)
+      </dt>
+      <dd>
+        saves a persistent variable accessible during another run
+      </dd>
+      <dt class="code">
+        get(key, default=None)
+      </dt>
+      <dd>
+        retrieves a persistent variable saved by this scraper
+      </dd>
+      <dt class="code">
+        put("chart", value)
+      </dt>
+      <dd>
+        sets the <a href="http://code.google.com/apis/charttools/">googlechart</a> image for the scraper
+      </dd>
+    </dl>
+
+    <h4>Recommended libraries</h4>
+    <dl>
+      <dt class="code">urllib2, urlparse</dt>
+      <dd>
+        Standard python libraries for opening urls. <a href="http://docs.python.org/library/urllib2.html" target="_blank">docs</a>
+      </dd>
+
+      <dt class="code">BeautifulSoup</dt>
+      <dd>
+        For parsing html.  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">docs</a>
+      </dd>
+
+      <dt class="code">mechanize</dt>
+      <dd>
+        Automates submitting forms. <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
+      </dd>
+
+      <dt class="code">lxml</dt>
+      <dd>
+        For parsing html and accessing it using cssselect.
+      </dd>
+
+      <dt class="code">pdftoxml</dt>
+      <dd>
+        Converts the binary data of a PDF file into a parsable XML string
+      </dd>
+    </dl>
