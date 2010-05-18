@@ -27,7 +27,15 @@ class ScraperMetadataHandler(BaseHandler):
     def read(self, request, scraper_guid, metadata_name):
         try:
             scraper = Scraper.objects.get(guid=scraper_guid)
-            metadata = scraper.scrapermetadata_set.get(name=metadata_name)
+            if metadata_name == "title":
+                metadata = ScraperMetadata()
+                metadata.name = metadata_name
+                metadata.scraper = scraper
+                metadata.run_id = 0
+                metadata.value = '"%s"' % scraper.title
+                print metadata.value, metadata  
+            else:
+                metadata = scraper.scrapermetadata_set.get(name=metadata_name)
             return metadata
         except:
             return rc.NOT_HERE
