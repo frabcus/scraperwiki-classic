@@ -102,6 +102,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return True
 
         allowed = False
+        if re.match("http://127.0.0.1[/:]", path):
+            allowed = True
         
         # first if it is the white-list
         for allow in self.m_allowed :
@@ -240,8 +242,11 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         Handle GET and POST requests.
         """
 
+        # this ensures that we only add headers into requests that are going into the scraperwiki system (or a runlocal sw system)
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-        isSW = netloc[-16:] == '.scraperwiki.com'
+        isSW = (netloc[-16:] == '.scraperwiki.com')
+        if netloc[:9] == '127.0.0.1':
+            isSW = True
 
         #  Path /Status returns status information.
         #

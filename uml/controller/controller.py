@@ -516,11 +516,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         swl.connect ()
         swl.log     (scraperID, runID, 'C.START')
 
+        os.environ['metadata_host' ] = config.get ('metadata', 'host')
+        
         tap      = config.get (socket.gethostname(), 'tap')
         httpport = config.get ('httpproxy', 'port')
         ftpport  = config.get ('ftpproxy',  'port')
-
-        import scraperwiki.utils
 
         #  These seem to be needed for urllib.urlopen() to support proxying, though
         #  FTP doesn't actually work.
@@ -528,6 +528,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         os.environ['http_proxy' ] = 'http://%s:%s' % (tap, httpport)
         os.environ['https_proxy'] = 'http://%s:%s' % (tap, httpport)
         os.environ['ftp_proxy'  ] = 'ftp://%s:%s'  % (tap, ftpport )
+        
+        import scraperwiki.utils
         scraperwiki.utils.urllibSetup   ()
 
         #  This is for urllib2.urlopen() (and hance scraperwiki.scrape()) where

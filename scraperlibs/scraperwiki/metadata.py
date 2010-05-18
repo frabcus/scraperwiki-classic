@@ -13,6 +13,7 @@ class MetadataClient(object):
         self.connection = httplib.HTTPConnection(proxy_host, proxy_port)
         self.scraper_guid = os.environ['SCRAPER_GUID']
         self.run_id = os.environ['RUNID']
+        self.metadata_host = os.environ['metadata_host']
 
     def _check_scraper_guid(self):
         if not self.scraper_guid:
@@ -22,7 +23,7 @@ class MetadataClient(object):
         self._check_scraper_guid()
 
         self.connection.connect()
-        self.connection.request(url='http://metadata.scraperwiki.com/scrapers/metadata_api/%s/%s/' % (self.scraper_guid, urllib.quote(metadata_name)), method='GET')
+        self.connection.request(url='http://%s/scrapers/metadata_api/%s/%s/' % (self.metadata_host, self.scraper_guid, urllib.quote(metadata_name)), method='GET')
         resp = self.connection.getresponse()
         if resp.status == 200:
             result = json.loads(resp.read())
@@ -57,12 +58,13 @@ class MetadataClient(object):
         parameters['value'] = json.dumps(value)
 
         self.connection.connect()
-        self.connection.request(url='http://metadata.scraperwiki.com/scrapers/metadata_api/%s/%s/' % (self.scraper_guid, urllib.quote(metadata_name)), 
+        self.connection.request(url='http://%s/scrapers/metadata_api/%s/%s/' % (self.metadata_host, self.scraper_guid, urllib.quote(metadata_name)), 
                                 method=method,
                                 body=urllib.urlencode(parameters),
                                 headers={'Content-Type': 'application/x-www-form-urlencoded'})
-        self.connection.getresponse() # Make sure we have a response before closing the connection!
+        response = self.connection.getresponse() # Make sure we have a response before closing the connection!
         self.connection.close()
+        return response.read()
 
 
 # defer construction of client
