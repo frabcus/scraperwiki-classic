@@ -5,6 +5,8 @@
 Does the initial loading of the databases.
 """
 
+# Probably a DEAD FILE
+
 import ConfigParser
 import connection
 import sys

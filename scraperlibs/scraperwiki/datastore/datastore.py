@@ -188,6 +188,7 @@ def save (unique_keys, data, date = None, latlng = None, silent = False) :
 
 # undocumented fetch function
 def fetch (unique_keys) :
+    """undocumented - use at your own risk"""
     ds = DataStore(None)
     rc, arg = ds.fetch (unique_keys)
     if not rc :
@@ -198,6 +199,7 @@ def fetch (unique_keys) :
 
 # undocumented retrieve function
 def retrieve (unique_keys) :
+    """undocumented - use at your own risk"""
     ds = DataStore(None)
     rc, arg = ds.retrieve (unique_keys)
     if not rc :
