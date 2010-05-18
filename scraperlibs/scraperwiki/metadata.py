@@ -14,13 +14,18 @@ class MetadataClient(object):
         self.scraper_guid = os.environ['SCRAPER_GUID']
         self.run_id = os.environ['RUNID']
         self.metadata_host = os.environ['metadata_host']
+        
+        # make a fake local metadata for unsaved scraper (could fill in values from environ).  Perhaps save some in the session
+        if not self.scraper_guid:
+            self.metadata_local = { "title":"Untitled Scraper", "CPU limit":100 }
 
     def _check_scraper_guid(self):
         if not self.scraper_guid:
             raise Exception('Metadata cannot be accessed before the scraper has been saved')
 
     def _get_metadata(self, metadata_name):
-        self._check_scraper_guid()
+        if not self.scraper_guid:
+            return {'value':json.loads(self.metadata_local.get(metadata_name))}
 
         self.connection.connect()
         self.connection.request(url='http://%s/scrapers/metadata_api/%s/%s/' % (self.metadata_host, self.scraper_guid, urllib.quote(metadata_name)), method='GET')
@@ -46,7 +51,9 @@ class MetadataClient(object):
             return metadata['run_id']
 
     def put(self, metadata_name, value):
-        self._check_scraper_guid()
+        if not self.scraper_guid:
+            self.metadata_local[metadata_name] = json.dumps(value)
+            return
 
         if self.get(metadata_name):
             method = 'PUT'
