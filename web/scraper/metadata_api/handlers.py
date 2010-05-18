@@ -27,12 +27,12 @@ class ScraperMetadataHandler(BaseHandler):
     def read(self, request, scraper_guid, metadata_name):
         try:
             scraper = Scraper.objects.get(guid=scraper_guid)
-            if metadata_name == "title":
+            if metadata_name in ['title', 'short_name']:
                 metadata = ScraperMetadata()
                 metadata.name = metadata_name
                 metadata.scraper = scraper
                 metadata.run_id = 0
-                metadata.value = '"%s"' % scraper.title
+                metadata.value = '"%s"' % getattr(scraper, metadata_name)
                 print metadata.value, metadata  
             else:
                 metadata = scraper.scrapermetadata_set.get(name=metadata_name)
