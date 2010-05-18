@@ -24,9 +24,6 @@ class MetadataClient(object):
             raise Exception('Metadata cannot be accessed before the scraper has been saved')
 
     def _get_metadata(self, metadata_name):
-        if not self.scraper_guid:
-            return {"value":json.loads(self.metadata_local.get(metadata_name))}
-
         self.connection.connect()
         self.connection.request(url='http://%s/scrapers/metadata_api/%s/%s/' % (self.metadata_host, self.scraper_guid, urllib.quote(metadata_name)), method='GET')
         resp = self.connection.getresponse()
@@ -39,6 +36,9 @@ class MetadataClient(object):
         self.connection.close()
 
     def get(self, metadata_name, default=None):
+        if not self.scraper_guid: # Scraper hasn't been saved yet
+            return self.metadata_local.get(metadata_name, default)
+
         metadata = self._get_metadata(metadata_name)
         if metadata:
             return metadata['value']
@@ -51,8 +51,9 @@ class MetadataClient(object):
             return metadata['run_id']
 
     def put(self, metadata_name, value):
-        if not self.scraper_guid:
-            self.metadata_local[metadata_name] = json.dumps(value)
+        if not self.scraper_guid: # Scraper hasn't been saved yet
+            print "Warning: The scraper has not been saved yet. Metadata will not be persisted between runs"
+            self.metadata_local[metadata_name] = value
             return
 
         if self.get(metadata_name):
