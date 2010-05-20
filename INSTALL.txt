@@ -43,6 +43,9 @@ c) Then, get the older version of pip, version 0.6 breaks some old code. Go to [
 2) Buildout
 ***********
 
+DONNY NOTE: I did this first on Lucid Lynx Ubuntu to allow mysql-python to install properly:
+> $ sudo apt-get install libmysqlclient15-dev
+
 To run the buildout, first bootstrap it:
 
 > $ python bootstrap.py
@@ -65,15 +68,15 @@ Note, sometimes this causes a "SandboxViolation" error, however it's normally
 done what it needs to do before this, so ignore the error and run buildout
 again.
 
-3) localsettings.py
+3) local settings.py
 *******************
 
 Now, make a copy of the local settings file and edit it
 
 > $ cd web
-> $ cp localsettings.py-inhg  localsettings.py
+> $ cp localsettings.py-inhg  settings.py
 
-Then edit localsettings.py to:
+Then edit settings.py to:
 
 a) Add details of your local setup (database etc). Call the database 'scraperwiki'. 
 
