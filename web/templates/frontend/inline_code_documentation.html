@@ -47,7 +47,7 @@
     <h4>scraperwiki.metadata functions</h4>
     <dl>
       <dt class="code">
-        put(key, value)
+        save(key, value)
       </dt>
       <dd>
         saves a persistent variable accessible during another run
@@ -59,7 +59,7 @@
         retrieves a persistent variable saved by this scraper
       </dd>
       <dt class="code">
-        put("chart", value)
+        save("chart", value)
       </dt>
       <dd>
         sets the <a href="http://code.google.com/apis/charttools/">googlechart</a> image for the scraper
@@ -91,5 +91,10 @@
       <dt class="code">pdftoxml</dt>
       <dd>
         Converts the binary data of a PDF file into a parsable XML string
+      </dd>
+
+      <dt class="code">Python Google Chart</dt>
+      <dd>
+        For generating charts using the Google Chart API. <a href="http://pygooglechart.slowchop.com/" target="_new">docs</a>
       </dd>
     </dl>

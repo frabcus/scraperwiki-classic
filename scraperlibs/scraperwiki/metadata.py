@@ -50,7 +50,7 @@ class MetadataClient(object):
         if metadata:
             return metadata['run_id']
 
-    def put(self, metadata_name, value):
+    def save(self, metadata_name, value):
         if not self.scraper_guid: # Scraper hasn't been saved yet
             print "Warning: The scraper has not been saved yet. Metadata will not be persisted between runs"
             self.metadata_local[metadata_name] = value
@@ -90,5 +90,5 @@ def get(metadata_name, default=None):
 def get_run_id(metadata_name, default=None):
     return get_client().get(metadata_name, default)
 
-def put(metadata_name, value):
-    return get_client().put(metadata_name, value)
+def save(metadata_name, value):
+    return get_client().save(metadata_name, value)
