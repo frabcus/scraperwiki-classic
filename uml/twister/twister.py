@@ -8,6 +8,13 @@ Orbited TCP socket.
 When a connection is made RunnerProtocol listens for data coming from the 
 client.  This can be anything
 
+
+class RunnerProtocol(protocol.Protocol):
+class RunnerFactory(protocol.ServerFactory):
+    protocol = RunnerProtocol
+
+class spawnRunner(protocol.ProcessProtocol)
+
 """
 
 import sys
@@ -25,11 +32,13 @@ try:
 except:
   import simplejson as json
 
-from twisted.internet import protocol, utils, reactor, defer
+from twisted.internet import protocol, utils, reactor, task
 from twisted.protocols.basic import LineOnlyReceiver
 
+
+# perhaps in-line this
 def format_message(content, message_type='console'):
-    return json.dumps(locals())
+    return json.dumps({'message_type' : message_type, 'content' : content})
 
 
 class LocalLineOnlyReceiver(LineOnlyReceiver):
@@ -65,16 +74,19 @@ class spawnRunner(protocol.ProcessProtocol):
         self.client.kill_run(reason="OK")
         print "run ended"
         
+
+# There's one of these per editor window open.  All connecting to same factory
 class RunnerProtocol(protocol.Protocol):
      
     def __init__(self):
         # Set if a run is currently taking place, to make sure we don't run 
         # more than one scraper at a time.
         self.running = False
-        
+            
     def connectionMade(self):
-        print "new connection"
-        
+        self.factory.clientConnectionMade(self)
+        print "new connection", len(self.factory.clients)
+    
     def dataReceived(self, data):
         """
         Listens for data coming from the client.
@@ -157,18 +169,42 @@ class RunnerProtocol(protocol.Protocol):
         
         Kills and running spawnRunner processes.
         """
+        self.factory.clientConnectionLost(self)
+        print "end connection", len(self.factory.clients), reason
         
-        self.kill_run()
+        self.kill_run(reason='connectionLost')
 
 
 class RunnerFactory(protocol.ServerFactory):
     protocol = RunnerProtocol
+    
+    def __init__(self):
+        self.clients = []
+        self.announcecount = 0
+        self.lc = task.LoopingCall(self.announce)
+        self.lc.start(10)
+
+    # every 10 seconds sends out a quiet poll
+    def announce(self):
+        self.announcecount += 1
+        for client in self.clients:
+            res = []
+            for c in self.clients:
+                res.append(c == self.clients and "T" or "-")
+                res.append(c.running and "R" or ".")
+            client.write(format_message("%d c %d clients, running:%s" % (self.announcecount, len(self.clients), "".join(res))))
+
+    def clientConnectionMade(self, client):
+        self.clients.append(client)
+
+    def clientConnectionLost(self, client):
+        self.clients.remove(client)
 
 
 def execute (port) :
-
+    
     reactor.listenTCP(port, RunnerFactory())
-    reactor.run()
+    reactor.run()   # this function never returns
 
 
 def sigTerm (signum, frame) :

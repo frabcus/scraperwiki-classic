@@ -314,7 +314,7 @@ $(document).ready(function() {
     //send a message to the server
     function send(json_data) {
       conn.send(
-        JSON.stringify(json_data)
+        $.toJSON(json_data)
         );  
     }
 
