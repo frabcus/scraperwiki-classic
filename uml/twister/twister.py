@@ -36,9 +36,12 @@ from twisted.internet import protocol, utils, reactor, task
 from twisted.protocols.basic import LineOnlyReceiver
 
 
+# the comma is added into format_message and LineOnlyReceiver because lines may be batched and 
+# they are decoded in editor.js by attempting to evaluate the json string '['+receiveddata+']'
+
 # perhaps in-line this
 def format_message(content, message_type='console'):
-    return json.dumps({'message_type' : message_type, 'content' : content})
+    return json.dumps({'message_type' : message_type, 'content' : content}) + ", "
 
 
 class LocalLineOnlyReceiver(LineOnlyReceiver):
@@ -190,7 +193,7 @@ class RunnerFactory(protocol.ServerFactory):
         for client in self.clients:
             res = []
             for c in self.clients:
-                res.append(c == self.clients and "T" or "-")
+                res.append(c == client and "T" or "-")
                 res.append(c.running and "R" or ".")
             client.write(format_message("%d c %d clients, running:%s" % (self.announcecount, len(self.clients), "".join(res))))
 

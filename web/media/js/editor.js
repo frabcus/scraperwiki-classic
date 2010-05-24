@@ -6,7 +6,7 @@ $(document).ready(function() {
     var codeeditor;
     var codemirroriframe; // the iframe that needs resizing
     var codemirroriframeheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
-    var previouscodeeditorheight;    // saved for the double-clicking on the drag bar
+    var previouscodeeditorheight = $("#codeeditordiv").height() * 2/3;    // saved for the double-clicking on the drag bar
     var short_name = $('#scraper_short_name').val();
     var guid = $('#scraper_guid').val();
     var run_type = $('#code_running_mode').val();
@@ -28,7 +28,6 @@ $(document).ready(function() {
     setupToolbar();
     setupDetailsForm();
     setupResizeEvents();
-    setupKeygrabs();
     showIntro();
 
     //setup code editor
@@ -37,6 +36,7 @@ $(document).ready(function() {
             parserfile: ["../contrib/python/js/parsepython.js"],
             stylesheet: codemirror_url + "contrib/python/css/pythoncolors.css",
             path: codemirror_url + "js/",
+            domain: document.domain, 
             textWrapping: true,
             lineNumbers: true,
             indentUnit: 4,
@@ -70,7 +70,8 @@ $(document).ready(function() {
             initCallback: function() {
                     codemirroriframe = $("#id_code").next().children(":first"); 
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
-                    onWindowResize();
+                    setupKeygrabs();
+                    resizeControls('up');
                     pageIsDirty = false; // page not dirty at this point
                     
                 } 
@@ -148,8 +149,6 @@ $(document).ready(function() {
 
         //show default tab
         showTab('console'); 
-        
-        resizeControls('up');
     }
     
     //Setup Popups
@@ -261,19 +260,19 @@ $(document).ready(function() {
 
     }
 
-/*
-    conn.onclose = function(){
-        alert('connection closed');
+    conn.onclose = function(code){
+        //alert('connection closed');
+        writeToConsole('connection closed ' + code); 
     }
-*/
     //read data back from twisted
 
-    conn.onread = function(data) {
+    conn.onread = function(ldata) {
       // check if this data is valid JSON, or add it to the buffer
       try {
-        data = buffer+data;
-        buffer = "";
-        json_data = '{"lines": [' + data + ']}';
+        ldata = buffer+ldata;
+        buffer = " ";
+        lldata = ldata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
+        json_data = '{"lines": [' + lldata + ']}';
         all_data = eval('('+json_data+')');      
         lines = all_data.lines
       
@@ -306,16 +305,16 @@ $(document).ready(function() {
               writeToConsole(data.content, data.content_long, data.message_type)
           }
         }        
+
+// this bit has never worked because the data variable was reused in the loop and became misset.
       } catch(err) {
-        buffer +=data;
+        buffer = buffer + ldata;
       }
     }
 
     //send a message to the server
     function send(json_data) {
-      conn.send(
-        $.toJSON(json_data)
-        );  
+      conn.send($.toJSON(json_data));  
     }
 
     //send a 'kill' message
@@ -326,6 +325,10 @@ $(document).ready(function() {
 
     //send code request run
     function sendCode() {
+
+        // protect not-ready case
+        if (conn.readyState != conn.READY_STATE_OPEN)
+            { alert("readyState " + conn.readyState); return }
 
         //show the output area
         resizeControls('up');
@@ -836,21 +839,18 @@ $(document).ready(function() {
     //click bar to resize
     function resizeControls(sDirection) {
     
-        if (sDirection != 'up' && sDirection != 'down'){
+        if (sDirection != 'up' && sDirection != 'down')
             sDirection = 'none';
-        }
 
-      //work out which way to go
-      var maxheight = $("#codeeditordiv").height() + $(window).height() - ($("#outputeditordiv").position().top + 5); 
-      if (maxheight >= $("#codeeditordiv").height() + 5 && (sDirection == 'none' || sDirection == 'down')) {
-          previouscodeeditorheight = $("#codeeditordiv").height();
-          $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
-      } else if (sDirection == 'none' || sDirection == 'up') {
-
-          $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
-
-      };
-
+        //work out which way to go
+        var maxheight = $("#codeeditordiv").height() + $(window).height() - ($("#outputeditordiv").position().top + 5); 
+        if (($("#codeeditordiv").height() + 5 <= maxheight) && (sDirection == 'none' || sDirection == 'down')) 
+        {
+            previouscodeeditorheight = $("#codeeditordiv").height();
+            $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
+        } 
+        else if (sDirection == 'none' || ((sDirection == 'up') && ($("#codeeditordiv").height() + 5 >= maxheight)))
+            $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
     }
 
 function onWindowResize() {
