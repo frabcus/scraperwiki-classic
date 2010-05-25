@@ -170,14 +170,11 @@ class UserToUserRole(models.Model):
     role      = models.CharField(max_length = 100)
 
 # Signal Registrations
+# when a user is created, we want to generate a profile for them
 
-# when a user gets registered, we want to generate a profile for them
-from registration.signals import user_registered
+def create_user_profile(sender, instance, created, **kwargs):
+    if created and sender == User:
+        profile = UserProfile(user=instance, alert_frequency=60*60*24)
+        profile.save()
 
-def create_user_profile(sender, **kwargs):
-    user = kwargs['user']
-    profile = UserProfile(user=user, alert_frequency=60*60*24)
-    profile.save()  
-
-user_registered.connect(create_user_profile)
-
+models.signals.post_save.connect(create_user_profile)

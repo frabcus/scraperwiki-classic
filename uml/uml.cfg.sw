@@ -24,6 +24,9 @@ user    = datastore
 passwd  = 3jFjLrje6dFJ7cQE
 db      = datastore_live
 
+[metadata]
+host    = scraperwiki.com
+
 [swlogger]
 host	= 89.16.177.176
 user	= scraperlog

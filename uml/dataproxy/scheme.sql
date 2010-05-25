@@ -52,4 +52,4 @@ CREATE TABLE postcode_lookup (
 ALTER TABLE `postcode_lookup` ADD UNIQUE INDEX postcode_unique(`postcode`),
  ADD INDEX country_code(`country_code`),
  ADD INDEX postcode(`postcode`);
-
+

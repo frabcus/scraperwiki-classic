@@ -31,7 +31,7 @@
                  </dl>
             <h3>Standard libraries</h3>
             <p>You can download pages using all the standard Python functions.
-            The page will not appear in the "sources" pane).
+            The page will not appear in the "sources" pane.
             </p>
             <ul>
                 <li><code><b>urllib2</b>, <b>urlparse</b></code>
@@ -43,9 +43,11 @@
                 <li><code><strong>mechanize</strong></code>
                     For navigating form fillings. <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">docs</a>
                 </li>
-                <li>
-                    <code><strong>xlrd</strong></code>
+                <li><code><strong>xlrd</strong></code>
                     For reading Excel files. <a href="http://www.lexicon.net/sjmachin/xlrd.htm" target="_new">docs</a>
+                </li>
+                <li><code><strong>Python Google Chart</strong></code>
+                    For generating charts using the Google Chart API. <a href="http://pygooglechart.slowchop.com/" target="_new">docs</a>
                 </li>
             </ul>
         </div>
@@ -154,19 +156,19 @@
               communicating information about the scraper (such as the url of a google chart
               made from the scraped data) to the site.
             </p>
-            <h3>scraperwiki.metadata.put(key, value)</h3>
+            <h3>scraperwiki.metadata.save(key, value)</h3>
             <p>Stores an item of metadata that can later be retrieved using the <code>scraperwiki.metadata.get</code> function.</p>
             <dl>
               <dt><code>key</code></dt>
               <dd>
-                This is a unique identifier for the data being stored. Multiple put requests
+                This is a unique identifier for the data being stored. Multiple save requests
                 with the same key will overwrite any existing value associated with the key.
               </dd>
               <dt><code>value</code></dt>
               <dd>The value to be stored.</dd>
             </dl>
             <h3>scraperwiki.metadata.get(key, [default=])</h3>
-            <p>Retrieves an item of metadata that has previously been stored using the <code>scraperwiki.metadata.put</code> function.</p>
+            <p>Retrieves an item of metadata that has previously been stored using the <code>scraperwiki.metadata.save</code> function.</p>
             <dl>
               <dt><code>key</code></dt>
               <dd>The unique identifier that was used when storing the data.</dd>

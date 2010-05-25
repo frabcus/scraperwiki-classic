@@ -157,6 +157,7 @@ class DataStoreClass :
 
 
 # manage local copy of the above class in the global space of this module
+# (this function is first called from controller.execPython)
 ds = None
 def DataStore (config) :
     global ds
@@ -187,6 +188,7 @@ def save (unique_keys, data, date = None, latlng = None, silent = False) :
 
 # undocumented fetch function
 def fetch (unique_keys) :
+    """undocumented - use at your own risk"""
     ds = DataStore(None)
     rc, arg = ds.fetch (unique_keys)
     if not rc :
@@ -197,6 +199,7 @@ def fetch (unique_keys) :
 
 # undocumented retrieve function
 def retrieve (unique_keys) :
+    """undocumented - use at your own risk"""
     ds = DataStore(None)
     rc, arg = ds.retrieve (unique_keys)
     if not rc :

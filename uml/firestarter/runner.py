@@ -95,6 +95,8 @@ def execute (code, guid = None) :
         line = res.readline()
 
 
+# You can test this script by typing:
+# echo "print 1" | python runner.py
 
 if __name__ == "__main__":
     

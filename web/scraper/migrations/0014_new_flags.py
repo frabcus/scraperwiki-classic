@@ -14,17 +14,6 @@ class Migration:
         # Adding field 'Scraper.isstartup'
         db.add_column('scraper_scraper', 'isstartup', orm['scraper.scraper:isstartup'])
 
-        tutorial_scrapers = Scraper.objects.filter(short_name__startswith='tutorial-')
-        for s in tutorial_scrapers:
-            s.istutorial = True
-            s.save()
-
-        startup_scrapers = Scraper.objects.filter(short_name__startswith='startup-')
-        for s in startup_scrapers:
-            s.isstartup = True
-            s.save()
-    
-    
     def backwards(self, orm):
         
         # Deleting field 'Scraper.istutorial'

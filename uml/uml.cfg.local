@@ -20,6 +20,9 @@ user	= scraperwiki
 passwd	= scraperwiki
 db	= scraperwiki_datastore
 
+[metadata]
+host    = 127.0.0.1:8000
+
 [swlogger]
 host	= 127.0.0.1
 user	= scraperlog

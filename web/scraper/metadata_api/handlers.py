@@ -27,7 +27,15 @@ class ScraperMetadataHandler(BaseHandler):
     def read(self, request, scraper_guid, metadata_name):
         try:
             scraper = Scraper.objects.get(guid=scraper_guid)
-            metadata = scraper.scrapermetadata_set.get(name=metadata_name)
+            if metadata_name in ['title', 'short_name']:
+                metadata = ScraperMetadata()
+                metadata.name = metadata_name
+                metadata.scraper = scraper
+                metadata.run_id = 0
+                metadata.value = '"%s"' % getattr(scraper, metadata_name)
+                print metadata.value, metadata  
+            else:
+                metadata = scraper.scrapermetadata_set.get(name=metadata_name)
             return metadata
         except:
             return rc.NOT_HERE
@@ -35,13 +43,14 @@ class ScraperMetadataHandler(BaseHandler):
     @check_scraperid_header
     def create(self, request, scraper_guid, metadata_name):
         if not 'run_id' in request.POST or not 'value' in request.POST:
-            print "Bad Request - create"
             return rc.BAD_REQUEST
 
-        scraper = Scraper.objects.get(guid=scraper_guid) 
+        try:
+            scraper = Scraper.objects.get(guid=scraper_guid) 
+        except:
+            return rc.NOT_HERE
 
         if scraper.scrapermetadata_set.filter(name=metadata_name).count() > 0:
-            print "Duplicate entry"
             return rc.DUPLICATE_ENTRY
 
         metadata = ScraperMetadata()
@@ -56,7 +65,6 @@ class ScraperMetadataHandler(BaseHandler):
     @check_scraperid_header
     def update(self, request, scraper_guid, metadata_name):
         if not 'run_id' in request.PUT or not 'value' in request.PUT:
-            print "Bad Request - update"
             return rc.BAD_REQUEST
 
         try:
