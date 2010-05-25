@@ -24,11 +24,6 @@ function setupCodeViewer(iLineCount){
       });
 }
 
-function AlertBrowser(){
-    if ($.browser.msie)
-        $('#feedbackmess').html(' --- <span class="incompatible-browser">Your browser might not be compatible</span>, please see <a href="/help#browsers">FAQ</a>');
-}
-
 function APISetupExploreFunction(){
 
     //link up the call button to change a few bits of text

@@ -18,7 +18,6 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 .helplink {background:#f08a38; border:solid 1px #bf6312!important; padding:0.18em 0.4em!important;
     border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;}
 .helplink a {text-decoration:none;color:#fff;}
-.incompatible-browser {background:#f99;}
 
 /* Header & menu */
 #divHeader {padding:0 1.5% 0 1.5%; margin-bottom:1em; width:97%;
