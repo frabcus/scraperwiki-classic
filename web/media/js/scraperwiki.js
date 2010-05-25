@@ -120,7 +120,7 @@ function setupButtonConfirmation(sId, sMessage){
     );
 }
 
-function setupDataMap(){
+function setupDataMap(oData){
 
     // Setup the map
     oNavigation = new OpenLayers.Control.Navigation();
@@ -156,9 +156,6 @@ function setupDataMap(){
         var oIcon = new OpenLayers.Icon('/media/images/mapmarkers/' + markers[i] + 'marker.png', oIconSize, oIconOffset);
         oIcons[markers[i]] = oIcon;
      }
-     
-     // Get data
-     var oData = eval('('+ $('#hidMapData').val() + ')');
      
      //find where the latlng field is
      var iLatLngIndex = -1;

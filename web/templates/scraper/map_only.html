@@ -1,12 +1,13 @@
 <html>
 <head>
+<script type="text/javascript" src="http://www.openlayers.org/api/OpenLayers.js"></script>                                        
+<script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script> 
 <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js"></script>
 </head>
 <body>
-<input id="hidMapData" type="hidden" value="{{data}}" />
 <div id="divDataMap"></div>
 <script type="text/javascript">
-  setupDataMap();
+  setupDataMap({{data|safe}});
 </script>
 </body>
 </html>
