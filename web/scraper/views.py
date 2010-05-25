@@ -165,7 +165,7 @@ def scraper_data(request, scraper_short_name):
       }, context_instance=RequestContext(request))
 
 
-def scraper_map(request, scraper_short_name):
+def scraper_map(request, scraper_short_name, map_only=False):
     #user details
     user = request.user
     scraper = get_object_or_404(
@@ -185,7 +185,12 @@ def scraper_map(request, scraper_short_name):
     has_data = len(data['rows']) > 0
     data = json.dumps(data)
 
-    return render_to_response('scraper/map.html', {
+    if map_only:
+        template = 'scraper/map_only.html'
+    else:
+        template = 'scraper/map.html'
+
+    return render_to_response(template, {
     'scraper_tags': scraper_tags,
     'selected_tab': 'map',
     'scraper': scraper,
