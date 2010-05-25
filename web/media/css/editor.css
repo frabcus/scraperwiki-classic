@@ -106,8 +106,8 @@ span.hiddenfields { margin-left:10px; }
     opacity:0.6;filter: alpha(opacity=60); display:none;}
 
 /* note that height of popup is set from editor.js showPopup() */
-#popups .popup_item {border: 10px solid #000;position:absolute;width:500px;height:300px;background:#fff;
-    z-index:110; position:absolute; top:0; width:86%; margin:4%; padding:0 2%;
+#popups .popup_item {border: 10px solid #333;height:300px;background:#fff;
+    z-index:110; position:absolute; top:0; left:0; width:86%; margin:4%; padding:0 2%;
     text-align:left; display:none; }
 
 .popup_item .popup_header {margin:0% 0 0 0;height:4%; position:relative;}
@@ -135,12 +135,6 @@ dl.quick_help a { font-size:0.8em; font-style:italic;}
 dl.quick_help ul { padding:0 0 0 1em; margin: 0; }
 dl.quick_help li { padding:0 0 0 0; margin: 0; }
 dl.quick_help li code {font-size:1.1em; }
-
-
-/* note that height of popup is set from editor.js showPopup() */
-#popups .popup_item {border: 10px solid #000;position:absolute;width:500px;height:300px;background:#fff;
-    z-index:110; position:absolute; top:0; width:86%; margin:4%; padding:0 2%;
-    text-align:left; display:none; }
 
 /* tutorial page.  needs specify exactly the popup_item case in order to overload the padding */
 #popups .popup_item#popup_tutorials { padding:0 0 0 0; overflow:auto;}
