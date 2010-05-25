@@ -184,8 +184,8 @@ class RunnerFactory(protocol.ServerFactory):
     def __init__(self):
         self.clients = []
         self.announcecount = 0
-        self.lc = task.LoopingCall(self.announce)
-        self.lc.start(10)
+        #self.lc = task.LoopingCall(self.announce)
+        #self.lc.start(10)
 
     # every 10 seconds sends out a quiet poll
     def announce(self):
