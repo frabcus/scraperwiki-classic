@@ -151,11 +151,9 @@ def edit(request, short_name='__new__'):
     if not request.POST:
 
         # Build the form
-        form = forms.editorForm(scraper.__dict__, instance=scraper)
+        form = forms.editorForm(instance=scraper)
         form.fields['code'].initial = scraper.code
-        form.fields['title'].initial = scraper.title
-        form.fields['license'].initial = scraper.license
-        #form.fields['run_interval'].initial = scraper.run_interval
+        form.fields['tags'].initial = " ".join([tag.name for tag in scraper.tags])
     
         tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True)
 
