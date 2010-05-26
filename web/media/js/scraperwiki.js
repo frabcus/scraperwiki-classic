@@ -142,7 +142,7 @@ function setupDataMap(oData, sUrl){
 
 
       // Add OSM tile and marker layers
-      oMarkersLayer = new OpenLayers.Layer.Markers("Markers", {attribution:"<a href='" + sUrl + "'>ScraperWiki</a>"});
+      oMarkersLayer = new OpenLayers.Layer.Markers("Markers", {attribution:"<a href='" + sUrl + "' target='_parent'>ScraperWiki</a>"});
       oMap.addLayer(oMarkersLayer);      
 
       oMap.addLayer(new OpenLayers.Layer.OSM.Mapnik("Osmarender"));
