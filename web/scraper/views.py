@@ -475,3 +475,11 @@ def unfollow(request, scraper_short_name):
     scraper.unfollow(user)
     # Redirect after POST
     return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
+
+
+def twisterstatus(request):
+    if 'value' not in request.POST:
+        return HttpResponse("needs value=")
+    tstatus = json.loads(request.POST.get('value'))
+    print "This is where we update the UserScraperEditing objects to match:", tstatus
+    return HttpResponse("Howdy ppp ")

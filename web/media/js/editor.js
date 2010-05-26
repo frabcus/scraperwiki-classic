@@ -290,7 +290,7 @@ $(document).ready(function() {
 
     conn.onclose = function(code){
         writeToChat('connection closed, closecode=' + code); 
-        writeToChat('You will have to reload the page to reconnect');  // couldn't find a way to make a reconnect button work!
+        writeToChat('<b>You will need to reload the page to reconnect</b>');  // couldn't find a way to make a reconnect button work!
         sChatTabMessage = 'Disconnected'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
     }

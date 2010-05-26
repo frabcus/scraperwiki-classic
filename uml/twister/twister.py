@@ -22,6 +22,9 @@ import os
 import signal
 import time
 from optparse import OptionParser
+import ConfigParser
+import urllib2
+import urllib      #  do some asynchronous calls
 
 varDir = './var'
 
@@ -88,11 +91,13 @@ class RunnerProtocol(protocol.Protocol):
         self.guid = ""
         self.username = ""
         self.clientnumber = -1 
-            
+        
+
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
         print "new connection", len(self.factory.clients)
-    
+        self.factory.notifytwisterstatus()
+            
     def dataReceived(self, data):
         """
         Listens for data coming from the client.
@@ -149,17 +154,18 @@ class RunnerProtocol(protocol.Protocol):
                 self.username = parsed_data['username']
         
             elif parsed_data['command'] == 'chat':
-                print "CCCC", parsed_data['text'], self.guid
                 if self.guid:
                     for client in self.factory.clients:
                         if client.guid == self.guid:
-                            client.write(format_message(parsed_data['text'], message_type='chat'))
+                            client.write(format_message("%s: %s" % (self.username, parsed_data['text']), message_type='chat'))
                 else:
                     self.write(format_message(parsed_data['text'], message_type='chat'))  # write it back to itself
+            
+            self.factory.notifytwisterstatus()
         
         
         except Exception, e:
-            self.transport.write(format_message("Command not valid (%s)" % e))
+            self.transport.write(format_message("Command not valid (%s)  %s " % (e, data)))
 
     def write(self, line, formatted=True):
         """
@@ -183,6 +189,7 @@ class RunnerProtocol(protocol.Protocol):
             self.write(json.dumps({'message_type' : 'kill', 'content' : 'Script successful'}))
         else:
             self.write(json.dumps({'message_type' : 'kill', 'content' : 'Script cancelled'}))
+        self.factory.notifytwisterstatus()
             
     def connectionLost(self, reason):
         """
@@ -192,6 +199,7 @@ class RunnerProtocol(protocol.Protocol):
         """
         self.factory.clientConnectionLost(self)
         print "end connection", len(self.factory.clients), reason
+        self.factory.notifytwisterstatus()
         
         self.kill_run(reason='connectionLost')
 
@@ -206,6 +214,13 @@ class RunnerFactory(protocol.ServerFactory):
         #self.lc = task.LoopingCall(self.announce)
         #self.lc.start(10)
 
+        self.m_conf        = ConfigParser.ConfigParser()
+        config = '/var/www/scraperwiki/uml/uml.cfg'
+        self.m_conf.readfp (open(config))
+        self.twisterstatusurl = self.m_conf.get('twister', 'statusurl')
+        
+        self.notifytwisterstatus()
+
     # every 10 seconds sends out a quiet poll
     def announce(self):
         self.announcecount += 1
@@ -216,7 +231,6 @@ class RunnerFactory(protocol.ServerFactory):
                 res.append(c.running and "R" or ".")
             client.write(format_message("%d c %d clients, running:%s" % (self.announcecount, len(self.clients), "".join(res)), message_type='chat'))
 
-
     def clientConnectionMade(self, client):
         client.clientnumber = self.clientcount
         self.clients.append(client)
@@ -225,11 +239,11 @@ class RunnerFactory(protocol.ServerFactory):
     def clientConnectionLost(self, client):
         self.clients.remove(client)
 
-    def notifyClients(self, guid):
-        pass
-        # this scraper is watched by X number of users.  
-        # You have run rights to this
-        # you see their running.
+    def notifytwisterstatus(self):
+        clientlist = [ { "clientnumber":client.clientnumber, "guid":client.guid, "username":client.username, "running":bool(client.running)}   for client in self.clients ]
+        data = { "value": json.dumps({'message_type' : "currentstatus", 'clientlist':clientlist}) }
+        res = urllib2.urlopen(self.twisterstatusurl, urllib.urlencode(data)).read()
+        #print res, data
         
         
 

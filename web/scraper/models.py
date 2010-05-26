@@ -274,6 +274,23 @@ class UserScraperRole(models.Model):
         return "Scraper_id: %s -> User: %s (%s)" % \
                                         (self.scraper, self.user, self.role)
 
+class UserScraperEditing(models.Model):
+    """
+    Updated by Twisted to state which scrapers are being editing at this moment
+    """
+    user    = models.ForeignKey(User)
+    scraper = models.ForeignKey(Scraper)
+    editingsince = models.DateTimeField(blank=True, null=True)
+    runningsince = models.DateTimeField(blank=True, null=True)
+    closedsince  = models.DateTimeField(blank=True, null=True)
+    twisterclientnumber = models.IntegerField(default=-1)
+    twisterscraperpriority = models.IntegerField(default=0)   # >0 another client has priority on this scraper
+    
+        
+    def __unicode__(self):
+        return "Editing: Scraper_id: %s -> User: %s (%s)" % (self.scraper, self.user)
+
+
 class ScraperMetadata(models.Model):
     """
     Allows named metadata to be associated with a scraper
