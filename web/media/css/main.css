@@ -308,3 +308,14 @@ div.user_comment img {float:left; margin-right:10px;}
 .olPopupContent table td {border:solid 1px #ccc; padding:5px;}
 
 #embedMapBox {width: 100%;}
+
+form.scraper_admin label {
+  display: inline-block;
+  line-height: 1.8;
+  vertical-align: top;
+  width: 20%; /* Width of labels */
+}
+
+form.scraper_admin li input,select,textarea {
+  width: 30%; /* Width of labels */
+}
