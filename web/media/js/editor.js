@@ -9,6 +9,7 @@ $(document).ready(function() {
     var previouscodeeditorheight = $("#codeeditordiv").height() * 2/3;    // saved for the double-clicking on the drag bar
     var short_name = $('#scraper_short_name').val();
     var guid = $('#scraper_guid').val();
+    var username = $('#username').val(); 
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
     var conn; // Orbited connection
@@ -17,6 +18,8 @@ $(document).ready(function() {
     var outputMaxItems = 400;
     var cookieOptions = { path: '/editor', expires: 90};    
     var popupStatus = 0
+    var sTabCurrent = ''; 
+    var sChatTabMessage = 'Chat'; 
 
     //constructor functions
     setupCodeEditor();
@@ -82,18 +85,20 @@ $(document).ready(function() {
     
     function setupOrbited() {
         TCPSocket = Orbited.TCPSocket;
-        conn = new TCPSocket()
-        conn.open('localhost', '9010')
+        conn = new TCPSocket(); 
+        conn.open('localhost', '9010'); 
+        buffer = " "; 
+        sChatTabMessage = 'Connecting...'; 
+        $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
+        $(window).unload( function () { conn.close(); } );
     }
     
     //Setup Keygrabs
 
     function setupKeygrabs(){
-
         addHotkey('ctrl+r', sendCode);       
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+d', viewDiff);                       
-          
     };
     
     //Setup tutorials
@@ -129,6 +134,17 @@ $(document).ready(function() {
             saveScraper(false); 
             return false; 
         })
+
+        $('#chat_line').bind('keypress', function(eventObject) {
+            var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
+        	var target = eventObject.target.tagName.toLowerCase();
+        	if (key === 13 && target === 'input') {
+                eventObject.preventDefault();
+                sendChat(); 
+                return false; 
+            }
+            return true; 
+        })
     }
     
     //Setup Tabs
@@ -144,6 +160,10 @@ $(document).ready(function() {
         })
         $('.editor_output .sources a').click(function(){
             showTab('sources');
+            return false;
+        })
+        $('.editor_output .chat a').click(function(){
+            showTab('chat');
             return false;
         })
 
@@ -260,9 +280,19 @@ $(document).ready(function() {
 
     }
 
+    conn.onopen = function(code){
+        sChatTabMessage = 'Chat'; 
+        $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
+        writeToChat('connection opened, readystate=' + conn.readyState); 
+        data = {"command":'connection_open', "guid":guid, "username":username};
+        send(data);
+    }
+
     conn.onclose = function(code){
-        //alert('connection closed');
-        writeToConsole('connection closed ' + code); 
+        writeToChat('connection closed, closecode=' + code); 
+        writeToChat('You will have to reload the page to reconnect');  // couldn't find a way to make a reconnect button work!
+        sChatTabMessage = 'Disconnected'; 
+        $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
     }
     //read data back from twisted
 
@@ -291,6 +321,8 @@ $(document).ready(function() {
 
           } else if (data.message_type == "sources") {
               writeToSources(data.content, data.url)
+          } else if (data.message_type == "chat") {
+              writeToChat(data.content)
           } else if (data.message_type == "data") {
               writeToData(data.content)
           } else if (data.message_type == "exception") {
@@ -312,6 +344,13 @@ $(document).ready(function() {
       }
     }
 
+    function sendChat() 
+    {
+        data = {"command":'chat', "guid":guid, "username":username, "text":$('#chat_line').val()};
+        send(data); 
+        $('#chat_line').val(''); 
+    }
+
     //send a message to the server
     function send(json_data) {
       conn.send($.toJSON(json_data));  
@@ -328,7 +367,7 @@ $(document).ready(function() {
 
         // protect not-ready case
         if (conn.readyState != conn.READY_STATE_OPEN)
-            { alert("readyState " + conn.readyState); return }
+            { alert("Not ready, readyState=" + conn.readyState); return }
 
         //show the output area
         resizeControls('up');
@@ -346,6 +385,7 @@ $(document).ready(function() {
           data = {
             "command" : "run",
             "guid" : guid,
+            "username" : username, 
             "code" : codeeditor.getCode()
           }
           send(data)
@@ -538,7 +578,6 @@ $(document).ready(function() {
                         bReturn = false
                     }
                 }
-
                 return bReturn;
             }
         );
@@ -691,7 +730,7 @@ $(document).ready(function() {
     }
 
 
-    //Write to concole/data/sources
+    //Write to console/data/sources
     function writeToConsole(sMessage, sLongMessage, sMessageType, iLine) {
 
         // if an exception set the class accordingly
@@ -784,11 +823,10 @@ $(document).ready(function() {
               oCell.html(aRowData[i]);
               oRow.append(oCell);
           })
-/*
+
           if ($('#output_data .output_content').children().size() >= outputMaxItems){
               $('#output_data .output_content').children(':first').remove();
           }
-*/
           
           $('#output_data .output_content').append(oRow);
           $('.editor_output div.tabs li.data').addClass('new');
@@ -799,16 +837,35 @@ $(document).ready(function() {
           }, 0);
     }
 
+    function writeToChat(sMessage) {
+          var oRow = $('<tr></tr>');
+          var oCell = $('<td></td>');
+          oCell.html(sMessage);
+          oRow.append(oCell);
+          
+          $('#output_chat .output_content').append(oRow);
+          $('.editor_output div.tabs li.chat').addClass('new');
+
+//alert("  "  + $('#output_chat').height()+ "," + $('#output_chat')[0].scrollHeight + "  " + $('#chat_line').offset().top); 
+          $('#output_chat').animate({ 
+              scrollTop: $('#output_chat').height()+$('#output_chat')[0].scrollHeight 
+          }, 0);
+    }
+
     //show tab
     function showTab(sTab, bRevert){
         $('.editor_output .info').children().hide();
         $('.editor_output .controls').children().hide();        
         $('#output_' + sTab).show();
         $('#controls_' + sTab).show();
+        sTabCurrent = sTab; 
 
         $('.editor_output div.tabs ul').children().removeClass('selected');
         $('.editor_output div.tabs li.' + sTab).addClass('selected');
+        $('.editor_output div.tabs li.' + sTab).removeClass('new');
         
+
+
     }
     
     //show text tab
@@ -830,8 +887,12 @@ $(document).ready(function() {
           iEditorHeight = $("#codeeditordiv").height();
           iControlsHeight = $('.editor_controls').height()
           iCodeEditorTop = parseInt($("#codeeditordiv").position().top);
-          $("#outputeditordiv").height(iWindowHeight - (iEditorHeight + iControlsHeight + iCodeEditorTop) + 'px');   
-          $("#outputeditordiv .info").height($("#outputeditordiv").height() - parseInt($("#outputeditordiv .info").position().top) + 'px');
+          iOutputEditorTabs = $('#outputeditordiv .tabs').height()
+          iOutputEditorDiv = iWindowHeight - (iEditorHeight + iControlsHeight + iCodeEditorTop) - 30; 
+          $("#outputeditordiv").height(iOutputEditorDiv + 'px');   
+          //$("#outputeditordiv .info").height($("#outputeditordiv").height() - parseInt($("#outputeditordiv .info").position().top) + 'px');
+          $("#outputeditordiv .info").height((iOutputEditorDiv - iOutputEditorTabs) + 'px');
+//iOutputEditorTabs
       }
     };
     

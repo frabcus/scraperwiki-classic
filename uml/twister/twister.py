@@ -47,7 +47,7 @@ def format_message(content, message_type='console'):
 class LocalLineOnlyReceiver(LineOnlyReceiver):
     def lineReceived(self, line):
         if line != "":
-            self.transport.write(line+",")
+            self.transport.write(line+",")  # note the comma added to the end for json parsing when strung together
 
 class spawnRunner(protocol.ProcessProtocol):
     def __init__(self, P, code):
@@ -85,6 +85,9 @@ class RunnerProtocol(protocol.Protocol):
         # Set if a run is currently taking place, to make sure we don't run 
         # more than one scraper at a time.
         self.running = False
+        self.guid = ""
+        self.username = ""
+        self.clientnumber = -1 
             
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
@@ -126,6 +129,7 @@ class RunnerProtocol(protocol.Protocol):
                     code = code.encode('utf8')
                     
                     guid = parsed_data['guid']
+                    assert guid == self.guid
                     args = ['./firestarter/runner.py']
                     args.append('-g %s' % guid)
                     
@@ -140,6 +144,20 @@ class RunnerProtocol(protocol.Protocol):
                 else:
                     raise ValueError('++?????++ Out of Cheese Error. Redo From Start: `code` to run not specified')
                     
+            elif parsed_data['command'] == 'connection_open':
+                self.guid = parsed_data['guid']
+                self.username = parsed_data['username']
+        
+            elif parsed_data['command'] == 'chat':
+                print "CCCC", parsed_data['text'], self.guid
+                if self.guid:
+                    for client in self.factory.clients:
+                        if client.guid == self.guid:
+                            client.write(format_message(parsed_data['text'], message_type='chat'))
+                else:
+                    self.write(format_message(parsed_data['text'], message_type='chat'))  # write it back to itself
+        
+        
         except Exception, e:
             self.transport.write(format_message("Command not valid (%s)" % e))
 
@@ -183,6 +201,7 @@ class RunnerFactory(protocol.ServerFactory):
     
     def __init__(self):
         self.clients = []
+        self.clientcount = 0
         self.announcecount = 0
         #self.lc = task.LoopingCall(self.announce)
         #self.lc.start(10)
@@ -195,14 +214,24 @@ class RunnerFactory(protocol.ServerFactory):
             for c in self.clients:
                 res.append(c == client and "T" or "-")
                 res.append(c.running and "R" or ".")
-            client.write(format_message("%d c %d clients, running:%s" % (self.announcecount, len(self.clients), "".join(res))))
+            client.write(format_message("%d c %d clients, running:%s" % (self.announcecount, len(self.clients), "".join(res)), message_type='chat'))
+
 
     def clientConnectionMade(self, client):
+        client.clientnumber = self.clientcount
         self.clients.append(client)
+        self.clientcount += 1
 
     def clientConnectionLost(self, client):
         self.clients.remove(client)
 
+    def notifyClients(self, guid):
+        pass
+        # this scraper is watched by X number of users.  
+        # You have run rights to this
+        # you see their running.
+        
+        
 
 def execute (port) :
     

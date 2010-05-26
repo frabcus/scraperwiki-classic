@@ -38,6 +38,7 @@
         {# Hidden inputs for passing to js #}
         <input type="hidden" id="scraper_short_name" value="{{ scraper.short_name }}"/>
         <input type="hidden" id="scraper_guid" value="{{ scraper.guid }}"/>
+        <input type="hidden" id="username" value="{{ user.username }}"/>
         <input type="hidden" id="code_runningMode" value="{{ settings.CODE_RUNNING_MODE|escape }}"/>    
         <input type="hidden" id="codemirror_url" value="{{ settings.CODEMIRROR_URL }}"/>
     </fieldset>
@@ -80,6 +81,7 @@
                 <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
+                
                 <div class="right">
                     {% if scraper.short_name %}
                         <a id="aCloseEditor" href="{% url scraper_code scraper.short_name %}" title="Return to scraper page">Close editor</a>
@@ -104,6 +106,9 @@
                         <li class="sources">
                             <a href="#" title="Pages you are scraping">Sources</a>                            
                         </li>
+                        <li class="chat">
+                            <a href="#" title="Communicate to others">Chat</a>                            
+                        </li>
                     </ul>
                 </div>
                 <div class="info">
@@ -117,7 +122,13 @@
                     <div id="output_sources" class="output">
                         <div class="output_content"></div>
                     </div>
+                    <div id="output_chat" class="output">
+                        <table class="output_content"></table>
+                        <input type="text" name="chat_line" value="" id="chat_line"/>
+                    </div>
                 </div>
+
+{# this iframe doesn't appear to be used!!! #}
                 <iframe name="console" id="console" style="display:none;"><pre></pre></iframe>
             </div>
       </div>
