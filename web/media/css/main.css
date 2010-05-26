@@ -306,3 +306,5 @@ div.user_comment img {float:left; margin-right:10px;}
 #divDataMap {width:100%; height:550px;}
 .olPopup {opacity:0.5;-moz-opacity:0.5;}
 .olPopupContent table td {border:solid 1px #ccc; padding:5px;}
+
+#embedMapBox {width: 100%;}
