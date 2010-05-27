@@ -43,7 +43,7 @@ HOME_DIR = ""
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a trailing slash.
 URL_ROOT = ""
 MEDIA_ROOT = URL_ROOT + 'media/'
-CODEMIRROR_ROOT = MEDIA_ROOT + "CodeMirror-0.67/"
+CODEMIRROR_DIR = 'CodeMirror-0.67/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a trailing slash.
 ADMIN_MEDIA_PREFIX = URL_ROOT + '/media-admin/'
@@ -139,8 +139,6 @@ FORCE_LOWERCASE_TAGS = True
 
 # define default directories needed for paths to run scrapers
 SCRAPER_LIBS_DIR = join(HOME_DIR, "scraperlibs")
-# this value doesn't get through into frontend/base.html, unfortunately
-CODEMIRROR_URL = MEDIA_URL + "CodeMirror-0.67/"  
 
 #send broken link emails
 SEND_BROKEN_LINK_EMAILS = DEBUG == False
@@ -165,7 +163,6 @@ TEMPLATE_SETTINGS = [
  'API_DOMAIN',
  'ORBETED_PORT',
  'ORBETED_DOMAIN',
- 'CODE_RUNNING_MODE',
  'CODEMIRROR_URL',
 ]
 
