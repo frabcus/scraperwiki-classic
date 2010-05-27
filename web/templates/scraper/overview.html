@@ -41,9 +41,9 @@
           <dd><a href="{% url export_csv scraper.short_name %}" rel="nofollow">download csv</a></dd>
           <dt>Tags:</dt>
           {% if scraper.published %}
-              <dd>{% for tag in scraper_tags %}<a href="{% url tag tag %}">{{ tag }}</a> {% endfor %}</dd>
+              {% for tag in scraper_tags %}<dd><a href="{% url tag tag %}">{{ tag }}</a></dd>{% endfor %}
           {% else %}
-              <dd>{% for tag in scraper_tags %}{{ tag }} {% endfor %}</dd>
+              {% for tag in scraper_tags %}<dd>{{ tag }}</dd>{% endfor %}
           {% endif %}
         </dl>
     </div>

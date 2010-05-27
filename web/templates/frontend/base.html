@@ -11,10 +11,7 @@
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>		
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>	
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/flexigrid.js"></script>			
-
-        {% comment %}CODEMIRROR_URL doesn't get into this template, unfortunately (only MEDIA_URL does){% endcomment %}
-		<script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-0.67/js/codemirror.js"></script>
-
+		<script type="text/javascript" src="{{ settings.CODEMIRROR_URL }}js/codemirror.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js"></script>		
 	    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/flexigrid.css" />
 	    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />

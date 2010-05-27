@@ -592,10 +592,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             cltime2    = time.time()
             try    :
                 sys.stdout.write \
-            (   '%d seconds elapsed, used %d CPU seconds' % 
-                (   int(cltime2 - cltime1),
-                    int(ostimes2[0] - ostimes1[0])
-            )   )
+                    (   '%d seconds elapsed, used %d CPU seconds' % 
+                        (   int(cltime2 - cltime1),
+                            int(ostimes2[0] - ostimes1[0])
+                    )   )
             except :
                 pass
             etext, trace, infile, atline = None, None, None, None

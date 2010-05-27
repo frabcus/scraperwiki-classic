@@ -1,8 +1,12 @@
 {% extends "scraper/scraper_base.html" %}
 {% load replace %}
 {% block tab %}
-<input id="hidMapData" type="hidden" value="{{data}}" />
 <div id="divDataMap"></div>
 
+<h2>Embed this map in your site</h2>
+<textarea id="embedMapBox" >
+<iframe width="425" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://{{domain}}{% url scraper_map_only scraper.short_name %}" style="border: 1px solid black"></iframe><br /><small><a href="http://{{domain}}{% url scraper_map_only scraper.short_name %}">View Larger Map</a></small>
+</textarea>
+
 {% endblock %}
-{% block run_script %}setupDataMap();{% endblock %}
+{% block run_script %}setupDataMap({{data|safe}}, "http://{{domain}}{% url scraper_overview scraper.short_name %}");{% endblock %}

@@ -133,6 +133,20 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         return scraperID, runID
 
+    def postcodeToLatLng (self, scraperID, runID, postcode) :
+
+        if runID is not None :
+            try    : statusInfo[runID]['action'] = 'postcodetolatlng'
+            except : pass
+
+        rc, arg = datalib.postcodeToLatLng (scraperID, postcode)
+        self.connection.send (json.dumps ((rc, arg)) + '\n')
+
+        if runID is not None :
+            try    : statusInfo[runID]['action'] = None
+            except : pass
+
+
     def fetch (self, scraperID, runID, unique) :
 
         if runID is not None :
@@ -179,15 +193,19 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         request = json.loads(line) 
 
         if request [0] == 'save'  :
-            self.save (scraperID, runID, request[1], request[2], request[3], request[4])
+            self.save     (scraperID, runID, request[1], request[2], request[3], request[4])
             return
 
         if request[0] == 'fetch' :
-            self.fetch (scraperID, runID, request[1])
+            self.fetch    (scraperID, runID, request[1])
             return
 
         if request[0] == 'retrieve' :
             self.retrieve (scraperID, runID, request[1])
+            return
+        
+        if request[0] == 'postcodetolatlng' :
+            self.postcodeToLatLng (scraperID, runID, request[1])
             return
         
         self.connection.send (json.dumps ((False, 'Unknown datastore command: %s' % request[0])) + '\n')

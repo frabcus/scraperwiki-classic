@@ -120,7 +120,7 @@ function setupButtonConfirmation(sId, sMessage){
     );
 }
 
-function setupDataMap(){
+function setupDataMap(oData, sUrl){
 
     // Setup the map
     oNavigation = new OpenLayers.Control.Navigation();
@@ -142,10 +142,11 @@ function setupDataMap(){
 
 
       // Add OSM tile and marker layers
+      oMarkersLayer = new OpenLayers.Layer.Markers("Markers", {attribution:"<a href='" + sUrl + "' target='_parent'>ScraperWiki</a>"});
+      oMap.addLayer(oMarkersLayer);      
+
       oMap.addLayer(new OpenLayers.Layer.OSM.Mapnik("Osmarender"));
 
-      oMarkersLayer = new OpenLayers.Layer.Markers("Markers");
-      oMap.addLayer(oMarkersLayer);      
       
      // Make icon (derived from http://www.openstreetmap.org/openlayers/img/marker.png -- could later include variations on markers)
      markers = ["red", "blue", "purple", "green", "white", "black"];
@@ -156,9 +157,6 @@ function setupDataMap(){
         var oIcon = new OpenLayers.Icon('/media/images/mapmarkers/' + markers[i] + 'marker.png', oIconSize, oIconOffset);
         oIcons[markers[i]] = oIcon;
      }
-     
-     // Get data
-     var oData = eval('('+ $('#hidMapData').val() + ')');
      
      //find where the latlng field is
      var iLatLngIndex = -1;
