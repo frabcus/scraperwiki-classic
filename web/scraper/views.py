@@ -4,6 +4,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
 
@@ -88,40 +89,24 @@ def create(request):
             context_instance=RequestContext(request))
 
 def scraper_admin(request, scraper_short_name):
-    #user details
     user = request.user
     scraper = get_object_or_404(
         models.Scraper.objects, short_name=scraper_short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    form = forms.RunIntervalForm(instance=scraper)
 
     #you can only get here if you are signed in and own the scraper. v important
     if user_owns_it == False:
-          raise Http404
+        raise Http404
 
     if request.method == 'POST':
-        delete_data = request.POST.get('delete_data', None)
-        scheduler_update = request.POST.get('scheduler_update', None)
-        delete_scraper = request.POST.get('delete_scraper', None)
-
-        #if user has requested a delete, **double** check they are allowed to,
-        # the do the delete
-        if delete_data == '1' and user_owns_it:
-            models.Scraper.objects.clear_datastore(
-                scraper_id=scraper.guid)
-
-        #change the run interval for this scraper?
-        if scheduler_update == '1' and user_owns_it:
-            scraper.run_interval = request.POST.get('run_interval', -1)
-            scraper.save()
-
-        #delete the entire scraper (marked as delete)
-        if delete_scraper == '1' and user_owns_it:
-            scraper.deleted = True
-            scraper.save()
-            request.notifications.add("Your scraper has been deleted")
-            return HttpResponseRedirect('/')
+        form = forms.ScraperAdministrationForm(request.POST, instance=scraper)
+        if form.is_valid():
+            s = form.save()
+            s.tags = form.cleaned_data['tags']
+    else:
+        form = forms.ScraperAdministrationForm(instance=scraper)
+        form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
 
     return render_to_response('scraper/admin.html', {
       'selected_tab': 'admin',
@@ -130,7 +115,34 @@ def scraper_admin(request, scraper_short_name):
       'user_follows_it': user_follows_it,
       'form': form,
       }, context_instance=RequestContext(request))
-      
+
+def scraper_delete_data(request, scraper_short_name):
+    scraper = get_object_or_404(
+        models.Scraper.objects, short_name=scraper_short_name)
+
+    if scraper.owner() != request.user:
+        raise Http404
+
+    if request.POST.get('delete_data', None) == '1':
+        models.Scraper.objects.clear_datastore(scraper_id=scraper.guid)
+
+    return HttpResponseRedirect(reverse('scraper_admin', args=[scraper_short_name]))
+
+def scraper_delete_scraper(request, scraper_short_name):
+    user = request.user
+    scraper = get_object_or_404(
+        models.Scraper.objects, short_name=scraper_short_name)
+
+    if scraper.owner() != request.user:
+        raise Http404
+
+    if request.POST.get('delete_scraper', None) == '1':
+        scraper.deleted = True
+        scraper.save()
+        request.notifications.add("Your scraper has been deleted")
+        return HttpResponseRedirect('/')
+
+    return HttpResponseRedirect(reverse('scraper_admin', args=[scraper_short_name]))
 
 def scraper_data(request, scraper_short_name):
     #user details

@@ -153,7 +153,7 @@ def edit(request, short_name='__new__'):
         # Build the form
         form = forms.editorForm(instance=scraper)
         form.fields['code'].initial = scraper.code
-        form.fields['tags'].initial = " ".join([tag.name for tag in scraper.tags])
+        form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
     
         tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True)
 

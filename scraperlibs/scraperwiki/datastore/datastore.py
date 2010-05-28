@@ -148,6 +148,9 @@ class DataStoreClass :
         
         return self.request (('save', uunique_keys, js_data, date, latlng))
 
+    def postcodeToLatLng (self, postcode) :
+
+        return self.request (('postcodetolatlng', postcode))
 
     def close (self) :
 

@@ -1,11 +1,11 @@
 from django import forms
 from models import Scraper
+from editor.forms import LICENSE_CHOICES
 
 class SearchForm(forms.Form):
     q = forms.CharField(label='Find datasets', max_length=50)
 
-class RunIntervalForm (forms.ModelForm):
-
+class ScraperAdministrationForm (forms.ModelForm):
     run_interval = forms.ChoiceField(required=True, label="Re-run this scraper", choices = (
                                 (-1, 'Never'),
                                 (3600*24, 'Once a day'),
@@ -17,7 +17,10 @@ class RunIntervalForm (forms.ModelForm):
                                 (3600*24*63, 'Every two months'),
                                 (3600*24*182, 'Every six months'),
                                 ))
+    title = forms.CharField(label="Title")
+    license = forms.ChoiceField(choices=LICENSE_CHOICES, label='Data licence')
+    tags = forms.CharField(required=False, label="Tags (comma separated)")
                                 
     class Meta:
         model = Scraper
-        fields = ('run_interval')
+        fields = ('run_interval', 'title', 'description', 'license')
