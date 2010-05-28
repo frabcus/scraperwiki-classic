@@ -244,7 +244,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         # this ensures that we only add headers into requests that are going into the scraperwiki system (or a runlocal sw system)
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-        isSW = (netloc[-16:] == '.scraperwiki.com')
+        isSW = netloc.endswith('scraperwiki.com')
         if netloc[:9] == '127.0.0.1':
             isSW = True
 
