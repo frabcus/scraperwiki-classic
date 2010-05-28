@@ -95,8 +95,8 @@ def scraper_admin(request, scraper_short_name):
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
 
-    #you can only get here if you are signed in and own the scraper. v important
-    if user_owns_it == False:
+    #you can only get here if you are signed in
+    if not user.is_authenticated():
         raise Http404
 
     if request.method == 'POST':
