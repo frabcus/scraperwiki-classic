@@ -193,7 +193,7 @@ def scraper_map(request, scraper_short_name, map_only=False):
 
     #get data for this scaper
     data = models.Scraper.objects.data_summary(
-        scraper_id=scraper.guid, limit=250)
+        scraper_id=scraper.guid, limit=settings.MAX_MAP_POINTS)
     has_data = len(data['rows']) > 0
     data = json.dumps(data)
 
