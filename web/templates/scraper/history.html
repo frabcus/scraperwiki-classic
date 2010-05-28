@@ -4,6 +4,7 @@
 <table>
   <tr>
     <th>Date</th>
+    <th>Action</th>
     <th>Message</th>
   </tr>
   {% for item in history %}
@@ -12,7 +13,6 @@
         {{ item.datetime|date:"D j M Y, H:i" }}
       </td>
       <td>
-
           {% ifequal item.message_type|lower "commit" %}
             Scraper committed
           {% endifequal %}
@@ -30,6 +30,13 @@
             {% load gravatar %} {% show_gravatar item.user 'small' %}&nbsp;{{item.user.username}}</a>
           {% endif %}
         
+        </td>
+        <td>
+          {% ifequal item.message_type|lower "commit" %}
+              <em>{{item.message_value}}</em>
+          {% else %}
+              &nbsp;
+          {% endifequal %}
         </td>
     </tr>
   {% endfor %}
