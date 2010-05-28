@@ -101,7 +101,7 @@ def scrape (url, params = None) :
         text = fin.read()
         fin.close()   # get the mimetype here
     except:
-        print '<scraperwiki:message type="sources">' + json.dumps({ 'content' : "Failed: %s" % url })
+        print '<scraperwiki:message type="sources">' + json.dumps({ 'content' : "Failed: %s" % url, 'url': url })
         return None
 
     print_content = {
