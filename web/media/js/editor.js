@@ -90,7 +90,7 @@ $(document).ready(function() {
         buffer = " "; 
         sChatTabMessage = 'Connecting...'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
-        $(window).unload( function () { conn.close(); } );
+        $(window).unload( function () { conn.close();  } );  // this close function needs some kind of pause to allow the disconnection message to go through
     }
     
     //Setup Keygrabs
@@ -283,19 +283,41 @@ $(document).ready(function() {
     conn.onopen = function(code){
         sChatTabMessage = 'Chat'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
-        writeToChat('connection opened, readystate=' + conn.readyState); 
+
+        if (conn.readyState == conn.READY_STATE_OPEN)
+            mreadystate = 'Ready'; 
+        else
+            mreadystate = 'readystate=' + conn.readyState;
+        writeToChat('Connection opened: ' + mreadystate); 
+
+        // stend the username and guid of this connection to twisted so it knows who's logged on
         data = {"command":'connection_open', "guid":guid, "username":username};
         send(data);
     }
 
     conn.onclose = function(code){
-        writeToChat('connection closed, closecode=' + code); 
-        writeToChat('<b>You will need to reload the page to reconnect</b>');  // couldn't find a way to make a reconnect button work!
+        if (code == Orbited.Statuses.ServerClosedConnection)
+            mcode = 'ServerClosedConnection'; 
+        else if (code == Orbited.Errors.ConnectionTimeout)
+            mcode = 'ConnectionTimeout'; 
+        else  // http://orbited.org/wiki/TCPSocket
+            //Orbited.Errors.InvalidHandshake = 102
+            //Orbited.Errors.UserConnectionReset = 103
+            //Orbited.Errors.Unauthorized = 106
+            //Orbited.Errors.RemoteConnectionFailed = 108
+            //Orbited.Statuses.SocketControlKilled = 301
+            mcode = 'code=' + code;
+
+        writeToChat('Connection closed: ' + mcode); 
+        
+        // couldn't find a way to make a reconnect button work!
+        writeToChat('<b>You will need to reload the page to reconnect</b>');  
+
         sChatTabMessage = 'Disconnected'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
     }
-    //read data back from twisted
 
+    //read data back from twisted
     conn.onread = function(ldata) {
       // check if this data is valid JSON, or add it to the buffer
       try {

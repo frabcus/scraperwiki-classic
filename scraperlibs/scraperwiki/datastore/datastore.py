@@ -96,6 +96,7 @@ class DataStoreClass :
             text += data
             if text[-1] == '\n' :
                 break
+        print text
 
         return json.loads (text)
 
@@ -151,6 +152,7 @@ class DataStoreClass :
     def postcodeToLatLng (self, postcode) :
 
         return self.request (('postcodetolatlng', postcode))
+# decode disconnection message http://orbited.org/wiki/TCPSocket
 
     def close (self) :
 

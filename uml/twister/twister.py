@@ -38,6 +38,10 @@ except:
 from twisted.internet import protocol, utils, reactor, task
 from twisted.protocols.basic import LineOnlyReceiver
 
+# for calling back to the scrapers/twister/status
+from twisted.web.client import Agent
+from twisted.web.http_headers import Headers
+agent = Agent(reactor)
 
 # the comma is added into format_message and LineOnlyReceiver because lines may be batched and 
 # they are decoded in editor.js by attempting to evaluate the json string '['+receiveddata+']'
@@ -211,8 +215,10 @@ class RunnerFactory(protocol.ServerFactory):
         self.clients = []
         self.clientcount = 0
         self.announcecount = 0
-        #self.lc = task.LoopingCall(self.announce)
-        #self.lc.start(10)
+        
+        # set the visible heartbeat going
+        self.lc = task.LoopingCall(self.announce)
+        self.lc.start(10)
 
         self.m_conf        = ConfigParser.ConfigParser()
         config = '/var/www/scraperwiki/uml/uml.cfg'
@@ -242,7 +248,14 @@ class RunnerFactory(protocol.ServerFactory):
     def notifytwisterstatus(self):
         clientlist = [ { "clientnumber":client.clientnumber, "guid":client.guid, "username":client.username, "running":bool(client.running)}   for client in self.clients ]
         data = { "value": json.dumps({'message_type' : "currentstatus", 'clientlist':clientlist}) }
-        res = urllib2.urlopen(self.twisterstatusurl, urllib.urlencode(data)).read()
+        
+        # achieves the same as below, but causing the system to wait for response
+        #d = urllib2.urlopen(self.twisterstatusurl, urllib.urlencode(data)).read()
+        
+        # uses a GET due to not knowing how to use POST and send stuff
+        #  http://twistedmatrix.com/documents/current/web/howto/client.html
+        d = agent.request('GET', "%s?%s" % (self.twisterstatusurl, urllib.urlencode(data)), Headers({'User-Agent': ['Twisted Web Client Example']}), None)
+
         #print res, data
         
         

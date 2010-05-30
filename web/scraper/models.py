@@ -288,7 +288,7 @@ class UserScraperEditing(models.Model):
     
         
     def __unicode__(self):
-        return "Editing: Scraper_id: %s -> User: %s (%s)" % (self.scraper, self.user)
+        return "Editing: Scraper_id: %s -> User: %s (%d)" % (self.scraper, self.user, self.twisterclientnumber)
 
 
 class ScraperMetadata(models.Model):
