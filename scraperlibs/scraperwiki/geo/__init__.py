@@ -23,7 +23,8 @@ def gb_postcode_to_latlng(postcode):
     ds = DataStore (None)
     rc, arg = ds.postcodeToLatLng (postcode)
     if not rc :
-        raise Exception (arg)
+        print arg
+        return None
     return arg
 
 #    '''Convert postcode to latlng maxmander's code. (in future use a scraperwiki-rpc)'''
