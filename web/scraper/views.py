@@ -498,8 +498,11 @@ def twisterstatus(request):
     # very brutally drop all objects and rebuild them.  In future we will do the updates
     models.UserScraperEditing.objects.all().delete()
     for client in tstatus["clientlist"]:
-        user = models.User.objects.get(username=client['username'])
-        scraper = models.Scraper.objects.get(guid=client['guid'])
+        try:
+            user = models.User.objects.get(username=client['username'])
+            scraper = models.Scraper.objects.get(guid=client['guid'])
+        except:
+            continue
         twisterclientnumber = client["clientnumber"]
         userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
         userscraperediting.save()
