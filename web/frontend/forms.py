@@ -28,7 +28,7 @@ class UserProfileForm (forms.ModelForm):
     
     class Meta:
         model = UserProfile
-        fields = ('bio','alert_frequency', 'alert_types')
+        fields = ('bio', 'name', 'alert_frequency', 'alert_types')
 
 class scraperContactForm(ContactForm):
   subject_dropdown = django.forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request a private scraper'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))

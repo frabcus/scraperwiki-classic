@@ -1,4 +1,4 @@
-Hello {{developer.username}},
+Hello {{developer.get_profile.name}},
 
 Unfortunately the scraper you wrote for '{{solicitation.title}}' on ScraperWiki.com has been rejected.
 

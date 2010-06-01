@@ -57,7 +57,7 @@
     <ul>
     {% for key, value in top_writers %}
         {% load gravatar %} {% show_gravatar key 'small' %} 
-	         <a href="<a href="/profiles/{{ key.username }}">{{ key.username }}</a> ({{ value }})
+	         <a href="/profiles/{{ key.username }}">{{ key.get_profile.name }}</a> ({{ value }})
 	{% endfor %}
 		{% endif %}
     </ul>
