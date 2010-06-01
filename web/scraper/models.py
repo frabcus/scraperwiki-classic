@@ -23,8 +23,8 @@ from django.core.mail import send_mail
 # models defining scrapers and their metadata.
 
 LANGUAGES = (
-    ('python', 'Python'),
-    ('php', 'PHP'),
+    ('Python', 'Python'),
+    ('PHP', 'PHP'),
 )
 
 class Scraper(models.Model):
@@ -83,7 +83,7 @@ class Scraper(models.Model):
     istutorial        = models.BooleanField(default=False)
     isstartup         = models.BooleanField(default=False)
     
-    language          = models.CharField(max_length=32, choices=LANGUAGES)
+    language          = models.CharField(max_length=32, choices=LANGUAGES, default='Python')
 
     objects = managers.scraper.ScraperManager()
     unfiltered = models.Manager()

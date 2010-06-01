@@ -10,7 +10,7 @@ def set_language(app, **kwargs):
         return
 
     for scraper in Scraper.objects.all():
-        scraper.language = 'python'
+        scraper.language = 'Python'
         scraper.save()
 
 post_migrate.connect(set_language)
