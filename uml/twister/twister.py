@@ -97,6 +97,7 @@ class RunnerProtocol(protocol.Protocol):
         self.running = False
         self.guid = ""
         self.username = ""
+        self.userrealname = ""
         self.clientnumber = -1 
         
 
@@ -141,9 +142,12 @@ class RunnerProtocol(protocol.Protocol):
                     code = code.encode('utf8')
                     
                     guid = parsed_data['guid']
+                    scraperlanguage = parsed_data['language']
+                    
                     assert guid == self.guid
                     args = ['./firestarter/runner.py']
                     args.append('-g %s' % guid)
+                    args.append('-l %s' % scraperlanguage)
                     
                     # args must be an ancoded string, not a unicode object
                     args = [i.encode('utf8') for i in args]
@@ -159,12 +163,13 @@ class RunnerProtocol(protocol.Protocol):
             elif parsed_data['command'] == 'connection_open':
                 self.guid = parsed_data['guid']
                 self.username = parsed_data['username']
+                self.userrealname = parsed_data['userrealname']
         
             elif parsed_data['command'] == 'chat':
                 if self.guid:
                     for client in self.factory.clients:
                         if client.guid == self.guid:
-                            client.write(format_message("%s: %s" % (self.username, parsed_data['text']), message_type='chat'))
+                            client.write(format_message("%s: %s" % (self.userrealname or "Anonymous", parsed_data['text']), message_type='chat'))
                 else:
                     self.write(format_message(parsed_data['text'], message_type='chat'))  # write it back to itself
             

@@ -316,6 +316,8 @@ form.scraper_admin label {
   width: 20%; /* Width of labels */
 }
 
-form.scraper_admin li input,select,textarea {
-  width: 30%; /* Width of labels */
+form.scraper_admin input, form.scraper_admin select, form.scraper_admin textarea {
+  width: 60%; /* Width of labels */
 }
+
+td.bicolumn { width:50%; vertical-align:top; }

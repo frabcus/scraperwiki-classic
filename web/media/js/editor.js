@@ -10,6 +10,8 @@ $(document).ready(function() {
     var short_name = $('#scraper_short_name').val();
     var guid = $('#scraper_guid').val();
     var username = $('#username').val(); 
+    var userrealname = $('#userrealname').val(); 
+    var scraperlanguage = $('#scraperlanguage').val(); 
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
     var conn; // Orbited connection
@@ -290,8 +292,8 @@ $(document).ready(function() {
             mreadystate = 'readystate=' + conn.readyState;
         writeToChat('Connection opened: ' + mreadystate); 
 
-        // stend the username and guid of this connection to twisted so it knows who's logged on
-        data = {"command":'connection_open', "guid":guid, "username":username};
+        // send the username and guid of this connection to twisted so it knows who's logged on
+        data = { "command":'connection_open', "guid":guid, "username":username, "userrealname":userrealname };
         send(data);
     }
 
@@ -408,6 +410,8 @@ $(document).ready(function() {
             "command" : "run",
             "guid" : guid,
             "username" : username, 
+            "userrealname" : userrealname, 
+            "language":scraperlanguage, 
             "code" : codeeditor.getCode()
           }
           send(data)
