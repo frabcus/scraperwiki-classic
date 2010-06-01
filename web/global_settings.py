@@ -130,7 +130,7 @@ INTERNAL_IPS = ['127.0.0.1',]
 
 
 NOTIFICATIONS_STORAGE = 'session.SessionStorage'
-REGISTRATION_BACKEND = "registration.backends.default.DefaultBackend"
+REGISTRATION_BACKEND = "frontend.backends.UserWithNameBackend"
 
 #tagging
 FORCE_LOWERCASE_TAGS = True

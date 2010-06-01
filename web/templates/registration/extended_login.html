@@ -59,15 +59,20 @@
     	       <input type="hidden" name="redirect" value="{{redirect}}"/>
     	    </fieldset>
     	    <ul class="form">	    
+    	        <li{% if registration_form.name.errors %} class="error"{% endif %}>
+        	    {{ registration_form.name.label_tag }}
+        	    {{ registration_form.name }}
+        	    {% field_errors registration_form.name %}        	        
+        	</li>
     	        <li{% if registration_form.username.errors %} class="error"{% endif %}>
-        	        {{ registration_form.username.label_tag }}
-        	        {{ registration_form.username }}
-        	        {% field_errors registration_form.username %}        	        
-        	    </li>
+        	    {{ registration_form.username.label_tag }}
+        	    {{ registration_form.username }}
+        	    {% field_errors registration_form.username %}        	        
+        	</li>
     	        <li{% if registration_form.email.errors %} class="error"{% endif %}>
         	    {{ registration_form.email.label_tag }}
         	    {{ registration_form.email }}
-                {% field_errors registration_form.email %}        	    
+                    {% field_errors registration_form.email %}        	    
     	        </li>
     	        <li{% if registration_form.password1.errors %} class="error"{% endif %}>
             	    {{ registration_form.password1.label_tag }}
