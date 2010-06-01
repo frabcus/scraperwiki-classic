@@ -96,7 +96,6 @@ class DataStoreClass :
             text += data
             if text[-1] == '\n' :
                 break
-        print text
 
         return json.loads (text)
 
