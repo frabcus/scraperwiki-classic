@@ -22,6 +22,10 @@ from django.core.mail import send_mail
 
 # models defining scrapers and their metadata.
 
+LANGUAGES = (
+    ('python', 'Python'),
+    ('php', 'PHP'),
+)
 
 class Scraper(models.Model):
     """
@@ -79,6 +83,8 @@ class Scraper(models.Model):
     istutorial        = models.BooleanField(default=False)
     isstartup         = models.BooleanField(default=False)
     
+    language          = models.CharField(max_length=32, choices=LANGUAGES)
+
     objects = managers.scraper.ScraperManager()
     unfiltered = models.Manager()
 
@@ -140,9 +146,6 @@ class Scraper(models.Model):
         #do the parent save
         super(Scraper, self).save()
   
-    def language(self):
-        return "Python"
-
     def count_records(self):
         return int(Scraper.objects.item_count(self.guid))
 
