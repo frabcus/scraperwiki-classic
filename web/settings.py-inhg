@@ -66,4 +66,4 @@ ORBETED_DOMAIN = 'localhost'
 # TEST_RUNNER = 'django-test-coverage.runner.run_tests'
 
 MEDIA_URL = '/media/'
-CODEMIRROR_URL = MEDIA_URL + "CodeMirror-0.67/"
+CODEMIRROR_URL = MEDIA_URL + "CodeMirror/"
