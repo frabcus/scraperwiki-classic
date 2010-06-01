@@ -162,7 +162,6 @@ TEMPLATE_SETTINGS = [
  'API_DOMAIN',
  'ORBETED_PORT',
  'ORBETED_DOMAIN',
- 'CODEMIRROR_URL',
 ]
 
 #sparklines and graphs
