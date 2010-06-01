@@ -173,3 +173,5 @@ try:
     CHANGESET = open('changeset.txt').read()
 except Exception, e:
     CHANGESET = "none"
+
+MAX_MAP_POINTS = 2500

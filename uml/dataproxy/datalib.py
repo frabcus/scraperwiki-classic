@@ -160,7 +160,8 @@ def fetch (scraperID, unique_keys) :   # note: unique_keys is a dict in the func
 def postcodeToLatLng (scraperID, postcode) :   
 
     cursor = db.cursor()
-    cursor.execute ('select x(location), y(location) from postcode_lookup where postcode = %s', [ postcode.upper().replace(' ', '') ])
+    postcode = postcode.upper().replace(' ', '')
+    cursor.execute ('select x(location), y(location) from postcode_lookup where postcode = %s', [ postcode ])
     try :
         result = cursor.fetchone()
         print result

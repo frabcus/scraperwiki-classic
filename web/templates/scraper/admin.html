@@ -13,6 +13,7 @@
                 <input type="submit" class="button small" value="Save changes" />
             </form>
         </div>
+       {% if user_owns_it %}
         <div class="section">        
             <h3>Datastore</h3>
             <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
@@ -29,7 +30,7 @@
                 Deletes this scraper and all it's data. There is no undo.
             </form>
         </div>
-        
+        {% endif %} 
     </div>
 {% endblock %}
 {% block run_script %}

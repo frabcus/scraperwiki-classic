@@ -95,8 +95,8 @@ def scraper_admin(request, scraper_short_name):
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
 
-    #you can only get here if you are signed in and own the scraper. v important
-    if user_owns_it == False:
+    #you can only get here if you are signed in
+    if not user.is_authenticated():
         raise Http404
 
     if request.method == 'POST':
@@ -193,7 +193,7 @@ def scraper_map(request, scraper_short_name, map_only=False):
 
     #get data for this scaper
     data = models.Scraper.objects.data_summary(
-        scraper_id=scraper.guid, limit=250)
+        scraper_id=scraper.guid, limit=settings.MAX_MAP_POINTS)
     has_data = len(data['rows']) > 0
     data = json.dumps(data)
 

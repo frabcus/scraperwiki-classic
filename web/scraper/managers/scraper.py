@@ -338,7 +338,7 @@ class ScraperManager(models.Manager):
     def recent_record_count(self, scraper_id, days):
 
         sql = "SELECT date(date_scraped) as date, count(date_scraped) as count FROM items "
-        sql += "WHERE scraper_id='%s' and date_scraped BETWEEN CURDATE() - INTERVAL %d DAY AND CURDATE() + 1 " % (scraper_id, days)
+        sql += "WHERE scraper_id='%s' and date_scraped BETWEEN DATE_SUB(CURDATE(), INTERVAL %d DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)" % (scraper_id, days)
         sql += "GROUP BY date(date_scraped)"
 
         cursor = self.datastore_connection.cursor()
