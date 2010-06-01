@@ -168,6 +168,9 @@ function setupDataMap(oData, sUrl){
          if(oData.headings[i] == 'colour'){
              iColourIndex = i;
          }
+         if(oData.headings[i] == 'chart'){
+             iChartIndex = i;
+         }
      };
      if (iLatLngIndex == -1)
         return; // nothing more to look for
@@ -176,7 +179,7 @@ function setupDataMap(oData, sUrl){
          if(oData.rows[i][iLatLngIndex] == ""){
              continue;
          }
-         
+
          //get the lat/lng
          iLat = oData.rows[i][iLatLngIndex].split(',')[1].replace(')', '');
          iLng = oData.rows[i][iLatLngIndex].split(',')[0].replace('(', '');         
@@ -193,11 +196,27 @@ function setupDataMap(oData, sUrl){
          };
          sHtml += '</table>';
 
-         //make the marker
-         colour = "red"; 
-         if ((iColourIndex != -1) && (oData.rows[i][iColourIndex] in oIcons))
-            colour = oData.rows[i][iColourIndex]
-         var oMarker = new OpenLayers.Marker(oLngLat, oIcons[colour].clone())
+
+         //make the marker from the chart or the colour
+         var icon = undefined; 
+         try {
+            if (iChartIndex != -1) {
+                chartdata = eval('(' + oData.rows[i][iChartIndex] + ')');
+                var oIconSize = new OpenLayers.Size(chartdata['Size'][0], chartdata['Size'][1]);
+                var oIconOffset = new OpenLayers.Pixel(chartdata['Pixel'][0], chartdata['Pixel'][1]);
+                icon = new OpenLayers.Icon(chartdata['chartimg'], oIconSize, oIconOffset);
+           }
+         } catch (err) { /*alert(err)*/; }
+
+         if (icon == undefined) { 
+            colour = "red"; 
+            if ((iColourIndex != -1) && (oData.rows[i][iColourIndex] in oIcons))
+                colour = oData.rows[i][iColourIndex];
+            icon = oIcons[colour].clone(); 
+         }
+
+         var oMarker = new OpenLayers.Marker(oLngLat, icon)
+
          oMarkersLayer.addMarker(oMarker);
          oMarker.html = sHtml;
          
