@@ -98,14 +98,16 @@ class RunnerProtocol(protocol.Protocol):
         self.guid = ""
         self.username = ""
         self.userrealname = ""
-        self.clientnumber = -1 
+        self.chatname = ""
+        self.clientnumber = -1  # for whole operation of twisted
+        self.scrapereditornumber = -1  # out of all people editing a particular scraper
         
 
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
         print "new connection", len(self.factory.clients)
-        self.factory.notifytwisterstatus()
-            
+        # we don't know what scraper they've actually opened until we get the dataReceived
+        
     def dataReceived(self, data):
         """
         Listens for data coming from the client.
@@ -157,6 +159,12 @@ class RunnerProtocol(protocol.Protocol):
                         './firestarter/runner.py', args
                             )
 
+                    message = "%s runs scraper" % self.chatname
+                    if self.guid:
+                        self.factory.sendchatmessage(self.guid, message, None)
+                    else:   
+                        self.write(format_message(message, message_type='chat'))  # write it back to itself
+                
                 else:
                     raise ValueError('++?????++ Out of Cheese Error. Redo From Start: `code` to run not specified')
                     
@@ -164,20 +172,42 @@ class RunnerProtocol(protocol.Protocol):
                 self.guid = parsed_data['guid']
                 self.username = parsed_data['username']
                 self.userrealname = parsed_data['userrealname']
-        
-            elif parsed_data['command'] == 'chat':
-                if self.guid:
-                    for client in self.factory.clients:
-                        if client.guid == self.guid:
-                            client.write(format_message("%s: %s" % (self.userrealname or "Anonymous", parsed_data['text']), message_type='chat'))
+                
+                if self.userrealname:
+                    self.chatname = self.userrealname
                 else:
-                    self.write(format_message(parsed_data['text'], message_type='chat'))  # write it back to itself
+                    self.chatname = "Anonymous%d" % self.factory.anonymouscount
+                    self.factory.anonymouscount += 1
+                    
+                if self.guid:
+                    editorclients = self.factory.updatescrapereditornumber(self.guid)
+                    self.factory.sendchatmessage(self.guid, "%s enters" % self.chatname, self)
+                    if self in editorclients:
+                        editorclients.remove(self)
+                        if editorclients:
+                            message = "Other editors: %s" % ", ".join([lclient.chatname  for lclient in editorclients ])
+                            self.write(format_message(message, message_type='chat'))  # write it back to itself
+                
+                self.factory.notifytwisterstatus()
+        
             
-            self.factory.notifytwisterstatus()
+            elif parsed_data['command'] == 'chat':
+                if parsed_data['text'] == "scraper saved":
+                    message = "%s saved scraper" % self.chatname
+                else:
+                    message = "%s: %s" % (self.chatname, parsed_data['text'])
+                
+                if self.guid:
+                    self.factory.sendchatmessage(self.guid, message, None)
+                
+                # unsaved scraper case (just talking to self)
+                else:   
+                    self.write(format_message(message, message_type='chat'))  # write it back to itself
         
         
         except Exception, e:
             self.transport.write(format_message("Command not valid (%s)  %s " % (e, data)))
+
 
     def write(self, line, formatted=True):
         """
@@ -209,8 +239,12 @@ class RunnerProtocol(protocol.Protocol):
         
         Kills and running spawnRunner processes.
         """
+        if self.guid:
+            self.factory.sendchatmessage(self.guid, "%s leaves" % self.chatname, self)
         self.factory.clientConnectionLost(self)
         print "end connection", len(self.factory.clients), reason
+        if self.guid:
+            self.factory.updatescrapereditornumber(self.guid)
         self.factory.notifytwisterstatus()
         
         self.kill_run(reason='connectionLost')
@@ -222,11 +256,12 @@ class RunnerFactory(protocol.ServerFactory):
     def __init__(self):
         self.clients = []
         self.clientcount = 0
+        self.anonymouscount = 1
         self.announcecount = 0
         
         # set the visible heartbeat going
-        self.lc = task.LoopingCall(self.announce)
-        self.lc.start(10)
+        #self.lc = task.LoopingCall(self.announce)
+        #self.lc.start(10)
 
         self.m_conf        = ConfigParser.ConfigParser()
         config = '/var/www/scraperwiki/uml/uml.cfg'
@@ -244,6 +279,23 @@ class RunnerFactory(protocol.ServerFactory):
                 res.append(c == client and "T" or "-")
                 res.append(c.running and "R" or ".")
             client.write(format_message("%d c %d clients, running:%s" % (self.announcecount, len(self.clients), "".join(res)), message_type='chat'))
+
+    def sendchatmessage(self, guid, message, nomessageclient):
+        for client in self.clients:
+            if client.guid == guid and client != nomessageclient:
+                client.write(format_message(message, message_type='chat'))
+        
+    # yes I know this would all be better as a dict from scrapers to lists of clients
+    def updatescrapereditornumber(self, guid):
+        editorclients = []
+        lscrapereditornumber = 0
+        for client in self.clients:
+            if client.guid == guid:
+                client.scrapereditornumber = lscrapereditornumber
+                lscrapereditornumber += 1
+                editorclients.append(client)
+        return editorclients
+
 
     def clientConnectionMade(self, client):
         client.clientnumber = self.clientcount
@@ -264,7 +316,6 @@ class RunnerFactory(protocol.ServerFactory):
         #  http://twistedmatrix.com/documents/current/web/howto/client.html
         d = agent.request('GET', "%s?%s" % (self.twisterstatusurl, urllib.urlencode(data)), Headers({'User-Agent': ['Twisted Web Client Example']}), None)
 
-        #print res, data
         
         
 

@@ -672,6 +672,8 @@ $(document).ready(function() {
                             showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
                         }
                     
+                        send({"command":'chat', "text":"scraper saved"}); 
+
                         pageIsDirty = false; // page no longer dirty
                     }
                 },
