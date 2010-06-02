@@ -1,5 +1,6 @@
 {% extends "scraper/scraper_base.html" %}
 {% load replace %}
+{% load display_chart %}
 {% block tab %}
 <div class="tab_tools">
     {% if data_tables %}
@@ -25,7 +26,7 @@
                     {% for row in data.rows %}
                         <tr>
                             {% for value in row %}
-                                <td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>
+                                <td>{{ value|display_chart|truncatewords_html:30|urlizetrunc:30 }}</td>
                             {% endfor %}
                         </tr>
                     {% endfor %}    
