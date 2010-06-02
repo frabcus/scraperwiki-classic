@@ -16,6 +16,8 @@ import os
 import traceback
 import datetime
 
+import scraperwiki.console
+
 # this will be useful for profiling the code, 
 # it should return an output in json that you can click on to take you to the correct line
 # see formatting in scrape 
@@ -26,8 +28,8 @@ def log(message=""):
     now = datetime.datetime.now()
     str_now = now.strftime("%Y-%m-%d %H:%M:%S")
     logmessage = "log( %s )\t\t %s() line %d%s : %s" % (str(message), stack[-2][2], stack[-2][1], tail, str_now)
-    print logmessage
-    
+    scraperwiki.console.logMessage (logmessage)
+
 
 #  The code will install a set of specific handlers to be used when a URL
 #  is opened. See the "urllibSetup" and "urllib2Setup" functions below.
@@ -101,16 +103,10 @@ def scrape (url, params = None) :
         text = fin.read()
         fin.close()   # get the mimetype here
     except:
-        print '<scraperwiki:message type="sources">' + json.dumps({ 'content' : "Failed: %s" % url, 'url': url })
+        scraperwiki.console.logScrapedURLError (url)
         return None
 
-    print_content = {
-      'url': url,
-      'content' : "%d bytes from %s" % (len(text), url),
-      }
-      #'content_long' : cgi.escape(text),      
-
-    print '<scraperwiki:message type="sources">%s' % json.dumps(print_content)
+    scraperwiki.console.logScrapedURL (url, len(text))
     return text
 
 

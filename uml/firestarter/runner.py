@@ -15,13 +15,6 @@ try:
 except:
     import json
 
-#try: 
-#    import runner_config
-#except:
-#    print "Error: You need to set up runner_config before you can use runner."
-#    sys.exit()
-
-
 # Make sure stdout doesn't buffer anything
 sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 10000000)
 
@@ -31,39 +24,12 @@ import firestarter
 def execute (code, guid = None) :
 
     def format_json(line):
-        if line.startswith('<scraperwiki:message type="data">'):
-            offset_len = len('<scraperwiki:message type="data">')
-            message = {}
-            message['content'] = json.loads(line[offset_len:])
-            message['message_type'] = "data"
-        
-        elif line.startswith('<scraperwiki:message type="sources">'):
-            offset_len = len('<scraperwiki:message type="sources">')
-            message = json.loads(line[offset_len:])
-            message['message_type'] = "sources"
 
-        elif line.startswith('<scraperwiki:message type="exception">'):
-            offset_len = len('<scraperwiki:message type="exception">')
-            message = json.loads(line[offset_len:])
-            message['message_type'] = "exception"
-            message['content'] = cgi.escape(message['content'])
-            message['content_long'] = cgi.escape(message['content_long'])
-
-        elif line.startswith('<scraperwiki:message type="fail">'):
-            offset_len = len('<scraperwiki:message type="fail">')
-            message = json.loads(line[offset_len:])
-            message['message_type'] = "fail"
-            message['content'] = cgi.escape(message['content'])
-
-        else :
-            offset_len = len('<scraperwiki:message type="console">')
-            message = json.loads(line[offset_len:])
-            message['message_type'] = "console"
-            message['content'] = cgi.escape(message['content'])
-            try :
-                message['content_long'] = cgi.escape(message['content_long'])
-            except :
-                pass
+        message = json.loads(line)
+        for key in [ 'content', 'content_long' ] :
+            try    : message[key] = cgi.escape(message[key])
+            except : pass
+        return json.dumps(message)
 
         return json.dumps(message)
 
@@ -81,17 +47,16 @@ def execute (code, guid = None) :
 
     fs.loadConfiguration()
 
-#   fs = runner_config.config(fs)
-    
     res = fs.execute (string.replace (code, '\r', ''), True)
     if res is None :
-        print format_json('<scraperwiki:message type="fail">%s' % json.dumps({ 'content' : fs.error() }))
+        sys.stdout.write (json.dumps({ 'message_type' : 'fail', 'content' : fs.error() }) + '\r\n')
+        sys.stdout.flush ()
         return
 
     line = res.readline()
     while line != '' and line is not None :
-        print format_json(line), "\r\n"
-        sys.stdout.flush()
+        sys.stdout.write (format_json(line) + "\r\n")
+        sys.stdout.flush ()
         line = res.readline()
 
 

@@ -10,7 +10,7 @@ import  ConfigParser
 try   : import json
 except: import simplejson as json
 
-
+import  scraperwiki.console
 
 def mangleflattendict(data):
     rdata = { }
@@ -186,7 +186,7 @@ def save (unique_keys, data, date = None, latlng = None, silent = False) :
         pdata[cgi.escape(key)] = cgi.escape(value)
 
     if not silent :
-        print '<scraperwiki:message type="data">%s' % json.dumps(pdata)
+        scraperwiki.console.logScrapedData (pdata)
     return arg
 
 

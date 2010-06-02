@@ -7,12 +7,16 @@ import os
 try   : import json
 except: import simplejson as json
 
+import scraperwiki.console
+
 class MetadataClient(object):
     def __init__(self):
         proxy_host, proxy_port = os.environ['http_proxy'][7:].split(':')
         self.connection = httplib.HTTPConnection(proxy_host, proxy_port)
-        self.scraper_guid = os.environ['SCRAPER_GUID']
-        self.run_id = os.environ['RUNID']
+        try    : self.scraper_guid = os.environ['SCRAPER_GUID']
+        except : self.scraper_guid = None
+        try    : self.run_id       = os.environ['RUNID']
+        except : self.run_id       = None
         self.metadata_host = os.environ['metadata_host']
         
         # make a fake local metadata for unsaved scraper (could fill in values from environ).  Perhaps save some in the session
@@ -52,7 +56,7 @@ class MetadataClient(object):
 
     def save(self, metadata_name, value):
         if not self.scraper_guid: # Scraper hasn't been saved yet
-            print "Warning: The scraper has not been saved yet. Metadata will not be persisted between runs"
+            scraperwiki.console.logWarning ('The scraper has not been saved yet. Metadata will not be persisted between runs')
             self.metadata_local[metadata_name] = value
             return
 

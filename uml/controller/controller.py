@@ -103,8 +103,7 @@ class TaggedStream :
 
     """
     This class is duck-type equivalent to a file object. Used to replace
-    sys.stdout and sys.stderr, to insert a <scraperwiki:message> before
-    each chunck of output.
+    sys.stdout and sys.stderr, to json-ify each chunck of output.
     """
 
     def __init__ (self, fd) :
@@ -134,19 +133,11 @@ class TaggedStream :
         Flush buffered text independent of the presence of newlines.
         """
 
-        #  Skip ready prefixes lines. Hack until there is an API to
-        #  generate data and sources message. 
-        #
-        if self.m_text.startswith ('<scraperwiki:message') :
-            self.m_fd.write (self.m_text)
-            self.m_text = ''
-            return
-
         if self.m_text != '' :
             msg  = { 'message_type' : 'console', 'content' : self.m_text[:100] }
             if len(self.m_text) >= 100 :
                 msg['content_long'] = self.m_text
-            self.m_fd.write ('<scraperwiki:message type="console">' + json.dumps(msg) + '\n')
+            self.m_fd.write (json.dumps(msg) + '\n')
             self.m_fd.flush ()
             self.m_text = ''
 
@@ -560,6 +551,9 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    : open ('/tmp/scraper.%d' % os.getpid(), 'w').write(code)
         except : pass
 
+        import scraperwiki.console
+        scraperwiki.console.setConsole  (self.wfile)
+
         #  Pass the configuration to the datastore. At this stage no connection
         #  is made; a connection will be made on demand if the scraper tries
         #  to save anything.
@@ -587,22 +581,30 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             ostimes1   = os.times ()
             cltime1    = time.time()
             mod        = imp.new_module ('scraper')
-            exec code.rstrip() in mod.__dict__
+            exec code.rstrip() + "\n" in mod.__dict__
             ostimes2   = os.times ()
             cltime2    = time.time()
-            try    :
-                sys.stdout.write \
-                    (   '%d seconds elapsed, used %d CPU seconds' % 
-                        (   int(cltime2 - cltime1),
-                            int(ostimes2[0] - ostimes1[0])
-                    )   )
-            except :
-                pass
-            etext, trace, infile, atline = None, None, None, None
             sys.stdout.flush()
             sys.stderr.flush()
             sys.stdout = self.wfile
             sys.stderr = self.wfile
+            try    :
+                msg = '%d seconds elapsed, used %d CPU seconds' %  \
+                                        (   int(cltime2 - cltime1),
+                                            int(ostimes2[0] - ostimes1[0])
+                                        )
+                sys.stdout.write \
+                    (   json.dumps \
+                        (   {   'message_type'  : 'console',
+                                'content'       : msg,
+                            }
+                        )   + '\n'
+                    )
+                sys.stdout.flush ()
+
+            except :
+                pass
+            etext, trace, infile, atline = None, None, None, None
             swl.log     (scraperID, runID, 'C.END',   arg1 = ostimes2[0] - ostimes1[0], arg2 = ostimes2[1] - ostimes1[1])
         except Exception, e :
             import errormapper
@@ -613,14 +615,15 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             emsg = errormapper.mapException (e)
             etext, trace, infile, atline = self.getTraceback (code)
             sys.stdout.write \
-                (   '<scraperwiki:message type="exception">%s\n' % \
-                    json.dumps \
-                    (   {   'content'   : emsg,
+                (   json.dumps \
+                    (   {   'message_type'  : 'exception',
+                            'content'       : emsg,
                             'content_long'  : trace,
-                            'filename'  : infile,
-                            'lineno'    : atline
-                    }
-                )   )
+                            'filename'      : infile,
+                            'lineno'        : atline
+                        }
+                    )   + '\n'
+                )
             sys.stdout.flush ()
             swl.log     (scraperID, runID, 'C.ERROR', arg1 = etext, arg2 = trace)
 
