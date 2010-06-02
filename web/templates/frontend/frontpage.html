@@ -80,7 +80,7 @@
                             created by
                           	{% load gravatar %}
                             {% show_gravatar scraper.owner 'small' %} 	
-                            <a href='{% url profiles_profile_detail scraper.owner.username %}'>{{ scraper.owner.username }}</a>
+                            <a href='{% url profiles_profile_detail scraper.owner.username %}'>{{ scraper.owner.get_profile.name }}</a>
                         </p>
                     </div>
         		{% endfor %}	                

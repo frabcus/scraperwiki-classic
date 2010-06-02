@@ -106,6 +106,10 @@ if __name__ == "__main__":
                       help="GUID of the scraper",  
                       default=None, metavar="GUID")
 
+    parser.add_option("-l", "--language", dest="language", action="store", type='str',
+                      help="Programming language of the scraper",  
+                      default='python', metavar="LANGUAGE")
+    
     (options, args) = parser.parse_args()
 
     guid = options.guid

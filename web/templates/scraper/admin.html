@@ -4,15 +4,20 @@
 
 {% block tab %}
     <div class="content">        
+
+      <table class="bicolumn">
+      <tr><td class="bicolumn">
         <div class="section">
             <h3>Scraper</h3>
             <form action="." method="post" class="scraper_admin">
+                <input type="submit" class="button small" value="Save changes" />
                 <ul>
                 {{ form.as_ul }}
                 </ul>
-                <input type="submit" class="button small" value="Save changes" />
             </form>
         </div>
+
+      </td><td class="bicolumn">
        {% if user_owns_it %}
         <div class="section">        
             <h3>Datastore</h3>
@@ -30,7 +35,13 @@
                 Deletes this scraper and all it's data. There is no undo.
             </form>
         </div>
+        {% else %}
+        <div class="section">                
+         <p>You must be the owner of the scraper to delete it or remove data from the datastore.</p>
+        </div>
         {% endif %} 
+      </td></tr>
+      </table>
     </div>
 {% endblock %}
 {% block run_script %}

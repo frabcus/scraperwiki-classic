@@ -24,6 +24,11 @@
     <div class="content col left">
     	<form method="post">
             <ul class="form">
+                <li>
+                  {{ form.name.label_tag }}
+                  {{ form.name }}
+                  {% field_errors form.name %}                      
+                </li>
                 <li> 
                     <label>Profile picture</label> 
                     {% load gravatar %}

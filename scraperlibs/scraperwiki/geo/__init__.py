@@ -27,15 +27,16 @@ def gb_postcode_to_latlng(postcode):
         return None
     return arg
 
-#    '''Convert postcode to latlng maxmander's code. (in future use a scraperwiki-rpc)'''
-#    if not postcode:
-#        return None
-#    purl = "http://maxmanders.co.uk/ukgeocode/postcode/" + urllib2.quote(postcode)
-#    res = urllib2.urlopen(purl).read()
-#    latlng = map(float, re.findall("(?:<lat>|<lon>)(.*?)</", res))
-#    if not latlng:
-#        return None
-#    return latlng
+def gb_postcode_to_latlng_maxmanders(postcode):
+    '''Convert postcode to latlng maxmander's code. (in future use a scraperwiki-rpc)'''
+    if not postcode:
+        return None
+    purl = "http://maxmanders.co.uk/ukgeocode/postcode/" + urllib2.quote(postcode)
+    res = urllib2.urlopen(purl).read()
+    latlng = map(float, re.findall("(?:<lat>|<lon>)(.*?)</", res))
+    if not latlng:
+        return None
+    return latlng
 
 def os_easting_northing_to_latlng(easting, northing, grid='GB'):
     '''Convert easting, northing to latlng assuming altitude 200m'''

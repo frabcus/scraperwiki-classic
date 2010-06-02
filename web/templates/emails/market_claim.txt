@@ -1,4 +1,4 @@
-Hello {{solicitation.user_created.username}},
+Hello {{solicitation.user_created.get_profile.name}},
 
 You asked someone write you a scraper for '{{solicitation.title}}' on ScraperWiki.com. 
 

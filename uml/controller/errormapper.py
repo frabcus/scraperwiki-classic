@@ -17,6 +17,7 @@ eimap = \
     "not all arguments converted during string formatting"  : "Formatting error"
     }
 
+# what the hell is this code??? --JT
 def mapExceptionType (etype, einfo) :
 
     try :

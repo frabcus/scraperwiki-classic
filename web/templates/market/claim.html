@@ -19,7 +19,7 @@
         <h1>Claim <em>{{solicitation.title}}</em></h1>
         <p>
             If you have written a scraper for {{solicitation.title}}, please enter the details below and we'll email
-            {{solicitation.user_created.username}} who requested it letting them know.
+            {{solicitation.user_created.get_profile.name}} who requested it letting them know.
         </p>
         <form method="post" action=".">
     	    {{ form.scraper }}

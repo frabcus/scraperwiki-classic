@@ -1,4 +1,4 @@
-from scraper.models import Scraper, ScraperMetadata, UserScraperRole
+from scraper.models import Scraper, ScraperMetadata, UserScraperRole, UserScraperEditing
 from django.contrib import admin
 from django.db import models
 
@@ -16,7 +16,14 @@ class ScraperAdmin(admin.ModelAdmin):
 
 admin.site.register(Scraper, ScraperAdmin)
 
+
 class ScraperMetadataAdmin(admin.ModelAdmin):
     pass
 
 admin.site.register(ScraperMetadata, ScraperMetadataAdmin)
+
+
+class UserScraperEditingAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(UserScraperEditing, UserScraperEditingAdmin)

@@ -11,7 +11,7 @@
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>		
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>	
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/flexigrid.js"></script>			
-		<script type="text/javascript" src="{{ settings.CODEMIRROR_URL }}js/codemirror.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror/js/codemirror.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js"></script>		
 	    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/flexigrid.css" />
 	    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
@@ -24,7 +24,7 @@
 	    <div class="banner">
 	        <ul class="user_menu">
 				{% if user.is_authenticated %}
-				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.username}}</a></li>
+				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.get_profile.name}}</a></li>
 				  <li><a href="{% url my_scrapers %}">{{ user.scraper_set.owned_count }}
 				     {% ifnotequal user.scraper_set.owned_count 1 %}
 				        scrapers

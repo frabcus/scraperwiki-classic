@@ -24,7 +24,7 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.htmlClean-min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js"></script>
-    <script type="text/javascript" src="{{ settings.CODEMIRROR_URL }}js/codemirror.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror/js/codemirror.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?"></script>  
 {% endblock %}
 
@@ -38,7 +38,10 @@
         {# Hidden inputs for passing to js #}
         <input type="hidden" id="scraper_short_name" value="{{ scraper.short_name }}"/>
         <input type="hidden" id="scraper_guid" value="{{ scraper.guid }}"/>
-        <input type="hidden" id="codemirror_url" value="{{ settings.CODEMIRROR_URL }}"/>
+        <input type="hidden" id="username" value="{{ user.username }}"/>
+        <input type="hidden" id="userrealname" value="{{ user.get_profile.name }}"/>
+        <input type="hidden" id="scraperlanguage" value="{{ scraper.language|lower }}"/>
+        <input type="hidden" id="codemirror_url" value="{{ MEDIA_URL }}CodeMirror/"/>
     </fieldset>
     <form method="POST" accept-charset="utf-8" id="editor" action="">
         <div class="editor">
@@ -47,7 +50,7 @@
                 A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next={% url handle_session_draft 'save' %}">sign in or create an account</a>.
                 <!--Warning: this scraper has not been saved or committed. Click the save button or <a href="{% url delete_draft %}">discard changes</a>.-->
             </div>
-            <div class="draft_warning"{% if not has_draft %}style="display:none;"{% endif %}>
+            <div class="draft_warning"{% if not has_draft %} style="display:none;"{% endif %}>
                 Warning: this scraper has not been saved or committed. <a href="{% url login %}?next={% url handle_session_draft 'save' %}">Sign in or create an account</a> to save it permanently, or <a href="{% url delete_draft %}">discard changes</a>
             </div>
 
@@ -79,6 +82,7 @@
                 <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
+                
                 <div class="right">
                     {% if scraper.short_name %}
                         <a id="aCloseEditor" href="{% url scraper_code scraper.short_name %}" title="Return to scraper page">Close editor</a>
@@ -103,6 +107,9 @@
                         <li class="sources">
                             <a href="#" title="Pages you are scraping">Sources</a>                            
                         </li>
+                        <li class="chat{% if not user.is_staff %} chathidden{% endif %}">
+                            <a href="#" title="Communicate to others">Chat</a>                            
+                        </li>
                     </ul>
                 </div>
                 <div class="info">
@@ -116,8 +123,11 @@
                     <div id="output_sources" class="output">
                         <div class="output_content"></div>
                     </div>
+                    <div id="output_chat" class="output">
+                        <table class="output_content"></table>
+                        <input type="text" name="chat_line" value="" id="chat_line"/>
+                    </div>
                 </div>
-                <iframe name="console" id="console" style="display:none;"><pre></pre></iframe>
             </div>
       </div>
       

@@ -79,7 +79,7 @@
 		    	    by
 		            {% show_gravatar solicitation.user_created 'small' %} 	
 		            <a href='{% url profiles_profile_detail solicitation.user_created %}'>
-		                {{ solicitation.user_created.username }}
+		                {{ solicitation.user_created.get_profile.name }}
 		            </a>
 		            {% if solicitation.has_bounty %}
 		                <span class="bounty">

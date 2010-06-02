@@ -22,6 +22,10 @@ from django.core.mail import send_mail
 
 # models defining scrapers and their metadata.
 
+LANGUAGES = (
+    ('Python', 'Python'),
+    ('PHP', 'PHP'),
+)
 
 class Scraper(models.Model):
     """
@@ -79,6 +83,8 @@ class Scraper(models.Model):
     istutorial        = models.BooleanField(default=False)
     isstartup         = models.BooleanField(default=False)
     
+    language          = models.CharField(max_length=32, choices=LANGUAGES, default='Python')
+
     objects = managers.scraper.ScraperManager()
     unfiltered = models.Manager()
 
@@ -140,9 +146,6 @@ class Scraper(models.Model):
         #do the parent save
         super(Scraper, self).save()
   
-    def language(self):
-        return "Python"
-
     def count_records(self):
         return int(Scraper.objects.item_count(self.guid))
 
@@ -273,6 +276,23 @@ class UserScraperRole(models.Model):
     def __unicode__(self):
         return "Scraper_id: %s -> User: %s (%s)" % \
                                         (self.scraper, self.user, self.role)
+
+class UserScraperEditing(models.Model):
+    """
+    Updated by Twisted to state which scrapers are being editing at this moment
+    """
+    user    = models.ForeignKey(User)
+    scraper = models.ForeignKey(Scraper)
+    editingsince = models.DateTimeField(blank=True, null=True)
+    runningsince = models.DateTimeField(blank=True, null=True)
+    closedsince  = models.DateTimeField(blank=True, null=True)
+    twisterclientnumber = models.IntegerField(default=-1)
+    twisterscraperpriority = models.IntegerField(default=0)   # >0 another client has priority on this scraper
+    
+        
+    def __unicode__(self):
+        return "Editing: Scraper_id: %s -> User: %s (%d)" % (self.scraper, self.user, self.twisterclientnumber)
+
 
 class ScraperMetadata(models.Model):
     """

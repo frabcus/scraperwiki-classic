@@ -43,7 +43,6 @@ HOME_DIR = ""
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a trailing slash.
 URL_ROOT = ""
 MEDIA_ROOT = URL_ROOT + 'media/'
-CODEMIRROR_DIR = 'CodeMirror-0.67/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a trailing slash.
 ADMIN_MEDIA_PREFIX = URL_ROOT + '/media-admin/'
@@ -131,7 +130,7 @@ INTERNAL_IPS = ['127.0.0.1',]
 
 
 NOTIFICATIONS_STORAGE = 'session.SessionStorage'
-REGISTRATION_BACKEND = "registration.backends.default.DefaultBackend"
+REGISTRATION_BACKEND = "frontend.backends.UserWithNameBackend"
 
 #tagging
 FORCE_LOWERCASE_TAGS = True
@@ -163,7 +162,6 @@ TEMPLATE_SETTINGS = [
  'API_DOMAIN',
  'ORBETED_PORT',
  'ORBETED_DOMAIN',
- 'CODEMIRROR_URL',
 ]
 
 #sparklines and graphs

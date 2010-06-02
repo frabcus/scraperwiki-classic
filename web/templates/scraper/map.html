@@ -1,4 +1,9 @@
 {% extends "scraper/scraper_base.html" %}
+
+{% block javascript %}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/map.js"></script>
+{% endblock %}
+
 {% load replace %}
 {% block tab %}
 <div id="divDataMap"></div>

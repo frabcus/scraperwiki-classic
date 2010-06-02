@@ -4,6 +4,9 @@ port	= 9000
 umllist	= uml001,uml002,uml003,uml004
 confurl	= http://localhost:8080/whitelist/config
 
+[twister]
+statusurl = http://localhost:8080/scrapers/twister/status
+
 [httpproxy]
 host	= 89.16.177.195
 port	= 9002

@@ -487,3 +487,30 @@ def unfollow(request, scraper_short_name):
     scraper.unfollow(user)
     # Redirect after POST
     return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
+
+
+def twisterstatus(request):
+    # uses a GET due to agent.request in twister not knowing how to use POST and send stuff
+    if 'value' not in request .GET:
+        return HttpResponse("needs value=")
+    tstatus = json.loads(request.GET.get('value'))
+    
+    # very brutally drop all objects and rebuild them.  In future we will do the updates
+    models.UserScraperEditing.objects.all().delete()
+    for client in tstatus["clientlist"]:
+        try:
+            user = models.User.objects.get(username=client['username'])
+            scraper = models.Scraper.objects.get(guid=client['guid'])
+        except:
+            continue
+        twisterclientnumber = client["clientnumber"]
+        userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
+        userscraperediting.save()
+        # print "uuuuu", userscraperediting
+        
+        #editingsince = models.DateTimeField(blank=True, null=True)
+        #runningsince = models.DateTimeField(blank=True, null=True)
+        #closedsince  = models.DateTimeField(blank=True, null=True)
+        #twisterscraperpriority = models.IntegerField(default=0)   # >0 another client has priority on this scraper
+
+    return HttpResponse("Howdy ppp ")

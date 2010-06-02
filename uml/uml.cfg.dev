@@ -4,6 +4,9 @@ port	= 9000
 umllist	= uml001
 confurl	= http://dev.scraperwiki.com/whitelist/config
 
+[twister]
+statusurl = http://dev.scraperwiki.com/scrapers/twister/status
+
 [httpproxy]
 host	= 212.84.75.28
 port	= 9002

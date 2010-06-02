@@ -157,7 +157,7 @@ def edit(request, short_name='__new__'):
     
         tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True)
 
-        return render_to_response('editor/editor.html', {'form':form, 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft}, context_instance=RequestContext(request))        
+        return render_to_response('editor/editor.html', {'form':form, 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft, 'user':request.user}, context_instance=RequestContext(request))        
     
     else:        
         # 3) If there is POST, then use that
