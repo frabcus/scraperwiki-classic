@@ -1,19 +1,8 @@
 # encoding: utf-8
 
 from south.db import db
-from south.signals import post_migrate
 from django.db import models
 from scraper.models import *
-
-def set_language(app, **kwargs):
-    if app != 'scraper':
-        return
-
-    for scraper in Scraper.objects.filter(language__isnull=True):
-        scraper.language = 'Python'
-        scraper.save()
-
-post_migrate.connect(set_language)
 
 class Migration:
     
