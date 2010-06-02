@@ -8,7 +8,7 @@ def set_name_on_profile(app, **kwargs):
     if app != 'frontend':
         return
 
-    for profile in UserProfile.objects.all():
+    for profile in UserProfile.objects.filter(name__isnull=True):
         profile.name = profile.user.username
         profile.save()
 

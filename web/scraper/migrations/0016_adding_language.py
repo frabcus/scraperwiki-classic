@@ -9,7 +9,7 @@ def set_language(app, **kwargs):
     if app != 'scraper':
         return
 
-    for scraper in Scraper.objects.all():
+    for scraper in Scraper.objects.filter(language__isnull=True):
         scraper.language = 'Python'
         scraper.save()
 
