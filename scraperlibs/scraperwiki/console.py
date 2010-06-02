@@ -24,7 +24,7 @@ def logScrapedURLError (url) :
 
 def logScrapedData (pdata) :
 
-    dumpMessage (message_type = 'data', **pdata)
+    dumpMessage (message_type = 'data', content = pdata)
 
 def logMessage (message) :
 
