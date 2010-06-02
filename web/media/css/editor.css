@@ -87,6 +87,7 @@ span.hiddenfields { margin-left:10px; }
 .editor_output .info #output_chat {overflow:auto;}
 .editor_output .info #chat_line {width:90%;}
 
+
 .editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.3em 1em;
     height:1.4em;}
 .editor_output .info span.exception {background:#fafafa url(../images/icons/bug_error.png) no-repeat 5px 3px; padding-left:25px; font-weight:bold;}
@@ -172,3 +173,5 @@ dl.quick_help li code {font-size:1.1em; }
 /* Feedback messages */
 #feedback_messages {position:absolute; bottom:0; background:url(../images/message_back.png); width:100%;
     padding:1em 1em 2em 1em;text-align:left; color:#fff; text-shadow: 2px 2px 3px #000; display:none;}
+
+.chathidden {display:none;}
