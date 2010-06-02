@@ -7,9 +7,9 @@ function setupCodeViewer(iLineCount){
 
        oCodeEditor = CodeMirror.fromTextArea("txtScraperCode", {
            parserfile: ["../contrib/python/js/parsepython.js"],
-           stylesheet: "/media/CodeMirror-0.67/contrib/python/css/pythoncolors.css",
+           stylesheet: "/media/CodeMirror/contrib/python/css/pythoncolors.css",
 
-           path: "/media/CodeMirror-0.67/js/",
+           path: "/media/CodeMirror/js/",
            textWrapping: true, 
            lineNumbers: true, 
            indentUnit: 4,
