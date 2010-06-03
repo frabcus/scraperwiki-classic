@@ -351,26 +351,21 @@ def export_csv(request, scraper_short_name):
     #context = Context({'data_tables': data_tables,})
 
 
-def scraper_list(request):
+def scraper_list(request, page_number):
     #scrapers =
     #   models.Scraper.objects.filter(published=True).order_by('-created_at')
 
     # return render_to_response('scraper/list.html', {'scrapers': scrapers},
     # context_instance = RequestContext(request))
 
-    all_scrapers = models.Scraper.objects.filter(
-        published=True).order_by('-created_at')
+    all_scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
 
     # Number of results to show from settings
-    paginator = Paginator(
-        all_scrapers,
-        settings.SCRAPERS_PER_PAGE)
+    settings.SCRAPERS_PER_PAGE = 3
+    paginator = Paginator(all_scrapers, settings.SCRAPERS_PER_PAGE)
 
     # Make sure page request is an int. If not, deliver first page.
-    try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-        page = 1
+    page = page_number and int(page_number) or 1
 
     # If page request (9999) is out of range, deliver last page of results.
     try:
@@ -380,12 +375,9 @@ def scraper_list(request):
 
     form = SearchForm()
 
-    return render_to_response(
-        'scraper/list.html',
-        {
-            "scrapers": scrapers,
-            "form": form,},
-            context_instance=RequestContext(request))
+    dictionary = { "scrapers": scrapers, "form": form }
+    return render_to_response('scraper/list.html', dictionary, context_instance=RequestContext(request))
+
 
 
 def download(request, scraper_short_name):

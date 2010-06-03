@@ -27,21 +27,22 @@
             {% include 'scraper/scraper_line.html' %}
           {% endfor %}
         </ul>
-<div class="pagination">
 
-    <span class="step_links">
-        {% if scrapers.has_previous %}
-            <a href="?page={{ scrapers.previous_page_number }}">previous</a>
-        {% endif %}
-
-        <span class="current">
-            Page {{ scrapers.number }} of {{ scrapers.paginator.num_pages }}
+        <div class="pagination">
+        <span class="step_links">
+            {% if scrapers.has_previous %}
+                <a href="{% url scraper_list scrapers.previous_page_number %}">previous</a>
+            {% endif %}
+    
+            <span class="current">
+                Page {{ scrapers.number }} of {{ scrapers.paginator.num_pages }}
+            </span>
+    
+            {% if scrapers.has_next %}
+                <a href="{% url scraper_list scrapers.next_page_number %}">next</a>
+            {% endif %}
         </span>
+        </div>
 
-        {% if scrapers.has_next %}
-            <a href="?page={{ scrapers.next_page_number }}">next</a>
-        {% endif %}
-    </span>
-</div>
     </div>
 {% endblock %}

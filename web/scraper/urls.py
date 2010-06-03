@@ -3,7 +3,7 @@ from django.conf.urls.defaults import *
 from scraper import views
 
 urlpatterns = patterns('',
-   url(r'^list/$', views.scraper_list, name='scraper_list'),
+   url(r'^list/(?P<page_number>\d+)?$', views.scraper_list, name='scraper_list'),
    url(r'^create/$', views.create, name='scraper_create'),
    url(r'^show/(?P<scraper_short_name>[\w_\-]+)/$', views.overview, name='scraper_overview'),
    url(r'^show/(?P<scraper_short_name>[\w_\-]+)/map/$', views.scraper_map, {'map_only': False}, name='scraper_map'),
