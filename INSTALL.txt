@@ -68,13 +68,13 @@ Note, sometimes this causes a "SandboxViolation" error, however it's normally
 done what it needs to do before this, so ignore the error and run buildout
 again.
 
-3) local settings.py
+3) settings.py
 *******************
 
-Now, make a copy of the local settings file and edit it
+Now, make a copy of the settings file and edit it
 
 > $ cd web
-> $ cp localsettings.py-inhg  settings.py
+> $ cp settings.py-inhg  settings.py
 
 Then edit settings.py to:
 
@@ -150,7 +150,7 @@ mysql> create database scraperwiki_datastore;
 
 There are two configuration files which need pointing to the database.
 
-a) In web/localsettings.py, edit the DATASTORE_DATABASE_* entries. This is access for the Django web application, for example for the API to read from the datastore. A read only database user might be enough for this.
+a) In web/settings.py, edit the DATASTORE_DATABASE_* entries. This is access for the Django web application, for example for the API to read from the datastore. A read only database user might be enough for this.
 
 b) In ./scraperlibs/scraperwiki/datastore, copy config.cfg-inhg to config.cfg.local and edit it. This is the config used by the scrapers to write to the database. You need a user who can read/write to the database.
 
