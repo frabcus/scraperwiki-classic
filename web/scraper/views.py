@@ -158,9 +158,14 @@ def scraper_data(request, scraper_short_name):
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
 
+    try:
+        heading_order = json.loads(scraper.scrapermetadata_set.get(name='heading_order'))
+    except:
+        heading_order = None
+
     #get data for this scaper
     data = models.Scraper.objects.data_summary(
-                            scraper_id=scraper.guid, limit=500)
+                            scraper_id=scraper.guid, limit=500, heading_order=heading_order)
 
     # replicates output from data_summary_tables
     data_tables = {"": data }

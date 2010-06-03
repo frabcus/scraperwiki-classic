@@ -5,15 +5,20 @@ import settings
 from collections import defaultdict
 import re
 import datetime
+import types
 from tagging.utils import get_tag
 from tagging.models import Tag, TaggedItem
 
-def convert_dictlist_to_datalist(allitems):
+def convert_dictlist_to_datalist(allitems, heading_order=None):
     allkeys = set()
     for item in allitems:
         allkeys.update(item.keys())
-    
-    headings = sorted(list(allkeys))
+
+    if type(heading_order) == types.ListType and allkeys.issuperset(heading_order):
+        headings = heading_order
+    else:
+        headings = sorted(list(allkeys))
+
     rows = [ ]
     for item in allitems:
         rows.append([ (key in item and unicode(item[key]) or "")  for key in headings ])
@@ -277,10 +282,10 @@ class ScraperManager(models.Manager):
            
               
     
-    def data_summary(self, scraper_id=0, limit=1000, offset=0, start_date=None, end_date=None, latlng=None):
+    def data_summary(self, scraper_id=0, limit=1000, offset=0, start_date=None, end_date=None, latlng=None, heading_order=None):
         '''single table of all rows for a scraper'''
         allitems = self.data_dictlist(scraper_id, limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
-        return convert_dictlist_to_datalist(allitems)
+        return convert_dictlist_to_datalist(allitems, heading_order)
 
 
     # not yet used   probably to delete
