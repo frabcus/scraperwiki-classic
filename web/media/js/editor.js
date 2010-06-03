@@ -22,6 +22,7 @@ $(document).ready(function() {
     var popupStatus = 0
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 
+    var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
 
     //constructor functions
     setupCodeEditor();
@@ -455,7 +456,7 @@ $(document).ready(function() {
     }
 
     function clearOutput(){
-        $('#output_console div').html('');    
+//        $('#output_console div').html('');    
         $('#output_sources div').html('');    
         $('#output_data table').html('');                    
         $('.editor_output div.tabs li.console').removeClass('new');
@@ -815,10 +816,8 @@ $(document).ready(function() {
         //append to console
         $('#output_console .output_content').append(oConsoleItem);
         $('.editor_output div.tabs li.console').addClass('new');
-        $('#output_console div').animate({ 
-            scrollTop: $('#output_console .output_content').height()+$('#output_console div')[0].scrollHeight 
-        }, 0);
 
+        setTabScrollPosition('console', 'bottom'); 
     };
 
 
@@ -837,53 +836,68 @@ $(document).ready(function() {
         .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a></span>')
 
         $('.editor_output div.tabs li.sources').addClass('new');
-        $('#output_sources div').animate({ 
-            scrollTop: $('#output_sources .output_content').height()+$('#output_sources div')[0].scrollHeight 
-        }, 0);
+
+        setTabScrollPosition('sources', 'bottom'); 
     }
 
     function writeToData(sMessage) {
-          var aRowData = eval(sMessage)
-          var oRow = $('<tr></tr>');
+        var aRowData = eval(sMessage)
+        var oRow = $('<tr></tr>');
 
-          $.each(aRowData, function(i){
-              var oCell = $('<td></td>');
-              oCell.html(aRowData[i]);
-              oRow.append(oCell);
-          })
+        $.each(aRowData, function(i){
+            var oCell = $('<td></td>');
+            oCell.html(aRowData[i]);
+            oRow.append(oCell);
+        })
 
-          if ($('#output_data .output_content').children().size() >= outputMaxItems){
-              $('#output_data .output_content').children(':first').remove();
-          }
-          
-          $('#output_data .output_content').append(oRow);
-          $('.editor_output div.tabs li.data').addClass('new');
+        if ($('#output_data .output_content').children().size() >= outputMaxItems){
+            $('#output_data .output_content').children(':first').remove();
+        }
+        
+        $('#output_data .output_content').append(oRow);
+        $('.editor_output div.tabs li.data').addClass('new');
 
-
-          $('#output_data').animate({ 
-              scrollTop: $('#output_data').height()+$('#output_data')[0].scrollHeight 
-          }, 0);
+        setTabScrollPosition('data', 'bottom'); 
     }
 
     function writeToChat(sMessage) {
-          var oRow = $('<tr></tr>');
-          var oCell = $('<td></td>');
-          oCell.html(sMessage);
-          oRow.append(oCell);
-          
-          $('#output_chat .output_content').append(oRow);
-          $('.editor_output div.tabs li.chat').addClass('new');
+        var oRow = $('<tr></tr>');
+        var oCell = $('<td></td>');
+        oCell.html(sMessage);
+        oRow.append(oCell);
+        
+        $('#output_chat .output_content').append(oRow);
+        $('.editor_output div.tabs li.chat').addClass('new');
 
-//alert("  "  + $('#output_chat').height()+ "," + $('#output_chat')[0].scrollHeight + "  " + $('#chat_line').offset().top); 
-          $('#output_chat').animate({ 
-              scrollTop: $('#output_chat').height()+$('#output_chat')[0].scrollHeight 
-          }, 0);
+        setTabScrollPosition('chat', 'bottom'); 
     }
 
+    // some are implemented with tables, and some with span rows.  
+    function setTabScrollPosition(sTab, command) {
+        divtab = '#output_' + sTab; 
+        contenttab = '#output_' + sTab; 
+
+        if ((sTab == 'console') || (sTab == 'sources')) {
+            divtab = '#output_' + sTab + ' div';
+            contenttab = '#output_' + sTab + ' .output_content';
+        }
+
+        if (command == 'hide')
+            scrollPositions[sTab] = $(divtab).scrollTop();
+        else {
+            if (command == 'bottom')
+                scrollPositions[sTab] = $(contenttab).height()+$(divtab)[0].scrollHeight; 
+            $(divtab).animate({ scrollTop: scrollPositions[sTab] }, 0);
+        }
+    }
+
+
     //show tab
-    function showTab(sTab, bRevert){
+    function showTab(sTab){
+        setTabScrollPosition(sTabCurrent, 'hide'); 
         $('.editor_output .info').children().hide();
         $('.editor_output .controls').children().hide();        
+        
         $('#output_' + sTab).show();
         $('#controls_' + sTab).show();
         sTabCurrent = sTab; 
@@ -891,19 +905,9 @@ $(document).ready(function() {
         $('.editor_output div.tabs ul').children().removeClass('selected');
         $('.editor_output div.tabs li.' + sTab).addClass('selected');
         $('.editor_output div.tabs li.' + sTab).removeClass('new');
-        
-
-
+        setTabScrollPosition(sTab, 'show'); 
     }
     
-    //show text tab
-    function showTextTab(sTab){
-        $('#popup_text .output').hide();
-        $('#popup_text .popup_' + sTab).show();
-
-        $('#popup_text div.tabs ul').children().removeClass('selected');
-        $('#popup_text div.tabs li.' + sTab+'_tab').addClass('selected');
-    }
 
     //resize code editor
    function resizeCodeEditor(){
