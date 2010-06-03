@@ -1,0 +1,39 @@
+
+{% extends "frontend/base.html" %}
+
+{% block title %}Browse datasets{% endblock %}
+{% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/all_scrapers/" />{% endblock %}
+
+{% block content %}
+<div class="page_title">
+    <h1>Who's doing what</h1>
+</div>
+
+<div class="content">
+
+<table class="scraperlist">
+<tr>
+  <th>Title</th>
+  <th>Editors</th>
+  <th>Line Count</th>
+  <th>Record Count</th>
+  <th>Language</th>
+</tr>
+
+{% for scraper in scrapers %}
+<tr>
+  <td>
+    <a href='{% url scraper_code scraper.short_name %}'>{{ scraper.title }}</a>
+  </td>
+  <td>
+    {% for userscraperediting in scraper.userscraperediting_set.all %} {{userscraperediting.user.first_name}} {% endfor %}
+  </td> 
+
+  <td>{{ scraper.line_count }}</td>
+  <td>{{ scraper.record_count }}</td>
+  <td>{{ scraper.language }}</td>
+</tr>
+{% endfor %}
+</table>
+</div>
+{% endblock %}

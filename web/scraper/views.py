@@ -352,16 +352,9 @@ def export_csv(request, scraper_short_name):
 
 
 def scraper_list(request, page_number):
-    #scrapers =
-    #   models.Scraper.objects.filter(published=True).order_by('-created_at')
-
-    # return render_to_response('scraper/list.html', {'scrapers': scrapers},
-    # context_instance = RequestContext(request))
-
     all_scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
 
     # Number of results to show from settings
-    settings.SCRAPERS_PER_PAGE = 3
     paginator = Paginator(all_scrapers, settings.SCRAPERS_PER_PAGE)
 
     # Make sure page request is an int. If not, deliver first page.
@@ -374,10 +367,20 @@ def scraper_list(request, page_number):
         scrapers = paginator.page(paginator.num_pages)
 
     form = SearchForm()
-
-    dictionary = { "scrapers": scrapers, "form": form }
+    
+    # put number of people here so we can see it
+    #npeople = UserScraperEditing in models.UserScraperEditing.objects.all().count()
+    # there might be a slick way of counting this, but I don't know it.
+    npeople = len(set([userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.all() ]))
+    
+    dictionary = { "scrapers": scrapers, "form": form, "npeople": npeople }
     return render_to_response('scraper/list.html', dictionary, context_instance=RequestContext(request))
 
+def scraper_table(request):
+    all_scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
+    dictionary = { "scrapers": all_scrapers }
+    return render_to_response('scraper/scraper_table.html', dictionary, context_instance=RequestContext(request))
+    
 
 
 def download(request, scraper_short_name):
