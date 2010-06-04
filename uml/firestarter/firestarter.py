@@ -4,7 +4,7 @@ import  string
 import  time
 import  inspect
 import  os
-import  sha
+import  hashlib
 import  ConfigParser
 import  urllib2
 
@@ -117,8 +117,9 @@ class FireStarter :
         self.m_traceback   = None
         self.m_error       = None
         self.m_cache       = 0
+        self.m_language    = None
 
-        s = sha.new()
+        s = hashlib.sha1()
         s.update(str(os.urandom(16)))
         s.update(str(os.getpid (  )))
         s.update(str(time.time (  )))
@@ -286,6 +287,17 @@ class FireStarter :
 
         self.m_cache = cache
 
+    def setLanguage (self, language) :
+
+        """
+        Set scripting language
+
+        @type   language: String
+        @param  language: Scripting language
+        """
+
+        self.m_language = language
+
     def addAllowedSites (self, *sites) :
 
         """
@@ -439,6 +451,8 @@ class FireStarter :
             setter ('x-runid',      self.m_runID    )
         if self.m_cache      is not None :
             setter ('x-cache',      self.m_cache    )
+        if self.m_language   is not None :
+            setter ('x-language',   self.m_language )
 
         for resource, limit in self.m_limits.items() :
             setter ('x-setrlimit-%d' % resource, '%s,%s' % (limit[0], limit[1]))
