@@ -256,6 +256,13 @@ class Scraper(models.Model):
     def content_type(self):
         return ContentType.objects.get(app_label="scraper", model="Scraper")
 
+    def get_metadata(name, default=None):
+        try:
+            return json.loads(scraper.scrapermetadata_set.get(name=name).value)
+        except:
+            return default
+        
+
 #register tagging for scrapers
 try:
     tagging.register(Scraper)
