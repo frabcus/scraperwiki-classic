@@ -93,7 +93,18 @@ if __name__ == "__main__":
             default = 'python',
             metavar = "LANGUAGE"
         )
-
+    
+    parser.add_option \
+        (   "-n",
+            "--name",
+            dest    = "name",
+            action  = "store",
+            type    = 'str',
+            help    = "Short name of the scraper",  
+            default = '',
+            metavar = "NAME"
+        )
+    
     (options, args) = parser.parse_args()
     code = sys.stdin.read()
     execute (code, options.guid, options.language)

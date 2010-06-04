@@ -40,6 +40,7 @@
         <input type="hidden" id="scraper_guid" value="{{ scraper.guid }}"/>
         <input type="hidden" id="username" value="{{ user.username }}"/>
         <input type="hidden" id="userrealname" value="{{ user.get_profile.name }}"/>
+        <input type="hidden" id="isstaff" value="{% if user.is_staff %}yes{% endif %}"/>
         <input type="hidden" id="scraperlanguage" value="{{ scraper.language|lower }}"/>
         <input type="hidden" id="codemirror_url" value="{{ MEDIA_URL }}CodeMirror/"/>
     </fieldset>
