@@ -23,6 +23,9 @@
 	<body{% if grey_body %} class="bold_body"{% endif %}>
 	    <div class="banner">
 	        <ul class="user_menu">
+                {% if npeople %}
+                  <li><small>{{ npeople }} people at work</small></li>
+                {% endif %}
 				{% if user.is_authenticated %}
 				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.get_profile.name}}</a></li>
 				  <li><a href="{% url my_scrapers %}">{{ user.scraper_set.owned_count }}
@@ -44,7 +47,8 @@
 				<li class="helplink"><a href="{% url help %}">Help</a></li>
 			</ul>
 			<p>
-    	        Hello! This is the beta version of ScraperWiki, <span id="feedbackmess">please <a href="{% url contact_form %}">tell us what you think</a></span>.
+    	        Hello! This is the beta version of ScraperWiki, 
+                <span id="feedbackmess">please <a href="{% url contact_form %}">tell us what you think</a></span>.
             </p>
 	    </div>
 

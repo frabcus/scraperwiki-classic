@@ -158,9 +158,14 @@ def scraper_data(request, scraper_short_name):
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
 
+    try:
+        heading_order = json.loads(scraper.scrapermetadata_set.get(name='heading_order').value)
+    except:
+        heading_order = None
+
     #get data for this scaper
     data = models.Scraper.objects.data_summary(
-                            scraper_id=scraper.guid, limit=500)
+                            scraper_id=scraper.guid, limit=500, heading_order=heading_order)
 
     # replicates output from data_summary_tables
     data_tables = {"": data }
@@ -346,26 +351,14 @@ def export_csv(request, scraper_short_name):
     #context = Context({'data_tables': data_tables,})
 
 
-def scraper_list(request):
-    #scrapers =
-    #   models.Scraper.objects.filter(published=True).order_by('-created_at')
-
-    # return render_to_response('scraper/list.html', {'scrapers': scrapers},
-    # context_instance = RequestContext(request))
-
-    all_scrapers = models.Scraper.objects.filter(
-        published=True).order_by('-created_at')
+def scraper_list(request, page_number):
+    all_scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
 
     # Number of results to show from settings
-    paginator = Paginator(
-        all_scrapers,
-        settings.SCRAPERS_PER_PAGE)
+    paginator = Paginator(all_scrapers, settings.SCRAPERS_PER_PAGE)
 
     # Make sure page request is an int. If not, deliver first page.
-    try:
-        page = int(request.GET.get('page', '1'))
-    except ValueError:
-        page = 1
+    page = page_number and int(page_number) or 1
 
     # If page request (9999) is out of range, deliver last page of results.
     try:
@@ -374,13 +367,20 @@ def scraper_list(request):
         scrapers = paginator.page(paginator.num_pages)
 
     form = SearchForm()
+    
+    # put number of people here so we can see it
+    #npeople = UserScraperEditing in models.UserScraperEditing.objects.all().count()
+    # there might be a slick way of counting this, but I don't know it.
+    npeople = len(set([userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.all() ]))
+    
+    dictionary = { "scrapers": scrapers, "form": form, "npeople": npeople }
+    return render_to_response('scraper/list.html', dictionary, context_instance=RequestContext(request))
 
-    return render_to_response(
-        'scraper/list.html',
-        {
-            "scrapers": scrapers,
-            "form": form,},
-            context_instance=RequestContext(request))
+def scraper_table(request):
+    all_scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
+    dictionary = { "scrapers": all_scrapers }
+    return render_to_response('scraper/scraper_table.html', dictionary, context_instance=RequestContext(request))
+    
 
 
 def download(request, scraper_short_name):

@@ -13,6 +13,7 @@ try:
 except:
   import simplejson as json
 
+import scraperwiki.console
 
 '''standardized to wgs84 (if possible)'''
 
@@ -23,7 +24,7 @@ def gb_postcode_to_latlng(postcode):
     ds = DataStore (None)
     rc, arg = ds.postcodeToLatLng (postcode)
     if not rc :
-        print arg
+        scraperwiki.console.logWarning ('%s: %s' % (arg, postcode))
         return None
     return arg
 

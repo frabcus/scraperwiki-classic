@@ -302,3 +302,6 @@ class ScraperMetadata(models.Model):
     scraper = models.ForeignKey(Scraper, null=False)
     run_id = models.CharField(max_length=100, null=False, blank=False)
     value = models.TextField()
+
+    def __unicode__(self):
+        return u"%s['%s']" % (self.scraper, self.name)
