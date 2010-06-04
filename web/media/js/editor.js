@@ -113,7 +113,7 @@ $(document).ready(function() {
                     if($.browser.mozilla){
                         // I cannot work out why this only affects firefox
                         // would be nice if we could use selectLines/replaceSelection
-                        // instead as this allows CTRL z to work. TODO Get rid of this
+                        // instead as this allows CTRL-Z to work. TODO Get rid of this
                         codeeditor.setCode(data);
                     }else{
                         codeeditor.selectLines(codeeditor.firstLine(), 0, codeeditor.lastLine(), 0); 
@@ -346,6 +346,11 @@ $(document).ready(function() {
               writeToSources(data.content, data.url)
           } else if (data.message_type == "chat") {
               writeToChat(data.content)
+          } else if (data.message_type == "saved") {
+              writeToChat(data.content)
+          } else if (data.message_type == "othersaved") {
+              reloadScraper();
+              writeToChat("OOO: " + data.content)
           } else if (data.message_type == "data") {
               writeToData(data.content)
           } else if (data.message_type == "startingrun") {
@@ -500,8 +505,9 @@ $(document).ready(function() {
             selrange = eval(selrange); 
         }
 
-        codeeditor.setCode(newcode); 
+        codeeditor.setCode(newcode); // see setupTutorial() for way to leave control-Z in place
         codeeditor.focus(); 
+        pageIsDirty = false; 
 
         // make the selection
         if (!((selrange[2] == 0) && (selrange[3] == 0))){
@@ -509,6 +515,8 @@ $(document).ready(function() {
             linehandleend = codeeditor.nthLine(selrange[2] + 1); 
             codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
         }
+
+        showFeedbackMessage("This scraper has been reloaded.");
     }; 
 
 
@@ -599,7 +607,7 @@ $(document).ready(function() {
             }
         ); 
 
-        //diff button
+        //reload button
          $('.editor_controls #reload').click(function() {
                 reloadScraper(); 
                 return false; 
@@ -683,7 +691,7 @@ $(document).ready(function() {
                             showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
                         }
                     
-                        send({"command":'chat', "text":"scraper saved"}); 
+                        send({"command":'saved'}); 
 
                         pageIsDirty = false; // page no longer dirty
                     }

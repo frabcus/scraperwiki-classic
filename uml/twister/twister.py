@@ -222,11 +222,13 @@ class RunnerProtocol(protocol.Protocol):
                 self.factory.notifytwisterstatus()
         
             
+            elif parsed_data['command'] == 'saved':
+                line = json.dumps({'message_type' : "saved", 'content' : "%s saved" % self.chatname})
+                otherline = json.dumps({'message_type' : "othersaved", 'content' : "%s saved" % self.chatname})
+                self.writeall(line, otherline)
+
             elif parsed_data['command'] == 'chat':
-                if parsed_data['text'] == "scraper saved":
-                    message = "%s saved scraper" % self.chatname
-                else:
-                    message = "%s: %s" % (self.chatname, parsed_data['text'])
+                message = "%s: %s" % (self.chatname, parsed_data['text'])
                 
                 if self.guid:
                     self.factory.sendchatmessage(self.guid, message, None)
@@ -250,13 +252,16 @@ class RunnerProtocol(protocol.Protocol):
         """
         self.transport.write(line+",")  # note the comma added to the end for json parsing when strung together
     
-    def writeall(self, line):
+    def writeall(self, line, otherline=""):
         self.write(line)  
-            
+        
+        if not otherline:
+            otherline = line
+        
         # send any destination output to any staff who are watching
         for client in self.factory.clients:
             if client.guid == self.guid and client != self and client.isstaff:
-                client.write(line)  
+                client.write(otherline)  
     
     def kill_run(self, reason='connectionLost'):
         try:
@@ -321,6 +326,9 @@ class RunnerFactory(protocol.ServerFactory):
                 res.append(c == client and "T" or "-")
                 res.append(c.running and "R" or ".")
             client.write(format_message("%d c %d clients, running:%s" % (self.announcecount, len(self.clients), "".join(res)), message_type='chat'))
+
+
+# could get rid of this and replace everywhere with writeall
 
     def sendchatmessage(self, guid, message, nomessageclient):
         for client in self.clients:
