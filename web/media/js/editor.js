@@ -341,22 +341,15 @@ $(document).ready(function() {
         for (var i=0, len=lines.length; i<len; ++i ) {          
               data = lines[i];
           if (data.message_type == "kill" || data.message_type == "end") {
-              $('.editor_controls #run').removeClass('running').val('run');
-              $('.editor_controls #run').unbind('click.abort');
-              $('.editor_controls #run').bind('click.run', sendCode);
-              writeToConsole(data.content, data.content_long, data.message_type)
-            //change title
-            document.title = document.title.replace('*', '')
-
-            //hide annimation
-            $('#running_annimation').hide();
-
+              endingrun(data.content); 
           } else if (data.message_type == "sources") {
               writeToSources(data.content, data.url)
           } else if (data.message_type == "chat") {
               writeToChat(data.content)
           } else if (data.message_type == "data") {
               writeToData(data.content)
+          } else if (data.message_type == "startingrun") {
+              startingrun(data.content)
           } else if (data.message_type == "exception") {
               sMessage = data.content;
               iLineNumber = 0;
@@ -396,11 +389,29 @@ $(document).ready(function() {
 
     //send code request run
     function sendCode() {
-
         // protect not-ready case
         if (conn.readyState != conn.READY_STATE_OPEN)
             { alert("Not ready, readyState=" + conn.readyState); return }
 
+    
+        //send the data
+        data = {
+        "command" : "run",
+        "guid" : guid,
+        "username" : username, 
+        "userrealname" : userrealname, 
+        "language":scraperlanguage, 
+        "scraper-name":short_name,
+
+        "code" : codeeditor.getCode()
+        }
+        send(data)
+
+        // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
+        // means we can have simultaneous running for staff overview
+    }
+
+    function startingrun(content){
         //show the output area
         resizeControls('up');
         
@@ -412,40 +423,30 @@ $(document).ready(function() {
     
         //clear the tabs
         clearOutput();
+        writeToConsole('SStarting run ...'); 
+
+        //unbind run button
+        $('.editor_controls #run').unbind('click.run')
+        $('.editor_controls #run').addClass('running').val('Stop');
+
+        //bind abort button
+        $('.editor_controls #run').bind('click.abort', function() {
+            sendKill();
+//            endingrun("abort"); 
+        });
+    }
     
-          //send the data
-          data = {
-            "command" : "run",
-            "guid" : guid,
-            "username" : username, 
-            "userrealname" : userrealname, 
-            "language":scraperlanguage, 
-            "scraper-name":short_name,
+    function endingrun(content){
+        $('.editor_controls #run').removeClass('running').val('run');
+        $('.editor_controls #run').unbind('click.abort');
+        $('.editor_controls #run').bind('click.run', sendCode);
+        writeToConsole(content)
 
-            "code" : codeeditor.getCode()
-          }
-          send(data)
-
-          //unbind run button
-          $('.editor_controls #run').unbind('click.run')
-          $('.editor_controls #run').addClass('running').val('Stop');
-
-          //bind abort button
-          $('.editor_controls #run').bind('click.abort', function() {
-              sendKill();
-              $('.editor_controls #run').removeClass('running').val('run');
-              $('.editor_controls #run').unbind('click.abort')
-              $('.editor_controls #run').bind('click.run', sendCode);
-
-              //hide annimation
-              $('#running_annimation').hide();
-  
-              //change title
-              document.title = document.title.replace(' *', '')
-          });
-  
-      
-      
+        //change title
+        document.title = document.title.replace('*', '')
+    
+        //hide annimation
+        $('#running_annimation').hide();
     }
 
 
@@ -513,20 +514,20 @@ $(document).ready(function() {
 
     function run_abort() {
             runRequest = runScraper();
-            $('.editor_controls #run').unbind('click.run')
+            $('.editor_controls #run').unbind('click.run');
             $('.editor_controls #run').addClass('running').val('Stop');
             $('.editor_controls #run').bind('click.abort', function() {
-                sendKill()
+                sendKill();
                 $('.editor_controls #run').removeClass('running').val('run');
-                $('.editor_controls #run').unbind('click.abort')                    
-                writeToConsole('Run Aborted') // Custom function that append to a div
+                $('.editor_controls #run').unbind('click.abort');
+                writeToConsole('Run Aborted'); // Custom function that append to a div
                 $('.editor_controls #run').bind('click.run', run_abort);
                 
                 //hide annimation
                 $('#running_annimation').hide();
                 
                 //change title
-                document.title = document.title.replace(' *', '')
+                document.title = document.title.replace(' *', '');
             });
             
         }

@@ -599,8 +599,8 @@ class ScraperController (BaseController) :
             #  for input. We will loop reading and processing data from these.
             #
             p   = select.poll()
-            p.register (ppipe[0], select.EPOLLIN)
-            p.register (lpipe[0], select.EPOLLIN)
+            p.register (ppipe[0], select.POLLIN)
+            p.register (lpipe[0], select.POLLIN)
 
             #  Loop while the file descriptors are still open in the child
             #  process. Output is passed back, with "print" output jsonified.
