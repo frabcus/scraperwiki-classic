@@ -60,8 +60,8 @@ class LocalLineOnlyReceiver(LineOnlyReceiver):
             self.transport.write(line+",")  # note the comma added to the end for json parsing when strung together
 
 class spawnRunner(protocol.ProcessProtocol):
-    def __init__(self, P, code):
-        self.client = P
+    def __init__(self, client, code):
+        self.client = client
         self.code = code
         self.LineOnlyReceiver = LocalLineOnlyReceiver()
         self.LineOnlyReceiver.transport = self.client.transport
@@ -77,7 +77,7 @@ class spawnRunner(protocol.ProcessProtocol):
         self.client.write(format_message("Starting scraper ..."))
         
     def outReceived(self, data):
-        print data
+        print "out", data
         self.LineOnlyReceiver.dataReceived(data)
 
 
@@ -96,6 +96,8 @@ class RunnerProtocol(protocol.Protocol):
         # more than one scraper at a time.
         self.running = False
         self.guid = ""
+        self.scrapername = ""
+        self.isstaff = False
         self.username = ""
         self.userrealname = ""
         self.chatname = ""
@@ -143,13 +145,17 @@ class RunnerProtocol(protocol.Protocol):
                     code = parsed_data['code']
                     code = code.encode('utf8')
                     
+                    # these could all be fetched from self
                     guid = parsed_data['guid']
-                    scraperlanguage = parsed_data['language']
-                    
+                    scraperlanguage = parsed_data.get('language', 'Python')
+                    scrapername = parsed_data.get('scrapername', '')
+                    scraperlanguage = parsed_data.get('language', '')
+
                     assert guid == self.guid
                     args = ['./firestarter/runner.py']
                     args.append('-g %s' % guid)
                     args.append('-l %s' % scraperlanguage)
+                    args.append('-n %s' % scrapername)
                     
                     # args must be an ancoded string, not a unicode object
                     args = [i.encode('utf8') for i in args]
@@ -171,7 +177,10 @@ class RunnerProtocol(protocol.Protocol):
             elif parsed_data['command'] == 'connection_open':
                 self.guid = parsed_data['guid']
                 self.username = parsed_data['username']
-                self.userrealname = parsed_data['userrealname']
+                self.userrealname = parsed_data.get('userrealname', self.username)
+                self.scrapername = parsed_data.get('scrapername', '')
+                self.scraperlanguage = parsed_data.get('language', '')
+                self.isstaff = (parsed_data.get('isstaff') == "yes")
                 
                 if self.userrealname:
                     self.chatname = self.userrealname

@@ -11,6 +11,7 @@ $(document).ready(function() {
     var guid = $('#scraper_guid').val();
     var username = $('#username').val(); 
     var userrealname = $('#userrealname').val(); 
+    var isstaff = $('#isstaff').val(); 
     var scraperlanguage = $('#scraperlanguage').val(); 
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
@@ -294,7 +295,13 @@ $(document).ready(function() {
         writeToChat('Connection opened: ' + mreadystate); 
 
         // send the username and guid of this connection to twisted so it knows who's logged on
-        data = { "command":'connection_open', "guid":guid, "username":username, "userrealname":userrealname };
+        data = { "command":'connection_open', 
+                 "guid":guid, 
+                 "username":username, 
+                 "userrealname":userrealname, 
+                 "language":scraperlanguage, 
+                 "scraper-name":short_name, 
+                 "isstaff":isstaff };
         send(data);
     }
 
@@ -413,6 +420,8 @@ $(document).ready(function() {
             "username" : username, 
             "userrealname" : userrealname, 
             "language":scraperlanguage, 
+            "scraper-name":short_name,
+
             "code" : codeeditor.getCode()
           }
           send(data)
