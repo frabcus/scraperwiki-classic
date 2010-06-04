@@ -15,7 +15,7 @@ from scraper import forms
 from scraper.forms import SearchForm
 import frontend
 
-import StringIO, csv
+import StringIO, csv, types
 from django.utils.encoding import smart_str
 
 try:
