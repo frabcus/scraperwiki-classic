@@ -148,8 +148,8 @@ class RunnerProtocol(protocol.Protocol):
                     
                     assert guid == self.guid
                     args = ['./firestarter/runner.py']
-                    args.append('-g %s' % guid)
-                    args.append('-l %s' % scraperlanguage)
+                    args.append('--guid=%s' % guid)
+                    args.append('--language=%s' % scraperlanguage)
                     
                     # args must be an ancoded string, not a unicode object
                     args = [i.encode('utf8') for i in args]

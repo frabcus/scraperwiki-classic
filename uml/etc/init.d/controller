@@ -40,6 +40,8 @@ SCRIPTNAME=/etc/init.d/$NAME
 #
 do_start()
 {
+	PATH=$PATH:$DAEMON_PATH
+
 	# Return
 	#   0 if daemon has been started
 	#   1 if daemon was already running
