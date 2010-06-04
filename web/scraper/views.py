@@ -159,7 +159,7 @@ def scraper_data(request, scraper_short_name):
     scraper_tags = Tag.objects.get_for_object(scraper)
 
     try:
-        heading_order = json.loads(scraper.scrapermetadata_set.get(name='heading_order'))
+        heading_order = json.loads(scraper.scrapermetadata_set.get(name='heading_order').value)
     except:
         heading_order = None
 
