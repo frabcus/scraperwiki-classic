@@ -1,6 +1,9 @@
 from django import template
 from django.utils.safestring import mark_safe
-import simplejson as json
+try:
+    import json
+except:
+    import simplejson as json
 
 register = template.Library()
 
