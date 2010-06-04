@@ -456,7 +456,7 @@ $(document).ready(function() {
     }
 
     function clearOutput(){
-//        $('#output_console div').html('');    
+        $('#output_console div').html('');    
         $('#output_sources div').html('');    
         $('#output_data table').html('');                    
         $('.editor_output div.tabs li.console').removeClass('new');
