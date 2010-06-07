@@ -129,9 +129,8 @@ class Scraper(models.Model):
         if self.__dict__.get('code'):
             vc.save(self)
             if commit:
-                # Publish the scraper & set it's publish date
-                self.published = True
-                if self.first_published_at == None:
+                # if publishing for the first time set the first published date
+                if self.published and self.first_published_at == None:
                     self.first_published_at = datetime.datetime.today()
                 vc.commit(self, message=message, user=user)
                 

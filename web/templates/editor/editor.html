@@ -94,7 +94,7 @@
                         <a id="aCloseEditor" href="{% url frontpage %}" title="Close editor">Close editor</a>                
                     {% endif %}
                     &nbsp;<input type="button" class="save  button" name="action" value="Save draft" title="Save draft version (Ctrl + S)" />&nbsp;
-                    <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>
+                    <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Commit" title="Commit this scraper"/>
                 </div>
             </div>
 
@@ -170,15 +170,15 @@
                   {{ form.commit_message }}
                 </li>
                 <li>
-                  <label for="id_run_interval">{{ form.run_interval.label}} {{ form.run_interval.errors }}</label>
-                  {{ form.run_interval }}
+                  <label for="id_published">{{ form.published.label}} {{ form.published.errors }}</label>
+                  {{ form.published }}
                 </li>
             </ul>
             <div class="popup_controls">
                 <small>* Required field</small>
                 <div class="right">
                     <a class="popupReady">cancel</a>&nbsp;&nbsp;
-                    <input type="button" id="btnCommitPublish" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>
+                    <input type="button" id="btnCommitPublish" class="commit button" name="action" value="Commit" title="Commit this scraper"/>
                 </div>
             </div>
     </div>
