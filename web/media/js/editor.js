@@ -18,13 +18,14 @@ $(document).ready(function() {
     var conn; // Orbited connection
     var buffer = "";
     var selectedTab = 'console';
-    var outputMaxItems = 20;
+    var outputMaxItems = 400;
     var cookieOptions = { path: '/editor', expires: 90};    
     var popupStatus = 0
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 
     var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
     var receiverecordqueue = [ ]; 
+    var receivechatqueue = [ ]; 
 
     //constructor functions
     setupCodeEditor();
@@ -311,12 +312,13 @@ $(document).ready(function() {
             mcode = 'ServerClosedConnection'; 
         else if (code == Orbited.Errors.ConnectionTimeout)
             mcode = 'ConnectionTimeout'; 
-        else  // http://orbited.org/wiki/TCPSocket
-            //Orbited.Errors.InvalidHandshake = 102
-            //Orbited.Errors.UserConnectionReset = 103
-            //Orbited.Errors.Unauthorized = 106
-            //Orbited.Errors.RemoteConnectionFailed = 108
-            //Orbited.Statuses.SocketControlKilled = 301
+        else  
+            // http://orbited.org/wiki/TCPSocket documents: 
+            //    Orbited.Errors.InvalidHandshake = 102
+            //    Orbited.Errors.UserConnectionReset = 103
+            //    Orbited.Errors.Unauthorized = 106
+            //    Orbited.Errors.RemoteConnectionFailed = 108
+            //    Orbited.Statuses.SocketControlKilled = 301
             mcode = 'code=' + code;
 
         writeToChat('Connection closed: ' + mcode); 
@@ -340,30 +342,70 @@ $(document).ready(function() {
             sdata = sdata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
             if (sdata.length == 0)
                 continue; 
+
+            var jdata = undefined; 
             try {
                 jdata = $.evalJSON(sdata);
-                receiverecordqueue.push(jdata); 
             } catch(err) {
                 alert("Malformed json: '''" + sdata + "'''"); 
             }
-            if (receiverecordqueue.length == 1)
-                window.setTimeout(function() { receiveRecordFromQueue(); }, 0); 
+
+            if (jdata != undefined) {
+                if (jdata.message_type == 'chat')
+                    receivechatqueue.push(jdata); 
+                else
+                    receiverecordqueue.push(jdata); 
+
+                if (receiverecordqueue.length + receivechatqueue.length == 1)
+                    window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  // delay of 1ms makes it work better in FireFox (possibly so it doesn't take priority over the similar function calls in Orbited.js)
+
+                // clear batched up data that's choking the system
+                if (jdata.message_type == 'kill')
+                    window.setTimeout(clearJunkFromQueue, 0); 
+
+                // allow the user to clear the choked data if they want
+                if (jdata.message_type == 'end') {
+                    window.setTimeout(function() { 
+                        $('.editor_controls #run').val('Finishing');
+                        $('.editor_controls #run').unbind('click.abort');
+                        $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
+                    }); 
+                }
+            }
         }
     }
 
-    // run our own queue not in the timeout system
+    function clearJunkFromQueue() {
+        var lreceiverecordqueue = [ ]; 
+        for (var i = 0; i < receiverecordqueue.length; i++) {
+            jdata = receiverecordqueue[i]; 
+            if (jdata.message_type != "data")
+                lreceiverecordqueue.push(jdata); 
+        }
+        writeToConsole("Clearing " + (receiverecordqueue.length - lreceiverecordqueue.length) + " records from receiverqueue, leaving: " + lreceiverecordqueue.length); 
+        receiverecordqueue = lreceiverecordqueue; 
+    }
+
+    // run our own queue not in the timeout system (letting chat messages get to the front)
     function receiveRecordFromQueue() {
-        if (receiverecordqueue.length > 0) {
+        var jdata = undefined; 
+        if (receivechatqueue.length > 0)
+            jdata = receivechatqueue.shift(); 
+        else if (receiverecordqueue.length > 0) 
             jdata = receiverecordqueue.shift(); 
+
+        if (jdata != undefined) {
             receiveRecord(jdata);
-            if (receiverecordqueue.length >= 1)
-                window.setTimeout(function() { receiveRecordFromQueue(); }, 0); 
+            if (receiverecordqueue.length + receivechatqueue.length >= 1)
+                window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
         }
     }
 
       //read data back from twisted
       function receiveRecord(data) {
-          if (data.message_type == "kill" || data.message_type == "end") {
+          if (data.message_type == "kill") {
+              endingrun(data.content); 
+          } else if (data.message_type == "end") {
               endingrun(data.content); 
           } else if (data.message_type == "sources") {
               writeToSources(data.content, data.url)
@@ -418,7 +460,7 @@ $(document).ready(function() {
         // protect not-ready case
         if (conn.readyState != conn.READY_STATE_OPEN) { 
             alert("Not ready, readyState=" + conn.readyState); 
-            return 
+            return; 
         }
 
     
@@ -461,13 +503,15 @@ $(document).ready(function() {
         $('.editor_controls #run').bind('click.abort', function() {
             sendKill();
             $('.editor_controls #run').val('Stopping');
-//            endingrun("abort"); 
+            $('.editor_controls #run').unbind('click.abort');
+            $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
         });
     }
     
-    function endingrun(content){
+    function endingrun(content) {
         $('.editor_controls #run').removeClass('running').val('run');
         $('.editor_controls #run').unbind('click.abort');
+        $('.editor_controls #run').unbind('click.stopping');
         $('.editor_controls #run').bind('click.run', sendCode);
         writeToConsole(content)
 
@@ -523,10 +567,10 @@ $(document).ready(function() {
         var selrangedelimeter = ":::sElEcT rAnGe:::"; 
         var iselrangedelimeter = newcode.indexOf(selrangedelimeter); 
         var selrange = [0,0,0,0]
-        if (iselrangedelimeter != -1){
+        if (iselrangedelimeter != -1) {
             var selrange = newcode.substring(0, iselrangedelimeter); 
             newcode = newcode.substring(iselrangedelimeter + selrangedelimeter.length); 
-            selrange = eval(selrange); 
+            selrange = $.evalJSON(selrange); 
         }
 
         codeeditor.setCode(newcode); // see setupTutorial() for way to leave control-Z in place
@@ -592,7 +636,7 @@ $(document).ready(function() {
             }
             if ($('#meta_form #id_commit_message').val() == ""){
                 $('#meta_form #id_commit_message').parent().addClass('error');
-                bValid = false
+                bValid = false;
             }else{
                 $('#meta_form #id_commit_message').parent().removeClass('error');                
             }
@@ -693,7 +737,7 @@ $(document).ready(function() {
                 }),
               dataType: "html",
               success: function(response){
-                    res = eval('('+response+')');
+                    res = $.evalJSON(response);
 
                     //failed
                     if (res.status == 'Failed'){
@@ -998,9 +1042,9 @@ $(document).ready(function() {
         var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
         if (maxheight < $("#codeeditordiv").height()){
             $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor);
+        }
+        resizeCodeEditor();
     }
-    resizeCodeEditor();
-}
 
     //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
     //which means we have to do some seemingly random binds/unbinds

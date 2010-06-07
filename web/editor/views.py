@@ -47,7 +47,7 @@ def raw(request, short_name=None):
     newcode = scraper.saved_code()
     if oldcodeineditor:
         sequencechange = vc.DiffLineSequenceChanges(oldcodeineditor, newcode)
-        res = "%s:::sElEcT rAnGe:::%s" % (str(list(sequencechange)), newcode)   # a delimeter that the javascript can find, in absence of using json
+        res = "%s:::sElEcT rAnGe:::%s" % (json.dumps(list(sequencechange)), newcode)   # a delimeter that the javascript can find, in absence of using json
     else:
         res = newcode
     return HttpResponse(res, mimetype="text/plain")

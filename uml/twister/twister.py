@@ -273,7 +273,7 @@ class RunnerProtocol(protocol.Protocol):
         if reason == 'clientKilled':
             self.writeall(json.dumps({'message_type' : 'kill', 'content' : 'Script cancelled'}))
         elif reason == "OK":
-            self.writeall(json.dumps({'message_type' : 'kill', 'content' : 'Script successful'}))
+            self.writeall(json.dumps({'message_type' : 'end', 'content' : 'Script successful'}))
         else:
             self.writeall(json.dumps({'message_type' : 'kill', 'content' : 'Script cancelled'}))
         self.factory.notifytwisterstatus()
