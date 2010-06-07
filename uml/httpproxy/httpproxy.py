@@ -415,10 +415,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 soc  .close()
         finally :
             rem     = self.connection.getpeername()
-            offset1 = string.index (page, '\r\n\r\n')
-            offset2 = string.index (page, '\n\n'    )
-            if offset1 < 0 : offset1 = 0x3fffffff
-            if offset2 < 0 : offset1 = 0x3fffffff
+            try    : offset1 = string.index (page, '\r\n\r\n')
+            except : offset1 = 0x3fffffff
+            try    : offset2 = string.index (page, '\n\n'    )
+            except : offset2 = 0x3fffffff
             if offset1 < offset2 :
                    bytes = len(page) - offset1 - 4
             else : bytes = len(page) - offset2 - 2

@@ -51,7 +51,7 @@ def overview(request, scraper_short_name):
     if has_data:
         data = zip(table['headings'], table['rows'][0])
 
-    chart_url = scraper.get_metadata('chart')
+    chart_url = scraper.get_metadata('chart', '')
     if not chart_url.startswith('http://chart.apis.google.com/chart?'):
         chart_url = None
 
