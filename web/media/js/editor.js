@@ -18,7 +18,7 @@ $(document).ready(function() {
     var conn; // Orbited connection
     var buffer = "";
     var selectedTab = 'console';
-    var outputMaxItems = 400;
+    var outputMaxItems = 200;
     var cookieOptions = { path: '/editor', expires: 90};    
     var popupStatus = 0
     var sTabCurrent = ''; 
@@ -329,17 +329,27 @@ $(document).ready(function() {
 
     //read data back from twisted
     conn.onread = function(ldata) {
-      // check if this data is valid JSON, or add it to the buffer
-      try {
-        ldata = buffer+ldata;
-        buffer = " ";
-        lldata = ldata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
-        json_data = '{"lines": [' + lldata + ']}';
-        all_data = eval('('+json_data+')');      
-        lines = all_data.lines
-      
-        for (var i=0, len=lines.length; i<len; ++i ) {          
-              data = lines[i];
+        buffer = buffer+ldata;
+        while (true) {
+            var linefeed = buffer.indexOf("\n"); 
+            if (linefeed == -1)
+                break; 
+            sdata = buffer.substring(0, linefeed); 
+            buffer = buffer.substring(linefeed+1); 
+            sdata = sdata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
+            if (sdata.length == 0)
+                continue; 
+            try {
+                jdata = $.evalJSON(sdata);
+                receiveRecord(jdata);
+            } catch(err) {
+                alert("Malformed json: '''" + sdata + "'''"); 
+            }
+        }
+    }
+
+      //read data back from twisted
+      function receiveRecord(data) {
           if (data.message_type == "kill" || data.message_type == "end") {
               endingrun(data.content); 
           } else if (data.message_type == "sources") {
@@ -366,13 +376,7 @@ $(document).ready(function() {
           } else {
               writeToConsole(data.content, data.content_long, data.message_type)
           }
-        }        
-
-// this bit has never worked because the data variable was reused in the loop and became misset.
-      } catch(err) {
-        buffer = buffer + ldata;
-      }
-    }
+      }        
 
     function sendChat() 
     {
@@ -383,40 +387,42 @@ $(document).ready(function() {
 
     //send a message to the server
     function send(json_data) {
-      conn.send($.toJSON(json_data));  
+        conn.send($.toJSON(json_data));  
     }
 
     //send a 'kill' message
     function sendKill() {
-      data = {"command" : 'kill'};
-      send(data);
+        data = {"command" : 'kill'};
+        send(data);
     }
 
     //send code request run
     function sendCode() {
         // protect not-ready case
-        if (conn.readyState != conn.READY_STATE_OPEN)
-            { alert("Not ready, readyState=" + conn.readyState); return }
+        if (conn.readyState != conn.READY_STATE_OPEN) { 
+            alert("Not ready, readyState=" + conn.readyState); 
+            return 
+        }
 
     
         //send the data
         data = {
-        "command" : "run",
-        "guid" : guid,
-        "username" : username, 
-        "userrealname" : userrealname, 
-        "language":scraperlanguage, 
-        "scraper-name":short_name,
-
-        "code" : codeeditor.getCode()
+            "command" : "run",
+            "guid" : guid,
+            "username" : username, 
+            "userrealname" : userrealname, 
+            "language":scraperlanguage, 
+            "scraper-name":short_name,
+            "code" : codeeditor.getCode()
         }
+        
         send(data)
 
         // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
         // means we can have simultaneous running for staff overview
     }
 
-    function startingrun(content){
+    function startingrun(content) {
         //show the output area
         resizeControls('up');
         
@@ -858,8 +864,7 @@ $(document).ready(function() {
         setTabScrollPosition('sources', 'bottom'); 
     }
 
-    function writeToData(sMessage) {
-        var aRowData = eval(sMessage)
+    function writeToData(aRowData) {
         var oRow = $('<tr></tr>');
 
         $.each(aRowData, function(i){
@@ -868,14 +873,15 @@ $(document).ready(function() {
             oRow.append(oCell);
         })
 
-        if ($('#output_data .output_content').children().size() >= outputMaxItems){
-            $('#output_data .output_content').children(':first').remove();
+        if ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) {
+            $('#output_data table.output_content tbody').children(':first').remove();
         }
         
-        $('#output_data .output_content').append(oRow);
-        $('.editor_output div.tabs li.data').addClass('new');
+        $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
 
         setTabScrollPosition('data', 'bottom'); 
+
+        $('.editor_output div.tabs li.data').addClass('new');
     }
 
     function writeToChat(sMessage) {

@@ -250,7 +250,7 @@ class RunnerProtocol(protocol.Protocol):
         We assume that `line` has been formatted correctly at some stage 
         before.
         """
-        self.transport.write(line+",")  # note the comma added to the end for json parsing when strung together
+        self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together
     
     def writeall(self, line, otherline=""):
         self.write(line)  
