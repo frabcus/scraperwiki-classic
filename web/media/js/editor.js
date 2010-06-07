@@ -18,12 +18,13 @@ $(document).ready(function() {
     var conn; // Orbited connection
     var buffer = "";
     var selectedTab = 'console';
-    var outputMaxItems = 400;
+    var outputMaxItems = 20;
     var cookieOptions = { path: '/editor', expires: 90};    
     var popupStatus = 0
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 
     var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
+    var receiverecordqueue = [ ]; 
 
     //constructor functions
     setupCodeEditor();
@@ -329,17 +330,39 @@ $(document).ready(function() {
 
     //read data back from twisted
     conn.onread = function(ldata) {
-      // check if this data is valid JSON, or add it to the buffer
-      try {
-        ldata = buffer+ldata;
-        buffer = " ";
-        lldata = ldata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
-        json_data = '{"lines": [' + lldata + ']}';
-        all_data = eval('('+json_data+')');      
-        lines = all_data.lines
-      
-        for (var i=0, len=lines.length; i<len; ++i ) {          
-              data = lines[i];
+        buffer = buffer+ldata;
+        while (true) {
+            var linefeed = buffer.indexOf("\n"); 
+            if (linefeed == -1)
+                break; 
+            sdata = buffer.substring(0, linefeed); 
+            buffer = buffer.substring(linefeed+1); 
+            sdata = sdata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
+            if (sdata.length == 0)
+                continue; 
+            try {
+                jdata = $.evalJSON(sdata);
+                receiverecordqueue.push(jdata); 
+            } catch(err) {
+                alert("Malformed json: '''" + sdata + "'''"); 
+            }
+            if (receiverecordqueue.length == 1)
+                window.setTimeout(function() { receiveRecordFromQueue(); }, 0); 
+        }
+    }
+
+    // run our own queue not in the timeout system
+    function receiveRecordFromQueue() {
+        if (receiverecordqueue.length > 0) {
+            jdata = receiverecordqueue.shift(); 
+            receiveRecord(jdata);
+            if (receiverecordqueue.length >= 1)
+                window.setTimeout(function() { receiveRecordFromQueue(); }, 0); 
+        }
+    }
+
+      //read data back from twisted
+      function receiveRecord(data) {
           if (data.message_type == "kill" || data.message_type == "end") {
               endingrun(data.content); 
           } else if (data.message_type == "sources") {
@@ -366,13 +389,7 @@ $(document).ready(function() {
           } else {
               writeToConsole(data.content, data.content_long, data.message_type)
           }
-        }        
-
-// this bit has never worked because the data variable was reused in the loop and became misset.
-      } catch(err) {
-        buffer = buffer + ldata;
-      }
-    }
+      }        
 
     function sendChat() 
     {
@@ -383,40 +400,46 @@ $(document).ready(function() {
 
     //send a message to the server
     function send(json_data) {
-      conn.send($.toJSON(json_data));  
+        try {
+            conn.send($.toJSON(json_data));  
+        } catch(err) {
+            alert("Send error: " + err); 
+        }
     }
 
     //send a 'kill' message
     function sendKill() {
-      data = {"command" : 'kill'};
-      send(data);
+        data = {"command" : 'kill'};
+        send(data);
     }
 
     //send code request run
     function sendCode() {
         // protect not-ready case
-        if (conn.readyState != conn.READY_STATE_OPEN)
-            { alert("Not ready, readyState=" + conn.readyState); return }
+        if (conn.readyState != conn.READY_STATE_OPEN) { 
+            alert("Not ready, readyState=" + conn.readyState); 
+            return 
+        }
 
     
         //send the data
         data = {
-        "command" : "run",
-        "guid" : guid,
-        "username" : username, 
-        "userrealname" : userrealname, 
-        "language":scraperlanguage, 
-        "scraper-name":short_name,
-
-        "code" : codeeditor.getCode()
+            "command" : "run",
+            "guid" : guid,
+            "username" : username, 
+            "userrealname" : userrealname, 
+            "language":scraperlanguage, 
+            "scraper-name":short_name,
+            "code" : codeeditor.getCode()
         }
+        
         send(data)
 
         // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
         // means we can have simultaneous running for staff overview
     }
 
-    function startingrun(content){
+    function startingrun(content) {
         //show the output area
         resizeControls('up');
         
@@ -428,7 +451,7 @@ $(document).ready(function() {
     
         //clear the tabs
         clearOutput();
-        writeToConsole('SStarting run ...'); 
+        writeToConsole('Starting run ...'); 
 
         //unbind run button
         $('.editor_controls #run').unbind('click.run')
@@ -437,6 +460,7 @@ $(document).ready(function() {
         //bind abort button
         $('.editor_controls #run').bind('click.abort', function() {
             sendKill();
+            $('.editor_controls #run').val('Stopping');
 //            endingrun("abort"); 
         });
     }
@@ -827,12 +851,12 @@ $(document).ready(function() {
         }
         
         //remove items if over max
-        if ($('#output_console .output_content').children().size() >= outputMaxItems){
-            $('#output_console .output_content').children(':first').remove();
+        if ($('#output_console div.output_content').children().size() >= outputMaxItems) {
+            $('#output_console div.output_content').children(':first').remove();
         }
 
         //append to console
-        $('#output_console .output_content').append(oConsoleItem);
+        $('#output_console div.output_content').append(oConsoleItem);
         $('.editor_output div.tabs li.console').addClass('new');
 
         setTabScrollPosition('console', 'bottom'); 
@@ -844,12 +868,12 @@ $(document).ready(function() {
         var sDisplayMessage = sMessage;
         
         //remove items if over max
-        if ($('#output_sources .output_content').children().size() >= outputMaxItems){
-            $('#output_sources .output_content').children(':first').remove();
+        if ($('#output_sources div.output_content').children().size() >= outputMaxItems) {
+            $('#output_sources div.output_content').children(':first').remove();
         }
 
         //append to sources tab
-        $('#output_sources .output_content')
+        $('#output_sources div.output_content')
         //.append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
         .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a></span>')
 
@@ -858,8 +882,7 @@ $(document).ready(function() {
         setTabScrollPosition('sources', 'bottom'); 
     }
 
-    function writeToData(sMessage) {
-        var aRowData = eval(sMessage)
+    function writeToData(aRowData) {
         var oRow = $('<tr></tr>');
 
         $.each(aRowData, function(i){
@@ -868,14 +891,15 @@ $(document).ready(function() {
             oRow.append(oCell);
         })
 
-        if ($('#output_data .output_content').children().size() >= outputMaxItems){
-            $('#output_data .output_content').children(':first').remove();
+        if ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) {
+            $('#output_data table.output_content tbody').children(':first').remove();
         }
         
-        $('#output_data .output_content').append(oRow);
-        $('.editor_output div.tabs li.data').addClass('new');
+        $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
 
         setTabScrollPosition('data', 'bottom'); 
+
+        $('.editor_output div.tabs li.data').addClass('new');
     }
 
     function writeToChat(sMessage) {
@@ -884,10 +908,16 @@ $(document).ready(function() {
         oCell.html(sMessage);
         oRow.append(oCell);
         
-        $('#output_chat .output_content').append(oRow);
-        $('.editor_output div.tabs li.chat').addClass('new');
+
+        if ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) {
+            $('#output_chat table.output_content tbody').children(':first').remove();
+        }
+
+        $('#output_chat table.output_content').append(oRow);
 
         setTabScrollPosition('chat', 'bottom'); 
+
+        $('.editor_output div.tabs li.chat').addClass('new');
     }
 
     // some are implemented with tables, and some with span rows.  
@@ -964,10 +994,10 @@ $(document).ready(function() {
             $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
     }
 
-function onWindowResize() {
-    var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-    if (maxheight < $("#codeeditordiv").height()){
-        $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor);
+    function onWindowResize() {
+        var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
+        if (maxheight < $("#codeeditordiv").height()){
+            $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor);
     }
     resizeCodeEditor();
 }
