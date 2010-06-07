@@ -18,6 +18,11 @@ from frontend import models as frontendmodels
 import util
 import vc
 
+try:
+    import json
+except:
+    import simplejson as json
+
 from django.core.mail import send_mail
 
 # models defining scrapers and their metadata.
@@ -256,9 +261,9 @@ class Scraper(models.Model):
     def content_type(self):
         return ContentType.objects.get(app_label="scraper", model="Scraper")
 
-    def get_metadata(name, default=None):
+    def get_metadata(self, name, default=None):
         try:
-            return json.loads(scraper.scrapermetadata_set.get(name=name).value)
+            return json.loads(self.scrapermetadata_set.get(name=name).value)
         except:
             return default
         
