@@ -451,7 +451,7 @@ $(document).ready(function() {
     
         //clear the tabs
         clearOutput();
-        writeToConsole('SStarting run ...'); 
+        writeToConsole('Starting run ...'); 
 
         //unbind run button
         $('.editor_controls #run').unbind('click.run')
@@ -460,6 +460,7 @@ $(document).ready(function() {
         //bind abort button
         $('.editor_controls #run').bind('click.abort', function() {
             sendKill();
+            $('.editor_controls #run').val('Stopping');
 //            endingrun("abort"); 
         });
     }
