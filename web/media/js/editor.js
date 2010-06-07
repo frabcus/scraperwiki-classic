@@ -18,12 +18,13 @@ $(document).ready(function() {
     var conn; // Orbited connection
     var buffer = "";
     var selectedTab = 'console';
-    var outputMaxItems = 200;
+    var outputMaxItems = 20;
     var cookieOptions = { path: '/editor', expires: 90};    
     var popupStatus = 0
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 
     var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
+    var receiverecordqueue = [ ]; 
 
     //constructor functions
     setupCodeEditor();
@@ -341,10 +342,22 @@ $(document).ready(function() {
                 continue; 
             try {
                 jdata = $.evalJSON(sdata);
-                receiveRecord(jdata);
+                receiverecordqueue.push(jdata); 
             } catch(err) {
                 alert("Malformed json: '''" + sdata + "'''"); 
             }
+            if (receiverecordqueue.length == 1)
+                window.setTimeout(function() { receiveRecordFromQueue(); }, 0); 
+        }
+    }
+
+    // run our own queue not in the timeout system
+    function receiveRecordFromQueue() {
+        if (receiverecordqueue.length > 0) {
+            jdata = receiverecordqueue.shift(); 
+            receiveRecord(jdata);
+            if (receiverecordqueue.length >= 1)
+                window.setTimeout(function() { receiveRecordFromQueue(); }, 0); 
         }
     }
 
@@ -387,7 +400,11 @@ $(document).ready(function() {
 
     //send a message to the server
     function send(json_data) {
-        conn.send($.toJSON(json_data));  
+        try {
+            conn.send($.toJSON(json_data));  
+        } catch(err) {
+            alert("Send error: " + err); 
+        }
     }
 
     //send a 'kill' message
@@ -833,12 +850,12 @@ $(document).ready(function() {
         }
         
         //remove items if over max
-        if ($('#output_console .output_content').children().size() >= outputMaxItems){
-            $('#output_console .output_content').children(':first').remove();
+        if ($('#output_console div.output_content').children().size() >= outputMaxItems) {
+            $('#output_console div.output_content').children(':first').remove();
         }
 
         //append to console
-        $('#output_console .output_content').append(oConsoleItem);
+        $('#output_console div.output_content').append(oConsoleItem);
         $('.editor_output div.tabs li.console').addClass('new');
 
         setTabScrollPosition('console', 'bottom'); 
@@ -850,12 +867,12 @@ $(document).ready(function() {
         var sDisplayMessage = sMessage;
         
         //remove items if over max
-        if ($('#output_sources .output_content').children().size() >= outputMaxItems){
-            $('#output_sources .output_content').children(':first').remove();
+        if ($('#output_sources div.output_content').children().size() >= outputMaxItems) {
+            $('#output_sources div.output_content').children(':first').remove();
         }
 
         //append to sources tab
-        $('#output_sources .output_content')
+        $('#output_sources div.output_content')
         //.append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
         .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a></span>')
 
@@ -890,10 +907,16 @@ $(document).ready(function() {
         oCell.html(sMessage);
         oRow.append(oCell);
         
-        $('#output_chat .output_content').append(oRow);
-        $('.editor_output div.tabs li.chat').addClass('new');
+
+        if ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) {
+            $('#output_chat table.output_content tbody').children(':first').remove();
+        }
+
+        $('#output_chat table.output_content').append(oRow);
 
         setTabScrollPosition('chat', 'bottom'); 
+
+        $('.editor_output div.tabs li.chat').addClass('new');
     }
 
     // some are implemented with tables, and some with span rows.  
@@ -970,10 +993,10 @@ $(document).ready(function() {
             $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
     }
 
-function onWindowResize() {
-    var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-    if (maxheight < $("#codeeditordiv").height()){
-        $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor);
+    function onWindowResize() {
+        var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
+        if (maxheight < $("#codeeditordiv").height()){
+            $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor);
     }
     resizeCodeEditor();
 }
