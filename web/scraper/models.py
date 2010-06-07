@@ -126,12 +126,13 @@ class Scraper(models.Model):
                   str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
             self.guid = guid
      
+        # if publishing for the first time set the first published date
+        if self.published and self.first_published_at == None:
+            self.first_published_at = datetime.datetime.today()
+
         if self.__dict__.get('code'):
             vc.save(self)
             if commit:
-                # if publishing for the first time set the first published date
-                if self.published and self.first_published_at == None:
-                    self.first_published_at = datetime.datetime.today()
                 vc.commit(self, message=message, user=user)
                 
                 # Log this commit in the history table
