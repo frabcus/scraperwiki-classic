@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS `items` (
   KEY `item_id` (`item_id`,`unique_hash`,`scraper_id`,`date`,`latlng`)
 ) ENGINE=MyISAM;
 
+CREATE INDEX scraper_id ON items (scraper_id);
+CREATE INDEX unique_hash ON items (unique_hash);
+
 
 DROP TABLE IF EXISTS `kv`;
 CREATE TABLE IF NOT EXISTS `kv` (

@@ -14,7 +14,7 @@ class editorForm(forms.ModelForm):
     
     class Meta:
         model = scraper.models.Scraper
-        fields = ('title', 'code', 'description', 'license', 'tags',)
+        fields = ('title', 'code', 'description', 'license', 'tags', 'published')
 
     title = forms.CharField(
         widget=forms.TextInput(attrs={'title' : 'Untitled Scraper'}),

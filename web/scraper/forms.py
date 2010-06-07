@@ -26,4 +26,4 @@ class ScraperAdministrationForm (forms.ModelForm):
                                 
     class Meta:
         model = Scraper
-        fields = ('run_interval', 'title', 'description', 'license')
+        fields = ('run_interval', 'title', 'description', 'license', 'published')
