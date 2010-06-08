@@ -732,6 +732,7 @@ $(document).ready(function() {
                 description : $('#id_description').val(),
                 run_interval : $('#id_run_interval').val(),
                 commit_message: $('#id_commit_message').val(),
+                published: $('#id_published').val(),
                 code : codeeditor.getCode(),
                 action : form_action
                 }),

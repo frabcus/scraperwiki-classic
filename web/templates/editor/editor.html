@@ -150,6 +150,10 @@
             <div class="popup_error"></div>            
             <ul class="form">
                 <li>
+                  <label for="id_published">{{ form.published.label}} {{ form.published.errors }}</label>
+                  {{ form.published }}
+                </li>
+                <li>
                     <label for="id_meta_title">{{ form.title.label}}</label>
                     <input type="text" name="title" value="" id="id_meta_title">
                 </li>
@@ -171,10 +175,6 @@
                 <li>
                   <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
                   {{ form.commit_message }}
-                </li>
-                <li>
-                  <label for="id_published">{{ form.published.label}} {{ form.published.errors }}</label>
-                  {{ form.published }}
                 </li>
             </ul>
             <div class="popup_controls">
