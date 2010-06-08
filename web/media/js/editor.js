@@ -415,17 +415,11 @@ $(document).ready(function() {
               reloadScraper();
               writeToChat("OOO: " + data.content)
           } else if (data.message_type == "data") {
-              writeToData(data.content)
+              writeToData(data.content);
           } else if (data.message_type == "startingrun") {
-              startingrun(data.content)
+              startingrun(data.content);
           } else if (data.message_type == "exception") {
-              sMessage = data.content;
-              iLineNumber = 0;
-              if(parseInt(data.lineno) > 0){
-                 iLineNumber = data.lineno;
-                 codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0, codeeditor.nthLine(iLineNumber + 1), 0);                 
-              }
-              writeToConsole(sMessage, data.content_long, data.message_type, iLineNumber)
+              writeExceptionDump(data); 
           } else {
               writeToConsole(data.content, data.content_long, data.message_type)
           }
@@ -843,6 +837,35 @@ $(document).ready(function() {
         codeeditor.focus(); 
     }
 
+    function writeExceptionDump(data) {
+
+        // original exception code
+        if (true || !data.jtraceback) {
+            sMessage = data.content;
+            iLineNumber = 0;
+            if(parseInt(data.lineno) > 0){
+                iLineNumber = data.lineno;
+                codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0, codeeditor.nthLine(iLineNumber + 1), 0);                 
+            }
+            writeToConsole(sMessage, data.content_long, data.message_type, iLineNumber) 
+        }
+
+        // new exception code
+        writeToConsole("New exception handler:"); 
+        writeToConsole("New exception handler:"); 
+        if (data.jtraceback) {
+            //alert($.toJSON(data.jtraceback)); 
+            var sMessage; 
+            var linenumber; 
+            for (var i = 0; i < data.jtraceback.stackdump.length; i++) {
+                var stackentry = data.jtraceback.stackdump[i]; 
+                sMessage = (stackentry.func == undefined ? "code" : stackentry.func + stackentry.funcargs); 
+                linenumber = (stackentry.file == "<string>" ? stackentry.linenumber : undefined); 
+                writeToConsole(sMessage, undefined, 'exception', linenumber); 
+            }
+            writeToConsole(data.jtraceback.exceptiondescription, undefined, 'exception'); 
+        }
+    }
 
     //Write to console/data/sources
     function writeToConsole(sMessage, sLongMessage, sMessageType, iLine) {
@@ -851,14 +874,10 @@ $(document).ready(function() {
         var sShortClassName = '';
         var sLongClassName = 'message_expander';
         var sExpand = '...more'
-        if (sMessageType == 'exception'){
+        if (sMessageType == 'exception') {
             sShortClassName = 'exception';
             sLongClassName = 'exception_expander';
             sExpand = 'view traceback'
-            if(iLine){
-               sMessage = ('Line ' + iLine + ': ' +  sMessage);                
-            }
-
         }   
 
 
@@ -869,8 +888,9 @@ $(document).ready(function() {
         
         //add text
         oConsoleItem.html(sMessage);        
-        if(sLongMessage != undefined){
-            
+
+        // add long message (expansion link).  Should be derived from sMessage
+        if(sLongMessage != undefined) {
             //expand link
             oMoreLink = $('<a href="#"></a>');
             oMoreLink.addClass('expand_link');
@@ -892,6 +912,16 @@ $(document).ready(function() {
             }
             oConsoleItem.append(oMoreLink);
         }
+
+        // add clickable line number link
+        if(iLine) {
+            oLineLink = $('<a href="#">Line ' + iLine + ' - </a>'); 
+            oConsoleItem.prepend(oLineLink);
+            oLineLink.click( function() {
+                codeeditor.selectLines(codeeditor.nthLine(iLine), 0, codeeditor.nthLine(iLine + 1), 0); 
+            }); 
+        }
+
         
         //remove items if over max
         if ($('#output_console div.output_content').children().size() >= outputMaxItems) {

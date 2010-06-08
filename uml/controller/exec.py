@@ -121,6 +121,36 @@ def sigXCPU (signum, frame) :
 
 signal.signal (signal.SIGXCPU, sigXCPU)
 
+
+# Code waiting to be reformatted to another standard that I don't understand (Julian)
+import inspect
+import traceback
+def getJTraceback():
+    """Traceback that makes raw data available to javascript to process"""
+    info = sys.exc_info()   # last exception that was thrown
+    stackdump = [ ]
+    # outer level is the controller, 
+    # second level is the module call.
+    # anything beyond is within a function.  Move the function call description to the correct place
+    for frame, file, linenumber, func, lines, index in inspect.getinnerframes(info[2])[1:]:  # skip outer frame
+        args, varargs, varkw, locals = inspect.getargvalues(frame)
+        funcargs = inspect.formatargvalues(args, varargs, varkw, locals, formatvalue=lambda value: '=%s' % repr(value))
+        
+        # shuffle up the values so they are aligned with where the functions are called
+        if stackdump:
+            stackdump[-1]["func"] = func
+            stackdump[-1]["funcargs"] = funcargs
+        else:
+            pass # assert func == "<module>"
+        if file[:15] == "/usr/lib/python":
+            break
+        else: 
+            pass # assert file == "<string>"
+        
+        stackdump.append({"linenumber":linenumber, "file":file})
+    return { "exceptiondescription":repr(info[1]), "stackdump":stackdump }
+
+
 def getTraceback (code) :
 
     """
@@ -155,13 +185,17 @@ def execute (code) :
         import errormapper
         emsg = errormapper.mapException (e)
         etext, trace, infile, atline = getTraceback (code)
+        jtraceback = getJTraceback()  # raw stack info so it can be formatted in javascript (and replace previous methods)
+        
+        # errfd = sys.stderr, which has the problem that the messages can get printed out of order!
         errfd.write \
             (   json.dumps \
                 (   {   'message_type'  : 'exception',
                         'content'       : emsg,
                         'content_long'  : trace,
                         'filename'      : infile,
-                        'lineno'        : atline
+                        'lineno'        : atline, 
+                        'jtraceback'    : jtraceback
                     }
                 )   + '\n'
             )
