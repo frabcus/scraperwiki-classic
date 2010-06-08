@@ -280,7 +280,7 @@ def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
                          VALUES  (        %s, %s, %s
                                  )
                          ''',
-                         (       itemid,
+                         (       idlist[0],
                                  key,
                                  value
                          )
