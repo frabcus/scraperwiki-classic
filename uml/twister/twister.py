@@ -364,7 +364,8 @@ class RunnerFactory(protocol.ServerFactory):
         
         # uses a GET due to not knowing how to use POST and send stuff
         #  http://twistedmatrix.com/documents/current/web/howto/client.html
-        d = agent.request('GET', "%s?%s" % (self.twisterstatusurl, urllib.urlencode(data)), Headers({'User-Agent': ['Twisted Web Client Example']}), None)
+        #print "Notifying status", data
+        d = agent.request('GET', "%s?%s" % (self.twisterstatusurl, urllib.urlencode(data)), Headers({'User-Agent': ['Scraperwiki Twisted']}), None)
 
         
         

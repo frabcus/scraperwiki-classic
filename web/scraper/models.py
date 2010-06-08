@@ -293,8 +293,8 @@ class UserScraperEditing(models.Model):
     """
     Updated by Twisted to state which scrapers are being editing at this moment
     """
-    user    = models.ForeignKey(User)
-    scraper = models.ForeignKey(Scraper)
+    user    = models.ForeignKey(User, null=True)
+    scraper = models.ForeignKey(Scraper, null=True)
     editingsince = models.DateTimeField(blank=True, null=True)
     runningsince = models.DateTimeField(blank=True, null=True)
     closedsince  = models.DateTimeField(blank=True, null=True)

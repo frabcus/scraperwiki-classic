@@ -356,21 +356,19 @@ $(document).ready(function() {
                 else
                     receiverecordqueue.push(jdata); 
 
+                // allow the user to clear the choked data if they want
+                if (jdata.message_type == 'end') {
+                        $('.editor_controls #run').val('Finishing');
+                        $('.editor_controls #run').unbind('click.abort');
+                        $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
+                }
+
                 if (receiverecordqueue.length + receivechatqueue.length == 1)
                     window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  // delay of 1ms makes it work better in FireFox (possibly so it doesn't take priority over the similar function calls in Orbited.js)
 
                 // clear batched up data that's choking the system
                 if (jdata.message_type == 'kill')
                     window.setTimeout(clearJunkFromQueue, 0); 
-
-                // allow the user to clear the choked data if they want
-                if (jdata.message_type == 'end') {
-                    window.setTimeout(function() { 
-                        $('.editor_controls #run').val('Finishing');
-                        $('.editor_controls #run').unbind('click.abort');
-                        $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
-                    }); 
-                }
             }
         }
     }
@@ -379,7 +377,7 @@ $(document).ready(function() {
         var lreceiverecordqueue = [ ]; 
         for (var i = 0; i < receiverecordqueue.length; i++) {
             jdata = receiverecordqueue[i]; 
-            if (jdata.message_type != "data")
+            if ((jdata.message_type != "data") && (jdata.message_type != "console"))
                 lreceiverecordqueue.push(jdata); 
         }
         writeToConsole("Clearing " + (receiverecordqueue.length - lreceiverecordqueue.length) + " records from receiverqueue, leaving: " + lreceiverecordqueue.length); 

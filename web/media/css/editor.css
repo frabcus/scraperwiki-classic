@@ -170,6 +170,8 @@ dl.quick_help li code {font-size:1.1em; }
 #meta_form .field-commit_message labal { width:20%; vertical-align:center;}
 */
 
+#meta_form li.hidden { display:none; }
+
 /* Feedback messages */
 #feedback_messages {position:absolute; bottom:0; background:url(../images/message_back.png); width:100%;
     padding:1em 1em 2em 1em;text-align:left; color:#fff; text-shadow: 2px 2px 3px #000; display:none;}

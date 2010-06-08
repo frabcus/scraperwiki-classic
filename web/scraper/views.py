@@ -523,7 +523,7 @@ def twisterstatus(request):
         twisterclientnumber = client["clientnumber"]
         userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
         userscraperediting.save()
-        # print "uuuuu", userscraperediting
+        #print "uuuuu", userscraperediting
         
         #editingsince = models.DateTimeField(blank=True, null=True)
         #runningsince = models.DateTimeField(blank=True, null=True)

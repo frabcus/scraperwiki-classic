@@ -106,39 +106,109 @@ def handle_session_draft(request, action):
     return HttpResponseRedirect(response_url)
 
 
+# called from the edit function
+def saveeditedscraper(request, scraper):
+    form = forms.editorForm(request.POST, instance=scraper)
+
+    #validate
+    if not form.is_valid() or 'action' not in request.POST:
+        return HttpResponse(json.dumps({'status' : 'Failed'}))
+
+    action = request.POST.get('action').lower()
+
+    # Save the form  (without committing at first - http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
+    savedForm = form.save(commit=False)      
+
+    # Add some more fields to the form
+    savedForm.code = form.cleaned_data['code']
+    savedForm.description = form.cleaned_data['description']    
+    savedForm.license = form.cleaned_data['license']
+    # savedForm.run_interval = form.cleaned_data['run_interval']
+
+    # User is signed in, we can save the scraper
+    if request.user.is_authenticated():
+        if action == 'save':
+            #save without commiting
+            savedForm.save()
+        if action.startswith('commit'):          
+            message = None
+            #set the commit message if present
+            if request.POST.get('commit_message', False):
+                message = request.POST['commit_message']
+            # save and commit
+            savedForm.save(commit=True, message=message, user=request.user.pk)
+
+        # Add user roles
+        if savedForm.owner():
+            if savedForm.owner().pk != request.user.pk:
+                savedForm.add_user_role(request.user, 'editor')
+        else:
+            savedForm.add_user_role(request.user, 'owner')
+
+        # Add tags (note that we have to do this *after* the scraper has been saved)
+        s = get_object_or_404(ScraperModel, short_name=savedForm.short_name)
+        s.tags = request.POST.get('tags')
+
+        # Work out the URL to return in the JSON object
+        url = reverse('editor', kwargs={'short_name' : savedForm.short_name})
+        if action.startswith("commit"):
+            url = reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name})
+
+        # Build the JSON object and return it
+        res = json.dumps({'redirect':'true', 'url':url,})    
+        return HttpResponse(res)
+
+    # User is not logged in, save the scraper to the session
+    else:
+        draft_session_scraper = { 'scraper':savedForm, 'tags': request.POST.get('tags'), 'commit_message': request.POST.get('commit_message')}
+        request.session['ScraperDraft'] = draft_session_scraper
+
+        # Set a message with django_notify telling the user their scraper is safe
+        request.notifications.add("You need to sign in or create an account - don't worry, your scraper is safe ")
+        savedForm.action = action
+
+        status = 'Failed'
+        response_url = reverse('editor')
+        if action == 'save':
+            status = 'OK'
+        elif action == 'commit':
+            response_url =  reverse('login') + "?next=%s" % reverse('handle_session_draft', kwargs={'action': action})
+            status = 'OK'
+
+        return HttpResponse(json.dumps({'status' : status, 'draft' : 'True', 'url': response_url}))
+
+
 #Editor form
 def edit(request, short_name='__new__'):
 
-    #have we got an existing draft?
+    # identify the scraper (including if there was a draft one backed up)
     has_draft = False
     if request.session.get('ScraperDraft', None):
         draft = request.session['ScraperDraft'].get('scraper', None)
         if draft:
           has_draft  = True      
       
-    # 1) Get scraper
-
+    # draft scraper was backed up
     if has_draft:
         # Does a draft version exist?
         scraper = draft
         scraper.tags = request.session['ScraperDraft'].get('tags', '')
         scraper.commit_message = request.session['ScraperDraft'].get('commit_message', '')        
     
+    # Try and load an existing scraper
     elif short_name is not "__new__":
-        # Try and load an existing scraper
         scraper = get_object_or_404(ScraperModel, short_name=short_name)
         scraper.code = scraper.saved_code()
         scraper.tags = ", ".join(tag.name for tag in scraper.tags)
         if not scraper.published:
             scraper.commit_message = 'Scraper created'
     
+    # Create a new scraper
     else:
-        # Create a new scraper
-        scraper = ScraperModel()
+        scraper = ScraperModel()  
         
-        # select a startup scraper value randomly from those with the right flag
+        # select a startup scraper code randomly from those with the right flag
         startup_scrapers = ScraperModel.objects.filter(published=True, isstartup=True)
-
         startupcode = "# blank"
         if len(startup_scrapers):
             startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
@@ -146,88 +216,21 @@ def edit(request, short_name='__new__'):
         scraper.code = startupcode
         scraper.license = 'Unknown'
         scraper.commit_message = 'Scraper created'
-
-    # 2) If no POST, then just render the page
-    if not request.POST:
-
-        # Build the form
-        form = forms.editorForm(instance=scraper)
-        form.fields['code'].initial = scraper.code
-        form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
     
-        tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True)
+        # could crate a default for new scrapers
+        # scraper.published = True
+        
+    # tags and commit_message are not actually attributes of the scraper
 
-        return render_to_response('editor/editor.html', {'form':form, 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft, 'user':request.user}, context_instance=RequestContext(request))        
-    
-    else:        
-        # 3) If there is POST, then use that
-        form = forms.editorForm(request.POST, instance=scraper)
+    # if it's a post-back (save) then execute that
+    if request.POST:
+        return saveeditedscraper(request, scraper)
 
-        #validate
-        if not form.is_valid() or 'action' not in request.POST:
-            return HttpResponse(json.dumps({'status' : 'Failed'}))
+    # Build the page
+    form = forms.editorForm(instance=scraper)
+    form.fields['code'].initial = scraper.code
+    form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
 
-        action = request.POST.get('action').lower()
+    tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True)
 
-        # Save the form  (without committing at first - http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
-        savedForm = form.save(commit=False)      
-
-        # Add some more fields to the form
-        savedForm.code = form.cleaned_data['code']
-        savedForm.description = form.cleaned_data['description']    
-        savedForm.license = form.cleaned_data['license']
-        # savedForm.run_interval = form.cleaned_data['run_interval']
-
-        if request.user.is_authenticated():
-            # User is signed in, we can save the scraper
-            if action == 'save':
-                #save without commiting
-                savedForm.save()
-            if action.startswith('commit'):          
-                message = None
-                #set the commit message if present
-                if request.POST.get('commit_message', False):
-                    message = request.POST['commit_message']
-                # save and commit
-                savedForm.save(commit=True, message=message, user=request.user.pk)
-
-            # Add user roles
-            # MOVE TO MODEL THIS IS BUSINESS LOGIC
-            if savedForm.owner():
-                if savedForm.owner().pk != request.user.pk:
-                    savedForm.add_user_role(request.user, 'editor')
-            else:
-                savedForm.add_user_role(request.user, 'owner')
-
-            # Add tags (note that we have to do this *after* the scraper has been saved)
-            s = get_object_or_404(ScraperModel, short_name=savedForm.short_name)
-            s.tags = request.POST.get('tags')
-
-            # Work out the URL to return in the JSON object
-            url = reverse('editor', kwargs={'short_name' : savedForm.short_name})
-            if action.startswith("commit"):
-                url = reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name})
-
-            # Build the JSON object and return it
-            res = json.dumps({'redirect':'true', 'url':url,})    
-            return HttpResponse(res)
-
-        else:
-
-            # User is not logged in, save the scraper to the session
-            draft_session_scraper = { 'scraper':savedForm, 'tags': request.POST.get('tags'), 'commit_message': request.POST.get('commit_message')}
-            request.session['ScraperDraft'] = draft_session_scraper
-
-            # Set a message with django_notify telling the user their scraper is safe
-            request.notifications.add("You need to sign in or create an account - don't worry, your scraper is safe ")
-            savedForm.action = action
-
-            status = 'Failed'
-            response_url = reverse('editor')
-            if action == 'save':
-                status = 'OK'
-            elif action == 'commit':
-                response_url =  reverse('login') + "?next=%s" % reverse('handle_session_draft', kwargs={'action': action})
-                status = 'OK'
-
-            return HttpResponse(json.dumps({'status' : status, 'draft' : 'True', 'url': response_url}))
+    return render_to_response('editor/editor.html', {'form':form, 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft, 'user':request.user}, context_instance=RequestContext(request))
