@@ -50,8 +50,7 @@ def execute (code, guid = None, language = None) :
     code = string.replace (code, '\r', '')
     if language == "php" :
         code = "<?php\n%s\n?>\n" % code
-    open("/tmp/args", "w").write("%s\n" % sys.argv)
-    open("/tmp/code", "w").write("[%s]:%s\n" % (language, code))
+
     res = fs.execute (code, True)
     if res is None :
         sys.stdout.write (json.dumps({ 'message_type' : 'fail', 'content' : fs.error() }) + '\r\n')

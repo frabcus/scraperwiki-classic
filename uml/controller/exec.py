@@ -73,6 +73,9 @@ if path is not None :
     for p in string.split (path, ':') :
         sys.path.append (p)
 
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
+
 import  scraperwiki.utils
 import  scraperwiki.datastore
 import  scraperwiki.console
