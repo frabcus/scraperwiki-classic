@@ -9,15 +9,19 @@ import types
 from tagging.utils import get_tag
 from tagging.models import Tag, TaggedItem
 
-def convert_dictlist_to_datalist(allitems, heading_order=None):
+def convert_dictlist_to_datalist(allitems, column_order=None, private_columns=None):
     allkeys = set()
     for item in allitems:
         allkeys.update(item.keys())
 
-    if type(heading_order) == types.ListType and allkeys.issuperset(heading_order):
-        headings = heading_order
+    if type(column_order) == types.ListType and allkeys.issuperset(column_order):
+        headings = column_order
     else:
         headings = sorted(list(allkeys))
+
+    if type(private_columns) == types.ListType and set(headings).issuperset(private_columns):
+        for column in private_columns:
+            headings.remove(column)
 
     rows = [ ]
     for item in allitems:
@@ -282,10 +286,10 @@ class ScraperManager(models.Manager):
            
               
     
-    def data_summary(self, scraper_id=0, limit=1000, offset=0, start_date=None, end_date=None, latlng=None, heading_order=None):
+    def data_summary(self, scraper_id=0, limit=1000, offset=0, start_date=None, end_date=None, latlng=None, column_order=None, private_columns=None):
         '''single table of all rows for a scraper'''
         allitems = self.data_dictlist(scraper_id, limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
-        return convert_dictlist_to_datalist(allitems, heading_order)
+        return convert_dictlist_to_datalist(allitems, column_order, private_columns)
 
 
     # not yet used   probably to delete

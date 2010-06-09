@@ -15,7 +15,7 @@ from scraper import forms
 from scraper.forms import SearchForm
 import frontend
 
-import StringIO, csv
+import StringIO, csv, types
 from django.utils.encoding import smart_str
 
 try:
@@ -51,13 +51,8 @@ def overview(request, scraper_short_name):
     if has_data:
         data = zip(table['headings'], table['rows'][0])
 
-    try:
-        chart_value = json.loads(scraper.scrapermetadata_set.get(name='chart').value)
-        if chart_value.startswith('http://chart.apis.google.com/chart?'):
-            chart_url = chart_value
-        else:
-            chart_url = None
-    except ObjectDoesNotExist:
+    chart_url = scraper.get_metadata('chart', '')
+    if not chart_url.startswith('http://chart.apis.google.com/chart?'):
         chart_url = None
 
     return render_to_response('scraper/overview.html', {
@@ -158,14 +153,21 @@ def scraper_data(request, scraper_short_name):
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    try:
-        heading_order = json.loads(scraper.scrapermetadata_set.get(name='heading_order').value)
-    except:
-        heading_order = None
+    num_data_points = scraper.get_metadata('num_data_points')
+    if type(num_data_points) != types.IntType:
+        num_data_points = settings.MAX_DATA_POINTS
+
+    column_order = scraper.get_metadata('data_columns')
+    if not user_owns_it:
+        private_columns = scraper.get_metadata('private_columns')
+    else:
+        private_columns = None
 
     #get data for this scaper
-    data = models.Scraper.objects.data_summary(
-                            scraper_id=scraper.guid, limit=500, heading_order=heading_order)
+    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
+                                               limit=num_data_points, 
+                                               column_order=column_order,
+                                               private_columns=private_columns)
 
     # replicates output from data_summary_tables
     data_tables = {"": data }
@@ -196,9 +198,21 @@ def scraper_map(request, scraper_short_name, map_only=False):
     user_follows_it = (user in scraper.followers())
     scraper_tags = Tag.objects.get_for_object(scraper)
 
+    num_map_points = scraper.get_metadata('num_map_points')
+    if type(num_map_points) != types.IntType:
+        num_map_points = settings.MAX_MAP_POINTS
+
+    column_order = scraper.get_metadata('map_columns')
+    if not user_owns_it:
+        private_columns = scraper.get_metadata('private_columns')
+    else:
+        private_columns = None
+
     #get data for this scaper
-    data = models.Scraper.objects.data_summary(
-        scraper_id=scraper.guid, limit=settings.MAX_MAP_POINTS)
+    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
+                                               limit=num_map_points,
+                                               column_order=column_order,
+                                               private_columns=private_columns)
     has_data = len(data['rows']) > 0
     data = json.dumps(data)
 
@@ -372,6 +386,9 @@ def scraper_list(request, page_number):
     #npeople = UserScraperEditing in models.UserScraperEditing.objects.all().count()
     # there might be a slick way of counting this, but I don't know it.
     npeople = len(set([userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.all() ]))
+    if npeople < 2:
+        npeople = 0
+        
     
     dictionary = { "scrapers": scrapers, "form": form, "npeople": npeople }
     return render_to_response('scraper/list.html', dictionary, context_instance=RequestContext(request))
@@ -506,7 +523,7 @@ def twisterstatus(request):
         twisterclientnumber = client["clientnumber"]
         userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
         userscraperediting.save()
-        # print "uuuuu", userscraperediting
+        #print "uuuuu", userscraperediting
         
         #editingsince = models.DateTimeField(blank=True, null=True)
         #runningsince = models.DateTimeField(blank=True, null=True)

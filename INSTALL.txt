@@ -154,9 +154,9 @@ a) In web/settings.py, edit the DATASTORE_DATABASE_* entries. This is access for
 
 b) In ./scraperlibs/scraperwiki/datastore, copy config.cfg-inhg to config.cfg.local and edit it. This is the config used by the scrapers to write to the database. You need a user who can read/write to the database.
 
-Then change to the datastore directory, and use mysql to import the database schema, scheme.sql:
+Then change to the dataproxy directory, and use mysql to import the database schema, scheme.sql:
 
-> $ cd ./scraperlibs/scraperwiki/datastore
+> $ cd uml/dataproxy/
 > $ mysql -u USERNAME -p -h localhost scraperwiki_datastore < scheme.sql
 
 And you should be done.

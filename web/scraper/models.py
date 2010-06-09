@@ -18,6 +18,11 @@ from frontend import models as frontendmodels
 import util
 import vc
 
+try:
+    import json
+except:
+    import simplejson as json
+
 from django.core.mail import send_mail
 
 # models defining scrapers and their metadata.
@@ -121,13 +126,13 @@ class Scraper(models.Model):
                   str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
             self.guid = guid
      
+        # if publishing for the first time set the first published date
+        if self.published and self.first_published_at == None:
+            self.first_published_at = datetime.datetime.today()
+
         if self.__dict__.get('code'):
             vc.save(self)
             if commit:
-                # Publish the scraper & set it's publish date
-                self.published = True
-                if self.first_published_at == None:
-                    self.first_published_at = datetime.datetime.today()
                 vc.commit(self, message=message, user=user)
                 
                 # Log this commit in the history table
@@ -256,6 +261,13 @@ class Scraper(models.Model):
     def content_type(self):
         return ContentType.objects.get(app_label="scraper", model="Scraper")
 
+    def get_metadata(self, name, default=None):
+        try:
+            return json.loads(self.scrapermetadata_set.get(name=name).value)
+        except:
+            return default
+        
+
 #register tagging for scrapers
 try:
     tagging.register(Scraper)
@@ -281,8 +293,8 @@ class UserScraperEditing(models.Model):
     """
     Updated by Twisted to state which scrapers are being editing at this moment
     """
-    user    = models.ForeignKey(User)
-    scraper = models.ForeignKey(Scraper)
+    user    = models.ForeignKey(User, null=True)
+    scraper = models.ForeignKey(Scraper, null=True)
     editingsince = models.DateTimeField(blank=True, null=True)
     runningsince = models.DateTimeField(blank=True, null=True)
     closedsince  = models.DateTimeField(blank=True, null=True)

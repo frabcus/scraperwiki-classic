@@ -26,7 +26,10 @@
     <a href='{% url scraper_code scraper.short_name %}'>{{ scraper.title }}</a>
   </td>
   <td>
-    {% for userscraperediting in scraper.userscraperediting_set.all %} {{userscraperediting.user.get_profile.name}} {% endfor %}
+    {% for userscraperediting in scraper.userscraperediting_set.all %} 
+        {{userscraperediting.user.get_profile.name}}
+        ({{userscraperediting.twisterclientnumber}}) 
+    {% endfor %}
   </td> 
 
   <td>{{ scraper.line_count }}</td>

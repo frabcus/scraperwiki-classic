@@ -11,6 +11,7 @@ $(document).ready(function() {
     var guid = $('#scraper_guid').val();
     var username = $('#username').val(); 
     var userrealname = $('#userrealname').val(); 
+    var isstaff = $('#isstaff').val(); 
     var scraperlanguage = $('#scraperlanguage').val(); 
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
@@ -23,6 +24,8 @@ $(document).ready(function() {
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 
     var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
+    var receiverecordqueue = [ ]; 
+    var receivechatqueue = [ ]; 
 
     //constructor functions
     setupCodeEditor();
@@ -112,7 +115,7 @@ $(document).ready(function() {
                     if($.browser.mozilla){
                         // I cannot work out why this only affects firefox
                         // would be nice if we could use selectLines/replaceSelection
-                        // instead as this allows CTRL z to work. TODO Get rid of this
+                        // instead as this allows CTRL-Z to work. TODO Get rid of this
                         codeeditor.setCode(data);
                     }else{
                         codeeditor.selectLines(codeeditor.firstLine(), 0, codeeditor.lastLine(), 0); 
@@ -294,7 +297,13 @@ $(document).ready(function() {
         writeToChat('Connection opened: ' + mreadystate); 
 
         // send the username and guid of this connection to twisted so it knows who's logged on
-        data = { "command":'connection_open', "guid":guid, "username":username, "userrealname":userrealname };
+        data = { "command":'connection_open', 
+                 "guid":guid, 
+                 "username":username, 
+                 "userrealname":userrealname, 
+                 "language":scraperlanguage, 
+                 "scraper-name":short_name, 
+                 "isstaff":isstaff };
         send(data);
     }
 
@@ -303,12 +312,13 @@ $(document).ready(function() {
             mcode = 'ServerClosedConnection'; 
         else if (code == Orbited.Errors.ConnectionTimeout)
             mcode = 'ConnectionTimeout'; 
-        else  // http://orbited.org/wiki/TCPSocket
-            //Orbited.Errors.InvalidHandshake = 102
-            //Orbited.Errors.UserConnectionReset = 103
-            //Orbited.Errors.Unauthorized = 106
-            //Orbited.Errors.RemoteConnectionFailed = 108
-            //Orbited.Statuses.SocketControlKilled = 301
+        else  
+            // http://orbited.org/wiki/TCPSocket documents: 
+            //    Orbited.Errors.InvalidHandshake = 102
+            //    Orbited.Errors.UserConnectionReset = 103
+            //    Orbited.Errors.Unauthorized = 106
+            //    Orbited.Errors.RemoteConnectionFailed = 108
+            //    Orbited.Statuses.SocketControlKilled = 301
             mcode = 'code=' + code;
 
         writeToChat('Connection closed: ' + mcode); 
@@ -322,52 +332,98 @@ $(document).ready(function() {
 
     //read data back from twisted
     conn.onread = function(ldata) {
-      // check if this data is valid JSON, or add it to the buffer
-      try {
-        ldata = buffer+ldata;
-        buffer = " ";
-        lldata = ldata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
-        json_data = '{"lines": [' + lldata + ']}';
-        all_data = eval('('+json_data+')');      
-        lines = all_data.lines
-      
-        for (var i=0, len=lines.length; i<len; ++i ) {          
-              data = lines[i];
-          if (data.message_type == "kill" || data.message_type == "end") {
-              $('.editor_controls #run').removeClass('running').val('run');
-              $('.editor_controls #run').unbind('click.abort');
-              $('.editor_controls #run').bind('click.run', sendCode);
-              writeToConsole(data.content, data.content_long, data.message_type)
-            //change title
-            document.title = document.title.replace('*', '')
+        buffer = buffer+ldata;
+        while (true) {
+            var linefeed = buffer.indexOf("\n"); 
+            if (linefeed == -1)
+                break; 
+            sdata = buffer.substring(0, linefeed); 
+            buffer = buffer.substring(linefeed+1); 
+            sdata = sdata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
+            if (sdata.length == 0)
+                continue; 
 
-            //hide annimation
-            $('#running_annimation').hide();
+            var jdata = undefined; 
+            try {
+                jdata = $.evalJSON(sdata);
+            } catch(err) {
+                alert("Malformed json: '''" + sdata + "'''"); 
+            }
 
+            if (jdata != undefined) {
+                if (jdata.message_type == 'chat')
+                    receivechatqueue.push(jdata); 
+                else
+                    receiverecordqueue.push(jdata); 
+
+                // allow the user to clear the choked data if they want
+                if (jdata.message_type == 'end') {
+                        $('.editor_controls #run').val('Finishing');
+                        $('.editor_controls #run').unbind('click.abort');
+                        $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
+                }
+
+                if (receiverecordqueue.length + receivechatqueue.length == 1)
+                    window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  // delay of 1ms makes it work better in FireFox (possibly so it doesn't take priority over the similar function calls in Orbited.js)
+
+                // clear batched up data that's choking the system
+                if (jdata.message_type == 'kill')
+                    window.setTimeout(clearJunkFromQueue, 0); 
+            }
+        }
+    }
+
+    function clearJunkFromQueue() {
+        var lreceiverecordqueue = [ ]; 
+        for (var i = 0; i < receiverecordqueue.length; i++) {
+            jdata = receiverecordqueue[i]; 
+            if ((jdata.message_type != "data") && (jdata.message_type != "console"))
+                lreceiverecordqueue.push(jdata); 
+        }
+        writeToConsole("Clearing " + (receiverecordqueue.length - lreceiverecordqueue.length) + " records from receiverqueue, leaving: " + lreceiverecordqueue.length); 
+        receiverecordqueue = lreceiverecordqueue; 
+    }
+
+    // run our own queue not in the timeout system (letting chat messages get to the front)
+    function receiveRecordFromQueue() {
+        var jdata = undefined; 
+        if (receivechatqueue.length > 0)
+            jdata = receivechatqueue.shift(); 
+        else if (receiverecordqueue.length > 0) 
+            jdata = receiverecordqueue.shift(); 
+
+        if (jdata != undefined) {
+            receiveRecord(jdata);
+            if (receiverecordqueue.length + receivechatqueue.length >= 1)
+                window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
+        }
+    }
+
+      //read data back from twisted
+      function receiveRecord(data) {
+          if (data.message_type == "kill") {
+              endingrun(data.content); 
+          } else if (data.message_type == "end") {
+              endingrun(data.content); 
           } else if (data.message_type == "sources") {
               writeToSources(data.content, data.url)
           } else if (data.message_type == "chat") {
               writeToChat(data.content)
+          } else if (data.message_type == "saved") {
+              writeToChat(data.content)
+          } else if (data.message_type == "othersaved") {
+              reloadScraper();
+              writeToChat("OOO: " + data.content)
           } else if (data.message_type == "data") {
-              writeToData(data.content)
+              writeToData(data.content);
+          } else if (data.message_type == "startingrun") {
+              startingrun(data.content);
           } else if (data.message_type == "exception") {
-              sMessage = data.content;
-              iLineNumber = 0;
-              if(parseInt(data.lineno) > 0){
-                 iLineNumber = data.lineno;
-                 codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0, codeeditor.nthLine(iLineNumber + 1), 0);                 
-              }
-              writeToConsole(sMessage, data.content_long, data.message_type, iLineNumber)
+              writeExceptionDump(data); 
           } else {
               writeToConsole(data.content, data.content_long, data.message_type)
           }
-        }        
-
-// this bit has never worked because the data variable was reused in the loop and became misset.
-      } catch(err) {
-        buffer = buffer + ldata;
-      }
-    }
+      }        
 
     function sendChat() 
     {
@@ -378,22 +434,46 @@ $(document).ready(function() {
 
     //send a message to the server
     function send(json_data) {
-      conn.send($.toJSON(json_data));  
+        try {
+            conn.send($.toJSON(json_data));  
+        } catch(err) {
+            alert("Send error: " + err); 
+        }
     }
 
     //send a 'kill' message
     function sendKill() {
-      data = {"command" : 'kill'};
-      send(data);
+        data = {"command" : 'kill'};
+        send(data);
     }
 
     //send code request run
     function sendCode() {
-
         // protect not-ready case
-        if (conn.readyState != conn.READY_STATE_OPEN)
-            { alert("Not ready, readyState=" + conn.readyState); return }
+        if (conn.readyState != conn.READY_STATE_OPEN) { 
+            alert("Not ready, readyState=" + conn.readyState); 
+            return; 
+        }
 
+    
+        //send the data
+        data = {
+            "command" : "run",
+            "guid" : guid,
+            "username" : username, 
+            "userrealname" : userrealname, 
+            "language":scraperlanguage, 
+            "scraper-name":short_name,
+            "code" : codeeditor.getCode()
+        }
+        
+        send(data)
+
+        // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
+        // means we can have simultaneous running for staff overview
+    }
+
+    function startingrun(content) {
         //show the output area
         resizeControls('up');
         
@@ -405,38 +485,33 @@ $(document).ready(function() {
     
         //clear the tabs
         clearOutput();
+        writeToConsole('Starting run ...'); 
+
+        //unbind run button
+        $('.editor_controls #run').unbind('click.run')
+        $('.editor_controls #run').addClass('running').val('Stop');
+
+        //bind abort button
+        $('.editor_controls #run').bind('click.abort', function() {
+            sendKill();
+            $('.editor_controls #run').val('Stopping');
+            $('.editor_controls #run').unbind('click.abort');
+            $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
+        });
+    }
     
-          //send the data
-          data = {
-            "command" : "run",
-            "guid" : guid,
-            "username" : username, 
-            "userrealname" : userrealname, 
-            "language":scraperlanguage, 
-            "code" : codeeditor.getCode()
-          }
-          send(data)
+    function endingrun(content) {
+        $('.editor_controls #run').removeClass('running').val('run');
+        $('.editor_controls #run').unbind('click.abort');
+        $('.editor_controls #run').unbind('click.stopping');
+        $('.editor_controls #run').bind('click.run', sendCode);
+        writeToConsole(content)
 
-          //unbind run button
-          $('.editor_controls #run').unbind('click.run')
-          $('.editor_controls #run').addClass('running').val('Stop');
-
-          //bind abort button
-          $('.editor_controls #run').bind('click.abort', function() {
-              sendKill();
-              $('.editor_controls #run').removeClass('running').val('run');
-              $('.editor_controls #run').unbind('click.abort')
-              $('.editor_controls #run').bind('click.run', sendCode);
-
-              //hide annimation
-              $('#running_annimation').hide();
-  
-              //change title
-              document.title = document.title.replace(' *', '')
-          });
-  
-      
-      
+        //change title
+        document.title = document.title.replace('*', '')
+    
+        //hide annimation
+        $('#running_annimation').hide();
     }
 
 
@@ -456,7 +531,7 @@ $(document).ready(function() {
     }
 
     function clearOutput(){
-//        $('#output_console div').html('');    
+        $('#output_console div').html('');    
         $('#output_sources div').html('');    
         $('#output_data table').html('');                    
         $('.editor_output div.tabs li.console').removeClass('new');
@@ -484,14 +559,15 @@ $(document).ready(function() {
         var selrangedelimeter = ":::sElEcT rAnGe:::"; 
         var iselrangedelimeter = newcode.indexOf(selrangedelimeter); 
         var selrange = [0,0,0,0]
-        if (iselrangedelimeter != -1){
+        if (iselrangedelimeter != -1) {
             var selrange = newcode.substring(0, iselrangedelimeter); 
             newcode = newcode.substring(iselrangedelimeter + selrangedelimeter.length); 
-            selrange = eval(selrange); 
+            selrange = $.evalJSON(selrange); 
         }
 
-        codeeditor.setCode(newcode); 
+        codeeditor.setCode(newcode); // see setupTutorial() for way to leave control-Z in place
         codeeditor.focus(); 
+        pageIsDirty = false; 
 
         // make the selection
         if (!((selrange[2] == 0) && (selrange[3] == 0))){
@@ -499,25 +575,27 @@ $(document).ready(function() {
             linehandleend = codeeditor.nthLine(selrange[2] + 1); 
             codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
         }
+
+        showFeedbackMessage("This scraper has been reloaded.");
     }; 
 
 
     function run_abort() {
             runRequest = runScraper();
-            $('.editor_controls #run').unbind('click.run')
+            $('.editor_controls #run').unbind('click.run');
             $('.editor_controls #run').addClass('running').val('Stop');
             $('.editor_controls #run').bind('click.abort', function() {
-                sendKill()
+                sendKill();
                 $('.editor_controls #run').removeClass('running').val('run');
-                $('.editor_controls #run').unbind('click.abort')                    
-                writeToConsole('Run Aborted') // Custom function that append to a div
+                $('.editor_controls #run').unbind('click.abort');
+                writeToConsole('Run Aborted'); // Custom function that append to a div
                 $('.editor_controls #run').bind('click.run', run_abort);
                 
                 //hide annimation
                 $('#running_annimation').hide();
                 
                 //change title
-                document.title = document.title.replace(' *', '')
+                document.title = document.title.replace(' *', '');
             });
             
         }
@@ -550,7 +628,7 @@ $(document).ready(function() {
             }
             if ($('#meta_form #id_commit_message').val() == ""){
                 $('#meta_form #id_commit_message').parent().addClass('error');
-                bValid = false
+                bValid = false;
             }else{
                 $('#meta_form #id_commit_message').parent().removeClass('error');                
             }
@@ -589,7 +667,7 @@ $(document).ready(function() {
             }
         ); 
 
-        //diff button
+        //reload button
          $('.editor_controls #reload').click(function() {
                 reloadScraper(); 
                 return false; 
@@ -646,12 +724,13 @@ $(document).ready(function() {
                 description : $('#id_description').val(),
                 run_interval : $('#id_run_interval').val(),
                 commit_message: $('#id_commit_message').val(),
+                published: $('#id_published').val(),
                 code : codeeditor.getCode(),
                 action : form_action
                 }),
               dataType: "html",
               success: function(response){
-                    res = eval('('+response+')');
+                    res = $.evalJSON(response);
 
                     //failed
                     if (res.status == 'Failed'){
@@ -673,7 +752,7 @@ $(document).ready(function() {
                             showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
                         }
                     
-                        send({"command":'chat', "text":"scraper saved"}); 
+                        send({"command":'saved'}); 
 
                         pageIsDirty = false; // page no longer dirty
                     }
@@ -758,6 +837,35 @@ $(document).ready(function() {
         codeeditor.focus(); 
     }
 
+    function writeExceptionDump(data) {
+
+        // original exception code
+        if (true || !data.jtraceback) {
+            sMessage = data.content;
+            iLineNumber = 0;
+            if(parseInt(data.lineno) > 0){
+                iLineNumber = data.lineno;
+                codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0, codeeditor.nthLine(iLineNumber + 1), 0);                 
+            }
+            writeToConsole(sMessage, data.content_long, data.message_type, iLineNumber) 
+        }
+
+        // new exception code
+        writeToConsole("New exception handler:"); 
+        writeToConsole("New exception handler:"); 
+        if (data.jtraceback) {
+            //alert($.toJSON(data.jtraceback)); 
+            var sMessage; 
+            var linenumber; 
+            for (var i = 0; i < data.jtraceback.stackdump.length; i++) {
+                var stackentry = data.jtraceback.stackdump[i]; 
+                sMessage = (stackentry.func == undefined ? "code" : stackentry.func + stackentry.funcargs); 
+                linenumber = (stackentry.file == "<string>" ? stackentry.linenumber : undefined); 
+                writeToConsole(sMessage, undefined, 'exception', linenumber); 
+            }
+            writeToConsole(data.jtraceback.exceptiondescription, undefined, 'exception'); 
+        }
+    }
 
     //Write to console/data/sources
     function writeToConsole(sMessage, sLongMessage, sMessageType, iLine) {
@@ -766,14 +874,10 @@ $(document).ready(function() {
         var sShortClassName = '';
         var sLongClassName = 'message_expander';
         var sExpand = '...more'
-        if (sMessageType == 'exception'){
+        if (sMessageType == 'exception') {
             sShortClassName = 'exception';
             sLongClassName = 'exception_expander';
             sExpand = 'view traceback'
-            if(iLine){
-               sMessage = ('Line ' + iLine + ': ' +  sMessage);                
-            }
-
         }   
 
 
@@ -784,8 +888,9 @@ $(document).ready(function() {
         
         //add text
         oConsoleItem.html(sMessage);        
-        if(sLongMessage != undefined){
-            
+
+        // add long message (expansion link).  Should be derived from sMessage
+        if(sLongMessage != undefined) {
             //expand link
             oMoreLink = $('<a href="#"></a>');
             oMoreLink.addClass('expand_link');
@@ -807,14 +912,24 @@ $(document).ready(function() {
             }
             oConsoleItem.append(oMoreLink);
         }
+
+        // add clickable line number link
+        if(iLine) {
+            oLineLink = $('<a href="#">Line ' + iLine + ' - </a>'); 
+            oConsoleItem.prepend(oLineLink);
+            oLineLink.click( function() {
+                codeeditor.selectLines(codeeditor.nthLine(iLine), 0, codeeditor.nthLine(iLine + 1), 0); 
+            }); 
+        }
+
         
         //remove items if over max
-        if ($('#output_console .output_content').children().size() >= outputMaxItems){
-            $('#output_console .output_content').children(':first').remove();
+        if ($('#output_console div.output_content').children().size() >= outputMaxItems) {
+            $('#output_console div.output_content').children(':first').remove();
         }
 
         //append to console
-        $('#output_console .output_content').append(oConsoleItem);
+        $('#output_console div.output_content').append(oConsoleItem);
         $('.editor_output div.tabs li.console').addClass('new');
 
         setTabScrollPosition('console', 'bottom'); 
@@ -826,12 +941,12 @@ $(document).ready(function() {
         var sDisplayMessage = sMessage;
         
         //remove items if over max
-        if ($('#output_sources .output_content').children().size() >= outputMaxItems){
-            $('#output_sources .output_content').children(':first').remove();
+        if ($('#output_sources div.output_content').children().size() >= outputMaxItems) {
+            $('#output_sources div.output_content').children(':first').remove();
         }
 
         //append to sources tab
-        $('#output_sources .output_content')
+        $('#output_sources div.output_content')
         //.append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
         .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a></span>')
 
@@ -840,8 +955,7 @@ $(document).ready(function() {
         setTabScrollPosition('sources', 'bottom'); 
     }
 
-    function writeToData(sMessage) {
-        var aRowData = eval(sMessage)
+    function writeToData(aRowData) {
         var oRow = $('<tr></tr>');
 
         $.each(aRowData, function(i){
@@ -850,14 +964,15 @@ $(document).ready(function() {
             oRow.append(oCell);
         })
 
-        if ($('#output_data .output_content').children().size() >= outputMaxItems){
-            $('#output_data .output_content').children(':first').remove();
+        if ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) {
+            $('#output_data table.output_content tbody').children(':first').remove();
         }
         
-        $('#output_data .output_content').append(oRow);
-        $('.editor_output div.tabs li.data').addClass('new');
+        $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
 
         setTabScrollPosition('data', 'bottom'); 
+
+        $('.editor_output div.tabs li.data').addClass('new');
     }
 
     function writeToChat(sMessage) {
@@ -866,10 +981,16 @@ $(document).ready(function() {
         oCell.html(sMessage);
         oRow.append(oCell);
         
-        $('#output_chat .output_content').append(oRow);
-        $('.editor_output div.tabs li.chat').addClass('new');
+
+        if ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) {
+            $('#output_chat table.output_content tbody').children(':first').remove();
+        }
+
+        $('#output_chat table.output_content').append(oRow);
 
         setTabScrollPosition('chat', 'bottom'); 
+
+        $('.editor_output div.tabs li.chat').addClass('new');
     }
 
     // some are implemented with tables, and some with span rows.  
@@ -946,13 +1067,13 @@ $(document).ready(function() {
             $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
     }
 
-function onWindowResize() {
-    var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
-    if (maxheight < $("#codeeditordiv").height()){
-        $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor);
+    function onWindowResize() {
+        var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top; 
+        if (maxheight < $("#codeeditordiv").height()){
+            $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor);
+        }
+        resizeCodeEditor();
     }
-    resizeCodeEditor();
-}
 
     //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
     //which means we have to do some seemingly random binds/unbinds

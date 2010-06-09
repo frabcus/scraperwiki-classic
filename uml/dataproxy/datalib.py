@@ -267,15 +267,34 @@ def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
             return [ True, 'Data record already exists' ]
 
         for key, value in insert_data.items() :
-            execute \
-                (   '''
-                    UPDATE  `kv`
-                    SET     `value`     = %s
-                    WHERE   `item_id`   = %s
-                    AND     `key`       = %s
-                    ''',
-                    [   value, idlist[0], key   ]
-                )
+            cursor = execute ('SELECT 1 FROM `kv` WHERE `item_id` = %s AND `key` = %s', (idlist[0], key))
+
+            if cursor.rowcount == 0:
+                execute \
+                    (    '''
+                         INSERT INTO    `kv`
+                                 (       `item_id`,
+                                         `key`,
+                                         `value`
+                                 )
+                         VALUES  (        %s, %s, %s
+                                 )
+                         ''',
+                         (       idlist[0],
+                                 key,
+                                 value
+                         )
+                    )
+            else:
+                execute \
+                    (   '''
+                        UPDATE  `kv`
+                        SET     `value`     = %s
+                        WHERE   `item_id`   = %s
+                        AND     `key`       = %s
+                        ''',
+                        [   value, idlist[0], key   ]
+                    )
         return  [ True, 'Data record updated' ]
 
     #  New data to be inserted. Get a new item identifier and then insert

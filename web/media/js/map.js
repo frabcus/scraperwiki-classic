@@ -76,7 +76,7 @@ function setupDataMap(oData, sUrl){
             }
         } catch (err) { /*alert(err)*/; }
 
-        {//if (icon == undefined) {
+        if (icon == undefined) {
             colour = "FF0000"; 
             if ((iColourIndex != -1) && oData.rows[i][iColourIndex].match(/[0-9a-fA-F]{6}$/g, colour))
                 colour = oData.rows[i][iColourIndex]; 

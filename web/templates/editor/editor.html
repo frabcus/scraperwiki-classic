@@ -40,6 +40,7 @@
         <input type="hidden" id="scraper_guid" value="{{ scraper.guid }}"/>
         <input type="hidden" id="username" value="{{ user.username }}"/>
         <input type="hidden" id="userrealname" value="{{ user.get_profile.name }}"/>
+        <input type="hidden" id="isstaff" value="{% if user.is_staff %}yes{% endif %}"/>
         <input type="hidden" id="scraperlanguage" value="{{ scraper.language|lower }}"/>
         <input type="hidden" id="codemirror_url" value="{{ MEDIA_URL }}CodeMirror/"/>
     </fieldset>
@@ -80,6 +81,9 @@
             {# Controls #}
             <div class="editor_controls">
                 <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
+                {% if user.is_staff %}
+                    <input type="button" value="Reload" name="reload" id="reload" title="Reload data from server"/>
+                {% endif %}
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
                 
@@ -90,7 +94,7 @@
                         <a id="aCloseEditor" href="{% url frontpage %}" title="Close editor">Close editor</a>                
                     {% endif %}
                     &nbsp;<input type="button" class="save  button" name="action" value="Save draft" title="Save draft version (Ctrl + S)" />&nbsp;
-                    <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>
+                    <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Commit and publish" title="Commit this scraper"/>
                 </div>
             </div>
 
@@ -117,14 +121,17 @@
                         <div class="output_content"></div>
                     </div>
                     <div id="output_data" class="output">
-                        <table class="output_content">                            
+                        <table class="output_content">
+                            <tbody></tbody>
                         </table>
                     </div>
                     <div id="output_sources" class="output">
                         <div class="output_content"></div>
                     </div>
                     <div id="output_chat" class="output">
-                        <table class="output_content"></table>
+                        <table class="output_content">
+                            <tbody></tbody>
+                        </table>
                         <input type="text" name="chat_line" value="" id="chat_line"/>
                     </div>
                 </div>
@@ -139,42 +146,42 @@
 
 {% block popups %}    
     <div id="meta_form" class="popup_item">
-            <p>Publishing your scraper will the code and data available to other users, allow you to access the data it generated via the API and set it to be rerun once a day (we will soon be adding a system to let you control the frequency yourself)</p>
-            <div class="popup_error"></div>            
+            <p>.</p>
+            <div class="popup_error">
+            </div>            
             <ul class="form">
                 <li>
                     <label for="id_meta_title">{{ form.title.label}}</label>
                     <input type="text" name="title" value="" id="id_meta_title">
                 </li>
                 <li>
+                  <label for="id_published">{{ form.published.label}} {{ form.published.errors }}</label>
+                  {{ form.published }} 
+                  (Publishing your scraper will make the code and data available to others, and allow you to schedule it.)
+                </li>
+                <li{% if scraper.description %} class="hidden"{% endif %}>
                     <label for="id_description">{{ form.description.label}} {{ form.description.errors }}</label>
                     {{ form.description }}
                 </li>
-                <li> 
+                <li{% if scraper.description %} class="hidden"{% endif %}>
                     <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
                     {{ form.license }}
                 </li>
-                {% if not has_draft %}
-                    <li>
-                        <label for="id_tags">{{ form.tags.label}} {{ form.tags.errors }}</label>
-                        {{ form.tags }}
-                        <small class="hint taghint">e.g. europe<em>,</em> grants<em>,</em> transport</small>
-                    </li>
-                {% endif %}
+                <li{% if scraper.description %} class="hidden"{% endif %}>
+                    <label for="id_tags">{{ form.tags.label}} {{ form.tags.errors }}</label>
+                    {{ form.tags }}
+                    <small class="hint taghint">e.g. europe<em>,</em> grants<em>,</em> transport</small>
+                </li>
                 <li>
                   <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
                   {{ form.commit_message }}
-                </li>
-                <li>
-                  <label for="id_run_interval">{{ form.run_interval.label}} {{ form.run_interval.errors }}</label>
-                  {{ form.run_interval }}
                 </li>
             </ul>
             <div class="popup_controls">
                 <small>* Required field</small>
                 <div class="right">
                     <a class="popupReady">cancel</a>&nbsp;&nbsp;
-                    <input type="button" id="btnCommitPublish" class="commit button" name="action" value="Commit and publish" title="Commit this scraper and publish on the site"/>
+                    <input type="button" id="btnCommitPublish" class="commit button" name="action" value="Commit" title="Commit this scraper"/>
                 </div>
             </div>
     </div>

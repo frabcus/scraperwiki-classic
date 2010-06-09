@@ -205,6 +205,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         return scraperID, runID
 
     def blockmessage(self, url):
+
         qurl = urllib.quote(url)
         return """Scraperwiki blocked access to "%s".  Click <a href="/whitelist/?url=%s">here</a> for details.""" % (url, qurl)
 
@@ -229,12 +230,18 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                                  " 200 Connection established\r\n")
                 self.wfile.write("Proxy-agent: %s\r\n" % self.version_string())
                 self.wfile.write("\r\n")
-                self._read_write(soc)
+                self.wfile.write(self.getResponse(soc))
         finally:
             soc.close()
             self.connection.close()
 
         self.swlog().log (scraperID, runID, 'P.DONE', arg1 = self.path)
+
+    def notify (self, host, **query) :
+
+#       query['message_type'] = 'sources'
+#       urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
+        pass
 
     def retrieve (self, method) :
 
@@ -279,6 +286,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         ctag    = None
         used    = None
         content = None
+        bytes   = 0
         cache   = 0
         try    : cache = int(self.headers['x-cache'])
         except : pass
@@ -356,7 +364,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             id, page  = cursor.fetchone()
             cursor    = db.cursor()
             cursor.execute ('update httpcache set stamp = now(), hits = hits + 1 where tag = %s', [ ctag ])
-            self.connection.send(page)
             used = 'CACHED'
         except :
             startat = time.strftime ('%Y-%m-%d %H:%M:%S')
@@ -387,7 +394,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     soc.send ("\r\n")
                     if content :
                         soc.send (content)
-                    resp = self._read_write(soc)
+                    page  = self.getResponse(soc)
                     if db :
                         cursor = db.cursor()
                         cursor.execute \
@@ -402,11 +409,23 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                                         )
                                 values  ( %s, %s, %s, %s, %s, %s )
                                 ''',
-                                [   ctag, self.path, resp, 1, scraperID, runID    ]
+                                [   ctag, self.path, page, 1, scraperID, runID    ]
                             )
             finally :
                 soc  .close()
         finally :
+            rem     = self.connection.getpeername()
+            try    : offset1 = string.index (page, '\r\n\r\n')
+            except : offset1 = 0x3fffffff
+            try    : offset2 = string.index (page, '\n\n'    )
+            except : offset2 = 0x3fffffff
+            if offset1 < offset2 :
+                   bytes = len(page) - offset1 - 4
+            else : bytes = len(page) - offset2 - 2
+            if bytes < 0 :
+                bytes = len(page)
+            self.notify (self.connection.getpeername()[0], runid = runID, url = self.path, content = '%d bytes from %s' % (bytes, self.path))
+            self.connection.send (page)
             self.connection.close()
 
         if runID is not None :
@@ -417,7 +436,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         self.swlog().log (scraperID, runID, 'P.DONE', arg1 = self.path, arg2 = used)
 
-    def _read_write (self, soc, idle = 0x7ffffff) :
+    def getResponse (self, soc, idle = 0x7ffffff) :
 
         """
         Copy data back and forth between the client and the server.
@@ -448,10 +467,11 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     try    : data = i.recv (8192)
                     except : return
                     if data :
-                        out.send(data)
                         count = 0
                         if i is soc :
                             resp.append (data)
+                        else :
+                            out.send(data)
                     else :
                         busy = False
                         break
