@@ -43,6 +43,7 @@ def execute (code, guid = None, language = None) :
     fs.addPaths         ('/scraperwiki/live/scrapers')
     fs.addPaths         ('/scraperwiki/live/scraperlibs')
     fs.setCache         (3600 * 12)
+    fs.setCPULimit      (80, 81)
 
     fs.loadConfiguration()
 
