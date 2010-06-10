@@ -537,7 +537,7 @@ class HTTPSProxyServer (HTTPProxyServer) :
 
         HTTPProxyServer.__init__(self, server_address, HandlerClass)
         ctx = OpenSSL.SSL.Context(OpenSSL.SSL.SSLv23_METHOD)
-        fpem = '/usr/share/pyshared/twisted/test/server.pem'
+        fpem = '/var/www/scraperwiki/uml/httpproxy/server.pem'
         ctx.use_privatekey_file (fpem)
         ctx.use_certificate_file(fpem)
         self.socket = OpenSSL.SSL.Connection \

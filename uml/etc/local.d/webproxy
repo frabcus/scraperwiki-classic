@@ -1,10 +1,10 @@
 #!/bin/sh
 
-DESC="HTTPProxy"
-NAME=httpproxy
+DESC="WebProxy"
+NAME=webproxy
 CONFIG=/var/www/scraperwiki/uml/uml.cfg.local
 DAEMON=/var/www/scraperwiki/uml/httpproxy/httpproxy.py
-DAEMON_ARGS="--daemon --subproc --varDir=./var --config=$CONFIG ==mode=H"
+DAEMON_ARGS="--daemon --subproc --varDir=./var --config=$CONFIG --mode=P"
 PIDFILE=./var/run/$NAME.pid
 
 do_start()
