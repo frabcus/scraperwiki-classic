@@ -7,9 +7,17 @@ confurl	= http://localhost:8000/whitelist/config
 [twister]
 statusurl = http://localhost:8000/scrapers/twister/status
 
-[httpproxy]
+[webproxy]
 host	= 127.0.0.1
 port	= 9002
+
+[httpproxy]
+host	= 127.0.0.1
+port	= 9005
+
+[httpsproxy]
+host	= 127.0.0.1
+port	= 9006
 
 [ftpproxy]
 host	= 127.0.0.1
