@@ -15,6 +15,10 @@ user	= cache
 passwd	= 4dlk4eaaA44A1gTx
 db	= swcache_live
 
+[ftpproxy]
+host	= 89.16.177.195
+port	= 9004
+
 [dataproxy]
 dbtype  = mysql                                                                                                                             
 host    = 89.16.177.176
