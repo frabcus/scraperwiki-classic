@@ -11,5 +11,7 @@ mkdir -p ./var/run
 ./etc/local.d/dispatcher	restart
 ./etc/local.d/ftpproxy		restart
 ./etc/local.d/httpproxy		restart
+./etc/local.d/httpsproxy	restart
+./etc/local.d/webproxy		restart
 ./etc/local.d/twister		restart
 ./etc/local.d/orbited		restart
