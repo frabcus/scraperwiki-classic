@@ -89,8 +89,8 @@ config.set         ('dataproxy', 'port', string.split(datastore, ':')[1])
 #  These seem to be needed for urllib.urlopen() to support proxying, though
 #  FTP doesn't actually work.
 #
-os.environ['http_proxy' ] = httpProxy
-os.environ['https_proxy'] = httpsProxy
+##os.environ['http_proxy' ] = httpProxy
+##os.environ['https_proxy'] = httpsProxy
 os.environ['ftp_proxy'  ] = ftpProxy
 scraperwiki.utils.urllibSetup   ()
 
@@ -99,8 +99,8 @@ scraperwiki.utils.urllibSetup   ()
 #
 scraperwiki.utils.urllib2Setup \
     (
-        urllib2.ProxyHandler ({'http':  httpProxy }),
-        urllib2.ProxyHandler ({'https': httpsProxy}),
+##        urllib2.ProxyHandler ({'http':  httpProxy }),
+##        urllib2.ProxyHandler ({'https': httpsProxy}),
         urllib2.ProxyHandler ({'ftp':   ftpProxy  })
     )
 

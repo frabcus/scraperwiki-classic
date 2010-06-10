@@ -138,7 +138,12 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if scheme == 'https' :
-            soc = OpenSSL.SSL.wrap_socket(soc)
+            try :
+                import ssl
+                soc = ssl.wrap_socket(soc)
+            except :
+                self.send_error (404, "No ssl support, python 2.5")
+                return None
 
         try :
             soc.connect(host_port)
