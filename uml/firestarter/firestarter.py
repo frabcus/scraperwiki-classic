@@ -109,7 +109,6 @@ class FireStarter :
         self.m_limits      = {}
         self.m_allowed     = []
         self.m_blocked     = []
-        self.m_iptables    = []
         self.m_paths       = []
         self.m_testName    = None
         self.m_runID       = None
@@ -348,20 +347,6 @@ class FireStarter :
             except :
                 pass
 
-    def addIPTables (self, *rules) :
-
-        """
-        Add firewall rules which will be in effect when the command
-        or script runs. The rules are arguments to the I{iptables}
-        command. Multiple rules can be added as multiple arguments.
-
-        @type   rules   : List
-        @param  rules   : List of iptables firewall rules
-        """
-
-        for rule in rules :
-            self.m_iptables.append (rule)
-
     def addPaths (self, *paths) :
 
         """
@@ -466,9 +451,6 @@ class FireStarter :
 
         for site in range(len(self.m_blocked )) :
             setter ('x-addblockedsite-%d' % site, self.m_blocked [site])
-
-        for rule in range(len(self.m_iptables)) :
-            setter ('x-iptables-%d'       % rule, self.m_iptables[rule])
 
         for path in range(len(self.m_paths   )) :
             setter ('x-paths-%d'          % path, self.m_paths   [path])

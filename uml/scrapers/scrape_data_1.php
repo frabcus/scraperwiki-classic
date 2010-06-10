@@ -1,4 +1,4 @@
-require  'simple_html_dom.php'   ;
+require  'scraperwiki/simple_html_dom.php'   ;
 
 $html = file_get_html('http://scraperwiki.com/hello_world.html') ;
 foreach ($html->find('table') as $table)

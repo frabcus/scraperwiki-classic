@@ -7,9 +7,25 @@ confurl	= http://localhost:8000/whitelist/config
 [twister]
 statusurl = http://localhost:8000/scrapers/twister/status
 
-[httpproxy]
+[webproxy]
 host	= 192.168.1.66
 port	= 9002
+dbhost	= 192.168.1.66
+user	= scraperwiki
+passwd	= scraperwiki
+db	= scraperwiki_cache
+
+[httpproxy]
+host	= 192.168.1.66
+port	= 9005
+dbhost	= 192.168.1.66
+user	= scraperwiki
+passwd	= scraperwiki
+db	= scraperwiki_cache
+
+[httpsproxy]
+host	= 192.168.1.66
+port	= 9006
 dbhost	= 192.168.1.66
 user	= scraperwiki
 passwd	= scraperwiki

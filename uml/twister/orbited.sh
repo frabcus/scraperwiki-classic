@@ -31,9 +31,13 @@ done
 #
 execute(){
 
-    cd /var/www/scraperwiki/uml
+#    cd /var/www/scraperwiki/uml
+#    . /var/www/scraperwiki/bin/activate
+#    exec orbited --config ./twister/orbited.cfg
+
+    cd /var/www/scraperwiki
     . /var/www/scraperwiki/bin/activate
-    exec orbited --config ./twister/orbited.cfg
+    exec orbited --config ./uml/twister/orbited.cfg
 }
 
 #  process

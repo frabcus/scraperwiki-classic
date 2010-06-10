@@ -103,10 +103,10 @@ def scrape (url, params = None) :
         text = fin.read()
         fin.close()   # get the mimetype here
     except:
-        scraperwiki.console.logScrapedURLError (url)
+#     scraperwiki.console.logScrapedURLError (url)
         return None
 
-    scraperwiki.console.logScrapedURL (url, len(text))
+#   scraperwiki.console.logScrapedURL (url, len(text))
     return text
 
 

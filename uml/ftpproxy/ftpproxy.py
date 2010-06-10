@@ -17,16 +17,16 @@ import  signal
 import  ConfigParser
 import  SocketServer
 
-USAGE      = " [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file]"
-child      = None
-config     = None
-varDir     = '/var'
-uid    = None
-gid    = None
-allowAll   = False
-statusLock = None
-statusInfo = {}
-blockmsg   = """500 Scraperwiki has blocked you from accessing "%s" because it is not allowed according to the rules\n"""
+USAGE       = " [--allowAll] [--varDir=dir] [--subproc] [--daemon] [--config=file]"
+child       = None
+config      = None
+varDir      = '/var'
+uid         = None
+gid         = None
+allowAll    = False
+statusLock  = None
+statusInfo  = {}
+blockmsg    = """500 Scraperwiki has blocked you from accessing "%s" because it is not allowed according to the rules\n"""
 
 class FTPProxyServer (SocketServer.ThreadingMixIn, SocketServer.TCPServer) :
 
@@ -122,10 +122,17 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
 
         return scraperID, runID
 
+    def notify (self, host, **query) :
+
+        query['message_type'] = 'sources'
+        urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
+
     def handle (self) :
 
         self.request.send ("220- ScraperWiki FTP Proxy\n")
         self.request.send ("220\n")
+
+        scraperID, runID = self.ident ()
 
         busy = True
         text = ''
@@ -181,9 +188,7 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                 if args[0] == 'RETR' :
 
                     url = 'ftp://%s/%s/%s' % (self.m_cwd[2], string.join (self.m_cwd[3:], '/'), args[1])
-                    print url
 
-                    scraperID, runID = self.ident ()
                     if not self.hostAllowed (url, scraperID, runID) :
                         self.request.send (blockmsg % self.m_cwd[2])
                         self.swlog().log (scraperID, runID, 'T.ERROR', arg1 = 'Denied', arg2 = url)
@@ -192,6 +197,14 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                     self.request.send ("150 File follows.\n")
                     try :
                         data = urllib2.urlopen(url).read()
+
+                        self.notify \
+                            (   self.request.getpeername()[0],
+                                runid   = runID,
+                                url     = url,
+                                content = '%d bytes from %s' % (len(data), url)
+                            )
+
                         self.m_pasv.send (data)
                         self.m_pasv.close()
                         self.m_pasv = None

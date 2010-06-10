@@ -22,7 +22,7 @@ sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 10000000)
 import firestarter
 
 
-def execute (code, guid = None, language = None) :
+def execute (code, options) :
 
     def format_json(line):
         message = json.loads(line)
@@ -33,9 +33,9 @@ def execute (code, guid = None, language = None) :
 
     fs  = firestarter.FireStarter('/var/www/scraperwiki/uml/uml.cfg')
     
-    fs.setTestName      ('Runner' )
-    fs.setScraperID     (guid     )
-    fs.setLanguage      (language )
+    fs.setTestName      (options.name     )
+    fs.setScraperID     (options.guid     )
+    fs.setLanguage      (options.language )
     fs.setUser          ('nobody' )
     fs.setGroup         ('nogroup')
 
@@ -48,7 +48,7 @@ def execute (code, guid = None, language = None) :
     fs.loadConfiguration()
 
     code = string.replace (code, '\r', '')
-    if language == "php" :
+    if options.language == "php" :
         code = "<?php\n%s\n?>\n" % code
 
     res = fs.execute (code, True)
@@ -107,4 +107,4 @@ if __name__ == "__main__":
     
     (options, args) = parser.parse_args()
     code = sys.stdin.read()
-    execute (code, options.guid, options.language)
+    execute (code, options)

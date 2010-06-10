@@ -1,20 +1,6 @@
 #!/usr/bin/php5
 <?php
 
-ini_set        ('include_path',  ini_get('include_path') . PATH_SEPARATOR . '/home/mike/ScraperWiki/scraperwiki/uml/controller') ;
-
-#import  sys
-#import  os
-#import  socket
-#import  signal
-#import  string
-#import  time
-#import  urllib2
-#import  ConfigParser
-#
-#try    : import json
-#except : import simplejson as json
-#
 $USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]' ;
 $cache       = undef ;
 $trace       = undef ;
@@ -107,11 +93,9 @@ function sw_scrape ($url)
 
    $curl = curl_init ($url ) ;
    curl_setopt ($curl, CURLOPT_RETURNTRANSFER,  true      ) ;
-   curl_setopt ($curl, CURLOPT_PROXY,           $httpProxy) ;
    $res  = curl_exec ($curl) ;
 
    curl_close ($curl) ;
-   sw_logScrapedURL ($url, strlen($res)) ;
    return   $res  ;
 }
 
@@ -120,11 +104,9 @@ function sw_data_save ($unique_keys, $data)
    sw_dumpMessage (array('message_type' => 'data', 'content' => $data)) ;
 }
 
-#
-#if path is not None :
-#    for p in string.split (path, ':') :
-#        sys.path.append (p)
-#
+foreach (split (':', $path) as $dir)
+    ini_set ('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
+
 #import  scraperwiki.utils
 #import  scraperwiki.datastore
 #import  scraperwiki.console
@@ -197,48 +179,13 @@ function sw_data_save ($unique_keys, $data)
 #          ]
 #    return str(sys.exc_type), string.join(tb, ''), None, None
 #
-#def execute (code) :
-#
-#    try :
-#        import imp
-#        ostimes1   = os.times ()
-#        cltime1    = time.time()
-#        mod        = imp.new_module ('scraper')
-#        exec code.rstrip() + "\n" in mod.__dict__
-#        ostimes2   = os.times ()
-#        cltime2    = time.time()
-#        try    :
-#            msg = '%d seconds elapsed, used %d CPU seconds' %  \
-#                                    (   int(cltime2 - cltime1),
-#                                        int(ostimes2[0] - ostimes1[0])
-#                                    )
-#            sys.stdout.write \
-#                (   json.dumps \
-#                    (   {   'message_type'  : 'console',
-#                            'content'       : msg,
-#                        }
-#                    )   + '\n'
-#                )
-#            sys.stdout.flush ()
-#        except :
-#            pass
-#        etext, trace, infile, atline = None, None, None, None
-#    except Exception, e :
-#        import errormapper
-#        emsg = errormapper.mapException (e)
-#        etext, trace, infile, atline = getTraceback (code)
-#        errfd.write \
-#            (   json.dumps \
-#                (   {   'message_type'  : 'exception',
-#                        'content'       : emsg,
-#                        'content_long'  : trace,
-#                        'filename'      : infile,
-#                        'lineno'        : atline
-#                    }
-#                )   + '\n'
-#            )
-#        sys.stdout.flush ()
-#
-#execute (open(script).read())
-require  $script  ;
+#try
+{
+   require  $script  ;
+}
+#catch (Exception $e)
+#{
+#   print "EXCEPTION\n" ;
+#}
+
 ?>

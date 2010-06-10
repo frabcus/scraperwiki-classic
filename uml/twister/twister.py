@@ -169,7 +169,7 @@ class RunnerProtocol(protocol.Protocol):
                     
                     # these could all be fetched from self
                     guid = parsed_data['guid']
-                    scraperlanguage = parsed_data.get('language', 'Python')
+                    scraperlanguage = parsed_data.get('language', 'python')
                     scrapername = parsed_data.get('scrapername', '')
                     scraperlanguage = parsed_data.get('language', '')
 
