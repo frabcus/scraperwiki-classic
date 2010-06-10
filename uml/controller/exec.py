@@ -167,7 +167,7 @@ def getJTraceback(code):
         stackentry["furtherlinetext"] = exc_value.msg
         stackdump.append(stackentry)
     
-    result = { "exceptiondescription":repr(exc_value), "stackdump":stackdump }
+    result = { "exceptiondescription":repr(exc_value).replace("<", "&lt;"), "stackdump":stackdump }
     return result
 
 

@@ -16,6 +16,7 @@ $(document).ready(function() {
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
     var conn; // Orbited connection
+    var bConnected = false; 
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
@@ -295,6 +296,7 @@ $(document).ready(function() {
         else
             mreadystate = 'readystate=' + conn.readyState;
         writeToChat('Connection opened: ' + mreadystate); 
+        bConnected = true; 
 
         // send the username and guid of this connection to twisted so it knows who's logged on
         data = { "command":'connection_open', 
@@ -322,9 +324,16 @@ $(document).ready(function() {
             mcode = 'code=' + code;
 
         writeToChat('Connection closed: ' + mcode); 
-        
+        bConnected = false; 
+
         // couldn't find a way to make a reconnect button work!
         writeToChat('<b>You will need to reload the page to reconnect</b>');  
+        writeToConsole("Connection to runner lost, you will need to reload this page.", undefined, "exception"); 
+        writeToConsole("(You can still save your work)", undefined, "exception"); 
+        $('.editor_controls #run').val('Unconnected');
+        $('.editor_controls #run').unbind('click.run');
+        $('.editor_controls #run').unbind('click.abort');
+        $('#running_annimation').hide(); 
 
         sChatTabMessage = 'Disconnected'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
@@ -477,10 +486,8 @@ $(document).ready(function() {
         //show the output area
         resizeControls('up');
         
-        //chaneg docuemnt title
         document.title = document.title + ' *'
         
-        //hide annimation
         $('#running_annimation').show();
     
         //clear the tabs
@@ -752,7 +759,8 @@ $(document).ready(function() {
                             showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
                         }
                     
-                        send({"command":'saved'}); 
+                        if (bConnected)
+                            send({"command":'saved'}); 
 
                         pageIsDirty = false; // page no longer dirty
                     }
