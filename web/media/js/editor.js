@@ -840,7 +840,7 @@ $(document).ready(function() {
     function writeExceptionDump(data) {
 
         // original exception code
-        if (true || !data.jtraceback) {
+        if (false || !data.jtraceback) {
             sMessage = data.content;
             iLineNumber = 0;
             if(parseInt(data.lineno) > 0){
@@ -851,16 +851,19 @@ $(document).ready(function() {
         }
 
         // new exception code
-        writeToConsole("New exception handler:"); 
-        writeToConsole("New exception handler:"); 
+        //writeToConsole("New exception handler:"); 
+        //writeToConsole("New exception handler:"); 
         if (data.jtraceback) {
             //alert($.toJSON(data.jtraceback)); 
             var sMessage; 
             var linenumber; 
             for (var i = 0; i < data.jtraceback.stackdump.length; i++) {
                 var stackentry = data.jtraceback.stackdump[i]; 
-                sMessage = (stackentry.func == undefined ? "code" : stackentry.func + stackentry.funcargs); 
+                sMessage = (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file); 
+                if (stackentry.furtherlinetext != undefined)
+                    sMessage += " -- " + stackentry.furtherlinetext; 
                 linenumber = (stackentry.file == "<string>" ? stackentry.linenumber : undefined); 
+                sMessage = sMessage.replace(/</g, '&lt;'); // quick escape
                 writeToConsole(sMessage, undefined, 'exception', linenumber); 
             }
             writeToConsole(data.jtraceback.exceptiondescription, undefined, 'exception'); 

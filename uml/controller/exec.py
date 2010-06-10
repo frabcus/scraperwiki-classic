@@ -125,33 +125,49 @@ def sigXCPU (signum, frame) :
 signal.signal (signal.SIGXCPU, sigXCPU)
 
 
+
+
+
 # Code waiting to be reformatted to another standard that I don't understand (Julian)
+
+
+
 import inspect
 import traceback
-def getJTraceback():
+def getJTraceback(code):
     """Traceback that makes raw data available to javascript to process"""
-    info = sys.exc_info()   # last exception that was thrown
+    exc_type, exc_value, exc_traceback = sys.exc_info()   # last exception that was thrown
+    codelines = code.splitlines()
     stackdump = [ ]
-    # outer level is the controller, 
-    # second level is the module call.
-    # anything beyond is within a function.  Move the function call description to the correct place
-    for frame, file, linenumber, func, lines, index in inspect.getinnerframes(info[2])[1:]:  # skip outer frame
-        args, varargs, varkw, locals = inspect.getargvalues(frame)
-        funcargs = inspect.formatargvalues(args, varargs, varkw, locals, formatvalue=lambda value: '=%s' % repr(value))
+        # outer level is the controller, 
+        # second level is the module call.
+        # anything beyond is within a function.  
+            # Move the function call description up one level to the correct place
+    for frame, file, linenumber, func, lines, index in inspect.getinnerframes(exc_traceback, context=1)[1:]:  # skip outer frame
+        stackentry = {"linenumber":linenumber, "file":file}
+        if func != "<module>":
+            args, varargs, varkw, locals = inspect.getargvalues(frame)
+            funcargs = inspect.formatargvalues(args, varargs, varkw, locals, formatvalue=lambda value: '=%s' % repr(value))
+            stackentry["furtherlinetext"] = "%s(%s)" % (func, funcargs)  # double brackets to make it stand out
         
-        # shuffle up the values so they are aligned with where the functions are called
-        if stackdump:
-            stackdump[-1]["func"] = func
-            stackdump[-1]["funcargs"] = funcargs
-        else:
-            pass # assert func == "<module>"
+        if file == "<string>" and 0 < linenumber - 1 < len(codelines):
+            stackentry["linetext"] = codelines[linenumber - 1]  # have to do this as context=1 doesn't work (it doesn't give me anything in lines)
+        
+        stackdump.append(stackentry)
+        
         if file[:15] == "/usr/lib/python":
             break
-        else: 
-            pass # assert file == "<string>"
+        pass # assert file == "<string>"
         
-        stackdump.append({"linenumber":linenumber, "file":file})
-    return { "exceptiondescription":repr(info[1]), "stackdump":stackdump }
+    if exc_type == SyntaxError:
+        stackentry = {"linenumber":exc_value.lineno, "file":exc_value.filename, "offset":exc_value.offset}
+        if stackentry["file"] == "<string>" and 0 < stackentry["linenumber"] - 1 < len(codelines):
+            stackentry["linetext"] = codelines[stackentry["linenumber"] - 1]  # can't seem to recover the text from the SyntaxError object, though it is in it's repr
+        stackentry["furtherlinetext"] = exc_value.msg
+        stackdump.append(stackentry)
+    
+    result = { "exceptiondescription":repr(exc_value), "stackdump":stackdump }
+    return result
 
 
 def getTraceback (code) :
@@ -185,23 +201,18 @@ def execute (code) :
         mod        = imp.new_module ('scraper')
         exec code.rstrip() + "\n" in mod.__dict__
     except Exception, e :
+        
+        # all this to go when happy
         import errormapper
         emsg = errormapper.mapException (e)
         etext, trace, infile, atline = getTraceback (code)
-        jtraceback = getJTraceback()  # raw stack info so it can be formatted in javascript (and replace previous methods)
+        
+        # new version that gives raw stack info that can be formatted in javascript (and replace previous methods)
+        jtraceback = getJTraceback(code)  
         
         # errfd = sys.stderr, which has the problem that the messages can get printed out of order!
-        errfd.write \
-            (   json.dumps \
-                (   {   'message_type'  : 'exception',
-                        'content'       : emsg,
-                        'content_long'  : trace,
-                        'filename'      : infile,
-                        'lineno'        : atline, 
-                        'jtraceback'    : jtraceback
-                    }
-                )   + '\n'
-            )
-        sys.stdout.flush ()
+        scraperwiki.console.dumpMessage(message_type='exception', content=emsg, content_long=trace, filename=infile, 
+                                        lineno=atline, jtraceback=jtraceback)
+        
 
 execute (open(script).read())
