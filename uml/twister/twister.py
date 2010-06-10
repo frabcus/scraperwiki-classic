@@ -182,9 +182,11 @@ class RunnerProtocol(protocol.Protocol):
                     # args must be an ancoded string, not a unicode object
                     args = [i.encode('utf8') for i in args]
 
+                    print "./firestarter/runner.py: %s" % args
+
                     self.running = reactor.spawnProcess(
                         spawnRunner(self, code), \
-                        './firestarter/runner.py', args
+                        './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'}
                             )
 
                     message = "%s runs scraper" % self.chatname
