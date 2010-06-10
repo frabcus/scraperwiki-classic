@@ -20,7 +20,6 @@ import  urllib   # should this be urllib2? -- JGT
 import  ConfigParser
 import  hashlib
 import  OpenSSL
-import  ssl
 import  re
 
 global config
@@ -139,7 +138,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if scheme == 'https' :
-            soc = ssl.wrap_socket(soc)
+            soc = OpenSSL.SSL.wrap_socket(soc)
 
         try :
             soc.connect(host_port)
