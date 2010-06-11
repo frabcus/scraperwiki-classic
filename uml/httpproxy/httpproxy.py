@@ -260,7 +260,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     def notify (self, host, **query) :
 
         query['message_type'] = 'sources'
-        urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
+        try    : urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
+        except : pass
 
     def retrieve (self, method) :
 

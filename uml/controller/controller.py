@@ -324,10 +324,14 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         params = cgi.parse_qs(query)
-        try    :
+        wfile  = None
+        try     :
             lock.acquire()
             wfile = scrapers[params['runid'][0]]['wfile']
+        finally :
             lock.release()
+
+        if wfile is not None :
             msg   = {}
             for key, value in params.items() :
                 if key != 'runid' :
@@ -335,8 +339,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             line  = json.dumps(msg) + '\n'
             wfile.write (line)
             wfile.flush ()
-        except :
-            pass
 
         self.connection.send  ('HTTP/1.0 200 OK\n')
         self.connection.send  ('Connection: Close\n')
