@@ -5,6 +5,7 @@ from django.utils.encoding import smart_str
 
 from piston.emitters import Emitter
 import phpserialize
+import gviz_api
 
 try:
     import cStringIO as StringIO
@@ -80,3 +81,25 @@ class PHPEmitter(Emitter):
         
         result = phpserialize.dumps(return_content)
         return result
+
+
+class GVizEmitter(Emitter):
+    def render(self, request):
+        dictlist = self.construct()
+
+        keyset = set()
+        for row in dictlist:
+            if "latlng" in row:   # split the latlng
+                row["lat"], row["lng"] = row.pop("latlng")
+            row.pop("date_scraped", None)
+            keyset.update(row.keys())
+        allkeys = sorted(keyset)
+
+        description = {}
+        for key in allkeys:
+            description[key] = ('string', key)
+
+        data_table = gviz_api.DataTable(description)
+        data_table.LoadData(dictlist)
+
+        return unicode(data_table.ToJSonResponse())
