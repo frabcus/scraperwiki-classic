@@ -1,3 +1,4 @@
+require  'scraperwiki/datastore.php'         ;
 require  'scraperwiki/simple_html_dom.php'   ;
 
 $html = file_get_html('http://scraperwiki.com/hello_world.html') ;

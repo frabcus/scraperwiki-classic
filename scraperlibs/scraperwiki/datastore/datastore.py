@@ -151,7 +151,6 @@ class DataStoreClass :
     def postcodeToLatLng (self, postcode) :
 
         return self.request (('postcodetolatlng', postcode))
-# decode disconnection message http://orbited.org/wiki/TCPSocket
 
     def close (self) :
 

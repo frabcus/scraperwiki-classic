@@ -99,10 +99,6 @@ function sw_scrape ($url)
    return   $res  ;
 }
 
-function sw_data_save ($unique_keys, $data)
-{
-   sw_dumpMessage (array('message_type' => 'data', 'content' => $data)) ;
-}
 
 foreach (split (':', $path) as $dir)
     ini_set ('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
