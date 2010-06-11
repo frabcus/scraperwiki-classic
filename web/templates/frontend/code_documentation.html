@@ -191,6 +191,46 @@
                   will be displayed on the scraper overview page.
                 </td>
               </tr>
+              <tr>
+                <td>data_columns</td>
+                <td>
+                  If a list of column names is stored in this metadata item it will be used to decide
+                  which columns will be displayed in the data table and in which order.
+                </td>
+              </tr>
+              <tr>
+                <td>map_columns</td>
+                <td>
+                  If a list of column names is stored in this metadata item it will be used to decide
+                  which columns will be displayed in the map popups and in which order.
+
+                  Note: 'latlng' must be included in this list for the points to be displayed on the map
+                </td>
+              </tr>
+              <tr>
+                <td>private_columns</td>
+                <td>
+                  If a list of column names is stored in this metadata item it will be used to hide
+                  columns, in the data table and the map, from users who are not the owner of the
+                  scraper.
+
+                  Note: Making 'latlng' private will cause the points not to be displayed on the map
+                </td>
+              </tr>
+              <tr>
+                <td>num_data_points</td>
+                <td>
+                  Determines the maximum number of items that will be shown in the data table.
+                  Default: {{settings.MAX_DATA_POINTS}}
+                </td>
+              </tr>
+              <tr>
+                <td>num_map_points</td>
+                <td>
+                  Determines the maximum number of points that will be shown on the map.
+                  Default: {{settings.MAX_MAP_POINTS}}
+                </td>
+              </tr>
             </table>
         </div>
 
