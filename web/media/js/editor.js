@@ -42,9 +42,17 @@ $(document).ready(function() {
 
     //setup code editor
     function setupCodeEditor(){
+        var parsers = Array();
+        parsers['python'] = '../contrib/python/js/parsepython.js';
+        parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];
+
+        var stylesheets = Array();
+        stylesheets['python'] = 'contrib/python/css/pythoncolors.css';
+        stylesheets['php'] = 'contrib/php/css/phpcolors.css';
+
         codeeditor = CodeMirror.fromTextArea("id_code", {
-            parserfile: ["../contrib/python/js/parsepython.js"],
-            stylesheet: codemirror_url + "contrib/python/css/pythoncolors.css",
+            parserfile: parsers[scraperlanguage],
+            stylesheet: codemirror_url + stylesheets[scraperlanguage],
             path: codemirror_url + "js/",
             domain: document.domain, 
             textWrapping: true,

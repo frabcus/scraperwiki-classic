@@ -179,7 +179,7 @@ def saveeditedscraper(request, scraper):
 
 
 #Editor form
-def edit(request, short_name='__new__'):
+def edit(request, short_name='__new__', language='Python'):
 
     # identify the scraper (including if there was a draft one backed up)
     has_draft = False
@@ -205,17 +205,21 @@ def edit(request, short_name='__new__'):
     
     # Create a new scraper
     else:
+        if language not in ['Python', 'PHP']:
+            language = 'Python'
+
         scraper = ScraperModel()  
         
         # select a startup scraper code randomly from those with the right flag
-        startup_scrapers = ScraperModel.objects.filter(published=True, isstartup=True)
+        startup_scrapers = ScraperModel.objects.filter(published=True, isstartup=True, language=language)
         startupcode = "# blank"
         if len(startup_scrapers):
             startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
-        
+
         scraper.code = startupcode
         scraper.license = 'Unknown'
         scraper.commit_message = 'Scraper created'
+        scraper.language = language
     
         # could crate a default for new scrapers
         # scraper.published = True
@@ -231,6 +235,6 @@ def edit(request, short_name='__new__'):
     form.fields['code'].initial = scraper.code
     form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
 
-    tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True)
+    tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language=language)
 
     return render_to_response('editor/editor.html', {'form':form, 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft, 'user':request.user}, context_instance=RequestContext(request))

@@ -8,15 +8,11 @@ urlpatterns = patterns('',
   # The order of these is very important to
   url(r'^handle_session_draft/(?P<action>[\-\w]+)$',     views.handle_session_draft, name="handle_session_draft"),
   url(r'^$',                            views.edit, name="editor"),    # blank name for draft scraper
+  url(r'^new/(?P<language>[\w]+)$',     views.edit, name="editor"),
   url(r'^(?P<short_name>[\-\w]+)$',     views.edit, name="editor"),
-  
-  
-  url(r'^draft/delete/$',                views.delete_draft, name="delete_draft"),
-  
+  url(r'^draft/delete/$',               views.delete_draft, name="delete_draft"),
   url(r'diff/$',                        views.diff,         name="diff"),   # blank name for draft scraper
   url(r'diff/(?P<short_name>[\-\w]+)$', views.diff,         name="diff"),
-  
   url(r'raw/$',                         views.raw,          name="raw"),   # blank name for draft scraper
   url(r'raw/(?P<short_name>[\-\w]+)$',  views.raw,          name="raw"),   # blank name for draft scraper
-  
 )
