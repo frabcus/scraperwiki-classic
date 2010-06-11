@@ -1,6 +1,7 @@
 #!/usr/bin/php5
 <?php
 
+
 $USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]' ;
 $cache       = undef ;
 $trace       = undef ;
@@ -102,6 +103,10 @@ function sw_scrape ($url)
 
 foreach (split (':', $path) as $dir)
     ini_set ('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
+
+require_once  'scraperwiki/datastore.php' ;
+$dsinfo = split (':', $datastore)         ;
+DataStoreClass::create ($dsinfo[0], $dsinfo[1]) ;
 
 #import  scraperwiki.utils
 #import  scraperwiki.datastore

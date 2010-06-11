@@ -1,15 +1,17 @@
-v<?php
+<?php
 
 class DataStoreClass
 {
    private static $m_ds       ;
    protected      $m_socket   ;
-   protected      $m_config   ;
+   protected      $m_host     ;
+   protected      $m_port     ;
 
-   function __construct ($config)
+   function __construct ($host, $port)
    {
       $this->m_socket    = null     ;
-      $this->m_config    = $config  ;
+      $this->m_host      = $host    ;
+      $this->m_port      = $port    ;
    }
 
    function mangleflattendict ($data)
@@ -52,7 +54,7 @@ class DataStoreClass
       if (is_null($this->m_socket))
       {
             $this->m_socket    = socket_create (AF_INET, SOCK_STREAM, SOL_TCP) ;
-            socket_connect     ($this->m_socket, $this->m_config[0], $this->m_config[1]) ;
+            socket_connect     ($this->m_socket, $this->m_host, $this->m_port) ;
             socket_getsockname ($this->m_socket, $addr, $port) ;
             $getmsg = sprintf  ("GET /?uml=%s&port=%s HTTP/1.1\n\n", trim(`/bin/hostname`), $port) ;
             socket_send        ($this->m_socket, $getmsg, strlen($getmsg), MSG_EOR) ;
@@ -141,24 +143,22 @@ class DataStoreClass
 #        $this->m_socket = None
 #
 
-   static function create ($config)
+   static function create ($host = null, $port = null)
    {
       if (is_null(self::$m_ds))
-         self::$m_ds = new DataStoreClass ($config) ;
+         self::$m_ds = new DataStoreClass ($host, $port) ;
       return   self::$m_ds ;
    }
 }
 
 function sw_data_save ($unique_keys, $data, $date = null, $latlng = null)
 {
-   $ds      = DataStoreClass::create (array('192.168.1.66', 9003)) ;
+   $ds      = DataStoreClass::create () ;
 
    $result  = $ds->save ($unique_keys, $data, $date = null, $latlng = null) ;
    if (! $result[0])
-{
-print "E:" . $result[0] . "::" . $result[1] . ":\n" ;
       throw new Exception ($result[1]) ;
-}
+
    sw_dumpMessage (array('message_type' => 'data', 'content' => $data)) ;
 }
 
