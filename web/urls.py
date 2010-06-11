@@ -31,9 +31,6 @@ feeds = {
 urlpatterns = patterns('',
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
     url(r'^editor/', include('editor.urls')),
-    
-    url(r'^scraper_data/(?P<short_name>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}, name="scraper_data"),
-    
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name="logout"), 
     url(r'^accounts/', include('registration.urls')),
     url(r'^scrapers/', include('scraper.urls')),
