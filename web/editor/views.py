@@ -69,7 +69,7 @@ def handle_session_draft(request, action):
         success = False
         if not session_scraper_draft:
             # Shouldn't be here, go home
-            response_url = reverse(frontpage)
+            response_url = reverse('frontpage')
         else:
             draft_scraper = session_scraper_draft.get('scraper', None)
             draft_tags = session_scraper_draft.get('tags', '')   
