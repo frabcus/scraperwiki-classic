@@ -17,6 +17,8 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 .editor_header ul.help {font-size:0.75em; position:absolute; right:1em; top:0.75em;}
 .editor_header ul.help, .editor_header ul.help li {padding:0; margin:0 0 0 0.8em;}
 .editor_header ul.help li {list-style-type:none; display:inline;}
+.language {background:#ccff33; border:solid 1px #99ff00; padding:0.18em 0.4em!important;
+    border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;}
 .helplink {background:#f08a38; border:solid 1px #bf6312; padding:0.18em 0.4em!important;
     border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;}
 .helplink a {text-decoration:none;}    
