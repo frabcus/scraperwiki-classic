@@ -17,7 +17,7 @@ class GetInfo(APIBase):
                 info['last_run']    = scraper.last_run
                 info['records']     = scraper.record_count
                 info['short_name']  = scraper.short_name
-                info['language']    = scraper.language()
+                info['language']    = scraper.language
                 info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
                 self.result = [info,]
             else:
