@@ -43,9 +43,12 @@ def overview(request, scraper_short_name):
     scraper_contributors = scraper.contributors()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
+    offset = request.GET.get('i', 0) 
+
     table = models.Scraper.objects.data_summary(
         scraper_id=scraper.guid,
-        limit=1)
+        limit=1,
+        offset=offset)
     data = None
     has_data = len(table['rows']) > 0
     if has_data:
