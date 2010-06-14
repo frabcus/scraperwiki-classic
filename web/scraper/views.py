@@ -43,7 +43,10 @@ def overview(request, scraper_short_name):
     scraper_contributors = scraper.contributors()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    offset = request.GET.get('i', 0) 
+    try:
+        offset = int(request.GET.get('i'))
+    except:
+        offset = 0
 
     table = models.Scraper.objects.data_summary(
         scraper_id=scraper.guid,
