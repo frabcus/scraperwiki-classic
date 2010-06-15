@@ -219,6 +219,7 @@ def osgb_to_lonlat (osgb_str):
 	"""
 	## Preconditions & preparation:
 	# clean string and split off zone prefix & coords
+	osgb_str = str(osgb_str)   # deals with unicode problems
 	osgb_str = osgb_str.replace (' ', '').upper()
 	osgb_zone = osgb_str[:2]
 	osgb_coords = osgb_str[2:]

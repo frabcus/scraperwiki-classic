@@ -2,12 +2,21 @@
 
 import  sys
 import  os
+
+# moved to the top because syntax errors in the scraperlibs otherwise are difficult to detect
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
+
+errfd = sys.stderr
+sys.stderr = sys.stdout
+
 import  socket
 import  signal
 import  string
 import  time
 import  urllib2
 import  ConfigParser
+
 
 try    : import json
 except : import simplejson as json
@@ -73,8 +82,6 @@ if path is not None :
     for p in string.split (path, ':') :
         sys.path.append (p)
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
 
 import  scraperwiki.utils
 import  scraperwiki.datastore
@@ -85,6 +92,7 @@ config = ConfigParser.ConfigParser()
 config.add_section ('dataproxy')
 config.set         ('dataproxy', 'host', string.split(datastore, ':')[0])
 config.set         ('dataproxy', 'port', string.split(datastore, ':')[1])
+
 
 #  These seem to be needed for urllib.urlopen() to support proxying, though
 #  FTP doesn't actually work.
@@ -113,9 +121,9 @@ if cache is not None :
 #
 scraperwiki.datastore.DataStore (config)
 
-errfd = sys.stderr
-scraperwiki.console.setConsole  (sys.stderr)
-sys.stderr = sys.stdout
+
+scraperwiki.console.setConsole  (errfd)
+
 
 #  Set up a CPU time limit handler which simply throws a python
 #  exception.
@@ -130,7 +138,6 @@ signal.signal (signal.SIGXCPU, sigXCPU)
 
 
 # Code waiting to be reformatted to another standard that I don't understand (Julian)
-
 
 
 import inspect

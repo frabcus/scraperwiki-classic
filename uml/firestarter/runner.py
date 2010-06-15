@@ -25,7 +25,12 @@ import firestarter
 def execute (code, options) :
 
     def format_json(line):
-        message = json.loads(line)
+        try:
+            message = json.loads(line)
+        except:
+            # this only seems to get one line out when there 
+            message = { 'content': "ERROR: %s" % line, "content_long":"" }
+            
         for key in [ 'content', 'content_long' ] :
             try    : message[key] = cgi.escape(message[key])
             except : pass
