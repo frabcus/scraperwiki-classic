@@ -13,6 +13,8 @@ $httpProxy   = undef ;
 $httpsProxy  = undef ;
 $ftpProxy    = undef ;
 $datastore   = undef ;
+$uid         = undef ;
+$gid         = undef ;
 
 for ($idx = 1 ; $idx < count($argv) ; $idx += 1)
 {
@@ -68,14 +70,39 @@ for ($idx = 1 ; $idx < count($argv) ; $idx += 1)
       $datastore  = substr ($arg,  5) ;
       continue    ;
    }
+   if (substr ($arg, 0, 6) == '--uid='       )
+   {
+      $uid        = substr ($arg,  6) ;
+      continue    ;
+   }
+   if (substr ($arg, 0, 6) == '--gid='       )
+   {
+      $gid        = substr ($arg,  6) ;
+      continue    ;
+   }
 
    print "usage: " . $argv[0] . $USAGE . "\n" ;
    exit  (1) ;
 }
 
+$logfd = fopen("/proc/self/fd/3", "w") ;
+
+if (!is_null($gid))
+{
+   posix_setgid  ($gid) ;
+   posix_setegid ($gid) ;
+}
+if (!is_null($uid))
+{
+   posix_setuid  ($uid) ;
+   posix_seteuid ($uid) ;
+}
+
+
 function sw_dumpMessage ($dict)
 {
-   fwrite (STDERR, json_encode ($dict) . "\n") ;
+   global $logfd ;
+   fwrite ($logfd, json_encode ($dict) . "\n") ;
 }
 
 function sw_logScrapedURL ($url, $length)

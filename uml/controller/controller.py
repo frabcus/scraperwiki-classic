@@ -34,21 +34,24 @@ except : import simplejson as json
 global  confnam
 global  config
 global  firewall
-global  scrapers
+global  scrapersByRunID
+global  scrapersByPID
 global  lock
 
-USAGE       = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--firewall=option] [--config=file] [--name=name]"
-child       = None
-varDir      = '/var'
-confnam     = 'uml.cfg'
-config      = None
-name        = None
-firewall    = None
-re_resolv   = re.compile ('nameserver\s+([0-9.]+)')
-setuid      = True
-scrapers    = {}
-lock        = threading.Lock()
+USAGE           = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--firewall=option] [--config=file] [--name=name]"
+child           = None
+varDir          = '/var'
+confnam         = 'uml.cfg'
+config          = None
+name            = None
+firewall        = None
+re_resolv       = re.compile ('nameserver\s+([0-9.]+)')
+setuid          = True
+scrapersByRunID = {}
+scrapersByPID   = {}
+lock            = threading.Lock()
 
+infomap     = {}
 
 class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
@@ -78,6 +81,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.m_stderr       = sys.stderr
         self.m_scraperID    = None
         self.m_runID        = None
+        self.m_uid          = None
+        self.m_gid          = None
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
@@ -170,6 +175,38 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             except :
                 self.send_error (404, 'Group %s not found' % self.headers['x-setgroup'])
                 return
+
+    def checkUser (self) :
+
+        """
+        If the \em x-setuser header is present then use that for the real and
+        effective user.
+        """
+
+        if setuid and 'x-setuser'  in self.headers :
+            import pwd
+            try    :
+                self.m_uid = pwd.getpwnam (self.headers['x-setuser' ]).pw_uid
+            except :
+                self.send_error (404, 'User %s not found'  % self.headers['x-setuser' ])
+                return False
+        return True
+
+    def checkGroup (self) :
+
+        """
+        If the \em x-setgroup header is present then use that for the real and
+        effective group.
+        """
+
+        if setuid and 'x-setgroup' in self.headers :
+            import grp
+            try    :
+                self.m_gid = grp.getgrnam (self.headers['x-setgroup']).gr_gid
+            except :
+                self.send_error (404, 'Group %s not found' % self.headers['x-setgroup'])
+                return False
+        return True
 
     def setScraperID (self) :
 
@@ -267,7 +304,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         status = []
         lock.acquire()
-        for key, value in scrapers.items() :
+        for key, value in scrapersByRunID.items() :
             status.append ('runID=%s' % (key))
         lock.release()
 
@@ -299,8 +336,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         #  The query contains the proxy's remote port (which is the local port here)
         #  and the proxy's local port (which is the remote port here). Scan all open
         #  files for a TCP/IP stream with these two ports. If found then extract the
-        #  process number; this is used to open the /tmp/ident.PID file which contains
-        #  the scraper and run identifiers.
+        #  process number; this is used to map to the identification information for
+        #  the scraper.
         #
         (lport, rport) = string.split (query, ':')
         p    = re.compile ('exec.[a-z]+ *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
@@ -309,8 +346,14 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             m = p.match (line)
             if m :
                 self.log_request('Ident', '(%s,%s) is pid %s' % (lport, rport, m.group(1)))
-                try    : self.connection.send (open('/tmp/ident.%s' % m.group(1)).read())
-                except : self.log_request('Ident', '(%s,%s) send failed' % (lport, rport))
+                try    :
+                    info = scrapersByPID[int(m.group(1))]
+                    self.connection.send (string.join(info['idents'], '\n'))
+                    self.connection.send ("\n")
+                    for key, value in info['options'].items() :
+                        self.connection.send ('option=%s:%s\n' % (key, value))
+                except :
+                    self.log_request('Ident', '(%s,%s) send failed' % (lport, rport))
                 return
         self.log_request('Ident', '(%s,%s) not found' % (lport, rport))
 
@@ -320,14 +363,14 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         Send notification back through the controller.
 
         @type   query   : String
-        @param  query   : (remote:local) ports from the proxy's viewpoint
+        @param  query   : URL-encoded message data plus runid
         """
 
-        params = cgi.parse_qs(query)
-        wfile  = None
+        params  = cgi.parse_qs(query)
+        wfile   = None
         try     :
             lock.acquire()
-            wfile = scrapers[params['runid'][0]]['wfile']
+            wfile = scrapersByRunID[params['runid'][0]]['wfile']
         finally :
             lock.release()
 
@@ -347,6 +390,38 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  ('Content-Type: text/text\n')
         self.connection.send  ('\n')
 
+    def sendOption (self, query) :
+
+        """
+        Set option
+
+        @type   query   : String
+        @param  query   : URL-encoded options data plus runid
+        """
+
+        params  = cgi.parse_qs(query)
+        options = None
+        try     :
+            lock.acquire()
+            options = scrapersByRunID[params['runid'][0]]['options']
+        finally :
+            lock.release()
+
+        if options is not None :
+            for key, value in params.items() :
+                if key != 'runid' :
+                    options[key] = value[0]
+
+        self.connection.send  ('HTTP/1.0 200 OK\n')
+        self.connection.send  ('Connection: Close\n')
+        self.connection.send  ('Pragma: no-cache\n')
+        self.connection.send  ('Cache-Control: no-cache\n')
+        self.connection.send  ('Content-Type: text/text\n')
+        self.connection.send  ('\n')
+        for key, value in options.items() :
+            self.connection.send ("%s=%s\n" % (key, value))
+
+        self.log_request('Option', '')
 
     def execute (self, path) :
 
@@ -398,13 +473,18 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
             return
 
-        if path == '/Status'  :
+        if path == '/Status' :
             self.sendStatus (query)
             self.connection.close()
             return
 
         if path == '/Notify' :
             self.sendNotify (query)
+            self.connection.close()
+            return
+
+        if path == '/Option' :
+            self.sendOption (query)
             self.connection.close()
             return
 
@@ -459,6 +539,9 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                     '--script=/tmp/scraper.%d'  % os.getpid(),
                 ]
 
+        if self.m_uid is not None : args.append ('--uid=%d' % self.m_uid)
+        if self.m_gid is not None : args.append ('--gid=%d' % self.m_gid)
+
         try    : args.append ('--cache=%s' % self.headers['x-cache'    ])
         except : pass
         try    : args.append ('--trace=%s' % self.headers['x-traceback'])
@@ -467,9 +550,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         os.close (0)
         os.close (1)
         os.close (2)
+        os.close (3)
         os.open  ('/dev/null', os.O_RDONLY)
         os.dup2  (pwfd, 1)
-        os.dup2  (lwfd, 2)
+        os.dup2  (pwfd, 2)
+        os.dup2  (lwfd, 3)
         os.close (pwfd)
         os.close (lwfd)
 
@@ -518,8 +603,22 @@ class ScraperController (BaseController) :
         @param  path    : Split CGI execution path
         """
 
+        if not self.checkUser () : return
+        if not self.checkGroup() : return
+
         self.setScraperID   ()
         self.setRunID       ()
+
+        idents = []
+        if self.m_scraperID is not None : idents.append ('scraperid=%s' % self.m_scraperID)
+        if self.m_runID     is not None : idents.append ('runid=%s'     % self.m_runID    )
+        for name, value in self.headers.items() :
+            if name[:17] == 'x-addallowedsite-' :
+                idents.append ('allow=%s' % value)
+                continue
+            if name[:17] == 'x-addblockedsite-' :
+                idents.append ('block=%s' % value)
+                continue
 
         fs = self.getFieldStorage ()
 
@@ -531,7 +630,9 @@ class ScraperController (BaseController) :
 
             cltime1 = time.time()
             lock.acquire()
-            scrapers[self.m_runID] = { 'wfile' : self.wfile }
+            info    = { 'wfile' : self.wfile, 'idents' : idents, 'options' : {} }
+            scrapersByRunID[self.m_runID] = info
+            scrapersByPID  [pid         ] = info
             lock.release()
 
             try :
@@ -624,7 +725,8 @@ class ScraperController (BaseController) :
             finally :
 
                 lock.acquire()
-                del scrapers[self.m_runID]
+                del scrapersByRunID[self.m_runID]
+                del scrapersByPID  [pid         ]
                 lock.release()
 
                 try    : os.remove ('/tmp/scraper.%d' % pid)
@@ -642,17 +744,6 @@ class ScraperController (BaseController) :
         os.close (ppipe[0])
         os.close (lpipe[0])
 
-        idents = []
-        if self.m_scraperID is not None : idents.append ('scraperid=%s' % self.m_scraperID)
-        if self.m_runID     is not None : idents.append ('runid=%s'     % self.m_runID    )
-        for name, value in self.headers.items() :
-            if name[:17] == 'x-addallowedsite-' :
-                idents.append ('allow=%s' % value)
-                continue
-            if name[:17] == 'x-addblockedsite-' :
-                idents.append ('block=%s' % value)
-                continue
-
         open ('/tmp/ident.%d'   % os.getpid(), 'w').write(string.join(idents, '\n'))
         open ('/tmp/scraper.%d' % os.getpid(), 'w').write(fs['script'].value)
 
@@ -662,8 +753,6 @@ class ScraperController (BaseController) :
         #  environment.
         #
         self.setRLimit      ()
-        self.setGroup       ()
-        self.setUser        ()
         self.addPaths       ()
         self.addEnvironment ()
 
@@ -731,8 +820,10 @@ def autoFirewall () :
     natrules = []
 
     rules.append ('*filter')
+    rules.append ('-A OUTPUT -p tcp -d 127.0.0.1 -j ACCEPT'       )
     rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'host')))
     rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'tap' )))
+    rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'eth' )))
     rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('httpproxy',  'host'), config.get ('httpproxy',  'port')))
     rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('httpsproxy', 'host'), config.get ('httpsproxy', 'port')))
     rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('webproxy',   'host'), config.get ('webproxy',   'port')))

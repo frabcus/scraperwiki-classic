@@ -75,13 +75,15 @@ def allowCache (cf) :
 #
 def cache (enable = True) :
 
-    global urllibopener
-    global urllib2opener
+#   global urllibopener
+#   global urllib2opener
 
-    if urllibopener  is None : urllibSetup  ()
-    if urllib2opener is None : urllib2Setup ()
-    urllibopener .addheaders.append (('x-cache', enable and cacheFor or 0))
-    urllib2opener.addheaders.append (('x-cache', enable and cacheFor or 0))
+#   if urllibopener  is None : urllibSetup  ()
+#   if urllib2opener is None : urllib2Setup ()
+#   urllibopener .addheaders.append (('x-cache', enable and cacheFor or 0))
+#   urllib2opener.addheaders.append (('x-cache', enable and cacheFor or 0))
+
+    urllib2.urlopen("http://127.0.0.1:9001/Option?runid=%s&webcache=%s" % (os.environ['RUNID'], enable and cacheFor or 0)).read()
 
 #  Scrape a URL optionally with parameters. This is effectively a wrapper around
 #  urllib2.orlopen().

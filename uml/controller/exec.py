@@ -4,11 +4,9 @@ import  sys
 import  os
 
 # moved to the top because syntax errors in the scraperlibs otherwise are difficult to detect
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
-
-errfd = sys.stderr
-sys.stderr = sys.stdout
+#
+sys.stdout = os.fdopen(1, 'w', 0)
+sys.stderr = os.fdopen(2, 'w', 0)
 
 import  socket
 import  signal
@@ -32,6 +30,8 @@ httpProxy   = None
 httpsProxy  = None
 ftpProxy    = None
 datastore   = None
+uid         = None
+gid         = None
 
 for arg in sys.argv[1:] :
 
@@ -75,17 +75,34 @@ for arg in sys.argv[1:] :
         datastore  = arg[ 5:]
         continue
 
+    if arg[: 6] == '--uid='         :
+        uid        = arg[ 6:]
+        continue
+
+    if arg[: 6] == '--gid='         :
+        gid        = arg[ 6:]
+        continue
+
     print "usage: " + sys.argv[0] + USAGE
     sys.exit (1)
+
+if gid is not None :
+    os.setregid (int(gid), int(gid))
+if uid is not None :
+    os.setreuid (int(uid), int(uid))
 
 if path is not None :
     for p in string.split (path, ':') :
         sys.path.append (p)
 
 
+#  Imports cannot be done until sys.path is set
+#
 import  scraperwiki.utils
 import  scraperwiki.datastore
 import  scraperwiki.console
+
+scraperwiki.console.setConsole  (os.fdopen(3, 'w', 0))
 
 
 config = ConfigParser.ConfigParser()
@@ -122,7 +139,6 @@ if cache is not None :
 scraperwiki.datastore.DataStore (config)
 
 
-scraperwiki.console.setConsole  (errfd)
 
 
 #  Set up a CPU time limit handler which simply throws a python

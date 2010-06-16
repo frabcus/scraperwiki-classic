@@ -193,6 +193,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         scraperID = None
         runID     = None
+        cache     = 0
 
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
@@ -207,6 +208,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         ident     = urllib.urlopen ('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
 
         for line in string.split (ident, '\n') :
+            if line == '' :
+                continue
             key, value = string.split (line, '=')
             if key == 'runid' :
                 runID     = value
@@ -214,14 +217,17 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             if key == 'scraperid' :
                 scraperID = value
                 continue
-            if key == 'allow' :
+            if key == 'allow'  :
                 self.m_allowed.append (value)
                 continue
-            if key == 'block' :
+            if key == 'block'  :
                 self.m_blocked.append (value)
                 continue
+            if key == 'option' :
+                name, opt = string.split (value, ':')
+                if name == 'webcache' : cache = int(opt)
 
-        return scraperID, runID
+        return scraperID, runID, cache
 
     def blockmessage(self, url):
 
@@ -232,7 +238,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     def do_CONNECT (self) :
 
         (scheme, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-        scraperID, runID = self.ident ()
+        scraperID, runID, cache = self.ident ()
 
         self.swlog().log (scraperID, runID, 'P.CONNECT', arg1 = self.path)
 
@@ -290,7 +296,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
             return
 
-        scraperID, runID = self.ident ()
+        scraperID, runID, cache = self.ident ()
+        print "===>", scraperID, runID, cache
         self.swlog().log (scraperID, runID, 'P.GET', arg1 = self.path)
 
         if path == '' or path is None :
@@ -315,9 +322,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         used    = None
         content = None
         bytes   = 0
-        cache   = 0
-        try    : cache = int(self.headers['x-cache'])
-        except : pass
 
         #  Check if caching might be possible. This is the case if
         #   * Caching has been enabled
