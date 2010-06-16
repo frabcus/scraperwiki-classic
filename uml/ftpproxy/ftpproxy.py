@@ -106,6 +106,8 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
         loc       = self.request.getsockname()
         ident     = urllib.urlopen ('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], loc[1])).read()
         for line in string.split (ident, '\n') :
+            if line == '' :
+                continue
             key, value = string.split (line, '=')
             if key == 'runid' :
                 runID     = value
