@@ -12,7 +12,7 @@ def check_scraperid_header(fn):
         This allows us to check that metadata is only edited by
         the scraper it belongs to.
         """
-        if request.META['HTTP_X_SCRAPERID'] != scraper_guid:
+        if request.META.get('HTTP_X_SCRAPERID', None) != scraper_guid:
             return rc.FORBIDDEN
         else:
             return fn(self, request, scraper_guid, metadata_name)
@@ -33,7 +33,6 @@ class ScraperMetadataHandler(BaseHandler):
                 metadata.scraper = scraper
                 metadata.run_id = 0
                 metadata.value = '"%s"' % getattr(scraper, metadata_name)
-                print metadata.value, metadata  
             else:
                 metadata = scraper.scrapermetadata_set.get(name=metadata_name)
             return metadata
