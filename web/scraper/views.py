@@ -15,6 +15,8 @@ from scraper import forms
 from scraper.forms import SearchForm
 import frontend
 
+import subprocess
+
 import StringIO, csv, types
 from django.utils.encoding import smart_str
 
@@ -514,7 +516,7 @@ def unfollow(request, scraper_short_name):
 
 def twisterstatus(request):
     # uses a GET due to agent.request in twister not knowing how to use POST and send stuff
-    if 'value' not in request .GET:
+    if 'value' not in request.GET:
         return HttpResponse("needs value=")
     tstatus = json.loads(request.GET.get('value'))
     
@@ -537,3 +539,48 @@ def twisterstatus(request):
         #twisterscraperpriority = models.IntegerField(default=0)   # >0 another client has priority on this scraper
 
     return HttpResponse("Howdy ppp ")
+
+
+# quick hack the manage the RPC execute feature 
+# to test this locally you need to use python manage.py runserver twice (on 8000 and on 8010)
+def rpcexecute(request, scraper_short_name):
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    runner_path = "%s/runner.py" % settings.FIREBOX_PATH
+    failed = False
+        
+    args = [runner_path]
+    args.append('--guid=%s' % scraper.guid)
+    args.append('--language=%s' % scraper.language.lower())
+    args.append('--name=%s' % scraper.short_name)
+    
+    # should have CPU limit set by runner.py
+    # the escaping of characters done in runner.py, and the content_long is done in controller.py
+    # https://kforgehosting.com/scraperwiki/trac/ticket/239
+    
+    runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    runner.stdin.write(scraper.saved_code())
+    runner.stdin.close()
+
+    response = HttpResponse()
+    for line in runner.stdout:
+        try:
+            message = json.loads(line)
+            print "mmmm", message
+            if message['message_type'] == 'fail' or message['message_type'] == 'exception':
+                failed = True
+            
+            # recover the message from all the escaping
+            if message['message_type'] == "console":
+                sline = message["content"]
+                if message.get("content_long"):
+                    sline = message["content_long"]
+                sline = sline.replace("&lt;", "<")
+                sline = sline.replace("&gt;", ">")
+                sline = sline.replace("&amp;", "&")
+                response.write(sline)
+        
+        except:
+            pass
+        
+    return response
+    

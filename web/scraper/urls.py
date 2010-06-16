@@ -27,5 +27,7 @@ urlpatterns = patterns('',
    url(r'^follow/(?P<scraper_short_name>[\w_\-]+)/$', views.follow, name='scraper_follow'),
    url(r'^unfollow/(?P<scraper_short_name>[\w_\-]+)/$', views.unfollow, name='scraper_unfollow'),
    url(r'^twister/status$', views.twisterstatus, name='twisterstatus'),
+   url(r'^rpcexecute/(?P<scraper_short_name>[\w_\-]+)$', views.rpcexecute, name='rpcexecute'),
+   
    url(r'^metadata_api/', include('scraper.metadata_api.urls')),
 )

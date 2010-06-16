@@ -16,6 +16,10 @@ import settings
 import datetime
 import time
 
+# this is invoked by the crontab with the function
+#   python manage.py run_scrapers.
+# currently it runs committed scrapers, rather than saved scrapers!
+
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--short_name', '-s', dest='short_name',
