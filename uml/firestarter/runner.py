@@ -24,17 +24,21 @@ import firestarter
 
 def execute (code, options) :
 
+    # small transform function that used to cgi.escape the messages, 
+    # now it removes the content_long field inserted at in controller.fnExecute
+    # once that stops happening, we can lose this function entirely and simply stream 
+    # the data across from the controller
     def format_json(line):
         try:
             message = json.loads(line)
         except:
             # this only seems to get one line out when there 
-            message = { 'content': "ERROR: %s" % line, "content_long":"" }
+            message = { 'message_type':'console', 'content': "JSONERROR: %s" % line }
             
-        for key in [ 'content', 'content_long' ] :
-            try    : message[key] = cgi.escape(message[key])
-            except : pass
+        if message.get('message_type') == 'console' and message.get('content_long'):
+            message['content'] = message.pop('content_long')
         return json.dumps(message)
+
 
     fs  = firestarter.FireStarter('/var/www/scraperwiki/uml/uml.cfg')
     

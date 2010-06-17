@@ -252,7 +252,7 @@ $(document).ready(function() {
         });
     }
 
-    //show feedback massage
+    // show the bottom grey sliding up message
     function showFeedbackMessage(sMessage){
        $('#feedback_messages').html(sMessage)
        $('#feedback_messages').slideToggle(200);
@@ -437,8 +437,10 @@ $(document).ready(function() {
               startingrun(data.content);
           } else if (data.message_type == "exception") {
               writeExceptionDump(data); 
+          } else if (data.message_type == "console") {
+              writeToConsole(data.content, data.content_long, data.message_type); 
           } else {
-              writeToConsole(data.content, data.content_long, data.message_type)
+              writeToConsole(data.content, data.content_long, data.message_type); // unknown type
           }
       }        
 
@@ -781,6 +783,10 @@ $(document).ready(function() {
         }
     }
 
+    function cgiescape(text) {
+        return text.replace(/</g, '&lt;'); 
+    }
+
     //Show random text popup
     function showTextPopup(sMessage, sMessageType){
         $('#popup_text .output pre').html(sMessage);
@@ -879,10 +885,9 @@ $(document).ready(function() {
                 if (stackentry.furtherlinetext != undefined)
                     sMessage += " -- " + stackentry.furtherlinetext; 
                 linenumber = (stackentry.file == "<string>" ? stackentry.linenumber : undefined); 
-                sMessage = sMessage.replace(/</g, '&lt;'); // quick escape
-                writeToConsole(sMessage, undefined, 'exception', linenumber); 
+                writeToConsole(sMessage, undefined, 'exceptiondump', linenumber); 
             }
-            writeToConsole(data.jtraceback.exceptiondescription, undefined, 'exception'); 
+            writeToConsole(data.jtraceback.exceptiondescription, undefined, 'exceptiondump'); 
         }
     }
 
@@ -893,21 +898,27 @@ $(document).ready(function() {
         var sShortClassName = '';
         var sLongClassName = 'message_expander';
         var sExpand = '...more'
-        if (sMessageType == 'exception') {
+
+        if (sMessageType == 'exception') {   // this is prob out of date with new stack dump technology
             sShortClassName = 'exception';
             sLongClassName = 'exception_expander';
             sExpand = 'view traceback'
         }   
-
+        else {
+            if (sMessageType == 'exceptiondump') 
+                sShortClassName = 'exception';
+            if (sMessage.length > 110) {
+                sLongMessage = sMessage; 
+                sMessage = sMessage.substring(0, 100); 
+            }
+        }
 
         //create new item
         var oConsoleItem = $('<span></span>');
         oConsoleItem.addClass('output_item');
         oConsoleItem.addClass(sShortClassName);
         
-        //add text
-        oConsoleItem.html(sMessage);        
-
+        oConsoleItem.html(cgiescape(sMessage)); 
         // add long message (expansion link).  Should be derived from sMessage
         if(sLongMessage != undefined) {
             //expand link
@@ -925,7 +936,7 @@ $(document).ready(function() {
             }else{
                 oMoreLink.click(
                         function(){
-                            showTextPopup(sLongMessage);
+                            showTextPopup(cgiescape(sLongMessage));
                         }
                     );                
             }
@@ -979,7 +990,7 @@ $(document).ready(function() {
 
         $.each(aRowData, function(i){
             var oCell = $('<td></td>');
-            oCell.html(aRowData[i]);
+            oCell.html(cgiescape(aRowData[i]));
             oRow.append(oCell);
         })
 
@@ -997,7 +1008,7 @@ $(document).ready(function() {
     function writeToChat(sMessage) {
         var oRow = $('<tr></tr>');
         var oCell = $('<td></td>');
-        oCell.html(sMessage);
+        oCell.html(cgiescape(sMessage));
         oRow.append(oCell);
         
 

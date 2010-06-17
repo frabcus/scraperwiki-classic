@@ -686,9 +686,7 @@ class ScraperController (BaseController) :
                                 busy -= 1
                                 continue
                             if e[0] == ppipe[0] :
-                                msg  = { 'message_type' : 'console', 'content' : line[:100] }
-                                if len(line) >= 100 :
-                                    msg['content_long'] = line
+                                msg  = { 'message_type' : 'console', 'content' : line }
                                 line = json.dumps(msg) + '\n'
                             self.wfile.write (line)
                             self.wfile.flush ()
@@ -713,6 +711,7 @@ class ScraperController (BaseController) :
                 self.wfile.write \
                     (   json.dumps \
                         (   {   'message_type'  : 'console',
+                                'message_sub_type'  : 'consolestatus',  # should be made into message_type
                                 'content'       : msg,
                             }
                         )   + '\n'
