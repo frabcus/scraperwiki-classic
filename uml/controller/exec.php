@@ -99,121 +99,51 @@ if (!is_null($uid))
 }
 
 
-function sw_dumpMessage ($dict)
-{
-   global $logfd ;
-   fwrite ($logfd, json_encode ($dict) . "\n") ;
-}
+#function sw_dumpMessage ($dict)
+#{
+#   global $logfd ;
+#   fwrite ($logfd, json_encode ($dict) . "\n") ;
+#}
 
-function sw_logScrapedURL ($url, $length)
-{
-    sw_dumpMessage
-      (  array
-         (  'message_type' => 'sources',
-            'url'          => $url,
-            'content'      => sprintf ("%d bytes from %s", $length, $url)
-      )  )  ;
-}
+#function sw_logScrapedURL ($url, $length)
+#{
+#    sw_dumpMessage
+#      (  array
+#         (  'message_type' => 'sources',
+#            'url'          => $url,
+#            'content'      => sprintf ("%d bytes from %s", $length, $url)
+#      )  )  ;
+#}
 
-function sw_scrape ($url)
-{
-   global $httpProxy ;
-
-   $curl = curl_init ($url ) ;
-   curl_setopt ($curl, CURLOPT_RETURNTRANSFER,  true      ) ;
-   $res  = curl_exec ($curl) ;
-
-   curl_close ($curl) ;
-   return   $res  ;
-}
+#function sw_scrape ($url)
+#{
+#   global $httpProxy ;
+#
+#   $curl = curl_init ($url ) ;
+#   curl_setopt ($curl, CURLOPT_RETURNTRANSFER,  true      ) ;
+#   $res  = curl_exec ($curl) ;
+#
+#   curl_close ($curl) ;
+#   return   $res  ;
+#}
 
 
 foreach (split (':', $path) as $dir)
     ini_set ('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
 
-require_once  'scraperwiki/datastore.php' ;
-$dsinfo = split (':', $datastore)         ;
-DataStoreClass::create ($dsinfo[0], $dsinfo[1]) ;
+require_once   'scraperwiki/datastore.php' ;
+require_once   'scraperwiki.php'           ;
 
-#import  scraperwiki.utils
-#import  scraperwiki.datastore
-#import  scraperwiki.console
+$dsinfo = split (':', $datastore) ;
+SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1]) ;
+
+if (!is_null ($cache))
+   scraperwiki::sw_allowCache ($cache) ;
 #
-#
-#config = ConfigParser.ConfigParser()
-#config.add_section ('dataproxy')
-#config.set         ('dataproxy', 'host', string.split(datastore, ':')[0])
-#config.set         ('dataproxy', 'port', string.split(datastore, ':')[1])
-#
-##  These seem to be needed for urllib.urlopen() to support proxying, though
-##  FTP doesn't actually work.
-##
-#os.environ['http_proxy' ] = httpProxy
-#os.environ['https_proxy'] = httpsProxy
-#os.environ['ftp_proxy'  ] = ftpProxy
-#scraperwiki.utils.urllibSetup   ()
-#
-##  This is for urllib2.urlopen() (and hance scraperwiki.scrape()) where
-##  we can set explicit handlers.
-##
-#scraperwiki.utils.urllib2Setup \
-#    (   urllib2.ProxyHandler ({'http':  httpProxy }),
-#        urllib2.ProxyHandler ({'https': httpsProxy}),
-#        urllib2.ProxyHandler ({'ftp':   ftpProxy  })
-#    )
-#
-#if cache is not None :
-#    scraperwiki.utils.allowCache (cache)
-#
-##  Pass the configuration to the datastore. At this stage no connection
-##  is made; a connection will be made on demand if the scraper tries
-##  to save anything.
-##
-#scraperwiki.datastore.DataStore (config)
-#
-#errfd = sys.stderr
-#scraperwiki.console.setConsole  (sys.stderr)
-#sys.stderr = sys.stdout
-#
-##  Set up a CPU time limit handler which simply throws a python
-##  exception.
-##
 #def sigXCPU (signum, frame) :
 #    raise Exception ("CPUTimeExceeded")
 #
 #signal.signal (signal.SIGXCPU, sigXCPU)
 #
-#def getTraceback (code) :
-#
-#    """
-#    Get traceback information. Returns exception, traceback, the
-#    scraper file in whch the error occured and the line number.
-#
-#    @return         : (exception, traceback, file, line)
-#    """
-#
-#    if trace == 'text' :
-#        import backtrace
-#        return backtrace.backtrace ('text', code, context = 10)
-#    if trace == 'html' :
-#        import backtrace
-#        return backtrace.backtrace ('html', code, context = 10)
-#
-#    import traceback
-#    tb = [ \
-#            string.replace (t, 'File "<string>"', 'Scraper')
-#            for t in traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback)
-#            if string.find (t, 'Controller.py') < 0
-#          ]
-#    return str(sys.exc_type), string.join(tb, ''), None, None
-#
-#try
-{
-   require  $script  ;
-}
-#catch (Exception $e)
-#{
-#   print "EXCEPTION\n" ;
-#}
-
+require  $script  ;
 ?>

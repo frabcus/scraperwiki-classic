@@ -1,6 +1,6 @@
 require_once  'scraperwiki/datastore.php'         ;
 print "GO\n" ;
-sw_data_save
+scraperwiki::save
    (  array('key'),
       array
          (  'key'       => 'key_1',
@@ -15,7 +15,7 @@ sw_data_save
             'arg8'      => 'ARG_ARG_ARG_ARG_ARG_ARG_ARG_ARG_ARG_ARG_ARG_ARG_8'
          )
    ) ;
-sw_data_save
+scraperwiki::save
    (  array('key'),
       array
          (  'key'       => 'key_2',
