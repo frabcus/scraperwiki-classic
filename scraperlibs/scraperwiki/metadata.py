@@ -23,10 +23,6 @@ class MetadataClient(object):
         if not self.scraper_guid:
             self.metadata_local = { "title":'"Untitled Scraper"', "CPU limit":'100' }
 
-    def _check_scraper_guid(self):
-        if not self.scraper_guid:
-            raise Exception('Metadata cannot be accessed before the scraper has been saved')
-
     def _get_metadata(self, metadata_name):
         self.connection.connect()
         self.connection.request(url='http://%s/scrapers/metadata_api/%s/%s/' % (self.metadata_host, self.scraper_guid, urllib.quote(metadata_name)), method='GET')

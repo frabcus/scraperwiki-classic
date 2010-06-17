@@ -13,6 +13,15 @@ class SW_MetadataClient
         return self::$instance;
     }
 
+    function __construct()
+    {
+        if(!getenv("SCRAPER_GUID"))
+        {
+            $this->$metadata_local = Array("title" => "Untitled Scraper", "CPU limit" => "100");
+        }
+
+    }
+
     private function get_url($metadata_name)
     {
         return sprintf("http://%s/scrapers/metadata_api/%s/%s/", getenv("metadata_host"), getenv("SCRAPER_GUID"), urlencode($metadata_name));
@@ -38,6 +47,16 @@ class SW_MetadataClient
     
     public function get($metadata_name, $default=null)
     {
+        if(!getenv("SCRAPER_GUID"))
+        {
+            $value = $this->$metadata_local[$metadata_name];
+            if($value == null)
+            {
+                return $default;
+            }
+            return $value;
+        }
+
         $metadata = $this->get_metadata($metadata_name);
         if($metadata)
         {
@@ -65,6 +84,11 @@ class SW_MetadataClient
     
     public function save($metadata_name, $value)
     {
+        if(!getenv("SCRAPER_GUID"))
+        {
+            $this->$metadata_local[$metadata_name] = $value;
+        }
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->get_url($metadata_name));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
