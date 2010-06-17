@@ -1,7 +1,7 @@
 <?php
 
 require_once   ('scraperwiki/datastore.php') ;
-require_once   ('scraperwiki/metadata.php') ;
+require_once   ('scraperwiki/metadata.php' ) ;
 
 class scraperwiki
 {
@@ -61,7 +61,7 @@ class scraperwiki
       return $result[1] ;
    }
 
-   function sw_scrape ($url)
+   function scrape ($url)
    {
       $curl = curl_init ($url ) ;
       curl_setopt ($curl, CURLOPT_RETURNTRANSFER, true) ;
@@ -70,7 +70,7 @@ class scraperwiki
       return   $res  ;
    }
 
-   function sw_cache ($enable = true)
+   function cache ($enable = true)
    {
       file_get_html
          (  sprintf
@@ -82,12 +82,13 @@ class scraperwiki
 
    function get_metadata($metadata_name)
    {
-      return MetadataClient::create()->get($metadata_name);
+      return SW_MetadataClient::create()->get($metadata_name);
    }
 
    function save_metadata($metadata_name, $value)
    {
-      return MetadataClient::create()->save($metadata_name, $value);
+      print "Saving " . $metadata_name . ": " . $value . "\n";
+      return SW_MetadataClient::create()->save($metadata_name, $value);
    }
 }
 ?>

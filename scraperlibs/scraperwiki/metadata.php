@@ -1,5 +1,5 @@
 <?php
-class MetadataClient
+class SW_MetadataClient
 {   
     private static $instance;
 
@@ -7,7 +7,7 @@ class MetadataClient
     {
         if (!isset(self::$instance))
         {
-            self::$instance = new MetadataClient();
+            self::$instance = new SW_MetadataClient();
         }
 
         return self::$instance;
@@ -21,13 +21,12 @@ class MetadataClient
     private function get_metadata($metadata_name)
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('x-scraperid: ' . getenv("SCRAPER_GUID"))); 
         curl_setopt($ch, CURLOPT_URL, $this->get_url($metadata_name));
         curl_setopt ($ch, CURLOPT_RETURNTRANSFER, true);
         $res = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-
-        if($res)
+        if($status == 200)
         {
             return json_decode($res);
         }
@@ -42,7 +41,7 @@ class MetadataClient
         $metadata = $this->get_metadata($metadata_name);
         if($metadata)
         {
-            return json_decode($metadata->{"value"});
+            return json_decode($metadata->value);
         }
         else
         {
@@ -56,7 +55,7 @@ class MetadataClient
         $metadata = $this->get_metadata($metadata_name);
         if($metadata)
         {
-            return json_decode($metadata->{"run_id"});
+            return json_decode($metadata->run_id);
         }
         else
         {
@@ -67,7 +66,6 @@ class MetadataClient
     public function save($metadata_name, $value)
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('x-scraperid: ' . getenv("SCRAPER_GUID"))); 
         curl_setopt($ch, CURLOPT_URL, $this->get_url($metadata_name));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
