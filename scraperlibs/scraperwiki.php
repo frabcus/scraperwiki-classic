@@ -1,6 +1,7 @@
 <?php
 
 require_once   ('scraperwiki/datastore.php') ;
+require_once   ('scraperwiki/metadata.php') ;
 
 class scraperwiki
 {
@@ -78,6 +79,15 @@ class scraperwiki
                $enable ? self::$m_cacheFor : 0
          )  )  ;
    }
+
+   function get_metadata($metadata_name)
+   {
+      return MetadataClient::create()->get($metadata_name);
+   }
+
+   function save_metadata($metadata_name, $value)
+   {
+      return MetadataClient::create()->save($metadata_name, $value);
+   }
 }
 ?>
-

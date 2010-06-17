@@ -87,14 +87,4 @@ class MetadataClient
         return $res;
     }        
 }
-
-function get_metadata($metadata_name)
-{
-    return MetadataClient::create()->get($metadata_name);
-}
-
-function save_metadata($metadata_name, $value)
-{
-    return MetadataClient::create()->save($metadata_name, $value);
-}
 ?>
