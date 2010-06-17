@@ -17,7 +17,7 @@ class SW_MetadataClient
     {
         if(!getenv("SCRAPER_GUID"))
         {
-            $this->$metadata_local = Array("title" => "Untitled Scraper", "CPU limit" => "100");
+            $this->metadata_local = Array("title" => "Untitled Scraper", "CPU limit" => "100");
         }
 
     }
@@ -49,7 +49,7 @@ class SW_MetadataClient
     {
         if(!getenv("SCRAPER_GUID"))
         {
-            $value = $this->$metadata_local[$metadata_name];
+            $value = $this->metadata_local[$metadata_name];
             if($value == null)
             {
                 return $default;
@@ -86,7 +86,7 @@ class SW_MetadataClient
     {
         if(!getenv("SCRAPER_GUID"))
         {
-            $this->$metadata_local[$metadata_name] = $value;
+            $this->metadata_local[$metadata_name] = $value;
         }
 
         $ch = curl_init();
