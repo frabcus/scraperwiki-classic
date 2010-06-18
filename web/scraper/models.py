@@ -317,3 +317,10 @@ class ScraperMetadata(models.Model):
 
     def __unicode__(self):
         return u"%s['%s']" % (self.scraper, self.name)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('metadata_api', [self.scraper.guid, self.name])
+
+    class Meta:
+        verbose_name_plural = 'scraper metadata'
