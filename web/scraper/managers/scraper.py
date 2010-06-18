@@ -136,10 +136,13 @@ class ScraperManager(models.Manager):
         qquery.append("WHERE items.scraper_id=%s")
         qlist.append(scraper_id)
         
+        filters = []
         for key_value in key_values:
-            qquery.append("and kv.key = %s and kv.value = %s")
+            filters.append("(kv.key = %s and kv.value = %s)")
             qlist.append(key_value[0])
-            qlist.append(key_value[1])            			
+            qlist.append(key_value[1])
+
+        qquery.append("AND (%s)" % " OR ".join(filters))
 
         qquery.append("LIMIT %s,%s")
         qlist.append(offset)
@@ -149,7 +152,7 @@ class ScraperManager(models.Manager):
         c = self.datastore_connection.cursor()
         print " ".join(qquery)
         c.execute(" ".join(qquery), tuple(qlist))
-        item_idlist = c.fetchall()
+        item_idlist = set(c.fetchall())
 
         allitems = [ ]
         for item_idl in item_idlist:
