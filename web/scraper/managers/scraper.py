@@ -126,7 +126,7 @@ class ScraperManager(models.Manager):
 
     def data_search(self, scraper_id, key_values, limit=1000, offset=0):   
 
-        qquery = ["SELECT items.item_id AS item_id"]
+        qquery = ["SELECT DISTINCT items.item_id"]
         qlist  = [ ]
 
         qquery.append("FROM items")
@@ -152,7 +152,7 @@ class ScraperManager(models.Manager):
         c = self.datastore_connection.cursor()
         print " ".join(qquery)
         c.execute(" ".join(qquery), tuple(qlist))
-        item_idlist = set(c.fetchall())
+        item_idlist = c.fetchall()
 
         allitems = [ ]
         for item_idl in item_idlist:
