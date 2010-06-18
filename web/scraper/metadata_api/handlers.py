@@ -3,6 +3,7 @@
 from piston.handler import BaseHandler
 from piston.utils import rc
 from scraper.models import Scraper, ScraperMetadata
+from django.conf import settings
 
 def check_scraperid_header(fn):
     def inner(self, request, scraper_guid, metadata_name):
@@ -12,7 +13,7 @@ def check_scraperid_header(fn):
         This allows us to check that metadata is only edited by
         the scraper it belongs to.
         """
-        if request.META.get('HTTP_X_SCRAPERID', None) != scraper_guid:
+        if not settings.DEBUG and request.META.get('HTTP_X_SCRAPERID', None) != scraper_guid:
             return rc.FORBIDDEN
         else:
             return fn(self, request, scraper_guid, metadata_name)
