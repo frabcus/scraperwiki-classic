@@ -25,7 +25,7 @@ class Search(APIBase):
             kv_string = request.GET.get('filter', None)
             kv_split = kv_string.split('|') 
             for item in kv_split:
-                item_split = item.split(',')
+                item_split = item.split(',', 1)
                 key_values.append((item_split[0], item_split[1]))
             
             limit = self.clamp_limit(int(request.GET.get('limit', 100)))
