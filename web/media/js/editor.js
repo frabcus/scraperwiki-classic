@@ -425,12 +425,12 @@ $(document).ready(function() {
           } else if (data.message_type == "sources") {
               writeToSources(data.content, data.url)
           } else if (data.message_type == "chat") {
-              writeToChat(data.content)
+              writeToChat(cgiescape(data.content))
           } else if (data.message_type == "saved") {
-              writeToChat(data.content)
+              writeToChat(cgiescape(data.content))
           } else if (data.message_type == "othersaved") {
               reloadScraper();
-              writeToChat("OOO: " + data.content)
+              writeToChat("OOO: " + cgiescape(data.content))
           } else if (data.message_type == "data") {
               writeToData(data.content);
           } else if (data.message_type == "startingrun") {
@@ -1005,10 +1005,10 @@ $(document).ready(function() {
         $('.editor_output div.tabs li.data').addClass('new');
     }
 
-    function writeToChat(sMessage) {
+    function writeToChat(seMessage) {
         var oRow = $('<tr></tr>');
         var oCell = $('<td></td>');
-        oCell.html(cgiescape(sMessage));
+        oCell.html(seMessage);
         oRow.append(oCell);
         
 

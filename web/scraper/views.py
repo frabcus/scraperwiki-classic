@@ -542,20 +542,38 @@ def twisterstatus(request):
 
 
 # quick hack the manage the RPC execute feature 
-# to test this locally you need to use python manage.py runserver twice (on 8000 and on 8010)
+# to test this locally you need to use python manage.py runserver twice, on 8000 and on 8010, 
+# and view the webpage on 8010
 def rpcexecute(request, scraper_short_name):
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
     failed = False
-        
+
+    rargs = { }
+    for key in request.POST.keys():
+        rargs[str(key)] = request.POST.get(key)
+    for key in request.GET.keys():
+        rargs[str(key)] = request.GET.get(key)
+    func = rargs.pop("function", None)
+    for key in rargs.keys():
+        try: 
+            rargs[key] = json.loads(rargs[key])
+        except:
+            pass
+
     args = [runner_path]
     args.append('--guid=%s' % scraper.guid)
     args.append('--language=%s' % scraper.language.lower())
     args.append('--name=%s' % scraper.short_name)
-    args.append('--cpulimit=1')
+    args.append('--cpulimit=80')
     
     runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     runner.stdin.write(scraper.saved_code())
+    
+    # append in the single line at the bottom that gets the rpc executed with the right function and arguments
+    if func:
+        runner.stdin.write("\n\n%s(**%s)\n" % (func, repr(rargs)))
+        
     runner.stdin.close()
 
     response = HttpResponse()
@@ -563,8 +581,12 @@ def rpcexecute(request, scraper_short_name):
         try:
             message = json.loads(line)
             print "mmmm", message
-            if message['message_type'] == 'fail' or message['message_type'] == 'exception':
+            if message['message_type'] == 'fail':
                 failed = True
+            elif message['message_type'] == 'exception':
+                response.write("<h3>%s</h3>\n" % str(message["jtraceback"].get("exceptiondescription")).replace("<", "&lt;"))
+                for stackentry in message["jtraceback"]["stackdump"]:
+                    response.write("<h3>%s</h3>\n" % re.replace("<", "&lt;", str(stackentry).replace("<", "&lt;")))
             
             # recover the message from all the escaping
             if message['message_type'] == "console" and message.get('message_sub_type') != 'consolestatus':
