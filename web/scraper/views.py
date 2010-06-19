@@ -552,6 +552,7 @@ def rpcexecute(request, scraper_short_name):
     args.append('--guid=%s' % scraper.guid)
     args.append('--language=%s' % scraper.language.lower())
     args.append('--name=%s' % scraper.short_name)
+    args.append('--cpulimit=1')
     
     runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     runner.stdin.write(scraper.saved_code())

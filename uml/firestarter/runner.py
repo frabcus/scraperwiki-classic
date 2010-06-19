@@ -41,6 +41,7 @@ def execute (code, options) :
 
 
     fs  = firestarter.FireStarter('/var/www/scraperwiki/uml/uml.cfg')
+    cpulimit = int(options.cpulimit)
     
     fs.setTestName      (options.name     )
     fs.setScraperID     (options.guid     )
@@ -52,7 +53,7 @@ def execute (code, options) :
     fs.addPaths         ('/scraperwiki/live/scrapers')
     fs.addPaths         ('/scraperwiki/live/scraperlibs')
     fs.setCache         (3600 * 12)
-    fs.setCPULimit      (80, 81)
+    fs.setCPULimit      (cpulimit, cpulimit+1)
 
     fs.loadConfiguration()
 
@@ -112,6 +113,17 @@ if __name__ == "__main__":
             help    = "Short name of the scraper",  
             default = '',
             metavar = "NAME"
+        )
+    
+    parser.add_option \
+        (   "-c",
+            "--cpulimit",
+            dest    = "cpulimit",
+            action  = "store",
+            type    = 'str',
+            help    = "Time limit for running script",  
+            default = '80',
+            metavar = "CPULIMIT"
         )
     
     (options, args) = parser.parse_args()
