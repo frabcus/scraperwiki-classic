@@ -267,6 +267,7 @@ class Scraper(models.Model):
         except:
             return default
         
+        
 
 #register tagging for scrapers
 try:

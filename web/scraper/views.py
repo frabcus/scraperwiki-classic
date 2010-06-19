@@ -553,10 +553,6 @@ def rpcexecute(request, scraper_short_name):
     args.append('--language=%s' % scraper.language.lower())
     args.append('--name=%s' % scraper.short_name)
     
-    # should have CPU limit set by runner.py
-    # the escaping of characters done in runner.py, and the content_long is done in controller.py
-    # https://kforgehosting.com/scraperwiki/trac/ticket/239
-    
     runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     runner.stdin.write(scraper.saved_code())
     runner.stdin.close()
@@ -570,14 +566,8 @@ def rpcexecute(request, scraper_short_name):
                 failed = True
             
             # recover the message from all the escaping
-            if message['message_type'] == "console":
-                sline = message["content"]
-                if message.get("content_long"):
-                    sline = message["content_long"]
-                sline = sline.replace("&lt;", "<")
-                sline = sline.replace("&gt;", ">")
-                sline = sline.replace("&amp;", "&")
-                response.write(sline)
+            if message['message_type'] == "console" and message.get('message_sub_type') != 'consolestatus':
+                response.write(message["content"])
         
         except:
             pass

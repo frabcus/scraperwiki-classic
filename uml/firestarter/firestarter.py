@@ -334,7 +334,11 @@ class FireStarter :
         """
 
         confurl = self.m_conf.get('dispatcher', 'confurl')
-        conftxt = urllib2.urlopen(confurl).read().replace('\r', '')
+        try:
+            conftxt = urllib2.urlopen(confurl).read().replace('\r', '')
+        except:
+            print "Failed to open:", confurl
+            conftxt = [ ]
         for line in conftxt.split('\n') :
             try :
                 key, value = line.split('=')

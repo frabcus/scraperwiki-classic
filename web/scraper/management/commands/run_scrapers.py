@@ -31,22 +31,22 @@ class Command(BaseCommand):
     
     
     def run_scraper(self, scraper, options):
-        guid = scraper.guid
-        code = scraper.committed_code()
         runner_path = "%s/runner.py" % settings.FIREBOX_PATH
         failed = False
         
         start = time.time()
-        runner = subprocess.Popen(
-            [runner_path, '-g', guid], 
-            shell=False, 
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE)
-        runner.stdin.write(code)
+        args = [runner_path]
+        args.append('--guid=%s' % scraper.guid)
+        args.append('--language=%s' % scraper.language.lower())
+        args.append('--name=%s' % scraper.short_name)
+        
+        runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        runner.stdin.write(scraper.saved_code())
         runner.stdin.close()
+        
         for line in runner.stdout:
             if options.get('verbose'):
-                print line
+                print "nnn", line
             try:
                 message = json.loads(line)
                 if message['message_type'] == 'fail' or message['message_type'] == 'exception':
@@ -55,14 +55,15 @@ class Command(BaseCommand):
                 pass
         
         elapsed = (time.time() - start)
-        if options.get('verbose'): print elapsed
+        if options.get('verbose'): 
+            print elapsed
 
         if failed:
             alert_type = 'run_fail'
         else:
             alert_type = 'run_success'
 
-        # Update the scrapers meta information                    
+        # Update the scrapers meta information
         scraper.update_meta()
         scraper.last_run = datetime.datetime.now()
         scraper.save()
@@ -74,6 +75,13 @@ class Command(BaseCommand):
         alert.message_value = elapsed
         alert.save()
 
+
+    def get_overdue_scrapers(self):
+        #get all scrapers where interval > 0 and require running
+        scrapers = Scraper.objects.filter(published=True).filter(run_interval__gt=0)
+#        scrapers = scrapers.extra(where=["(ADDTIME(last_run, SEC_TO_TIME(run_interval)) < NOW() or last_run is null)"])
+        return scrapers
+    
     def handle(self, **options):
         if options['short_name']:
             scrapers = Scraper.objects.get(short_name=options['short_name'], published=True)
@@ -87,8 +95,3 @@ class Command(BaseCommand):
                     print "Error running scraper: " + scraper.short_name
                     print e
 
-    def get_overdue_scrapers(self):
-        #get all scrapers where interval > 0 and require running
-        scrapers = Scraper.objects.filter(published=True).filter(run_interval__gt=0)
-        scrapers = scrapers.extra(where=["(ADDTIME(last_run, SEC_TO_TIME(run_interval)) < NOW() or last_run is null)"])
-        return scrapers
