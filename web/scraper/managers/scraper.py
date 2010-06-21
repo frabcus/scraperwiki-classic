@@ -126,16 +126,16 @@ class ScraperManager(models.Manager):
 
     def data_search(self, scraper_id, key_values, limit=1000, offset=0):   
 
-        qquery = ["SELECT DISTINCT items.item_id"]
+        qquery = ["SELECT items.item_id, COUNT(items.item_id) as item_count"]
         qlist  = [ ]
 
         qquery.append("FROM items")
-        qquery.append("inner join kv on items.item_id = kv.item_id")        
+        qquery.append("inner join kv on items.item_id = kv.item_id")
         
         # add the where clause
         qquery.append("WHERE items.scraper_id=%s")
         qlist.append(scraper_id)
-        
+
         filters = []
         for key_value in key_values:
             filters.append("(kv.key = %s and kv.value = %s)")
@@ -144,13 +144,17 @@ class ScraperManager(models.Manager):
 
         qquery.append("AND (%s)" % " OR ".join(filters))
 
+        qquery.append("GROUP BY items.item_id")
+
+        qquery.append("HAVING item_count = %s")
+        qlist.append(len(key_values))
+        
         qquery.append("LIMIT %s,%s")
         qlist.append(offset)
         qlist.append(limit)
 
         #execute
         c = self.datastore_connection.cursor()
-        print " ".join(qquery)
         c.execute(" ".join(qquery), tuple(qlist))
         item_idlist = c.fetchall()
 
