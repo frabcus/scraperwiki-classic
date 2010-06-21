@@ -680,7 +680,7 @@ class ScraperController (BaseController) :
                             os.kill (pid, signal.SIGKILL)
                             break
                         if e[0] in fdmap :
-                            line = fdmap[e[0]].readline()
+                            line = fdmap[e[0]].read()
                             if line == '' :
                                 p.unregister (e[0])
                                 busy -= 1
