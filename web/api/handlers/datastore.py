@@ -13,8 +13,7 @@ class Keys(APIBase):
             self.result = Scraper.objects.datastore_keys(scraper_id=scraper.guid)
 
 class Search(APIBase):
-    required_arguments = ['name']
-    required_arguments = ['filter']
+    required_arguments = ['name', 'filter']
 
     def validate(self, request):
         super(Search, self).validate(request)
