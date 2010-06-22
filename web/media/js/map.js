@@ -53,17 +53,23 @@ function setupDataMap(oData, sUrl){
         iLng = oData.rows[i][iLatLngIndex].split(',')[0].replace('(', '');         
         var oLngLat = new OpenLayers.LonLat(iLat, iLng).transform(new OpenLayers.Projection("EPSG:4326"), oMap.getProjectionObject());         
 
-        //work out the html to show
-        var sHtml = '<table>';
+        //work out the html to pop-up (this could also be a special field)
+        var sHtml = ''; 
+        var nrows = 0; 
         for (var ii=0; ii < oData.rows[i].length; ii++) {
-            sHtml += ('<tr><td>' + oData.headings[ii] + '</td>');
+            sheading = oData.headings[ii]; 
             sdata = oData.rows[i][ii]
-            if (sdata.substring(0, 5) == "http:") 
-                sdata = ('<a href="' + sdata + '">' + sdata + '</a>');
-            sHtml += ('<td>' + sdata + '</td></tr>');
+            if ((sheading != "chart") && (sheading != "date_scraped") && (sheading != "latlng") && (sheading != "colour") && (sdata != "")) {
+                if (sdata.substring(0, 5) == "http:") 
+                    sdata = ('<a href="' + sdata + '">' + sdata + '</a>');
+                sHtml += ('<tr><td>' + sheading + '</td><td>' + sdata + '</td></tr>');
+                nrows++; 
+            }
         };
-        sHtml += '</table>';
-
+        if (sHtml != '')
+            sHtml = '<table>' + sHtml + '</table>';
+        else
+            sHtml = '<p>blank</p>';
 
         //make the marker from the chart or the colour (there are issues with it being str(python-object) rather than true json
         var icon = undefined; 
@@ -89,11 +95,12 @@ function setupDataMap(oData, sUrl){
 
         oMarkersLayer.addMarker(oMarker);
         oMarker.html = sHtml;
-         
+        oMarker.nrows = nrows; 
+
         oMarker.events.register("mousedown", oMarker,
             function(o, b){
                 var oPopup = new OpenLayers.Popup.AnchoredBubble("item", this.lonlat, 
-                    new OpenLayers.Size(350,250), this.html, this.icon, true);
+                    new OpenLayers.Size(350,(this.nrows < 3 ? 60 : 250)), this.html, this.icon, true);
                 oMap.addPopup(oPopup, true);
             }  );              
     };

@@ -17,5 +17,5 @@
 {% endblock %}
 
 {% block run_script %}
-    setupCodeViewer({{ scraper.line_count }});
+    setupCodeViewer({{ scraper.line_count }}, '{{ scraper.language|lower }}');
 {% endblock %}

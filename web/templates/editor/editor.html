@@ -62,6 +62,7 @@
                 </div>
                 
                 <ul class="help">
+                    <li class="language">{{scraper.language}}</li>
                     <li class="helplink">
                         <a id="menu_tutorials" href="#" title="Load a helpful tutorial">Tutorials and help</a>
                     </li>
@@ -236,7 +237,11 @@
     
       <table class="bicolumn">
           <tr><td class="bicolumn">
-            {% include 'frontend/inline_code_documentation.html' %}
+            {% ifequal scraper.language 'Python' %}
+              {% include 'frontend/inline_code_docs_python.html' %}
+            {% else %}
+              {% include 'frontend/inline_code_docs_php.html' %}
+            {% endifequal %}
           </td><td class="bicolumn">
             <h4>Handy tutorials</h4>
             <p class="descr">Click on one to load it up.</p>

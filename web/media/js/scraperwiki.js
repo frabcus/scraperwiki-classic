@@ -1,13 +1,20 @@
-function setupCodeViewer(iLineCount){
+function setupCodeViewer(iLineCount, scraperlanguage){
     var oCodeEditor;
     if(iLineCount < 20){
         iLineCount = 20;
     }
     $(document).ready(function(){
+        var parsers = Array();
+        parsers['python'] = '../contrib/python/js/parsepython.js';
+        parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];
 
-       oCodeEditor = CodeMirror.fromTextArea("txtScraperCode", {
-           parserfile: ["../contrib/python/js/parsepython.js"],
-           stylesheet: "/media/CodeMirror/contrib/python/css/pythoncolors.css",
+        var stylesheets = Array();
+        stylesheets['python'] = 'python/css/pythoncolors.css';
+        stylesheets['php'] = 'php/css/phpcolors.css';
+
+        oCodeEditor = CodeMirror.fromTextArea("txtScraperCode", {
+           parserfile: parsers[scraperlanguage],
+           stylesheet: "/media/CodeMirror/contrib/" + stylesheets[scraperlanguage],
 
            path: "/media/CodeMirror/js/",
            textWrapping: true, 
@@ -21,7 +28,7 @@ function setupCodeViewer(iLineCount){
            parserConfig: {'pythonVersion': 2, 'strictErrors': true}
 
        });
-      });
+    });
 }
 
 function APISetupExploreFunction(){

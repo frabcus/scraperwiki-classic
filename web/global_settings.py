@@ -162,6 +162,8 @@ TEMPLATE_SETTINGS = [
  'API_DOMAIN',
  'ORBETED_PORT',
  'ORBETED_DOMAIN',
+ 'MAX_DATA_POINTS',
+ 'MAX_MAP_POINTS',
 ]
 
 #sparklines and graphs

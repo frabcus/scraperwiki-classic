@@ -7,5 +7,7 @@
 ./etc/local.d/dispatcher	stop
 ./etc/local.d/ftpproxy		stop
 ./etc/local.d/httpproxy		stop
+./etc/local.d/httpsproxy	stop
+./etc/local.d/webproxy		stop
 ./etc/local.d/orbited		stop
 ./etc/local.d/twister		stop

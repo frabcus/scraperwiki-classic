@@ -26,6 +26,7 @@ import subprocess
 import re
 import cgi
 import ConfigParser
+import threading
 
 try    : import json
 except : import simplejson as json
@@ -33,76 +34,24 @@ except : import simplejson as json
 global  confnam
 global  config
 global  firewall
-global  wfmap
+global  scrapersByRunID
+global  scrapersByPID
+global  lock
 
-USAGE       = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--firewall=option] [--config=file] [--name=name]"
-child       = None
-varDir      = '/var'
-confnam     = 'uml.cfg'
-config      = None
-name        = None
-firewall    = None
-re_resolv   = re.compile ('nameserver\s+([0-9.]+)')
-setuid      = True
-wfmap       = {}
+USAGE           = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--firewall=option] [--config=file] [--name=name]"
+child           = None
+varDir          = '/var'
+confnam         = 'uml.cfg'
+config          = None
+name            = None
+firewall        = None
+re_resolv       = re.compile ('nameserver\s+([0-9.]+)')
+setuid          = True
+scrapersByRunID = {}
+scrapersByPID   = {}
+lock            = threading.Lock()
 
-def firewallBegin (rules) :
-
-    """
-    Append initial firewall (iptables) rules. These allow traffic to
-    the host (both the host's own address and and the tap address),
-    to the DataProxy, and to the logging database. Also add a rule for
-    each nameserver.
-    """
-
-    rules.append ('*filter')
-    rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'host')))
-    rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'tap' )))
-    rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('dataproxy', 'host'), config.get ('dataproxy', 'port')))
-    rules.append ('-A OUTPUT -p tcp -d %s --dport 3306 -j ACCEPT' % (config.get ('dataproxy', 'host')))
-    for line in open ('/etc/resolv.conf').readlines() :
-        m = re_resolv.match (line)
-        if m :
-            rules.append ('-A OUTPUT -p udp -d %s --dport 53 -j ACCEPT' % m.group(1))
-
-
-def firewallEnd (rules) :
-
-    """
-    Append final filewall (iptables) rules. These reject anything
-    not explicitely allowed, then commit.
-    """
-
-    rules.append ('-A OUTPUT -j REJECT')
-    rules.append ('COMMIT')
-
-
-def firewallSetup (rules, stdout, stderr) :
-
-    """
-    Set up firewall rules. The actual setup is skipped unless we are
-    running as root, so that the controller can be run outside of a
-    UML instance.
-    """
-
-    rname = '/tmp/iptables.%s' % os.getpid()
-    rfile = open (rname, 'w')
-    rfile.write  (string.join (rules, '\n') + '\n')
-    rfile.close  ()
-
-    if os.getuid() == 0 :
-
-        p = subprocess.Popen \
-                (    'iptables-restore < %s' % rname,
-                     shell  = True,
-                     stdin  = open('/dev/null'),
-                     stdout = stdout,
-                     stderr = stderr
-        )
-        p.wait ()
-
-    os.remove   (rname)
-
+infomap     = {}
 
 class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
@@ -132,6 +81,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.m_stderr       = sys.stderr
         self.m_scraperID    = None
         self.m_runID        = None
+        self.m_uid          = None
+        self.m_gid          = None
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
@@ -166,6 +117,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         @type   query   : String
         @param  query   : HTTP query string
         """
+
         self.m_cgi_fp       = rfile
         self.m_cgi_headers  = headers
         self.m_cgi_env      = { 'REQUEST_METHOD' : method }
@@ -224,6 +176,38 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 self.send_error (404, 'Group %s not found' % self.headers['x-setgroup'])
                 return
 
+    def checkUser (self) :
+
+        """
+        If the \em x-setuser header is present then use that for the real and
+        effective user.
+        """
+
+        if setuid and 'x-setuser'  in self.headers :
+            import pwd
+            try    :
+                self.m_uid = pwd.getpwnam (self.headers['x-setuser' ]).pw_uid
+            except :
+                self.send_error (404, 'User %s not found'  % self.headers['x-setuser' ])
+                return False
+        return True
+
+    def checkGroup (self) :
+
+        """
+        If the \em x-setgroup header is present then use that for the real and
+        effective group.
+        """
+
+        if setuid and 'x-setgroup' in self.headers :
+            import grp
+            try    :
+                self.m_gid = grp.getgrnam (self.headers['x-setgroup']).gr_gid
+            except :
+                self.send_error (404, 'Group %s not found' % self.headers['x-setgroup'])
+                return False
+        return True
+
     def setScraperID (self) :
 
         """
@@ -254,30 +238,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             if name[:12] == 'x-setrlimit-' :
                 args = string.split (value, ',')
                 resource.setrlimit (int(name[12:]), (int(args[0]), int(args[1])))
-
-#   def setIPTables (self) :
-#
-#       """
-#       Set up IPTables firewalling. The firewall rules, as \em iptables command
-#       arguments, are passed as headers starting 'x-iptables-'. These are written
-#       to a temporary file which is used as input to the \em iptables-restore
-#       command.
-#       """
-#
-#       if os.getuid() != 0 :
-#           return
-#       if 'x-noiptables' in self.headers :
-#           return
-#       if firewall != 'request' :
-#           return
-#
-#       rules = []
-#       firewallBegin (rules)
-#       for name, value in self.headers.items() :
-#           if name[:11] == 'x-iptables-' :
-#               rfile.write (value + '\n')
-#       firewallEnd   (rules)
-#       firewallSetup (rules, self.wfile. self.wfile)
 
     def addPaths (self) :
 
@@ -333,6 +293,29 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  ('\n')
         self.connection.send  ('hostname=%s\n' % socket.gethostname())
 
+    def sendStatus (self, query) :
+
+        """
+        Send status information, useful for debugging.
+
+        @type   query   : String
+        @param  query   : 
+        """
+
+        status = []
+        lock.acquire()
+        for key, value in scrapersByRunID.items() :
+            status.append ('runID=%s' % (key))
+        lock.release()
+
+        self.connection.send  ('HTTP/1.0 200 OK\n')
+        self.connection.send  ('Connection: Close\n')
+        self.connection.send  ('Pragma: no-cache\n')
+        self.connection.send  ('Cache-Control: no-cache\n')
+        self.connection.send  ('Content-Type: text/text\n')
+        self.connection.send  ('\n')
+        self.connection.send  (string.join (status, '\n') + '\n')
+
     def sendIdent (self, query) :
 
         """
@@ -353,19 +336,24 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         #  The query contains the proxy's remote port (which is the local port here)
         #  and the proxy's local port (which is the remote port here). Scan all open
         #  files for a TCP/IP stream with these two ports. If found then extract the
-        #  process number; this is used to open the /tmp/ident.PID file which contains
-        #  the scraper and run identifiers.
+        #  process number; this is used to map to the identification information for
+        #  the scraper.
         #
         (lport, rport) = string.split (query, ':')
-#       p    = re.compile ('python *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
         p    = re.compile ('exec.[a-z]+ *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
         lsof = subprocess.Popen([ 'lsof', '-n', '-P' ], stdout = subprocess.PIPE).communicate()[0]
         for line in lsof.split('\n') :
             m = p.match (line)
             if m :
                 self.log_request('Ident', '(%s,%s) is pid %s' % (lport, rport, m.group(1)))
-                try    : self.connection.send (open('/tmp/ident.%s' % m.group(1)).read())
-                except : self.log_request('Ident', '(%s,%s) send failed' % (lport, rport))
+                try    :
+                    info = scrapersByPID[int(m.group(1))]
+                    self.connection.send (string.join(info['idents'], '\n'))
+                    self.connection.send ("\n")
+                    for key, value in info['options'].items() :
+                        self.connection.send ('option=%s:%s\n' % (key, value))
+                except :
+                    self.log_request('Ident', '(%s,%s) send failed' % (lport, rport))
                 return
         self.log_request('Ident', '(%s,%s) not found' % (lport, rport))
 
@@ -375,12 +363,18 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         Send notification back through the controller.
 
         @type   query   : String
-        @param  query   : (remote:local) ports from the proxy's viewpoint
+        @param  query   : URL-encoded message data plus runid
         """
 
-        params = cgi.parse_qs(query)
-        try    :
-            wfile = wfmap[params['runid'][0]]
+        params  = cgi.parse_qs(query)
+        wfile   = None
+        try     :
+            lock.acquire()
+            wfile = scrapersByRunID[params['runid'][0]]['wfile']
+        finally :
+            lock.release()
+
+        if wfile is not None :
             msg   = {}
             for key, value in params.items() :
                 if key != 'runid' :
@@ -388,8 +382,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             line  = json.dumps(msg) + '\n'
             wfile.write (line)
             wfile.flush ()
-        except :
-            pass
 
         self.connection.send  ('HTTP/1.0 200 OK\n')
         self.connection.send  ('Connection: Close\n')
@@ -398,6 +390,38 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  ('Content-Type: text/text\n')
         self.connection.send  ('\n')
 
+    def sendOption (self, query) :
+
+        """
+        Set option
+
+        @type   query   : String
+        @param  query   : URL-encoded options data plus runid
+        """
+
+        params  = cgi.parse_qs(query)
+        options = None
+        try     :
+            lock.acquire()
+            options = scrapersByRunID[params['runid'][0]]['options']
+        finally :
+            lock.release()
+
+        if options is not None :
+            for key, value in params.items() :
+                if key != 'runid' :
+                    options[key] = value[0]
+
+        self.connection.send  ('HTTP/1.0 200 OK\n')
+        self.connection.send  ('Connection: Close\n')
+        self.connection.send  ('Pragma: no-cache\n')
+        self.connection.send  ('Cache-Control: no-cache\n')
+        self.connection.send  ('Content-Type: text/text\n')
+        self.connection.send  ('\n')
+        for key, value in options.items() :
+            self.connection.send ("%s=%s\n" % (key, value))
+
+        self.log_request('Option', '')
 
     def execute (self, path) :
 
@@ -449,8 +473,18 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
             return
 
+        if path == '/Status' :
+            self.sendStatus (query)
+            self.connection.close()
+            return
+
         if path == '/Notify' :
             self.sendNotify (query)
+            self.connection.close()
+            return
+
+        if path == '/Option' :
+            self.sendOption (query)
             self.connection.close()
             return
 
@@ -490,7 +524,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         tap      = config.get (socket.gethostname(), 'tap')
-        httpport = config.get ('httpproxy', 'port')
+        httpport = config.get ('webproxy',  'port')
         ftpport  = config.get ('ftpproxy',  'port')
         dshost   = config.get ('dataproxy', 'host')
         dsport   = config.get ('dataproxy', 'port')
@@ -505,6 +539,9 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                     '--script=/tmp/scraper.%d'  % os.getpid(),
                 ]
 
+        if self.m_uid is not None : args.append ('--uid=%d' % self.m_uid)
+        if self.m_gid is not None : args.append ('--gid=%d' % self.m_gid)
+
         try    : args.append ('--cache=%s' % self.headers['x-cache'    ])
         except : pass
         try    : args.append ('--trace=%s' % self.headers['x-traceback'])
@@ -513,9 +550,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         os.close (0)
         os.close (1)
         os.close (2)
+        os.close (3)
         os.open  ('/dev/null', os.O_RDONLY)
         os.dup2  (pwfd, 1)
-        os.dup2  (lwfd, 2)
+        os.dup2  (pwfd, 2)
+        os.dup2  (lwfd, 3)
         os.close (pwfd)
         os.close (lwfd)
 
@@ -564,105 +603,11 @@ class ScraperController (BaseController) :
         @param  path    : Split CGI execution path
         """
 
+        if not self.checkUser () : return
+        if not self.checkGroup() : return
+
         self.setScraperID   ()
         self.setRunID       ()
-
-        ppipe = os.pipe()
-        lpipe = os.pipe()
-        pid   = os.fork()
-
-        if pid > 0 :
-
-            cltime1 = time.time()
-            wfmap[self.m_runID] = self.wfile
-
-            import swlogger
-            swl = swlogger.SWLogger(config)
-            swl.connect ()
-            swl.log     (self.m_scraperID, self.m_runID, 'C.START')
-
-            #  Close the write sides of the pipes, these are only needed in the
-            #  child processes.
-            #
-            os.close (ppipe[1])
-            os.close (lpipe[1])
-
-            #  Create file-like objects so that we can use readline. These are
-            #  stored mapped from the file descriptors for convenient access
-            #  below.
-            #
-            fdmap = {}
-            fdmap[ppipe[0]] = os.fdopen(ppipe[0], 'r')
-            fdmap[lpipe[0]] = os.fdopen(lpipe[0], 'r')
-
-            #  Create a polling object and register the two pipe read descriptors
-            #  for input. We will loop reading and processing data from these.
-            #
-            p   = select.poll()
-            p.register (ppipe[0], select.POLLIN)
-            p.register (lpipe[0], select.POLLIN)
-
-            #  Loop while the file descriptors are still open in the child
-            #  process. Output is passed back, with "print" output jsonified.
-            #  Check for exception messages, in which case log the exception to
-            #  the logging database.
-            #
-            busy = 2
-            while busy > 0 :
-                for e in p.poll() :
-                    if e[0] in fdmap :
-                        line = fdmap[e[0]].readline()
-                        if line == '' :
-                            p.unregister (e[0])
-                            busy -= 1
-                            continue
-                        if e[0] == ppipe[0] :
-                            msg  = { 'message_type' : 'console', 'content' : line[:100] }
-                            if len(line) >= 100 :
-                                msg['content_long'] = line
-                            line = json.dumps(msg) + '\n'
-                        self.wfile.write (line)
-                        self.wfile.flush ()
-                        if e[0] == lpipe[0] :
-                            msg = json.loads(line)
-                            if msg['message_type'] == 'exception' :
-                                swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = msg['content'], arg2 = msg['content_long'])
-
-            #  Capture the child user and system times as best we can, since this
-            #  is summed over all children.
-            #
-            ostimes1   = os.times ()
-            os.wait()
-            ostimes2   = os.times ()
-            cltime2    = time.time()
-            swl.log (self.m_scraperID, self.m_runID, 'C.END',   arg1 = ostimes2[2] - ostimes1[2], arg2 = ostimes2[3] - ostimes1[3])
-
-            msg = '%d seconds elapsed, used %d CPU seconds' %  \
-                                    (   int(cltime2 - cltime1),
-                                        int(ostimes2[2] - ostimes1[2])
-                                    )
-            self.wfile.write \
-                (   json.dumps \
-                    (   {   'message_type'  : 'console',
-                            'content'       : msg,
-                        }
-                    )   + '\n'
-                )
-            del wfmap[self.m_runID]
-
-            try    : os.remove ('/tmp/scraper.%d' % pid)
-            except : pass
-            try    : os.remove ('/tmp/ident.%d'   % pid)
-            except : pass
-            return
-
-        if pid < 0 :
-            return
-
-        os.close (ppipe[0])
-        os.close (lpipe[0])
-
-        fs = self.getFieldStorage ()
 
         idents = []
         if self.m_scraperID is not None : idents.append ('scraperid=%s' % self.m_scraperID)
@@ -675,6 +620,129 @@ class ScraperController (BaseController) :
                 idents.append ('block=%s' % value)
                 continue
 
+        fs = self.getFieldStorage ()
+
+        ppipe = os.pipe()
+        lpipe = os.pipe()
+        pid   = os.fork()
+
+        if pid > 0 :
+
+            cltime1 = time.time()
+            lock.acquire()
+            info    = { 'wfile' : self.wfile, 'idents' : idents, 'options' : {} }
+            scrapersByRunID[self.m_runID] = info
+            scrapersByPID  [pid         ] = info
+            lock.release()
+
+            try :
+
+                import swlogger
+                swl = swlogger.SWLogger(config)
+                swl.connect ()
+                swl.log     (self.m_scraperID, self.m_runID, 'C.START')
+
+                #  Close the write sides of the pipes, these are only needed in the
+                #  child processes.
+                #
+                os.close (ppipe[1])
+                os.close (lpipe[1])
+
+                #  Create file-like objects so that we can use readline. These are
+                #  stored mapped from the file descriptors for convenient access
+                #  below.
+                #
+                fdmap = {}
+                fdmap[ppipe[0]] = os.fdopen(ppipe[0], 'r')
+                fdmap[lpipe[0]] = os.fdopen(lpipe[0], 'r')
+
+                #  Create a polling object and register the two pipe read descriptors
+                #  for input. We will loop reading and processing data from these. Also
+                #  poll the connection; this will be flagged as having input if it is
+                #  closed at the other end.
+                #
+                p   = select.poll()
+                p.register (ppipe[0],                 select.POLLIN)
+                p.register (lpipe[0],                 select.POLLIN)
+                p.register (self.connection.fileno(), select.POLLIN)
+
+                #  Loop while the file descriptors are still open in the child
+                #  process. Output is passed back, with "print" output jsonified.
+                #  Check for exception messages, in which case log the exception to
+                #  the logging database. If the caller closes the connection,
+                #  kill the child and exit the loop.
+                #
+                busy = 2
+                while busy > 0 :
+                    for e in p.poll() :
+                        if e[0] == self.connection.fileno() :
+                            busy = 0
+                            os.kill (pid, signal.SIGKILL)
+                            break
+                        if e[0] in fdmap :
+                            line = fdmap[e[0]].read()
+                            if line == '' :
+                                p.unregister (e[0])
+                                busy -= 1
+                                continue
+                            if e[0] == ppipe[0] :
+                                msg  = { 'message_type' : 'console', 'content' : line }
+                                line = json.dumps(msg) + '\n'
+                            self.wfile.write (line)
+                            self.wfile.flush ()
+                            if e[0] == lpipe[0] :
+                                msg = json.loads(line)
+                                if msg['message_type'] == 'exception' :
+                                    swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = msg['content'], arg2 = msg['content_long'])
+
+                #  Capture the child user and system times as best we can, since this
+                #  is summed over all children.
+                #
+                ostimes1   = os.times ()
+                os.wait()
+                ostimes2   = os.times ()
+                cltime2    = time.time()
+                swl.log (self.m_scraperID, self.m_runID, 'C.END',   arg1 = ostimes2[2] - ostimes1[2], arg2 = ostimes2[3] - ostimes1[3])
+    
+                msg = '%d seconds elapsed, used %d CPU seconds' %  \
+                                        (   int(cltime2 - cltime1),
+                                            int(ostimes2[2] - ostimes1[2])
+                                        )
+                self.wfile.write \
+                    (   json.dumps \
+                        (   {   'message_type'  : 'console',
+                                'message_sub_type'  : 'consolestatus',  # should be made into message_type
+                                'content'       : msg,
+                            }
+                        )   + '\n'
+                    )
+
+            except  :
+
+                pass
+
+            finally :
+
+                lock.acquire()
+                del scrapersByRunID[self.m_runID]
+                del scrapersByPID  [pid         ]
+                lock.release()
+
+                try    : os.remove ('/tmp/scraper.%d' % pid)
+                except : pass
+                try    : os.remove ('/tmp/ident.%d'   % pid)
+                except : pass
+
+            return
+
+        if pid < 0 :
+            return
+
+        #  Code from here down runs in the child process
+        #
+        os.close (ppipe[0])
+        os.close (lpipe[0])
+
         open ('/tmp/ident.%d'   % os.getpid(), 'w').write(string.join(idents, '\n'))
         open ('/tmp/scraper.%d' % os.getpid(), 'w').write(fs['script'].value)
 
@@ -684,8 +752,6 @@ class ScraperController (BaseController) :
         #  environment.
         #
         self.setRLimit      ()
-        self.setGroup       ()
-        self.setUser        ()
         self.addPaths       ()
         self.addEnvironment ()
 
@@ -749,10 +815,66 @@ def autoFirewall () :
     Setup firewall when the firewall=auto option is selected.
     """
 
-    rules = []
-    firewallBegin (rules)
-    firewallEnd   (rules)
-    firewallSetup (rules, sys.stdout, sys.stderr)
+    rules    = []
+    natrules = []
+
+    rules.append ('*filter')
+    rules.append ('-A OUTPUT -p tcp -d 127.0.0.1 -j ACCEPT'       )
+    rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'host')))
+    rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'tap' )))
+    rules.append ('-A OUTPUT -p tcp -d %s -j ACCEPT'              % (config.get (socket.gethostname(), 'eth' )))
+    rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('httpproxy',  'host'), config.get ('httpproxy',  'port')))
+    rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('httpsproxy', 'host'), config.get ('httpsproxy', 'port')))
+    rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('webproxy',   'host'), config.get ('webproxy',   'port')))
+    rules.append ('-A OUTPUT -p tcp -d %s --dport %s -j ACCEPT'   % (config.get ('dataproxy',  'host'), config.get ('dataproxy',  'port')))
+    rules.append ('-A OUTPUT -p tcp -d %s --dport 3306 -j ACCEPT' % (config.get ('dataproxy',  'host')))
+    for line in open ('/etc/resolv.conf').readlines() :
+        m = re_resolv.match (line)
+        if m :
+            rules.append ('-A OUTPUT -p udp -d %s --dport 53 -j ACCEPT' % m.group(1))
+    rules.append ('-A OUTPUT -j REJECT')
+    rules.append ('COMMIT')
+
+    natrules.append   ('*nat')
+    host = config.get ('httpproxy',  'host')
+    port = config.get ('httpproxy',  'port')
+    natrules.append   ('-A OUTPUT -s ! %s -p tcp --dport 80  -j DNAT --to %s:%s' % (host, host, port))
+    host = config.get ('httpsproxy', 'host')
+    port = config.get ('httpsproxy', 'port')
+    natrules.append   ('-A OUTPUT -s ! %s -p tcp --dport 443 -j DNAT --to %s:%s' % (host, host, port))
+    natrules.append   ('COMMIT')
+
+    rname = '/tmp/iptables.%s' % os.getpid()
+    rfile = open (rname, 'w')
+    rfile.write  (string.join (rules, '\n') + '\n')
+    rfile.close  ()
+
+    if os.getuid() == 0 :
+
+        p = subprocess.Popen \
+                (    'iptables-restore < %s' % rname,
+                     shell  = True,
+                     stdin  = open('/dev/null'),
+                     stdout = sys.stdout,
+                     stderr = sys.stderr
+        )
+        p.wait ()
+
+    rname = '/tmp/iptables_nat.%s' % os.getpid()
+    rfile = open (rname, 'w')
+    rfile.write  (string.join (natrules, '\n') + '\n')
+    rfile.close  ()
+
+    if os.getuid() == 0 :
+
+        p = subprocess.Popen \
+                (    'iptables-restore --table nat < %s' % rname,
+                     shell  = True,
+                     stdin  = open('/dev/null'),
+                     stdout = sys.stdout,
+                     stderr = sys.stderr
+        )
+        p.wait ()
 
 def sigTerm (signum, frame) :
 

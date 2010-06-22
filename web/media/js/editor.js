@@ -16,6 +16,7 @@ $(document).ready(function() {
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
     var conn; // Orbited connection
+    var bConnected = false; 
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
@@ -41,9 +42,17 @@ $(document).ready(function() {
 
     //setup code editor
     function setupCodeEditor(){
+        var parsers = Array();
+        parsers['python'] = '../contrib/python/js/parsepython.js';
+        parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];
+
+        var stylesheets = Array();
+        stylesheets['python'] = 'contrib/python/css/pythoncolors.css';
+        stylesheets['php'] = 'contrib/php/css/phpcolors.css';
+
         codeeditor = CodeMirror.fromTextArea("id_code", {
-            parserfile: ["../contrib/python/js/parsepython.js"],
-            stylesheet: codemirror_url + "contrib/python/css/pythoncolors.css",
+            parserfile: parsers[scraperlanguage],
+            stylesheet: codemirror_url + stylesheets[scraperlanguage],
             path: codemirror_url + "js/",
             domain: document.domain, 
             textWrapping: true,
@@ -243,7 +252,7 @@ $(document).ready(function() {
         });
     }
 
-    //show feedback massage
+    // show the bottom grey sliding up message
     function showFeedbackMessage(sMessage){
        $('#feedback_messages').html(sMessage)
        $('#feedback_messages').slideToggle(200);
@@ -295,6 +304,7 @@ $(document).ready(function() {
         else
             mreadystate = 'readystate=' + conn.readyState;
         writeToChat('Connection opened: ' + mreadystate); 
+        bConnected = true; 
 
         // send the username and guid of this connection to twisted so it knows who's logged on
         data = { "command":'connection_open', 
@@ -322,9 +332,16 @@ $(document).ready(function() {
             mcode = 'code=' + code;
 
         writeToChat('Connection closed: ' + mcode); 
-        
+        bConnected = false; 
+
         // couldn't find a way to make a reconnect button work!
         writeToChat('<b>You will need to reload the page to reconnect</b>');  
+        writeToConsole("Connection to runner lost, you will need to reload this page.", undefined, "exception"); 
+        writeToConsole("(You can still save your work)", undefined, "exception"); 
+        $('.editor_controls #run').val('Unconnected');
+        $('.editor_controls #run').unbind('click.run');
+        $('.editor_controls #run').unbind('click.abort');
+        $('#running_annimation').hide(); 
 
         sChatTabMessage = 'Disconnected'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
@@ -408,20 +425,22 @@ $(document).ready(function() {
           } else if (data.message_type == "sources") {
               writeToSources(data.content, data.url)
           } else if (data.message_type == "chat") {
-              writeToChat(data.content)
+              writeToChat(cgiescape(data.content))
           } else if (data.message_type == "saved") {
-              writeToChat(data.content)
+              writeToChat(cgiescape(data.content))
           } else if (data.message_type == "othersaved") {
               reloadScraper();
-              writeToChat("OOO: " + data.content)
+              writeToChat("OOO: " + cgiescape(data.content))
           } else if (data.message_type == "data") {
               writeToData(data.content);
           } else if (data.message_type == "startingrun") {
               startingrun(data.content);
           } else if (data.message_type == "exception") {
               writeExceptionDump(data); 
+          } else if (data.message_type == "console") {
+              writeToConsole(data.content, data.content_long, data.message_type); 
           } else {
-              writeToConsole(data.content, data.content_long, data.message_type)
+              writeToConsole(data.content, data.content_long, data.message_type); // unknown type
           }
       }        
 
@@ -477,10 +496,8 @@ $(document).ready(function() {
         //show the output area
         resizeControls('up');
         
-        //chaneg docuemnt title
         document.title = document.title + ' *'
         
-        //hide annimation
         $('#running_annimation').show();
     
         //clear the tabs
@@ -752,7 +769,8 @@ $(document).ready(function() {
                             showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
                         }
                     
-                        send({"command":'saved'}); 
+                        if (bConnected)
+                            send({"command":'saved'}); 
 
                         pageIsDirty = false; // page no longer dirty
                     }
@@ -763,6 +781,10 @@ $(document).ready(function() {
               }
             });
         }
+    }
+
+    function cgiescape(text) {
+        return text.replace(/</g, '&lt;'); 
     }
 
     //Show random text popup
@@ -840,7 +862,7 @@ $(document).ready(function() {
     function writeExceptionDump(data) {
 
         // original exception code
-        if (true || !data.jtraceback) {
+        if (false || !data.jtraceback) {
             sMessage = data.content;
             iLineNumber = 0;
             if(parseInt(data.lineno) > 0){
@@ -851,19 +873,21 @@ $(document).ready(function() {
         }
 
         // new exception code
-        writeToConsole("New exception handler:"); 
-        writeToConsole("New exception handler:"); 
+        //writeToConsole("New exception handler:"); 
+        //writeToConsole("New exception handler:"); 
         if (data.jtraceback) {
             //alert($.toJSON(data.jtraceback)); 
             var sMessage; 
             var linenumber; 
             for (var i = 0; i < data.jtraceback.stackdump.length; i++) {
                 var stackentry = data.jtraceback.stackdump[i]; 
-                sMessage = (stackentry.func == undefined ? "code" : stackentry.func + stackentry.funcargs); 
+                sMessage = (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file); 
+                if (stackentry.furtherlinetext != undefined)
+                    sMessage += " -- " + stackentry.furtherlinetext; 
                 linenumber = (stackentry.file == "<string>" ? stackentry.linenumber : undefined); 
-                writeToConsole(sMessage, undefined, 'exception', linenumber); 
+                writeToConsole(sMessage, undefined, 'exceptiondump', linenumber); 
             }
-            writeToConsole(data.jtraceback.exceptiondescription, undefined, 'exception'); 
+            writeToConsole(data.jtraceback.exceptiondescription, undefined, 'exceptiondump'); 
         }
     }
 
@@ -874,21 +898,27 @@ $(document).ready(function() {
         var sShortClassName = '';
         var sLongClassName = 'message_expander';
         var sExpand = '...more'
-        if (sMessageType == 'exception') {
+
+        if (sMessageType == 'exception') {   // this is prob out of date with new stack dump technology
             sShortClassName = 'exception';
             sLongClassName = 'exception_expander';
             sExpand = 'view traceback'
         }   
-
+        else {
+            if (sMessageType == 'exceptiondump') 
+                sShortClassName = 'exception';
+            if (sMessage.length > 110) {
+                sLongMessage = sMessage; 
+                sMessage = sMessage.substring(0, 100); 
+            }
+        }
 
         //create new item
         var oConsoleItem = $('<span></span>');
         oConsoleItem.addClass('output_item');
         oConsoleItem.addClass(sShortClassName);
         
-        //add text
-        oConsoleItem.html(sMessage);        
-
+        oConsoleItem.html(cgiescape(sMessage)); 
         // add long message (expansion link).  Should be derived from sMessage
         if(sLongMessage != undefined) {
             //expand link
@@ -906,7 +936,7 @@ $(document).ready(function() {
             }else{
                 oMoreLink.click(
                         function(){
-                            showTextPopup(sLongMessage);
+                            showTextPopup(cgiescape(sLongMessage));
                         }
                     );                
             }
@@ -960,7 +990,7 @@ $(document).ready(function() {
 
         $.each(aRowData, function(i){
             var oCell = $('<td></td>');
-            oCell.html(aRowData[i]);
+            oCell.html(cgiescape(aRowData[i]));
             oRow.append(oCell);
         })
 
@@ -975,10 +1005,10 @@ $(document).ready(function() {
         $('.editor_output div.tabs li.data').addClass('new');
     }
 
-    function writeToChat(sMessage) {
+    function writeToChat(seMessage) {
         var oRow = $('<tr></tr>');
         var oCell = $('<td></td>');
-        oCell.html(sMessage);
+        oCell.html(seMessage);
         oRow.append(oCell);
         
 

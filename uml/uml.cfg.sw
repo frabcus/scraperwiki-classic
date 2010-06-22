@@ -7,9 +7,25 @@ confurl	= http://localhost:8080/whitelist/config
 [twister]
 statusurl = http://localhost:8080/scrapers/twister/status
 
-[httpproxy]
+[webproxy]
 host	= 89.16.177.195
 port	= 9002
+dbhost	= 89.16.177.176
+user	= cache
+passwd	= 4dlk4eaaA44A1gTx
+db	= swcache_live
+
+[httpproxy]
+host	= 89.16.177.195
+port	= 9005
+dbhost	= 89.16.177.176
+user	= cache
+passwd	= 4dlk4eaaA44A1gTx
+db	= swcache_live
+
+[httpsproxy]
+host	= 89.16.177.195
+port	= 9006
 dbhost	= 89.16.177.176
 user	= cache
 passwd	= 4dlk4eaaA44A1gTx

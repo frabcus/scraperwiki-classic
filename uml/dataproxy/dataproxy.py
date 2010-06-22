@@ -123,6 +123,8 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         ident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()
 
         for line in string.split (ident, '\n') :
+            if line == '' :
+                continue
             key, value = string.split (line, '=')
             if key == 'runid' :
                 runID     = value

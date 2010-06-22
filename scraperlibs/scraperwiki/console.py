@@ -3,7 +3,8 @@ try:
 except:
   import simplejson as json
 
-logfd = None
+import  sys
+logfd = sys.stderr
 
 def setConsole (_logfd) :
 

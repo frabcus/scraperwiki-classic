@@ -13,8 +13,10 @@
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/flexigrid.js"></script>			
 		<script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror/js/codemirror.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js"></script>		
-	    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/flexigrid.css" />
-	    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/language-choice.js"></script>		
+                <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui.css" />
+	        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/flexigrid.css" />
+	        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
 	    {% block css %}{% endblock %}
 	    {% block rss %}{% endblock %}
 	    {% block javascript %}{% endblock %}
@@ -66,7 +68,7 @@
 			<div id="divMenu">
 			    <ul class="main_menu">
 				    <li>
-				        <a href="{% url editor %}" title="Create a new screen scraper">Create a scraper</a>
+				        <a href="{% url editor %}" title="Create a new screen scraper" class="editor">Create a scraper</a>
 				    </li>
 				    <li>
 				        <a href="{% url scraper_list %}" title="Browse scrapers and data">Browse data</a>
@@ -135,8 +137,8 @@
 		           <dd>
 		             <ul>
 		                 <li><a href="{% url scraper_list %}">Browse data &amp; scrapers</a></li>
-		                 <li><a href="{% url market_list %}">Request a dataset</a></li>		                 
-		                 <li><a href="{% url editor %}">Create a scraper</a></li>		                 		                 
+		                 <li><a href="{% url market_list %}">Request a dataset</a></li>
+		                 <li><a href="{% url editor %}" class="editor">Create a scraper</a></li>
 		                 <li><a href="{% url api:index %}">API</a></li>
 		             </ul>
 		           </dd>

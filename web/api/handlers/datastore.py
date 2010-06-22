@@ -1,6 +1,7 @@
 from api.handlers.api_base import APIBase
 from web.scraper.models import Scraper
 import datetime
+from piston.utils import rc
 
 class Keys(APIBase):
     required_arguments = ['name']
@@ -13,8 +14,7 @@ class Keys(APIBase):
             self.result = Scraper.objects.datastore_keys(scraper_id=scraper.guid)
 
 class Search(APIBase):
-    required_arguments = ['name']
-    required_arguments = ['filter']
+    required_arguments = ['name', 'filter']
 
     def validate(self, request):
         super(Search, self).validate(request)
@@ -25,8 +25,13 @@ class Search(APIBase):
             kv_string = request.GET.get('filter', None)
             kv_split = kv_string.split('|') 
             for item in kv_split:
-                item_split = item.split(',')
-                key_values.append((item_split[0], item_split[1]))
+                item_split = item.split(',', 1)
+                if len(item_split) == 2:
+                    key_values.append((item_split[0], item_split[1]))
+
+            if len(key_values) == 0:
+                self.error_response = rc.BAD_REQUEST
+                return
             
             limit = self.clamp_limit(int(request.GET.get('limit', 100)))
             offset = int(request.GET.get('offset', 0))

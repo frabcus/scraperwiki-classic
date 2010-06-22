@@ -11,25 +11,25 @@ import scraperwiki.console
 
 class MetadataClient(object):
     def __init__(self):
-        proxy_host, proxy_port = os.environ['http_proxy'][7:].split(':')
+        self.metadata_host = os.environ['metadata_host']
+        if ":" in self.metadata_host:
+            proxy_host, proxy_port = self.metadata_host.split(':')
+        else:
+            proxy_host, proxy_port = self.metadata_host, 80
+        
         self.connection = httplib.HTTPConnection(proxy_host, proxy_port)
         try    : self.scraper_guid = os.environ['SCRAPER_GUID']
         except : self.scraper_guid = None
         try    : self.run_id       = os.environ['RUNID']
         except : self.run_id       = None
-        self.metadata_host = os.environ['metadata_host']
         
         # make a fake local metadata for unsaved scraper (could fill in values from environ).  Perhaps save some in the session
         if not self.scraper_guid:
             self.metadata_local = { "title":'"Untitled Scraper"', "CPU limit":'100' }
 
-    def _check_scraper_guid(self):
-        if not self.scraper_guid:
-            raise Exception('Metadata cannot be accessed before the scraper has been saved')
-
     def _get_metadata(self, metadata_name):
         self.connection.connect()
-        self.connection.request(url='http://%s/scrapers/metadata_api/%s/%s/' % (self.metadata_host, self.scraper_guid, urllib.quote(metadata_name)), method='GET')
+        self.connection.request(url='/scrapers/metadata_api/%s/%s/' % (self.scraper_guid, urllib.quote(metadata_name)), method='GET')
         resp = self.connection.getresponse()
         if resp.status == 200:
             result = json.loads(resp.read())    # un-json twice (one for input, and one from piston's auto json-ing of the output)
@@ -70,7 +70,7 @@ class MetadataClient(object):
         parameters['value'] = json.dumps(value)
 
         self.connection.connect()
-        self.connection.request(url='http://%s/scrapers/metadata_api/%s/%s/' % (self.metadata_host, self.scraper_guid, urllib.quote(metadata_name)), 
+        self.connection.request(url='/scrapers/metadata_api/%s/%s/' % (self.scraper_guid, urllib.quote(metadata_name)), 
                                 method=method,
                                 body=urllib.urlencode(parameters),
                                 headers={'Content-Type': 'application/x-www-form-urlencoded'})

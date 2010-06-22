@@ -22,20 +22,30 @@ sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 10000000)
 import firestarter
 
 
-def execute (code, guid = None, language = None) :
+def execute (code, options) :
 
+    # small transform function that used to cgi.escape the messages, 
+    # now it removes the content_long field inserted at in controller.fnExecute
+    # once that stops happening, we can lose this function entirely and simply stream 
+    # the data across from the controller
     def format_json(line):
-        message = json.loads(line)
-        for key in [ 'content', 'content_long' ] :
-            try    : message[key] = cgi.escape(message[key])
-            except : pass
+        try:
+            message = json.loads(line)
+        except:
+            # this only seems to get one line out when there 
+            message = { 'message_type':'console', 'content': "JSONERROR: %s" % line }
+            
+        if message.get('message_type') == 'console' and message.get('content_long'):
+            message['content'] = message.pop('content_long')
         return json.dumps(message)
 
+
     fs  = firestarter.FireStarter('/var/www/scraperwiki/uml/uml.cfg')
+    cpulimit = int(options.cpulimit)
     
-    fs.setTestName      ('Runner' )
-    fs.setScraperID     (guid     )
-    fs.setLanguage      (language )
+    fs.setTestName      (options.name     )
+    fs.setScraperID     (options.guid     )
+    fs.setLanguage      (options.language )
     fs.setUser          ('nobody' )
     fs.setGroup         ('nogroup')
 
@@ -43,12 +53,12 @@ def execute (code, guid = None, language = None) :
     fs.addPaths         ('/scraperwiki/live/scrapers')
     fs.addPaths         ('/scraperwiki/live/scraperlibs')
     fs.setCache         (3600 * 12)
-    fs.setCPULimit      (80, 81)
+    fs.setCPULimit      (cpulimit, cpulimit+1)
 
     fs.loadConfiguration()
 
     code = string.replace (code, '\r', '')
-    if language == "php" :
+    if options.language == "php" :
         code = "<?php\n%s\n?>\n" % code
 
     res = fs.execute (code, True)
@@ -105,6 +115,17 @@ if __name__ == "__main__":
             metavar = "NAME"
         )
     
+    parser.add_option \
+        (   "-c",
+            "--cpulimit",
+            dest    = "cpulimit",
+            action  = "store",
+            type    = 'str',
+            help    = "Time limit for running script",  
+            default = '80',
+            metavar = "CPULIMIT"
+        )
+    
     (options, args) = parser.parse_args()
     code = sys.stdin.read()
-    execute (code, options.guid, options.language)
+    execute (code, options)

@@ -13,7 +13,8 @@
     <dd>A postcode. <input type="text" name="postcode" id="postcode"/></dd>
     <dt><code>country_code</code> (required)</dt>
     <dd>A country code (currently only supports 'GB') <input type="text" name="country_code" id="country_code"/></dd>        
-
+    <dt><code>callback</code> (optional)</dt>
+    <dd><a href="http://en.wikipedia.org/wiki/JSONP#JSONP">JSONP</a> callback function. Only useful when requesting JSON data. <input type="text" name="callback" id="callback"/></dd>
 {% endblock %}
 
 {% block example_url %}{% url api:explorer_example method='geo.postcodetolatlng_1.0' %}{% endblock %}

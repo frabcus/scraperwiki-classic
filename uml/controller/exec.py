@@ -2,12 +2,19 @@
 
 import  sys
 import  os
+
+# moved to the top because syntax errors in the scraperlibs otherwise are difficult to detect
+#
+sys.stdout = os.fdopen(1, 'w', 0)
+sys.stderr = os.fdopen(2, 'w', 0)
+
 import  socket
 import  signal
 import  string
 import  time
 import  urllib2
 import  ConfigParser
+
 
 try    : import json
 except : import simplejson as json
@@ -23,6 +30,8 @@ httpProxy   = None
 httpsProxy  = None
 ftpProxy    = None
 datastore   = None
+uid         = None
+gid         = None
 
 for arg in sys.argv[1:] :
 
@@ -66,19 +75,34 @@ for arg in sys.argv[1:] :
         datastore  = arg[ 5:]
         continue
 
+    if arg[: 6] == '--uid='         :
+        uid        = arg[ 6:]
+        continue
+
+    if arg[: 6] == '--gid='         :
+        gid        = arg[ 6:]
+        continue
+
     print "usage: " + sys.argv[0] + USAGE
     sys.exit (1)
+
+if gid is not None :
+    os.setregid (int(gid), int(gid))
+if uid is not None :
+    os.setreuid (int(uid), int(uid))
 
 if path is not None :
     for p in string.split (path, ':') :
         sys.path.append (p)
 
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
 
+#  Imports cannot be done until sys.path is set
+#
 import  scraperwiki.utils
 import  scraperwiki.datastore
 import  scraperwiki.console
+
+scraperwiki.console.setConsole  (os.fdopen(3, 'w', 0))
 
 
 config = ConfigParser.ConfigParser()
@@ -86,11 +110,12 @@ config.add_section ('dataproxy')
 config.set         ('dataproxy', 'host', string.split(datastore, ':')[0])
 config.set         ('dataproxy', 'port', string.split(datastore, ':')[1])
 
+
 #  These seem to be needed for urllib.urlopen() to support proxying, though
 #  FTP doesn't actually work.
 #
-os.environ['http_proxy' ] = httpProxy
-os.environ['https_proxy'] = httpsProxy
+##os.environ['http_proxy' ] = httpProxy
+##os.environ['https_proxy'] = httpsProxy
 os.environ['ftp_proxy'  ] = ftpProxy
 scraperwiki.utils.urllibSetup   ()
 
@@ -98,8 +123,9 @@ scraperwiki.utils.urllibSetup   ()
 #  we can set explicit handlers.
 #
 scraperwiki.utils.urllib2Setup \
-    (   urllib2.ProxyHandler ({'http':  httpProxy }),
-        urllib2.ProxyHandler ({'https': httpsProxy}),
+    (
+##        urllib2.ProxyHandler ({'http':  httpProxy }),
+##        urllib2.ProxyHandler ({'https': httpsProxy}),
         urllib2.ProxyHandler ({'ftp':   ftpProxy  })
     )
 
@@ -112,9 +138,8 @@ if cache is not None :
 #
 scraperwiki.datastore.DataStore (config)
 
-errfd = sys.stderr
-scraperwiki.console.setConsole  (sys.stderr)
-sys.stderr = sys.stdout
+
+
 
 #  Set up a CPU time limit handler which simply throws a python
 #  exception.
@@ -125,33 +150,48 @@ def sigXCPU (signum, frame) :
 signal.signal (signal.SIGXCPU, sigXCPU)
 
 
+
+
+
 # Code waiting to be reformatted to another standard that I don't understand (Julian)
+
+
 import inspect
 import traceback
-def getJTraceback():
+def getJTraceback(code):
     """Traceback that makes raw data available to javascript to process"""
-    info = sys.exc_info()   # last exception that was thrown
+    exc_type, exc_value, exc_traceback = sys.exc_info()   # last exception that was thrown
+    codelines = code.splitlines()
     stackdump = [ ]
-    # outer level is the controller, 
-    # second level is the module call.
-    # anything beyond is within a function.  Move the function call description to the correct place
-    for frame, file, linenumber, func, lines, index in inspect.getinnerframes(info[2])[1:]:  # skip outer frame
-        args, varargs, varkw, locals = inspect.getargvalues(frame)
-        funcargs = inspect.formatargvalues(args, varargs, varkw, locals, formatvalue=lambda value: '=%s' % repr(value))
+        # outer level is the controller, 
+        # second level is the module call.
+        # anything beyond is within a function.  
+            # Move the function call description up one level to the correct place
+    for frame, file, linenumber, func, lines, index in inspect.getinnerframes(exc_traceback, context=1)[1:]:  # skip outer frame
+        stackentry = {"linenumber":linenumber, "file":file}
+        if func != "<module>":
+            args, varargs, varkw, locals = inspect.getargvalues(frame)
+            funcargs = inspect.formatargvalues(args, varargs, varkw, locals, formatvalue=lambda value: '=%s' % repr(value))
+            stackentry["furtherlinetext"] = "%s(%s)" % (func, funcargs)  # double brackets to make it stand out
         
-        # shuffle up the values so they are aligned with where the functions are called
-        if stackdump:
-            stackdump[-1]["func"] = func
-            stackdump[-1]["funcargs"] = funcargs
-        else:
-            pass # assert func == "<module>"
+        if file == "<string>" and 0 < linenumber - 1 < len(codelines):
+            stackentry["linetext"] = codelines[linenumber - 1]  # have to do this as context=1 doesn't work (it doesn't give me anything in lines)
+        
+        stackdump.append(stackentry)
+        
         if file[:15] == "/usr/lib/python":
             break
-        else: 
-            pass # assert file == "<string>"
+        pass # assert file == "<string>"
         
-        stackdump.append({"linenumber":linenumber, "file":file})
-    return { "exceptiondescription":repr(info[1]), "stackdump":stackdump }
+    if exc_type == SyntaxError:
+        stackentry = {"linenumber":exc_value.lineno, "file":exc_value.filename, "offset":exc_value.offset}
+        if stackentry["file"] == "<string>" and 0 < stackentry["linenumber"] - 1 < len(codelines):
+            stackentry["linetext"] = codelines[stackentry["linenumber"] - 1]  # can't seem to recover the text from the SyntaxError object, though it is in it's repr
+        stackentry["furtherlinetext"] = exc_value.msg
+        stackdump.append(stackentry)
+    
+    result = { "exceptiondescription":repr(exc_value), "stackdump":stackdump }
+    return result
 
 
 def getTraceback (code) :
@@ -185,23 +225,18 @@ def execute (code) :
         mod        = imp.new_module ('scraper')
         exec code.rstrip() + "\n" in mod.__dict__
     except Exception, e :
+        
+        # all this to go when happy
         import errormapper
         emsg = errormapper.mapException (e)
         etext, trace, infile, atline = getTraceback (code)
-        jtraceback = getJTraceback()  # raw stack info so it can be formatted in javascript (and replace previous methods)
+        
+        # new version that gives raw stack info that can be formatted in javascript (and replace previous methods)
+        jtraceback = getJTraceback(code)  
         
         # errfd = sys.stderr, which has the problem that the messages can get printed out of order!
-        errfd.write \
-            (   json.dumps \
-                (   {   'message_type'  : 'exception',
-                        'content'       : emsg,
-                        'content_long'  : trace,
-                        'filename'      : infile,
-                        'lineno'        : atline, 
-                        'jtraceback'    : jtraceback
-                    }
-                )   + '\n'
-            )
-        sys.stdout.flush ()
+        scraperwiki.console.dumpMessage(message_type='exception', content=emsg, content_long=trace, filename=infile, 
+                                        lineno=atline, jtraceback=jtraceback)
+        
 
 execute (open(script).read())

@@ -16,13 +16,6 @@ class FrontEndViewsTests(TestCase):
         user = User(username='test', password='123')
         user.save()
         
-        # ...and then make it's profile
-        profile = frontend.models.UserProfile()
-        profile.user = user
-        profile.bio = "test bio"
-        profile.save()
-        
-
     def test_profile_edit(self):
         self.client.login(username='test', password='123')
         response = self.client.post(reverse('profiles_edit_profile',), 

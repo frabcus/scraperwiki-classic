@@ -151,7 +151,6 @@ class DataStoreClass :
     def postcodeToLatLng (self, postcode) :
 
         return self.request (('postcodetolatlng', postcode))
-# decode disconnection message http://orbited.org/wiki/TCPSocket
 
     def close (self) :
 
@@ -183,7 +182,7 @@ def save (unique_keys, data, date = None, latlng = None, silent = False) :
         except : key   = key  .encode('utf-8')
         try    : value = str(value)
         except : value = value.encode('utf-8')
-        pdata[cgi.escape(key)] = cgi.escape(value)
+        pdata[key] = value
 
     if not silent :
         scraperwiki.console.logScrapedData (pdata)
