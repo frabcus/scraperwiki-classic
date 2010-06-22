@@ -622,7 +622,7 @@ class ScraperController (BaseController) :
 
         fs = self.getFieldStorage ()
 
-        ppipe = os.pipe()
+        psock = socket.socketpair()
         lpipe = os.pipe()
         pid   = os.fork()
 
@@ -645,16 +645,16 @@ class ScraperController (BaseController) :
                 #  Close the write sides of the pipes, these are only needed in the
                 #  child processes.
                 #
-                os.close (ppipe[1])
-                os.close (lpipe[1])
+                psock[1].close()
+                os.close(lpipe[1])
 
                 #  Create file-like objects so that we can use readline. These are
                 #  stored mapped from the file descriptors for convenient access
                 #  below.
                 #
                 fdmap = {}
-                fdmap[ppipe[0]] = os.fdopen(ppipe[0], 'r')
-                fdmap[lpipe[0]] = os.fdopen(lpipe[0], 'r')
+                fdmap[psock[0].fileno()] = [ psock[0], '' ]
+                fdmap[lpipe[0]         ] = [ lpipe[0], '' ]
 
                 #  Create a polling object and register the two pipe read descriptors
                 #  for input. We will loop reading and processing data from these. Also
@@ -662,7 +662,7 @@ class ScraperController (BaseController) :
                 #  closed at the other end.
                 #
                 p   = select.poll()
-                p.register (ppipe[0],                 select.POLLIN)
+                p.register (psock[0].fileno(),        select.POLLIN)
                 p.register (lpipe[0],                 select.POLLIN)
                 p.register (self.connection.fileno(), select.POLLIN)
 
@@ -672,25 +672,62 @@ class ScraperController (BaseController) :
                 #  the logging database. If the caller closes the connection,
                 #  kill the child and exit the loop.
                 #
-                busy = 2
+                busy    = 3
                 while busy > 0 :
                     for e in p.poll() :
-                        if e[0] == self.connection.fileno() :
+                        fd = e[0]
+                        #
+                        #  If the event is on the caller connection then caller must
+                        #  have terminated, so exit loop.
+                        #
+                        if fd == self.connection.fileno() :
                             busy = 0
                             os.kill (pid, signal.SIGKILL)
                             break
-                        if e[0] in fdmap :
-                            line = fdmap[e[0]].read()
+                        #
+                        #  Otherwise should have been from child ...
+                        #
+                        if fd in fdmap :
+                            #
+                            #  Read some text. If none then the child has closed the connection
+                            #  so unregister here and decrement count of open child connections.
+                            #
+                            try    : line = fdmap[fd][0].recv(8192)
+                            except : line = os.read (fdmap[fd][0], 8192)
                             if line == '' :
-                                p.unregister (e[0])
-                                busy -= 1
+                                p.unregister (fd)
+                                busy -= 3
+                            #
+                            #  If data received and data does not end in a newline the add to
+                            #  any prior data from the connection and loop.
+                            #
+                            if len(line) > 0 and line[-1] != '\n' :
+                                fdmap[fd][1] = fdmap[fd][1] + line
                                 continue
-                            if e[0] == ppipe[0] :
+                            #
+                            #  Prepend prior data to the current data and clear the prior
+                            #  data. If still nothing then loop.
+                            line = fdmap[fd][1] + line
+                            fdmap[fd][1] = ''
+                            if line == '' :
+                                continue
+                            #
+                            #  If data is from the print connection then json-format as a console
+                            #  message; data from logging connection should be already formatted.
+                            #
+                            if fd == psock[0].fileno() :
                                 msg  = { 'message_type' : 'console', 'content' : line }
                                 line = json.dumps(msg) + '\n'
+                            #
+                            #  Send data back towards the client.
+                            #
                             self.wfile.write (line)
                             self.wfile.flush ()
-                            if e[0] == lpipe[0] :
+                            #
+                            #  If the data came from the logging connection and was an error the
+                            #  log to the database.
+                            #
+                            if fd == lpipe[0] :
                                 msg = json.loads(line)
                                 if msg['message_type'] == 'exception' :
                                     swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = msg['content'], arg2 = msg['content_long'])
@@ -740,8 +777,8 @@ class ScraperController (BaseController) :
 
         #  Code from here down runs in the child process
         #
-        os.close (ppipe[0])
-        os.close (lpipe[0])
+        psock[0].close()
+        os.close(lpipe[0])
 
         open ('/tmp/ident.%d'   % os.getpid(), 'w').write(string.join(idents, '\n'))
         open ('/tmp/scraper.%d' % os.getpid(), 'w').write(fs['script'].value)
@@ -759,11 +796,11 @@ class ScraperController (BaseController) :
         except : language = 'python'
 
         if language == 'python' :
-            self.execScript  ('py',  fs['script'].value, ppipe[1], lpipe[1])
+            self.execScript  ('py',  fs['script'].value, psock[1].fileno(), lpipe[1])
             return
 
         if language == 'php'    :
-            self.execScript  ('php', fs['script'].value, ppipe[1], lpipe[1])
+            self.execScript  ('php', fs['script'].value, psock[1].fileno(), lpipe[1])
             return
 
         self.wfile.write \
