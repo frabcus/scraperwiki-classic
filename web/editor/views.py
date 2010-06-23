@@ -179,7 +179,7 @@ def saveeditedscraper(request, scraper):
 
 
 #Editor form
-def edit(request, short_name='__new__', language='Python'):
+def edit(request, short_name='__new__', language='Python', tutorial_scraper=None):
 
     # identify the scraper (including if there was a draft one backed up)
     has_draft = False
@@ -210,11 +210,17 @@ def edit(request, short_name='__new__', language='Python'):
 
         scraper = ScraperModel()  
         
-        # select a startup scraper code randomly from those with the right flag
-        startup_scrapers = ScraperModel.objects.filter(published=True, isstartup=True, language=language)
         startupcode = "# blank"
-        if len(startup_scrapers):
-            startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
+
+        if tutorial_scraper:
+            startup_scraper = get_object_or_404(ScraperModel, short_name=tutorial_scraper)
+            startupcode = startup_scraper.saved_code()
+            language = startup_scraper.language
+        else:
+            # select a startup scraper code randomly from those with the right flag
+            startup_scrapers = ScraperModel.objects.filter(published=True, isstartup=True, language=language)
+            if len(startup_scrapers):
+                startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
 
         scraper.code = startupcode
         scraper.license = 'Unknown'
