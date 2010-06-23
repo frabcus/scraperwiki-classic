@@ -183,7 +183,7 @@ def getJTraceback(code):
             break
         pass # assert file == "<string>"
         
-    if exc_type == SyntaxError:
+    if exc_type in [SyntaxError, IndentationError]:
         stackentry = {"linenumber":exc_value.lineno, "file":exc_value.filename, "offset":exc_value.offset}
         if stackentry["file"] == "<string>" and 0 < stackentry["linenumber"] - 1 < len(codelines):
             stackentry["linetext"] = codelines[stackentry["linenumber"] - 1]  # can't seem to recover the text from the SyntaxError object, though it is in it's repr
