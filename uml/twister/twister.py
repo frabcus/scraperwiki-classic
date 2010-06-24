@@ -91,7 +91,7 @@ class spawnRunner(protocol.ProcessProtocol):
     # see http://twistedmatrix.com/documents/10.0.0/api/twisted.internet.protocol.ProcessProtocol.html
     # reroutes this into LineOnlyReceiver to chunk into lines
     def outReceived(self, data):
-        print "out", data
+        print "out", self.LineOnlyReceiver.client.guid, data
         self.LineOnlyReceiver.dataReceived(data)  # this batches it up into line feeds
 
 
@@ -261,9 +261,10 @@ class RunnerProtocol(protocol.Protocol):
             otherline = line
         
         # send any destination output to any staff who are watching
-        for client in self.factory.clients:
-            if client.guid == self.guid and client != self and client.isstaff:
-                client.write(otherline)  
+        if client.guid:
+            for client in self.factory.clients:
+                if client.guid == self.guid and client != self and client.isstaff:
+                    client.write(otherline)  
     
     def kill_run(self, reason='connectionLost'):
         try:
