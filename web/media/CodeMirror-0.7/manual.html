@@ -418,8 +418,15 @@
 
       <dt><code><a
       href="contrib/php/js/parsephp.js">contrib/php/js/parsephp.js</a></code>
-      (<a href="contrib/php/index.html">demo</a>)</dt><dd>PHP
-      parser.</dd>
+      (<a href="contrib/php/index.html">demo</a>)</dt><dd>PHP parser.
+      There is also <code><a
+      href="contrib/php/js/parsephphtmlmixed.js">contrib/php/js/parsephphtmlmixed.js</a></code>,
+      which wraps this parser to allow mixed-mode HTML + PHP parsing.
+      This one takes a configuration parameter <code>opening</code>,
+      which should contain an array of XML processing instruction
+      openings (<code>&lt;?php</code>, <code>&lt;?</code> etc) which
+      can be used to open a PHP block. Default is
+      <code>["&lt;?php"]</code>.</dd>
 
       <dt><code><a
       href="contrib/python/js/parsepython.js">contrib/python/js/parsepython.js</a></code>
@@ -486,7 +493,9 @@
       whether searching should start at the cursor (<code>true</code>)
       or at the start of the document (<code>false</code>). When
       <code>caseFold</code> is true, the search will be
-      case-insensivive. Returns an object that provides an interface
+      case-insensitive; if <code>caseFold</code> is unspecified, the
+      search will be case-sensitive if the search string contains
+      uppercase characters. Returns an object that provides an interface
       for searching. Call its <code>findNext()</code> method to search
       for an occurrence of the given string. This returns
       <code>true</code> if something is found, or <code>false</code>
@@ -520,12 +529,14 @@
       <dt><code>ungrabKeys()</code></dt><dd>Revert the effect of
       <code>grabKeys</code>.</dd>
 
-      <dt><code>setParser(name)</code></dt><dd>Change the active
-      parser. To use this you'll have to load more than one parser
-      (put the one you want to use as default at the end of the list).
-      Then call this function with a string containing the name of the
-      parser you want to switch to (see the parser script file to find
-      the name, it'll be something like <code>CSSParser</code>).</dd>
+      <dt><code>setParser(name, parserConfig)</code></dt><dd>Change
+      the active parser. To use this you'll have to load more than one
+      parser (put the one you want to use as default at the end of the
+      list). Then call this function with a string containing the name
+      of the parser you want to switch to (see the parser script file
+      to find the name, it'll be something like
+      <code>CSSParser</code>). The second argument is optional, and
+      can be used to pass a new parser configuration object.</dd>
     </dl>
 
     <p>For detailed interaction with the content of the editor,

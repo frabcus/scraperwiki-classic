@@ -48,6 +48,12 @@ var select = {};
     // offset, just scroll to the end.
     if (compensateHack == 0) atEnd = false;
 
+    // WebKit has a bad habit of (sometimes) happily returning bogus
+    // offsets when the document has just been changed. This seems to
+    // always be 5/5, so we don't use those.
+    if (webkit && element && element.offsetTop == 5 && element.offsetLeft == 5)
+      return
+
     var y = compensateHack * (element ? element.offsetHeight : 0), x = 0, pos = element;
     while (pos && pos.offsetParent) {
       y += pos.offsetTop;
@@ -534,6 +540,20 @@ var select = {};
       range.deleteContents();
       range.insertNode(node);
       webkitLastLineHack(window.document.body);
+
+      // work around weirdness where Opera will magically insert a new
+      // BR node when a BR node inside a span is moved around. makes
+      // sure the BR ends up outside of spans.
+      if (window.opera && isBR(node) && isSpan(node.parentNode)) {
+        var next = node.nextSibling, p = node.parentNode, outer = p.parentNode;
+        outer.insertBefore(node, p.nextSibling);
+        var textAfter = "";
+        for (; next && next.nodeType == 3; next = next.nextSibling) {
+          textAfter += next.nodeValue;
+          removeElement(next);
+        }
+        outer.insertBefore(makePartSpan(textAfter, window.document), node.nextSibling);
+      }
       range = window.document.createRange();
       range.selectNode(node);
       range.collapse(false);
@@ -562,7 +582,11 @@ var select = {};
         range.setStartAfter(topNode);
       else
         range.setStartBefore(container);
-      return {node: topNode, offset: range.toString().length};
+
+      var text = range.toString();
+      // Don't count characters introduced by webkitLastLineHack (see editor.js)
+      if (webkit) text = text.replace(/\u200b/g, "");
+      return {node: topNode, offset: text.length};
     };
 
     select.setCursorPos = function(container, from, to) {
