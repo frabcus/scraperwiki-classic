@@ -131,4 +131,4 @@ def restart_webserver():
     sudo('apache2ctl restart')
 
 def create_tarball():
-    run("cd %s; mkdir -p ./web/media/src/; hg archive -t tgz ./web/media/src/scraperwiki.tar.gz" % env.path)
+    virtualenv("mkdir -p ./web/media/src/; hg archive -t tgz ./web/media/src/scraperwiki.tar.gz")
