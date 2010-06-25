@@ -321,3 +321,8 @@ form.scraper_admin input, form.scraper_admin select, form.scraper_admin textarea
 }
 
 td.bicolumn { width:50%; vertical-align:top; }
+
+/* Language Choice Popup */
+.ui-widget {font-family: Helvetica,arial,sans-serif;}
+.ui-widget-header {background: #FFFFD7; color: #2680C6;}
+.ui-widget input.button {font-size: 0.7em;}
