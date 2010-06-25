@@ -98,6 +98,7 @@ def deploy():
     migrate()
     write_changeset()
     install_cron()
+    create_tarball()
     restart_webserver()   
     email(message)
 
@@ -122,11 +123,12 @@ Subject: New Scraperwiki Deployment to %(version)s (deployed by %(user)s)
     sudo("""echo "%s" | sendmail scrapewiki-commits@googlegroups.com """ % message)
     
 def migrate():
-  virtualenv('cd web; python manage.py syncdb')
-  virtualenv('cd web; python manage.py migrate')
+    virtualenv('cd web; python manage.py syncdb')
+    virtualenv('cd web; python manage.py migrate')
 
 def restart_webserver():
     "Restart the web server"
     sudo('apache2ctl restart')
 
-
+def create_tarball():
+    run("cd %s; mkdir -p ./web/media/src/; hg archive -t tgz /web/media/src/scraperwiki.tar.gz" % env.path)
