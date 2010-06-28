@@ -25,3 +25,4 @@ syntax: regexp
 ^web/python$
 ^web/pip-log.txt$
 ^uml$
+^web/media/src/scraperwiki.tar.gz
