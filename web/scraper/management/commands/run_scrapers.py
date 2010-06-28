@@ -79,7 +79,7 @@ class Command(BaseCommand):
     def get_overdue_scrapers(self):
         #get all scrapers where interval > 0 and require running
         scrapers = Scraper.objects.filter(published=True).filter(run_interval__gt=0)
-        scrapers = scrapers.extra(where=["(ADDTIME(last_run, SEC_TO_TIME(run_interval)) < NOW() or last_run is null)"])
+        scrapers = scrapers.extra(where=["(DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW() or last_run is null)"])
         return scrapers
     
     def handle(self, **options):
