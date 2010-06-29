@@ -26,11 +26,11 @@ import datetime
 from utilities import location
 location.is_gb_postcode('sw98JX')
 
+from scraper.models import Scraper as ScraperModel  # is this renaming necessary?
 
 def frontpage(request, public_profile_field=None):
     user = request.user
 
-    
     # The following items are only used when there is a logged in user.	
     if user.is_authenticated():
         hide_logo = False
@@ -77,6 +77,10 @@ def frontpage(request, public_profile_field=None):
             'new_scrapers': new_scrapers, 'featured_scrapers': featured_scrapers, 'contribution_count': contribution_count, }
     return render_to_response(template, data, context_instance=RequestContext(request))
 
+def tutorials(request):
+    python_tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language="python").order_by('-first_published_at')
+    php_tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language="php").order_by('-first_published_at')
+    return render_to_response('frontend/tutorials.html', {'python_tutorial_scrapers' : python_tutorial_scrapers, 'php_tutorial_scrapers' : php_tutorial_scrapers}, context_instance=RequestContext(request))
 
 def my_scrapers(request):
 	user = request.user
@@ -186,5 +190,5 @@ def tutorials(request):
     languages = Scraper.objects.values_list('language', flat=True).distinct()
     tutorials = {}
     for language in languages:
-        tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language)
+        tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('-first_published_at')
     return render_to_response('frontend/tutorials.html', {'tutorials': tutorials}, context_instance = RequestContext(request))

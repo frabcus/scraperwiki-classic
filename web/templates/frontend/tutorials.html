@@ -1,115 +1,30 @@
 {% extends "frontend/base.html" %}
 
-{% block title %}Tutorials: How to write a screen scraper{% endblock %}
+{% block title %}ScraperWiki tutorials{% endblock %}
 {% block content %}
     <div class="page_title">
-        <h1>Tutorials: how to write a screen scraper (DRAFT)</h1>
-        <p>
-            In these tutorials, we'll explain how to use Scraperwiki to write a screen scraper, starting with the basics. </p>
-<p>If you'd rather just dive straight in, go straight to the <a href="{% url help_code_documentation %}">code documentation</a>.</p>
+        <h1>ScraperWiki tutorials</h1>
+        <p>A complete introduction to how to use ScraperWiki to write screen scrapers.</p>
+        <p>Begins with the basics of screen scraping, then covers more complex scraping, e.g. forms, ASP.NET pages, Excel and PDFs.</p>
+	<p>Also covers ways to present your data. This includes with Google charts and maps.</p>
     </div>
-    <div class="content">
-        <ul class="list_of_contents">
-            <li><a href="#prerequisites">Prerequisites</a></li>
-            <li><a href="#helloworld">Tutorial 1: Hello world</a></li>
-            <li><a href="#metoffice">Tutorial 2: Met Office weather data</a></li>
-        </ul>
 
-        <dl class="faq">
+<div class="content">
 
-            <dt id="prerequisites">Prerequisites</dt>
+ {% for key, value in tutorials.items %}
+<h3>{{ key }} tutorials</h3>
+<dl>
+    {% for scraper in value %}
+    <dt>
+    <a href="/editor/tutorial/{{scraper.short_name}}" class="scraper-tutorial-link"><b>{{scraper.short_name}}</b></a>
+    </dt>
+    <dd>
+      {{scraper.description}}
+    </dd>
+    {% endfor %}
+</dl>
+ {% endfor %}
 
-            <dd>
-                <p>There isn't much to know before using Scraperwiki for the first time, but as a minimum you will need basic <a href="http://diveintopython.org/">Python</a>, and some idea of what <a href="http://www.crummy.com/software/BeautifulSoup/documentation.html">BeautifulSoup</a> does.
-                </p>
-            </dd>
+</div>
 
-            <dt id="helloworld">Tutorial 1: Hello world</dt>
-
-            <dd>
-                <p>We'll begin with the traditional introduction to any new system: a 'Hello world' scraper. It just demonstrates how to retrieve a web page, extract some simple data, and save it to the Scraperwiki datastore. </p>
-<p>These are all standard Scraperwiki tasks. So standard, in fact, that whenever you create a new scraper in Scraperwiki, you'll have this code as a template.</p.>
-                <p>To get started, <a href="{% url editor %}" target="_blank">create a new scraper</a>.
-</p>
-<h4>Running a scraper</h4>
-<p>
-In the new window that opens, click on the 'Run' button to run the scraper. </p>
-<p>As it runs, you'll see live console output at the bottom of the screen. 
-
-</p>
-<pre class="scraperoutput">Starting scraper&#x2026;
-Script successful</pre>
-<p>
-When this has finished, click on the 'Data' tab to see the actual data collected by the scraper.
-                </p>
-<pre class="scraperoutput">hello<br/>world</pre>
-
-<p>
-And finally, click on the 'Sources' tab to see a link with details of the page scraped. (Clicking on the link shows you the actual HTML retrieved.)
-                </p>
-<pre class="scraperoutput">447 bytes from http://scraperwiki.com/hello_world.html</pre>
-
-<p>How does this scraper work? Let's go through the code, line by line.</p>
-
-<h4>The code</h4>
-
-<pre class="scrapercode">
-import scraperwiki
-import BeautifulSoup
-from scraperwiki import datastore
-</pre>
-
-<p>The scraper begins by importing the <span class="code">scraperwiki</span> module and its <span class="code">datastore</span> function. These are the special Scraperwiki functions used to retrieve pages and store data. It also imports <span class="code">BeautifulSoup</span>, the standard HTML parsing library.</p>
-
-<pre class="scrapercode">
-html = scraperwiki.scrape('http://scraperwiki.com/hello_world.html')
-</pre>
-
-<p>Next, it calls Scraperwiki's <span class="code">scraperwiki.scrape()</span> function, which takes a URL argument and returns HTML. The page being scraped here is  a really, really boringly simple <a href="http://scraperwiki.com/hello_world.html" target="_blank">hello world table</a>.</p>
-
-<pre class="scrapercode">
-page = BeautifulSoup.BeautifulSoup(html)
-for table in page.findAll('table'):
-    for row in table.findAll('tr')[1:]: 
-	data = {'message' : row.td.string,}
-</pre>
-
-<p>Standard screen scraping stuff - the scraper uses BeautifulSoup to loop through all the &lt;tr&gt; and &lt;td&gt; elements in the page. Then it stores the contents of each table cell in a Python dictionary.</p>
-
-<pre class="scrapercode">
-	datastore.save(unique_keys=['message'], data=data)
-</pre>
-
-<p>Finally - and this is the interesting bit - it uses Scraperwiki's <span class="code">datastore.save()</span> to save the dictionary. This is what gets printed in the 'Data' tab.</p>
-
-<p>The first argument, <span class="code">unique_keys</span>, is an array of the columns that must be unique. Any data with the same values for those attributes will only be recorded once. (So, if there were two rows saying 'world' in our table, the datastore would only record one.)
-</p>
-
-
-<h4>Saving the code</h4>
-
-<p>Save the code as a template to use for the next tutorial. Click on the 'Save' button, and enter a name for your scraper.</p>
-
-<p>This saves the code for you, but means no-one else can view or edit it. If you were to click the 'Publish' button, the code would become publicly visible. (The FAQ has more on <a href="{% url help %}#saving">the difference between saving and publishing</a>.)</p>
-            </dd>
-
-
-            <dt id="metoffice">Tutorial 2: Met Office weather data</dt>
-
-            <dd>
-               <p>This scraper shows how to extract and store more complex data, including dates and GPS coordinates. For extra points, we'll also build a chart of our data, using Google's Charts API.</p>
-
-<p><strong>TBA</strong></p>
-    	</dd>
-
-<!-- <p>Then go to the Met Office's <a href="http://www.metoffice.gov.uk/weather/uk/uk_forecast_weather.html" target="_blank">forecast page</a>, scroll down to 'POSTCODE', and type in your postcode.</p>
-
-
-<p>The page you -->
-
-        </dl>
-
-
-
-    </div>
 {% endblock %}
