@@ -261,7 +261,7 @@ class RunnerProtocol(protocol.Protocol):
             otherline = line
         
         # send any destination output to any staff who are watching
-        if client.guid:
+        if self.guid:
             for client in self.factory.clients:
                 if client.guid == self.guid and client != self and client.isstaff:
                     client.write(otherline)  

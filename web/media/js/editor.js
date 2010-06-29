@@ -765,13 +765,14 @@ $(document).ready(function() {
                             window.location = res.url;
                         };
 
-                        if (bCommit != true){                        
-                            showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
-                        }
+                        if (res.draft != 'True') {
+                            if (bCommit != true) {                        
+                                showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
+                            }
                     
-                        if (bConnected)
-                            send({"command":'saved'}); 
-
+                            if (bConnected)
+                                send({"command":'saved'}); 
+                        }
                         pageIsDirty = false; // page no longer dirty
                     }
                 },
