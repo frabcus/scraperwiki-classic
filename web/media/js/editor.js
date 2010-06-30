@@ -47,12 +47,12 @@ $(document).ready(function() {
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];
 
         var stylesheets = Array();
-        stylesheets['python'] = 'contrib/python/css/pythoncolors.css';
-        stylesheets['php'] = 'contrib/php/css/phpcolors.css';
+        stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
+        stylesheets['php'] = [codemirror_url+'contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css'];
 
         codeeditor = CodeMirror.fromTextArea("id_code", {
             parserfile: parsers[scraperlanguage],
-            stylesheet: codemirror_url + stylesheets[scraperlanguage],
+            stylesheet: stylesheets[scraperlanguage],
             path: codemirror_url + "js/",
             domain: document.domain, 
             textWrapping: true,
