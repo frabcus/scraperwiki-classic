@@ -19,6 +19,59 @@ import  ConfigParser
 try    : import json
 except : import simplejson as json
 
+class ConsoleStream :
+
+    """
+    This class is duck-type equivalent to a file object. Used to replace
+    sys.stdout and sys.stderr, to json-ify each chunk of output directly to
+    the logging stream.
+    """
+
+    def __init__ (self, fd) :
+
+        """
+        Constructor. The file descriptor is saved and a local buffer
+        initialised to an empty string.
+        """
+
+        self.m_fd   = fd
+        self.m_text = ''
+        self.m_log  = open("/tmp/exec.%d" % os.getpid(), 'w')
+
+    def write (self, text) :
+
+        """
+        Write the specified text. This is appened to the local buffer,
+        which is then flushed if it contains a newline.
+        """
+
+        self.m_text += text
+        if len(self.m_text) > 0 and self.m_text[-1] == '\n' :
+            self.flush ()
+
+    def flush (self) :
+
+        """
+        Flush buffered text independent of the presence of newlines.
+        """
+
+        if self.m_text != '' :
+            msg  = { 'message_type' : 'console', 'content' : self.m_text }
+            if len(self.m_text) >= 100 :
+                msg['content_long'] = self.m_text
+            self.m_fd.write (json.dumps(msg) + '\n')
+            self.m_fd.flush ()
+            self.m_text = ''
+
+    def close (self) :
+
+        self.m_fd.close ()
+
+    def fileno (self) :
+
+        return self.m_fd.fileno ()
+
+
 USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
 cache       = None
 trace       = None
@@ -102,8 +155,11 @@ import  scraperwiki.utils
 import  scraperwiki.datastore
 import  scraperwiki.console
 
-scraperwiki.console.setConsole  (os.fdopen(3, 'w', 0))
+logfd	= os.fdopen(3, 'w', 0)
+scraperwiki.console.setConsole  (logfd)
 
+sys.stdout	= ConsoleStream (logfd) ;
+sys.stderr	= sys.stderr
 
 config = ConfigParser.ConfigParser()
 config.add_section ('dataproxy')
