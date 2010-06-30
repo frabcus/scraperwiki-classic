@@ -213,7 +213,7 @@ ul.scraper_list p.controls {position:absolute; top:0; right:1em;}
 /* Welcome page */
 #divWelcome {position:relative; background:url(../images/graph_paper.png) #1d7cae;
     top:-1.1em; padding: 1.5em 2%; border-top:solid 5px #287aa6;border-bottom:solid 10px #287aa6;}    
-#divWelcomeText {margin-right:500px;position:relative; top:-95px;margin-bottom:-95px;}
+#divWelcomeText {margin-right:550px;position:relative; top:-95px;margin-bottom:-95px;}
 #divWelcomeText h1 {font-size:2.3em; font-weight:bold; clear:none; line-height:1.1em; margin-bottom:0.5em;
     color:#fff; padding-top:10px;}
 #divWelcomeText h2 {font-size:1.8em; font-weight:bold; clear:none;line-height:1.2em;
