@@ -2,10 +2,7 @@ SHELL=/bin/bash
 
 # m h  dom mon dow   command
 
-# Run scrapers ar 44 minutes passed midnight every day
-# Note: This can take a very long time, so do anything that needs to be run *after* the scrapres have
-# run no sooner than 6 hours after this (7AM)
-44 0 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py run_scrapers
+*/15 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py run_scrapers -m 20
 
 # Collate email alerts every 5 minutes
 # Note: this only queues them, see below for sending
