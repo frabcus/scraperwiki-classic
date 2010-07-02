@@ -125,6 +125,8 @@ div.page_title {border-bottom:dotted 1px #ccc; border-top:solid 1px #ccc;
     padding-bottom:0.3em; padding-top:0.8em;margin-top:1em;}
 .page_controls {position:absolute; top:0.6em; right:0; text-align:right;}
 
+div.page_title_narrow { width:600px;}
+
 /* Page tabs */
 div.page_tabs {clear:left;}
 div.page_tabs ul {border-bottom:solid 1px #ccc; height:1.65em; padding:0; margin:0;}
