@@ -230,7 +230,7 @@ def getJTraceback(code):
             funcargs = inspect.formatargvalues(args, varargs, varkw, locals, formatvalue=lambda value: '=%s' % repr(value))
             stackentry["furtherlinetext"] = "%s(%s)" % (func, funcargs)  # double brackets to make it stand out
         
-        if file == "<string>" and 0 < linenumber - 1 < len(codelines):
+        if file == "<string>" and 0 <= linenumber - 1 < len(codelines):
             stackentry["linetext"] = codelines[linenumber - 1]  # have to do this as context=1 doesn't work (it doesn't give me anything in lines)
         
         stackdump.append(stackentry)
@@ -250,49 +250,16 @@ def getJTraceback(code):
     return result
 
 
-def getTraceback (code) :
-
-    """
-    Get traceback information. Returns exception, traceback, the
-    scraper file in whch the error occured and the line number.
-
-    @return         : (exception, traceback, file, line)
-    """
-
-    if trace == 'text' :
-        import backtrace
-        return backtrace.backtrace ('text', code, context = 10)
-    if trace == 'html' :
-        import backtrace
-        return backtrace.backtrace ('html', code, context = 10)
-
-    import traceback
-    tb = [ \
-            string.replace (t, 'File "<string>"', 'Scraper')
-            for t in traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback)
-            if string.find (t, 'Controller.py') < 0
-          ]
-    return str(sys.exc_type), string.join(tb, ''), None, None
-
 def execute (code) :
 
     try :
         import imp
         mod        = imp.new_module ('scraper')
         exec code.rstrip() + "\n" in mod.__dict__
+    
     except Exception, e :
-        
-        # all this to go when happy
-        import errormapper
-        emsg = errormapper.mapException (e)
-        etext, trace, infile, atline = getTraceback (code)
-        
-        # new version that gives raw stack info that can be formatted in javascript (and replace previous methods)
         jtraceback = getJTraceback(code)  
-        
-        # errfd = sys.stderr, which has the problem that the messages can get printed out of order!
-        scraperwiki.console.dumpMessage(message_type='exception', content=emsg, content_long=trace, filename=infile, 
-                                        lineno=atline, jtraceback=jtraceback)
+        scraperwiki.console.dumpMessage(message_type='exception', jtraceback=jtraceback)
         
 
 execute (open(script).read())

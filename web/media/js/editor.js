@@ -861,21 +861,6 @@ $(document).ready(function() {
     }
 
     function writeExceptionDump(data) {
-
-        // original exception code
-        if (false || !data.jtraceback) {
-            sMessage = data.content;
-            iLineNumber = 0;
-            if(parseInt(data.lineno) > 0){
-                iLineNumber = data.lineno;
-                codeeditor.selectLines(codeeditor.nthLine(iLineNumber), 0, codeeditor.nthLine(iLineNumber + 1), 0);                 
-            }
-            writeToConsole(sMessage, data.content_long, data.message_type, iLineNumber) 
-        }
-
-        // new exception code
-        //writeToConsole("New exception handler:"); 
-        //writeToConsole("New exception handler:"); 
         if (data.jtraceback) {
             //alert($.toJSON(data.jtraceback)); 
             var sMessage; 
