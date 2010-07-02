@@ -77,7 +77,7 @@ class APIBase(BaseHandler):
                 self.validate(request)
             except InvalidScraperException:
                 self.error_response = rc.NOT_FOUND
-                self.error_response.write(": No scraper found")
+                self.error_response.write(": Scraper not found")
 
         #if this call is set to cache, save the result
         if self.cache_duration > 0:
