@@ -5,7 +5,7 @@ from piston.utils import rc
 from piston.emitters import Emitter
 from api.models import api_key
 from api.emitters import CSVEmitter, PHPEmitter, GVizEmitter
-from settings import MAX_API_ITEMS
+from settings import MAX_API_ITEMS, DEFAULT_API_ITEMS
 import sys
 
 Emitter.register('csv', CSVEmitter, 'text/csv; charset=utf-8')
@@ -100,7 +100,7 @@ class APIBase(BaseHandler):
         try:
             limit = self.clamp_limit(int(request.GET.get('limit')))
         except:
-            limit = settings.DEFAULT_API_ITEMS
+            limit = DEFAULT_API_ITEMS
 
         try:
             offset = int(request.GET.get('offset'))
