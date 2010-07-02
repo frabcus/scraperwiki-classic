@@ -18,7 +18,7 @@
 <dl>
     {% for scraper in value %}
     <dt>
-    <a href="/editor/tutorial/{{scraper.short_name}}" class="scraper-tutorial-link"><b>{{scraper.short_name}}</b></a>
+    <a href="{% url tutorial scraper.short_name %}" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
     </dt>
     <dd>
       {{scraper.description}}
