@@ -28,9 +28,9 @@
           {% load gravatar %} {% show_gravatar scraper.owner 'small' %}&nbsp;{{scraper.owner.get_profile.name}}</a></dd>
           <dt>Data licence:</dt>
           <dd>{{scraper.license|default:"&nbsp;"}}</dd>
-          <dt>Scraper created:</dt><dd>{{ scraper.created_at|date:"D j M Y, H:i" }}</dd>
+          <dt>Scraper created:</dt><dd>{{ scraper.created_at|date:"H:i, j F Y" }}</dd>
           <dt>Last run:</dt>
-          <dd>{{scraper.last_run|naturalday|default:"never"|title}}</dd>
+          <dd>{{scraper.last_run|date:"H:i, j F Y"|default:"never"|title}}</dd>
           <dt>Records:</dt>
           <dd>{{ scraper.record_count }}</dd>
           <dt>API short name:</dt>

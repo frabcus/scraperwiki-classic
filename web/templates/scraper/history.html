@@ -10,7 +10,7 @@
   {% for item in history %}
     <tr>
       <td>
-        {{ item.datetime|date:"D j M Y, H:i" }}
+        {{ item.datetime|date:"H:i, j F Y" }}
       </td>
       <td>
           {% ifequal item.message_type|lower "commit" %}
