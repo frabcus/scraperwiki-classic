@@ -15,6 +15,8 @@
     <dd>The number of records to return, up to a maximum of {{ max_api_items }}. <input type="text" name="limit" size="4"/></dd>
     <dt><code>offset</code> (optional)</dt>
     <dd>Offset the limit. <input type="text" name="offset" size="4"/></dd>    
+    <dt><code>callback</code> (optional)</dt>
+    <dd><a href="http://en.wikipedia.org/wiki/JSONP#JSONP">JSONP</a> callback function. Only useful when requesting JSON data. <input type="text" name="callback" id="callback"/></dd>
 {% endblock %}
 
 {% block example_url %}{% url api:explorer_example method='datastore.getdata_1.0' %}{% endblock %}

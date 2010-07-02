@@ -96,7 +96,7 @@ class Scraper(models.Model):
     def __unicode__(self):
         return self.short_name
     
-    def save(self, commit=False, message=None, user=None):
+    def save(self, commit=False, message=None, user=None, **kwargs):
         """
         this function saves the uninitialized and undeclared .code member of
         the object to the disk you just have to know it's there by looking
@@ -149,7 +149,7 @@ class Scraper(models.Model):
         self.update_meta()
             
         #do the parent save
-        super(Scraper, self).save()
+        super(Scraper, self).save(**kwargs)
   
     def count_records(self):
         return int(Scraper.objects.item_count(self.guid))

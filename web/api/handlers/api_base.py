@@ -30,14 +30,15 @@ class APIBase(BaseHandler):
         explorer_user_run is for the API explorer only, and should be hidden in 
         some way!
         """
-        result = False
-        if request.GET.get('explorer_user_run', None) == '1':
-            result = True
-        else:
-            key = request.GET.get('key', None)
-            if key and api_key.objects.filter(key=key, active=True).count() == 1:
-                result = True
-        return result
+        #result = False
+        #if request.GET.get('explorer_user_run', None) == '1':
+        #    result = True
+        #else:
+        #    key = request.GET.get('key', None)
+        #    if key and api_key.objects.filter(key=key, active=True).count() == 1:
+        #        result = True
+        #return result
+        return True
 
     def validate(self, request):
 

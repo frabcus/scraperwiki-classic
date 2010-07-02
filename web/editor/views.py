@@ -54,56 +54,52 @@ def raw(request, short_name=None):
 
 
 # Handle Session Draft  
-# A non-served page for saving scrapers that have been stored in the session fo non-signed in users
+# A non-served page for saving scrapers that have been stored in the session for non-signed in users
 def handle_session_draft(request, action):
-
-    response_url = ''
 
     # check if they are signed in, if no, they shouldent be here, off to the signin page
     if not request.user.is_authenticated():
         response_url =  reverse('login') + "?next=%s" % reverse('handle_session_draft', kwargs={'action': action})
+        return HttpResponseRedirect(response_url)
+    
+    #check if anything in the session        
+    session_scraper_draft = request.session.pop('ScraperDraft', None)
+    
+    # shouldn't be here
+    if not session_scraper_draft:
+        response_url = reverse('frontpage')
+        return HttpResponseRedirect(response_url)
+        
+    draft_scraper = session_scraper_draft.get('scraper', None)
+    draft_tags = session_scraper_draft.get('tags', '')   
+    draft_commit_message = session_scraper_draft.get('commit_message')
+
+    #save or publish the scraper
+    if action == 'save':
+        draft_scraper.save()
+    elif action == 'commit':
+        draft_scraper.save(commit=True, message=draft_commit_message, user=request.user.pk)
+
+    # Add tags
+    draft_scraper.tags = session_scraper_draft.get('tags', '')
+
+    # Add user roles
+    # TODO: MOVE TO MODEL, THIS IS BUSINESS LOGIC
+    if draft_scraper.owner():
+        if draft_scraper.owner().pk != request.user.pk:
+            draft_scraper.add_user_role(request.user, 'editor')
     else:
-        #check if anything in the session        
-        session_scraper_draft = request.session.get('ScraperDraft', None)
+        draft_scraper.add_user_role(request.user, 'owner')
 
-        success = False
-        if not session_scraper_draft:
-            # Shouldn't be here, go home
-            response_url = reverse('frontpage')
-        else:
-            draft_scraper = session_scraper_draft.get('scraper', None)
-            draft_tags = session_scraper_draft.get('tags', '')   
-            draft_commit_message = session_scraper_draft.get('commit_message')
+    # work out where to send them next
+    #go to the scraper page if commited, or the editor if not
+    if action == 'save':
+        response_url = reverse('editor', kwargs={'short_name' : draft_scraper.short_name})
+    elif action == 'commit':
+        response_url = reverse('scraper_code', kwargs={'scraper_short_name' : draft_scraper.short_name})
 
-            #save or publish the scraper
-            if action == 'save':
-                draft_scraper.save()
-            elif action == 'commit':
-                draft_scraper.save(commit=True, message=draft_commit_message, user=request.user.pk)
-
-            # Add tags
-            draft_scraper.tags = request.session['ScraperDraft'].get('tags', '')
-
-            # Add user roles
-            # TODO: MOVE TO MODEL, THIS IS BUSINESS LOGIC
-            if draft_scraper.owner():
-                if draft_scraper.owner().pk != request.user.pk:
-                    draft_scraper.add_user_role(request.user, 'editor')
-            else:
-                draft_scraper.add_user_role(request.user, 'owner')
-
-            # work out where to send them next
-            #go to the scraper page if commited, or the editor if not
-            if action == 'save':
-                response_url = reverse('editor', kwargs={'short_name' : draft_scraper.short_name})
-            elif action == 'commit':
-                response_url = reverse('scraper_code', kwargs={'scraper_short_name' : draft_scraper.short_name})
-
-        #clear the session
-        del request.session['ScraperDraft']
-
-    # redirect
     return HttpResponseRedirect(response_url)
+
 
 
 # called from the edit function
@@ -179,7 +175,7 @@ def saveeditedscraper(request, scraper):
 
 
 #Editor form
-def edit(request, short_name='__new__', language='Python'):
+def edit(request, short_name='__new__', language='Python', tutorial_scraper=None):
 
     # identify the scraper (including if there was a draft one backed up)
     has_draft = False
@@ -210,11 +206,17 @@ def edit(request, short_name='__new__', language='Python'):
 
         scraper = ScraperModel()  
         
-        # select a startup scraper code randomly from those with the right flag
-        startup_scrapers = ScraperModel.objects.filter(published=True, isstartup=True, language=language)
         startupcode = "# blank"
-        if len(startup_scrapers):
-            startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
+
+        if tutorial_scraper:
+            startup_scraper = get_object_or_404(ScraperModel, short_name=tutorial_scraper)
+            startupcode = startup_scraper.saved_code()
+            language = startup_scraper.language
+        else:
+            # select a startup scraper code randomly from those with the right flag
+            startup_scrapers = ScraperModel.objects.filter(published=True, isstartup=True, language=language)
+            if len(startup_scrapers):
+                startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
 
         scraper.code = startupcode
         scraper.license = 'Unknown'

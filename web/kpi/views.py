@@ -3,7 +3,9 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 
 from scraper.models import Scraper
-import datetime, calendar, itertools, urllib
+import datetime, calendar
+
+from pygooglechart import StackedVerticalBarChart
 
 START_YEAR = 2010
 
@@ -21,29 +23,26 @@ def generate_chart_urls(years_list):
     new_users = []
     for year in years_list:
         for month in year['months']:
-            total_scrapers.append(str(month['total_scrapers']))
-            new_scrapers.append(str(month['this_months_scrapers']))
-            total_users.append(str(month['total_users']))
-            new_users.append(str(month['this_months_users']))
+            total_scrapers.append(month['total_scrapers'])
+            new_scrapers.append(month['this_months_scrapers'])
+            total_users.append(month['total_users'])
+            new_users.append(month['this_months_users'])
 
-    parameters = {}
+    chart = StackedVerticalBarChart(((30 * len(total_scrapers)) + 100), 125, y_range=(0, sorted(total_scrapers + total_users)[-1]))
+    chart.set_colours(['4d89f9', 'c6d9fd'])
+    chart.set_bar_width(20)
+    chart.set_legend(['Total Scrapers', 'Total Users'])
+    chart.add_data(total_scrapers)
+    chart.add_data(total_users)
+    total_url = chart.get_url()
 
-    parameters['cht'] = 'bvs'
-    parameters['chs'] = '%sx125' % ((30 * len(total_scrapers)) + 100)   # Size
-    parameters['chco'] = '4d89f9,c6d9fd'                                # Colour
-    parameters['chbh'] = '20'                                           # Bar Width
-
-    parameters['chdl'] = 'Total Scrapers|Total Users'                   # Legends
-    parameters['chds'] = '0,%s' % sorted(total_scrapers + total_users)[-1]
-    parameters['chd'] = 't:' + ','.join(total_scrapers) + '|' + ','.join(total_users)
-
-    total_url = 'http://chart.apis.google.com/chart?' + urllib.urlencode(parameters)
-
-    parameters['chdl'] = 'New Scrapers|New Users'                       # Legends
-    parameters['chds'] = '0,%s' % sorted(new_scrapers + new_users)[-1]
-    parameters['chd'] = 't:' + ','.join(new_scrapers) + '|' + ','.join(new_users)
-
-    new_url = 'http://chart.apis.google.com/chart?' + urllib.urlencode(parameters)
+    chart = StackedVerticalBarChart(((30 * len(new_scrapers)) + 100), 125, y_range=(0, sorted(new_scrapers + new_users)[-1]))
+    chart.set_colours(['4d89f9', 'c6d9fd'])
+    chart.set_bar_width(20)
+    chart.set_legend(['New Scrapers', 'New Users'])
+    chart.add_data(new_scrapers)
+    chart.add_data(new_users)
+    new_url = chart.get_url()
 
     return total_url, new_url
 
@@ -72,8 +71,7 @@ def index(request):
             years_list.append({'year': year, 'months': months_list})
 
         context['data'] = years_list 
-        context['total_chart_url'] = generate_chart_urls(years_list)[0]
-        context['new_chart_url'] = generate_chart_urls(years_list)[1]
+        context['total_chart_url'], context['new_chart_url'] = generate_chart_urls(years_list)
         
         return render_to_response('kpi/index.html', context)
     else:

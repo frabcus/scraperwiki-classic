@@ -464,7 +464,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 else : self.notify (self.connection.getpeername()[0], runid = runID, url = self.path, content = 'Failed: %s (%s)' % (self.path, m.group(2)))
             else :
                 self.notify (self.connection.getpeername()[0], runid = runID, url = self.path, content = 'Failed: %s' % (self.path))
-            self.connection.send (page)
+            self.connection.sendall (page)
             self.connection.close()
 
         if runID is not None :

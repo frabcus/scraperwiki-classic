@@ -7,7 +7,7 @@ $(function(){
     parts.push('<li><input type="radio" name="languages" value="PHP">PHP<br></li>');
     parts.push('</ul>');
     parts.push('<br/>');
-    parts.push('<a href="#" id="languageOK">OK</a>&nbsp;&nbsp;<a href="#" id="languageClose">CLOSE</a>');
+    parts.push('<input type="button" id="languageOK" value="OK" class="button"/>&nbsp;&nbsp;<input type="button" id="languageClose" value="Cancel" class="button"/>');
     parts.push('</div>');
     $('body').append(parts.join(''));
     $('#langDialog').dialog({autoOpen: false, draggable: false, resizable: false});

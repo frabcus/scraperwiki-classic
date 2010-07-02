@@ -276,11 +276,12 @@ var PHPParser = Editor.Parser = (function() {
       else if (type == "{") cont(pushlex("}"), block, poplex);
       else if (type == "function") funcdef();
       // technically, "class implode {...}" is correct, but we'll flag that as an error because it overrides a predefined function
-      else if (type == "class") cont(require("t_string"), expect("{"), pushlex("}"), block, poplex);
+      else if (type == "class") classdef();
       else if (type == "foreach") cont(pushlex("form"), require("("), pushlex(")"), expression, require("as"), require("variable"), /* => $value */ expect(")"), poplex, statement, poplex);
       else if (type == "for") cont(pushlex("form"), require("("), pushlex(")"), expression, require(";"), expression, require(";"), expression, require(")"), poplex, statement, poplex);
       // public final function foo(), protected static $bar;
-      else if (type == "modifier") cont(require(["modifier", "variable", "function"], [null, null, funcdef]));
+      else if (type == "modifier") cont(require(["modifier", "variable", "function", "abstract"], [null, null, funcdef, absfun]));
+      else if (type == "abstract") abs();
       else if (type == "switch") cont(pushlex("form"), require("("), expression, require(")"), pushlex("}", "switch"), require([":", "{"]), block, poplex, poplex);
       else if (type == "case") cont(expression, require(":"));
       else if (type == "default") cont(require(":"));
@@ -301,6 +302,7 @@ var PHPParser = Editor.Parser = (function() {
       // function call or parenthesized expression: $a = ($b + 1) * 2;
       else if (type == "(") cont(pushlex(")"), commasep(expression), require(")"), poplex, maybeoperator);
       else if (type == "operator") cont(expression);
+      else if (type == "function") lambdadef();
     }
     // Called for places where operators, function calls, or subscripts are
     // valid. Will skip on to the next action if none is found.
@@ -328,6 +330,32 @@ var PHPParser = Editor.Parser = (function() {
     function funcdef() {
       cont(require("t_string"), require("("), pushlex(")"), commasep(funcarg), require(")"), poplex, block);
     }
+    // the declaration or definition of a lambda
+    function lambdadef() {
+      cont(require("("), pushlex(")"), commasep(funcarg), require(")"), maybe_lambda_use, poplex, block);
+    }
+    // optional lambda 'use' statement
+    function maybe_lambda_use(token) {
+      if(token.type == "namespace") {
+        cont(require('('), commasep(funcarg), require(')'));
+      }
+      else {
+        pass(expression);
+      }
+    }
+    // the definition of a class
+    function classdef() {
+      cont(require("t_string"), expect("{"), pushlex("}"), block, poplex);
+    }
+    // either funcdef if the current token is "function", or the keyword "function" + funcdef
+    function absfun(token) {
+      if(token.type == "function") funcdef();
+      else cont(require(["function"], [funcdef]));
+    }
+    // the abstract class or function (with optional modifier)
+    function abs(token) {
+      cont(require(["modifier", "function", "class"], [absfun, funcdef, classdef]));
+    }
     // Parses a comma-separated list of the things that are recognized
     // by the 'what' argument.
     function commasep(what){
@@ -352,6 +380,8 @@ var PHPParser = Editor.Parser = (function() {
       if (token.type == "t_string") cont(require("variable"), maybedefaultparameter);
       // function foo($string) {...}
       else if (token.type == "variable") cont(maybedefaultparameter);
+      // function foo(&$ref) {...}
+      else if (token.content == "&") cont(require("variable"), maybedefaultparameter);
     }
 
     // A namespace definition or use
