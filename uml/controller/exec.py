@@ -296,3 +296,5 @@ def execute (code) :
         
 
 execute (open(script).read())
+sys.stdout.flush()
+sys.stderr.flush()

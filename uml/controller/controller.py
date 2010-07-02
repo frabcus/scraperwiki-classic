@@ -352,8 +352,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                     self.connection.send ("\n")
                     for key, value in info['options'].items() :
                         self.connection.send ('option=%s:%s\n' % (key, value))
-                except :
-                    self.log_request('Ident', '(%s,%s) send failed' % (lport, rport))
+                except Exception, e:
+                    self.log_request('Ident', '(%s,%s) send failed: %s' % (lport, rport, repr(e)))
                 return
         self.log_request('Ident', '(%s,%s) not found' % (lport, rport))
 
@@ -672,7 +672,7 @@ class ScraperController (BaseController) :
                 #  the logging database. If the caller closes the connection,
                 #  kill the child and exit the loop.
                 #
-                busy    = 3
+                busy    = 2
                 while busy > 0 :
                     for e in p.poll() :
                         fd = e[0]
@@ -696,7 +696,7 @@ class ScraperController (BaseController) :
                             except : line = os.read (fdmap[fd][0], 8192)
                             if line == '' :
                                 p.unregister (fd)
-                                busy -= 3
+                                busy -= 1
                             #
                             #  If data received and data does not end in a newline the add to
                             #  any prior data from the connection and loop.
@@ -707,6 +707,7 @@ class ScraperController (BaseController) :
                             #
                             #  Prepend prior data to the current data and clear the prior
                             #  data. If still nothing then loop.
+                            #
                             line = fdmap[fd][1] + line
                             fdmap[fd][1] = ''
                             if line == '' :
@@ -725,12 +726,15 @@ class ScraperController (BaseController) :
                             self.wfile.flush ()
                             #
                             #  If the data came from the logging connection and was an error the
-                            #  log to the database.
+                            #  log to the database. We might get multiple json'd lines in one
+                            #  so split up.
                             #
                             if fd == lpipe[0] :
-                                msg = json.loads(line)
-                                if msg['message_type'] == 'exception' :
-                                    swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = msg['content'], arg2 = msg['content_long'])
+                                for l in string.split(line, '\n') :
+                                    if l != '' :
+                                        msg = json.loads(l)
+                                        if msg['message_type'] == 'exception' :
+                                            swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = msg['content'], arg2 = msg['content_long'])
 
                 #  Capture the child user and system times as best we can, since this
                 #  is summed over all children.
@@ -754,9 +758,9 @@ class ScraperController (BaseController) :
                         )   + '\n'
                     )
 
-            except  :
+            except Exception, e :
 
-                pass
+                self.log_request('Copying results failed: %s' % repr(e))
 
             finally :
 
