@@ -336,8 +336,8 @@ $(document).ready(function() {
 
         // couldn't find a way to make a reconnect button work!
         writeToChat('<b>You will need to reload the page to reconnect</b>');  
-        writeToConsole("Connection to runner lost, you will need to reload this page.", undefined, "exception"); 
-        writeToConsole("(You can still save your work)", undefined, "exception"); 
+        writeToConsole("Connection to runner lost, you will need to reload this page.", "exception"); 
+        writeToConsole("(You can still save your work)", "exception"); 
         $('.editor_controls #run').val('Unconnected');
         $('.editor_controls #run').unbind('click.run');
         $('.editor_controls #run').unbind('click.abort');
@@ -397,7 +397,8 @@ $(document).ready(function() {
             if ((jdata.message_type != "data") && (jdata.message_type != "console"))
                 lreceiverecordqueue.push(jdata); 
         }
-        writeToConsole("Clearing " + (receiverecordqueue.length - lreceiverecordqueue.length) + " records from receiverqueue, leaving: " + lreceiverecordqueue.length); 
+        message = "Clearing " + (receiverecordqueue.length - lreceiverecordqueue.length) + " records from receiverqueue, leaving: " + lreceiverecordqueue.length; 
+        writeToConsole(message); 
         receiverecordqueue = lreceiverecordqueue; 
     }
 
@@ -438,9 +439,9 @@ $(document).ready(function() {
           } else if (data.message_type == "exception") {
               writeExceptionDump(data); 
           } else if (data.message_type == "console") {
-              writeToConsole(data.content, data.content_long, data.message_type); 
+              writeToConsole(data.content, data.message_type); 
           } else {
-              writeToConsole(data.content, data.content_long, data.message_type); // unknown type
+              writeToConsole(data.content, data.message_type); 
           }
       }        
 
@@ -605,7 +606,7 @@ $(document).ready(function() {
                 sendKill();
                 $('.editor_controls #run').removeClass('running').val('run');
                 $('.editor_controls #run').unbind('click.abort');
-                writeToConsole('Run Aborted'); // Custom function that append to a div
+                writeToConsole('Run Aborted'); 
                 $('.editor_controls #run').bind('click.run', run_abort);
                 
                 //hide annimation
@@ -794,13 +795,6 @@ $(document).ready(function() {
         showPopup('popup_text');
     }
     
-    //show exception popup
-    function showExceptionPopup(sTitle, sException){
-        $('#popup_exception h3').html(sTitle);
-        $('#popup_exception .output pre').html(sException);
-        showPopup('popup_exception');
-    }
-    
     function setupResizeEvents(){
         
         //window
@@ -871,32 +865,39 @@ $(document).ready(function() {
                 if (stackentry.furtherlinetext != undefined)
                     sMessage += " -- " + stackentry.furtherlinetext; 
                 linenumber = (stackentry.file == "<string>" ? stackentry.linenumber : undefined); 
-                writeToConsole(sMessage, undefined, 'exceptiondump', linenumber); 
+                writeToConsole(sMessage, 'exceptiondump', linenumber); 
             }
-            writeToConsole(data.jtraceback.exceptiondescription, undefined, 'exceptiondump'); 
+
+            if (data.jtraceback.blockedurl) {
+                sMessage = "The link " + data.jtraceback.blockedurl.substring(0,50) + " has been blocked. "; 
+                sMessage += "Click <a href=\"/whitelist/?url=" + data.jtraceback.blockedurlquoted + "\" target=\"_blank\">here</a> for details."; 
+                writeToConsole(sMessage, 'exceptionnoesc'); 
+            }
+            else
+                writeToConsole(data.jtraceback.exceptiondescription, 'exceptiondump'); 
         }
     }
 
     //Write to console/data/sources
-    function writeToConsole(sMessage, sLongMessage, sMessageType, iLine) {
+    function writeToConsole(sMessage, sMessageType, iLine) {
 
         // if an exception set the class accordingly
         var sShortClassName = '';
         var sLongClassName = 'message_expander';
         var sExpand = '...more'
 
-        if (sMessageType == 'exception') {   // this is prob out of date with new stack dump technology
+        sLongMessage = undefined; 
+        if (sMessageType == 'exceptiondump') 
             sShortClassName = 'exception';
-            sLongClassName = 'exception_expander';
-            sExpand = 'view traceback'
-        }   
-        else {
-            if (sMessageType == 'exceptiondump') 
-                sShortClassName = 'exception';
-            if (sMessage.length > 110) {
-                sLongMessage = sMessage; 
-                sMessage = sMessage.substring(0, 100); 
-            }
+
+        escsMessage = cgiescape(sMessage); 
+        if (sMessageType == 'exceptionnoesc') {
+            sShortClassName = 'exception';
+            escsMessage = sMessage; // no escaping
+        }
+        else if (sMessage.length > 110) {
+            sLongMessage = sMessage; 
+            sMessage = sMessage.substring(0, 100); 
         }
 
         //create new item
@@ -904,33 +905,19 @@ $(document).ready(function() {
         oConsoleItem.addClass('output_item');
         oConsoleItem.addClass(sShortClassName);
         
-        oConsoleItem.html(cgiescape(sMessage)); 
-        // add long message (expansion link).  Should be derived from sMessage
+        oConsoleItem.html(escsMessage); 
+
         if(sLongMessage != undefined) {
-            //expand link
             oMoreLink = $('<a href="#"></a>');
             oMoreLink.addClass('expand_link');
             oMoreLink.text(sExpand)
             oMoreLink.longMessage = sLongMessage;
-            //add event
-            if (sMessageType == 'exception'){
-                oMoreLink.click(
-                        function(){
-                            showExceptionPopup(sMessage, sLongMessage);
-                        }
-                    );
-            }else{
-                oMoreLink.click(
-                        function(){
-                            showTextPopup(cgiescape(sLongMessage));
-                        }
-                    );                
-            }
+            oMoreLink.click(function() { showTextPopup(cgiescape(sLongMessage)); });
             oConsoleItem.append(oMoreLink);
         }
 
         // add clickable line number link
-        if(iLine) {
+        if (iLine != undefined) {
             oLineLink = $('<a href="#">Line ' + iLine + ' - </a>'); 
             oConsoleItem.prepend(oLineLink);
             oLineLink.click( function() {
@@ -963,8 +950,7 @@ $(document).ready(function() {
 
         //append to sources tab
         $('#output_sources div.output_content')
-        //.append('<span class="output_item message_expander">' + sDisplayMessage + "</span>");
-        .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a></span>')
+                .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a></span>')
 
         $('.editor_output div.tabs li.sources').addClass('new');
 

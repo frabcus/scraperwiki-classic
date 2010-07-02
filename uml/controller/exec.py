@@ -57,8 +57,6 @@ class ConsoleStream :
 
         if self.m_text != '' :
             msg  = { 'message_type' : 'console', 'content' : self.m_text }
-            if len(self.m_text) >= 100 :
-                msg['content_long'] = self.m_text
             self.m_fd.write (json.dumps(msg) + '\n')
             self.m_fd.flush ()
             self.m_text = ''
@@ -208,12 +206,11 @@ signal.signal (signal.SIGXCPU, sigXCPU)
 
 
 
-
-# Code waiting to be reformatted to another standard that I don't understand (Julian)
-
-
+# code hacked here by Julian for clearer stack dump
 import inspect
 import traceback
+import re
+import urllib
 def getJTraceback(code):
     """Traceback that makes raw data available to javascript to process"""
     exc_type, exc_value, exc_traceback = sys.exc_info()   # last exception that was thrown
@@ -239,14 +236,21 @@ def getJTraceback(code):
             break
         pass # assert file == "<string>"
         
-    if exc_type in [SyntaxError, IndentationError]:
+    if exc_type in [ SyntaxError, IndentationError ]:
         stackentry = {"linenumber":exc_value.lineno, "file":exc_value.filename, "offset":exc_value.offset}
-        if stackentry["file"] == "<string>" and 0 < stackentry["linenumber"] - 1 < len(codelines):
+        if stackentry["file"] == "<string>" and 0 <= stackentry["linenumber"] - 1 < len(codelines):
             stackentry["linetext"] = codelines[stackentry["linenumber"] - 1]  # can't seem to recover the text from the SyntaxError object, though it is in it's repr
         stackentry["furtherlinetext"] = exc_value.msg
         stackdump.append(stackentry)
-    
+        
     result = { "exceptiondescription":repr(exc_value), "stackdump":stackdump }
+    
+    if exc_type == IOError and exc_value.args[1] == 403:
+        mblockaccess = re.match('Scraperwiki blocked access to "(.*?)"', str(exc_value.args[2]))
+        if mblockaccess:
+            result["blockedurl"] = mblockaccess.group(1)
+            result["blockedurlquoted"] = urllib.quote(mblockaccess.group(1))
+    #raise IOError('http error', 403, 'Scraperwiki blocked access to "http://tits.ru/".  Click <a href="/whitelist/?url=http%3A//tits.ru/">here</a> for details.', <httplib.HTTPMessage instance at 0x84c318c>)
     return result
 
 

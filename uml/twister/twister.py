@@ -54,7 +54,7 @@ def format_message(content, message_type='console'):
 # and are passed through lineReceived.  Look there fore further formatting information.
 # things like exception parsing is done all the way in the controller.py
 
-# I think this class is only only for chunking into lines
+# I think this class is only for chunking into lines
 # see http://twistedmatrix.com/documents/8.2.0/api/twisted.protocols.basic.LineOnlyReceiver.htm
 
 class LocalLineOnlyReceiver(LineOnlyReceiver):
