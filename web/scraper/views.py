@@ -243,8 +243,7 @@ def scraper_map(request, scraper_short_name, map_only=False):
 
 def code(request, scraper_short_name):
     user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -252,17 +251,13 @@ def code(request, scraper_short_name):
 
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    committed_code = scraper.committed_code()
+    saved_code = scraper.saved_code()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    return render_to_response('scraper/code.html', {
-        'scraper_tags': scraper_tags,
-        'selected_tab': 'code',
-        'scraper': scraper,
-        'user_owns_it': user_owns_it,
-        'committed_code': committed_code,
-        'user_follows_it': user_follows_it,},
-        context_instance=RequestContext(request))
+    dictionary = { 'scraper_tags': scraper_tags, 'selected_tab': 'code', 'scraper': scraper,
+                   'user_owns_it': user_owns_it, 'saved_code': saved_code,
+                   'user_follows_it': user_follows_it }
+    return render_to_response('scraper/code.html', dictionary, context_instance=RequestContext(request))
 
 def comments(request, scraper_short_name):
 
@@ -283,24 +278,16 @@ def comments(request, scraper_short_name):
 
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    return render_to_response('scraper/comments.html', {
-        'scraper_tags': scraper_tags,
-        'scraper_owner': scraper_owner,
-        'scraper_contributors': scraper_contributors,
-        'scraper_followers': scraper_followers,
-        'selected_tab': 'comments',
-        'scraper': scraper,
-        'user_owns_it': user_owns_it,
-        'user_follows_it': user_follows_it,
-        }, context_instance=RequestContext(request))
+    dictionary = { 'scraper_tags': scraper_tags, 'scraper_owner': scraper_owner, 'scraper_contributors': scraper_contributors,
+                   'scraper_followers': scraper_followers, 'selected_tab': 'comments', 'scraper': scraper,
+                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
+    return render_to_response('scraper/comments.html', dictionary, context_instance=RequestContext(request))
 
 
 def scraper_history(request, scraper_short_name):
 
     user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects,
-        short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -313,13 +300,9 @@ def scraper_history(request, scraper_short_name):
         content_type=content_type,
         object_id=scraper.pk).order_by('-datetime')
 
-    return render_to_response('scraper/history.html', {
-        'selected_tab': 'history',
-        'scraper': scraper,
-        'history': history,
-        'user_owns_it': user_owns_it,
-        'user_follows_it': user_follows_it,
-        }, context_instance=RequestContext(request))
+    dictionary = { 'selected_tab': 'history', 'scraper': scraper, 'history': history,
+                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
+    return render_to_response('scraper/history.html', dictionary, context_instance=RequestContext(request))
 
 
 def stringnot(v):
@@ -414,7 +397,7 @@ def download(request, scraper_short_name):
     """
     scraper = get_object_or_404(models.Scraper.objects, 
                                 short_name=scraper_short_name)
-    response = HttpResponse(scraper.committed_code(), mimetype="text/plain")
+    response = HttpResponse(scraper.saved_code(), mimetype="text/plain")
     response['Content-Disposition'] = \
         'attachment; filename=%s.py' % (scraper.short_name)
     return response

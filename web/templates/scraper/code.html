@@ -7,12 +7,7 @@
     </form>
 </div>
 <div class="code_viewer">
-    <textarea id="txtScraperCode">{{ committed_code }}</textarea>
-    {% if not committed_code %}
-    <div class="info_unpublished">
-        This scraper is being worked on <br/>but has not been published yet
-    </div>
-    {% endif %}
+    <textarea id="txtScraperCode">{{ saved_code }}</textarea>
 </div>
 {% endblock %}
 

@@ -3,10 +3,11 @@ import sys
 import os
 import datetime
 import random
-try:
-  import json
-except:
-  import simplejson as json
+import difflib
+
+try:    import json
+except: import simplejson as json
+
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
@@ -21,22 +22,21 @@ import forms
 import settings
 
 
-# Delete the draft
 def delete_draft(request):
-    if  request.session.get('ScraperDraft', False):
+    if request.session.get('ScraperDraft', False):
         del request.session['ScraperDraft']    
     return HttpResponseRedirect(reverse('editor'))
 
-# Diff
+
 def diff(request, short_name=None):
     if not short_name or short_name == "__new__":
         return HttpResponse("Draft scraper, nothing to diff against", mimetype='text')
     code = request.POST.get('code', None)    
-    if code:
-        scraper = get_object_or_404(ScraperModel, short_name=short_name)
-        scraper.code = scraper.committed_code()
-        return HttpResponse(vc.diff(scraper.code, code), mimetype='text')
-    return HttpResponse("Programme error: No code sent up to diff against", mimetype='text')
+    if not code:
+        return HttpResponse("Programme error: No code sent up to diff against", mimetype='text')
+    scraper = get_object_or_404(ScraperModel, short_name=short_name)
+    result = '\n'.join(difflib.unified_diff(scraper.saved_code().splitlines(), code.splitlines(), lineterm=''))
+    return HttpResponse("::::" + result, mimetype='text')
     
     
 def raw(request, short_name=None):
@@ -47,10 +47,10 @@ def raw(request, short_name=None):
     newcode = scraper.saved_code()
     if oldcodeineditor:
         sequencechange = vc.DiffLineSequenceChanges(oldcodeineditor, newcode)
-        res = "%s:::sElEcT rAnGe:::%s" % (json.dumps(list(sequencechange)), newcode)   # a delimeter that the javascript can find, in absence of using json
+        result = "%s:::sElEcT rAnGe:::%s" % (json.dumps(list(sequencechange)), newcode)   # a delimeter that the javascript can find, in absence of using json
     else:
-        res = newcode
-    return HttpResponse(res, mimetype="text/plain")
+        result = newcode
+    return HttpResponse(result, mimetype="text/plain")
 
 
 # Handle Session Draft  

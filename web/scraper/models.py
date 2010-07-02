@@ -217,16 +217,13 @@ class Scraper(models.Model):
     def editors(self):
         return (self.owner(),)
             
-    def committed_code(self):
-        code = vc.get_code(self.short_name, committed=True)
-        return code
-
+    
     def saved_code(self):
         code = vc.get_code(self.short_name, committed=False)
         return code
 
     def count_number_of_lines(self):
-        code = vc.get_code(self.short_name)
+        code = vc.get_code(self.short_name, committed=False)
         return int(code.count("\n"))
         
     def get_absolute_url(self):

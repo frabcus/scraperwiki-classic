@@ -127,26 +127,7 @@ def been_edited(scraper_name=None):
   else:
     return False
 
-def diff(a, b=None, rev='tip', scraper_name=None):
-  """
-  Given a scraper name, allow browsing of diffs.
-  
-  - `a`: Code to diff against.
-  - `b`: (optional) The other half of the code to diff against.
-  - `rev`: (optional) The revistion to diff against.
-  
-  `b` and `rev` are optional.  If `b` is not provided diff is performed
-  against the 'tip' revision of the code.  If 'rev' is provided then 
-  we diff against that revision.  If 'b' and 'rev' are provided then
-  'rev is ignored.
-  
-  """
-  if not b:
-    b = get_code(scraper_name, rev=rev)
-  
-  x = '\n'.join(difflib.unified_diff(a.splitlines(), b.splitlines(), lineterm=''))
-  return x
-    # yield line
+
 
 def DiffLineSequenceChanges(oldcode, newcode):
     """
