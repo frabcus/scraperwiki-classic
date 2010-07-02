@@ -78,8 +78,8 @@ def frontpage(request, public_profile_field=None):
     return render_to_response(template, data, context_instance=RequestContext(request))
 
 def tutorials(request):
-    python_tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language="python").order_by('-first_published_at')
-    php_tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language="php").order_by('-first_published_at')
+    python_tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language="python").order_by('first_published_at')
+    php_tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language="php").order_by('first_published_at')
     return render_to_response('frontend/tutorials.html', {'python_tutorial_scrapers' : python_tutorial_scrapers, 'php_tutorial_scrapers' : php_tutorial_scrapers}, context_instance=RequestContext(request))
 
 def my_scrapers(request):
