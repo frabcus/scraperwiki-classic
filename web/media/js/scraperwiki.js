@@ -9,12 +9,12 @@ function setupCodeViewer(iLineCount, scraperlanguage){
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];
 
         var stylesheets = Array();
-        stylesheets['python'] = 'python/css/pythoncolors.css';
-        stylesheets['php'] = 'php/css/phpcolors.css';
+        stylesheets['python'] = ['/media/CodeMirror/contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
+        stylesheets['php'] = ['/media/CodeMirror/contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css']; 
 
         oCodeEditor = CodeMirror.fromTextArea("txtScraperCode", {
            parserfile: parsers[scraperlanguage],
-           stylesheet: "/media/CodeMirror/contrib/" + stylesheets[scraperlanguage],
+           stylesheet: stylesheets[scraperlanguage],
 
            path: "/media/CodeMirror/js/",
            textWrapping: true, 
