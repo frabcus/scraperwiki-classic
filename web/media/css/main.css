@@ -311,16 +311,9 @@ div.user_comment img {float:left; margin-right:10px;}
 
 #embedMapBox {width: 100%;}
 
-form.scraper_admin label {
-  display: inline-block;
-  line-height: 1.8;
-  vertical-align: top;
-  width: 20%; /* Width of labels */
-}
-
-form.scraper_admin input, form.scraper_admin select, form.scraper_admin textarea {
-  width: 60%; /* Width of labels */
-}
+form.scraper_admin label { display: inline-block; line-height: 1.8; vertical-align: top; width: 20%; }
+form.scraper_admin input, form.scraper_admin select, form.scraper_admin textarea { width: 60%; }
+form.scraper_admin input#id_published { width: auto; }
 
 td.bicolumn { width:50%; vertical-align:top; }
 
