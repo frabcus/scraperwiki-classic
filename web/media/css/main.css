@@ -117,6 +117,9 @@ table.data tr:nth-child(odd) td {background:#ffffd7;}
 table.data td {border-bottom:dotted 1px #ccc; border-top:solid 1px #ffffd7;padding:0.3em 0.5em; line-height:1em;}
 table.data tr:hover td {border-bottom:solid 1px #ccc;border-top:solid 1px #ccc;}
 
+table.scrapersediting { width:auto;}
+table.scrapersediting td { border: 1px solid black;}
+
 /* Flexigrid override */
 .flexigrid table {width:auto;}
 

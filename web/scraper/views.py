@@ -18,6 +18,7 @@ import frontend
 import subprocess
 
 import StringIO, csv, types
+import datetime
 from django.utils.encoding import smart_str
 
 try:
@@ -384,9 +385,17 @@ def scraper_list(request, page_number):
     dictionary = { "scrapers": scrapers, "form": form, "npeople": npeople }
     return render_to_response('scraper/list.html', dictionary, context_instance=RequestContext(request))
 
+
 def scraper_table(request):
-    all_scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
-    dictionary = { "scrapers": all_scrapers }
+    dictionary = { }
+    dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
+    dictionary["loggedinusers"] = set([ userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.filter(user__isnull=False)])
+    dictionary["numloggedoutusers"] = len(models.UserScraperEditing.objects.filter(user__isnull=True))
+    dictionary["numdraftscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__isnull=True))
+    dictionary["numunpublishedscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__published=True))
+    dictionary["numpublishedscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__published=False))
+    dictionary["numpublishedscraperstotal"] = len(dictionary["scrapers"])
+    dictionary["numunpublishedscraperstotal"] = len(models.Scraper.objects.filter(published=False))
     return render_to_response('scraper/scraper_table.html', dictionary, context_instance=RequestContext(request))
     
 
@@ -503,24 +512,45 @@ def twisterstatus(request):
         return HttpResponse("needs value=")
     tstatus = json.loads(request.GET.get('value'))
     
-    # very brutally drop all objects and rebuild them.  In future we will do the updates
-    models.UserScraperEditing.objects.all().delete()
+    twisterclientnumbers = set()
+    
     for client in tstatus["clientlist"]:
+        # fixed attributes of the object
+        twisterclientnumber = client["clientnumber"]
+        twisterclientnumbers.add(twisterclientnumber)
         try:
-            user = models.User.objects.get(username=client['username'])
-            scraper = models.Scraper.objects.get(guid=client['guid'])
+            user = client['username'] and models.User.objects.get(username=client['username']) or None
+            scraper = client['guid'] and models.Scraper.objects.get(guid=client['guid']) or None
         except:
             continue
-        twisterclientnumber = client["clientnumber"]
-        userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
-        userscraperediting.save()
-        #print "uuuuu", userscraperediting
         
-        #editingsince = models.DateTimeField(blank=True, null=True)
-        #runningsince = models.DateTimeField(blank=True, null=True)
-        #closedsince  = models.DateTimeField(blank=True, null=True)
-        #twisterscraperpriority = models.IntegerField(default=0)   # >0 another client has priority on this scraper
+        # identify or create the editing object
+        luserscraperediting = models.UserScraperEditing.objects.filter(twisterclientnumber=twisterclientnumber)
+        if not luserscraperediting:
+            userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
+            userscraperediting.editingsince = datetime.datetime.now()
+        else:
+            assert len(luserscraperediting) == 1
+            userscraperediting = luserscraperediting[0]
+            assert userscraperediting.user == user
+            assert userscraperediting.scraper == scraper
+        
+        # updateable values of the object
+        userscraperediting.twisterscraperpriority = client['scrapereditornumber']
+        
+        # this condition could instead reference a running object
+        if client['running'] and not userscraperediting.runningsince:
+            userscraperediting.runningsince = datetime.datetime.now()
+        if not client['running'] and userscraperediting.runningsince:
+            userscraperediting.runningsince = None
+        
+        userscraperediting.save()
 
+    # discard now closed values of the object
+    for userscraperediting in models.UserScraperEditing.objects.all():
+        if userscraperediting.twisterclientnumber not in twisterclientnumbers:
+            userscraperediting.delete()
+            # or could use the field: closedsince  = models.DateTimeField(blank=True, null=True)
     return HttpResponse("Howdy ppp ")
 
 

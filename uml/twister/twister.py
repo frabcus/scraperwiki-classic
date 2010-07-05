@@ -359,7 +359,13 @@ class RunnerFactory(protocol.ServerFactory):
         self.clients.remove(client)
 
     def notifytwisterstatus(self):
-        clientlist = [ { "clientnumber":client.clientnumber, "guid":client.guid, "username":client.username, "running":bool(client.running)}   for client in self.clients ]
+        clientlist = [ ]
+        for client in self.clients:
+            clientdata = { "clientnumber":client.clientnumber, "guid":client.guid, 
+                           "username":client.username, "running":bool(client.running), 
+                           "scrapereditornumber":client.scrapereditornumber }
+            clientlist.append(clientdata)
+            
         data = { "value": json.dumps({'message_type' : "currentstatus", 'clientlist':clientlist}) }
         
         # achieves the same as below, but causing the system to wait for response
