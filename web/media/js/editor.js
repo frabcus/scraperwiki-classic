@@ -45,10 +45,12 @@ $(document).ready(function() {
         var parsers = Array();
         parsers['python'] = '../contrib/python/js/parsepython.js';
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];
+        parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
 
         var stylesheets = Array();
         stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['php'] = [codemirror_url+'contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css'];
+        stylesheets['ruby'] = [codemirror_url+'../ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
 
         codeeditor = CodeMirror.fromTextArea("id_code", {
             parserfile: parsers[scraperlanguage],

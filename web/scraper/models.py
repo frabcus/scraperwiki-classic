@@ -30,6 +30,7 @@ from django.core.mail import send_mail
 LANGUAGES = (
     ('Python', 'Python'),
     ('PHP', 'PHP'),
+    ('Ruby', 'Ruby'),
 )
 
 class Scraper(models.Model):

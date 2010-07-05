@@ -201,7 +201,7 @@ def edit(request, short_name='__new__', language='Python', tutorial_scraper=None
     
     # Create a new scraper
     else:
-        if language not in ['Python', 'PHP']:
+        if language not in ['Python', 'PHP', 'Ruby']:
             language = 'Python'
 
         scraper = ScraperModel()  
