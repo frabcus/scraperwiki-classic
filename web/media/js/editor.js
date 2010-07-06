@@ -888,18 +888,18 @@ $(document).ready(function() {
         var sLongClassName = 'message_expander';
         var sExpand = '...more'
 
-        sLongMessage = undefined; 
+        var sLongMessage = undefined; 
         if (sMessageType == 'exceptiondump') 
             sShortClassName = 'exception';
 
-        escsMessage = cgiescape(sMessage); 
+        var escsMessage = cgiescape(sMessage); 
         if (sMessageType == 'exceptionnoesc') {
             sShortClassName = 'exception';
             escsMessage = sMessage; // no escaping
         }
         else if (sMessage.length > 110) {
             sLongMessage = sMessage; 
-            sMessage = sMessage.substring(0, 100); 
+            escsMessage = cgiescape(sMessage.substring(0, 100)); 
         }
 
         //create new item
@@ -914,15 +914,15 @@ $(document).ready(function() {
             oMoreLink.addClass('expand_link');
             oMoreLink.text(sExpand)
             oMoreLink.longMessage = sLongMessage;
-            oMoreLink.click(function() { showTextPopup(cgiescape(sLongMessage)); });
             oConsoleItem.append(oMoreLink);
+            oMoreLink.click(function() { showTextPopup(cgiescape(sLongMessage)); });
         }
 
         // add clickable line number link
         if (iLine != undefined) {
             oLineLink = $('<a href="#">Line ' + iLine + ' - </a>'); 
             oConsoleItem.prepend(oLineLink);
-            oLineLink.click( function() {
+            oLineLink.click( function() { 
                 codeeditor.selectLines(codeeditor.nthLine(iLine), 0, codeeditor.nthLine(iLine + 1), 0); 
             }); 
         }
