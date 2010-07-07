@@ -175,7 +175,12 @@ class UserToUserRole(models.Model):
 
 def create_user_profile(sender, instance, created, **kwargs):
     if created and sender == User:
-        profile = UserProfile(user=instance, alert_frequency=60*60*24)
-        profile.save()
+        try:
+            profile = UserProfile(user=instance, alert_frequency=60*60*24)
+            profile.save()
+        except:
+            # syncdb is saving the superuser
+            # UserProfile is yet to be created by migrations
+            pass
 
 models.signals.post_save.connect(create_user_profile)
