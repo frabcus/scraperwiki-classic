@@ -324,3 +324,10 @@ td.bicolumn { width:50%; vertical-align:top; }
 .ui-widget {font-family: Helvetica,arial,sans-serif;}
 .ui-widget-header {background: #FFFFD7; color: #2680C6;}
 .ui-widget input.button {font-size: 0.7em;}
+
+
+div.mercurialcommitlog { padding-top:1em; font-size:80%; background-color:#e0e0e0; }
+div.mercurialcommitlog span.history-user { padding-left:1em; }
+div.mercurialcommitlog h3 { padding:0; margin:0; font-style:italic; }
+div.mercurialcommitlog ul { padding:0; margin:0; }
+

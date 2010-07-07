@@ -26,6 +26,7 @@ class MercurialInterface:
         # (definitely doesn't update if commit is done against a second repo object)
         self.repo = hg.repository(self.ui, self.repopath)
     
+    
     def save(self, scraper, code):
         scraperfolder = os.path.join(self.repopath, scraper.short_name)
         if not os.path.exists(scraperfolder):
@@ -46,12 +47,14 @@ class MercurialInterface:
         response = self.ui.popbuffer()  # either 'nothing changed\n' or 'committed changeset 28:8ef0500ffeec\n'
         return ""
 
+
     def getsavedcode(self, scraper):
         scraperpath = os.path.join(self.repopath, scraper.short_name, "__init__.py")
         fin = open(path,'rU')
         code = fin.read()
         fin.close()
         return code
+    
     
     def getcommittedcode(self, scraper):
         scraperpath = os.path.join(self.repopath, scraper.short_name, "__init__.py")
@@ -60,9 +63,42 @@ class MercurialInterface:
         code = self.ui.popbuffer()
         return code
 
-    def getstatus(self, scraper):
-        modified, added, removed, deleted, unknown, ignored, clean = repo.status()
-        return modified
+
+    def getstatus(self, scraper, rev):
+        # information about saved file
+        scraperfile = os.path.join(scraper.short_name, "__init__.py")
+        scraperpath = os.path.join(self.repopath, scraperfile)
+        lmtime = time.localtime(os.stat(scraperpath).st_mtime)
+        filemodifieddate = datetime.datetime(*lmtime[:7])
+        
+        # what does mercurial say about its status
+        modified, added, removed, deleted, unknown, ignored, clean = self.repo.status()
+        ismodified = (scraperfile in modified)
+        
+        result = { "filemodifieddate":filemodifieddate, "ismodified":ismodified }
+        
+        # adjacent commit informations
+        commitlog = self.getcommitlog(scraper)
+        if commitlog:
+            irev = len(commitlog)
+            if rev != -1:
+                for lirev in range(len(commitlog)):
+                    if commitlog[lirev]["rev"] == rev:
+                        irev = lirev
+                        break
+            if 0 <= irev < len(commitlog):
+                result["currcommit"] = commitlog[irev]
+            if 0 <= irev - 1 < len(commitlog):
+                result["prevcommit"] = commitlog[irev - 1]
+            if 0 <= irev + 1 < len(commitlog):
+                result["nextcommit"] = commitlog[irev + 1]
+                    
+        # upgrade the currcommit to contain the code as well
+        if "currcommit" in result:
+            reversion = self.getreversion(rev)
+            result["currcommit"]["code"] = reversion["text"].get(scraperfile)
+        return result
+    
 
     def getctxrevisionsummary(self, ctx):
         data = { "rev":ctx.rev(), "userid":ctx.user(), "description":ctx.description() }
@@ -73,8 +109,8 @@ class MercurialInterface:
         return data
             
             
-    def getcommitlog(self, scraper_short_name):
-        scraperfile = os.path.join(scraper_short_name, "__init__.py")
+    def getcommitlog(self, scraper):
+        scraperfile = os.path.join(scraper.short_name, "__init__.py")
         result = [ ]
         for rev in self.repo:
             ctx = self.repo[rev]
@@ -82,6 +118,7 @@ class MercurialInterface:
                 result.append(self.getctxrevisionsummary(ctx))
         return result
             
+    
     def getreversion(self, rev):
         ctx = self.repo[rev]
         result = self.getctxrevisionsummary(ctx)
@@ -91,6 +128,8 @@ class MercurialInterface:
             result["text"][f] = ftx.data()
         return result
         
+
+
 
 def DiffLineSequenceChanges(oldcode, newcode):
     """

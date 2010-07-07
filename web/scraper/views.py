@@ -8,11 +8,15 @@ from django.core.urlresolvers import reverse
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
 
+from django.contrib.auth.models import User
+
 from django.conf import settings
 
 from scraper import models
 from scraper import forms
 from scraper.forms import SearchForm
+import vc
+
 import frontend
 
 import subprocess
@@ -245,19 +249,31 @@ def scraper_map(request, scraper_short_name, map_only=False):
 def code(request, scraper_short_name):
     user = request.user
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-
+    
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
         return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
 
+    rev = int(request.GET.get('rev', '-1'))
+    
+    mercurialinterface = vc.MercurialInterface()
+    status = mercurialinterface.getstatus(scraper, rev)
+    
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    saved_code = scraper.saved_code()
+    scode = scraper.saved_code()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
     dictionary = { 'scraper_tags': scraper_tags, 'selected_tab': 'code', 'scraper': scraper,
-                   'user_owns_it': user_owns_it, 'saved_code': saved_code,
+                   'user_owns_it': user_owns_it, 'code': scode,
                    'user_follows_it': user_follows_it }
+                   
+    dictionary["status"] = status
+    if "currcommit" in status:
+        dictionary["code"] = status["currcommit"]["code"]
+    
+    dictionary["line_count"] = dictionary["code"].count("\n") + 3
+            
     return render_to_response('scraper/code.html', dictionary, context_instance=RequestContext(request))
 
 def comments(request, scraper_short_name):
@@ -296,13 +312,25 @@ def scraper_history(request, scraper_short_name):
 
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
+    
+    # sift through the alerts filtering on the scraper through the annoying content_type field
     content_type = scraper.content_type()
-    history = frontend.models.Alerts.objects.filter(
-        content_type=content_type,
-        object_id=scraper.pk).order_by('-datetime')
-
+    history = frontend.models.Alerts.objects.filter(content_type=content_type, object_id=scraper.pk).order_by('-datetime')
+        
     dictionary = { 'selected_tab': 'history', 'scraper': scraper, 'history': history,
                    'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
+    
+    # extract the commit log directly from the mercurial repository
+    # (in future, the entries in django may be synchronized against this to make it possible to update the repository(ies) outside the system)
+    commitlog = [ ]
+    for commitentry in vc.MercurialInterface().getcommitlog(scraper):
+        try:    user = User.objects.get(id=int(commitentry["userid"]))
+        except: user = None
+        commitlog.append({"rev":commitentry['rev'], "description":commitentry['description'], "datetime":commitentry["date"], "user":user})
+        print user, commitentry
+    commitlog.reverse()
+    dictionary["commitlog"] = commitlog
+    
     return render_to_response('scraper/history.html', dictionary, context_instance=RequestContext(request))
 
 
