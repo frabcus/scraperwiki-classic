@@ -136,21 +136,22 @@ class Scraper(models.Model):
             if commit:
                 vc.commit(self, message=message, user=user)
                 
-                # Log this commit in the history table
-                alert = frontendmodels.Alerts()
-                alert.content_object = self
-                alert.message_type = 'commit'
-                alert.message_value = message
-                alert.user = User.objects.get(id=user)
-                alert.save()
-                
-                
-                
         #update meta data
         self.update_meta()
             
         #do the parent save
         super(Scraper, self).save(**kwargs)
+
+        # this must come after the parent save so that the content_object
+        # of the alert has an id to reference
+        if commit:
+            # Log this commit in the history table
+            alert = frontendmodels.Alerts()
+            alert.content_object = self
+            alert.message_type = 'commit'
+            alert.message_value = message
+            alert.user = User.objects.get(id=user)
+            alert.save()
   
     def count_records(self):
         return int(Scraper.objects.item_count(self.guid))
