@@ -578,7 +578,7 @@ $(document).ready(function() {
         // extract the (changed) select range information from the header of return data
         var selrangedelimeter = ":::sElEcT rAnGe:::"; 
         var iselrangedelimeter = newcode.indexOf(selrangedelimeter); 
-        var selrange = [0,0,0,0]
+        var selrange = [0,0,0,0];
         if (iselrangedelimeter != -1) {
             var selrange = newcode.substring(0, iselrangedelimeter); 
             newcode = newcode.substring(iselrangedelimeter + selrangedelimeter.length); 
@@ -758,12 +758,14 @@ $(document).ready(function() {
                         $('#meta_form .popup_error').html("Failed to save, please make sure you have entered a title, a description and a commit message");
                     //success    
                     }else{
-	                    //tracking code for Analytics
-	                    if (bCommit != true) { 
-	                         pageTracker._trackPageview('/scraper_save_draft_goal');   
-	                    } else {
-	                         pageTracker._trackPageview('/scraper_committed_goal');  		
-	                    }  
+	                    // pageTracker stopped existing 2010-07-08
+                        if (false) {
+                            if (bCommit != true) { 
+                                pageTracker._trackPageview('/scraper_save_draft_goal');   
+                            } else {
+                                pageTracker._trackPageview('/scraper_committed_goal');  		
+                            }  
+                        }
 
                         if (res.draft == 'True') {
                             $('#divDraftSavedWarning').show();

@@ -11,7 +11,11 @@
   {% for item in history %}
     <tr>
       <td>
-        {{ item.datetime|date:"H:i, j F Y" }}
+        {% ifequal item.message_type|lower "commit" %}
+          <a href="{% url scraper_code scraper.short_name %}?rev={{item.event_object.revision}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
+        {% else %}
+          {{ item.datetime|date:"H:i, j F Y" }}
+        {% endifequal %}
       </td>
       <td>
           {% ifequal item.message_type|lower "commit" %}

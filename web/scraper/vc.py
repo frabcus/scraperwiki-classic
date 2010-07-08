@@ -37,15 +37,78 @@ class MercurialInterface:
         fout.write(code.encode('utf-8'))
         fout.close()
         
+    # need to dig into the commit command to find the rev
     def commit(self, scraper, message="changed", user="unknown"): 
         scraperpath = os.path.join(self.repopath, scraper.short_name, "__init__.py")
         if message is None:
             message = "changed"
   
         self.ui.pushbuffer()
-        mercurial.commands.commit(self.ui, self.repo, scraperpath, addremove=True, message=str(message), user=str(user))
+        mercurial.commands.commit(self.ui, self.repo, scraperpath, addremove=True, message=str(message), user=str(user.pk))  # what is this pk?
         response = self.ui.popbuffer()  # either 'nothing changed\n' or 'committed changeset 28:8ef0500ffeec\n'
-        return ""
+        return 666
+
+    
+    # this function possibly in wrong place (which makes the imports awkward)
+    def updatecommitalertsrev(self, rev):
+        from scraper.models import Scraper, ScraperCommitEvent
+        from frontend.models import Alerts
+        from django.contrib.auth.models import User
+    
+        # discard all alerts and commit events for this revision (made complex due to the indirection through ScraperCommitEvent for a integer)
+        for scrapercommitevent in ScraperCommitEvent.objects.filter(revision=rev):
+            for alert in Alerts.objects.filter(event_object=scrapercommitevent):
+                alert.delete()
+            scrapercommitevent.delete()
+        
+        warnings = [ ]
+        
+        ctx = self.repo[rev]
+        commitentry = self.getctxrevisionsummary(ctx)
+        
+        user = None
+        try:    
+            user = User.objects.get(id=int(commitentry["userid"]))
+        except: 
+            warnings.append("Unmatched userid: %s" % commitentry.get("userid"))
+        
+        # there should actually be only one file in this batch, if everything is going right
+        if len(ctx.files()) != 1:
+            warnings.append("More than one file in rev: %s" % ctx.files())
+        for scraperfile in ctx.files():
+            mscraper = re.match("(.*?)/__init__.py", scraperfile)
+            if not mscraper:
+                warnings.append("unrecognized scraperfile: %s" % scraperfile)
+                continue
+            scrapers = Scraper.objects.filter(short_name=mscraper.group(1))
+            if len(scrapers) != 1:
+                warnings.append("scraperfile unmatched to scraper: %s" % scraperfile)
+                continue
+            scraper = scrapers[0]
+    
+            # yes, the allocation of information (eg the date) between the Alert and the ScraperCommitEvent looks in fact arbitrary.  
+            scrapercommitevent = ScraperCommitEvent(revision=rev)
+            scrapercommitevent.save()
+            alert = Alerts(content_object=scraper, message_type='commit', message_value=commitentry["description"], 
+                           user=user, event_object=scrapercommitevent, datetime=commitentry["date"])
+            alert.save()
+            print "creating alert", alert
+        return warnings
+    
+    # delete and rebuild all the ScraperCommitEvents and related alerts to make migration easy (and question whether they need to exist)
+    def updateallcommitalerts(self):
+        from scraper.models import Scraper, ScraperCommitEvent
+        from frontend.models import Alerts
+        from django.contrib.auth.models import User
+        
+        # remove all alerts and commit events 
+        Alerts.objects.filter(message_type='commit').delete()
+        ScraperCommitEvent.objects.all().delete()
+        
+        for rev in self.repo:
+            warnings = self.updatecommitalertsrev(rev)
+            if warnings:
+                print "updateallcommitalerts warnings", warnings
 
 
     def getsavedcode(self, scraper):
@@ -56,50 +119,6 @@ class MercurialInterface:
         return code
     
     
-    def getcommittedcode(self, scraper):
-        scraperpath = os.path.join(self.repopath, scraper.short_name, "__init__.py")
-        self.ui.pushbuffer()
-        commands.cat(self.ui, self.repo, scraperpath, rev="tip")
-        code = self.ui.popbuffer()
-        return code
-
-
-    def getstatus(self, scraper, rev):
-        # information about saved file
-        scraperfile = os.path.join(scraper.short_name, "__init__.py")
-        scraperpath = os.path.join(self.repopath, scraperfile)
-        lmtime = time.localtime(os.stat(scraperpath).st_mtime)
-        filemodifieddate = datetime.datetime(*lmtime[:7])
-        
-        # what does mercurial say about its status
-        modified, added, removed, deleted, unknown, ignored, clean = self.repo.status()
-        ismodified = (scraperfile in modified)
-        
-        result = { "filemodifieddate":filemodifieddate, "ismodified":ismodified }
-        
-        # adjacent commit informations
-        commitlog = self.getcommitlog(scraper)
-        if commitlog:
-            irev = len(commitlog)
-            if rev != -1:
-                for lirev in range(len(commitlog)):
-                    if commitlog[lirev]["rev"] == rev:
-                        irev = lirev
-                        break
-            if 0 <= irev < len(commitlog):
-                result["currcommit"] = commitlog[irev]
-            if 0 <= irev - 1 < len(commitlog):
-                result["prevcommit"] = commitlog[irev - 1]
-            if 0 <= irev + 1 < len(commitlog):
-                result["nextcommit"] = commitlog[irev + 1]
-                    
-        # upgrade the currcommit to contain the code as well
-        if "currcommit" in result:
-            reversion = self.getreversion(rev)
-            result["currcommit"]["code"] = reversion["text"].get(scraperfile)
-        return result
-    
-
     def getctxrevisionsummary(self, ctx):
         data = { "rev":ctx.rev(), "userid":ctx.user(), "description":ctx.description() }
         epochtime, offset = ctx.date()
@@ -107,16 +126,6 @@ class MercurialInterface:
         data["date"] = datetime.datetime(*ltime[:7])
         data["files"] = ctx.files()
         return data
-            
-            
-    def getcommitlog(self, scraper):
-        scraperfile = os.path.join(scraper.short_name, "__init__.py")
-        result = [ ]
-        for rev in self.repo:
-            ctx = self.repo[rev]
-            if scraperfile in ctx.files():
-                result.append(self.getctxrevisionsummary(ctx))
-        return result
             
     
     def getreversion(self, rev):
@@ -128,7 +137,64 @@ class MercurialInterface:
             result["text"][f] = ftx.data()
         return result
         
+            
+    def getcommitlog(self, scraper):
+        scraperfile = os.path.join(scraper.short_name, "__init__.py")
+        result = [ ]
+        for rev in self.repo:
+            ctx = self.repo[rev]
+            if scraperfile in ctx.files():
+                result.append(self.getctxrevisionsummary(ctx))
+        return result
+            
 
+    def getstatus(self, scraper, rev=None):
+        # information about saved file
+        scraperfile = os.path.join(scraper.short_name, "__init__.py")
+        scraperpath = os.path.join(self.repopath, scraperfile)
+        
+        status = { }
+
+        # adjacent commit informations
+        if rev != None:
+            commitlog = self.getcommitlog(scraper)
+            if commitlog:
+                irev = len(commitlog)
+                if rev != -1:
+                    for lirev in range(len(commitlog)):
+                        if commitlog[lirev]["rev"] == rev:
+                            irev = lirev
+                            break
+                if 0 <= irev < len(commitlog):
+                    status["currcommit"] = commitlog[irev]
+                if 0 <= irev - 1 < len(commitlog):
+                    status["prevcommit"] = commitlog[irev - 1]
+                if 0 <= irev + 1 < len(commitlog):
+                    status["nextcommit"] = commitlog[irev + 1]
+                    
+        # fetch code from reversion or the file
+        if "currcommit" in status:
+            reversion = self.getreversion(rev)
+            status["code"] = reversion["text"].get(scraperfile)
+        
+        else:
+            fin = open(scraperpath,'rU')
+            status["code"] = fin.read()
+            fin.close()
+
+            # what does mercurial say about its status
+            lmtime = time.localtime(os.stat(scraperpath).st_mtime)
+            status["filemodifieddate"] = datetime.datetime(*lmtime[:7])
+            modified, added, removed, deleted, unknown, ignored, clean = self.repo.status()
+            status["ismodified"] = (scraperfile in modified)
+
+        if "prevcommit" in status:
+            reversion = self.getreversion(status["prevcommit"]["rev"])
+            prevcode = reversion["text"].get(scraperfile)
+            if prevcode:
+                status["matchlines"] = list(DiffLineSequenceChanges(prevcode, status["code"]))
+    
+        return status
 
 
 def DiffLineSequenceChanges(oldcode, newcode):
@@ -164,7 +230,9 @@ def DiffLineSequenceChanges(oldcode, newcode):
         return (matchlinesfront, 0, matchlinesfront, 1)
     
     # find the sequence start in first line that's different
-    sqmfront = difflib.SequenceMatcher(None, a[matchlinesfront], b[matchlinesfront])
+    afront = matchlinesfront < len(a) and a[matchlinesfront] or ""
+    bfront = matchlinesfront < len(b) and b[matchlinesfront] or ""
+    sqmfront = difflib.SequenceMatcher(None, afront, bfront)
     matchingcblocksfront = sqmfront.get_matching_blocks()  # [ (i, j, n) ] where  a[i:i+n] == b[j:j+n].
     matchcharsfront = (matchingcblocksfront[0][:2] == (0, 0) and matchingcblocksfront[0][2] or 0)
     
@@ -262,6 +330,7 @@ def get_code(scraper_name=None, committed=True, rev='tip'):
   """
   Returns the committed file as a string
   """
+        
   path = make_file_path(scraper_name)
   if committed:
 

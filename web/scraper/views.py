@@ -152,6 +152,7 @@ def scraper_delete_scraper(request, scraper_short_name):
 
     return HttpResponseRedirect(reverse('scraper_admin', args=[scraper_short_name]))
 
+
 def scraper_data(request, scraper_short_name):
     #user details
     user = request.user
@@ -246,6 +247,10 @@ def scraper_map(request, scraper_short_name, map_only=False):
     }, context_instance=RequestContext(request))
 
 
+# saved_code to go
+# also make the diff with previous version and make the selection
+# check that all the non-loggedin logic still works
+
 def code(request, scraper_short_name):
     user = request.user
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
@@ -261,20 +266,20 @@ def code(request, scraper_short_name):
     
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    scode = scraper.saved_code()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
     dictionary = { 'scraper_tags': scraper_tags, 'selected_tab': 'code', 'scraper': scraper,
-                   'user_owns_it': user_owns_it, 'code': scode,
-                   'user_follows_it': user_follows_it }
+                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
                    
+    # overcome lack of subtract in template
+    if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
+        status["modifiedcommitdifference"] = status["filemodifieddate"] - status["prevcommit"]["date"]
+        
     dictionary["status"] = status
-    if "currcommit" in status:
-        dictionary["code"] = status["currcommit"]["code"]
-    
-    dictionary["line_count"] = dictionary["code"].count("\n") + 3
-            
+    dictionary["line_count"] = status["code"].count("\n") + 3
+
     return render_to_response('scraper/code.html', dictionary, context_instance=RequestContext(request))
+
 
 def comments(request, scraper_short_name):
 
@@ -323,11 +328,11 @@ def scraper_history(request, scraper_short_name):
     # extract the commit log directly from the mercurial repository
     # (in future, the entries in django may be synchronized against this to make it possible to update the repository(ies) outside the system)
     commitlog = [ ]
+    # should commit info about the saved   commitlog.append({"rev":commitentry['rev'], "description":commitentry['description'], "datetime":commitentry["date"], "user":user})
     for commitentry in vc.MercurialInterface().getcommitlog(scraper):
         try:    user = User.objects.get(id=int(commitentry["userid"]))
         except: user = None
         commitlog.append({"rev":commitentry['rev'], "description":commitentry['description'], "datetime":commitentry["date"], "user":user})
-        print user, commitentry
     commitlog.reverse()
     dictionary["commitlog"] = commitlog
     

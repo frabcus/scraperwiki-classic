@@ -113,26 +113,31 @@ def saveeditedscraper(request, scraper):
     action = request.POST.get('action').lower()
 
     # Save the form  (without committing at first - http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
-    savedForm = form.save(commit=False)      
-
+    
+    # this whole business of form, savedForm and scraper looks unnecessarily complicated; check if form.save() actually returns a scraper object -- it appears to be that type
+    savedForm = form.save()
+    if not savedForm.guid:
+        savedForm.buildfromfirsttitle()
+    
     # Add some more fields to the form
-    savedForm.code = form.cleaned_data['code']
+    code = form.cleaned_data['code']
     savedForm.description = form.cleaned_data['description']    
     savedForm.license = form.cleaned_data['license']
     # savedForm.run_interval = form.cleaned_data['run_interval']
 
     # User is signed in, we can save the scraper
     if request.user.is_authenticated():
-        if action == 'save':
-            #save without commiting
-            savedForm.save()
-        if action.startswith('commit'):          
-            message = None
-            #set the commit message if present
-            if request.POST.get('commit_message', False):
-                message = request.POST['commit_message']
-            # save and commit
-            savedForm.save(commit=True, message=message, user=request.user.pk)
+        savedForm.update_meta()
+        savedForm.line_count = int(code.count("\n"))
+        savedForm.save()   # save the actual object
+        
+        mercurialinterface = vc.MercurialInterface()
+        mercurialinterface.save(savedForm, code)
+        if action.startswith('commit'):
+            message = request.POST.get('commit_message', "changed")
+            rev = mercurialinterface.commit(savedForm, message=message, user=request.user)
+            #mercurialinterface.updatecommitalertsrev(rev)
+            mercurialinterface.updateallcommitalerts()  # stopgap method till we get the rev reliably
 
         # Add user roles
         if savedForm.owner():

@@ -97,64 +97,13 @@ class Scraper(models.Model):
     def __unicode__(self):
         return self.short_name
     
-    def save(self, commit=False, message=None, user=None, **kwargs):
-        """
-        this function saves the uninitialized and undeclared .code member of
-        the object to the disk you just have to know it's there by looking
-        into the cryptically named vc.py module
-        """
-
-        # if the scraper doesn't exist already give it a short name (slug)
-        if self.short_name:
-            self.short_name = util.SlugifyUniquely(self.short_name, 
-                                                   Scraper, 
-                                                   slugfield='short_name', 
-                                                   instance=self)
-        else:
-            self.short_name = util.SlugifyUniquely(self.title, 
-                                                   Scraper, 
-                                                   slugfield='short_name', 
-                                                   instance=self)
+    def buildfromfirsttitle(self):
+        assert not self.short_name and not self.guid
+        import hashlib
+        self.short_name = util.SlugifyUniquely(self.title, Scraper, slugfield='short_name', instance=self)
+        self.created_at = datetime.datetime.today()  # perhaps this should be moved out to the draft scraper
+        self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
-        if self.created_at == None:
-            self.created_at = datetime.datetime.today()
-    
-                
-        if not self.guid:
-            import hashlib
-            guid = hashlib.md5("%s" % ("**@@@".join([
-                  self.short_name, 
-                  str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
-            self.guid = guid
-     
-        # if publishing for the first time set the first published date
-        if self.published and self.first_published_at == None:
-            self.first_published_at = datetime.datetime.today()
-
-        if self.__dict__.get('code'):
-            vc.save(self)
-            if commit:
-                rev = vc.commit(self, message=message, user=user) or 666
-                
-        #update meta data
-        self.update_meta()
-            
-        #do the parent save
-        super(Scraper, self).save(**kwargs)
-
-        # this must come after the parent save so that the content_object
-        # of the alert has an id to reference
-        if commit:
-            event = ScraperCommitEvent.objects.create(revision=rev)
-
-            # Log this commit in the history table
-            alert = frontendmodels.Alerts()
-            alert.content_object = self
-            alert.message_type = 'commit'
-            alert.message_value = message
-            alert.user = User.objects.get(id=user)
-            alert.event_object = event
-            alert.save()
   
     def count_records(self):
         return int(Scraper.objects.item_count(self.guid))
@@ -223,6 +172,7 @@ class Scraper(models.Model):
         return (self.owner(),)
             
     
+    # thse functions to go
     def saved_code(self):
         code = vc.get_code(self.short_name, committed=False)
         return code
@@ -241,9 +191,11 @@ class Scraper(models.Model):
 
     # update scraper meta data (lines of code etc)    
     def update_meta(self):
+        # if publishing for the first time set the first published date
+        if self.published and self.first_published_at == None:
+            self.first_published_at = datetime.datetime.today()
         
         #update line counts etc
-        self.line_count = self.count_number_of_lines()
         self.record_count = self.count_records()
         self.has_geo = bool(Scraper.objects.has_geo(self.guid))
         self.has_temporal = bool(Scraper.objects.has_temporal(self.guid))
@@ -251,14 +203,13 @@ class Scraper(models.Model):
         #get data for sparklines
         sparline_days = settings.SPARKLINE_MAX_DAYS
         created_difference = datetime.datetime.now() - self.created_at
+        
         #if (created_difference.days < settings.SPARKLINE_MAX_DAYS):
         #    sparline_days = created_difference.days
 
         #minimum of 1 day
-        recent_record_count = \
-                Scraper.objects.recent_record_count(self.guid, sparline_days)
-        self.scraper_sparkline_csv = ",".join("%d" % count \
-                                             for count in recent_record_count)
+        recent_record_count = Scraper.objects.recent_record_count(self.guid, sparline_days)
+        self.scraper_sparkline_csv = ",".join("%d" % count for count in recent_record_count)
 
     def content_type(self):
         return ContentType.objects.get(app_label="scraper", model="Scraper")

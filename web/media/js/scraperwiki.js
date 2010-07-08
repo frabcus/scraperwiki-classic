@@ -1,8 +1,17 @@
-function setupCodeViewer(iLineCount, scraperlanguage){
+function setupCodeViewer(iLineCount, scraperlanguage)
+{
     var oCodeEditor;
-    if(iLineCount < 20){
+    if(iLineCount < 20)
         iLineCount = 20;
-    }
+
+    var selrangefunc = function() {
+        if (!((selrange[2] == 0) && (selrange[3] == 0))){
+            linehandlestart = oCodeEditor.nthLine(selrange[0] + 1); 
+            linehandleend = oCodeEditor.nthLine(selrange[2] + 1); 
+            oCodeEditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
+        }; 
+    }; 
+
     $(document).ready(function(){
         var parsers = Array();
         parsers['python'] = '../contrib/python/js/parsepython.js';
@@ -13,21 +22,23 @@ function setupCodeViewer(iLineCount, scraperlanguage){
         stylesheets['php'] = ['/media/CodeMirror/contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css']; 
 
         oCodeEditor = CodeMirror.fromTextArea("txtScraperCode", {
-           parserfile: parsers[scraperlanguage],
-           stylesheet: stylesheets[scraperlanguage],
+            parserfile: parsers[scraperlanguage],
+            stylesheet: stylesheets[scraperlanguage],
 
-           path: "/media/CodeMirror/js/",
-           textWrapping: true, 
-           lineNumbers: true, 
-           indentUnit: 4,
-           readOnly: true,
-           tabMode: "spaces", 
-           autoMatchParens: true,
-           width: '100%',
-           height: iLineCount + 'em',           
-           parserConfig: {'pythonVersion': 2, 'strictErrors': true}
+            path: "/media/CodeMirror/js/",
+            textWrapping: true, 
+            lineNumbers: true, 
+            indentUnit: 4,
+            readOnly: true,
+            tabMode: "spaces", 
+            autoMatchParens: true,
+            width: '100%',
+            height: iLineCount + 'em', 
+            parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
 
-       });
+            // this is called once the codemirror window has finished initializing itself, (though happens to early, so that the selection gets deselected.  should file a bug)
+            initCallback: function() { setTimeout(selrangefunc, 1000); }
+        });
     });
 }
 

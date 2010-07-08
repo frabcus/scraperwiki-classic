@@ -6,7 +6,7 @@
 {# viewing a revision #}
 {% if status.currcommit %}
   Version from: <b>{{status.currcommit.date|date:"H:i, j F Y" }}</b>
-  <i>{{status.currcommit.description}}</i>
+  <i>({{status.currcommit.description}})</i>
 
   {% if status.prevcommit %}
     <a href="{% url scraper_code scraper.short_name %}?rev={{status.prevcommit.rev}}">previous commit</a>
@@ -24,6 +24,7 @@
   Saved: {{status.filemodifieddate|date:"H:i, j F Y" }}, 
   {% if status.prevcommit %}
     Committed: <a href="{% url scraper_code scraper.short_name %}?rev={{status.prevcommit.rev}}">{{status.prevcommit.date|date:"H:i, j F Y" }}</a>
+    <i>({{status.prevcommit.description}})</i>
   {% endif %}
   
   {% if status.ismodified %}
@@ -33,7 +34,7 @@
       {% ifequal status.filemodifieddate status.prevcommit.date %}
         (same)
       {% else %}
-        DATES DISAGREE
+        (timediff {{status.modifiedcommitdifference}})
       {% endifequal %}
     {% else %}
       (never committed)
@@ -47,11 +48,12 @@
 </div>
 
 <div class="code_viewer">
-  <textarea id="txtScraperCode">{{ code }}</textarea>
+  <textarea id="txtScraperCode">{{ status.code }}</textarea>
 </div>
-
+{{status.matchlines}}
 {% endblock %}
 
 {% block run_script %}
+    var selrange = {% if status.matchlines %}{{status.matchlines}}{% else %}[0,0,0,0]{% endif %}; 
     setupCodeViewer({{ line_count }}, '{{ scraper.language|lower }}');
 {% endblock %}
