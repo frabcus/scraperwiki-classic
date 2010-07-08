@@ -30,4 +30,8 @@ urlpatterns = patterns('',
    url(r'^rpcexecute/(?P<scraper_short_name>[\w_\-]+)$', views.rpcexecute, name='rpcexecute'),
    
    url(r'^metadata_api/', include('scraper.metadata_api.urls')),
+
+   url(r'^run/(?P<event_id>[\w_\-]+)/$', views.run_event, name='run_event'),
+   url(r'^commit/(?P<event_id>\d+)/$', views.commit_event, name='commit_event'),
+   url(r'^running_scrapers/$', views.running_scrapers, name='running_scrapers'),
 )

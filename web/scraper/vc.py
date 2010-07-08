@@ -255,7 +255,7 @@ def commit(scraper, message="changed", user="unknown"):
   ui.pushbuffer()
   rev = commands.commit(ui, r, path, addremove=True, message=str(message), user=str(user))
   code = ui.popbuffer()  
-  return ""
+  return rev
 
 def get_code(scraper_name=None, committed=True, rev='tip'):
   

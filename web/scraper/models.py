@@ -134,7 +134,7 @@ class Scraper(models.Model):
         if self.__dict__.get('code'):
             vc.save(self)
             if commit:
-                vc.commit(self, message=message, user=user)
+                rev = vc.commit(self, message=message, user=user) or 666
                 
         #update meta data
         self.update_meta()
@@ -145,12 +145,15 @@ class Scraper(models.Model):
         # this must come after the parent save so that the content_object
         # of the alert has an id to reference
         if commit:
+            event = ScraperCommitEvent.objects.create(revision=rev)
+
             # Log this commit in the history table
             alert = frontendmodels.Alerts()
             alert.content_object = self
             alert.message_type = 'commit'
             alert.message_value = message
             alert.user = User.objects.get(id=user)
+            alert.event_object = event
             alert.save()
   
     def count_records(self):
@@ -228,9 +231,9 @@ class Scraper(models.Model):
         code = vc.get_code(self.short_name, committed=False)
         return int(code.count("\n"))
         
+    @models.permalink
     def get_absolute_url(self):
-        # used by RSS feeds - TODO
-        return "/scrapers/%i/" % self.short_name
+        return ('scraper_overview', [self.short_name])
 
     def is_good(self):
         # don't know how goodness is going to be defined yet.
@@ -324,3 +327,30 @@ class ScraperMetadata(models.Model):
 
     class Meta:
         verbose_name_plural = 'scraper metadata'
+
+class ScraperRunEvent(models.Model):
+    scraper = models.ForeignKey(Scraper)
+    run_id = models.CharField(max_length=100)
+    pid = models.IntegerField()
+    run_started = models.DateTimeField()
+    run_ended = models.DateTimeField(null=True)
+    records_produced = models.IntegerField(default=0)
+    pages_scraped = models.IntegerField(default=0)
+    output = models.TextField()
+
+    def __unicode__(self):
+        return u'start: %s   end: %s' % (self.run_started, self.run_ended)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('run_event', [self.id])
+
+class ScraperCommitEvent(models.Model):
+    revision = models.IntegerField()
+
+    def __unicode__(self):
+        return unicode(self.revision)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('commit_event', [self.id])

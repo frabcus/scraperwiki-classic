@@ -9,7 +9,7 @@ except:
 
 import subprocess
 
-from scraper.models import Scraper
+from scraper.models import Scraper, ScraperRunEvent
 from frontend.models import Alerts
 import frontend
 import settings
@@ -30,7 +30,7 @@ class ScraperRunner(threading.Thread):
     
     def run(self):
         guid = self.scraper.guid
-        code = self.scraper.committed_code()
+        code = self.scraper.saved_code()
 
         runner_path = "%s/runner.py" % settings.FIREBOX_PATH
         failed = False
@@ -44,8 +44,17 @@ class ScraperRunner(threading.Thread):
         runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         runner.stdin.write(self.scraper.saved_code())
         runner.stdin.close()
-        
+
+        event = ScraperRunEvent()
+        event.scraper = self.scraper
+        event.run_id = '???'
+        event.pid = runner.pid
+        event.run_started = datetime.datetime.now()
+        event.output = ""
+        event.save()
+
         for line in runner.stdout:
+            event.output += line
             if self.options.get('verbose'):
                 print "nnn", line
             try:
@@ -54,6 +63,9 @@ class ScraperRunner(threading.Thread):
                     failed = True
             except:
                 pass
+
+        event.run_ended = datetime.datetime.now()
+        event.save()
         
         elapsed = (time.time() - start)
         if self.options.get('verbose'): 
@@ -74,6 +86,7 @@ class ScraperRunner(threading.Thread):
         alert.content_object = self.scraper
         alert.message_type = alert_type
         alert.message_value = elapsed
+        alert.event_object = event
         alert.save()
 
 

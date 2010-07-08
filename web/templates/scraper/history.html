@@ -6,6 +6,7 @@
     <th>Date</th>
     <th>Action</th>
     <th>Message</th>
+    <th>&nbsp;</th>
   </tr>
   {% for item in history %}
     <tr>
@@ -40,6 +41,13 @@
           {% else %}
               &nbsp;
           {% endifequal %}
+        </td>
+        <td>
+          {% if item.event_object %}
+             <a href="{{item.event_object.get_absolute_url}}">More...</a> 
+          {% else %}
+            &nbsp;
+          {% endif %}
         </td>
     </tr>
   {% endfor %}

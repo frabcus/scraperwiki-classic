@@ -62,6 +62,10 @@ class Alerts(models.Model):
     datetime = models.DateTimeField(blank=False, default=datetime.datetime.now)
     user = models.ForeignKey(User, blank=True, null=True)
 
+    event_type = models.ForeignKey(ContentType, null=True, related_name='event_alerts_set')
+    event_id = models.PositiveSmallIntegerField(blank=True, null=True)
+    event_object = generic.GenericForeignKey('event_type', 'event_id')
+
     objects = models.Manager()
     
     def __unicode__(self):

@@ -638,3 +638,15 @@ def rpcexecute(request, scraper_short_name):
         
     return response
     
+
+def run_event(request, event_id):
+    event = get_object_or_404(models.ScraperRunEvent, id=event_id)
+    return render_to_response('scraper/run_event.html', {'event': event}, context_instance=RequestContext(request))
+
+def commit_event(request, event_id):
+    event = get_object_or_404(models.ScraperCommitEvent, id=event_id)
+    return render_to_response('scraper/commit_event.html', {'event': event}, context_instance=RequestContext(request))
+
+def running_scrapers(request):
+    events = models.ScraperRunEvent.objects.filter(run_ended=None)
+    return render_to_response('scraper/running_scrapers.html', {'events': events}, context_instance=RequestContext(request))
