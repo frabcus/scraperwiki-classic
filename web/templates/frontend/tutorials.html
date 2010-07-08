@@ -15,7 +15,7 @@
 <div class="content">
 
  {% for key, value in tutorials.items %}
-<h3>{{ key }} tutorials</h3>
+<h3 id="{{ key }}_tutorials">{{ key }} tutorials</h3>
 <dl>
     {% for scraper in value %}
     <dt>

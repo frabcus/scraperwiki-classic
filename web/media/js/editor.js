@@ -758,7 +758,13 @@ $(document).ready(function() {
                         $('#meta_form .popup_error').html("Failed to save, please make sure you have entered a title, a description and a commit message");
                     //success    
                     }else{
-                    
+	                    //tracking code for Analytics
+	                    if (bCommit != true) { 
+	                         pageTracker._trackPageview('/scraper_save_draft_goal');   
+	                    } else {
+	                         pageTracker._trackPageview('/scraper_committed_goal');  		
+	                    }  
+
                         if (res.draft == 'True') {
                             $('#divDraftSavedWarning').show();
                         }
@@ -769,7 +775,8 @@ $(document).ready(function() {
                         };
 
                         if (res.draft != 'True') {
-                            if (bCommit != true) {                        
+                            if (bCommit != true) {     
+	                                           
                                 showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
                             }
                     

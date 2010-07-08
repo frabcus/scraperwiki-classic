@@ -8,7 +8,7 @@ $(function(){
     //parts.push('<li><input type="radio" name="languages" value="Ruby">Ruby<br></li>');
     parts.push('</ul>');
     parts.push('<br/>');
-    parts.push('<input type="button" id="languageOK" value="OK" class="button"/>&nbsp;&nbsp;<input type="button" id="languageClose" value="Cancel" class="button"/>');
+    parts.push('<input type="button" id="languageOK" value="OK" class="button" onClick="javascript:pageTracker._trackPageview(\'/scraper_new_goal\');"/>&nbsp;&nbsp;<input type="button" id="languageClose" value="Cancel" class="button"/>');
     parts.push('</div>');
     $('body').append(parts.join(''));
     $('#langDialog').dialog({autoOpen: false, draggable: false, resizable: false});
