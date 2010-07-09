@@ -19,6 +19,26 @@ import  ConfigParser
 try    : import json
 except : import simplejson as json
 
+
+def saveunicode(text):
+    try:
+        return unicode(text)
+    except UnicodeDecodeError:
+        pass
+    
+    try:
+        return unicode(text, encoding='utf8')
+    except UnicodeDecodeError:
+        pass
+
+    try:
+        return unicode(text, encoding='latin1')
+    except UnicodeDecodeError:
+        pass
+    
+    return unicode(text, errors='replace')
+
+
 class ConsoleStream :
 
     """
@@ -56,7 +76,7 @@ class ConsoleStream :
         """
 
         if self.m_text != '' :
-            msg  = { 'message_type' : 'console', 'content' : self.m_text }
+            msg  = { 'message_type' : 'console', 'content' : saveunicode(self.m_text) }
             self.m_fd.write (json.dumps(msg) + '\n')
             self.m_fd.flush ()
             self.m_text = ''
