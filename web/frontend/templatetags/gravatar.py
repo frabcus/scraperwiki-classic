@@ -1,4 +1,5 @@
 import urllib, hashlib
+import os
 from django import template
 from django.http import HttpResponse
 from django.conf import settings
@@ -20,11 +21,10 @@ def show_gravatar(user, size = 'medium'):
         size_px = 125
 
     domain = Site.objects.get_current().domain
-    default =  settings.MEDIA_URL + "/images/gravatar_default.png"
-    url = "http://www.gravatar.com/avatar.php?"
-    url += urllib.urlencode({
-        'gravatar_id': hashlib.md5(user.email).hexdigest(), 
-        'default': default, 
-        'size': str(size_px)
-    })
-    return {'gravatar': {'url': url, 'size': size, 'size_px': size_px, 'username': user.username}}
+    defaultimg =  settings.MEDIA_URL + "images/gravatar_default.png"
+    gravatar_id = user and hashlib.md5(user.email).hexdigest() or ''
+    gravatardata = urllib.urlencode({'gravatar_id':gravatar_id, 'default':defaultimg, 'size':str(size_px)})
+    
+    url = "http://www.gravatar.com/avatar.php?%s" % gravatardata
+    username = user and user.username or ''
+    return {'gravatar': {'url':url, 'size':size, 'size_px':size_px, 'username':username }}
