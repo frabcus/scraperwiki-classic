@@ -27,8 +27,8 @@
             {{ scraper.description }}            
         </p>
     {% endif %}
+
     <small>
-        
         Created by
         {% load gravatar %}
         {% if scraper.owner %}
@@ -42,13 +42,18 @@
           [error: missing user]
         {% endif %}
         {{scraper.created_at|timesince}} ago |
-    {% if scraper.last_run %}
-        last run {{scraper.last_run|timesince}} ago |
+
+    {% ifequal scraper.language 'HTML' %}
+        <a href="{% url htmlview scraper.short_name %}">{{ scraper.language }}</a>
     {% else %}
-        not run yet |
-	{% endif %}
-	    written in {{ scraper.language }} |
-	    {{ scraper.record_count }} records
+        {% if scraper.last_run %}
+            last run {{scraper.last_run|timesince}} ago |
+        {% else %}
+            not run yet |
+        {% endif %}
+        <b>{{ scraper.language }}</b>
+        | {{ scraper.record_count }} records
+    {% endifequal %}
     </small>
     
 </li>

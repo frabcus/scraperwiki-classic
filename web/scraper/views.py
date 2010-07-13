@@ -25,16 +25,13 @@ import StringIO, csv, types
 import datetime
 from django.utils.encoding import smart_str
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+try:                import json
+except ImportError: import simplejson as json
+
 
 def overview(request, scraper_short_name):
     """
     Shows info on the scraper plus example data.
-
-    This is the main scraper view (default tab)
     """
     user = request.user
     scraper = get_object_or_404(
@@ -50,10 +47,8 @@ def overview(request, scraper_short_name):
     scraper_contributors = scraper.contributors()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    try:
-        offset = int(request.GET.get('i'))
-    except:
-        offset = 0
+    try:    offset = int(request.GET.get('i', 0))
+    except ValueError:   offset = 0
 
     table = models.Scraper.objects.data_summary(
         scraper_id=scraper.guid,
@@ -378,7 +373,7 @@ def export_csv(request, scraper_short_name):
 
 
 def scraper_list(request, page_number):
-    all_scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
+    all_scrapers = models.Scraper.objects.filter(published=True).exclude(language='HTML').order_by('-featured', '-created_at')
 
     # Number of results to show from settings
     paginator = Paginator(all_scrapers, settings.SCRAPERS_PER_PAGE)
@@ -630,6 +625,10 @@ def rpcexecute(request, scraper_short_name):
         
     return response
     
+
+def htmlview(request, scraper_short_name):
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    return HttpResponse(scraper.saved_code())
 
 def run_event(request, event_id):
     event = get_object_or_404(models.ScraperRunEvent, id=event_id)

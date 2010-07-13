@@ -401,9 +401,11 @@ $(document).ready(function() {
             if ((jdata.message_type != "data") && (jdata.message_type != "console"))
                 lreceiverecordqueue.push(jdata); 
         }
-        message = "Clearing " + (receiverecordqueue.length - lreceiverecordqueue.length) + " records from receiverqueue, leaving: " + lreceiverecordqueue.length; 
-        writeToConsole(message); 
-        receiverecordqueue = lreceiverecordqueue; 
+        if (receiverecordqueue.length != lreceiverecordqueue.length) {
+            message = "Clearing " + (receiverecordqueue.length - lreceiverecordqueue.length) + " records from receiverqueue, leaving: " + lreceiverecordqueue.length; 
+            writeToConsole(message); 
+            receiverecordqueue = lreceiverecordqueue; 
+        }
     }
 
     // run our own queue not in the timeout system (letting chat messages get to the front)
