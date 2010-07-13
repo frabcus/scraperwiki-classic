@@ -135,7 +135,10 @@ def saveeditedscraper(request, lscraper):
             message = request.POST.get('commit_message', "changed")
             rev = mercurialinterface.commit(scraper, message=message, user=request.user)
             mercurialinterface.updatecommitalertsrev(rev)
-            #mercurialinterface.updateallcommitalerts()  # stopgap method till we get the rev reliably
+            
+            # refresh the whole set of commit alerts when we have this message
+            if message.strip() == "updatecommitalertsrev" and request.user.is_staff:
+                mercurialinterface.updateallcommitalerts()
 
         # Add user roles
         if scraper.owner():

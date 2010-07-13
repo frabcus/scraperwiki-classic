@@ -243,7 +243,8 @@ def code(request, scraper_short_name):
     if not scraper.published and not user.is_authenticated():
         return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
 
-    rev = int(request.GET.get('rev', '-1'))
+    try: rev = int(request.GET.get('rev', '-1'))
+    except ValueError: rev = -1
     
     mercurialinterface = vc.MercurialInterface()
     status = mercurialinterface.getstatus(scraper, rev)
