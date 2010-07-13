@@ -103,8 +103,8 @@ def handle_session_draft(request, action):
 
 
 # called from the edit function
-def saveeditedscraper(request, scraper):
-    form = forms.editorForm(request.POST, instance=scraper)
+def saveeditedscraper(request, lscraper):
+    form = forms.editorForm(request.POST, instance=lscraper)
 
     #validate
     if not form.is_valid() or 'action' not in request.POST:
@@ -112,48 +112,46 @@ def saveeditedscraper(request, scraper):
 
     action = request.POST.get('action').lower()
 
-    # Save the form  (without committing at first - http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
-    
-    # this whole business of form, savedForm and scraper looks unnecessarily complicated; check if form.save() actually returns a scraper object -- it appears to be that type
-    savedForm = form.save()
-    if not savedForm.guid:
-        savedForm.buildfromfirsttitle()
+    # recover the altered object from the form, without saving it to django database - http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method
+    scraper = form.save(commit=False)
+    if not scraper.guid:
+        scraper.buildfromfirsttitle()
     
     # Add some more fields to the form
     code = form.cleaned_data['code']
-    savedForm.description = form.cleaned_data['description']    
-    savedForm.license = form.cleaned_data['license']
-    # savedForm.run_interval = form.cleaned_data['run_interval']
+    scraper.description = form.cleaned_data['description']    
+    scraper.license = form.cleaned_data['license']
+    # scraper.run_interval = form.cleaned_data['run_interval']
 
     # User is signed in, we can save the scraper
     if request.user.is_authenticated():
-        savedForm.update_meta()
-        savedForm.line_count = int(code.count("\n"))
-        savedForm.save()   # save the actual object
+        scraper.update_meta()
+        scraper.line_count = int(code.count("\n"))
+        scraper.save()   # save the actual object
         
         mercurialinterface = vc.MercurialInterface()
-        mercurialinterface.save(savedForm, code)
+        mercurialinterface.save(scraper, code)
         if action.startswith('commit'):
             message = request.POST.get('commit_message', "changed")
-            rev = mercurialinterface.commit(savedForm, message=message, user=request.user)
-            #mercurialinterface.updatecommitalertsrev(rev)
-            mercurialinterface.updateallcommitalerts()  # stopgap method till we get the rev reliably
+            rev = mercurialinterface.commit(scraper, message=message, user=request.user)
+            mercurialinterface.updatecommitalertsrev(rev)
+            #mercurialinterface.updateallcommitalerts()  # stopgap method till we get the rev reliably
 
         # Add user roles
-        if savedForm.owner():
-            if savedForm.owner().pk != request.user.pk:
-                savedForm.add_user_role(request.user, 'editor')
+        if scraper.owner():
+            if scraper.owner().pk != request.user.pk:
+                scraper.add_user_role(request.user, 'editor')
         else:
-            savedForm.add_user_role(request.user, 'owner')
+            scraper.add_user_role(request.user, 'owner')
 
         # Add tags (note that we have to do this *after* the scraper has been saved)
-        s = get_object_or_404(ScraperModel, short_name=savedForm.short_name)
+        s = get_object_or_404(ScraperModel, short_name=scraper.short_name)
         s.tags = request.POST.get('tags')
 
         # Work out the URL to return in the JSON object
-        url = reverse('editor', kwargs={'short_name' : savedForm.short_name})
+        url = reverse('editor', kwargs={'short_name':scraper.short_name})
         if action.startswith("commit"):
-            url = reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name})
+            url = reverse('scraper_code', kwargs={'scraper_short_name':scraper.short_name})
 
         # Build the JSON object and return it
         res = json.dumps({'redirect':'true', 'url':url,})    
@@ -161,12 +159,12 @@ def saveeditedscraper(request, scraper):
 
     # User is not logged in, save the scraper to the session
     else:
-        draft_session_scraper = { 'scraper':savedForm, 'tags': request.POST.get('tags'), 'commit_message': request.POST.get('commit_message')}
+        draft_session_scraper = { 'scraper':scraper, 'tags': request.POST.get('tags'), 'commit_message': request.POST.get('commit_message')}
         request.session['ScraperDraft'] = draft_session_scraper
 
         # Set a message with django_notify telling the user their scraper is safe
         request.notifications.add("You need to sign in or create an account - don't worry, your scraper is safe ")
-        savedForm.action = action
+        scraper.action = action
 
         status = 'Failed'
         response_url = reverse('editor')
@@ -176,7 +174,7 @@ def saveeditedscraper(request, scraper):
             response_url =  reverse('login') + "?next=%s" % reverse('handle_session_draft', kwargs={'action': action})
             status = 'OK'
 
-        return HttpResponse(json.dumps({'status' : status, 'draft' : 'True', 'url': response_url}))
+        return HttpResponse(json.dumps({'status':status, 'draft':'True', 'url':response_url}))
 
 
 #Editor form

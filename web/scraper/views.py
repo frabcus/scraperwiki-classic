@@ -80,22 +80,6 @@ def overview(request, scraper_short_name):
         'chart_url': chart_url,
         }, context_instance=RequestContext(request))
 
-
-def create(request):
-    """
-    Rendars the scraper create form
-
-    Is this unused?
-    """
-    if request.method == 'POST':
-        return render_to_response(
-            'scraper/create.html',
-            context_instance=RequestContext(request))
-    else:
-        return render_to_response(
-            'scraper/create.html',
-            context_instance=RequestContext(request))
-
 def scraper_admin(request, scraper_short_name):
     user = request.user
     scraper = get_object_or_404(
@@ -329,12 +313,14 @@ def scraper_history(request, scraper_short_name):
     # (in future, the entries in django may be synchronized against this to make it possible to update the repository(ies) outside the system)
     commitlog = [ ]
     # should commit info about the saved   commitlog.append({"rev":commitentry['rev'], "description":commitentry['description'], "datetime":commitentry["date"], "user":user})
-    for commitentry in vc.MercurialInterface().getcommitlog(scraper):
-        try:    user = User.objects.get(id=int(commitentry["userid"]))
+    mercurialinterface = vc.MercurialInterface()
+    for commitentry in mercurialinterface.getcommitlog(scraper):
+        try:    user = User.objects.get(pk=int(commitentry["userid"]))
         except: user = None
         commitlog.append({"rev":commitentry['rev'], "description":commitentry['description'], "datetime":commitentry["date"], "user":user})
     commitlog.reverse()
     dictionary["commitlog"] = commitlog
+    dictionary["filestatus"] = mercurialinterface.getfilestatus(scraper)
     
     return render_to_response('scraper/history.html', dictionary, context_instance=RequestContext(request))
 

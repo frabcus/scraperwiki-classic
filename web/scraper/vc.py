@@ -9,11 +9,14 @@ from django.conf import settings
 import datetime
 import time
 import mercurial
+import mercurial.ui
+import mercurial.hg
 
 
 # The documentation and help strings for this Mercurial interface is inadequate
 # The best bet is to look directly at the source code to work out what attributes exist
-# mercurial.commands is mostly a wrapper on the functionality of the repo object
+# (although can't be done for repo.commit as this is in hgext.mq, which I can't find)
+# mercurial.commands module is mostly a wrapper on the functionality of the repo object
 
 class MercurialInterface:
     def __init__(self):
@@ -24,29 +27,36 @@ class MercurialInterface:
         
         # danger with member copy of repo as not sure if it updates with commits
         # (definitely doesn't update if commit is done against a second repo object)
-        self.repo = hg.repository(self.ui, self.repopath)
+        self.repo = mercurial.hg.repository(self.ui, self.repopath)
     
     
     def save(self, scraper, code):
         scraperfolder = os.path.join(self.repopath, scraper.short_name)
+        scraperfile = os.path.join(scraper.short_name, "__init__.py")
+        scraperpath = os.path.join(scraperfolder, "__init__.py")
+        
         if not os.path.exists(scraperfolder):
             os.makedirs(scraperfolder)
-        scraperpath = os.path.join(scraperfolder, "__init__.py")
         
         fout = open(scraperpath, "w")
         fout.write(code.encode('utf-8'))
         fout.close()
+    
+        # add into mercurial
+        if scraperfile not in self.repo.dirstate:
+            self.repo.add([scraperfile])   # note, relative to repopath
         
+    
     # need to dig into the commit command to find the rev
     def commit(self, scraper, message="changed", user="unknown"): 
         scraperpath = os.path.join(self.repopath, scraper.short_name, "__init__.py")
         if message is None:
             message = "changed"
   
-        self.ui.pushbuffer()
-        mercurial.commands.commit(self.ui, self.repo, scraperpath, addremove=True, message=str(message), user=str(user.pk))  # what is this pk?
-        response = self.ui.popbuffer()  # either 'nothing changed\n' or 'committed changeset 28:8ef0500ffeec\n'
-        return 666
+        node = self.repo.commit(message, str(user.pk))  
+        if not node:
+            return None
+        return self.repo.changelog.rev(node)
 
     
     # this function possibly in wrong place (which makes the imports awkward)
@@ -92,10 +102,11 @@ class MercurialInterface:
             alert = Alerts(content_object=scraper, message_type='commit', message_value=commitentry["description"], 
                            user=user, event_object=scrapercommitevent, datetime=commitentry["date"])
             alert.save()
-            print "creating alert", alert
         return warnings
     
-    # delete and rebuild all the ScraperCommitEvents and related alerts to make migration easy (and question whether they need to exist)
+    
+    # delete and rebuild all the ScraperCommitEvents and related alerts 
+    # to make migration easy (and question whether these objects really need to exist)
     def updateallcommitalerts(self):
         from scraper.models import Scraper, ScraperCommitEvent
         from frontend.models import Alerts
@@ -111,19 +122,13 @@ class MercurialInterface:
                 print "updateallcommitalerts warnings", warnings
 
 
-    def getsavedcode(self, scraper):
-        scraperpath = os.path.join(self.repopath, scraper.short_name, "__init__.py")
-        fin = open(path,'rU')
-        code = fin.read()
-        fin.close()
-        return code
-    
     
     def getctxrevisionsummary(self, ctx):
         data = { "rev":ctx.rev(), "userid":ctx.user(), "description":ctx.description() }
         epochtime, offset = ctx.date()
         ltime = time.localtime(epochtime)
         data["date"] = datetime.datetime(*ltime[:7])
+        data["date_isDST"] = ltime[-1]
         data["files"] = ctx.files()
         return data
             
@@ -141,19 +146,33 @@ class MercurialInterface:
     def getcommitlog(self, scraper):
         scraperfile = os.path.join(scraper.short_name, "__init__.py")
         result = [ ]
+        
         for rev in self.repo:
             ctx = self.repo[rev]
             if scraperfile in ctx.files():
                 result.append(self.getctxrevisionsummary(ctx))
         return result
             
-
-    def getstatus(self, scraper, rev=None):
-        # information about saved file
+    def getfilestatus(self, scraper):
+        status = { }
         scraperfile = os.path.join(scraper.short_name, "__init__.py")
         scraperpath = os.path.join(self.repopath, scraperfile)
         
+        lmtime = time.localtime(os.stat(scraperpath).st_mtime)
+        status["filemodifieddate"] = datetime.datetime(*lmtime[:7])
+        modified, added, removed, deleted, unknown, ignored, clean = self.repo.status()
+        
+        #print "sssss", (modified, added, removed, deleted, unknown, ignored, clean)
+        status["ismodified"] = (scraperfile in modified)
+        status["isadded"] = (scraperfile in added)
+        
+        return status
+
+
+    def getstatus(self, scraper, rev=None):
         status = { }
+        scraperfile = os.path.join(scraper.short_name, "__init__.py")
+        scraperpath = os.path.join(self.repopath, scraperfile)
 
         # adjacent commit informations
         if rev != None:
@@ -177,16 +196,12 @@ class MercurialInterface:
             reversion = self.getreversion(rev)
             status["code"] = reversion["text"].get(scraperfile)
         
+        # get information about the saved file (which we will if there's no current revision selected -- eg when rev in [-1, None]
         else:
             fin = open(scraperpath,'rU')
             status["code"] = fin.read()
             fin.close()
-
-            # what does mercurial say about its status
-            lmtime = time.localtime(os.stat(scraperpath).st_mtime)
-            status["filemodifieddate"] = datetime.datetime(*lmtime[:7])
-            modified, added, removed, deleted, unknown, ignored, clean = self.repo.status()
-            status["ismodified"] = (scraperfile in modified)
+            status.update(self.getfilestatus(scraper))
 
         if "prevcommit" in status:
             reversion = self.getreversion(status["prevcommit"]["rev"])
@@ -195,6 +210,9 @@ class MercurialInterface:
                 status["matchlines"] = list(DiffLineSequenceChanges(prevcode, status["code"]))
     
         return status
+
+
+
 
 
 def DiffLineSequenceChanges(oldcode, newcode):
@@ -253,126 +271,6 @@ def DiffLineSequenceChanges(oldcode, newcode):
       #  matchingcblocksback[-2][2], len(b[matchlinesbackb]) - 
       #  matchingcblocksback[-2][2]))
 
-
-
-
-# old code
-
-from StringIO import StringIO
-from mercurial import ui as hgui, hg, commands, util, cmdutil
-from mercurial.match import always, exact
-SMODULES_DIR = settings.SMODULES_DIR
-
-def make_file_path(scraper_short_name):
-  """
-  Scrapers all called __init__.py and are stored in a 
-  folder with the same name as the short_name.
-  """
-  path = "%s%s/__init__.py" % (SMODULES_DIR, scraper_short_name)
-  return path.encode()
-
-def create(scraper_name):
-  scraper_folder_path = "%s%s" % (SMODULES_DIR, scraper_name)
-  def make_file(scraper_folder_path):
-    open("%s/__init__.py" % scraper_folder_path, 'w')
-
-  if os.path.exists(scraper_folder_path):
-    # the folder exists, but not the file
-    make_file(scraper_folder_path)
-  else:
-    # The folder doesn't exist, so make everything
-    os.makedirs(scraper_folder_path)
-    make_file(scraper_folder_path)
-
-
-# the text which is saved comes in as the scraper.code attribute, 
-# which doesn't appear anywhere else, and isn't even set during scraper.get_code()
-def save(scraper):
-  path = make_file_path(scraper.short_name)
-  create(scraper.short_name)
-  scraper_file = open(path, 'w')
-
-  code = scraper.code
-  scraper_file.write(code.encode('utf-8'))
-
-  scraper_file.close()
-  
-
-def commit(scraper, message="changed", user="unknown"): 
-  """
-  Called each time a file is saved. At this
-  point we don't know if it's a new file that needs to be added to version control, or if
-  it's been added and just needs to be committed, so use the 'addremove' kwarg.
-  """
-  
-  path = make_file_path(scraper.short_name)
-  if not os.path.exists(path):
-    create(scraper.short_name)
-    
-  ui = hgui.ui()
-  ui.setconfig('ui', 'interactive', 'off')
-  ui.setconfig('ui', 'verbose', 'on')
-
-  reop_path = os.path.normpath(os.path.abspath(SMODULES_DIR))
-  r = hg.repository(ui, reop_path, create=False)
-  
-  # Because passing None in an optional argument means it doesn't use the default value
-  if message is None:
-    message = "changed"
-  
-  ui.pushbuffer()
-  rev = commands.commit(ui, r, path, addremove=True, message=str(message), user=str(user))
-  code = ui.popbuffer()  
-  return rev
-
-def get_code(scraper_name=None, committed=True, rev='tip'):
-  
-  """
-  Returns the committed file as a string
-  """
-        
-  path = make_file_path(scraper_name)
-  if committed:
-
-    ui = hgui.ui()
-    ui.setconfig('ui', 'interactive', 'off')
-    ui.setconfig('ui', 'verbose', 'on')
-
-    reop_path = os.path.normpath(os.path.abspath(SMODULES_DIR))
-    r = hg.repository(ui, reop_path, create=False)
-
-    code = StringIO("")
-    commands.cat(ui,r,path, output=code, rev=rev)
-
-    code_str =  code.getvalue()
-    return code_str
-
-
-  else:
-    return open(path,'rU').read()
-
-def been_edited(scraper_name=None):
-  """
-  Works out if the latest version committed (tip) is different 
-  from the version on the file system.
-  """
-  ui = hgui.ui()
-  ui.setconfig('ui', 'interactive', 'off')
-  ui.setconfig('ui', 'verbose', 'on')
-
-  reop_path = os.path.normpath(os.path.abspath(SMODULES_DIR))
-  r = hg.repository(ui, reop_path, create=False)
-  
-  path = make_file_path(scraper_name)
-  
-  ui.pushbuffer()
-  commands.status(ui,r,path, change='tip')
-  code = ui.popbuffer() 
-
-  if code != "":
-    return True
-  else:
-    return False
 
 
 

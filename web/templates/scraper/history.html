@@ -60,6 +60,23 @@
 <div class="mercurialcommitlog">
 <h3>Commit log extracted directly from repository</h3>
 <ul>
+
+  {% if filestatus.ismodified %}
+  <li>
+    <a href="{% url scraper_code scraper.short_name %}">{{ filestatus.filemodifieddate|date:"H:i, j F Y" }}</a> 
+    <span class="history-user">someone</span>
+    saved the file
+  </li>
+  {% endif %}
+
+  {% if filestatus.isadded %}
+  <li>
+    <a href="{% url scraper_code scraper.short_name %}">{{ filestatus.filemodifieddate|date:"H:i, j F Y" }}</a>
+    <span class="history-user">someone</span>
+    last saved after creation
+  </li>
+  {% endif %}
+
   {% for item in commitlog %}
   <li>
     <a href="{% url scraper_code scraper.short_name %}?rev={{item.rev}}">{{ item.datetime|date:"H:i, j F Y" }}</a>

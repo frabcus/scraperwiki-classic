@@ -18,10 +18,6 @@ class ScraperViewsTests(TestCase):
         response = self.client.get(reverse('scraper_list'))
         self.assertEqual(response.status_code, 200)
         
-    def test_scraper_create(self):
-        response = self.client.get(reverse('scraper_create'))
-        self.assertEqual(response.status_code, 200)
-        
     def test_scraper_overview(self):
         response = self.client.get(reverse('scraper_overview', 
                             kwargs={'scraper_short_name': 'test_scraper'}))

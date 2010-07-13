@@ -172,14 +172,11 @@ class Scraper(models.Model):
         return (self.owner(),)
             
     
-    # thse functions to go
+    # this functions to go
     def saved_code(self):
-        code = vc.get_code(self.short_name, committed=False)
-        return code
+        return vc.MercurialInterface().getstatus(self)["code"]
 
-    def count_number_of_lines(self):
-        code = vc.get_code(self.short_name, committed=False)
-        return int(code.count("\n"))
+        
         
     @models.permalink
     def get_absolute_url(self):
