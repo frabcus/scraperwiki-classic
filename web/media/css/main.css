@@ -316,7 +316,7 @@ div.user_comment img {float:left; margin-right:10px;}
 
 form.scraper_admin label { display: inline-block; line-height: 1.8; vertical-align: top; width: 20%; }
 form.scraper_admin input, form.scraper_admin select, form.scraper_admin textarea { width: 60%; }
-form.scraper_admin input#id_published { width: auto; }
+form.scraper_admin input#id_published, form.scraper_admin input#id_featured { width: auto; }
 
 td.bicolumn { width:50%; vertical-align:top; }
 

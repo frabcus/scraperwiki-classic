@@ -30,7 +30,8 @@ from django.core.mail import send_mail
 LANGUAGES = (
     ('Python', 'Python'),
     ('PHP', 'PHP'),
-#    ('Ruby', 'Ruby'),
+    ('Ruby', 'Ruby'),
+    ('HTML', 'HTML'),
 )
 
 class Scraper(models.Model):
@@ -39,25 +40,6 @@ class Scraper(models.Model):
         that are classed as being the same, though changed over time as the
         data required changes and the page being scraped changes, thus
         breaking a particular version.
-        
-         scrapers are related to users through the UserScraperRole table.
-        
-         you can get the owner of a scraper by....
-        
-         scraper.owner()
-        
-         or the people following this scraper...
-        
-         scraper.followers()
-        
-         from the user side, you can find a users scraper with
-        
-         user.scraper_set.owned()
-        
-         or, the scrapers a user is following by....
-        
-         user.scraper_set.watching()
-
     """
     title             = models.CharField(max_length=100, 
                                         null=False, 
