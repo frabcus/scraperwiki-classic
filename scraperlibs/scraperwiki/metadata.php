@@ -86,6 +86,7 @@ class SW_MetadataClient
     {
         if(!getenv("SCRAPER_GUID"))
         {
+            print 'The scraper has not been saved yet. Metadata will not be persisted between runs\n';
             $this->metadata_local[$metadata_name] = $value;
         }
 
