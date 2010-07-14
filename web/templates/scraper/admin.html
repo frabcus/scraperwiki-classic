@@ -32,7 +32,7 @@
             <form action="{% url scraper_delete_scraper scraper.short_name %}" method="post">
                 <input type="hidden" name="delete_scraper" value="1" />
                 <input type="submit" id="btnDeleteScraper" class="button small danger" value="Delete this scraper" />
-                Deletes this scraper and all it's data. There is no undo.
+                Deletes this scraper and all its data. There is no undo.
             </form>
         </div>
         {% else %}
