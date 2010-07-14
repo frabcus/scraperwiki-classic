@@ -14,7 +14,10 @@
 	
 	<div class="content"> 
 		 {% ifequal profile.user.username user.username %}
-	     <a href="/profiles/edit/">Edit your profile</a>
+             <ul>
+               <li>Registered email address: {{user.email}}</li>
+	       <li><a href="/profiles/edit/">Edit your profile</a></li>
+             </ul>
 
 {% comment %} [APS: remove following/watching features for now]
          {% else  %}
