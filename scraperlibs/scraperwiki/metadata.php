@@ -103,11 +103,11 @@ class SW_MetadataClient
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         }
 
-        curl_setopt($ch, CURLOPT_POSTFIELDS, sprintf("run_id=%s&value=%s", getenv("RUNID"), $value));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, sprintf("run_id=%s&value=%s", getenv("RUNID"), json_encode($value)));
         
         $res = curl_exec($ch);
         curl_close($ch);
         return $res;
-    }        
+    }
 }
 ?>
