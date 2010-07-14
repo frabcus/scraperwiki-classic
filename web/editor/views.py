@@ -243,6 +243,6 @@ def edit(request, short_name='__new__', language='Python', tutorial_scraper=None
     form.fields['code'].initial = scraper.code
     form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
 
-    tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language=language)
+    tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
 
     return render_to_response('editor/editor.html', {'form':form, 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft, 'user':request.user}, context_instance=RequestContext(request))
