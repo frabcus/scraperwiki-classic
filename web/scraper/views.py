@@ -8,28 +8,30 @@ from django.core.urlresolvers import reverse
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
 
+from django.contrib.auth.models import User
+
 from django.conf import settings
 
 from scraper import models
 from scraper import forms
 from scraper.forms import SearchForm
+import vc
+
 import frontend
 
 import subprocess
 
 import StringIO, csv, types
+import datetime
 from django.utils.encoding import smart_str
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+try:                import json
+except ImportError: import simplejson as json
+
 
 def overview(request, scraper_short_name):
     """
     Shows info on the scraper plus example data.
-
-    This is the main scraper view (default tab)
     """
     user = request.user
     scraper = get_object_or_404(
@@ -45,10 +47,8 @@ def overview(request, scraper_short_name):
     scraper_contributors = scraper.contributors()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    try:
-        offset = int(request.GET.get('i'))
-    except:
-        offset = 0
+    try:    offset = int(request.GET.get('i', 0))
+    except ValueError:   offset = 0
 
     table = models.Scraper.objects.data_summary(
         scraper_id=scraper.guid,
@@ -74,22 +74,6 @@ def overview(request, scraper_short_name):
         'scraper_contributors': scraper_contributors,
         'chart_url': chart_url,
         }, context_instance=RequestContext(request))
-
-
-def create(request):
-    """
-    Rendars the scraper create form
-
-    Is this unused?
-    """
-    if request.method == 'POST':
-        return render_to_response(
-            'scraper/create.html',
-            context_instance=RequestContext(request))
-    else:
-        return render_to_response(
-            'scraper/create.html',
-            context_instance=RequestContext(request))
 
 def scraper_admin(request, scraper_short_name):
     user = request.user
@@ -146,6 +130,7 @@ def scraper_delete_scraper(request, scraper_short_name):
         return HttpResponseRedirect('/')
 
     return HttpResponseRedirect(reverse('scraper_admin', args=[scraper_short_name]))
+
 
 def scraper_data(request, scraper_short_name):
     #user details
@@ -241,28 +226,40 @@ def scraper_map(request, scraper_short_name, map_only=False):
     }, context_instance=RequestContext(request))
 
 
+# saved_code to go
+# also make the diff with previous version and make the selection
+# check that all the non-loggedin logic still works
+
 def code(request, scraper_short_name):
     user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
-
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
         return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
 
+    try: rev = int(request.GET.get('rev', '-1'))
+    except ValueError: rev = -1
+    
+    mercurialinterface = vc.MercurialInterface()
+    status = mercurialinterface.getstatus(scraper, rev)
+    
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
-    committed_code = scraper.committed_code()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    return render_to_response('scraper/code.html', {
-        'scraper_tags': scraper_tags,
-        'selected_tab': 'code',
-        'scraper': scraper,
-        'user_owns_it': user_owns_it,
-        'committed_code': committed_code,
-        'user_follows_it': user_follows_it,},
-        context_instance=RequestContext(request))
+    dictionary = { 'scraper_tags': scraper_tags, 'selected_tab': 'code', 'scraper': scraper,
+                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
+                   
+    # overcome lack of subtract in template
+    if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
+        status["modifiedcommitdifference"] = status["filemodifieddate"] - status["prevcommit"]["date"]
+        
+    dictionary["status"] = status
+    dictionary["line_count"] = status["code"].count("\n") + 3
+
+    return render_to_response('scraper/code.html', dictionary, context_instance=RequestContext(request))
+
 
 def comments(request, scraper_short_name):
 
@@ -283,24 +280,16 @@ def comments(request, scraper_short_name):
 
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    return render_to_response('scraper/comments.html', {
-        'scraper_tags': scraper_tags,
-        'scraper_owner': scraper_owner,
-        'scraper_contributors': scraper_contributors,
-        'scraper_followers': scraper_followers,
-        'selected_tab': 'comments',
-        'scraper': scraper,
-        'user_owns_it': user_owns_it,
-        'user_follows_it': user_follows_it,
-        }, context_instance=RequestContext(request))
+    dictionary = { 'scraper_tags': scraper_tags, 'scraper_owner': scraper_owner, 'scraper_contributors': scraper_contributors,
+                   'scraper_followers': scraper_followers, 'selected_tab': 'comments', 'scraper': scraper,
+                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
+    return render_to_response('scraper/comments.html', dictionary, context_instance=RequestContext(request))
 
 
 def scraper_history(request, scraper_short_name):
 
     user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects,
-        short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -308,18 +297,28 @@ def scraper_history(request, scraper_short_name):
 
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
+    
+    # sift through the alerts filtering on the scraper through the annoying content_type field
     content_type = scraper.content_type()
-    history = frontend.models.Alerts.objects.filter(
-        content_type=content_type,
-        object_id=scraper.pk).order_by('-datetime')
-
-    return render_to_response('scraper/history.html', {
-        'selected_tab': 'history',
-        'scraper': scraper,
-        'history': history,
-        'user_owns_it': user_owns_it,
-        'user_follows_it': user_follows_it,
-        }, context_instance=RequestContext(request))
+    history = frontend.models.Alerts.objects.filter(content_type=content_type, object_id=scraper.pk).order_by('-datetime')
+        
+    dictionary = { 'selected_tab': 'history', 'scraper': scraper, 'history': history,
+                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
+    
+    # extract the commit log directly from the mercurial repository
+    # (in future, the entries in django may be synchronized against this to make it possible to update the repository(ies) outside the system)
+    commitlog = [ ]
+    # should commit info about the saved   commitlog.append({"rev":commitentry['rev'], "description":commitentry['description'], "datetime":commitentry["date"], "user":user})
+    mercurialinterface = vc.MercurialInterface()
+    for commitentry in mercurialinterface.getcommitlog(scraper):
+        try:    user = User.objects.get(pk=int(commitentry["userid"]))
+        except: user = None
+        commitlog.append({"rev":commitentry['rev'], "description":commitentry['description'], "datetime":commitentry["date"], "user":user})
+    commitlog.reverse()
+    dictionary["commitlog"] = commitlog
+    dictionary["filestatus"] = mercurialinterface.getfilestatus(scraper)
+    
+    return render_to_response('scraper/history.html', dictionary, context_instance=RequestContext(request))
 
 
 def stringnot(v):
@@ -374,7 +373,7 @@ def export_csv(request, scraper_short_name):
 
 
 def scraper_list(request, page_number):
-    all_scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
+    all_scrapers = models.Scraper.objects.filter(published=True).exclude(language='HTML').order_by('-featured', '-created_at')
 
     # Number of results to show from settings
     paginator = Paginator(all_scrapers, settings.SCRAPERS_PER_PAGE)
@@ -401,9 +400,17 @@ def scraper_list(request, page_number):
     dictionary = { "scrapers": scrapers, "form": form, "npeople": npeople }
     return render_to_response('scraper/list.html', dictionary, context_instance=RequestContext(request))
 
+
 def scraper_table(request):
-    all_scrapers = models.Scraper.objects.filter(published=True).order_by('-created_at')
-    dictionary = { "scrapers": all_scrapers }
+    dictionary = { }
+    dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
+    dictionary["loggedinusers"] = set([ userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.filter(user__isnull=False)])
+    dictionary["numloggedoutusers"] = len(models.UserScraperEditing.objects.filter(user__isnull=True))
+    dictionary["numdraftscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__isnull=True))
+    dictionary["numunpublishedscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__published=True))
+    dictionary["numpublishedscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__published=False))
+    dictionary["numpublishedscraperstotal"] = len(dictionary["scrapers"])
+    dictionary["numunpublishedscraperstotal"] = len(models.Scraper.objects.filter(published=False))
     return render_to_response('scraper/scraper_table.html', dictionary, context_instance=RequestContext(request))
     
 
@@ -414,7 +421,7 @@ def download(request, scraper_short_name):
     """
     scraper = get_object_or_404(models.Scraper.objects, 
                                 short_name=scraper_short_name)
-    response = HttpResponse(scraper.committed_code(), mimetype="text/plain")
+    response = HttpResponse(scraper.saved_code(), mimetype="text/plain")
     response['Content-Disposition'] = \
         'attachment; filename=%s.py' % (scraper.short_name)
     return response
@@ -520,24 +527,45 @@ def twisterstatus(request):
         return HttpResponse("needs value=")
     tstatus = json.loads(request.GET.get('value'))
     
-    # very brutally drop all objects and rebuild them.  In future we will do the updates
-    models.UserScraperEditing.objects.all().delete()
+    twisterclientnumbers = set()
+    
     for client in tstatus["clientlist"]:
+        # fixed attributes of the object
+        twisterclientnumber = client["clientnumber"]
+        twisterclientnumbers.add(twisterclientnumber)
         try:
-            user = models.User.objects.get(username=client['username'])
-            scraper = models.Scraper.objects.get(guid=client['guid'])
+            user = client['username'] and models.User.objects.get(username=client['username']) or None
+            scraper = client['guid'] and models.Scraper.objects.get(guid=client['guid']) or None
         except:
             continue
-        twisterclientnumber = client["clientnumber"]
-        userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
-        userscraperediting.save()
-        #print "uuuuu", userscraperediting
         
-        #editingsince = models.DateTimeField(blank=True, null=True)
-        #runningsince = models.DateTimeField(blank=True, null=True)
-        #closedsince  = models.DateTimeField(blank=True, null=True)
-        #twisterscraperpriority = models.IntegerField(default=0)   # >0 another client has priority on this scraper
+        # identify or create the editing object
+        luserscraperediting = models.UserScraperEditing.objects.filter(twisterclientnumber=twisterclientnumber)
+        if not luserscraperediting:
+            userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
+            userscraperediting.editingsince = datetime.datetime.now()
+        else:
+            assert len(luserscraperediting) == 1
+            userscraperediting = luserscraperediting[0]
+            assert userscraperediting.user == user
+            assert userscraperediting.scraper == scraper
+        
+        # updateable values of the object
+        userscraperediting.twisterscraperpriority = client['scrapereditornumber']
+        
+        # this condition could instead reference a running object
+        if client['running'] and not userscraperediting.runningsince:
+            userscraperediting.runningsince = datetime.datetime.now()
+        if not client['running'] and userscraperediting.runningsince:
+            userscraperediting.runningsince = None
+        
+        userscraperediting.save()
 
+    # discard now closed values of the object
+    for userscraperediting in models.UserScraperEditing.objects.all():
+        if userscraperediting.twisterclientnumber not in twisterclientnumbers:
+            userscraperediting.delete()
+            # or could use the field: closedsince  = models.DateTimeField(blank=True, null=True)
     return HttpResponse("Howdy ppp ")
 
 
@@ -597,3 +625,19 @@ def rpcexecute(request, scraper_short_name):
         
     return response
     
+
+def htmlview(request, scraper_short_name):
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    return HttpResponse(scraper.saved_code())
+
+def run_event(request, event_id):
+    event = get_object_or_404(models.ScraperRunEvent, id=event_id)
+    return render_to_response('scraper/run_event.html', {'event': event}, context_instance=RequestContext(request))
+
+def commit_event(request, event_id):
+    event = get_object_or_404(models.ScraperCommitEvent, id=event_id)
+    return render_to_response('scraper/commit_event.html', {'event': event}, context_instance=RequestContext(request))
+
+def running_scrapers(request):
+    events = models.ScraperRunEvent.objects.filter(run_ended=None)
+    return render_to_response('scraper/running_scrapers.html', {'events': events}, context_instance=RequestContext(request))

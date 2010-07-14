@@ -54,7 +54,7 @@ def format_message(content, message_type='console'):
 # and are passed through lineReceived.  Look there fore further formatting information.
 # things like exception parsing is done all the way in the controller.py
 
-# I think this class is only only for chunking into lines
+# I think this class is only for chunking into lines
 # see http://twistedmatrix.com/documents/8.2.0/api/twisted.protocols.basic.LineOnlyReceiver.htm
 
 class LocalLineOnlyReceiver(LineOnlyReceiver):
@@ -359,7 +359,13 @@ class RunnerFactory(protocol.ServerFactory):
         self.clients.remove(client)
 
     def notifytwisterstatus(self):
-        clientlist = [ { "clientnumber":client.clientnumber, "guid":client.guid, "username":client.username, "running":bool(client.running)}   for client in self.clients ]
+        clientlist = [ ]
+        for client in self.clients:
+            clientdata = { "clientnumber":client.clientnumber, "guid":client.guid, 
+                           "username":client.username, "running":bool(client.running), 
+                           "scrapereditornumber":client.scrapereditornumber }
+            clientlist.append(clientdata)
+            
         data = { "value": json.dumps({'message_type' : "currentstatus", 'clientlist':clientlist}) }
         
         # achieves the same as below, but causing the system to wait for response

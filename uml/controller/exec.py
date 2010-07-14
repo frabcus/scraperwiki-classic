@@ -19,6 +19,26 @@ import  ConfigParser
 try    : import json
 except : import simplejson as json
 
+
+def saveunicode(text):
+    try:
+        return unicode(text)
+    except UnicodeDecodeError:
+        pass
+    
+    try:
+        return unicode(text, encoding='utf8')
+    except UnicodeDecodeError:
+        pass
+
+    try:
+        return unicode(text, encoding='latin1')
+    except UnicodeDecodeError:
+        pass
+    
+    return unicode(text, errors='replace')
+
+
 class ConsoleStream :
 
     """
@@ -56,9 +76,7 @@ class ConsoleStream :
         """
 
         if self.m_text != '' :
-            msg  = { 'message_type' : 'console', 'content' : self.m_text }
-            if len(self.m_text) >= 100 :
-                msg['content_long'] = self.m_text
+            msg  = { 'message_type' : 'console', 'content' : saveunicode(self.m_text) }
             self.m_fd.write (json.dumps(msg) + '\n')
             self.m_fd.flush ()
             self.m_text = ''
@@ -208,12 +226,11 @@ signal.signal (signal.SIGXCPU, sigXCPU)
 
 
 
-
-# Code waiting to be reformatted to another standard that I don't understand (Julian)
-
-
+# code hacked here by Julian for clearer stack dump
 import inspect
 import traceback
+import re
+import urllib
 def getJTraceback(code):
     """Traceback that makes raw data available to javascript to process"""
     exc_type, exc_value, exc_traceback = sys.exc_info()   # last exception that was thrown
@@ -230,7 +247,7 @@ def getJTraceback(code):
             funcargs = inspect.formatargvalues(args, varargs, varkw, locals, formatvalue=lambda value: '=%s' % repr(value))
             stackentry["furtherlinetext"] = "%s(%s)" % (func, funcargs)  # double brackets to make it stand out
         
-        if file == "<string>" and 0 < linenumber - 1 < len(codelines):
+        if file == "<string>" and 0 <= linenumber - 1 < len(codelines):
             stackentry["linetext"] = codelines[linenumber - 1]  # have to do this as context=1 doesn't work (it doesn't give me anything in lines)
         
         stackdump.append(stackentry)
@@ -239,40 +256,23 @@ def getJTraceback(code):
             break
         pass # assert file == "<string>"
         
-    if exc_type in [SyntaxError, IndentationError]:
+    if exc_type in [ SyntaxError, IndentationError ]:
         stackentry = {"linenumber":exc_value.lineno, "file":exc_value.filename, "offset":exc_value.offset}
-        if stackentry["file"] == "<string>" and 0 < stackentry["linenumber"] - 1 < len(codelines):
+        if stackentry["file"] == "<string>" and 0 <= stackentry["linenumber"] - 1 < len(codelines):
             stackentry["linetext"] = codelines[stackentry["linenumber"] - 1]  # can't seem to recover the text from the SyntaxError object, though it is in it's repr
         stackentry["furtherlinetext"] = exc_value.msg
         stackdump.append(stackentry)
-    
+        
     result = { "exceptiondescription":repr(exc_value), "stackdump":stackdump }
+    
+    if exc_type == IOError and exc_value.args[1] == 403:
+        mblockaccess = re.match('Scraperwiki blocked access to "(.*?)"', str(exc_value.args[2]))
+        if mblockaccess:
+            result["blockedurl"] = mblockaccess.group(1)
+            result["blockedurlquoted"] = urllib.quote(mblockaccess.group(1))
+    #raise IOError('http error', 403, 'Scraperwiki blocked access to "http://tits.ru/".  Click <a href="/whitelist/?url=http%3A//tits.ru/">here</a> for details.', <httplib.HTTPMessage instance at 0x84c318c>)
     return result
 
-
-def getTraceback (code) :
-
-    """
-    Get traceback information. Returns exception, traceback, the
-    scraper file in whch the error occured and the line number.
-
-    @return         : (exception, traceback, file, line)
-    """
-
-    if trace == 'text' :
-        import backtrace
-        return backtrace.backtrace ('text', code, context = 10)
-    if trace == 'html' :
-        import backtrace
-        return backtrace.backtrace ('html', code, context = 10)
-
-    import traceback
-    tb = [ \
-            string.replace (t, 'File "<string>"', 'Scraper')
-            for t in traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback)
-            if string.find (t, 'Controller.py') < 0
-          ]
-    return str(sys.exc_type), string.join(tb, ''), None, None
 
 def execute (code) :
 
@@ -280,19 +280,10 @@ def execute (code) :
         import imp
         mod        = imp.new_module ('scraper')
         exec code.rstrip() + "\n" in mod.__dict__
+    
     except Exception, e :
-        
-        # all this to go when happy
-        import errormapper
-        emsg = errormapper.mapException (e)
-        etext, trace, infile, atline = getTraceback (code)
-        
-        # new version that gives raw stack info that can be formatted in javascript (and replace previous methods)
         jtraceback = getJTraceback(code)  
-        
-        # errfd = sys.stderr, which has the problem that the messages can get printed out of order!
-        scraperwiki.console.dumpMessage(message_type='exception', content=emsg, content_long=trace, filename=infile, 
-                                        lineno=atline, jtraceback=jtraceback)
+        scraperwiki.console.dumpMessage(message_type='exception', jtraceback=jtraceback)
         
 
 execute (open(script).read())

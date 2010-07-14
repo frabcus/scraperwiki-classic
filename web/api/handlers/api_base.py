@@ -5,12 +5,14 @@ from piston.utils import rc
 from piston.emitters import Emitter
 from api.models import api_key
 from api.emitters import CSVEmitter, PHPEmitter, GVizEmitter
-from settings import MAX_API_ITEMS
+from settings import MAX_API_ITEMS, DEFAULT_API_ITEMS
 import sys
 
 Emitter.register('csv', CSVEmitter, 'text/csv; charset=utf-8')
 Emitter.register('php', PHPEmitter, 'text/plain; charset=utf-8')
 Emitter.register('gviz', GVizEmitter, 'text/plain; charset=utf-8')
+
+class InvalidScraperException(Exception): pass
 
 class APIBase(BaseHandler):
     allowed_methods = ('GET',)
@@ -49,10 +51,10 @@ class APIBase(BaseHandler):
 
         #all required arguments passed?
         for required_argument in self.required_arguments:
-            argument_value = request.GET.get(required_argument, None)
-            if argument_value == None:
+            if required_argument not in request.GET:
                 self.error_response = rc.BAD_REQUEST
                 self.error_response.write(": Missing required argument '%s'" % required_argument)
+                break
 
     def read(self, request):
 
@@ -71,7 +73,11 @@ class APIBase(BaseHandler):
 
         # validate and set the result (unless we have already retrieved the answer from cache)
         if self.result == None:
-            self.validate(request)
+            try:
+                self.validate(request)
+            except InvalidScraperException:
+                self.error_response = rc.NOT_FOUND
+                self.error_response.write(": Scraper not found")
 
         #if this call is set to cache, save the result
         if self.cache_duration > 0:
@@ -85,19 +91,25 @@ class APIBase(BaseHandler):
             return self.result
 
     def get_scraper(self, request):
-        scraper = None 
-        short_name = request.GET.get('name', None)
         try:
-            scraper = Scraper.objects.get(short_name=short_name)
-        except Exception, e:
-            scraper = None
+            return Scraper.objects.get(short_name=request.GET.get('name'), published=True)
+        except:
+            raise InvalidScraperException()
 
-        if scraper != None and scraper.published == False:
-            scraper = None
+    def get_limit_and_offset(self, request):
+        try:
+            limit = self.clamp_limit(int(request.GET.get('limit')))
+        except:
+            limit = DEFAULT_API_ITEMS
 
-        return scraper
+        try:
+            offset = int(request.GET.get('offset'))
+        except:
+            offset = 0
+
+        return limit, offset
 
     def clamp_limit(self, limit):
         if limit == 0 or limit > MAX_API_ITEMS:
             limit = MAX_API_ITEMS
-        return limit            
+        return limit

@@ -11,6 +11,16 @@
 
 <div class="content">
 
+<table class="scrapersediting">
+<tr><td>Logged-in users editing</td><td>{{loggedinusers|length}}</td>
+<td>Logged-out users editing</td><td>{{numloggedoutusers}}</td>
+<td>Draft scrapers editing</td><td>{{numdraftscrapersediting}}</td></tr>
+<tr><td>Published scrapers editing</td><td>{{numpublishedscrapersediting}}</td>
+<td>Unpublished scrapers editing</td><td>{{numunpublishedscrapersediting}}</td></tr>
+<tr><td>Published scrapers total</td><td>{{numpublishedscraperstotal}}</td>
+<td>Unpublished scrapers total</td><td>{{numunpublishedscraperstotal}}</td></tr>
+</table>
+
 <table class="scraperlist">
 <tr>
   <th>Title</th>
@@ -27,7 +37,11 @@
   </td>
   <td>
     {% for userscraperediting in scraper.userscraperediting_set.all %} 
-        {{userscraperediting.user.get_profile.name}}
+        {% if userscraperediting.user %}
+            {{userscraperediting.user.get_profile.name}}
+        {% else %}
+            Anonymous
+        {% endif %}
         ({{userscraperediting.twisterclientnumber}}) 
     {% endfor %}
   </td> 

@@ -99,16 +99,11 @@ def scrape (url, params = None) :
         urllib2Setup ()
 
     data = params and urllib.urlencode(params) or None
-    
-    try:
-        fin  = urllib2opener.open(url, data)
-        text = fin.read()
-        fin.close()   # get the mimetype here
-    except:
-#     scraperwiki.console.logScrapedURLError (url)
-        return None
 
-#   scraperwiki.console.logScrapedURL (url, len(text))
+    fin  = urllib2opener.open(url, data)
+    text = fin.read()
+    fin.close()   # get the mimetype here
+
     return text
 
 

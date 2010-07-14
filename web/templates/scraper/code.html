@@ -2,20 +2,57 @@
 
 {% block tab %}
 <div class="tab_tools">
-    <form method="get" action="{% url editor scraper.short_name %}">
-        <input type="submit" value="Edit scraper" />
-    </form>
-</div>
-<div class="code_viewer">
-    <textarea id="txtScraperCode">{{ committed_code }}</textarea>
-    {% if not committed_code %}
-    <div class="info_unpublished">
-        This scraper is being worked on <br/>but has not been published yet
-    </div>
+
+{# viewing a revision #}
+{% if status.currcommit %}
+  Version from: <b>{{status.currcommit.date|date:"H:i, j F Y" }}</b>
+  <i>({{status.currcommit.description}})</i>
+
+  {% if status.prevcommit %}
+    <a href="{% url scraper_code scraper.short_name %}?rev={{status.prevcommit.rev}}">previous commit</a>
+  {% endif %}
+
+  {% if status.nextcommit %}
+    <a href="{% url scraper_code scraper.short_name %}?rev={{status.nextcommit.rev}}">next commit</a>
+  {% else %}
+    <a href="{% url scraper_code scraper.short_name %}">last saved version</a>
+  {% endif %}
+
+
+{# Viewing the current saved version #}
+{% else %}
+  Saved: {{status.filemodifieddate|date:"H:i, j F Y" }}, 
+  {% if status.prevcommit %}
+    Committed: <a href="{% url scraper_code scraper.short_name %}?rev={{status.prevcommit.rev}}">{{status.prevcommit.date|date:"H:i, j F Y" }}</a>
+    <i>({{status.prevcommit.description}})</i>
+  {% endif %}
+  
+  {% if status.ismodified %}
+    (modified)
+  {% else %}
+    {% if status.prevcommit %}
+      {% ifequal status.filemodifieddate status.prevcommit.date %}
+        (same)
+      {% else %}
+        (timediff {{status.modifiedcommitdifference}})
+      {% endifequal %}
+    {% else %}
+      (never committed)
     {% endif %}
+  {% endif %}
+
+  <form method="get" action="{% url editor scraper.short_name %}">
+    <input type="submit" value="Edit scraper" />
+  </form>
+{% endif %}
+</div>
+
+<div class="code_viewer">
+  <textarea id="txtScraperCode">{{ status.code }}</textarea>
 </div>
 {% endblock %}
 
 {% block run_script %}
-    setupCodeViewer({{ scraper.line_count }}, '{{ scraper.language|lower }}');
+    var selrange = {% if status.matchlines %}{{status.matchlines}}{% else %}[0,0,0,0]{% endif %}; 
+    setupCodeViewer({{ line_count }}, '{{ scraper.language|lower }}');
 {% endblock %}
