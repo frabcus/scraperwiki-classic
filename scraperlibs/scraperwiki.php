@@ -80,7 +80,7 @@ class scraperwiki
          )  )  ;
    }
 
-   function get_metadata($metadata_name)
+   function get_metadata($metadata_name, $default = null)
    {
       return SW_MetadataClient::create()->get($metadata_name);
    }
