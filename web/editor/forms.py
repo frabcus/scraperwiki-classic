@@ -14,7 +14,7 @@ class editorForm(forms.ModelForm):
     
     class Meta:
         model = scraper.models.Scraper
-        fields = ('title', 'code', 'description', 'license', 'tags', 'published')
+        fields = ('title', 'code', 'description', 'license', 'commaseparatedtags', 'published')
 
     title = forms.CharField(
         widget=forms.TextInput(attrs={'title' : 'Untitled Scraper'}),
@@ -33,8 +33,14 @@ class editorForm(forms.ModelForm):
         label = "Description*",
     )
     
-    tags = forms.CharField(required=False)
+    commaseparatedtags = forms.CharField(
+       required=False, 
+       widget=forms.TextInput(attrs={'title' : 'tags for scraper'}),
+       label = "TTags",
+    )
+    
     license = forms.ChoiceField(choices=LICENSE_CHOICES, label='Data licence')
+    
     code = forms.CharField(
         widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'})
     )

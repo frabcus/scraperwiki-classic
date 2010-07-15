@@ -182,7 +182,7 @@ def login(request):
     return render_to_response('registration/extended_login.html', {'registration_form': registration_form, 'login_form': login_form, 'error_messages': error_messages, 'redirect': redirect}, context_instance = RequestContext(request))
 
 def tutorials(request):
-    languages = Scraper.objects.values_list('language', flat=True).distinct()
+    languages = Scraper.objects.filter(published=True, istutorial=True).values_list('language', flat=True).distinct()
     tutorials = {}
     for language in languages:
         tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')

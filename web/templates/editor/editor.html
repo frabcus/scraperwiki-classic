@@ -169,8 +169,8 @@
                     {{ form.license }}
                 </li>
                 <li{% if scraper.description %} class="hidden"{% endif %}>
-                    <label for="id_tags">{{ form.tags.label}} {{ form.tags.errors }}</label>
-                    {{ form.tags }}
+                    <label for="id_commaseparatedtags">{{ form.commaseparatedtags.label}} {{ form.commaseparatedtags.errors }}</label>
+                    {{ form.commaseparatedtags }}
                     <small class="hint taghint">e.g. europe<em>,</em> grants<em>,</em> transport</small>
                 </li>
                 <li>
@@ -248,7 +248,7 @@
             <dl>
             {% for scraper in tutorial_scrapers %}
             <dt>
-                <a href="#" class="scraper-tutorial-link"><b>{{scraper.short_name}}</b></a>
+                <a href="#" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
             </dt>
             <dd>
               {{scraper.description}}
