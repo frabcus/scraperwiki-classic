@@ -53,6 +53,35 @@ def raw(request, short_name=None):
     return HttpResponse(result, mimetype="text/plain")
 
 
+
+def savecodeofscraper(scraper, user, code, commaseparatedtags, commitmessage, bnew):
+    scraper.update_meta()
+    scraper.line_count = int(code.count("\n"))
+    scraper.save()   # save the actual object
+    
+    mercurialinterface = vc.MercurialInterface()
+    mercurialinterface.save(scraper, code)
+    if commitmessage:
+        rev = mercurialinterface.commit(scraper, message=commitmessage, user=user)
+        mercurialinterface.updatecommitalertsrev(rev)
+        
+        # refresh the whole set of commit alerts when we have this message
+        if commitmessage.strip() == "updatecommitalertsrev" and user.is_staff:
+            mercurialinterface.updateallcommitalerts()
+
+    # Add user roles
+    if scraper.owner():
+        if scraper.owner().pk != user.pk:
+            scraper.add_user_role(user, 'editor')
+    else:
+        scraper.add_user_role(user, 'owner')
+        
+    # don't know how this somehow magically splits and creates the tags
+    scraper.tags = commaseparatedtags
+    scraper.save()
+
+
+
 # Handle Session Draft  
 # A non-served page for saving scrapers that have been stored in the session for non-signed in users
 def handle_session_draft(request, action):
@@ -71,25 +100,13 @@ def handle_session_draft(request, action):
         return HttpResponseRedirect(response_url)
         
     draft_scraper = session_scraper_draft.get('scraper', None)
-    draft_tags = session_scraper_draft.get('tags', '')   
-    draft_commit_message = session_scraper_draft.get('commit_message')
-
-    #save or publish the scraper
-    if action == 'save':
-        draft_scraper.save()
-    elif action == 'commit':
-        draft_scraper.save(commit=True, message=draft_commit_message, user=request.user.pk)
-
-    # Add tags
-    draft_scraper.tags = session_scraper_draft.get('tags', '')
-
-    # Add user roles
-    # TODO: MOVE TO MODEL, THIS IS BUSINESS LOGIC
-    if draft_scraper.owner():
-        if draft_scraper.owner().pk != request.user.pk:
-            draft_scraper.add_user_role(request.user, 'editor')
-    else:
-        draft_scraper.add_user_role(request.user, 'owner')
+    draft_scraper.save()
+    draft_commit_message = action.startswith('commit') and session_scraper_draft.get('commit_message') or None
+    draft_code = session_scraper_draft.get('code')
+    draft_tags = session_scraper_draft.get('commaseparatedtags', '')
+    
+    savecodeofscraper(draft_scraper, request.user, draft_code, draft_tags, draft_commit_message, True)
+ 
 
     # work out where to send them next
     #go to the scraper page if commited, or the editor if not
@@ -99,7 +116,6 @@ def handle_session_draft(request, action):
         response_url = reverse('scraper_code', kwargs={'scraper_short_name' : draft_scraper.short_name})
 
     return HttpResponseRedirect(response_url)
-
 
 
 # called from the edit function
@@ -125,32 +141,9 @@ def saveeditedscraper(request, lscraper):
 
     # User is signed in, we can save the scraper
     if request.user.is_authenticated():
-        scraper.update_meta()
-        scraper.line_count = int(code.count("\n"))
-        scraper.save()   # save the actual object
+        commitmessage = action.startswith('commit') and request.POST.get('commit_message', "changed") or None
+        savecodeofscraper(scraper, request.user, code, form.cleaned_data['commaseparatedtags'], commitmessage, False)  # though not always not new
         
-        mercurialinterface = vc.MercurialInterface()
-        mercurialinterface.save(scraper, code)
-        if action.startswith('commit'):
-            message = request.POST.get('commit_message', "changed")
-            rev = mercurialinterface.commit(scraper, message=message, user=request.user)
-            mercurialinterface.updatecommitalertsrev(rev)
-            
-            # refresh the whole set of commit alerts when we have this message
-            if message.strip() == "updatecommitalertsrev" and request.user.is_staff:
-                mercurialinterface.updateallcommitalerts()
-
-        # Add user roles
-        if scraper.owner():
-            if scraper.owner().pk != request.user.pk:
-                scraper.add_user_role(request.user, 'editor')
-        else:
-            scraper.add_user_role(request.user, 'owner')
-
-        # Add tags (note that we have to do this *after* the scraper has been saved)
-        s = get_object_or_404(ScraperModel, short_name=scraper.short_name)
-        s.tags = request.POST.get('tags')
-
         # Work out the URL to return in the JSON object
         url = reverse('editor', kwargs={'short_name':scraper.short_name})
         if action.startswith("commit"):
@@ -162,7 +155,7 @@ def saveeditedscraper(request, lscraper):
 
     # User is not logged in, save the scraper to the session
     else:
-        draft_session_scraper = { 'scraper':scraper, 'tags': request.POST.get('tags'), 'commit_message': request.POST.get('commit_message')}
+        draft_session_scraper = { 'scraper':scraper, 'code':code, 'commaseparatedtags': request.POST.get('commaseparatedtags'), 'commit_message': request.POST.get('commit_message')}
         request.session['ScraperDraft'] = draft_session_scraper
 
         # Set a message with django_notify telling the user their scraper is safe
@@ -182,28 +175,27 @@ def saveeditedscraper(request, lscraper):
 
 #Editor form
 def edit(request, short_name='__new__', language='Python', tutorial_scraper=None):
-
     # identify the scraper (including if there was a draft one backed up)
     has_draft = False
     if request.session.get('ScraperDraft', None):
         draft = request.session['ScraperDraft'].get('scraper', None)
         if draft:
-          has_draft  = True      
-      
-    # draft scraper was backed up
+            has_draft  = True      
+
+    commit_message = ''
     if has_draft:
-        # Does a draft version exist?
         scraper = draft
-        scraper.tags = request.session['ScraperDraft'].get('tags', '')
-        scraper.commit_message = request.session['ScraperDraft'].get('commit_message', '')        
+        commaseparatedtags = request.session['ScraperDraft'].get('commaseparatedtags', '')
+        commit_message = request.session['ScraperDraft'].get('commit_message', '')        
+        code = request.session['ScraperDraft'].get('code', ' missing')
     
     # Try and load an existing scraper
     elif short_name is not "__new__":
         scraper = get_object_or_404(ScraperModel, short_name=short_name)
-        scraper.code = scraper.saved_code()
-        scraper.tags = ", ".join(tag.name for tag in scraper.tags)
+        code = scraper.saved_code()
+        commaseparatedtags = ", ".join([tag.name for tag in scraper.tags])
         if not scraper.published:
-            scraper.commit_message = 'Scraper created'
+            commit_message = 'Scraper created'
     
     # Create a new scraper
     else:
@@ -224,24 +216,21 @@ def edit(request, short_name='__new__', language='Python', tutorial_scraper=None
             if len(startup_scrapers):
                 startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
 
-        scraper.code = startupcode
         scraper.license = 'Unknown'
-        scraper.commit_message = 'Scraper created'
         scraper.language = language
     
-        # could crate a default for new scrapers
-        # scraper.published = True
+        code = startupcode
+        commit_message = 'Scraper created'
+        commaseparatedtags = ''
         
-    # tags and commit_message are not actually attributes of the scraper
-
     # if it's a post-back (save) then execute that
     if request.POST:
         return saveeditedscraper(request, scraper)
 
     # Build the page
     form = forms.editorForm(instance=scraper)
-    form.fields['code'].initial = scraper.code
-    form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
+    form.fields['code'].initial = code
+    form.fields['commaseparatedtags'].initial = commaseparatedtags 
 
     tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
 

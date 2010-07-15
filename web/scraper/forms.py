@@ -20,8 +20,9 @@ class ScraperAdministrationForm (forms.ModelForm):
     title = forms.CharField(label="Title")
     license = forms.ChoiceField(choices=LICENSE_CHOICES, label='Data licence')
     
-    tags = forms.CharField(required=False, label="Tags (comma separated)")
            # label should be this, but for html escaping: <small class="hint taghint">e.g. europe<em>,</em> grants<em>,</em> transport</small>
+           # (there's some magic that does the comma separating and making of tag objects that I can't find how it works)
+    tags = forms.CharField(required=False, label="Tags (comma separated)")
                                 
                                 
     class Meta:

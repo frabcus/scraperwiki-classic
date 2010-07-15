@@ -683,6 +683,8 @@ $(document).ready(function() {
         
         // run button
         $('.editor_controls #run').bind('click.run', sendCode);
+        if (scraperlanguage == 'html')
+            $('.editor_controls #run').hide();
 
         //diff button
          $('.editor_controls #diff').click(function() {
@@ -743,7 +745,7 @@ $(document).ready(function() {
               URL : window.location.pathname,
               data: ({
                 title : $('#id_title').val(),
-                tags : $('#id_tags').val(),
+                commaseparatedtags : $('#id_commaseparatedtags').val(),
                 license : $('#id_license').val(),
                 description : $('#id_description').val(),
                 run_interval : $('#id_run_interval').val(),

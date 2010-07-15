@@ -93,6 +93,7 @@ def scraper_admin(request, scraper_short_name):
             s.tags = form.cleaned_data['tags']
     else:
         form = forms.ScraperAdministrationForm(instance=scraper)
+            # somehow the magic that can convert from comma separated tags into the tags list is not able to convert back, hence this code.  can't be true
         form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
 
     return render_to_response('scraper/admin.html', {
@@ -547,8 +548,8 @@ def twisterstatus(request):
         else:
             assert len(luserscraperediting) == 1
             userscraperediting = luserscraperediting[0]
-            assert userscraperediting.user == user
-            assert userscraperediting.scraper == scraper
+            assert userscraperediting.user == user, ("different", userscraperediting.user, user)
+            assert userscraperediting.scraper == scraper, ("different", userscraperediting.scraper, scraper)
         
         # updateable values of the object
         userscraperediting.twisterscraperpriority = client['scrapereditornumber']
