@@ -769,6 +769,18 @@ class ScraperController (BaseController) :
                 del scrapersByPID  [pid         ]
                 lock.release()
 
+                #  Make absolutely sure all sockets and pipes are closed, since we are
+                #  running in a thread and not a separate process.
+                #
+                try    : psock[0].close()
+                except : pass
+                try    : psock[1].close()
+                except : pass
+                try    : os.close(lpipe[0])
+                except : pass
+                try    : os.close(lpipe[1])
+                except : pass
+
                 try    : os.remove ('/tmp/scraper.%d' % pid)
                 except : pass
                 try    : os.remove ('/tmp/ident.%d'   % pid)
