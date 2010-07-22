@@ -4,46 +4,24 @@ from django.db import models
 from frontend.models import *
 
 class Migration:
-
-    # Need to make sure the content types for Scraper and Solicitation
-    # models have been created so that frontend.management.create_alert_types
-    # doesn't fail
-    depends_on = (
-        ("scraper", "0001_initial"),
-        ("market", "0001_initial"),
-    )
     
     def forwards(self, orm):
         
-        # Adding model 'UserProfile'
-        db.create_table('frontend_userprofile', (
-            ('id', orm['frontend.UserProfile:id']),
-            ('user', orm['frontend.UserProfile:user']),
-            ('bio', orm['frontend.UserProfile:bio']),
-            ('created_at', orm['frontend.UserProfile:created_at']),
-            ('alerts_last_sent', orm['frontend.UserProfile:alerts_last_sent']),
-            ('alert_frequency', orm['frontend.UserProfile:alert_frequency']),
-        ))
-        db.send_create_signal('frontend', ['UserProfile'])
+        # Adding field 'Alerts.event_id'
+        db.add_column('frontend_alerts', 'event_id', orm['frontend.alerts:event_id'])
         
-        # Adding model 'UserToUserRole'
-        db.create_table('frontend_usertouserrole', (
-            ('id', orm['frontend.UserToUserRole:id']),
-            ('from_user', orm['frontend.UserToUserRole:from_user']),
-            ('to_user', orm['frontend.UserToUserRole:to_user']),
-            ('role', orm['frontend.UserToUserRole:role']),
-        ))
-        db.send_create_signal('frontend', ['UserToUserRole'])
+        # Adding field 'Alerts.event_type'
+        db.add_column('frontend_alerts', 'event_type', orm['frontend.alerts:event_type'])
         
     
     
     def backwards(self, orm):
         
-        # Deleting model 'UserProfile'
-        db.delete_table('frontend_userprofile')
+        # Deleting field 'Alerts.event_id'
+        db.delete_column('frontend_alerts', 'event_id')
         
-        # Deleting model 'UserToUserRole'
-        db.delete_table('frontend_usertouserrole')
+        # Deleting field 'Alerts.event_type'
+        db.delete_column('frontend_alerts', 'event_type_id')
         
     
     
@@ -82,12 +60,34 @@ class Migration:
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        'frontend.alerts': {
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
+            'datetime': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'event_id': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'event_type': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'event_alerts_set'", 'null': 'True', 'to': "orm['contenttypes.ContentType']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'message_level': ('django.db.models.fields.IntegerField', [], {'default': '0', 'null': 'True', 'blank': 'True'}),
+            'message_type': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'message_value': ('django.db.models.fields.CharField', [], {'max_length': '5000', 'null': 'True', 'blank': 'True'}),
+            'meta': ('django.db.models.fields.CharField', [], {'max_length': '1000', 'blank': 'True'}),
+            'object_id': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'blank': 'True'})
+        },
+        'frontend.alerttypes': {
+            'applies_to': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'label': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100', 'blank': 'True'})
+        },
         'frontend.userprofile': {
-            'alert_frequency': ('django.db.models.fields.IntegerField', [], {}),
+            'alert_frequency': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'alert_types': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['frontend.AlertTypes']"}),
             'alerts_last_sent': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'bio': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'bio': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'unique': 'True'})
         },
         'frontend.usertouserrole': {

@@ -1,33 +1,48 @@
-function setupCodeViewer(iLineCount, scraperlanguage){
+function setupCodeViewer(iLineCount, scraperlanguage)
+{
     var oCodeEditor;
-    if(iLineCount < 20){
+    if(iLineCount < 20)
         iLineCount = 20;
-    }
+
+    var selrangefunc = function() {
+        if (!((selrange[2] == 0) && (selrange[3] == 0))){
+            linehandlestart = oCodeEditor.nthLine(selrange[0] + 1); 
+            linehandleend = oCodeEditor.nthLine(selrange[2] + 1); 
+            oCodeEditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
+        }; 
+    }; 
+
     $(document).ready(function(){
         var parsers = Array();
         parsers['python'] = '../contrib/python/js/parsepython.js';
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];
+        parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
+        parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
 
         var stylesheets = Array();
-        stylesheets['python'] = 'python/css/pythoncolors.css';
-        stylesheets['php'] = 'php/css/phpcolors.css';
+        stylesheets['python'] = ['/media/CodeMirror/contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
+        stylesheets['php'] = ['/media/CodeMirror/contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css']; 
+        stylesheets['ruby'] = ['/media/ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
+        stylesheets['html'] = ['/media/CodeMirror/css/xmlcolors.css', '/media/CodeMirror/css/jscolors.css', '/media/CodeMirror/css/csscolors.css', '/media/css/codemirrorcolours.css']; 
 
         oCodeEditor = CodeMirror.fromTextArea("txtScraperCode", {
-           parserfile: parsers[scraperlanguage],
-           stylesheet: "/media/CodeMirror/contrib/" + stylesheets[scraperlanguage],
+            parserfile: parsers[scraperlanguage],
+            stylesheet: stylesheets[scraperlanguage],
 
-           path: "/media/CodeMirror/js/",
-           textWrapping: true, 
-           lineNumbers: true, 
-           indentUnit: 4,
-           readOnly: true,
-           tabMode: "spaces", 
-           autoMatchParens: true,
-           width: '100%',
-           height: iLineCount + 'em',           
-           parserConfig: {'pythonVersion': 2, 'strictErrors': true}
+            path: "/media/CodeMirror/js/",
+            textWrapping: true, 
+            lineNumbers: true, 
+            indentUnit: 4,
+            readOnly: true,
+            tabMode: "spaces", 
+            autoMatchParens: true,
+            width: '100%',
+            height: iLineCount + 'em', 
+            parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
 
-       });
+            // this is called once the codemirror window has finished initializing itself, (though happens to early, so that the selection gets deselected.  should file a bug)
+            initCallback: function() { setTimeout(selrangefunc, 1000); }
+        });
     });
 }
 

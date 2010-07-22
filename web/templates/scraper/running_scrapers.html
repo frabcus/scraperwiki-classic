@@ -1,0 +1,16 @@
+<h1>Running Scrapers</h1>
+
+<table border=1>
+  <tr>
+    <th>Scraper</th>
+    <th>Started</th>
+    <th>&nbsp;</th>
+  </tr>
+{% for run_event in events %}
+  <tr>
+    <td><a href="{{run_event.scraper.get_absolute_url}}">{{run_event.scraper.title}}</a></td> 
+    <td>{{run_event.run_started}}</td> 
+    <td><a href="{{run_event.get_absolute_url}}">More...</a></td>
+  </tr>
+{% endfor %}
+</table>

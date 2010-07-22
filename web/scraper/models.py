@@ -30,6 +30,8 @@ from django.core.mail import send_mail
 LANGUAGES = (
     ('Python', 'Python'),
     ('PHP', 'PHP'),
+    ('Ruby', 'Ruby'),
+    ('HTML', 'HTML'),
 )
 
 class Scraper(models.Model):
@@ -38,25 +40,6 @@ class Scraper(models.Model):
         that are classed as being the same, though changed over time as the
         data required changes and the page being scraped changes, thus
         breaking a particular version.
-        
-         scrapers are related to users through the UserScraperRole table.
-        
-         you can get the owner of a scraper by....
-        
-         scraper.owner()
-        
-         or the people following this scraper...
-        
-         scraper.followers()
-        
-         from the user side, you can find a users scraper with
-        
-         user.scraper_set.owned()
-        
-         or, the scrapers a user is following by....
-        
-         user.scraper_set.watching()
-
     """
     title             = models.CharField(max_length=100, 
                                         null=False, 
@@ -96,60 +79,13 @@ class Scraper(models.Model):
     def __unicode__(self):
         return self.short_name
     
-    def save(self, commit=False, message=None, user=None, **kwargs):
-        """
-        this function saves the uninitialized and undeclared .code member of
-        the object to the disk you just have to know it's there by looking
-        into the cryptically named vc.py module
-        """
-
-        # if the scraper doesn't exist already give it a short name (slug)
-        if self.short_name:
-            self.short_name = util.SlugifyUniquely(self.short_name, 
-                                                   Scraper, 
-                                                   slugfield='short_name', 
-                                                   instance=self)
-        else:
-            self.short_name = util.SlugifyUniquely(self.title, 
-                                                   Scraper, 
-                                                   slugfield='short_name', 
-                                                   instance=self)
+    def buildfromfirsttitle(self):
+        assert not self.short_name and not self.guid
+        import hashlib
+        self.short_name = util.SlugifyUniquely(self.title, Scraper, slugfield='short_name', instance=self)
+        self.created_at = datetime.datetime.today()  # perhaps this should be moved out to the draft scraper
+        self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
-        if self.created_at == None:
-            self.created_at = datetime.datetime.today()
-    
-                
-        if not self.guid:
-            import hashlib
-            guid = hashlib.md5("%s" % ("**@@@".join([
-                  self.short_name, 
-                  str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
-            self.guid = guid
-     
-        # if publishing for the first time set the first published date
-        if self.published and self.first_published_at == None:
-            self.first_published_at = datetime.datetime.today()
-
-        if self.__dict__.get('code'):
-            vc.save(self)
-            if commit:
-                vc.commit(self, message=message, user=user)
-                
-                # Log this commit in the history table
-                alert = frontendmodels.Alerts()
-                alert.content_object = self
-                alert.message_type = 'commit'
-                alert.message_value = message
-                alert.user = User.objects.get(id=user)
-                alert.save()
-                
-                
-                
-        #update meta data
-        self.update_meta()
-            
-        #do the parent save
-        super(Scraper, self).save(**kwargs)
   
     def count_records(self):
         return int(Scraper.objects.item_count(self.guid))
@@ -217,21 +153,16 @@ class Scraper(models.Model):
     def editors(self):
         return (self.owner(),)
             
-    def committed_code(self):
-        code = vc.get_code(self.short_name, committed=True)
-        return code
-
+    
+    # this functions to go
     def saved_code(self):
-        code = vc.get_code(self.short_name, committed=False)
-        return code
+        return vc.MercurialInterface().getstatus(self)["code"]
 
-    def count_number_of_lines(self):
-        code = vc.get_code(self.short_name)
-        return int(code.count("\n"))
         
+        
+    @models.permalink
     def get_absolute_url(self):
-        # used by RSS feeds - TODO
-        return "/scrapers/%i/" % self.short_name
+        return ('scraper_overview', [self.short_name])
 
     def is_good(self):
         # don't know how goodness is going to be defined yet.
@@ -239,9 +170,11 @@ class Scraper(models.Model):
 
     # update scraper meta data (lines of code etc)    
     def update_meta(self):
+        # if publishing for the first time set the first published date
+        if self.published and self.first_published_at == None:
+            self.first_published_at = datetime.datetime.today()
         
         #update line counts etc
-        self.line_count = self.count_number_of_lines()
         self.record_count = self.count_records()
         self.has_geo = bool(Scraper.objects.has_geo(self.guid))
         self.has_temporal = bool(Scraper.objects.has_temporal(self.guid))
@@ -249,14 +182,13 @@ class Scraper(models.Model):
         #get data for sparklines
         sparline_days = settings.SPARKLINE_MAX_DAYS
         created_difference = datetime.datetime.now() - self.created_at
+        
         #if (created_difference.days < settings.SPARKLINE_MAX_DAYS):
         #    sparline_days = created_difference.days
 
         #minimum of 1 day
-        recent_record_count = \
-                Scraper.objects.recent_record_count(self.guid, sparline_days)
-        self.scraper_sparkline_csv = ",".join("%d" % count \
-                                             for count in recent_record_count)
+        recent_record_count = Scraper.objects.recent_record_count(self.guid, sparline_days)
+        self.scraper_sparkline_csv = ",".join("%d" % count for count in recent_record_count)
 
     def content_type(self):
         return ContentType.objects.get(app_label="scraper", model="Scraper")
@@ -325,3 +257,30 @@ class ScraperMetadata(models.Model):
 
     class Meta:
         verbose_name_plural = 'scraper metadata'
+
+class ScraperRunEvent(models.Model):
+    scraper = models.ForeignKey(Scraper)
+    run_id = models.CharField(max_length=100)
+    pid = models.IntegerField()
+    run_started = models.DateTimeField()
+    run_ended = models.DateTimeField(null=True)
+    records_produced = models.IntegerField(default=0)
+    pages_scraped = models.IntegerField(default=0)
+    output = models.TextField()
+
+    def __unicode__(self):
+        return u'start: %s   end: %s' % (self.run_started, self.run_ended)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('run_event', [self.id])
+
+class ScraperCommitEvent(models.Model):
+    revision = models.IntegerField()
+
+    def __unicode__(self):
+        return unicode(self.revision)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('commit_event', [self.id])

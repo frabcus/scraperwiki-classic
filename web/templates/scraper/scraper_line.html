@@ -27,19 +27,33 @@
             {{ scraper.description }}            
         </p>
     {% endif %}
+
     <small>
-        
         Created by
         {% load gravatar %}
-        {% show_gravatar scraper.owner 'small' %}
-        <a href="{% url profiles_profile_detail scraper.owner.username %}">{{ scraper.owner.get_profile.name }}</a> {{scraper.created_at|timesince}} ago |
-    {% if scraper.last_run %}
-        last run {{scraper.last_run|timesince}} ago |
+        {% if scraper.owner %}
+          {% show_gravatar scraper.owner 'small' %}
+          {% if scraper.owner.username %}
+            <a href="{% url profiles_profile_detail scraper.owner.username %}">{{ scraper.owner.get_profile.name }}</a>
+          {% else %}
+            [error: missing user name]
+          {% endif %}
+        {% else %}
+          [error: missing user]
+        {% endif %}
+        {{scraper.created_at|timesince}} ago |
+
+    {% ifequal scraper.language 'HTML' %}
+        <a href="{% url htmlview scraper.short_name %}">{{ scraper.language }}</a>
     {% else %}
-        not run yet |
-	{% endif %}
-	    written in {{ scraper.language }} |
-	    {{ scraper.record_count }} records
+        {% if scraper.last_run %}
+            last run {{scraper.last_run|timesince}} ago |
+        {% else %}
+            not run yet |
+        {% endif %}
+        <b>{{ scraper.language }}</b>
+        | {{ scraper.record_count }} records
+    {% endifequal %}
     </small>
     
 </li>

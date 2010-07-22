@@ -3,10 +3,11 @@ import sys
 import os
 import datetime
 import random
-try:
-  import json
-except:
-  import simplejson as json
+import difflib
+
+try:    import json
+except: import simplejson as json
+
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
@@ -21,22 +22,21 @@ import forms
 import settings
 
 
-# Delete the draft
 def delete_draft(request):
-    if  request.session.get('ScraperDraft', False):
+    if request.session.get('ScraperDraft', False):
         del request.session['ScraperDraft']    
     return HttpResponseRedirect(reverse('editor'))
 
-# Diff
+
 def diff(request, short_name=None):
     if not short_name or short_name == "__new__":
         return HttpResponse("Draft scraper, nothing to diff against", mimetype='text')
     code = request.POST.get('code', None)    
-    if code:
-        scraper = get_object_or_404(ScraperModel, short_name=short_name)
-        scraper.code = scraper.committed_code()
-        return HttpResponse(vc.diff(scraper.code, code), mimetype='text')
-    return HttpResponse("Programme error: No code sent up to diff against", mimetype='text')
+    if not code:
+        return HttpResponse("Programme error: No code sent up to diff against", mimetype='text')
+    scraper = get_object_or_404(ScraperModel, short_name=short_name)
+    result = '\n'.join(difflib.unified_diff(scraper.saved_code().splitlines(), code.splitlines(), lineterm=''))
+    return HttpResponse("::::" + result, mimetype='text')
     
     
 def raw(request, short_name=None):
@@ -47,10 +47,39 @@ def raw(request, short_name=None):
     newcode = scraper.saved_code()
     if oldcodeineditor:
         sequencechange = vc.DiffLineSequenceChanges(oldcodeineditor, newcode)
-        res = "%s:::sElEcT rAnGe:::%s" % (json.dumps(list(sequencechange)), newcode)   # a delimeter that the javascript can find, in absence of using json
+        result = "%s:::sElEcT rAnGe:::%s" % (json.dumps(list(sequencechange)), newcode)   # a delimeter that the javascript can find, in absence of using json
     else:
-        res = newcode
-    return HttpResponse(res, mimetype="text/plain")
+        result = newcode
+    return HttpResponse(result, mimetype="text/plain")
+
+
+
+def savecodeofscraper(scraper, user, code, commaseparatedtags, commitmessage, bnew):
+    scraper.update_meta()
+    scraper.line_count = int(code.count("\n"))
+    scraper.save()   # save the actual object
+    
+    mercurialinterface = vc.MercurialInterface()
+    mercurialinterface.save(scraper, code)
+    if commitmessage:
+        rev = mercurialinterface.commit(scraper, message=commitmessage, user=user)
+        mercurialinterface.updatecommitalertsrev(rev)
+        
+        # refresh the whole set of commit alerts when we have this message
+        if commitmessage.strip() == "updatecommitalertsrev" and user.is_staff:
+            mercurialinterface.updateallcommitalerts()
+
+    # Add user roles
+    if scraper.owner():
+        if scraper.owner().pk != user.pk:
+            scraper.add_user_role(user, 'editor')
+    else:
+        scraper.add_user_role(user, 'owner')
+        
+    # don't know how this somehow magically splits and creates the tags
+    scraper.tags = commaseparatedtags
+    scraper.save()
+
 
 
 # Handle Session Draft  
@@ -71,25 +100,13 @@ def handle_session_draft(request, action):
         return HttpResponseRedirect(response_url)
         
     draft_scraper = session_scraper_draft.get('scraper', None)
-    draft_tags = session_scraper_draft.get('tags', '')   
-    draft_commit_message = session_scraper_draft.get('commit_message')
-
-    #save or publish the scraper
-    if action == 'save':
-        draft_scraper.save()
-    elif action == 'commit':
-        draft_scraper.save(commit=True, message=draft_commit_message, user=request.user.pk)
-
-    # Add tags
-    draft_scraper.tags = session_scraper_draft.get('tags', '')
-
-    # Add user roles
-    # TODO: MOVE TO MODEL, THIS IS BUSINESS LOGIC
-    if draft_scraper.owner():
-        if draft_scraper.owner().pk != request.user.pk:
-            draft_scraper.add_user_role(request.user, 'editor')
-    else:
-        draft_scraper.add_user_role(request.user, 'owner')
+    draft_scraper.save()
+    draft_commit_message = action.startswith('commit') and session_scraper_draft.get('commit_message') or None
+    draft_code = session_scraper_draft.get('code')
+    draft_tags = session_scraper_draft.get('commaseparatedtags', '')
+    
+    savecodeofscraper(draft_scraper, request.user, draft_code, draft_tags, draft_commit_message, True)
+ 
 
     # work out where to send them next
     #go to the scraper page if commited, or the editor if not
@@ -101,10 +118,9 @@ def handle_session_draft(request, action):
     return HttpResponseRedirect(response_url)
 
 
-
 # called from the edit function
-def saveeditedscraper(request, scraper):
-    form = forms.editorForm(request.POST, instance=scraper)
+def saveeditedscraper(request, lscraper):
+    form = forms.editorForm(request.POST, instance=lscraper)
 
     #validate
     if not form.is_valid() or 'action' not in request.POST:
@@ -112,43 +128,26 @@ def saveeditedscraper(request, scraper):
 
     action = request.POST.get('action').lower()
 
-    # Save the form  (without committing at first - http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method)
-    savedForm = form.save(commit=False)      
-
+    # recover the altered object from the form, without saving it to django database - http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method
+    scraper = form.save(commit=False)
+    if not scraper.guid:
+        scraper.buildfromfirsttitle()
+    
     # Add some more fields to the form
-    savedForm.code = form.cleaned_data['code']
-    savedForm.description = form.cleaned_data['description']    
-    savedForm.license = form.cleaned_data['license']
-    # savedForm.run_interval = form.cleaned_data['run_interval']
+    code = form.cleaned_data['code']
+    scraper.description = form.cleaned_data['description']    
+    scraper.license = form.cleaned_data['license']
+    # scraper.run_interval = form.cleaned_data['run_interval']
 
     # User is signed in, we can save the scraper
     if request.user.is_authenticated():
-        if action == 'save':
-            #save without commiting
-            savedForm.save()
-        if action.startswith('commit'):          
-            message = None
-            #set the commit message if present
-            if request.POST.get('commit_message', False):
-                message = request.POST['commit_message']
-            # save and commit
-            savedForm.save(commit=True, message=message, user=request.user.pk)
-
-        # Add user roles
-        if savedForm.owner():
-            if savedForm.owner().pk != request.user.pk:
-                savedForm.add_user_role(request.user, 'editor')
-        else:
-            savedForm.add_user_role(request.user, 'owner')
-
-        # Add tags (note that we have to do this *after* the scraper has been saved)
-        s = get_object_or_404(ScraperModel, short_name=savedForm.short_name)
-        s.tags = request.POST.get('tags')
-
+        commitmessage = action.startswith('commit') and request.POST.get('commit_message', "changed") or None
+        savecodeofscraper(scraper, request.user, code, form.cleaned_data['commaseparatedtags'], commitmessage, False)  # though not always not new
+        
         # Work out the URL to return in the JSON object
-        url = reverse('editor', kwargs={'short_name' : savedForm.short_name})
+        url = reverse('editor', kwargs={'short_name':scraper.short_name})
         if action.startswith("commit"):
-            url = reverse('scraper_code', kwargs={'scraper_short_name' : savedForm.short_name})
+            url = reverse('scraper_code', kwargs={'scraper_short_name':scraper.short_name})
 
         # Build the JSON object and return it
         res = json.dumps({'redirect':'true', 'url':url,})    
@@ -156,12 +155,12 @@ def saveeditedscraper(request, scraper):
 
     # User is not logged in, save the scraper to the session
     else:
-        draft_session_scraper = { 'scraper':savedForm, 'tags': request.POST.get('tags'), 'commit_message': request.POST.get('commit_message')}
+        draft_session_scraper = { 'scraper':scraper, 'code':code, 'commaseparatedtags': request.POST.get('commaseparatedtags'), 'commit_message': request.POST.get('commit_message')}
         request.session['ScraperDraft'] = draft_session_scraper
 
         # Set a message with django_notify telling the user their scraper is safe
         request.notifications.add("You need to sign in or create an account - don't worry, your scraper is safe ")
-        savedForm.action = action
+        scraper.action = action
 
         status = 'Failed'
         response_url = reverse('editor')
@@ -171,37 +170,36 @@ def saveeditedscraper(request, scraper):
             response_url =  reverse('login') + "?next=%s" % reverse('handle_session_draft', kwargs={'action': action})
             status = 'OK'
 
-        return HttpResponse(json.dumps({'status' : status, 'draft' : 'True', 'url': response_url}))
+        return HttpResponse(json.dumps({'status':status, 'draft':'True', 'url':response_url}))
 
 
 #Editor form
 def edit(request, short_name='__new__', language='Python', tutorial_scraper=None):
-
     # identify the scraper (including if there was a draft one backed up)
     has_draft = False
     if request.session.get('ScraperDraft', None):
         draft = request.session['ScraperDraft'].get('scraper', None)
         if draft:
-          has_draft  = True      
-      
-    # draft scraper was backed up
+            has_draft  = True      
+
+    commit_message = ''
     if has_draft:
-        # Does a draft version exist?
         scraper = draft
-        scraper.tags = request.session['ScraperDraft'].get('tags', '')
-        scraper.commit_message = request.session['ScraperDraft'].get('commit_message', '')        
+        commaseparatedtags = request.session['ScraperDraft'].get('commaseparatedtags', '')
+        commit_message = request.session['ScraperDraft'].get('commit_message', '')        
+        code = request.session['ScraperDraft'].get('code', ' missing')
     
     # Try and load an existing scraper
     elif short_name is not "__new__":
         scraper = get_object_or_404(ScraperModel, short_name=short_name)
-        scraper.code = scraper.saved_code()
-        scraper.tags = ", ".join(tag.name for tag in scraper.tags)
+        code = scraper.saved_code()
+        commaseparatedtags = ", ".join([tag.name for tag in scraper.tags])
         if not scraper.published:
-            scraper.commit_message = 'Scraper created'
+            commit_message = 'Scraper created'
     
     # Create a new scraper
     else:
-        if language not in ['Python', 'PHP']:
+        if language not in ['Python', 'PHP', 'Ruby']:
             language = 'Python'
 
         scraper = ScraperModel()  
@@ -218,25 +216,22 @@ def edit(request, short_name='__new__', language='Python', tutorial_scraper=None
             if len(startup_scrapers):
                 startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
 
-        scraper.code = startupcode
         scraper.license = 'Unknown'
-        scraper.commit_message = 'Scraper created'
         scraper.language = language
     
-        # could crate a default for new scrapers
-        # scraper.published = True
+        code = startupcode
+        commit_message = 'Scraper created'
+        commaseparatedtags = ''
         
-    # tags and commit_message are not actually attributes of the scraper
-
     # if it's a post-back (save) then execute that
     if request.POST:
         return saveeditedscraper(request, scraper)
 
     # Build the page
     form = forms.editorForm(instance=scraper)
-    form.fields['code'].initial = scraper.code
-    form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
+    form.fields['code'].initial = code
+    form.fields['commaseparatedtags'].initial = commaseparatedtags 
 
-    tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language=language)
+    tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
 
     return render_to_response('editor/editor.html', {'form':form, 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft, 'user':request.user}, context_instance=RequestContext(request))

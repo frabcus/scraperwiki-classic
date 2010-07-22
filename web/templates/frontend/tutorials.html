@@ -2,21 +2,24 @@
 
 {% block title %}ScraperWiki tutorials{% endblock %}
 {% block content %}
+
     <div class="page_title">
-        <h1>ScraperWiki tutorials</h1>
-        <p>A complete introduction to how to use ScraperWiki to write screen scrapers.</p>
-        <p>Begins with the basics of screen scraping, then covers more complex scraping, e.g. forms, ASP.NET pages, Excel and PDFs.</p>
-	<p>Also covers ways to present your data. This includes with Google charts and maps.</p>
+        <h1>ScraperWiki Tutorials</h1>
+        <p>Choose from a wide selection of worked examples and tutorials from introductory to very specialized.
+           Simply click on a link below, follow the instructions in the comments, and 
+           start hacking.</p>
+        <p>If you are looking for the basic code and function documentation, go 
+           <a href="{% url help_code_documentation %}">here</a>.</p>
     </div>
 
 <div class="content">
 
  {% for key, value in tutorials.items %}
-<h3>{{ key }} tutorials</h3>
+<h3 id="{{ key }}_tutorials">{{ key }} tutorials</h3>
 <dl>
     {% for scraper in value %}
     <dt>
-    <a href="/editor/tutorial/{{scraper.short_name}}" class="scraper-tutorial-link"><b>{{scraper.short_name}}</b></a>
+    <a href="{% url tutorial scraper.short_name %}" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
     </dt>
     <dd>
       {{scraper.description}}

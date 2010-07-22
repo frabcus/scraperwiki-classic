@@ -10,7 +10,15 @@
   {% for item in history %}
     <tr>
       <td>
-        {{ item.datetime|date:"D j M Y, H:i" }}
+        {% ifequal item.message_type|lower "commit" %}
+          <a href="{% url scraper_code scraper.short_name %}?rev={{item.event_object.revision}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
+        {% else %}
+          {% if item.event_object %}
+            <a href="{{item.event_object.get_absolute_url}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
+          {% else %}
+            {{ item.datetime|date:"H:i, j F Y" }}
+          {% endif %}
+        {% endifequal %}
       </td>
       <td>
           {% ifequal item.message_type|lower "commit" %}
@@ -18,7 +26,7 @@
           {% endifequal %}
 
           {% ifequal item.message_type|lower "run_fail" %}
-            Scraper run failed after {{ item.message_value|floatformat }}
+            Scraper run failed after {{ item.message_value|floatformat }} seconds
           {% endifequal %}
 
           {% ifequal item.message_type|lower "run_success" %}
@@ -26,8 +34,11 @@
           {% endifequal %}
           
           {% if item.user %}
-            by <a href="{% url profiles_profile_detail item.user.username %}">
-            {% load gravatar %} {% show_gravatar item.user 'small' %}&nbsp;{{item.user.get_profile.name}}</a>
+            by 
+            <a href="{% url profiles_profile_detail item.user.username %}">
+              {% load gravatar %} {% show_gravatar item.user 'small' %}&nbsp;
+              {% if item.user.get_profile.name %}{{item.user.get_profile.name}}{% else %}{{item.user.username}}{% endif %}
+            </a>
           {% endif %}
         
         </td>
@@ -41,6 +52,45 @@
     </tr>
   {% endfor %}
 </table>
+
+<div class="mercurialcommitlog">
+<h3>Commit log extracted directly from repository</h3>
+<ul>
+
+  {% if filestatus.ismodified %}
+  <li>
+    <a href="{% url scraper_code scraper.short_name %}">{{ filestatus.filemodifieddate|date:"H:i, j F Y" }}</a> 
+    <span class="history-user">someone</span>
+    saved the file
+  </li>
+  {% endif %}
+
+  {% if filestatus.isadded %}
+  <li>
+    <a href="{% url scraper_code scraper.short_name %}">{{ filestatus.filemodifieddate|date:"H:i, j F Y" }}</a>
+    <span class="history-user">someone</span>
+    last saved after creation
+  </li>
+  {% endif %}
+
+  {% for item in commitlog %}
+  <li>
+    <a href="{% url scraper_code scraper.short_name %}?rev={{item.rev}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
+    <span class="history-user">
+    {% if item.user %}
+      <a href="{% url profiles_profile_detail item.user.username %}">
+        {% if item.user.get_profile.name %}{{item.user.get_profile.name}}{% else %}{{item.user.username}}{% endif %}
+      </a>
+    {% else %}
+        Unknown user
+    {% endif %}
+    </span>
+    ({{item.description}})
+  </li>
+  {% endfor %}
+</ul>
+</div>
+
 {% endblock %}
 
 {% block run_script %}

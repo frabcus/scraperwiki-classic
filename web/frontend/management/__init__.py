@@ -16,6 +16,7 @@ http://djangoadvent.com/1.2/natural-keys/
 """
 
 from django.dispatch import dispatcher
+from django.contrib.auth.models import User
 from south.signals import post_migrate
 from frontend import models as frontend
 from scraper import models as scraper
@@ -91,3 +92,16 @@ def create_alert_types(*args, **kwargs):
                 alert.delete()
 
 post_migrate.connect(create_alert_types)
+
+def add_user_profile_to_super_user(*args, **kwargs):
+    """
+    The super user created by the syncdb process is
+    created before the UserProfile model has been
+    migrated.
+    """
+    if kwargs['app'] == 'frontend':
+        for user in User.objects.all():
+            if user.userprofile_set.count() == 0:
+                frontend.create_user_profile(User, user, True)
+
+post_migrate.connect(add_user_profile_to_super_user)

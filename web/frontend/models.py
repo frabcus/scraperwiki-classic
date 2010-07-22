@@ -62,6 +62,10 @@ class Alerts(models.Model):
     datetime = models.DateTimeField(blank=False, default=datetime.datetime.now)
     user = models.ForeignKey(User, blank=True, null=True)
 
+    event_type = models.ForeignKey(ContentType, null=True, related_name='event_alerts_set')
+    event_id = models.PositiveSmallIntegerField(blank=True, null=True)
+    event_object = generic.GenericForeignKey('event_type', 'event_id')
+
     objects = models.Manager()
     
     def __unicode__(self):
@@ -175,7 +179,12 @@ class UserToUserRole(models.Model):
 
 def create_user_profile(sender, instance, created, **kwargs):
     if created and sender == User:
-        profile = UserProfile(user=instance, alert_frequency=60*60*24)
-        profile.save()
+        try:
+            profile = UserProfile(user=instance, alert_frequency=60*60*24)
+            profile.save()
+        except:
+            # syncdb is saving the superuser
+            # UserProfile is yet to be created by migrations
+            pass
 
 models.signals.post_save.connect(create_user_profile)

@@ -117,6 +117,9 @@ table.data tr:nth-child(odd) td {background:#ffffd7;}
 table.data td {border-bottom:dotted 1px #ccc; border-top:solid 1px #ffffd7;padding:0.3em 0.5em; line-height:1em;}
 table.data tr:hover td {border-bottom:solid 1px #ccc;border-top:solid 1px #ccc;}
 
+table.scrapersediting { width:auto;}
+table.scrapersediting td { border: 1px solid black;}
+
 /* Flexigrid override */
 .flexigrid table {width:auto;}
 
@@ -124,6 +127,8 @@ table.data tr:hover td {border-bottom:solid 1px #ccc;border-top:solid 1px #ccc;}
 div.page_title {border-bottom:dotted 1px #ccc; border-top:solid 1px #ccc;
     padding-bottom:0.3em; padding-top:0.8em;margin-top:1em;}
 .page_controls {position:absolute; top:0.6em; right:0; text-align:right;}
+
+div.page_title_narrow { width:600px;}
 
 /* Page tabs */
 div.page_tabs {clear:left;}
@@ -259,7 +264,7 @@ ul.filter_list {position:absolute;}
 ul.filter_list li {display:block; float:left;}
 
 /* Report */
-p.report {background:#f8f8f8 url(../images/icons/flag_yellow.png) no-repeat 8px 0.4em;
+p.report {background:#f8f8a8 url(../images/icons/flag_yellow.png) no-repeat 8px 0.4em;
     font-size:0.8em; border-top:dotted 1px #ccc; border-bottom:dotted 1px #ccc; padding:0.5em 10px 0.5em 30px; margin-top:1em;}
     
 /* API */
@@ -309,16 +314,9 @@ div.user_comment img {float:left; margin-right:10px;}
 
 #embedMapBox {width: 100%;}
 
-form.scraper_admin label {
-  display: inline-block;
-  line-height: 1.8;
-  vertical-align: top;
-  width: 20%; /* Width of labels */
-}
-
-form.scraper_admin input, form.scraper_admin select, form.scraper_admin textarea {
-  width: 60%; /* Width of labels */
-}
+form.scraper_admin label { display: inline-block; line-height: 1.8; vertical-align: top; width: 20%; }
+form.scraper_admin input, form.scraper_admin select, form.scraper_admin textarea { width: 60%; }
+form.scraper_admin input#id_published, form.scraper_admin input#id_featured { width: auto; }
 
 td.bicolumn { width:50%; vertical-align:top; }
 
@@ -326,3 +324,10 @@ td.bicolumn { width:50%; vertical-align:top; }
 .ui-widget {font-family: Helvetica,arial,sans-serif;}
 .ui-widget-header {background: #FFFFD7; color: #2680C6;}
 .ui-widget input.button {font-size: 0.7em;}
+
+
+div.mercurialcommitlog { padding-top:1em; font-size:80%; background-color:#e0e0e0; }
+div.mercurialcommitlog span.history-user { padding-left:1em; }
+div.mercurialcommitlog h3 { padding:0; margin:0; font-style:italic; }
+div.mercurialcommitlog ul { padding:0; margin:0; }
+
