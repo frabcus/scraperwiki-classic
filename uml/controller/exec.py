@@ -56,7 +56,6 @@ class ConsoleStream :
 
         self.m_fd   = fd
         self.m_text = ''
-        self.m_log  = open("/tmp/exec.%d" % os.getpid(), 'w')
 
     def write (self, text) :
 
@@ -173,11 +172,11 @@ import  scraperwiki.utils
 import  scraperwiki.datastore
 import  scraperwiki.console
 
-logfd	= os.fdopen(3, 'w', 0)
+logfd   = os.fdopen(3, 'w', 0)
 scraperwiki.console.setConsole  (logfd)
 
-sys.stdout	= ConsoleStream (logfd) ;
-sys.stderr	= sys.stderr
+sys.stdout  = ConsoleStream (logfd) ;
+sys.stderr  = sys.stderr
 
 config = ConfigParser.ConfigParser()
 config.add_section ('dataproxy')
