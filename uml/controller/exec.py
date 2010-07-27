@@ -187,6 +187,10 @@ config.set         ('dataproxy', 'port', string.split(datastore, ':')[1])
 #  These seem to be needed for urllib.urlopen() to support proxying, though
 #  FTP doesn't actually work.
 #
+
+# uncomment the following line and the ProxyHandler lines if you want proxying to work 
+# in a local version
+
 ##os.environ['http_proxy' ] = httpProxy
 ##os.environ['https_proxy'] = httpsProxy
 os.environ['ftp_proxy'  ] = ftpProxy
