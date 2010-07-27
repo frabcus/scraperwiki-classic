@@ -124,7 +124,7 @@ $(document).ready(function() {
     function setupTutorial(){
         $('a.scraper-tutorial-link').each(function(){
             $(this).click(function() { 
-                jQuery.get('/editor/raw/'+$(this).text(), function(data) {
+                jQuery.get('/editor/raw/'+$(this).attr('short_name'), function(data) {
                     if($.browser.mozilla){
                         // I cannot work out why this only affects firefox
                         // would be nice if we could use selectLines/replaceSelection

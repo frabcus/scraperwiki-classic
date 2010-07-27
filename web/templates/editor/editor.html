@@ -248,7 +248,7 @@
             <dl>
             {% for scraper in tutorial_scrapers %}
             <dt>
-                <a href="#" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
+                <a href="#" class="scraper-tutorial-link" short_name="{{scraper.short_name}}"><b>{{scraper.title}}</b></a>
             </dt>
             <dd>
               {{scraper.description}}
