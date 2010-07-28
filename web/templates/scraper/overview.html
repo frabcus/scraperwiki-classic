@@ -45,7 +45,7 @@
           {% else %}
               {% for tag in scraper_tags %}{{ tag }} {% endfor %}
           {% endif %}
-          </dd>
+          &nbsp;</dd>
         </dl>
     </div>
     <p>
@@ -76,4 +76,8 @@
     </ul>
 </div>
 <br class="clear"/>
+{% endblock %}
+
+{% block run_script %}
+    setupCKANLink();
 {% endblock %}

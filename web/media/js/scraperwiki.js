@@ -214,3 +214,20 @@ function setupDataViewer(){
     $('.raw_data').flexigrid({height:250});    
     
 }
+
+function setupCKANLink(){
+    $.ajax({
+        url:'http://ckan.net/api/search/resource',
+        dataType:'jsonp',
+        cache: true,
+        data: {url: 'scraperwiki.com', all_fields: 1},
+        success:function(data){
+            var id = window.location.pathname.split('/')[3];
+            $.each(data.results, function(index,ckan){
+                if ($.inArray(id, ckan.url.split('/')) != -1){
+                    $('div.metadata dl').append('<dt>CKAN</dt><dd><a href="http://ckan.net/package/'+ckan.package_id+'">link</a><dd>');
+                }
+            });
+        }
+    });
+}
