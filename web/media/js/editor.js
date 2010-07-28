@@ -430,7 +430,7 @@ $(document).ready(function() {
           } else if (data.message_type == "end") {
               endingrun(data.content); 
           } else if (data.message_type == "sources") {
-              writeToSources(data.content, data.url)
+              writeToSources(data.url, data.bytes, data.failedmessage, data.cached, data.cacheid)
           } else if (data.message_type == "chat") {
               writeToChat(cgiescape(data.content))
           } else if (data.message_type == "saved") {
@@ -793,8 +793,8 @@ $(document).ready(function() {
                 },
 
             error: function(response){
-                //alert('Sorry, something went wrong, please try copying your code and then reloading the page');
-                document.write(response.responseText); // Uncomment to get the actual error page
+                alert('Sorry, something went wrong, please try copying your code and then reloading the page');
+                //document.write(response.responseText); // Uncomment to get the actual error page
               }
             });
         }
@@ -954,21 +954,26 @@ $(document).ready(function() {
     };
 
 
-    function writeToSources(sMessage, sUrl) {
+    function writeToSources(sUrl, bytes, failedmessage, cached, cacheid) {
 
-        var sDisplayMessage = sMessage;
-        
         //remove items if over max
         if ($('#output_sources div.output_content').children().size() >= outputMaxItems) {
             $('#output_sources div.output_content').children(':first').remove();
         }
 
         //append to sources tab
-        $('#output_sources div.output_content')
-                .append('<span class="output_item"><a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a></span>')
+        if (cacheid != undefined)
+            malink = 'class="cached" href="/cachedscrape/' + cacheid + '"'; 
+        else
+            malink = 'href="' + sUrl + '"'; 
+        alink = '<a ' + malink + ' target="_new">' + sUrl.substring(0, 100) + '</a>'; 
+        if ((failedmessage != undefined) && (failedmessage != ''))
+            smessage = failedmessage + alink; 
+        else
+            smessage = bytes + ' bytes loaded ' + (cached == 'True' ? '(from cache) ' : '') + alink; 
 
+        $('#output_sources div.output_content').append('<span class="output_item">' + smessage + '</span>')
         $('.editor_output div.tabs li.sources').addClass('new');
-
         setTabScrollPosition('sources', 'bottom'); 
     }
 

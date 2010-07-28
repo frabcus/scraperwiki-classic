@@ -37,7 +37,6 @@ mode        = 'P'
 statusLock  = None
 statusInfo  = {}
 
-
 class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     """
@@ -322,13 +321,13 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         used    = None
         content = None
         bytes   = 0
+        cacheid = ''
 
         #  Check if caching might be possible. This is the case if
         #   * Caching has been enabled
         #   * The x-cache header is greater than zero
         #
         if not isSW and useCache and cache > 0 :
-
             #  "cbits" will be set to a 3-element list comprising the path (including
             #  query bits), the url-encoded content if any, and the cookie string, if any.
             #
@@ -393,7 +392,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    :
             cursor    = db.cursor()
             cursor.execute ('select id, page from httpcache where tag = %s and time_to_sec(timediff(now(), stamp)) < %s', [ ctag, cache ])
-            id, page  = cursor.fetchone()
+            cacheid, page  = cursor.fetchone()
             cursor    = db.cursor()
             cursor.execute ('update httpcache set stamp = now(), hits = hits + 1 where tag = %s', [ ctag ])
             used = 'CACHED'
@@ -443,6 +442,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                                 ''',
                                 [   ctag, self.path, page, 1, scraperID, runID    ]
                             )
+                        cacheid = c.lastrowid
             finally :
                 if soc is not None :
                     soc.close()
@@ -457,13 +457,17 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             else : bytes = len(page) - offset2 - 2
             if bytes < 0 :
                 bytes = len(page)
+            
+            failedmessage = ''
             m = re.match ('^HTTP/1\\..\\s+([0-9]+)\\s+(.*?)[\r\n]', page)
             if m :
-                if m.group(1) == '200' :
-                       self.notify (self.connection.getpeername()[0], runid = runID, url = self.path, content = '%d bytes from %s' % (bytes, self.path))
-                else : self.notify (self.connection.getpeername()[0], runid = runID, url = self.path, content = 'Failed: %s (%s)' % (self.path, m.group(2)))
+                if m.group(1) != '200' :
+                    failedmessage = 'Failed:' + m.group(1) + "  " + m.group(2)
             else :
-                self.notify (self.connection.getpeername()[0], runid = runID, url = self.path, content = 'Failed: %s' % (self.path))
+                failedmessage = 'Failed: (code missing)'
+            
+            self.notify (self.connection.getpeername()[0], runid = runID, url = self.path, failedmessage = failedmessage, bytes = bytes, cacheid = cacheid, cached = (used == 'CACHED'))
+            
             self.connection.sendall (page)
             self.connection.close()
 
