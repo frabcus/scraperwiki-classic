@@ -225,7 +225,7 @@ function setupCKANLink(){
             var id = window.location.pathname.split('/')[3];
             $.each(data.results, function(index,ckan){
                 if ($.inArray(id, ckan.url.split('/')) != -1){
-                    $('div.metadata dl').append('<dt>CKAN</dt><dd><a href="http://ckan.net/package/'+ckan.package_id+'">link</a><dd>');
+                    $('div.metadata dl').append('<dt>CKAN:</dt><dd><a href="http://ckan.net/package/'+ckan.package_id+'">link</a><dd>');
                 }
             });
         }
