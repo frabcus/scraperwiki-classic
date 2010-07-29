@@ -25,9 +25,15 @@
 	<body{% if grey_body %} class="bold_body"{% endif %}>
 	    <div class="banner">
 	        <ul class="user_menu">
+
                 {% if npeople %}
-                  <li><small>{{ npeople }} people at work</small></li>
+                  {% ifequal npeople 1 %}
+                    <li><small>{{ npeople }} person at work</small></li>
+                  {% else %}
+                    <li><small>{{ npeople }} people at work</small></li>
+                  {% endifequal %}
                 {% endif %}
+
 				{% if user.is_authenticated %}
 				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.get_profile.name}}</a></li>
 				  <li><a href="{% url my_scrapers %}">{{ user.scraper_set.owned_count }}

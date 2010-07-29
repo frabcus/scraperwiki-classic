@@ -98,3 +98,19 @@ class SWLogger :
 
             cursor = self.m_mysql.cursor ()
             cursor.execute ("delete from log where runid = %s", [ runid ])
+            
+            
+            
+# To whom it may concern, the table definition is: 
+"""CREATE TABLE `log` (
+  `id` int(11) NOT NULL auto_increment,
+  `stamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `scraperid` varchar(255) default NULL,
+  `runid` varchar(255) default NULL,
+  `pytime` varchar(31) default NULL,
+  `event` varchar(255) default NULL,
+  `arg1` text,
+  `arg2` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=16857 DEFAULT CHARSET=latin1"""
+
