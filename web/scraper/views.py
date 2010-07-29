@@ -532,8 +532,9 @@ def twisterstatus(request):
         return HttpResponse("needs value=")
     tstatus = json.loads(request.GET.get('value'))
     
-    twisterclientnumbers = set()
+    twisterclientnumbers = set()  # used to delete the ones that no longer exist
     
+    # we are making objects in django to represent the objects in twister for editor windows open
     for client in tstatus["clientlist"]:
         # fixed attributes of the object
         twisterclientnumber = client["clientnumber"]
@@ -550,7 +551,13 @@ def twisterstatus(request):
             userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
             userscraperediting.editingsince = datetime.datetime.now()
         else:
-            assert len(luserscraperediting) == 1
+            # this assertion is firing and sending us emails.  please investigate to find out how 
+            # extra copies of the UserScraperEditing objects are getting created?  
+            # This may be because there are two threads getting into this function simultaneously 
+            # from twister callbacks.  If this is verified as the case (and not some other avoidable bug), then it's 
+            # okay to delete the superfluous one, as long as this doesn't cause any problems (eg the other thread might be doing this at the same time)
+            assert len(luserscraperediting) == 1, [luserscraperediting]  
+            
             userscraperediting = luserscraperediting[0]
             assert userscraperediting.user == user, ("different", userscraperediting.user, user)
             assert userscraperediting.scraper == scraper, ("different", userscraperediting.scraper, scraper)
