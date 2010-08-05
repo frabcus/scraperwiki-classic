@@ -61,15 +61,15 @@ class MercurialInterface:
     
     # this function possibly in wrong place (which makes the imports awkward)
     def updatecommitalertsrev(self, rev):
-        from codewiki.models import Scraper, ScraperCommitEvent
+        from codewiki.models import Scraper, CodeCommitEvent
         from frontend.models import Alerts
         from django.contrib.auth.models import User
     
-        # discard all alerts and commit events for this revision (made complex due to the indirection through ScraperCommitEvent for a integer)
-        for scrapercommitevent in ScraperCommitEvent.objects.filter(revision=rev):
-            for alert in Alerts.objects.filter(event_object=scrapercommitevent):
+        # discard all alerts and commit events for this revision (made complex due to the indirection through CodeCommitEvent for a integer)
+        for codecommitevent in CodeCommitEvent.objects.filter(revision=rev):
+            for alert in Alerts.objects.filter(event_object=codecommitevent):
                 alert.delete()
-            scrapercommitevent.delete()
+            codecommitevent.delete()
         
         warnings = [ ]
         
@@ -96,25 +96,25 @@ class MercurialInterface:
                 continue
             scraper = scrapers[0]
     
-            # yes, the allocation of information (eg the date) between the Alert and the ScraperCommitEvent looks in fact arbitrary.  
-            scrapercommitevent = ScraperCommitEvent(revision=rev)
-            scrapercommitevent.save()
+            # yes, the allocation of information (eg the date) between the Alert and the CodeCommitEvent looks in fact arbitrary.  
+            codecommitevent = CodeCommitEvent(revision=rev)
+            codecommitevent.save()
             alert = Alerts(content_object=scraper, message_type='commit', message_value=commitentry["description"], 
-                           user=user, event_object=scrapercommitevent, datetime=commitentry["date"])
+                           user=user, event_object=codecommitevent, datetime=commitentry["date"])
             alert.save()
         return warnings
     
     
-    # delete and rebuild all the ScraperCommitEvents and related alerts 
+    # delete and rebuild all the CodeCommitEvents and related alerts 
     # to make migration easy (and question whether these objects really need to exist)
     def updateallcommitalerts(self):
-        from codewiki.models import Scraper, ScraperCommitEvent
+        from codewiki.models import Scraper, CodeCommitEvent
         from frontend.models import Alerts
         from django.contrib.auth.models import User
         
         # remove all alerts and commit events 
         Alerts.objects.filter(message_type='commit').delete()
-        ScraperCommitEvent.objects.all().delete()
+        CodeCommitEvent.objects.all().delete()
         
         for rev in self.repo:
             warnings = self.updatecommitalertsrev(rev)

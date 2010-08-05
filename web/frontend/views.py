@@ -35,8 +35,8 @@ def frontpage(request, public_profile_field=None):
     if user.is_authenticated():
         hide_logo = False
         grey_body = False    
-        my_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False).order_by('-created_at')
-        following_scrapers = user.scraper_set.filter(userscraperrole__role='follow', deleted=False).order_by('-created_at')
+        my_scrapers = user.scraper_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
+        following_scrapers = user.scraper_set.filter(usercoderole__role='follow', deleted=False).order_by('-created_at')
         following_users = user.to_user.following()
         following_users_count = len(following_users)
         # contribution_scrapers needs to be expanded to include scrapers you have edit rights on
@@ -81,12 +81,12 @@ def my_scrapers(request):
 	user = request.user
 
 	if user.is_authenticated():
-		owned_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False).order_by('-created_at')
+		owned_scrapers = user.scraper_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
 		owned_count = len(owned_scrapers) 
 		# needs to be expanded to include scrapers you have edit rights on.
-		contribution_scrapers = user.scraper_set.filter(userscraperrole__role='editor', deleted=False)
+		contribution_scrapers = user.scraper_set.filter(usercoderole__role='editor', deleted=False)
 		contribution_count = len(contribution_scrapers)
-		following_scrapers = user.scraper_set.filter(userscraperrole__role='follow', deleted=False)
+		following_scrapers = user.scraper_set.filter(usercoderole__role='follow', deleted=False)
 		following_count = len(following_scrapers)
 	else:
 		return HttpResponseRedirect(reverse('frontpage'))
@@ -97,7 +97,7 @@ def profile_detail(request, username):
     
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
-    owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True)
+    owned_scrapers = profiled_user.scraper_set.filter(usercoderole__role='owner', published=True)
     solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
 
     return profile_views.profile_detail(request, username=username, extra_context={ 'solicitations' : solicitations, 'owned_scrapers' : owned_scrapers, } )

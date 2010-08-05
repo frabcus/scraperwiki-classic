@@ -9,28 +9,8 @@ import types
 from tagging.utils import get_tag
 from tagging.models import Tag, TaggedItem
 
-def convert_dictlist_to_datalist(allitems, column_order=None, private_columns=None):
-    allkeys = set()
-    for item in allitems:
-        allkeys.update(item.keys())
 
-    if type(column_order) == types.ListType and allkeys.issuperset(column_order):
-        headings = column_order
-    else:
-        headings = sorted(list(allkeys))
-
-    if type(private_columns) == types.ListType and set(headings).issuperset(private_columns):
-        for column in private_columns:
-            headings.remove(column)
-
-    rows = [ ]
-    for item in allitems:
-        rows.append([ (key in item and unicode(item[key]) or "")  for key in headings ])
-    
-    return { 'headings' : headings, 'rows' : rows, }
-
-
-class ScraperManager(models.Manager):
+class CodeManager(models.Manager):
     """
         This manager is implemented to allow you to link back to the particular scrapers through
         names defining their relationship to the user.

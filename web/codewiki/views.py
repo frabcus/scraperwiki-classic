@@ -399,9 +399,9 @@ def scraper_list(request, page_number):
     form = SearchForm()
     
     # put number of people here so we can see it
-    #npeople = UserScraperEditing in models.UserScraperEditing.objects.all().count()
+    #npeople = UserCodeEditing in models.UserCodeEditing.objects.all().count()
     # there might be a slick way of counting this, but I don't know it.
-    npeople = len(set([userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.all() ]))
+    npeople = len(set([userscraperediting.user  for usercodeediting in models.UserCodeEditing.objects.all() ]))
     dictionary = { "scrapers": scrapers, "form": form, "featured_scrapers":featured_scrapers, "npeople": npeople }
     return render_to_response('scraper/list.html', dictionary, context_instance=RequestContext(request))
 
@@ -409,11 +409,11 @@ def scraper_list(request, page_number):
 def scraper_table(request):
     dictionary = { }
     dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
-    dictionary["loggedinusers"] = set([ userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.filter(user__isnull=False)])
-    dictionary["numloggedoutusers"] = len(models.UserScraperEditing.objects.filter(user__isnull=True))
-    dictionary["numdraftscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__isnull=True))
-    dictionary["numunpublishedscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__published=True))
-    dictionary["numpublishedscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__published=False))
+    dictionary["loggedinusers"] = set([ userscraperediting.user  for usercodeediting in models.UserCodeEditing.objects.filter(user__isnull=False)])
+    dictionary["numloggedoutusers"] = len(models.UserCodeEditing.objects.filter(user__isnull=True))
+    dictionary["numdraftscrapersediting"] = len(models.UserCodeEditing.objects.filter(scraper__isnull=True))
+    dictionary["numunpublishedscrapersediting"] = len(models.UserCodeEditing.objects.filter(scraper__published=True))
+    dictionary["numpublishedscrapersediting"] = len(models.UserCodeEditing.objects.filter(scraper__published=False))
     dictionary["numpublishedscraperstotal"] = len(dictionary["scrapers"])
     dictionary["numunpublishedscraperstotal"] = len(models.Scraper.objects.filter(published=False))
     return render_to_response('scraper/scraper_table.html', dictionary, context_instance=RequestContext(request))
@@ -546,19 +546,19 @@ def twisterstatus(request):
             continue
         
         # identify or create the editing object
-        luserscraperediting = models.UserScraperEditing.objects.filter(twisterclientnumber=twisterclientnumber)
+        lusercodeediting= models.UserCodeEditing.objects.filter(twisterclientnumber=twisterclientnumber)
         if not luserscraperediting:
-            userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
+            usercodeediting= models.UserCodeEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
             userscraperediting.editingsince = datetime.datetime.now()
         else:
             # this assertion is firing and sending us emails.  please investigate to find out how 
-            # extra copies of the UserScraperEditing objects are getting created?  
+            # extra copies of the UserCodeEditing objects are getting created?  
             # This may be because there are two threads getting into this function simultaneously 
             # from twister callbacks.  If this is verified as the case (and not some other avoidable bug), then it's 
             # okay to delete the superfluous one, as long as this doesn't cause any problems (eg the other thread might be doing this at the same time)
             assert len(luserscraperediting) == 1, [luserscraperediting]  
             
-            userscraperediting = luserscraperediting[0]
+            usercodeediting= luserscraperediting[0]
             assert userscraperediting.user == user, ("different", userscraperediting.user, user)
             assert userscraperediting.scraper == scraper, ("different", userscraperediting.scraper, scraper)
         
@@ -574,7 +574,7 @@ def twisterstatus(request):
         userscraperediting.save()
 
     # discard now closed values of the object
-    for userscraperediting in models.UserScraperEditing.objects.all():
+    for usercodeediting in models.UserCodeEditing.objects.all():
         if userscraperediting.twisterclientnumber not in twisterclientnumbers:
             userscraperediting.delete()
             # or could use the field: closedsince  = models.DateTimeField(blank=True, null=True)
@@ -647,7 +647,7 @@ def run_event(request, event_id):
     return render_to_response('scraper/run_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def commit_event(request, event_id):
-    event = get_object_or_404(models.ScraperCommitEvent, id=event_id)
+    event = get_object_or_404(models.CodeCommitEvent, id=event_id)
     return render_to_response('scraper/commit_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def running_scrapers(request):

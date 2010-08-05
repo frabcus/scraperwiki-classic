@@ -56,7 +56,7 @@ class Scraper(models.Model):
     disabled          = models.BooleanField()
     deleted           = models.BooleanField()
     status            = models.CharField(max_length=10, blank=True)
-    users             = models.ManyToManyField(User, through='UserScraperRole')
+    users             = models.ManyToManyField(User, through='UserCodeRole')
     guid              = models.CharField(max_length=1000)
     published         = models.BooleanField(default=False)
     first_published_at   = models.DateTimeField(null=True, blank=True)
@@ -92,19 +92,19 @@ class Scraper(models.Model):
 
     def owner(self):
         if self.pk:
-            owner = self.users.filter(userscraperrole__role='owner')
+            owner = self.users.filter(usercoderole__role='owner')
             if len(owner) >= 1:
                 return owner[0]
         return None
 
     def contributors(self):
         if self.pk:
-            contributors = self.users.filter(userscraperrole__role='editor')
+            contributors = self.users.filter(usercoderole__role='editor')
         return contributors
     
     def followers(self):
         if self.pk:
-            followers = self.users.filter(userscraperrole__role='follow')
+            followers = self.users.filter(usercoderole__role='follow')
         return followers
 
     def add_user_role(self, user, role='owner'):
@@ -129,7 +129,7 @@ class Scraper(models.Model):
               """ % (role, ", ".join(valid_roles)))
   
         #check if role exists before adding 
-        u, created = UserScraperRole.objects.get_or_create(user=user, 
+        u, created = UserCodeRole.objects.get_or_create(user=user, 
                                                            scraper=self, 
                                                            role=role)
 
@@ -138,13 +138,13 @@ class Scraper(models.Model):
         Deliberately not making this generic, as you can't stop being an owner
         or editor
         """
-        UserScraperRole.objects.filter(scraper=self, 
+        UserCodeRole.objects.filter(scraper=self, 
                                        user=user, 
                                        role='follow').delete()
         return True
 
     def followers(self):
-        return self.users.filter(userscraperrole__role='follow')
+        return self.users.filter(usercoderole__role='follow')
 
     def is_published(self):
         return self.status == 'Published'
@@ -208,7 +208,7 @@ except tagging.AlreadyRegistered:
     pass
     
     
-class UserScraperRole(models.Model):
+class UserCodeRole(models.Model):
     """
     This embodies the roles associated between particular users and scrapers.
     This should be used to store all user/scraper relationships, ownership,
@@ -222,7 +222,7 @@ class UserScraperRole(models.Model):
         return "Scraper_id: %s -> User: %s (%s)" % \
                                         (self.scraper, self.user, self.role)
 
-class UserScraperEditing(models.Model):
+class UserCodeEditing(models.Model):
     """
     Updated by Twisted to state which scrapers are being editing at this moment
     """
@@ -275,7 +275,7 @@ class ScraperRunEvent(models.Model):
     def get_absolute_url(self):
         return ('run_event', [self.id])
 
-class ScraperCommitEvent(models.Model):
+class CodeCommitEvent(models.Model):
     revision = models.IntegerField()
 
     def __unicode__(self):

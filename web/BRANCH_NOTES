@@ -1,0 +1,18 @@
+
+1) The 'scraper' application has been renamed 'codewiki'
+
+Manually rename the tables 'scraper_' to 'codewiki_' I think this is all of them:
+
+ALTER TABLE `scraper_scraper` RENAME TO `codewiki_scraper`;
+ALTER TABLE `scraper_codecommitevent` RENAME TO `codewiki_codecommitevent`;
+ALTER TABLE `scraper_scraperrunevent` RENAME TO `codewiki_scraperrunevent`;
+ALTER TABLE `scraper_userscraperediting` RENAME TO `codewiki_userscraperediting`;
+ALTER TABLE `scraper_usercoderole` RENAME TO `codewiki_usercoderole`;
+
+--------------------------------------------------------------------------------------
+
+2) The models file in the codewiki application (previously named 'scraper') have been split out into individual files
+
+No action required
+
+--------------------------------------------------------------------------------------

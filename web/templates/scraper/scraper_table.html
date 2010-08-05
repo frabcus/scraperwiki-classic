@@ -44,7 +44,7 @@
     <a href='{% url scraper_code scraper.short_name %}'>{{ scraper.title }}</a>
   </td>
   <td>
-    {% for userscraperediting in scraper.userscraperediting_set.all %} 
+    {% for usercodeediting in scraper.userscraperediting_set.all %} 
         {% if userscraperediting.user %}
             {{userscraperediting.user.get_profile.name}}
         {% else %}

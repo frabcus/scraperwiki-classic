@@ -54,7 +54,7 @@ def explore_scraper_getkeys_1_0(request):
     user = request.user
     if user.is_authenticated():
         users_keys = api_key.objects.filter(user=user)
-        scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True)[:5]
+        scrapers = user.scraper_set.filter(usercoderole__role='owner', deleted=False, published=True)[:5]
     else: 
         users_keys = None
         scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('first_published_at')[:5]
@@ -66,7 +66,7 @@ def explore_datastore_search_1_0(request):
     user = request.user
     if user.is_authenticated():
         users_keys = api_key.objects.filter(user=user)
-        scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True)[:5]
+        scrapers = user.scraper_set.filter(usercoderole__role='owner', deleted=False, published=True)[:5]
     else: 
         users_keys = None
         scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('first_published_at')[:5]
@@ -79,7 +79,7 @@ def explore_scraper_getdata_1_0(request):
     user = request.user
     if user.is_authenticated():
         users_keys = api_key.objects.filter(user=user)
-        scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True)[:5]
+        scrapers = user.scraper_set.filter(usercoderole__role='owner', deleted=False, published=True)[:5]
     else: 
         users_keys = None
         scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('first_published_at')[:5]
@@ -92,7 +92,7 @@ def explore_scraper_getdatabydate_1_0(request):
     user = request.user
     if user.is_authenticated():
         users_keys = api_key.objects.filter(user=user)
-        scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True)[:5]
+        scrapers = user.scraper_set.filter(usercoderole__role='owner', deleted=False, published=True)[:5]
     else:
         users_keys = None
         scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('first_published_at')[:5]
@@ -105,7 +105,7 @@ def explore_scraper_getdatabylocation_1_0(request):
     user = request.user
     if user.is_authenticated():
         users_keys = api_key.objects.filter(user=user)
-        scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False, published=True, has_geo=True)[:5]                    
+        scrapers = user.scraper_set.filter(usercoderole__role='owner', deleted=False, published=True, has_geo=True)[:5]                    
     else:    
         users_keys = None
 

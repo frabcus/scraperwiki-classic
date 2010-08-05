@@ -98,7 +98,7 @@ class Command(BaseCommand):
         alert_objects = {
             'models':
                 self.user.user.scraper_set.filter(
-                    userscraperrole__role__in=roles, deleted=False),
+                    usercoderole__role__in=roles, deleted=False),
             'alert_type': alert_wanted.name}
         
         if alert_wanted.name == "scraper_comment":

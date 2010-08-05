@@ -1,9 +1,9 @@
-from codewiki.models import Scraper, ScraperMetadata, UserScraperRole, UserScraperEditing
+from codewiki.models import Scraper, ScraperMetadata, UserCodeRole, UserCodeEditing
 from django.contrib import admin
 from django.db import models
 
-class UserScraperRoleInlines(admin.TabularInline):
-    model = UserScraperRole
+class UserCodeRoleInlines(admin.TabularInline):
+    model = UserCodeRole
     extra = 1
 
 class ScraperMetadataInlines(admin.TabularInline):
@@ -12,7 +12,7 @@ class ScraperMetadataInlines(admin.TabularInline):
     extra = 1
 
 class ScraperAdmin(admin.ModelAdmin):
-    inlines = (UserScraperRoleInlines, ScraperMetadataInlines)
+    inlines = (UserCodeRoleInlines, ScraperMetadataInlines)
     list_display = ('title', 'short_name', 'last_run', 'status', 'published', 'deleted')
     list_filter = ('status', 'last_run', 'published',)
 
@@ -28,7 +28,7 @@ class ScraperMetadataAdmin(admin.ModelAdmin):
 admin.site.register(ScraperMetadata, ScraperMetadataAdmin)
 
 
-class UserScraperEditingAdmin(admin.ModelAdmin):
+class UserCodeEditingAdmin(admin.ModelAdmin):
     pass
 
-admin.site.register(UserScraperEditing, UserScraperEditingAdmin)
+admin.site.register(UserCodeEditing, UserCodeEditingAdmin)
