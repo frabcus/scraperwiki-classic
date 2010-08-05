@@ -35,6 +35,8 @@ try:
 except:
   import simplejson as json
 
+from zope.interface import implements
+
 from twisted.internet import protocol, utils, reactor, task
 from twisted.protocols.basic import LineOnlyReceiver
 
