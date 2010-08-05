@@ -539,27 +539,17 @@ def twisterstatus(request):
         twisterclientnumber = client["clientnumber"]
         twisterclientnumbers.add(twisterclientnumber)
         try:
-            user = client['username'] and models.User.objects.get(username=client['username']) or None
+            user = client['username'] and User.objects.get(username=client['username']) or None
             scraper = client['guid'] and models.Scraper.objects.get(guid=client['guid']) or None
         except:
             continue
         
         # identify or create the editing object
-        luserscraperediting = models.UserScraperEditing.objects.filter(twisterclientnumber=twisterclientnumber)
-        if not luserscraperediting:
-            userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
+        userscraperediting, created = models.UserScraperEditing.objects.get_or_create(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
+        if created:
             userscraperediting.editingsince = datetime.datetime.now()
-        else:
-            # this assertion is firing and sending us emails.  please investigate to find out how 
-            # extra copies of the UserScraperEditing objects are getting created?  
-            # This may be because there are two threads getting into this function simultaneously 
-            # from twister callbacks.  If this is verified as the case (and not some other avoidable bug), then it's 
-            # okay to delete the superfluous one, as long as this doesn't cause any problems (eg the other thread might be doing this at the same time)
-            assert len(luserscraperediting) == 1, [luserscraperediting]  
-            
-            userscraperediting = luserscraperediting[0]
-            assert userscraperediting.user == user, ("different", userscraperediting.user, user)
-            assert userscraperediting.scraper == scraper, ("different", userscraperediting.scraper, scraper)
+
+        assert models.UserScraperEditing.objects.filter(twisterclientnumber=twisterclientnumber).count() == 1, client
         
         # updateable values of the object
         userscraperediting.twisterscraperpriority = client['scrapereditornumber']

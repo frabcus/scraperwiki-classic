@@ -393,12 +393,6 @@ class RunnerFactory(protocol.ServerFactory):
             
         data = { "value": json.dumps({'message_type' : "currentstatus", 'clientlist':clientlist}) }
         
-        # achieves the same as below, but causing the system to wait for response
-        #d = urllib2.urlopen(self.twisterstatusurl, urllib.urlencode(data)).read()
-        
-        # uses a GET due to not knowing how to use POST and send stuff
-        #  http://twistedmatrix.com/documents/current/web/howto/client.html
-        #print "Notifying status", data
         d = agent.request('POST', self.twisterstatusurl, Headers({'User-Agent': ['Scraperwiki Twisted']}), StringProducer(urllib.urlencode(data)))
 
         
