@@ -43,6 +43,8 @@ from twisted.protocols.basic import LineOnlyReceiver
 # for calling back to the scrapers/twister/status
 from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
+from twisted.web.iweb import IBodyProducer
+from twisted.internet.defer import succeed
 agent = Agent(reactor)
 
 # the comma is added into format_message and LineOnlyReceiver because lines may be batched and 
