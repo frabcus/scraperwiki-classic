@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import widgets
-import scraper
+import codewiki
 
 LICENSE_CHOICES = ( 
     ('Public domain', 'Public domain'),
@@ -13,7 +13,7 @@ LICENSE_CHOICES = (
 class editorForm(forms.ModelForm):
     
     class Meta:
-        model = scraper.models.Scraper
+        model = codewiki.models.Scraper
         fields = ('title', 'code', 'description', 'license', 'commaseparatedtags', 'published')
 
     title = forms.CharField(

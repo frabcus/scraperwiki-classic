@@ -1,6 +1,6 @@
 import unittest
 import datetime
-from scraper.models import Scraper
+from codewiki.models import Scraper
 from scraper.management.commands.run_scrapers import Command
 
 class TestRunScrapers(unittest.TestCase):

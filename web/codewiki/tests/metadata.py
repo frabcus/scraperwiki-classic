@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
-from scraper.models import Scraper, ScraperMetadata
+from codewiki.models import Scraper, ScraperMetadata
 
 try:
     import json

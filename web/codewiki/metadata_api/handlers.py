@@ -2,7 +2,7 @@
 
 from piston.handler import BaseHandler
 from piston.utils import rc
-from scraper.models import Scraper, ScraperMetadata
+from codewiki.models import Scraper, ScraperMetadata
 from django.conf import settings
 
 def check_scraperid_header(fn):

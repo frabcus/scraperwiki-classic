@@ -12,7 +12,7 @@ import settings
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.comments.models import Comment
-# from scraper.models import Scraper
+# from codewiki.models import Scraper
 from frontend.models import UserProfile, Alerts
 from market.models import Solicitation
 import datetime

@@ -61,7 +61,7 @@ class MercurialInterface:
     
     # this function possibly in wrong place (which makes the imports awkward)
     def updatecommitalertsrev(self, rev):
-        from scraper.models import Scraper, ScraperCommitEvent
+        from codewiki.models import Scraper, ScraperCommitEvent
         from frontend.models import Alerts
         from django.contrib.auth.models import User
     
@@ -108,7 +108,7 @@ class MercurialInterface:
     # delete and rebuild all the ScraperCommitEvents and related alerts 
     # to make migration easy (and question whether these objects really need to exist)
     def updateallcommitalerts(self):
-        from scraper.models import Scraper, ScraperCommitEvent
+        from codewiki.models import Scraper, ScraperCommitEvent
         from frontend.models import Alerts
         from django.contrib.auth.models import User
         

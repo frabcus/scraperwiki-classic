@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
 
 from market.models import Solicitation
-from scraper.models import Scraper
+from codewiki.models import Scraper
 
 class SolicitationForm (ModelForm):
 

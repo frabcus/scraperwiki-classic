@@ -9,7 +9,7 @@ except:
 
 import subprocess
 
-from scraper.models import Scraper, ScraperRunEvent
+from codewiki.models import Scraper, ScraperRunEvent
 from frontend.models import Alerts
 import frontend
 import settings

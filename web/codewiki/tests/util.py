@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from scraper.util import SlugifyUniquely
-from scraper.models import Scraper
+from codewiki.models import Scraper
 
 class ScraperUtilTests(TestCase):
     def test_scraper_list(self):

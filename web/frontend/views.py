@@ -11,7 +11,7 @@ from django.contrib.auth import logout
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
-from scraper.models import Scraper
+from codewiki.models import Scraper
 from market.models import Solicitation
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
@@ -26,7 +26,7 @@ import datetime
 from utilities import location
 location.is_gb_postcode('sw98JX')
 
-from scraper.models import Scraper as ScraperModel  # is this renaming necessary?
+from codewiki.models import Scraper as ScraperModel  # is this renaming necessary?
 
 def frontpage(request, public_profile_field=None):
     user = request.user

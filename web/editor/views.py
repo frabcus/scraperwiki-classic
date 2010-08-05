@@ -14,10 +14,10 @@ from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, get_object_or_404
 from django.core.urlresolvers import reverse
 
-from scraper.models import Scraper as ScraperModel  # is this renaming necessary?
-from scraper.models import UserScraperRole
+from codewiki.models import Scraper as ScraperModel  # is this renaming necessary?
+from codewiki.models import UserScraperRole
 
-from scraper import vc
+from codewiki import vc
 import forms
 import settings
 

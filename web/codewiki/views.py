@@ -12,9 +12,9 @@ from django.contrib.auth.models import User
 
 from django.conf import settings
 
-from scraper import models
-from scraper import forms
-from scraper.forms import SearchForm
+from codewiki import models
+from codewiki import forms
+from codewiki.forms import SearchForm
 import vc
 
 import frontend

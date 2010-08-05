@@ -33,7 +33,7 @@ urlpatterns = patterns('',
     url(r'^editor/', include('editor.urls')),
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name="logout"), 
     url(r'^accounts/', include('registration.urls')),
-    url(r'^scrapers/', include('scraper.urls')),
+    url(r'^scrapers/', include('codewiki.urls')),
     url(r'^comments/', include('django.contrib.comments.urls')),
     
     # allows direct viewing of the django tables

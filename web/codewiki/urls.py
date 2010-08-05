@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-from scraper import views
+from codewiki import views
 
 urlpatterns = patterns('',
     url(r'^list/(?P<page_number>\d+)?$', views.scraper_list, name='scraper_list'),
@@ -31,7 +31,7 @@ urlpatterns = patterns('',
     url(r'^rpcexecute/(?P<scraper_short_name>[\w_\-]+)$', views.rpcexecute, name='rpcexecute'),
     url(r'^html/(?P<scraper_short_name>[\w_\-]+)$',       views.htmlview,   name='htmlview'),
     
-    url(r'^metadata_api/', include('scraper.metadata_api.urls')),
+    url(r'^metadata_api/', include('codewiki.metadata_api.urls')),
     
     url(r'^run/(?P<event_id>[\w_\-]+)/$', views.run_event, name='run_event'),
     url(r'^commit/(?P<event_id>\d+)/$', views.commit_event, name='commit_event'),

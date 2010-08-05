@@ -1,6 +1,6 @@
 from django.contrib.syndication.feeds import Feed, FeedDoesNotExist
 from django.core.exceptions import ObjectDoesNotExist
-from scraper.models import Scraper
+from codewiki.models import Scraper
 from tagging.utils import get_tag
 from tagging.models import Tag, TaggedItem
 from django.contrib.comments.models import Comment

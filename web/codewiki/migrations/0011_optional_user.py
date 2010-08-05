@@ -2,7 +2,7 @@
 
 from south.db import db
 from django.db import models
-from scraper.models import *
+from codewiki.models import *
 
 class Migration:
     

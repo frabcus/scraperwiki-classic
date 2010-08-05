@@ -1,7 +1,7 @@
 from django.test import TestCase
 from datetime import datetime
 
-from scraper.models import Scraper, ScraperRunEvent
+from codewiki.models import Scraper, ScraperRunEvent
 
 class TestRunEvents(TestCase):
     def setUp(self):

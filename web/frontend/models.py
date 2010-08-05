@@ -10,7 +10,7 @@ class AlertTypes(models.Model):
     Model defining what type of alerts a user will get.
     
     `name`
-        should match the 'message_type' in scraper.models.ScraperHistory
+        should match the 'message_type' in codewiki.models.ScraperHistory
     `label`
         is the default text to be displaied on the user profile form. This may
         not be the best way of doing it, but it does make sure the form

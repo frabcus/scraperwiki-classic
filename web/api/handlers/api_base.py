@@ -1,5 +1,5 @@
 from django.core.cache import cache
-from web.scraper.models import Scraper
+from web.codewiki.models import Scraper
 from piston.handler import BaseHandler
 from piston.utils import rc
 from piston.emitters import Emitter

@@ -1,5 +1,5 @@
 from api.handlers.api_base import APIBase
-from web.scraper.models import Scraper
+from web.codewiki.models import Scraper
 import datetime
 from piston.utils import rc
 

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 
-from scraper.models import Scraper
+from codewiki.models import Scraper
 from payment.models import Invoice
 from payment.models import payment_done
 
