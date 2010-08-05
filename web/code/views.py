@@ -374,13 +374,21 @@ def export_csv(request, scraper_short_name):
 
 
 def scraper_list(request, page_number):
-    all_scrapers = models.Scraper.objects.filter(published=True).exclude(language='HTML').order_by('-featured', '-created_at')
+    all_scrapers = models.Scraper.objects.filter(published=True).exclude(language='HTML').order_by('-created_at')
 
     # Number of results to show from settings
     paginator = Paginator(all_scrapers, settings.SCRAPERS_PER_PAGE)
 
-    # Make sure page request is an int. If not, deliver first page.
-    page = page_number and int(page_number) or 1
+    try:  
+        page = int(page_number)
+    except (ValueError, TypeError):
+        page = 1
+    
+    if page == 1:
+        featured_scrapers = models.Scraper.objects.filter(published=True, featured=True).exclude(language='HTML').order_by('-created_at')
+    else:
+        featured_scrapers = None
+        
 
     # If page request (9999) is out of range, deliver last page of results.
     try:
@@ -394,11 +402,7 @@ def scraper_list(request, page_number):
     #npeople = UserScraperEditing in models.UserScraperEditing.objects.all().count()
     # there might be a slick way of counting this, but I don't know it.
     npeople = len(set([userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.all() ]))
-    if npeople < 2:
-        npeople = 0
-        
-    
-    dictionary = { "scrapers": scrapers, "form": form, "npeople": npeople }
+    dictionary = { "scrapers": scrapers, "form": form, "featured_scrapers":featured_scrapers, "npeople": npeople }
     return render_to_response('scraper/list.html', dictionary, context_instance=RequestContext(request))
 
 
@@ -528,8 +532,9 @@ def twisterstatus(request):
         return HttpResponse("needs value=")
     tstatus = json.loads(request.GET.get('value'))
     
-    twisterclientnumbers = set()
+    twisterclientnumbers = set()  # used to delete the ones that no longer exist
     
+    # we are making objects in django to represent the objects in twister for editor windows open
     for client in tstatus["clientlist"]:
         # fixed attributes of the object
         twisterclientnumber = client["clientnumber"]
@@ -546,7 +551,13 @@ def twisterstatus(request):
             userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
             userscraperediting.editingsince = datetime.datetime.now()
         else:
-            assert len(luserscraperediting) == 1
+            # this assertion is firing and sending us emails.  please investigate to find out how 
+            # extra copies of the UserScraperEditing objects are getting created?  
+            # This may be because there are two threads getting into this function simultaneously 
+            # from twister callbacks.  If this is verified as the case (and not some other avoidable bug), then it's 
+            # okay to delete the superfluous one, as long as this doesn't cause any problems (eg the other thread might be doing this at the same time)
+            assert len(luserscraperediting) == 1, [luserscraperediting]  
+            
             userscraperediting = luserscraperediting[0]
             assert userscraperediting.user == user, ("different", userscraperediting.user, user)
             assert userscraperediting.scraper == scraper, ("different", userscraperediting.scraper, scraper)

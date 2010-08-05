@@ -50,7 +50,8 @@
         {% else %}
             Anonymous
         {% endif %}
-        ({{userscraperediting.twisterclientnumber}}) 
+        (editing for {{userscraperediting.editingsince|timesince}})
+        <sup>[{{userscraperediting.twisterclientnumber}}]</sup>
     {% endfor %}
   </td> 
 

@@ -801,7 +801,7 @@ $(document).ready(function() {
     }
 
     function cgiescape(text) {
-        return text.replace('&', '&amp;').replace(/</g, '&lt;'); 
+        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;'); 
     }
 
     //Show random text popup
@@ -966,7 +966,7 @@ $(document).ready(function() {
             malink = 'class="cached" href="/cachedscrape/' + cacheid + '"'; 
         else
             malink = 'href="' + sUrl + '"'; 
-        alink = '<a ' + malink + ' target="_new">' + sUrl.substring(0, 100) + '</a>'; 
+        alink = '<a ' + malink + ' target="_new">' + sUrl.substring(0, 100) + '</a> '; 
         if ((failedmessage != undefined) && (failedmessage != ''))
             smessage = failedmessage + alink; 
         else
