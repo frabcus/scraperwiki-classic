@@ -300,6 +300,27 @@ class RunnerProtocol(protocol.Protocol):
             self.kill_run(reason='connectionLost')
 
 
+class StringProducer(object):
+    """
+    http://twistedmatrix.com/documents/10.1.0/web/howto/client.html
+    """
+    implements(IBodyProducer)
+
+    def __init__(self, body):
+        self.body = body
+        self.length = len(body)
+
+    def startProducing(self, consumer):
+        consumer.write(self.body)
+        return succeed(None)
+
+    def pauseProducing(self):
+        pass
+
+    def stopProducing(self):
+        pass
+
+
 class RunnerFactory(protocol.ServerFactory):
     protocol = RunnerProtocol
     
@@ -374,7 +395,7 @@ class RunnerFactory(protocol.ServerFactory):
         # uses a GET due to not knowing how to use POST and send stuff
         #  http://twistedmatrix.com/documents/current/web/howto/client.html
         #print "Notifying status", data
-        d = agent.request('GET', "%s?%s" % (self.twisterstatusurl, urllib.urlencode(data)), Headers({'User-Agent': ['Scraperwiki Twisted']}), None)
+        d = agent.request('POST', self.twisterstatusurl, Headers({'User-Agent': ['Scraperwiki Twisted']}), StringProducer(urllib.urlencode(data)))
 
         
         
