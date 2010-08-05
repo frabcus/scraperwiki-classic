@@ -527,10 +527,9 @@ def unfollow(request, scraper_short_name):
 
 
 def twisterstatus(request):
-    # uses a GET due to agent.request in twister not knowing how to use POST and send stuff
-    if 'value' not in request.GET:
+    if 'value' not in request.POST:
         return HttpResponse("needs value=")
-    tstatus = json.loads(request.GET.get('value'))
+    tstatus = json.loads(request.POST.get('value'))
     
     twisterclientnumbers = set()  # used to delete the ones that no longer exist
     
