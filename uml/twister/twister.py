@@ -35,12 +35,16 @@ try:
 except:
   import simplejson as json
 
+from zope.interface import implements
+
 from twisted.internet import protocol, utils, reactor, task
 from twisted.protocols.basic import LineOnlyReceiver
 
 # for calling back to the scrapers/twister/status
 from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
+from twisted.web.iweb import IBodyProducer
+from twisted.internet.defer import succeed
 agent = Agent(reactor)
 
 # the comma is added into format_message and LineOnlyReceiver because lines may be batched and 
@@ -300,6 +304,27 @@ class RunnerProtocol(protocol.Protocol):
             self.kill_run(reason='connectionLost')
 
 
+class StringProducer(object):
+    """
+    http://twistedmatrix.com/documents/10.1.0/web/howto/client.html
+    """
+    implements(IBodyProducer)
+
+    def __init__(self, body):
+        self.body = body
+        self.length = len(body)
+
+    def startProducing(self, consumer):
+        consumer.write(self.body)
+        return succeed(None)
+
+    def pauseProducing(self):
+        pass
+
+    def stopProducing(self):
+        pass
+
+
 class RunnerFactory(protocol.ServerFactory):
     protocol = RunnerProtocol
     
@@ -368,13 +393,7 @@ class RunnerFactory(protocol.ServerFactory):
             
         data = { "value": json.dumps({'message_type' : "currentstatus", 'clientlist':clientlist}) }
         
-        # achieves the same as below, but causing the system to wait for response
-        #d = urllib2.urlopen(self.twisterstatusurl, urllib.urlencode(data)).read()
-        
-        # uses a GET due to not knowing how to use POST and send stuff
-        #  http://twistedmatrix.com/documents/current/web/howto/client.html
-        #print "Notifying status", data
-        d = agent.request('GET', "%s?%s" % (self.twisterstatusurl, urllib.urlencode(data)), Headers({'User-Agent': ['Scraperwiki Twisted']}), None)
+        d = agent.request('POST', self.twisterstatusurl, Headers({'User-Agent': ['Scraperwiki Twisted']}), StringProducer(urllib.urlencode(data)))
 
         
         
