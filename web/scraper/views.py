@@ -410,12 +410,13 @@ def scraper_table(request):
     dictionary = { }
     dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
     dictionary["loggedinusers"] = set([ userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.filter(user__isnull=False)])
-    dictionary["numloggedoutusers"] = len(models.UserScraperEditing.objects.filter(user__isnull=True))
-    dictionary["numdraftscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__isnull=True))
-    dictionary["numunpublishedscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__published=True))
-    dictionary["numpublishedscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__published=False))
-    dictionary["numpublishedscraperstotal"] = len(dictionary["scrapers"])
-    dictionary["numunpublishedscraperstotal"] = len(models.Scraper.objects.filter(published=False))
+    dictionary["numloggedoutusers"] = models.UserScraperEditing.objects.filter(user__isnull=True).count()
+    dictionary["numdraftscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__isnull=True).count()
+    dictionary["numpublishedscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__published=True).count()
+    dictionary["numunpublishedscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__published=False).count()
+    dictionary["numpublishedscraperstotal"] = dictionary["scrapers"].count()
+    dictionary["numunpublishedscraperstotal"] = models.Scraper.objects.filter(published=False).count()
+    dictionary["numdeletedscrapers"] = models.Scraper.unfiltered.filter(deleted=True).count()
     return render_to_response('scraper/scraper_table.html', dictionary, context_instance=RequestContext(request))
     
 
