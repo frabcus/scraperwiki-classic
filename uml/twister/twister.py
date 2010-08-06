@@ -35,12 +35,16 @@ try:
 except:
   import simplejson as json
 
+from zope.interface import implements
+
 from twisted.internet import protocol, utils, reactor, task
 from twisted.protocols.basic import LineOnlyReceiver
 
 # for calling back to the scrapers/twister/status
 from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
+from twisted.web.iweb import IBodyProducer
+from twisted.internet.defer import succeed
 agent = Agent(reactor)
 
 # the comma is added into format_message and LineOnlyReceiver because lines may be batched and 
@@ -389,12 +393,6 @@ class RunnerFactory(protocol.ServerFactory):
             
         data = { "value": json.dumps({'message_type' : "currentstatus", 'clientlist':clientlist}) }
         
-        # achieves the same as below, but causing the system to wait for response
-        #d = urllib2.urlopen(self.twisterstatusurl, urllib.urlencode(data)).read()
-        
-        # uses a GET due to not knowing how to use POST and send stuff
-        #  http://twistedmatrix.com/documents/current/web/howto/client.html
-        #print "Notifying status", data
         d = agent.request('POST', self.twisterstatusurl, Headers({'User-Agent': ['Scraperwiki Twisted']}), StringProducer(urllib.urlencode(data)))
 
         

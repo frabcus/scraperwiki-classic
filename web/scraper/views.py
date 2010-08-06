@@ -410,12 +410,13 @@ def scraper_table(request):
     dictionary = { }
     dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
     dictionary["loggedinusers"] = set([ userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.filter(user__isnull=False)])
-    dictionary["numloggedoutusers"] = len(models.UserScraperEditing.objects.filter(user__isnull=True))
-    dictionary["numdraftscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__isnull=True))
-    dictionary["numunpublishedscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__published=True))
-    dictionary["numpublishedscrapersediting"] = len(models.UserScraperEditing.objects.filter(scraper__published=False))
-    dictionary["numpublishedscraperstotal"] = len(dictionary["scrapers"])
-    dictionary["numunpublishedscraperstotal"] = len(models.Scraper.objects.filter(published=False))
+    dictionary["numloggedoutusers"] = models.UserScraperEditing.objects.filter(user__isnull=True).count()
+    dictionary["numdraftscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__isnull=True).count()
+    dictionary["numpublishedscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__published=True).count()
+    dictionary["numunpublishedscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__published=False).count()
+    dictionary["numpublishedscraperstotal"] = dictionary["scrapers"].count()
+    dictionary["numunpublishedscraperstotal"] = models.Scraper.objects.filter(published=False).count()
+    dictionary["numdeletedscrapers"] = models.Scraper.unfiltered.filter(deleted=True).count()
     return render_to_response('scraper/scraper_table.html', dictionary, context_instance=RequestContext(request))
     
 
@@ -527,10 +528,9 @@ def unfollow(request, scraper_short_name):
 
 
 def twisterstatus(request):
-    # uses a GET due to agent.request in twister not knowing how to use POST and send stuff
-    if 'value' not in request.GET:
+    if 'value' not in request.POST:
         return HttpResponse("needs value=")
-    tstatus = json.loads(request.GET.get('value'))
+    tstatus = json.loads(request.POST.get('value'))
     
     twisterclientnumbers = set()  # used to delete the ones that no longer exist
     
@@ -540,27 +540,17 @@ def twisterstatus(request):
         twisterclientnumber = client["clientnumber"]
         twisterclientnumbers.add(twisterclientnumber)
         try:
-            user = client['username'] and models.User.objects.get(username=client['username']) or None
+            user = client['username'] and User.objects.get(username=client['username']) or None
             scraper = client['guid'] and models.Scraper.objects.get(guid=client['guid']) or None
         except:
             continue
         
         # identify or create the editing object
-        luserscraperediting = models.UserScraperEditing.objects.filter(twisterclientnumber=twisterclientnumber)
-        if not luserscraperediting:
-            userscraperediting = models.UserScraperEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
+        userscraperediting, created = models.UserScraperEditing.objects.get_or_create(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
+        if created:
             userscraperediting.editingsince = datetime.datetime.now()
-        else:
-            # this assertion is firing and sending us emails.  please investigate to find out how 
-            # extra copies of the UserScraperEditing objects are getting created?  
-            # This may be because there are two threads getting into this function simultaneously 
-            # from twister callbacks.  If this is verified as the case (and not some other avoidable bug), then it's 
-            # okay to delete the superfluous one, as long as this doesn't cause any problems (eg the other thread might be doing this at the same time)
-            assert len(luserscraperediting) == 1, [luserscraperediting]  
-            
-            userscraperediting = luserscraperediting[0]
-            assert userscraperediting.user == user, ("different", userscraperediting.user, user)
-            assert userscraperediting.scraper == scraper, ("different", userscraperediting.scraper, scraper)
+
+        assert models.UserScraperEditing.objects.filter(twisterclientnumber=twisterclientnumber).count() == 1, client
         
         # updateable values of the object
         userscraperediting.twisterscraperpriority = client['scrapereditornumber']
