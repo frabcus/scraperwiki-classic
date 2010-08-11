@@ -52,19 +52,18 @@ def raw(request, short_name=None):
         result = newcode
     return HttpResponse(result, mimetype="text/plain")
 
-
-
-def savecodeofscraper(scraper, user, code, commaseparatedtags, commitmessage, bnew):
+#save a scraper/view
+def save_code(scraper, user, code, commaseparatedtags, commitmessage, bnew):
     scraper.update_meta()
     scraper.line_count = int(code.count("\n"))
     scraper.save()   # save the actual object
-    
+
     mercurialinterface = vc.MercurialInterface()
     mercurialinterface.save(scraper, code)
     if commitmessage:
         rev = mercurialinterface.commit(scraper, message=commitmessage, user=user)
         mercurialinterface.updatecommitalertsrev(rev)
-        
+
         # refresh the whole set of commit alerts when we have this message
         if commitmessage.strip() == "updatecommitalertsrev" and user.is_staff:
             mercurialinterface.updateallcommitalerts()
@@ -90,7 +89,7 @@ def handle_session_draft(request, action):
     if not request.user.is_authenticated():
         response_url =  reverse('login') + "?next=%s" % reverse('handle_session_draft', kwargs={'action': action})
         return HttpResponseRedirect(response_url)
-    
+
     #check if anything in the session        
     session_scraper_draft = request.session.pop('ScraperDraft', None)
     
@@ -98,14 +97,14 @@ def handle_session_draft(request, action):
     if not session_scraper_draft:
         response_url = reverse('frontpage')
         return HttpResponseRedirect(response_url)
-        
+
     draft_scraper = session_scraper_draft.get('scraper', None)
     draft_scraper.save()
     draft_commit_message = action.startswith('commit') and session_scraper_draft.get('commit_message') or None
     draft_code = session_scraper_draft.get('code')
     draft_tags = session_scraper_draft.get('commaseparatedtags', '')
     
-    savecodeofscraper(draft_scraper, request.user, draft_code, draft_tags, draft_commit_message, True)
+    save_code(draft_scraper, request.user, draft_code, draft_tags, draft_commit_message, True)
  
 
     # work out where to send them next
@@ -132,7 +131,7 @@ def saveeditedscraper(request, lscraper):
     scraper = form.save(commit=False)
     if not scraper.guid:
         scraper.buildfromfirsttitle()
-    
+
     # Add some more fields to the form
     code = form.cleaned_data['code']
     scraper.description = form.cleaned_data['description']    
@@ -142,7 +141,7 @@ def saveeditedscraper(request, lscraper):
     # User is signed in, we can save the scraper
     if request.user.is_authenticated():
         commitmessage = action.startswith('commit') and request.POST.get('commit_message', "changed") or None
-        savecodeofscraper(scraper, request.user, code, form.cleaned_data['commaseparatedtags'], commitmessage, False)  # though not always not new
+        save_code(scraper, request.user, code, form.cleaned_data['commaseparatedtags'], commitmessage, False)  # though not always not new
         
         # Work out the URL to return in the JSON object
         url = reverse('editor', kwargs={'short_name':scraper.short_name})

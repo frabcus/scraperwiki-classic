@@ -24,7 +24,6 @@ import re
 import datetime
 
 from utilities import location
-location.is_gb_postcode('sw98JX')
 
 from codewiki.models import Scraper as ScraperModel  # is this renaming necessary?
 
@@ -34,9 +33,9 @@ def frontpage(request, public_profile_field=None):
     # The following items are only used when there is a logged in user.	
     if user.is_authenticated():
         hide_logo = False
-        grey_body = False    
-        my_scrapers = user.scraper_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
-        following_scrapers = user.scraper_set.filter(usercoderole__role='follow', deleted=False).order_by('-created_at')
+        grey_body = False   
+        my_scrapers = user.code_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
+        following_scrapers = user.code_set.filter(usercoderole__role='follow', deleted=False).order_by('-created_at')
         following_users = user.to_user.following()
         following_users_count = len(following_users)
         # contribution_scrapers needs to be expanded to include scrapers you have edit rights on

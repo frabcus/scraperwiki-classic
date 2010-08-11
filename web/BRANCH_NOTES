@@ -16,3 +16,14 @@ ALTER TABLE `scraper_usercoderole` RENAME TO `codewiki_usercoderole`;
 No action required
 
 --------------------------------------------------------------------------------------
+Datastore
+
+- The connection in ScraperManager wasn't working - I had to change the names form e.g. DATABASE_NAME to NAME
+
+
+--------------------------------------------------------------------------------------
+Commented out things
+
+in vc.py the following is commented out since the internal API for mercurial appears to have changed. check with julian which version he is using
+#if scraperfile not in self.repo.dirstate:
+  #self.repo.add([scraperfile])   # note, relative to repopath

@@ -11,51 +11,11 @@ from tagging.models import Tag, TaggedItem
 
 
 class CodeManager(models.Manager):
-    """
-        This manager is implemented to allow you to link back to the particular scrapers through
-        names defining their relationship to the user.
 
-        So, having a user
-
-        > user
-
-        you can reference all scrapers that user has ownership of by
-
-        > user.scraper_set.owns()
-
-        and you can reference all the scrapers that user is watching by
-
-        > user.scraper_set.watching()
-
-        to check if this user owns any scrapers you can use
-
-        > user.dont_own_any()
-
-        or to check if the user is following any
-
-        > user.not_watching_any()
-
-    """
-
-    def __init__(self, *args, **kwargs):
-
-        # yuck, I have to build the database connection by hand
-        backend = django.db.load_backend(settings.DATASTORE_DATABASE_ENGINE)
-        self.datastore_connection = backend.DatabaseWrapper({
-            'DATABASE_HOST': settings.DATASTORE_DATABASE_HOST,
-            'DATABASE_NAME': settings.DATASTORE_DATABASE_NAME,
-            'DATABASE_OPTIONS': {},
-            'DATABASE_PASSWORD': settings.DATASTORE_DATABASE_PASSWORD,
-            'DATABASE_PORT': settings.DATASTORE_DATABASE_PORT,
-            'DATABASE_USER': settings.DATASTORE_DATABASE_USER,
-            'TIME_ZONE': settings.TIME_ZONE,
-        })
-        super(ScraperManager, self).__init__(*args, **kwargs)
-    
-    use_for_related_fields = True
+    #use_for_related_fields = True
 
     def get_query_set(self):
-        return super(ScraperManager, self).get_query_set().filter(deleted=False)
+        return super(CodeManager, self).get_query_set().filter(deleted=False)
         
         	
     def owns(self):

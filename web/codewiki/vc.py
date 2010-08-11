@@ -27,7 +27,7 @@ class MercurialInterface:
         
         # danger with member copy of repo as not sure if it updates with commits
         # (definitely doesn't update if commit is done against a second repo object)
-        self.repo = mercurial.hg.repository(self.ui, self.repopath)
+        self.repo = mercurial.hg.repository(self.ui, self.repopath)    
     
     
     def save(self, scraper, code):
@@ -41,10 +41,10 @@ class MercurialInterface:
         fout = open(scraperpath, "w")
         fout.write(code.encode('utf-8'))
         fout.close()
-    
+
         # add into mercurial
-        if scraperfile not in self.repo.dirstate:
-            self.repo.add([scraperfile])   # note, relative to repopath
+        #if scraperfile not in self.repo.dirstate:
+            #self.repo.add([scraperfile])   # note, relative to repopath
         
     
     # need to dig into the commit command to find the rev

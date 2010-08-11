@@ -794,7 +794,7 @@ $(document).ready(function() {
 
             error: function(response){
                 alert('Sorry, something went wrong, please try copying your code and then reloading the page');
-                //document.write(response.responseText); // Uncomment to get the actual error page
+                document.write(response.responseText); // Uncomment to get the actual error page
               }
             });
         }

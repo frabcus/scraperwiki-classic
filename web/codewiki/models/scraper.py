@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 import settings
 
 import codewiki.managers.scraper
+from codewiki import managers
 from django.db.models.signals import post_save
 from registration.signals import user_registered
 
@@ -26,16 +27,8 @@ except:
 
 from django.core.mail import send_mail
 
-# models defining scrapers and their metadata.
-
-LANGUAGES = (
-    ('Python', 'Python'),
-    ('PHP', 'PHP'),
-    ('Ruby', 'Ruby'),
-    ('HTML', 'HTML'),
-)
-
 class Scraper (code.Code):
+
     has_geo = models.BooleanField(default=False)
     has_temporal = models.BooleanField(default=False)    
     last_run = models.DateTimeField(blank=True, null=True)    
@@ -44,6 +37,7 @@ class Scraper (code.Code):
     scraper_sparkline_csv = models.CharField(max_length=255, null=True)
     run_interval = models.IntegerField(default=86400)
 
+    objects = managers.scraper.ScraperManager()
 
     def count_records(self):
         return int(Scraper.objects.item_count(self.guid))

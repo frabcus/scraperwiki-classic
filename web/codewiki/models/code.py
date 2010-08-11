@@ -6,9 +6,8 @@ from django.contrib.auth.models import User
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 import settings
+from codewiki.managers.code import CodeManager
 
-import codewiki.managers.scraper
-from codewiki import managers
 from django.db.models.signals import post_save
 from registration.signals import user_registered
 
@@ -31,13 +30,13 @@ LANGUAGES = (
     ('HTML', 'HTML'),
 )
 
+WIKI_TYPES = (
+    ('scraper', 'Scraper'),
+    ('view', 'View'),    
+)
+
 class Code(models.Model):
-    """
-        A 'Scraper' is the definition of all versions of a particular scraper
-        that are classed as being the same, though changed over time as the
-        data required changes and the page being scraped changes, thus
-        breaking a particular version.
-    """
+
     title             = models.CharField(max_length=100, 
                                         null=False, 
                                         blank=False, 
@@ -55,38 +54,41 @@ class Code(models.Model):
     guid              = models.CharField(max_length=1000)
     published         = models.BooleanField(default=False)
     first_published_at   = models.DateTimeField(null=True, blank=True)
+    line_count = models.IntegerField(default=0)    
     featured          = models.BooleanField(default=False)
     istutorial        = models.BooleanField(default=False)
     isstartup         = models.BooleanField(default=False)
     language          = models.CharField(max_length=32, choices=LANGUAGES, default='Python')
-    objects = managers.scraper.ScraperManager()
+    wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
+
     unfiltered = models.Manager()
+    objects = CodeManager()
 
     def __unicode__(self):
         return self.short_name
-    
+
     def buildfromfirsttitle(self):
         assert not self.short_name and not self.guid
         import hashlib
-        self.short_name = util.SlugifyUniquely(self.title, Scraper, slugfield='short_name', instance=self)
+        self.short_name = codewiki.util.SlugifyUniquely(self.title, Code, slugfield='short_name', instance=self)
         self.created_at = datetime.datetime.today()  # perhaps this should be moved out to the draft scraper
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
     def owner(self):
         if self.pk:
-            owner = self.users.filter(UserCodeRole__role='owner')
+            owner = self.users.filter(usercoderole__role='owner')
             if len(owner) >= 1:
                 return owner[0]
         return None
 
     def contributors(self):
         if self.pk:
-            contributors = self.users.filter(UserCodeRole__role='editor')
+            contributors = self.users.filter(usercoderole__role='editor')
         return contributors
     
     def followers(self):
         if self.pk:
-            followers = self.users.filter(UserCodeRole__role='follow')
+            followers = self.users.filter(usercoderole__role='follow')
         return followers
 
     def add_user_role(self, user, role='owner'):
@@ -112,7 +114,7 @@ class Code(models.Model):
 
         #check if role exists before adding 
         u, created = UserCodeRole.objects.get_or_create(user=user, 
-                                                           scraper=self, 
+                                                           code=self, 
                                                            role=role)
 
     def unfollow(self, user):
@@ -126,7 +128,7 @@ class Code(models.Model):
         return True
 
     def followers(self):
-        return self.users.filter(UserCodeRole__role='follow')
+        return self.users.filter(usercoderole__role='follow')
 
     def is_published(self):
         return self.status == 'Published'

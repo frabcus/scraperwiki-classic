@@ -58,7 +58,7 @@ via	= 9001
 mem	= 128M
 count	= 25
 
-[richard-popes-macbook-pro-3.local]
+[unknown-00-21-e9-d9-c5-07.config]
 host	= 127.0.0.1
 tap	= 127.0.0.1
 eth	= 127.0.0.1
