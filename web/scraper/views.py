@@ -15,6 +15,7 @@ from django.conf import settings
 from scraper import models
 from scraper import forms
 from scraper.forms import SearchForm
+from api.emitters import CSVEmitter
 import vc
 
 import frontend
@@ -23,7 +24,6 @@ import subprocess
 
 import StringIO, csv, types
 import datetime
-from django.utils.encoding import smart_str
 
 try:                import json
 except ImportError: import simplejson as json
@@ -322,20 +322,6 @@ def scraper_history(request, scraper_short_name):
     return render_to_response('scraper/history.html', dictionary, context_instance=RequestContext(request))
 
 
-def stringnot(v):
-    """
-    (also from scraperwiki/web/api/emitters.py CSVEmitter render()
-    as below -- not sure what smart_str needed for)
-    """
-    if v == None:
-        return ""
-    if type(v) == float:
-        return v
-    if type(v) == int:
-        return v
-    return smart_str(v)
-
-
 def export_csv(request, scraper_short_name):
     """
     This could have been done by having linked directly to the api/csvout, but
@@ -349,24 +335,10 @@ def export_csv(request, scraper_short_name):
         scraper_id=scraper.guid,
         limit=100000)
 
-    keyset = set()
-    for row in dictlist:
-        if "latlng" in row:   # split the latlng
-            row["lat"], row["lng"] = row.pop("latlng")
-        row.pop("date_scraped")
-        keyset.update(row.keys())
-    allkeys = sorted(keyset)
-
-    fout = StringIO.StringIO()
-    writer = csv.writer(fout, dialect='excel')
-    writer.writerow(allkeys)
-    for rowdict in dictlist:
-        writer.writerow([stringnot(rowdict.get(key))  for key in allkeys])
-
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = \
         'attachment; filename=%s.csv' % (scraper_short_name)
-    response.write(fout.getvalue())
+    response.write(CSVEmitter.to_csv(dictlist))
 
     return response
     #template = loader.get_template('scraper/data.csv')
