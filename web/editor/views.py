@@ -54,6 +54,7 @@ def raw(request, short_name=None):
 
 #save a scraper/view
 def save_code(scraper, user, code, commaseparatedtags, commitmessage, bnew):
+
     scraper.update_meta()
     scraper.line_count = int(code.count("\n"))
     scraper.save()   # save the actual object
@@ -74,8 +75,8 @@ def save_code(scraper, user, code, commaseparatedtags, commitmessage, bnew):
             scraper.add_user_role(user, 'editor')
     else:
         scraper.add_user_role(user, 'owner')
-        
-    # don't know how this somehow magically splits and creates the tags
+   
+    #this somehow magically splits and creates the tags
     scraper.tags = commaseparatedtags
     scraper.save()
 
@@ -123,6 +124,7 @@ def saveeditedscraper(request, lscraper):
 
     #validate
     if not form.is_valid() or 'action' not in request.POST:
+        print form.errors
         return HttpResponse(json.dumps({'status' : 'Failed'}))
 
     action = request.POST.get('action').lower()

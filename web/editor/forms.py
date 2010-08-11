@@ -11,10 +11,10 @@ LICENSE_CHOICES = (
 )
 
 class editorForm(forms.ModelForm):
-    
+
     class Meta:
         model = codewiki.models.Scraper
-        fields = ('title', 'code', 'description', 'license', 'commaseparatedtags', 'published')
+        fields = ('title', 'code', 'description', 'license', 'commaseparatedtags', 'published', 'wiki_type')
 
     title = forms.CharField(
         widget=forms.TextInput(attrs={'title' : 'Untitled Scraper'}),
@@ -36,10 +36,11 @@ class editorForm(forms.ModelForm):
     commaseparatedtags = forms.CharField(
        required=False, 
        widget=forms.TextInput(attrs={'title' : 'tags for scraper'}),
-       label = "TTags",
+       label = "Tags",
     )
-    
+
     license = forms.ChoiceField(choices=LICENSE_CHOICES, label='Data licence')
+    wiki_type = forms.ChoiceField(choices=codewiki.models.code.WIKI_TYPES, widget=forms.HiddenInput())    
     
     code = forms.CharField(
         widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'})

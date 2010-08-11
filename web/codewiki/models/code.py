@@ -59,7 +59,7 @@ class Code(models.Model):
     istutorial        = models.BooleanField(default=False)
     isstartup         = models.BooleanField(default=False)
     language          = models.CharField(max_length=32, choices=LANGUAGES, default='Python')
-    wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
+    wiki_type         = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
 
     unfiltered = models.Manager()
     objects = CodeManager()

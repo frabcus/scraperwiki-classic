@@ -39,6 +39,10 @@ class Scraper (code.Code):
 
     objects = managers.scraper.ScraperManager()
 
+    def __init__(self, *args, **kwargs):
+        self.wiki_type = 'scraper'
+        super(Scraper, self).__init__(*args, **kwargs)
+        
     def count_records(self):
         return int(Scraper.objects.item_count(self.guid))
         
@@ -64,6 +68,10 @@ class Scraper (code.Code):
         #minimum of 1 day
         recent_record_count = Scraper.objects.recent_record_count(self.guid, sparline_days)
         self.scraper_sparkline_csv = ",".join("%d" % count for count in recent_record_count)
+
+    def save(self, *args, **kwargs):
+        self.wiki_type = 'scraper'
+        super(Scraper, self).save(*args, **kwargs)
 
         
 #register tagging for scrapers
