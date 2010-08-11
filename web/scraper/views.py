@@ -24,6 +24,7 @@ import subprocess
 
 import StringIO, csv, types
 import datetime
+import urllib
 
 try:                import json
 except ImportError: import simplejson as json
@@ -462,7 +463,7 @@ def search(request, q=""):
             q = form.cleaned_data['q']
             # Process the data in form.cleaned_data
             # Redirect after POST
-            return HttpResponseRedirect('/scrapers/search/%s/' % q)
+            return HttpResponseRedirect('/scrapers/search/%s/' % urllib.quote(q.encode('utf-8')))
         else:
             form = SearchForm()
             return render_to_response('scraper/search.html', {
