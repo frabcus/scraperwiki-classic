@@ -14,7 +14,8 @@ from registration.signals import user_registered
 import tagging
 from frontend import models as frontendmodels
 
-import codewiki.vc
+from codewiki import vc
+from codewiki import util
 
 try:
     import json
@@ -37,6 +38,7 @@ WIKI_TYPES = (
 
 class Code(models.Model):
 
+    # model fields
     title             = models.CharField(max_length=100, 
                                         null=False, 
                                         blank=False, 
@@ -52,7 +54,7 @@ class Code(models.Model):
     status            = models.CharField(max_length=10, blank=True)
     users             = models.ManyToManyField(User, through='UserCodeRole')
     guid              = models.CharField(max_length=1000)
-    published         = models.BooleanField(default=False)
+    published         = models.BooleanField(default=True)
     first_published_at   = models.DateTimeField(null=True, blank=True)
     line_count = models.IntegerField(default=0)    
     featured          = models.BooleanField(default=False)
@@ -61,16 +63,17 @@ class Code(models.Model):
     language          = models.CharField(max_length=32, choices=LANGUAGES, default='Python')
     wiki_type         = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
 
+    # managers
     unfiltered = models.Manager()
     objects = CodeManager()
-
+    
     def __unicode__(self):
         return self.short_name
 
     def buildfromfirsttitle(self):
         assert not self.short_name and not self.guid
         import hashlib
-        self.short_name = codewiki.util.SlugifyUniquely(self.title, Code, slugfield='short_name', instance=self)
+        self.short_name = util.SlugifyUniquely(self.title, Code, slugfield='short_name', instance=self)
         self.created_at = datetime.datetime.today()  # perhaps this should be moved out to the draft scraper
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
@@ -139,9 +142,16 @@ class Code(models.Model):
             
     # this functions to go
     def saved_code(self):
-        return vc.MercurialInterface().getstatus(self)["code"]
+        return vc.MercurialInterface(self.get_repo_path()).getstatus(self)["code"]
 
-        
+    def get_repo_path(self):
+        result = None
+        if self.wiki_type == 'view':
+            result = settings.VMODULES_DIR
+        else:
+            result = settings.SMODULES_DIR        
+        return result
+
     @models.permalink
     def get_absolute_url(self):
         return ('scraper_overview', [self.short_name])

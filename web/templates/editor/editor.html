@@ -91,7 +91,7 @@
                 
                 <div class="right">
                     {% if scraper.short_name %}
-                        <a id="aCloseEditor" href="{% url scraper_code scraper.short_name %}" title="Return to scraper page">Close editor</a>
+                        <a id="aCloseEditor" href="{% url scraper_code scraper.wiki_type scraper.short_name %}" title="Return to scraper page">Close editor</a>
                     {% else %}
                         <a id="aCloseEditor" href="{% url frontpage %}" title="Close editor">Close editor</a>                
                     {% endif %}

@@ -21,7 +21,7 @@ sys.path.append('web')
 # Django settings for scraperwiki project.
 
 DEBUG = False
- 
+
 TIME_ZONE = 'London/England'
 LANGUAGE_CODE = 'en-uk'
 

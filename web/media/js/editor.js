@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    
+
     //variables
     var pageIsDirty = false;
     var editor_id = 'id_code';
@@ -20,7 +20,7 @@ $(document).ready(function() {
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
-    var cookieOptions = { path: '/editor', expires: 90};    
+    var cookieOptions = { path: '/views', expires: 90};    
     var popupStatus = 0
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 

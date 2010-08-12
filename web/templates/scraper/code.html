@@ -2,20 +2,19 @@
 
 {% block tab %}
 <div class="tab_tools">
-
 {# viewing a revision #}
 {% if status.currcommit %}
   Version from: <b>{{status.currcommit.date|date:"H:i, j F Y" }}</b>
   <i>({{status.currcommit.description}})</i>
 
   {% if status.prevcommit %}
-    <a href="{% url scraper_code scraper.short_name %}?rev={{status.prevcommit.rev}}">previous commit</a>
+    <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}?rev={{status.prevcommit.rev}}">previous commit</a>
   {% endif %}
 
   {% if status.nextcommit %}
-    <a href="{% url scraper_code scraper.short_name %}?rev={{status.nextcommit.rev}}">next commit</a>
+    <a href="{% url scraper_code  scraper.wiki_type  scraper.short_name %}?rev={{status.nextcommit.rev}}">next commit</a>
   {% else %}
-    <a href="{% url scraper_code scraper.short_name %}">last saved version</a>
+    <a href="{% url scraper_code  scraper.wiki_type scraper.short_name %}">last saved version</a>
   {% endif %}
 
 
@@ -41,7 +40,7 @@
     {% endif %}
   {% endif %}
 
-  <form method="get" action="{% url editor scraper.short_name %}">
+  <form method="get" action="{% url editor_edit scraper.wiki_type scraper.short_name %}">
     <input type="submit" value="Edit scraper" />
   </form>
 {% endif %}

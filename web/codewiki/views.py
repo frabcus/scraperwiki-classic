@@ -29,7 +29,7 @@ try:                import json
 except ImportError: import simplejson as json
 
 
-def overview(request, scraper_short_name):
+def overview(request, wiki_type, scraper_short_name):
     """
     Shows info on the scraper plus example data.
     """
@@ -231,10 +231,11 @@ def scraper_map(request, scraper_short_name, map_only=False):
 # also make the diff with previous version and make the selection
 # check that all the non-loggedin logic still works
 
-def code(request, scraper_short_name):
+def code(request, wiki_type, scraper_short_name):
+    print scraper_short_name
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    
+    scraper = get_object_or_404(models.Code.objects, short_name=scraper_short_name)
+
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
         return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
@@ -242,7 +243,7 @@ def code(request, scraper_short_name):
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
     
-    mercurialinterface = vc.MercurialInterface()
+    mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
     status = mercurialinterface.getstatus(scraper, rev)
     
     user_owns_it = (scraper.owner() == user)
@@ -310,7 +311,7 @@ def scraper_history(request, scraper_short_name):
     # (in future, the entries in django may be synchronized against this to make it possible to update the repository(ies) outside the system)
     commitlog = [ ]
     # should commit info about the saved   commitlog.append({"rev":commitentry['rev'], "description":commitentry['description'], "datetime":commitentry["date"], "user":user})
-    mercurialinterface = vc.MercurialInterface()
+    mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
     for commitentry in mercurialinterface.getcommitlog(scraper):
         try:    user = User.objects.get(pk=int(commitentry["userid"]))
         except: user = None

@@ -2,52 +2,18 @@ from django import forms
 from django.forms import widgets
 import codewiki
 
-LICENSE_CHOICES = ( 
-    ('Public domain', 'Public domain'),
-    ('Share-alike', 'Share-alike'),
-    ('Crown copyright', 'Crown copyright'),
-    ('Other', 'Other'),
-    ('Unknown', 'Unknown'),
-)
-
 class editorForm(forms.ModelForm):
 
     class Meta:
-        model = codewiki.models.Scraper
-        fields = ('title', 'code', 'description', 'license', 'commaseparatedtags', 'published', 'wiki_type')
-
-    title = forms.CharField(
-        widget=forms.TextInput(attrs={'title' : 'Untitled Scraper'}),
-        label = "Title*",
-    )
-    commit_message = forms.CharField(
-        required=False, 
-        widget=forms.Textarea(attrs={'title' : ''}),
-        label = "Commit message*",
-    )
-    
-    description = forms.CharField(
-        #widget=forms.TextInput(attrs={'title' : ''})
-        required=False,
-        widget=widgets.Textarea({'cols':'80', 'rows':'4', }),
-        label = "Description*",
-    )
-    
-    commaseparatedtags = forms.CharField(
-       required=False, 
-       widget=forms.TextInput(attrs={'title' : 'tags for scraper'}),
-       label = "Tags",
-    )
-
-    license = forms.ChoiceField(choices=LICENSE_CHOICES, label='Data licence')
+        model = codewiki.models.Code
+        fields = ('title', 'code', 'wiki_type')
+        
+    title = forms.CharField(widget=forms.TextInput(attrs={'title' : 'Untitled'}),label = "Title*",)
     wiki_type = forms.ChoiceField(choices=codewiki.models.code.WIKI_TYPES, widget=forms.HiddenInput())    
-    
-    code = forms.CharField(
-        widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'})
-    )
+    code = forms.CharField(widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'}))
 
     def clean_title(self):
         title = self.cleaned_data['title']
-        if not title or title == '' or title.lower() == 'untitled scraper':
+        if not title or title == '' or title.lower() == 'untitled':
             raise forms.ValidationError("Scraper needs a title")
         return title

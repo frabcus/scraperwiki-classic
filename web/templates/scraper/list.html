@@ -38,7 +38,7 @@
           <ul>
           {% for scraper in featured_scrapers %}
             <li>
-            <a href="{% url scraper_overview scraper.short_name %}">
+            <a href="{% url scraper_overview scraper.wiki_type scraper.short_name %}">
               {% if scraper.title %}{{ scraper.title }}{% else %}{{ scraper.short_name }}{% endif %}
             </a>
             </li>

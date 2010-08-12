@@ -1,6 +1,6 @@
 <li>
     <h3>
-        <a href="{% url scraper_overview scraper.short_name %}">
+        <a href="{% url scraper_overview scraper.wiki_type scraper.short_name %}">
             {% if scraper.title %}{{ scraper.title }}{% else %}{{ scraper.short_name }}{% endif %}
         </a>
         {% if scraper.has_geo %}
@@ -42,7 +42,7 @@
           [error: missing user]
         {% endif %}
         {{scraper.created_at|timesince}} ago |
-
+        <strong>{{scraper.wiki_type}}</strong>
     {% ifequal scraper.language 'HTML' %}
         <a href="{% url htmlview scraper.short_name %}">{{ scraper.language }}</a>
     {% else %}

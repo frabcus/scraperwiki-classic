@@ -40,8 +40,9 @@ class Scraper (code.Code):
     objects = managers.scraper.ScraperManager()
 
     def __init__(self, *args, **kwargs):
-        self.wiki_type = 'scraper'
         super(Scraper, self).__init__(*args, **kwargs)
+        self.wiki_type = 'scraper'
+        self.license = 'Unknown'        
         
     def count_records(self):
         return int(Scraper.objects.item_count(self.guid))
@@ -59,14 +60,14 @@ class Scraper (code.Code):
         self.has_temporal = bool(Scraper.objects.has_temporal(self.guid))
 
         #get data for sparklines
-        sparline_days = settings.SPARKLINE_MAX_DAYS
+        sparkline_days = settings.SPARKLINE_MAX_DAYS
         created_difference = datetime.datetime.now() - self.created_at
 
-        #if (created_difference.days < settings.SPARKLINE_MAX_DAYS):
-        #    sparline_days = created_difference.days
+        if (created_difference.days < settings.SPARKLINE_MAX_DAYS):
+            sparkline_days = created_difference.days
 
         #minimum of 1 day
-        recent_record_count = Scraper.objects.recent_record_count(self.guid, sparline_days)
+        recent_record_count = Scraper.objects.recent_record_count(self.guid, parkline_days)
         self.scraper_sparkline_csv = ",".join("%d" % count for count in recent_record_count)
 
     def save(self, *args, **kwargs):

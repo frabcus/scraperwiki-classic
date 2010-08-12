@@ -19,8 +19,8 @@ class View (code.Code):
     mime_type = models.CharField(max_length=255, null=True)
 
     def __init__(self, *args, **kwargs):
-        self.wiki_type = 'scraper'
-        super(Scraper, self).__init__(*args, **kwargs)
+        super(View, self).__init__(*args, **kwargs)
+        self.wiki_type = 'view'        
 
     def save(self, *args, **kwargs):
         self.wiki_type = 'view'

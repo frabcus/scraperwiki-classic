@@ -53,7 +53,7 @@
 					<li><a href="{% url login %}?next=/">Sign in or create an account</a></li>
 				{% endif %}
 				<li class="helplink"><a href="{% url help %}">Help</a></li>
-			</ul>
+ 			</ul>
 			<p>
     	        Hello! This is the beta version of ScraperWiki, 
                 <span id="feedbackmess">please <a href="{% url contact_form %}">tell us what you think</a></span>.
@@ -62,7 +62,6 @@
 
 	    {# Header #}
 	    <div id="divHeader">
-                
                 <div id="divLogo">
                     {% if not hide_logo %}
     					<p>
@@ -77,7 +76,10 @@
 			             <a href="{% url help_tutorials %}" title="Tutorials">Tutorials</a>
 			        </li>
 				    <li>
-				        <a href="{% url editor %}" title="Create a new screen scraper" class="editor">New scraper</a>
+				        <a href="#" title="Create a new screen scraper" class="editor_scraper">New scraper</a>
+				    </li>
+				    <li>
+				        <a href="#" title="Create a new view" class="editor_view">New view</a>
 				    </li>
 				    <li>
 				        <a href="{% url scraper_list %}" title="Browse scrapers and data">Browse</a>
@@ -147,7 +149,8 @@
 		             <ul>
 		                 <li><a href="{% url scraper_list %}">Browse data &amp; scrapers</a></li>
 		                 <li><a href="{% url market_list %}">Request a dataset</a></li>
-		                 <li><a href="{% url editor %}" class="editor">Create a scraper</a></li>
+		                 <li><a href="#" class="editor_scraper">Create a scraper</a></li>
+		                 <li><a href="#" class="editor_view">Create a view</a></li>		                 
 		                 <li><a href="{% url api:index %}">API</a></li>
 		             </ul>
 		           </dd>

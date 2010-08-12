@@ -11,7 +11,7 @@
     <tr>
       <td>
         {% ifequal item.message_type|lower "commit" %}
-          <a href="{% url scraper_code scraper.short_name %}?rev={{item.event_object.revision}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
+          <a href="{% url scraper_code  scraper.wiki_type  scraper.short_name %}?rev={{item.event_object.revision}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
         {% else %}
           {% if item.event_object %}
             <a href="{{item.event_object.get_absolute_url}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
@@ -59,7 +59,7 @@
 
   {% if filestatus.ismodified %}
   <li>
-    <a href="{% url scraper_code scraper.short_name %}">{{ filestatus.filemodifieddate|date:"H:i, j F Y" }}</a> 
+    <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}">{{ filestatus.filemodifieddate|date:"H:i, j F Y" }}</a> 
     <span class="history-user">someone</span>
     saved the file
   </li>
@@ -67,7 +67,7 @@
 
   {% if filestatus.isadded %}
   <li>
-    <a href="{% url scraper_code scraper.short_name %}">{{ filestatus.filemodifieddate|date:"H:i, j F Y" }}</a>
+    <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}">{{ filestatus.filemodifieddate|date:"H:i, j F Y" }}</a>
     <span class="history-user">someone</span>
     last saved after creation
   </li>
@@ -75,7 +75,7 @@
 
   {% for item in commitlog %}
   <li>
-    <a href="{% url scraper_code scraper.short_name %}?rev={{item.rev}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
+    <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
     <span class="history-user">
     {% if item.user %}
       <a href="{% url profiles_profile_detail item.user.username %}">

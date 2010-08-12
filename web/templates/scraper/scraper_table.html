@@ -41,7 +41,7 @@
 {% for scraper in scrapers %}
 <tr>
   <td>
-    <a href='{% url scraper_code scraper.short_name %}'>{{ scraper.title }}</a>
+    <a href='{% url scraper_code  scraper.wiki_type  scraper.short_name %}'>{{ scraper.title }}</a>
   </td>
   <td>
     {% for usercodeediting in scraper.userscraperediting_set.all %} 

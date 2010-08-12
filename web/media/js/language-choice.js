@@ -12,16 +12,28 @@ $(function(){
     parts.push('</div>');
     $('body').append(parts.join(''));
     $('#langDialog').dialog({autoOpen: false, draggable: false, resizable: false});
-    $('a.editor').click(function(){
+    $('a.editor_scraper').click(function(){
         if(!$('#langDialog').dialog('isOpen')){
           $('#langDialog').dialog('open');
+          $('#languageOK').click(function(){
+              window.location.replace('/editor/new/scraper/' + $("input[name='languages']:checked").val());
+          });
         }
         return false;
     });
+    
+    $('a.editor_view').click(function(){
+        if(!$('#langDialog').dialog('isOpen')){
+          $('#langDialog').dialog('open');
+          $('#languageOK').click(function(){
+              window.location.replace('/editor/new/view/' + $("input[name='languages']:checked").val());
+          });
+        }
+        return false;
+    });
+    
+    
     $('#languageClose').click(function(){
         $('#langDialog').dialog('close');
-    });
-    $('#languageOK').click(function(){
-        window.location.replace('/editor/new/' + $("input[name='languages']:checked").val());
     });
 });

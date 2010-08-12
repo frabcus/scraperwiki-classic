@@ -19,11 +19,11 @@ import mercurial.hg
 # mercurial.commands module is mostly a wrapper on the functionality of the repo object
 
 class MercurialInterface:
-    def __init__(self):
+    def __init__(self, repo_path):
         self.ui = mercurial.ui.ui()
         self.ui.setconfig('ui', 'interactive', 'off')
         self.ui.setconfig('ui', 'verbose', 'on')
-        self.repopath = os.path.normpath(os.path.abspath(settings.SMODULES_DIR))  # probably to handle windows values
+        self.repopath = os.path.normpath(os.path.abspath(repo_path))  # probably to handle windows values
         
         # danger with member copy of repo as not sure if it updates with commits
         # (definitely doesn't update if commit is done against a second repo object)
@@ -52,7 +52,7 @@ class MercurialInterface:
         scraperpath = os.path.join(self.repopath, scraper.short_name, "__init__.py")
         if message is None:
             message = "changed"
-  
+
         node = self.repo.commit(message, str(user.pk))  
         if not node:
             return None
@@ -64,7 +64,7 @@ class MercurialInterface:
         from codewiki.models import Scraper, CodeCommitEvent
         from frontend.models import Alerts
         from django.contrib.auth.models import User
-    
+
         # discard all alerts and commit events for this revision (made complex due to the indirection through CodeCommitEvent for a integer)
         for codecommitevent in CodeCommitEvent.objects.filter(revision=rev):
             for alert in Alerts.objects.filter(event_object=codecommitevent):
@@ -120,7 +120,6 @@ class MercurialInterface:
             warnings = self.updatecommitalertsrev(rev)
             if warnings:
                 print "updateallcommitalerts warnings", warnings
-
 
     
     def getctxrevisionsummary(self, ctx):
