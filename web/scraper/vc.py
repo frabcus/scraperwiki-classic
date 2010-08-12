@@ -8,6 +8,7 @@ from django.conf import settings
 
 import datetime
 import time
+import codecs
 import mercurial
 import mercurial.ui
 import mercurial.hg
@@ -38,8 +39,8 @@ class MercurialInterface:
         if not os.path.exists(scraperfolder):
             os.makedirs(scraperfolder)
         
-        fout = open(scraperpath, "w")
-        fout.write(code.encode('utf-8'))
+        fout = codecs.open(scraperpath, mode='w', encoding='utf-8')
+        fout.write(code)
         fout.close()
     
         # add into mercurial
@@ -198,7 +199,7 @@ class MercurialInterface:
         
         # get information about the saved file (which we will if there's no current revision selected -- eg when rev in [-1, None]
         else:
-            fin = open(scraperpath,'rU')
+            fin = codecs.open(scraperpath, mode='rU', encoding='utf-8')
             status["code"] = fin.read()
             fin.close()
             status.update(self.getfilestatus(scraper))

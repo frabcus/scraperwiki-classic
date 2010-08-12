@@ -29,10 +29,12 @@ class CSVEmitter(Emitter):
     Emitter for exporting to CSV (excel dialect).
     """
     
-    # code here itentical to scraperwiki/web/scraper/views.py export_csv()
     def render(self, request):
         dictlist = self.construct()
-        
+        return self.to_csv(dictlist)
+
+    @staticmethod
+    def to_csv(dictlist):
         keyset = set()
         for row in dictlist:
             if "latlng" in row:   # split the latlng
@@ -43,7 +45,7 @@ class CSVEmitter(Emitter):
         
         fout = StringIO.StringIO()
         writer = csv.writer(fout, dialect='excel')
-        writer.writerow(allkeys)
+        writer.writerow([k.encode('utf-8') for k in allkeys])
         for rowdict in dictlist:
             writer.writerow([stringnot(rowdict.get(key))  for key in allkeys])
 
