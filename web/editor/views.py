@@ -26,7 +26,7 @@ import settings
 def delete_draft(request):
     if request.session.get('ScraperDraft', False):
         del request.session['ScraperDraft']
-    return HttpResponseRedirect(reverse('editor'))
+    #return HttpResponseRedirect(reverse('editor'))
 
 def diff(request, short_name=None):
     if not short_name or short_name == "__new__":
@@ -102,9 +102,9 @@ def handle_session_draft(request, action):
     # work out where to send them next
     #go to the scraper page if commited, or the editor if not
     if action == 'save':
-        response_url = reverse('editor', kwargs={'short_name' : draft_scraper.short_name})
+        response_url = reverse('editor_edit', kwargs={'wiki_type': draft_scraper.wiki_type, 'short_name' : draft_scraper.short_name})
     elif action == 'commit':
-        response_url = reverse('scraper_code', kwargs={'wiki_type': draft_scraper.wiki_type, 'scraper_short_name' : draft_scraper.short_name})
+        response_url = reverse('editor_edit', kwargs={'wiki_type': draft_scraper.wiki_type, 'short_name' : draft_scraper.short_name})
 
     return HttpResponseRedirect(response_url)
 
@@ -135,12 +135,13 @@ def saveeditedscraper(request, lscraper):
         save_code(scraper, request.user, code, False)  # though not always not new
         
         # Work out the URL to return in the JSON object
-        url = reverse('editor', kwargs={'short_name':scraper.short_name})
+        url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name':scraper.short_name})
         if action.startswith("commit"):
-            url = reverse('scraper_code', kwargs={'wiki_type': scraper.wiki_type, 'scraper_short_name':scraper.short_name})
+            #!url = reverse('scraper_code', kwargs={'wiki_type': scraper.wiki_type, 'scraper_short_name':scraper.short_name})
+            response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
 
         # Build the JSON object and return it
-        res = json.dumps({'redirect':'true', 'url':url,})    
+        res = json.dumps({'redirect':'true', 'url':response_url,})
         return HttpResponse(res)
 
     # User is not logged in, save the scraper to the session
@@ -153,11 +154,11 @@ def saveeditedscraper(request, lscraper):
         scraper.action = action
 
         status = 'Failed'
-        response_url = reverse('editor')
+        response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
         if action == 'save':
             status = 'OK'
         elif action == 'commit':
-            response_url =  reverse('login') + "?next=%s" % reverse('handle_session_draft', kwargs={'action': action})
+            #!response_url =  reverse('login') + "?next=%s" % reverse('handle_session_draft', kwargs={'action': action})
             status = 'OK'
 
         return HttpResponse(json.dumps({'status':status, 'draft':'True', 'url':response_url}))

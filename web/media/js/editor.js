@@ -265,30 +265,31 @@ $(document).ready(function() {
 
     //Setup save / details forms
     function setupDetailsForm(){
-        
+
         //sync title text boxes
         $('#id_meta_title').keyup(
                 function(){
                     $('#id_title').val($('#meta_form #id_meta_title').val());
                 }
             );
-        
+
         // Meta form
+        /*
         $('#meta_fields_mini').appendTo($('#meta_form'))
         $('#meta_fields_mini').attr('id', 'meta_fields')
         $('#id_title').before('<a href="" id="meta_form_edit"><img src="/media/images/icons/information.png" alt="Edit scraper information" title="Edit scraper information"/></a>')
         $('#meta_form_edit').click(function() {            
 
             // Only add the save button if it's not there already
-            /*
+          
             if (!$('#meta_form .save').length) {
                 $('.save').clone().appendTo($('#meta_form'));
             };
-            */
+          
             showPopup('meta_form');
             return false;
         });
-
+        */
     }
 
     function showIntro(){
@@ -630,55 +631,8 @@ $(document).ready(function() {
 
         //commit popup button
         $('#btnCommitPopup').live('click', function (){
-            var bValid = true;
-            if (popupStatus == 0) {
-                showPopup('meta_form');
-                bValid = false;     
-                if (shortNameIsSet() == false){
-                    $('#meta_form #id_meta_title').val('');
-                }
-            }
-        });
-        
-        $('#btnCommitPublish').live('click', function (){
-
-            var bValid = true;
-            //validate
-            if ($('#meta_form #id_meta_title').val() == ""){
-                   $('#meta_form #id_meta_title').parent().addClass('error');
-                   bValid = false
-            }else{
-                   $('#meta_form #id_meta_title').parent().removeClass('error');                
-            }
-            if ($('#meta_form #id_commit_message').val() == ""){
-                $('#meta_form #id_commit_message').parent().addClass('error');
-                bValid = false;
-            }else{
-                $('#meta_form #id_commit_message').parent().removeClass('error');                
-            }
-            if ($('#meta_form #id_description').val() == ""){
-                   $('#meta_form #id_description').parent().addClass('error');
-                   bValid = false
-            }else{
-                   $('#meta_form #id_description').parent().removeClass('error');                
-            }
-
-            //if valid, save it
-            if (bValid == true){
-                saveScraper(true);                
-            }else{
-                $('#meta_form .popup_error').show();
-                $('#meta_form .popup_error').html("Please make sure you have entered a title, a description and a commit message");
-            }
-            
-            //return false
+            saveScraper(true);  
             return false;
-        });
-        
-        //save button
-        $('.save').live('click', function(){
-             saveScraper(false);
-             return false;
         });
         
         // run button
@@ -720,10 +674,10 @@ $(document).ready(function() {
         var bSuccess = false;
 
         //if saving then check if the title is set
-        if(shortNameIsSet() == false && bCommit != true){
+        if(shortNameIsSet() == false){
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
 
-            if(sResult != false && sResult != '' && sResult != 'Untitled Scraper'){
+            if(sResult != false && sResult != '' && sResult != 'Untitled'){
                 $('#id_title').val(sResult);
                 aPageTitle = document.title.split('|')
                 document.title = sResult + ' | ' + aPageTitle[1]
@@ -774,20 +728,21 @@ $(document).ready(function() {
                         if (res.draft == 'True') {
                             $('#divDraftSavedWarning').show();
                         }
-                    
+
                         // redirect somewhere
                         if (res.url && window.location.pathname != res.url) {
-                            window.location = res.url;
+                            //window.location = res.url;
                         };
 
                         if (res.draft != 'True') {
-                            if (bCommit != true) {     
-	                                           
-                                showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
+                            if (bCommit == true) {     
+
+                                showFeedbackMessage("Your code has been saved.");
                             }
                     
-                            if (bConnected)
+                            if (bConnected){
                                 send({"command":'saved'}); 
+                            }
                         }
                         pageIsDirty = false; // page no longer dirty
                     }
