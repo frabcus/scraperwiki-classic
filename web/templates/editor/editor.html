@@ -1,11 +1,11 @@
-{% extends "editor/editor_base.html" %}
-{% block css %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+    <title>{{ scraper.title }} | ScraperWiki</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.7.2.custom.css" />
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/editor.css" />
-{% endblock %}
-
-{% block js %}
     {% comment %}
         Below needed for orbited, don't remove.  
         See http://orbited.org/wiki/Deployment#Cross-SubdomainDeployment 
@@ -25,14 +25,9 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.htmlClean-min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror/js/codemirror.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?"></script>  
-{% endblock %}
-
-{% block title %}
-    {{ scraper.title }} | ScraperWiki
-{% endblock %}
-
-{% block content %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?"></script>
+</head>
+<body>
 
     <form method="POST" accept-charset="utf-8" id="editor" action="">
         <fieldset>
@@ -64,7 +59,7 @@
                     </a>
                     {{ form.title }}
                 </div>
-                
+            
                 <ul class="help">
                     <li class="language"><code>{{scraper.wiki_type}}</code></li>
                     <li class="language"><code>{{scraper.language}}</code></li>
@@ -91,7 +86,7 @@
                 <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
-                
+            
                 <div class="right">
                     <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save {{scraper.wiki_type}}" title="Save and publish this scraperm  (Ctrl + S)"/>
                 </div>
@@ -136,126 +131,136 @@
                 </div>
             </div>
       </div>
-      
+  
       <div id="feedback_messages">
-          
+      
       </div>
-
-{% endblock %}
-
-{% block popups %}    
-    <div id="meta_form" class="popup_item">
-            <p>.</p>
-            <div class="popup_error">
-            </div>            
-            <ul class="form">
-                <li>
-                    <label for="id_meta_title">{{ form.title.label}}</label>
-                    <input type="text" name="title" value="" id="id_meta_title">
-                </li>
-                <li>
-                  <label for="id_published">{{ form.published.label}} {{ form.published.errors }}</label>
-                  {{ form.published }} 
-                  (Publishing your scraper will make the code and data available to others, and allow you to schedule it.)
-                </li>
-                <li{% if scraper.description %} class="hidden"{% endif %}>
-                    <label for="id_description">{{ form.description.label}} {{ form.description.errors }}</label>
-                    {{ form.description }}
-                </li>
-                <li{% if scraper.description %} class="hidden"{% endif %}>
-                    <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
-                    {{ form.license }}
-                </li>
-                <li{% if scraper.description %} class="hidden"{% endif %}>
-                    <label for="id_commaseparatedtags">{{ form.commaseparatedtags.label}} {{ form.commaseparatedtags.errors }}</label>
-                    {{ form.commaseparatedtags }}
-                    <small class="hint taghint">e.g. europe<em>,</em> grants<em>,</em> transport</small>
-                </li>
-                <li>
-                  <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
-                  {{ form.commit_message }}
-                </li>
-            </ul>
-            <div class="popup_controls">
-                <small>* Required field</small>
-                <div class="right">
-                    <a class="popupReady">cancel</a>&nbsp;&nbsp;
-                    <input type="button" id="btnCommitPublish" class="commit button" name="action" value="Commit" title="Commit this scraper"/>
+    <div id="popups">
+            <div id="meta_form" class="popup_item">
+                    <p>.</p>
+                    <div class="popup_error">
+                    </div>            
+                    <ul class="form">
+                        <li>
+                            <label for="id_meta_title">{{ form.title.label}}</label>
+                            <input type="text" name="title" value="" id="id_meta_title">
+                        </li>
+                        <li>
+                          <label for="id_published">{{ form.published.label}} {{ form.published.errors }}</label>
+                          {{ form.published }} 
+                          (Publishing your scraper will make the code and data available to others, and allow you to schedule it.)
+                        </li>
+                        <li{% if scraper.description %} class="hidden"{% endif %}>
+                            <label for="id_description">{{ form.description.label}} {{ form.description.errors }}</label>
+                            {{ form.description }}
+                        </li>
+                        <li{% if scraper.description %} class="hidden"{% endif %}>
+                            <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
+                            {{ form.license }}
+                        </li>
+                        <li{% if scraper.description %} class="hidden"{% endif %}>
+                            <label for="id_commaseparatedtags">{{ form.commaseparatedtags.label}} {{ form.commaseparatedtags.errors }}</label>
+                            {{ form.commaseparatedtags }}
+                            <small class="hint taghint">e.g. europe<em>,</em> grants<em>,</em> transport</small>
+                        </li>
+                        <li>
+                          <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
+                          {{ form.commit_message }}
+                        </li>
+                    </ul>
+                    <div class="popup_controls">
+                        <small>* Required field</small>
+                        <div class="right">
+                            <a class="popupReady">cancel</a>&nbsp;&nbsp;
+                            <input type="button" id="btnCommitPublish" class="commit button" name="action" value="Commit" title="Commit this scraper"/>
+                        </div>
+                    </div>
+            </div>
+            <div id="diff" class="popup_item">
+                <div class="popup_header">
+                    <h2>Diff with the published version</h2>
+                    <a class="popupClose">close</a>
+                </div>
+                <div class="output">
+                    <pre></pre>
                 </div>
             </div>
-    </div>
-    <div id="diff" class="popup_item">
-        <div class="popup_header">
-            <h2>Diff with the published version</h2>
-            <a class="popupClose">close</a>
-        </div>
-        <div class="output">
-            <pre></pre>
-        </div>
-    </div>
-    <div id="popup_text" class="popup_item">
-        <div class="popup_header">
-            <a class="popupClose">close</a>
-        </div>
-        <div class="output"><pre></pre></div>
-    </div>
+            <div id="popup_text" class="popup_item">
+                <div class="popup_header">
+                    <a class="popupClose">close</a>
+                </div>
+                <div class="output"><pre></pre></div>
+            </div>
 
-    <div id="popup_exception" class="popup_item">
-        <div class="popup_header">
-            <h3>Traceback</h3>            
-            <a class="popupClose">close</a>
-        </div>
-        <div class="output"><pre></pre></div>
-    </div>
+            <div id="popup_exception" class="popup_item">
+                <div class="popup_header">
+                    <h3>Traceback</h3>            
+                    <a class="popupClose">close</a>
+                </div>
+                <div class="output"><pre></pre></div>
+            </div>
 
-    <div id="popup_intro" class="popup_item">
-        <div class="popup_header">
-            <h2>Welcome to the ScraperWiki code editor</h2>
-        </div>
-        <div class="output">
-            <p>
-                Here you can write, test and debug your screen scrapers using the Python programming language. If you are not familiar with Python <a href="http://docs.python.org/tutorial/" target="_new">click here to read a bit about it</a>.
-            </p>
-            <p>
-                Click the <em>Run</em> button to test your scraper and view the results.
-            </p>
-            <p>
-                Whilst you are working on your scraper click <em>Save draft</em> to back it up. When you are finished, click <em>Commit and publish</em> to share it with the world.
-            </p>
+            <div id="popup_intro" class="popup_item">
+                <div class="popup_header">
+                    <h2>Welcome to the ScraperWiki code editor</h2>
+                </div>
+                <div class="output">
+                    <p>
+                        Here you can write, test and debug your screen scrapers using the Python programming language. If you are not familiar with Python <a href="http://docs.python.org/tutorial/" target="_new">click here to read a bit about it</a>.
+                    </p>
+                    <p>
+                        Click the <em>Run</em> button to test your scraper and view the results.
+                    </p>
+                    <p>
+                        Whilst you are working on your scraper click <em>Save draft</em> to back it up. When you are finished, click <em>Commit and publish</em> to share it with the world.
+                    </p>
 
-            <a href="#" class="popupReady">Ready to start?</a>
-        </div>
-    </div>
+                    <a href="#" class="popupReady">Ready to start?</a>
+                </div>
+            </div>
 
-    <div id="popup_tutorials" class="popup_item">
-      <a class="popupClose">close</a>
-      <h3>Help and instructions</h3>            
-      <p class="descr">Scraperwiki is a collaborative wiki for web-scrapers.  
-                       See <a href="{% url help %}" target="_blank">FAQ</a> for details.</p>
-    
-      <table class="bicolumn">
-          <tr><td class="bicolumn">
-            {% ifequal scraper.language 'Python' %}
-              {% include 'frontend/inline_code_docs_python.html' %}
-            {% else %}
-              {% include 'frontend/inline_code_docs_php.html' %}
-            {% endifequal %}
-          </td><td class="bicolumn">
-            <h4>Handy tutorials</h4>
-            <p class="descr">Click on one to load it up.</p>
-            <dl>
-            {% for scraper in tutorial_scrapers %}
-            <dt>
-                <a href="#" class="scraper-tutorial-link" short_name="{{scraper.short_name}}"><b>{{scraper.title}}</b></a>
-            </dt>
-            <dd>
-              {{scraper.description}}
-            </dd>
-            {% endfor %}
-            </dl>
-          </td></tr>
-      </table>
-      <div class="popup_header"><a class="popupClose">close</a></div>
+            <div id="popup_tutorials" class="popup_item">
+              <a class="popupClose">close</a>
+              <h3>Help and instructions</h3>            
+              <p class="descr">Scraperwiki is a collaborative wiki for web-scrapers.  
+                               See <a href="{% url help %}" target="_blank">FAQ</a> for details.</p>
+
+              <table class="bicolumn">
+                  <tr><td class="bicolumn">
+                    {% ifequal scraper.language 'Python' %}
+                      {% include 'frontend/inline_code_docs_python.html' %}
+                    {% else %}
+                      {% include 'frontend/inline_code_docs_php.html' %}
+                    {% endifequal %}
+                  </td><td class="bicolumn">
+                    <h4>Handy tutorials</h4>
+                    <p class="descr">Click on one to load it up.</p>
+                    <dl>
+                    {% for scraper in tutorial_scrapers %}
+                    <dt>
+                        <a href="#" class="scraper-tutorial-link" short_name="{{scraper.short_name}}"><b>{{scraper.title}}</b></a>
+                    </dt>
+                    <dd>
+                      {{scraper.description}}
+                    </dd>
+                    {% endfor %}
+                    </dl>
+                  </td></tr>
+              </table>
+              <div class="popup_header"><a class="popupClose">close</a></div>
+            </div>
+        </form>
+        <div id="overlay"></div>        
     </div>
-</form>
-{% endblock %}
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+            var pageTracker = _gat._getTracker("UA-321882-15");
+            pageTracker._trackPageview();
+        } catch(err) {}
+    </script>
+</body>
+</html>
