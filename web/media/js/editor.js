@@ -28,6 +28,10 @@ $(document).ready(function() {
     var receiverecordqueue = [ ]; 
     var receivechatqueue = [ ]; 
 
+    $.ajaxSetup({
+        timeout: 10000,
+    });
+
     //constructor functions
     setupCodeEditor();
     setupMenu();
