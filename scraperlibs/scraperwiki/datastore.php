@@ -118,7 +118,7 @@ class SW_DataStoreClass
 #         date   = str(date)
 
       if (!is_null($latlng))
-         $latlng = sprintf ('%010.6f,%010.6f', $latlng[0], $latlan[1]) ;
+         $latlng = sprintf ('%010.6f,%010.6f', $latlng[0], $latlng[1]) ;
 
       # flatten everything into strings here rather than in the dataproxy/datalib
       #

@@ -32,7 +32,7 @@ class scraperwiki
    {
       $ds      = SW_DataStoreClass::create () ;
    
-      $result  = $ds->save ($unique_keys, $data, $date = null, $latlng = null) ;
+      $result  = $ds->save ($unique_keys, $data, $date, $latlng) ;
       if (! $result[0])
          throw new Exception ($result[1]) ;
    
