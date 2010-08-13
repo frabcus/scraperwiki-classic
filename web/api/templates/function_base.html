@@ -27,14 +27,16 @@
     </div>
     <div class="content col right">
         <h3>Useful values</h3>
-        {% if user.is_authenticated and keys %}
-            <h4>API keys</h4>
-            <ul id="ulApiKeys" class="api_suggest">
-		      {% for key in keys %}
-		        <li><code title="{{key.key}}">{{ key.key }}</code><br/><small>({{ key.description }})</small></li>
-		      {% endfor %}	                
-            </ul>
-        {% endif %}
+        {% comment %}
+            {% if user.is_authenticated and keys %}
+                <h4>API keys</h4>
+                <ul id="ulApiKeys" class="api_suggest">
+    		      {% for key in keys %}
+    		        <li><code title="{{key.key}}">{{ key.key }}</code><br/><small>({{ key.description }})</small></li>
+    		      {% endfor %}	                
+                </ul>
+            {% endif %}
+        {% endcomment %}
         <h4>Response formats</h4>
         <ul id="ulFormats" class="api_suggest">
             <li><code>json</code></li>

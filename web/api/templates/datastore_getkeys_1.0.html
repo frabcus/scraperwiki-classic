@@ -5,8 +5,10 @@
 {% block heading %}scraperwiki.datastore.getKeys{% endblock %}
 {% block subheading %}Returns the keys for a scraper{% endblock %}
 {% block arguments %}
-    <dt><code>key</code> (required)</dt>
-    <dd>A valid API key.{% if user.is_authenticated and keys %} <input type="text" name="key" id="key" />{% endif %}</dd>
+    {% comment %}
+        <dt><code>key</code> (required)</dt>
+        <dd>A valid API key.{% if user.is_authenticated and keys %} <input type="text" name="key" id="key" />{% endif %}</dd>
+    {% endcomment %}
     <dt><code>format</code> (required)</dt>
     <dd>The format you would like the response in. <input type="text" name="format" id="format" size="4"/></dd>
     <dt><code>name</code> (required)</dt>

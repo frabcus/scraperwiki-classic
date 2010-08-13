@@ -23,7 +23,7 @@ geo_postcode_to_latlng_handler = Resource(geo.PostcodeToLatLng)
 urlpatterns = patterns('',
 
     # Standard Views
-    url(r'^keys$', views.keys, name='keys'),
+    #url(r'^keys$', views.keys, name='keys'),
 
     #explorer
     url(r'^explorer_call$', views.explorer_user_run, name='explorer_call'),

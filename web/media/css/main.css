@@ -29,7 +29,7 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 #divMenu ul li {padding:0.3em 0.3em; list-style-type:none; font-weight:bold;}
 
 /* Content and columns */
-#divContent {padding-bottom:3em;border-left:solid 1px #9f9f9f;border-top:solid 1px #9f9f9f;padding:1em 0.8em 2em 0.8em;}
+#divContent {padding-bottom:3em;border-left:solid 1px #9f9f9f;border-top:solid 1px #9f9f9f;border-bottom:solid 1px #9f9f9f;padding:1em 0.8em 2em 0.8em; margin-bottom:3em;}
 .content {padding-top:1.3em;}
 .content.left, .content.right {float:left;}
 .content.half {width:50%;}
