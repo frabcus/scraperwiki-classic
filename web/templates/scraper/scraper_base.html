@@ -15,74 +15,11 @@
             {% if scraper.has_temporal %}                        
                 <img src="{{ MEDIA_URL }}/images/icons/date.png"/>
             {% endif %}
-	    </h1>	    
-    </div>
-    <div class="content col left">
-  	  {% if scraper.is_published %}
-  		  <p>Published</p>
-  	  {% endif %}
-
-  	  <div>
-					{% if user.is_authenticated %}
-	    {% if not user_owns_it   %}
-{% comment %} [APS: remove following/watching features for now]
-  					{% if user_follows_it %}
-  		  				<p>You are watching this scraper, and will be alerted if it changes or appears to be broken. 
-	
-							<form method="get" action="{% url scraper_unfollow scraper.short_name %}">
-                  				<input type="submit" value="Stop watching" />
-              				</form>
-						</p>
-
-  		   			{% else %} 
-
-             			<p>
-              				<form method="get" action="{% url scraper_follow scraper.short_name %}">
-                  				<input type="submit" value="Watch scraper" /> (You will be alerted if this scraper changes or appears to be broken)
-              				</form>
-              			</p> 
-					{% endif %}
-{% endcomment %} 
-  		   				{% else %} 
-						You own this scraper
-  						{% endif %}
-  						{% endif %}
-  	  </div>
-
-
+	    </h1>
     </div>
     <div class="content full">
         <div class="page_tabs">
-            <ul>
-                <li{% ifequal selected_tab "overview" %} class="selected"{% endifequal %}>
-                    <a href="{% url scraper_overview scraper.wiki_type scraper.short_name %}">Overview</a>
-                </li>
-                <li{% ifequal selected_tab "data" %} class="selected"{% endifequal %}>
-                    <a href="{% url scraper_data scraper.short_name %}">Data</a>
-                </li>
-                {% if scraper.has_geo %}
-                    <li{% ifequal selected_tab "map" %} class="selected"{% endifequal %}>
-                        <a href="{% url scraper_map scraper.short_name %}">Map</a>
-                    </li>
-                {% endif %}
-                <li{% ifequal selected_tab "code" %} class="selected"{% endifequal %}>
-                    <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}">Code</a>
-                </li>
-                <li{% ifequal selected_tab "history" %} class="selected"{% endifequal %}>
-                    <a href="{% url scraper_history scraper.short_name %}">History</a>
-                </li>
-                {% load comments %}
-                <li{% ifequal selected_tab "comments" %} class="selected"{% endifequal %}>
-                    <a href="{% url scraper_comments scraper.short_name %}">Notes &amp; questions 
-                       {% get_comment_count for scraper as cc %}({{ cc }})</a>
-                </li>
-                {% if user.is_authenticated %}
-                    <li{% ifequal selected_tab "admin" %} class="selected"{% endifequal %}>
-                        <a href="{% url scraper_admin scraper.short_name %}">Admin</a>
-                    </li>
-                {% endif %}
-            </ul>
-            
+            {% include 'scraper/includes/tabs.html' %}
         </div>
         <div class="page_tab_body">
                     

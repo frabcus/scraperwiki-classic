@@ -15,8 +15,8 @@ div.banner a {font-weight:bold;}
 ul.user_menu {float:right; margin:0; padding:0;}
 ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 
-.helplink {background:#f08a38; border:solid 1px #bf6312!important; padding:0.18em 0.4em!important;
-    border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;}
+.helplink {background:#f08a38; border:solid 1px #bf6312!important; padding:0.19em 0.4em!important;
+    border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; color:#fff;}
 .helplink a {text-decoration:none;color:#fff;}
 
 /* Header & menu */
@@ -132,8 +132,9 @@ div.page_title_narrow { width:600px;}
 
 /* Page tabs */
 div.page_tabs {clear:left;}
+div.page_tabs.small {font-size:0.8em;}
 div.page_tabs ul {border-bottom:solid 1px #ccc; height:1.65em; padding:0; margin:0;}
-div.page_tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
+div.page_tabs ul li {float:right; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
         border-top:solid 1px #ccc;border-left:solid 1px #ccc;border-right:solid 1px #ccc;}
 div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
         background:#fff;}
@@ -161,6 +162,9 @@ br.clear {clear:both;}
 .info_unpublished {display:block; height:97%; width:100%; text-align:center; padding-top:3%;
     position:absolute; top:0; left:0; font-weight:bold; color:#ccc; text-transform:uppercase;
     font-size:2em; background:url(../images/transparent.png) repeat 0 0; line-height:1.3em;}
+
+/* View pages */
+iframe.view {border:none;}
 
 /* Hide */
 .hide {display:none;}
@@ -330,4 +334,3 @@ div.mercurialcommitlog { padding-top:1em; font-size:80%; background-color:#e0e0e
 div.mercurialcommitlog span.history-user { padding-left:1em; }
 div.mercurialcommitlog h3 { padding:0; margin:0; font-style:italic; }
 div.mercurialcommitlog ul { padding:0; margin:0; }
-

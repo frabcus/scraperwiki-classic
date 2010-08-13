@@ -64,7 +64,7 @@ def save_code(code_object, user, code_text, bnew):
     mercurialinterface.save(code_object, code_text)
     rev = mercurialinterface.commit(code_object, message='', user=user)
     mercurialinterface.updatecommitalertsrev(rev)
-    
+
     # Add user roles
     if code_object.owner():
         if code_object.owner().pk != user.pk:
@@ -72,8 +72,7 @@ def save_code(code_object, user, code_text, bnew):
     else:
         code_object.add_user_role(user, 'owner')
 
-
-# Handle Session Draft  
+# Handle Session Draft
 # A non-served page for saving scrapers that have been stored in the session for non-signed in users
 def handle_session_draft(request, action):
 
@@ -84,7 +83,7 @@ def handle_session_draft(request, action):
 
     #check if anything in the session        
     session_scraper_draft = request.session.pop('ScraperDraft', None)
-    
+
     # shouldn't be here
     if not session_scraper_draft:
         response_url = reverse('frontpage')
@@ -166,12 +165,16 @@ def saveeditedscraper(request, lscraper):
 
 #Editor form
 def edit(request, short_name='__new__', wiki_type='scraper', language='Python', tutorial_scraper=None):
+
+    #return url (where to exit the editor to)
+    return_url = reverse('frontpage')
+
     # identify the scraper (including if there was a draft one backed up)
     has_draft = False
     if request.session.get('ScraperDraft', None):
         draft = request.session['ScraperDraft'].get('scraper', None)
         if draft:
-            has_draft  = True      
+            has_draft  = True
 
     commit_message = ''
     if has_draft:
@@ -184,6 +187,10 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
     elif short_name is not "__new__":
         scraper = get_object_or_404(CodeModel, short_name=short_name)
         code = scraper.saved_code()
+        if scraper.wiki_type == 'scraper':
+            return_url = reverse('scraper_overview', kwargs={'scraper_short_name': scraper.short_name})
+        else:
+            return_url = reverse('view_overview', kwargs={'short_name': scraper.short_name})
         #!commaseparatedtags = ", ".join([tag.name for tag in scraper.tags])
         if not scraper.published:
             commit_message = 'Scraper created'
@@ -229,4 +236,4 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
 
         tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
 
-        return render_to_response('editor/editor.html', {'form':form, 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft, 'user':request.user}, context_instance=RequestContext(request))
+        return render_to_response('editor/editor.html', {'form':form, 'return_url':return_url, 'selected_tab':'code', 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft, 'user':request.user}, context_instance=RequestContext(request))

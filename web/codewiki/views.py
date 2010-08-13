@@ -29,7 +29,7 @@ try:                import json
 except ImportError: import simplejson as json
 
 
-def overview(request, wiki_type, scraper_short_name):
+def scraper_overview(request, scraper_short_name):
     """
     Shows info on the scraper plus example data.
     """
@@ -262,12 +262,18 @@ def code(request, wiki_type, scraper_short_name):
 
     return render_to_response('scraper/code.html', dictionary, context_instance=RequestContext(request))
 
+def view_overview (request, short_name):
+    user = request.user
+    scraper = get_object_or_404(models.View.objects, short_name=short_name)
 
-def comments(request, scraper_short_name):
+    return render_to_response('scraper/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper}, context_instance=RequestContext(request))
+
+
+def comments(request, wiki_type, scraper_short_name):
 
     user = request.user
     scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
+        models.Code.objects, short_name=scraper_short_name)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -288,10 +294,10 @@ def comments(request, scraper_short_name):
     return render_to_response('scraper/comments.html', dictionary, context_instance=RequestContext(request))
 
 
-def scraper_history(request, scraper_short_name):
+def scraper_history(request, wiki_type, scraper_short_name):
 
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Code.objects, short_name=scraper_short_name)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -565,7 +571,7 @@ def twisterstatus(request):
         
         # updateable values of the object
         userscraperediting.twisterscraperpriority = client['scrapereditornumber']
-        
+
         # this condition could instead reference a running object
         if client['running'] and not userscraperediting.runningsince:
             userscraperediting.runningsince = datetime.datetime.now()
@@ -581,12 +587,54 @@ def twisterstatus(request):
             # or could use the field: closedsince  = models.DateTimeField(blank=True, null=True)
     return HttpResponse("Howdy ppp ")
 
+def rpcexecute_dummy(request, scraper_short_name):
+    response = HttpResponse()
+    response.write('''
+    <html>
+      <head>
+        <script type='text/javascript' src='http://www.google.com/jsapi'></script>
+        <script type='text/javascript'>
+          google.load('visualization', '1', {'packages':['annotatedtimeline']});
+          google.setOnLoadCallback(drawChart);
+          function drawChart() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('date', 'Date');
+            data.addColumn('number', 'Sold Pencils');
+            data.addColumn('string', 'title1');
+            data.addColumn('string', 'text1');
+            data.addColumn('number', 'Sold Pens');
+            data.addColumn('string', 'title2');
+            data.addColumn('string', 'text2');
+            data.addRows([
+              [new Date(2008, 1 ,1), 30000, undefined, undefined, 40645, undefined, undefined],
+              [new Date(2008, 1 ,2), 14045, undefined, undefined, 20374, undefined, undefined],
+              [new Date(2008, 1 ,3), 55022, undefined, undefined, 50766, undefined, undefined],
+              [new Date(2008, 1 ,4), 75284, undefined, undefined, 14334, 'Out of Stock','Ran out of stock on pens at 4pm'],
+              [new Date(2008, 1 ,5), 41476, 'Bought Pens','Bought 200k pens', 66467, undefined, undefined],
+              [new Date(2008, 1 ,6), 33322, undefined, undefined, 39463, undefined, undefined]
+            ]);
 
+            var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));
+            chart.draw(data, {displayAnnotations: true});
+          }
+        </script>
+      </head>
+
+      <body>
+        <div id='chart_div' style='width: 700px; height: 240px;'></div>
+
+      </body>
+    </html>
+    '''
+    )
+    print "fdsfdsdfs"
+    return response
+                        
 # quick hack the manage the RPC execute feature 
 # to test this locally you need to use python manage.py runserver twice, on 8000 and on 8010, 
 # and view the webpage on 8010
 def rpcexecute(request, scraper_short_name):
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(models.View.objects, short_name=scraper_short_name)
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
     failed = False
 
@@ -614,7 +662,7 @@ def rpcexecute(request, scraper_short_name):
     # append in the single line at the bottom that gets the rpc executed with the right function and arguments
     if func:
         runner.stdin.write("\n\n%s(**%s)\n" % (func, repr(rargs)))
-        
+
     runner.stdin.close()
 
     response = HttpResponse()
@@ -640,8 +688,8 @@ def rpcexecute(request, scraper_short_name):
     
 
 def htmlview(request, scraper_short_name):
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    return HttpResponse(scraper.saved_code())
+    view = get_object_or_404(models.View.objects, short_name=scraper_short_name)
+    return HttpResponse(view.saved_code())
 
 def run_event(request, event_id):
     event = get_object_or_404(models.ScraperRunEvent, id=event_id)

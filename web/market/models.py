@@ -13,7 +13,6 @@ from payment.models import payment_done
 import market
 import tagging
 
-
 def solicitation_paid(sender, invoice, **kwargs):
 
     solicitation = Solicitation.objects.get(id=invoice.parent_id, deleted=False)
@@ -38,7 +37,6 @@ class SolicitationStatus(models.Model):
 
     def __unicode__(self):
         return self.display_name
-
 
 class Solicitation(models.Model):
 

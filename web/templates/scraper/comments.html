@@ -3,7 +3,7 @@
 {% block tab %}
 {% load comments %}
 {% load gravatar %}
-<span style="float: right"><a href="/feeds/scraper_comments/{{ scraper.short_name }}">RSS feed of comments</a></span>
+<span style="float: right"><a href="/feeds/scraper_comments/{{ scraper.short_name }}">RSS feed of discussion</a></span>
   
 
  
@@ -12,7 +12,7 @@
     {% get_comment_form for scraper as form %}
 <h4>Add a comment or question about this scraper or the data it produces</h4>
 <form action="{% comment_form_target %}" method="post" class="add_comment">
-    <input type="hidden" name="next" value="{% url  scraper_comments scraper.short_name %}" />    
+    <input type="hidden" name="next" value="{% url  scraper_comments scraper.wiki_type scraper.short_name %}" />    
    {% show_gravatar user 'medium' %}
    <div>
     	<textarea name="comment" id="id_comment" rows="3"></textarea>

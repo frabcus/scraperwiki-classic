@@ -14,4 +14,4 @@
 </textarea>
 
 {% endblock %}
-{% block run_script %}setupDataMap({{data|safe}}, "http://{{domain}}{% url scraper_overview scraper.wiki_type scraper.short_name %}");{% endblock %}
+{% block run_script %}setupDataMap({{data|safe}}, "http://{{domain}}{% url scraper_overview scraper.short_name %}");{% endblock %}

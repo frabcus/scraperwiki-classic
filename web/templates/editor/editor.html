@@ -28,7 +28,6 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?"></script>
 </head>
 <body>
-
     <form method="POST" accept-charset="utf-8" id="editor" action="">
         <fieldset>
             {# Hidden inputs for passing to js #}
@@ -42,10 +41,8 @@
             {{form.wiki_type}}
         </fieldset>
         <div class="editor">
-
             <div id="divDraftSavedWarning" class="draft_warning" style="display:none;">
                 A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next={% url handle_session_draft 'save' %}">sign in or create an account</a>.
-                <!--Warning: this scraper has not been saved or committed. Click the save button or <a href="{% url delete_draft %}">discard changes</a>.-->
             </div>
             <div class="draft_warning"{% if not has_draft %} style="display:none;"{% endif %}>
                 Warning: this scraper has not been saved or committed. <a href="{% url login %}?next={% url handle_session_draft 'save' %}">Sign in or create an account</a> to save it permanently, or <a href="{% url delete_draft %}">discard changes</a>
@@ -54,26 +51,15 @@
             {# Header #}
             <div class="editor_header">
                 <div class="title">
-                    <a href="{% url frontpage %}">
+                    <a id="aCloseEditor" href="{{return_url}}" title="{% if scraper.short_name %}Return to {{ scraper.wiki_type }} page{% else %}Exit editor{% endif %}">
                         <img src="{{ MEDIA_URL }}/images/editor_logo.png" width="39" height="25"/>
                     </a>
                     {{ form.title }}
+                    <div class="page_tabs small">
+                        {% include 'scraper/includes/tabs.html' %}
+                    </div>
                 </div>
-            
-                <ul class="help">
-                    <li class="language"><code>{{scraper.wiki_type}}</code></li>
-                    <li class="language"><code>{{scraper.language}}</code></li>
-                    <li class="helplink">
-                        <a id="menu_tutorials" href="#" title="Load a helpful tutorial">Tutorials and help</a>
-                    </li>
-                    <li>
-                        {% if scraper.short_name %}
-                            <a id="aCloseEditor" href="{% url scraper_code scraper.wiki_type scraper.short_name %}" title="Return to scraper page">Exit editor</a>
-                        {% else %}
-                            <a id="aCloseEditor" href="{% url frontpage %}" title="Close editor">Exit editor</a>                
-                        {% endif %}
-                    </li>
-                </ul>          
+
             </div>
 
             {# Code editor #}
@@ -83,11 +69,16 @@
 
             {# Controls #}
             <div class="editor_controls">
+                <a id="menu_tutorials" class="helplink" href="#" title="Load a helpful tutorial">Tutorials and help</a>
                 <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
             
                 <div class="right">
+                    <ul class="help">
+                        <li class="language"><code>{{scraper.wiki_type}}</code></li>
+                        <li class="language"><code>{{scraper.language}}</code></li>
+                    </ul>
                     <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save {{scraper.wiki_type}}" title="Save and publish this scraperm  (Ctrl + S)"/>
                 </div>
             </div>

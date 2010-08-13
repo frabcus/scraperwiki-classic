@@ -61,7 +61,7 @@
     		    {% for scraper in featured_scrapers %}    
                     <div class="scroll_item">
                         <h4>
-                            <a href='{% url scraper_overview scraper.wiki_type scraper.short_name %}'>{{scraper.title}}</a>
+                            <a href='{% url scraper_overview scraper.short_name %}'>{{scraper.title}}</a>
                             {% if scraper.has_geo %}
                                 <a href="{% url scraper_data scraper.short_name %}">                                    
                                     <img src="{{ MEDIA_URL }}/images/icons/map.png"/>

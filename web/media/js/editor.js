@@ -668,7 +668,7 @@ $(document).ready(function() {
         );
     }
 
-    
+
     //Save
     function saveScraper(bCommit){
         var bSuccess = false;
