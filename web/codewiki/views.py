@@ -47,22 +47,25 @@ def scraper_overview(request, scraper_short_name):
     scraper_contributors = scraper.contributors()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    try:    offset = int(request.GET.get('i', 0))
-    except ValueError:   offset = 0
+    num_data_points = scraper.get_metadata('num_data_points')
+    if type(num_data_points) != types.IntType:
+        num_data_points = 50
 
-    table = models.Scraper.objects.data_summary(
-        scraper_id=scraper.guid,
-        limit=1,
-        offset=offset)
-    data = None
-    has_data = len(table['rows']) > 0
-    if has_data:
-        data = zip(table['headings'], table['rows'][0])
+    column_order = scraper.get_metadata('data_columns')
+    if not user_owns_it:
+        private_columns = scraper.get_metadata('private_columns')
+    else:
+        private_columns = None
 
-    chart_url = scraper.get_metadata('chart', '')
-    if not chart_url.startswith('http://chart.apis.google.com/chart?'):
-        chart_url = None
+    #get data for this scaper
+    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
+                                               limit=num_data_points, 
+                                               column_order=column_order,
+                                               private_columns=private_columns)
 
+    # replicates output from data_summary_tables
+    data_tables = {"": data }
+    has_data = len(data['rows']) > 0
     return render_to_response('scraper/overview.html', {
         'scraper_tags': scraper_tags,
         'selected_tab': 'overview',
@@ -72,7 +75,6 @@ def scraper_overview(request, scraper_short_name):
         'has_data': has_data,
         'data': data,
         'scraper_contributors': scraper_contributors,
-        'chart_url': chart_url,
         }, context_instance=RequestContext(request))
 
 def scraper_admin(request, scraper_short_name):
@@ -133,50 +135,6 @@ def scraper_delete_scraper(request, scraper_short_name):
     return HttpResponseRedirect(reverse('scraper_admin', args=[scraper_short_name]))
 
 
-def scraper_data(request, scraper_short_name):
-    #user details
-    user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
-
-    # Only logged in users should be able to see unpublished scrapers
-    if not scraper.published and not user.is_authenticated():
-        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
-
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
-    scraper_tags = Tag.objects.get_for_object(scraper)
-
-    num_data_points = scraper.get_metadata('num_data_points')
-    if type(num_data_points) != types.IntType:
-        num_data_points = settings.MAX_DATA_POINTS
-
-    column_order = scraper.get_metadata('data_columns')
-    if not user_owns_it:
-        private_columns = scraper.get_metadata('private_columns')
-    else:
-        private_columns = None
-
-    #get data for this scaper
-    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
-                                               limit=num_data_points, 
-                                               column_order=column_order,
-                                               private_columns=private_columns)
-
-    # replicates output from data_summary_tables
-    data_tables = {"": data }
-    has_data = len(data['rows']) > 0
-
-    return render_to_response('scraper/data.html', {
-      'scraper_tags': scraper_tags,
-      'selected_tab': 'data',
-      'scraper': scraper,
-      'user_owns_it': user_owns_it,
-      'user_follows_it': user_follows_it,
-      'data_tables': data_tables,
-      'has_data': has_data,
-      }, context_instance=RequestContext(request))
-
 
 def scraper_map(request, scraper_short_name, map_only=False):
     #user details
@@ -227,47 +185,11 @@ def scraper_map(request, scraper_short_name, map_only=False):
     }, context_instance=RequestContext(request))
 
 
-# saved_code to go
-# also make the diff with previous version and make the selection
-# check that all the non-loggedin logic still works
-
-def code(request, wiki_type, scraper_short_name):
-    print scraper_short_name
-    user = request.user
-    scraper = get_object_or_404(models.Code.objects, short_name=scraper_short_name)
-
-    # Only logged in users should be able to see unpublished scrapers
-    if not scraper.published and not user.is_authenticated():
-        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
-
-    try: rev = int(request.GET.get('rev', '-1'))
-    except ValueError: rev = -1
-    
-    mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
-    status = mercurialinterface.getstatus(scraper, rev)
-    
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
-    scraper_tags = Tag.objects.get_for_object(scraper)
-
-    dictionary = { 'scraper_tags': scraper_tags, 'selected_tab': 'code', 'scraper': scraper,
-                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
-                   
-    # overcome lack of subtract in template
-    if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
-        status["modifiedcommitdifference"] = status["filemodifieddate"] - status["prevcommit"]["date"]
-        
-    dictionary["status"] = status
-    dictionary["line_count"] = status["code"].count("\n") + 3
-
-    return render_to_response('scraper/code.html', dictionary, context_instance=RequestContext(request))
-
 def view_overview (request, short_name):
     user = request.user
     scraper = get_object_or_404(models.View.objects, short_name=short_name)
 
     return render_to_response('scraper/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper}, context_instance=RequestContext(request))
-
 
 def comments(request, wiki_type, scraper_short_name):
 

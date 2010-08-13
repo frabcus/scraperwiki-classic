@@ -655,7 +655,8 @@ $(document).ready(function() {
         );
 
         //close editor link
-        $('#aCloseEditor').click(
+
+        $('#aCloseEditor, .page_tabs a').click(
             function (){
                 var bReturn = true;
                 if (pageIsDirty){

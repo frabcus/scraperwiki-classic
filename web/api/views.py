@@ -75,6 +75,8 @@ def explore_datastore_search_1_0(request):
             
 def explore_scraper_getdata_1_0(request):
 
+    scraper_short_name = request.GET.get('name', '')
+
     scrapers = []
     user = request.user
     if user.is_authenticated():
@@ -84,7 +86,7 @@ def explore_scraper_getdata_1_0(request):
         users_keys = None
         scrapers = Scraper.objects.filter(deleted=False, published=True).order_by('first_published_at')[:5]
 
-    return render_to_response('scraper_getdata_1.0.html', {'keys' : users_keys, 'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdata')}, context_instance=RequestContext(request))
+    return render_to_response('scraper_getdata_1.0.html', {'keys' : users_keys, 'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdata'), 'scraper_short_name': scraper_short_name}, context_instance=RequestContext(request))
 
 def explore_scraper_getdatabydate_1_0(request):
 

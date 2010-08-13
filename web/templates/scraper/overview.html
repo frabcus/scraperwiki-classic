@@ -1,26 +1,71 @@
 {% extends "scraper/scraper_base.html" %}
 {% load humanize %}
 {% load sparkline %}
-
+{% load display_chart %}
 {% block tab %}
-<div class="content col left">
-    <h3>Description</h3>
-    <p>{{ scraper.description }}</p>
-    {% if has_data %}
-        <h3>Example data</h3>
-        <table class="raw_data">
-            {% for heading, value in data %}
-                <tr>
-                    <td>{{heading}}</td>
-                    <td>{{value}}</td>
-                </tr>
+<div class="content full">
+    <h2>Example data from this scraper</h2>
+    <div class="data_viewer">
+        {% if has_data %}
+            {% for table, data in data_tables.items %}
+            <div>
+                <table class="data">
+                    <thead>
+                        <tr>
+                            {% for heading in data.headings %}
+                                <th width="120">{{ heading }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data.rows %}
+                            <tr>
+                                {% for value in row %}
+                                    <td>{{ value|display_chart|truncatewords_html:30|urlizetrunc:30 }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}    
+                    </tbody>
+                </table>
+            </div>
             {% endfor %}
-        </table>
 
-    {% endif %}
+        {% else %}
+            <div class="data">
+            <table>
+                    <tbody>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    </tbody>
+                </table>
+            </div>
+    	    <div class="info_unpublished">
+                {% if scraper.published %}
+    	            This scraper is being worked on <br/>and there is no data to display yet
+                {% else %}
+    	            This scraper is being worked on <br/>but has not been published yet
+    	        {% endif %}
+    	    </div>
+
+
+        {% endif %}
+    </div>
 
 </div>
-<div class="content col right">
+<div class="content full">
+    <h2>Views using this data</h2>
+</div>
+<div class="content col left">
+    <h3>About this dataset</h3>
     <div class="metadata">
         <dl>
           <dt>Created by:</dt>
@@ -48,14 +93,11 @@
           &nbsp;</dd>
         </dl>
     </div>
+</div>
+<div class="content col right">
     <p>
-        {% if chart_url %}
-            <h4>Chart</h4>
-            <a href='{{chart_url}}'><img src='{{chart_url}}'/></a>
-        {% else %}
-            <h4>Recent activity</h4>
-            {% sparkline scraper.scraper_sparkline_csv 'medium' %}    
-        {% endif %}
+        <h3>Recent activity</h3>
+        {% sparkline scraper.scraper_sparkline_csv 'medium' %}    
     </p>
     <h4>Contributors</h4>
     <ul>
@@ -76,8 +118,4 @@
     </ul>
 </div>
 <br class="clear"/>
-{% endblock %}
-
-{% block run_script %}
-    setupCKANLink();
 {% endblock %}

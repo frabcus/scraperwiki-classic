@@ -2,8 +2,9 @@
 h1, h2, h3, h4, h5, h6 {padding:0; margin:0; }
 img {border:none;}
 
-body {text-align:center; padding:0; margin:0; font-family:Helvetica, arial, sans-serif;}
-#divPage {width:94%; text-align:left; margin:0 auto; position:relative; font-size:100%;}
+body {text-align:center; padding:0; margin:0; font-family:Helvetica, arial, sans-serif; background:#fafafa;}
+#divPage {text-align:left; margin:0 auto; position:relative; font-size:100%;margin-left:180px; background:#fff; 
+    clear:none;font-size:0.9em; padding-top:0.8em;}
 body.bold_body {background:#5f6060;}
 div.above_page {text-align:left;}
 
@@ -20,27 +21,23 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 .helplink a {text-decoration:none;color:#fff;}
 
 /* Header & menu */
-#divHeader {padding:0 1.5% 0 1.5%; margin-bottom:1em; width:97%;
-    position:relative;background:#fff; text-align:left;}
-#divLogo {height:84px; width:360px; }
+#divHeader {padding:0 1.5% 0 1.5%; margin-bottom:1em; width:150px; float:left;
+    position:relative;text-align:left;}
+#divLogo {height:149px; width:144px; }
 #divLogo p {margin:0; padding:10px 0 5px 0;}
-#divLogo p a {display:block; height:84px; width:360px; background:url(../images/logo.png) no-repeat; margin:0;}
-#divMenu {position:absolute; top:18px; right:1.5%; text-align:right; }
-#divMenu ul li {padding:0.3em 0.3em; list-style-type:none; display:inline; 
-    border-right:dotted 1px #808080; font-size:1.1em;
-    margin-right:0.3em;font-weight:bold;}
-#divMenu ul li.last {border:none;padding-right:0;margin-right:4px;}    
+#divLogo p a {display:block; height:129px; width:144px; background:url(../images/logo.png) no-repeat; margin:5px 0 0 0;}
+#divMenu ul li {padding:0.3em 0.3em; list-style-type:none; font-weight:bold;}
 
 /* Content and columns */
-#divContent {padding-bottom:3em; font-size:0.9em;}
+#divContent {padding-bottom:3em;border-left:solid 1px #9f9f9f;border-top:solid 1px #9f9f9f;padding:1em 0.8em 2em 0.8em;}
 .content {padding-top:1.3em;}
 .content.left, .content.right {float:left;}
 .content.half {width:50%;}
 .content.col.left {width:60%;}
-.content.col.right {width:37%; padding-left:3%;}
+.content.col.right {width:35%; padding-left:3%;}
 .content .section {padding:1em 0; border-bottom:dotted 1px #ccc;}
-.content h2 {padding-bottom:0.6em;font-size:1.7em;}
-.content h3 {padding-bottom:0.6em;}
+.content h2 {padding-bottom:0.6em;font-size:1.4em;}
+.content h3 {padding-bottom:0.6em;font-size:1.2em;}
 .content h4 {padding-bottom:0.6em;}
 
 /* Data scroller */
@@ -124,26 +121,27 @@ table.scrapersediting td { border: 1px solid black;}
 .flexigrid table {width:auto;}
 
 /* Page titles */
-div.page_title {border-bottom:dotted 1px #ccc; border-top:solid 1px #ccc;
-    padding-bottom:0.3em; padding-top:0.8em;margin-top:1em;}
+div.page_title {border-bottom:dotted 1px #ccc; padding:1em 0 0.5em 0; margin:0 0.8em; position:relative;}
 .page_controls {position:absolute; top:0.6em; right:0; text-align:right;}
-
 div.page_title_narrow { width:600px;}
+ul.title_links {position:absolute; top:0.6em; right:0;}
+ul.title_links li a {padding-left:20px;}
+ul.title_links li.csv a {background:url(../images/icons/csv_download.png) no-repeat;}
+ul.title_links li.api a {background:url(../images/icons/api.png) no-repeat;}
 
 /* Page tabs */
-div.page_tabs {clear:left;}
+div.page_tabs {background:#fafafa; padding-right:0.2em;height:1.65em; }
 div.page_tabs.small {font-size:0.8em;}
-div.page_tabs ul {border-bottom:solid 1px #ccc; height:1.65em; padding:0; margin:0;}
+div.page_tabs ul {padding:0; margin:0;}
 div.page_tabs ul li {float:right; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
-        border-top:solid 1px #ccc;border-left:solid 1px #ccc;border-right:solid 1px #ccc;}
+        border-top:solid 1px #9f9f9f;border-left:solid 1px #9f9f9f;border-right:solid 1px #9f9f9f;}
 div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
         background:#fff;}
+div.page_tabs ul li small {font-size:0.7em; position:relative; top:-0.2em;}        
 div.tab_tools {text-align:right; padding:0.8em 0.1em;}
 div.tab_tools form {padding:0 0.5em; display:inline;}
-div.page_tab_body {clear:left;}
 
 /* meta data */
-div.metadata {background:#ffffd7; padding:0.8em 1em;margin-bottom:1.8em;}
 div.metadata dl {padding:0; margin:0; line-height:1.5em;}
 div.metadata dt {float:left; font-weight:normal; font-style:italic;}
 div.metadata dd {position:relative; left:1em;}

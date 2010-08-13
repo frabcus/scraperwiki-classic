@@ -28,16 +28,6 @@ class ScraperViewsTests(TestCase):
                             kwargs={'scraper_short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
     
-    def test_scraper_data(self):
-        response = self.client.get(reverse('scraper_data', 
-                            kwargs={'scraper_short_name': 'test_scraper'}))
-        self.assertEqual(response.status_code, 200)
-    
-    def test_scraper_code(self):
-        response = self.client.get(reverse('scraper_code', 
-                            kwargs={'scraper_short_name': 'test_scraper'}))
-        self.assertEqual(response.status_code, 200)
-    
     def test_scraper_history(self):
         response = self.client.get(reverse('scraper_history',
                             kwargs={'scraper_short_name': 'test_scraper'}))

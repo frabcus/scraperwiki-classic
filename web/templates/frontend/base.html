@@ -93,7 +93,10 @@
 				</ul>
 
 			</div>
-			<div id="divInfo">
+	    </div>
+	    {% block above_page %}{% endblock %}		    
+		<div id="divPage">
+		    <div id="divInfo">
 		        {% if info_messages %}
                      <ul>
                          {% for info in info_messages %}
@@ -124,12 +127,14 @@
 		            
     		    {% endblock %}		    
     		</div>
-	    </div>
-	    {% block above_page %}{% endblock %}		    
-		<div id="divPage">
+    		
+    		<div class="page_tabs">
+                {% block tabs %}{% endblock %}
+            </div>
+            
 		    <div id="divContent">
-          
-  		    {% block content %}{% endblock %}
+  		        {% block content %}{% endblock %}
+  		        <br class="clear"/>
 		    </div>
 		</div>			
 		{% block footer %}

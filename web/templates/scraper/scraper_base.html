@@ -3,12 +3,15 @@
 {% block title %}{{ scraper.title }}{% endblock %}
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/scraper_comments/{{ scraper.short_name }}" />{% endblock %}
 
+{% block tabs %}
+    {% include 'scraper/includes/tabs.html' %}
+{% endblock %}
 {% block content %}
     <div class="page_title">
 	    <h1>
 	        {{ scraper.title }}
 	        {% if scraper.has_geo %}
-                <a href="{% url scraper_map scraper.short_name %}">	        
+                <a href="{% url scraper_map scraper.short_name %}">	
                     <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
                 </a>
             {% endif %}
@@ -16,11 +19,15 @@
                 <img src="{{ MEDIA_URL }}/images/icons/date.png"/>
             {% endif %}
 	    </h1>
+        <p>{{ scraper.description }}</p>
+        {% ifequal scraper.wiki_type 'scraper'%}
+            <ul class="title_links">
+                <li class="csv"><a href="{% url export_csv scraper.short_name %}">Download this dataset (CSV)</a></li>
+                <li class="api"><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>            
+            </ul>
+        {% endifequal %}
     </div>
     <div class="content full">
-        <div class="page_tabs">
-            {% include 'scraper/includes/tabs.html' %}
-        </div>
         <div class="page_tab_body">
                     
             {% block tab %}
