@@ -67,7 +67,7 @@ class Scraper (code.Code):
             sparkline_days = created_difference.days
 
         #minimum of 1 day
-        recent_record_count = Scraper.objects.recent_record_count(self.guid, parkline_days)
+        recent_record_count = Scraper.objects.recent_record_count(self.guid, sparkline_days)
         self.scraper_sparkline_csv = ",".join("%d" % count for count in recent_record_count)
 
     def save(self, *args, **kwargs):

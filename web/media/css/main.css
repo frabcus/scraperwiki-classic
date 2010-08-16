@@ -128,6 +128,8 @@ ul.title_links {position:absolute; top:0.6em; right:0;}
 ul.title_links li a {padding-left:20px;}
 ul.title_links li.csv a {background:url(../images/icons/csv_download.png) no-repeat;}
 ul.title_links li.api a {background:url(../images/icons/api.png) no-repeat;}
+ul.title_links li.full_screen a {background:url(../images/icons/zoom.png) no-repeat;}
+ul.title_links li.embed a {background:url(../images/icons/script_code_red.png) no-repeat;}
 
 /* Page tabs */
 div.page_tabs {background:#fafafa; padding-right:0.2em;height:1.65em; }

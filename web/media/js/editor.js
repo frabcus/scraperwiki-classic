@@ -732,7 +732,7 @@ $(document).ready(function() {
 
                         // redirect somewhere
                         if (res.url && window.location.pathname != res.url) {
-                            //window.location = res.url;
+                            window.location = res.url;
                         };
 
                         if (res.draft != 'True') {

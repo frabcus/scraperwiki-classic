@@ -1,4 +1,5 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en">
 <head>
     <title>{{ scraper.title }} | ScraperWiki</title>
@@ -56,8 +57,11 @@
                     </a>
                     {{ form.title }}
                     <div class="page_tabs small">
-                        {% include 'scraper/includes/tabs.html' %}
+                        {% if scraper.short_name %}
+                            {% include 'scraper/includes/tabs.html' %}
+                        {% endif %}
                     </div>
+                    <span id="border_hide"></span>
                 </div>
 
             </div>

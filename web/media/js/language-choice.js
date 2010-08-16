@@ -16,7 +16,7 @@ $(function(){
         if(!$('#langDialog').dialog('isOpen')){
           $('#langDialog').dialog('open');
           $('#languageOK').click(function(){
-              window.location.replace('/editor/new/scraper/' + $("input[name='languages']:checked").val());
+              window.location.replace('/scrapers/new/' + $("input[name='languages']:checked").val());
           });
         }
         return false;
@@ -26,7 +26,7 @@ $(function(){
         if(!$('#langDialog').dialog('isOpen')){
           $('#langDialog').dialog('open');
           $('#languageOK').click(function(){
-              window.location.replace('/editor/new/view/' + $("input[name='languages']:checked").val());
+              window.location.replace('/views/new/' + $("input[name='languages']:checked").val());
           });
         }
         return false;

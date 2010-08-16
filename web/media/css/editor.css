@@ -6,18 +6,20 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
     border-bottom:solid 1px #c38938;color:#000;}
 
 /* Header */
-.editor_header {background:#fafafa; position:relative;border-bottom:solid #9f9f9f 1px}
+.editor_header {background:#fafafa; position:relative;border-bottom:solid #9f9f9f 1px;}
 .editor_header div.title input {font-weight:bold; font-size:1em; padding:0 0 0 0; color:#000;
         border:solid 2px transparent; background:none; width:30%;margin-left:2px;position:relative;top:-5px;}
 .editor_header div.title img {margin:5px 0 0 10px;}        
 .editor_header div.title input:focus {background:#fff; border:inset 2px;outline:none; color:#000;}
 .editor_header div.title input:hover {background:#ffffd3;color:#000;}
-.editor_header div.page_tabs {position:absolute; bottom:-2px; right:0;}
+.editor_header div.page_tabs {position:absolute; bottom:0px; right:0;}
 .editor_header div.page_tabs li {border-color:#9f9f9f;}
 .editor_header div.page_tabs ul {border-bottom-color:#9f9f9f;}
+.editor_header #border_hide {background:#fafafa;position:absolute; display:block; width:2.85em; height:3px;
+    bottom:-2px; left:0;}
 
 /* Code */
-.editor_code {padding:0;border:none;position:relative;height:500px;width:100%;}
+.editor_code {padding:0;border:none;position:relative;height:500px;width:100%; }
 .CodeMirror-line-numbers {width: 2.2em;color: #888;background:#fafafa;text-align: right;
         padding: 0.4em 1.1em 0 0.2em;margin: 0;font-family: monaco, monospace;font-size: 10pt;line-height: 1.1em;
         border-right:solid 1px #9f9f9f;position:relative;}

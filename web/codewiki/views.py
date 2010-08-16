@@ -190,6 +190,13 @@ def view_overview (request, short_name):
     scraper = get_object_or_404(models.View.objects, short_name=short_name)
 
     return render_to_response('scraper/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper}, context_instance=RequestContext(request))
+    
+    
+def view_fullscreen (request, short_name):
+    user = request.user
+    scraper = get_object_or_404(models.View.objects, short_name=short_name)
+
+    return render_to_response('scraper/view_fullscreen.html', {'scraper': scraper}, context_instance=RequestContext(request))
 
 def comments(request, wiki_type, scraper_short_name):
 
@@ -542,7 +549,7 @@ def rpcexecute_dummy(request, scraper_short_name):
         </script>
       </head>
 
-      <body>
+      <body style="height:10000px;">
         <div id='chart_div' style='width: 700px; height: 240px;'></div>
 
       </body>

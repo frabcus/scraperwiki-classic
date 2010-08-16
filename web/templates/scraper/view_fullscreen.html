@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>{{scraper.title}}</title>
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>	
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.autoheight.js"></script>		
+	<style>
+	    body {padding:none; margin:0;}
+	    #full_bar {border-bottom:solid 1px #ddd; background:#fafafa;padding:3px; height:20px; font-family:helvetica, arial, sans-serif;}
+	    #full_bar h1 {font-size:1em; margin:0; padding:0 0 0 0.3em;}
+	    #full_bar a {color:#808080; text-decoration:none;}
+        #full_bar a:hover {text-decoration:underline;color:#2680c6;}
+	    .hide {display:none;}
+	    iframe.view {border:none;}
+	    #powered {display:block;width:175px; height:20px; background:url(/media/images/powered.png) no-repeat;
+	        position:absolute; right:2em; top:5px;}
+	    #close {position:absolute; right:1em; top:4px;}
+	</style>
+</head>
+<body>
+    <div id="full_bar">
+        <h1><a href="{%url view_overview scraper.short_name %}">{{scraper.title}}</a></h1>
+        <fb:like href="http://localhost:8000/views/hgfhgf/full" layout="button_count" font="arial"></fb:like>
+        <a href="{%url frontpage %}" id="powered"><span class="hide">Powered by ScraperWiki</span></a>
+        <a id="close" href="{% url rpcexecute scraper.short_name %}">x</a>
+    </div>
+    <iframe class="view autoHeight" width="100%" height="100%" src="{% url rpcexecute scraper.short_name %}">
+        
+    </iframe>
+</body>
+</html>

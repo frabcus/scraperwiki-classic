@@ -23,7 +23,13 @@
         {% ifequal scraper.wiki_type 'scraper'%}
             <ul class="title_links">
                 <li class="csv"><a href="{% url export_csv scraper.short_name %}">Download this dataset (CSV)</a></li>
-                <li class="api"><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>            
+                <li class="api"><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>
+            </ul>
+        {% endifequal %}
+        {% ifequal scraper.wiki_type 'view'%}
+            <ul class="title_links">
+                <li class="full_screen"><a href="{% url view_fullscreen scraper.short_name %}">View full page</a></li>
+                <li class="embed"><a href="#" title="click to hide this bar">Add to your site</a></li>                
             </ul>
         {% endifequal %}
     </div>
