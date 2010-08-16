@@ -180,6 +180,6 @@ MAX_MAP_POINTS = 2500
 MAX_DATA_POINTS = 500
 
 try:
-    REVISION = open('revision.txt').read()[:-1]
+    REVISION = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'revision.txt')).read()[:-1]
 except:
     REVISION = ""

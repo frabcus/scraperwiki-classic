@@ -73,7 +73,7 @@ def update_revision():
     """
     Put the current HG revision in a file so that Django can use it to avoid caching JS files
     """
-    virtualenv("hg identify | awk '{print $1} > web/revision.txt'")
+    virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
 
 def install_cron():
     virtualenv('crontab crontab')
