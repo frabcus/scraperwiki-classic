@@ -231,7 +231,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     def blockmessage(self, url):
 
         qurl = urllib.quote(url)
-        return """Scraperwiki blocked access to "%s".""" % (url, qurl)
+        return """Scraperwiki blocked access to "%s".""" % (qurl)
 
 
     def do_CONNECT (self) :
@@ -472,7 +472,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 failedmessage = 'Failed: (code missing)'
             
             self.notify (self.connection.getpeername()[0], runid = runID, url = self.path, failedmessage = failedmessage, bytes = bytes, cacheid = cacheid, cached = (used == 'CACHED'))
-            
+
             self.connection.sendall (page)
             self.connection.close()
 
@@ -526,7 +526,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     def do_GET (self) :
 
+        print "XXXGET ...."
         self.retrieve ("GET" )
+        print "XXXDONE GET ...."
 
     def do_POST (self) :
 
@@ -543,12 +545,12 @@ class HTTPSProxyHandler (HTTPProxyHandler) :
         self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
         self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
 
-
 class HTTPProxyServer \
         (   SocketServer.ThreadingMixIn,
             BaseHTTPServer.HTTPServer
         ) :
-    pass
+
+
 
 class HTTPSProxyServer (HTTPProxyServer) :
 
@@ -569,8 +571,8 @@ class HTTPSProxyServer (HTTPProxyServer) :
 
 def execute () :
 
-    HTTPProxyHandler.protocol_version  = "HTTP/1.1"
-    HTTPSProxyHandler.protocol_version = "HTTPS/1.1"
+    HTTPProxyHandler.protocol_version  = "HTTP/1.0"
+    HTTPSProxyHandler.protocol_version = "HTTPS/1.0"
 
     port = config.getint (varName, 'port')
 

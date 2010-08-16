@@ -83,6 +83,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.m_runID        = None
         self.m_uid          = None
         self.m_gid          = None
+        self.m_paths        = []
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
@@ -242,19 +243,18 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
     def addPaths (self) :
 
         """
-        Add directories to the python search path.
+        Add directories to the search path.
         command.
         """
 
         for name, value in self.headers.items() :
             if name[:8] == 'x-paths-' :
-                sys.path.append (value)
+                self.m_paths.append (value)
 
     def addEnvironment (self) :
 
         """
-        Add directories to the python search path.
-        command.
+        Add stuff to the environment
         """
 
         for name, value in self.headers.items() :
@@ -535,7 +535,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                     '--https=http://%s:%s'      % (tap,  httpport),
                     '--ftp=ftp://%s:%s'         % (tap,  ftpport ),
                     '--ds=%s:%s'                % (dshost, dsport),
-                    '--path=%s'                 % string.join(sys.path, ':'),
+                    '--path=%s'                 % string.join(self.m_paths, ':'),
                     '--script=/tmp/scraper.%d'  % os.getpid(),
                 ]
 
@@ -817,6 +817,10 @@ class ScraperController (BaseController) :
 
         if language == 'php'    :
             self.execScript  ('php', fs['script'].value, psock[1].fileno(), lpipe[1])
+            return
+
+        if language == 'ruby'   :
+            self.execScript  ('rb',  fs['script'].value, psock[1].fileno(), lpipe[1])
             return
 
         self.wfile.write \
