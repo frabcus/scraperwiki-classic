@@ -165,6 +165,7 @@ TEMPLATE_SETTINGS = [
  'ORBETED_DOMAIN',
  'MAX_DATA_POINTS',
  'MAX_MAP_POINTS',
+ 'REVISION',
 ]
 
 #sparklines and graphs
@@ -177,3 +178,8 @@ except Exception, e:
 
 MAX_MAP_POINTS = 2500
 MAX_DATA_POINTS = 500
+
+try:
+    REVISION = open('revision.txt').read()[:-1]
+except:
+    REVISION = ""
