@@ -14,6 +14,7 @@ module ScraperWiki
 
     def ScraperWiki.dumpMessage(hash)
         $logfd.write(JSON.generate(hash) + "\n")
+        $logfd.flush()
     end
 
     def ScraperWiki.save(unique_keys, data, date = nil, latlng = nil)

@@ -143,6 +143,9 @@ end
 require	'scraperwiki'
 
 $logfd  = IO.new(3)
+$stdout = ConsoleStream.new($logfd)
+$stderr = ConsoleStream.new($logfd)
+
 
 if cache
     ScraperWiki.allowCache(cache) ;
