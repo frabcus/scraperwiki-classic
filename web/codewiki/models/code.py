@@ -39,6 +39,7 @@ WIKI_TYPES = (
 class Code(models.Model):
 
     # model fields
+    relations = models.ManyToManyField("self")    
     title             = models.CharField(max_length=100, 
                                         null=False, 
                                         blank=False, 
@@ -205,7 +206,7 @@ class UserCodeRole(models.Model):
     def __unicode__(self):
         return "Scraper_id: %s -> User: %s (%s)" % \
                                         (self.code, self.user, self.role)
-                                        
+                                                                                
 class CodeCommitEvent(models.Model):
     revision = models.IntegerField()
 

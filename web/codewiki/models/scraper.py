@@ -19,6 +19,7 @@ from frontend import models as frontendmodels
 import codewiki.util
 import codewiki.vc
 import code
+import view
 
 try:
     import json
@@ -36,6 +37,7 @@ class Scraper (code.Code):
     record_count = models.IntegerField(default=0)        
     scraper_sparkline_csv = models.CharField(max_length=255, null=True)
     run_interval = models.IntegerField(default=86400)
+    views = models.ManyToManyField(view.View)    
 
     objects = managers.scraper.ScraperManager()
 
@@ -46,7 +48,7 @@ class Scraper (code.Code):
         
     def count_records(self):
         return int(Scraper.objects.item_count(self.guid))
-        
+
 
     # update scraper meta data (lines of code etc)    
     def update_meta(self):

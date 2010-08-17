@@ -22,7 +22,7 @@
 </head>
 <body>
     <div id="full_bar">
-        <h1><a href="{%url view_overview scraper.short_name %}">{{scraper.title}}</a></h1>
+        <h1><a href="{%url view_overview scraper.short_name %}" title="Go to overview page">{{scraper.title}}</a></h1>
         <fb:like href="http://localhost:8000/views/hgfhgf/full" layout="button_count" font="arial"></fb:like>
         <a href="{%url frontpage %}" id="powered"><span class="hide">Powered by ScraperWiki</span></a>
         <a id="close" href="{% url rpcexecute scraper.short_name %}">x</a>

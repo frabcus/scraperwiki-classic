@@ -58,6 +58,7 @@ def frontpage(request, public_profile_field=None):
     good_contribution_scrapers = []
     # cut number of scrapers displayed on homepage down to the most recent 10 items
     my_scrapers = my_scrapers[:10]
+    #print my_scrapers[0].related_codes.add(my_scrapers[1])
     has_scrapers = len(my_scrapers) > 0
     # also need to add filtering to limit to public published scrapers
     for scraper in contribution_scrapers:

@@ -4,6 +4,7 @@ import time
 import settings
 import tagging
 import code
+import scraper
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
@@ -17,6 +18,7 @@ except:
 class View (code.Code):
 
     mime_type = models.CharField(max_length=255, null=True)
+    
 
     def __init__(self, *args, **kwargs):
         super(View, self).__init__(*args, **kwargs)
