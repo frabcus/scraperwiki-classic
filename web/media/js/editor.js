@@ -28,6 +28,10 @@ $(document).ready(function() {
     var receiverecordqueue = [ ]; 
     var receivechatqueue = [ ]; 
 
+    $.ajaxSetup({
+        timeout: 10000,
+    });
+
     //constructor functions
     setupCodeEditor();
     setupMenu();
@@ -68,22 +72,6 @@ $(document).ready(function() {
             autoMatchParens: true,
             width: '100%',
             parserConfig: {'pythonVersion': 2, 'strictErrors': true},
-            saveFunction: function () {    // this is your Control-S function
-              $.ajax({
-                type : 'POST',
-                URL : window.location.pathname,
-                data: ({
-                  title : $('#id_title').val(),
-                  code : codeeditor.getCode(),
-                  action : 'save'
-                  }),
-                dataType: "html",
-                success: function(){
-                    
-                      }
-                  });
-              },
-              
             onChange: function (){
                 pageIsDirty = true; // note that code has changed
             },

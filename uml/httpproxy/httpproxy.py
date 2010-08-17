@@ -296,7 +296,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
 
         scraperID, runID, cache = self.ident ()
-        print "===>", scraperID, runID, cache
         self.swlog().log (scraperID, runID, 'P.GET', arg1 = self.path)
 
         if path == '' or path is None :
@@ -442,7 +441,13 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                                 ''',
                                 [   ctag, self.path, page, 1, scraperID, runID    ]
                             )
-                        cacheid = c.lastrowid
+                        def iid (cursor) :
+                            try    : return cursor.lastrowid
+                            except : pass
+                            try    : return cursor.insert_id()
+                            except : pass
+                            return None
+                        cacheid = iid(cursor)
             finally :
                 if soc is not None :
                     soc.close()

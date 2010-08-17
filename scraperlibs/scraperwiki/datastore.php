@@ -100,7 +100,7 @@ class SW_DataStoreClass
    function save ($unique_keys, $scraper_data, $date = null, $latlng = null)
    {
       if (!is_null($unique_keys) && !is_array($unique_keys))
-         return array (false, 'unique_keys must be None, or a list or tuple') ;
+         return array (false, 'unique_keys must be null, or an array') ;
 #
 #     if date   is not None :
 #        if type(date) not in [ datetime.datetime, datetime.date ] :
@@ -109,16 +109,16 @@ class SW_DataStoreClass
       if (!is_null($latlng))
       {
          if (!is_array($latlng) || count($latlng) != 2)
-            return array (false, 'latlng must be a (float,float) list or tuple') ;
+            return array (false, 'latlng must be a (float,float) array') ;
          if (!is_numeric($latlng[0]) || !is_numeric($latlng[1]) )
-            return array (false, 'latlng must be a (float,float) list or tuple') ;
+            return array (false, 'latlng must be a (float,float) array') ;
       }
 
 #     if date   is not None :
 #         date   = str(date)
 
       if (!is_null($latlng))
-         $latlng = sprintf ('%010.6f,%010.6f', $latlng[0], $latlan[1]) ;
+         $latlng = sprintf ('%010.6f,%010.6f', $latlng[0], $latlng[1]) ;
 
       # flatten everything into strings here rather than in the dataproxy/datalib
       #
