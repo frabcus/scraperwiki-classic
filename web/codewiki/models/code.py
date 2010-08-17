@@ -28,7 +28,6 @@ LANGUAGES = (
     ('Python', 'Python'),
     ('PHP', 'PHP'),
     ('Ruby', 'Ruby'),
-    ('HTML', 'HTML'),
 )
 
 WIKI_TYPES = (

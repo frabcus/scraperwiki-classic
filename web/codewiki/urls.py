@@ -30,11 +30,13 @@ urlpatterns = patterns('',
     url(r'^views/(?P<scraper_short_name>[\w_\-]+)/run/$', views.rpcexecute_dummy, name='rpcexecute'),
     url(r'^views/(?P<scraper_short_name>[\w_\-]+)/html/$',       views.htmlview,   name='htmlview'),
     url(r'^views/(?P<short_name>[\w_\-]+)/full/$',        views.view_fullscreen,                 name='view_fullscreen'),    
-    
 
     url(r'^scrapers/metadata_api/', include('codewiki.metadata_api.urls')),
 
     url(r'^scrapers/run/(?P<event_id>[\w_\-]+)/$', views.run_event, name='run_event'),
     url(r'^scrapers/commit/(?P<event_id>\d+)/$', views.commit_event, name='commit_event'),
     url(r'^scrapers/running_scrapers/$', views.running_scrapers, name='running_scrapers'),
+
+    url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$', views.choose_template, name='choose_template'),    
+    url(r'^(?P<wiki_type>scraper|view)s/new/chosen_template/$', views.chosen_template, name='chosen_template'),        
 )

@@ -1,0 +1,23 @@
+<div class="blog_latest">
+    <div class="blog_headline">
+        {% if headline_image_url %}
+            <div class="image_wrap">
+                <img src="{{headline_image_url}}"/>
+            </div>
+        {% endif %}
+        <h5><a href="{{headline.link}}">{{headline.title}}</a></h5>
+        {% autoescape off %}
+            <p>{{headline.summary}}</p>
+        {% endautoescape %}
+    </div>    
+    <div class="blog_subs">
+        <h5>More from the data blog ...</h5>
+        <ul>
+            {% for sub in subs %}
+                <li>
+                    <a href="{{sub.link}}">{{sub.title}}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

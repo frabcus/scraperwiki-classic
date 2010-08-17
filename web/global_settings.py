@@ -177,3 +177,5 @@ except Exception, e:
 
 MAX_MAP_POINTS = 2500
 MAX_DATA_POINTS = 500
+
+BLOG_FEED = 'http://blog.scraperwiki.com/feed/'

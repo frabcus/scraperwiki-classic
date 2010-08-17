@@ -18,7 +18,6 @@ except:
 class View (code.Code):
 
     mime_type = models.CharField(max_length=255, null=True)
-    
 
     def __init__(self, *args, **kwargs):
         super(View, self).__init__(*args, **kwargs)
@@ -27,7 +26,7 @@ class View (code.Code):
     def save(self, *args, **kwargs):
         self.wiki_type = 'view'
         super(View, self).save(*args, **kwargs)
-    
+
 
 #register tagging
 try:

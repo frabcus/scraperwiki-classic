@@ -14,7 +14,7 @@ from django.conf import settings
 
 from codewiki import models
 from codewiki import forms
-from codewiki.forms import SearchForm
+from codewiki.forms import SearchForm, ChooseTemplateForm
 import vc
 
 import frontend
@@ -605,16 +605,16 @@ def rpcexecute(request, scraper_short_name):
                 response.write("<h3>%s</h3>\n" % str(message["jtraceback"].get("exceptiondescription")).replace("<", "&lt;"))
                 for stackentry in message["jtraceback"]["stackdump"]:
                     response.write("<h3>%s</h3>\n" % re.replace("<", "&lt;", str(stackentry).replace("<", "&lt;")))
-            
+
             # recover the message from all the escaping
             if message['message_type'] == "console" and message.get('message_sub_type') != 'consolestatus':
                 response.write(message["content"])
-        
+
         except:
             pass
         
     return response
-    
+
 
 def htmlview(request, scraper_short_name):
     view = get_object_or_404(models.View.objects, short_name=scraper_short_name)
@@ -631,3 +631,15 @@ def commit_event(request, event_id):
 def running_scrapers(request):
     events = models.ScraperRunEvent.objects.filter(run_ended=None)
     return render_to_response('scraper/running_scrapers.html', {'events': events}, context_instance=RequestContext(request))
+
+def choose_template(request, wiki_type):
+    form = forms.ChooseTemplateForm(wiki_type)
+    return render_to_response('scraper/ajax/choose_template.html', {'wiki_type': wiki_type, 'form': form}, context_instance=RequestContext(request))
+
+def chosen_template(request, wiki_type):
+    template = request.GET.get('template', None)
+    language = request.GET.get('language', None)
+    template_arg = ''
+    if template:
+        template_arg = '?template=' + template
+    return HttpResponseRedirect(reverse('editor', args=(wiki_type, language)) + template_arg)

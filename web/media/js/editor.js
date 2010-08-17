@@ -20,7 +20,6 @@ $(document).ready(function() {
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
-    var cookieOptions = { path: '/views', expires: 90};    
     var popupStatus = 0
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 
@@ -38,7 +37,6 @@ $(document).ready(function() {
     setupToolbar();
     setupDetailsForm();
     setupResizeEvents();
-    showIntro();
 
     //setup code editor
     function setupCodeEditor(){
@@ -290,14 +288,6 @@ $(document).ready(function() {
             return false;
         });
         */
-    }
-
-    function showIntro(){
-        if($.cookie('scraperwiki.editor.intro') == null){
-            showPopup('popup_intro');
-        }
-        $.cookie('scraperwiki.editor.intro', 1, cookieOptions);                    
-
     }
 
     conn.onopen = function(code){

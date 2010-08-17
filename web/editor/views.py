@@ -215,13 +215,12 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
             startupcode = startup_scraper.saved_code()
             language = startup_scraper.language
         else:
-            # select a startup scraper code randomly from those with the right flag
-            startup_scrapers = ScraperModel.objects.filter(published=True, isstartup=True, language=language)
-            if len(startup_scrapers):
-                startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
+            if request.GET.get('template', False):
+                startup_scrapers = ScraperModel.objects.filter(published=True, isstartup=True, language=language, short_name=request.GET.get('template', False))
+                if len(startup_scrapers):
+                    startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
 
         scraper.language = language
-    
         code = startupcode
         commaseparatedtags = ''
 

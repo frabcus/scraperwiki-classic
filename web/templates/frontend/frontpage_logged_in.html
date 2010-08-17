@@ -5,7 +5,7 @@
 {% block content  %}
 
 {% load gravatar %}
-
+            
 <div class="page_title">
 	<h1><span class="text">Hello {{ user.get_profile.name }}</span></h1>
 
@@ -93,6 +93,9 @@
 	
 
 </div>
-
+<div class="content full">
+    {% load blog_latest %}
+    {% blog_latest %}
+</div>
 {% endblock %}
 {% block run_script %}setupIntroSlideshow(); setupScroller();{% endblock %}

@@ -6,24 +6,40 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>{{scraper.title}}</title>
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>	
-	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.autoheight.js"></script>		
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.autoheight.js"></script>	
 	<style>
 	    body {padding:none; margin:0;}
-	    #full_bar {border-bottom:solid 1px #ddd; background:#fafafa;padding:3px; height:20px; font-family:helvetica, arial, sans-serif;}
-	    #full_bar h1 {font-size:1em; margin:0; padding:0 0 0 0.3em;}
+	    #full_bar {border-bottom:solid 1px #ddd; background:#fafafa;padding:3px; height:23px; font-family:helvetica, arial, sans-serif;}
+	    #full_bar h1 {font-size:1em; margin:0; padding:0.2em 0 0 0.3em;}
 	    #full_bar a {color:#808080; text-decoration:none;}
         #full_bar a:hover {text-decoration:underline;color:#2680c6;}
+        #full_bar #share_links {position:absolute;top:5px; right:175px;padding:0;margin:0;}
 	    .hide {display:none;}
 	    iframe.view {border:none;}
 	    #powered {display:block;width:175px; height:20px; background:url(/media/images/powered.png) no-repeat;
-	        position:absolute; right:2em; top:5px;}
-	    #close {position:absolute; right:1em; top:4px;}
+	        position:absolute; right:2em; top:7px;}
+	    #close {position:absolute; right:1em; top:6px;}
 	</style>
 </head>
 <body>
+    <div id="fb-root"></div>
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({appId: 'your app id', status: true, cookie: true,
+                 xfbml: true});
+      };
+      (function() {
+        var e = document.createElement('script'); e.async = true;
+        e.src = document.location.protocol +
+          '//connect.facebook.net/en_US/all.js';
+        document.getElementById('fb-root').appendChild(e);
+      }());
+    </script>
     <div id="full_bar">
         <h1><a href="{%url view_overview scraper.short_name %}" title="Go to overview page">{{scraper.title}}</a></h1>
-        <fb:like href="http://localhost:8000/views/hgfhgf/full" layout="button_count" font="arial"></fb:like>
+        <p id="share_links">
+            <fb:like href="%url view_fullscreen scraper.short_name %}" layout="button_count" font="arial"></fb:like>
+        </p>
         <a href="{%url frontpage %}" id="powered"><span class="hide">Powered by ScraperWiki</span></a>
         <a id="close" href="{% url rpcexecute scraper.short_name %}">x</a>
     </div>
