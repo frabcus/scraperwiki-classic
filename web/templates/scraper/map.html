@@ -1,7 +1,7 @@
 {% extends "scraper/scraper_base.html" %}
 
 {% block javascript %}
-<script type="text/javascript" src="{{ MEDIA_URL }}js/map.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/map.js?{{settings.REVISION}}"></script>
 {% endblock %}
 
 {% load replace %}
