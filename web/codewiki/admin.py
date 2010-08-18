@@ -1,4 +1,4 @@
-from codewiki.models import Scraper, ScraperMetadata, UserCodeRole, UserCodeEditing
+from codewiki.models import Code, View, Scraper, ScraperMetadata, UserCodeRole, UserCodeEditing, ScraperRunEvent
 from django.contrib import admin
 from django.db import models
 
@@ -10,25 +10,26 @@ class ScraperMetadataInlines(admin.TabularInline):
     model = ScraperMetadata
     max_num = 100
     extra = 1
+class ScraperRunEventInlines(admin.TabularInline):
+    model = ScraperRunEvent
+    extra = 0
 
-class ScraperAdmin(admin.ModelAdmin):
-    inlines = (UserCodeRoleInlines, ScraperMetadataInlines)
-    list_display = ('title', 'short_name', 'last_run', 'status', 'published', 'deleted')
-    list_filter = ('status', 'last_run', 'published',)
+class CodeAdmin(admin.ModelAdmin):
+    inlines = (UserCodeRoleInlines,)    
+    readonly_fields = ('wiki_type','guid')
 
     def queryset(self, request):
-        return Scraper.unfiltered
+        return self.model.unfiltered.get_query_set()
+
+class ScraperAdmin(CodeAdmin):
+    inlines = (UserCodeRoleInlines, ScraperMetadataInlines, ScraperRunEventInlines)
+    list_display = ('title', 'short_name', 'last_run', 'status', 'published', 'deleted')
+    list_filter = ('status', 'last_run', 'published',)
+    
+class ViewAdmin(CodeAdmin):
+    list_filter = ('status', 'mime_type', 'published',)
 
 admin.site.register(Scraper, ScraperAdmin)
-
-
-class ScraperMetadataAdmin(admin.ModelAdmin):
-    pass
-
-admin.site.register(ScraperMetadata, ScraperMetadataAdmin)
-
-
-class UserCodeEditingAdmin(admin.ModelAdmin):
-    pass
-
-admin.site.register(UserCodeEditing, UserCodeEditingAdmin)
+admin.site.register(View, ViewAdmin)
+admin.site.register(ScraperMetadata)
+admin.site.register(UserCodeEditing)

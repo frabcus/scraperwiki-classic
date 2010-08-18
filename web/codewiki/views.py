@@ -41,7 +41,11 @@ def scraper_overview(request, scraper_short_name):
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
         return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
-
+    
+    #get views that use this scraper
+    related_views = scraper.relations.filter(wiki_type='view')
+    
+    #get meta data
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_contributors = scraper.contributors()
@@ -75,6 +79,7 @@ def scraper_overview(request, scraper_short_name):
         'has_data': has_data,
         'data': data,
         'scraper_contributors': scraper_contributors,
+        'related_views': related_views,
         }, context_instance=RequestContext(request))
 
 def scraper_admin(request, scraper_short_name):
@@ -188,8 +193,11 @@ def scraper_map(request, scraper_short_name, map_only=False):
 def view_overview (request, short_name):
     user = request.user
     scraper = get_object_or_404(models.View.objects, short_name=short_name)
-
-    return render_to_response('scraper/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper}, context_instance=RequestContext(request))
+    
+    #get scrapers used in this view
+    related_scrapers = scraper.relations.filter(wiki_type='scraper')
+    
+    return render_to_response('scraper/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper, 'related_scrapers': related_scrapers, }, context_instance=RequestContext(request))
     
     
 def view_fullscreen (request, short_name):

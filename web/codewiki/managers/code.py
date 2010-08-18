@@ -16,7 +16,7 @@ class CodeManager(models.Manager):
 
     def get_query_set(self):
         return super(CodeManager, self).get_query_set().filter(deleted=False)
-        
+
         	
     def owns(self):
         return self.get_query_set().filter(usercoderole__role='owner')

@@ -38,7 +38,6 @@ WIKI_TYPES = (
 class Code(models.Model):
 
     # model fields
-    relations = models.ManyToManyField("self")    
     title             = models.CharField(max_length=100, 
                                         null=False, 
                                         blank=False, 
@@ -62,9 +61,9 @@ class Code(models.Model):
     isstartup         = models.BooleanField(default=False)
     language          = models.CharField(max_length=32, choices=LANGUAGES, default='Python')
     wiki_type         = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
-
+    relations = models.ManyToManyField("self")  #manage.py refuses to generate the tabel for this, so you haev to do it manually.
+    
     # managers
-    unfiltered = models.Manager()
     objects = CodeManager()
     
     def __unicode__(self):

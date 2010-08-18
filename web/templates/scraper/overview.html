@@ -56,14 +56,20 @@
     	        {% endif %}
     	    </div>
 
-
         {% endif %}
     </div>
 
 </div>
-<div class="content full">
-    <h2>Views using this data</h2>
-</div>
+{% if related_views %}
+    <div class="content full">
+        <h2>Views using this data</h2>
+        <ul>
+            {% for related_view in related_views %}
+                <a href="{% url view_overview related_view.short_name %}">{{related_view.title}}</a>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
 <div class="content col left">
     <h3>About this dataset</h3>
     <div class="metadata">

@@ -5,7 +5,7 @@
                 <img src="{{headline_image_url}}"/>
             </div>
         {% endif %}
-        <h5><a href="{{headline.link}}">{{headline.title}}</a></h5>
+        <h5>Blogged: <a href="{{headline.link}}">{{headline.title}}</a></h5>
         {% autoescape off %}
             <p>{{headline.summary}}</p>
         {% endautoescape %}
