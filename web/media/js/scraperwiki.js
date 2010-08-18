@@ -142,6 +142,12 @@ function setupButtonConfirmation(sId, sMessage){
     );
 }
 
+function setupHints(){
+    $('#q').tbHinter({
+    	text: 'Search ScraperWiki',
+    	class: 'hint'
+    });
+}
 
 function setupScroller(){
     

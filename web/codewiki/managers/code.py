@@ -317,7 +317,8 @@ class CodeManager(models.Manager):
         return return_dates
 
     def search(self, query):
-        scrapers = self.get_query_set().filter(title__icontains=query,published=True)
+        scrapers = self.get_query_set().filter(title__icontains=query)
+        return scrapers
         scrapers_description = self.get_query_set().filter(description__icontains=query, published=True)
 
         # and by tag

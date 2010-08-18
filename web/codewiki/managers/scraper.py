@@ -352,23 +352,6 @@ class ScraperManager(CodeManager):
         
         return return_dates
 
-    def search(self, query):
-        scrapers = self.get_query_set().filter(title__icontains=query,published=True)
-        scrapers_description = self.get_query_set().filter(description__icontains=query, published=True)
-
-        # and by tag
-        tag = get_tag(query)
-        if tag:
-            scrapers_for_tag = self.get_query_set().filter(published=True)
-            qs = TaggedItem.objects.get_by_model(scrapers_for_tag, tag)
-            scrapers = scrapers | qs
-
-        scrapers_all = scrapers | scrapers_description
-        scrapers_all = scrapers_all.filter(published=True)
-        scrapers_all = scrapers_all.order_by('-created_at')
-
-        return scrapers_all
-    
     #for example lists    
     def example_scrapers(self, user, count):
         scrapers = []

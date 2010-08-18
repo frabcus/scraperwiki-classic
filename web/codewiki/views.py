@@ -14,7 +14,7 @@ from django.conf import settings
 
 from codewiki import models
 from codewiki import forms
-from codewiki.forms import SearchForm, ChooseTemplateForm
+from codewiki.forms import ChooseTemplateForm
 import vc
 
 import frontend
@@ -410,41 +410,6 @@ def tag_data(request, tag):  # to delete
         'tag': tag,
         'selected_tab': 'data',
         }, context_instance=RequestContext(request))
-
-
-def search(request, q=""):
-    if (q != ""):
-        form = SearchForm(initial={'q': q})
-        q = q.strip()
-
-        scrapers = models.Scraper.objects.search(q)
-        return render_to_response('scraper/search_results.html',
-            {
-                'scrapers': scrapers,
-                'form': form,
-                'query': q,},
-            context_instance=RequestContext(request))
-
-    # If the form has been submitted, or we have a search term in the URL
-    # - redirect to nice URL
-    elif (request.POST):
-        form = SearchForm(request.POST)
-        if form.is_valid():
-            q = form.cleaned_data['q']
-            # Process the data in form.cleaned_data
-            # Redirect after POST
-            return HttpResponseRedirect('/scrapers/search/%s/' % q)
-        else:
-            form = SearchForm()
-            return render_to_response('scraper/search.html', {
-                'form': form,},
-                context_instance=RequestContext(request))
-    else:
-        form = SearchForm()
-        return render_to_response('scraper/search.html', {
-            'form': form,
-        }, context_instance = RequestContext(request))
-
 
 def follow (request, scraper_short_name):
     scraper = get_object_or_404(

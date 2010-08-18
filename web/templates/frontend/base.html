@@ -10,7 +10,8 @@
 		{% endif %}
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>		
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>	
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.textbox-hinter.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/flexigrid.js"></script>			
 		<script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror/js/codemirror.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js"></script>		
@@ -18,7 +19,7 @@
                 <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui.css" />
 	        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/flexigrid.css" />
 	        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
-	    {% block css %}{% endblock %}
+	    {% block css %}{% endblock %}   
 	    {% block rss %}{% endblock %}
 	    {% block javascript %}{% endblock %}
 	    <title>{% block title %}{% endblock %} | ScraperWiki</title>
@@ -70,7 +71,6 @@
     				    </p>
 				    {% endif %}
 				</div>
-			
 			<div id="divMenu">
 			    <ul class="main_menu">
 			        <li>
@@ -92,7 +92,11 @@
 				        <a href="{% url api:index %}" title="ScraperWiki API">API</a>
 				    </li>
 				</ul>
-
+                <form id="divSidebarSearch" action="/search/" method="post">
+                    <label for="q" class="hide">Search ScraperWiki</label>
+                    <input type="text" id="q" name="q"/>
+                    <input type="submit" value="Go" />
+                </form>
 			</div>
 	    </div>
 	    {% block above_page %}{% endblock %}		    
@@ -107,7 +111,6 @@
                  {% endif %}
                  {% if notifications %}
                  <ul>
-		     
                      {% for message in notifications %}
                  	{% if forloop.first %} {% comment %} Just get the first notification - otherwise login message displays twice, strange bug {% endcomment %}
                         <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
@@ -188,6 +191,7 @@
 		{% endblock %}
 		
 	    <script type="text/javascript" defer="defer">
+	        setupHints();
 	        {% block run_script %}{% endblock %}
         </script>
         {% if not debug %}

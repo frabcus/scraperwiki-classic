@@ -37,6 +37,10 @@ urlpatterns = patterns('',
     
     # Example pages to scrape :)
     url(r'^examples/basic_table\.html$',  direct_to_template,{ 'template': 'examples/basic_table.html' },name='example_basic_table'),
+    
+    #searching and browsing
+    url(r'^search/$', frontend_views.search, name='search'),
+    url(r'^search/(?P<q>.+)/$', frontend_views.search, name='search'),
    )
 
 

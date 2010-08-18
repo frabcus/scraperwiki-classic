@@ -9,9 +9,6 @@ LICENSE_CHOICES = (
     ('Unknown', 'Unknown'),
 )
 
-class SearchForm(forms.Form):
-    q = forms.CharField(label='Find datasets', max_length=50)
-
 class ScraperAdministrationForm (forms.ModelForm):
     run_interval = forms.ChoiceField(required=True, label="Re-run this scraper", choices = (
                                 (-1, 'Never'),

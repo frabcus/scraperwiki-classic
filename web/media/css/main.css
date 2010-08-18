@@ -20,16 +20,20 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
     border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; color:#fff;}
 .helplink a {text-decoration:none;color:#fff;}
 
-/* Header & menu */
+/* Header */
 #divHeader {padding:0 1.5% 0 1.5%; margin-bottom:1em; width:150px; float:left;
     position:relative;text-align:left;}
 #divLogo {height:149px; width:144px; }
 #divLogo p {margin:0; padding:10px 0 5px 0;}
 #divLogo p a {display:block; height:129px; width:144px; background:url(../images/logo.png) no-repeat; margin:5px 0 0 0;}
+
+/* Main menu */
 #divMenu ul li {padding:0.3em 0.3em; list-style-type:none; font-weight:bold;}
+#divSidebarSearch #q {width:103px;}
+#divMenu ul, #divMenu form {border-bottom:solid 1px #ccc; padding-bottom:1em;}
 
 /* Content and columns */
-#divContent {padding-bottom:3em;border-left:solid 1px #9f9f9f;border-top:solid 1px #9f9f9f;border-bottom:solid 1px #9f9f9f;padding:1em 0.8em 2em 0.8em; margin-bottom:3em;}
+#divContent {padding-bottom:3em;border-left:solid 1px #9f9f9f;border-top:solid 1px #9f9f9f;border-bottom:solid 1px #9f9f9f;padding:1em 0.8em 2em 0.8em; margin-bottom:3em; min-height:600px;}
 .content {padding-top:1.3em;}
 .content.left, .content.right {float:left;}
 .content.half {width:50%;}
@@ -104,7 +108,6 @@ span.faux_link {color:#ccc;}
 pre.scraperoutput {background-color: aliceblue; padding: 0.5em;}
 pre.scrapercode {background-color: lemonchiffon; padding: 0.5em;}
 
-
 /* Tables */
 table {width:100%; border-collapse:collapse;}
 table.data {margin-top:1em; margin-bottom:1em;}
@@ -121,7 +124,7 @@ table.scrapersediting td { border: 1px solid black;}
 .flexigrid table {width:auto;}
 
 /* Page titles */
-div.page_title {border-bottom:dotted 1px #ccc; padding:1em 0 0.5em 0; margin:0 0.8em; position:relative;}
+div.page_title {border-bottom:dotted 1px #ccc; padding:1em 0 0.5em 0; position:relative;}
 .page_controls {position:absolute; top:0.6em; right:0; text-align:right;}
 div.page_title_narrow { width:600px;}
 ul.title_links {position:absolute; top:0.6em; right:0;}
@@ -178,7 +181,7 @@ ul.form li.checkboxes {clear:left;}
 ul.form li.checkboxes label {clear:none; display:inline; width:auto;}
 fieldset {padding:0; margin:0; border:none;}
 div.buttons {clear:left;}
-
+input.hint {color:#808080;}
 input.button {font-size:1em;
     -webkit-border-radius: 4px;-moz-border-radius: 4px; 
     background-color:#6fb1e6; color:#fff;
@@ -349,3 +352,8 @@ div.mercurialcommitlog ul { padding:0; margin:0; }
 .blog_latest .blog_headline h5 {font-size:1.2em;}    
 .blog_latest .blog_subs ul {font-size:0.8em;}
 .blog_latest .blog_subs h5 {font-size:0.9em;padding:0;}
+
+
+/* Search results */
+.page_title #frmSearchResults {display:inline;padding:0;margin:0;}
+.page_title #frmSearchResults input {font-size:1em;}

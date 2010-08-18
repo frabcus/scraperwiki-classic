@@ -4,20 +4,20 @@ from django.shortcuts import render_to_response
 from django.contrib import auth
 from django.shortcuts import get_object_or_404
 import settings
-from frontend.forms import SigninForm, UserProfileForm
+from frontend.forms import SigninForm, UserProfileForm, SearchForm
 
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
-from codewiki.models import Scraper
+from codewiki.models import Scraper, Code
 from market.models import Solicitation
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
 from registration.backends import get_backend
 from profiles import views as profile_views
-
+from codewiki.forms import ChooseTemplateForm
 import django.contrib.auth.views
 import os
 import re
@@ -187,3 +187,36 @@ def tutorials(request):
     for language in languages:
         tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
     return render_to_response('frontend/tutorials.html', {'tutorials': tutorials}, context_instance = RequestContext(request))
+
+def search(request, q=""):
+    if (q != ""):
+        form = SearchForm(initial={'q': q})
+        q = q.strip()
+
+        scrapers = Code.objects.search(q)
+        return render_to_response('frontend/search_results.html',
+            {
+                'scrapers': scrapers,
+                'form': form,
+                'query': q,},
+            context_instance=RequestContext(request))
+
+    # If the form has been submitted, or we have a search term in the URL
+    # - redirect to nice URL
+    elif (request.POST):
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            q = form.cleaned_data['q']
+            # Process the data in form.cleaned_data
+            # Redirect after POST
+            return HttpResponseRedirect('/search/%s/' % q)
+        else:
+            form = SearchForm()
+            return render_to_response('frontend/search.html', {
+                'form': form,},
+                context_instance=RequestContext(request))
+    else:
+        form = SearchForm()
+        return render_to_response('frontend/search.html', {
+            'form': form,
+        }, context_instance = RequestContext(request))
