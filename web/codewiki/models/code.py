@@ -48,7 +48,6 @@ class Code(models.Model):
     description       = models.TextField(blank=True)
     revision          = models.CharField(max_length=100, blank=True)
     created_at        = models.DateTimeField(auto_now_add=True)
-    disabled          = models.BooleanField()
     deleted           = models.BooleanField()
     status            = models.CharField(max_length=10, blank=True)
     users             = models.ManyToManyField(User, through='UserCodeRole')
@@ -65,6 +64,7 @@ class Code(models.Model):
     
     # managers
     objects = CodeManager()
+    unfiltered = models.Manager()
     
     def __unicode__(self):
         return self.short_name

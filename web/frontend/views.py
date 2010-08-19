@@ -5,13 +5,13 @@ from django.contrib import auth
 from django.shortcuts import get_object_or_404
 import settings
 from frontend.forms import SigninForm, UserProfileForm, SearchForm
-
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
-from codewiki.models import Scraper, Code
+from codewiki.models import Scraper, Code, UserCodeEditing
 from market.models import Solicitation
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
@@ -58,7 +58,6 @@ def frontpage(request, public_profile_field=None):
     good_contribution_scrapers = []
     # cut number of scrapers displayed on homepage down to the most recent 10 items
     my_scrapers = my_scrapers[:10]
-    print my_scrapers[0].relations.add(my_scrapers[1])
     has_scrapers = len(my_scrapers) > 0
     # also need to add filtering to limit to public published scrapers
     for scraper in contribution_scrapers:
@@ -188,6 +187,38 @@ def tutorials(request):
         tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
     return render_to_response('frontend/tutorials.html', {'tutorials': tutorials}, context_instance = RequestContext(request))
 
+def browse(request, page_number):
+    all_code_objects = Code.objects.filter(published=True).order_by('-created_at')
+
+    # Number of results to show from settings
+    paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)
+
+    try:  
+        page = int(page_number)
+    except (ValueError, TypeError):
+        page = 1
+
+    if page == 1:
+        featured_scrapers = Code.objects.filter(published=True, featured=True).order_by('-created_at')
+    else:
+        featured_scrapers = None
+
+    # If page request (9999) is out of range, deliver last page of results.
+    try:
+        scrapers = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        scrapers = paginator.page(paginator.num_pages)
+
+    form = SearchForm()
+
+    # put number of people here so we can see it
+    #npeople = UserCodeEditing in models.UserCodeEditing.objects.all().count()
+    # there might be a slick way of counting this, but I don't know it.
+    npeople = len(set([userscraperediting.user  for usercodeediting in UserCodeEditing.objects.all() ]))
+    dictionary = { "scrapers": scrapers, "form": form, "featured_scrapers":featured_scrapers, "npeople": npeople }
+    return render_to_response('scraper/list.html', dictionary, context_instance=RequestContext(request))
+
+
 def search(request, q=""):
     if (q != ""):
         form = SearchForm(initial={'q': q})
@@ -220,3 +251,4 @@ def search(request, q=""):
         return render_to_response('frontend/search.html', {
             'form': form,
         }, context_instance = RequestContext(request))
+

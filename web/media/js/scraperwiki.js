@@ -129,7 +129,6 @@ function rewriteApiUrl (){
     $('#aApiLink').attr('href', $('#uri').val() + sArgs);
 }
 
-
 function setupButtonConfirmation(sId, sMessage){
     $('#' + sId).click(
         function(){

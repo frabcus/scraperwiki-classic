@@ -3,7 +3,6 @@ from django.conf.urls.defaults import *
 from codewiki import views
 
 urlpatterns = patterns('',
-    url(r'^list/(?P<page_number>\d+)?$', views.scraper_list, name='scraper_list'),
     url(r'^table/$', views.scraper_table, name='scraper_table'),
 
     url(r'^scrapers/(?P<scraper_short_name>[\w_\-]+)/$',        views.scraper_overview,                 name='scraper_overview'),

@@ -73,9 +73,6 @@
 				</div>
 			<div id="divMenu">
 			    <ul class="main_menu">
-			        <li>
-			             <a href="{% url help_tutorials %}" title="Tutorials">Tutorials</a>
-			        </li>
 				    <li>
 				        <a href="#" title="Create a new screen scraper" class="editor_scraper">New scraper</a>
 				    </li>
@@ -83,14 +80,17 @@
 				        <a href="#" title="Create a new view" class="editor_view">New view</a>
 				    </li>
 				    <li>
-				        <a href="{% url scraper_list %}" title="Browse scrapers and data">Browse</a>
-				    </li>
-				    <li>
-				        <a href="{% url market_solicitation %}" title="Request a new scraper">Request</a>
+				        <a href="{% url market_solicitation %}" title="Request a new scraper">Data market</a>
 				    </li>
 				    <li class="last">
 				        <a href="{% url api:index %}" title="ScraperWiki API">API</a>
 				    </li>
+				    <li>
+			             <a href="{% url help_tutorials %}" title="Tutorials">Tutorials</a>
+			        </li>
+			        <li>
+			             <a href="{% url about %}" title="About ScraperWiki">About</a>
+			        </li>
 				</ul>
                 <form id="divSidebarSearch" action="/search/" method="post">
                     <label for="q" class="hide">Search ScraperWiki</label>

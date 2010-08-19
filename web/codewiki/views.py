@@ -2,7 +2,6 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
-from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from tagging.models import Tag, TaggedItem
@@ -315,39 +314,6 @@ def export_csv(request, scraper_short_name):
     return response
     #template = loader.get_template('scraper/data.csv')
     #context = Context({'data_tables': data_tables,})
-
-
-def scraper_list(request, page_number):
-    all_scrapers = models.Scraper.objects.filter(published=True).exclude(language='HTML').order_by('-created_at')
-
-    # Number of results to show from settings
-    paginator = Paginator(all_scrapers, settings.SCRAPERS_PER_PAGE)
-
-    try:  
-        page = int(page_number)
-    except (ValueError, TypeError):
-        page = 1
-    
-    if page == 1:
-        featured_scrapers = models.Scraper.objects.filter(published=True, featured=True).exclude(language='HTML').order_by('-created_at')
-    else:
-        featured_scrapers = None
-        
-
-    # If page request (9999) is out of range, deliver last page of results.
-    try:
-        scrapers = paginator.page(page)
-    except (EmptyPage, InvalidPage):
-        scrapers = paginator.page(paginator.num_pages)
-
-    form = SearchForm()
-    
-    # put number of people here so we can see it
-    #npeople = UserCodeEditing in models.UserCodeEditing.objects.all().count()
-    # there might be a slick way of counting this, but I don't know it.
-    npeople = len(set([userscraperediting.user  for usercodeediting in models.UserCodeEditing.objects.all() ]))
-    dictionary = { "scrapers": scrapers, "form": form, "featured_scrapers":featured_scrapers, "npeople": npeople }
-    return render_to_response('scraper/list.html', dictionary, context_instance=RequestContext(request))
 
 
 def scraper_table(request):

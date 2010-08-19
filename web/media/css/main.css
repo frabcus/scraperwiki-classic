@@ -224,7 +224,7 @@ ul.scraper_list p.controls {position:absolute; top:0; right:1em;}
 
 /* Welcome page */
 #divWelcome {position:relative; background:url(../images/graph_paper.png) #1d7cae;
-    top:-1.1em; padding: 1.5em 2%; border-top:solid 5px #287aa6;border-bottom:solid 10px #287aa6;}    
+    top:70px; padding: 1.5em 2%; border-top:solid 5px #287aa6;border-bottom:solid 10px #287aa6;}    
 #divWelcomeText {margin-right:550px;position:relative; top:-95px;margin-bottom:-95px;}
 #divWelcomeText h1 {font-size:2.3em; font-weight:bold; clear:none; line-height:1.1em; margin-bottom:0.5em;
     color:#fff; padding-top:10px;}
@@ -357,3 +357,17 @@ div.mercurialcommitlog ul { padding:0; margin:0; }
 /* Search results */
 .page_title #frmSearchResults {display:inline;padding:0;margin:0;}
 .page_title #frmSearchResults input {font-size:1em;}
+
+
+/* Full screen */
+body.fullscreen {padding:none; margin:0;}
+body.fullscreen #full_bar {border-bottom:solid 1px #ddd; background:#fafafa;padding:3px; height:23px; font-family:helvetica, arial, sans-serif;}
+body.fullscreen #full_bar h1 {font-size:1em; margin:0; padding:0.2em 0 0 0.3em;text-align:left;}
+body.fullscreen #full_bar a {color:#808080; text-decoration:none;}
+body.fullscreen #full_bar a:hover {text-decoration:underline;color:#2680c6;}
+body.fullscreen #full_bar #share_links {position:absolute;top:5px; right:175px;padding:0;margin:0;}
+body.fullscreen .hide {display:none;}
+body.fullscreen iframe.view {border:none;}
+body.fullscreen #powered {display:block;width:175px; height:20px; background:url(/media/images/powered.png) no-repeat;
+    position:absolute; right:2em; top:7px;}
+body.fullscreen #close {position:absolute; right:1em; top:6px;}

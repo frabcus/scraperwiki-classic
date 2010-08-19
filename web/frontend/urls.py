@@ -41,6 +41,7 @@ urlpatterns = patterns('',
     #searching and browsing
     url(r'^search/$', frontend_views.search, name='search'),
     url(r'^search/(?P<q>.+)/$', frontend_views.search, name='search'),
+    url(r'^browse/(?P<page_number>\d+)?$', frontend_views.browse, name='scraper_list'),    
    )
 
 

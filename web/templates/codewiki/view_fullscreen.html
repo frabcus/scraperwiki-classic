@@ -7,21 +7,9 @@
 	<title>{{scraper.title}}</title>
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>	
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.autoheight.js"></script>	
-	<style>
-	    body {padding:none; margin:0;}
-	    #full_bar {border-bottom:solid 1px #ddd; background:#fafafa;padding:3px; height:23px; font-family:helvetica, arial, sans-serif;}
-	    #full_bar h1 {font-size:1em; margin:0; padding:0.2em 0 0 0.3em;}
-	    #full_bar a {color:#808080; text-decoration:none;}
-        #full_bar a:hover {text-decoration:underline;color:#2680c6;}
-        #full_bar #share_links {position:absolute;top:5px; right:175px;padding:0;margin:0;}
-	    .hide {display:none;}
-	    iframe.view {border:none;}
-	    #powered {display:block;width:175px; height:20px; background:url(/media/images/powered.png) no-repeat;
-	        position:absolute; right:2em; top:7px;}
-	    #close {position:absolute; right:1em; top:6px;}
-	</style>
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />	
 </head>
-<body>
+<body class="fullscreen">
     <div id="fb-root"></div>
     <script>
       window.fbAsyncInit = function() {
