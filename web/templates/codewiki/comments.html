@@ -1,12 +1,12 @@
-{% extends "scraper/scraper_base.html" %}
+{% extends "codewiki/scraper_base.html" %}
 {% load humanize %}
 {% block tab %}
 {% load comments %}
 {% load gravatar %}
-<span style="float: right"><a href="/feeds/scraper_comments/{{ scraper.short_name }}">RSS feed of discussion</a></span>
-  
+<a href="/feeds/code_object_comments/{{ scraper.short_name }}">RSS feed of discussion</a>
 
- 
+
+
 {% if user.is_authenticated %}
  
     {% get_comment_form for scraper as form %}

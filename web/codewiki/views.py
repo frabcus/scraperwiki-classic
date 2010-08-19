@@ -39,7 +39,7 @@ def scraper_overview(request, scraper_short_name):
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
-        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+        return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
     
     #get views that use this scraper
     related_views = scraper.relations.filter(wiki_type='view')
@@ -69,7 +69,7 @@ def scraper_overview(request, scraper_short_name):
     # replicates output from data_summary_tables
     data_tables = {"": data }
     has_data = len(data['rows']) > 0
-    return render_to_response('scraper/overview.html', {
+    return render_to_response('codewiki/overview.html', {
         'scraper_tags': scraper_tags,
         'selected_tab': 'overview',
         'scraper': scraper,
@@ -102,7 +102,7 @@ def scraper_admin(request, scraper_short_name):
             # somehow the magic that can convert from comma separated tags into the tags list is not able to convert back, hence this code.  can't be true
         form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
 
-    return render_to_response('scraper/admin.html', {
+    return render_to_response('codewiki/admin.html', {
       'selected_tab': 'admin',
       'scraper': scraper,
       'user_owns_it': user_owns_it,
@@ -148,7 +148,7 @@ def scraper_map(request, scraper_short_name, map_only=False):
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
-        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+        return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
 
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
@@ -173,9 +173,9 @@ def scraper_map(request, scraper_short_name, map_only=False):
     data = json.dumps(data)
 
     if map_only:
-        template = 'scraper/map_only.html'
+        template = 'codewiki/map_only.html'
     else:
-        template = 'scraper/map.html'
+        template = 'codewiki/map.html'
 
     return render_to_response(template, {
     'scraper_tags': scraper_tags,
@@ -196,14 +196,14 @@ def view_overview (request, short_name):
     #get scrapers used in this view
     related_scrapers = scraper.relations.filter(wiki_type='scraper')
     
-    return render_to_response('scraper/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper, 'related_scrapers': related_scrapers, }, context_instance=RequestContext(request))
+    return render_to_response('codewiki/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper, 'related_scrapers': related_scrapers, }, context_instance=RequestContext(request))
     
     
 def view_fullscreen (request, short_name):
     user = request.user
     scraper = get_object_or_404(models.View.objects, short_name=short_name)
 
-    return render_to_response('scraper/view_fullscreen.html', {'scraper': scraper}, context_instance=RequestContext(request))
+    return render_to_response('codewiki/view_fullscreen.html', {'scraper': scraper}, context_instance=RequestContext(request))
 
 def comments(request, wiki_type, scraper_short_name):
 
@@ -213,7 +213,7 @@ def comments(request, wiki_type, scraper_short_name):
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
-        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+        return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
 
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
@@ -227,7 +227,7 @@ def comments(request, wiki_type, scraper_short_name):
     dictionary = { 'scraper_tags': scraper_tags, 'scraper_owner': scraper_owner, 'scraper_contributors': scraper_contributors,
                    'scraper_followers': scraper_followers, 'selected_tab': 'comments', 'scraper': scraper,
                    'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
-    return render_to_response('scraper/comments.html', dictionary, context_instance=RequestContext(request))
+    return render_to_response('codewiki/comments.html', dictionary, context_instance=RequestContext(request))
 
 
 def scraper_history(request, wiki_type, scraper_short_name):
@@ -237,7 +237,7 @@ def scraper_history(request, wiki_type, scraper_short_name):
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
-        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+        return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
 
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
@@ -262,7 +262,7 @@ def scraper_history(request, wiki_type, scraper_short_name):
     dictionary["commitlog"] = commitlog
     dictionary["filestatus"] = mercurialinterface.getfilestatus(scraper)
     
-    return render_to_response('scraper/history.html', dictionary, context_instance=RequestContext(request))
+    return render_to_response('codewiki/history.html', dictionary, context_instance=RequestContext(request))
 
 
 def stringnot(v):
@@ -312,7 +312,7 @@ def export_csv(request, scraper_short_name):
     response.write(fout.getvalue())
 
     return response
-    #template = loader.get_template('scraper/data.csv')
+    #template = loader.get_template('codewiki/data.csv')
     #context = Context({'data_tables': data_tables,})
 
 
@@ -326,7 +326,7 @@ def scraper_table(request):
     dictionary["numpublishedscrapersediting"] = len(models.UserCodeEditing.objects.filter(scraper__published=False))
     dictionary["numpublishedscraperstotal"] = len(dictionary["scrapers"])
     dictionary["numunpublishedscraperstotal"] = len(models.Scraper.objects.filter(published=False))
-    return render_to_response('scraper/scraper_table.html', dictionary, context_instance=RequestContext(request))
+    return render_to_response('codewiki/scraper_table.html', dictionary, context_instance=RequestContext(request))
     
 
 
@@ -344,7 +344,7 @@ def download(request, scraper_short_name):
 
 def all_tags(request):
     return render_to_response(
-        'scraper/all_tags.html',
+        'codewiki/all_tags.html',
         context_instance = RequestContext(request))
 
 
@@ -352,7 +352,7 @@ def scraper_tag(request, tag):
     tag = get_tag(tag)
     scrapers = models.Scraper.objects.filter(published=True)
     queryset = TaggedItem.objects.get_by_model(scrapers, tag)
-    return render_to_response('scraper/tag.html', {
+    return render_to_response('codewiki/tag.html', {
         'queryset': queryset,
         'tag': tag,
         'selected_tab': 'items',
@@ -371,7 +371,7 @@ def tag_data(request, tag):  # to delete
         guids.append(q.guid)
     data = models.Scraper.objects.data_summary(scraper_id=guids)
 
-    return render_to_response('scraper/tag_data.html', {
+    return render_to_response('codewiki/tag_data.html', {
         'data': data,
         'tag': tag,
         'selected_tab': 'data',
@@ -561,19 +561,19 @@ def htmlview(request, scraper_short_name):
 
 def run_event(request, event_id):
     event = get_object_or_404(models.ScraperRunEvent, id=event_id)
-    return render_to_response('scraper/run_event.html', {'event': event}, context_instance=RequestContext(request))
+    return render_to_response('codewiki/run_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def commit_event(request, event_id):
     event = get_object_or_404(models.CodeCommitEvent, id=event_id)
-    return render_to_response('scraper/commit_event.html', {'event': event}, context_instance=RequestContext(request))
+    return render_to_response('codewiki/commit_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def running_scrapers(request):
     events = models.ScraperRunEvent.objects.filter(run_ended=None)
-    return render_to_response('scraper/running_scrapers.html', {'events': events}, context_instance=RequestContext(request))
+    return render_to_response('codewiki/running_scrapers.html', {'events': events}, context_instance=RequestContext(request))
 
 def choose_template(request, wiki_type):
     form = forms.ChooseTemplateForm(wiki_type)
-    return render_to_response('scraper/ajax/choose_template.html', {'wiki_type': wiki_type, 'form': form}, context_instance=RequestContext(request))
+    return render_to_response('codewiki/ajax/choose_template.html', {'wiki_type': wiki_type, 'form': form}, context_instance=RequestContext(request))
 
 def chosen_template(request, wiki_type):
     template = request.GET.get('template', None)

@@ -14,13 +14,13 @@ import settings
 from django.contrib import admin
 admin.autodiscover()
 
-from frontend.feeds import LatestScrapers, LatestScrapersBySearchTerm, LatestScrapersByTag, CommentsForScraper
+from frontend.feeds import LatestCodeObjects, LatestCodeObjectsBySearchTerm, LatestCodeObjectsByTag, CommentsForCode
 
 feeds = {
-    'all_scrapers': LatestScrapers,
-    'latest_scrapers_by_search_term': LatestScrapersBySearchTerm,
-    'latest_scrapers_by_tag': LatestScrapersByTag,
-    'scraper_comments': CommentsForScraper,
+    'all_code_objects': LatestCodeObjects,
+    'latest_code_objects_by_search_term': LatestCodeObjectsBySearchTerm,
+    'latest_code_objects_by_tag': LatestCodeObjectsByTag,
+    'code_object_comments': CommentsForCode,
 }
 
 urlpatterns = patterns('',
@@ -46,7 +46,7 @@ urlpatterns = patterns('',
     (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/media/images/favicon.ico'}),
 
     # RSS feeds  
-    (r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}),
+    url(r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}, name='feeds'),
 
     # API
     (r'^api/', include('api.urls', namespace='foo', app_name='api')),

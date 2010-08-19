@@ -177,7 +177,7 @@ def browse(request, page_number):
     # there might be a slick way of counting this, but I don't know it.
     npeople = len(set([userscraperediting.user  for usercodeediting in UserCodeEditing.objects.all() ]))
     dictionary = { "scrapers": scrapers, "form": form, "featured_scrapers":featured_scrapers, "npeople": npeople }
-    return render_to_response('scraper/list.html', dictionary, context_instance=RequestContext(request))
+    return render_to_response('codewiki/list.html', dictionary, context_instance=RequestContext(request))
 
 
 def search(request, q=""):

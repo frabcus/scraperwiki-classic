@@ -1,48 +1,48 @@
 from django.contrib.syndication.feeds import Feed, FeedDoesNotExist
 from django.core.exceptions import ObjectDoesNotExist
-from codewiki.models import Scraper
+from codewiki.models import Code
 from tagging.utils import get_tag
 from tagging.models import Tag, TaggedItem
 from django.contrib.comments.models import Comment
 from django.contrib.sites.models import Site
 
 current_site = Site.objects.get_current()
-scraper_name = ""
+short_name = ""
 
-class CommentsForScraper(Feed):
+class CommentsForCode(Feed):
     
     def get_object(self, bits):
         # In case of "/rss/beats/0613/foo/bar/baz/", or other such clutter,
         # check that bits has only one member.
         if len(bits) != 1:
             raise ObjectDoesNotExist
-        scraper_name = bits[0]
-        scraper = Scraper.objects.get(short_name__exact=scraper_name)
-        if scraper:  
-            self.scraper_name = scraper.short_name
-            return scraper
+        short_name = bits[0]
+        code_object = Code.objects.get(short_name__exact=short_name)
+        if code_object:  
+            self.short_name = code_object.short_name
+            return code_object
         else: 
             raise ObjectDoesNotExist
             
     def title(self, obj):
-        return "ScraperWiki.com: comments on scraper '%s' | %s" % (obj.short_name, current_site.name)
+        return "ScraperWiki.com: comments on  '%s' | %s" % (obj.short_name, current_site.name)
 
     def link(self, obj):
         if not obj:
             raise FeedDoesNotExist
-        return '/scrapers/%s/' % obj.short_name
+        return '/%ss/%s/' % (obj.wiki_type, obj.short_name)
         
     def item_link(self, item):
-        return '/scrapers/show/%s/comments/#%s' % (self.scraper_name, item.id)
+            return '/%ss/%s/comments/#%s' % (item.wiki_type, self.short_name, item.id)
 
     def description(self, obj):
-        return "Comments on scraper '%s'" % obj.short_name
+        return "Comments on '%s'" % obj.short_name
 
     def items(self, obj):
         return Comment.objects.for_model(obj).filter(is_public=True, is_removed=False).order_by('-submit_date')[:15]  
       
         
-class LatestScrapersByTag(Feed):
+class LatestCodeObjectsByTag(Feed):
     def get_object(self, bits):
         # In case of "/rss/beats/0613/foo/bar/baz/", or other such clutter,
         # check that bits has only one member.
@@ -52,39 +52,38 @@ class LatestScrapersByTag(Feed):
         return tag
             
     def title(self, obj):
-        return "ScraperWiki.com: Scrapers tagged with '%s' | %s" % (obj.name, current_site.name)
+        return "ScraperWiki.com: items tagged with '%s' | %s" % (obj.name, current_site.name)
 
     def link(self, obj):
         if not obj:
             raise FeedDoesNotExist
-        return '/scrapers/tags/%s/' % obj.name
-        
+        return '/%ss/tags/%s/' % (item.wikik_type, obj.name)
+
     def item_link(self, item):
-        return '/scrapers/show/%s/' % item.short_name
+        return '/%ss/show/%s/' % (item.wiki_type, item.short_name)
 
     def description(self, obj):
-        return "Scrapers recently published on ScraperWiki with tag '%s'" % obj.name
+        return "Items recently published on ScraperWiki with tag '%s'" % obj.name
 
     def items(self, obj):
-       scrapers = Scraper.objects.filter(published=True)    
-       queryset = TaggedItem.objects.get_by_model(scrapers, obj)
+       code_objects = Code.objects.filter(published=True)    
+       queryset = TaggedItem.objects.get_by_model(code_objects, obj)
        return queryset.order_by('-created_at')[:30]
-       
-       
-class LatestScrapers(Feed):
-    title = "Latest scrapers | %s" % current_site.name
-    link = "/scrapers/list"
-    description = "All the latest scrapers added to ScraperWiki"
-   
-        
+
+
+class LatestCodeObjects(Feed):
+    title = "Latest items | %s" % current_site.name
+    link = "/browse"
+    description = "All the latest scrapers and views added to ScraperWiki"
+
     def item_link(self, item):
-        return '/scrapers/show/%s/' % item.short_name
+        return '/%ss/show/%s/' % (item.wiki_type, item.short_name)
         
     def items(self):
-        return Scraper.objects.filter(published=True).order_by('-created_at')[:10]
+        return Code.objects.filter(published=True).order_by('-created_at')[:10]
         
         
-class LatestScrapersBySearchTerm(Feed):
+class LatestCodeObjectsBySearchTerm(Feed):
     def get_object(self, bits):
         # In case of "/rss/beats/0613/foo/bar/baz/", or other such clutter,
         # check that bits has only one member.
@@ -95,25 +94,25 @@ class LatestScrapersBySearchTerm(Feed):
         return search_term
             
     def title(self, obj):
-        return "ScraperWiki.com: Scrapers matching '%s' | %s" % (obj, current_site.name)
+        return "ScraperWiki.com: items matching '%s' | %s" % (obj, current_site.name)
 
     def link(self, obj):
         if not obj:
             raise FeedDoesNotExist
-        return '/scrapers/tags/%s/' % obj
-        
+        return '/browse/tags/%s/' % obj
+
     def item_link(self, item):
-        return '/scrapers/show/%s/' % item.short_name
+        return '/%ss/%s/' % (item.wiki_type, item.short_name)
 
     def description(self, obj):
-        return "Scrapers published with '%s' somewhere in title or tags" % obj
+        return "Items published with '%s' somewhere in title or tags" % obj
 
     def items(self, obj):
-        scrapers = Scraper.objects.filter(title__icontains=obj, published=True) 
+        code_objects = Code.objects.filter(title__icontains=obj, published=True) 
         tag = Tag.objects.filter(name__icontains=obj)
         if tag: 
-          qs = TaggedItem.objects.get_by_model(Scraper, tag)
-          scrapers = scrapers | qs
-        scrapers = scrapers.filter(published=True).order_by('-created_at')
-        return scrapers[:10]
+          qs = TaggedItem.objects.get_by_model(Code, tag)
+          code_objects = code_objects | qs
+        code_objects = code_objects.filter(published=True).order_by('-created_at')
+        return code_objects[:50]
         
