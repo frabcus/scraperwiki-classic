@@ -24,7 +24,7 @@
 	    {% block javascript %}{% endblock %}
 	    <title>{% block title %}{% endblock %} | ScraperWiki</title>
 	</head>
-	<body{% if grey_body %} class="bold_body"{% endif %}>
+	<body>
 	    <div class="banner">
 	        <ul class="user_menu">
 
@@ -38,7 +38,7 @@
 
 				{% if user.is_authenticated %}
 				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.get_profile.name}}</a></li>
-				  <li><a href="{% url my_scrapers %}">{{ user.scraper_set.owned_count }}
+				  <li><a href="{% url dashboard %}">{{ user.code_set.owned_count }}
 				     {% ifnotequal user.scraper_set.owned_count 1 %}
 				        scrapers
 				     {% else %}
@@ -58,21 +58,22 @@
  			</ul>
 			<p>
     	        Hello! This is the beta version of ScraperWiki, 
-                <span id="feedbackmess">please <a href="{% url contact_form %}">tell us what you think</a></span>.
+                please <a href="{% url contact_form %}">tell us what you think</a>.
             </p>
 	    </div>
 
 	    {# Header #}
 	    <div id="divHeader">
                 <div id="divLogo">
-                    {% if not hide_logo %}
-    					<p>
-    					    <a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a>
-    				    </p>
-				    {% endif %}
+					<p>
+					    <a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a>
+				    </p>
 				</div>
 			<div id="divMenu">
 			    <ul class="main_menu">
+			        <li>
+				        <a href="#" title="Manage your scrapers" class="dashboard">Your dashboard</a>
+				    </li>
 				    <li>
 				        <a href="#" title="Create a new screen scraper" class="editor_scraper">New scraper</a>
 				    </li>

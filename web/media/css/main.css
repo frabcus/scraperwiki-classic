@@ -34,13 +34,16 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 #divContent {padding-bottom:3em;border-left:solid 1px #9f9f9f;border-top:solid 1px #9f9f9f;border-bottom:solid 1px #9f9f9f;padding:1em 0.8em 2em 0.8em; margin-bottom:3em; min-height:600px;}
 .content {padding-top:1.3em;}
 .content.left, .content.right {float:left;}
-.content.half {width:50%;}
+.content.half {width:48.5%;}
+.content.half.left {padding-right:1.5%;}
+.content.half.right {padding-left:1.5%;}
 .content.col.left {width:60%;}
 .content.col.right {width:35%; padding-left:3%;}
 .content .section {padding:1em 0; border-bottom:dotted 1px #ccc;}
 .content h2 {padding-bottom:0.6em;font-size:1.4em;}
 .content h3 {padding-bottom:0.6em;font-size:1.2em;}
 .content h4 {padding-bottom:0.6em;}
+.content.divider {border-top:solid 1px #ddd;}
 
 /* Data scroller */
 div.scroller {background:#fafafa;}

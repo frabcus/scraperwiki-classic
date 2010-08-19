@@ -33,7 +33,7 @@ urlpatterns = patterns('',
     url(r'^contact/sent/$',               direct_to_template,{ 'template': 'contact_form/contact_form_sent.html' },name='contact_form_sent'),
     
     # user's scrapers
-    url(r'^my-scrapers/$',                  frontend_views.my_scrapers, name='my_scrapers'),
+    url(r'^dashboard/$',                  frontend_views.dashboard, name='dashboard'),
     
     # Example pages to scrape :)
     url(r'^examples/basic_table\.html$',  direct_to_template,{ 'template': 'examples/basic_table.html' },name='example_basic_table'),
