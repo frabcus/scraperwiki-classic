@@ -5,8 +5,6 @@ img {border:none;}
 body {text-align:center; padding:0; margin:0; font-family:Helvetica, arial, sans-serif; background:#fafafa;}
 #divPage {text-align:left; margin:0 auto; position:relative; font-size:100%;margin-left:180px; background:#fff; 
     clear:none;font-size:0.9em; padding-top:0.8em;}
-body.bold_body {background:#5f6060;}
-div.above_page {text-align:left;}
 
 /* Banner (feedback etc) */
 div.banner {background:#ffffd7; font-size:0.8em; padding:0.6em 0; border-bottom:solid 1px #9f9f9f;
@@ -222,9 +220,9 @@ ul.scraper_list span.edit a {color:green;}
 ul.scraper_list p.controls {position:absolute; top:0; right:1em;}
 
 
-/* Welcome page */
+/* About page */
 #divWelcome {position:relative; background:url(../images/graph_paper.png) #1d7cae;
-    top:70px; padding: 1.5em 2%; border-top:solid 5px #287aa6;border-bottom:solid 10px #287aa6;}    
+    padding: 20px 1.5em 1em 1.5em; margin-top:80px;border-top:solid 5px #287aa6;border-bottom:solid 10px #287aa6;}    
 #divWelcomeText {margin-right:550px;position:relative; top:-95px;margin-bottom:-95px;}
 #divWelcomeText h1 {font-size:2.3em; font-weight:bold; clear:none; line-height:1.1em; margin-bottom:0.5em;
     color:#fff; padding-top:10px;}
@@ -236,7 +234,7 @@ ul.scraper_list p.controls {position:absolute; top:0; right:1em;}
 
 #hNewDatasets {padding-top:1em;}
 #divNewScrapers {margin-bottom:1em;}
-div.feature {padding-top:2em;}
+div.feature {padding-top:2em; background:#5f6060; color:#fff;border-top:solid 10px #4f4f4f;border-bottom:solid 10px #4f4f4f; margin-bottom:1em; min-height:200px;}
 div.feature h2 {padding:0;}
 div.feature img {float:left; margin-right:20px;position:relative; top:-8px;}
 
