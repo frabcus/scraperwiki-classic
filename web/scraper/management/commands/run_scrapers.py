@@ -30,7 +30,7 @@ class ScraperRunner(threading.Thread):
     
     def run(self):
         guid = self.scraper.guid
-        code = self.scraper.saved_code()
+        code = self.scraper.saved_code().encode('utf-8')
 
         runner_path = "%s/runner.py" % settings.FIREBOX_PATH
         failed = False
@@ -42,7 +42,7 @@ class ScraperRunner(threading.Thread):
         args.append('--name=%s' % self.scraper.short_name)
         
         runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        runner.stdin.write(self.scraper.saved_code())
+        runner.stdin.write(code)
         runner.stdin.close()
 
         event = ScraperRunEvent()
@@ -131,6 +131,9 @@ class Command(BaseCommand):
                 try:
                     if not self.is_currently_running(scraper):
                         self.run_scraper(scraper, options)
+                    else:
+                        if 'verbose' in options:
+                            print "%s is already running" % scraper.short_name
                 except Exception, e:
                     print "Error running scraper: " + scraper.short_name
                     print e
