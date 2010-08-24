@@ -9,7 +9,7 @@ from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
 
 from django.contrib.auth.models import User
-
+from django.db import IntegrityError
 from django.conf import settings
 
 from scraper import models
@@ -519,9 +519,11 @@ def twisterstatus(request):
             continue
         
         # identify or create the editing object
-        userscraperediting, created = models.UserScraperEditing.objects.get_or_create(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
-        if created:
+        try:
+            userscraperediting = models.UserScraperEditing.objects.create(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
             userscraperediting.editingsince = datetime.datetime.now()
+        except IntegrityError:
+            userscraperediting = models.UserScraperEditing.objects.get(twisterclientnumber=twisterclientnumber)
 
         assert models.UserScraperEditing.objects.filter(twisterclientnumber=twisterclientnumber).count() == 1, client
         
