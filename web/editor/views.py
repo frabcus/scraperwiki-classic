@@ -232,6 +232,12 @@ def edit(request, short_name='__new__', language='Python', tutorial_scraper=None
     form.fields['code'].initial = code
     form.fields['commaseparatedtags'].initial = commaseparatedtags 
 
-    tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
+    context = {}
+    context['form'] = form
+    context['tutorial_scrapers'] = ScraperModel.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
+    context['scraper'] = scraper
+    context['has_draft'] = has_draft
+    context['user'] = request.user
+    context['docs'] = 'frontend/inline_code_docs_%s.html' % scraper.language.lower()
 
-    return render_to_response('editor/editor.html', {'form':form, 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft, 'user':request.user}, context_instance=RequestContext(request))
+    return render_to_response('editor/editor.html', context, context_instance=RequestContext(request))
