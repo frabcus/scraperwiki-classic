@@ -3,48 +3,13 @@
 {% load sparkline %}
 
 {% block tab %}
-    <div class="content">        
-
-      <table class="bicolumn">
-      <tr><td class="bicolumn">
-        <div class="section">
-            <h3>Scraper</h3>
+    <div class="content full">        
+            <h3>Edit details</h3>
             <form action="." method="post" class="scraper_admin">
                 <ul>
                 {{ form.as_ul }}
                 </ul>
-                <input type="submit" class="button small" value="Save changes" />
+                <input type="submit" value="Save changes" />
             </form>
         </div>
-
-      </td><td class="bicolumn">
-       {% if user_owns_it %}
-        <div class="section">        
-            <h3>Datastore</h3>
-            <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
-                <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
-                <input type="submit" id="btnClearDatastore" class="button small danger" value="Clear the datastore" />
-                Removes all data for this scraper. There is no undo.
-            </form>
-        </div>
-        <div class="section">                
-            <h3>Status</h3>
-            <form action="{% url scraper_delete_scraper scraper.short_name %}" method="post">
-                <input type="hidden" name="delete_scraper" value="1" />
-                <input type="submit" id="btnDeleteScraper" class="button small danger" value="Delete this scraper" />
-                Deletes this scraper and all its data. There is no undo.
-            </form>
-        </div>
-        {% else %}
-        <div class="section">                
-         <p>You must be the owner of the scraper to delete it or remove data from the datastore.</p>
-        </div>
-        {% endif %} 
-      </td></tr>
-      </table>
-    </div>
-{% endblock %}
-{% block run_script %}
-    setupButtonConfirmation("btnClearDatastore", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete all existing data for this scraper.");
-    setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this scraper and it's data.");    
 {% endblock %}

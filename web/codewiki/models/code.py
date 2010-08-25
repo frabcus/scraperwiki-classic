@@ -46,7 +46,6 @@ class Code(models.Model):
     short_name        = models.CharField(max_length=50)
     source            = models.CharField(max_length=100, blank=True)
     description       = models.TextField(blank=True)
-    revision          = models.CharField(max_length=100, blank=True)
     created_at        = models.DateTimeField(auto_now_add=True)
     deleted           = models.BooleanField()
     status            = models.CharField(max_length=10, blank=True)
@@ -138,10 +137,9 @@ class Code(models.Model):
     # currently, the only editor we have is the owner of the scraper.
     def editors(self):
         return (self.owner(),)
-            
-    # this functions to go
-    def saved_code(self):
-        return vc.MercurialInterface(self.get_repo_path()).getstatus(self)["code"]
+        
+    def saved_code(self, revision = None):
+        return vc.MercurialInterface(self.get_repo_path()).getstatus(self, revision)["code"]
 
     def get_repo_path(self):
         result = None

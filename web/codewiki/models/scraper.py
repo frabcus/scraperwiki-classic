@@ -34,6 +34,7 @@ class Scraper (code.Code):
     has_temporal = models.BooleanField(default=False)    
     last_run = models.DateTimeField(blank=True, null=True)    
     license = models.CharField(max_length=100, blank=True)
+    license_link = models.URLField(verify_exists=False, null=True, blank=True)
     record_count = models.IntegerField(default=0)        
     scraper_sparkline_csv = models.CharField(max_length=255, null=True)
     run_interval = models.IntegerField(default=86400)

@@ -236,3 +236,13 @@ function setupCKANLink(){
         }
     });
 }
+
+function setupCodewikiEditInPlace(wiki_type, short_name){
+    $('#id_title').editable('/ajax/ajax_update_codewiki_details/', {
+             indicator : 'Saving...',
+             tooltip   : 'Click to edit...',
+             cancel    : 'Cancel',
+             submit    : 'OK',
+             submitdata : {wiki_type: wiki_type, short_name: short_name},
+         });
+}

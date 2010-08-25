@@ -6,7 +6,7 @@
         
     </iframe>
     {% if related_scrapers %}    
-        <div class="content full">
+        <div class="content col left">
             <h2>Scrapers used in the making of this view</h2>
             <ul>
                 {% for related_scraper in related_scrapers %}
@@ -14,5 +14,9 @@
                 {% endfor %}
             </ul>
         </div>
+        <div class="content col right">
+            {% include 'codewiki/includes/contributors.html' %}
+        </div>
+        <br class="clear"/>
     {% endif %}
 {% endblock %}

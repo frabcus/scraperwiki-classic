@@ -3,8 +3,8 @@
 {% load sparkline %}
 {% load display_chart %}
 {% block tab %}
+{% load markup %}
 <div class="content full">
-    <h2>Example data from this scraper</h2>
     <div class="data_viewer">
         {% if has_data %}
             {% for table, data in data_tables.items %}
@@ -29,10 +29,9 @@
                 </table>
             </div>
             {% endfor %}
-
         {% else %}
-            <div class="data">
-            <table>
+            <div>
+            <table class="data">
                     <tbody>
                     <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
                     <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -55,73 +54,79 @@
     	            This scraper is being worked on <br/>but has not been published yet
     	        {% endif %}
     	    </div>
-
         {% endif %}
-    </div>
+        <div class="content_footer">
+            <p>
+                This dataset has a total of {{ scraper.record_count }} records and was last updated on {{scraper.last_run|date:"H:i, j F Y"}}.
 
+                {% if scraper.license_link%}The license for this data is {{scraper.license|lower|default:"&nbsp;"}} and a copy can be found on <a href="{{scraper.license_link}}">this page</a>. <a href="#" class="edit">[Edit]</a>{% else %}The license for this dataset is unknown, <a href="#">please add a link to the license if you are able to locate it</a>.{% endif %}
+            </p>
+        </div>
+    </div>
 </div>
-{% if related_views %}
-    <div class="content full">
-        <h2>Views using this data</h2>
-        <ul>
+<div class="content full">
+    <h2>Views using this data</h2>    
+    <ul class="views">
+        {% if related_views %}
             {% for related_view in related_views %}
-                <a href="{% url view_overview related_view.short_name %}">{{related_view.title}}</a>
+                <li><a href="{% url view_overview related_view.short_name %}">{{related_view.title}}</a></li>
             {% endfor %}
-        </ul>
-    </div>
-{% endif %}
+        {% endif %}        
+        <li><a href="#">Create a new view</a></li>        
+    </ul>
+
+        <div class="content_footer">
+            <p>Views are ways of visualising and repurposing the data gathered by a scraper.         {% if related_views %}{% else %}No one has created one for <em>{{scraper.title}}</em> yet. </p>{% endif %}
+        </div>
+</div>
+<div class="content full">
+    <h2>About this scraper</h2>
+    <div class="text_wiki">{{ scraper.description|textile }}</div>
+</div>
+
 <div class="content col left">
-    <h3>About this dataset</h3>
-    <div class="metadata">
-        <dl>
-          <dt>Created by:</dt>
-          <dd><a href="{% url profiles_profile_detail scraper.owner.username %}">
-          {% load gravatar %} {% show_gravatar scraper.owner 'small' %}&nbsp;{{scraper.owner.get_profile.name}}</a></dd>
-          <dt>Data licence:</dt>
-          <dd>{{scraper.license|default:"&nbsp;"}}</dd>
-          <dt>Scraper created:</dt><dd>{{ scraper.created_at|date:"H:i, j F Y" }}</dd>
-          <dt>Last run:</dt>
-          <dd>{{scraper.last_run|date:"H:i, j F Y"|default:"never"|title}}</dd>
-          <dt>Records:</dt>
-          <dd>{{ scraper.record_count }}</dd>
-          <dt>API short name:</dt>
-          <dd>{{scraper.short_name}}</dd>
-          <dt>Language:</dt>
-          <dd>{{scraper.language}}</dd>
-          <dt>Data:</dt>
-          <dd><a href="{% url export_csv scraper.short_name %}" rel="nofollow">download csv</a></dd>
-          <dt>Tags:</dt>
-          <dd>{% if scraper.published %}
-              {% for tag in scraper_tags %}<a href="{% url tag tag %}">{{ tag }}</a> {% endfor %}
-          {% else %}
-              {% for tag in scraper_tags %}{{ tag }} {% endfor %}
-          {% endif %}
-          &nbsp;</dd>
-        </dl>
-    </div>
+    <h3>Tags <a href="{% url scraper_admin scraper.short_name %}" class="edit">[Add a tag]</a></h3>
+    <ul>
+        {% for tag in scraper_tags %}
+            <li><a href="{% url tag tag %}">{{ tag }}</a></li>
+        {% endfor %}
+    </ul>
+    <h3>Contributors</h3>
+    {% include 'codewiki/includes/contributors.html' %}
 </div>
 <div class="content col right">
-    <p>
-        <h3>Recent activity</h3>
-        {% sparkline scraper.scraper_sparkline_csv 'medium' %}    
-    </p>
-    <h4>Contributors</h4>
-    <ul>
-        <li>
-            <a href="{% url profiles_profile_detail scraper.owner.username %}">
-            {% load gravatar %} {% show_gravatar scraper.owner 'small' %} 
-            {{scraper.owner.get_profile.name}}</a>
-            <em>(creator)</em>
-        </li>
-        {% if scraper_contributors %}  
-          {% for contributor in scraper_contributors %}  
-            <li>
-            	{% load gravatar %} {% show_gravatar contributor 'small' %} 
-                <a href="{% url profiles_profile_detail contributor.username %}">{{contributor.get_profile.name}}</a>
-            </li>
-          {% endfor %}
-        {% endif %}
-    </ul>
+    <h3>Schedule</h3>
+    {% if scraper.run_interval %}
+        This scraper is scheduled to run every {{scraper.run_interval}}
+    {% else %}
+        This scraper is no currently scheduled to be rerun
+    {% endif %}
+    {% sparkline scraper.scraper_sparkline_csv 'medium' %}    
+    <h3>Delete &amp; reset</h3>
+   {% if user_owns_it %}    
+        <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
+            <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
+            <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
+            <p>
+                Removes all data for this scraper. There is no undo.
+            </p>
+        </form>
+        <form action="{% url scraper_delete_scraper scraper.short_name %}" method="post">
+            <input type="hidden" name="delete_scraper" value="1" />
+            <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
+            <p>
+                Deletes this scraper and all its data. There is no undo.
+            </p>
+        </form>
+    {% else %}
+        <p class="infobox">Only the creator of a scraper can delete or reset it.</p>
+    {% endif %}
 </div>
 <br class="clear"/>
+{% endblock %}
+
+{% block run_script %}
+    setupCodewikiEditInPlace('{{scraper.wiki_type}}','{{scraper.short_name}}');
+    setupButtonConfirmation("btnClearDatastore", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete all existing data for this scraper.");
+    setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this scraper and it's data.");    
 {% endblock %}

@@ -9,6 +9,10 @@ LICENSE_CHOICES = (
     ('Unknown', 'Unknown'),
 )
 
+class CodeTagForm (forms.Form):
+
+        tags = forms.CharField(required=False, label="Add new tags (comma separated)")
+            
 class ScraperAdministrationForm (forms.ModelForm):
     run_interval = forms.ChoiceField(required=True, label="Re-run this scraper", choices = (
                                 (-1, 'Never'),

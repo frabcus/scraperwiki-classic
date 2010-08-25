@@ -8,7 +8,7 @@
 {% endblock %}
 {% block content %}
     <div class="page_title">
-	    <h1>
+	    <h1 id="hCodeTitle">
 	        {{ scraper.title }}
 	        {% if scraper.has_geo %}
                 <a href="{% url scraper_map scraper.short_name %}">	
@@ -19,7 +19,10 @@
                 <img src="{{ MEDIA_URL }}/images/icons/date.png"/>
             {% endif %}
 	    </h1>
-        <p>{{ scraper.description }}</p>
+	    <ul class="code_about">
+	       <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
+	       <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
+	    </ul>
         {% ifequal scraper.wiki_type 'scraper'%}
             <ul class="title_links">
                 <li class="csv"><a href="{% url export_csv scraper.short_name %}">Download this dataset (CSV)</a></li>
@@ -43,4 +46,7 @@
             <strong>Important</strong> If you suspect this scraper breaks our <a href="/terms_and_conditions/">Terms &amp; Conditions</a>, please <a href="/contact/">report it</a>
         </p>
     </div>
+{% endblock %}
+{% block run_script %}
+    setupCodewikiEditInPlace('{{scraper.wiki_type}}','{{scraper.short_name}}');
 {% endblock %}

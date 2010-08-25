@@ -7,6 +7,7 @@
 	<title>{{scraper.title}}</title>
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>	
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.autoheight.js"></script>	
+    <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>	
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />	
 </head>
 <body class="fullscreen">
@@ -27,6 +28,7 @@
         <h1><a href="{%url view_overview scraper.short_name %}" title="Go to overview page">{{scraper.title}}</a></h1>
         <p id="share_links">
             <fb:like href="%url view_fullscreen scraper.short_name %}" layout="button_count" font="arial"></fb:like>
+            <a href="http://twitter.com/share" class="twitter-share-button" data-count="none">Tweet</a>
         </p>
         <a href="{%url frontpage %}" id="powered"><span class="hide">Powered by ScraperWiki</span></a>
         <a id="close" href="{% url rpcexecute scraper.short_name %}">x</a>

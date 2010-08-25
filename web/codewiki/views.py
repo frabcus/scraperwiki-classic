@@ -81,10 +81,10 @@ def scraper_overview(request, scraper_short_name):
         'related_views': related_views,
         }, context_instance=RequestContext(request))
 
-def scraper_admin(request, scraper_short_name):
+def scraper_admin(request, short_name):
     user = request.user
     scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
+        models.Scraper.objects, short_name=short_name)
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
 
@@ -97,13 +97,14 @@ def scraper_admin(request, scraper_short_name):
         if form.is_valid():
             s = form.save()
             s.tags = form.cleaned_data['tags']
+            return HttpResponseRedirect(reverse('scraper_overview', args=[short_name]))            
     else:
         form = forms.ScraperAdministrationForm(instance=scraper)
             # somehow the magic that can convert from comma separated tags into the tags list is not able to convert back, hence this code.  can't be true
         form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
 
     return render_to_response('codewiki/admin.html', {
-      'selected_tab': 'admin',
+      'selected_tab': 'overview',
       'scraper': scraper,
       'user_owns_it': user_owns_it,
       'user_follows_it': user_follows_it,
@@ -245,7 +246,7 @@ def scraper_history(request, wiki_type, scraper_short_name):
     # sift through the alerts filtering on the scraper through the annoying content_type field
     content_type = scraper.content_type()
     history = frontend.models.Alerts.objects.filter(content_type=content_type, object_id=scraper.pk).order_by('-datetime')
-        
+
     dictionary = { 'selected_tab': 'history', 'scraper': scraper, 'history': history,
                    'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
     
@@ -264,7 +265,57 @@ def scraper_history(request, wiki_type, scraper_short_name):
     
     return render_to_response('codewiki/history.html', dictionary, context_instance=RequestContext(request))
 
+def code(request, wiki_type, scraper_short_name):
+    user = request.user
+    scraper = get_object_or_404(models.Code.objects, short_name=scraper_short_name)
 
+    # Only logged in users should be able to see unpublished scrapers
+    if not scraper.published and not user.is_authenticated():
+        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+
+    try: rev = int(request.GET.get('rev', '-1'))
+    except ValueError: rev = -1
+
+    mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
+    status = mercurialinterface.getstatus(scraper, rev)
+
+    user_owns_it = (scraper.owner() == user)
+    user_follows_it = (user in scraper.followers())
+    scraper_tags = Tag.objects.get_for_object(scraper)
+
+    dictionary = { 'scraper_tags': scraper_tags, 'selected_tab': 'history', 'scraper': scraper,
+                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
+
+    # overcome lack of subtract in template
+    if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
+        status["modifiedcommitdifference"] = status["filemodifieddate"] - status["prevcommit"]["date"]
+
+    dictionary["status"] = status
+    dictionary["line_count"] = status["code"].count("\n") + 3
+
+    return render_to_response('codewiki/code.html', dictionary, context_instance=RequestContext(request))
+
+def ajax_update_codewiki_details(request):
+    response = HttpResponse()
+    if request.POST:
+        #get the code wiki object
+        wiki_type = request.POST.get('wiki_type', None)
+        short_name = request.POST.get('short_name', None)
+        code_object = get_object_or_404(models.Code.objects, wiki_type = wiki_type, short_name = short_name)
+        
+        #get the new values
+        control_id = request.POST.get('id', None)
+        
+        #title
+        if control_id == 'hCodeTitle':
+            title = request.POST.get('value', None)
+            if title:
+                code_object.title = title
+        
+        code_object.save()
+    response.write(title)
+    return response
+        
 def stringnot(v):
     """
     (also from scraperwiki/web/api/emitters.py CSVEmitter render()
@@ -455,7 +506,7 @@ def twisterstatus(request):
             # or could use the field: closedsince  = models.DateTimeField(blank=True, null=True)
     return HttpResponse("Howdy ppp ")
 
-def rpcexecute_dummy(request, scraper_short_name):
+def rpcexecute_dummy(request, scraper_short_name, revision = None):
     response = HttpResponse()
     response.write('''
     <html>
@@ -501,7 +552,7 @@ def rpcexecute_dummy(request, scraper_short_name):
 # quick hack the manage the RPC execute feature 
 # to test this locally you need to use python manage.py runserver twice, on 8000 and on 8010, 
 # and view the webpage on 8010
-def rpcexecute(request, scraper_short_name):
+def rpcexecute(request, scraper_short_name, revision = None):
     scraper = get_object_or_404(models.View.objects, short_name=scraper_short_name)
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
     failed = False
@@ -525,7 +576,7 @@ def rpcexecute(request, scraper_short_name):
     args.append('--cpulimit=80')
     
     runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    runner.stdin.write(scraper.saved_code())
+    runner.stdin.write(scraper.saved_code(revision))
     
     # append in the single line at the bottom that gets the rpc executed with the right function and arguments
     if func:
@@ -574,6 +625,7 @@ def running_scrapers(request):
 def choose_template(request, wiki_type):
     form = forms.ChooseTemplateForm(wiki_type)
     return render_to_response('codewiki/ajax/choose_template.html', {'wiki_type': wiki_type, 'form': form}, context_instance=RequestContext(request))
+
 
 def chosen_template(request, wiki_type):
     template = request.GET.get('template', None)
