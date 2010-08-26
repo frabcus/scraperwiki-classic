@@ -46,6 +46,7 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 .content h4 {padding-bottom:0.6em;}
 .content.divider {border-top:solid 1px #ddd;}
 .content_footer {font-size:0.9em;color:#808080;}
+.content_footer.right {text-align:right;}
 .content_footer p, .content_footer ul {margin-top:0;}
 
 /* Data scroller */
@@ -99,7 +100,7 @@ small.error_hint {color:#cc0000;}
 .http_error {text-align:center; padding-top:1em;}
 
 /* Info */
-#divInfo ul {padding:0; margin:0; list-style-type:none; line-height:1.4em;}
+#divInfo ul {padding:0; margin:0; list-style-type:none; line-height:1.4em;border:solid 1px #9f9f9f;}
 #divInfo ul li {background:#ffffd7; padding:0.1em 0; margin:0; text-align:center;}
 
 /* Links */
@@ -128,6 +129,7 @@ table.scrapersediting td { border: 1px solid black;}
 
 /* Page titles */
 div.page_title {border-bottom:dotted 1px #ccc; padding:1em 0 0.5em 0; position:relative;}
+div.page_title h1 {width:65%;}
 .page_controls {position:absolute; top:0.6em; right:0; text-align:right;}
 div.page_title_narrow { width:600px;}
 ul.title_links {position:absolute; top:0.6em; right:0;}
@@ -165,9 +167,20 @@ br.clear {clear:both;}
 
 .data_viewer {position:relative;}
 
-.info_unpublished {display:block; height:97%; width:100%; text-align:center; padding-top:5%;
+.info_unpublished {display:block; height:40%; width:100%; text-align:center; padding-top:5%;
     position:absolute; top:0; left:0; font-weight:bold; color:#cdcbaa; text-transform:uppercase;
     font-size:2em; background:url(../images/transparent.png) repeat 0 0; line-height:1.3em;}
+#divAboutScraper textarea {margin-bottom:1em;}
+#divMarkupHint {padding-top:1em;}
+.views {}
+.views li {float:left;}
+.views li a {display:block;width:220px; text-align:center;}
+.views li a.screenshot {display:block;background:#fafafa; border:solid 1px #9f9f9f;
+    margin-right:15px;height:145px; text-align:center; margin-bottom:10px;}
+.views li.new {border:dashed 1px #ccc; width:220px;height:145px;background:#fafafa; padding:0;}
+.views li.new a {margin-top:26%;}
+
+#divEditTags form input {height:1.3em!important; width:200px!important;}
 
 /* View pages */
 iframe.view {border:none;}
@@ -394,3 +407,9 @@ body.fullscreen #close {position:absolute; right:1em; top:6px;}
 
 /* infobox */
 .infobox {border:solid 1px #ccc; font-size:0.9em; color:#808080; padding:0.5em;}
+
+/* edit links */
+a.edit {font-variant:normal!important;font-size:0.8em; font-weight:bold!important;}
+h2 a.edit {font-size:0.6em;}
+h3 a.edit {font-size:0.7em;}
+h4 a.edit {font-size:0.8em;}

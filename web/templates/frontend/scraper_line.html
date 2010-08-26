@@ -1,3 +1,4 @@
+{% load markup %}
 <li>
     <h3>
         <a href="{% ifequal scraper.wiki_type 'scraper'%}{% url scraper_overview scraper.short_name %}{% else %}{% url view_overview scraper.short_name %}{% endifequal %}">
@@ -21,7 +22,7 @@
     </p>
     {% if scraper.description %}
         <p>
-            {{ scraper.description }}            
+            {{ scraper.description|textile|striptags|truncatewords:75 }}            
         </p>
     {% endif %}
 

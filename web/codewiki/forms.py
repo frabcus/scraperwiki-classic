@@ -36,6 +36,7 @@ class ScraperAdministrationForm (forms.ModelForm):
         model = Scraper
         fields = ('run_interval', 'title', 'description', 'license', 'published', 'featured')
 
+
 class ChooseTemplateForm (forms.Form):
     language = forms.ChoiceField(required=True, label="Language", choices = code.LANGUAGES, widget=forms.RadioSelect, initial='Python')
     template = forms.ChoiceField(required=True, label="Template", choices = [], widget=forms.RadioSelect, initial='')    

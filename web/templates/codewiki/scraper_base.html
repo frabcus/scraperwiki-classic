@@ -8,20 +8,19 @@
 {% endblock %}
 {% block content %}
     <div class="page_title">
-	    <h1 id="hCodeTitle">
-	        {{ scraper.title }}
-	        {% if scraper.has_geo %}
-                <a href="{% url scraper_map scraper.short_name %}">	
-                    <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
-                </a>
-            {% endif %}
-            {% if scraper.has_temporal %}                        
-                <img src="{{ MEDIA_URL }}/images/icons/date.png"/>
-            {% endif %}
-	    </h1>
+	    <h1 id="hCodeTitle">{{ scraper.title }}</h1>	    
 	    <ul class="code_about">
 	       <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
 	       <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
+	        {% if scraper.has_geo %}
+               <li>
+                   <a href="{% url scraper_map scraper.short_name %}"><img src="{{ MEDIA_URL }}/images/icons/map.png"/></a>
+                  </li>
+           {% endif %}
+           {% if scraper.has_temporal %}                        
+               <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
+           {% endif %}
+            <li><a href="{% url scraper_admin scraper.short_name %}" id="aEditTitle" class="edit">[edit title]</a></li>
 	    </ul>
         {% ifequal scraper.wiki_type 'scraper'%}
             <ul class="title_links">

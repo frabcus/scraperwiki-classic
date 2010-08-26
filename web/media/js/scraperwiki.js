@@ -217,7 +217,6 @@ function setupIntroSlideshow(){
 
 function setupDataViewer(){
     $('.raw_data').flexigrid({height:250});    
-    
 }
 
 function setupCKANLink(){
@@ -237,12 +236,74 @@ function setupCKANLink(){
     });
 }
 
-function setupCodewikiEditInPlace(wiki_type, short_name){
-    $('#id_title').editable('/ajax/ajax_update_codewiki_details/', {
+function setupScraperEditInPlace(short_name){
+    
+    //about
+    $('#divAboutScraper').editable('admin/', {
              indicator : 'Saving...',
              tooltip   : 'Click to edit...',
              cancel    : 'Cancel',
-             submit    : 'OK',
-             submitdata : {wiki_type: wiki_type, short_name: short_name},
+             submit    : 'Save',
+             type      : 'textarea',
+             loadurl: 'raw_about_markup/',
+             event: 'dblclick',
+             submitdata : {js: 1, short_name: short_name},
          });
+
+    $('#aEditAboutScraper').click(
+        function(){
+             $('#divAboutScraper').dblclick();
+             oHint = $('<div id="divMarkupHint" class="content_footer"><p><strong>You can use Textile markup to style the description:</strong></p><ul><li>*bold* / _italic_ / @code@</li><li>* Bulleted list item / # Numbered list item</li><li>"A link":http://www.data.gov.uk</li><li>h1. Big header / h2. Normal header</li></ul></div>');
+             $('#divAboutScraper form').append(oHint);
+             return false;
+        }
+    );
+
+    //title
+    $('#hCodeTitle').editable('admin/', {
+             indicator : 'Saving...',
+             tooltip   : 'Click to edit...',
+             cancel    : 'Cancel',
+             submit    : 'Save',
+             event: 'dblclick',
+             submitdata : {js: 1, short_name: short_name},
+         });
+         
+    $('#aEditTitle').click(
+        function(){
+             $('#hCodeTitle').dblclick();
+             return false;
+        }
+    );
+
+    //tags
+    oDummy = $('<div id="divEditTags"></div>');
+    $('#divScraperTags').append(oDummy);
+    $('#divEditTags').editable('admin/', {
+             indicator : 'Saving...',
+             tooltip   : 'Click to edit...',
+             cancel    : 'Cancel',
+             submit    : 'Add tags',
+             event: 'dblclick',
+             placeholder: '',
+             submitdata : {js: 1, short_name: short_name},
+             callback: function (data){
+                 //add the new tags onto the list
+                 aItems = data.split(',');
+                 $('#divScraperTags ul').html('');
+                 for (var i=0; i < aItems.length; i++) {
+                    url = '/scrapers/tags/' + escape(aItems[i].trim())
+                    $('#divScraperTags ul').append($('<li><a href="' + url +'">' + aItems[i].trim() + '</a></li>'))
+                 };
+                 //clear out the textbox for next time
+                 $('#divEditTags').html('');
+            },
+         });
+    $('#aAddTags').click (
+         function(){
+              $('#divEditTags').dblclick();
+              return false;
+         }
+     );
+    
 }

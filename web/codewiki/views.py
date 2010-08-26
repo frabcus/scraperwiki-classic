@@ -8,6 +8,7 @@ from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
 
 from django.contrib.auth.models import User
+import textile
 
 from django.conf import settings
 
@@ -81,36 +82,59 @@ def scraper_overview(request, scraper_short_name):
         'related_views': related_views,
         }, context_instance=RequestContext(request))
 
-def scraper_admin(request, short_name):
+def scraper_admin (request, short_name):
+    response = None
+
     user = request.user
     scraper = get_object_or_404(
         models.Scraper.objects, short_name=short_name)
     user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
+
+    form = forms.ScraperAdministrationForm(instance=scraper)
+    form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
+    response = render_to_response('codewiki/admin.html', {'selected_tab': 'overview','scraper': scraper,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
 
     #you can only get here if you are signed in
     if not user.is_authenticated():
         raise Http404
 
     if request.method == 'POST':
-        form = forms.ScraperAdministrationForm(request.POST, instance=scraper)
-        if form.is_valid():
-            s = form.save()
-            s.tags = form.cleaned_data['tags']
-            return HttpResponseRedirect(reverse('scraper_overview', args=[short_name]))            
-    else:
-        form = forms.ScraperAdministrationForm(instance=scraper)
-            # somehow the magic that can convert from comma separated tags into the tags list is not able to convert back, hence this code.  can't be true
-        form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
+        #is this an ajax post of a single value?
+        js = request.POST.get('js', None)
+        #single fields saved via ajax
+        if js:
+            response = HttpResponse()
+            response_text = ''
+            element_id = request.POST.get('id', None)       
+            if element_id == 'divAboutScraper':
+                scraper.description = request.POST.get('value', None)                                                  
+                response_text = textile.textile(scraper.description)
+                
+            if element_id == 'hCodeTitle':
+                scraper.title = request.POST.get('value', None)                                                  
+                response_text = scraper.title
 
-    return render_to_response('codewiki/admin.html', {
-      'selected_tab': 'overview',
-      'scraper': scraper,
-      'user_owns_it': user_owns_it,
-      'user_follows_it': user_follows_it,
-      'form': form,
-      }, context_instance=RequestContext(request))
+            if element_id == 'divEditTags':
+                scraper.tags = ", ".join([tag.name for tag in scraper.tags]) + ',' + request.POST.get('value', '')                                                  
+                response_text = ", ".join([tag.name for tag in scraper.tags])
 
+            #save scraper
+            scraper.save()
+            response.write(response_text)
+        #saved by form 
+        else:
+            form = forms.ScraperAdministrationForm(request.POST, instance=scraper)
+            response =  HttpResponseRedirect(reverse('scraper_overview', args=[short_name]))
+
+            if form.is_valid():
+                s = form.save()
+                s.tags = form.cleaned_data['tags']
+            else:
+                response = render_to_response('codewiki/admin.html', {'selected_tab': 'overview','scraper': scraper,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
+
+    # send back whatever responbse we have
+    return response
+    
 def scraper_delete_data(request, scraper_short_name):
     scraper = get_object_or_404(
         models.Scraper.objects, short_name=scraper_short_name)
@@ -295,26 +319,12 @@ def code(request, wiki_type, scraper_short_name):
 
     return render_to_response('codewiki/code.html', dictionary, context_instance=RequestContext(request))
 
-def ajax_update_codewiki_details(request):
-    response = HttpResponse()
-    if request.POST:
-        #get the code wiki object
-        wiki_type = request.POST.get('wiki_type', None)
-        short_name = request.POST.get('short_name', None)
-        code_object = get_object_or_404(models.Code.objects, wiki_type = wiki_type, short_name = short_name)
-        
-        #get the new values
-        control_id = request.POST.get('id', None)
-        
-        #title
-        if control_id == 'hCodeTitle':
-            title = request.POST.get('value', None)
-            if title:
-                code_object.title = title
-        
-        code_object.save()
-    response.write(title)
+def raw_about_markup(request, wiki_type, short_name):
+    code_object = get_object_or_404(models.Code.objects, short_name=short_name)
+    response = HttpResponse(mimetype='text/x-web-textile')
+    response.write(code_object.description)
     return response
+
         
 def stringnot(v):
     """

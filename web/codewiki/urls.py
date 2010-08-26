@@ -38,5 +38,6 @@ urlpatterns = patterns('',
 
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$', views.choose_template, name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/new/chosen_template/$', views.chosen_template, name='chosen_template'),        
-    url(r'^ajax/ajax_update_codewiki_details/$', views.ajax_update_codewiki_details, name='ajax_update_codewiki_details'),            
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        
+    
 )
