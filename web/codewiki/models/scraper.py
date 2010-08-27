@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 import settings
 
 import codewiki.managers.scraper
@@ -28,6 +29,8 @@ except:
 
 from django.core.mail import send_mail
 
+SCHEDULE_OPTIONS = ((-1, 'never'), (3600*24, 'once a day'), (3600*24*2, 'every two days'), (3600*24*3, 'every three days'),                                                                 (3600*24*7, 'once a week'), (3600*24*14, 'every two weeks'), (3600*24*31, 'once a month'), (3600*24*63, 'every two months'), (3600*24*182, 'every six months'),)
+
 class Scraper (code.Code):
 
     has_geo = models.BooleanField(default=False)
@@ -45,7 +48,17 @@ class Scraper (code.Code):
     def __init__(self, *args, **kwargs):
         super(Scraper, self).__init__(*args, **kwargs)
         self.wiki_type = 'scraper'
-        self.license = 'Unknown'        
+        self.license = 'Unknown'
+
+    def clean(self):
+        if self.run_interval == 'draft' and self.pub_date is not None:
+            found = False
+            for schedule_option in SCHEDULE_OPTIONS:
+                if schedule_option[0] == self.run_interval:
+                    found = True
+            if not found:
+                raise ValidationError('Invalid run interval')
+
         
     def count_records(self):
         return int(Scraper.objects.item_count(self.guid))

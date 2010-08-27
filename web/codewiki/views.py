@@ -24,6 +24,7 @@ import subprocess
 import StringIO, csv, types
 import datetime
 from django.utils.encoding import smart_str
+from models.scraper import SCHEDULE_OPTIONS
 
 try:                import json
 except ImportError: import simplejson as json
@@ -67,6 +68,7 @@ def scraper_overview(request, scraper_short_name):
                                                column_order=column_order,
                                                private_columns=private_columns)
 
+    # json up the schedule options
     # replicates output from data_summary_tables
     data_tables = {"": data }
     has_data = len(data['rows']) > 0
@@ -80,8 +82,63 @@ def scraper_overview(request, scraper_short_name):
         'data': data,
         'scraper_contributors': scraper_contributors,
         'related_views': related_views,
+        'schedule_options': SCHEDULE_OPTIONS,
         }, context_instance=RequestContext(request))
 
+
+def view_admin (request, short_name):
+    response = None
+
+    user = request.user
+    view = get_object_or_404(
+        models.View.objects, short_name=short_name)
+    user_owns_it = (view.owner() == user)
+
+    form = forms.ViewAdministrationForm(instance=view)
+    #form.fields['tags'].initial = ", ".join([tag.name for tag in view.tags])
+    response = render_to_response('codewiki/view_admin.html', {'selected_tab': 'overview','scraper': view,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
+
+    #you can only get here if you are signed in
+    if not user.is_authenticated():
+        raise Http404
+
+    if request.method == 'POST':
+        #is this an ajax post of a single value?
+        js = request.POST.get('js', None)
+        #single fields saved via ajax
+        if js:
+            response = HttpResponse()
+            response_text = ''
+            element_id = request.POST.get('id', None)       
+            if element_id == 'divAboutScraper':
+                view.description = request.POST.get('value', None)                                                  
+                response_text = textile.textile(view.description)
+
+            if element_id == 'hCodeTitle':
+                view.title = request.POST.get('value', None)                                                  
+                response_text = view.title
+
+            if element_id == 'divEditTags':
+                view.tags = ", ".join([tag.name for tag in view.tags]) + ',' + request.POST.get('value', '')                                                  
+                response_text = ", ".join([tag.name for tag in view.tags])
+
+            #save view
+            view.save()
+            response.write(response_text)
+        #saved by form 
+        else:
+            form = forms.ViewAdministrationForm(request.POST, instance=view)
+            response =  HttpResponseRedirect(reverse('view_overview', args=[short_name]))
+
+            if form.is_valid():
+                s = form.save()
+                s.tags = form.cleaned_data['tags']
+            else:
+                response = render_to_response('codewiki/admin.html', {'selected_tab': 'overview','scraper': view,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
+
+    # send back whatever responbse we have
+    return response
+    
 def scraper_admin (request, short_name):
     response = None
 
@@ -118,6 +175,12 @@ def scraper_admin (request, short_name):
                 scraper.tags = ", ".join([tag.name for tag in scraper.tags]) + ',' + request.POST.get('value', '')                                                  
                 response_text = ", ".join([tag.name for tag in scraper.tags])
 
+            if element_id == 'spnRunInterval':
+                scraper.run_interval = request.POST.get('value', None)
+                for schedule_option in SCHEDULE_OPTIONS:
+                    if schedule_option[0] == int(scraper.run_interval):
+                        response_text = schedule_option[1]
+                    
             #save scraper
             scraper.save()
             response.write(response_text)
@@ -325,7 +388,6 @@ def raw_about_markup(request, wiki_type, short_name):
     response.write(code_object.description)
     return response
 
-        
 def stringnot(v):
     """
     (also from scraperwiki/web/api/emitters.py CSVEmitter render()

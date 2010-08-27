@@ -29,6 +29,7 @@ urlpatterns = patterns('',
     url(r'^views/(?P<scraper_short_name>[\w_\-]+)/run/(?P<revision>\d+)/$', views.rpcexecute_dummy, name='rpcexecute'),    
     url(r'^views/(?P<scraper_short_name>[\w_\-]+)/html/$',       views.htmlview,   name='htmlview'),
     url(r'^views/(?P<short_name>[\w_\-]+)/full/$',        views.view_fullscreen,                 name='view_fullscreen'),   
+    url(r'^views/(?P<short_name>[\w_\-]+)/admin/$',  views.view_admin,            name='view_admin'),    
 
     url(r'^scrapers/metadata_api/', include('codewiki.metadata_api.urls')),
 

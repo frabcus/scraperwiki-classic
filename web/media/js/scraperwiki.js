@@ -1,5 +1,4 @@
-function setupCodeViewer(iLineCount, scraperlanguage)
-{
+function setupCodeViewer(iLineCount, scraperlanguage) {
     var oCodeEditor;
     if(iLineCount < 20)
         iLineCount = 20;
@@ -236,7 +235,7 @@ function setupCKANLink(){
     });
 }
 
-function setupScraperEditInPlace(short_name){
+function setupScraperEditInPlace(wiki_type, short_name){
     
     //about
     $('#divAboutScraper').editable('admin/', {
@@ -248,6 +247,7 @@ function setupScraperEditInPlace(short_name){
              loadurl: 'raw_about_markup/',
              event: 'dblclick',
              submitdata : {js: 1, short_name: short_name},
+             placeholder: '',             
          });
 
     $('#aEditAboutScraper').click(
@@ -266,6 +266,7 @@ function setupScraperEditInPlace(short_name){
              cancel    : 'Cancel',
              submit    : 'Save',
              event: 'dblclick',
+             placeholder: '',             
              submitdata : {js: 1, short_name: short_name},
          });
          
@@ -292,7 +293,7 @@ function setupScraperEditInPlace(short_name){
                  aItems = data.split(',');
                  $('#divScraperTags ul').html('');
                  for (var i=0; i < aItems.length; i++) {
-                    url = '/scrapers/tags/' + escape(aItems[i].trim())
+                    url = '/' + wiki_type + 's/tags/' + escape(aItems[i].trim())
                     $('#divScraperTags ul').append($('<li><a href="' + url +'">' + aItems[i].trim() + '</a></li>'))
                  };
                  //clear out the textbox for next time
@@ -305,5 +306,28 @@ function setupScraperEditInPlace(short_name){
               return false;
          }
      );
+
+     //scheduler
+     //alert(schedule_options.length)
+     $('#spnRunInterval').editable('admin/', {
+              indicator : 'Saving...',
+              tooltip   : 'Click to edit...',
+              cancel    : 'Cancel',
+              submit    : 'Save',
+              data   : $('#hidScheduleOptions').val(),
+              type   : 'select',
+              event: 'dblclick',
+              placeholder: '',
+              submitdata : {js: 1, short_name: short_name},
+          });
+      
+      $('#aEditSchedule').click (
+           function(){
+                sCurrent = $('#spnRunInterval').html().trim();               
+                $('#spnRunInterval').dblclick();
+                $('#spnRunInterval select').val(sCurrent);
+                return false;
+           }
+       );          
     
 }

@@ -1,9 +1,12 @@
 {% extends "codewiki/scraper_base.html" %}
 {% load humanize %}
 {% load sparkline %}
-{% load display_chart %}
+{% load schedule %}
 {% block tab %}
 {% load markup %}
+<fieldset>
+    <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} }" />
+</fieldset>
 <div class="content full">
     <div class="data_viewer">
         {% if has_data %}
@@ -21,7 +24,7 @@
                         {% for row in data.rows %}
                             <tr>
                                 {% for value in row %}
-                                    <td>{{ value|display_chart|truncatewords_html:30|urlizetrunc:30 }}</td>
+                                    <td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>
                                 {% endfor %}
                             </tr>
                         {% endfor %}    
@@ -98,13 +101,8 @@
     </div>
 </div>
 <div class="content col right">
-    <h3>Schedule</h3>
-    {% if scraper.run_interval %}
-        This scraper is scheduled to run every {{scraper.run_interval}}
-    {% else %}
-        This scraper is no currently scheduled to be rerun
-    {% endif %}
-    {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" class="edit">[edit]</a>{% endif %}
+    <h3>Schedule{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
+    This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
     {% sparkline scraper.scraper_sparkline_csv 'medium' %}
     <h3>Delete &amp; reset</h3>
    {% if user_owns_it %}    
@@ -131,7 +129,7 @@
 
 {% block run_script %}
     {% if user.is_authenticated %}
-        setupScraperEditInPlace('{{scraper.short_name}}');
+        setupScraperEditInPlace('scraper', '{{scraper.short_name}}');
         setupButtonConfirmation("btnClearDatastore", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete all existing data for this scraper.");
         setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this scraper and it's data.");
     {% endif %}
