@@ -9,7 +9,6 @@ class Migration:
     # models have been created so that frontend.management.create_alert_types
     # doesn't fail
     depends_on = (
-        ("scraper", "0001_initial"),
         ("market", "0001_initial"),
     )
     
