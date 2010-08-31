@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
-
+from django.db import IntegrityError
 from django.contrib.auth.models import User
 import textile
 
@@ -15,16 +15,14 @@ from django.conf import settings
 from codewiki import models
 from codewiki import forms
 from codewiki.forms import ChooseTemplateForm
+from api.emitters import CSVEmitter 
 import vc
-
 import frontend
 
 import subprocess
 
 import StringIO, csv, types
 import datetime
-from django.utils.encoding import smart_str
-from models.scraper import SCHEDULE_OPTIONS
 
 try:                import json
 except ImportError: import simplejson as json
@@ -68,7 +66,6 @@ def scraper_overview(request, scraper_short_name):
                                                column_order=column_order,
                                                private_columns=private_columns)
 
-    # json up the schedule options
     # replicates output from data_summary_tables
     data_tables = {"": data }
     has_data = len(data['rows']) > 0
@@ -82,9 +79,7 @@ def scraper_overview(request, scraper_short_name):
         'data': data,
         'scraper_contributors': scraper_contributors,
         'related_views': related_views,
-        'schedule_options': SCHEDULE_OPTIONS,
         }, context_instance=RequestContext(request))
-
 
 def view_admin (request, short_name):
     response = None
@@ -175,12 +170,6 @@ def scraper_admin (request, short_name):
                 scraper.tags = ", ".join([tag.name for tag in scraper.tags]) + ',' + request.POST.get('value', '')                                                  
                 response_text = ", ".join([tag.name for tag in scraper.tags])
 
-            if element_id == 'spnRunInterval':
-                scraper.run_interval = request.POST.get('value', None)
-                for schedule_option in SCHEDULE_OPTIONS:
-                    if schedule_option[0] == int(scraper.run_interval):
-                        response_text = schedule_option[1]
-                    
             #save scraper
             scraper.save()
             response.write(response_text)
@@ -388,18 +377,6 @@ def raw_about_markup(request, wiki_type, short_name):
     response.write(code_object.description)
     return response
 
-def stringnot(v):
-    """
-    (also from scraperwiki/web/api/emitters.py CSVEmitter render()
-    as below -- not sure what smart_str needed for)
-    """
-    if v == None:
-        return ""
-    if type(v) == float:
-        return v
-    if type(v) == int:
-        return v
-    return smart_str(v)
 
 
 def export_csv(request, scraper_short_name):
@@ -415,24 +392,10 @@ def export_csv(request, scraper_short_name):
         scraper_id=scraper.guid,
         limit=100000)
 
-    keyset = set()
-    for row in dictlist:
-        if "latlng" in row:   # split the latlng
-            row["lat"], row["lng"] = row.pop("latlng")
-        row.pop("date_scraped")
-        keyset.update(row.keys())
-    allkeys = sorted(keyset)
-
-    fout = StringIO.StringIO()
-    writer = csv.writer(fout, dialect='excel')
-    writer.writerow(allkeys)
-    for rowdict in dictlist:
-        writer.writerow([stringnot(rowdict.get(key))  for key in allkeys])
-
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = \
         'attachment; filename=%s.csv' % (scraper_short_name)
-    response.write(fout.getvalue())
+    response.write(CSVEmitter.to_csv(dictlist))
 
     return response
     #template = loader.get_template('codewiki/data.csv')
@@ -442,13 +405,14 @@ def export_csv(request, scraper_short_name):
 def scraper_table(request):
     dictionary = { }
     dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
-    dictionary["loggedinusers"] = set([ userscraperediting.user  for usercodeediting in models.UserCodeEditing.objects.filter(user__isnull=False)])
-    dictionary["numloggedoutusers"] = len(models.UserCodeEditing.objects.filter(user__isnull=True))
-    dictionary["numdraftscrapersediting"] = len(models.UserCodeEditing.objects.filter(scraper__isnull=True))
-    dictionary["numunpublishedscrapersediting"] = len(models.UserCodeEditing.objects.filter(scraper__published=True))
-    dictionary["numpublishedscrapersediting"] = len(models.UserCodeEditing.objects.filter(scraper__published=False))
-    dictionary["numpublishedscraperstotal"] = len(dictionary["scrapers"])
-    dictionary["numunpublishedscraperstotal"] = len(models.Scraper.objects.filter(published=False))
+    dictionary["loggedinusers"] = set([ userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.filter(user__isnull=False)])
+    dictionary["numloggedoutusers"] = models.UserScraperEditing.objects.filter(user__isnull=True).count()
+    dictionary["numdraftscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__isnull=True).count()
+    dictionary["numpublishedscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__published=True).count()
+    dictionary["numunpublishedscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__published=False).count()
+    dictionary["numpublishedscraperstotal"] = dictionary["scrapers"].count()
+    dictionary["numunpublishedscraperstotal"] = models.Scraper.objects.filter(published=False).count()
+    dictionary["numdeletedscrapers"] = models.Scraper.unfiltered.filter(deleted=True).count()
     return render_to_response('codewiki/scraper_table.html', dictionary, context_instance=RequestContext(request))
     
 
@@ -525,41 +489,32 @@ def unfollow(request, scraper_short_name):
 
 
 def twisterstatus(request):
-    # uses a GET due to agent.request in twister not knowing how to use POST and send stuff
-    if 'value' not in request.GET:
+    if 'value' not in request.POST:
         return HttpResponse("needs value=")
-    tstatus = json.loads(request.GET.get('value'))
-    
+    tstatus = json.loads(request.POST.get('value'))
+
     twisterclientnumbers = set()  # used to delete the ones that no longer exist
-    
+
     # we are making objects in django to represent the objects in twister for editor windows open
     for client in tstatus["clientlist"]:
         # fixed attributes of the object
         twisterclientnumber = client["clientnumber"]
         twisterclientnumbers.add(twisterclientnumber)
         try:
-            user = client['username'] and models.User.objects.get(username=client['username']) or None
+            user = client['username'] and User.objects.get(username=client['username']) or None
             scraper = client['guid'] and models.Scraper.objects.get(guid=client['guid']) or None
         except:
             continue
-        
+
         # identify or create the editing object
-        lusercodeediting= models.UserCodeEditing.objects.filter(twisterclientnumber=twisterclientnumber)
-        if not luserscraperediting:
-            usercodeediting= models.UserCodeEditing(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
+        try:
+            userscraperediting = models.UserScraperEditing.objects.create(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
             userscraperediting.editingsince = datetime.datetime.now()
-        else:
-            # this assertion is firing and sending us emails.  please investigate to find out how 
-            # extra copies of the UserCodeEditing objects are getting created?  
-            # This may be because there are two threads getting into this function simultaneously 
-            # from twister callbacks.  If this is verified as the case (and not some other avoidable bug), then it's 
-            # okay to delete the superfluous one, as long as this doesn't cause any problems (eg the other thread might be doing this at the same time)
-            assert len(luserscraperediting) == 1, [luserscraperediting]  
-            
-            usercodeediting= luserscraperediting[0]
-            assert userscraperediting.user == user, ("different", userscraperediting.user, user)
-            assert userscraperediting.scraper == scraper, ("different", userscraperediting.scraper, scraper)
-        
+        except IntegrityError:
+            userscraperediting = models.UserScraperEditing.objects.get(twisterclientnumber=twisterclientnumber)
+
+        assert models.UserScraperEditing.objects.filter(twisterclientnumber=twisterclientnumber).count() == 1, client
+
         # updateable values of the object
         userscraperediting.twisterscraperpriority = client['scrapereditornumber']
 
@@ -568,15 +523,16 @@ def twisterstatus(request):
             userscraperediting.runningsince = datetime.datetime.now()
         if not client['running'] and userscraperediting.runningsince:
             userscraperediting.runningsince = None
-        
+
         userscraperediting.save()
 
     # discard now closed values of the object
-    for usercodeediting in models.UserCodeEditing.objects.all():
+    for userscraperediting in models.UserScraperEditing.objects.all():
         if userscraperediting.twisterclientnumber not in twisterclientnumbers:
             userscraperediting.delete()
             # or could use the field: closedsince  = models.DateTimeField(blank=True, null=True)
     return HttpResponse("Howdy ppp ")
+
 
 def rpcexecute_dummy(request, scraper_short_name, revision = None):
     response = HttpResponse()

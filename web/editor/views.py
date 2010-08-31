@@ -235,4 +235,12 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
 
         tutorial_scrapers = ScraperModel.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
 
-        return render_to_response('editor/editor.html', {'form':form, 'return_url':return_url, 'selected_tab':'code', 'tutorial_scrapers':tutorial_scrapers, 'scraper':scraper, 'has_draft':has_draft, 'user':request.user}, context_instance=RequestContext(request))
+    context = {}
+    context['form'] = form
+    context['tutorial_scrapers'] = ScraperModel.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
+    context['scraper'] = scraper
+    context['has_draft'] = has_draft
+    context['user'] = request.user
+    context['docs'] = 'frontend/inline_code_docs_%s.html' % scraper.language.lower()
+
+    return render_to_response('editor/editor.html', context, context_instance=RequestContext(request))

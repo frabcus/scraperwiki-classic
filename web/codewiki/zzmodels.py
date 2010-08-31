@@ -231,7 +231,7 @@ class UserCodeEditing(models.Model):
     editingsince = models.DateTimeField(blank=True, null=True)
     runningsince = models.DateTimeField(blank=True, null=True)
     closedsince  = models.DateTimeField(blank=True, null=True)
-    twisterclientnumber = models.IntegerField(default=-1)
+    twisterclientnumber = models.IntegerField(unique=True)
     twisterscraperpriority = models.IntegerField(default=0)   # >0 another client has priority on this scraper
     
         

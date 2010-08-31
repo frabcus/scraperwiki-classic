@@ -1,8 +1,6 @@
 $(function(){
     $('a.editor_view').click(function(){
         newCodeObject('view')
-        return false;
-    });
     $('a.editor_scraper').click(function(){
         newCodeObject('scraper')
         return false;

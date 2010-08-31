@@ -23,6 +23,7 @@ import django.contrib.auth.views
 import os
 import re
 import datetime
+import urllib
 
 from utilities import location
 
@@ -201,7 +202,7 @@ def search(request, q=""):
             q = form.cleaned_data['q']
             # Process the data in form.cleaned_data
             # Redirect after POST
-            return HttpResponseRedirect('/search/%s/' % q)
+            return HttpResponseRedirect('/search/%s/' % urllib.quote(q.encode('utf-8')))
         else:
             form = SearchForm()
             return render_to_response('frontend/search.html', {

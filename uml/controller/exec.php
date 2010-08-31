@@ -98,36 +98,6 @@ if (!is_null($uid))
    posix_seteuid ($uid) ;
 }
 
-
-#function sw_dumpMessage ($dict)
-#{
-#   global $logfd ;
-#   fwrite ($logfd, json_encode ($dict) . "\n") ;
-#}
-
-#function sw_logScrapedURL ($url, $length)
-#{
-#    sw_dumpMessage
-#      (  array
-#         (  'message_type' => 'sources',
-#            'url'          => $url,
-#            'content'      => sprintf ("%d bytes from %s", $length, $url)
-#      )  )  ;
-#}
-
-#function sw_scrape ($url)
-#{
-#   global $httpProxy ;
-#
-#   $curl = curl_init ($url ) ;
-#   curl_setopt ($curl, CURLOPT_RETURNTRANSFER,  true      ) ;
-#   $res  = curl_exec ($curl) ;
-#
-#   curl_close ($curl) ;
-#   return   $res  ;
-#}
-
-
 foreach (split (':', $path) as $dir)
     ini_set ('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
 
@@ -139,6 +109,7 @@ SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1]) ;
 
 if (!is_null ($cache))
    scraperwiki::sw_allowCache ($cache) ;
+
 #
 #def sigXCPU (signum, frame) :
 #    raise Exception ("CPUTimeExceeded")

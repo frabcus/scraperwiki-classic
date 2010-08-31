@@ -69,6 +69,12 @@ def write_changeset():
     except:
         env.changeset = ""
 
+def update_revision():
+    """
+    Put the current HG revision in a file so that Django can use it to avoid caching JS files
+    """
+    virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
+
 def install_cron():
     virtualenv('crontab crontab')
 
@@ -99,6 +105,7 @@ def deploy():
     write_changeset()
     install_cron()
     create_tarball()
+    update_revision()
     restart_webserver()   
     email(message)
 

@@ -1,1 +1,70 @@
-This is where the PHP code docs will go.
+    <h4>Keyboard shortcuts</h4>
+    <div class="h4content">
+    <table>
+      <tr><td>Control-S</td><td>Save</td></tr>
+      <tr><td>Control-R</td><td>Run</td></tr>
+      <tr><td>Control-D</td><td>Diff</td></tr>
+      <tr><td>Control-Z</td><td>Undo</td></tr>
+      <tr><td>Control-Y</td><td>Redo</td></tr>
+    </table>
+    </div>
+
+    <h4>ScraperWiki functions</h4>
+    <dl>
+      <dt class="code">
+        scraperwiki::scrape(url)
+      </dt>
+      <dd>Returns the source text of a webpage as a string.</dd>
+    </dl>
+
+    <h4>ScraperWiki datastore functions</h4>
+    <dl>
+      <dt class="code">
+        scraperwiki::save(unique_keys, data={}, <em>date=null</em>, <em>latlng=null</em>)
+      </dt>
+      <dd>Saves to the datastore, either adding or over-writing data with the same values for unique_keys. 
+        <code>date</code> and <code>latlng</code> are optional special fields for indexing each record.</dd>
+    </dl>
+
+    <h4>ScraperWiki geo functions</h4>
+    <dl>
+      <dt class="code">
+        scraperwiki::gb_postcode_to_latlng(postcode)
+      </dt>
+      <dd>
+        returns (lat,lng) array suitable for passing to the scraperwiki::save function.
+      </dd>
+    </dl>
+
+    <h4>ScraperWiki metadata functions</h4>
+    <dl>
+      <dt class="code">
+        scraperwiki::save_metadata(key, value)
+      </dt>
+      <dd>
+        saves a persistent variable accessible during another run.
+      </dd>
+      <dt class="code">
+        scraperwiki::get_metadata(key, default=null)
+      </dt>
+      <dd>
+        retrieves a persistent variable saved by this scraper.
+      </dd>
+      <dt class="code">
+        scraperwiki::save_metadata("chart", value)
+      </dt>
+      <dd>
+        sets the <a href="http://code.google.com/apis/charttools/">googlechart</a> image for the scraper.
+      </dd>
+    </dl>
+
+    <h4>Recommended libraries</h4>
+    <dl>
+      <dt class="code">Simple HTML DOM</dt>
+      <dd>
+        HTML DOM parser that allows selection of tags using selectors. <a href="http://simplehtmldom.sourceforge.net/manual.htm" target="_blank">docs</a>
+      </dd>
+      <dd>
+        Add <code>require 'scraperwiki/simple_html_dom.php';</code> to the top of your scraper in order to use this library.
+      </dd>
+    </dl>
