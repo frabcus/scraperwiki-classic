@@ -46,6 +46,13 @@ class ScraperManager(CodeManager):
             'PORT': settings.DATASTORE_DATABASE_PORT,
             'USER': settings.DATASTORE_DATABASE_USER,
             'TIME_ZONE': settings.TIME_ZONE,
+            'DATABASE_HOST': settings.DATASTORE_DATABASE_HOST,
+            'DATABASE_NAME': settings.DATASTORE_DATABASE_NAME,
+            'DATABASE_OPTIONS': {},
+            'DATABASE_PASSWORD': settings.DATASTORE_DATABASE_PASSWORD,
+            'DATABASE_PORT': settings.DATASTORE_DATABASE_PORT,
+            'DATABASE_USER': settings.DATASTORE_DATABASE_USER,
+            'DATABASE_TIME_ZONE': settings.TIME_ZONE,
         })
         super(ScraperManager, self).__init__(*args, **kwargs)
     
