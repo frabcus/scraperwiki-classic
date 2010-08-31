@@ -58,7 +58,7 @@ def profile_detail(request, username):
     
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
-    owned_scrapers = profiled_user.scraper_set.filter(usercoderole__role='owner', published=True)
+    owned_scrapers = profiled_user.code_set.filter(usercoderole__role='owner', wiki_type="scraper", published=True)
     solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
 
     return profile_views.profile_detail(request, username=username, extra_context={ 'solicitations' : solicitations, 'owned_scrapers' : owned_scrapers, } )

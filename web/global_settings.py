@@ -99,7 +99,6 @@ INSTALLED_APPS = [
     'django.contrib.markup',
     'registration',
     'south',
-    
     'profiles',
   	'django.contrib.humanize',
   	'paypal.standard.ipn',
