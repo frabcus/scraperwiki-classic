@@ -334,12 +334,3 @@ class CodeManager(models.Manager):
 
         return scrapers_all
     
-    #for example lists    
-    def example_scrapers(self, user, count):
-        scrapers = []
-        if user.is_authenticated():
-            scrapers = user.scraper_set.filter(usercoderole__role='owner', deleted=False, published=True)[:count]
-        else:
-            scrapers = self.filter(deleted=False, featured=True).order_by('first_published_at')[:count]
-        
-        return scrapers

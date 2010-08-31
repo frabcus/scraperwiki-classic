@@ -147,6 +147,7 @@ div.page_tabs ul li {float:right; list-style-type:none; padding:0.3em 0.8em; mar
         border-top:solid 1px #9f9f9f;border-left:solid 1px #9f9f9f;border-right:solid 1px #9f9f9f;}
 div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
         background:#fff;}
+div.page_tabs ul li a {font-weight:bold;}
 div.page_tabs ul li small {font-size:0.7em; position:relative; top:-0.2em;}        
 div.tab_tools {text-align:right; padding:0.8em 0.1em;}
 div.tab_tools form {padding:0 0.5em; display:inline;}
