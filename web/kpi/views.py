@@ -2,7 +2,7 @@ from django.shortcuts import render_to_response
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 
-from scraper.models import Scraper
+from codewiki.models import Scraper
 import datetime, calendar
 
 from pygooglechart import StackedVerticalBarChart

@@ -777,7 +777,7 @@
         "pk": 53, 
         "model": "auth.permission", 
         "fields": {
-            "codename": "add_userscraperrole", 
+            "codename": "add_usercoderole", 
             "name": "Can add user scraper role", 
             "content_type": 18
         }
@@ -795,7 +795,7 @@
         "pk": 54, 
         "model": "auth.permission", 
         "fields": {
-            "codename": "change_userscraperrole", 
+            "codename": "change_usercoderole", 
             "name": "Can change user scraper role", 
             "content_type": 18
         }
@@ -813,7 +813,7 @@
         "pk": 55, 
         "model": "auth.permission", 
         "fields": {
-            "codename": "delete_userscraperrole", 
+            "codename": "delete_usercoderole", 
             "name": "Can delete user scraper role", 
             "content_type": 18
         }
@@ -1026,7 +1026,7 @@
     }, 
     {
         "pk": 1, 
-        "model": "scraper.userscraperrole", 
+        "model": "scraper.usercoderole", 
         "fields": {
             "role": "owner", 
             "user": 2, 

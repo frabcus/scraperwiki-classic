@@ -21,7 +21,7 @@ sys.path.append('web')
 # Django settings for scraperwiki project.
 
 DEBUG = False
- 
+
 TIME_ZONE = 'London/England'
 LANGUAGE_CODE = 'en-uk'
 
@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.comments',
+    'django.contrib.markup',
     'registration',
     'south',
     
@@ -110,13 +111,14 @@ INSTALLED_APPS = [
     
     # the following are scraperwiki apps
     'frontend',
-  	'scraper',
+  	'codewiki',
   	'notification',
   	'editor',
   	'payment',  	
   	'market',
   	'api',
     'whitelist',
+    'devserver',
 ]
 
 
@@ -172,14 +174,12 @@ TEMPLATE_SETTINGS = [
 SPARKLINE_MAX_DAYS = 30
 
 try:
-    CHANGESET = open('changeset.txt').read()
-except Exception, e:
-    CHANGESET = "none"
-
-MAX_MAP_POINTS = 2500
-MAX_DATA_POINTS = 500
-
-try:
     REVISION = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'revision.txt')).read()[:-1]
 except:
     REVISION = ""
+    
+MAX_MAP_POINTS = 2500
+MAX_DATA_POINTS = 500
+
+BLOG_FEED = 'http://blog.scraperwiki.com/feed/'
+

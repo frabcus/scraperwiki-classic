@@ -4,100 +4,61 @@ from django.shortcuts import render_to_response
 from django.contrib import auth
 from django.shortcuts import get_object_or_404
 import settings
-from frontend.forms import SigninForm, UserProfileForm
-
+from frontend.forms import SigninForm, UserProfileForm, SearchForm
+from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
-from scraper.models import Scraper
+from django.contrib.auth.decorators import login_required
+from codewiki.models import Scraper, Code, UserCodeEditing
 from market.models import Solicitation
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
 from registration.backends import get_backend
 from profiles import views as profile_views
-
+from codewiki.forms import ChooseTemplateForm
 import django.contrib.auth.views
 import os
 import re
 import datetime
+import urllib
 
 from utilities import location
-location.is_gb_postcode('sw98JX')
 
-from scraper.models import Scraper as ScraperModel  # is this renaming necessary?
+from codewiki.models import Scraper as ScraperModel  # is this renaming necessary?
 
 def frontpage(request, public_profile_field=None):
     user = request.user
 
-    # The following items are only used when there is a logged in user.	
-    if user.is_authenticated():
-        hide_logo = False
-        grey_body = False    
-        my_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False).order_by('-created_at')
-        following_scrapers = user.scraper_set.filter(userscraperrole__role='follow', deleted=False).order_by('-created_at')
-        following_users = user.to_user.following()
-        following_users_count = len(following_users)
-        # contribution_scrapers needs to be expanded to include scrapers you have edit rights on
-        contribution_scrapers = my_scrapers
-        template = 'frontend/frontpage_logged_in.html'        
+    #featured
+    featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').order_by('-first_published_at')[:5]    
+    featured_views = Code.objects.filter(featured=True, wiki_type='view').order_by('-first_published_at')[:5]        
     
-    # the following is for an anonymous user
-    else:
-        hide_logo = True
-        grey_body = True
-        my_scrapers = []
-        following_scrapers = []
-        following_users = []
-        following_users_count = 0
-        contribution_scrapers = []
-        profile_obj = None
-        template = 'frontend/frontpage.html'
-        
-    contribution_count = len(contribution_scrapers)
-    good_contribution_scrapers = []
-    # cut number of scrapers displayed on homepage down to the most recent 10 items
-    my_scrapers = my_scrapers[:10]
-    has_scrapers = len(my_scrapers) > 0
-    # also need to add filtering to limit to public published scrapers
-    for scraper in contribution_scrapers:
-        if scraper.is_good():
-            good_contribution_scrapers.append(scraper)
-
-    #new scrapers
-    new_scrapers = Scraper.objects.filter(deleted=False, published=True, featured=False).order_by('-first_published_at')[:5]
-    featured_scrapers = Scraper.objects.filter(deleted=False, published=True, featured=True).order_by('-first_published_at')[:5]    
-    
-    #suggested scrapers
+    #market
     solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
     
-    data = {'grey_body': grey_body, 'hide_logo': hide_logo, 'my_scrapers': my_scrapers, 'has_scrapers':has_scrapers, 
-            'solicitations': solicitations, 'following_scrapers': following_scrapers, 'following_users': following_users, 'following_users_count' : following_users_count, 
-            'new_scrapers': new_scrapers, 'featured_scrapers': featured_scrapers, 'contribution_count': contribution_count, }
-    return render_to_response(template, data, context_instance=RequestContext(request))
-
-def my_scrapers(request):
+    data = {'solicitations': solicitations, 'featured_views': featured_views, 'featured_scrapers': featured_scrapers,}
+    return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
+@login_required
+def dashboard(request):
 	user = request.user
+	owned_scrapers = user.code_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
+	owned_count = len(owned_scrapers) 
+	# needs to be expanded to include scrapers you have edit rights on.
+	contribution_scrapers = user.code_set.filter(usercoderole__role='editor', deleted=False)
+	contribution_count = len(contribution_scrapers)
+	following_scrapers = user.code_set.filter(usercoderole__role='follow', deleted=False)
+	following_count = len(following_scrapers)
 
-	if user.is_authenticated():
-		owned_scrapers = user.scraper_set.filter(userscraperrole__role='owner', deleted=False).order_by('-created_at')
-		owned_count = len(owned_scrapers) 
-		# needs to be expanded to include scrapers you have edit rights on.
-		contribution_scrapers = user.scraper_set.filter(userscraperrole__role='editor', deleted=False)
-		contribution_count = len(contribution_scrapers)
-		following_scrapers = user.scraper_set.filter(userscraperrole__role='follow', deleted=False)
-		following_count = len(following_scrapers)
-	else:
-		return HttpResponseRedirect(reverse('frontpage'))
-
-	return render_to_response('frontend/my_scrapers.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count, }, context_instance = RequestContext(request))
+	return render_to_response('frontend/your_scrapers.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count, }, context_instance = RequestContext(request))
 
 def profile_detail(request, username):
     
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
-    owned_scrapers = profiled_user.scraper_set.filter(userscraperrole__role='owner', published=True)
+    owned_scrapers = profiled_user.scraper_set.filter(usercoderole__role='owner', published=True)
     solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
 
     return profile_views.profile_detail(request, username=username, extra_context={ 'solicitations' : solicitations, 'owned_scrapers' : owned_scrapers, } )
@@ -187,3 +148,69 @@ def tutorials(request):
     for language in languages:
         tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
     return render_to_response('frontend/tutorials.html', {'tutorials': tutorials}, context_instance = RequestContext(request))
+
+def browse(request, page_number):
+    all_code_objects = Code.objects.filter(published=True).order_by('-created_at')
+
+    # Number of results to show from settings
+    paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)
+
+    try:  
+        page = int(page_number)
+    except (ValueError, TypeError):
+        page = 1
+
+    if page == 1:
+        featured_scrapers = Code.objects.filter(published=True, featured=True).order_by('-created_at')
+    else:
+        featured_scrapers = None
+
+    # If page request (9999) is out of range, deliver last page of results.
+    try:
+        scrapers = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        scrapers = paginator.page(paginator.num_pages)
+
+    form = SearchForm()
+
+    # put number of people here so we can see it
+    #npeople = UserCodeEditing in models.UserCodeEditing.objects.all().count()
+    # there might be a slick way of counting this, but I don't know it.
+    npeople = len(set([userscraperediting.user  for usercodeediting in UserCodeEditing.objects.all() ]))
+    dictionary = { "scrapers": scrapers, "form": form, "featured_scrapers":featured_scrapers, "npeople": npeople }
+    return render_to_response('codewiki/list.html', dictionary, context_instance=RequestContext(request))
+
+
+def search(request, q=""):
+    if (q != ""):
+        form = SearchForm(initial={'q': q})
+        q = q.strip()
+
+        scrapers = Code.objects.search(q)
+        return render_to_response('frontend/search_results.html',
+            {
+                'scrapers': scrapers,
+                'form': form,
+                'query': q,},
+            context_instance=RequestContext(request))
+
+    # If the form has been submitted, or we have a search term in the URL
+    # - redirect to nice URL
+    elif (request.POST):
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            q = form.cleaned_data['q']
+            # Process the data in form.cleaned_data
+            # Redirect after POST
+            return HttpResponseRedirect('/search/%s/' % urllib.quote(q.encode('utf-8')))
+        else:
+            form = SearchForm()
+            return render_to_response('frontend/search.html', {
+                'form': form,},
+                context_instance=RequestContext(request))
+    else:
+        form = SearchForm()
+        return render_to_response('frontend/search.html', {
+            'form': form,
+        }, context_instance = RequestContext(request))
+

@@ -8,32 +8,29 @@ from django.views.generic import date_based, list_detail
 from django.views.generic.simple import direct_to_template
 from django.contrib import admin
 import django.contrib.auth.views as auth_views
-
+from editor import views as editor_views
 import settings
 
 from django.contrib import admin
 admin.autodiscover()
 
-from frontend.feeds import LatestScrapers, LatestScrapersBySearchTerm, LatestScrapersByTag, CommentsForScraper
+from frontend.feeds import LatestCodeObjects, LatestCodeObjectsBySearchTerm, LatestCodeObjectsByTag, CommentsForCode
 
 feeds = {
-    'all_scrapers': LatestScrapers,
-    'latest_scrapers_by_search_term': LatestScrapersBySearchTerm,
-    'latest_scrapers_by_tag': LatestScrapersByTag,
-    'scraper_comments': CommentsForScraper,
+    'all_code_objects': LatestCodeObjects,
+    'latest_code_objects_by_search_term': LatestCodeObjectsBySearchTerm,
+    'latest_code_objects_by_tag': LatestCodeObjectsByTag,
+    'code_object_comments': CommentsForCode,
 }
-
-# sort out clash between from django.db import models and codewiki.models
-# collectors should make django tables (difficult) under development
-# move hungary and pdf handling from farmsubsidy/
-# remove all log files references
 
 urlpatterns = patterns('',
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
+    url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$', editor_views.edit, name="editor"),
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/edit/$', editor_views.edit, name="editor_edit"),    
+    url(r'^', include('codewiki.urls')),    
     url(r'^editor/', include('editor.urls')),
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name="logout"), 
     url(r'^accounts/', include('registration.urls')),
-    url(r'^scrapers/', include('scraper.urls')),
     url(r'^comments/', include('django.contrib.comments.urls')),
     
     # allows direct viewing of the django tables
@@ -44,12 +41,12 @@ urlpatterns = patterns('',
     
     # market place
     url(r'^market/', include('market.urls')),
-    
+
     # favicon
     (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/media/images/favicon.ico'}),
 
     # RSS feeds  
-    (r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}),
+    url(r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}, name='feeds'),
 
     # API
     (r'^api/', include('api.urls', namespace='foo', app_name='api')),

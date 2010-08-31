@@ -6,13 +6,12 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 
-from scraper.models import Scraper
+from codewiki.models import Scraper
 from payment.models import Invoice
 from payment.models import payment_done
 
 import market
 import tagging
-
 
 def solicitation_paid(sender, invoice, **kwargs):
 
@@ -38,7 +37,6 @@ class SolicitationStatus(models.Model):
 
     def __unicode__(self):
         return self.display_name
-
 
 class Solicitation(models.Model):
 

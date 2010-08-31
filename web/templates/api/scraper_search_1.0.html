@@ -1,0 +1,20 @@
+{% extends "function_base.html" %}
+
+{% block title %}scraperwiki.scraper.search | API{% endblock %}
+
+{% block heading %}scraperwiki.scraper.search{% endblock %}
+{% block subheading %}Returns a list of scrapers with matching titles or tags{% endblock %}
+{% block arguments %}
+    {% comment %}
+        <dt><code>key</code> (required)</dt>
+        <dd>A valid API key.{% if user.is_authenticated and keys %} <input type="text" name="key" id="key" />{% endif %}</dd>
+    {% comment %}    
+    <dt><code>format</code> (required)</dt>
+    <dd>The format you would like the response in. <input type="text" name="format" id="format" size="4"/></dd>
+    <dt><code>query</code> (required)</dt>
+    <dd>The text to search for. <input type="text" name="query" id="query"/></dd>
+    <dt><code>callback</code> (optional)</dt>
+    <dd><a href="http://en.wikipedia.org/wiki/JSONP#JSONP">JSONP</a> callback function. Only useful when requesting JSON data. <input type="text" name="callback" id="callback"/></dd>
+{% endblock %}
+
+{% block example_url %}{% url api:explorer_example method='scraper.search_1.0' %}{% endblock %}

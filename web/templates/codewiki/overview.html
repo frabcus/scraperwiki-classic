@@ -1,0 +1,136 @@
+{% extends "codewiki/scraper_base.html" %}
+{% load humanize %}
+{% load sparkline %}
+{% load schedule %}
+{% block tab %}
+{% load markup %}
+<fieldset>
+    <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} }" />
+</fieldset>
+<div class="content full">
+    <div class="data_viewer">
+        {% if has_data %}
+            {% for table, data in data_tables.items %}
+            <div>
+                <table class="data">
+                    <thead>
+                        <tr>
+                            {% for heading in data.headings %}
+                                <th width="120">{{ heading }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data.rows %}
+                            <tr>
+                                {% for value in row %}
+                                    <td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}    
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div>
+            <table class="data">
+                    <tbody>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    </tbody>
+                </table>
+            </div>
+    	    <div class="info_unpublished">
+                {% if scraper.published %}
+    	            This scraper is being worked on <br/>and there is no data to display yet
+                {% else %}
+    	            This scraper is being worked on <br/>but has not been published yet
+    	        {% endif %}
+    	    </div>
+        {% endif %}
+        <div class="content_footer">
+            <p>
+                This dataset has a total of {{ scraper.record_count }} records and was last updated on {{scraper.last_run|date:"H:i, j F Y"}}.
+                {% if scraper.license_link%}The license for this data is {{scraper.license|lower|default:"&nbsp;"}} and a copy can be found on <a href="{{scraper.license_link}}">this page</a>.{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" class="edit">[edit license]</a>{% else %}The license for this dataset is unknown, <a href="{% url scraper_admin scraper.short_name %}">please add a link to the license if you are able to locate it</a>.{% endif %}{% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+<div class="content full">
+    <h2>Views using this data from this scraper</h2>    
+    <ul class="views">
+        {% if related_views %}
+            {% for related_view in related_views %}
+                <li>
+                    <a href="{% url view_overview related_view.short_name %}" class="screenshot"><img src="{{MEDIA_URL}}/images/no_screenshot.png" title="No screen-shot available yet" /></a>
+                    <a href="{% url view_overview related_view.short_name %}">{{related_view.title}}</a>
+                </li>
+            {% endfor %}
+        {% endif %}        
+        <li class="new"><a href="#" class="editor_view">Create a new view</a></li>
+    </ul>
+    <br class="clear"/>
+</div>
+<div class="content full">
+    <h2>About this scraper{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" id="aEditAboutScraper" class="edit">[edit description]</a>{% endif %}</h2>
+    <div class="text_wiki">
+        <div id="divAboutScraper">{{ scraper.description|textile }}</div>
+    </div>
+</div>
+
+<div class="content col left">
+    <h3>Contributors</h3>
+    {% include 'codewiki/includes/contributors.html' %}
+    <div id="divScraperTags">
+        <h3>Tags{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" id="aAddTags" class="edit">[add a tag]</a>{% endif %}</h3>
+        <ul>
+            {% for tag in scraper_tags %}
+                <li><a href="{% url tag tag %}">{{ tag }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<div class="content col right">
+    <h3>Schedule{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
+    This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
+    {% sparkline scraper.scraper_sparkline_csv 'medium' %}
+    <h3>Delete &amp; reset</h3>
+   {% if user_owns_it %}    
+        <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
+            <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
+            <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
+            <p>
+                Removes all data for this scraper. There is no undo.
+            </p>
+        </form>
+        <form action="{% url scraper_delete_scraper scraper.short_name %}" method="post">
+            <input type="hidden" name="delete_scraper" value="1" />
+            <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
+            <p>
+                Deletes this scraper and all its data. There is no undo.
+            </p>
+        </form>
+    {% else %}
+        <p class="infobox">Only the creator of a scraper can delete or reset it.</p>
+    {% endif %}
+</div>
+<br class="clear"/>
+{% endblock %}
+
+{% block run_script %}
+    {% if user.is_authenticated %}
+        setupScraperEditInPlace('scraper', '{{scraper.short_name}}');
+        setupButtonConfirmation("btnClearDatastore", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete all existing data for this scraper.");
+        setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this scraper and it's data.");
+    {% endif %}
+{% endblock %}

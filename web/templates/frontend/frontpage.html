@@ -1,95 +1,55 @@
 {% extends "frontend/base.html" %}
-{% block css %}{% endblock %}
+{% load gravatar %}
 
 {% block title %}Welcome{% endblock %}
-{% block above_page %}
-
-<div id="divWelcome" class="above_page">
-    <div id="divIntroSlideShow">
-        <div class="slide_show">
-            <img src="{{ MEDIA_URL }}images/intro_slides/intro1.png" />
-            <img src="{{ MEDIA_URL }}images/intro_slides/intro2.png" />
-            <img src="{{ MEDIA_URL }}images/intro_slides/intro3.png" />
-            <img src="{{ MEDIA_URL }}images/intro_slides/intro4.png" />  
-            <img src="{{ MEDIA_URL }}images/intro_slides/intro5.png" />                                                
-        </div>
-        <div class="slide_nav"></div>
-    </div>
-    <div id="divWelcomeText">
-        <img id="imgLogoLarge" src="{{MEDIA_URL}}/images/logo_large.png"/>
-        <h1>ScraperWiki is all the tools you need for Screen Scraping &amp; Data Mining.</h1>            
-        <h2>Make bad data good, collaborate &amp; discover new datasets.</h2>
-    </div>
-    <br class="clear"/>
-</div>
-{% endblock %}
 {% block content  %}
-<div id="divAboutScraperWiki" class="content">
-    
-    <!-- Features -->
-    <div class="feature">
-        <img src="{{MEDIA_URL}}/images/screenshots/editor.png"/>              
-        <h2>Tools for developers ...</h2>            
-        <ul>
-            <li>Online code editor, write debug and run Python and PHP in your browser <small>(Ruby coming soon!)</small></li>
-            <li>ScraperWiki code libraries make scraping, parsing and geocoding simple</li>
-            <li>Store data direct to the datastore</li>
-            <li>API access to data in XML, JSON, PHP, YAML or CSV</li>
-            <li>Schedule scrapers to re-run so your data is always up-to-date</li>
-            <li>Email alerts if your scrapers fail</li>
-            <li>Built in source control</li>
-        </ul>             
+    <div class="page_title">
+        <h1>Welcome to ScraperWiki</h1>
+        <p>
+            All the tools you need for screen scraping, data mining &amp; visualisation.
+        </p>
     </div>
-    <div class="feature">
-        <img src="{{MEDIA_URL}}/images/screenshots/map.png"/>
-        <h2>... and for journalists and researchers</h2>            
+    <div class="content half left">
+        <h2>Featured scrapers</h2>        
         <ul>
-            <li>Search and browse all the datasets in ScraperWiki</li>
-            <li>Export data directly to a spreadsheet</li>
-            <li>Suggest new datasets to the community or request directly from ScraperWiki</li>
-            <li>View data by location</li>
-        </ul>             
+    		{% for scraper in featured_scrapers %}
+    		  {% include 'frontend/scraper_line.html' %}
+    		{% endfor %}
+    	</ul>
     </div>
-    
+    <div class="content half right">
+        <h2>Featured views</h2>
+        <ul>
+    		{% for scraper in featured_views %}
+    		  {% include 'frontend/scraper_line.html' %}
+    		{% endfor %}
+    	</ul>
+    </div>
     <br class="clear"/>
-    <!-- Featured datasets -->
-    <h2 id="hNewDatasets">Interesting new datasets</h2>
-    <div id="divNewScrapers" class="scroller">
-        <a href="#" class="scroll_left"></a>
-        <div class="scroller_wrapper">
-            <div class="scroll_items">
-    		    {% for scraper in featured_scrapers %}    
-                    <div class="scroll_item">
-                        <h4>
-                            <a href='{% url scraper_overview scraper.short_name %}'>{{scraper.title}}</a>
-                            {% if scraper.has_geo %}
-                                <a href="{% url scraper_data scraper.short_name %}">                                    
-                                    <img src="{{ MEDIA_URL }}/images/icons/map.png"/>
-                                </a>
-                            {% endif %}
-                            {% if scraper.has_temporal %}                        
-                                <img src="{{ MEDIA_URL }}/images/icons/date.png"/>
-                            {% endif %}                        
-                        </h4>
-                        <p>{{scraper.description}}</p>
-                        <p>
-                            {% load sparkline %}
-                            {% sparkline scraper.scraper_sparkline_csv %}
-                        </p>
-                        <p>
-                            created by
-                          	{% load gravatar %}
-                            {% show_gravatar scraper.owner 'small' %} 	
-                            <a href='{% url profiles_profile_detail scraper.owner.username %}'>{{ scraper.owner.get_profile.name }}</a>
-                        </p>
-                    </div>
-        		{% endfor %}	                
-            </div>
-        </div>
-        <a href="#" class="scroll_right"></a>        
+    <div class="content full divider">
+        {% load blog_latest %}
+        {% blog_latest %}
     </div>
-    
-</div>
-
+    <div class="contentfull">
+        <h3>Latest requested datasets</h3>
+        <ul>
+        {% for solicitation in solicitations %}
+            <li>
+        	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
+        	    by
+                {% show_gravatar solicitation.user_created 'small' %} 	
+                <a href='{% url profiles_profile_detail solicitation.user_created %}'>
+                    {{ solicitation.user_created.get_profile.name }}
+                </a>
+                {% if solicitation.has_bounty %}
+                    <span class="bounty">
+                        <a href="{% url market_view solicitation.id %}">
+                            &pound;{{solicitation.price}} bounty
+                        </a>
+                    </span>
+                {% endif %}
+        	</li>
+    	{% endfor %}
+        </ul>
+    </div>
 {% endblock %}
-{% block run_script %}setupIntroSlideshow(); setupScroller();{% endblock %}

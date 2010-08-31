@@ -1,4 +1,4 @@
-from web.scraper.models import Scraper
+from web.codewiki.models import Scraper
 from api.handlers.api_base import APIBase
 from tagging.models import Tag
 from piston.utils import rc

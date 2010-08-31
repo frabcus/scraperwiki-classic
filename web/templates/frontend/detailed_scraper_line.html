@@ -1,7 +1,0 @@
-<li>
-	<a href='{% url scraper_data scraper.short_name %}'>{{ scraper.title }}</a>
-	by
-	{% load gravatar %}
-    {% show_gravatar scraper.owner 'small' %} 	
-  <a href='{% url profiles_profile_detail scraper.owner.username %}'>{{ scraper.owner.get_profile.name }}</a>
-</li>

@@ -133,13 +133,18 @@ You can make a MySQL database to log into another time. XXX update instructions 
 more stable
 
 
-6) Create the scrapers' Mercurial repository
+6) Create the scraper and views Mercurial repositories
 ********************************************
 
 Create a new repository to store the screen scrapers in.
 
 > $ cd scraperwiki
 > $ hg init scrapers
+
+Create a new repository to store the views in.
+
+> $ cd scraperwiki
+> $ hg init views
 
 
 7) Create the scrapers' datastore

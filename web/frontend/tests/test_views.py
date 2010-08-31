@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 import frontend
-from scraper.models import Scraper
+from codewiki.models import Scraper
 
 class FrontEndViewsTests(TestCase):
     fixtures = ['./fixtures/test_data.json']

@@ -29,6 +29,7 @@ SCRAPERWIKI_DIR     = HOME_DIR + '/web/'      # top level directory of the insta
 READINGS_DIR        = SCRAPERWIKI_DIR + '/readings/'  # directory containing the cached webpages
 MODULES_DIR         = SCRAPERWIKI_DIR                # directory containing readers, detectors, collectors, and observers modules
 SMODULES_DIR        = HOME_DIR + '/scrapers/'                # directory containing scrapers
+VMODULES_DIR        = HOME_DIR + '/views/'                # directory containing views
 
 DATASTORE_DATABASE_ENGINE     = ''       # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATASTORE_DATABASE_HOST     = ''      

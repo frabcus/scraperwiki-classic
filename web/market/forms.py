@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
 
 from market.models import Solicitation
-from scraper.models import Scraper
+from codewiki.models import Scraper
 
 class SolicitationForm (ModelForm):
 
@@ -23,7 +23,7 @@ class SolicitationClaimForm (Form):
 
     def __init__(self, *args, **kwargs):
          user = User.objects.get(id=kwargs.pop('user_id'))
-         queryset = user.scraper_set.filter(userscraperrole__role='owner', deleted=False).order_by('-created_at')
+         queryset = user.scraper_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
          super(SolicitationClaimForm, self).__init__(*args, **kwargs)
          self.fields['scraper'] = forms.ModelChoiceField(
                  required=True,
