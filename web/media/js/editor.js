@@ -86,7 +86,6 @@ $(document).ready(function() {
           });        
     }
 
-
     
     function setupOrbited() {
         TCPSocket = Orbited.TCPSocket;

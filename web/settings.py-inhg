@@ -67,3 +67,5 @@ ORBETED_DOMAIN = 'localhost'
 # TEST_RUNNER = 'django-test-coverage.runner.run_tests'
 
 MEDIA_URL = '/media/'
+
+USE_DUMMY_VIEWS = False # use a dummy when running views in iframes
