@@ -17,18 +17,19 @@ def blog_latest():
         feed = feedparser.parse(settings.BLOG_FEED)        
         cache.set('blog_feed', feed, 120)
 
-    #get the headline story and attempt to strip an image out of it
-    headline = feed.entries[1]
-    headline_image_url = ''
-    soup = BeautifulSoup(headline.content[0].value)
-    img_tags = soup.findAll('img')
-    if len(img_tags) > 0:
-        if img_tags[0]['src'].find('http://feeds.wordpress.com') == -1:
-            headline_image_url = img_tags[0]['src']
+    if feed.entries:
+        #get the headline story and attempt to strip an image out of it
+        headline = feed.entries[1]
+        headline_image_url = ''
+        soup = BeautifulSoup(headline.content[0].value)
+        img_tags = soup.findAll('img')
+        if len(img_tags) > 0:
+            if img_tags[0]['src'].find('http://feeds.wordpress.com') == -1:
+                headline_image_url = img_tags[0]['src']
     
-    #get a few other recent stories
-    subs = []
-    subs.append(feed.entries[1])
-    subs.append(feed.entries[2])
-    #subs.append(feed.entries[3])        
-    return {'headline': headline, 'headline_image_url': headline_image_url, 'subs': subs}
+        #get a few other recent stories
+        subs = []
+        subs.append(feed.entries[1])
+        subs.append(feed.entries[2])
+        #subs.append(feed.entries[3])        
+        return {'headline': headline, 'headline_image_url': headline_image_url, 'subs': subs}
