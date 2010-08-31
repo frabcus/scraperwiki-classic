@@ -28,6 +28,9 @@ class View (code.Code):
         self.wiki_type = 'view'
         super(View, self).save(*args, **kwargs)
 
+    class Meta:
+        app_label = 'codewiki'
+
 
 #register tagging
 try:

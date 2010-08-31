@@ -172,6 +172,9 @@ class Code(models.Model):
         except:
             return default
 
+    class Meta:
+        app_label = 'codewiki'
+
 
 class UserCodeEditing(models.Model):
     """
@@ -187,6 +190,9 @@ class UserCodeEditing(models.Model):
 
     def __unicode__(self):
         return "Editing: Scraper_id: %s -> User: %s (%d)" % (self.code, self.user, self.twisterclientnumber)
+
+    class Meta:
+        app_label = 'codewiki'
         
 
 class UserCodeRole(models.Model):
@@ -202,6 +208,9 @@ class UserCodeRole(models.Model):
     def __unicode__(self):
         return "Scraper_id: %s -> User: %s (%s)" % \
                                         (self.code, self.user, self.role)
+
+    class Meta:
+        app_label = 'codewiki'
                                                                                 
 class CodeCommitEvent(models.Model):
     revision = models.IntegerField()
@@ -212,4 +221,7 @@ class CodeCommitEvent(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('commit_event', [self.id])
+
+    class Meta:
+        app_label = 'codewiki'
                                         

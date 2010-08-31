@@ -90,6 +90,9 @@ class Scraper (code.Code):
         self.wiki_type = 'scraper'
         super(Scraper, self).save(*args, **kwargs)
 
+    class Meta:
+        app_label = 'codewiki'
+
         
 #register tagging for scrapers
 try:
@@ -116,6 +119,7 @@ class ScraperMetadata(models.Model):
         return ('metadata_api', [self.scraper.guid, self.name])
 
     class Meta:
+        app_label = 'codewiki'
         verbose_name_plural = 'scraper metadata'
 
 class ScraperRunEvent(models.Model):
@@ -134,3 +138,6 @@ class ScraperRunEvent(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('run_event', [self.id])
+
+    class Meta:
+        app_label = 'codewiki'
