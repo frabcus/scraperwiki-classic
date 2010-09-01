@@ -1,0 +1,41 @@
+
+{% extends "frontend/base.html" %}
+
+{% block title %}Browse{% endblock %}
+{% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/all_code_objects/" />{% endblock %}
+
+{% block content %}
+    <div class="page_title">
+        <h1>Browse</h1>
+        <p>
+            Page {{ scrapers.number }} of {{ scrapers.paginator.num_pages }}, newest first
+        </p>
+        <a href="/feeds/all_scrapers/">RSS feed of all scrapers</a>            
+    </div>
+
+    <div class="content">
+
+        <ul class="scraper_list">
+          {% for scraper in scrapers.object_list %}
+            {% include 'frontend/scraper_line.html' %}
+          {% endfor %}
+        </ul>
+
+        <div class="pagination">
+        <span class="step_links">
+            {% if scrapers.has_previous %}
+                <a href="{% url scraper_list scrapers.previous_page_number %}">previous</a>
+            {% endif %}
+    
+            <span class="current">
+                Page {{ scrapers.number }} of {{ scrapers.paginator.num_pages }}
+            </span>
+    
+            {% if scrapers.has_next %}
+                <a href="{% url scraper_list scrapers.next_page_number %}">next</a>
+            {% endif %}
+        </span>
+        </div>
+
+    </div>
+{% endblock %}

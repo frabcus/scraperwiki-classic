@@ -342,8 +342,6 @@ form.scraper_admin label { display: inline-block; line-height: 1.8; vertical-ali
 form.scraper_admin input, form.scraper_admin select, form.scraper_admin textarea { width: 60%; }
 form.scraper_admin input#id_published, form.scraper_admin input#id_featured { width: auto; }
 
-td.bicolumn { width:50%; vertical-align:top; }
-
 /* Language Choice Popup */
 .ui-widget {font-family: Helvetica,arial,sans-serif;}
 .ui-widget-header {background: #FFFFD7; color: #2680C6;}
