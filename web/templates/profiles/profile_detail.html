@@ -41,7 +41,7 @@
 	        <h2>{{ profile.name }}'s published scrapers</h2>    	
     	    <ul>	        
                 {% for scraper in owned_scrapers %}
-            	    {% include 'frontend/scraper_line.html' %}
+            	    {% include 'frontend/code_object_line.html' %}
             	{% endfor %}
 	        </ul> 	            	
          {% endif %}

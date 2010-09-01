@@ -1,0 +1,45 @@
+{% load markup %}
+<li class="code_object_line">
+    <h3>
+        <a href="{% ifequal scraper.wiki_type 'scraper'%}{% url scraper_overview scraper.short_name %}{% else %}{% url view_overview scraper.short_name %}{% endifequal %}">
+            {% if scraper.title %}{{ scraper.title }}{% else %}{{ scraper.short_name }}{% endif %}
+        </a>
+	    <ul class="code_about">
+	       <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
+	       <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
+	        {% if scraper.has_geo %}
+               <li>
+                   <a href="{% url scraper_map scraper.short_name %}"><img src="{{ MEDIA_URL }}/images/icons/map.png"/></a>
+                  </li>
+           {% endif %}
+           {% if scraper.has_temporal %}                        
+               <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
+           {% endif %}
+	    </ul>
+    </h3>
+    <p class="controls">
+        {% if not scraper.published %}
+            <span class="status unpublished">unpublished</span>
+        {% endif %}
+    </p>
+    {% if scraper.description %}
+        <p>
+            {{ scraper.description|textile|striptags|truncatewords:75 }}            
+        </p>
+    {% endif %}
+
+    <small>
+        Created by
+        {% load gravatar %}
+        {% if scraper.owner %}
+            {% show_gravatar scraper.owner 'small' %}
+            {% if scraper.owner.username %}
+                <a href="{% url profiles_profile_detail scraper.owner.username %}">{{ scraper.owner.get_profile.name }}</a>
+            {% endif %}
+        {% endif %}
+        {{scraper.created_at|timesince}} ago
+    </small>
+    
+</li>
+
+

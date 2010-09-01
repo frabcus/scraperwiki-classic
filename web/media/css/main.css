@@ -227,8 +227,8 @@ span.highlight {background:#ffffaa; padding:0 0.4em;}
 div.highlight {background:#ffffd7; padding:1em; margin-bottom: 0.5em;}
 
 /* scraper lists */
-ul.scraper_list li {list-style-type:none; padding:0.2em 0.2em 1em 0.2em; border-bottom:dotted 1px #ccc;
-    position:relative;}
+ul.scraper_list {margin-top:0; position:relative; top:-1em;}
+ul.scraper_list li {list-style-type:none; padding:1em 0.2em 1em 0.2em; border-bottom:dotted 1px #ccc;}
 ul.scraper_list li img {vertical-align:baseline;}
 ul.scraper_list li h3 {padding:0 0 0.2em 0;}
 ul.scraper_list li p {padding:0.5em 0;margin:0; font-size:0.9em;}
@@ -236,7 +236,9 @@ ul.scraper_list small {font-size:0.7em;}
 ul.scraper_list span.status {color:#fff; padding:0 0.5em;}
 ul.scraper_list span.status.unpublished {background-color:#ccc;}
 ul.scraper_list span.edit a {color:green;}
-ul.scraper_list p.controls {position:absolute; top:0; right:1em;}
+ul.scraper_list p {padding:0.3em 0; line-height:1.4em;}
+ul.scraper_list ul.code_about {display:inline;font-weight:normal;font-size:0.8em;}
+ul.scraper_list ul.code_about li {padding-bottom:0;padding-top:0; border-bottom:0;}
 
 
 /* About page */
@@ -392,16 +394,16 @@ body.fullscreen #close {position:absolute; right:1em; top:6px;}
 
 /* code_about (languages / wiki type) */
 .code_about {color:#808080;font-variant:small-caps;margin:0;padding:0.5em 0;}
-.code_about li {display:inline;padding-right:0.3em;}
+.code_about li {display:inline;padding-right:0.3em!important;}
 
-.language {background-repeat:no-repeat; padding-left:22px;}
-.language.python {background-image:url(../images/icons/python.png);}
-.language.php {background-image:url(../images/icons/php.png);}
-.language.ruby {background-image:url(../images/icons/ruby.png);}
+.code_about li.language {background-repeat:no-repeat; padding-left:22px}
+.code_about li.language.python {background-image:url(../images/icons/python.png);}
+.code_about li.language.php {background-image:url(../images/icons/php.png);}
+.code_about li.language.ruby {background-image:url(../images/icons/ruby.png);}
 
-.codewiki_type {background-repeat:no-repeat; padding-left:22px;}
-.codewiki_type.scraper {background-image:url(../images/icons/scraper.png);}
-.codewiki_type.view {background-image:url(../images/icons/view.png);}
+.code_about li.codewiki_type {background-repeat:no-repeat; padding-left:22px;}
+.code_about li.codewiki_type.scraper {background-image:url(../images/icons/scraper.png);}
+.code_about li.codewiki_type.view {background-image:url(../images/icons/view.png);}
 
 /* infobox */
 .infobox {border:solid 1px #ccc; font-size:0.9em; color:#808080; padding:0.5em;}
