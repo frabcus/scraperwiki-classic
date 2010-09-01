@@ -829,7 +829,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
 
     # Try and load an existing scraper
     elif short_name is not "__new__":
-        scraper = get_object_or_404(CodeModel, short_name=short_name)
+        scraper = get_object_or_404(models.Code, short_name=short_name)
         code = scraper.saved_code()
         if scraper.wiki_type == 'scraper':
             return_url = reverse('scraper_overview', kwargs={'scraper_short_name': scraper.short_name})
