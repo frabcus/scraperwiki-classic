@@ -40,5 +40,16 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$', views.choose_template, name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/new/chosen_template/$', views.chosen_template, name='chosen_template'),        
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        
+
+    url(r'^handle_session_draft/(?P<action>[\-\w]+)$', views.handle_session_draft, name="handle_session_draft"),
+    #!url(r'^$', views.edit, name="editor"),    # blank name for draft scraper
+    url(r'^editor/tutorial/(?P<tutorial_scraper>[\-\w]+)$',   views.edit, name="tutorial"),
+    #!url(r'^new/(?P<wiki_type>[\w]+)/(?P<language>[\w]+)$',                  views.edit, name="editor"),
+    url(r'^editor/draft/delete/$',                            views.delete_draft, name="delete_draft"),
+    url(r'editor/diff/$',                                     views.diff,         name="diff"),   # blank name for draft scraper
+    url(r'editor/diff/(?P<short_name>[\-\w]+)$',              views.diff,         name="diff"),
+    url(r'editor/raw/$',                                      views.raw,          name="raw"),   # blank name for draft scraper
+    url(r'editor/raw/(?P<short_name>[\-\w]+)$',               views.raw,          name="raw"),   # blank name for draft scraper
+
     
 )

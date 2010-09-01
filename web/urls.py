@@ -9,6 +9,7 @@ from django.views.generic.simple import direct_to_template
 from django.contrib import admin
 import django.contrib.auth.views as auth_views
 from editor import views as editor_views
+from codewiki import views as codewiki_views
 import settings
 
 from django.contrib import admin
@@ -25,8 +26,8 @@ feeds = {
 
 urlpatterns = patterns('',
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
-    url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$', editor_views.edit, name="editor"),
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/edit/$', editor_views.edit, name="editor_edit"),    
+    url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$', codewiki_views.edit, name="editor"),
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/edit/$', codewiki_views.edit, name="editor_edit"),    
     url(r'^', include('codewiki.urls')),    
     url(r'^editor/', include('editor.urls')),
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name="logout"), 
