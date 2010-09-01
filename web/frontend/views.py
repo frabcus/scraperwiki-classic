@@ -33,8 +33,8 @@ def frontpage(request, public_profile_field=None):
     user = request.user
 
     #featured
-    featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').order_by('-first_published_at')[:5]    
-    featured_views = Code.objects.filter(featured=True, wiki_type='view').order_by('-first_published_at')[:5]        
+    featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').order_by('-first_published_at')[:2]    
+    featured_views = Code.objects.filter(featured=True, wiki_type='view').order_by('-first_published_at')[:2]        
     
     #market
     solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
