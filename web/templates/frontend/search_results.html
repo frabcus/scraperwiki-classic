@@ -3,11 +3,11 @@
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/latest_code_objects_by_search_term/{{ query }}" />{% endblock %}
 {% block content %}
     <div class="page_title">
-        <h1>Search results for <form id="frmSearchResults" action="/search/" method="POST">
+        <h1>Search results for <form id="frmSearchResults" class="inline_form" action="/search/" method="POST">
             {{ form.q }}
             <input type="submit" value="Go" />
         </form></h1>
-        <p>Found {{ scrapers|length }} published scraper{{ scrapers|pluralize }} with <em><strong>{{ query }}</strong></em> somewhere in title, description or tags.</p>
+        <p>{{ scrapers|length }} {% ifequal scrapers|length 1 %}result{% else %}results{% endifequal %} found</p>
             <a href="/feeds/latest_code_objects_by_search_term/{{ query }}">RSS feed for this search term</a>            
     </div>
     <div class="content">

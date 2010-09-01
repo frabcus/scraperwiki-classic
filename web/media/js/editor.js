@@ -788,7 +788,7 @@ $(document).ready(function() {
 
     function shortNameIsSet(){
         var sTitle = jQuery.trim($('#id_title').val());
-        return sTitle != 'Untitled Scraper' && sTitle != '' && sTitle != undefined && sTitle != false;
+        return sTitle != 'Untitled' && sTitle != '' && sTitle != undefined && sTitle != false;
     }
 
     //Hide popup

@@ -129,7 +129,6 @@ table.scrapersediting td { border: 1px solid black;}
 
 /* Page titles */
 div.page_title {border-bottom:dotted 1px #ccc; padding:1em 0 0.5em 0; position:relative;}
-div.page_title h1 {width:65%;}
 .page_controls {position:absolute; top:0.6em; right:0; text-align:right;}
 div.page_title_narrow { width:600px;}
 ul.title_links {position:absolute; top:0.6em; right:0;}
@@ -207,6 +206,7 @@ input.button.small {font-size:0.7em;}
 input.danger {background:#cc0000; border-color:#cc0000;color:#fff;}
 input.button:active {color:#2680c6;}
 input.button:disabled {background-color:#ddd; border-color:#ccc; }
+form.inline_form {display:inline;padding:0;margin:0;}
 
 /* Lists */
 ul {padding-left:0;}
@@ -370,8 +370,7 @@ div.mercurialcommitlog ul { padding:0; margin:0; }
 .blog_latest .blog_subs h5 {font-size:0.9em;padding:0;}
 
 /* Search results */
-.page_title #frmSearchResults {display:inline;padding:0;margin:0;}
-.page_title #frmSearchResults input {font-size:1em;}
+.page_title input {font-size:1em;}
 
 
 /* Full screen */

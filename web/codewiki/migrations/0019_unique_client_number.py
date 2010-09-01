@@ -80,7 +80,7 @@ class Migration:
             'short_name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'source': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
             'status': ('django.db.models.fields.CharField', [], {'max_length': '10', 'blank': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'default': "'Untitled Scraper'", 'max_length': '100'}),
+            'title': ('django.db.models.fields.CharField', [], {'default': "'Untitled'", 'max_length': '100'}),
             'users': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.User']"})
         },
         'scraper.scrapercommitevent': {

@@ -52,7 +52,7 @@
             {# Header #}
             <div class="editor_header">
                 <div class="title">
-                    <a id="aCloseEditor" href="{{return_url}}" title="{% if scraper.short_name %}Return to {{ scraper.wiki_type }} page{% else %}Exit editor{% endif %}">
+                    <a id="aCloseEditor" href="{% url frontpage %}" title="Home">
                         <img src="{{ MEDIA_URL }}/images/editor_logo.png" width="39" height="25"/>
                     </a>
                     {{ form.title }}
@@ -79,9 +79,9 @@
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
             
                 <div class="right">
-                    <ul class="help">
-                        <li class="language"><code>{{scraper.wiki_type}}</code></li>
-                        <li class="language"><code>{{scraper.language}}</code></li>
+                    <ul class="code_about">
+                        <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
+              	        <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
                     </ul>
                     <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save {{scraper.wiki_type}}" title="Save and publish this scraperm  (Ctrl + S)"/>
                 </div>

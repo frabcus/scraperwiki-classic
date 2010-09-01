@@ -46,9 +46,9 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 .editor_controls .commit, #meta_form .button.commit {background-image:url(../images/icons/database_save.png); border-color:#2680c6;
     background-color:#6fb1e6; color:#fff;}
 
-.editor_controls ul.help {display:inline;}
-.editor_controls ul.help, .editor_controls ul.help li {padding:0; margin:0 0 0 0.2em;}
-.editor_controls ul.help li {list-style-type:none; display:inline;}
+.editor_controls ul.code_about {display:inline;font-size:0.9em;}
+.editor_controls ul.code_about, .editor_controls ul.help li {padding:0; margin:0 0 0 0.2em;}
+.editor_controls ul.code_about li {list-style-type:none; display:inline;}
 .language code {color:#808080; background:#ddd; padding:0.05em 0.5em; font-size:1em;
 }
 .helplink {background:#f08a38; border:solid 1px #bf6312; padding:0.2em 0.4em!important;
