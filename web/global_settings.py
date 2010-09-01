@@ -176,8 +176,7 @@ try:
     REVISION = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'revision.txt')).read()[:-1]
 except:
     REVISION = ""
-    
-MAX_MAP_POINTS = 2500
+
 MAX_DATA_POINTS = 500
 
 BLOG_FEED = 'http://blog.scraperwiki.com/feed/'

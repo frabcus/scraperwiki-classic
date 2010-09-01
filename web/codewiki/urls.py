@@ -6,8 +6,6 @@ urlpatterns = patterns('',
     url(r'^table/$', views.scraper_table, name='scraper_table'),
 
     url(r'^scrapers/(?P<scraper_short_name>[\w_\-]+)/$',        views.scraper_overview,                 name='scraper_overview'),
-    url(r'^scrapers/(?P<scraper_short_name>[\w_\-]+)/map/$',    views.scraper_map, {'map_only': False}, name='scraper_map'),
-    url(r'^scrapers/(?P<scraper_short_name>[\w_\-]+)/map-only/$',views.scraper_map, {'map_only': True}, name='scraper_map_only'),
     url(r'^scrapers/(?P<short_name>[\w_\-]+)/admin/$',  views.scraper_admin,            name='scraper_admin'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/history/$',views.scraper_history,          name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/comments/$',views.comments,                name='scraper_comments'),

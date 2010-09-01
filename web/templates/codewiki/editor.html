@@ -73,7 +73,7 @@
 
             {# Controls #}
             <div class="editor_controls">
-                <a id="menu_tutorials" class="helplink" href="#" title="Load a helpful tutorial">Tutorials and help</a>
+                <a id="menu_tutorials" class="helplink" href="#" title="Load a helpful tutorial">Quick help</a>
                 <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
@@ -196,34 +196,12 @@
             </div>
 
             <div id="popup_tutorials" class="popup_item">
-              <a class="popupClose">close</a>
-              <h3>Help and instructions</h3>            
-              <p class="descr">Scraperwiki is a collaborative wiki for web-scrapers.  
-                               See <a href="{% url help %}" target="_blank">FAQ</a> for details.</p>
-
-              <table class="bicolumn">
-                  <tr>
-                      <td class="bicolumn">
-                          {% include docs %}
-                      </td>
-                      <td class="bicolumn">
-                          <h4>Handy tutorials</h4>
-                          <p class="descr">Click on one to load it up.</p>
-                          <dl>
-                              {% for scraper in tutorial_scrapers %}
-                                    <dt>
-                                        <a href="#" class="scraper-tutorial-link" short_name="{{scraper.short_name}}"><b>{{scraper.title}}</b></a>
-                                    </dt>
-                                    <dd>
-                                        {{scraper.description}}
-                                    </dd>
-                                {% endfor %}
-                          </dl>
-                      </td>
-                  </tr>
-              </table>
-              <div class="popup_header"><a class="popupClose">close</a></div>
-            </div>
+                <a class="popupClose">close</a>
+                <h3>Quick help <small><a href="{% url help %}" target="_blank">Full documentation (new window)</a></small></h3>
+                <div class="output">
+                    {% include quick_help_template %}           
+                 </div>
+             </div>                  
         </form>
         <div id="overlay"></div>        
     </div>

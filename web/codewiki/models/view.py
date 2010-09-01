@@ -9,6 +9,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
+from codewiki.managers.view import ViewManager
 
 try:
     import json
@@ -18,6 +19,7 @@ except:
 class View (code.Code):
 
     mime_type = models.CharField(max_length=255, null=True)
+    objects = ViewManager()    
     unfiltered = models.Manager() # django admin gets all confused if this lives in the parent class, so duplicated in child classes
 
     def __init__(self, *args, **kwargs):

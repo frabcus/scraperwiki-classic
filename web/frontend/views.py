@@ -52,7 +52,7 @@ def dashboard(request):
 	following_scrapers = user.code_set.filter(usercoderole__role='follow', deleted=False)
 	following_count = len(following_scrapers)
 
-	return render_to_response('frontend/your_scrapers.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count, }, context_instance = RequestContext(request))
+	return render_to_response('frontend/dashbaord.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count, }, context_instance = RequestContext(request))
 
 def profile_detail(request, username):
     
@@ -208,12 +208,12 @@ def search(request, q=""):
             return HttpResponseRedirect('/search/%s/' % urllib.quote(q.encode('utf-8')))
         else:
             form = SearchForm()
-            return render_to_response('frontend/search.html', {
+            return render_to_response('frontend/search_results.html', {
                 'form': form,},
                 context_instance=RequestContext(request))
     else:
         form = SearchForm()
-        return render_to_response('frontend/search.html', {
+        return render_to_response('frontend/search_results.html', {
             'form': form,
         }, context_instance = RequestContext(request))
 

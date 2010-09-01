@@ -69,7 +69,7 @@ def scraper_overview(request, scraper_short_name):
     # replicates output from data_summary_tables
     data_tables = {"": data }
     has_data = len(data['rows']) > 0
-    return render_to_response('codewiki/overview.html', {
+    return render_to_response('codewiki/scraper_overview.html', {
         'scraper_tags': scraper_tags,
         'selected_tab': 'overview',
         'scraper': scraper,
@@ -129,7 +129,7 @@ def view_admin (request, short_name):
                 s = form.save()
                 s.tags = form.cleaned_data['tags']
             else:
-                response = render_to_response('codewiki/admin.html', {'selected_tab': 'overview','scraper': view,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
+                response = render_to_response('codewiki/scraper_admin.html', {'selected_tab': 'overview','scraper': view,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
 
     # send back whatever responbse we have
     return response
@@ -144,7 +144,7 @@ def scraper_admin (request, short_name):
 
     form = forms.ScraperAdministrationForm(instance=scraper)
     form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
-    response = render_to_response('codewiki/admin.html', {'selected_tab': 'overview','scraper': scraper,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
+    response = render_to_response('codewiki/scraper_admin.html', {'selected_tab': 'overview','scraper': scraper,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
 
     #you can only get here if you are signed in
     if not user.is_authenticated():
@@ -182,7 +182,7 @@ def scraper_admin (request, short_name):
                 s = form.save()
                 s.tags = form.cleaned_data['tags']
             else:
-                response = render_to_response('codewiki/admin.html', {'selected_tab': 'overview','scraper': scraper,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
+                response = render_to_response('codewiki/scraper_admin.html', {'selected_tab': 'overview','scraper': scraper,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
 
     # send back whatever responbse we have
     return response
@@ -214,57 +214,6 @@ def scraper_delete_scraper(request, scraper_short_name):
         return HttpResponseRedirect('/')
 
     return HttpResponseRedirect(reverse('scraper_admin', args=[scraper_short_name]))
-
-
-
-def scraper_map(request, scraper_short_name, map_only=False):
-    #user details
-    user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
-
-    # Only logged in users should be able to see unpublished scrapers
-    if not scraper.published and not user.is_authenticated():
-        return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
-
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
-    scraper_tags = Tag.objects.get_for_object(scraper)
-
-    num_map_points = scraper.get_metadata('num_map_points')
-    if type(num_map_points) != types.IntType:
-        num_map_points = settings.MAX_MAP_POINTS
-
-    column_order = scraper.get_metadata('map_columns')
-    if not user_owns_it:
-        private_columns = scraper.get_metadata('private_columns')
-    else:
-        private_columns = None
-
-    #get data for this scaper
-    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
-                                               limit=num_map_points,
-                                               column_order=column_order,
-                                               private_columns=private_columns)
-    has_data = len(data['rows']) > 0
-    data = json.dumps(data)
-
-    if map_only:
-        template = 'codewiki/map_only.html'
-    else:
-        template = 'codewiki/map.html'
-
-    return render_to_response(template, {
-    'scraper_tags': scraper_tags,
-    'selected_tab': 'map',
-    'scraper': scraper,
-    'user_owns_it': user_owns_it,
-    'user_follows_it': user_follows_it,
-    'data': data,
-    'has_data': has_data,
-    'has_map': True,
-    }, context_instance=RequestContext(request))
-
 
 def view_overview (request, short_name):
     user = request.user
@@ -885,6 +834,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
     context['scraper'] = scraper
     context['has_draft'] = has_draft
     context['user'] = request.user
-    context['docs'] = 'frontend/inline_code_docs_%s.html' % scraper.language.lower()
+    context['quick_help_template'] = 'frontend/quick_help_%s.html' % scraper.language.lower()
 
-    return render_to_response('editor/editor.html', context, context_instance=RequestContext(request))
+    return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
