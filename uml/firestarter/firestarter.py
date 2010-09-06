@@ -126,6 +126,9 @@ class FireStarter :
 
         self.setDispatcher  ('%s:%d' % (self.m_conf.get('dispatcher', 'host'), self.m_conf.getint('dispatcher', 'port')))
 
+        if self.m_conf.has_option('dispatcher', 'path'):
+            self.addPaths(*self.m_conf.get('dispatcher', 'path').split(","))
+
         import swlogger
         self.m_swlog = swlogger.SWLogger(config)
         self.m_swlog.connect ()
@@ -359,7 +362,8 @@ class FireStarter :
         """
 
         for path in paths :
-            self.m_paths.append (path)
+            if path:
+                self.m_paths.append (path)
 
     def setASLimit (self, soft, hard = None) :
 
