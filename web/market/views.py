@@ -99,7 +99,10 @@ def tag(request, tag):
     # calculate percentage complete 
     closed_count = queryset_complete.count()
     total_count = queryset_open.count() + queryset_pending.count() + queryset_complete.count()
-    percentage_complete = (float(closed_count)/float(total_count)) * 100
+    if total_count != 0:
+        percentage_complete = (float(closed_count)/float(total_count)) * 100
+    else:
+        percentage_complete = 0
 
     # calculate top scraper writers, and sort
     writers = []
