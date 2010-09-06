@@ -25,7 +25,7 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.htmlClean-min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror/js/codemirror.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?"></script>  
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?{{settings.REVISION}}"></script>  
 {% endblock %}
 
 {% block title %}
@@ -237,11 +237,7 @@
     
       <table class="bicolumn">
           <tr><td class="bicolumn">
-            {% ifequal scraper.language 'Python' %}
-              {% include 'frontend/inline_code_docs_python.html' %}
-            {% else %}
-              {% include 'frontend/inline_code_docs_php.html' %}
-            {% endifequal %}
+            {% include docs %}
           </td><td class="bicolumn">
             <h4>Handy tutorials</h4>
             <p class="descr">Click on one to load it up.</p>

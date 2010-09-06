@@ -789,7 +789,11 @@ $(document).ready(function() {
     }
 
     function cgiescape(text) {
-        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;'); 
+        if(text){
+            return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+        }else{
+            return "";
+        }
     }
 
     //Show random text popup
