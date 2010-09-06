@@ -131,6 +131,8 @@ class Command(BaseCommand):
                 try:
                     if not self.is_currently_running(scraper):
                         self.run_scraper(scraper, options)
+                        import time
+                        time.sleep(5)
                     else:
                         if 'verbose' in options:
                             print "%s is already running" % scraper.short_name
