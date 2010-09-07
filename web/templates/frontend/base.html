@@ -38,7 +38,7 @@
                 {% endif %}
 
 				{% if user.is_authenticated %}
-				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{{user.get_profile.name}}</a></li>
+				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</a></li>
 				  {% comment %}
 				  <li><a href="{% url dashboard %}">{{ user.code_set.owned_count }}
 				     {% ifnotequal user.scraper_set.owned_count 1 %}
@@ -80,9 +80,13 @@
 				    <li>
 				        <a href="#" title="Create a new screen scraper" class="editor_scraper">New scraper</a>
 				    </li>
-				    <li>
+
+                    {% if user.is_staff %}
+  				    <li>
 				        <a href="#" title="Create a new view" class="editor_view">New view</a>
 				    </li>
+                    {% endif %}
+
 				    <li>
 				        <a href="{% url market_list %}" title="Request a new scraper">Data market</a>
 				    </li>
@@ -170,8 +174,10 @@
 		             <ul>
 		                 <li><a href="{% url scraper_list %}">Browse data &amp; scrapers</a></li>
 		                 <li><a href="{% url market_list %}">Request a dataset</a></li>
-		                 <li><a href="#" class="editor_scraper">Create a scraper</a></li>
-		                 <li><a href="#" class="editor_view">Create a view</a></li>		                 
+                         <li><a href="#" class="editor_scraper">Create a scraper</a></li>
+                         {% if user.is_staff %}
+                           <li><a href="#" class="editor_view">Create a view</a></li>		                 
+                         {% endif %}
 		                 <li><a href="{% url api:index %}">API</a></li>
 		             </ul>
 		           </dd>

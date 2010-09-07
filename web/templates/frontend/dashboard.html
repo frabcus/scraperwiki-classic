@@ -5,7 +5,7 @@
 
 <div class="page_title">
 	<h1><span class="text">Your dashboard</span></h1>
-	<p>Manage your scrapers and views</p>
+	<p>Manage your scrapers{% if user.is_staff %} and views{% endif %}</p>
 </div>
 
 <div class="content">

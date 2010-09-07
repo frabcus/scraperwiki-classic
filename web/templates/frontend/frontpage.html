@@ -9,6 +9,7 @@
             All the tools you need for screen scraping, data mining &amp; visualisation.
         </p>
     </div>
+
     <div class="content half left">
         <h2>Featured scrapers</h2>        
         <ul>
@@ -17,6 +18,8 @@
     		{% endfor %}
     	</ul>
     </div>
+
+    {% if user.is_staff %}
     <div class="content half right">
         <h2>Featured views</h2>
         <ul>
@@ -25,7 +28,9 @@
     		{% endfor %}
     	</ul>
     </div>
+    {% endif %}
     <br class="clear"/>
+
     <div class="content full divider">
         {% load blog_latest %}
         {% blog_latest %}

@@ -4,9 +4,11 @@
 {% load schedule %}
 {% block tab %}
 {% load markup %}
+
 <fieldset>
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} }" />
 </fieldset>
+
 <div class="content full">
     <div class="data_viewer">
         {% if has_data %}
@@ -66,6 +68,9 @@
         </div>
     </div>
 </div>
+
+
+{% if user.is_staff %}
 <div class="content full">
     <h2>Views using this data from this scraper</h2>    
     <ul class="views">
@@ -81,6 +86,8 @@
     </ul>
     <br class="clear"/>
 </div>
+{% endif %}
+
 <div class="content full">
     <h2>About this scraper{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" id="aEditAboutScraper" class="edit">[edit description]</a>{% endif %}</h2>
     <div class="text_wiki">
@@ -100,6 +107,7 @@
         </ul>
     </div>
 </div>
+
 <div class="content col right">
     <h3>Schedule{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
     This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
