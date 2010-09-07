@@ -6,17 +6,21 @@
     <div class="page_title">
         <h1>Welcome to ScraperWiki</h1>
         <p>
-            All the tools you need for screen scraping, data mining &amp; visualisation.
+            All the tools you need for screen scraping{% if user.is_staff %}, data mining &amp; visualisation{% endif %}.
         </p>
     </div>
 
-    <div class="content half left">
+    <div class="content {% if user.is_staff %}half left{% else %}full{% endif %}">
         <h2>Featured scrapers</h2>        
-        <ul>
+        <ul class="scraper_list">
     		{% for scraper in featured_scrapers %}
     		  {% include 'frontend/includes/code_object_line.html' %}
     		{% endfor %}
     	</ul>
+
+        <p>
+            <a href="{% url scraper_list %}" title="Browse all scrapers"><em><b>Browse all scrapers</b></em></a>
+        </p>
     </div>
 
     {% if user.is_staff %}
