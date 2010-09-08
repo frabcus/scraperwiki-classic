@@ -79,6 +79,7 @@ def scraper_overview(request, scraper_short_name):
         'data': data,
         'scraper_contributors': scraper_contributors,
         'related_views': related_views,
+        'schedule_options': models.SCHEDULE_OPTIONS,
         }, context_instance=RequestContext(request))
 
 def view_admin (request, short_name):
@@ -169,6 +170,10 @@ def scraper_admin (request, short_name):
             if element_id == 'divEditTags':
                 scraper.tags = ", ".join([tag.name for tag in scraper.tags]) + ',' + request.POST.get('value', '')                                                  
                 response_text = ", ".join([tag.name for tag in scraper.tags])
+
+            if element_id == 'spnRunInterval':
+                scraper.run_interval = int(request.POST.get('value', None))
+                response_text = models.SCHEDULE_OPTIONS_DICT[scraper.run_interval]
 
             #save scraper
             scraper.save()
