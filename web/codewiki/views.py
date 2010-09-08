@@ -835,5 +835,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
     context['has_draft'] = has_draft
     context['user'] = request.user
     context['quick_help_template'] = 'frontend/quick_help_%s.html' % scraper.language.lower()
+    context['selected_tab'] = 'code'
 
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
