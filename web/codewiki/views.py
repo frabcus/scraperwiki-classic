@@ -223,11 +223,13 @@ def scraper_delete_scraper(request, scraper_short_name):
 def view_overview (request, short_name):
     user = request.user
     scraper = get_object_or_404(models.View.objects, short_name=short_name)
+
+    scraper_tags = Tag.objects.get_for_object(scraper)
     
     #get scrapers used in this view
     related_scrapers = scraper.relations.filter(wiki_type='scraper')
     
-    return render_to_response('codewiki/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper, 'related_scrapers': related_scrapers, }, context_instance=RequestContext(request))
+    return render_to_response('codewiki/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper, 'scraper_tags': scraper_tags, 'related_scrapers': related_scrapers, }, context_instance=RequestContext(request))
     
     
 def view_fullscreen (request, short_name):
