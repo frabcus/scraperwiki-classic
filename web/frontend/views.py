@@ -52,7 +52,7 @@ def dashboard(request):
 	following_scrapers = user.code_set.filter(usercoderole__role='follow', deleted=False)
 	following_count = len(following_scrapers)
 
-	return render_to_response('frontend/dashbaord.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count, }, context_instance = RequestContext(request))
+	return render_to_response('frontend/dashboard.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count, }, context_instance = RequestContext(request))
 
 def profile_detail(request, username):
     

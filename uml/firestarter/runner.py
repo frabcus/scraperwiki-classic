@@ -50,8 +50,11 @@ def execute (code, options) :
     fs.setGroup         ('nogroup')
 
     fs.setTraceback     ('text')
+    
+    # see ticket 325 about moving these settings into uml.cfg
     fs.addPaths         ('/scraperwiki/live/scrapers')
     fs.addPaths         ('/scraperwiki/live/scraperlibs')
+    
     fs.setCache         (3600 * 12)
     fs.setCPULimit      (cpulimit, cpulimit+1)
 

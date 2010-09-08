@@ -45,6 +45,7 @@ from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import succeed
+
 agent = Agent(reactor)
 
 # the comma is added into format_message and LineOnlyReceiver because lines may be batched and 
@@ -343,7 +344,6 @@ class RunnerFactory(protocol.ServerFactory):
         self.m_conf.readfp (open(config))
         self.twisterstatusurl = self.m_conf.get('twister', 'statusurl')
         
-        self.notifytwisterstatus()
 
     # every 10 seconds sends out a quiet poll
     def announce(self):
@@ -394,13 +394,15 @@ class RunnerFactory(protocol.ServerFactory):
         data = { "value": json.dumps({'message_type' : "currentstatus", 'clientlist':clientlist}) }
         
         d = agent.request('POST', self.twisterstatusurl, Headers({'User-Agent': ['Scraperwiki Twisted']}), StringProducer(urllib.urlencode(data)))
-
+        d.addErrback(lambda e:  sys.stdout.write("notifytwisterstatus failed to get through\n"))  
         
         
 
 def execute (port) :
     
-    reactor.listenTCP(port, RunnerFactory())
+    runnerfactory = RunnerFactory()
+    reactor.listenTCP(port, runnerfactory)
+    reactor.callLater(1, runnerfactory.notifytwisterstatus)
     reactor.run()   # this function never returns
 
 
