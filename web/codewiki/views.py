@@ -619,6 +619,10 @@ def chosen_template(request, wiki_type):
 def delete_draft(request):
     if request.session.get('ScraperDraft', False):
         del request.session['ScraperDraft']
+
+    # Remove any pending notifications, i.e. the "don't worry, your scraper is safe" one
+    request.notifications.used = True
+
     return HttpResponseRedirect(reverse('frontpage'))
 
 def diff(request, short_name=None):
