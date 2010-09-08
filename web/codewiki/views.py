@@ -619,7 +619,7 @@ def chosen_template(request, wiki_type):
 def delete_draft(request):
     if request.session.get('ScraperDraft', False):
         del request.session['ScraperDraft']
-    #return HttpResponseRedirect(reverse('editor'))
+    return HttpResponseRedirect(reverse('frontpage'))
 
 def diff(request, short_name=None):
     if not short_name or short_name == "__new__":

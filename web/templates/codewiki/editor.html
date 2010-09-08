@@ -57,8 +57,10 @@
                     </a>
                     {{ form.title }}
                     <div class="page_tabs small">
-                        {% if scraper.short_name %}
+                        {% if scraper.id %}
                             {% include 'codewiki/includes/tabs.html' %}
+                        {% else %}
+                            {% include 'codewiki/includes/cancel_button.html' %}
                         {% endif %}
                     </div>
                     <span id="border_hide"></span>
