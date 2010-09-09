@@ -10,9 +10,9 @@
 </fieldset>
 
 <div class="content full">
+    <h2>Sample Data</h2>
     <div class="data_viewer">
         {% if has_data %}
-            {% for table, data in data_tables.items %}
             <div>
                 <table class="data">
                     <thead>
@@ -33,7 +33,6 @@
                     </tbody>
                 </table>
             </div>
-            {% endfor %}
         {% else %}
             <div>
             <table class="data">

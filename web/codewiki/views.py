@@ -50,10 +50,6 @@ def scraper_overview(request, scraper_short_name):
     scraper_contributors = scraper.contributors()
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    num_data_points = scraper.get_metadata('num_data_points')
-    if type(num_data_points) != types.IntType:
-        num_data_points = 50
-
     column_order = scraper.get_metadata('data_columns')
     if not user_owns_it:
         private_columns = scraper.get_metadata('private_columns')
@@ -62,12 +58,11 @@ def scraper_overview(request, scraper_short_name):
 
     #get data for this scaper
     data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
-                                               limit=num_data_points, 
+                                               limit=settings.DATA_TABLE_ROWS, 
                                                column_order=column_order,
                                                private_columns=private_columns)
 
     # replicates output from data_summary_tables
-    data_tables = {"": data }
     has_data = len(data['rows']) > 0
     return render_to_response('codewiki/scraper_overview.html', {
         'scraper_tags': scraper_tags,

@@ -180,3 +180,4 @@ MAX_DATA_POINTS = 500
 
 BLOG_FEED = 'http://blog.scraperwiki.com/feed/'
 
+DATA_TABLE_ROWS = 10

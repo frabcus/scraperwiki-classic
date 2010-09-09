@@ -153,8 +153,7 @@
             <p>
               Scrapers can store and retrieve items of metadata that are persisted between
               runs. These can either be used internally by the scraper or as a means of
-              communicating information about the scraper (such as the url of a google chart
-              made from the scraped data) to the site.
+              communicating information about the scraper to the site.
             </p>
             <h3>scraperwiki.metadata.save(key, value)</h3>
             <p>Stores an item of metadata that can later be retrieved using the <code>scraperwiki.metadata.get</code> function.</p>
@@ -184,14 +183,6 @@
             <table class='data'>
               <tr><th>Key</th><th>Outcome</th></tr>
               <tr>
-                <td>chart</td>
-                <td>
-                  If a valid Google Charts url (starting with
-                  http://chart.apis.google.com/chart?) is associated with this key then the chart
-                  will be displayed on the scraper overview page.
-                </td>
-              </tr>
-              <tr>
                 <td>data_columns</td>
                 <td>
                   If a list of column names is stored in this metadata item it will be used to decide
@@ -199,36 +190,11 @@
                 </td>
               </tr>
               <tr>
-                <td>map_columns</td>
-                <td>
-                  If a list of column names is stored in this metadata item it will be used to decide
-                  which columns will be displayed in the map popups and in which order.
-
-                  Note: 'latlng' must be included in this list for the points to be displayed on the map
-                </td>
-              </tr>
-              <tr>
                 <td>private_columns</td>
                 <td>
                   If a list of column names is stored in this metadata item it will be used to hide
-                  columns, in the data table and the map, from users who are not the owner of the
+                  columns, in the data table, from users who are not the owner of the
                   scraper.
-
-                  Note: Making 'latlng' private will cause the points not to be displayed on the map
-                </td>
-              </tr>
-              <tr>
-                <td>num_data_points</td>
-                <td>
-                  Determines the maximum number of items that will be shown in the data table.
-                  Default: {{settings.MAX_DATA_POINTS}}
-                </td>
-              </tr>
-              <tr>
-                <td>num_map_points</td>
-                <td>
-                  Determines the maximum number of points that will be shown on the map.
-                  Default: {{settings.MAX_MAP_POINTS}}
                 </td>
               </tr>
             </table>
