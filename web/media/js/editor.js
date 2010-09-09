@@ -692,11 +692,7 @@ $(document).ready(function() {
                         $('#meta_form .popup_error').html("Failed to save, please make sure you have entered a title, a description and a commit message");
                     //success    
                     }else{
-                        if (bCommit != true) { 
-                            pageTracker._trackPageview('/scraper_save_draft_goal');   
-                        } else {
-                            pageTracker._trackPageview('/scraper_committed_goal');  		
-                        }  
+                        pageTracker._trackPageview('/scraper_committed_goal');  		
 
                         if (res.draft == 'True') {
                             $('#divDraftSavedWarning').show();
@@ -708,10 +704,7 @@ $(document).ready(function() {
                         };
 
                         if (res.draft != 'True') {
-                            if (bCommit == true) {     
-
-                                showFeedbackMessage("Your code has been saved.");
-                            }
+                            showFeedbackMessage("Your code has been saved.");
                     
                             if (bConnected){
                                 send({"command":'saved'}); 
