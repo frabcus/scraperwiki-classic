@@ -79,6 +79,7 @@ def scraper_overview(request, scraper_short_name):
         'data': data,
         'scraper_contributors': scraper_contributors,
         'related_views': related_views,
+        'schedule_options': models.SCHEDULE_OPTIONS,
         }, context_instance=RequestContext(request))
 
 def view_admin (request, short_name):
@@ -170,6 +171,10 @@ def scraper_admin (request, short_name):
                 scraper.tags = ", ".join([tag.name for tag in scraper.tags]) + ',' + request.POST.get('value', '')                                                  
                 response_text = ", ".join([tag.name for tag in scraper.tags])
 
+            if element_id == 'spnRunInterval':
+                scraper.run_interval = int(request.POST.get('value', None))
+                response_text = models.SCHEDULE_OPTIONS_DICT[scraper.run_interval]
+
             #save scraper
             scraper.save()
             response.write(response_text)
@@ -218,11 +223,13 @@ def scraper_delete_scraper(request, scraper_short_name):
 def view_overview (request, short_name):
     user = request.user
     scraper = get_object_or_404(models.View.objects, short_name=short_name)
+
+    scraper_tags = Tag.objects.get_for_object(scraper)
     
     #get scrapers used in this view
     related_scrapers = scraper.relations.filter(wiki_type='scraper')
     
-    return render_to_response('codewiki/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper, 'related_scrapers': related_scrapers, }, context_instance=RequestContext(request))
+    return render_to_response('codewiki/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper, 'scraper_tags': scraper_tags, 'related_scrapers': related_scrapers, }, context_instance=RequestContext(request))
     
     
 def view_fullscreen (request, short_name):
@@ -619,7 +626,11 @@ def chosen_template(request, wiki_type):
 def delete_draft(request):
     if request.session.get('ScraperDraft', False):
         del request.session['ScraperDraft']
-    #return HttpResponseRedirect(reverse('editor'))
+
+    # Remove any pending notifications, i.e. the "don't worry, your scraper is safe" one
+    request.notifications.used = True
+
+    return HttpResponseRedirect(reverse('frontpage'))
 
 def diff(request, short_name=None):
     if not short_name or short_name == "__new__":
@@ -835,5 +846,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
     context['has_draft'] = has_draft
     context['user'] = request.user
     context['quick_help_template'] = 'frontend/quick_help_%s.html' % scraper.language.lower()
+    context['selected_tab'] = 'code'
 
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))

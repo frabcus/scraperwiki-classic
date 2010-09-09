@@ -112,7 +112,6 @@ INSTALLED_APPS = [
     'frontend',
   	'codewiki',
   	'notification',
-  	'editor',
   	'payment',  	
   	'market',
   	'api',

@@ -30,6 +30,7 @@ except:
 from django.core.mail import send_mail
 
 SCHEDULE_OPTIONS = ((-1, 'never'), (3600*24, 'once a day'), (3600*24*2, 'every two days'), (3600*24*3, 'every three days'),                                                                 (3600*24*7, 'once a week'), (3600*24*14, 'every two weeks'), (3600*24*31, 'once a month'), (3600*24*63, 'every two months'), (3600*24*182, 'every six months'),)
+SCHEDULE_OPTIONS_DICT = dict(SCHEDULE_OPTIONS)
 
 class Scraper (code.Code):
 
