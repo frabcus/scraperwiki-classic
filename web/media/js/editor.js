@@ -135,7 +135,7 @@ $(document).ready(function() {
             showPopup('popup_tutorials'); 
         });        
         $('form#editor').submit(function() { 
-            saveScraper(false); 
+            saveScraper(); 
             return false; 
         })
 
@@ -608,7 +608,7 @@ $(document).ready(function() {
 
         //commit popup button
         $('#btnCommitPopup').live('click', function (){
-            saveScraper(true);  
+            saveScraper();  
             return false;
         });
         
@@ -648,7 +648,7 @@ $(document).ready(function() {
 
 
     //Save
-    function saveScraper(bCommit){
+    function saveScraper(){
         var bSuccess = false;
 
         //if saving then check if the title is set
@@ -665,11 +665,6 @@ $(document).ready(function() {
             bSuccess = true;
         }
         
-        form_action = 'save';
-        if (bCommit == true) {
-            form_action = 'commit';
-        }
-
         if(bSuccess == true){          
             $.ajax({
               type : 'POST',
@@ -685,7 +680,7 @@ $(document).ready(function() {
                 wiki_type: $('#id_wiki_type').val(),                
                 published: ($('#id_published:checked').length == 1) ? 'on': '',
                 code : codeeditor.getCode(),
-                action : form_action
+                action : 'commit'
                 }),
               dataType: "html",
               success: function(response){
