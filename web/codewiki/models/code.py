@@ -164,7 +164,7 @@ class Code(models.Model):
             self.first_published_at = datetime.datetime.today()
 
     def content_type(self):
-        return ContentType.objects.get(app_label="scraper", model="Scraper")
+        return ContentType.objects.get(app_label="codewiki", model="Code")
 
     def get_metadata(self, name, default=None):
         try:

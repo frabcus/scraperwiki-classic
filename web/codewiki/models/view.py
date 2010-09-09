@@ -38,6 +38,9 @@ class View (code.Code):
         filename = "%s_%s.png" % (self.short_name, size)
         return os.path.join(settings.VIEW_SCREENSHOT_DIR, filename)
 
+    def content_type(self):
+        return ContentType.objects.get(app_label="codewiki", model="View")
+
     class Meta:
         app_label = 'codewiki'
 

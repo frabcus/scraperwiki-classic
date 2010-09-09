@@ -91,6 +91,9 @@ class Scraper (code.Code):
         self.wiki_type = 'scraper'
         super(Scraper, self).save(*args, **kwargs)
 
+    def content_type(self):
+        return ContentType.objects.get(app_label="codewiki", model="Scraper")
+
     class Meta:
         app_label = 'codewiki'
 
