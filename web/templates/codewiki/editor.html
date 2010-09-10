@@ -89,9 +89,9 @@
               	        <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
                     </ul>
                     {% if scraper.id %}
-                        <a href="{% url scraper_overview scraper.short_name %}">close editor</a>
+                        <a id="aCloseEditor1" href="{% url scraper_overview scraper.short_name %}">close editor</a>
                     {% else %}
-                        <a href="{% url frontpage %}">close editor</a>
+                        <a id="aCloseEditor1" href="{% url frontpage %}">close editor</a>
                     {% endif %}
                     <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save {{scraper.wiki_type}}" title="Save this scraper (Ctrl + S)"/>
                 </div>

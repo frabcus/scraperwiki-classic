@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
     //variables
-    var pageIsDirty = false;
+    var pageIsDirty = true;
     var editor_id = 'id_code';
     var codeeditor;
     var codemirroriframe; // the iframe that needs resizing
@@ -42,6 +42,16 @@ $(document).ready(function() {
     setupDetailsForm();
     setupResizeEvents();
 
+    function setPageIsDirty(lpageIsDirty) {
+        if (pageIsDirty == lpageIsDirty)
+            return; 
+        pageIsDirty = lpageIsDirty; 
+        if (pageIsDirty && guid)
+            $('#aCloseEditor1').css("font-style", "italic"); 
+        else
+            $('#aCloseEditor1').css("font-style", "normal"); 
+    }
+
     //setup code editor
     function setupCodeEditor(){
         var parsers = Array();
@@ -70,9 +80,7 @@ $(document).ready(function() {
             autoMatchParens: true,
             width: '100%',
             parserConfig: {'pythonVersion': 2, 'strictErrors': true},
-            onChange: function (){
-                pageIsDirty = true; // note that code has changed
-            },
+            onChange: function ()  { setPageIsDirty(true); },
 
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
@@ -80,7 +88,7 @@ $(document).ready(function() {
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     setupKeygrabs();
                     resizeControls('up');
-                    pageIsDirty = false; // page not dirty at this point
+                    setPageIsDirty(false); // page not dirty at this point
                     
                 } 
           });        
@@ -573,7 +581,7 @@ $(document).ready(function() {
 
         codeeditor.setCode(newcode); // see setupTutorial() for way to leave control-Z in place
         codeeditor.focus(); 
-        pageIsDirty = false; 
+        setPageIsDirty(false); 
 
         // make the selection
         if (!((selrange[2] == 0) && (selrange[3] == 0))){
@@ -636,8 +644,7 @@ $(document).ready(function() {
         );
 
         //close editor link
-
-        $('#aCloseEditor, .page_tabs a').click(
+        $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(
             function (){
                 var bReturn = true;
                 if (pageIsDirty){
@@ -719,7 +726,7 @@ $(document).ready(function() {
                                 send({"command":'saved'}); 
                             }
                         }
-                        pageIsDirty = false; // page no longer dirty
+                        setPageIsDirty(false); 
                     }
                 },
 
