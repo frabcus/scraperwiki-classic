@@ -211,8 +211,8 @@ class RunnerProtocol(protocol.Protocol):
                 self.scraperlanguage = parsed_data.get('language', '')
                 self.isstaff = (parsed_data.get('isstaff') == "yes")
                 
-                if self.userrealname:
-                    self.chatname = self.userrealname
+                if self.username:
+                    self.chatname = self.userrealname or self.username
                 else:
                     self.chatname = "Anonymous%d" % self.factory.anonymouscount
                     self.factory.anonymouscount += 1

@@ -41,6 +41,7 @@ def frontpage(request, public_profile_field=None):
     
     data = {'solicitations': solicitations, 'featured_views': featured_views, 'featured_scrapers': featured_scrapers,}
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
+
 @login_required
 def dashboard(request):
 	user = request.user

@@ -64,7 +64,7 @@ class MercurialInterface:
     
     # this function possibly in wrong place (which makes the imports awkward)
     def updatecommitalertsrev(self, rev):
-        from codewiki.models import Scraper, CodeCommitEvent
+        from codewiki.models import Code, CodeCommitEvent
         from frontend.models import Alerts
         from django.contrib.auth.models import User
 
@@ -93,7 +93,7 @@ class MercurialInterface:
             if not mscraper:
                 warnings.append("unrecognized scraperfile: %s" % scraperfile)
                 continue
-            scrapers = Scraper.objects.filter(short_name=mscraper.group(1))
+            scrapers = Code.objects.filter(short_name=mscraper.group(1))
             if len(scrapers) != 1:
                 warnings.append("scraperfile unmatched to scraper: %s" % scraperfile)
                 continue

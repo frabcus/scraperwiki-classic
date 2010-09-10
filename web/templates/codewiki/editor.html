@@ -76,7 +76,9 @@
             {# Controls #}
             <div class="editor_controls">
                 <a id="menu_tutorials" class="helplink" href="#" title="Load a helpful tutorial">Quick help</a>
-                <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
+                {% if 0 %}
+                    <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
+                {% endif %}
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
                 {% if scraper.id %}
                     <input type="checkbox" value="autosavecheck" name="autosavecheck" id="autosavecheck" checked>autosave</input>

@@ -275,6 +275,8 @@ def scraper_history(request, wiki_type, scraper_short_name):
     
     # sift through the alerts filtering on the scraper through the annoying content_type field
     content_type = scraper.content_type()
+    
+    # The function updatecommitalertsrev() creates Alerts of content_type.  Make sure it's Code type, not Scraper or View type
     history = frontend.models.Alerts.objects.filter(content_type=content_type, object_id=scraper.pk).order_by('-datetime')
 
     dictionary = { 'selected_tab': 'history', 'scraper': scraper, 'history': history,
