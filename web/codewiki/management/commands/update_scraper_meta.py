@@ -17,8 +17,8 @@ class Command(BaseCommand):
         
         Don't forget to save() it
         """
-        #Do something here
-        pass
+        scraper.update_meta()
+        scraper.save()
     
     def handle(self, **options):
         
