@@ -52,11 +52,7 @@
                 </table>
             </div>
     	    <div class="info_unpublished">
-                {% if scraper.published %}
     	            This scraper is being worked on <br/>and there is no data to display yet
-                {% else %}
-    	            This scraper is being worked on <br/>but has not been published yet
-    	        {% endif %}
     	    </div>
         {% endif %}
         <div class="content_footer">
@@ -111,6 +107,16 @@
     <h3>Schedule{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
     This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
     {% sparkline scraper.scraper_sparkline_csv 'medium' %}
+    {% if user_owns_it and not scraper.published %}
+      <div id="publishScraper">
+        <h3>Publish</h3>
+        <p>By default all scrapers are now published. This scraper was created before that policy. This button allows you to publish this scraper.</p>
+        <form>
+          <input type="submit" class="small button" id="publishScraperButton" value="Publish"/>
+        </form>
+        <br/>
+      </div>
+    {% endif %}
     <h3>Delete &amp; reset</h3>
    {% if user_owns_it %}    
         <form action="{% url scraper_delete_data scraper.short_name %}" method="post">

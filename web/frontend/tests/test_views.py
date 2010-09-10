@@ -64,11 +64,11 @@ class FrontEndViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_tutorials(self):    
-        Scraper.objects.create(title='Python1', language='Python', published=True, istutorial=True)
-        Scraper.objects.create(title='Python2', language='Python', published=True, istutorial=True)
-        Scraper.objects.create(title='Python3', language='Python', published=True, istutorial=True)
-        Scraper.objects.create(title='PHP1', language='PHP', published=True, istutorial=True)
-        Scraper.objects.create(title='PHP2', language='PHP', published=True, istutorial=True)
+        Scraper.objects.create(title='Python1', language='Python', istutorial=True)
+        Scraper.objects.create(title='Python2', language='Python', istutorial=True)
+        Scraper.objects.create(title='Python3', language='Python', istutorial=True)
+        Scraper.objects.create(title='PHP1', language='PHP', istutorial=True)
+        Scraper.objects.create(title='PHP2', language='PHP', istutorial=True)
 
         response = self.client.get(reverse('help_tutorials2'))
         self.assertEqual(response.status_code, 200)

@@ -329,5 +329,18 @@ function setupScraperEditInPlace(wiki_type, short_name){
                 return false;
            }
        );          
-    
+       $('#publishScraperButton').click(function(){
+           $.ajax({
+               url: 'admin/',
+               data: {'id': 'publishScraperButton'},
+               type: 'POST',
+               success: function(){
+                   $('#publishScraper').fadeOut();
+               },
+               error: function(){
+                   alert("Something went wrong publishing this scraper. Please try again. If the problem continues please send a message via the feedback form.");
+               }
+           });
+           return false;
+       });
 }

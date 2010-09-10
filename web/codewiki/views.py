@@ -147,13 +147,11 @@ def scraper_admin (request, short_name):
         raise Http404
 
     if request.method == 'POST':
-        #is this an ajax post of a single value?
-        js = request.POST.get('js', None)
         #single fields saved via ajax
-        if js:
+        if request.is_ajax():
             response = HttpResponse()
             response_text = ''
-            element_id = request.POST.get('id', None)       
+            element_id = request.POST.get('id', None)
             if element_id == 'divAboutScraper':
                 scraper.description = request.POST.get('value', None)                                                  
                 response_text = textile.textile(scraper.description)
@@ -169,6 +167,10 @@ def scraper_admin (request, short_name):
             if element_id == 'spnRunInterval':
                 scraper.run_interval = int(request.POST.get('value', None))
                 response_text = models.SCHEDULE_OPTIONS_DICT[scraper.run_interval]
+
+            if element_id == 'publishScraperButton':
+                scraper.published = True
+                response_text = ''
 
             #save scraper
             scraper.save()
@@ -525,7 +527,6 @@ def rpcexecute_dummy(request, scraper_short_name, revision = None):
     </html>
     '''
     )
-    print "fdsfdsdfs"
     return response
                         
 # quick hack the manage the RPC execute feature 
