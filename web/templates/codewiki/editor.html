@@ -141,46 +141,6 @@
       
       </div>
     <div id="popups">
-            <div id="meta_form" class="popup_item">
-                    <p>.</p>
-                    <div class="popup_error">
-                    </div>            
-                    <ul class="form">
-                        <li>
-                            <label for="id_meta_title">{{ form.title.label}}</label>
-                            <input type="text" name="title" value="" id="id_meta_title">
-                        </li>
-                        <li>
-                          <label for="id_published">{{ form.published.label}} {{ form.published.errors }}</label>
-                          {{ form.published }} 
-                          (Publishing your scraper will make the code and data available to others, and allow you to schedule it.)
-                        </li>
-                        <li{% if scraper.description %} class="hidden"{% endif %}>
-                            <label for="id_description">{{ form.description.label}} {{ form.description.errors }}</label>
-                            {{ form.description }}
-                        </li>
-                        <li{% if scraper.description %} class="hidden"{% endif %}>
-                            <label for="id_license">{{ form.license.label }} {{ form.license.errors }}</label>
-                            {{ form.license }}
-                        </li>
-                        <li{% if scraper.description %} class="hidden"{% endif %}>
-                            <label for="id_commaseparatedtags">{{ form.commaseparatedtags.label}} {{ form.commaseparatedtags.errors }}</label>
-                            {{ form.commaseparatedtags }}
-                            <small class="hint taghint">e.g. europe<em>,</em> grants<em>,</em> transport</small>
-                        </li>
-                        <li>
-                          <label for="id_commit_message">{{ form.commit_message.label}} {{ form.commit_message.errors }}</label>
-                          {{ form.commit_message }}
-                        </li>
-                    </ul>
-                    <div class="popup_controls">
-                        <small>* Required field</small>
-                        <div class="right">
-                            <a class="popupReady">cancel</a>&nbsp;&nbsp;
-                            <input type="button" id="btnCommitPublish" class="commit button" name="action" value="Commit" title="Commit this scraper"/>
-                        </div>
-                    </div>
-            </div>
             <div id="diff" class="popup_item">
                 <div class="popup_header">
                     <h2>Diff with the published version</h2>

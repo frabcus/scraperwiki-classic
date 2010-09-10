@@ -44,10 +44,10 @@ urlpatterns = patterns('',
     url(r'^editor/tutorial/(?P<tutorial_scraper>[\-\w]+)$',   views.edit, name="tutorial"),
     #!url(r'^new/(?P<wiki_type>[\w]+)/(?P<language>[\w]+)$',                  views.edit, name="editor"),
     url(r'^editor/draft/delete/$',                            views.delete_draft, name="delete_draft"),
-    url(r'editor/diff/$',                                     views.diff,         name="diff"),   # blank name for draft scraper
-    url(r'editor/diff/(?P<short_name>[\-\w]+)$',              views.diff,         name="diff"),
-    url(r'editor/raw/$',                                      views.raw,          name="raw"),   # blank name for draft scraper
-    url(r'editor/raw/(?P<short_name>[\-\w]+)$',               views.raw,          name="raw"),   # blank name for draft scraper
+    url(r'^editor/diff/$',                                     views.diff,         name="diff"),   # blank name for draft scraper
+    url(r'^editor/diff/(?P<short_name>[\-\w]+)$',              views.diff,         name="diff"),
+    url(r'^editor/raw/$',                                      views.raw,          name="raw"),   # blank name for draft scraper
+    url(r'^editor/raw/(?P<short_name>[\-\w]+)$',               views.raw,          name="raw"),   # blank name for draft scraper
 
     
 )

@@ -43,14 +43,16 @@ class MercurialInterface:
         fout.write(code)
         fout.close()
 
-        # add into mercurial
-        #if scraperfile not in self.repo.dirstate:
-            #self.repo.add([scraperfile])   # note, relative to repopath
-        
     
     # need to dig into the commit command to find the rev
     def commit(self, scraper, message="changed", user="unknown"): 
+        scraperfile = os.path.join(scraper.short_name, "__init__.py")
         scraperpath = os.path.join(self.repopath, scraper.short_name, "__init__.py")
+        
+        # add into mercurial (must be relative to repopath)
+        if scraperfile not in self.repo.dirstate:
+            self.repo.add([scraperfile])   
+        
         if message is None:
             message = "changed"
 

@@ -20,6 +20,7 @@ import vc
 import frontend
 
 import subprocess
+import difflib
 
 import StringIO, csv, types
 import datetime
@@ -652,17 +653,17 @@ def raw(request, short_name=None):
     return HttpResponse(result, mimetype="text/plain")
 
 #save a code object
-def save_code(code_object, user, code_text, bnew):
+def save_code(code_object, user, code_text, commitmessage):
 
     # save the actual object to mySQL
     code_object.update_meta()
     code_object.line_count = int(code_text.count("\n"))
     code_object.save()   
 
-    # save the code to mercurial
+    # save code and commit code through the mercurialinterface
     mercurialinterface = vc.MercurialInterface(code_object.get_repo_path())
     mercurialinterface.save(code_object, code_text)
-    rev = mercurialinterface.commit(code_object, message='', user=user)
+    rev = mercurialinterface.commit(code_object, message=commitmessage, user=user)
     mercurialinterface.updatecommitalertsrev(rev)
 
     # Add user roles
@@ -695,7 +696,8 @@ def handle_session_draft(request, action):
     draft_code = session_scraper_draft.get('code')
     #draft_tags = session_scraper_draft.get('commaseparatedtags', '')
 
-    save_code(draft_scraper, request.user, draft_code, True)
+    commitmessage = request.POST.get('commit_message', "")
+    save_code(draft_scraper, request.user, draft_code, commitmessage)
 
 
     # work out where to send them next
@@ -724,19 +726,15 @@ def saveeditedscraper(request, lscraper):
 
     # Add some more fields to the form
     code = form.cleaned_data['code']
-    #!scraper.description = form.cleaned_data['description']    
-    #!scraper.license = form.cleaned_data['license']
-    #!scraper.run_interval = form.cleaned_data['run_interval']
-
+    
     # User is signed in, we can save the scraper
     if request.user.is_authenticated():
-        #!commitmessage = action.startswith('commit') and request.POST.get('commit_message', "changed") or None
-        save_code(scraper, request.user, code, False)  # though not always not new
+        commitmessage = request.POST.get('commit_message', "")
+        save_code(scraper, request.user, code, commitmessage)  
 
         # Work out the URL to return in the JSON object
         url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name':scraper.short_name})
         if action.startswith("commit"):
-            #!url = reverse('scraper_code', kwargs={'wiki_type': scraper.wiki_type, 'scraper_short_name':scraper.short_name})
             response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
 
         # Build the JSON object and return it

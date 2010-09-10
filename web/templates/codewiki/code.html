@@ -9,13 +9,13 @@
   <i>({{status.currcommit.description}})</i>
 
   {% if status.prevcommit %}
-    <a href="{% url scraper_code scraper.short_name %}?rev={{status.prevcommit.rev}}">previous commit</a>
+    <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}?rev={{status.prevcommit.rev}}">previous commit</a>
   {% endif %}
 
   {% if status.nextcommit %}
-    <a href="{% url scraper_code scraper.short_name %}?rev={{status.nextcommit.rev}}">next commit</a>
+    <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}?rev={{status.nextcommit.rev}}">next commit</a>
   {% else %}
-    <a href="{% url scraper_code scraper.short_name %}">last saved version</a>
+    <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}">last saved version</a>
   {% endif %}
 
 
@@ -23,7 +23,7 @@
 {% else %}
   Saved: {{status.filemodifieddate|date:"H:i, j F Y" }}, 
   {% if status.prevcommit %}
-    Committed: <a href="{% url scraper_code scraper.short_name %}?rev={{status.prevcommit.rev}}">{{status.prevcommit.date|date:"H:i, j F Y" }}</a>
+    Committed: <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}?rev={{status.prevcommit.rev}}">{{status.prevcommit.date|date:"H:i, j F Y" }}</a>
     <i>({{status.prevcommit.description}})</i>
   {% endif %}
   

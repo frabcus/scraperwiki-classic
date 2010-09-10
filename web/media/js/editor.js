@@ -39,7 +39,6 @@ $(document).ready(function() {
     setupTabs();
     setupPopups();
     setupToolbar();
-    setupDetailsForm();
     setupResizeEvents();
 
     function setPageIsDirty(lpageIsDirty) {
@@ -222,10 +221,6 @@ $(document).ready(function() {
         $('#popups div.popup_item').each(function(i) {
             if (this.id == sId) {
                 
-                if (sId == 'meta_form') {
-                    $('#id_meta_title').val($('#id_title').val())
-                }
-                
                 popupStatus = 1;
                 //show
                 $(this).css({
@@ -256,34 +251,6 @@ $(document).ready(function() {
        setTimeout('$("#feedback_messages").slideToggle();', 2500);
     }
 
-    //Setup save / details forms
-    function setupDetailsForm(){
-
-        //sync title text boxes
-        $('#id_meta_title').keyup(
-                function(){
-                    $('#id_title').val($('#meta_form #id_meta_title').val());
-                }
-            );
-
-        // Meta form
-        /*
-        $('#meta_fields_mini').appendTo($('#meta_form'))
-        $('#meta_fields_mini').attr('id', 'meta_fields')
-        $('#id_title').before('<a href="" id="meta_form_edit"><img src="/media/images/icons/information.png" alt="Edit scraper information" title="Edit scraper information"/></a>')
-        $('#meta_form_edit').click(function() {            
-
-            // Only add the save button if it's not there already
-          
-            if (!$('#meta_form .save').length) {
-                $('.save').clone().appendTo($('#meta_form'));
-            };
-          
-            showPopup('meta_form');
-            return false;
-        });
-        */
-    }
 
     conn.onopen = function(code){
         sChatTabMessage = 'Chat'; 
@@ -682,16 +649,10 @@ $(document).ready(function() {
               contentType : "application/json",
               URL : window.location.pathname,
 
-              // many of these should go, eg commaseparatedtags, license, etc.
               data: ({
                 title : $('#id_title').val(),
-                commaseparatedtags : $('#id_commaseparatedtags').val(),
-                license : $('#id_license').val(),
-                description : $('#id_description').val(),
-                run_interval : $('#id_run_interval').val(),
-                commit_message: $('#id_commit_message').val(),
+                commit_message: "cccommit",
                 wiki_type: $('#id_wiki_type').val(),                
-                published: ($('#id_published:checked').length == 1) ? 'on': '',
                 code : codeeditor.getCode(),
                 action : 'commit'
                 }),
@@ -707,7 +668,7 @@ $(document).ready(function() {
 
                     //success    
                     }else{
-                        pageTracker._trackPageview('/scraper_committed_goal');  		
+                        //pageTracker._trackPageview('/scraper_committed_goal');  		
 
                         // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
                         if (res.draft == 'True') {
