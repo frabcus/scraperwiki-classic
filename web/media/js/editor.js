@@ -475,6 +475,10 @@ $(document).ready(function() {
 
         // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
         // means we can have simultaneous running for staff overview
+
+        // new auto-save every time 
+        if (guid && $('#autosavecheck').attr('checked') && pageIsDirty)
+            saveScraper(); 
     }
 
     function startingrun(content) {
@@ -651,7 +655,7 @@ $(document).ready(function() {
     function saveScraper(){
         var bSuccess = false;
 
-        //if saving then check if the title is set
+        //if saving then check if the title is set (must be if guid is set)
         if(shortNameIsSet() == false){
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
 
@@ -670,6 +674,8 @@ $(document).ready(function() {
               type : 'POST',
               contentType : "application/json",
               URL : window.location.pathname,
+
+              // many of these should go, eg commaseparatedtags, license, etc.
               data: ({
                 title : $('#id_title').val(),
                 commaseparatedtags : $('#id_commaseparatedtags').val(),
@@ -682,6 +688,7 @@ $(document).ready(function() {
                 code : codeeditor.getCode(),
                 action : 'commit'
                 }),
+
               dataType: "html",
               success: function(response){
                     res = $.evalJSON(response);
@@ -690,22 +697,24 @@ $(document).ready(function() {
                     if (res.status == 'Failed'){
                         $('#meta_form .popup_error').show();
                         $('#meta_form .popup_error').html("Failed to save, please make sure you have entered a title, a description and a commit message");
+
                     //success    
                     }else{
                         pageTracker._trackPageview('/scraper_committed_goal');  		
 
+                        // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
                         if (res.draft == 'True') {
                             $('#divDraftSavedWarning').show();
                         }
 
-                        // redirect somewhere
+                        // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
                         if (res.url && window.location.pathname != res.url) {
                             window.location = res.url;
                         };
 
+                        // orginary save case.  show the slider up that it has been saved
                         if (res.draft != 'True') {
                             showFeedbackMessage("Your code has been saved.");
-                    
                             if (bConnected){
                                 send({"command":'saved'}); 
                             }
