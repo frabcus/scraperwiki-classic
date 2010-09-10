@@ -38,28 +38,28 @@ WIKI_TYPES = (
 class Code(models.Model):
 
     # model fields
-    title             = models.CharField(max_length=100, 
+    title              = models.CharField(max_length=100, 
                                         null=False, 
                                         blank=False, 
                                         verbose_name='Scraper Title', 
                                         default='Untitled')
-    short_name        = models.CharField(max_length=50)
-    source            = models.CharField(max_length=100, blank=True)
-    description       = models.TextField(blank=True)
-    created_at        = models.DateTimeField(auto_now_add=True)
-    deleted           = models.BooleanField()
-    status            = models.CharField(max_length=10, blank=True)
-    users             = models.ManyToManyField(User, through='UserCodeRole')
-    guid              = models.CharField(max_length=1000)
-    published         = models.BooleanField(default=True)
-    first_published_at   = models.DateTimeField(null=True, blank=True)
-    line_count = models.IntegerField(default=0)    
-    featured          = models.BooleanField(default=False)
-    istutorial        = models.BooleanField(default=False)
-    isstartup         = models.BooleanField(default=False)
-    language          = models.CharField(max_length=32, choices=LANGUAGES, default='Python')
-    wiki_type         = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
-    relations = models.ManyToManyField("self")  #manage.py refuses to generate the tabel for this, so you haev to do it manually.
+    short_name         = models.CharField(max_length=50)
+    source             = models.CharField(max_length=100, blank=True)
+    description        = models.TextField(blank=True)
+    created_at         = models.DateTimeField(auto_now_add=True)
+    deleted            = models.BooleanField()
+    status             = models.CharField(max_length=10, blank=True)
+    users              = models.ManyToManyField(User, through='UserCodeRole')
+    guid               = models.CharField(max_length=1000)
+    published          = models.BooleanField(default=True)
+    first_published_at = models.DateTimeField(null=True, blank=True)
+    line_count         = models.IntegerField(default=0)    
+    featured           = models.BooleanField(default=False)
+    istutorial         = models.BooleanField(default=False)
+    isstartup          = models.BooleanField(default=False)
+    language           = models.CharField(max_length=32, choices=LANGUAGES, default='Python')
+    wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
+    relations          = models.ManyToManyField("self", blank=True)  #manage.py refuses to generate the tabel for this, so you haev to do it manually.
     
     # managers
     objects = CodeManager()
@@ -164,7 +164,7 @@ class Code(models.Model):
             self.first_published_at = datetime.datetime.today()
 
     def content_type(self):
-        return ContentType.objects.get(app_label="scraper", model="Scraper")
+        return ContentType.objects.get(app_label="codewiki", model="Code")
 
     def get_metadata(self, name, default=None):
         try:

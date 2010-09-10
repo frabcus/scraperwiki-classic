@@ -148,7 +148,7 @@ class Solicitation(models.Model):
             send_mail(title, template.render(context), settings.EMAIL_FROM, [self.user_created.email], fail_silently=False)
         else:
             #someone is messing about if we are here, throw an exception
-            raise Exception("Unable to find a published scraper (for this user) to add to this solicitation")
+            raise Exception("Unable to find a scraper (for this user) to add to this solicitation")
    
     def __unicode__(self):
         return "%s (%s)" % (self.title, self.price)

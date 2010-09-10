@@ -63,7 +63,7 @@ class LatestCodeObjectsByTag(Feed):
         return '/%ss/show/%s/' % (item.wiki_type, item.short_name)
 
     def description(self, obj):
-        return "Items recently published on ScraperWiki with tag '%s'" % obj.name
+        return "Items recently created on ScraperWiki with tag '%s'" % obj.name
 
     def items(self, obj):
        code_objects = Code.objects.filter(published=True)    
@@ -105,7 +105,7 @@ class LatestCodeObjectsBySearchTerm(Feed):
         return '/%ss/%s/' % (item.wiki_type, item.short_name)
 
     def description(self, obj):
-        return "Items published with '%s' somewhere in title or tags" % obj
+        return "Items created with '%s' somewhere in title or tags" % obj
 
     def items(self, obj):
         code_objects = Code.objects.filter(title__icontains=obj, published=True) 
