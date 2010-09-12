@@ -21,6 +21,7 @@ import frontend
 
 import subprocess
 import difflib
+import re
 
 import StringIO, csv, types
 import datetime
@@ -274,28 +275,63 @@ def scraper_history(request, wiki_type, scraper_short_name):
     user_follows_it = (user in scraper.followers())
     
     # sift through the alerts filtering on the scraper through the annoying content_type field
-    content_type = scraper.content_type()
+    content_type = scraper.content_type() # this one is actually type Code
     
     # The function updatecommitalertsrev() creates Alerts of content_type.  Make sure it's Code type, not Scraper or View type
     history = frontend.models.Alerts.objects.filter(content_type=content_type, object_id=scraper.pk).order_by('-datetime')
 
     dictionary = { 'selected_tab': 'history', 'scraper': scraper, 'history': history,
-                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
+                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it, "user":user }
     
-    # extract the commit log directly from the mercurial repository
-    # (in future, the entries in django may be synchronized against this to make it possible to update the repository(ies) outside the system)
+    
+    
+    # extract the commit log directly from the mercurial repository without referring to the 'Alerts'
+    
     commitlog = [ ]
-    # should commit info about the saved   commitlog.append({"rev":commitentry['rev'], "description":commitentry['description'], "datetime":commitentry["date"], "user":user})
     mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
     for commitentry in mercurialinterface.getcommitlog(scraper):
         try:    user = User.objects.get(pk=int(commitentry["userid"]))
         except: user = None
-        commitlog.append({"rev":commitentry['rev'], "description":commitentry['description'], "datetime":commitentry["date"], "user":user})
+        
+        description = commitentry['description']
+        commititem = {"rev":commitentry['rev'], "datetime":commitentry["date"], "user":user}
+        
+        # extract earliesteditor value that has been prepended into the description(commitmessage)
+        mearliesteditor = re.match("(.+?)\|\|\|", description)
+        if mearliesteditor:
+            commititem['earliesteditor'] = mearliesteditor.group(1)
+            description = description[mearliesteditor.end(0):]
+        else:
+            commititem['earliesteditor'] = ""
+        
+        commititem["description"] = description 
+        
+        # aggregate in the commitlog
+        if commitlog and commititem["earliesteditor"] and commitlog[-1]["earliesteditor"] == commititem["earliesteditor"]:
+            lcommititem = commitlog[-1]
+            lcommititem["users"].add(commititem["user"])
+            lcommititem["lastrev"] = commititem["rev"]
+            lcommititem["lastdatetime"] = commititem["datetime"]
+            lcommititem["revcount"] += 1
+        else:
+            commititem["users"] = set([commititem["user"]])
+            commititem["firstrev"] = commititem["rev"]
+            commititem["lastrev"] = commititem["rev"]
+            commititem["firstdatetime"] = commititem["datetime"]
+            commititem["lastdatetime"] = commititem["datetime"]
+            commititem["revcount"] = 1
+            commitlog.append(commititem)
+    
+    for commititem in commitlog:
+        timeduration = commititem["lastdatetime"] - commititem["firstdatetime"]
+        commititem["durationminutes"] = "%.1f" % (timeduration.days*24*60 + timeduration.seconds/60.0)
+        
     commitlog.reverse()
     dictionary["commitlog"] = commitlog
     dictionary["filestatus"] = mercurialinterface.getfilestatus(scraper)
     
     return render_to_response('codewiki/history.html', dictionary, context_instance=RequestContext(request))
+
 
 def code(request, wiki_type, scraper_short_name):
     user = request.user

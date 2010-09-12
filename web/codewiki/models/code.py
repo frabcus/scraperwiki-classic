@@ -214,6 +214,7 @@ class UserCodeRole(models.Model):
                                                                                 
 class CodeCommitEvent(models.Model):
     revision = models.IntegerField()
+    # earliesteditor = models.DateTimeField() # used for aggregating the edits  (JGT)
 
     def __unicode__(self):
         return unicode(self.revision)

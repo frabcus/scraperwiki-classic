@@ -53,43 +53,39 @@
   {% endfor %}
 </table>
 
+{% if user.is_staff %}
 <div class="mercurialcommitlog">
 <h3>Commit log extracted directly from repository</h3>
-<ul>
-
-  {% if filestatus.ismodified %}
-  <li>
-    <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}">{{ filestatus.filemodifieddate|date:"H:i, j F Y" }}</a> 
-    <span class="history-user">someone</span>
-    saved the file
-  </li>
-  {% endif %}
-
-  {% if filestatus.isadded %}
-  <li>
-    <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}">{{ filestatus.filemodifieddate|date:"H:i, j F Y" }}</a>
-    <span class="history-user">someone</span>
-    last saved after creation
-  </li>
-  {% endif %}
-
+<table>
+  
+  <tr><th>time</th><th>user(s)</th><th>earliesteditor</th><th>desc</th></tr>
   {% for item in commitlog %}
-  <li>
-    <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
-    <span class="history-user">
-    {% if item.user %}
-      <a href="{% url profiles_profile_detail item.user.username %}">
-        {% if item.user.get_profile.name %}{{item.user.get_profile.name}}{% else %}{{item.user.username}}{% endif %}
-      </a>
-    {% else %}
-        Unknown user
-    {% endif %}
-    </span>
-    ({{item.description}})
-  </li>
+  <tr>
+    <td>
+      <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
+      {% ifnotequal item.revcount 1 %}({{item.revcount}} edits over {{item.durationminutes}} minutes){% endifnotequal %}
+    </td>
+    <td>
+      {% for user in item.users %}
+      <span class="history-user">
+        <a href="{% url profiles_profile_detail item.user.username %}">
+          {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}
+        </a>
+      </span>
+      {% endfor %}
+    </td>
+
+    <td>
+      {{item.earliesteditor}}
+    </td>
+    <td>
+      {{item.description}}
+    </td>
+  </tr>
   {% endfor %}
-</ul>
+</table>
 </div>
+{% endif %}
 
 {% endblock %}
 
