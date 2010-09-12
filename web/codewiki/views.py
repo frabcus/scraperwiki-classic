@@ -655,7 +655,7 @@ def raw(request, short_name=None):
     return HttpResponse(result, mimetype="text/plain")
 
 #save a code object
-def save_code(code_object, user, code_text, commitmessage):
+def save_code(code_object, user, code_text, earliesteditor, commitmessage):
 
     # save the actual object to mySQL
     code_object.update_meta()
@@ -663,9 +663,10 @@ def save_code(code_object, user, code_text, commitmessage):
     code_object.save()   
 
     # save code and commit code through the mercurialinterface
+    lcommitmessage = earliesteditor and ("%s|||%s" % (earliesteditor, commitmessage)) or commitmessage
     mercurialinterface = vc.MercurialInterface(code_object.get_repo_path())
     mercurialinterface.save(code_object, code_text)
-    rev = mercurialinterface.commit(code_object, message=commitmessage, user=user)
+    rev = mercurialinterface.commit(code_object, message=lcommitmessage, user=user)
     mercurialinterface.updatecommitalertsrev(rev)
 
     # Add user roles
@@ -699,8 +700,8 @@ def handle_session_draft(request, action):
     #draft_tags = session_scraper_draft.get('commaseparatedtags', '')
 
     commitmessage = request.POST.get('commit_message', "")
-    save_code(draft_scraper, request.user, draft_code, commitmessage)
-
+    earliesteditor = request.POST.get('earliesteditor', "")
+    save_code(draft_scraper, request.user, draft_code, earliesteditor, commitmessage)
 
     # work out where to send them next
     #go to the scraper page if commited, or the editor if not
@@ -720,6 +721,7 @@ def saveeditedscraper(request, lscraper):
         return HttpResponse(json.dumps({'status' : 'Failed'}))
 
     action = request.POST.get('action').lower()
+    # assert action == 'commit'
 
     # recover the altered object from the form, without saving it to django database - http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method
     scraper = form.save(commit=False)
@@ -732,7 +734,8 @@ def saveeditedscraper(request, lscraper):
     # User is signed in, we can save the scraper
     if request.user.is_authenticated():
         commitmessage = request.POST.get('commit_message', "")
-        save_code(scraper, request.user, code, commitmessage)  
+        earliesteditor = request.POST.get('earliesteditor', "")
+        save_code(scraper, request.user, code, earliesteditor, commitmessage)  
 
         # Work out the URL to return in the JSON object
         url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name':scraper.short_name})

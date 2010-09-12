@@ -169,7 +169,7 @@ dl.quick_help li code {font-size:1.1em; }
 #meta_form li.hidden { display:none; }
 
 /* Feedback messages */
-#feedback_messages {position:absolute; bottom:0; background:url(../images/message_back.png); width:100%;
+#feedback_messages {position:absolute; bottom:0; right:0; background:url(../images/message_back.png); width:50%;
     padding:1em 1em 2em 1em;text-align:left; color:#fff; text-shadow: 2px 2px 3px #000; display:none;}
 
 .chathidden {display:none;}

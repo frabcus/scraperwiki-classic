@@ -29,7 +29,9 @@ class ScraperAdmin(CodeAdmin):
 class ViewAdmin(CodeAdmin):
     list_filter = ('status', 'mime_type', 'published',)
 
+
 admin.site.register(Scraper, ScraperAdmin)
 admin.site.register(View, ViewAdmin)
 admin.site.register(ScraperMetadata)
 admin.site.register(UserCodeEditing)
+admin.site.register(ScraperRunEvent)

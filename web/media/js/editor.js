@@ -15,6 +15,7 @@ $(document).ready(function() {
     var scraperlanguage = $('#scraperlanguage').val(); 
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
+    var earliesteditor = ""; 
     var conn; // Orbited connection
     var bConnected = false; 
     var buffer = "";
@@ -384,6 +385,8 @@ $(document).ready(function() {
               endingrun(data.content); 
           } else if (data.message_type == "sources") {
               writeToSources(data.url, data.bytes, data.failedmessage, data.cached, data.cacheid)
+          } else if (data.message_type == "connectionconfirmed") {
+              earliesteditor = data.earliesteditor; writeToChat(cgiescape("earliesteditor: " + data.earliesteditor)); 
           } else if (data.message_type == "chat") {
               writeToChat(cgiescape(data.content))
           } else if (data.message_type == "saved") {
@@ -654,6 +657,7 @@ $(document).ready(function() {
                 commit_message: "cccommit",
                 wiki_type: $('#id_wiki_type').val(),                
                 code : codeeditor.getCode(),
+                earliesteditor : earliesteditor, 
                 action : 'commit'
                 }),
 
