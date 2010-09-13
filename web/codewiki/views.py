@@ -409,6 +409,7 @@ def scraper_table(request):
     dictionary = { }
     dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
     dictionary["loggedinusers"] = set([ usercodeediting.user  for usercodeediting in models.UserCodeEditing.objects.filter(user__isnull=False)])
+    dictionary["loggedinusers"] = set([ usercodeediting.user  for usercodeediting in models.UserCodeEditing.objects.filter(user__isnull=False)])
     dictionary["numloggedoutusers"] = models.UserCodeEditing.objects.filter(user__isnull=True).count()
     dictionary["numdraftscrapersediting"] = models.UserCodeEditing.objects.filter(code__isnull=True).count()
     dictionary["numpublishedscrapersediting"] = models.UserCodeEditing.objects.filter(code__published=True).count()
@@ -416,6 +417,7 @@ def scraper_table(request):
     dictionary["numpublishedscraperstotal"] = dictionary["scrapers"].count()
     dictionary["numunpublishedscraperstotal"] = models.Scraper.objects.filter(published=False).count()
     dictionary["numdeletedscrapers"] = models.Scraper.unfiltered.filter(deleted=True).count()
+    dictionary["user"] = request.user
     return render_to_response('codewiki/scraper_table.html', dictionary, context_instance=RequestContext(request))
     
 

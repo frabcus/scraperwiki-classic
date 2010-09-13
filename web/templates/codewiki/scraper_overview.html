@@ -117,8 +117,9 @@
         <br/>
       </div>
     {% endif %}
+    
     <h3>Delete &amp; reset</h3>
-   {% if user_owns_it %}    
+    {% if user_owns_it %}    
         <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
             <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
             <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
