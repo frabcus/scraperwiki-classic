@@ -864,6 +864,9 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
             startup_scraper = get_object_or_404(models.Code, short_name=tutorial_scraper)
             startupcode = startup_scraper.saved_code()
             language = startup_scraper.language
+        
+        # old startup code method which derived chose a random scaper.  now it's a random choice of one
+        # code to be refactored when a decision over whether to specify the copied code is done using a ?= or a /x/ url style
         else:
             if request.GET.get('template', False):
                 startup_scrapers = models.Code.objects.filter(published=True, isstartup=True, language=language, short_name=request.GET.get('template', False))

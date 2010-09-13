@@ -17,11 +17,11 @@ function newCodeObject(wiki_type){
     oOverlay.show();
     $('body').append(oOverlay);
     $('body').append(oPopup);        
+
+    
     $('#popup').load('/' + wiki_type + 's/new/choose_template/',
         function() {
-            var oCloseLink = $('<a href="#">close</a>');            
-            $('#popup').append(oCloseLink);            
-            oCloseLink.click(function(){
+            $('#popup .popupClose').click(function(){
                 $('#overlay').remove();
                 $('#popup').remove();        
                 return false;

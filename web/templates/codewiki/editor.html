@@ -81,7 +81,7 @@
                 {% endif %}
                 <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
                 {% if scraper.id %}
-                    <input type="checkbox" value="autosavecheck" name="autosavecheck" id="autosavecheck" checked>autosave</input>
+                    <input type="checkbox" value="autosavecheck" name="autosavecheck" id="autosavecheck" {% if user.username %}checked{% endif %}>autosave</input>
                 {% endif %}
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
             

@@ -36,13 +36,20 @@ urlpatterns = patterns('',
     url(r'^scrapers/running_scrapers/$', views.running_scrapers, name='running_scrapers'),
 
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$', views.choose_template, name='choose_template'),    
-    url(r'^(?P<wiki_type>scraper|view)s/new/chosen_template/$', views.chosen_template, name='chosen_template'),        
+    url(r'^(?P<wiki_type>scraper|view)s/new/chosen_template/$', views.chosen_template, name='chosen_template'),      # NB not duplicate
+    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        
 
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/edit/$', views.edit, name="editor_edit"),    
+    
+    # both of these methods lead to pre-populating a new draft scraper with code copied from another scraper 
+    # (the former with a field ?template=name which I far prefer because it doesn't lead to a misleading url.
+    #  use the 'ugly' ?= version; beauty is not always truth)
+    url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$', views.edit, name="editor"),
+    url(r'^editor/template/(?P<tutorial_scraper>[\-\w]+)$',   views.edit, name="tutorial"),
+
     url(r'^handle_session_draft/(?P<action>[\-\w]+)$', views.handle_session_draft, name="handle_session_draft"),
-    #!url(r'^$', views.edit, name="editor"),    # blank name for draft scraper
-    url(r'^editor/tutorial/(?P<tutorial_scraper>[\-\w]+)$',   views.edit, name="tutorial"),
-    #!url(r'^new/(?P<wiki_type>[\w]+)/(?P<language>[\w]+)$',                  views.edit, name="editor"),
+    
     url(r'^editor/draft/delete/$',                            views.delete_draft, name="delete_draft"),
     url(r'^editor/diff/$',                                     views.diff,         name="diff"),   # blank name for draft scraper
     url(r'^editor/diff/(?P<short_name>[\-\w]+)$',              views.diff,         name="diff"),
