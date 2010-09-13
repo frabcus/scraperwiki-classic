@@ -8,11 +8,6 @@
         <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}">History</a>
     </li>
     {% ifequal scraper.wiki_type 'scraper' %}                
-        {% if scraper.has_geo %}
-            <li{% ifequal selected_tab "map" %} class="selected"{% endifequal %}>
-                <a href="{% url scraper_map scraper.short_name %}">Map</a>
-            </li>
-        {% endif %}
         <li{% ifequal selected_tab "code" %} class="selected"{% endifequal %}>
             <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit <small>({{scraper.language}})</small></a>
         </li>

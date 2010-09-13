@@ -23,7 +23,7 @@ class CodeAdmin(admin.ModelAdmin):
         return self.model.unfiltered.get_query_set()
 
 class ScraperAdmin(CodeAdmin):
-    inlines = (UserCodeRoleInlines)
+    inlines = (UserCodeRoleInlines,)
     list_display = ('title', 'short_name', 'last_run', 'status', 'published', 'deleted')
     list_filter = ('status', 'last_run', 'published',)
     
