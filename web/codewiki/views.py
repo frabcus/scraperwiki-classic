@@ -265,6 +265,14 @@ def comments(request, wiki_type, scraper_short_name):
 def scraper_history(request, wiki_type, scraper_short_name):
 
     user = request.user
+    
+    # refresh the whole set of commit alerts when we have this message
+    if scraper_short_name == "updatecommitalertsrev" and user.is_staff:
+        lrepopath = (wiki_type == 'view' and settings.VMODULES_DIR or settings.SMODULES_DIR)
+        mercurialinterface = vc.MercurialInterface(lrepopath)
+        mercurialinterface.updateallcommitalerts()
+        return HttpResponse("Updated commit alerts from mercurial for:" + lrepopath, mimetype="text/plain")
+    
     scraper = get_object_or_404(models.Code.objects, short_name=scraper_short_name)
 
     # Only logged in users should be able to see unpublished scrapers

@@ -144,7 +144,7 @@ class MercurialInterface:
             result["text"][f] = ftx.data()
         return result
         
-            
+	            
     def getcommitlog(self, scraper):
         scraperfile = os.path.join(scraper.short_name, "__init__.py")
         result = [ ]
