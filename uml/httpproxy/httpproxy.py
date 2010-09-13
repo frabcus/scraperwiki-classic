@@ -549,7 +549,7 @@ class HTTPProxyServer \
         (   SocketServer.ThreadingMixIn,
             BaseHTTPServer.HTTPServer
         ) :
-
+    pass
 
 
 class HTTPSProxyServer (HTTPProxyServer) :

@@ -1,0 +1,15 @@
+{% extends "codewiki/scraper_base.html" %}
+{% load humanize %}
+{% load sparkline %}
+
+{% block tab %}
+    <div class="content full">        
+            <h3>Edit details</h3>
+            <form action="." method="post" class="scraper_admin">
+                <ul>
+                {{ form.as_ul }}
+                </ul>
+                <input type="submit" value="Save changes" />
+            </form>
+        </div>
+{% endblock %}

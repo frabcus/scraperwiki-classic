@@ -1,0 +1,93 @@
+{% extends "codewiki/scraper_base.html" %}
+{% load humanize %}
+{% block tab %}
+<table>
+  <tr>
+    <th>Date</th>
+    <th>Action</th>
+    <th>Message</th>
+  </tr>
+  {% for item in history %}
+    <tr>
+      <td>
+        {% ifequal item.message_type|lower "commit" %}
+          <a href="{% url scraper_code  scraper.wiki_type  scraper.short_name %}?rev={{item.event_object.revision}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
+        {% else %}
+          {% if item.event_object %}
+            <a href="{{item.event_object.get_absolute_url}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
+          {% else %}
+            {{ item.datetime|date:"H:i, j F Y" }}
+          {% endif %}
+        {% endifequal %}
+      </td>
+      <td>
+          {% ifequal item.message_type|lower "commit" %}
+            Committed
+          {% endifequal %}
+
+          {% ifequal item.message_type|lower "run_fail" %}
+            Scraper run failed after {{ item.message_value|floatformat }} seconds
+          {% endifequal %}
+
+          {% ifequal item.message_type|lower "run_success" %}
+            Scraper run success after {{ item.message_value|floatformat }} seconds
+          {% endifequal %}
+          
+          {% if item.user %}
+            by 
+            <a href="{% url profiles_profile_detail item.user.username %}">
+              {% load gravatar %} {% show_gravatar item.user 'small' %}&nbsp;
+              {% if item.user.get_profile.name %}{{item.user.get_profile.name}}{% else %}{{item.user.username}}{% endif %}
+            </a>
+          {% endif %}
+        
+        </td>
+        <td>
+          {% ifequal item.message_type|lower "commit" %}
+              <em>{{item.message_value}}</em>  {% if item.historicalgroup %}(group: {{item.historicalgroup}}){% endif %}
+          {% else %}
+              &nbsp;
+          {% endifequal %}
+        </td>
+    </tr>
+  {% endfor %}
+</table>
+
+{% if user.is_staff %}
+<div class="mercurialcommitlog">
+<h3>Commit log extracted directly from repository</h3>
+<table>
+  
+  <tr><th>time</th><th>user(s)</th><th>earliesteditor</th><th>desc</th></tr>
+  {% for item in commitlog %}
+  <tr>
+    <td>
+      <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
+      {% ifnotequal item.revcount 1 %}({{item.revcount}} edits over {{item.durationminutes}} minutes){% endifnotequal %}
+    </td>
+    <td>
+      {% for user in item.users %}
+      <span class="history-user">
+        <a href="{% url profiles_profile_detail item.user.username %}">
+          {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}
+        </a>
+      </span>
+      {% endfor %}
+    </td>
+
+    <td>
+      {{item.earliesteditor}}
+    </td>
+    <td>
+      {{item.description}}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block run_script %}
+{% endblock %}

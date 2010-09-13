@@ -1,0 +1,42 @@
+{% extends "codewiki/scraper_base.html" %}
+{% load humanize %}
+{% load markup %}
+{% block tab %}
+    <iframe class="view" width="100%" height="400px" src="{% url rpcexecute scraper.short_name %}">
+
+    </iframe>
+    <div class="content full">
+        <h2>About this scraper{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" id="aEditAboutScraper" class="edit">[edit description]</a>{% endif %}</h2>
+        <div class="text_wiki">
+            <div id="divAboutScraper">{{ scraper.description|textile }}</div>
+        </div>
+    </div>
+    <div class="content col left">
+        <h3>Contributors</h3>
+        {% include 'codewiki/includes/contributors.html' %}
+        <div id="divScraperTags">
+            <h3>Tags{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" id="aAddTags" class="edit">[add a tag]</a>{% endif %}</h3>
+            <ul>
+                {% for tag in scraper_tags %}
+                    <li><a href="{% url tag tag %}">{{ tag }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% if related_scrapers %}
+        <div class="content col right">
+            <h3>Scrapers used in the making of this view</h3>
+            <ul>
+                {% for related_scraper in related_scrapers %}
+                    <a href="{% url scraper_overview related_scraper.short_name %}">{{related_scraper.title}}</a>
+                {% endfor %}
+            </ul>
+        </div>
+        <br class="clear"/>
+    {% endif %}
+{% endblock %}
+{% block run_script %}
+    {% if user.is_authenticated %}
+        setupScraperEditInPlace('view', '{{scraper.short_name}}');
+    {% endif %}
+{% endblock %}

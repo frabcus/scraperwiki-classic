@@ -21,7 +21,7 @@ FAILED SCRAPERS
 
 {% for alert in all_alerts.scraper.run_fail %}
   - {{ alert.content_object.title }} (Failed after {{ alert.message_value|floatformat }} seconds, {{ alert.datetime|naturalday|title }})
-    http://{{ site.domain }}{% url scraper_history alert.content_object.short_name %}
+    http://{{ site.domain }}{% url scraper_history alert.content_object.wiki_type alert.content_object.short_name %}
 {% endfor %}
 
 {% endif %}
@@ -30,7 +30,7 @@ SUCCESSFUL SCRAPERS
 
 {% for alert in all_alerts.scraper.run_success %}
   - {{ alert.content_object.title }} (run {{ alert.datetime|naturalday|title }}, taking {{ alert.message_value|floatformat }} seconds)
-    http://{{ site.domain }}{% url scraper_history alert.content_object.short_name %}
+    http://{{ site.domain }}{% url scraper_history alert.content_object.wiki_type alert.content_object.short_name %}
 {% endfor %}
 
 {% endif %}

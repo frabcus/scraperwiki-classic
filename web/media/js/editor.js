@@ -1,7 +1,7 @@
 $(document).ready(function() {
-    
+
     //variables
-    var pageIsDirty = false;
+    var pageIsDirty = true;
     var editor_id = 'id_code';
     var codeeditor;
     var codemirroriframe; // the iframe that needs resizing
@@ -15,12 +15,12 @@ $(document).ready(function() {
     var scraperlanguage = $('#scraperlanguage').val(); 
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
+    var earliesteditor = ""; 
     var conn; // Orbited connection
     var bConnected = false; 
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
-    var cookieOptions = { path: '/editor', expires: 90};    
     var popupStatus = 0
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 
@@ -40,9 +40,17 @@ $(document).ready(function() {
     setupTabs();
     setupPopups();
     setupToolbar();
-    setupDetailsForm();
     setupResizeEvents();
-    showIntro();
+
+    function setPageIsDirty(lpageIsDirty) {
+        if (pageIsDirty == lpageIsDirty)
+            return; 
+        pageIsDirty = lpageIsDirty; 
+        if (pageIsDirty && guid)
+            $('#aCloseEditor1').css("font-style", "italic"); 
+        else
+            $('#aCloseEditor1').css("font-style", "normal"); 
+    }
 
     //setup code editor
     function setupCodeEditor(){
@@ -72,9 +80,7 @@ $(document).ready(function() {
             autoMatchParens: true,
             width: '100%',
             parserConfig: {'pythonVersion': 2, 'strictErrors': true},
-            onChange: function (){
-                pageIsDirty = true; // note that code has changed
-            },
+            onChange: function ()  { setPageIsDirty(true); },
 
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
@@ -82,12 +88,11 @@ $(document).ready(function() {
                     codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
                     setupKeygrabs();
                     resizeControls('up');
-                    pageIsDirty = false; // page not dirty at this point
+                    setPageIsDirty(false); // page not dirty at this point
                     
                 } 
           });        
     }
-
 
     
     function setupOrbited() {
@@ -138,7 +143,7 @@ $(document).ready(function() {
             showPopup('popup_tutorials'); 
         });        
         $('form#editor').submit(function() { 
-            saveScraper(false); 
+            saveScraper(); 
             return false; 
         })
 
@@ -217,10 +222,6 @@ $(document).ready(function() {
         $('#popups div.popup_item').each(function(i) {
             if (this.id == sId) {
                 
-                if (sId == 'meta_form') {
-                    $('#id_meta_title').val($('#id_title').val())
-                }
-                
                 popupStatus = 1;
                 //show
                 $(this).css({
@@ -251,41 +252,6 @@ $(document).ready(function() {
        setTimeout('$("#feedback_messages").slideToggle();', 2500);
     }
 
-    //Setup save / details forms
-    function setupDetailsForm(){
-        
-        //sync title text boxes
-        $('#id_meta_title').keyup(
-                function(){
-                    $('#id_title').val($('#meta_form #id_meta_title').val());
-                }
-            );
-        
-        // Meta form
-        $('#meta_fields_mini').appendTo($('#meta_form'))
-        $('#meta_fields_mini').attr('id', 'meta_fields')
-        $('#id_title').before('<a href="" id="meta_form_edit"><img src="/media/images/icons/information.png" alt="Edit scraper information" title="Edit scraper information"/></a>')
-        $('#meta_form_edit').click(function() {            
-
-            // Only add the save button if it's not there already
-            /*
-            if (!$('#meta_form .save').length) {
-                $('.save').clone().appendTo($('#meta_form'));
-            };
-            */
-            showPopup('meta_form');
-            return false;
-        });
-
-    }
-
-    function showIntro(){
-        if($.cookie('scraperwiki.editor.intro') == null){
-            showPopup('popup_intro');
-        }
-        $.cookie('scraperwiki.editor.intro', 1, cookieOptions);                    
-
-    }
 
     conn.onopen = function(code){
         sChatTabMessage = 'Chat'; 
@@ -419,6 +385,8 @@ $(document).ready(function() {
               endingrun(data.content); 
           } else if (data.message_type == "sources") {
               writeToSources(data.url, data.bytes, data.failedmessage, data.cached, data.cacheid)
+          } else if (data.message_type == "connectionconfirmed") {
+              earliesteditor = data.earliesteditor; writeToChat(cgiescape("earliesteditor: " + data.earliesteditor)); 
           } else if (data.message_type == "chat") {
               writeToChat(cgiescape(data.content))
           } else if (data.message_type == "saved") {
@@ -485,6 +453,10 @@ $(document).ready(function() {
 
         // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
         // means we can have simultaneous running for staff overview
+
+        // new auto-save every time 
+        if (guid && $('#autosavecheck').attr('checked') && pageIsDirty)
+            saveScraper(); 
     }
 
     function startingrun(content) {
@@ -579,7 +551,7 @@ $(document).ready(function() {
 
         codeeditor.setCode(newcode); // see setupTutorial() for way to leave control-Z in place
         codeeditor.focus(); 
-        pageIsDirty = false; 
+        setPageIsDirty(false); 
 
         // make the selection
         if (!((selrange[2] == 0) && (selrange[3] == 0))){
@@ -618,55 +590,8 @@ $(document).ready(function() {
 
         //commit popup button
         $('#btnCommitPopup').live('click', function (){
-            var bValid = true;
-            if (popupStatus == 0) {
-                showPopup('meta_form');
-                bValid = false;     
-                if (shortNameIsSet() == false){
-                    $('#meta_form #id_meta_title').val('');
-                }
-            }
-        });
-        
-        $('#btnCommitPublish').live('click', function (){
-
-            var bValid = true;
-            //validate
-            if ($('#meta_form #id_meta_title').val() == ""){
-                   $('#meta_form #id_meta_title').parent().addClass('error');
-                   bValid = false
-            }else{
-                   $('#meta_form #id_meta_title').parent().removeClass('error');                
-            }
-            if ($('#meta_form #id_commit_message').val() == ""){
-                $('#meta_form #id_commit_message').parent().addClass('error');
-                bValid = false;
-            }else{
-                $('#meta_form #id_commit_message').parent().removeClass('error');                
-            }
-            if ($('#meta_form #id_description').val() == ""){
-                   $('#meta_form #id_description').parent().addClass('error');
-                   bValid = false
-            }else{
-                   $('#meta_form #id_description').parent().removeClass('error');                
-            }
-
-            //if valid, save it
-            if (bValid == true){
-                saveScraper(true);                
-            }else{
-                $('#meta_form .popup_error').show();
-                $('#meta_form .popup_error').html("Please make sure you have entered a title, a description and a commit message");
-            }
-            
-            //return false
+            saveScraper();  
             return false;
-        });
-        
-        //save button
-        $('.save').live('click', function(){
-             saveScraper(false);
-             return false;
         });
         
         // run button
@@ -689,7 +614,7 @@ $(document).ready(function() {
         );
 
         //close editor link
-        $('#aCloseEditor').click(
+        $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(
             function (){
                 var bReturn = true;
                 if (pageIsDirty){
@@ -702,16 +627,16 @@ $(document).ready(function() {
         );
     }
 
-    
+
     //Save
-    function saveScraper(bCommit){
+    function saveScraper(){
         var bSuccess = false;
 
-        //if saving then check if the title is set
-        if(shortNameIsSet() == false && bCommit != true){
+        //if saving then check if the title is set (must be if guid is set)
+        if(shortNameIsSet() == false){
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
 
-            if(sResult != false && sResult != '' && sResult != 'Untitled Scraper'){
+            if(sResult != false && sResult != '' && sResult != 'Untitled'){
                 $('#id_title').val(sResult);
                 aPageTitle = document.title.split('|')
                 document.title = sResult + ' | ' + aPageTitle[1]
@@ -721,27 +646,21 @@ $(document).ready(function() {
             bSuccess = true;
         }
         
-        form_action = 'save';
-        if (bCommit == true) {
-            form_action = 'commit';
-        }
-
         if(bSuccess == true){          
             $.ajax({
               type : 'POST',
               contentType : "application/json",
               URL : window.location.pathname,
+
               data: ({
                 title : $('#id_title').val(),
-                commaseparatedtags : $('#id_commaseparatedtags').val(),
-                license : $('#id_license').val(),
-                description : $('#id_description').val(),
-                run_interval : $('#id_run_interval').val(),
-                commit_message: $('#id_commit_message').val(),
-                published: ($('#id_published:checked').length == 1) ? 'on': '',
+                commit_message: "cccommit",
+                wiki_type: $('#id_wiki_type').val(),                
                 code : codeeditor.getCode(),
-                action : form_action
+                earliesteditor : earliesteditor, 
+                action : 'commit'
                 }),
+
               dataType: "html",
               success: function(response){
                     res = $.evalJSON(response);
@@ -750,39 +669,35 @@ $(document).ready(function() {
                     if (res.status == 'Failed'){
                         $('#meta_form .popup_error').show();
                         $('#meta_form .popup_error').html("Failed to save, please make sure you have entered a title, a description and a commit message");
+
                     //success    
                     }else{
-                        if (bCommit != true) { 
-                            pageTracker._trackPageview('/scraper_save_draft_goal');   
-                        } else {
-                            pageTracker._trackPageview('/scraper_committed_goal');  		
-                        }  
+                        //pageTracker._trackPageview('/scraper_committed_goal');  		
 
+                        // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
                         if (res.draft == 'True') {
                             $('#divDraftSavedWarning').show();
                         }
-                    
-                        // redirect somewhere
+
+                        // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
                         if (res.url && window.location.pathname != res.url) {
                             window.location = res.url;
                         };
 
+                        // orginary save case.  show the slider up that it has been saved
                         if (res.draft != 'True') {
-                            if (bCommit != true) {     
-	                                           
-                                showFeedbackMessage("Your scraper has been saved. Click <em>Commit</em> to publish it.");
-                            }
-                    
-                            if (bConnected)
+                            showFeedbackMessage("Your code has been saved.");
+                            if (bConnected){
                                 send({"command":'saved'}); 
+                            }
                         }
-                        pageIsDirty = false; // page no longer dirty
+                        setPageIsDirty(false); 
                     }
                 },
 
             error: function(response){
                 alert('Sorry, something went wrong, please try copying your code and then reloading the page');
-                //document.write(response.responseText); // Uncomment to get the actual error page
+                document.write(response.responseText); // Uncomment to get the actual error page
               }
             });
         }
@@ -842,7 +757,7 @@ $(document).ready(function() {
 
     function shortNameIsSet(){
         var sTitle = jQuery.trim($('#id_title').val());
-        return sTitle != 'Untitled Scraper' && sTitle != '' && sTitle != undefined && sTitle != false;
+        return sTitle != 'Untitled' && sTitle != '' && sTitle != undefined && sTitle != false;
     }
 
     //Hide popup

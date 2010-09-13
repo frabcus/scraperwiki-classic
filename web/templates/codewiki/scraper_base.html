@@ -1,0 +1,51 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}{{ scraper.title }}{% endblock %}
+{% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/code_object_comments/{{ scraper.short_name }}" />{% endblock %}
+
+{% block tabs %}
+    {% include 'codewiki/includes/tabs.html' %}
+{% endblock %}
+{% block content %}
+    <div class="page_title">
+	    <h1 id="hCodeTitle">{{ scraper.title }}</h1>	    
+	    <ul class="code_about">
+	       <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
+	       <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
+	        {% if scraper.has_geo %}
+               <li>
+                   <a href="{% url scraper_map scraper.short_name %}"><img src="{{ MEDIA_URL }}/images/icons/map.png"/></a>
+                  </li>
+           {% endif %}
+           {% if scraper.has_temporal %}                        
+               <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
+           {% endif %}
+            <li><a href="{% url scraper_admin scraper.short_name %}" id="aEditTitle" class="edit">[edit title]</a></li>
+	    </ul>
+        {% ifequal scraper.wiki_type 'scraper'%}
+            <ul class="title_links">
+                <li class="csv"><a href="{% url export_csv scraper.short_name %}">Download this dataset (CSV)</a></li>
+                <li class="api"><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>
+            </ul>
+        {% endifequal %}
+        {% ifequal scraper.wiki_type 'view'%}
+            <ul class="title_links">
+                <li class="full_screen"><a href="{% url view_fullscreen scraper.short_name %}">View as full page</a></li>
+                <li class="embed"><a href="#" title="click to hide this bar">Add to your site</a></li>                
+            </ul>
+        {% endifequal %}
+    </div>
+    <div class="content full">
+        <div class="page_tab_body">
+                    
+            {% block tab %}
+            {% endblock %}
+        </div>
+        <p class="report">
+            <strong>Important</strong> If you suspect this scraper breaks our <a href="/terms_and_conditions/">Terms &amp; Conditions</a>, please <a href="/contact/">report it</a>
+        </p>
+    </div>
+{% endblock %}
+{% block run_script %}
+    setupCodewikiEditInPlace('{{scraper.wiki_type}}','{{scraper.short_name}}');
+{% endblock %}

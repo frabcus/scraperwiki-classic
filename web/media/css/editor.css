@@ -6,28 +6,23 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
     border-bottom:solid 1px #c38938;color:#000;}
 
 /* Header */
-.editor_header {min-height:1.5em; background:#000 url(../images/black_bar.png) repeat-x 50% 50%; position:relative;}
-.editor_header a {color:#fff;}
-.editor_header div.title input {font-weight:bold; font-size:1em; padding:0.4em 0 0 0; color:#fff;
-        border:solid 2px transparent; background:none; width:30%;margin-left:45px;}
+.editor_header {background:#fafafa; position:relative;border-bottom:solid #9f9f9f 1px;}
+.editor_header div.title input {font-weight:bold; font-size:1em; padding:0 0 0 0; color:#000;
+        border:solid 2px transparent; background:none; width:30%;margin-left:2px;position:relative;top:-5px;}
+.editor_header div.title img {margin:5px 0 0 10px;}        
 .editor_header div.title input:focus {background:#fff; border:inset 2px;outline:none; color:#000;}
 .editor_header div.title input:hover {background:#ffffd3;color:#000;}
-.editor_header div.title #meta_form_edit {position:absolute;top:25%; left:18px;}
-
-.editor_header ul.help {font-size:0.75em; position:absolute; right:1em; top:0.75em;}
-.editor_header ul.help, .editor_header ul.help li {padding:0; margin:0 0 0 0.8em;}
-.editor_header ul.help li {list-style-type:none; display:inline;}
-.language {background:#d8d8d8; border:solid 1px #c8c8c8; padding:0.18em 0.4em!important;
-    border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;}
-.helplink {background:#f08a38; border:solid 1px #bf6312; padding:0.18em 0.4em!important;
-    border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;}
-.helplink a {text-decoration:none;}    
+.editor_header div.page_tabs {position:absolute; bottom:0px; right:0;}
+.editor_header div.page_tabs li {border-color:#9f9f9f;}
+.editor_header div.page_tabs ul {border-bottom-color:#9f9f9f;}
+.editor_header #border_hide {background:#fafafa;position:absolute; display:block; width:2.85em; height:3px;
+    bottom:-2px; left:0;}
 
 /* Code */
-.editor_code {padding:0;border:none;position:relative;height:500px;width:100%;}
+.editor_code {padding:0;border:none;position:relative;height:500px;width:100%; }
 .CodeMirror-line-numbers {width: 2.2em;color: #888;background:#fafafa;text-align: right;
         padding: 0.4em 1.1em 0 0.2em;margin: 0;font-family: monaco, monospace;font-size: 10pt;line-height: 1.1em;
-        border-right:solid 1px #9f9f9f;}
+        border-right:solid 1px #9f9f9f;position:relative;}
 .CodeMirror-wrapping {height:100%!important;width:auto!important;}
 
 
@@ -50,6 +45,16 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 .editor_controls #diff {background-image:url(../images/icons/diff.png)}
 .editor_controls .commit, #meta_form .button.commit {background-image:url(../images/icons/database_save.png); border-color:#2680c6;
     background-color:#6fb1e6; color:#fff;}
+
+.editor_controls ul.code_about {display:inline;font-size:0.9em;}
+.editor_controls ul.code_about, .editor_controls ul.help li {padding:0; margin:0 0 0 0.2em;}
+.editor_controls ul.code_about li {list-style-type:none; display:inline;}
+.language code {color:#808080; background:#ddd; padding:0.05em 0.5em; font-size:1em;
+}
+.helplink {background:#f08a38; border:solid 1px #bf6312; padding:0.2em 0.4em!important;
+    border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;}
+.helplink a {text-decoration:none;}
+
 #meta_form {overflow: auto;}
 #meta_form p {margin:2.5em 0 2em 0;padding:0.5em 0 0.5em 0; border-top:solid 1px #808080;border-bottom:solid 1px #808080;}
     
@@ -108,15 +113,13 @@ span.hiddenfields { margin-left:10px; }
 .editor_output td {border-bottom:dotted 1px #ccc; padding:0.3em 0.5em; line-height:1em;}
 
 /* Overlays and help */
-#overlay {background:black;z-index:100;position:absolute; top:0; left:0; width:100%; height:100%;
-    opacity:0.6;filter: alpha(opacity=60); display:none;}
 
 /* note that height of popup is set from editor.js showPopup() */
 #popups .popup_item {border: 10px solid #333;height:300px;background:#fff;
     z-index:110; position:absolute; top:0; left:0; width:86%; margin:4%; padding:0 2%;
     text-align:left; display:none; }
 
-.popup_item .popup_header {margin:0% 0 0 0;height:4%; position:relative;}
+.popup_item .popup_header {margin:0 0 0 0;height:4%; position:relative;}
 .popup_item .output {overflow-y:auto; height:88%;}
 .popup_item .popup_error {background:#a22424; padding:0.1em 0; margin:0; text-align:center; position:relative; top:-1em;color:#fff;}
 
@@ -126,7 +129,9 @@ span.hiddenfields { margin-left:10px; }
     white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;}
 #popup_exception a.popupClose, #popup_text a.popupClose {color:#fff;}
 
-.popupClose {font-size:1em; line-height:20px; right:0; top:0; position:absolute; color:#000; background-color:#fcc; font-weight:700; display:block; cursor:pointer;}
+#popups .popup_item#popup_tutorials {padding-right:0;}
+
+.popupClose {right:0; top:0; position:absolute; color:#000; background-color:#fcc; display:block; cursor:pointer;}
 .popupReady {font-weight:bold;}
 
 .popup_controls {padding-top:1em; margin-top:1em;border-top:solid 1px #808080;position:relative;}
@@ -142,17 +147,6 @@ dl.quick_help ul { padding:0 0 0 1em; margin: 0; }
 dl.quick_help li { padding:0 0 0 0; margin: 0; }
 dl.quick_help li code {font-size:1.1em; }
 
-/* tutorial page.  needs specify exactly the popup_item case in order to overload the padding */
-#popups .popup_item#popup_tutorials { padding:0 0 0 0; overflow:auto;}
-#popup_tutorials .popupClose {font-size:1em; line-height:20px; float:right; color:#000; background-color:#fcc; font-weight:700; display:block; cursor:pointer;}
-#popup_tutorials h3 { text-align: center; padding:0.1em;}
-#popup_tutorials p.descr { margin:0 0.2em; text-align:center; font-size:0.8em; font-style:italic; }
-#popup_tutorials td.bicolumn { width:50%; vertical-align:top; }
-#popup_tutorials h4 { padding: 0.2em 0 0 0.1em;}
-#popup_tutorials td.bicolumn dl { margin:0.1em 1.2em;}
-#popup_tutorials td.bicolumn table {width:auto; margin:0 1.2em; }
-#popup_tutorials td.bicolumn dt.code { font-weight:bold; font-family: monaco, monospace; font-size:0.8em;}
-#popup_tutorials td.bicolumn dd { padding:0.0em 0 0.2em 0.8em; margin:0;}
 
 /*
 #meta_fields_mini .field { display:inline; }
@@ -175,7 +169,7 @@ dl.quick_help li code {font-size:1.1em; }
 #meta_form li.hidden { display:none; }
 
 /* Feedback messages */
-#feedback_messages {position:absolute; bottom:0; background:url(../images/message_back.png); width:100%;
+#feedback_messages {position:absolute; bottom:0; right:0; background:url(../images/message_back.png); width:50%;
     padding:1em 1em 2em 1em;text-align:left; color:#fff; text-shadow: 2px 2px 3px #000; display:none;}
 
 .chathidden {display:none;}

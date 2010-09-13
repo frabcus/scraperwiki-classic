@@ -1,0 +1,22 @@
+{% extends "function_base.html" %}
+
+{% block title %}scraperwiki.geo.postcodeToLatLng | API{% endblock %}
+
+{% block heading %}scraperwiki.geo.postcodeToLatLng{% endblock %}
+{% block subheading %}Returns a latitude and {% endblock %}
+{% block arguments %}
+    {% comment %}
+    <dt><code>key</code> (required)</dt>
+    <dd>A valid API key.{% if user.is_authenticated and keys %} <input type="text" name="key" id="key" />{% endif %}</dd>
+    {% endcomment %}    
+    <dt><code>format</code> (required)</dt>
+    <dd>The format you would like the response in. <input type="text" name="format" id="format" size="4"/></dd>
+    <dt><code>postcode</code> (required)</dt>
+    <dd>A postcode. <input type="text" name="postcode" id="postcode"/></dd>
+    <dt><code>country_code</code> (required)</dt>
+    <dd>A country code (currently only supports 'GB') <input type="text" name="country_code" id="country_code"/></dd>        
+    <dt><code>callback</code> (optional)</dt>
+    <dd><a href="http://en.wikipedia.org/wiki/JSONP#JSONP">JSONP</a> callback function. Only useful when requesting JSON data. <input type="text" name="callback" id="callback"/></dd>
+{% endblock %}
+
+{% block example_url %}{% url api:explorer_example method='geo.postcodetolatlng_1.0' %}{% endblock %}

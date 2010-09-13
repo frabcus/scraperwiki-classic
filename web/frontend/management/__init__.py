@@ -19,40 +19,40 @@ from django.dispatch import dispatcher
 from django.contrib.auth.models import User
 from south.signals import post_migrate
 from frontend import models as frontend
-from scraper import models as scraper
 from market import models as market
 
 def create_alert_types(*args, **kwargs):
     if kwargs['app'] == 'frontend':        
         existing_pks = []
+        alert_types = []
         # Scraper alerts:
-        content_pk = scraper.Scraper().content_type()
-        alert_types = [
-            {
-                "content_pk" : content_pk,
-                "name": "run_fail", 
-                "applies_to": "contribute", 
-                "label": "When a scraper I contribute to fails",
-            },
-            {
-                "content_pk" : content_pk,
-                "name": "commit", 
-                "applies_to": "contribute", 
-                "label": "When the code in a scraper I contribute to is changed"
-            },
-            {
-                "content_pk" : content_pk,
-                "name": "run_success", 
-                "applies_to": "contribute", 
-                "label": "When a scraper I contribute to is run"
-            },
-            {
-                "content_pk" : content_pk,
-                "name": "scraper_comment",
-                "applies_to": "contribute",
-                "label": "New comments on scrapers I contribute to"
-            },
-        ]
+        #content_pk = scraper.Scraper().content_type()
+        #alert_types += [
+        #    {
+        #        "content_pk" : content_pk,
+        #        "name": "run_fail", 
+        #        "applies_to": "contribute", 
+        #        "label": "When a scraper I contribute to fails",
+        #    },
+        #    {
+        #        "content_pk" : content_pk,
+        #        "name": "commit", 
+        #        "applies_to": "contribute", 
+        #        "label": "When the code in a scraper I contribute to is changed"
+        #    },
+        #    {
+        #        "content_pk" : content_pk,
+        #        "name": "run_success", 
+        #        "applies_to": "contribute", 
+        #        "label": "When a scraper I contribute to is run"
+        #    },
+        #    {
+        #        "content_pk" : content_pk,
+        #        "name": "scraper_comment",
+        #        "applies_to": "contribute",
+        #        "label": "New comments on scrapers I contribute to"
+        #    },
+        #]
 
         # Market alerts:
         content_pk = market.Solicitation().content_type()

@@ -23,16 +23,16 @@ geo_postcode_to_latlng_handler = Resource(geo.PostcodeToLatLng)
 urlpatterns = patterns('',
 
     # Standard Views
-    url(r'^keys$', views.keys, name='keys'),
+    #url(r'^keys$', views.keys, name='keys'),
 
     #explorer
     url(r'^explorer_call$', views.explorer_user_run, name='explorer_call'),
     url(r'^explorer_example(?P<method>[\w_\-\.\_]+)$', views.explorer_example, name='explorer_example'),
 
     # Documentation
-    url(r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'index.html'}),
-    url(r'^1\.0$', 'django.views.generic.simple.direct_to_template', {'template': '1.0.html'}, name='index'),
-    url(r'^1\.0/libraries$', 'django.views.generic.simple.direct_to_template', {'template': 'libraries.html'}, name='libraries'),
+    url(r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'api/index.html'}),
+    url(r'^1\.0$', 'django.views.generic.simple.direct_to_template', {'template': 'api/1.0.html'}, name='index'),
+    url(r'^1\.0/libraries$', 'django.views.generic.simple.direct_to_template', {'template': 'api/libraries.html'}, name='libraries'),
     url(r'^1\.0/explore/scraperwiki.scraper.search$', views.explore_scraper_search_1_0, name='scraper_search'),
     url(r'^1\.0/explore/scraperwiki.scraper.getinfo$', views.explore_scraper_getinfo_1_0, name='scraper_getinfo'),    
     url(r'^1\.0/explore/scraperwiki.datastore.getkeys$', views.explore_scraper_getkeys_1_0, name='datastore_getkeys'),    

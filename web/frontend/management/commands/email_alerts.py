@@ -12,7 +12,7 @@ import settings
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.comments.models import Comment
-# from scraper.models import Scraper
+# from codewiki.models import Scraper
 from frontend.models import UserProfile, Alerts
 from market.models import Solicitation
 import datetime
@@ -98,7 +98,7 @@ class Command(BaseCommand):
         alert_objects = {
             'models':
                 self.user.user.scraper_set.filter(
-                    userscraperrole__role__in=roles, deleted=False),
+                    usercoderole__role__in=roles, deleted=False),
             'alert_type': alert_wanted.name}
         
         if alert_wanted.name == "scraper_comment":

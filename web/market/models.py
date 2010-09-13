@@ -6,13 +6,12 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 
-from scraper.models import Scraper
+from codewiki.models import Scraper
 from payment.models import Invoice
 from payment.models import payment_done
 
 import market
 import tagging
-
 
 def solicitation_paid(sender, invoice, **kwargs):
 
@@ -38,7 +37,6 @@ class SolicitationStatus(models.Model):
 
     def __unicode__(self):
         return self.display_name
-
 
 class Solicitation(models.Model):
 
@@ -150,7 +148,7 @@ class Solicitation(models.Model):
             send_mail(title, template.render(context), settings.EMAIL_FROM, [self.user_created.email], fail_silently=False)
         else:
             #someone is messing about if we are here, throw an exception
-            raise Exception("Unable to find a published scraper (for this user) to add to this solicitation")
+            raise Exception("Unable to find a scraper (for this user) to add to this solicitation")
    
     def __unicode__(self):
         return "%s (%s)" % (self.title, self.price)

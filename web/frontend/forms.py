@@ -9,7 +9,9 @@ from django.contrib.auth.forms import AuthenticationForm
 
 
 #from django.forms.extras.widgets import Textarea
-
+class SearchForm(forms.Form):
+    q = forms.CharField(label='Find datasets', max_length=50)
+    
 class UserProfileForm (forms.ModelForm):
     alert_frequency = forms.ChoiceField(required=False, label="How often do you want to be emailed?", choices = (
                                 (-1, 'Never'), 

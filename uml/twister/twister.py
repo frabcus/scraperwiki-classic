@@ -25,6 +25,7 @@ from optparse import OptionParser
 import ConfigParser
 import urllib2
 import urllib      #  do some asynchronous calls
+import datetime
 
 varDir = './var'
 
@@ -45,6 +46,7 @@ from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import succeed
+
 agent = Agent(reactor)
 
 # the comma is added into format_message and LineOnlyReceiver because lines may be batched and 
@@ -120,9 +122,9 @@ class RunnerProtocol(protocol.Protocol):
         self.username = ""
         self.userrealname = ""
         self.chatname = ""
-        self.clientnumber = -1  # for whole operation of twisted
-        self.scrapereditornumber = -1  # out of all people editing a particular scraper
-        
+        self.clientnumber = -1         # number for whole operation of twisted
+        self.scrapereditornumber = -1  # number out of all people editing a particular scraper
+        self.earliesteditor = datetime.datetime.now()  # used to group together everything in one editing session
 
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
@@ -202,6 +204,7 @@ class RunnerProtocol(protocol.Protocol):
                 else:
                     raise ValueError('++?????++ Out of Cheese Error. Redo From Start: `code` to run not specified')
                     
+            # data uploaded when a new connection is made from the editor
             elif parsed_data['command'] == 'connection_open':
                 self.guid = parsed_data['guid']
                 self.username = parsed_data['username']
@@ -210,20 +213,30 @@ class RunnerProtocol(protocol.Protocol):
                 self.scraperlanguage = parsed_data.get('language', '')
                 self.isstaff = (parsed_data.get('isstaff') == "yes")
                 
-                if self.userrealname:
-                    self.chatname = self.userrealname
+                if self.username:
+                    self.chatname = self.userrealname or self.username
                 else:
                     self.chatname = "Anonymous%d" % self.factory.anonymouscount
                     self.factory.anonymouscount += 1
                     
+                # data sent back
                 if self.guid:
                     editorclients = self.factory.updatescrapereditornumber(self.guid)
-                    self.factory.sendchatmessage(self.guid, "%s enters" % self.chatname, self)
+                    
+                    if editorclients:
+                        self.earliesteditor = editorclients[0].earliesteditor
+                        connectionconfirmedmessage = json.dumps({'message_type' : "connectionconfirmed", 'earliesteditor' : self.earliesteditor.isoformat()})
+                        self.write(connectionconfirmedmessage)
+                    
+                    # send update to self
                     if self in editorclients:
                         editorclients.remove(self)
                         if editorclients:
                             message = "Other editors: %s" % ", ".join([lclient.chatname  for lclient in editorclients ])
                             self.write(format_message(message, message_type='chat'))  # write it back to itself
+                
+                    # send update to everyone else
+                    self.factory.sendchatmessage(self.guid, "%s enters" % self.chatname, self)
                 
                 self.factory.notifytwisterstatus()
         
@@ -343,7 +356,6 @@ class RunnerFactory(protocol.ServerFactory):
         self.m_conf.readfp (open(config))
         self.twisterstatusurl = self.m_conf.get('twister', 'statusurl')
         
-        self.notifytwisterstatus()
 
     # every 10 seconds sends out a quiet poll
     def announce(self):
@@ -356,8 +368,7 @@ class RunnerFactory(protocol.ServerFactory):
             client.write(format_message("%d c %d clients, running:%s" % (self.announcecount, len(self.clients), "".join(res)), message_type='chat'))
 
 
-# could get rid of this and replace everywhere with writeall
-
+    # could get rid of this and replace everywhere with writeall
     def sendchatmessage(self, guid, message, nomessageclient):
         for client in self.clients:
             if client.guid == guid and client != nomessageclient and client.isstaff:
@@ -388,19 +399,22 @@ class RunnerFactory(protocol.ServerFactory):
         for client in self.clients:
             clientdata = { "clientnumber":client.clientnumber, "guid":client.guid, 
                            "username":client.username, "running":bool(client.running), 
-                           "scrapereditornumber":client.scrapereditornumber }
+                           "scrapereditornumber":client.scrapereditornumber, 
+                           "earliesteditor":client.earliesteditor.isoformat() }
             clientlist.append(clientdata)
             
         data = { "value": json.dumps({'message_type' : "currentstatus", 'clientlist':clientlist}) }
         
         d = agent.request('POST', self.twisterstatusurl, Headers({'User-Agent': ['Scraperwiki Twisted']}), StringProducer(urllib.urlencode(data)))
-
+        d.addErrback(lambda e:  sys.stdout.write("notifytwisterstatus failed to get through\n"))  
         
         
 
 def execute (port) :
     
-    reactor.listenTCP(port, RunnerFactory())
+    runnerfactory = RunnerFactory()
+    reactor.listenTCP(port, runnerfactory)
+    reactor.callLater(1, runnerfactory.notifytwisterstatus)
     reactor.run()   # this function never returns
 
 
