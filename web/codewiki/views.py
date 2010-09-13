@@ -294,6 +294,8 @@ def scraper_history(request, wiki_type, scraper_short_name):
     
     
     # extract the commit log directly from the mercurial repository without referring to the 'Alerts'
+    # keeping this type of code up-to-date means we still have the chance to ditch the entire of 
+    # the 'Alert' machinery when it becomes too costly to complete
     
     commitlog = [ ]
     mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())

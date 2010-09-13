@@ -102,7 +102,16 @@ class MercurialInterface:
             # yes, the allocation of information (eg the date) between the Alert and the CodeCommitEvent looks in fact arbitrary.  
             codecommitevent = CodeCommitEvent(revision=rev)
             codecommitevent.save()
-            alert = Alerts(content_object=scraper, message_type='commit', message_value=commitentry["description"], 
+            
+            # extract earliesteditor from commit message
+            description = commitentry["description"]
+            earliesteditor = ''
+            mearliesteditor = re.match("(.+?)\|\|\|", commitentry["description"])
+            if mearliesteditor:
+                earliesteditor = mearliesteditor.group(1)
+                description = description[mearliesteditor.end(0):]
+            
+            alert = Alerts(content_object=scraper, message_type='commit', message_value=description, historicalgroup=earliesteditor, 
                            user=user, event_object=codecommitevent, datetime=commitentry["date"])
             alert.save()
         return warnings

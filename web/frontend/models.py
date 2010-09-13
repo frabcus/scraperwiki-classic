@@ -51,20 +51,24 @@ class Alerts(models.Model):
         * 'commit'
         
     """
-    
+    # the object about which the alert is about (eg codewiki.models.Code or User)
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveSmallIntegerField(blank=True, null=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
+    
     message_type = models.CharField(blank=False, max_length=100)
     message_value = models.CharField(blank=True, null=True, max_length=5000)
     meta = models.CharField(blank=True, max_length=1000)
     message_level = models.IntegerField(blank=True, null=True, default=0)
     datetime = models.DateTimeField(blank=False, default=datetime.datetime.now)
     user = models.ForeignKey(User, blank=True, null=True)
+    historicalgroup = models.CharField(blank=True, max_length=100)  # currently this is set from earliesteditor
 
+    # links to the object with further event information (either codewiki.models.Code.CodeCommitEvent or codewiki.models.Scraper.ScraperRunEvent)
     event_type = models.ForeignKey(ContentType, null=True, related_name='event_alerts_set')
     event_id = models.PositiveSmallIntegerField(blank=True, null=True)
     event_object = generic.GenericForeignKey('event_type', 'event_id')
+
 
     objects = models.Manager()
     

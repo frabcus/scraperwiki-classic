@@ -44,7 +44,7 @@
         </td>
         <td>
           {% ifequal item.message_type|lower "commit" %}
-              <em>{{item.message_value}}</em>
+              <em>{{item.message_value}}</em>  {% if item.historicalgroup %}(group: {{item.historicalgroup}}){% endif %}
           {% else %}
               &nbsp;
           {% endifequal %}
