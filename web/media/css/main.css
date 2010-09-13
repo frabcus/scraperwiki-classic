@@ -10,6 +10,7 @@ body {text-align:center; padding:0; margin:0; font-family:Helvetica, arial, sans
 div.banner {background:#ffffd7; font-size:0.8em; padding:0.6em 0; border-bottom:solid 1px #9f9f9f;
     text-align:left; padding:0.8em 1.5%; line-height:1em;}
 div.banner p {margin-right:10em;margin:0; padding:0;}
+div.banner p span.warning { background:#800000; color:#ffb0b0}
 div.banner a {font-weight:bold;}
 ul.user_menu {float:right; margin:0; padding:0;}
 ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
