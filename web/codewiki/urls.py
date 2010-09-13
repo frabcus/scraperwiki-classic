@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-from codewiki import views
+from codewiki import views, viewsrpc
 
 urlpatterns = patterns('',
     
@@ -8,22 +8,22 @@ urlpatterns = patterns('',
     url(r'^table/$',                                      views.scraper_table,          name='scraper_table'),
 
     # special views functionality
-    url(r'^views/(?P<scraper_short_name>[\w_\-]+)/run/$', views.rpcexecute,             name='rpcexecute'),
+    url(r'^views/(?P<scraper_short_name>[\w_\-]+)/run/$', viewsrpc.rpcexecute,          name='rpcexecute'),
     url(r'^views/(?P<scraper_short_name>[\w_\-]+)/run/(?P<revision>\d+)/$', 
-                                                          views.rpcexecute,             name='rpcexecute'),    
+                                                          viewsrpc.rpcexecute,          name='rpcexecute'),    
     url(r'^views/(?P<scraper_short_name>[\w_\-]+)/html/$',views.htmlview,               name='htmlview'),
     url(r'^views/(?P<short_name>[\w_\-]+)/full/$',        views.view_fullscreen,        name='view_fullscreen'),   
     url(r'^views/(?P<short_name>[\w_\-]+)/admin/$',       views.view_admin,             name='view_admin'),    
     
     url(r'^scrapers/delete-data/(?P<scraper_short_name>[\w_\-]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
-    url(r'^scrapers/download/(?P<scraper_short_name>[\w_\-]+)/$', views.download, name='scraper_download'),
-    url(r'^scrapers/export/(?P<scraper_short_name>[\w_\-]+)/$', views.export_csv, name='export_csv'),
+    url(r'^scrapers/download/(?P<scraper_short_name>[\w_\-]+)/$', views.download,       name='scraper_download'),
+    url(r'^scrapers/export/(?P<scraper_short_name>[\w_\-]+)/$', views.export_csv,       name='export_csv'),
     
-    url(r'^scrapers/tags/$', views.all_tags, name='all_tags'),
-    url(r'^scrapers/tags/(?P<tag>[^/]+)$', views.scraper_tag, name='tag'),
-    url(r'^scrapers/tags/(?P<tag>[^/]+)/data$', views.tag_data, name='tag_data'),  # to delete
-    url(r'^scrapers/follow/(?P<scraper_short_name>[\w_\-]+)/$', views.follow, name='scraper_follow'),
-    url(r'^scrapers/unfollow/(?P<scraper_short_name>[\w_\-]+)/$', views.unfollow, name='scraper_unfollow'),
+    url(r'^scrapers/tags/$',                              views.all_tags,               name='all_tags'),
+    url(r'^scrapers/tags/(?P<tag>[^/]+)$',                views.scraper_tag,            name='tag'),
+    url(r'^scrapers/tags/(?P<tag>[^/]+)/data$',           views.tag_data,               name='tag_data'),  # to delete
+    url(r'^scrapers/follow/(?P<scraper_short_name>[\w_\-]+)/$', views.follow,           name='scraper_follow'),
+    url(r'^scrapers/unfollow/(?P<scraper_short_name>[\w_\-]+)/$', views.unfollow,       name='scraper_unfollow'),
     
     url(r'^scrapers/(?P<scraper_short_name>[\w_\-]+)/$',  views.scraper_overview,       name='scraper_overview'),
     url(r'^views/(?P<short_name>[\w_\-]+)/$',             views.view_overview,          name='view_overview'),

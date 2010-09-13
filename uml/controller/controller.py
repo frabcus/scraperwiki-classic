@@ -81,6 +81,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.m_stderr       = sys.stderr
         self.m_scraperID    = None
         self.m_runID        = None
+        self.m_urlquery     = None
         self.m_uid          = None
         self.m_gid          = None
         self.m_paths        = []
@@ -227,6 +228,16 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         if 'x-runid'      in self.headers :
             self.m_runID     = os.environ['RUNID']        = self.headers['x-runid']
 
+    def setUrlquery (self) :
+
+        """
+        If the \em x-urlquery header is present then set that as the urlquery
+        """
+
+        if 'x-urlquery'   in self.headers :
+            self.m_urlquery  = os.environ['URLQUERY']        = self.headers['x-urlquery']
+
+    
     def setRLimit (self) :
 
         """
@@ -581,6 +592,7 @@ class ScraperController (BaseController) :
         self.addEnvironment ()
         self.setScraperID   ()
         self.setRunID       ()
+        self.setUrlquery    ()
 
         p = subprocess.Popen \
         (   command,
@@ -608,6 +620,7 @@ class ScraperController (BaseController) :
 
         self.setScraperID   ()
         self.setRunID       ()
+        self.setUrlquery    ()
 
         idents = []
         if self.m_scraperID is not None : idents.append ('scraperid=%s' % self.m_scraperID)
