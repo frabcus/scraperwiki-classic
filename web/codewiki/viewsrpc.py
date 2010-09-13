@@ -71,8 +71,8 @@ def rpcexecute_dummy(request, scraper_short_name, revision = None):
 # and view the webpage on 8010
 def rpcexecute(request, scraper_short_name, revision = None):
     
-    if settings.USE_DUMMY_VIEWS == True:
-        return rpcexecute_dummy(request, scraper_short_name, revision)
+    #if settings.USE_DUMMY_VIEWS == True:
+    #    return rpcexecute_dummy(request, scraper_short_name, revision)
     
     scraper = get_object_or_404(models.View.objects, short_name=scraper_short_name)
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
