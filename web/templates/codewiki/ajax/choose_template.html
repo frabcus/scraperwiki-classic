@@ -1,8 +1,23 @@
 <form method="get" action="{% url chosen_template wiki_type %}">
+    <div class="popup_header">
+        <a class="popupClose">close</a>
+    </div>
     <h2>New {{wiki_type}}</h2>
-    <h3>Choose a language</h3>
-    {{form.language}}
-    <h3>Choose a template</h3>
-    {{form.template}}
-    <input type="Submit" value="Next"/>        
+
+    <div class="output">
+    <table>
+    <tr>
+    <td>
+      <h3>Choose a language</h3>
+      {{form.language}}
+    </td>
+    <td>
+      <h3>Choose a template</h3>
+      {{form.template}}
+    </td>
+    </tr>
+    </table>
+    </div>
+
+    <input type="Submit" value="Start new {{wiki_type}}"/>
 </form>
