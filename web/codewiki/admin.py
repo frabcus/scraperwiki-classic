@@ -10,6 +10,7 @@ class ScraperMetadataInlines(admin.TabularInline):
     model = ScraperMetadata
     max_num = 100
     extra = 1
+
 class ScraperRunEventInlines(admin.TabularInline):
     model = ScraperRunEvent
     extra = 0
@@ -22,7 +23,7 @@ class CodeAdmin(admin.ModelAdmin):
         return self.model.unfiltered.get_query_set()
 
 class ScraperAdmin(CodeAdmin):
-    inlines = (UserCodeRoleInlines, ScraperMetadataInlines, ScraperRunEventInlines)
+    inlines = (UserCodeRoleInlines)
     list_display = ('title', 'short_name', 'last_run', 'status', 'published', 'deleted')
     list_filter = ('status', 'last_run', 'published',)
     
