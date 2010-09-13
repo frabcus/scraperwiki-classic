@@ -35,32 +35,34 @@
 
         {% endifequal %}
 	</div>
-		
-	<div class="content">
-    	{% if owned_scrapers %}
-	    <h2>{{ profile.name }}'s scrapers</h2>    	
-    	    <ul>	        
-                {% for scraper in owned_scrapers %}
-            	    {% include 'frontend/includes/code_object_line.html' %}
-            	{% endfor %}
-	    </ul> 	            	
-        {% endif %}
-    	{% if owned_views %}
-	    <h2>{{ profile.name }}'s views</h2>    	
-    	    <ul>	        
-                {% for scraper in owned_views %}
-            	    {% include 'frontend/includes/code_object_line.html' %}
-            	{% endfor %}
-	    </ul> 	            	
-        {% endif %}
-        {%  if solicitations %}
- 	    <h2>{{ profile.name }}'s requests for datasets</h2>    	
-     	    <ul>	        
-                {% for solicitation in solicitations %}
-                    <li><a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>{% if solicitation.has_bounty %} <span class="bounty"><a href="{% url market_view solicitation.id %}">&pound;{{solicitation.price}} bounty</a></span>{% endif %}</li>
-             	{% endfor %}
- 	    </ul> 	            	
-        {% endif %}
+
+    <div class="content">
+    {% if owned_scrapers %}
+      <h2>{{ profile.name }}'s scrapers</h2>    	
+      <ul class="scraper_list">
+        {% for scraper in owned_scrapers %}
+          {% include 'frontend/includes/code_object_line.html' %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if owned_views %}
+    <h2>{{ profile.name }}'s views</h2>
+      <ul class="scraper_list">
+        {% for scraper in owned_views %}
+          {% include 'frontend/includes/code_object_line.html' %}
+        {% endfor %}
+      </ul> 	            	
+    {% endif %}
+
+    {% if solicitations %}
+      <h2>{{ profile.name }}'s requests for datasets</h2>    	
+        <ul>
+          {% for solicitation in solicitations %}
+             <li><a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>{% if solicitation.has_bounty %} <span class="bounty"><a href="{% url market_view solicitation.id %}">&pound;{{solicitation.price}} bounty</a></span>{% endif %}</li>
+          {% endfor %}
+        </ul>
+    {% endif %}
     </div>
     
     {% endblock %}
