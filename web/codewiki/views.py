@@ -9,6 +9,7 @@ from tagging.utils import get_tag
 from django.db import IntegrityError
 from django.contrib.auth.models import User
 import textile
+import random
 
 from django.conf import settings
 
@@ -407,11 +408,11 @@ def export_csv(request, scraper_short_name):
 def scraper_table(request):
     dictionary = { }
     dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
-    dictionary["loggedinusers"] = set([ userscraperediting.user  for userscraperediting in models.UserScraperEditing.objects.filter(user__isnull=False)])
-    dictionary["numloggedoutusers"] = models.UserScraperEditing.objects.filter(user__isnull=True).count()
-    dictionary["numdraftscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__isnull=True).count()
-    dictionary["numpublishedscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__published=True).count()
-    dictionary["numunpublishedscrapersediting"] = models.UserScraperEditing.objects.filter(scraper__published=False).count()
+    dictionary["loggedinusers"] = set([ usercodeediting.user  for usercodeediting in models.UserCodeEditing.objects.filter(user__isnull=False)])
+    dictionary["numloggedoutusers"] = models.UserCodeEditing.objects.filter(user__isnull=True).count()
+    dictionary["numdraftscrapersediting"] = models.UserCodeEditing.objects.filter(code__isnull=True).count()
+    dictionary["numpublishedscrapersediting"] = models.UserCodeEditing.objects.filter(code__published=True).count()
+    dictionary["numunpublishedscrapersediting"] = models.UserCodeEditing.objects.filter(code__published=False).count()
     dictionary["numpublishedscraperstotal"] = dictionary["scrapers"].count()
     dictionary["numunpublishedscraperstotal"] = models.Scraper.objects.filter(published=False).count()
     dictionary["numdeletedscrapers"] = models.Scraper.unfiltered.filter(deleted=True).count()
@@ -510,28 +511,28 @@ def twisterstatus(request):
 
         # identify or create the editing object
         try:
-            userscraperediting = models.UserScraperEditing.objects.create(user=user, scraper=scraper, twisterclientnumber=twisterclientnumber)
-            userscraperediting.editingsince = datetime.datetime.now()
+            usercodeediting = models.UserCodeEditing.objects.create(user=user, code=scraper, twisterclientnumber=twisterclientnumber)
+            usercodeediting.editingsince = datetime.datetime.now()
         except IntegrityError:
-            userscraperediting = models.UserScraperEditing.objects.get(twisterclientnumber=twisterclientnumber)
+            usercodeediting = models.UserCodeEditing.objects.get(twisterclientnumber=twisterclientnumber)
 
-        assert models.UserScraperEditing.objects.filter(twisterclientnumber=twisterclientnumber).count() == 1, client
+        assert models.UserCodeEditing.objects.filter(twisterclientnumber=twisterclientnumber).count() == 1, client
 
         # updateable values of the object
-        userscraperediting.twisterscraperpriority = client['scrapereditornumber']
+        usercodeediting.twisterscraperpriority = client['scrapereditornumber']
 
         # this condition could instead reference a running object
-        if client['running'] and not userscraperediting.runningsince:
-            userscraperediting.runningsince = datetime.datetime.now()
-        if not client['running'] and userscraperediting.runningsince:
-            userscraperediting.runningsince = None
+        if client['running'] and not usercodeediting.runningsince:
+            usercodeediting.runningsince = datetime.datetime.now()
+        if not client['running'] and usercodeediting.runningsince:
+            usercodeediting.runningsince = None
 
-        userscraperediting.save()
+        usercodeediting.save()
 
     # discard now closed values of the object
-    for userscraperediting in models.UserScraperEditing.objects.all():
-        if userscraperediting.twisterclientnumber not in twisterclientnumbers:
-            userscraperediting.delete()
+    for usercodeediting in models.UserCodeEditing.objects.all():
+        if usercodeediting.twisterclientnumber not in twisterclientnumbers:
+            usercodeediting.delete()
             # or could use the field: closedsince  = models.DateTimeField(blank=True, null=True)
     return HttpResponse("Howdy ppp ")
 
