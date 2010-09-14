@@ -92,6 +92,9 @@
 				    <li>
 				        <a href="{% url market_list %}" title="Request a new scraper">Data market</a>
 				    </li>
+                    <li>
+			             <a href="{% url help_tutorials %}" title="Tutorials">Tutorials</a>
+			        </li>
 				    <li>
 				        <a href="{% url scraper_list %}" title="Browse all scrapers">Browse</a>
 				    </li>
@@ -99,15 +102,14 @@
 				        <a href="{% url api:index %}" title="ScraperWiki API">API</a>
 				    </li>
 				</ul>
+
                 <form id="divSidebarSearch" action="/search/" method="post">
                     <label for="q" class="hide">Search ScraperWiki</label>
                     <input type="text" id="q" name="q"/>
                     <input type="submit" value="Go" />
                 </form>
+
                 <ul class="sub_menu">
-                    <li>
-			             <a href="{% url help_tutorials %}" title="Tutorials">Tutorials</a>
-			        </li>
 			        <li>
 			             <a href="{% url about %}" title="About ScraperWiki">About ScraperWiki</a>
 			        </li>
@@ -115,7 +117,13 @@
 			             <a href="http://blog.scraperwiki.com" title="ScraperWiki Data Blog">Read our blog</a>
 			        </li>
 			        <li>
-			             <a href="http://twitter.com/scraperwiki" title="Twiotter">Follow us on Twitter</a>
+			             <a href="{% url contact_form %}" title="Feedback form">Feedback</a>
+			        </li>
+			        <li>
+			             <a href="http://groups.google.com/group/scraperwiki" title="Google groups">Email list</a>
+			        </li>
+			        <li>
+			             <a href="http://twitter.com/scraperwiki" title="Follow us on Twitter">Twitter</a>
 			        </li>
                 </ul>
 			</div>

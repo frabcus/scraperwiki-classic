@@ -51,13 +51,22 @@ class Alerts(models.Model):
         * 'commit'
         
     """
-    # the object about which the alert is about (eg codewiki.models.Code or User)
+    
+    # there are two GenericForeignKey entries in this class that cause massive 
+    # complications in order to avoid the evil of including fields in the base class that are 
+    # not applicable to all types.
+    # could be worse; could use inherited classes
+    
+    # the object about which the alert is about, eg codewiki.models.Code or User, 
+    # notwithstanding the fact that there is a user field already below
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveSmallIntegerField(blank=True, null=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     
-    message_type = models.CharField(blank=False, max_length=100)
+    # assumes this represents the actual type of the alert (although you will have to dig into the special kind of alert to represent it properly in ways not covered by message_value)
+    message_type = models.CharField(blank=False, max_length=100)  
     message_value = models.CharField(blank=True, null=True, max_length=5000)
+    
     meta = models.CharField(blank=True, max_length=1000)
     message_level = models.IntegerField(blank=True, null=True, default=0)
     datetime = models.DateTimeField(blank=False, default=datetime.datetime.now)

@@ -28,7 +28,7 @@
             <h3>Scrapers used in the making of this view</h3>
             <ul>
                 {% for related_scraper in related_scrapers %}
-                    <a href="{% url scraper_overview related_scraper.short_name %}">{{related_scraper.title}}</a>
+                    <a href="{% url code_overview related_scraper.wiki_type related_scraper.short_name %}">{{related_scraper.title}}</a>
                 {% endfor %}
             </ul>
         </div>

@@ -19,8 +19,8 @@ class ScraperViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         
     def test_scraper_overview(self):
-        response = self.client.get(reverse('scraper_overview', 
-                            kwargs={'scraper_short_name': 'test_scraper'}))
+        response = self.client.get(reverse('code_overview', 
+                            kwargs={'wiki_type':'scraper', 'scraper_short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
     
     def test_scraper_map(self):
