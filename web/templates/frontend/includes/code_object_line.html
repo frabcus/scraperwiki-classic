@@ -1,7 +1,7 @@
 {% load markup %}
 <li class="code_object_line">
     <h3>
-        <a href="{% ifequal scraper.wiki_type 'scraper'%}{% url scraper_overview scraper.short_name %}{% else %}{% url view_overview scraper.short_name %}{% endifequal %}">
+        <a href="{% url code_overview scraper.wiki_type scraper.short_name %}">
             {% if scraper.title %}{{ scraper.title }}{% else %}{{ scraper.short_name }}{% endif %}
         </a>
 	    <ul class="code_about">

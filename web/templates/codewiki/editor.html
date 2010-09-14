@@ -91,7 +91,7 @@
               	        <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
                     </ul>
                     {% if scraper.id %}
-                        <a id="aCloseEditor1" href="{% url scraper_overview scraper.short_name %}">close editor</a>
+                        <a id="aCloseEditor1" href="{% url code_overview scraper.wiki_type scraper.short_name %}">close editor</a>
                     {% else %}
                         <a id="aCloseEditor1" href="{% url frontpage %}">close editor</a>
                     {% endif %}

@@ -89,16 +89,13 @@ def deploy():
     print "***************** DEPLOY *****************"
     print "Please Enter your deploy message: \r"
     message = raw_input()
-    env.kforge_user = raw_input('Your kforge Username: ')
-    kforge_pass = pw = getpass.getpass('Your kforge Password: ')
+    env.name = raw_input('Your name: ')
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
 
     run("""cd %s; 
-        hg pull https://%s:%s@kforgehosting.com/scraperwiki/hg; 
+        hg pull https://kforgehosting.com/scraperwiki/hg; 
         hg update -C %s""" % (env.path,
-                              env.kforge_user,
-                              kforge_pass,
                               env.branch))
     
     migrate()
@@ -123,7 +120,7 @@ Subject: New Scraperwiki Deployment to %(version)s (deployed by %(user)s)
 
 """ % {
         'version' : env.deploy_version,
-        'user' : env.kforge_user,
+        'user' : env.name,
         'changeset' : env.changeset,
         'message_body' : message_body,
         }

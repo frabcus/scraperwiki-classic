@@ -113,6 +113,7 @@ class FireStarter :
         self.m_testName    = None
         self.m_runID       = None
         self.m_scraperID   = None
+        self.m_urlquery   = None
         self.m_traceback   = None
         self.m_error       = None
         self.m_cache       = 0
@@ -224,6 +225,17 @@ class FireStarter :
 
         self.m_scraperID = scraperID
 
+    def setUrlquery (self, urlquery) :
+
+        """
+        Set the urlquery string
+
+        @type   urlquery : String
+        @param  urlquery : Value
+        """
+
+        self.m_urlquery = urlquery
+    
     def setUser (self, user) :
 
         """
@@ -341,7 +353,7 @@ class FireStarter :
             conftxt = urllib2.urlopen(confurl).read().replace('\r', '')
         except:
             print "Failed to open:", confurl
-            conftxt = [ ]
+            conftxt = ""
         for line in conftxt.split('\n') :
             try :
                 key, value = line.split('=')
@@ -438,6 +450,8 @@ class FireStarter :
             setter ('x-traceback',  self.m_traceback)
         if self.m_scraperID  is not None :
             setter ('x-scraperid',  self.m_scraperID)
+        if self.m_urlquery   is not None :
+            setter ('x-urlquery',   self.m_urlquery )
         if self.m_testName   is not None :
             setter ('x-testname',   self.m_testName )
         if self.m_runID      is not None :

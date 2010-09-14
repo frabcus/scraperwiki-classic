@@ -46,6 +46,7 @@ def execute (code, options) :
     fs.setTestName      (options.name     )
     fs.setScraperID     (options.guid     )
     fs.setLanguage      (options.language )
+    fs.setUrlquery      (options.urlquery )
     fs.setUser          ('nobody' )
     fs.setGroup         ('nogroup')
 
@@ -59,6 +60,10 @@ def execute (code, options) :
     fs.setCPULimit      (cpulimit, cpulimit+1)
 
     fs.loadConfiguration()
+
+    # extract the querystring
+    #rargs = cgi.parse_qs(options.urlquery)
+    #sys.stdout.write (json.dumps({ 'message_type':'console', 'content':"jjkjkjk" + str(rargs)}) + "\r\n")
 
     code = string.replace (code, '\r', '')
     if options.language == "php" :
@@ -127,6 +132,17 @@ if __name__ == "__main__":
             help    = "Time limit for running script",  
             default = '80',
             metavar = "CPULIMIT"
+        )
+    
+    parser.add_option \
+        (   "-u",
+            "--urlquery",
+            dest    = "urlquery",
+            action  = "store",
+            type    = 'str',
+            help    = "URL query argumentspassed in for a view",  
+            default = '',
+            metavar = "URLQUERY"
         )
     
     (options, args) = parser.parse_args()

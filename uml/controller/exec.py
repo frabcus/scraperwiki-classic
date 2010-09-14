@@ -89,13 +89,14 @@ class ConsoleStream :
         return self.m_fd.fileno ()
 
 
-USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
+USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [--urlquery=str] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
 cache       = None
 trace       = None
 script      = None
 path        = None
 scraperID   = None
 runID       = None
+urlquery    = None
 httpProxy   = None
 httpsProxy  = None
 ftpProxy    = None
@@ -125,6 +126,10 @@ for arg in sys.argv[1:] :
         runID      = arg[ 8:]
         continue
 
+    if arg[: 11] == '--urlquery='       :
+        urlquery   = arg[ 11:]
+        continue
+    
     if arg[: 7] == '--path='        :
         path       = arg[ 7:]
         continue

@@ -151,7 +151,7 @@ class Code(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('scraper_overview', [self.short_name])
+        return ('code_overview', [self.wiki_type, self.short_name])
 
     def is_good(self):
         # don't know how goodness is going to be defined yet.
@@ -221,6 +221,9 @@ class CodeCommitEvent(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return ('commit_event', [self.id])
+
+    def content_type(self):
+        return ContentType.objects.get(app_label="codewiki", model="CodeCommitEvent")
 
     class Meta:
         app_label = 'codewiki'

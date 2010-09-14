@@ -44,14 +44,14 @@
     <a href='{% url scraper_code  scraper.wiki_type  scraper.short_name %}'>{{ scraper.title }}</a>
   </td>
   <td>
-    {% for usercodeediting in scraper.userscraperediting_set.all %} 
-        {% if userscraperediting.user %}
-            {{userscraperediting.user.get_profile.name}}
+    {% for usercodeediting in scraper.usercodeediting_set.all %} 
+        {% if usercodeediting.user %}
+            <a href="{% url profiles_profile_detail usercodeediting.user.username %}">{{usercodeediting.user.get_profile.name}}</a>
         {% else %}
             Anonymous
         {% endif %}
-        (editing for {{userscraperediting.editingsince|timesince}})
-        <sup>[{{userscraperediting.twisterclientnumber}}]</sup>
+        (editing for {{usercodeediting.editingsince|timesince}})
+        <sup>[{{usercodeediting.twisterclientnumber}}]</sup>
     {% endfor %}
   </td> 
 
