@@ -126,7 +126,7 @@ def view_admin (request, short_name):
         #saved by form 
         else:
             form = forms.ViewAdministrationForm(request.POST, instance=view)
-            response =  HttpResponseRedirect(reverse('code_overview', args=['view', short_name]))
+            response =  HttpResponseRedirect(reverse('code_overview', args=[view.wiki_type, view.short_name]))
 
             if form.is_valid():
                 s = form.save()
@@ -267,18 +267,18 @@ def comments(request, wiki_type, scraper_short_name):
     return render_to_response('codewiki/comments.html', dictionary, context_instance=RequestContext(request))
 
 
-def scraper_history(request, wiki_type, scraper_short_name):
+def scraper_history(request, wiki_type, short_name):
 
     user = request.user
     
     # refresh the whole set of commit alerts when we have this message
-    if scraper_short_name == "updatecommitalertsrev" and user.is_staff:
+    if short_name == "updatecommitalertsrev" and user.is_staff:
         lrepopath = (wiki_type == 'view' and settings.VMODULES_DIR or settings.SMODULES_DIR)
         mercurialinterface = vc.MercurialInterface(lrepopath)
         mercurialinterface.updateallcommitalerts()
         return HttpResponse("Updated commit alerts from mercurial for:" + lrepopath, mimetype="text/plain")
     
-    scraper = get_object_or_404(models.Code.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Code.objects, short_name=short_name)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -348,9 +348,9 @@ def scraper_history(request, wiki_type, scraper_short_name):
     return render_to_response('codewiki/history.html', dictionary, context_instance=RequestContext(request))
 
 
-def code(request, wiki_type, scraper_short_name):
+def code(request, wiki_type, short_name):
     user = request.user
-    scraper = get_object_or_404(models.Code.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Code.objects, short_name=short_name)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -741,7 +741,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
         scraper = get_object_or_404(models.Code, short_name=short_name)
         code = scraper.saved_code()
         return_url = reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
-        
         #!commaseparatedtags = ", ".join([tag.name for tag in scraper.tags])
         if not scraper.published:
             commit_message = 'Scraper created'

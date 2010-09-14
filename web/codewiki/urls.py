@@ -38,12 +38,10 @@ urlpatterns = patterns('',
         #not deprecated as used in by ajax to implement publishScraperButton
     url(r'^scrapers/(?P<short_name>[\w_\-]+)/admin/$',    views.scraper_admin,          name='scraper_admin'),
         
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/$',
-                                                          views.code_overview,          name='code_overview'),
-    
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/history/$',    views.scraper_history,  name='scraper_history'),
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/comments/$',   views.comments,         name='scraper_comments'),
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/code/$',       views.code,             name='scraper_code'),    
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/$',          views.code_overview,    name='code_overview'),
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/history/$',  views.scraper_history,  name='scraper_history'),
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/comments/$', views.comments,         name='scraper_comments'),
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/code/$',     views.code,             name='scraper_code'),    
         
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$', views.choose_template, name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/new/chosen_template/$', views.chosen_template, name='chosen_template'),      # NB not duplicate
