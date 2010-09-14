@@ -8,7 +8,7 @@
     <div class="attention">
         <h1><em>"{{solicitation.title}}"</em> has been written</h1>
         <p>
-            <a href="{% url scraper_overview scraper.short_name %}">Click here to see the scraper</a>
+            <a href="{% url code_overview scraper.wiki_type scraper.short_name %}">Click here to see the scraper</a>
         </p>
         {% if solicitation.has_bounty %}
             {% if use_sandbox %}

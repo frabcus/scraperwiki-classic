@@ -12,14 +12,14 @@
             <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit <small>({{scraper.language}})</small></a>
         </li>
         <li{% ifequal selected_tab "overview" %} class="selected"{% endifequal %}>
-            <a href="{% url scraper_overview scraper.short_name %}">Scraper</a>
+            <a href="{% url code_overview scraper.wiki_type scraper.short_name %}">Scraper</a>
         </li>
     {% else %}
         <li{% ifequal selected_tab "code" %} class="selected"{% endifequal %}>
             <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit</a>
         </li>
         <li{% ifequal selected_tab "overview" %} class="selected"{% endifequal %}>
-            <a href="{% url view_overview scraper.short_name %}">View</a>
+            <a href="{% url code_overview scraper.wiki_type scraper.short_name %}">View</a>
         </li>
     {% endifequal %}
 </ul>

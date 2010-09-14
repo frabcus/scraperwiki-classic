@@ -126,7 +126,7 @@ def view_admin (request, short_name):
         #saved by form 
         else:
             form = forms.ViewAdministrationForm(request.POST, instance=view)
-            response =  HttpResponseRedirect(reverse('view_overview', args=[short_name]))
+            response =  HttpResponseRedirect(reverse('code_overview', args=['view', short_name]))
 
             if form.is_valid():
                 s = form.save()
@@ -185,7 +185,7 @@ def scraper_admin (request, short_name):
         #saved by form 
         else:
             form = forms.ScraperAdministrationForm(request.POST, instance=scraper)
-            response =  HttpResponseRedirect(reverse('scraper_overview', args=[short_name]))
+            response =  HttpResponseRedirect(reverse('code_overview', args=['scraper', short_name]))
 
             if form.is_valid():
                 s = form.save()
@@ -224,9 +224,9 @@ def scraper_delete_scraper(request, scraper_short_name):
 
     return HttpResponseRedirect(reverse('scraper_admin', args=[scraper_short_name]))
 
-def view_overview (request, short_name):
+def view_overview (request, view_short_name):
     user = request.user
-    scraper = get_object_or_404(models.View.objects, short_name=short_name)
+    scraper = get_object_or_404(models.View.objects, short_name=view_short_name)
 
     scraper_tags = Tag.objects.get_for_object(scraper)
     
@@ -740,10 +740,8 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
     elif short_name is not "__new__":
         scraper = get_object_or_404(models.Code, short_name=short_name)
         code = scraper.saved_code()
-        if scraper.wiki_type == 'scraper':
-            return_url = reverse('scraper_overview', kwargs={'scraper_short_name': scraper.short_name})
-        else:
-            return_url = reverse('view_overview', kwargs={'short_name': scraper.short_name})
+        return_url = reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
+        
         #!commaseparatedtags = ", ".join([tag.name for tag in scraper.tags])
         if not scraper.published:
             commit_message = 'Scraper created'

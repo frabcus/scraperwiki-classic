@@ -36,9 +36,11 @@ urlpatterns = patterns('',
     url(r'^scrapers/twister/status$', views.twisterstatus, name='twisterstatus'),
         
         #not deprecated as used in by ajax to implement publishScraperButton
-    url(r'^scrapers/(?P<short_name>[\w_\-]+)/admin/$',  views.scraper_admin,            name='scraper_admin'),
+    url(r'^scrapers/(?P<short_name>[\w_\-]+)/admin/$',    views.scraper_admin,          name='scraper_admin'),
         
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/$',            views.code_overview,    name='code_overview'),
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/$',
+                                                          views.code_overview,          name='code_overview'),
+    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/history/$',    views.scraper_history,  name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/comments/$',   views.comments,         name='scraper_comments'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/code/$',       views.code,             name='scraper_code'),    
