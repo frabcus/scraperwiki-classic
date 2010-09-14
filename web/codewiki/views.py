@@ -29,6 +29,11 @@ import datetime
 try:                import json
 except ImportError: import simplejson as json
 
+def code_overview(request, wiki_type, short_name):
+    if wiki_type == 'scraper':
+        return scraper_overview(request, short_name)
+    else:
+        return view_overview(request, short_name)
 
 def scraper_overview(request, scraper_short_name):
     """

@@ -25,9 +25,6 @@ urlpatterns = patterns('',
     url(r'^scrapers/follow/(?P<scraper_short_name>[\w_\-]+)/$', views.follow,           name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<scraper_short_name>[\w_\-]+)/$', views.unfollow,       name='scraper_unfollow'),
     
-    url(r'^scrapers/(?P<scraper_short_name>[\w_\-]+)/$',  views.scraper_overview,       name='scraper_overview'),
-    url(r'^views/(?P<short_name>[\w_\-]+)/$',             views.view_overview,          name='view_overview'),
-    
     url(r'^scrapers/metadata_api/', include('codewiki.metadata_api.urls')),
 
     # events and monitoring (pehaps should have both wiki_types possible)
@@ -41,7 +38,7 @@ urlpatterns = patterns('',
         #not deprecated as used in by ajax to implement publishScraperButton
     url(r'^scrapers/(?P<short_name>[\w_\-]+)/admin/$',  views.scraper_admin,            name='scraper_admin'),
         
-
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/$',            views.code_overview,    name='code_overview'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/history/$',    views.scraper_history,  name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/comments/$',   views.comments,         name='scraper_comments'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<scraper_short_name>[\w_\-]+)/code/$',       views.code,             name='scraper_code'),    
