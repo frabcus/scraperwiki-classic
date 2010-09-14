@@ -32,8 +32,8 @@ class CommentsForCode(Feed):
             raise FeedDoesNotExist
         return '/%ss/%s/' % (obj.wiki_type, obj.short_name)
         
-    def item_link(self, item):
-            return '/%ss/%s/comments/#%s' % (item.wiki_type, self.short_name, item.id)
+    def item_link(self, obj):
+        return '/%ss/%s/comments/#%s' % (obj.wiki_type, self.short_name, obj.id)
 
     def description(self, obj):
         return "Comments on '%s'" % obj.short_name
@@ -57,10 +57,10 @@ class LatestCodeObjectsByTag(Feed):
     def link(self, obj):
         if not obj:
             raise FeedDoesNotExist
-        return '/%ss/tags/%s/' % (item.wikik_type, obj.name)
+        return '/%ss/tags/%s/' % (obj.wiki_type, obj.name)
 
-    def item_link(self, item):
-        return '/%ss/show/%s/' % (item.wiki_type, item.short_name)
+    def item_link(self, obj):
+        return '/%ss/show/%s/' % (obj.wiki_type, obj.short_name)
 
     def description(self, obj):
         return "Items recently created on ScraperWiki with tag '%s'" % obj.name
@@ -76,8 +76,8 @@ class LatestCodeObjects(Feed):
     link = "/browse"
     description = "All the latest scrapers and views added to ScraperWiki"
 
-    def item_link(self, item):
-        return '/%ss/show/%s/' % (item.wiki_type, item.short_name)
+    def item_link(self, obj):
+        return '/%ss/show/%s/' % (obj.wiki_type, obj.short_name)
         
     def items(self):
         return Code.objects.filter(published=True).order_by('-created_at')[:10]
@@ -101,8 +101,8 @@ class LatestCodeObjectsBySearchTerm(Feed):
             raise FeedDoesNotExist
         return '/browse/tags/%s/' % obj
 
-    def item_link(self, item):
-        return '/%ss/%s/' % (item.wiki_type, item.short_name)
+    def item_link(self, obj):
+        return '/%ss/%s/' % (obj.wiki_type, obj.short_name)
 
     def description(self, obj):
         return "Items created with '%s' somewhere in title or tags" % obj
