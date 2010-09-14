@@ -68,9 +68,10 @@ class MercurialInterface:
         from frontend.models import Alerts
         from django.contrib.auth.models import User
 
+        
         # discard all alerts and commit events for this revision (made complex due to the indirection through CodeCommitEvent for a integer)
         for codecommitevent in CodeCommitEvent.objects.filter(revision=rev):
-            for alert in Alerts.objects.filter(event_object=codecommitevent):
+            for alert in Alerts.objects.filter(event_type=codecommitevent.content_type(), event_id=codecommitevent.id):
                 alert.delete()
             codecommitevent.delete()
         
