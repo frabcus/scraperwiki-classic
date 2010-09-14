@@ -222,6 +222,9 @@ class CodeCommitEvent(models.Model):
     def get_absolute_url(self):
         return ('commit_event', [self.id])
 
+    def content_type(self):
+        return ContentType.objects.get(app_label="codewiki", model="CodeCommitEvent")
+
     class Meta:
         app_label = 'codewiki'
                                         
