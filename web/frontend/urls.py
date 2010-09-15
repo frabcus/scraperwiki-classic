@@ -41,9 +41,9 @@ urlpatterns = patterns('',
     #searching and browsing
     url(r'^search/$', frontend_views.search, name='search'),
     url(r'^search/(?P<q>.+)/$', frontend_views.search, name='search'),
+    
     url(r'^browse/(?P<page_number>\d+)?$', frontend_views.browse, name='scraper_list'),    
-    url(r'^browse/(?P<wiki_type>scraper|view)s/$', frontend_views.browse, name='scraper_list_wiki_type'),
-    url(r'^browse/(?P<wiki_type>scraper|view)s/(?P<page_number>\d+)?$', frontend_views.browse),
+    url(r'^browse/(?P<wiki_type>scraper|view)s/(?P<page_number>\d+)?$', frontend_views.browse_wiki_type, name='scraper_list_wiki_type'),
    )
 
 

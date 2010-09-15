@@ -151,6 +151,10 @@ def tutorials(request):
         tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
     return render_to_response('frontend/tutorials.html', {'tutorials': tutorials}, context_instance = RequestContext(request))
 
+
+def browse_wiki_type(request, wiki_type = None, page_number = 1):
+    return browse(request, page_number, wiki_type)
+
 def browse(request, page_number = 1, wiki_type = None):
     if wiki_type == None:
         all_code_objects = Code.objects.filter(published=True).order_by('-created_at')
@@ -182,7 +186,7 @@ def browse(request, page_number = 1, wiki_type = None):
     #npeople = UserCodeEditing in models.UserCodeEditing.objects.all().count()
     # there might be a slick way of counting this, but I don't know it.
     npeople = len(set([usercodeediting.user for usercodeediting in UserCodeEditing.objects.all() ]))
-    dictionary = { "scrapers": scrapers, "form": form, "featured_scrapers":featured_scrapers, "npeople": npeople }
+    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, "npeople": npeople }
     return render_to_response('frontend/browse.html', dictionary, context_instance=RequestContext(request))
 
 

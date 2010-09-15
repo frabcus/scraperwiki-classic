@@ -84,6 +84,7 @@ def scraper_overview(request, scraper_short_name):
         'schedule_options': models.SCHEDULE_OPTIONS,
         }, context_instance=RequestContext(request))
 
+
 def view_admin (request, short_name):
     response = None
 
