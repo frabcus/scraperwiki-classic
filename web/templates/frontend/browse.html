@@ -24,7 +24,11 @@
         <div class="pagination">
         <span class="step_links">
             {% if scrapers.has_previous %}
+              {% if wiki_type %}
+                <a href="{% url scraper_list_wiki_type wiki_type scrapers.previous_page_number %}">previous</a>
+              {% else %}
                 <a href="{% url scraper_list scrapers.previous_page_number %}">previous</a>
+              {% endif %}
             {% endif %}
     
             <span class="current">
@@ -32,7 +36,11 @@
             </span>
     
             {% if scrapers.has_next %}
+              {% if wiki_type %}
+                <a href="{% url scraper_list_wiki_type wiki_type scrapers.next_page_number %}">next</a>
+              {% else %}
                 <a href="{% url scraper_list scrapers.next_page_number %}">next</a>
+              {% endif %}
             {% endif %}
         </span>
         </div>
