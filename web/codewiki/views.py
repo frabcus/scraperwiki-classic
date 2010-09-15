@@ -208,6 +208,7 @@ def scraper_delete_data(request, scraper_short_name):
 
     return HttpResponseRedirect(reverse('scraper_admin', args=[scraper_short_name]))
 
+# should be generalized to both wikitypes
 def scraper_delete_scraper(request, scraper_short_name):
     user = request.user
     scraper = get_object_or_404(
@@ -242,11 +243,10 @@ def view_fullscreen (request, short_name):
 
     return render_to_response('codewiki/view_fullscreen.html', {'scraper': scraper}, context_instance=RequestContext(request))
 
-def comments(request, wiki_type, scraper_short_name):
+def comments(request, wiki_type, short_name):
 
     user = request.user
-    scraper = get_object_or_404(
-        models.Code.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Code.objects, short_name=short_name)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
