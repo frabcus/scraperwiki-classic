@@ -12,7 +12,7 @@
 <div class="content full">
     <h2>Sample Data</h2>
     <div class="data_viewer">
-        {% if has_data %}
+        {% if data.rows %}
             <div>
                 <table class="data">
                     <thead>
@@ -57,8 +57,21 @@
         {% endif %}
         <div class="content_footer">
             <p>
-                This dataset has a total of {{ scraper.record_count }} records and was last updated on {{scraper.last_run|date:"H:i, j F Y"}}.
-                {% if scraper.license_link%}The license for this data is {{scraper.license|lower|default:"&nbsp;"}} and a copy can be found on <a href="{{scraper.license_link}}">this page</a>.{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" class="edit">[edit license]</a>{% else %}The license for this dataset is unknown, <a href="{% url scraper_admin scraper.short_name %}">please add a link to the license if you are able to locate it</a>.{% endif %}{% endif %}
+                This dataset has a total of {{ scraper.record_count }} records and 
+                {% if scraper.last_run %}
+                  was last run on {{scraper.last_run|date:"H:i, j F Y"}}
+                {% else %}
+                  has not yet been run
+                {% endif %}
+
+                {% if scraper.license_link%}
+                  The license for this data is {{scraper.license|lower|default:"&nbsp;"}} and a copy can be found on <a href="{{scraper.license_link}}">this page</a>.
+                  {% if user.is_authenticated %}
+                    <a href="{% url scraper_admin scraper.short_name %}" class="edit">[edit license]</a>
+                  {% else %}
+                    The license for this dataset is unknown, <a href="{% url scraper_admin scraper.short_name %}">please add a link to the license if you are able to locate it</a>.
+                  {% endif %}
+                {% endif %}
             </p>
         </div>
     </div>

@@ -70,14 +70,12 @@ def scraper_overview(request, scraper_short_name):
                                                private_columns=private_columns)
 
     # replicates output from data_summary_tables
-    has_data = len(data['rows']) > 0
     return render_to_response('codewiki/scraper_overview.html', {
         'scraper_tags': scraper_tags,
         'selected_tab': 'overview',
         'scraper': scraper,
         'user_owns_it': user_owns_it,
         'user_follows_it': user_follows_it,
-        'has_data': has_data,
         'data': data,
         'scraper_contributors': scraper_contributors,
         'related_views': related_views,
@@ -608,11 +606,15 @@ def raw(request, short_name=None):
 #save a code object
 def save_code(code_object, user, code_text, earliesteditor, commitmessage):
 
-    # save the actual object to mySQL
-    #if code_object.wiki_type == "scraper":
-    #code_object.scraper.update_meta()
     code_object.line_count = int(code_text.count("\n"))
-    code_object.save()   
+    
+    # perhaps the base class should call the upper class updates, not the other way round
+    if code_object.wiki_type == "scraper":
+        code_object.scraper.update_meta()
+        code_object.scraper.save()
+    else:
+        code_object.update_meta()
+        code_object.save()   
 
     # save code and commit code through the mercurialinterface
     lcommitmessage = earliesteditor and ("%s|||%s" % (earliesteditor, commitmessage)) or commitmessage

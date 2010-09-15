@@ -68,7 +68,7 @@ class Scraper (code.Code):
     # update scraper meta data (lines of code etc)    
     def update_meta(self):
 
-        #run parent's update_meta method
+        # runs Code.update_meta
         super(Scraper, self).update_meta()
 
         #update line counts etc
