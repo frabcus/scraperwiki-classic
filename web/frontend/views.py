@@ -161,6 +161,14 @@ def browse(request, page_number = 1, wiki_type = None):
     else:
         all_code_objects = Code.objects.filter(published=True, wiki_type=wiki_type).order_by('-created_at')
 
+    # extremely crude upgrade of Code objects to Scraper objects so I can print out numbers of records associated
+    # there must be a proper way to do this, to overcome the difficulties created by creating multiple code type classes
+    all_code_objects = list(all_code_objects)
+    for i in range(len(all_code_objects)):
+        if all_code_objects[i].wiki_type == 'scraper':
+            all_code_objects[i] = Scraper.objects.get(pk=all_code_objects[i].pk)
+            
+    
     # Number of results to show from settings
     paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)
 

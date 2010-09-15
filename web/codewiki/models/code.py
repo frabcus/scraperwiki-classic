@@ -163,6 +163,7 @@ class Code(models.Model):
         if self.published and self.first_published_at == None:
             self.first_published_at = datetime.datetime.today()
 
+    # this is just to handle the general pointer put into Alerts
     def content_type(self):
         return ContentType.objects.get(app_label="codewiki", model="Code")
 
