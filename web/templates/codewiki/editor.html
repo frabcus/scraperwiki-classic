@@ -83,7 +83,13 @@
                 {% if scraper.id %}
                     <input type="checkbox" value="autosavecheck" name="autosavecheck" id="id_autosavecheck" {% if user.username %}checked{% endif %}>autosave</input>
                 {% endif %}
-                <input id="id_urlquery" type="text" class="text" name="urlquery" /> 
+
+                {% if scraper.view %}
+                  <input id="id_urlquery" type="text" class="text" name="urlquery" /> 
+                {% else %}
+                  <input id="id_urlquery" type="hidden" class="text" name="urlquery" /> 
+                {% endif %}
+
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
             
                 <div class="right">

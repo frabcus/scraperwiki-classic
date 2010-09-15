@@ -35,7 +35,6 @@ $(document).ready(function() {
     //constructor functions
     setupCodeEditor();
     setupMenu();
-    setupTutorial(); 
     setupOrbited();
     setupTabs();
     setupPopups();
@@ -113,26 +112,6 @@ $(document).ready(function() {
         addHotkey('ctrl+d', viewDiff);                       
     };
     
-    //Setup tutorials
-    function setupTutorial(){
-        $('a.scraper-tutorial-link').each(function(){
-            $(this).click(function() { 
-                jQuery.get('/editor/raw/'+$(this).attr('short_name'), function(data) {
-                    if($.browser.mozilla){
-                        // I cannot work out why this only affects firefox
-                        // would be nice if we could use selectLines/replaceSelection
-                        // instead as this allows CTRL-Z to work. TODO Get rid of this
-                        codeeditor.setCode(data);
-                    }else{
-                        codeeditor.selectLines(codeeditor.firstLine(), 0, codeeditor.lastLine(), 0); 
-                        codeeditor.replaceSelection(data);
-                    }
-                    codeeditor.selectLines(codeeditor.firstLine(), 0);   // set cursor to start
-                    hidePopup();
-                });
-            })
-        })
-    }
 
     //Setup Menu
     function setupMenu(){
@@ -157,6 +136,18 @@ $(document).ready(function() {
             }
             return true; 
         })
+
+        $('#id_urlquery').bind('keypress', function(eventObject) {
+            var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
+        	var target = eventObject.target.tagName.toLowerCase();
+        	if (key === 13 && target === 'input') {
+                eventObject.preventDefault();
+                sendCode(); aler
+                return false; 
+            }
+            return true; 
+        })
+
     }
     
     //Setup Tabs
@@ -636,8 +627,7 @@ $(document).ready(function() {
         //if saving then check if the title is set (must be if guid is set)
         if(shortNameIsSet() == false){
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
-
-            if(sResult != false && sResult != '' && sResult != 'Untitled'){
+            if (sResult != false && sResult != '' && sResult != 'Untitled') {
                 $('#id_title').val(sResult);
                 aPageTitle = document.title.split('|')
                 document.title = sResult + ' | ' + aPageTitle[1]
