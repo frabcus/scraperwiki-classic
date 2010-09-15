@@ -12,8 +12,8 @@
         </p>
     </div>
     <div class="content">
-        <ul class="allscraperlist">
-        {% for scraper in queryset %}
+        <ul class="scraper_list">
+        {% for code in queryset %}
             {% include 'frontend/includes/code_object_line.html' %}
     	{% endfor %}
         </ul>

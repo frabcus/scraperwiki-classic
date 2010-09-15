@@ -1,48 +1,51 @@
 {% load markup %}
 <li class="code_object_line">
     <h3>
-        <a href="{% url code_overview scraper.wiki_type scraper.short_name %}">
-            {% if scraper.title %}{{ scraper.title }}{% else %}{{ scraper.short_name }}{% endif %}
+        <a href="{% url code_overview code.wiki_type code.short_name %}">
+            {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
         </a>
-	    <ul class="code_about">
-	       <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
-	       <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
-	        {% if scraper.has_geo %}
-               <li><img src="{{ MEDIA_URL }}/images/icons/map.png"/></li>
-           {% endif %}
-           {% if scraper.has_temporal %}                        
-               <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
-           {% endif %}
+        <ul class="code_about">
+           <li class="codewiki_type {{code.wiki_type|lower}}">{{code.wiki_type|lower}}</li>
+           <li class="language {{code.language|lower}}">{{code.language|lower}}</li>
 
-           {% if scraper.scraper %}
-             ({{ scraper.scraper.record_count }} records)
+           {% if code.scraper %}
+             {% if code.scraper.has_geo %}
+               <li><img src="{{ MEDIA_URL }}/images/icons/map.png"/></li>
+             {% endif %}
+             {% if code.scraper.has_temporal %}
+               <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
+             {% endif %}
+
+             {% if code.scraper.record_count %}
+               ({{ code.scraper.record_count }} records)
+             {% else %}
+               (no records)
+             {% endif %}
            {% endif %}
-           {% ifequal scraper.record_count 0%}
-             (no records)
-           {% endifequal %}
-	    </ul>
+        </ul>
     </h3>
+
     <p class="controls">
-        {% if not scraper.published %}
+        {% if not code.published %}
             <span class="status unpublished">unpublished</span>
         {% endif %}
     </p>
-    {% if scraper.description %}
+    {% if code.description %}
         <p>
-            {{ scraper.description|textile|striptags|truncatewords:75 }}            
+            {{ code.description|textile|striptags|truncatewords:75 }}            
         </p>
     {% endif %}
 
     <small>
         Created by
         {% load gravatar %}
-        {% if scraper.owner %}
-            {% show_gravatar scraper.owner 'small' %}
-            {% if scraper.owner.username %}
-                <a href="{% url profiles_profile_detail scraper.owner.username %}">{{ scraper.owner.get_profile.name }}</a>
+        {% if code.owner %}
+            {% show_gravatar code.owner 'small' %}
+            {% if code.owner.username %}
+                <a href="{% url profiles_profile_detail code.owner.username %}">{{ code.owner.get_profile.name }}</a>
             {% endif %}
         {% endif %}
-        {{scraper.created_at|timesince}} ago
+        {{code.created_at|timesince}} ago
     </small>
     
 </li>

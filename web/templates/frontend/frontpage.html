@@ -13,7 +13,7 @@
     <div class="content {% if user.is_staff %}half left{% else %}full{% endif %}">
         <h2>Featured scrapers</h2>        
         <ul class="scraper_list">
-    		{% for scraper in featured_scrapers %}
+    		{% for code in featured_scrapers %}
     		  {% include 'frontend/includes/code_object_line.html' %}
     		{% endfor %}
     	</ul>
@@ -27,7 +27,7 @@
     <div class="content half right">
         <h2>Featured views</h2>
         <ul>
-    		{% for scraper in featured_views %}
+    		{% for code in featured_views %}
     		  {% include 'frontend/includes/code_object_line.html' %}
     		{% endfor %}
     	</ul>

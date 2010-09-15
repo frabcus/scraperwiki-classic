@@ -40,7 +40,7 @@
     {% if owned_scrapers %}
       <h2>{{ profile.name }}'s scrapers</h2>    	
       <ul class="scraper_list">
-        {% for scraper in owned_scrapers %}
+        {% for code in owned_scrapers %}
           {% include 'frontend/includes/code_object_line.html' %}
         {% endfor %}
       </ul>
@@ -49,7 +49,7 @@
     {% if owned_views %}
     <h2>{{ profile.name }}'s views</h2>
       <ul class="scraper_list">
-        {% for scraper in owned_views %}
+        {% for code in owned_views %}
           {% include 'frontend/includes/code_object_line.html' %}
         {% endfor %}
       </ul> 	            	
