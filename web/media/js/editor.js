@@ -446,7 +446,8 @@ $(document).ready(function() {
             "userrealname" : userrealname, 
             "language":scraperlanguage, 
             "scraper-name":short_name,
-            "code" : codeeditor.getCode()
+            "code" : codeeditor.getCode(),
+            "urlquery" : $('#id_urlquery').val()
         }
         
         send(data)
@@ -455,7 +456,7 @@ $(document).ready(function() {
         // means we can have simultaneous running for staff overview
 
         // new auto-save every time 
-        if (guid && $('#autosavecheck').attr('checked') && pageIsDirty)
+        if (guid && $('#id_autosavecheck').attr('checked') && pageIsDirty)
             saveScraper(); 
     }
 
@@ -655,7 +656,7 @@ $(document).ready(function() {
               data: ({
                 title : $('#id_title').val(),
                 commit_message: "cccommit",
-                wiki_type: $('#id_wiki_type').val(),                
+                wiki_type: $('#id_wiki_type').val(),
                 code : codeeditor.getCode(),
                 earliesteditor : earliesteditor, 
                 action : 'commit'

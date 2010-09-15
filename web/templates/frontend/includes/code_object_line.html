@@ -14,13 +14,12 @@
                <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
            {% endif %}
 
-           {% if scraper.record_count %}
-             ({{ scraper.record_count }} records)
+           {% if scraper.scraper %}
+             ({{ scraper.scraper.record_count }} records)
            {% endif %}
            {% ifequal scraper.record_count 0%}
              (no records)
            {% endifequal %}
-
 	    </ul>
     </h3>
     <p class="controls">
