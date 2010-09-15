@@ -17,10 +17,11 @@ class editorForm(forms.ModelForm):
         model = Code
         fields = ('title', 'code', 'wiki_type')
         
-    title = forms.CharField(widget=forms.TextInput(attrs={'title' : 'Untitled'}),label = "Title*",)
+    title =     forms.CharField(widget=forms.TextInput(attrs={'title' : 'Untitled'}), label = "Title*",)
     wiki_type = forms.ChoiceField(choices=code.WIKI_TYPES, widget=forms.HiddenInput())    
-    code = forms.CharField(widget=widgets.Textarea({'cols':'80', 'rows':'10', 'style':'width:90%'}))
-
+    code =      forms.CharField(widget=widgets.Textarea(attrs={'cols':'80', 'rows':'10', 'style':'width:90%'}))
+    urlquery =  forms.CharField(widget=widgets.TextInput(attrs={'class':'text'}), label = "URLquerystring")
+    
     def clean_title(self):
         title = self.cleaned_data['title']
         if not title or title == '' or title.lower() == 'untitled':

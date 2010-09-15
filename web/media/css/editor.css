@@ -32,7 +32,7 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
         border-top:solid 1px #9f9f9f;border-bottom:solid 1px #9f9f9f;}
 .editor_controls .right  {position:absolute; right:0.3em; top:0.35em;}
 .editor_controls a {font-size:0.8em;}
-.editor_controls input, #meta_form input.button {font-size:0.7em;
+.editor_controls input.button, #meta_form input.button {font-size:0.7em;
     -webkit-border-radius: 4px;-moz-border-radius: 4px; 
     background-color:#e3e3e3; background-repeat:no-repeat; background-position:2px 49%;
         padding:0.4em 0.6em 0.4em 22px;border:solid 1px #9f9f9f; color:#333; font-weight:bold; text-transform:uppercase;}
@@ -45,6 +45,10 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 .editor_controls #diff {background-image:url(../images/icons/diff.png)}
 .editor_controls .commit, #meta_form .button.commit {background-image:url(../images/icons/database_save.png); border-color:#2680c6;
     background-color:#6fb1e6; color:#fff;}
+
+.editor_controls input.text { background-color:#f3f3f3; color:#00b}
+.editor_controls input.text:focus {background:#fff; border:inset 2px;outline:none; }
+.editor_controls input.text:hover {background:#ffffd3;}
 
 .editor_controls ul.code_about {display:inline;font-size:0.9em;}
 .editor_controls ul.code_about, .editor_controls ul.help li {padding:0; margin:0 0 0 0.2em;}

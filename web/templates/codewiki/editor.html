@@ -79,10 +79,11 @@
                 {% if 0 %}
                     <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
                 {% endif %}
-                <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
+                <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
                 {% if scraper.id %}
                     <input type="checkbox" value="autosavecheck" name="autosavecheck" id="autosavecheck" {% if user.username %}checked{% endif %}>autosave</input>
                 {% endif %}
+                {{ form.urlquery }}
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
             
                 <div class="right">
