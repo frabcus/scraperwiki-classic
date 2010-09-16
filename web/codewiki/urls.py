@@ -8,8 +8,7 @@ urlpatterns = patterns('',
     url(r'^table/$',                                      views.scraper_table,          name='scraper_table'),
 
     # special views functionality
-    url(r'^views/(?P<scraper_short_name>[\w_\-]+)/run/$', viewsrpc.rpcexecute,          name='rpcexecute'),
-    url(r'^views/(?P<scraper_short_name>[\w_\-]+)/run/(?P<revision>\d+)/$', 
+    url(r'^views/(?P<scraper_short_name>[\w_\-]+)/run/(?P<revision>\d+)?$', 
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    
     url(r'^views/(?P<scraper_short_name>[\w_\-]+)/html/$',views.htmlview,               name='htmlview'),
     url(r'^views/(?P<short_name>[\w_\-]+)/full/$',        views.view_fullscreen,        name='view_fullscreen'),   
