@@ -71,7 +71,7 @@ urlpatterns = patterns('',
     url(r'^', include('frontend.urls')),
 
     # redirects from old version
-    (r'^editor/$', lambda request: HttpResponseRedirect('/scrapers/new/Python')),
+    (r'^editor/$', lambda request: HttpResponseRedirect('/editor/template/tutorial-1')),
     (r'^scrapers/show/(?P<short_name>[\w_\-]+)/(?:data/|map-only/)?$', 
                    lambda request, short_name: HttpResponseRedirect(reverse('code_overview', args=['scraper', short_name]))),
 #    http://scraperwiki.com/scrapers/epsrc-grants-1/
