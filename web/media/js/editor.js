@@ -16,6 +16,9 @@ $(document).ready(function() {
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
     var earliesteditor = ""; 
+    var wiki_type = $('#id_wiki_type').val(); 
+    var viewrunurl = $('#viewrunurl').val(); 
+    var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
     var conn; // Orbited connection
     var bConnected = false; 
     var buffer = "";
@@ -107,9 +110,10 @@ $(document).ready(function() {
     //Setup Keygrabs
 
     function setupKeygrabs(){
-        addHotkey('ctrl+r', sendCode);       
+        addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+s', saveScraper); 
-        addHotkey('ctrl+d', viewDiff);                       
+        addHotkey('ctrl+d', viewDiff);
+        addHotkey('ctrl+p', popupPreview); 
     };
     
 
@@ -120,7 +124,7 @@ $(document).ready(function() {
         });
         $('#menu_tutorials').click(function(){
             showPopup('popup_tutorials'); 
-        });        
+        });
         $('form#editor').submit(function() { 
             saveScraper(); 
             return false; 
@@ -128,8 +132,8 @@ $(document).ready(function() {
 
         $('#chat_line').bind('keypress', function(eventObject) {
             var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
-        	var target = eventObject.target.tagName.toLowerCase();
-        	if (key === 13 && target === 'input') {
+            var target = eventObject.target.tagName.toLowerCase();
+            if (key === 13 && target === 'input') {
                 eventObject.preventDefault();
                 sendChat(); 
                 return false; 
@@ -139,14 +143,30 @@ $(document).ready(function() {
 
         $('#id_urlquery').bind('keypress', function(eventObject) {
             var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
-        	var target = eventObject.target.tagName.toLowerCase();
-        	if (key === 13 && target === 'input') {
+            var target = eventObject.target.tagName.toLowerCase();
+            if (key === 13 && target === 'input') {
                 eventObject.preventDefault();
-                sendCode(); aler
+                sendCode(); 
                 return false; 
             }
             return true; 
         })
+
+        // code scavenged from the flawed tbHinter plugin that uses value of text rather than value of class to tell whether the box is really empty
+        var urlqueryobj = $('#id_urlquery'); 
+		$('#id_urlquery').focus(function() {
+            if ($(this).hasClass('hint')) {
+                $(this).val('');
+				$(this).removeClass('hint');
+			}
+		});
+		$('#id_urlquery').blur(function() {
+			if(!$(this).hasClass() && ($(this).val() == '')) {
+				$(this).val('urlquery');
+				$(this).addClass('hint');
+			}
+		});
+        $('#id_urlquery').blur();
 
     }
     
@@ -368,8 +388,8 @@ $(document).ready(function() {
         }
     }
 
-      //read data back from twisted
-      function receiveRecord(data) {
+    //read data back from twisted
+    function receiveRecord(data) {
           if (data.message_type == "kill") {
               endingrun(data.content); 
           } else if (data.message_type == "end") {
@@ -392,9 +412,12 @@ $(document).ready(function() {
           } else if (data.message_type == "exception") {
               writeExceptionDump(data); 
           } else if (data.message_type == "console") {
-              writeToConsole(data.content, data.message_type); 
+              if (data.message_sub_type == "consolestatus")  // should really be its own type
+                writeToConsole(data.content, data.message_type); 
+              else
+                writeRunOutput(data.content); 
           } else {
-              writeToConsole(data.content, data.message_type); 
+              writeToConsole(data.content, data.message_type); // able to divert text to the preview iframe
           }
       }        
 
@@ -438,7 +461,7 @@ $(document).ready(function() {
             "language":scraperlanguage, 
             "scraper-name":short_name,
             "code" : codeeditor.getCode(),
-            "urlquery" : $('#id_urlquery').val()
+            "urlquery" : ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val())
         }
         
         send(data)
@@ -456,7 +479,7 @@ $(document).ready(function() {
         resizeControls('up');
         
         document.title = document.title + ' *'
-        
+
         $('#running_annimation').show();
     
         //clear the tabs
@@ -488,6 +511,12 @@ $(document).ready(function() {
     
         //hide annimation
         $('#running_annimation').hide();
+
+        // suppress any more activity to the preview frame
+        if (activepreviewiframe != undefined) {
+            activepreviewiframe.document.close(); 
+            activepreviewiframe = undefined; 
+        }
     }
 
 
@@ -580,25 +609,20 @@ $(document).ready(function() {
     //Setup toolbar
     function setupToolbar(){
 
-        //commit popup button
+        // actually the save button
         $('#btnCommitPopup').live('click', function (){
             saveScraper();  
             return false;
         });
         
-        // run button
-        $('.editor_controls #run').bind('click.run', sendCode);
-        if (scraperlanguage == 'html')
-            $('.editor_controls #run').hide();
-
-        //diff button
+        //diff button (hidden)
          $('.editor_controls #diff').click(function() {
                 viewDiff(); 
                 return false; 
             }
         ); 
 
-        //reload button
+        //reload button (hidden)
          $('.editor_controls #reload').click(function() {
                 reloadScraper(); 
                 return false; 
@@ -617,9 +641,48 @@ $(document).ready(function() {
                 return bReturn;
             }
         );
+
+
+        if (wiki_type == 'view')
+            $('.editor_controls #preview').bind('click.run', popupPreview);
+        else
+            $('.editor_controls #preview').hide();
+
+        if (scraperlanguage == 'html')
+            $('.editor_controls #run').hide();
+        else
+            $('.editor_controls #run').bind('click.run', sendCode);
     }
 
+    function popupPreview() {
+        var viewurl = viewrunurl; 
+        var urlquery = ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
+        var viewurl = viewrunurl; 
+        var previewmessage = ''; 
+        if (urlquery.length != 0) {
+            if (urlquery.match(/^[\w%_.;&~+=\-]+$/g)) 
+                viewurl = viewurl + '?' + urlquery; 
+            else
+                previewmessage = ' [' + urlquery + '] is an invalid query string'; 
+        }
+        previewmessage = '<a href="' + viewurl + '" target="_blank">' + viewurl + '</a>' + previewmessage; 
 
+        $('#previewmessage').html(previewmessage); 
+        $('#popup_preview iframe#previewiframe').css({height: $(window).height() - 180}); 
+
+        // direct method of importing from a view run
+        // $('#popup_preview iframe.view').attr('src', viewurl);  
+
+        // indirect method of directing the run panel into the iframe (works for drafts and without saving)
+        $('#popup_preview iframe#previewiframe').attr('src', 'about:blank');  
+        ifrm = document.getElementById('previewiframe');// $('#popup_preview iframe#previewiframe'); 
+        activepreviewiframe = (ifrm.contentWindow) ? ifrm.contentWindow : (ifrm.contentDocument.document) ? ifrm.contentDocument.document : ifrm.contentDocument;
+        activepreviewiframe.document.open(); 
+
+        sendCode(); // do the running the standard way
+
+        showPopup('popup_preview'); 
+    }
     //Save
     function saveScraper(){
         var bSuccess = false;
@@ -646,7 +709,7 @@ $(document).ready(function() {
               data: ({
                 title : $('#id_title').val(),
                 commit_message: "cccommit",
-                wiki_type: $('#id_wiki_type').val(),
+                wiki_type: wiki_type,
                 code : codeeditor.getCode(),
                 earliesteditor : earliesteditor, 
                 action : 'commit'
@@ -789,6 +852,12 @@ $(document).ready(function() {
             else
                 writeToConsole(data.jtraceback.exceptiondescription, 'exceptiondump'); 
         }
+    }
+
+    function writeRunOutput(sMessage) {
+        writeToConsole(sMessage, 'console'); 
+        if (activepreviewiframe != undefined) 
+            activepreviewiframe.document.write(sMessage); 
     }
 
     //Write to console/data/sources

@@ -184,7 +184,7 @@ br.clear {clear:both;}
 #divEditTags form input {height:1.3em!important; width:200px!important;}
 
 /* View pages */
-iframe.view {border:none;}
+iframe.view {border:thick red dashed;}
 
 /* Hide */
 .hide {display:none;}

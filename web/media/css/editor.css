@@ -43,12 +43,14 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 .editor_controls #run.running {color:red;}
 .editor_controls #reload {background-image:url(../images/icons/arrow_refresh.png)}
 .editor_controls #diff {background-image:url(../images/icons/diff.png)}
+.editor_controls #preview {background-image:url(../images/icons/script_code_red.png)}
 .editor_controls .commit, #meta_form .button.commit {background-image:url(../images/icons/database_save.png); border-color:#2680c6;
     background-color:#6fb1e6; color:#fff;}
 
 .editor_controls input.text { background-color:#f3f3f3; color:#00b}
 .editor_controls input.text:focus {background:#fff; border:inset 2px;outline:none; }
 .editor_controls input.text:hover {background:#ffffd3;}
+.editor_controls input.hint { background-color:#f3f3f3; color:#66b}
 
 .editor_controls ul.code_about {display:inline;font-size:0.9em;}
 .editor_controls ul.code_about, .editor_controls ul.help li {padding:0; margin:0 0 0 0.2em;}
