@@ -12,7 +12,9 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
-from codewiki.models import Scraper, Code, UserCodeEditing
+
+from codewiki.models import Code, Scraper, View, UserCodeEditing
+
 from market.models import Solicitation
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
@@ -27,7 +29,6 @@ import urllib
 
 from utilities import location
 
-from codewiki.models import Scraper as ScraperModel  # is this renaming necessary?
 
 def frontpage(request, public_profile_field=None):
     user = request.user
@@ -149,7 +150,12 @@ def tutorials(request):
     tutorials = {}
     for language in languages:
         tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
-    return render_to_response('frontend/tutorials.html', {'tutorials': tutorials}, context_instance = RequestContext(request))
+    
+    languages = View.objects.filter(published=True, istutorial=True).values_list('language', flat=True).distinct()  # might include html
+    viewtutorials = {}
+    for language in languages:
+        viewtutorials[language] = View.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
+    return render_to_response('frontend/tutorials.html', {'tutorials': tutorials, 'viewtutorials': viewtutorials}, context_instance = RequestContext(request))
 
 
 def browse_wiki_type(request, wiki_type = None, page_number = 1):

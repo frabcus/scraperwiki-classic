@@ -13,22 +13,39 @@
            <a href="{% url help_code_documentation %}">here</a>.</p>
     </div>
 
-<div class="content">
-
- {% for key, value in tutorials.items %}
-<h3 id="{{ key }}_tutorials">{{ key }} tutorials</h3>
-<dl>
+<div class="content {% if user.is_staff %}half left{% else %}full{% endif %}">
+  <h2>Tutorial scrapers</h2>
+  {% for key, value in tutorials.items %}
+  <h3 id="{{ key }}_tutorials">{{ key }} tutorials</h3>
+  <dl>
     {% for scraper in value %}
     <dt>
-    <a href="{% url tutorial scraper.short_name %}" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
+      <a href="{% url tutorial scraper.short_name %}" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
     </dt>
-    <dd>
-      {{scraper.description}}
-    </dd>
+    <dd>{{scraper.description}}</dd>
     {% endfor %}
-</dl>
- {% endfor %}
-
+  </dl>
+  {% endfor %}
 </div>
+
+{% if user.is_staff %}
+<div class="content half right">
+  <h2>Tutorial views</h2>
+  {% for key, value in viewtutorials.items %}
+  <h3 id="{{ key }}_tutorials">{{ key }} tutorials</h3>
+  <dl>
+    {% for scraper in value %}
+    <dt>
+      <a href="{% url tutorial scraper.short_name %}" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
+    </dt>
+    <dd>{{scraper.description}}</dd>
+    {% endfor %}
+  </dl>
+  {% endfor %}
+</div>
+{% endif %}
+
+<br class="clear"/>
+
 
 {% endblock %}
