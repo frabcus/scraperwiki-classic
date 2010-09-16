@@ -40,7 +40,7 @@
             <input type="hidden" id="isstaff" value="{% if user.is_staff %}yes{% endif %}"/>
             <input type="hidden" id="scraperlanguage" value="{{ scraper.language|lower }}"/>
             <input type="hidden" id="codemirror_url" value="{{ MEDIA_URL }}CodeMirror/"/>
-            <input type="hidden" id="viewrunurl" value="{% url rpcexecute scraper.short_name %}"/>
+            <input type="hidden" id="viewrunurl" value="{% if scraper.short_name %}{% url rpcexecute scraper.short_name %}{% endif %}"/>
             {{form.wiki_type}}
         </fieldset>
         <div class="editor">
