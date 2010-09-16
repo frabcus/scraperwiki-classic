@@ -10,6 +10,9 @@ from django.contrib import admin
 import django.contrib.auth.views as auth_views
 import settings
 
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
+
 from django.contrib import admin
 admin.autodiscover()
 
@@ -24,6 +27,10 @@ feeds = {
 
 urlpatterns = patterns('',
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
+    
+    # redirects from old version (would clashes if you happen to have a scraper whose name is list!)
+    (r'^scrapers/list/$', lambda request: HttpResponseRedirect(reverse('scraper_list_wiki_type', args=['scraper']))),
+
     url(r'^', include('codewiki.urls')),    
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name="logout"), 
     url(r'^accounts/', include('registration.urls')),
@@ -62,4 +69,11 @@ urlpatterns = patterns('',
 
     #Rest of the site
     url(r'^', include('frontend.urls')),
+
+    # redirects from old version
+    (r'^editor/$', lambda request: HttpResponseRedirect('/scrapers/new/Python')),
+    (r'^scrapers/show/(?P<short_name>[\w_\-]+)/(?:data/|map-only/)?$', 
+                   lambda request, short_name: HttpResponseRedirect(reverse('code_overview', args=['scraper', short_name]))),
+#    http://scraperwiki.com/scrapers/epsrc-grants-1/
+    
 )
