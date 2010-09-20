@@ -61,10 +61,9 @@ def execute (code, options) :
 
     fs.loadConfiguration()
 
-    # extract the querystring
-    #rargs = cgi.parse_qs(options.urlquery)
-    #sys.stdout.write (json.dumps({ 'message_type':'console', 'content':"jjkjkjk" + str(rargs)}) + "\r\n")
-
+    sys.stdout.write (json.dumps({ 'message_type':'executionstatus', 'content':'startingrun', 'runID':fs.m_runID }) + '\r\n')
+    sys.stdout.flush ()
+    
     code = string.replace (code, '\r', '')
     if options.language == "php" :
         code = "<?php\n%s\n?>\n" % code

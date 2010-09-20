@@ -30,6 +30,7 @@ $(document).ready(function() {
     var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
     var receiverecordqueue = [ ]; 
     var receivechatqueue = [ ]; 
+    var runID = ''; 
 
     $.ajaxSetup({
         timeout: 10000,
@@ -343,7 +344,7 @@ $(document).ready(function() {
                     receiverecordqueue.push(jdata); 
 
                 // allow the user to clear the choked data if they want
-                if (jdata.message_type == 'end') {
+                if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'runfinished')) {
                         $('.editor_controls #run').val('Finishing');
                         $('.editor_controls #run').unbind('click.abort');
                         $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
@@ -353,8 +354,8 @@ $(document).ready(function() {
                     window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  // delay of 1ms makes it work better in FireFox (possibly so it doesn't take priority over the similar function calls in Orbited.js)
 
                 // clear batched up data that's choking the system
-                if (jdata.message_type == 'kill')
-                    window.setTimeout(clearJunkFromQueue, 0); 
+                if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
+                    window.setTimeout(clearJunkFromQueue, 1); 
             }
         }
     }
@@ -390,10 +391,8 @@ $(document).ready(function() {
 
     //read data back from twisted
     function receiveRecord(data) {
-          if (data.message_type == "kill") {
-              endingrun(data.content); 
-          } else if (data.message_type == "end") {
-              endingrun(data.content); 
+          if (data.message_type == "console") {
+              writeRunOutput(data.content); 
           } else if (data.message_type == "sources") {
               writeToSources(data.url, data.bytes, data.failedmessage, data.cached, data.cacheid)
           } else if (data.message_type == "connectionconfirmed") {
@@ -407,15 +406,20 @@ $(document).ready(function() {
               writeToChat("OOO: " + cgiescape(data.content))
           } else if (data.message_type == "data") {
               writeToData(data.content);
-          } else if (data.message_type == "startingrun") {
-              startingrun(data.content);
           } else if (data.message_type == "exception") {
               writeExceptionDump(data); 
-          } else if (data.message_type == "console") {
-              if (data.message_sub_type == "consolestatus")  // should really be its own type
-                writeToConsole(data.content, data.message_type); 
-              else
-                writeRunOutput(data.content); 
+
+          } else if (data.message_type == "executionstatus") {
+              if (data.content == "startingrun")
+                startingrun(data.runID);
+              else if (data.content == "runcompleted")
+                writeToConsole("Finished: " + data.elapsed_seconds + " seconds elapsed, " + data.CPU_seconds + " CPU seconds used"); 
+              else if (data.content == "killsignal")
+                writeToConsole(data.message); 
+              else if (data.content == "runfinished")
+                endingrun(data.content); 
+              else 
+                writeToConsole(data.content); 
           } else {
               writeToConsole(data.content, data.message_type); // able to divert text to the preview iframe
           }
@@ -463,7 +467,6 @@ $(document).ready(function() {
             "code" : codeeditor.getCode(),
             "urlquery" : ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val())
         }
-        
         send(data)
 
         // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
@@ -474,17 +477,18 @@ $(document).ready(function() {
             saveScraper(); 
     }
 
-    function startingrun(content) {
+    function startingrun(lrunID) {
         //show the output area
         resizeControls('up');
         
         document.title = document.title + ' *'
 
         $('#running_annimation').show();
-    
+        runID = lrunID; 
+
         //clear the tabs
         clearOutput();
-        writeToConsole('Starting run ...'); 
+        writeToConsole('Starting run ... ' + runID); 
 
         //unbind run button
         $('.editor_controls #run').unbind('click.run')
@@ -511,6 +515,7 @@ $(document).ready(function() {
     
         //hide annimation
         $('#running_annimation').hide();
+        runID = ''; 
 
         // suppress any more activity to the preview frame
         if (activepreviewiframe != undefined) {
