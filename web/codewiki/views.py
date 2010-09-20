@@ -136,6 +136,7 @@ def view_admin (request, short_name):
     # send back whatever responbse we have
     return response
     
+    
 def scraper_admin (request, short_name):
     response = None
 
@@ -194,35 +195,42 @@ def scraper_admin (request, short_name):
 
     # send back whatever responbse we have
     return response
-    
-def scraper_delete_data(request, scraper_short_name):
-    scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
 
+
+def scraper_delete_data(request, scraper_short_name):
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     if scraper.owner() != request.user:
         raise Http404
-
     if request.POST.get('delete_data', None) == '1':
         models.Scraper.objects.clear_datastore(scraper_id=scraper.guid)
+    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, scraper_short_name]))
 
-    return HttpResponseRedirect(reverse('scraper_admin', args=[scraper_short_name]))
+
+def scraper_run_scraper(request, scraper_short_name):
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    if scraper.owner() != request.user:
+        raise Http404
+    if request.POST.get('run_scraper', None) == '1':
+        from management.commands.run_scrapers import ScraperRunner
+        t = ScraperRunner(scraper, True)
+        t.start()
+    
+    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, scraper_short_name]))
+
 
 # should be generalized to both wikitypes
 def scraper_delete_scraper(request, scraper_short_name):
     user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
-
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
     if scraper.owner() != request.user:
         raise Http404
-
     if request.POST.get('delete_scraper', None) == '1':
         scraper.deleted = True
         scraper.save()
         request.notifications.add("Your scraper has been deleted")
         return HttpResponseRedirect('/')
+    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, scraper_short_name]))
 
-    return HttpResponseRedirect(reverse('scraper_admin', args=[scraper_short_name]))
 
 def view_overview (request, view_short_name):
     user = request.user

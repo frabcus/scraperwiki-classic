@@ -32,6 +32,8 @@ urlpatterns = patterns('',
     url(r'^scrapers/running_scrapers/$',                  views.running_scrapers,       name='running_scrapers'),
     url(r'^scrapers/delete-scraper/(?P<scraper_short_name>[\w_\-]+)/$', 
                                                           views.scraper_delete_scraper, name='scraper_delete_scraper'),
+    url(r'^scrapers/run-scraper/(?P<scraper_short_name>[\w_\-]+)/$', 
+                                                          views.scraper_run_scraper,    name='scraper_run_scraper'),
     url(r'^scrapers/twister/status$', views.twisterstatus, name='twisterstatus'),
         
         #not deprecated as used in by ajax to implement publishScraperButton

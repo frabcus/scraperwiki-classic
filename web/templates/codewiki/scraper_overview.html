@@ -150,6 +150,17 @@
     {% else %}
         <p class="infobox">Only the creator of a scraper can delete or reset it.</p>
     {% endif %}
+
+    {% if user.is_staff %}
+    <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
+        <input type="hidden" name="run_scraper" value="1" />
+        <input type="submit" id="btnRunScraper" class="danger" value="Run this scraper?" />
+        <p>
+            Runs this scraper as though from the schedule. (Staff only)
+        </p>
+    </form>
+    {% endif %}
+
 </div>
 <br class="clear"/>
 {% endblock %}
