@@ -34,7 +34,7 @@ class CSVEmitter(Emitter):
         return self.to_csv(dictlist)
 
     @staticmethod
-    def to_csv(dictlist):
+    def to_csv(dictlist, headings=True):
         keyset = set()
         for row in dictlist:
             if "latlng" in row:   # split the latlng
@@ -45,7 +45,8 @@ class CSVEmitter(Emitter):
         
         fout = StringIO.StringIO()
         writer = csv.writer(fout, dialect='excel')
-        writer.writerow([k.encode('utf-8') for k in allkeys])
+        if headings:
+            writer.writerow([k.encode('utf-8') for k in allkeys])
         for rowdict in dictlist:
             writer.writerow([stringnot(rowdict.get(key))  for key in allkeys])
 
