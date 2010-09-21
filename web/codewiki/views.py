@@ -605,17 +605,10 @@ def htmlview(request, scraper_short_name):
     view = get_object_or_404(models.View.objects, short_name=scraper_short_name)
     return HttpResponse(view.saved_code())
 
-def run_event(request, event_id):
-    event = get_object_or_404(models.ScraperRunEvent, id=event_id)
-    return render_to_response('codewiki/run_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def commit_event(request, event_id):
     event = get_object_or_404(models.CodeCommitEvent, id=event_id)
     return render_to_response('codewiki/commit_event.html', {'event': event}, context_instance=RequestContext(request))
-
-def running_scrapers(request):
-    events = models.ScraperRunEvent.objects.filter(run_ended=None)
-    return render_to_response('codewiki/running_scrapers.html', {'events': events}, context_instance=RequestContext(request))
 
 def choose_template(request, wiki_type):
     form = forms.ChooseTemplateForm(wiki_type)

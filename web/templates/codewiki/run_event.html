@@ -1,3 +1,29 @@
 <h1>Run event</h1>
 
-{{event}}<br/>{{event.output}}
+<table border="1">
+<tr><th>scraper</th> <td>{{event.scraper}}</td></tr>
+<tr><th>run_id</th> <td>{{event.run_id}}</td></tr>
+<tr><th>run_started</th> <td>{{event.run_started}} ({{event.run_started|timesince}} ago)</td></tr>
+{% if event.run_ended %}
+  <tr><th>run_ended</th> <td>{{event.run_ended}} ({{event.run_started|timesince}} ago)</td></tr>
+{% endif %}
+<tr><th>records_produced</th> <td>{{event.records_produced}}</td></tr>
+<tr><th>pages_scraped</th> <td>{{event.pages_scraped}}</td></tr>
+</table>
+
+{% if status %}
+  <form action="{% url scraper_killrunning event.run_id %}" method="post">
+    Running for {{status.runtime|floatformat}} seconds.  
+    <input type="hidden" id="hidKillRun" name="killrun" value="1" />
+    <input type="submit" id="btnKillRun" class="danger" value="Kill running scraper" />
+  </form>
+{% endif %}
+
+<h2>Output</h2>
+<ul>
+{% for line in outputlines %}
+  {% if line %}
+    <li>{{line}}</li>
+  {% endif %}
+{% endfor %}
+</ul>
