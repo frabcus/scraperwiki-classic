@@ -8,10 +8,12 @@ from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
 from django.db import IntegrityError
 from django.contrib.auth.models import User
+from django.views.decorators.http import condition
 import textile
 import random
 
 from django.conf import settings
+from django.utils.encoding import smart_str
 
 from codewiki import models
 from codewiki import forms
@@ -22,6 +24,7 @@ import frontend
 
 import difflib
 import re
+import csv
 
 import StringIO, csv, types
 import datetime
@@ -402,29 +405,66 @@ def raw_about_markup(request, wiki_type, short_name):
     return response
 
 
+        
+# see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
+# also inlining the crappy CSVEmitter.to_csv pointless functionality
+# this is all painfully inefficient due to the unstructuredness of the datastore 
+# and the fact that if you leave the output hanging too long the gateway times out
+import time
 
+def stringnot(v):
+    if v == None:
+        return ""
+    if type(v) == float:
+        return v
+    if type(v) == int:
+        return v
+    return smart_str(v)
+
+def stream_csv(scraper):
+    keylist = [ ]
+    
+    limit = 5000
+    for offset in range(0, 100000, limit):
+        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset)
+        
+        keyset = set()
+        for row in dictlist:
+            if "latlng" in row:   # split the latlng
+                row["lat"], row["lng"] = row.pop("latlng") 
+            row.pop("date_scraped", None) 
+            keyset.update(row.keys())
+        
+        for key in sorted(keyset):
+            if key not in keylist:
+                keylist.append(key)
+        
+        fout = StringIO.StringIO()
+        writer = csv.writer(fout, dialect='excel')
+        if offset == 0:
+            writer.writerow([k.encode('utf-8') for k in keylist])
+        for rowdict in dictlist:
+            writer.writerow([stringnot(rowdict.get(key))  for key in keylist])
+        result = fout.getvalue()
+        fout.close()
+        yield result
+
+        if len(dictlist) != limit:
+            break
+        
+
+# see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
+@condition(etag_func=None)
 def export_csv(request, scraper_short_name):
     """
     This could have been done by having linked directly to the api/csvout, but
     difficult to make the urlreverse for something in a different app code here
     itentical to scraperwiki/web/api/emitters.py CSVEmitter render()
     """
-    scraper = get_object_or_404(
-        models.Scraper.objects,
-        short_name=scraper_short_name)
-    
-    response = HttpResponse(mimetype='text/csv')
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    response = HttpResponse(stream_csv(scraper), mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)
-    limit = 5000
-    for offset in range(0, 100000, limit):
-        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset)
-        response.write(CSVEmitter.to_csv(dictlist, headings=(offset==0)))
-        if len(dictlist) != limit:
-            break
-
     return response
-    #template = loader.get_template('codewiki/data.csv')
-    #context = Context({'data_tables': data_tables,})
 
 
 def scraper_table(request):
