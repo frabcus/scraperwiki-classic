@@ -208,7 +208,7 @@ def scraper_delete_data(request, scraper_short_name):
 # implemented by setting last_run to None
 def scraper_schedule_scraper(request, scraper_short_name):
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    if scraper.owner() != request.user:
+    if scraper.owner() != request.user and not request.user.is_staff:
         raise Http404
     if request.POST.get('schedule_scraper', None) == '1':
         scraper.last_run = None
@@ -218,7 +218,7 @@ def scraper_schedule_scraper(request, scraper_short_name):
 
 def scraper_run_scraper(request, scraper_short_name):
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
-    if scraper.owner() != request.user:
+    if not request.user.is_staff:
         raise Http404
     if request.POST.get('run_scraper', None) == '1':
         from management.commands.run_scrapers import ScraperRunner
