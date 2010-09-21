@@ -60,10 +60,13 @@
 				<li class="helplink"><a href="{% url help %}">Help</a></li>
  			</ul>
 			<p>
-    	        <span class="warning">A new version of ScraperWiki is being deployed</span>,
-                please <a href="{% url contact_form %}">report any issues to us</a>.
-    	        {# Hello! This is the beta version of ScraperWiki,#}
-                {# please <a href="{% url contact_form %}">tell us what you think</a>. #}
+    	        {% if 0 %}
+                    <span class="warning">A new version of ScraperWiki is being deployed</span>,
+                    please <a href="{% url contact_form %}">report any issues to us</a>.
+                {% else %}
+    	            Hello! This is the beta version of ScraperWiki,
+                    please <a href="{% url contact_form %}">tell us what you think</a>.
+                {% endif %}
             </p>
 	    </div>
 
