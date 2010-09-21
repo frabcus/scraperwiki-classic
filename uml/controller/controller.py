@@ -753,7 +753,7 @@ class ScraperController (BaseController) :
                 #  is summed over all children.
                 #
                 ostimes1   = os.times ()
-                os.wait()
+                os.waitpid(pid, 0)
                 ostimes2   = os.times ()
                 cltime2    = time.time()
                 swl.log (self.m_scraperID, self.m_runID, 'C.END',   arg1 = ostimes2[2] - ostimes1[2], arg2 = ostimes2[3] - ostimes1[3])
