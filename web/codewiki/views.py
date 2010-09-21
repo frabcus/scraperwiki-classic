@@ -205,6 +205,16 @@ def scraper_delete_data(request, scraper_short_name):
         models.Scraper.objects.clear_datastore(scraper_id=scraper.guid)
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, scraper_short_name]))
 
+# implemented by setting last_run to None
+def scraper_schedule_scraper(request, scraper_short_name):
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    if scraper.owner() != request.user:
+        raise Http404
+    if request.POST.get('schedule_scraper', None) == '1':
+        scraper.last_run = None
+        scraper.save()
+    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, scraper_short_name]))
+
 
 def scraper_run_scraper(request, scraper_short_name):
     scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)

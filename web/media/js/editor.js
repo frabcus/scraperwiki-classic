@@ -420,6 +420,7 @@ $(document).ready(function() {
                 endingrun(data.content); 
               else 
                 writeToConsole(data.content); 
+
           } else {
               writeToConsole(data.content, data.message_type); // able to divert text to the preview iframe
           }

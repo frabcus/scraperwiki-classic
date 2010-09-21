@@ -65,7 +65,7 @@ class ScraperRunner(threading.Thread):
         runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         runner.stdin.write(code)
         runner.stdin.close()
-
+        
         event = ScraperRunEvent()
         event.scraper = self.scraper
         event.run_id = '???'
@@ -138,26 +138,28 @@ class Command(BaseCommand):
     
     def handle(self, **options):
         if options['short_name']:
-            scrapers = Scraper.objects.get(short_name=options['short_name'], published=True)
+            scrapers = Scraper.objects.get(short_name=options['short_name'])
             self.run_scraper(scrapers, options)
-        else:
-            scrapers = self.get_overdue_scrapers()
+            return
+        
+        scrapers = self.get_overdue_scrapers()
 
-            if 'max_concurrent' in options:
-                try:
-                    scrapers = scrapers[:int(options['max_concurrent'])]
-                except:
-                    pass
+        # limit to the first four scrapers
+        if 'max_concurrent' in options:
+            try:
+                scrapers = scrapers[:int(options['max_concurrent'])]
+            except:
+                pass
 
-            for scraper in scrapers:
-                try:
-                    if not is_currently_running(scraper):
-                        self.run_scraper(scraper, options)
-                        import time
-                        time.sleep(5)
-                    else:
-                        if 'verbose' in options:
-                            print "%s is already running" % scraper.short_name
-                except Exception, e:
-                    print "Error running scraper: " + scraper.short_name
-                    print e
+        for scraper in scrapers:
+            try:
+                if not is_currently_running(scraper):
+                    self.run_scraper(scraper, options)
+                    import time
+                    time.sleep(5)
+                else:
+                    if 'verbose' in options:
+                        print "%s is already running" % scraper.short_name
+            except Exception, e:
+                print "Error running scraper: " + scraper.short_name
+                print e

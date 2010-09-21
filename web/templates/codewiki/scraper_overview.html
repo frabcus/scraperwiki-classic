@@ -118,8 +118,14 @@
 
 <div class="content col right">
     <h3>Schedule{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
-    This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
-    {% sparkline scraper.scraper_sparkline_csv 'medium' %}
+    <p>
+      This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
+      {% ifnotequal scraper.next_run.year 9999 %}
+         (next in {{scraper.next_run|timeuntil}})
+      {% endifnotequal %}
+    </p>
+    <p>{% sparkline scraper.scraper_sparkline_csv 'medium' %}</p>
+
     {% if user_owns_it and not scraper.published %}
       <div id="publishScraper">
         <h3>Publish</h3>
@@ -136,16 +142,17 @@
         <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
             <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
             <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
-            <p>
-                Removes all data for this scraper. There is no undo.
-            </p>
+            <p>Removes all data for this scraper. There is no undo.</p>
         </form>
         <form action="{% url scraper_delete_scraper scraper.short_name %}" method="post">
             <input type="hidden" name="delete_scraper" value="1" />
             <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
-            <p>
-                Deletes this scraper and all its data. There is no undo.
-            </p>
+            <p>Deletes this scraper and all its data. There is no undo.</p>
+        </form>
+        <form action="{% url scraper_schedule_scraper scraper.short_name %}" method="post">
+            <input type="hidden" name="schedule_scraper" value="1" />
+            <input type="submit" id="btnScheduleScraper" class="danger" value="Schedule this scraper?" />
+            <p>Schedule next</p>
         </form>
     {% else %}
         <p class="infobox">Only the creator of a scraper can delete or reset it.</p>
@@ -155,9 +162,7 @@
     <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
         <input type="hidden" name="run_scraper" value="1" />
         <input type="submit" id="btnRunScraper" class="danger" value="Run this scraper?" />
-        <p>
-            Runs this scraper as though from the schedule. (Staff only)
-        </p>
+        <p>Runs this scraper as though from the schedule. (Staff only)</p>
     </form>
     {% endif %}
 

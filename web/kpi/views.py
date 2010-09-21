@@ -83,6 +83,8 @@ def index(request):
     else:
         raise PermissionDenied
     
+    
+# show what's going on with the UMLs and the schedule
 def umlstatus(request):
     user = request.user
     if not user.is_staff:

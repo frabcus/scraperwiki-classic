@@ -30,10 +30,13 @@ urlpatterns = patterns('',
     url(r'^scrapers/run/(?P<event_id>[\w_\-]+)/$',        views.run_event,              name='run_event'),
     url(r'^scrapers/commit/(?P<event_id>\d+)/$',          views.commit_event,           name='commit_event'),
     url(r'^scrapers/running_scrapers/$',                  views.running_scrapers,       name='running_scrapers'),
+    url(r'^scrapers/schedule-scraper/(?P<scraper_short_name>[\w_\-]+)/$', 
+                                                          views.scraper_schedule_scraper,name='scraper_schedule_scraper'),
     url(r'^scrapers/delete-scraper/(?P<scraper_short_name>[\w_\-]+)/$', 
                                                           views.scraper_delete_scraper, name='scraper_delete_scraper'),
     url(r'^scrapers/run-scraper/(?P<scraper_short_name>[\w_\-]+)/$', 
                                                           views.scraper_run_scraper,    name='scraper_run_scraper'),
+    
     url(r'^scrapers/twister/status$', views.twisterstatus, name='twisterstatus'),
         
         #not deprecated as used in by ajax to implement publishScraperButton
