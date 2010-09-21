@@ -412,14 +412,15 @@ def export_csv(request, scraper_short_name):
     scraper = get_object_or_404(
         models.Scraper.objects,
         short_name=scraper_short_name)
-    dictlist = models.Scraper.objects.data_dictlist(
-        scraper_id=scraper.guid,
-        limit=50000)
-
+    
     response = HttpResponse(mimetype='text/csv')
-    response['Content-Disposition'] = \
-        'attachment; filename=%s.csv' % (scraper_short_name)
-    response.write(CSVEmitter.to_csv(dictlist))
+    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)
+    limit = 5000
+    for offset in range(0, 100000, limit):
+        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset)
+        response.write(CSVEmitter.to_csv(dictlist, headings=(offset==0)))
+        if len(dictlist) != limit:
+            break
 
     return response
     #template = loader.get_template('codewiki/data.csv')
