@@ -90,23 +90,24 @@ class spawnRunner(protocol.ProcessProtocol):
         print "Starting run"
         self.transport.write(self.code)
         self.transport.closeStdin()
-        startmessage = json.dumps({'message_type' : "startingrun", 'content' : "starting run"})
+        # moved into runner.py where the runID is allocated and known
+        #startmessage = json.dumps({'message_type' : "startingrun", 'content' : "starting run"})
         #startmessage = format_message("starting run", message_type="startingrun")  # adds a comma
-        self.client.writeall(startmessage)
+        #self.client.writeall(startmessage)
         
     # see http://twistedmatrix.com/documents/10.0.0/api/twisted.internet.protocol.ProcessProtocol.html
     # reroutes this into LineOnlyReceiver to chunk into lines
     def outReceived(self, data):
         print "out", self.LineOnlyReceiver.client.guid, data
         self.LineOnlyReceiver.dataReceived(data)  # this batches it up into line feeds
-
+        # (if we intercepted this data we could potentially get at the runID)
 
     def processEnded(self, data):
-        # self.client.write('')
-        # data = format_message('Finished', 'kill')
-        self.client.kill_run(reason="OK")
-        print "run ended"
-        
+        self.client.running = False
+        self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished'}))
+        self.client.factory.notifytwisterstatus()
+        print "run process ended ", data
+
 
 # There's one of these per editor window open.  All connecting to same factory
 # this is usually called client
@@ -154,19 +155,18 @@ class RunnerProtocol(protocol.Protocol):
         new thread.  'Interfaces' here referes to reading and writing to the
         file descriptiors.  See the spawnRunner documentation for more.
         """
-
         try:
             parsed_data = json.loads(data)
             if parsed_data['command'] == "kill":
                 # Kill the running process (or other if staff)
                 if self.running:
-                    self.kill_run('clientKilled')
+                    self.kill_run()
                 
                 # someone who didn't start it going hits kill
                 elif self.isstaff:
                     for client in self.factory.clients:
                         if client.guid == self.guid and client.running:
-                            client.kill_run('clientKilled')
+                            client.kill_run()
                 
             elif parsed_data['command'] == 'run' and not self.running:
                 if 'code' in parsed_data:
@@ -285,20 +285,16 @@ class RunnerProtocol(protocol.Protocol):
                 if client.guid == self.guid and client != self and client.isstaff:
                     client.write(otherline)  
     
-    def kill_run(self, reason='connectionLost'):
+    def kill_run(self, reason=''):
+        msg = 'Script cancelled'
+        if reason:
+            msg += " (%s)" % reason
+        self.writeall(json.dumps({'message_type':'executionstatus', 'content':'killsignal', 'message':msg}))
+        print msg
         try:
             os.kill(self.running.pid, signal.SIGKILL)
         except:
             pass
-        self.running = False
-        
-        if reason == 'clientKilled':
-            self.writeall(json.dumps({'message_type' : 'kill', 'content' : 'Script cancelled'}))
-        elif reason == "OK":
-            self.writeall(json.dumps({'message_type' : 'end', 'content' : 'Script successful'}))
-        else:
-            self.writeall(json.dumps({'message_type' : 'kill', 'content' : 'Script cancelled'}))
-        self.factory.notifytwisterstatus()
 
 
     def connectionLost(self, reason):
@@ -316,7 +312,7 @@ class RunnerProtocol(protocol.Protocol):
         self.factory.notifytwisterstatus()
         
         if self.running:
-            self.kill_run(reason='connectionLost')
+            self.kill_run(reason='connection lost')
 
 
 class StringProducer(object):
