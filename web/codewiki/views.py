@@ -414,7 +414,7 @@ def export_csv(request, scraper_short_name):
         short_name=scraper_short_name)
     dictlist = models.Scraper.objects.data_dictlist(
         scraper_id=scraper.guid,
-        limit=100000)
+        limit=50000)
 
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = \
