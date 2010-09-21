@@ -12,7 +12,9 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
-from codewiki.models import Scraper, Code, UserCodeEditing
+
+from codewiki.models import Code, Scraper, View, UserCodeEditing
+
 from market.models import Solicitation
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
@@ -27,7 +29,6 @@ import urllib
 
 from utilities import location
 
-from codewiki.models import Scraper as ScraperModel  # is this renaming necessary?
 
 def frontpage(request, public_profile_field=None):
     user = request.user
@@ -149,7 +150,12 @@ def tutorials(request):
     tutorials = {}
     for language in languages:
         tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
-    return render_to_response('frontend/tutorials.html', {'tutorials': tutorials}, context_instance = RequestContext(request))
+    
+    languages = View.objects.filter(published=True, istutorial=True).values_list('language', flat=True).distinct()  # might include html
+    viewtutorials = {}
+    for language in languages:
+        viewtutorials[language] = View.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
+    return render_to_response('frontend/tutorials.html', {'tutorials': tutorials, 'viewtutorials': viewtutorials}, context_instance = RequestContext(request))
 
 
 def browse_wiki_type(request, wiki_type = None, page_number = 1):
@@ -161,13 +167,6 @@ def browse(request, page_number = 1, wiki_type = None):
     else:
         all_code_objects = Code.objects.filter(published=True, wiki_type=wiki_type).order_by('-created_at')
 
-    # extremely crude upgrade of Code objects to Scraper objects so I can print out numbers of records associated
-    # there must be a proper way to do this, to overcome the difficulties created by creating multiple code type classes
-    all_code_objects = list(all_code_objects)
-    for i in range(len(all_code_objects)):
-        if all_code_objects[i].wiki_type == 'scraper':
-            all_code_objects[i] = Scraper.objects.get(pk=all_code_objects[i].pk)
-            
     
     # Number of results to show from settings
     paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)

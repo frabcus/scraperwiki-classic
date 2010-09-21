@@ -16,6 +16,9 @@ $(document).ready(function() {
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
     var earliesteditor = ""; 
+    var wiki_type = $('#id_wiki_type').val(); 
+    var viewrunurl = $('#viewrunurl').val(); 
+    var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
     var conn; // Orbited connection
     var bConnected = false; 
     var buffer = "";
@@ -27,6 +30,7 @@ $(document).ready(function() {
     var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
     var receiverecordqueue = [ ]; 
     var receivechatqueue = [ ]; 
+    var runID = ''; 
 
     $.ajaxSetup({
         timeout: 10000,
@@ -35,7 +39,6 @@ $(document).ready(function() {
     //constructor functions
     setupCodeEditor();
     setupMenu();
-    setupTutorial(); 
     setupOrbited();
     setupTabs();
     setupPopups();
@@ -108,31 +111,12 @@ $(document).ready(function() {
     //Setup Keygrabs
 
     function setupKeygrabs(){
-        addHotkey('ctrl+r', sendCode);       
+        addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+s', saveScraper); 
-        addHotkey('ctrl+d', viewDiff);                       
+        addHotkey('ctrl+d', viewDiff);
+        addHotkey('ctrl+p', popupPreview); 
     };
     
-    //Setup tutorials
-    function setupTutorial(){
-        $('a.scraper-tutorial-link').each(function(){
-            $(this).click(function() { 
-                jQuery.get('/editor/raw/'+$(this).attr('short_name'), function(data) {
-                    if($.browser.mozilla){
-                        // I cannot work out why this only affects firefox
-                        // would be nice if we could use selectLines/replaceSelection
-                        // instead as this allows CTRL-Z to work. TODO Get rid of this
-                        codeeditor.setCode(data);
-                    }else{
-                        codeeditor.selectLines(codeeditor.firstLine(), 0, codeeditor.lastLine(), 0); 
-                        codeeditor.replaceSelection(data);
-                    }
-                    codeeditor.selectLines(codeeditor.firstLine(), 0);   // set cursor to start
-                    hidePopup();
-                });
-            })
-        })
-    }
 
     //Setup Menu
     function setupMenu(){
@@ -141,7 +125,7 @@ $(document).ready(function() {
         });
         $('#menu_tutorials').click(function(){
             showPopup('popup_tutorials'); 
-        });        
+        });
         $('form#editor').submit(function() { 
             saveScraper(); 
             return false; 
@@ -149,14 +133,42 @@ $(document).ready(function() {
 
         $('#chat_line').bind('keypress', function(eventObject) {
             var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
-        	var target = eventObject.target.tagName.toLowerCase();
-        	if (key === 13 && target === 'input') {
+            var target = eventObject.target.tagName.toLowerCase();
+            if (key === 13 && target === 'input') {
                 eventObject.preventDefault();
                 sendChat(); 
                 return false; 
             }
             return true; 
         })
+
+        $('#id_urlquery').bind('keypress', function(eventObject) {
+            var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
+            var target = eventObject.target.tagName.toLowerCase();
+            if (key === 13 && target === 'input') {
+                eventObject.preventDefault();
+                sendCode(); 
+                return false; 
+            }
+            return true; 
+        })
+
+        // code scavenged from the flawed tbHinter plugin that uses value of text rather than value of class to tell whether the box is really empty
+        var urlqueryobj = $('#id_urlquery'); 
+		$('#id_urlquery').focus(function() {
+            if ($(this).hasClass('hint')) {
+                $(this).val('');
+				$(this).removeClass('hint');
+			}
+		});
+		$('#id_urlquery').blur(function() {
+			if(!$(this).hasClass() && ($(this).val() == '')) {
+				$(this).val('urlquery');
+				$(this).addClass('hint');
+			}
+		});
+        $('#id_urlquery').blur();
+
     }
     
     //Setup Tabs
@@ -332,7 +344,7 @@ $(document).ready(function() {
                     receiverecordqueue.push(jdata); 
 
                 // allow the user to clear the choked data if they want
-                if (jdata.message_type == 'end') {
+                if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'runfinished')) {
                         $('.editor_controls #run').val('Finishing');
                         $('.editor_controls #run').unbind('click.abort');
                         $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
@@ -342,8 +354,8 @@ $(document).ready(function() {
                     window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  // delay of 1ms makes it work better in FireFox (possibly so it doesn't take priority over the similar function calls in Orbited.js)
 
                 // clear batched up data that's choking the system
-                if (jdata.message_type == 'kill')
-                    window.setTimeout(clearJunkFromQueue, 0); 
+                if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
+                    window.setTimeout(clearJunkFromQueue, 1); 
             }
         }
     }
@@ -377,12 +389,10 @@ $(document).ready(function() {
         }
     }
 
-      //read data back from twisted
-      function receiveRecord(data) {
-          if (data.message_type == "kill") {
-              endingrun(data.content); 
-          } else if (data.message_type == "end") {
-              endingrun(data.content); 
+    //read data back from twisted
+    function receiveRecord(data) {
+          if (data.message_type == "console") {
+              writeRunOutput(data.content); 
           } else if (data.message_type == "sources") {
               writeToSources(data.url, data.bytes, data.failedmessage, data.cached, data.cacheid)
           } else if (data.message_type == "connectionconfirmed") {
@@ -396,14 +406,23 @@ $(document).ready(function() {
               writeToChat("OOO: " + cgiescape(data.content))
           } else if (data.message_type == "data") {
               writeToData(data.content);
-          } else if (data.message_type == "startingrun") {
-              startingrun(data.content);
           } else if (data.message_type == "exception") {
               writeExceptionDump(data); 
-          } else if (data.message_type == "console") {
-              writeToConsole(data.content, data.message_type); 
+
+          } else if (data.message_type == "executionstatus") {
+              if (data.content == "startingrun")
+                startingrun(data.runID);
+              else if (data.content == "runcompleted")
+                writeToConsole("Finished: " + data.elapsed_seconds + " seconds elapsed, " + data.CPU_seconds + " CPU seconds used"); 
+              else if (data.content == "killsignal")
+                writeToConsole(data.message); 
+              else if (data.content == "runfinished")
+                endingrun(data.content); 
+              else 
+                writeToConsole(data.content); 
+
           } else {
-              writeToConsole(data.content, data.message_type); 
+              writeToConsole(data.content, data.message_type); // able to divert text to the preview iframe
           }
       }        
 
@@ -446,30 +465,31 @@ $(document).ready(function() {
             "userrealname" : userrealname, 
             "language":scraperlanguage, 
             "scraper-name":short_name,
-            "code" : codeeditor.getCode()
+            "code" : codeeditor.getCode(),
+            "urlquery" : ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val())
         }
-        
         send(data)
 
         // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
         // means we can have simultaneous running for staff overview
 
         // new auto-save every time 
-        if (guid && $('#autosavecheck').attr('checked') && pageIsDirty)
+        if (guid && $('#id_autosavecheck').attr('checked') && pageIsDirty)
             saveScraper(); 
     }
 
-    function startingrun(content) {
+    function startingrun(lrunID) {
         //show the output area
         resizeControls('up');
         
         document.title = document.title + ' *'
-        
+
         $('#running_annimation').show();
-    
+        runID = lrunID; 
+
         //clear the tabs
         clearOutput();
-        writeToConsole('Starting run ...'); 
+        writeToConsole('Starting run ... ' + runID); 
 
         //unbind run button
         $('.editor_controls #run').unbind('click.run')
@@ -496,6 +516,13 @@ $(document).ready(function() {
     
         //hide annimation
         $('#running_annimation').hide();
+        runID = ''; 
+
+        // suppress any more activity to the preview frame
+        if (activepreviewiframe != undefined) {
+            activepreviewiframe.document.close(); 
+            activepreviewiframe = undefined; 
+        }
     }
 
 
@@ -588,25 +615,20 @@ $(document).ready(function() {
     //Setup toolbar
     function setupToolbar(){
 
-        //commit popup button
+        // actually the save button
         $('#btnCommitPopup').live('click', function (){
             saveScraper();  
             return false;
         });
         
-        // run button
-        $('.editor_controls #run').bind('click.run', sendCode);
-        if (scraperlanguage == 'html')
-            $('.editor_controls #run').hide();
-
-        //diff button
+        //diff button (hidden)
          $('.editor_controls #diff').click(function() {
                 viewDiff(); 
                 return false; 
             }
         ); 
 
-        //reload button
+        //reload button (hidden)
          $('.editor_controls #reload').click(function() {
                 reloadScraper(); 
                 return false; 
@@ -625,9 +647,48 @@ $(document).ready(function() {
                 return bReturn;
             }
         );
+
+
+        if (wiki_type == 'view')
+            $('.editor_controls #preview').bind('click.run', popupPreview);
+        else
+            $('.editor_controls #preview').hide();
+
+        if (scraperlanguage == 'html')
+            $('.editor_controls #run').hide();
+        else
+            $('.editor_controls #run').bind('click.run', sendCode);
     }
 
+    function popupPreview() {
+        var viewurl = viewrunurl; 
+        var urlquery = ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
+        var viewurl = viewrunurl; 
+        var previewmessage = ''; 
+        if (urlquery.length != 0) {
+            if (urlquery.match(/^[\w%_.;&~+=\-]+$/g)) 
+                viewurl = viewurl + '?' + urlquery; 
+            else
+                previewmessage = ' [' + urlquery + '] is an invalid query string'; 
+        }
+        previewmessage = '<a href="' + viewurl + '" target="_blank">' + viewurl + '</a>' + previewmessage; 
 
+        $('#previewmessage').html(previewmessage); 
+        $('#popup_preview iframe#previewiframe').css({height: $(window).height() - 180}); 
+
+        // direct method of importing from a view run
+        // $('#popup_preview iframe.view').attr('src', viewurl);  
+
+        // indirect method of directing the run panel into the iframe (works for drafts and without saving)
+        $('#popup_preview iframe#previewiframe').attr('src', 'about:blank');  
+        ifrm = document.getElementById('previewiframe');// $('#popup_preview iframe#previewiframe'); 
+        activepreviewiframe = (ifrm.contentWindow) ? ifrm.contentWindow : (ifrm.contentDocument.document) ? ifrm.contentDocument.document : ifrm.contentDocument;
+        activepreviewiframe.document.open(); 
+
+        sendCode(); // do the running the standard way
+
+        showPopup('popup_preview'); 
+    }
     //Save
     function saveScraper(){
         var bSuccess = false;
@@ -635,8 +696,7 @@ $(document).ready(function() {
         //if saving then check if the title is set (must be if guid is set)
         if(shortNameIsSet() == false){
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
-
-            if(sResult != false && sResult != '' && sResult != 'Untitled'){
+            if (sResult != false && sResult != '' && sResult != 'Untitled') {
                 $('#id_title').val(sResult);
                 aPageTitle = document.title.split('|')
                 document.title = sResult + ' | ' + aPageTitle[1]
@@ -655,7 +715,7 @@ $(document).ready(function() {
               data: ({
                 title : $('#id_title').val(),
                 commit_message: "cccommit",
-                wiki_type: $('#id_wiki_type').val(),                
+                wiki_type: wiki_type,
                 code : codeeditor.getCode(),
                 earliesteditor : earliesteditor, 
                 action : 'commit'
@@ -798,6 +858,12 @@ $(document).ready(function() {
             else
                 writeToConsole(data.jtraceback.exceptiondescription, 'exceptiondump'); 
         }
+    }
+
+    function writeRunOutput(sMessage) {
+        writeToConsole(sMessage, 'console'); 
+        if (activepreviewiframe != undefined) 
+            activepreviewiframe.document.write(sMessage); 
     }
 
     //Write to console/data/sources

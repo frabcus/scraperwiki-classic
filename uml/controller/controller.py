@@ -753,7 +753,7 @@ class ScraperController (BaseController) :
                 #  is summed over all children.
                 #
                 ostimes1   = os.times ()
-                os.wait()
+                os.waitpid(pid, 0)
                 ostimes2   = os.times ()
                 cltime2    = time.time()
                 swl.log (self.m_scraperID, self.m_runID, 'C.END',   arg1 = ostimes2[2] - ostimes1[2], arg2 = ostimes2[3] - ostimes1[3])
@@ -762,11 +762,15 @@ class ScraperController (BaseController) :
                                         (   int(cltime2 - cltime1),
                                             int(ostimes2[2] - ostimes1[2])
                                         )
+                
+                # this creates the status output that is passed out to runner.py.  
+                # The actual completion signal comes when the runner.py process ends
                 self.wfile.write \
                     (   json.dumps \
-                        (   {   'message_type'  : 'console',
-                                'message_sub_type'  : 'consolestatus',  # should be made into message_type
-                                'content'       : msg,
+                        (   {   'message_type'    : 'executionstatus',
+                                'content'         : 'runcompleted', 
+                                'elapsed_seconds' : int(cltime2 - cltime1), 
+                                'CPU_seconds'     : int(ostimes2[2] - ostimes1[2])
                             }
                         )   + '\n'
                     )

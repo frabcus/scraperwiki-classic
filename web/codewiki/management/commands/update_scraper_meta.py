@@ -4,6 +4,8 @@ from django.core.management.base import BaseCommand, CommandError
 
 from codewiki.models import Scraper
 
+# this command looks like a botch.  why isn't this data updated when it's run
+
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--short_name', '-s', dest='short_name',

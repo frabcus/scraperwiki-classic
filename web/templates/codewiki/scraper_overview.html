@@ -12,7 +12,7 @@
 <div class="content full">
     <h2>Sample Data</h2>
     <div class="data_viewer">
-        {% if has_data %}
+        {% if data.rows %}
             <div>
                 <table class="data">
                     <thead>
@@ -57,8 +57,21 @@
         {% endif %}
         <div class="content_footer">
             <p>
-                This dataset has a total of {{ scraper.record_count }} records and was last updated on {{scraper.last_run|date:"H:i, j F Y"}}.
-                {% if scraper.license_link%}The license for this data is {{scraper.license|lower|default:"&nbsp;"}} and a copy can be found on <a href="{{scraper.license_link}}">this page</a>.{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" class="edit">[edit license]</a>{% else %}The license for this dataset is unknown, <a href="{% url scraper_admin scraper.short_name %}">please add a link to the license if you are able to locate it</a>.{% endif %}{% endif %}
+                This dataset has a total of {{ scraper.record_count }} records and 
+                {% if scraper.last_run %}
+                  was last run on {{scraper.last_run|date:"H:i, j F Y"}} ({{scraper.last_run|timesince}} ago)
+                {% else %}
+                  has not yet been run
+                {% endif %}
+
+                {% if scraper.license_link%}
+                  The license for this data is {{scraper.license|lower|default:"&nbsp;"}} and a copy can be found on <a href="{{scraper.license_link}}">this page</a>.
+                  {% if user.is_authenticated %}
+                    <a href="{% url scraper_admin scraper.short_name %}" class="edit">[edit license]</a>
+                  {% else %}
+                    The license for this dataset is unknown, <a href="{% url scraper_admin scraper.short_name %}">please add a link to the license if you are able to locate it</a>.
+                  {% endif %}
+                {% endif %}
             </p>
         </div>
     </div>
@@ -105,8 +118,14 @@
 
 <div class="content col right">
     <h3>Schedule{% if user.is_authenticated %} <a href="{% url scraper_admin scraper.short_name %}" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
-    This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
-    {% sparkline scraper.scraper_sparkline_csv 'medium' %}
+    <p>
+      This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
+      {% ifnotequal scraper.next_run.year 9999 %}
+         (next in {{scraper.next_run|timeuntil}})
+      {% endifnotequal %}
+    </p>
+    <p>{% sparkline scraper.scraper_sparkline_csv 'medium' %}</p>
+
     {% if user_owns_it and not scraper.published %}
       <div id="publishScraper">
         <h3>Publish</h3>
@@ -123,20 +142,30 @@
         <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
             <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
             <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
-            <p>
-                Removes all data for this scraper. There is no undo.
-            </p>
+            <p>Removes all data for this scraper. There is no undo.</p>
         </form>
         <form action="{% url scraper_delete_scraper scraper.short_name %}" method="post">
             <input type="hidden" name="delete_scraper" value="1" />
             <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
-            <p>
-                Deletes this scraper and all its data. There is no undo.
-            </p>
+            <p>Deletes this scraper and all its data. There is no undo.</p>
+        </form>
+        <form action="{% url scraper_schedule_scraper scraper.short_name %}" method="post">
+            <input type="hidden" name="schedule_scraper" value="1" />
+            <input type="submit" id="btnScheduleScraper" class="danger" value="Schedule this scraper?" />
+            <p>Schedule next</p>
         </form>
     {% else %}
         <p class="infobox">Only the creator of a scraper can delete or reset it.</p>
     {% endif %}
+
+    {% if user.is_staff %}
+    <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
+        <input type="hidden" name="run_scraper" value="1" />
+        <input type="submit" id="btnRunScraper" class="danger" value="Run this scraper?" />
+        <p>Runs this scraper as though from the schedule. (Staff only)</p>
+    </form>
+    {% endif %}
+
 </div>
 <br class="clear"/>
 {% endblock %}

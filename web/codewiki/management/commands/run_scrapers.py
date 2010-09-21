@@ -2,10 +2,8 @@ import django
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 
-try:
-    import json
-except:
-    import simplejson as json
+try:    import json
+except: import simplejson as json
 
 import subprocess
 
@@ -18,15 +16,38 @@ import time
 import threading
 import urllib
 
-# this is invoked by the crontab with the function
-#   python manage.py run_scrapers.
-# currently it runs committed scrapers, rather than saved scrapers!
+import re
 
+
+# useful function for polling the UML for its current position (don't know where to keep it)
+def GetUMLrunningstatus():
+    result = [ ]
+    now = time.time()
+    
+    
+    fin = urllib.urlopen('http://localhost:9000/Status')
+    lines = fin.readlines()
+    for line in lines:
+        if re.match("\s*$", line):
+            continue
+        mline = re.match('name=\w+;scraperID=([\w\._]*?);testName=([\w\._]*?);state=(\w);runID=([\w.]*);time=([\d.]*)\s*$', line)
+        assert mline, line
+        if mline:
+            result.append( {'scraperID':mline.group(1), 'testName':mline.group(2), 
+                            'state':mline.group(3), 'runID':mline.group(4), 
+                            'runtime':now - float(mline.group(5)) } )
+    return result
+
+def is_currently_running(scraper):
+    return urllib.urlopen('http://localhost:9000/Status').read().find(scraper.guid) > 0    
+
+
+# class to manage running one scraper
 class ScraperRunner(threading.Thread):
-    def __init__(self, scraper, options):
+    def __init__(self, scraper, verbose):
         super(ScraperRunner, self).__init__()
         self.scraper = scraper
-        self.options = options    
+        self.verbose = verbose 
     
     def run(self):
         guid = self.scraper.guid
@@ -44,7 +65,7 @@ class ScraperRunner(threading.Thread):
         runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         runner.stdin.write(code)
         runner.stdin.close()
-
+        
         event = ScraperRunEvent()
         event.scraper = self.scraper
         event.run_id = '???'
@@ -55,7 +76,7 @@ class ScraperRunner(threading.Thread):
 
         for line in runner.stdout:
             event.output += line
-            if self.options.get('verbose'):
+            if self.verbose:
                 print "nnn", line
             try:
                 message = json.loads(line)
@@ -68,7 +89,7 @@ class ScraperRunner(threading.Thread):
         event.save()
         
         elapsed = (time.time() - start)
-        if self.options.get('verbose'): 
+        if self.verbose: 
             print elapsed
 
         if failed:
@@ -90,6 +111,10 @@ class ScraperRunner(threading.Thread):
         alert.save()
 
 
+
+# this is invoked by the crontab with the function
+#   python manage.py run_scrapers.
+
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--short_name', '-s', dest='short_name',
@@ -101,11 +126,8 @@ class Command(BaseCommand):
     )
     help = 'Run a scraper, or all scrapers.  By default all scrapers that are published are run.'
 
-    def is_currently_running(self, scraper):
-        return urllib.urlopen('http://localhost:9000/Status').read().find(scraper.guid) > 0    
-
     def run_scraper(self, scraper, options):
-        t = ScraperRunner(scraper, options)
+        t = ScraperRunner(scraper, options.get('verbose'))
         t.start()
 
     def get_overdue_scrapers(self):
@@ -116,26 +138,28 @@ class Command(BaseCommand):
     
     def handle(self, **options):
         if options['short_name']:
-            scrapers = Scraper.objects.get(short_name=options['short_name'], published=True)
+            scrapers = Scraper.objects.get(short_name=options['short_name'])
             self.run_scraper(scrapers, options)
-        else:
-            scrapers = self.get_overdue_scrapers()
+            return
+        
+        scrapers = self.get_overdue_scrapers()
 
-            if 'max_concurrent' in options:
-                try:
-                    scrapers = scrapers[:int(options['max_concurrent'])]
-                except:
-                    pass
+        # limit to the first four scrapers
+        if 'max_concurrent' in options:
+            try:
+                scrapers = scrapers[:int(options['max_concurrent'])]
+            except:
+                pass
 
-            for scraper in scrapers:
-                try:
-                    if not self.is_currently_running(scraper):
-                        self.run_scraper(scraper, options)
-                        import time
-                        time.sleep(5)
-                    else:
-                        if 'verbose' in options:
-                            print "%s is already running" % scraper.short_name
-                except Exception, e:
-                    print "Error running scraper: " + scraper.short_name
-                    print e
+        for scraper in scrapers:
+            try:
+                if not is_currently_running(scraper):
+                    self.run_scraper(scraper, options)
+                    import time
+                    time.sleep(5)
+                else:
+                    if 'verbose' in options:
+                        print "%s is already running" % scraper.short_name
+            except Exception, e:
+                print "Error running scraper: " + scraper.short_name
+                print e

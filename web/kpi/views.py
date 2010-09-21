@@ -2,8 +2,14 @@ from django.shortcuts import render_to_response
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 
-from codewiki.models import Scraper
+from codewiki.models import Scraper, Code
 import datetime, calendar
+
+from codewiki.management.commands.run_scrapers import GetUMLrunningstatus
+from django.core.exceptions import ObjectDoesNotExist
+
+
+# this clearly is something that should be implemented as a scraperwiki view
 
 from pygooglechart import StackedVerticalBarChart
 
@@ -76,3 +82,19 @@ def index(request):
         return render_to_response('kpi/index.html', context)
     else:
         raise PermissionDenied
+    
+    
+# show what's going on with the UMLs and the schedule
+def umlstatus(request):
+    user = request.user
+    if not user.is_staff:
+        raise PermissionDenied
+            
+    statusscrapers = GetUMLrunningstatus()
+    for status in statusscrapers:
+        if status['scraperID']:
+            status['scraper'] = Code.objects.get(guid=status['scraperID'])   # could throw ObjectDoesNotExist
+        
+    context = { 'statusscrapers': statusscrapers }
+    return render_to_response('kpi/umlstatus.html', context)
+

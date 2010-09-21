@@ -34,17 +34,17 @@ SCHEDULE_OPTIONS_DICT = dict(SCHEDULE_OPTIONS)
 
 class Scraper (code.Code):
 
-    has_geo = models.BooleanField(default=False)
+    has_geo      = models.BooleanField(default=False)
     has_temporal = models.BooleanField(default=False)    
-    last_run = models.DateTimeField(blank=True, null=True)    
-    license = models.CharField(max_length=100, blank=True)
+    last_run     = models.DateTimeField(blank=True, null=True)    
+    license      = models.CharField(max_length=100, blank=True)
     license_link = models.URLField(verify_exists=False, null=True, blank=True)
     record_count = models.IntegerField(default=0)        
     scraper_sparkline_csv = models.CharField(max_length=255, null=True)
-    run_interval = models.IntegerField(default=86400)
+    run_interval = models.IntegerField(default=86400)  # in seconds
 
     objects = managers.scraper.ScraperManager()
-    unfiltered = models.Manager() # django admin gets all confused if this lives in the parent class, so duplicated in child classes
+    unfiltered  = models.Manager() # django admin gets confused if this lives in the parent class, so duplicated in child classes
 
     def __init__(self, *args, **kwargs):
         super(Scraper, self).__init__(*args, **kwargs)
@@ -68,7 +68,7 @@ class Scraper (code.Code):
     # update scraper meta data (lines of code etc)    
     def update_meta(self):
 
-        #run parent's update_meta method
+        # runs Code.update_meta
         super(Scraper, self).update_meta()
 
         #update line counts etc
@@ -93,6 +93,15 @@ class Scraper (code.Code):
 
     def content_type(self):
         return ContentType.objects.get(app_label="codewiki", model="Scraper")
+
+    # perhaps should be a member variable so we can sort directly on it (and set it when we want something to run immediately)
+    def next_run(self):
+        if not self.run_interval:
+            return datetime.datetime(9999, 12, 31)
+        if not self.last_run:
+            return datetime.datetime.now() - datetime.timedelta(1, 0, 0)  # one day ago
+        return self.last_run + datetime.timedelta(0, self.run_interval, 0)
+
 
     class Meta:
         app_label = 'codewiki'
@@ -127,14 +136,14 @@ class ScraperMetadata(models.Model):
         verbose_name_plural = 'scraper metadata'
 
 class ScraperRunEvent(models.Model):
-    scraper = models.ForeignKey(Scraper)
-    run_id = models.CharField(max_length=100)
-    pid = models.IntegerField()
-    run_started = models.DateTimeField()
-    run_ended = models.DateTimeField(null=True)
+    scraper         = models.ForeignKey(Scraper)
+    run_id          = models.CharField(max_length=100)  
+    pid             = models.IntegerField()   # will only be temporarily valid and probably doesn't belong here
+    run_started     = models.DateTimeField()
+    run_ended       = models.DateTimeField(null=True)
     records_produced = models.IntegerField(default=0)
-    pages_scraped = models.IntegerField(default=0)
-    output = models.TextField()
+    pages_scraped   = models.IntegerField(default=0)
+    output          = models.TextField()
 
     def __unicode__(self):
         return u'start: %s   end: %s' % (self.run_started, self.run_ended)

@@ -1,0 +1,25 @@
+<html>
+<head><title>UML status</title></head>
+<body>
+<h1>UML Status</h1>
+
+<table border="1">
+<tr><th>Scraper</th><th>Runid</th><th>time</th></tr>
+{% for status in statusscrapers %}
+  <tr>
+    <td>
+    {% if status.scraper %}
+      <a href="{% url code_overview status.scraper.wiki_type status.scraper.short_name %}">{{status.scraper.short_name}}</a>
+    {% else %}
+      {{status.scraperID}}--
+    {% endif %}
+    </td>
+
+    <td>{{status.runID}}</td>
+    <td>{{status.runtime}}</td>
+  </tr>
+{% endfor %}
+</table>
+
+</body>
+</html>

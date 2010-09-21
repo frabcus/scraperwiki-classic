@@ -22,6 +22,7 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cookie.js?{{settings.REVISION}}"></script>    
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.textbox-hinter.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.htmlClean-min.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js?{{settings.REVISION}}"></script>
@@ -39,6 +40,7 @@
             <input type="hidden" id="isstaff" value="{% if user.is_staff %}yes{% endif %}"/>
             <input type="hidden" id="scraperlanguage" value="{{ scraper.language|lower }}"/>
             <input type="hidden" id="codemirror_url" value="{{ MEDIA_URL }}CodeMirror/"/>
+            <input type="hidden" id="viewrunurl" value="{% if scraper.short_name %}{% url rpcexecute scraper.short_name %}{% endif %}"/>
             {{form.wiki_type}}
         </fieldset>
         <div class="editor">
@@ -79,10 +81,23 @@
                 {% if 0 %}
                     <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
                 {% endif %}
-                <input type="button" class="execute" value="Run" name="run" id="run" title="Run this scraper (Ctrl + R)"/>
-                {% if scraper.id %}
-                    <input type="checkbox" value="autosavecheck" name="autosavecheck" id="autosavecheck" {% if user.username %}checked{% endif %}>autosave</input>
+
+                <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R)"/>
+                {% if scraper.view %}
+                    <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P)"/>
                 {% endif %}
+
+                {% if scraper.id %}
+                    <input type="checkbox" value="autosavecheck" name="autosavecheck" id="id_autosavecheck" {% if user.username %}checked{% endif %} />autosave
+                {% endif %}
+
+                {% if scraper.view %}
+                  <label for="id_urlquery" class="hide">Urlquery:</label>
+                  <input id="id_urlquery" type="text" class="text" name="urlquery" title="URL query string passed to the view" /> 
+                {% else %}
+                  <input id="id_urlquery" type="hidden" class="text" name="urlquery" /> 
+                {% endif %}
+
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
             
                 <div class="right">
@@ -95,7 +110,7 @@
                     {% else %}
                         <a id="aCloseEditor1" href="{% url frontpage %}">close editor</a>
                     {% endif %}
-                    <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save {{scraper.wiki_type}}" title="Save this scraper (Ctrl + S)"/>
+                    <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save {% ifequal scraper.wiki_type 'scraper' %}{{scraper.wiki_type}}{% endifequal %}" title="Save this scraper (Ctrl + S)"/>
                 </div>
             </div>
 
@@ -142,7 +157,7 @@
       <div id="feedback_messages">
       
       </div>
-    <div id="popups">
+      <div id="popups">
             <div id="diff" class="popup_item">
                 <div class="popup_header">
                     <h2>Diff with the published version</h2>
@@ -152,6 +167,7 @@
                     <pre></pre>
                 </div>
             </div>
+
             <div id="popup_text" class="popup_item">
                 <div class="popup_header">
                     <a class="popupClose">close</a>
@@ -173,7 +189,17 @@
                 <div class="output">
                     {% include quick_help_template %}           
                  </div>
-             </div>                  
+             </div>
+
+            <div id="popup_preview" class="popup_item">
+                <a class="popupClose">close</a>
+                <h3>View preview <small id="previewmessage"></small></h3>
+                <div class="iframeoutput">
+                <iframe id="previewiframe" width="100%" height="100px" src="">
+                </iframe>
+                 </div>
+             </div>
+
         </form>
         <div id="overlay"></div>        
     </div>
