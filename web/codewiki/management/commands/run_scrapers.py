@@ -30,7 +30,7 @@ def GetUMLrunningstatus():
     for line in lines:
         if re.match("\s*$", line):
             continue
-        mline = re.match('name=\w+;scraperID=([\w\._]*?);testName=([\w\._]*?);state=(\w);runID=([\w.]*);time=([\d.]*)\s*$', line)
+        mline = re.match('name=\w+;scraperID=([\w\._]*?);testName=([^;]*?);state=(\w);runID=([\w.]*);time=([\d.]*)\s*$', line)
         assert mline, line
         if mline:
             result.append( {'scraperID':mline.group(1), 'testName':mline.group(2), 
