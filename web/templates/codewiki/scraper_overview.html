@@ -59,7 +59,7 @@
             <p>
                 This dataset has a total of {{ scraper.record_count }} records and 
                 {% if scraper.last_run %}
-                  was last run on {{scraper.last_run|date:"H:i, j F Y"}}
+                  was last run on {{scraper.last_run|date:"H:i, j F Y"}} ({{scraper.last_run|timesince}} ago)
                 {% else %}
                   has not yet been run
                 {% endif %}
