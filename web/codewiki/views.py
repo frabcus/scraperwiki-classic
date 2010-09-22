@@ -43,9 +43,7 @@ def scraper_overview(request, scraper_short_name):
     Shows info on the scraper plus example data.
     """
     user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects,
-        short_name=scraper_short_name)
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -254,7 +252,8 @@ def view_overview (request, view_short_name):
     #get scrapers used in this view
     related_scrapers = scraper.relations.filter(wiki_type='scraper')
     
-    return render_to_response('codewiki/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper, 'scraper_tags': scraper_tags, 'related_scrapers': related_scrapers, }, context_instance=RequestContext(request))
+    context = {'selected_tab': 'overview', 'scraper': scraper, 'scraper_tags': scraper_tags, 'related_scrapers': related_scrapers, }
+    return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
     
     
 def view_fullscreen (request, short_name):
@@ -281,10 +280,10 @@ def comments(request, wiki_type, short_name):
 
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    dictionary = { 'scraper_tags': scraper_tags, 'scraper_owner': scraper_owner, 'scraper_contributors': scraper_contributors,
+    context = { 'scraper_tags': scraper_tags, 'scraper_owner': scraper_owner, 'scraper_contributors': scraper_contributors,
                    'scraper_followers': scraper_followers, 'selected_tab': 'comments', 'scraper': scraper,
                    'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
-    return render_to_response('codewiki/comments.html', dictionary, context_instance=RequestContext(request))
+    return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
 
 def scraper_history(request, wiki_type, short_name):
@@ -312,10 +311,9 @@ def scraper_history(request, wiki_type, short_name):
     
     # The function updatecommitalertsrev() creates Alerts of content_type.  Make sure it's Code type, not Scraper or View type
     history = frontend.models.Alerts.objects.filter(content_type=content_type, object_id=scraper.pk).order_by('-datetime')
-
+    
     dictionary = { 'selected_tab': 'history', 'scraper': scraper, 'history': history,
                    'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it, "user":user }
-    
     
     
     # extract the commit log directly from the mercurial repository without referring to the 'Alerts'
@@ -355,14 +353,29 @@ def scraper_history(request, wiki_type, short_name):
             commititem["firstdatetime"] = commititem["datetime"]
             commititem["lastdatetime"] = commititem["datetime"]
             commititem["revcount"] = 1
+            commititem["datetime"] = commititem["datetime"]
+            commititem["type"] = "commit"
             commitlog.append(commititem)
     
+    # put in the duration ranges
     for commititem in commitlog:
         timeduration = commititem["lastdatetime"] - commititem["firstdatetime"]
         commititem["durationminutes"] = "%.1f" % (timeduration.days*24*60 + timeduration.seconds/60.0)
         
-    commitlog.reverse()
-    dictionary["commitlog"] = commitlog
+    
+    # now obtain the run-events and zip together
+    itemlog = commitlog
+    if scraper.wiki_type == 'scraper':
+        runevents = scraper.scraper.scraperrunevent_set.all().order_by('-run_started')
+        for runevent in runevents:
+            runitem = { "type":"runevent", "runevent":runevent, "datetime":runevent.run_started }
+            if runevent.run_ended:
+                runitem["runduration"] = runevent.run_ended - runevent.run_started
+            itemlog.append(runitem)
+        itemlog.sort(key=lambda x: x["datetime"])
+    
+    itemlog.reverse()
+    dictionary["itemlog"] = itemlog
     dictionary["filestatus"] = mercurialinterface.getfilestatus(scraper)
     
     return render_to_response('codewiki/history.html', dictionary, context_instance=RequestContext(request))
@@ -397,6 +410,8 @@ def code(request, wiki_type, short_name):
     dictionary["line_count"] = status["code"].count("\n") + 3
 
     return render_to_response('codewiki/code.html', dictionary, context_instance=RequestContext(request))
+
+
 
 def raw_about_markup(request, wiki_type, short_name):
     code_object = get_object_or_404(models.Code.objects, short_name=short_name)
@@ -605,17 +620,10 @@ def htmlview(request, scraper_short_name):
     view = get_object_or_404(models.View.objects, short_name=scraper_short_name)
     return HttpResponse(view.saved_code())
 
-def run_event(request, event_id):
-    event = get_object_or_404(models.ScraperRunEvent, id=event_id)
-    return render_to_response('codewiki/run_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def commit_event(request, event_id):
     event = get_object_or_404(models.CodeCommitEvent, id=event_id)
     return render_to_response('codewiki/commit_event.html', {'event': event}, context_instance=RequestContext(request))
-
-def running_scrapers(request):
-    events = models.ScraperRunEvent.objects.filter(run_ended=None)
-    return render_to_response('codewiki/running_scrapers.html', {'events': events}, context_instance=RequestContext(request))
 
 def choose_template(request, wiki_type):
     form = forms.ChooseTemplateForm(wiki_type)

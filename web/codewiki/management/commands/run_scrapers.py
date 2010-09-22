@@ -7,7 +7,7 @@ except: import simplejson as json
 
 import subprocess
 
-from codewiki.models import Scraper, ScraperRunEvent
+from codewiki.models import Code, Scraper, ScraperRunEvent
 from frontend.models import Alerts
 import frontend
 import settings
@@ -17,6 +17,8 @@ import threading
 import urllib
 
 import re
+import os
+import signal
 
 
 # useful function for polling the UML for its current position (don't know where to keep it)
@@ -38,8 +40,21 @@ def GetUMLrunningstatus():
                             'runtime':now - float(mline.group(5)) } )
     return result
 
+def killrunevent(runevent):
+    pid = runevent.pid
+    success = False
+    if pid != -1:
+        try:
+            os.kill(pid, signal.SIGKILL)
+            success = True
+        except:
+            pass
+    return success
+
+
 def is_currently_running(scraper):
     return urllib.urlopen('http://localhost:9000/Status').read().find(scraper.guid) > 0    
+
 
 
 # class to manage running one scraper
@@ -68,34 +83,69 @@ class ScraperRunner(threading.Thread):
         
         event = ScraperRunEvent()
         event.scraper = self.scraper
-        event.run_id = '???'
-        event.pid = runner.pid
+        event.run_id = '???'   # should allow empty
+        event.pid = runner.pid # only applies when this runner is active
         event.run_started = datetime.datetime.now()
+        event.run_ended = event.run_started  # actually used as last_updated
         event.output = ""
         event.save()
 
-        for line in runner.stdout:
-            event.output += line
-            if self.verbose:
-                print "nnn", line
+        # a partial implementation of editor.js
+        bexception = False
+        bcompleted = False
+        while True:
+            line = runner.stdout.readline()
+            if not line:
+                break
             try:
-                message = json.loads(line)
-                if message['message_type'] == 'fail' or message['message_type'] == 'exception':
-                    failed = True
+                data = json.loads(line)
             except:
-                pass
+                data = { 'message_type':'console', 'content':"JSONERROR: "+line }
+            
+            message_type = data.get('message_type')
+            content = data.get("content")
+            loutput = ''
+            lchanged = False
+            if message_type == 'executionstatus':
+                if content == "startingrun":
+                    event.run_id = data.get("runID")
+                elif content == "runcompleted":
+                    loutput = "Finished:: %s seconds elapsed, %s CPU seconds used" % (data.get("elapsed_seconds"), data.get("CPU_seconds")); 
+                    bcompleted = True
+                #elif content == "killsignal":  # will not happen as it's generated in twister
+                elif content == "runfinished":
+                    loutput += "Run finished\n"
 
+            elif message_type == "sources":
+                event.pages_scraped += 1    # data.url, data.bytes
+                lchanged = True
+            elif message_type == "data":
+                event.records_produced += 1
+                lchanged = True
+            elif message_type == "exception":
+                loutput = str(data.get("jtraceback"))+"\n"  # should parse this out properly
+                bexception = True
+            elif message_type == "console":
+                loutput = content
+            else:
+                loutput = "Unknown: %s\n" % line
+                
+            if loutput:
+                event.output += loutput
+            if loutput or lchanged:
+                event.run_ended = datetime.datetime.now()
+                event.save()
+            
+        # completion state
+        if not bcompleted:
+            event.output += "Run did not complete\n"
         event.run_ended = datetime.datetime.now()
+        event.pid = -1  # disable it
         event.save()
         
         elapsed = (time.time() - start)
         if self.verbose: 
             print elapsed
-
-        if failed:
-            alert_type = 'run_fail'
-        else:
-            alert_type = 'run_success'
 
         # Update the scrapers meta information
         self.scraper.update_meta()
@@ -104,8 +154,12 @@ class ScraperRunner(threading.Thread):
 
         # Log this run event to the history table
         alert = Alerts()
-        alert.content_object = self.scraper
-        alert.message_type = alert_type
+        
+        # more f**!ing hassle and bugs with this GenericForeignKey crap!
+        #alert.content_object = self.scraper.code   # saves it as the wrong type
+        alert.content_object = Code.objects.get(pk=self.scraper.pk)  # don't have a way to down-cast the scraper object for this useless unhelpful interface
+        
+        alert.message_type = (bexception or not bcompleted) and 'run_success' or 'run_fail'
         alert.message_value = elapsed
         alert.event_object = event
         alert.save()

@@ -392,7 +392,7 @@ $(document).ready(function() {
     //read data back from twisted
     function receiveRecord(data) {
           if (data.message_type == "console") {
-              writeRunOutput(data.content); 
+              writeRunOutput(data.content);     // able to divert text to the preview iframe
           } else if (data.message_type == "sources") {
               writeToSources(data.url, data.bytes, data.failedmessage, data.cached, data.cacheid)
           } else if (data.message_type == "connectionconfirmed") {
@@ -422,7 +422,7 @@ $(document).ready(function() {
                 writeToConsole(data.content); 
 
           } else {
-              writeToConsole(data.content, data.message_type); // able to divert text to the preview iframe
+              writeToConsole(data.content, data.message_type); 
           }
       }        
 

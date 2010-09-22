@@ -417,3 +417,7 @@ a.edit {font-variant:normal!important;font-size:0.8em; font-weight:bold!importan
 h2 a.edit {font-size:0.6em;}
 h3 a.edit {font-size:0.7em;}
 h4 a.edit {font-size:0.8em;}
+
+/* flag stuff that is seen by staff only */
+.staff { background-color: #fde;}
+

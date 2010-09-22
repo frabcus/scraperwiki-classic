@@ -135,18 +135,23 @@ class ScraperMetadata(models.Model):
         app_label = 'codewiki'
         verbose_name_plural = 'scraper metadata'
 
+
+# could have a last_update time in here so we can tell if it's hanging when we view this object as a run_event
 class ScraperRunEvent(models.Model):
     scraper         = models.ForeignKey(Scraper)
     run_id          = models.CharField(max_length=100)  
     pid             = models.IntegerField()   # will only be temporarily valid and probably doesn't belong here
     run_started     = models.DateTimeField()
-    run_ended       = models.DateTimeField(null=True)
+    run_ended       = models.DateTimeField(null=True)   # missnamed. used as last_updated so you can see if the scraper is hanging
     records_produced = models.IntegerField(default=0)
     pages_scraped   = models.IntegerField(default=0)
     output          = models.TextField()
 
     def __unicode__(self):
         return u'start: %s   end: %s' % (self.run_started, self.run_ended)
+
+    def outputsummary(self):
+        return u'records=%d scrapedpages=%d outputlines=%d' % (self.records_produced, self.pages_scraped, self.output.count('\n'))
 
     @models.permalink
     def get_absolute_url(self):
