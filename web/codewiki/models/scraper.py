@@ -142,7 +142,7 @@ class ScraperRunEvent(models.Model):
     run_id          = models.CharField(max_length=100)  
     pid             = models.IntegerField()   # will only be temporarily valid and probably doesn't belong here
     run_started     = models.DateTimeField()
-    run_ended       = models.DateTimeField(null=True)
+    run_ended       = models.DateTimeField(null=True)   # missnamed. used as last_updated so you can see if the scraper is hanging
     records_produced = models.IntegerField(default=0)
     pages_scraped   = models.IntegerField(default=0)
     output          = models.TextField()

@@ -88,7 +88,7 @@
 
                     {% if user.is_staff %}
   				    <li>
-				        <a href="#" title="Create a new view" class="editor_view">New view</a>
+				        <a href="#" title="Create a new view" class="editor_view staff">New view</a>
 				    </li>
                     {% endif %}
 
@@ -101,6 +101,11 @@
 				    <li>
 				        <a href="{% url scraper_list %}scrapers" title="Browse all scrapers">Browse</a>
 				    </li>
+                    {% if user.is_staff %}
+  				    <li>
+				        <a href="{% url running_scrapers %}" title="Interact with current UML status" class="staff">UML status</a>
+				    </li>
+                    {% endif %}
 				    <li class="last">
 				        <a href="{% url api:index %}" title="ScraperWiki API">API</a>
 				    </li>

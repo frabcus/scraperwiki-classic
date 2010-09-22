@@ -13,11 +13,13 @@ import frontend
 import re
 import StringIO, csv, types
 import datetime
+import time
 
 from codewiki.management.commands.run_scrapers import GetUMLrunningstatus, killrunevent
 
 
 def run_event(request, event_id):
+    user = request.user
     event = get_object_or_404(ScraperRunEvent, id=event_id)
     outputlines = event.output.split("\n")
     
@@ -26,6 +28,10 @@ def run_event(request, event_id):
     for status in statusscrapers:
         if status['runID'] == event.run_id:
             context['status'] = status
+    
+    context['scraper'] = event.scraper
+    context['selected_tab'] = ''
+    context['user_owns_it'] = (event.scraper.owner() == user)
     
     return render_to_response('codewiki/run_event.html', context, context_instance=RequestContext(request))
 
@@ -53,5 +59,6 @@ def scraper_killrunning(request, run_id):
         raise Http404
     if request.POST.get('killrun', None) == '1':
         success = killrunevent(event)
+    time.sleep(1)
     return HttpResponseRedirect(reverse('run_event', args=[event.id]))
 

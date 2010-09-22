@@ -254,7 +254,8 @@ def view_overview (request, view_short_name):
     #get scrapers used in this view
     related_scrapers = scraper.relations.filter(wiki_type='scraper')
     
-    return render_to_response('codewiki/view_overview.html', {'selected_tab': 'overview', 'scraper': scraper, 'scraper_tags': scraper_tags, 'related_scrapers': related_scrapers, }, context_instance=RequestContext(request))
+    context = {'selected_tab': 'overview', 'scraper': scraper, 'scraper_tags': scraper_tags, 'related_scrapers': related_scrapers, }
+    return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
     
     
 def view_fullscreen (request, short_name):
@@ -281,10 +282,10 @@ def comments(request, wiki_type, short_name):
 
     scraper_tags = Tag.objects.get_for_object(scraper)
 
-    dictionary = { 'scraper_tags': scraper_tags, 'scraper_owner': scraper_owner, 'scraper_contributors': scraper_contributors,
+    context = { 'scraper_tags': scraper_tags, 'scraper_owner': scraper_owner, 'scraper_contributors': scraper_contributors,
                    'scraper_followers': scraper_followers, 'selected_tab': 'comments', 'scraper': scraper,
                    'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
-    return render_to_response('codewiki/comments.html', dictionary, context_instance=RequestContext(request))
+    return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
 
 def scraper_history(request, wiki_type, short_name):

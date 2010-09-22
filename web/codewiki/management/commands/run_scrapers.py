@@ -86,6 +86,7 @@ class ScraperRunner(threading.Thread):
         event.run_id = '???'   # should allow empty
         event.pid = runner.pid # only applies when this runner is active
         event.run_started = datetime.datetime.now()
+        event.run_ended = event.run_started  # actually used as last_updated
         event.output = ""
         event.save()
 
@@ -113,7 +114,7 @@ class ScraperRunner(threading.Thread):
                     bcompleted = True
                 #elif content == "killsignal":  # will not happen as it's generated in twister
                 elif content == "runfinished":
-                    loutput += "Run finished"
+                    loutput += "Run finished\n"
 
             elif message_type == "sources":
                 event.pages_scraped += 1    # data.url, data.bytes
@@ -122,22 +123,23 @@ class ScraperRunner(threading.Thread):
                 event.records_produced += 1
                 lchanged = True
             elif message_type == "exception":
-                loutput = str(data.get("jtraceback"))  # should parse this out properly
+                loutput = str(data.get("jtraceback"))+"\n"  # should parse this out properly
                 bexception = True
             elif message_type == "console":
-                loutput += content
+                loutput = content
             else:
-                loutput = "Unknown: %s" % line
+                loutput = "Unknown: %s\n" % line
                 
             if loutput:
-                event.output += loutput + "\n"
+                event.output += loutput
             if loutput or lchanged:
+                event.run_ended = datetime.datetime.now()
                 event.save()
             
         # completion state
         if not bcompleted:
             event.output += "Run did not complete\n"
-        event.run_ended = datetime.datetime.now() - datetime.timedelta(10)
+        event.run_ended = datetime.datetime.now()
         event.pid = -1  # disable it
         event.save()
         
