@@ -6,7 +6,7 @@
   <tr>
     <td>
     {% if status.scraper %}
-      <a href="{% url code_overview status.scraper.wiki_type status.scraper.short_name %}">{{run_event.scraper.title}}</a>
+      <a href="{% url code_overview status.scraper.wiki_type status.scraper.short_name %}">{{status.scraper.title}}</a>
     {% else %}
       {{status.scraperID}}--
     {% endif %}
