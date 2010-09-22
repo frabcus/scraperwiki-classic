@@ -39,8 +39,7 @@ def run_event(request, event_id):
 def running_scrapers(request):
     # uncomment next line when run_started is indexed
     #recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:10]  
-    recentevents = ScraperRunEvent.objects.all().order_by('-id')[:10]
-    
+    recentevents = ScraperRunEvent.objects.all().order_by('-id')[:1]
     recentid = recentevents and recentevents[0].id or 100
     
     statusscrapers = GetUMLrunningstatus()
@@ -63,7 +62,10 @@ def scraper_killrunning(request, run_id):
     recentevents = ScraperRunEvent.objects.all().order_by('-id')[:1]
     recentid = recentevents and recentevents[0].id or 100
     
-    event = get_object_or_404(ScraperRunEvent, run_id=run_id)
+    # filtering necessary because run_id is not indexed
+    #event = get_object_or_404(ScraperRunEvent, run_id=run_id)
+    event = ScraperRunEvent.objects.filter(id__gt=recentid-100).filter(run_id=run_id)[0]
+    
     if event.scraper.owner() != request.user and not request.user.is_staff:
         raise Http404
     
