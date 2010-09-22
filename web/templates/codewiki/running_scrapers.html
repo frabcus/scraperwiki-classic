@@ -1,7 +1,7 @@
 
 <h1>UML Status</h1>
 <table border="1">
-<tr><th>Scraper</th><th>Runid</th><th>time</th><th>kill button</th></tr>
+<tr><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>
 {% for status in statusscrapers %}
   <tr>
     <td>
@@ -21,11 +21,14 @@
     </td>
 
     <td>
+    {% if status.scraperrunevent %}
     <form action="{% url scraper_killrunning status.runID %}" method="post">
         <input type="hidden" id="hidKillRun" name="killrun" value="1" />
         <input type="submit" id="btnKillRun" class="danger" value="Kill running scraper" />
     </form>
+    {% endif %}
     </td>
+    <td><small>{{status.runID}}</small></td>
   </tr>
 {% endfor %}
 </table>
