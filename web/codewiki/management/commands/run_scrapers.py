@@ -144,8 +144,6 @@ class ScraperRunner(threading.Thread):
         event.save()
         
         elapsed = (time.time() - start)
-        if self.verbose: 
-            print elapsed
 
         # Update the scrapers meta information
         self.scraper.update_meta()

@@ -21,9 +21,8 @@ from codewiki.management.commands.run_scrapers import GetUMLrunningstatus, killr
 def run_event(request, event_id):
     user = request.user
     event = get_object_or_404(ScraperRunEvent, id=event_id)
-    outputlines = event.output.split("\n")
     
-    context = { 'outputlines':outputlines, 'event':event }
+    context = { 'event':event }
     statusscrapers = GetUMLrunningstatus()
     for status in statusscrapers:
         if status['runID'] == event.run_id:
@@ -37,15 +36,19 @@ def run_event(request, event_id):
 
 
 def running_scrapers(request):
-    #events = ScraperRunEvent.objects.filter(run_ended=None)
-    recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:10]
-
+    # uncomment next line when run_started is indexed
+    #recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:10]  
+    recentevents = ScraperRunEvent.objects.all().order_by('-id')[:10]
+    
+    recentid = recentevents and recentevents[0].id or 100
+    
     statusscrapers = GetUMLrunningstatus()
     for status in statusscrapers:
         if status['scraperID']:
             status['scraper'] = Code.objects.get(guid=status['scraperID'])   # could throw ObjectDoesNotExist
         
-        scraperrunevents = ScraperRunEvent.objects.filter(run_id=status['runID'])
+        # filtering necessary because run_id is not indexed
+        scraperrunevents = ScraperRunEvent.objects.filter(id__gt=recentid-100).filter(run_id=status['runID'])
         if scraperrunevents:
             status['scraperrunevent'] = scraperrunevents[0]
     
