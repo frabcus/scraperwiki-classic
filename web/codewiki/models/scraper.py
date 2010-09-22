@@ -153,6 +153,9 @@ class ScraperRunEvent(models.Model):
     def outputsummary(self):
         return u'records=%d scrapedpages=%d outputlines=%d' % (self.records_produced, self.pages_scraped, self.output.count('\n'))
 
+    def getduration(self):
+        return (self.run_ended or datetime.datetime.now()) - self.run_started
+
     @models.permalink
     def get_absolute_url(self):
         return ('run_event', [self.id])

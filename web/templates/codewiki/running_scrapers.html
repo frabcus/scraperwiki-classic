@@ -6,7 +6,7 @@
   <tr>
     <td>
     {% if status.scraper %}
-      <a href="{% url code_overview status.scraper.wiki_type status.scraper.short_name %}">{{status.scraper.short_name}}</a>
+      <a href="{% url code_overview status.scraper.wiki_type status.scraper.short_name %}">{{run_event.scraper.title}}</a>
     {% else %}
       {{status.scraperID}}--
     {% endif %}
@@ -39,12 +39,14 @@
   <tr>
     <th>Scraper</th>
     <th>Started</th>
-    <th>&nbsp;</th>
+    <th>Duration</th>
+    <th>Output summary</th>
   </tr>
 {% for run_event in events %}
   <tr>
     <td><a href="{% url code_overview run_event.scraper.wiki_type run_event.scraper.short_name %}">{{run_event.scraper.title}}</a></td> 
-    <td>{{run_event.run_started}} ({{run_event.run_started|timesince}} ago)</td> 
+    <td>{{run_event.run_started|timesince}} ago (<small>{{run_event.run_started}}</small>)</td> 
+    <td>{{run_event.getduration}} seconds</td> 
     <td><a href="{% url run_event run_event.id %}">{{run_event.outputsummary}}</a></td>
   </tr>
 {% endfor %}

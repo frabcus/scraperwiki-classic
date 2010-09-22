@@ -357,7 +357,7 @@ def scraper_history(request, wiki_type, short_name):
             commititem["type"] = "commit"
             commitlog.append(commititem)
     
-    # put in the duration ranges
+    # put in the editing duration ranges
     for commititem in commitlog:
         timeduration = commititem["lastdatetime"] - commititem["firstdatetime"]
         commititem["durationminutes"] = "%.1f" % (timeduration.days*24*60 + timeduration.seconds/60.0)

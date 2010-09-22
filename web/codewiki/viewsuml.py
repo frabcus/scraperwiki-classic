@@ -39,7 +39,7 @@ def run_event(request, event_id):
 def running_scrapers(request):
     # uncomment next line when run_started is indexed
     #recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:10]  
-    recentevents = ScraperRunEvent.objects.all().order_by('-id')[:1]
+    recentevents = ScraperRunEvent.objects.all().order_by('-id')[:10]
     recentid = recentevents and recentevents[0].id or 100
     
     statusscrapers = GetUMLrunningstatus()
