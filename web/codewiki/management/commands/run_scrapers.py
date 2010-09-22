@@ -7,7 +7,7 @@ except: import simplejson as json
 
 import subprocess
 
-from codewiki.models import Scraper, ScraperRunEvent
+from codewiki.models import Code, Scraper, ScraperRunEvent
 from frontend.models import Alerts
 import frontend
 import settings
@@ -154,7 +154,11 @@ class ScraperRunner(threading.Thread):
 
         # Log this run event to the history table
         alert = Alerts()
-        alert.content_object = self.scraper
+        
+        # more f**!ing hassle and bugs with this GenericForeignKey crap!
+        #alert.content_object = self.scraper.code   # saves it as the wrong type
+        alert.content_object = Code.objects.get(pk=self.scraper.pk)  # don't have a way to down-cast the scraper object for this useless unhelpful interface
+        
         alert.message_type = (bexception or not bcompleted) and 'run_success' or 'run_fail'
         alert.message_value = elapsed
         alert.event_object = event

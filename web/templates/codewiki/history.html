@@ -1,6 +1,11 @@
 {% extends "codewiki/scraper_base.html" %}
 {% load humanize %}
 {% block tab %}
+
+{% if user.is_staff %}
+<p class="staff"><a href="#mercurialcommitlog">Go to alternative presentation</a></p>
+{% endif %}
+
 <table>
   <tr>
     <th>Date</th>
@@ -53,13 +58,27 @@
   {% endfor %}
 </table>
 
+
+
+
+
 {% if user.is_staff %}
-<div class="mercurialcommitlog">
-<h3>Commit log extracted directly from repository</h3>
+<div class="mercurialcommitlog" id="mercurialcommitlog">
+<h3>Commit log extracted directly from repository (without Alert technology)</h3>
 <table>
   
   <tr><th>time</th><th>user(s)</th><th>earliesteditor</th><th>desc</th></tr>
-  {% for item in commitlog %}
+  {% for item in itemlog %}
+
+  {% ifequal item.type 'runevent' %}
+  <tr>
+    <td>
+      <a href="{% url run_event item.runevent.id%}" class="staff">{{item.runevent.run_started|date:"H:i, j F Y" }}</a>
+      ({{item.runduration}} min:secs)
+    </td>
+    <td colspan="2">{{item.runevent.outputsummary}}</td>
+  </tr>
+  {% else %}
   <tr>
     <td>
       <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
@@ -82,6 +101,8 @@
       {{item.description}}
     </td>
   </tr>
+  {% endifequal %}
+
   {% endfor %}
 </table>
 </div>
