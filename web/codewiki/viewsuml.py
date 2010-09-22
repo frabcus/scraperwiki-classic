@@ -14,9 +14,10 @@ import re
 import StringIO, csv, types
 import datetime
 import time
+import os
+import signal
 
-from codewiki.management.commands.run_scrapers import GetUMLrunningstatus, killrunevent
-
+from codewiki.management.commands.run_scrapers import GetUMLrunningstatus
 
 def run_event(request, event_id):
     user = request.user
@@ -56,12 +57,25 @@ def running_scrapers(request):
     return render_to_response('codewiki/running_scrapers.html', context, context_instance=RequestContext(request))
 
 
+# doesn't work for scrapers that are run by the cronjob (only those that are run from a browser)
+# alternative method is to invoke a kill operation in the dispatcher, (the localhost:9000 link)
 def scraper_killrunning(request, run_id):
+    recentevents = ScraperRunEvent.objects.all().order_by('-id')[:1]
+    recentid = recentevents and recentevents[0].id or 100
+    
     event = get_object_or_404(ScraperRunEvent, run_id=run_id)
     if event.scraper.owner() != request.user and not request.user.is_staff:
         raise Http404
-    if request.POST.get('killrun', None) == '1':
-        success = killrunevent(event)
+    
+    pid = event.pid
+    if request.POST.get('killrun', None) == '1' and pid != -1:
+        try:
+            os.kill(pid, signal.SIGKILL)
+            success = True
+        except OSError, e:
+            if e.errno != 3:   # No such process
+                return HttpResponse("Kill failed: " + str(e) + " " + str(e.errno))
+    
     time.sleep(1)
     return HttpResponseRedirect(reverse('run_event', args=[event.id]))
 
