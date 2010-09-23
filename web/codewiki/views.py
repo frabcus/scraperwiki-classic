@@ -681,6 +681,7 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage):
     
     # perhaps the base class should call the upper class updates, not the other way round
     if code_object.wiki_type == "scraper":
+        code_object.save()  # save the object using the base class (otherwise causes a major failure if it doesn't exist)
         code_object.scraper.update_meta()
         code_object.scraper.save()
     else:
