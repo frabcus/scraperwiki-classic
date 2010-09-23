@@ -58,10 +58,15 @@
         <div class="content_footer">
             <p>
                 This dataset has a total of {{ scraper.record_count }} records and 
-                {% if scraper.last_run %}
-                  was last run on {{scraper.last_run|date:"H:i, j F Y"}} ({{scraper.last_run|timesince}} ago)
+                {% if lastscraperrunevent %}
+                  {% ifequal lastscraperrunevent.pid -1 %}
+                     last ran {{lastscraperrunevent.run_started|timesince}} ago 
+                     for <a href="{% url run_event lastscraperrunevent.id%}">{{lastscraperrunevent.getduration}} seconds</a>.
+                  {% else %}
+                     <a href="{% url run_event lastscraperrunevent.id%}">is currently running</a>.
+                  {% endifequal %}
                 {% else %}
-                  has not yet been run
+                   has not been run yet.
                 {% endif %}
 
                 {% if scraper.license_link%}
@@ -79,7 +84,7 @@
 
 
 {% if user.is_staff %}
-<div class="content full">
+<div class="content full staff">
     <h2>Views using this data from this scraper</h2>    
     <ul class="views">
         {% if related_views %}
@@ -159,7 +164,7 @@
     {% endif %}
 
     {% if user.is_staff %}
-    <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
+    <form action="{% url scraper_run_scraper scraper.short_name %}" method="post" class="staff">
         <input type="hidden" name="run_scraper" value="1" />
         <input type="submit" id="btnRunScraper" class="danger" value="Run this scraper?" />
         <p>Runs this scraper as though from the schedule. (Staff only)</p>

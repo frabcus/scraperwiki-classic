@@ -83,20 +83,20 @@
                 {% endif %}
 
                 <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R)"/>
-                {% if scraper.view %}
+                {% ifequal scraper.wiki_type 'view' %}
                     <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P)"/>
-                {% endif %}
+                {% endifequal %}
 
                 {% if scraper.id %}
                     <input type="checkbox" value="autosavecheck" name="autosavecheck" id="id_autosavecheck" {% if user.username %}checked{% endif %} />autosave
                 {% endif %}
 
-                {% if scraper.view %}
+                {% ifequal scraper.wiki_type 'view' %}
                   <label for="id_urlquery" class="hide">Urlquery:</label>
                   <input id="id_urlquery" type="text" class="text" name="urlquery" title="URL query string passed to the view" /> 
                 {% else %}
                   <input id="id_urlquery" type="hidden" class="text" name="urlquery" /> 
-                {% endif %}
+                {% endifequal %}
 
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
             

@@ -14,16 +14,16 @@ import re
 import StringIO, csv, types
 import datetime
 import time
+import os
+import signal
 
-from codewiki.management.commands.run_scrapers import GetUMLrunningstatus, killrunevent
-
+from codewiki.management.commands.run_scrapers import GetUMLrunningstatus
 
 def run_event(request, event_id):
     user = request.user
     event = get_object_or_404(ScraperRunEvent, id=event_id)
-    outputlines = event.output.split("\n")
     
-    context = { 'outputlines':outputlines, 'event':event }
+    context = { 'event':event }
     statusscrapers = GetUMLrunningstatus()
     for status in statusscrapers:
         if status['runID'] == event.run_id:
@@ -37,15 +37,18 @@ def run_event(request, event_id):
 
 
 def running_scrapers(request):
-    #events = ScraperRunEvent.objects.filter(run_ended=None)
-    recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:10]
-
+    # uncomment next line when run_started is indexed
+    #recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:10]  
+    recentevents = ScraperRunEvent.objects.all().order_by('-id')[:10]
+    recentid = recentevents and recentevents[0].id or 100
+    
     statusscrapers = GetUMLrunningstatus()
     for status in statusscrapers:
         if status['scraperID']:
             status['scraper'] = Code.objects.get(guid=status['scraperID'])   # could throw ObjectDoesNotExist
         
-        scraperrunevents = ScraperRunEvent.objects.filter(run_id=status['runID'])
+        # filtering necessary because run_id is not indexed
+        scraperrunevents = ScraperRunEvent.objects.filter(id__gt=recentid-100).filter(run_id=status['runID'])
         if scraperrunevents:
             status['scraperrunevent'] = scraperrunevents[0]
     
@@ -53,12 +56,28 @@ def running_scrapers(request):
     return render_to_response('codewiki/running_scrapers.html', context, context_instance=RequestContext(request))
 
 
+# doesn't work for scrapers that are run by the cronjob (only those that are run from a browser)
+# alternative method is to invoke a kill operation in the dispatcher, (the localhost:9000 link)
 def scraper_killrunning(request, run_id):
-    event = get_object_or_404(ScraperRunEvent, run_id=run_id)
+    recentevents = ScraperRunEvent.objects.all().order_by('-id')[:1]
+    recentid = recentevents and recentevents[0].id or 100
+    
+    # filtering necessary because run_id is not indexed
+    #event = get_object_or_404(ScraperRunEvent, run_id=run_id)
+    event = ScraperRunEvent.objects.filter(id__gt=recentid-100).filter(run_id=run_id)[0]
+    
     if event.scraper.owner() != request.user and not request.user.is_staff:
         raise Http404
-    if request.POST.get('killrun', None) == '1':
-        success = killrunevent(event)
+    
+    pid = event.pid
+    if request.POST.get('killrun', None) == '1' and pid != -1:
+        try:
+            os.kill(pid, signal.SIGKILL)
+            success = True
+        except OSError, e:
+            if e.errno != 3:   # No such process
+                return HttpResponse("Kill failed: " + str(e) + " " + str(e.errno))
+    
     time.sleep(1)
     return HttpResponseRedirect(reverse('run_event', args=[event.id]))
 

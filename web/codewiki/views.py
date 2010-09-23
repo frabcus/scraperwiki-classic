@@ -64,6 +64,9 @@ def scraper_overview(request, scraper_short_name):
     else:
         private_columns = None
 
+    lscraperrunevents = scraper.scraperrunevent_set.all().order_by("-id")[:1] # can't use date as it's unindexed
+    lastscraperrunevent = lscraperrunevents and lscraperrunevents[0] or None
+
     #get data for this scaper
     data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
                                                limit=settings.DATA_TABLE_ROWS, 
@@ -75,6 +78,7 @@ def scraper_overview(request, scraper_short_name):
         'scraper_tags': scraper_tags,
         'selected_tab': 'overview',
         'scraper': scraper,
+        'lastscraperrunevent':lastscraperrunevent,
         'user_owns_it': user_owns_it,
         'user_follows_it': user_follows_it,
         'data': data,
@@ -357,7 +361,7 @@ def scraper_history(request, wiki_type, short_name):
             commititem["type"] = "commit"
             commitlog.append(commititem)
     
-    # put in the duration ranges
+    # put in the editing duration ranges
     for commititem in commitlog:
         timeduration = commititem["lastdatetime"] - commititem["firstdatetime"]
         commititem["durationminutes"] = "%.1f" % (timeduration.days*24*60 + timeduration.seconds/60.0)
@@ -677,6 +681,7 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage):
     
     # perhaps the base class should call the upper class updates, not the other way round
     if code_object.wiki_type == "scraper":
+        code_object.save()  # save the object using the base class (otherwise causes a major failure if it doesn't exist)
         code_object.scraper.update_meta()
         code_object.scraper.save()
     else:

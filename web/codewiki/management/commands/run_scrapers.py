@@ -40,17 +40,6 @@ def GetUMLrunningstatus():
                             'runtime':now - float(mline.group(5)) } )
     return result
 
-def killrunevent(runevent):
-    pid = runevent.pid
-    success = False
-    if pid != -1:
-        try:
-            os.kill(pid, signal.SIGKILL)
-            success = True
-        except:
-            pass
-    return success
-
 
 def is_currently_running(scraper):
     return urllib.urlopen('http://localhost:9000/Status').read().find(scraper.guid) > 0    
@@ -144,8 +133,6 @@ class ScraperRunner(threading.Thread):
         event.save()
         
         elapsed = (time.time() - start)
-        if self.verbose: 
-            print elapsed
 
         # Update the scrapers meta information
         self.scraper.update_meta()
