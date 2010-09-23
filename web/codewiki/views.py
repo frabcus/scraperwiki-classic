@@ -64,7 +64,7 @@ def scraper_overview(request, scraper_short_name):
     else:
         private_columns = None
 
-    lscraperrunevents = scraper.scraperrunevent_set.all()[:1]
+    lscraperrunevents = scraper.scraperrunevent_set.all().order_by("-id")[:1] # can't use date as it's unindexed
     lastscraperrunevent = lscraperrunevents and lscraperrunevents[0] or None
 
     #get data for this scaper
