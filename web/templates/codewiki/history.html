@@ -25,7 +25,12 @@
           {% endif %}
         {% endifequal %}
       </td>
+
+      {% ifequal item.message_type|lower "commit" %}
       <td>
+      {% else %}
+      <td colspan="2">
+      {% endifequal %}
           {% ifequal item.message_type|lower "commit" %}
             Committed
           {% endifequal %}
@@ -45,15 +50,13 @@
               {% if item.user.get_profile.name %}{{item.user.get_profile.name}}{% else %}{{item.user.username}}{% endif %}
             </a>
           {% endif %}
-        
         </td>
-        <td>
-          {% ifequal item.message_type|lower "commit" %}
-              <em>{{item.message_value}}</em>  {% if item.historicalgroup %}(group: {{item.historicalgroup}}){% endif %}
-          {% else %}
-              &nbsp;
-          {% endifequal %}
-        </td>
+
+      {% ifequal item.message_type|lower "commit" %}
+      <td>
+          <em>{{item.message_value}}</em>  {% if item.historicalgroup %}(group: {{item.historicalgroup}}){% endif %}
+      </td>
+    {% endifequal %}
     </tr>
   {% endfor %}
 </table>
@@ -74,6 +77,10 @@
   <tr>
     <td>
       <a href="{% url run_event item.runevent.id%}" class="staff">{{item.runevent.run_started|date:"H:i, j F Y" }}</a>
+      {% ifequal item.runevent.pid -1 %}
+      {% else %}
+         <b>Still running</b>
+      {% endifequal %}
       ({{item.runduration}} min:secs)
     </td>
     <td colspan="2">{{item.runevent.outputsummary}}</td>

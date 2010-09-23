@@ -64,6 +64,9 @@ def scraper_overview(request, scraper_short_name):
     else:
         private_columns = None
 
+    lscraperrunevents = scraper.scraperrunevent_set.all()[:1]
+    lastscraperrunevent = lscraperrunevents and lscraperrunevents[0] or None
+
     #get data for this scaper
     data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
                                                limit=settings.DATA_TABLE_ROWS, 
@@ -75,6 +78,7 @@ def scraper_overview(request, scraper_short_name):
         'scraper_tags': scraper_tags,
         'selected_tab': 'overview',
         'scraper': scraper,
+        'lastscraperrunevent':lastscraperrunevent,
         'user_owns_it': user_owns_it,
         'user_follows_it': user_follows_it,
         'data': data,
