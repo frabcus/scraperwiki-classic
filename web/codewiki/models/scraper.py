@@ -139,9 +139,9 @@ class ScraperMetadata(models.Model):
 # could have a last_update time in here so we can tell if it's hanging when we view this object as a run_event
 class ScraperRunEvent(models.Model):
     scraper         = models.ForeignKey(Scraper)
-    run_id          = models.CharField(max_length=100)  
+    run_id          = models.CharField(max_length=100, db_index=True)  
     pid             = models.IntegerField()   # will only be temporarily valid and probably doesn't belong here
-    run_started     = models.DateTimeField()
+    run_started     = models.DateTimeField(db_index=True)
     run_ended       = models.DateTimeField(null=True)   # missnamed. used as last_updated so you can see if the scraper is hanging
     records_produced = models.IntegerField(default=0)
     pages_scraped   = models.IntegerField(default=0)
