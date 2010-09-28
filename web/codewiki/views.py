@@ -523,6 +523,8 @@ def all_tags(request):
 
 def scraper_tag(request, tag):
     tag = get_tag(tag)
+    if not tag:
+       raise Http404
     scrapers = models.Scraper.objects.filter(published=True)
     queryset = TaggedItem.objects.get_by_model(scrapers, tag)
     return render_to_response('codewiki/tag.html', {
@@ -536,6 +538,8 @@ def tag_data(request, tag):  # to delete
     assert False
 
     tag = get_tag(tag)
+    if not tag:
+       raise Http404
     scrapers = models.Scraper.objects.filter(published=True)
     queryset = TaggedItem.objects.get_by_model(scrapers, tag)
 
