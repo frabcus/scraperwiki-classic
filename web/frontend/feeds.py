@@ -69,7 +69,7 @@ class LatestCodeObjectsByTag(Feed):
 
     def items(self, obj):
        scrapers = TaggedItem.objects.get_by_model(Scraper, obj)
-       views = TaggedItem.objects.get_by_model(View, obj)
+       views = [] #TaggedItem.objects.get_by_model(View, obj)
        return sorted(list(views) + list(scrapers), key=lambda x: x.created_at, reverse=True)[:settings.RSS_ITEMS]
 
 
@@ -82,7 +82,8 @@ class LatestCodeObjects(Feed):
         return obj.get_absolute_url()
         
     def items(self):
-        return Code.objects.filter(published=True).order_by('-created_at')[:settings.RSS_ITEMS]
+        #return Code.objects.filter(published=True).order_by('-created_at')[:settings.RSS_ITEMS]
+        return Code.objects.filter(published=True, wiki_type='scraper').order_by('-created_at')[:settings.RSS_ITEMS]
         
         
 class LatestCodeObjectsBySearchTerm(Feed):
@@ -116,5 +117,6 @@ class LatestCodeObjectsBySearchTerm(Feed):
           qs = TaggedItem.objects.get_by_model(Code, tag)
           code_objects = code_objects | qs
         code_objects = code_objects.filter(published=True).order_by('-created_at')
+        code_objects = code_objects.filter(wiki_type='scraper')
         return code_objects[:settings.RSS_ITEMS]
         
