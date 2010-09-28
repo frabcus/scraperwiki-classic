@@ -23,11 +23,9 @@ class SolicitationClaimForm (Form):
 
     def __init__(self, *args, **kwargs):
          user = User.objects.get(id=kwargs.pop('user_id'))
-         queryset = user.scraper_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
+         queryset = user.code_set.filter(usercoderole__role='owner', wiki_type='scraper', deleted=False).order_by('-created_at')
          super(SolicitationClaimForm, self).__init__(*args, **kwargs)
-         self.fields['scraper'] = forms.ModelChoiceField(
-                 required=True,
-                 queryset=queryset,)
+         self.fields['scraper'] = forms.ModelChoiceField(required=True, queryset=queryset)
 
          self.fields['confirmed'] = forms.BooleanField(widget=forms.CheckboxInput(),
                                required=True, 
