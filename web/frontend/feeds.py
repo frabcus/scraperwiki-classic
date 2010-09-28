@@ -6,6 +6,7 @@ from tagging.models import Tag, TaggedItem
 from django.contrib.comments.models import Comment
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 current_site = Site.objects.get_current()
 short_name = ""
@@ -40,7 +41,7 @@ class CommentsForCode(Feed):
         return "Comments on '%s'" % obj.short_name
 
     def items(self, obj):
-        return Comment.objects.for_model(obj).filter(is_public=True, is_removed=False).order_by('-submit_date')[:15]
+        return Comment.objects.for_model(obj).filter(is_public=True, is_removed=False).order_by('-submit_date')[:settings.RSS_ITEMS]
       
         
 class LatestCodeObjectsByTag(Feed):
@@ -69,7 +70,7 @@ class LatestCodeObjectsByTag(Feed):
     def items(self, obj):
        scrapers = TaggedItem.objects.get_by_model(Scraper, obj)
        views = TaggedItem.objects.get_by_model(View, obj)
-       return sorted(list(views) + list(scrapers), key=lambda x: x.created_at, reverse=True)[:30]
+       return sorted(list(views) + list(scrapers), key=lambda x: x.created_at, reverse=True)[:settings.RSS_ITEMS]
 
 
 class LatestCodeObjects(Feed):
@@ -81,7 +82,7 @@ class LatestCodeObjects(Feed):
         return obj.get_absolute_url()
         
     def items(self):
-        return Code.objects.filter(published=True).order_by('-created_at')[:10]
+        return Code.objects.filter(published=True).order_by('-created_at')[:settings.RSS_ITEMS]
         
         
 class LatestCodeObjectsBySearchTerm(Feed):
@@ -115,5 +116,5 @@ class LatestCodeObjectsBySearchTerm(Feed):
           qs = TaggedItem.objects.get_by_model(Code, tag)
           code_objects = code_objects | qs
         code_objects = code_objects.filter(published=True).order_by('-created_at')
-        return code_objects[:50]
+        return code_objects[:settings.RSS_ITEMS]
         
