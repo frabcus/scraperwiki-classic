@@ -182,3 +182,5 @@ BLOG_FEED = 'http://blog.scraperwiki.com/feed/'
 
 DATA_TABLE_ROWS = 10
 RSS_ITEMS = 50
+
+SCREENSHOT_SIZES = {'small': (110, 73), 'medium': (220, 145)}
