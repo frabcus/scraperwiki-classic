@@ -1,3 +1,4 @@
+from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response
@@ -9,9 +10,10 @@ from tagging.utils import get_tag
 from django.db import IntegrityError
 from django.contrib.auth.models import User
 from django.views.decorators.http import condition
+from sys import getsizeof
 import textile
 import random
-
+import urllib
 from django.conf import settings
 from django.utils.encoding import smart_str
 
@@ -25,9 +27,11 @@ import frontend
 import difflib
 import re
 import csv
+import math
 
 import StringIO, csv, types
 import datetime
+import gdata.docs.service
 
 try:                import json
 except ImportError: import simplejson as json
@@ -470,7 +474,7 @@ def stream_csv(scraper):
 
         if len(dictlist) != limit:
             break
-        
+
 
 # see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
 @condition(etag_func=None)
@@ -485,6 +489,50 @@ def export_csv(request, scraper_short_name):
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)
     return response
 
+def export_gdocs_spreadsheet(request, scraper_short_name):
+    #TODO: this funciton needs to change to cache things on disc and read the size from tehre rather than in memory
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+
+    #get the csv, it's size and choose a title for the file
+    title = scraper.title + " - from ScraperWiki.com"
+    csv_url = 'http://%s%s' % (Site.objects.get_current().domain,  reverse('export_csv', kwargs={'scraper_short_name': scraper.short_name}))
+
+    csv_data = urllib.urlopen(csv_url).read()
+    document_size = getsizeof(csv_data)
+    percent_of_max = ((float(document_size) / float(settings.GDOCS_UPLOAD_MAX)) * 100) - 100.0
+
+    #if we are within 1% of maximum, don't upload
+    if percent_of_max > -1:
+        print "file is " + str(percent_of_max) + "% too large to upload"
+
+        #upload a subset of records with a note at the top and bottom
+        #this calculation is a little crude as it assumes each row is of a simular size. To take account of this, a buffer of 5% is added 
+        row_buffer = 5
+        split = csv_data.split('\n')
+        new_row_count = int(math.floor(len(split) / 100.0 * (percent_of_max -row_buffer)))
+
+        #set the new title, data and a warning
+        title = title + ' [SUBSET ONLY]'
+        csv_data = 'THIS IS A SUBSET OF THE DATA ONLY. GOOGLE DOCS LIMITS FILES TO 1MB. DOWNLOAD THE FULL DATASET AS CSV HERE: %s \n' % csv_url
+        csv_data = csv_data + '\n'.join(split[0:new_row_count - 1])
+
+    #create client and authenticate
+    client = gdata.docs.service.DocsService()
+    client.ClientLogin(settings.GDOCS_UPLOAD_USER, settings.GDOCS_UPLOAD_PASSWORD)
+
+    #create a document reference
+    ms = gdata.MediaSource(file_handle=StringIO.StringIO(csv_data), content_type=gdata.docs.service.SUPPORTED_FILETYPES['CSV'], content_length=len(csv_data))
+
+    #try to upload it
+    #try:
+    entry = client.Upload(ms, title, folder_or_uri=settings.GDOCS_UPLOAD_FOLDER_URI)
+    
+    #redirect
+    print "redirecting"
+    return HttpResponseRedirect(entry.GetAlternateLink().href)
+        
+    #except gdata.service.RequestError:
+    #    print "failed to upload for some other reason"
 
 def scraper_table(request):
     dictionary = { }
