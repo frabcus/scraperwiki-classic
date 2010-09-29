@@ -29,8 +29,10 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 /* Main menu */
 #divMenu ul li {padding:0.3em 0.3em; list-style-type:none; font-weight:bold;}
 #divSidebarSearch #q {width:103px;}
-#divMenu ul, #divMenu form {border-bottom:solid 1px #ccc; padding-bottom:1em;}
-#divMenu ul.sub_menu { font-size:0.8em;}
+#divMenu .main_menu, #divMenu .sub_menu, #divMenu form {border-bottom:solid 1px #ccc; padding-bottom:1em;}
+#divMenu .sub_menu { font-size:0.8em;}
+#divMenu .sub_menu h4 {padding:1.2em 0 0 0.3em; color:#333;}
+#divMenu .sub_menu ul {padding:0;margin:0.5em 0 0 0;}
 
 /* Content and columns */
 #divContent {padding-bottom:3em;border-left:solid 1px #9f9f9f;border-top:solid 1px #9f9f9f;border-bottom:solid 1px #9f9f9f;padding:1em 0.8em 2em 0.8em; margin-bottom:3em; min-height:600px;}
@@ -94,6 +96,7 @@ div.attention {text-align:center;}
 #divFooter #divCopyright {padding-top:1em; clear:left; padding-left:3%; color:#fff;}
 
 /* Errors */
+#divErrors {margin:0.5em 0.5em 1em 0;}
 #divErrors ul {padding:0; margin:0; list-style-type:none; line-height:1.4em;}
 #divErrors ul li {background:#a22424; padding:0.1em 0; margin:0; text-align:center; color:#fff;}
 .error textarea, .error input, .error select {border:solid 1px red;}
@@ -191,18 +194,21 @@ iframe.view {border:thick red dashed;}
 
 /* Forms */
 ul.form {padding:0; margin:0;}
-ul.form li {padding:0; margin:0; list-style-type:none; clear:left;}
-ul.form li label {display:block; float:left; width:10em;}
+ul.form li {padding:0; margin:0; list-style-type:none;}
+ul.form li label {display:block; float:left; width:10em;font-weight:bold;}
 ul.form li small.taghint em {font-size:2.5em;line-height:0.5em;}
 ul.form li.checkboxes {clear:left;}
 ul.form li.checkboxes label {clear:none; display:inline; width:auto;}
+
+ul.form.linear li {padding-bottom:1em;}
+ul.form.linear label {float:none;padding:0.8em 0 0.3em 0; width:100%;}
+ul.form.linear small {display:block;padding-top:1em;}
+ul.form.linear textarea, ul.form.linear input {width:100%;}
+
 fieldset {padding:0; margin:0; border:none;}
 div.buttons {clear:left;}
 input.hint {color:#808080;}
-input.button {font-size:1em;
-    -webkit-border-radius: 4px;-moz-border-radius: 4px; 
-    background-color:#6fb1e6; color:#fff;
-        padding:0.4em 0.6em 0.4em 0.6em;border:solid 1px #2680c6;font-weight:bold; text-transform:uppercase;}
+input.button {font-size:1em; padding:0.4em;}
 input.button.small {font-size:0.7em;}        
 input.danger {background:#cc0000; border-color:#cc0000;color:#fff;}
 input.button:active {color:#2680c6;}
@@ -381,7 +387,7 @@ div.mercurialcommitlog ul { padding:0; margin:0; }
 body.fullscreen {padding:none; margin:0;}
 body.fullscreen #full_bar {border-bottom:solid 1px #ddd; background:#fafafa;padding:3px; height:23px; font-family:helvetica, arial, sans-serif;}
 body.fullscreen #full_bar h1 {font-size:1em; margin:0; padding:0.2em 0 0 0.3em;text-align:left;}
-body.fullscreen #full_bar a {color:#808080; text-decoration:none;}
+body.fullscreen #full_bar a {color:#000; text-decoration:none;}
 body.fullscreen #full_bar a:hover {text-decoration:underline;color:#2680c6;}
 body.fullscreen #full_bar #share_links {position:absolute;top:5px; right:215px;padding:0;margin:0;text-align:right;}
 body.fullscreen #full_bar #share_links iframe {border:none!important;width:55px!important;}
@@ -418,6 +424,8 @@ h2 a.edit {font-size:0.6em;}
 h3 a.edit {font-size:0.7em;}
 h4 a.edit {font-size:0.8em;}
 
+
+/* market */
+.completeometer {position:absolute; top:0; right:0;}
 /* flag stuff that is seen by staff only */
 .staff { background-color: #fde;}
-
