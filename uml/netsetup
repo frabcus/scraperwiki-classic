@@ -16,6 +16,11 @@ test `id -u` = 0 ||
 	echo	netsetup: must be run as root
 	exit	1
 }
+test `ifconfig eth0 | sed -n 's/.*inet addr:\([0-9\.]*\).*/\1/p'` = 89.16.177.195 ||
+{
+	echo	netsetup: can only be run on rush
+	exit	1
+}
 
 iptables	-F
 iptables -t nat	-F
