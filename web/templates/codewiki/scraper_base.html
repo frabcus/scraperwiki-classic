@@ -21,6 +21,7 @@
             <ul class="title_links">
                 <li class="csv"><a href="{% url export_csv scraper.short_name %}">Download this dataset (CSV)</a></li>
                 <li class="api"><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>
+                <li class="gdocs"><a href="{% url export_gdocs_spreadsheet scraper.short_name %}">Open in Google Docs</a></li>                                
             </ul>
         {% endifequal %}
         {% ifequal scraper.wiki_type 'view'%}
