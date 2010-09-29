@@ -273,12 +273,13 @@ def getJTraceback(code):
         
     result = { "exceptiondescription":repr(exc_value), "stackdump":stackdump }
     
-    if exc_type == IOError and exc_value.args[1] == 403:
+    #raise IOError('http error', 403, 'Scraperwiki blocked access to "http://tits.ru/".  Click <a href="/whitelist/?url=http%3A//tits.ru/">here</a> for details.', <httplib.HTTPMessage instance at 0x84c318c>)
+    if exc_type == IOError and len(exc_value.args) >= 2 and exc_value.args[1] == 403:
         mblockaccess = re.match('Scraperwiki blocked access to "(.*?)"', str(exc_value.args[2]))
         if mblockaccess:
             result["blockedurl"] = mblockaccess.group(1)
             result["blockedurlquoted"] = urllib.quote(mblockaccess.group(1))
-    #raise IOError('http error', 403, 'Scraperwiki blocked access to "http://tits.ru/".  Click <a href="/whitelist/?url=http%3A//tits.ru/">here</a> for details.', <httplib.HTTPMessage instance at 0x84c318c>)
+    
     return result
 
 

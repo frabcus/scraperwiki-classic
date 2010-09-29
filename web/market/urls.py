@@ -11,5 +11,5 @@ urlpatterns = patterns('',
    url(r'^complete/(?P<solicitation_id>\d+)/$', views.complete, name='market_complete'),
    url(r'^payment/return/$', views.paypal_return, name='market_paypal_return'),
    url(r'^payment/cancel/$', views.paypal_cancel, name='market_paypal_cancel'),   
-   url(r'^tags/(?P<tag>[\w]+)$', views.tag, name='market_tag'),                                           
-   )
+   url(r'^tags/(?P<tag>[^/]+)$', views.tag, name='market_tag'),                                           
+)

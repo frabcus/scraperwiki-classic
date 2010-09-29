@@ -84,6 +84,8 @@ def single (request, solicitation_id):
 
 def tag(request, tag):
     tag = get_tag(tag)
+    if not tag:
+        raise Http404
 
     # possibly not the best way of doing this
     status = models.SolicitationStatus.objects.get(status='open')

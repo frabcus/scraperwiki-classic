@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from tagging.models import Tag, TaggedItem
-from tagging.utils import get_tag
 from django.db import IntegrityError
 from django.contrib.auth.models import User
 

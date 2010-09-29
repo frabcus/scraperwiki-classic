@@ -7,6 +7,7 @@ import  os
 import  hashlib
 import  ConfigParser
 import  urllib2
+import  cStringIO
 
 class FireWrapper :
 
@@ -32,7 +33,7 @@ class FireWrapper :
         resp.fp._rbufsize = 1
 
         self.m_resp    = resp
-        self.m_pending = ''
+        self.m_pending = cStringIO.StringIO()
 
     def read (self, n = None) :
 
@@ -67,18 +68,18 @@ class FireWrapper :
         ###  sensible code that sets the stream to non-blocking mode and
         ###  uses "select".
         ###
-        nlo = string.find (self.m_pending, '\n')
-        while nlo < 0 :
+        while True :
             more = self.m_resp.read (1)
             if more is None or more == '' :
-                res = self.m_pending
-                self.m_pending = ''
-                return res
-            self.m_pending += more
-            nlo = string.find (self.m_pending, '\n')
-        res = self.m_pending[:nlo + 1]
-        self.m_pending = self.m_pending[nlo + 1:]
+                break
+            self.m_pending.write(more)
+            if more == '\n' :
+                break
+        res = self.m_pending.getvalue()
+        self.m_pending.close()
+        self.m_pending = cStringIO.StringIO()
         return res
+
 
 class FireStarter :
 

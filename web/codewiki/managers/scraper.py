@@ -6,8 +6,6 @@ from collections import defaultdict
 import re
 import datetime
 import types
-from tagging.utils import get_tag
-from tagging.models import Tag, TaggedItem
 from code import CodeManager
 
 def convert_dictlist_to_datalist(allitems, column_order=None, private_columns=None):
