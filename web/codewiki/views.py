@@ -13,7 +13,6 @@ from django.views.decorators.http import condition
 from sys import getsizeof
 import textile
 import random
-import urllib
 from django.conf import settings
 from django.utils.encoding import smart_str
 
@@ -505,19 +504,21 @@ def export_gdocs_spreadsheet(request, scraper_short_name):
 
     row_limit = 5000
     csv_data = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=row_limit), 0)
-    
+
     document_size = getsizeof(csv_data)
+    #print "Document size: " + str(document_size)
     percent_of_max = ((float(document_size) / float(settings.GDOCS_UPLOAD_MAX)) * 100) - 100.0
 
     #if we are within 1% of maximum, don't upload
     if percent_of_max > -1:
-        print "file is " + str(percent_of_max) + "% too large to upload"
+        #print "File is " + str(percent_of_max) + "% too large to upload"
 
         #upload a subset of records with a note at the top and bottom
         #this calculation is a little crude as it assumes each row is of a simular size. To take account of this, a buffer of 5% is added 
         row_buffer = 5
         split = csv_data.split('\n')
-        new_row_count = int(math.floor(len(split) / 100.0 * (percent_of_max -row_buffer)))
+        new_row_count = int(math.floor(len(split) / 100.0 * (100 - (percent_of_max + row_buffer))))
+        #print "New row count: " + str(new_row_count)
 
         #set the new title, data and a warning
         title = title + ' [SUBSET ONLY]'
