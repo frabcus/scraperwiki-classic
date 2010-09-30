@@ -16,7 +16,7 @@
         <p><b>Run Started:</b> {{event.run_started|timesince}} ago (<small>{{event.run_started}}</small>)</p>
         {% if status %}
           <p>
-          <form action="{% url scraper_killrunning event.run_id %}" method="post">
+          <form action="{% url scraper_killrunning event.run_id event.id %}" method="post">
             Still running {{status.runtime|floatformat}} seconds.  
 
             {% if user_owns_it %}
