@@ -10,7 +10,6 @@ from tagging.utils import get_tag
 from django.db import IntegrityError
 from django.contrib.auth.models import User
 from django.views.decorators.http import condition
-from sys import getsizeof
 import textile
 import random
 from django.conf import settings
@@ -466,12 +465,7 @@ def generate_csv(dictlist, offset):
     fout.close()
     return result
 
-def stream_csv(scraper):
-
-
-    step = 5000 #number of records to grab at a time
-    max_rows = 1000000 # max number of rows to stream in total
-    
+def stream_csv(scraper, step=5000, max_rows=1000000):
     for offset in range(0, max_rows, step):
         dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=step, offset=offset)
         
@@ -502,10 +496,13 @@ def export_gdocs_spreadsheet(request, scraper_short_name):
     title = scraper.title + " - from ScraperWiki.com"
     csv_url = 'http://%s%s' % (Site.objects.get_current().domain,  reverse('export_csv', kwargs={'scraper_short_name': scraper.short_name}))
 
+    # the lack of a list of keys for the table makes a more elegant solution difficult to obtain
+    # as it is necessary to take a selection of rows in order to derive the set of columns used
+    
     row_limit = 5000
     csv_data = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=row_limit), 0)
 
-    document_size = getsizeof(csv_data)
+    document_size = len(csv_data)
     #print "Document size: " + str(document_size)
     percent_of_max = ((float(document_size) / float(settings.GDOCS_UPLOAD_MAX)) * 100) - 100.0
 
