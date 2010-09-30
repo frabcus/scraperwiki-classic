@@ -444,35 +444,41 @@ def stringnot(v):
         return v
     return smart_str(v)
 
-def stream_csv(scraper):
+def generate_csv(dictlist, offset):
     keylist = [ ]
-    
-    limit = 5000
-    for offset in range(0, 100000, limit):
-        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset)
-        
-        keyset = set()
-        for row in dictlist:
-            if "latlng" in row:   # split the latlng
-                row["lat"], row["lng"] = row.pop("latlng") 
-            row.pop("date_scraped", None) 
-            keyset.update(row.keys())
-        
-        for key in sorted(keyset):
-            if key not in keylist:
-                keylist.append(key)
-        
-        fout = StringIO.StringIO()
-        writer = csv.writer(fout, dialect='excel')
-        if offset == 0:
-            writer.writerow([k.encode('utf-8') for k in keylist])
-        for rowdict in dictlist:
-            writer.writerow([stringnot(rowdict.get(key))  for key in keylist])
-        result = fout.getvalue()
-        fout.close()
-        yield result
+    keyset = set()
+    for row in dictlist:
+        if "latlng" in row:   # split the latlng
+            row["lat"], row["lng"] = row.pop("latlng") 
+        row.pop("date_scraped", None) 
+        keyset.update(row.keys())
 
+    for key in sorted(keyset):
+        if key not in keylist:
+            keylist.append(key)
+
+    fout = StringIO.StringIO()
+    writer = csv.writer(fout, dialect='excel')
+    if offset == 0:
+        writer.writerow([k.encode('utf-8') for k in keylist])
+    for rowdict in dictlist:
+        writer.writerow([stringnot(rowdict.get(key))  for key in keylist])
+    result = fout.getvalue()
+    fout.close()
+    return result
+
+def stream_csv(scraper):
+
+
+    step = 5000 #number of records to grab at a time
+    max_rows = 1000000 # max number of rows to stream in total
+    
+    for offset in range(0, max_rows, step):
+        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=step, offset=offset)
+        
+        yield generate_csv(dictlist, offset)
         if len(dictlist) != limit:
+            #we'ver reached the end of the data
             break
 
 
@@ -495,9 +501,12 @@ def export_gdocs_spreadsheet(request, scraper_short_name):
 
     #get the csv, it's size and choose a title for the file
     title = scraper.title + " - from ScraperWiki.com"
-    csv_url = 'http://%s%s' % (Site.objects.get_current().domain,  reverse('export_csv', kwargs={'scraper_short_name': scraper.short_name}))
+    #csv_url = 'http://%s%s' % (Site.objects.get_current().domain,  reverse('export_csv', kwargs={'scraper_short_name': scraper.short_name}))
 
-    csv_data = urllib.urlopen(csv_url).read()
+    #csv_data = urllib.urlopen(csv_url).read()
+    row_limit = 5000
+    csv_data = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=row_limit), 0)
+    
     document_size = getsizeof(csv_data)
     percent_of_max = ((float(document_size) / float(settings.GDOCS_UPLOAD_MAX)) * 100) - 100.0
 
@@ -515,7 +524,12 @@ def export_gdocs_spreadsheet(request, scraper_short_name):
         title = title + ' [SUBSET ONLY]'
         csv_data = 'THIS IS A SUBSET OF THE DATA ONLY. GOOGLE DOCS LIMITS FILES TO 1MB. DOWNLOAD THE FULL DATASET AS CSV HERE: %s \n' % csv_url
         csv_data = csv_data + '\n'.join(split[0:new_row_count - 1])
-
+    
+    elif scraper.record_count > row_limit:
+        warning_row = 'THIS IS A SUBSET OF THE DATA ONLY. A MAXIMUM OF %s RECORDS CAN BE UPLOADED FROM SCRAPERWIKI. DOWNLOAD THE FULL DATASET AS CSV HERE: %s' % (str(row_limit), csv_url)
+        csv_data = warning_row + csv_data
+        
+        
     #create client and authenticate
     client = gdata.docs.service.DocsService()
     client.ClientLogin(settings.GDOCS_UPLOAD_USER, settings.GDOCS_UPLOAD_PASSWORD)
@@ -900,7 +914,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
         scraper.language = language
         code = startupcode
 
-    
+
     # if it's a post-back (save) then execute that
     if request.POST:
         return saveeditedscraper(request, scraper)

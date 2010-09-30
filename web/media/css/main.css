@@ -135,10 +135,11 @@ table.scrapersediting td { border: 1px solid black;}
 div.page_title {border-bottom:dotted 1px #ccc; padding:1em 0 0.5em 0; position:relative;}
 .page_controls {position:absolute; top:0.6em; right:0; text-align:right;}
 div.page_title_narrow { width:600px;}
-ul.title_links {position:absolute; top:0.6em; right:0;}
+ul.title_links {position:absolute; top:0; right:0;}
 ul.title_links li a {padding-left:20px;}
 ul.title_links li.csv a {background:url(../images/icons/csv_download.png) no-repeat;}
 ul.title_links li.api a {background:url(../images/icons/api.png) no-repeat;}
+ul.title_links li.gdocs a {background:url(../images/icons/google.png) no-repeat;}
 ul.title_links li.full_screen a {background:url(../images/icons/zoom.png) no-repeat;}
 ul.title_links li.embed a {background:url(../images/icons/script_code_red.png) no-repeat;}
 
