@@ -501,9 +501,8 @@ def export_gdocs_spreadsheet(request, scraper_short_name):
 
     #get the csv, it's size and choose a title for the file
     title = scraper.title + " - from ScraperWiki.com"
-    #csv_url = 'http://%s%s' % (Site.objects.get_current().domain,  reverse('export_csv', kwargs={'scraper_short_name': scraper.short_name}))
+    csv_url = 'http://%s%s' % (Site.objects.get_current().domain,  reverse('export_csv', kwargs={'scraper_short_name': scraper.short_name}))
 
-    #csv_data = urllib.urlopen(csv_url).read()
     row_limit = 5000
     csv_data = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=row_limit), 0)
     
