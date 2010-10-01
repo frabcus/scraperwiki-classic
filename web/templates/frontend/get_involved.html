@@ -113,8 +113,8 @@
     {% endif %}
 
     <div class="task_complete">
-        <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_tags">
-            {% dial scraper_description_percent 200 100 %}    
+        <a href="{% url scraper_list_wiki_type 'scraper' %}?filter=no_tags">
+            {% dial scraper_tags_percent 200 100 %}    
         </a>
         <h3>Add some tags to a scraper <small>({{scraper_tags_percent}}% complete)</small></h3>
         {% ifequal scraper_no_tags_count 0 %}

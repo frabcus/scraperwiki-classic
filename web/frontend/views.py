@@ -258,7 +258,7 @@ def get_involved(request):
 
         #no tags
         scraper_no_tags_count = TaggedItem.objects.get_no_tags(Scraper.objects.filter()).count()
-        scraper_tags_percent = int(scraper_no_tags_count / float(scraper_count) * 100)
+        scraper_tags_percent = 100 - int(scraper_no_tags_count / float(scraper_count) * 100)
     
         view_no_tags_count = TaggedItem.objects.get_no_tags(View.objects.filter()).count()
         view_tags_percent = 100 - int(view_no_tags_count / float(view_count) * 100)
