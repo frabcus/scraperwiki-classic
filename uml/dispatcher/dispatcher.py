@@ -236,6 +236,10 @@ class UML :
         for key, value in self.m_scrapers.items() :
            status.append (string.join([ '%s=%s' % (k,v) for k, v in value.m_status.items()], ';'))
 
+        # The above output is interpreted in web/codewiki/management/commands/run_scrapers.py by:
+        #   re.match("name=\w+;scraperID=([\w\._]*?);testName=([^;]*?);state=(\w);runID=([\w.]*);time=([\d.]*)\s*"
+        # Now I would have thought creating the output explicitly as it is done in line 215 so you knew all the keys available somewhat more helpful, but then I don't have a brain the size of a planet --JGT
+
     def close (self) :
 
         self.m_closing = True
