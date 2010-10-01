@@ -15,7 +15,7 @@
            {% if scraper.has_temporal %}                        
                <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
            {% endif %}
-            <li><a href="{% url scraper_admin scraper.short_name %}" id="aEditTitle" class="edit">[edit title]</a></li>
+            <li>{% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditTitle" class="edit">[edit title]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit title]</a>{% endif %}</li>
 	    </ul>
         {% ifequal scraper.wiki_type 'scraper'%}
             <ul class="title_links">
