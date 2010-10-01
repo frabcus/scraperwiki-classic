@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 
 from codewiki.models import Code, Scraper, View, UserCodeEditing
 from tagging.models import Tag, TaggedItem
-from market.models import Solicitation
+from market.models import Solicitation, SolicitationStatus
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
 from registration.backends import get_backend
@@ -264,8 +264,9 @@ def get_involved(request):
         view_tags_percent = 100 - int(view_no_tags_count / float(view_count) * 100)
 
         #scraper requests
+        status = SolicitationStatus.objects.get(status='open')
         solicitation_count = Solicitation.objects.filter().count()
-        solicitation_open_count = Solicitation.objects.filter(status=1).count()        
+        solicitation_open_count = Solicitation.objects.filter(status=status).count()        
         solicitation_percent = int(solicitation_open_count / float(solicitation_count) * 100)        
         
         #scraper status
