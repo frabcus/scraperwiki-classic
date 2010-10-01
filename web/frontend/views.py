@@ -253,7 +253,7 @@ def get_involved(request):
         scraper_no_description_count = Scraper.objects.filter(description='').count()
         scraper_description_percent = 100 - int(scraper_no_description_count / float(scraper_count) * 100)
 
-        view_no_description_count = Scraper.objects.filter(description='').count()
+        view_no_description_count = View.objects.filter(description='').count()
         view_description_percent = 100 - int(view_no_description_count / float(view_count) * 100)
 
         #no tags
@@ -291,4 +291,9 @@ def get_involved(request):
         }
 
         return render_to_response('frontend/get_involved.html', data, context_instance=RequestContext(request))
+
+def stats(request):
+    
+    return render_to_response('frontend/stats.html', {}, context_instance=RequestContext(request))
+    
     

@@ -35,6 +35,7 @@ urlpatterns = patterns('',
     
     # user's scrapers
     url(r'^dashboard/$',                  frontend_views.dashboard, name='dashboard'),
+    url(r'^stats/$',                  frontend_views.stats, name='stats'),    
     
     # Example pages to scrape :)
     url(r'^examples/basic_table\.html$',  direct_to_template,{ 'template': 'examples/basic_table.html' },name='example_basic_table'),
