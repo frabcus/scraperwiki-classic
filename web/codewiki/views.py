@@ -520,6 +520,7 @@ def export_gdocs_spreadsheet(request, scraper_short_name):
         #set the new title, data and a warning
         title = title + ' [SUBSET ONLY]'
         csv_data = 'THIS IS A SUBSET OF THE DATA ONLY. GOOGLE DOCS LIMITS FILES TO 1MB. DOWNLOAD THE FULL DATASET AS CSV HERE: %s \n' % csv_url
+        csv_data = csv_data.decode('uft-8')        
         csv_data = csv_data + '\n'.join(split[0:new_row_count - 1])
     
     elif scraper.record_count > row_limit:
