@@ -513,6 +513,7 @@ def export_gdocs_spreadsheet(request, scraper_short_name):
         #upload a subset of records with a note at the top and bottom
         #this calculation is a little crude as it assumes each row is of a simular size. To take account of this, a buffer of 5% is added 
         row_buffer = 5
+        csv_data = csv_data.decode('uft-8')
         split = csv_data.split('\n')
         new_row_count = int(math.floor(len(split) / 100.0 * (100 - (percent_of_max + row_buffer))))
         #print "New row count: " + str(new_row_count)
@@ -520,7 +521,7 @@ def export_gdocs_spreadsheet(request, scraper_short_name):
         #set the new title, data and a warning
         title = title + ' [SUBSET ONLY]'
         csv_data = 'THIS IS A SUBSET OF THE DATA ONLY. GOOGLE DOCS LIMITS FILES TO 1MB. DOWNLOAD THE FULL DATASET AS CSV HERE: %s \n' % csv_url
-        csv_data = csv_data.decode('uft-8')        
+        csv_data = csv_data.encode('uft-8')
         csv_data = csv_data + '\n'.join(split[0:new_row_count - 1])
     
     elif scraper.record_count > row_limit:
