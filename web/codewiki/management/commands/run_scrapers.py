@@ -152,7 +152,6 @@ class ScraperRunner(threading.Thread):
         # Update the scrapers meta information
         self.scraper.update_meta()
         self.scraper.last_run = datetime.datetime.now()
-        self.scraper.save()
 
         #set the status of the scraper which is used to highlight scrapers that need fixing
         #(TODO: this needs to expand with time to include scrapes that havent returned any records in $n days)
@@ -160,7 +159,10 @@ class ScraperRunner(threading.Thread):
             self.scraper.status = 'sick'
         else:
             self.scraper.status = 'ok'
-            
+
+        #save scraper
+        self.scraper.save()
+                    
         # Log this run event to the history table
         alert = Alerts()
 
