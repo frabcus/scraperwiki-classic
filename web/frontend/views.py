@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 
 from codewiki.models import Code, Scraper, View, UserCodeEditing
 from tagging.models import Tag, TaggedItem
-from market.models import Solicitation
+from market.models import Solicitation, SolicitationStatus
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
 from registration.backends import get_backend
@@ -253,7 +253,7 @@ def get_involved(request):
         scraper_no_description_count = Scraper.objects.filter(description='').count()
         scraper_description_percent = 100 - int(scraper_no_description_count / float(scraper_count) * 100)
 
-        view_no_description_count = Scraper.objects.filter(description='').count()
+        view_no_description_count = View.objects.filter(description='').count()
         view_description_percent = 100 - int(view_no_description_count / float(view_count) * 100)
 
         #no tags
@@ -264,9 +264,10 @@ def get_involved(request):
         view_tags_percent = 100 - int(view_no_tags_count / float(view_count) * 100)
 
         #scraper requests
+        status = SolicitationStatus.objects.get(status='open')
         solicitation_count = Solicitation.objects.filter().count()
-        solicitation_open_count = Solicitation.objects.filter(status=1).count()        
-        solicitation_percent = 100 - int(solicitation_open_count / float(solicitation_count) * 100)        
+        solicitation_open_count = Solicitation.objects.filter(status=status).count()        
+        solicitation_percent = int(solicitation_open_count / float(solicitation_count) * 100)        
         
         #scraper status
         scraper_sick_count = Scraper.objects.filter(status='sick').count()
@@ -291,4 +292,9 @@ def get_involved(request):
         }
 
         return render_to_response('frontend/get_involved.html', data, context_instance=RequestContext(request))
+
+def stats(request):
+    
+    return render_to_response('frontend/stats.html', {}, context_instance=RequestContext(request))
+    
     
