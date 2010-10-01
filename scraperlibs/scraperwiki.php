@@ -2,6 +2,7 @@
 
 require_once   ('scraperwiki/datastore.php') ;
 require_once   ('scraperwiki/metadata.php' ) ;
+require_once   ('scraperwiki/stacktrace.php' ) ;
 
 class scraperwiki
 {
@@ -91,4 +92,5 @@ class scraperwiki
       return SW_MetadataClient::create()->save($metadata_name, $value);
    }
 }
+
 ?>

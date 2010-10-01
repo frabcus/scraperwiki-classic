@@ -85,8 +85,8 @@ for ($idx = 1 ; $idx < count($argv) ; $idx += 1)
    exit  (1) ;
 }
 
+// need to comment out for local version
 $logfd = fopen("/proc/self/fd/3", "w") ;
-
 if (!is_null($gid))
 {
    posix_setgid  ($gid) ;
@@ -116,5 +116,15 @@ if (!is_null ($cache))
 #
 #signal.signal (signal.SIGXCPU, sigXCPU)
 #
-require  $script  ;
+try
+{
+    require  $script  ;
+}
+catch(Exception $e)
+{
+    $etb = exceptionHandler($e);
+    print_r($etb); 
+    #echo $etb;
+    scraperwiki::sw_dumpMessage($etb); 
+}
 ?>
