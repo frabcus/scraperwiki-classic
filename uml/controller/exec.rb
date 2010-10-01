@@ -168,4 +168,10 @@ SW_DataStore.create(host, port)
 #
 #signal.signal (signal.SIGXCPU, sigXCPU)
 
-eval File.new(script, 'r').read()
+begin
+    eval File.new(script, 'r').read()
+rescue Exception => e
+     message = { 'message_type' => 'exception', 'content' => e.to_s }
+     @fd.write(JSON.generate(message) + "\n")
+end
+
