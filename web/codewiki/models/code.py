@@ -38,17 +38,17 @@ WIKI_TYPES = (
 class Code(models.Model):
 
     # model fields
-    title              = models.CharField(max_length=100, 
-                                        null=False, 
-                                        blank=False, 
-                                        verbose_name='Scraper Title', 
+    title              = models.CharField(max_length=100,
+                                        null=False,
+                                        blank=False,
+                                        verbose_name='Scraper Title',
                                         default='Untitled')
     short_name         = models.CharField(max_length=50)
     source             = models.CharField(max_length=100, blank=True)
     description        = models.TextField(blank=True)
     created_at         = models.DateTimeField(auto_now_add=True)
     deleted            = models.BooleanField()
-    status             = models.CharField(max_length=10, blank=True)
+    status             = models.CharField(max_length=10, blank=True, default='ok')
     users              = models.ManyToManyField(User, through='UserCodeRole')
     guid               = models.CharField(max_length=1000)
     published          = models.BooleanField(default=True)
@@ -130,9 +130,6 @@ class Code(models.Model):
 
     def followers(self):
         return self.users.filter(usercoderole__role='follow')
-
-    def is_published(self):
-        return self.status == 'Published'
 
     # currently, the only editor we have is the owner of the scraper.
     def editors(self):

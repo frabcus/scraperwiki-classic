@@ -24,6 +24,7 @@ urlpatterns = patterns('',
     url(r'^example_data/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/example_data.html'}, name='api'),
     url(r'^help/code_documentation/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/code_documentation.html'}, name='help_code_documentation'),
     url(r'^help/tutorials/$',frontend_views.tutorials, name='help_tutorials'),
+    url(r'^get_involved/$',frontend_views.get_involved, name='get_involved'),
     
     #hello world
     url(r'^hello_world.html', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/hello_world.html'}, name='help_hello_world'),

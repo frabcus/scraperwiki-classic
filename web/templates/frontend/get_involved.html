@@ -1,0 +1,160 @@
+{% extends "frontend/base.html" %}
+{% load dial %}
+
+{% block title %}Get involved{% endblock %}
+{% block content %}
+    <div class="page_title">
+        <h1>Get involved - where to start with ScraperWiki</h1>
+        <p>
+            Here are just a few things things you can do to get involved with ScraperWiki and help improve it
+        </p>
+    </div>
+
+<div class="content full">
+
+    <h2>Technical tasks</h2>
+
+    <div class="task_complete">
+        <a href="{% url market_list %}">
+            {% dial solicitation_percent 200 100 %}
+        </a>
+        <h3>Write a scraper someone has requested <small>({{solicitation_percent}}% complete)</small></h3>
+        {% ifequal solicitation_open_count 0 %}
+            <p>No need! They've all been done.</p>
+        {% else %}
+            <p>
+                There are currently <strong>{{solicitation_open_count}} datasets</strong> that need scrapers writing for them. 
+                These have either been requested by people who can't program but would like to use the data locked away on the web
+                or programers who need help getting at numerous datasets, such as scraping data from every council in the UK. Take a look and see if there is anything you can help out with.
+            </p>
+            <form action="{% url market_list %}" method="get">
+                <input type="submit" value="Show me requested scrapers"/>
+            </form>
+        {% endifequal %}
+    </div>
+
+    <div class="task_complete">
+        <a href="{% url scraper_list_wiki_type 'scraper' %}?filter=sick">
+            {% dial scraper_sick_percent 200 100 %}   
+        </a>
+        <h3>Help fix a broken scraper <small>({{scraper_sick_percent}}% complete)</small></h3>
+        {% ifequal scraper_sick_count 0 %}
+            <p>No need! They've are all working!</p>
+        {% else %}
+            <p>
+                Scrapers break. It's just the way things are. In fact that was one of the reasons that ScraperWiki was built 
+                - to help people work together to keep scrapers ticking over.
+                If you are new to writing scrapers, or new to ScraperWiki, fixing a broken scraper that someone else wrote is a great way to start
+                (and will earn you their undying gratitude).
+            </p>
+            <p>
+                At the moment <strong>{{scraper_sick_count}} out of {{scraper_count}}</strong> look like they might be a bit broken.
+            </p>
+            <form action="{% url scraper_list_wiki_type 'scraper' %}" method="get">
+                <input type="hidden" name="filter" value="sick"/>
+                <input type="submit" value="Show me scrapers that need fixing"/>
+            </form>
+        {% endifequal %}
+    </div>
+
+    <h2>Non-technical tasks</h2>
+    <div class="task_complete">
+        <a href="{% url market_solicitation %}">
+            <img class="photo" src="{{MEDIA_URL}}/images/requests.jpg"/>
+        </a>
+        <h3>Request or suggest a dataset</h3>
+        <p>
+            Do you know of a good dataset that you think should be on ScraperWiki? Can you find all the individual websites listing councillors expenses, or parking suspensions, or planning applications?
+            What dataset would you really like to see in a spreadsheet rather than scattered across pages on a government website? <a href="{% url market_list %}">Click here to see what other people have suggested</a>.
+        </p>
+        <form action="{% url market_solicitation %}" method="get">
+            <input type="submit" value="Suggest a dataset"/>
+        </form>
+    </div>
+    
+    <div class="task_complete">
+        <a href="{% url scraper_list_wiki_type 'scraper' %}?filter=no_description">
+            {% dial scraper_description_percent 200 100 %}    
+        </a>
+        <h3>Add a description to a scraper <small>({{scraper_description_percent}}% complete)</small></h3>
+        {% ifequal scraper_no_description_count 0 %}
+            <p>No need! They've all been done.</p>
+        {% else %}
+            <p>
+                <strong>{{scraper_no_description_count}} out of {{scraper_count}}</strong> scrapers are currently missing a description. Help out by adding one that describes what the dataset is and where it came from.
+            </p>
+            <form action="{% url scraper_list_wiki_type 'scraper' %}?filter=no_description" method="get">
+                <input type="hidden" name="filter" value="no_description"/>
+                <input type="submit" value="Show me scrapers with no description"/>
+            </form>
+        {% endifequal %}
+    </div>
+
+    {% if user.is_staff %}
+        <div class="task_complete staff">
+            <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_description">
+                {% dial view_description_percent 200 100 %}
+            </a>
+            <h3>Add a description to a view <small>({{view_description_percent}}% complete)</small></h3>
+            {% ifequal view_no_description_count 0 %}
+                <p>No need! They've all been done.</p>
+            {% else %}
+                <p>{{view_no_description_count}} out of {{view_count}} views have no description. Help make ScraperWiki better by <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_description">adding a description to some random views</a>.</p>
+                
+                <p>
+                    <strong>{{view_no_description_count}} out of {{view_count}}</strong> views are currently missing a description. Help out by adding one that describes what the view shows and what data it uses.
+                </p>
+                <form action="{% url scraper_list_wiki_type 'view' %}" method="get">
+                    <input type="hidden" name="filter" value="no_description"/>                    
+                    <input type="submit" value="Show me views with no description"/>
+                </form>
+            {% endifequal %}
+        </div>
+    {% endif %}
+
+    <div class="task_complete">
+        <a href="{% url scraper_list_wiki_type 'scraper' %}?filter=no_tags">
+            {% dial scraper_tags_percent 200 100 %}    
+        </a>
+        <h3>Add some tags to a scraper <small>({{scraper_tags_percent}}% complete)</small></h3>
+        {% ifequal scraper_no_tags_count 0 %}
+            <p>No need! They've all been done.</p>
+        {% else %}
+        <p>
+            <strong>{{scraper_no_tags_count}} out of {{scraper_count}}</strong> scrapers are currently not tagged. Help out by adding some tags that describe the dataset.
+            This will help make the scraper easier to find for other people.
+        </p>
+        <form action="{% url scraper_list_wiki_type 'scraper' %}" method="get">
+            <input type="hidden" name="filter" value="no_tags"/>
+            <input type="submit" value="Show me scrapers with no description"/>
+        </form>
+    
+        {% endifequal %}
+    </div>
+
+    {% if user.is_staff %}    
+        <div class="task_complete staff">
+            <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_tags">
+                {% dial view_description_percent 200 100 %}
+            </a>
+            <h3>Add some tags to a view <small>({{view_tags_percent}}% complete)</small></h3>
+            {% ifequal view_no_tags_count 0 %}
+                <p>No need! They've all been done.</p>
+            {% else %}
+            <p>
+                <strong>{{view_no_tags_count}} out of {{view_count}}</strong> scrapers are currently not tagged. Help out by adding some tags that describe the view.
+                This will help make the view easier to find for other people.
+            </p>
+            <form action="{% url scraper_list_wiki_type 'scraper' %}?filter=no_tags" method="get">
+                <input type="hidden" name="filter" value="no_tags"/>                
+                <input type="submit" value="Show me scrapers with no description"/>
+            </form>
+        
+            {% endifequal %}
+        </div>
+    {% endif %}    
+</div>
+
+
+{% endblock %}
+{% block run_script %}setupIntroSlideshow();{% endblock %}

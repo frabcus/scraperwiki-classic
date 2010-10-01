@@ -139,7 +139,7 @@ class ScraperRunner(threading.Thread):
             if loutput or lchanged:
                 event.run_ended = datetime.datetime.now()
                 event.save()
-            
+
         # completion state
         if not bcompleted:
             event.output += "Run did not complete\n"
@@ -154,10 +154,16 @@ class ScraperRunner(threading.Thread):
         self.scraper.last_run = datetime.datetime.now()
         self.scraper.save()
 
+        #set the status of the scraper which is used to highlight scrapers that need fixing
+        #(TODO: this needs to expand with time to include scrapes that havent returned any records in $n days)
+        if bexception or bexception:
+            self.scraper.status = 'sick'
+        else:
+            self.scraper.status = 'ok'
+            
         # Log this run event to the history table
         alert = Alerts()
-        
-        # more f**!ing hassle and bugs with this GenericForeignKey crap!
+
         #alert.content_object = self.scraper.code   # saves it as the wrong type
         alert.content_object = Code.objects.get(pk=self.scraper.pk)  # don't have a way to down-cast the scraper object for this useless unhelpful interface
         

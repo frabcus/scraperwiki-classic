@@ -1,0 +1,11 @@
+<ul>
+    <li{% ifequal selected_tab "comments" %} class="selected"{% endifequal %}>
+        <a href="{% url market_discuss solicitation.id %}">Discussion</a>
+    </li>
+    <li{% ifequal selected_tab "edit" %} class="selected"{% endifequal %}>
+        <a href="{% url market_edit solicitation.id %}">Edit</a>
+    </li>
+    <li{% ifequal selected_tab "overview" %} class="selected"{% endifequal %}>
+        <a href="{% url market_view solicitation.id %}">Scraper request</a>
+    </li>
+</ul>

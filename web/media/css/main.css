@@ -430,3 +430,9 @@ h4 a.edit {font-size:0.8em;}
 .completeometer {position:absolute; top:0; right:0;}
 /* flag stuff that is seen by staff only */
 .staff { background-color: #fde;}
+
+/* get involved */
+.task_complete {border-bottom:dotted 1px #ccc;padding-bottom:2em; margin-bottom:2em;}
+.task_complete {min-height:150px;}
+.task_complete img.dial, .task_complete img.photo {float:left; margin-right:20px;}
+.task_complete p, .task_complete form {padding-left:220px;}

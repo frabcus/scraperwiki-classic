@@ -393,7 +393,7 @@ def code(request, wiki_type, short_name):
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
-        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+        return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
 
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
