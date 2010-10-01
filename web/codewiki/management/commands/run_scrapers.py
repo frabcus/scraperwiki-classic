@@ -49,7 +49,8 @@ def is_currently_running(scraper):
 
 def kill_running_runid(runid):
     response = urllib.urlopen('http://localhost:9000/Kill?'+runid).read()
-    mresponse = re.match("Scraper (\S+) (killed|not killed|not found)", runid)
+    mresponse = re.match("Scraper (\S+) (killed|not killed|not found)", response)
+    print response
     
     if not mresponse:  return False
     
