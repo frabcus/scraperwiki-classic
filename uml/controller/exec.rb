@@ -168,4 +168,15 @@ SW_DataStore.create(host, port)
 #
 #signal.signal (signal.SIGXCPU, sigXCPU)
 
-eval File.new(script, 'r').read()
+begin
+    require 'rubygems'
+    eval File.new(script, 'r').read()
+rescue Exception => e
+    jtraceback = { 'exceptiondescription' => e.to_s }
+    message = { 'message_type' => 'exception', 'jtraceback' => jtraceback }
+    #$logfd.write(JSON.generate(message) + "\n")
+    $logfd.write(JSON.generate({ 'message_type' => 'console', 'content' => e.to_s }) + "\n")
+    #$logfd.write(JSON.generate({ 'console' => 'exception', 'content' => e.to_s }) + "\n")
+
+end
+

@@ -109,8 +109,9 @@ class spawnRunner(protocol.ProcessProtocol):
         print "run process ended ", data
 
 
-# There's one of these per editor window open.  All connecting to same factory
-# this is usually called client
+
+
+# There's one of these 'clients' per editor window open.  All connecting to same factory
 class RunnerProtocol(protocol.Protocol):
      
     def __init__(self):
@@ -129,32 +130,10 @@ class RunnerProtocol(protocol.Protocol):
 
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
-        print "new connection", len(self.factory.clients)
         # we don't know what scraper they've actually opened until we get the dataReceived
         
+    
     def dataReceived(self, data):
-        """
-        Listens for data coming from the client.
-        
-        When new data is received it's parsed in to a JSON object and parsed.
-        If this fails an exception is raised and a message is written to the 
-        client.
-        
-        The parsed JSON object must contain a `command` key with a value of:
-        
-            - `run`: Run the code contained in the `code` key.  This command
-                     is not valid without accompioning `code` key.
-
-            - `kill`: Sends SIGKILL to the `spawnRunner` process for this 
-                      client.  No other keys are required.
-        
-        If `command` is 'run' and the `code` key exists, reactor.spawnProcess
-        is called with spawnRunner as an argument.  
-        
-        'spawnProcess' calls an object that interfaces with a command in a 
-        new thread.  'Interfaces' here referes to reading and writing to the
-        file descriptiors.  See the spawnRunner documentation for more.
-        """
         try:
             parsed_data = json.loads(data)
             if parsed_data['command'] == "kill":
@@ -170,78 +149,13 @@ class RunnerProtocol(protocol.Protocol):
                 
             elif parsed_data['command'] == 'run' and not self.running:
                 if 'code' in parsed_data:
-                    code = parsed_data['code']
-                    code = code.encode('utf8')
-                    
-                    # these could all be fetched from self
-                    guid = parsed_data['guid']
-                    scraperlanguage = parsed_data.get('language', 'python')
-                    scrapername = parsed_data.get('scrapername', '')
-                    scraperlanguage = parsed_data.get('language', '')
-                    urlquery = parsed_data.get('urlquery', '')
-                    
-                    assert guid == self.guid
-                    args = ['./firestarter/runner.py']
-                    args.append('--guid=%s' % guid)
-                    args.append('--language=%s' % scraperlanguage)
-                    args.append('--name=%s' % scrapername)
-                    args.append('--urlquery=%s' % urlquery)
-                    
-                    # args must be an ancoded string, not a unicode object
-                    args = [i.encode('utf8') for i in args]
-
-                    print "./firestarter/runner.py: %s" % args
-
-                    self.running = reactor.spawnProcess(
-                        spawnRunner(self, code), \
-                        './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'}
-                            )
-
-                    message = "%s runs scraper" % self.chatname
-                    if self.guid:
-                        self.factory.sendchatmessage(self.guid, message, None)
-                    else:   
-                        self.write(format_message(message, message_type='chat'))  # write it back to itself
-                
+                    self.runcode(parsed_data)
                 else:
                     raise ValueError('++?????++ Out of Cheese Error. Redo From Start: `code` to run not specified')
                     
             # data uploaded when a new connection is made from the editor
             elif parsed_data['command'] == 'connection_open':
-                self.guid = parsed_data['guid']
-                self.username = parsed_data['username']
-                self.userrealname = parsed_data.get('userrealname', self.username)
-                self.scrapername = parsed_data.get('scrapername', '')
-                self.scraperlanguage = parsed_data.get('language', '')
-                self.isstaff = (parsed_data.get('isstaff') == "yes")
-                
-                if self.username:
-                    self.chatname = self.userrealname or self.username
-                else:
-                    self.chatname = "Anonymous%d" % self.factory.anonymouscount
-                    self.factory.anonymouscount += 1
-                    
-                # data sent back
-                if self.guid:
-                    editorclients = self.factory.updatescrapereditornumber(self.guid)
-                    
-                    if editorclients:
-                        self.earliesteditor = editorclients[0].earliesteditor
-                        connectionconfirmedmessage = json.dumps({'message_type' : "connectionconfirmed", 'earliesteditor' : self.earliesteditor.isoformat()})
-                        self.write(connectionconfirmedmessage)
-                    
-                    # send update to self
-                    if self in editorclients:
-                        editorclients.remove(self)
-                        if editorclients:
-                            message = "Other editors: %s" % ", ".join([lclient.chatname  for lclient in editorclients ])
-                            self.write(format_message(message, message_type='chat'))  # write it back to itself
-                
-                    # send update to everyone else
-                    self.factory.sendchatmessage(self.guid, "%s enters" % self.chatname, self)
-                
-                self.factory.notifytwisterstatus()
-        
+                self.connectionopen(parsed_data)
             
             elif parsed_data['command'] == 'saved':
                 line = json.dumps({'message_type' : "saved", 'content' : "%s saved" % self.chatname})
@@ -262,17 +176,19 @@ class RunnerProtocol(protocol.Protocol):
         except Exception, e:
             self.transport.write(format_message("Command not valid (%s)  %s " % (e, data)))
 
-
     
     def write(self, line, formatted=True):
-        """
-        A simple method that writes `line` back to the client.
-        
-        We assume that `line` has been formatted correctly at some stage 
-        before.
-        """
         self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together
     
+    
+    def connectionLost(self, reason):
+        if self.running:
+            self.kill_run(reason='connection lost')
+        if self.guid:
+            self.factory.sendchatmessage(self.guid, "%s leaves" % self.chatname, self)
+        self.factory.clientConnectionLost(self)
+        self.factory.notifytwisterstatus()
+
     def writeall(self, line, otherline=""):
         self.write(line)  
         
@@ -291,29 +207,60 @@ class RunnerProtocol(protocol.Protocol):
             msg += " (%s)" % reason
         self.writeall(json.dumps({'message_type':'executionstatus', 'content':'killsignal', 'message':msg}))
         print msg
-        try:
+        try:      # should kill using the new dispatcher call
             os.kill(self.running.pid, signal.SIGKILL)
         except:
             pass
 
-
-    def connectionLost(self, reason):
-        """
-        Called when the connection is shut down.
+    def runcode(self, parsed_data):
+        code = parsed_data['code']
+        code = code.encode('utf8')
         
-        Kills and running spawnRunner processes.
-        """
+        # these could all be fetched from self
+        guid = parsed_data['guid']
+        scraperlanguage = parsed_data.get('language', 'python')
+        scrapername = parsed_data.get('scrapername', '')
+        scraperlanguage = parsed_data.get('language', '')
+        urlquery = parsed_data.get('urlquery', '')
+        
+        assert guid == self.guid
+        args = ['./firestarter/runner.py']
+        args.append('--guid=%s' % guid)
+        args.append('--language=%s' % scraperlanguage)
+        args.append('--name=%s' % scrapername)
+        args.append('--urlquery=%s' % urlquery)
+        
+        # args must be an ancoded string, not a unicode object
+        args = [i.encode('utf8') for i in args]
+
+        print "./firestarter/runner.py: %s" % args
+
+        # from here we should somehow get the runid
+        self.running = reactor.spawnProcess(spawnRunner(self, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
+
+        message = "%s runs scraper" % self.chatname
         if self.guid:
-            self.factory.sendchatmessage(self.guid, "%s leaves" % self.chatname, self)
-        self.factory.clientConnectionLost(self)
-        print "end connection", len(self.factory.clients), reason
-        if self.guid:
-            self.factory.updatescrapereditornumber(self.guid)
+            self.factory.sendchatmessage(self.guid, message, None)
+        else:   
+            self.write(format_message(message, message_type='chat'))  # write it back to itself
+
+    def connectionopen(self, parsed_data):
+        self.guid = parsed_data['guid']
+        self.username = parsed_data['username']
+        self.userrealname = parsed_data.get('userrealname', self.username)
+        self.scrapername = parsed_data.get('scrapername', '')
+        self.scraperlanguage = parsed_data.get('language', '')
+        self.isstaff = (parsed_data.get('isstaff') == "yes")
+        
+        if self.username:
+            self.chatname = self.userrealname or self.username
+        else:
+            self.chatname = "Anonymous%d" % self.factory.anonymouscount
+            self.factory.anonymouscount += 1
+            
+        self.factory.clientConnectionRegistered(self)
         self.factory.notifytwisterstatus()
         
-        if self.running:
-            self.kill_run(reason='connection lost')
-
 
 class StringProducer(object):
     """
@@ -336,14 +283,78 @@ class StringProducer(object):
         pass
 
 
+class EditorsOnOneScraper:
+    def __init__(self, guid):
+        self.guid = guid
+        self.sessionstarts = datetime.datetime.now()  # replaces earliesteditor
+        self.anonymouseditors = [ ]
+        self.usereditors = [ ]  # list of lists of clients
+        self.editinguser = ""
+        
+    def AddClient(self, client):
+        assert client.guid == self.guid
+        client.earliesteditor = self.sessionstarts
+        if client.username:
+            bnomatch = True
+            for userclients in self.usereditors:
+                if userclients[0].username == client.username:
+                    userclients.append(client)  # new window by same user
+                    bnomatch = False  # this signal is case for use of an else statement on the for
+                    break
+            if not self.usereditors:
+                self.editinguser = client.username
+            else:
+                assert self.editinguser
+            if bnomatch:
+                self.usereditors.append([client])
+        else:
+            self.anonymouseditors.append(client)
+        self.notifyEditorClients()
+        
+    def RemoveClient(self, client):
+        assert client.guid == self.guid
+        if client.username:
+            for i in range(len(self.usereditors)):
+                if self.usereditors[i][0].username == client.username:
+                    self.usereditors[i].remove(client)  
+                    if not self.usereditors[i]:
+                        del self.usereditors[i]
+                        
+                        # fairly inelegant logic to handle passing editing user on to next person
+                        if self.editinguser == client.username:
+                            if self.usereditors:
+                                self.editinguser = self.usereditors[0][0].username
+                            else:
+                                self.editinguser = ""
+                    break
+            assert False
+        else:
+            self.anonymouseditors.remove(client)
+        self.notifyEditorClients()
+        return self.usereditors or self.anonymouseditors
+        
+        
+    def notifyEditorClients(self):
+        editorstatusdata = {'message_type' : "editorstatus", 'earliesteditor' : self.sessionstarts.isoformat(), "editinguser":self.editinguser, "cansave":False}; 
+        editorstatusdata["message"] = "%d anonymous editors, %d logged editors with %d windows" % (len(self.anonymouseditors), len(self.usereditors), sum(map(len, self.usereditors)))
+        for client in self.anonymouseditors:
+            client.write(json.dumps(editorstatusdata)); 
+        for editorlist in self.usereditors:
+            editorstatusdata["cansave"] = (editorlist[0].username == self.editinguser)
+            for client in editorlist:
+                client.write(json.dumps(editorstatusdata)); 
+        
+
 class RunnerFactory(protocol.ServerFactory):
     protocol = RunnerProtocol
     
     def __init__(self):
-        self.clients = []
+        self.clients = [ ]
         self.clientcount = 0
         self.anonymouscount = 1
         self.announcecount = 0
+        
+        self.guidclientmap = { }  # maps to EditorsOnOneScraper objects
         
         # set the visible heartbeat going
         #self.lc = task.LoopingCall(self.announce)
@@ -372,25 +383,28 @@ class RunnerFactory(protocol.ServerFactory):
             if client.guid == guid and client != nomessageclient and client.isstaff:
                 client.write(format_message(message, message_type='chat'))
         
-    # yes I know this would all be better as a dict from scrapers to lists of clients
-    def updatescrapereditornumber(self, guid):
-        editorclients = []
-        lscrapereditornumber = 0
-        for client in self.clients:
-            if client.guid == guid:
-                client.scrapereditornumber = lscrapereditornumber
-                lscrapereditornumber += 1
-                editorclients.append(client)
-        return editorclients
-
+    
 
     def clientConnectionMade(self, client):
         client.clientnumber = self.clientcount
         self.clients.append(client)
         self.clientcount += 1
+        # will call next function when some actual data gets sent
 
+    def clientConnectionRegistered(self, client):
+        if not client.guid:
+            return
+        if client.guid not in self.guidclientmap:
+            self.guidclientmap[client.guid] = EditorsOnOneScraper(client.guid)
+        self.guidclientmap[client.guid].AddClient(client)
+
+            
+    
     def clientConnectionLost(self, client):
-        self.clients.remove(client)
+        self.clients.remove(client)  # main list
+        if client.guid and (client.guid in self.guidclientmap):
+            if not self.guidclientmap[client.guid].RemoveClient(client):
+                del self.guidclientmap[client.guid]
 
     def notifytwisterstatus(self):
         clientlist = [ ]

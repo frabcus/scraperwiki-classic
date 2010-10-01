@@ -21,6 +21,8 @@ import os
 import signal
 
 
+
+
 # useful function for polling the UML for its current position (don't know where to keep it)
 def GetUMLrunningstatus():
     result = [ ]
@@ -44,6 +46,19 @@ def GetUMLrunningstatus():
 def is_currently_running(scraper):
     return urllib.urlopen('http://localhost:9000/Status').read().find(scraper.guid) > 0    
 
+
+def kill_running_runid(runid):
+    response = urllib.urlopen('http://localhost:9000/Kill?'+runid).read()
+    mresponse = re.match("Scraper (\S+) (killed|not killed|not found)", response)
+    print response
+    
+    if not mresponse:  return False
+    
+    assert mresponse
+    assert mresponse.group(1) == runid
+    if mresponse.group(2) == 'killed':
+        return True
+    return False
 
 
 # class to manage running one scraper
