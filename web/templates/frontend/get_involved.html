@@ -38,7 +38,7 @@
             {% dial scraper_sick_percent 200 100 %}   
         </a>
         <h3>Help fix a broken scraper <small>({{scraper_sick_percent}}% complete)</small></h3>
-        {% ifequal scraper_sick_count 99 %}
+        {% ifequal scraper_sick_count 0 %}
             <p>No need! They've are all working!</p>
         {% else %}
             <p>
