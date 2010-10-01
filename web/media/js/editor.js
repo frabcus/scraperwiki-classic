@@ -338,7 +338,7 @@ $(document).ready(function() {
             }
 
             if (jdata != undefined) {
-                if (jdata.message_type == 'chat')
+                if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
                     receivechatqueue.push(jdata); 
                 else
                     receiverecordqueue.push(jdata); 
@@ -395,8 +395,8 @@ $(document).ready(function() {
               writeRunOutput(data.content);     // able to divert text to the preview iframe
           } else if (data.message_type == "sources") {
               writeToSources(data.url, data.bytes, data.failedmessage, data.cached, data.cacheid)
-          } else if (data.message_type == "connectionconfirmed") {
-              earliesteditor = data.earliesteditor; writeToChat(cgiescape("earliesteditor: " + data.earliesteditor)); 
+          } else if (data.message_type == "editorstatus") {
+              recordEditorStatus(data); 
           } else if (data.message_type == "chat") {
               writeToChat(cgiescape(data.content))
           } else if (data.message_type == "saved") {
@@ -407,8 +407,7 @@ $(document).ready(function() {
           } else if (data.message_type == "data") {
               writeToData(data.content);
           } else if (data.message_type == "exception") {
-              writeExceptionDump(data); 
-
+              writeExceptionDump(data.exceptiondescription, data.stackdump, data.blockedurl, data.blockedurlquoted); 
           } else if (data.message_type == "executionstatus") {
               if (data.content == "startingrun")
                 startingrun(data.runID);
@@ -478,6 +477,13 @@ $(document).ready(function() {
             saveScraper(); 
     }
 
+    function recordEditorStatus(data) { 
+        earliesteditor = data.earliesteditor; 
+        writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
+        if (data.message)
+            writeToChat(cgiescape(data.message)); 
+    }
+
     function startingrun(lrunID) {
         //show the output area
         resizeControls('up');
@@ -489,7 +495,7 @@ $(document).ready(function() {
 
         //clear the tabs
         clearOutput();
-        writeToConsole('Starting run ... ' + runID); 
+        writeToConsole('Starting run ... '); 
 
         //unbind run button
         $('.editor_controls #run').unbind('click.run')
@@ -836,28 +842,27 @@ $(document).ready(function() {
         codeeditor.focus(); 
     }
 
-    function writeExceptionDump(data) {
-        if (data.jtraceback) {
-            //alert($.toJSON(data.jtraceback)); 
-            var sMessage; 
-            var linenumber; 
-            for (var i = 0; i < data.jtraceback.stackdump.length; i++) {
-                var stackentry = data.jtraceback.stackdump[i]; 
-                sMessage = (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file); 
+    function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blockedurlquoted) {
+        if (stackdump) {
+            for (var i = 0; i < stackdump.length; i++) {
+                var stackentry = stackdump[i]; 
+                sMessage = (stackentry.file != undefined ? (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file) : ""); 
                 if (stackentry.furtherlinetext != undefined)
                     sMessage += " -- " + stackentry.furtherlinetext; 
                 linenumber = (stackentry.file == "<string>" ? stackentry.linenumber : undefined); 
                 writeToConsole(sMessage, 'exceptiondump', linenumber); 
+                if (stackentry.duplicates > 1)
+                    writeToConsole("  + " + stackentry.duplicates + " duplicates", 'exceptionnoesc'); 
             }
-
-            if (data.jtraceback.blockedurl) {
-                sMessage = "The link " + data.jtraceback.blockedurl.substring(0,50) + " has been blocked. "; 
-                sMessage += "Click <a href=\"/whitelist/?url=" + data.jtraceback.blockedurlquoted + "\" target=\"_blank\">here</a> for details."; 
-                writeToConsole(sMessage, 'exceptionnoesc'); 
-            }
-            else
-                writeToConsole(data.jtraceback.exceptiondescription, 'exceptiondump'); 
         }
+
+        if (blockedurl) {
+            sMessage = "The link " + blockedurl.substring(0,50) + " has been blocked. "; 
+            sMessage += "Click <a href=\"/whitelist/?url=" + blockedurlquoted + "\" target=\"_blank\">here</a> for details."; 
+            writeToConsole(sMessage, 'exceptionnoesc'); 
+        }
+        else
+            writeToConsole(exceptiondescription, 'exceptiondump'); 
     }
 
     function writeRunOutput(sMessage) {

@@ -318,7 +318,6 @@ class CodeManager(models.Manager):
 
     def search(self, query):
         scrapers = self.get_query_set().filter(title__icontains=query)
-        return scrapers
         scrapers_description = self.get_query_set().filter(description__icontains=query, published=True)
 
         # and by tag

@@ -14,15 +14,20 @@
 
     <td>
     {% if status.scraperrunevent %}
-      <a href="{% url run_event status.scraperrunevent.id%}">{{status.runtime|floatformat}} seconds</a>
+      <a href="{% url run_event status.scraperrunevent.id %}">{{status.runtime|floatformat}} seconds</a>
     {% else %}
       {{status.runtime|floatformat}} seconds
     {% endif %}
     </td>
 
     <td>
+    {% if status.killable %}
+
     {% if status.scraperrunevent %}
+    <form action="{% url scraper_killrunning status.runID status.scraperrunevent.id %}" method="post">
+    {% else %}
     <form action="{% url scraper_killrunning status.runID %}" method="post">
+    {% endif %}
         <input type="hidden" id="hidKillRun" name="killrun" value="1" />
         <input type="submit" id="btnKillRun" class="danger" value="Kill running scraper" />
     </form>

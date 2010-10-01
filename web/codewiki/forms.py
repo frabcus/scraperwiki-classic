@@ -36,6 +36,7 @@ class ScraperAdministrationForm (forms.ModelForm):
     run_interval = forms.ChoiceField(required=True, label="Re-run this scraper", choices = SCHEDULE_OPTIONS)
     title = forms.CharField(label="Title")
     license = forms.ChoiceField(choices=LICENSE_CHOICES, label='Data licence')
+    license_link = forms.URLField(label="License link")
     tags = forms.CharField(required=False, label="Tags (comma separated)")
 
     class Meta:

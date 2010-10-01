@@ -38,6 +38,25 @@ UMLList    = []
 UMLLock    = None
 UMLPtr     = None
 
+class Scraper :
+
+    def __init__ (self, status) :
+
+        self.m_status = status
+        self.m_socket = None
+
+    def setSocket (self, socket) :
+
+        self.m_socket = socket
+
+    def runID (self) :
+
+        return self.m_status['runID']
+
+    def socket (self) :
+
+        return self.m_socket
+
 class UML :
 
     """
@@ -60,16 +79,16 @@ class UML :
         @param  count   : Scraper count
         """
 
-        self.m_name    = name
-        self.m_server  = server
-        self.m_port    = port
-        self.m_config  = None
-        self.m_count   = count
-        self.m_free    = count
-        self.m_closing = False
-        self.m_status  = {}
-        self.m_lock    = threading.Semaphore(count)
-        self.m_next    = None
+        self.m_name     = name
+        self.m_server   = server
+        self.m_port     = port
+        self.m_config   = None
+        self.m_count    = count
+        self.m_free     = count
+        self.m_closing  = False
+        self.m_scrapers = {}
+        self.m_lock     = threading.Semaphore(count)
+        self.m_next     = None
 
     def setNextUML (self, next) :
 
@@ -147,15 +166,15 @@ class UML :
 
         @type   status  : Dictionary
         @param  status  : Status information
-        @rtype      : UUID
-        @return     : Request identifier
+        @rtype      	: UUID
+        @return     	: Request identifier
         """
 
         #  The status is marked as state=W(aiting) before the UML
         #  semephore is acquired, and changed to state=R(unning) after.
         #
         id = uuid.uuid4()
-        self.m_status[id] = status
+        self.m_scrapers[id] = Scraper (status)
         status['state']   = 'W'
         status['name' ]   = self.m_name
         status['time' ]   = time.time()
@@ -179,7 +198,7 @@ class UML :
 
         self.m_lock.release()
         self.m_free += 1
-        del self.m_status[id]
+        del self.m_scrapers[id]
 
         return self.m_closing and not self.active()
 
@@ -214,13 +233,31 @@ class UML :
         @param  status  : Status list
         """
 
-        for key, value in self.m_status.items() :
-           status.append (string.join([ '%s=%s' % (k,v) for k, v in value.items()], ';'))
+        for key, value in self.m_scrapers.items() :
+           status.append (string.join([ '%s=%s' % (k,v) for k, v in value.m_status.items()], ';'))
+
+        # The above output is interpreted in web/codewiki/management/commands/run_scrapers.py by:
+        #   re.match("name=\w+;scraperID=([\w\._]*?);testName=([^;]*?);state=(\w);runID=([\w.]*);time=([\d.]*)\s*"
+        # Now I would have thought creating the output explicitly as it is done in line 215 so you knew all the keys available somewhat more helpful, but then I don't have a brain the size of a planet --JGT
 
     def close (self) :
 
         self.m_closing = True
 
+    def setSocket (self, id, socket) :
+
+        self.m_scrapers[id].setSocket (socket)
+
+    def killScraper (self, runID) :
+
+        for key, scraper in self.m_scrapers.items() :
+            if scraper.runID() == runID :
+                try    :
+                    scraper.socket().close()
+                    return True
+                except :
+                    return False
+        return None
 
 def allocateUML (queue = False, **status) :
 
@@ -555,6 +592,31 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  ('UML %s closing' % name)
         self.connection.send  ('\n')
 
+    def killScraper (self, runID) :
+
+        """
+        Kill a scraper
+
+        @type   runID   : String
+        @param  runID   : Run identifier
+        """
+
+        global UMLPtr
+        global UMLList
+
+        killed = None
+        UMLLock.acquire()
+        for uml in UMLList :
+            killed = uml.killScraper (runID)
+            if killed is not None :
+                break
+        UMLLock.release()
+        self.sendOK ()
+        if killed is True  : self.connection.send  ('Scraper %s killed'     % runID)
+        if killed is False : self.connection.send  ('Scraper %s not killed' % runID)
+        if killed is None  : self.connection.send  ('Scraper %s not found'  % runID)
+        self.connection.send  ('\n')
+
     def do_GET (self) :
 
         """
@@ -583,6 +645,11 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
             return
 
+        if path == '/Kill'   :
+            self.killScraper(query)
+            self.connection.close()
+            return
+
         try    : scraperID  = self.headers['x-scraperid' ]
         except : scraperID  = None
         try    : testName   = self.headers['x-testname'  ]
@@ -604,6 +671,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
 
         soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        uml.setSocket (id, soc)
 
         try :
             if self._connect_to (uml.server(), uml.port(), soc) :
@@ -647,7 +715,10 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         busy  = True
         while busy :
             count        += pause
-            (ins, _, exs) = select.select(iw, ow, iw, pause)
+            try    :
+                (ins, _, exs) = select.select(iw, ow, iw, pause)
+            except :
+                break
             if exs :
                 break
             if ins :

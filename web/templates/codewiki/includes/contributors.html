@@ -7,7 +7,7 @@
     {% if scraper_contributors %}  
       {% for contributor in scraper_contributors %}  
         <li>
-        	{% load gravatar %} {% show_gravatar contributor 'small' %} 
+        	{% load gravatar %} {% show_gravatar contributor 'medium' %} 
             <a href="{% url profiles_profile_detail contributor.username %}">{{contributor.get_profile.name}}</a>
         </li>
       {% endfor %}

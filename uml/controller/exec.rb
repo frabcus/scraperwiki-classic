@@ -168,4 +168,13 @@ SW_DataStore.create(host, port)
 #
 #signal.signal (signal.SIGXCPU, sigXCPU)
 
-eval File.new(script, 'r').read()
+begin
+    require 'rubygems'
+    eval File.new(script, 'r').read()
+rescue Exception => e
+    # also needs to fill stackdump = [ "linenumber":, "file":"<string>", "duplicates":, "furtherlinetext":, "duplicates":1 ]
+    # exceptiondescription, blockedurl, blockedurlquoted
+    #  see exec.py for python version
+    $logfd.write(JSON.generate({ 'message_type' => 'exception', 'exceptiondescription' => e.to_s }) + "\n")
+end
+

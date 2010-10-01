@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^scrapers/delete-data/(?P<scraper_short_name>[\w_\-]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
     url(r'^scrapers/download/(?P<scraper_short_name>[\w_\-]+)/$', views.download,       name='scraper_download'),
     url(r'^scrapers/export/(?P<scraper_short_name>[\w_\-]+)/$', views.export_csv,       name='export_csv'),
+    url(r'^scrapers/export2/(?P<scraper_short_name>[\w_\-]+)/$', views.export_gdocs_spreadsheet,       name='export_gdocs_spreadsheet'),    
     
     url(r'^scrapers/tags/$',                              views.all_tags,               name='all_tags'),
     url(r'^scrapers/tags/(?P<tag>[^/]+)$',                views.scraper_tag,            name='tag'),
@@ -29,7 +30,7 @@ urlpatterns = patterns('',
     # events and monitoring (pehaps should have both wiki_types possible)
     url(r'^scrapers/running_scrapers/$',                  viewsuml.running_scrapers,    name='running_scrapers'),
     url(r'^scrapers/run/(?P<event_id>[\w_\-]+)/$',        viewsuml.run_event,           name='run_event'),
-    url(r'^scrapers/scraper_killrunning/(?P<run_id>[\w_\-\.]+)/$',        
+    url(r'^scrapers/scraper_killrunning/(?P<run_id>[\w_\-\.]+)(?:/(?P<event_id>[\w_\-]+))?$',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),
         
     url(r'^scrapers/commit/(?P<event_id>\d+)/$',          views.commit_event,           name='commit_event'),

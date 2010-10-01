@@ -9,7 +9,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 from django.conf import settings
+from django.core.urlresolvers import reverse
+
 from codewiki.managers.view import ViewManager
 
 try:
@@ -32,7 +35,7 @@ class View (code.Code):
         super(View, self).save(*args, **kwargs)
 
     def get_screenshot_url(self):
-        return "http://www.google.co.uk"
+        return 'http://%s%s' % (Site.objects.get_current().domain, reverse('rpcexecute', args=[self.short_name]))
 
     def get_screenshot_filename(self, size):
         filename = "%s_%s.png" % (self.short_name, size)

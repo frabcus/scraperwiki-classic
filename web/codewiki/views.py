@@ -1,3 +1,4 @@
+from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response
@@ -11,7 +12,6 @@ from django.contrib.auth.models import User
 from django.views.decorators.http import condition
 import textile
 import random
-
 from django.conf import settings
 from django.utils.encoding import smart_str
 
@@ -25,9 +25,11 @@ import frontend
 import difflib
 import re
 import csv
+import math
 
 import StringIO, csv, types
 import datetime
+import gdata.docs.service
 
 try:                import json
 except ImportError: import simplejson as json
@@ -391,7 +393,7 @@ def code(request, wiki_type, short_name):
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
-        return render_to_response('scraper/access_denied_unpublished.html', context_instance=RequestContext(request))
+        return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
 
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
@@ -440,37 +442,38 @@ def stringnot(v):
         return v
     return smart_str(v)
 
-def stream_csv(scraper):
+def generate_csv(dictlist, offset):
     keylist = [ ]
-    
-    limit = 5000
-    for offset in range(0, 100000, limit):
-        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset)
-        
-        keyset = set()
-        for row in dictlist:
-            if "latlng" in row:   # split the latlng
-                row["lat"], row["lng"] = row.pop("latlng") 
-            row.pop("date_scraped", None) 
-            keyset.update(row.keys())
-        
-        for key in sorted(keyset):
-            if key not in keylist:
-                keylist.append(key)
-        
-        fout = StringIO.StringIO()
-        writer = csv.writer(fout, dialect='excel')
-        if offset == 0:
-            writer.writerow([k.encode('utf-8') for k in keylist])
-        for rowdict in dictlist:
-            writer.writerow([stringnot(rowdict.get(key))  for key in keylist])
-        result = fout.getvalue()
-        fout.close()
-        yield result
+    keyset = set()
+    for row in dictlist:
+        if "latlng" in row:   # split the latlng
+            row["lat"], row["lng"] = row.pop("latlng") 
+        row.pop("date_scraped", None) 
+        keyset.update(row.keys())
 
-        if len(dictlist) != limit:
-            break
+    for key in sorted(keyset):
+        if key not in keylist:
+            keylist.append(key)
+
+    fout = StringIO.StringIO()
+    writer = csv.writer(fout, dialect='excel')
+    if offset == 0:
+        writer.writerow([k.encode('utf-8') for k in keylist])
+    for rowdict in dictlist:
+        writer.writerow([stringnot(rowdict.get(key))  for key in keylist])
+    result = fout.getvalue()
+    fout.close()
+    return result
+
+def stream_csv(scraper, step=5000, max_rows=1000000):
+    for offset in range(0, max_rows, step):
+        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=step, offset=offset)
         
+        yield generate_csv(dictlist, offset)
+        if len(dictlist) != limit:
+            #we'ver reached the end of the data
+            break
+
 
 # see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
 @condition(etag_func=None)
@@ -485,6 +488,62 @@ def export_csv(request, scraper_short_name):
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)
     return response
 
+def export_gdocs_spreadsheet(request, scraper_short_name):
+    #TODO: this funciton needs to change to cache things on disc and read the size from tehre rather than in memory
+    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+
+    #get the csv, it's size and choose a title for the file
+    title = scraper.title + " - from ScraperWiki.com"
+    csv_url = 'http://%s%s' % (Site.objects.get_current().domain,  reverse('export_csv', kwargs={'scraper_short_name': scraper.short_name}))
+
+    # the lack of a list of keys for the table makes a more elegant solution difficult to obtain
+    # as it is necessary to take a selection of rows in order to derive the set of columns used
+    
+    row_limit = 5000
+    csv_data = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=row_limit), 0)
+
+    document_size = len(csv_data)
+    #print "Document size: " + str(document_size)
+    percent_of_max = ((float(document_size) / float(settings.GDOCS_UPLOAD_MAX)) * 100) - 100.0
+
+    #if we are within 1% of maximum, don't upload
+    if percent_of_max > -1:
+        #print "File is " + str(percent_of_max) + "% too large to upload"
+
+        #upload a subset of records with a note at the top and bottom
+        #this calculation is a little crude as it assumes each row is of a simular size. To take account of this, a buffer of 5% is added 
+        row_buffer = 5
+        split = csv_data.split('\n')
+        new_row_count = int(math.floor(len(split) / 100.0 * (100 - (percent_of_max + row_buffer))))
+        #print "New row count: " + str(new_row_count)
+
+        #set the new title, data and a warning
+        title = title + ' [SUBSET ONLY]'
+        csv_data = 'THIS IS A SUBSET OF THE DATA ONLY. GOOGLE DOCS LIMITS FILES TO 1MB. DOWNLOAD THE FULL DATASET AS CSV HERE: %s \n' % csv_url
+        csv_data = csv_data + '\n'.join(split[0:new_row_count - 1])
+    
+    elif scraper.record_count > row_limit:
+        warning_row = 'THIS IS A SUBSET OF THE DATA ONLY. A MAXIMUM OF %s RECORDS CAN BE UPLOADED FROM SCRAPERWIKI. DOWNLOAD THE FULL DATASET AS CSV HERE: %s' % (str(row_limit), csv_url)
+        csv_data = warning_row + csv_data
+        
+        
+    #create client and authenticate
+    client = gdata.docs.service.DocsService()
+    client.ClientLogin(settings.GDOCS_UPLOAD_USER, settings.GDOCS_UPLOAD_PASSWORD)
+
+    #create a document reference
+    ms = gdata.MediaSource(file_handle=StringIO.StringIO(csv_data), content_type=gdata.docs.service.SUPPORTED_FILETYPES['CSV'], content_length=len(csv_data))
+
+    #try to upload it
+    #try:
+    entry = client.Upload(ms, title, folder_or_uri=settings.GDOCS_UPLOAD_FOLDER_URI)
+    
+    #redirect
+    print "redirecting"
+    return HttpResponseRedirect(entry.GetAlternateLink().href)
+        
+    #except gdata.service.RequestError:
+    #    print "failed to upload for some other reason"
 
 def scraper_table(request):
     dictionary = { }
@@ -852,7 +911,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
         scraper.language = language
         code = startupcode
 
-    
+
     # if it's a post-back (save) then execute that
     if request.POST:
         return saveeditedscraper(request, scraper)
