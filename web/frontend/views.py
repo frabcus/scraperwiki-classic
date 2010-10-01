@@ -14,7 +14,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 
 from codewiki.models import Code, Scraper, View, UserCodeEditing
-
+from tagging.models import Tag, TaggedItem
 from market.models import Solicitation
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
@@ -159,14 +159,28 @@ def tutorials(request):
 
 
 def browse_wiki_type(request, wiki_type = None, page_number = 1):
-    return browse(request, page_number, wiki_type)
+    
+    special_filter = request.GET.get('filter', None)
+    
+    return browse(request, page_number, wiki_type, special_filter)
 
-def browse(request, page_number = 1, wiki_type = None):
+def browse(request, page_number = 1, wiki_type = None, special_filter=None):
     if wiki_type == None:
         all_code_objects = Code.objects.filter(published=True).order_by('-created_at')
     else:
-        all_code_objects = Code.objects.filter(published=True, wiki_type=wiki_type).order_by('-created_at')
+        if wiki_type == 'scraper':
+            all_code_objects = Scraper.objects.filter().order_by('-created_at')
+        else:
+            all_code_objects = View.objects.filter().order_by('-created_at')            
 
+    #extra filters (broken scraper lists etc)
+    if special_filter == 'sick':
+        all_code_objects = all_code_objects.filter(status='sick')
+    elif special_filter == 'no_description':
+        all_code_objects = all_code_objects.filter(description='')
+    elif special_filter == 'no_tags':
+        all_code_objects = TaggedItem.objects.get_no_tags(all_code_objects)
+        print all_code_objects
     
     # Number of results to show from settings
     paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)
@@ -193,7 +207,7 @@ def browse(request, page_number = 1, wiki_type = None):
     #npeople = UserCodeEditing in models.UserCodeEditing.objects.all().count()
     # there might be a slick way of counting this, but I don't know it.
     npeople = len(set([usercodeediting.user for usercodeediting in UserCodeEditing.objects.all() ]))
-    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, "npeople": npeople }
+    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, "npeople": npeople, 'special_filter': special_filter}
     return render_to_response('frontend/browse.html', dictionary, context_instance=RequestContext(request))
 
 
@@ -230,3 +244,51 @@ def search(request, q=""):
             'form': form,
         }, context_instance = RequestContext(request))
 
+def get_involved(request):
+
+        scraper_count = Scraper.objects.count()
+        view_count = View.objects.count()
+
+        #no description
+        scraper_no_description_count = Scraper.objects.filter(description='').count()
+        scraper_description_percent = 100 - int(scraper_no_description_count / float(scraper_count) * 100)
+
+        view_no_description_count = Scraper.objects.filter(description='').count()
+        view_description_percent = 100 - int(view_no_description_count / float(view_count) * 100)
+
+        #no tags
+        scraper_no_tags_count = TaggedItem.objects.get_no_tags(Scraper.objects.filter()).count()
+        scraper_tags_percent = int(scraper_no_tags_count / float(scraper_count) * 100)
+    
+        view_no_tags_count = TaggedItem.objects.get_no_tags(View.objects.filter()).count()
+        view_tags_percent = 100 - int(view_no_tags_count / float(view_count) * 100)
+
+        #scraper requests
+        solicitation_count = Solicitation.objects.filter().count()
+        solicitation_open_count = Solicitation.objects.filter(status=1).count()        
+        solicitation_percent = 100 - int(solicitation_open_count / float(solicitation_count) * 100)        
+        
+        #scraper status
+        scraper_sick_count = Scraper.objects.filter(status='sick').count()
+        scraper_sick_percent = 100 - int(scraper_sick_count / float(scraper_count) * 100)
+                
+        data = {
+            'scraper_count': scraper_count,
+            'view_count': view_count,
+            'scraper_no_description_count': scraper_no_description_count,
+            'scraper_description_percent': scraper_description_percent,
+            'view_no_description_count': view_no_description_count,
+            'view_description_percent': view_description_percent,
+            'scraper_no_tags_count': scraper_no_tags_count,
+            'scraper_tags_percent': scraper_tags_percent,
+            'view_no_tags_count': view_no_tags_count,
+            'view_tags_percent': view_tags_percent,
+            'solicitation_count': solicitation_count,
+            'solicitation_open_count': solicitation_open_count,
+            'solicitation_percent': solicitation_percent,
+            'scraper_sick_count': scraper_sick_count,
+            'scraper_sick_percent': scraper_sick_percent,
+        }
+
+        return render_to_response('frontend/get_involved.html', data, context_instance=RequestContext(request))
+    

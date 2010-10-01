@@ -6,13 +6,13 @@
 
 {% block content %}
     <div class="page_title">
-        <h1>Browse</h1>
+        <h1>Browse{% if wiki_type %} {{wiki_type}}{% endif %}s{% ifequal special_filter 'no_description' %} with no description{% endifequal %}{% ifequal special_filter 'no_tags' %} with no tags{% endifequal %}{% ifequal special_filter 'sick' %} - broken{% endifequal %}</h1>
         <p>
             Page {{ scrapers.number }} of {{ scrapers.paginator.num_pages }}, newest first
         </p>
         <a href="/feeds/all_code_objects/">RSS feed of all scrapers</a>            
     </div>
-   
+
     <div class="content">
 
         <ul class="scraper_list">
@@ -37,9 +37,9 @@
     
             {% if scrapers.has_next %}
               {% if wiki_type %}
-                <a href="{% url scraper_list_wiki_type wiki_type scrapers.next_page_number %}">next</a>
+                <a href="{% url scraper_list_wiki_type wiki_type scrapers.next_page_number %}{% if special_filter %}?filter={{special_filter}}{% endif %}">next</a>
               {% else %}
-                <a href="{% url scraper_list scrapers.next_page_number %}">next</a>
+                <a href="{% url scraper_list scrapers.next_page_number %}{% if special_filter %}?filter={{special_filter}}{% endif %}">next</a>
               {% endif %}
             {% endif %}
         </span>

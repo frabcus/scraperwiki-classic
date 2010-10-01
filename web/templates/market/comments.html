@@ -1,0 +1,51 @@
+{% extends "market/market_base.html" %}
+{% load comments %}
+{% load gravatar %}
+
+{% block title %}{{solicitation.title}} | Requested scrapers{% endblock %}
+
+{% block tabs %}
+    {% include 'market/includes/tabs.html' %}
+{% endblock %}
+
+{% block tab %}
+
+    {% if user.is_authenticated %}
+
+    {% get_comment_form for solicitation as form %}
+
+    <form action="{% comment_form_target %}" method="post"class="add_comment">
+        <input type="hidden" name="next" value="{% url market_view solicitation.id %}" />    
+       {% show_gravatar user 'medium' %} 
+       <div>
+           <textarea name="comment" id="id_comment" rows="3"></textarea>
+           {{ form.content_type }} 
+           {{ form.object_pk }} 
+           {{ form.timestamp }} 
+           {{ form.security_hash }} 
+
+           <input type="submit" class="button" value="Add" id="id_submit" /> 
+       </div>
+    </form>
+    {% else %}
+        <p>Please <a href="/login/?next={{ request.get_full_path }}">log in</a> to add a comment.</p>
+    {% endif %}
+
+    {% get_comment_list for solicitation as comment_list %}
+
+    {% if comment_list %}
+        {% for comment in comment_list reversed %} 
+            <div class="user_comment">  
+    
+                <p id="{{ comment.id }}">
+                    {% show_gravatar comment.user 'small' %} 
+                    {{ comment.comment|escape|urlizetrunc:"100"|linebreaks }}
+                </p>
+                <small>
+                    Added by <a href="{% url profiles_profile_detail comment.name %}">{{ comment.name|escape }}</a> at {{ comment.submit_date|timesince }} ago
+                </small>
+            </div>  
+        {% endfor %} 
+    {% endif %}
+
+{% endblock %}
