@@ -16,8 +16,6 @@ $(document).ready(function() {
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
     var earliesteditor = ""; 
-    var scrapereditornumber = -1; 
-    var alleditors = [ ]; 
     var wiki_type = $('#id_wiki_type').val(); 
     var viewrunurl = $('#viewrunurl').val(); 
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
@@ -340,7 +338,7 @@ $(document).ready(function() {
             }
 
             if (jdata != undefined) {
-                if (jdata.message_type == 'chat')
+                if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
                     receivechatqueue.push(jdata); 
                 else
                     receiverecordqueue.push(jdata); 
@@ -398,7 +396,7 @@ $(document).ready(function() {
           } else if (data.message_type == "sources") {
               writeToSources(data.url, data.bytes, data.failedmessage, data.cached, data.cacheid)
           } else if (data.message_type == "editorstatus") {
-              recordEditorStatus(data.earliesteditor, data.alleditors, data.scrapereditornumber, data.message); 
+              recordEditorStatus(data); 
           } else if (data.message_type == "chat") {
               writeToChat(cgiescape(data.content))
           } else if (data.message_type == "saved") {
@@ -480,15 +478,11 @@ $(document).ready(function() {
             saveScraper(); 
     }
 
-    function recordEditorStatus(learliesteditor, lalleditors, lscrapereditornumber, message) { 
-        earliesteditor = learliesteditor; 
-        scrapereditornumber = lscrapereditornumber; 
-        alleditors = lalleditors; 
-        writeToChat(cgiescape("earliesteditor: " + earliesteditor)); 
-        writeToChat(cgiescape("alleditors: " + $.toJSON(lalleditors))); 
-        writeToChat(cgiescape("you are editor number: " + scrapereditornumber)); 
-        if (message)
-            writeToChat(cgiescape(message)); 
+    function recordEditorStatus(data) { 
+        earliesteditor = data.earliesteditor; 
+        writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
+        if (data.message)
+            writeToChat(cgiescape(data.message)); 
     }
 
     function startingrun(lrunID) {

@@ -283,6 +283,68 @@ class StringProducer(object):
         pass
 
 
+class EditorsOnOneScraper:
+    def __init__(self, guid):
+        self.guid = guid
+        self.sessionstarts = datetime.datetime.now()  # replaces earliesteditor
+        self.anonymouseditors = [ ]
+        self.usereditors = [ ]  # list of lists of clients
+        self.editinguser = ""
+        
+    def AddClient(self, client):
+        assert client.guid == self.guid
+        client.earliesteditor = self.sessionstarts
+        if client.username:
+            bnomatch = True
+            for userclients in self.usereditors:
+                if userclients[0].username == client.username:
+                    userclients.append(client)  # new window by same user
+                    bnomatch = False  # this signal is case for use of an else statement on the for
+                    break
+            if not self.usereditors:
+                self.editinguser = client.username
+            else:
+                assert self.editinguser
+            if bnomatch:
+                self.usereditors.append([client])
+        else:
+            self.anonymouseditors.append(client)
+        self.notifyEditorClients()
+        
+    def RemoveClient(self, client):
+        assert client.guid == self.guid
+        if client.username:
+            for i in range(len(self.usereditors)):
+                if self.usereditors[i][0].username == client.username:
+                    self.usereditors[i].remove(client)  
+                    if not self.usereditors[i]:
+                        del self.usereditors[i]
+                        
+                        # fairly inelegant logic to handle passing editing user on to next person
+                        if self.editinguser == client.username:
+                            if self.usereditors:
+                                self.editinguser = self.usereditors[0][0].username
+                            else:
+                                self.editinguser = ""
+                    break
+            assert False
+        else:
+            self.anonymouseditors.remove(client)
+        self.notifyEditorClients()
+        return self.usereditors or self.anonymouseditors
+        
+        
+    def notifyEditorClients(self):
+        editorstatusdata = {'message_type' : "editorstatus", 'earliesteditor' : self.sessionstarts.isoformat(), "editinguser":self.editinguser, "cansave":False}; 
+        editorstatusdata["message"] = "%d anonymous editors, %d logged editors with %d windows" % (len(self.anonymouseditors), len(self.usereditors), sum(map(len, self.usereditors)))
+        for client in self.anonymouseditors:
+            client.write(json.dumps(editorstatusdata)); 
+        for editorlist in self.usereditors:
+            editorstatusdata["cansave"] = (editorlist[0].username == self.editinguser)
+            for client in editorlist:
+                client.write(json.dumps(editorstatusdata)); 
+        
+
 class RunnerFactory(protocol.ServerFactory):
     protocol = RunnerProtocol
     
@@ -292,7 +354,7 @@ class RunnerFactory(protocol.ServerFactory):
         self.anonymouscount = 1
         self.announcecount = 0
         
-        self.guidclientmap = { }  # lists of clients per scraper to work out their priorities
+        self.guidclientmap = { }  # maps to EditorsOnOneScraper objects
         
         # set the visible heartbeat going
         #self.lc = task.LoopingCall(self.announce)
@@ -333,43 +395,15 @@ class RunnerFactory(protocol.ServerFactory):
         if not client.guid:
             return
         if client.guid not in self.guidclientmap:
-            self.guidclientmap[client.guid] = [ ]
-        editorclients = self.guidclientmap[client.guid]
-        if editorclients:
-            client.earliesteditor = editorclients[0].earliesteditor
-        
-        client.scrapereditornumber = len(editorclients)
-        editorclients.append(client)
-        self.notifyEditorClients(editorclients)
+            self.guidclientmap[client.guid] = EditorsOnOneScraper(client.guid)
+        self.guidclientmap[client.guid].AddClient(client)
 
             
-    def notifyEditorClients(self, editorclients):
-        # notify function begins here
-        for client in editorclients:
-            editorstatusdata = {'message_type' : "editorstatus", 'earliesteditor' : client.earliesteditor.isoformat()}; 
-            alleditors = [ ]
-            for lclient in editorclients:
-                editorinfo = { "isme":(lclient == client), "chatname":lclient.chatname, "username":lclient.username }
-                alleditors.append(editorinfo)
-            editorstatusdata["alleditors"] = alleditors
-            editorstatusdata["message"] = ""
-            editorstatusdata["scrapereditornumber"] = client.scrapereditornumber
-            client.write(json.dumps(editorstatusdata)); 
-    
     
     def clientConnectionLost(self, client):
         self.clients.remove(client)  # main list
-        
-        # lists per scraper
         if client.guid and (client.guid in self.guidclientmap):
-            editorclients = self.guidclientmap[client.guid]
-            if client in editorclients:
-                editorclients.remove(client)
-            if editorclients:
-                for lscrapereditornumber in range(len(editorclients)):
-                    editorclients[lscrapereditornumber].scrapereditornumber = lscrapereditornumber
-                self.notifyEditorClients(editorclients)
-            else:
+            if not self.guidclientmap[client.guid].RemoveClient(client):
                 del self.guidclientmap[client.guid]
 
     def notifytwisterstatus(self):
