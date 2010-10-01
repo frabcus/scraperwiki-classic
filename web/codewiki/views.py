@@ -440,7 +440,7 @@ def stringnot(v):
         return v
     if type(v) == int:
         return v
-    return smart_str(v)
+    return v
 
 def generate_csv(dictlist, offset):
     keylist = [ ]
@@ -458,7 +458,7 @@ def generate_csv(dictlist, offset):
     fout = StringIO.StringIO()
     writer = csv.writer(fout, dialect='excel')
     if offset == 0:
-        writer.writerow([k.encode('utf-8') for k in keylist])
+        writer.writerow([k for k in keylist])
     for rowdict in dictlist:
         writer.writerow([stringnot(rowdict.get(key))  for key in keylist])
     result = fout.getvalue()
@@ -519,6 +519,7 @@ def export_gdocs_spreadsheet(request, scraper_short_name):
 
         #set the new title, data and a warning
         title = title + ' [SUBSET ONLY]'
+
         csv_data = 'THIS IS A SUBSET OF THE DATA ONLY. GOOGLE DOCS LIMITS FILES TO 1MB. DOWNLOAD THE FULL DATASET AS CSV HERE: %s \n' % csv_url
         csv_data = csv_data + '\n'.join(split[0:new_row_count - 1])
     
