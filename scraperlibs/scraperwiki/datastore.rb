@@ -18,7 +18,7 @@ class SW_DataStore
                 rvalue  = ''
             elsif  value.eql?(true )
                 rvalue  = '1'
-            elseif value.eql?(false)
+            elsif value.eql?(false)
                 rvalue  = '0'
             else
                 rvalue  = value.to_s
