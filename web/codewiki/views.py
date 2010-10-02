@@ -433,6 +433,8 @@ def raw_about_markup(request, wiki_type, short_name):
 # and the fact that if you leave the output hanging too long the gateway times out
 import time
 
+# see http://stackoverflow.com/questions/1189111/unicode-to-utf8-for-csv-files-python-via-xlrd
+# for issues about how the csv model can't handle unicode
 def stringnot(v):
     if v == None:
         return ""
@@ -440,7 +442,7 @@ def stringnot(v):
         return v
     if type(v) == int:
         return v
-    return v
+    return v.encode("utf-8")
 
 def generate_csv(dictlist, offset):
     keylist = [ ]
@@ -458,7 +460,7 @@ def generate_csv(dictlist, offset):
     fout = StringIO.StringIO()
     writer = csv.writer(fout, dialect='excel')
     if offset == 0:
-        writer.writerow([k for k in keylist])
+        writer.writerow([k.encode("utf-8") for k in keylist])
     for rowdict in dictlist:
         writer.writerow([stringnot(rowdict.get(key))  for key in keylist])
     result = fout.getvalue()
