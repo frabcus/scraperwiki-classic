@@ -155,7 +155,7 @@ class ScraperRunner(threading.Thread):
 
         #set the status of the scraper which is used to highlight scrapers that need fixing
         #(TODO: this needs to expand with time to include scrapes that havent returned any records in $n days)
-        if bexception or bexception:
+        if bexception:
             self.scraper.status = 'sick'
         else:
             self.scraper.status = 'ok'

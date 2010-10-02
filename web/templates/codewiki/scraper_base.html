@@ -19,9 +19,9 @@
 	    </ul>
         {% ifequal scraper.wiki_type 'scraper'%}
             <ul class="title_links">
-                <li class="csv"><a href="{% url export_csv scraper.short_name %}">Download this dataset (CSV)</a></li>
+                <li class="csv"><a href="{% url export_csv scraper.short_name %}" rel="nofollow">Download this dataset (CSV)</a></li>
                 <li class="api"><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>
-                <li class="gdocs"><a href="{% url export_gdocs_spreadsheet scraper.short_name %}" target="_new">Open in Google Docs</a></li>                                
+                <li class="gdocs"><a href="{% url export_gdocs_spreadsheet scraper.short_name %}" target="_new" rel="nofollow">Open in Google Docs</a></li>                                
             </ul>
         {% endifequal %}
         {% ifequal scraper.wiki_type 'view'%}
