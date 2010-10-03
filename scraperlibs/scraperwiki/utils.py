@@ -13,8 +13,11 @@ except:
 
 import cgi
 import os
+import sys
 import traceback
 import datetime
+import tempfile
+
 
 import scraperwiki.console
 
@@ -132,7 +135,6 @@ def parse_html(text):
 
 def pdftoxml(pdfdata):
     """converts pdf file to xml file"""
-    import tempfile
     pdffout = tempfile.NamedTemporaryFile(suffix='.pdf')
     print pdffout.name
     pdffout.write(pdfdata)
@@ -151,6 +153,33 @@ def pdftoxml(pdfdata):
     return xmldata
 
 
+# code adapted from http://docs.python.org/library/imp.html#examples-imp
+# ideally there is a way to seamlessly overload the __import__ function and get us to call out like this
+# it should also be able to explicitly refer to a named revision
+def swimport(name, swinstance="http://scraperwiki.com"):
+    import imp
+    try:
+        return sys.modules[name]
+    except KeyError:
+        pass
+
+    #fp, pathname, description = imp.find_module(name)
+    url = "%s/editor/raw/%s" % (swinstance, name)
+    modulecode = urllib.urlopen(url).read() + "\n"
+    
+    modulefile = tempfile.NamedTemporaryFile(suffix='.py')
+    modulefile.write(modulecode)
+    modulefile.flush()
+    fp = open(modulefile.name)
+    return imp.load_module(name, fp, modulefile.name, (".py", "U", 1))
 
 
-
+# callback to a view with parameter lists (cross language capability)
+def jsviewcall(name, **args):
+    url = "http://scraperwiki.com/views/%s/run/?%s" % (name, urllib.urlencode(args))
+    response = urllib.urlopen(url).read()
+    try:
+        return json.loads(response)
+    except ValueError:
+        return response
+    
