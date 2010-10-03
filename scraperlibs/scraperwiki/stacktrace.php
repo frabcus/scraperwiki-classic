@@ -6,9 +6,11 @@ function exceptionHandler($exception)
     $stackdump = array(); 
     foreach ($exception->getTrace() as $key => $stackPoint) 
     {
+        print_r($stackPoint); 
         $stackentry = array("linenumber" => $stackPoint["line"], "file" => $stackPoint["file"], "duplicates" => 1); 
         $stackentry["linetext"] = "put code line here"; 
-        $stackentry["furtherlinetext"] = "argsss ".print_r($stackPoint["args"], true); 
+        if (array_key_exists("args", $stackPoint))
+            $stackentry["furtherlinetext"] = "argsss ".print_r($stackPoint["args"], true); 
         $stackdump[] = $stackentry; 
     }
     

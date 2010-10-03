@@ -8,18 +8,18 @@ class scraperwiki
 {
    private static $m_cacheFor = 0 ;
 
-   function sw_allowCache ($cacheFor)
+   static function sw_allowCache ($cacheFor)
    {
       self::$m_cacheFor = $cacheFor ;
    }
 
-   function sw_dumpMessage ($dict)
+   static function sw_dumpMessage ($dict)
    {
       global $logfd ;
       fwrite ($logfd, json_encode ($dict) . "\n") ;
    }
 
-   function sw_logScrapedURL ($url, $length)
+   static function sw_logScrapedURL ($url, $length)
    {
        scraperwiki::sw_dumpMessage
          (  array
@@ -29,7 +29,7 @@ class scraperwiki
          )  )  ;
    }
 
-   function save ($unique_keys, $data, $date = null, $latlng = null)
+   static function save ($unique_keys, $data, $date = null, $latlng = null)
    {
       $ds      = SW_DataStoreClass::create () ;
    
@@ -40,7 +40,7 @@ class scraperwiki
       scraperwiki::sw_dumpMessage (array('message_type' => 'data', 'content' => $data)) ;
    }
 
-   function gb_postcode_to_latlng ($postcode)
+   static function gb_postcode_to_latlng ($postcode)
    {
       if (is_null($postcode))
          return null ;
@@ -62,7 +62,7 @@ class scraperwiki
       return $result[1] ;
    }
 
-   function scrape ($url)
+   static function scrape ($url)
    {
       $curl = curl_init ($url ) ;
       curl_setopt ($curl, CURLOPT_RETURNTRANSFER, true) ;
@@ -71,7 +71,7 @@ class scraperwiki
       return   $res  ;
    }
 
-   function cache ($enable = true)
+   static function cache ($enable = true)
    {
       file_get_html
          (  sprintf
@@ -81,12 +81,12 @@ class scraperwiki
          )  )  ;
    }
 
-   function get_metadata($metadata_name, $default = null)
+   static function get_metadata($metadata_name, $default = null)
    {
       return SW_MetadataClient::create()->get($metadata_name);
    }
 
-   function save_metadata($metadata_name, $value)
+   static function save_metadata($metadata_name, $value)
    {
       print "Saving " . $metadata_name . ": " . $value . "\n";
       return SW_MetadataClient::create()->save($metadata_name, $value);
