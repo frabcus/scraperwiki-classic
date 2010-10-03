@@ -122,9 +122,8 @@ try
 }
 catch(Exception $e)
 {
-    $etb = exceptionHandler($e);
-    print_r($etb); 
-    #echo $etb;
+    $etb = exceptionHandler($e, $script);
+    //print_r($etb); 
     scraperwiki::sw_dumpMessage($etb); 
 }
 ?>
