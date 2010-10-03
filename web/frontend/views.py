@@ -180,7 +180,10 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
         all_code_objects = all_code_objects.filter(description='')
     elif special_filter == 'no_tags':
         all_code_objects = TaggedItem.objects.get_no_tags(all_code_objects)
-        print all_code_objects
+    else:
+        #if no filter, hide scrapers with no records
+        all_code_objects = all_code_objects.filter(record_count__gt=0)        
+        
     
     # Number of results to show from settings
     paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)
