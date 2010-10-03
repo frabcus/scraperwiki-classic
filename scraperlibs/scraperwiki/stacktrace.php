@@ -5,8 +5,10 @@ function exceptionHandler($exception, $script)
     // these are our templates
     $stackdump = array(); 
     $scriptlines = explode("\n", file_get_contents($script)); 
-    foreach ($exception->getTrace() as $key => $stackPoint) 
+    $trace = $exception->getTrace(); 
+    for ($i = count($trace) - 2; $i >= 0; $i--)
     {
+        $stackPoint = $trace[$i]; 
         $linenumber = $stackPoint["line"]-1; 
         $stackentry = array("linenumber" => $linenumber, "duplicates" => 1); 
         $stackentry["file"] = ($stackPoint["file"] == $script ? "<string>" : $stackPoint["file"]); 
