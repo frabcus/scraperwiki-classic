@@ -52,7 +52,7 @@ def scraper_overview(request, scraper_short_name):
         return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
     
     #get views that use this scraper
-    related_views = scraper.relations.filter(wiki_type='view')
+    related_views = models.View.objects.filter(relations=scraper)
     
     #get meta data
     user_owns_it = (scraper.owner() == user)
