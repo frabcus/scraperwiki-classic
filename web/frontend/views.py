@@ -168,10 +168,7 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
     if wiki_type == None:
         all_code_objects = Code.objects.filter(published=True).order_by('-created_at')
     else:
-        if wiki_type == 'scraper':
-            all_code_objects = Scraper.objects.filter().order_by('-created_at')
-        else:
-            all_code_objects = View.objects.filter().order_by('-created_at')            
+        all_code_objects = Code.objects.filter(wiki_type=wiki_type).order_by('-created_at')
 
     #extra filters (broken scraper lists etc)
     if special_filter == 'sick':
@@ -181,10 +178,9 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
     elif special_filter == 'no_tags':
         all_code_objects = TaggedItem.objects.get_no_tags(all_code_objects)
 
+    # filter out scrapers that have no records
     if not special_filter:
-        #if no filter, hide scrapers with no records
-        all_code_objects = all_code_objects.filter(record_count__gt=0)        
-
+        all_code_objects = all_code_objects.exclude(wiki_type='scraper', scraper__record_count=0)
     
     # Number of results to show from settings
     paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)
