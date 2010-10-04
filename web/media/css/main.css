@@ -395,7 +395,7 @@ body.fullscreen #full_bar #share_links iframe {border:none!important;width:55px!
 body.fullscreen #full_bar #share_links .fb_iframe_widget {position:relative; top:-4px;}
 body.fullscreen .hide {display:none;}
 body.fullscreen iframe.view {border:none;}
-body.fullscreen #powered {display:block;width:175px; height:20px; background:url(/media/images/powered.png) no-repeat;
+body.fullscreen #powered {display:block;width:175px; height:20px; background:url(../images/powered.png) no-repeat;
     position:absolute; right:2em; top:7px;}
 body.fullscreen #close {position:absolute; right:1em; top:6px;}
 
