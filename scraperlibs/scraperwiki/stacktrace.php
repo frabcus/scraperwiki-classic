@@ -2,7 +2,6 @@
 
 function exceptionHandler($exception, $script) 
 {
-    // these are our templates
     $stackdump = array(); 
     $scriptlines = explode("\n", file_get_contents($script)); 
     $trace = $exception->getTrace(); 
@@ -23,7 +22,7 @@ function exceptionHandler($exception, $script)
     }
     
     $linenumber = $exception->getLine()-1; 
-    $finalentry = array("linenumber" => $linenumber, "file" => $exception->getFile(), "duplicates" => 1); 
+    $finalentry = array("linenumber" => $linenumber, "duplicates" => 1); 
     $finalentry["file"] = ($exception->getFile() == $script ? "<string>" : $exception->getFile()); 
     if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
         $finalentry["linetext"] = $scriptlines[$linenumber]; 
@@ -33,43 +32,19 @@ function exceptionHandler($exception, $script)
     return array('message_type' => 'exception', 'exceptiondescription' => $exception->getMessage(), "stackdump" => $stackdump); 
 }
 
-// error handler function (eg syntax errors and worse)
-function myErrorHandler($errno, $errstr, $errfile, $errline)
+function errorParser($errno, $errstr, $errfile, $errline, $script)
 {
-    echo "hihihi $errno, $errstr, $errfile, $errline ------======="; 
+    $stackdump = array(); 
+    $scriptlines = explode("\n", file_get_contents($script)); 
+    $errorentry = array("linenumber" => $errline, "duplicates" => 1); 
+    $errorentry["file"] = ($errfile == $script ? "<string>" : $errfile); 
+    if (($errline >= 0) && ($errline < count($scriptlines)))
+        $errorentry["linetext"] = $scriptlines[$errline]; 
+    $errcode = ($errno == E_USER_ERROR ? "E_USER_ERROR" : ($errno == E_USER_WARNING ? "E_USER_WARNING" : "E_USER_NOTICE")); 
 
-    if (!(error_reporting() & $errno)) {
-        // This error code is not included in error_reporting
-        return;
-    }
-
-    switch ($errno) {
-    case E_USER_ERROR:
-        echo "<b>My ERROR</b> [$errno] $errstr<br />\n";
-        echo "  Fatal error on line $errline in file $errfile";
-        echo ", PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
-        echo "Aborting...<br />\n";
-        exit(1);
-        break;
-
-    case E_USER_WARNING:
-        echo "<b>My WARNING</b> [$errno] $errstr<br />\n";
-        break;
-
-    case E_USER_NOTICE:
-        echo "<b>My NOTICE</b> [$errno] $errstr<br />\n";
-        break;
-
-    default:
-        echo "Unknown error type: [$errno] $errstr<br />\n";
-        break;
-    }
-
-    /* Don't execute PHP internal error handler */
-    return true;
+    $stackdump[] = $errorentry; 
+    return array('message_type' => 'exception', 'exceptiondescription' => $errstr."  ".$errcode, "stackdump" => $stackdump); 
 }
 
-set_error_handler("myErrorHandler");
-error_reporting(E_ALL);
 
 ?>
