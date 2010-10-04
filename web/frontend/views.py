@@ -181,7 +181,7 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
     elif special_filter == 'no_tags':
         all_code_objects = TaggedItem.objects.get_no_tags(all_code_objects)
 
-    if not special_filter:
+    if not special_filter and wiki_type == 'scraper':
         #if no filter, hide scrapers with no records
         all_code_objects = all_code_objects.filter(record_count__gt=0)        
 
