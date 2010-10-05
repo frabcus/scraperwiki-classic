@@ -61,7 +61,7 @@ urlpatterns = patterns('',
     # (the former with a field ?template=name which I far prefer because it doesn't lead to a misleading url.
     #  use the 'ugly' ?= version; beauty is not always truth)
     url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',  views.edit, name="editor"),
-    url(r'^editor/template/(?P<tutorial_scraper>[\-\w]+)$',         views.edit, name="tutorial"),
+    url(r'^editor/template/(?P<tutorial_scraper>[\-\w]+)$',         views.edittutorial, name="tutorial"),
 
     url(r'^handle_session_draft/(?P<action>[\-\w]+)$',              views.handle_session_draft, name="handle_session_draft"),
     

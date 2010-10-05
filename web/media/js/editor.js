@@ -69,6 +69,12 @@ $(document).ready(function() {
         stylesheets['ruby'] = [codemirror_url+'../ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['html'] = [codemirror_url+'/css/xmlcolors.css', codemirror_url+'/css/jscolors.css', codemirror_url+'/css/csscolors.css', '/media/css/codemirrorcolours.css']; 
 
+        var indentUnits = Array();
+        indentUnits['python'] = 4;
+        indentUnits['php'] = 4;
+        indentUnits['ruby'] = 2;
+        indentUnits['html'] = 4;
+
         codeeditor = CodeMirror.fromTextArea("id_code", {
             parserfile: parsers[scraperlanguage],
             stylesheet: stylesheets[scraperlanguage],
@@ -76,9 +82,9 @@ $(document).ready(function() {
             domain: document.domain, 
             textWrapping: true,
             lineNumbers: true,
-            indentUnit: 4,
+            indentUnit: indentUnits[scraperlanguage],
             readOnly: false,
-            tabMode: "spaces", 
+            tabMode: "shift", 
             disableSpellcheck: true,
             autoMatchParens: true,
             width: '100%',

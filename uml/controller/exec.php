@@ -103,6 +103,7 @@ foreach (split (':', $path) as $dir)
 
 require_once   'scraperwiki/datastore.php' ;
 require_once   'scraperwiki.php'           ;
+require_once   'scraperwiki/stacktrace.php';
 
 $dsinfo = split (':', $datastore) ;
 SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1]) ;
@@ -116,8 +117,24 @@ if (!is_null ($cache))
 #
 #signal.signal (signal.SIGXCPU, sigXCPU)
 #
+
+// the following might be the only way to intercept syntax errors
+//$errors = array(); 
+//parsekit_compile_file($script, $errors); 
+
+// refer to http://php.net/manual/en/function.set-error-handler.php
+function errorHandler($errno, $errstr, $errfile, $errline)
+{
+    global $script; 
+    $etb = errorParser($errno, $errstr, $errfile, $errline, $script); 
+    scraperwiki::sw_dumpMessage($etb); 
+    return true; 
+}
+set_error_handler("errorHandler", E_ALL);  // this is for errors, not exceptions (eg 1/0)
+
 try
 {
+    // works also as include or eval.  However no way to trap syntax errors
     require  $script  ;
 }
 catch(Exception $e)

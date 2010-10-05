@@ -43,7 +43,7 @@ class Code(models.Model):
                                         blank=False,
                                         verbose_name='Scraper Title',
                                         default='Untitled')
-    short_name         = models.CharField(max_length=50)
+    short_name         = models.CharField(max_length=50, unique=True)
     source             = models.CharField(max_length=100, blank=True)
     description        = models.TextField(blank=True)
     created_at         = models.DateTimeField(auto_now_add=True)
