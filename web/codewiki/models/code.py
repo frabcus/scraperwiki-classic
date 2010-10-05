@@ -1,5 +1,6 @@
 import datetime
 import time
+import os
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -169,6 +170,13 @@ class Code(models.Model):
             return json.loads(self.scrapermetadata_set.get(name=name).value)
         except:
             return default
+
+    def get_screenshot_filename(self, size='medium'):
+        return "%s.png" % self.short_name
+
+    def get_screenshot_filepath(self, size='medium'):
+        filename = self.get_screenshot_filename(size)
+        return os.path.join(settings.SCREENSHOT_DIR, size, filename)
 
     class Meta:
         app_label = 'codewiki'

@@ -1,8 +1,9 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from optparse import make_option
-from codewiki.models import View
+from codewiki.models import View, Scraper
 from codewiki.management.screenshooter import ScreenShooter
+from itertools import chain
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -31,11 +32,16 @@ class Command(BaseCommand):
         else:
             views = View.unfiltered.filter(published=True)
 
-        for view in views:
+        if options['short_name']:
+            scrapers = Scraper.unfiltered.filter(short_name=options['short_name'], published=True)
+        else:
+            scrapers = Scraper.unfiltered.filter(published=True)
+
+        for obj in chain(views, scrapers):
             try:
-                self.add_screenshots(view, options)
+                self.add_screenshots(obj, options)
             except Exception, ex:
-                print "Error taking screenshot of %s" % view.short_name
+                print "Error taking screenshot of %s" % obj.short_name
                 print ex
 
         self.screenshooter.run()
