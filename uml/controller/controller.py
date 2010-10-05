@@ -814,10 +814,13 @@ class ScraperController (BaseController) :
         psock[0].close()
         os.close(lpipe[0])
 
+        try    : language = self.headers['x-language']
+        except : language = 'python'
+        
         open ('/tmp/ident.%d'   % os.getpid(), 'w').write(string.join(idents, '\n'))
         
         code = fs['script'].value
-        if language = php:
+        if language == 'php':
             code = "<?php\n%s\n?>\n" % code
         open ('/tmp/scraper.%d' % os.getpid(), 'w').write(code)
 
@@ -829,9 +832,6 @@ class ScraperController (BaseController) :
         self.setRLimit      ()
         self.addPaths       ()
         self.addEnvironment ()
-
-        try    : language = self.headers['x-language']
-        except : language = 'python'
 
         if language == 'python' :
             self.execScript  ('py',  code, psock[1].fileno(), lpipe[1])

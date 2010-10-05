@@ -18,7 +18,7 @@ function exceptionHandler($exception, $script)
         if (array_key_exists("args", $stackPoint) and count($stackPoint["args"]) != 0)
         {
             $args = array(); 
-            for ($stackPoint["args"] as $arg => $val)
+            foreach ($stackPoint["args"] as $arg => $val)
                 $args[] = $arg."=>".$val; 
             $stackentry["furtherlinetext"] = " param values: (".implode(", ", $args).")"; 
         }
