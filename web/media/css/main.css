@@ -300,10 +300,10 @@ ul.filter_list li {display:block; float:left;}
 /* Report */
 p.report {background:#f8f8a8 url(../images/icons/flag_yellow.png) no-repeat 8px 0.4em;
     font-size:0.8em; border-top:dotted 1px #ccc; border-bottom:dotted 1px #ccc; padding:0.5em 10px 0.5em 30px; margin-top:1em;}
-    
+
 /* Sick */
-p.sick {background:#f8f8a8 url(../images/icons/flag_yellow.png) no-repeat 8px 0.4em;
-    font-size:0.8em; border-top:dotted 1px #ccc; border-bottom:dotted 1px #ccc; padding:0.5em 10px 0.5em 30px; margin:0;}
+p.sick {background:#e9b2b2 url(../images/icons/eye.png) no-repeat 8px 0.4em;
+    font-size:0.8em; border-top:dotted 1px #d5a2a2; border-bottom:dotted 1px #d5a2a2; padding:0.5em 10px 0.5em 30px; margin:0;}
     
 /* API */
 code.api_call {background:white;display:block;padding:1em;border:dotted 1px #808080; word-wrap: break-word;
