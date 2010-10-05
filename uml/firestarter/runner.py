@@ -65,8 +65,6 @@ def execute (code, options) :
     sys.stdout.flush ()
     
     code = string.replace (code, '\r', '')
-    if options.language == "php" :
-        code = "<?php\n%s\n?>\n" % code
 
     res = fs.execute (code, True)
     if res is None :

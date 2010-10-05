@@ -526,6 +526,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
               ]
         return str(sys.exc_type), string.join(tb, ''), None, None
 
+        # this function doesn't use the code parameter and in fact seems to independently rebuild the name of the file that the code was saved to
     def execScript (self, lsfx, code, pwfd, lwfd) :
 
         """
@@ -814,7 +815,11 @@ class ScraperController (BaseController) :
         os.close(lpipe[0])
 
         open ('/tmp/ident.%d'   % os.getpid(), 'w').write(string.join(idents, '\n'))
-        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(fs['script'].value)
+        
+        code = fs['script'].value
+        if language = php:
+            code = "<?php\n%s\n?>\n" % code
+        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(code)
 
         os.environ['metadata_host' ] = config.get ('metadata', 'host')
 
@@ -829,15 +834,15 @@ class ScraperController (BaseController) :
         except : language = 'python'
 
         if language == 'python' :
-            self.execScript  ('py',  fs['script'].value, psock[1].fileno(), lpipe[1])
+            self.execScript  ('py',  code, psock[1].fileno(), lpipe[1])
             return
 
         if language == 'php'    :
-            self.execScript  ('php', fs['script'].value, psock[1].fileno(), lpipe[1])
+            self.execScript  ('php', code, psock[1].fileno(), lpipe[1])
             return
 
         if language == 'ruby'   :
-            self.execScript  ('rb',  fs['script'].value, psock[1].fileno(), lpipe[1])
+            self.execScript  ('rb',  code, psock[1].fileno(), lpipe[1])
             return
 
         self.wfile.write \

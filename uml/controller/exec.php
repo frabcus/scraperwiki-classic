@@ -118,24 +118,23 @@ if (!is_null ($cache))
 #signal.signal (signal.SIGXCPU, sigXCPU)
 #
 
+// the following might be the only way to intercept syntax errors
+//$errors = array(); 
+//parsekit_compile_file($script, $errors); 
+
 // refer to http://php.net/manual/en/function.set-error-handler.php
-// would like to catch syntax errors too!  
 function errorHandler($errno, $errstr, $errfile, $errline)
 {
     global $script; 
     $etb = errorParser($errno, $errstr, $errfile, $errline, $script); 
-    //print_r($etb); 
     scraperwiki::sw_dumpMessage($etb); 
-    // should be able to throw an error here to get the stack trace, but doesn't seem to work
-    // throw new Exception("zzz"); 
     return true; 
 }
-
-set_error_handler("errorHandler");  // this is for errors, not exceptions (eg 1/0)
-error_reporting(E_ALL);
+set_error_handler("errorHandler", E_ALL);  // this is for errors, not exceptions (eg 1/0)
 
 try
 {
+    // works also as include or eval.  However no way to trap syntax errors
     require  $script  ;
 }
 catch(Exception $e)

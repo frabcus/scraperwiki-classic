@@ -15,9 +15,13 @@ function exceptionHandler($exception, $script)
         if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
             $stackentry["linetext"] = $scriptlines[$linenumber]; 
 
-        if (array_key_exists("args", $stackPoint))
-            $stackentry["furtherlinetext"] = "argsss ".print_r($stackPoint["args"], true); 
-
+        if (array_key_exists("args", $stackPoint) and count($stackPoint["args"]) != 0)
+        {
+            $args = []; 
+            for ($stackPoint["args"] as $arg => $val)
+                $args[] = $arg."=>".$val; 
+            $stackentry["furtherlinetext"] = " param values: (".implode(", ", $args).")"; 
+        }
         $stackdump[] = $stackentry; 
     }
     
@@ -32,18 +36,20 @@ function exceptionHandler($exception, $script)
     return array('message_type' => 'exception', 'exceptiondescription' => $exception->getMessage(), "stackdump" => $stackdump); 
 }
 
+
 function errorParser($errno, $errstr, $errfile, $errline, $script)
 {
+        // this function could use debug_backtrace() to obtain the whole stack for this error
     $stackdump = array(); 
     $scriptlines = explode("\n", file_get_contents($script)); 
-    $errorentry = array("linenumber" => $errline, "duplicates" => 1); 
+    $errorentry = array("linenumber" => $errline-1, "duplicates" => 1); 
     $errorentry["file"] = ($errfile == $script ? "<string>" : $errfile); 
     if (($errline >= 0) && ($errline < count($scriptlines)))
         $errorentry["linetext"] = $scriptlines[$errline]; 
     $errcode = ($errno == E_USER_ERROR ? "E_USER_ERROR" : ($errno == E_USER_WARNING ? "E_USER_WARNING" : "E_USER_NOTICE")); 
 
     $stackdump[] = $errorentry; 
-    return array('message_type' => 'exception', 'exceptiondescription' => $errstr."  ".$errcode, "stackdump" => $stackdump); 
+    return array('message_type' => 'exception', 'exceptiondescription' => $errcode."  ".$errstr, "stackdump" => $stackdump); 
 }
 
 
