@@ -65,6 +65,10 @@ def execute (code, options) :
     sys.stdout.flush ()
     
     code = string.replace (code, '\r', '')
+    
+    # would prefer this block wrapping was done in the controller to make eval easy to use.
+    if options.language == "php" :
+        code = "<?php\n%s\n?>\n" % code
 
     res = fs.execute (code, True)
     if res is None :

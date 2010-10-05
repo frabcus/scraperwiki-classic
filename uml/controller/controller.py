@@ -526,7 +526,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
               ]
         return str(sys.exc_type), string.join(tb, ''), None, None
 
-        # this function doesn't use the code parameter and in fact seems to independently rebuild the name of the file that the code was saved to
     def execScript (self, lsfx, code, pwfd, lwfd) :
 
         """
@@ -814,15 +813,15 @@ class ScraperController (BaseController) :
         psock[0].close()
         os.close(lpipe[0])
 
-        try    : language = self.headers['x-language']
-        except : language = 'python'
-        
         open ('/tmp/ident.%d'   % os.getpid(), 'w').write(string.join(idents, '\n'))
-        
-        code = fs['script'].value
-        if language == 'php':
-            code = "<?php\n%s\n?>\n" % code
-        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(code)
+        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(fs['script'].value)
+
+        # notes: execScript takes the code as an argument, but doesn't do anything with it.  
+        #  it recreates the above file name from the pid and calls the language script with it
+        #  attempts to move the php block wrapping "<?php\n%s\n?>\n" % code to here from runner.py
+        #  made difficult by inability to restart the controller.
+        #  If it was done closer to this face then we could contemplate using eval() rather than require()
+        #  to invoke the script
 
         os.environ['metadata_host' ] = config.get ('metadata', 'host')
 
@@ -833,16 +832,19 @@ class ScraperController (BaseController) :
         self.addPaths       ()
         self.addEnvironment ()
 
+        try    : language = self.headers['x-language']
+        except : language = 'python'
+
         if language == 'python' :
-            self.execScript  ('py',  code, psock[1].fileno(), lpipe[1])
+            self.execScript  ('py',  fs['script'].value, psock[1].fileno(), lpipe[1])
             return
 
         if language == 'php'    :
-            self.execScript  ('php', code, psock[1].fileno(), lpipe[1])
+            self.execScript  ('php', fs['script'].value, psock[1].fileno(), lpipe[1])
             return
 
         if language == 'ruby'   :
-            self.execScript  ('rb',  code, psock[1].fileno(), lpipe[1])
+            self.execScript  ('rb',  fs['script'].value, psock[1].fileno(), lpipe[1])
             return
 
         self.wfile.write \
