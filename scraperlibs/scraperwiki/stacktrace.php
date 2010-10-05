@@ -42,10 +42,11 @@ function errorParser($errno, $errstr, $errfile, $errline, $script)
         // this function could use debug_backtrace() to obtain the whole stack for this error
     $stackdump = array(); 
     $scriptlines = explode("\n", file_get_contents($script)); 
-    $errorentry = array("linenumber" => $errline-1, "duplicates" => 1); 
+    $linenumber = $errline-1; 
+    $errorentry = array("linenumber" => $linenumber, "duplicates" => 1); 
     $errorentry["file"] = ($errfile == $script ? "<string>" : $errfile); 
-    if (($errline >= 0) && ($errline < count($scriptlines)))
-        $errorentry["linetext"] = $scriptlines[$errline]; 
+    if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
+        $errorentry["linetext"] = $scriptlines[$linenumber]; 
     $errcode = ($errno == E_USER_ERROR ? "E_USER_ERROR" : ($errno == E_USER_WARNING ? "E_USER_WARNING" : "E_USER_NOTICE")); 
 
     $stackdump[] = $errorentry; 
