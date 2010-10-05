@@ -52,7 +52,7 @@ def scraper_overview(request, scraper_short_name):
         return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
     
     #get views that use this scraper
-    related_views = scraper.relations.filter(wiki_type='view')
+    related_views = models.View.objects.filter(relations=scraper)
     
     #get meta data
     user_owns_it = (scraper.owner() == user)
@@ -858,8 +858,14 @@ def saveeditedscraper(request, lscraper):
         return HttpResponse(json.dumps({'status':status, 'draft':'True', 'url':response_url}))
 
 
+def edittutorial(request, tutorial_scraper):
+    code = get_object_or_404(models.Code, short_name=tutorial_scraper)
+    qtemplate = "?template="+code.short_name
+    return HttpResponseRedirect(reverse('editor', args=[code.wiki_type, code.language]) + qtemplate)
+
+
 #Editor form
-def edit(request, short_name='__new__', wiki_type='scraper', language='Python', tutorial_scraper=None):
+def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
     #return url (where to exit the editor to)
     return_url = reverse('frontpage')
 
@@ -898,19 +904,11 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
             raise Exception, "Invalid wiki type"
 
         startupcode = "# blank"
-
-        if tutorial_scraper:
-            startup_scraper = get_object_or_404(models.Code, short_name=tutorial_scraper)
-            startupcode = startup_scraper.saved_code()
-            language = startup_scraper.language
-        
-        # old startup code method which derived chose a random scaper.  now it's a random choice of one
-        # code to be refactored when a decision over whether to specify the copied code is done using a ?= or a /x/ url style
-        else:
-            if request.GET.get('template', False):
-                startup_scrapers = models.Code.objects.filter(published=True, isstartup=True, language=language, short_name=request.GET.get('template', False))
-                if len(startup_scrapers):
-                    startupcode = startup_scrapers[random.randint(0, len(startup_scrapers)-1)].saved_code()
+        statuptemplate = request.GET.get('template', False)
+        if statuptemplate:
+            templatescrapers = models.Code.objects.filter(published=True, language=language, short_name=statuptemplate)
+            if len(templatescrapers):
+                startupcode = templatescrapers[random.randint(0, len(templatescrapers)-1)].saved_code()
 
         scraper.language = language
         code = startupcode
@@ -928,7 +926,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python', 
 
     context = {}
     context['form'] = form
-    context['tutorial_scrapers'] = models.Code.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
     context['scraper'] = scraper
     context['has_draft'] = has_draft
     context['user'] = request.user

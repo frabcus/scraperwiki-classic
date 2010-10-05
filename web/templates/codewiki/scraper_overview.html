@@ -91,7 +91,7 @@
         {% if related_views %}
             {% for related_view in related_views %}
                 <li>
-                    <a href="{% url code_overview related_view.wiki_type related_view.short_name %}" class="screenshot"><img src="{{MEDIA_URL}}/images/no_screenshot.png" title="No screen-shot available yet" /></a>
+                    <a href="{% url code_overview related_view.wiki_type related_view.short_name %}" class="screenshot"><img src="{{MEDIA_URL}}screenshots/{{related_view.get_screenshot_filename}}" title="{{related_view.title}}" /></a>
                     <a href="{% url code_overview related_view.wiki_type related_view.short_name %}">{{related_view.title}}</a>
                 </li>
             {% endfor %}

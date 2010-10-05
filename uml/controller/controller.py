@@ -816,6 +816,13 @@ class ScraperController (BaseController) :
         open ('/tmp/ident.%d'   % os.getpid(), 'w').write(string.join(idents, '\n'))
         open ('/tmp/scraper.%d' % os.getpid(), 'w').write(fs['script'].value)
 
+        # notes: execScript takes the code as an argument, but doesn't do anything with it.  
+        #  it recreates the above file name from the pid and calls the language script with it
+        #  attempts to move the php block wrapping "<?php\n%s\n?>\n" % code to here from runner.py
+        #  made difficult by inability to restart the controller.
+        #  If it was done closer to this face then we could contemplate using eval() rather than require()
+        #  to invoke the script
+
         os.environ['metadata_host' ] = config.get ('metadata', 'host')
 
         #  Apply resource limits, set group and user, paths and

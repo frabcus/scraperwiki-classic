@@ -22,7 +22,7 @@ class Command(BaseCommand):
 
         for size in settings.SCREENSHOT_SIZES.keys():
             self.screenshooter.add_shot(url = view.get_screenshot_url(), 
-                                        filename = view.get_screenshot_filename(size),
+                                        filename = view.get_screenshot_filepath(size),
                                         size = settings.SCREENSHOT_SIZES[size])
 
     def handle(self, *args, **options):

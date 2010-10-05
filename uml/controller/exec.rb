@@ -159,6 +159,8 @@ require 'scraperwiki/datastore'
 host, port = datastore.split(':')
 SW_DataStore.create(host, port)
 
+require 'scraperwiki/stacktrace'
+
 #
 ##  Set up a CPU time limit handler which simply throws a python
 ##  exception.
@@ -168,13 +170,12 @@ SW_DataStore.create(host, port)
 #
 #signal.signal (signal.SIGXCPU, sigXCPU)
 
+code = File.new(script, 'r').read()
 begin
-    require 'rubygems'
-    eval File.new(script, 'r').read()
+    require 'rubygems'   # for nokigiri to work
+    eval code
 rescue Exception => e
-    # also needs to fill stackdump = [ "linenumber":, "file":"<string>", "duplicates":, "furtherlinetext":, "duplicates":1 ]
-    # exceptiondescription, blockedurl, blockedurlquoted
-    #  see exec.py for python version
-    $logfd.write(JSON.generate({ 'message_type' => 'exception', 'exceptiondescription' => e.to_s }) + "\n")
+    est = getExceptionTraceback(e, code)
+    $logfd.write(JSON.generate(est) + "\n")
 end
 
