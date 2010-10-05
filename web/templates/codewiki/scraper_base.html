@@ -32,9 +32,16 @@
         {% endifequal %}
     </div>
     <div class="content full">
-        <p class="sic">
-            <strong>Important</strong> If you suspect this scraper breaks our <a href="/terms_and_conditions/">Terms &amp; Conditions</a>, please <a href="/contact/">report it</a>
-        </p>
+        {% ifequal scraper.status 'sick' %}
+            <p class="sick">
+                <strong>Maintenance required!</strong> This {{scraper.wiki_type}} might be broken (it generated an exception on its <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}">last run</a>).
+                {% ifequal scraper.owner.get_profile user %}
+                    <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit this {{scraper.wiki_type}}</a>.
+                {% else %}
+                    Do you know any {{scraper.language}}? Could you help {{scraper.owner.get_profile.name}} <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">fix their {{scraper.wiki_type}}</a>?
+                {% endifequal %}
+            </p>
+        {% endifequal %}
         <div class="page_tab_body">
                     
             {% block tab %}
