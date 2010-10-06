@@ -6,7 +6,7 @@
     <div class="page_title tag_header">
         <h1>Tag: <a href="{% url single_tag tag.name %}" class="single_tag">{{tag.name}}</a></h1>
         <p>
-            Do you know of a dataset relating to <em>{{tag.name}}</em> that should have a scraper created for it? <a href="{% url market_solicitation %}?tag={{tag.name}}">If so, please request it</a>
+            Do you know of a dataset relating to <em>{{tag.name}}</em> that should have a scraper created for it? <a href="{% url market_solicitation %}?tags={{tag.name}}">If so, please request it</a>
             and it will be added to the open requests section of this page.
         </p>
         <table class="tag_stats">
@@ -56,7 +56,7 @@
         </p>
     {% endif %}
     <form method="get" action="{% url market_solicitation %}?">
-        <input type="hidden" name="tag" value="{{tag.name}}"/>
+        <input type="hidden" name="tags" value="{{tag.name}}"/>
         <input type="submit" value="Request a new scraper"/>
     </form>
     
