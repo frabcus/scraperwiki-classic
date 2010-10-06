@@ -117,7 +117,7 @@ class Solicitation(models.Model):
     def claim(self, scraper, user):
 
         #set the scraper_id on the solicitation
-        if scraper and scraper.is_published and user == scraper.owner():
+        if scraper and user == scraper.owner():
 
             #set the status of the solicitation to 'pending'
             status = SolicitationStatus.objects.get(status='pending')
