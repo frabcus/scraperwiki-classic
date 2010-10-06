@@ -1,7 +1,7 @@
 {% extends "frontend/base.html" %}
 {% load dial %}
 
-{% block title %}About{% endblock %}
+{% block title %}Scrapers and requests tagged '{{tag.name}}'{% endblock %}
 {% block content %}
     <div class="page_title tag_header">
         <h1>Tag: <a href="{% url single_tag tag.name %}" class="single_tag">{{tag.name}}</a></h1>
