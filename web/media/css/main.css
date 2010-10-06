@@ -111,6 +111,7 @@ small.error_hint {color:#cc0000;}
 a {color:#2680c6; text-decoration:none;}
 a:hover {text-decoration:underline;}
 span.faux_link {color:#ccc;}
+a.more_link {font-weight:bold; font-style:italic;}
 
 /* Code */
 .code {font-family: 'Courier New',Courier,monospace;}
