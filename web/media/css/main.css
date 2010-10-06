@@ -223,11 +223,11 @@ ul.bulleted li {padding:0 0 0 0; margin-left: 1.5em; list-style-type: disc; }
 ul.inline li {display:inline;}
 
 /* tags */
-ul.tags li {display:inline;padding-right:0.3em;}
-ul.tags li a, a.single_tag {background:#dfeaf2; padding: 0.2em 0.6em; border-right:solid 1px #90b5d0;border-bottom:solid 1px #90b5d0;}
+ul.tags li {display:inline;padding-right:0.3em;line-height:2em;}
+ul.tags li a, a.single_tag {background:#dfeaf2; padding: 0.2em 0.6em; border-right:solid 1px #90b5d0;border-bottom:solid 1px #90b5d0;text-transform:lowercase;}
 ul.tags li a:hover, a.single_tag:hover {text-decoration:none;background:#2680c6; color:#fff;}
 
-ul.tags.cloud {line-height:2em;text-align:center;}
+ul.tags.cloud {text-align:center;}
 ul.tags.cloud li {padding-right:0.15em;padding-left:0.15em;}
 ul.tags.cloud li.c1 {font-size:1em;}
 ul.tags.cloud li.c2 {font-size:1.3em;}
