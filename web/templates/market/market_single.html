@@ -1,98 +1,16 @@
-{% extends "frontend/base.html" %}
-{% load comments %}
-{% load gravatar %}
-
-{% block title %}{{solicitation.title}} | Requested scrapers{% endblock %}
-
-{% block content %}
-<div class="page_title">
-    <h1>{{solicitation.title}}</h1>
-    <p>
-        Requested scraper
-    </p>
-</div>
-<div class="content col left">
-    <h3>{{solicitation.title}} {% if solicitation.has_bounty %}<span class="bounty">&pound;{{solicitation.price}} bounty</span>{% endif %}</h3>
-    <h4>Added by {{solicitation.user_created.get_profile.name}} ({{solicitation.status.display_name}})</h4>
-    <p>{{solicitation.details}}</p>
-            <p>Tags: {% for tag in solicitation_tags %}<a href="{% url market_tag tag %}">{{ tag }}</a> {% endfor %}</p>
-    <p>Link: <a href="{{solicitation.link}}">{{solicitation.link|urlizetrunc:30}}</a></p>    
-</div>
-<div class="content col right">
-    {% ifequal solicitation.status.status 'open' %}
-        {% ifequal solicitation.user_created user %}
-           You own this request: <a href="{% url market_edit solicitation.id %}">edit it</a>
-       {% else %}
-    <form action="{% url market_claim solicitation.id %}" method="get">
-        <input type="submit" value="I've written this"/>
-    </form>
-       {% endifequal %}
-    {% else %}
-        {% ifequal solicitation.status.status 'pending' %}
-            <p>This suggestion has been claimed by <a href="{% url profiles_profile_detail solicitation.scraper.owner.username %}">{{solicitation.scraper.owner.get_profile.name}}</a> and is being reviewed by <a href="{% url profiles_profile_detail solicitation.user_created.username %}">{{solicitation.user_created.get_profile.name}}</a>.</p>
-            <p>The suggested scraper is: <a href="{% url code_overview solicitation.scraper.wiki_type solicitation.scraper.short_name %}">{{solicitation.scraper.title}}</a></p>
-            {% ifequal solicitation.user_created user %}
-                {% ifequal solicitation.price 0 %}
-                  <p>You own this request. When you are happy with the scraper go <a href="{% url market_complete solicitation.id %}">here</a> to accept it</p>
-                {% else %}
-                  <p>You own this request. When you are happy with the scraper go <a href="{% url market_complete solicitation.id %}">here</a> to pay for it</p>
-                {% endifequal %}
-            {% endifequal %}
-        {% else %}
-            <p>This suggestion has been turned into a scraper by <a href="{% url profiles_profile_detail solicitation.scraper.owner.username %}">{{solicitation.scraper.owner.get_profile.name}}</a>!</p>
-            <p>The successful scraper is: <a href="{% url code_overview solicitation.scraper.wiki_type solicitation.scraper.short_name %}">{{solicitation.scraper.title}}</a></p>
-        {% endifequal %}
-    {% endifequal %}
-    <ul>
-        <a href="{% url market_solicitation %}">Request a scraper</a>
-    </ul>
-    <h4>More suggestions</h4>
-    <ul>
-    {% for solicitation in recent_solicitations %}
-        <li>
-    	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
-    	</li>
-	{% endfor %}
-    </ul>
-</div>
-
-{% if user.is_authenticated %}
- 
-{% get_comment_form for solicitation as form %}
-<p>Add a comment or question about this request:</p>
-
-<form action="{% comment_form_target %}" method="post"class="add_comment">
-    <input type="hidden" name="next" value="{% url market_view solicitation.id %}" />    
-   {% show_gravatar user 'medium' %} 
-   <div>
-       <textarea name="comment" id="id_comment" rows="3"></textarea>
-       {{ form.content_type }} 
-       {{ form.object_pk }} 
-       {{ form.timestamp }} 
-       {{ form.security_hash }} 
-
-       <input type="submit" class="button" value="Add" id="id_submit" /> 
-   </div>
-</form>
-{% else %}
-    <p>Please <a href="/login/?next={{ request.get_full_path }}">log in</a> to add a comment.</p>
-{% endif %}
-
-{% get_comment_list for solicitation as comment_list %}
-
-{% if comment_list %}
-    {% for comment in comment_list reversed %} 
-        <div class="user_comment">  
-    
-            <p id="{{ comment.id }}">
-                {% show_gravatar comment.user 'small' %} 
-                {{ comment.comment|escape|urlizetrunc:"100"|linebreaks }}
-            </p>
-            <small>
-                Added by <a href="{% url profiles_profile_detail comment.name %}">{{ comment.name|escape }}</a> at {{ comment.submit_date|timesince }} ago
-            </small>
-        </div>  
-    {% endfor %} 
-{% endif %}
-
+{% extends "market/market_base.html" %}
+{% load markup %}
+{% block tab %}
+    <div class="content full">
+        <h2>Data to scrape: <a href="{{solicitation.link}}">{{solicitation.link|urlizetrunc:30}}</a></h2>        
+        <div class="text_wiki">{{solicitation.details|textile}}</div>
+    </div>
+    <div class="content col left">
+        <h2>Tags</h2>
+        <ul class="tags">
+            {% for tag in solicitation_tags %}
+                <li><a href="{% url single_tag tag %}">{{ tag }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

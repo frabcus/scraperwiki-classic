@@ -120,7 +120,7 @@ pre.scrapercode {background-color: lemonchiffon; padding: 0.5em;}
 /* Tables */
 table {width:100%; border-collapse:collapse;}
 table.data {margin-top:1em; margin-bottom:1em;}
-table.data th {text-transform:uppercase; font-weight:normal;background:#f8f8f8; color:#808080;padding:0.3em 0.5em;
+table.data th {font-weight:normal;background:#f8f8f8; color:#808080;padding:0.3em 0.5em;
 border-top:solid 1px #ccc; border-bottom:solid 1px #ccc;padding:0.4em 0.6em;}
 table.data tr:nth-child(odd) td {background:#f4f3e8;}
 table.data td {border-top:solid 1px #ebeade;padding:0.3em 0.5em; line-height:1em;}
@@ -220,6 +220,25 @@ form.inline_form {display:inline;padding:0;margin:0;}
 ul {padding-left:0;}
 ul li {padding:0 0 0.5em 0; margin-left:0; list-style-type:none;}
 ul.bulleted li {padding:0 0 0 0; margin-left: 1.5em; list-style-type: disc; }
+ul.inline li {display:inline;}
+
+/* tags */
+ul.tags li {display:inline;padding-right:0.3em;}
+ul.tags li a, a.single_tag {background:#dfeaf2; padding: 0.2em 0.6em; border-right:solid 1px #90b5d0;border-bottom:solid 1px #90b5d0;}
+ul.tags li a:hover, a.single_tag:hover {text-decoration:none;background:#2680c6; color:#fff;}
+
+ul.tags.cloud {line-height:2em;text-align:center;}
+ul.tags.cloud li {padding-right:0.15em;padding-left:0.15em;}
+ul.tags.cloud li.c1 {font-size:1em;}
+ul.tags.cloud li.c2 {font-size:1.3em;}
+ul.tags.cloud li.c3 {font-size:1.6em;}
+ul.tags.cloud li.c4 {font-size:1.9em;}
+
+div.tag_header {min-height:120px;padding-right:350px;}
+table.tag_stats {text-align:center; width:320px; position:absolute; top:-10px; right:5px;}
+table.tag_stats td {position:relative; text-align:center;}
+table.tag_stats td span {overflow:hidden;display:block;width:160px;}
+table.tag_stats td span img {position:relative; left:-20px;}
 
 
 /* Scroll */
@@ -247,7 +266,6 @@ ul.scraper_list span.edit a {color:green;}
 ul.scraper_list p {padding:0.3em 0; line-height:1.4em;}
 ul.scraper_list ul.code_about {display:inline;font-weight:normal;font-size:0.8em;}
 ul.scraper_list ul.code_about li {padding-bottom:0;padding-top:0; border-bottom:0;}
-
 
 /* About page */
 #divWelcome {position:relative; background:url(../images/graph_paper.png) #1d7cae;
@@ -302,7 +320,7 @@ p.report {background:#f8f8a8 url(../images/icons/flag_yellow.png) no-repeat 8px 
     font-size:0.8em; border-top:dotted 1px #ccc; border-bottom:dotted 1px #ccc; padding:0.5em 10px 0.5em 30px; margin-top:1em;}
 
 /* Sick */
-p.sick {background:#e9b2b2 url(../images/icons/eye.png) no-repeat 8px 0.4em;
+p.sick {background:#f3cacb url(../images/icons/eye.png) no-repeat 8px 0.4em;
     font-size:0.8em; border-top:dotted 1px #d5a2a2; border-bottom:dotted 1px #d5a2a2; padding:0.5em 10px 0.5em 30px; margin:0;}
     
 /* API */

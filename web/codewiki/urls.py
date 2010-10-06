@@ -19,9 +19,6 @@ urlpatterns = patterns('',
     url(r'^scrapers/export/(?P<scraper_short_name>[\w_\-]+)/$', views.export_csv,       name='export_csv'),
     url(r'^scrapers/export2/(?P<scraper_short_name>[\w_\-]+)/$', views.export_gdocs_spreadsheet,       name='export_gdocs_spreadsheet'),    
     
-    url(r'^scrapers/tags/$',                              views.all_tags,               name='all_tags'),
-    url(r'^scrapers/tags/(?P<tag>[^/]+)$',                views.scraper_tag,            name='tag'),
-    url(r'^scrapers/tags/(?P<tag>[^/]+)/data$',           views.tag_data,               name='tag_data'),  # to delete
     url(r'^scrapers/follow/(?P<scraper_short_name>[\w_\-]+)/$', views.follow,           name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<scraper_short_name>[\w_\-]+)/$', views.unfollow,       name='scraper_unfollow'),
     

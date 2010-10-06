@@ -83,6 +83,27 @@
     </div>
 </div>
 
+<div class="content full">
+    <h2>About this scraper {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}</h2>
+    <div class="text_wiki">
+        <div id="divAboutScraper">{{ scraper.description|textile }}</div>
+    </div>
+</div>
+
+<div class="content full">
+    <h2>Tags {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aAddTags" class="edit">[add a tag]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to add a tag]</a>{% endif %}</h2>
+    {% if scraper_tags %}
+        <ul class="tags">
+            {% for tag in scraper_tags %}
+                <li><a href="{% url single_tag tag %}">{{ tag }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>
+            Adding tags make sense of all the datasets on ScraperWiki
+        </p>
+    {% endif %}
+</div>
 
 {% if user.is_staff %}
 <div class="content full staff">
@@ -102,24 +123,9 @@
 </div>
 {% endif %}
 
-<div class="content full">
-    <h2>About this scraper {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}</h2>
-    <div class="text_wiki">
-        <div id="divAboutScraper">{{ scraper.description|textile }}</div>
-    </div>
-</div>
-
 <div class="content col left">
     <h3>Contributors</h3>
     {% include 'codewiki/includes/contributors.html' %}
-    <div id="divScraperTags">
-        <h3>Tags {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aAddTags" class="edit">[add a tag]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to add a tag]</a>{% endif %}</h3>
-        <ul>
-            {% for tag in scraper_tags %}
-                <li><a href="{% url tag tag %}">{{ tag }}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
 </div>
 
 <div class="content col right">

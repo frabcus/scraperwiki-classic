@@ -1,0 +1,72 @@
+{% extends "frontend/base.html" %}
+{% load dial %}
+
+{% block title %}About{% endblock %}
+{% block content %}
+    <div class="page_title tag_header">
+        <h1>Tag: <a href="{% url single_tag tag.name %}" class="single_tag">{{tag.name}}</a></h1>
+        <p>
+            Do you know of a dataset relating to <em>{{tag.name}}</em> that should have a scraper created for it? <a href="{% url market_solicitation %}?tag={{tag.name}}">If so, please request it</a>
+            and it will be added to the open requests section of this page.
+        </p>
+        <table class="tag_stats">
+            <tr>
+                <td>
+                    <span>
+                        {% dial scrapers_fixed_percentage 200 100 %}
+                    </span>
+                    <p>
+                        % Fixed scrapers
+                    </p>
+                </td>
+                <td>
+                    <span>
+                        {% dial solicitations_percent_complete 200 100 %}                            
+                    </span>
+                    <p>              
+                        % Completed requests
+                    </p>
+                </td>            
+            </tr>
+        </table>
+    </div>
+
+<div class="content left col">
+    {% if scrapers %}
+        <ul class="scraper_list">    
+            {% for code in scrapers %}
+                {% include 'frontend/includes/code_object_line.html' %}
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no scrapers yet for this tag</p>
+    {% endif %}
+</div>
+<div class="content right col">
+    <h2>Open requests</h2>
+    {% if solicitations_open %}
+        <ul class="scraper_list">
+            {% for solicitation in solicitations_open %}
+	            {% include 'market/solicitation_line.html' %}
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>
+            No requests, go add some!
+        </p>
+    {% endif %}
+    <form method="get" action="{% url market_solicitation %}?">
+        <input type="hidden" name="tag" value="{{tag.name}}"/>
+        <input type="submit" value="Request a new scraper"/>
+    </form>
+    
+    {% if solicitations_pending %}
+        <h2>Pending requests</h2>    
+        <ul>
+            {% for solicitation in solicitations_pending %}
+	            {% include 'market/solicitation_line.html' %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

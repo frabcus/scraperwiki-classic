@@ -12,17 +12,10 @@
             <div id="divAboutScraper">{{ scraper.description|textile }}</div>
         </div>
     </div>
+    
     <div class="content col left">
         <h3>Contributors</h3>
         {% include 'codewiki/includes/contributors.html' %}
-        <div id="divScraperTags">
-            <h3>Tags {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aAddTags" class="edit">[add a tag]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'view' scraper.short_name %}" class="edit">[sign in to add a tag]</a>{% endif %}</h3>
-            <ul>
-                {% for tag in scraper_tags %}
-                    <li><a href="{% url tag tag %}">{{ tag }}</a></li>
-                {% endfor %}
-            </ul>
-        </div>
     </div>
     {% if related_scrapers %}
         <div class="content col right">
@@ -33,8 +26,8 @@
                 {% endfor %}
             </ul>
         </div>
-        <br class="clear"/>
     {% endif %}
+    <br class="clear"/>    
 {% endblock %}
 {% block run_script %}
     {% if user.is_authenticated %}
