@@ -438,11 +438,9 @@ import time
 def stringnot(v):
     if v == None:
         return ""
-    if type(v) == float:
-        return v
-    if type(v) == int:
-        return v
-    return v.encode("utf-8")
+    if type(v) in [unicode, str]:
+        return v.encode("utf-8")
+    return v
 
 def generate_csv(dictlist, offset):
     keylist = [ ]

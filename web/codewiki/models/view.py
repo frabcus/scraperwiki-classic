@@ -37,13 +37,6 @@ class View (code.Code):
     def get_screenshot_url(self):
         return 'http://%s%s' % (Site.objects.get_current().domain, reverse('rpcexecute', args=[self.short_name]))
 
-    def get_screenshot_filename(self, size='medium'):
-        return "%s_%s.png" % (self.short_name, size)
-
-    def get_screenshot_filepath(self, size='medium'):
-        filename = self.get_screenshot_filename(size)
-        return os.path.join(settings.VIEW_SCREENSHOT_DIR, filename)
-
     def content_type(self):
         return ContentType.objects.get(app_label="codewiki", model="View")
 

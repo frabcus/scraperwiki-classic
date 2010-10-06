@@ -111,12 +111,6 @@ class LatestCodeObjectsBySearchTerm(Feed):
         return "Items created with '%s' somewhere in title or tags" % obj
 
     def items(self, obj):
-        code_objects = Code.objects.filter(title__icontains=obj, published=True) 
-        tag = Tag.objects.filter(name__icontains=obj)
-        if tag: 
-          qs = TaggedItem.objects.get_by_model(Code, tag)
-          code_objects = code_objects | qs
-        code_objects = code_objects.filter(published=True).order_by('-created_at')
-        code_objects = code_objects.filter(wiki_type='scraper')
+        code_objects = Code.objects.search(obj) 
         return code_objects[:settings.RSS_ITEMS]
         

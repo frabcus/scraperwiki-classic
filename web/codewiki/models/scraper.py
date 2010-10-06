@@ -7,7 +7,9 @@ from django.contrib.auth.models import User
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-import settings
+from django.contrib.sites.models import Site
+from django.conf import settings
+from django.core.urlresolvers import reverse
 
 import codewiki.managers.scraper
 from codewiki import managers
@@ -102,16 +104,19 @@ class Scraper (code.Code):
             return datetime.datetime.now() - datetime.timedelta(1, 0, 0)  # one day ago
         return self.last_run + datetime.timedelta(0, self.run_interval, 0)
 
+    def get_screenshot_url(self):
+        return 'http://%s%s' % (Site.objects.get_current().domain, reverse('editor_edit', args=[self.wiki_type, self.short_name]))
+
     class Meta:
         app_label = 'codewiki'
 
-
+        
 #register tagging for scrapers
 try:
     tagging.register(Scraper)
 except tagging.AlreadyRegistered:
     pass
-
+    
 
 
 class ScraperMetadata(models.Model):
