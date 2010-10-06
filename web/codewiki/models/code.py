@@ -178,6 +178,9 @@ class Code(models.Model):
         filename = self.get_screenshot_filename(size)
         return os.path.join(settings.SCREENSHOT_DIR, size, filename)
 
+    def has_image_file(self, size='medium'):
+        return os.path.exists(self.get_screenshot_filepath(size))
+
     class Meta:
         app_label = 'codewiki'
 
