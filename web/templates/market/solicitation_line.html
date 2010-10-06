@@ -1,14 +1,17 @@
-<li>
-    <h3>
-        <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>{% if solicitation.has_bounty %} <span class="bounty"><a href="{% url market_view solicitation.id %}">&pound;{{solicitation.price}} bounty</a></span>{% endif %}
-    </h3>
-<p><em>Added by
-	{% load gravatar %}
-    {% show_gravatar solicitation.user_created 'small' %} 	
-    <a href='{% url profiles_profile_detail solicitation.user_created %}'>
-        {{ solicitation.user_created.get_profile.name }}
-    </a></em></p>
 
+<li class="solicitations_line">
+    <h3>
+        <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>{% if solicitation.has_bounty %} <span class="bounty"><a href="{% url market_view solicitation.id %}">&pound;{{solicitation.price|floatformat}} bounty</a></span>{% endif %}
+    </h3>
     <p>{{solicitation.details}}</p>
+    <small>Added by
+    	{% load gravatar %}
+        {% show_gravatar solicitation.user_created 'small' %} 	
+        <a href='{% url profiles_profile_detail solicitation.user_created %}'>
+            {{ solicitation.user_created.get_profile.name }}
+        </a>
+        {{solicitation.created_at|timesince}} ago
+    </small>
+    
 </li>
 

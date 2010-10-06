@@ -578,45 +578,6 @@ def download(request, scraper_short_name):
     return response
 
 
-def all_tags(request):
-    return render_to_response(
-        'codewiki/all_tags.html',
-        context_instance = RequestContext(request))
-
-
-def scraper_tag(request, tag):
-    tag = get_tag(tag)
-    if not tag:
-       raise Http404
-    scrapers = models.Scraper.objects.filter(published=True)
-    queryset = TaggedItem.objects.get_by_model(scrapers, tag)
-    return render_to_response('codewiki/tag.html', {
-        'queryset': queryset,
-        'tag': tag,
-        'selected_tab': 'items',
-        }, context_instance=RequestContext(request))
-
-
-def tag_data(request, tag):  # to delete
-    assert False
-
-    tag = get_tag(tag)
-    if not tag:
-       raise Http404
-    scrapers = models.Scraper.objects.filter(published=True)
-    queryset = TaggedItem.objects.get_by_model(scrapers, tag)
-
-    guids = []
-    for q in queryset:
-        guids.append(q.guid)
-    data = models.Scraper.objects.data_summary(scraper_id=guids)
-
-    return render_to_response('codewiki/tag_data.html', {
-        'data': data,
-        'tag': tag,
-        'selected_tab': 'data',
-        }, context_instance=RequestContext(request))
-
 def follow (request, scraper_short_name):
     scraper = get_object_or_404(
         models.Scraper.objects, short_name=scraper_short_name)

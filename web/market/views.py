@@ -56,7 +56,7 @@ def edit(request, solicitation_id):
         else:
             solicitation.__dict__['tags'] = ", ".join(tag.name for tag in solicitation.tags)
             form = forms.SolicitationForm(solicitation.__dict__, instance=solicitation)
-            return render_to_response('market/market_edit.html', {'form': form, 'market_bounty_charge': settings.MARKET_BOUNTY_CHARGE }, context_instance = RequestContext(request))
+            return render_to_response('market/market_edit.html', {'solicitation': solicitation, 'form': form, 'market_bounty_charge': settings.MARKET_BOUNTY_CHARGE, 'selected_tab': 'edit'}, context_instance = RequestContext(request))
     else:
         return HttpResponseRedirect(reverse('market_view', args=(solicitation_id,)))
 
@@ -80,49 +80,15 @@ def single (request, solicitation_id):
     solicitation_tags = Tag.objects.get_for_object(solicitation)
     status = models.SolicitationStatus.objects.get(status='open')
     recent_solicitations = models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')[:5]    
-    return render_to_response('market/market_single.html', {'solicitation': solicitation, 'solicitation_tags': solicitation_tags, 'recent_solicitations': recent_solicitations}, context_instance = RequestContext(request))
+    return render_to_response('market/market_single.html', {'solicitation': solicitation, 'solicitation_tags': solicitation_tags, 'recent_solicitations': recent_solicitations, 'selected_tab': 'overview'}, context_instance = RequestContext(request))
 
-def tag(request, tag):
-    tag = get_tag(tag)
-    if not tag:
-        raise Http404
 
-    # possibly not the best way of doing this
+def discuss (request, solicitation_id):
+    solicitation = get_object_or_404(models.Solicitation, id=solicitation_id)
+    solicitation_tags = Tag.objects.get_for_object(solicitation)
     status = models.SolicitationStatus.objects.get(status='open')
-    solicitations_open = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
-    status = models.SolicitationStatus.objects.get(status='pending')
-    solicitations_pending = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
-    status = models.SolicitationStatus.objects.get(status='completed')
-    solicitations_complete = models.Solicitation.objects.filter(deleted=False, status=status).order_by('created_at')
-    queryset_open = TaggedItem.objects.get_by_model(solicitations_open, tag)
-    queryset_pending = TaggedItem.objects.get_by_model(solicitations_pending, tag)	
-    queryset_complete = TaggedItem.objects.get_by_model(solicitations_complete, tag)
-
-    # calculate percentage complete 
-    closed_count = queryset_complete.count()
-    total_count = queryset_open.count() + queryset_pending.count() + queryset_complete.count()
-    if total_count != 0:
-        percentage_complete = (float(closed_count)/float(total_count)) * 100
-    else:
-        percentage_complete = 0
-
-    # calculate top scraper writers, and sort
-    writers = []
-    for closed in queryset_complete:
-        temp_user = closed.scraper.owner()
-        writers.append(temp_user)
-    top_writers = leaders(writers)
-
-    return render_to_response('market/tag.html', {
-        'queryset_open': queryset_open, 
-        'queryset_pending': queryset_pending, 
-        'queryset_complete': queryset_complete, 
-        'closed_count': closed_count, 
-        'total_count': total_count, 
-        'percentage_complete': percentage_complete, 
-        'top_writers': top_writers, 
-        'tag' : tag,
-    }, context_instance = RequestContext(request))
+    recent_solicitations = models.Solicitation.objects.filter(deleted=False, status=status).order_by('-created_at')[:5]    
+    return render_to_response('market/market_discuss.html', {'solicitation': solicitation, 'solicitation_tags': solicitation_tags, 'recent_solicitations': recent_solicitations, 'selected_tab': 'comments'}, context_instance = RequestContext(request))
 
 def leaders(xs, top=5):
     counts = defaultdict(int)

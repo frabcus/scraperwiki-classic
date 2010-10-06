@@ -1,0 +1,23 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Stats{% endblock %}
+{% block content %}
+    <div class="page_title">
+        <h1>Browse by tag</h1>
+        <p>
+            Scrapers and requests by tag
+        </p>
+    </div>
+
+<div class="content full">
+
+    <ul class="cloud tags">
+        {% for tag in tags %}
+            <li class="c{{tag.font_size}}"><a href="{% url single_tag tag.name %}">{{tag.name}}</a></li>
+        {% endfor %}
+    </ul>
+
+</div>
+
+
+{% endblock %}

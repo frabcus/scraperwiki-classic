@@ -102,17 +102,16 @@ class Scraper (code.Code):
             return datetime.datetime.now() - datetime.timedelta(1, 0, 0)  # one day ago
         return self.last_run + datetime.timedelta(0, self.run_interval, 0)
 
-
     class Meta:
         app_label = 'codewiki'
 
-        
+
 #register tagging for scrapers
 try:
     tagging.register(Scraper)
 except tagging.AlreadyRegistered:
     pass
-    
+
 
 
 class ScraperMetadata(models.Model):

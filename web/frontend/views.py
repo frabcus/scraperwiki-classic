@@ -12,7 +12,8 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
-
+from tagging.models import Tag, TaggedItem
+from tagging.utils import get_tag
 from codewiki.models import Code, Scraper, View, UserCodeEditing
 from tagging.models import Tag, TaggedItem
 from market.models import Solicitation, SolicitationStatus
@@ -273,7 +274,7 @@ def get_involved(request):
         #scraper status
         scraper_sick_count = Scraper.objects.filter(status='sick').count()
         scraper_sick_percent = 100 - int(scraper_sick_count / float(scraper_count) * 100)
-                
+
         data = {
             'scraper_count': scraper_count,
             'view_count': view_count,
@@ -295,7 +296,54 @@ def get_involved(request):
         return render_to_response('frontend/get_involved.html', data, context_instance=RequestContext(request))
 
 def stats(request):
-    
+
     return render_to_response('frontend/stats.html', {}, context_instance=RequestContext(request))
+
+def tags(request):
+    scraper_tags =  Tag.objects.cloud_for_model(Scraper)
+    solicitation_tags =  Tag.objects.cloud_for_model(Solicitation)
+    all_tags = scraper_tags
+        
+    for solicitation_tag in solicitation_tags:
+        found = False
+        for scraper_tag in scraper_tags:
+            if scraper_tag.name == solicitation_tag.name:
+                found = True
+        if not found:
+            all_tags.append(solicitation_tag)
+    
+
+    return render_to_response('frontend/tags.html', {'tags':all_tags,}, context_instance=RequestContext(request))
+    
+def tag(request, tag):
+    tag = get_tag(tag)
+    if not tag:
+        raise Http404
+
+
+    #get all scrapers with this tag
+    scrapers = TaggedItem.objects.get_by_model(Scraper.objects.all(), tag)
+    
+    #get all open and pending solicitations with this tag
+    solicitations_open = Solicitation.objects.filter(deleted=False, status=SolicitationStatus.objects.get(status='open')).order_by('created_at')
+    solicitations_pending = Solicitation.objects.filter(deleted=False, status=SolicitationStatus.objects.get(status='pending')).order_by('created_at')
+
+    solicitations_open = TaggedItem.objects.get_by_model(solicitations_open, tag)
+    solicitations_pending = TaggedItem.objects.get_by_model(solicitations_pending, tag)
+    
+    #do some maths to work out how complete the tag is at the moment
+    solicitations_percent_complete = float(scrapers.count()) / float(scrapers.count() + solicitations_open.count() + solicitations_pending.count()) * 100
+    scrapers_fixed_percentage = 0
+    if scrapers.count() > 0:
+        scrapers_fixed_percentage = 100.0 - float(scrapers.filter(status='sick').count()) / float(scrapers.count()) * 100
+
+    return render_to_response('frontend/tag.html', {
+        'tag' : tag,
+        'scrapers': scrapers,
+        'solicitations_open':solicitations_open,
+        'solicitations_pending':solicitations_pending,        
+        'solicitations_percent_complete': solicitations_percent_complete,
+        'scrapers_fixed_percentage': scrapers_fixed_percentage,
+    }, context_instance = RequestContext(request))
     
     
