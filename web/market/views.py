@@ -16,11 +16,13 @@ from paypal.standard.forms import PayPalPaymentsForm
 from market import models
 from market import forms
 from payment.models import Invoice
-    
+
 def request_solicitation(request):
-    form = forms.SolicitationForm()    
+    initial = {'tags': request.GET.get('tags', None)}
+    form = forms.SolicitationForm(initial=initial)
+
     if request.method == 'POST':
-        form = forms.SolicitationForm(data=request.POST, files=request.FILES)
+        form = forms.SolicitationForm(data=request.POST)
         if form.is_valid():
             solicitation = form.save(commit=False)
             if not request.user.is_authenticated():
