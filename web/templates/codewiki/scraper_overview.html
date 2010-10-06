@@ -4,6 +4,7 @@
 {% load schedule %}
 {% block tab %}
 {% load markup %}
+{% load screen_shot %}
 
 <fieldset>
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} }" />
@@ -112,7 +113,7 @@
         {% if related_views %}
             {% for related_view in related_views %}
                 <li>
-                    <a href="{% url code_overview related_view.wiki_type related_view.short_name %}" class="screenshot"><img src="{{MEDIA_URL}}screenshots/medium/{{related_view.get_screenshot_filename}}" title="{{related_view.title}}" /></a>
+                    <a href="{% url code_overview related_view.wiki_type related_view.short_name %}" class="screenshot">{% screen_shot related_view %}</a>
                     <a href="{% url code_overview related_view.wiki_type related_view.short_name %}">{{related_view.title}}</a>
                 </li>
             {% endfor %}

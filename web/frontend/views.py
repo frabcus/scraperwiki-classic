@@ -38,10 +38,10 @@ def frontpage(request, public_profile_field=None):
     featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').order_by('-first_published_at')[:2]    
     featured_views = Code.objects.filter(featured=True, wiki_type='view').order_by('-first_published_at')[:2]        
     
-    #market
-    solicitations = Solicitation.objects.filter(deleted=False).order_by('-created_at')[:5]
+    #popular tags
+    tags = _get_merged_tags(5)[:10]
     
-    data = {'solicitations': solicitations, 'featured_views': featured_views, 'featured_scrapers': featured_scrapers,}
+    data = {'featured_views': featured_views, 'featured_scrapers': featured_scrapers, 'tags': tags}
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
 
 @login_required
@@ -299,21 +299,32 @@ def stats(request):
 
     return render_to_response('frontend/stats.html', {}, context_instance=RequestContext(request))
 
-def tags(request):
+#hack - get a merged list of scraper and soplicitation tags
+def _get_merged_tags(min_count = None):
     scraper_tags =  Tag.objects.cloud_for_model(Scraper)
-    solicitation_tags =  Tag.objects.cloud_for_model(Solicitation)
+    solicitation_tags =  Tag.objects.cloud_for_model(Solicitation, min_count=min_count)
     all_tags = scraper_tags
-        
+    
+    #merge both tag lists
     for solicitation_tag in solicitation_tags:
         found = False
-        for scraper_tag in scraper_tags:
+        for scraper_tag in all_tags:
             if scraper_tag.name == solicitation_tag.name:
                 found = True
+                if solicitation_tag.font_size > scraper_tag.font_size:
+                    scraper_tag.font_size = solicitation_tag.font_size
+                    
         if not found:
             all_tags.append(solicitation_tag)
+
+    return all_tags    
     
 
-    return render_to_response('frontend/tags.html', {'tags':all_tags,}, context_instance=RequestContext(request))
+def tags(request):
+
+    tags = _get_merged_tags()
+
+    return render_to_response('frontend/tags.html', {'tags':tags,}, context_instance=RequestContext(request))
     
 def tag(request, tag):
     tag = get_tag(tag)

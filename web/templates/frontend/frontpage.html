@@ -34,31 +34,16 @@
     </div>
     {% endif %}
     <br class="clear"/>
-
+    <div class="content full divider">
+        <h3>Popular tags</h3>
+        <ul class="tags">
+            {% for tag in tags %}
+                <li><a href="{% url single_tag tag.name %}">{{tag.name}}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
     <div class="content full divider">
         {% load blog_latest %}
         {% blog_latest %}
-    </div>
-    <div class="contentfull">
-        <h3>Latest requested datasets</h3>
-        <ul>
-        {% for solicitation in solicitations %}
-            <li>
-        	    <a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>
-        	    by
-                {% show_gravatar solicitation.user_created 'small' %} 	
-                <a href='{% url profiles_profile_detail solicitation.user_created %}'>
-                    {{ solicitation.user_created.get_profile.name }}
-                </a>
-                {% if solicitation.has_bounty %}
-                    <span class="bounty">
-                        <a href="{% url market_view solicitation.id %}">
-                            &pound;{{solicitation.price}} bounty
-                        </a>
-                    </span>
-                {% endif %}
-        	</li>
-    	{% endfor %}
-        </ul>
     </div>
 {% endblock %}
