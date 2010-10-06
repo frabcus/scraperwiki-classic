@@ -59,7 +59,7 @@ class LatestCodeObjectsByTag(Feed):
     def link(self, obj):
         if not obj:
             raise FeedDoesNotExist
-        return reverse('tag', args=[obj.name])
+        return reverse('single_tag', args=[obj.name])
 
     def item_link(self, obj):
         return obj.get_absolute_url()
