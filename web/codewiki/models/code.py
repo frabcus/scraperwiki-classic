@@ -92,6 +92,12 @@ class Code(models.Model):
         if self.pk:
             followers = self.users.filter(usercoderole__role='follow')
         return followers
+        
+        
+    def requesters(self):
+        if self.pk:
+            requesters = self.users.filter(usercoderole__role='requester')
+        return requesters        
 
     def add_user_role(self, user, role='owner'):
         """
@@ -104,10 +110,11 @@ class Code(models.Model):
           * "owner"
           * "editor"
           * "follow"
+          * "requester"
         
         """
 
-        valid_roles = ['owner', 'editor', 'follow']
+        valid_roles = ['owner', 'editor', 'follow', 'requester']
         if role not in valid_roles:
             raise ValueError("""
               %s is not a valid role.  Valid roles are:\n

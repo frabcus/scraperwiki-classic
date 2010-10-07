@@ -2,13 +2,23 @@
     <li>
         <a href="{% url profiles_profile_detail scraper.owner.username %}">
         {% load gravatar %} {% show_gravatar scraper.owner 'medium' %} 
-        {{scraper.owner.get_profile.name}}</a>
+        {{scraper.owner.get_profile.name}}</a> (creator)
     </li>
+    {% if scraper_requesters %}  
+      {% for requester in scraper_requesters %}  
+        <li>
+        	{% load gravatar %} {% show_gravatar requester 'medium' %} 
+            <a href="{% url profiles_profile_detail requester.username %}">{{requester.get_profile.name}}</a>
+            (requested this scraper)
+        </li>
+      {% endfor %}
+    {% endif %}
     {% if scraper_contributors %}  
       {% for contributor in scraper_contributors %}  
         <li>
         	{% load gravatar %} {% show_gravatar contributor 'medium' %} 
             <a href="{% url profiles_profile_detail contributor.username %}">{{contributor.get_profile.name}}</a>
+            (editor)
         </li>
       {% endfor %}
     {% endif %}

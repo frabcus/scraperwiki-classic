@@ -78,11 +78,28 @@ class Solicitation(models.Model):
         super(Solicitation, self).save()
 
     def complete(self):
+
         #update status
         status = SolicitationStatus.objects.get(status='completed')
         self.status = status
         self.save()
 
+        #copy over tags, description
+        for tag in tagging.models.Tag.objects.get_for_object(self):
+            tagging.models.Tag.objects.add_tag(self.scraper, tag.name)
+
+        if not self.scraper.description or self.scraper.description == '':
+            self.scraper.description = self.details
+
+        #add the requester as a contributor
+        self.scraper.add_user_role(self.user_created, 'requester')
+        
+        #TODO: add an item to the history of the scraper saying it was converted form a solicitation
+        #TODO: copy over discussion from solicitation to scraper
+        
+        #save scraper
+        self.scraper.save()
+        
         if self.has_bounty():
             #send an email to the team saying that money needs to be sent to the developer of the scraper
             template = loader.get_template('emails/send_bounty.txt')
@@ -93,12 +110,12 @@ class Solicitation(models.Model):
             send_mail('Send Bounty', template.render(context), settings.EMAIL_FROM, [settings.TEAM_EMAIL], fail_silently=False)
 
         #send an email to scraper owner to tell them they have been accepted and if bounty to expect an email about payment
-        template = loader.get_template('emails/bounty_accepted.txt')
-        context = Context({
-            'solicitation': self,
-            'developer': self.scraper.owner()
-        })
-        send_mail('Your scraper has been accepted', template.render(context), settings.EMAIL_FROM, [self.scraper.owner().email], fail_silently=False)
+            template = loader.get_template('emails/bounty_accepted.txt')
+            context = Context({
+                'solicitation': self,
+                'developer': self.scraper.owner()
+            })
+            send_mail('Your scraper has been accepted', template.render(context), settings.EMAIL_FROM, [self.scraper.owner().email], fail_silently=False)
 
     def reject(self):
         #send email to scraper owner to tell them they have been rejected
@@ -119,7 +136,7 @@ class Solicitation(models.Model):
         #set the scraper_id on the solicitation
         if scraper and user == scraper.owner():
 
-            #set the status of the solicitation to 'pending'
+            #set the status of the solicitation to 'pending' if bounty, or complete if not
             status = SolicitationStatus.objects.get(status='pending')
             self.status = status
             self.scraper = scraper
@@ -136,6 +153,9 @@ class Solicitation(models.Model):
                 invoice.parent_id = self.pk
                 invoice.user = self.user_created
                 invoice.save()
+            else:
+                #set straight to completed if no bounty
+                self.complete()
 
             #email the creator telling them it is done, and to pay if nesesary
             title = "The scraper you requested for " + self.title + " has been written"
