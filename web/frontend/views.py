@@ -346,7 +346,7 @@ def tag(request, tag):
 
     solicitations_open = TaggedItem.objects.get_by_model(solicitations_open, tag)
     solicitations_pending = TaggedItem.objects.get_by_model(solicitations_pending, tag)
-    
+
     #do some maths to work out how complete the tag is at the moment
     solicitations_percent_complete = 0
     if scrapers.count() + solicitations_open.count() + solicitations_pending.count() > 0:
