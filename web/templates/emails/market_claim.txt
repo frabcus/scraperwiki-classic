@@ -6,7 +6,7 @@ You asked someone write you a scraper for '{{solicitation.title}}' on ScraperWik
 
 Well, {{scraper.owner}} has done it for you!
 
-{{url}}{% url scraper_overview scraper.id %}
+{{url}}{% url code_overview 'scraper' scraper.short_name %}
 
 {% if solicitation.has_bounty %}
 You set a bounty of £{{solicitation.price}} for this scraper. When you have have made sure you are happy with the scraper {{scraper.owner}} has written for you, please go here to pay them:

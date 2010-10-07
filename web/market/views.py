@@ -14,6 +14,7 @@ from collections import defaultdict
 from paypal.standard.forms import PayPalPaymentsForm
 
 from market import models
+from codewiki.models import Scraper
 from market import forms
 from payment.models import Invoice
 
@@ -100,6 +101,7 @@ def leaders(xs, top=5):
 
 @login_required
 def claim (request, solicitation_id):
+    
     #check if open
     solicitation = get_object_or_404(models.Solicitation, id=solicitation_id)
 
@@ -113,8 +115,12 @@ def claim (request, solicitation_id):
 
     if form.is_valid():
         user = request.user
-        scraper = form.cleaned_data['scraper']
-
+        code = form.cleaned_data['scraper']
+        
+        #inheritance confution, get a scraper object rather than it's parent copde object
+        scraper = Scraper.objects.get(short_name__exact=code.short_name)
+        print scraper
+        
         #mark as claimed
         solicitation.claim(scraper=scraper, user=user)
 
