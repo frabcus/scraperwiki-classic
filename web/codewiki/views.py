@@ -58,8 +58,9 @@ def scraper_overview(request, scraper_short_name):
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
     scraper_contributors = scraper.contributors()
+    scraper_requesters = scraper.requesters()    
     scraper_tags = Tag.objects.get_for_object(scraper)
-
+    print scraper_requesters
     column_order = scraper.get_metadata('data_columns')
     if not user_owns_it:
         private_columns = scraper.get_metadata('private_columns')
@@ -85,6 +86,7 @@ def scraper_overview(request, scraper_short_name):
         'user_follows_it': user_follows_it,
         'data': data,
         'scraper_contributors': scraper_contributors,
+        'scraper_requesters': scraper_requesters,
         'related_views': related_views,
         'schedule_options': models.SCHEDULE_OPTIONS,
         }, context_instance=RequestContext(request))

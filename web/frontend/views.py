@@ -346,9 +346,11 @@ def tag(request, tag):
 
     solicitations_open = TaggedItem.objects.get_by_model(solicitations_open, tag)
     solicitations_pending = TaggedItem.objects.get_by_model(solicitations_pending, tag)
-    
+
     #do some maths to work out how complete the tag is at the moment
-    solicitations_percent_complete = float(scrapers.count()) / float(scrapers.count() + solicitations_open.count() + solicitations_pending.count()) * 100
+    solicitations_percent_complete = 0
+    if scrapers.count() + solicitations_open.count() + solicitations_pending.count() > 0:
+        solicitations_percent_complete = float(scrapers.count()) / float(scrapers.count() + solicitations_open.count() + solicitations_pending.count()) * 100
     scrapers_fixed_percentage = 0
     if scrapers.count() > 0:
         scrapers_fixed_percentage = 100.0 - float(scrapers.filter(status='sick').count()) / float(scrapers.count()) * 100

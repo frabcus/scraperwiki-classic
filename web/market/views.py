@@ -119,7 +119,6 @@ def claim (request, solicitation_id):
         
         #inheritance confution, get a scraper object rather than it's parent copde object
         scraper = Scraper.objects.get(short_name__exact=code.short_name)
-        print scraper
         
         #mark as claimed
         solicitation.claim(scraper=scraper, user=user)
