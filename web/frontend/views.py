@@ -354,7 +354,7 @@ def tag(request, tag):
     scrapers_fixed_percentage = 0
     if scrapers.count() > 0:
         scrapers_fixed_percentage = 100.0 - float(scrapers.filter(status='sick').count()) / float(scrapers.count()) * 100
-
+        
     return render_to_response('frontend/tag.html', {
         'tag' : tag,
         'scrapers': scrapers,
