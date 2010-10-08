@@ -64,7 +64,7 @@ $(document).ready(function() {
     //setup code editor
     function setupCodeEditor(){
         parsers['python'] = ['../contrib/python/js/parsepython.js'];
-        parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];
+        parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
         parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
         parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
 
@@ -84,7 +84,7 @@ $(document).ready(function() {
         parserConfig['html'] = {'strictErrors': true}; 
 
         parserName['python'] = 'PythonParser';
-        parserName['php'] = 'PHPParser';
+        parserName['php'] = 'PHPHTMLMixedParser'; // 'PHPParser';
         parserName['ruby'] = 'RubyParser';
         parserName['html'] = 'HTMLMixedParser';
 
