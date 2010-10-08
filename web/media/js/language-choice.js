@@ -1,3 +1,5 @@
+var scraper_short_name = '';  // reset in templates/codewiki/scraper_overview.html
+
 $(function(){
     $('a.editor_view').click(function(){
         newCodeObject('view')
@@ -18,7 +20,7 @@ function newCodeObject(wiki_type){
     $('body').append(oOverlay);
     $('body').append(oPopup);        
 
-    // scraper_short_name is set in templates/codewiki/scraper_overview.html
+    // scraper_short_name is set in templates/codewiki/scraper_overview.html  ** BOLLOCKS IT IS
     $('#popup').load('/' + wiki_type + 's/new/choose_template/?scraper_short_name=' + scraper_short_name,
         function() {
             $('#popup .popupClose').click(function(){

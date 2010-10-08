@@ -186,7 +186,7 @@
 
 {% block run_script %}
     {% if user.is_authenticated %}
-        var scraper_short_name = '{{scraper.short_name}}';
+        scraper_short_name = '{{scraper.short_name}}';
         setupScraperEditInPlace('scraper', '{{scraper.short_name}}');
         setupButtonConfirmation("btnClearDatastore", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete all existing data for this scraper.");
         setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this scraper and it's data.");

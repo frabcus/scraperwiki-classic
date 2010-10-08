@@ -837,6 +837,7 @@ def edittutorial(request, tutorial_scraper):
 
 
 #Editor form
+blankstartupcode = { 'Python':"# Blank Python", 'PHP':"<?\n# Blank PHP\n?>", 'Ruby':"# Blank Ruby" }
 def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
     #return url (where to exit the editor to)
     return_url = reverse('frontpage')
@@ -875,7 +876,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
         else:
             raise Exception, "Invalid wiki type"
 
-        startupcode = "# blank"
+        startupcode = blankstartupcode[language]
         statuptemplate = request.GET.get('template', False)
         if statuptemplate:
             templatescraper = get_object_or_404(models.Code, published=True, language=language, short_name=statuptemplate)
