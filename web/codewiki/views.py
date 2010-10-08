@@ -26,6 +26,7 @@ import difflib
 import re
 import csv
 import math
+import urllib
 
 import StringIO, csv, types
 import datetime
@@ -658,17 +659,27 @@ def commit_event(request, event_id):
     return render_to_response('codewiki/commit_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def choose_template(request, wiki_type):
-    form = forms.ChooseTemplateForm(wiki_type)
-    return render_to_response('codewiki/ajax/choose_template.html', {'wiki_type': wiki_type, 'form': form}, context_instance=RequestContext(request))
+    context = {}
+    context['wiki_type'] = wiki_type
+    context['form'] = forms.ChooseTemplateForm(wiki_type)
+    context['scraper_short_name'] = request.GET.get('scraper_short_name', '')
+    return render_to_response('codewiki/ajax/choose_template.html', context, context_instance=RequestContext(request))
 
 
 def chosen_template(request, wiki_type):
     template = request.GET.get('template', None)
     language = request.GET.get('language', None)
-    template_arg = ''
+    scraper_short_name = request.GET.get('scraper_short_name', None)
+    
+    parameters = {}
     if template:
-        template_arg = '?template=' + template
-    return HttpResponseRedirect(reverse('editor', args=(wiki_type, language)) + template_arg)
+        parameters['template'] = template
+    if scraper_short_name:
+        parameters['scraper'] = scraper_short_name
+
+    url = "%s?%s" % (reverse('editor', args=(wiki_type, language)), urllib.urlencode(parameters))
+
+    return HttpResponseRedirect(url)
     
 def delete_draft(request):
     if request.session.get('ScraperDraft', False):
@@ -905,6 +916,6 @@ def populate_template(code, mapping):
     e.g. views can be passed the name of the scraper which they should use the data of
     """
     # Simple first implementation - replace each key with its value
-    for k,v in mapping:
+    for k,v in mapping.items():
         code = code.replace(k, v)
     return code

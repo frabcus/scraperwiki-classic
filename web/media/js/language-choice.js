@@ -18,8 +18,8 @@ function newCodeObject(wiki_type){
     $('body').append(oOverlay);
     $('body').append(oPopup);        
 
-    
-    $('#popup').load('/' + wiki_type + 's/new/choose_template/',
+    // scraper_short_name is set in templates/codewiki/scraper_overview.html
+    $('#popup').load('/' + wiki_type + 's/new/choose_template/?scraper_short_name=' + scraper_short_name,
         function() {
             $('#popup .popupClose').click(function(){
                 $('#overlay').remove();
