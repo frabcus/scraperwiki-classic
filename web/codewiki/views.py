@@ -867,9 +867,13 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
         startupcode = "# blank"
         statuptemplate = request.GET.get('template', False)
         if statuptemplate:
-            templatescrapers = models.Code.objects.filter(published=True, language=language, short_name=statuptemplate)
-            if len(templatescrapers):
-                startupcode = templatescrapers[random.randint(0, len(templatescrapers)-1)].saved_code()
+            templatescraper = get_object_or_404(models.Code, published=True, language=language, short_name=statuptemplate)
+
+            mapping = {}
+            for k, v in request.GET.items():
+                mapping["{{%s}}" % k] = v
+
+            startupcode = populate_template(templatescraper.saved_code(), mapping)
 
         scraper.language = language
         code = startupcode
@@ -894,3 +898,13 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
     context['selected_tab'] = 'code'
 
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
+
+def populate_template(code, mapping):
+    """
+    Allow template scrapers/views to contain placeholders 
+    e.g. views can be passed the name of the scraper which they should use the data of
+    """
+    # Simple first implementation - replace each key with its value
+    for k,v in mapping:
+        code = code.replace(k, v)
+    return code
