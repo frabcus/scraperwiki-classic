@@ -67,7 +67,7 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 #running_annimation {display:none;}
     
 .ui-resizable-handle {z-index:80;}
-.ui-resizable-handle.ui-resizable-s {height:4px;cursor:ns-resize;border-top:solid 3px transparent;}
+.ui-resizable-handle.ui-resizable-s {height:4px;border-top:solid 3px transparent;}
 .ui-resizable-handle.ui-resizable-s:hover {border-top:solid 3px #ffce5d;}
 
 span.hiddenfields input  { display:none; width:4em; } 

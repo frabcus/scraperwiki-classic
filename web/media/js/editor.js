@@ -32,6 +32,12 @@ $(document).ready(function() {
     var receivechatqueue = [ ]; 
     var runID = ''; 
 
+    var parsers = Array();
+    var stylesheets = Array();
+    var indentUnits = Array();
+    var parserConfig = Array();
+    var parserName = Array();
+
     $.ajaxSetup({
         timeout: 10000,
     });
@@ -57,23 +63,34 @@ $(document).ready(function() {
 
     //setup code editor
     function setupCodeEditor(){
-        var parsers = Array();
-        parsers['python'] = '../contrib/python/js/parsepython.js';
+        parsers['python'] = ['../contrib/python/js/parsepython.js'];
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];
         parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
         parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
 
-        var stylesheets = Array();
         stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['php'] = [codemirror_url+'contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['ruby'] = [codemirror_url+'../ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['html'] = [codemirror_url+'/css/xmlcolors.css', codemirror_url+'/css/jscolors.css', codemirror_url+'/css/csscolors.css', '/media/css/codemirrorcolours.css']; 
 
-        var indentUnits = Array();
         indentUnits['python'] = 4;
         indentUnits['php'] = 4;
         indentUnits['ruby'] = 2;
         indentUnits['html'] = 4;
+
+        parserConfig['python'] = {'pythonVersion': 2, 'strictErrors': true}; 
+        parserConfig['php'] = {'strictErrors': true}; 
+        parserConfig['ruby'] = {'strictErrors': true}; 
+        parserConfig['html'] = {'strictErrors': true}; 
+
+        parserName['python'] = 'PythonParser';
+        parserName['php'] = 'PHPParser';
+        parserName['ruby'] = 'RubyParser';
+        parserName['html'] = 'HTMLMixedParser';
+
+        // allow php to access HTML style parser
+        parsers['php'] = parsers['html'].concat(parsers['php']);
+        stylesheets['php'] = stylesheets['html'].concat(stylesheets['php']); 
 
         codeeditor = CodeMirror.fromTextArea("id_code", {
             parserfile: parsers[scraperlanguage],
@@ -88,17 +105,16 @@ $(document).ready(function() {
             disableSpellcheck: true,
             autoMatchParens: true,
             width: '100%',
-            parserConfig: {'pythonVersion': 2, 'strictErrors': true},
+            parserConfig: parserConfig[scraperlanguage],
             onChange: function ()  { setPageIsDirty(true); },
 
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
-                    codemirroriframe = $("#id_code").next().children(":first"); 
-                    codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
+                    codemirroriframe = codeeditor.frame // $("#id_code").next().children(":first"); (the object is now a HTMLIFrameElement so you have to set the height as an attribute rather than a function)
+                    codemirroriframeheightdiff = codemirroriframe.height - $("#codeeditordiv").height(); 
                     setupKeygrabs();
                     resizeControls('up');
                     setPageIsDirty(false); // page not dirty at this point
-                    
                 } 
           });        
     }
@@ -666,6 +682,20 @@ $(document).ready(function() {
         else
             $('.editor_controls #preview').hide();
 
+        // available only for php cases
+        $('#togglelanguage').bind('click', function () 
+        { 
+            if (!$(this).hasClass('htmltoggled')) {
+                $(this).html('toggle PHP');
+                $(this).addClass('htmltoggled');
+                codeeditor.setParser(parserName["html"], parserConfig["php"]); 
+            } else {
+                $(this).html('toggle HTML');
+                $(this).removeClass('htmltoggled');
+                codeeditor.setParser(parserName["php"], parserConfig["php"]); 
+            }
+        }); 
+
         if (scraperlanguage == 'html')
             $('.editor_controls #run').hide();
         else
@@ -823,8 +853,8 @@ $(document).ready(function() {
                                  }
                              }); 
 
-           // bind the double-click 
-           $(".ui-resizable-s").bind("dblclick", resizeControls);
+           // bind the double-click (causes problems with the jquery interface as it doesn't notice the mouse exiting the frame
+           // $(".ui-resizable-s").bind("dblclick", resizeControls);
     }
 
     function shortNameIsSet(){
@@ -1040,7 +1070,7 @@ $(document).ready(function() {
    function resizeCodeEditor(){
       if (codemirroriframe){
           //resize the iFrame inside the editor wrapping div
-          codemirroriframe.height(($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px');
+          codemirroriframe.height = (($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px');
           //resize the output area so the console scrolls correclty
           iWindowHeight = $(window).height();
           iEditorHeight = $("#codeeditordiv").height();
