@@ -15,7 +15,6 @@ $(document).ready(function() {
     var scraperlanguage = $('#scraperlanguage').val(); 
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
-    var earliesteditor = ""; 
     var wiki_type = $('#id_wiki_type').val(); 
     var viewrunurl = $('#viewrunurl').val(); 
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
@@ -32,6 +31,14 @@ $(document).ready(function() {
     var receiverecordqueue = [ ]; 
     var receivechatqueue = [ ]; 
     var runID = ''; 
+
+    // information handling who else is watching and editing during this session
+    var earliesteditor = ""; 
+    var editinguser = ""; 
+    var bcansave = true; 
+    var loggedineditors = [ ]; // list of who else is here and their windows open
+    var nanonymouseditors = 0; 
+    var chatname = ""   // special in case of Anonymous users
 
     var parsers = Array();
     var stylesheets = Array();
@@ -360,6 +367,7 @@ $(document).ready(function() {
 
             var jdata = undefined; 
             try {
+                //writeToChat(cgiescape(sdata)); // for debug of what's coming out
                 jdata = $.evalJSON(sdata);
             } catch(err) {
                 alert("Malformed json: '''" + sdata + "'''"); 
@@ -505,11 +513,50 @@ $(document).ready(function() {
             saveScraper(); 
     }
 
+    function updateEditorStatus() { 
+        // Construct a message that reflects the situation for now.  
+        // Later on add in options to allow auto-reload and ability to find the names of those who are watching
+        var message = "";
+        var nwatchers = loggedineditors.length + nanonymouseditors; 
+        if (username)
+        {
+            if (editinguser == username)
+            {
+                if (nwatchers > 1)
+                    message += (nwatchers-1) + " watching"; 
+            }
+            else
+            {
+                message += editinguser + " is editing; "; 
+                message += "you"; 
+                if (nwatchers > 2)
+                    message += " (+ " + (nwatchers-2) + " others)"; 
+                message += " are watching"; 
+            }
+        }
+        else
+        {
+            if (editinguser)
+                message += editinguser + " is editing; "; 
+            var owatchers = nwatchers - 1 - (editinguser ? 1 : 0); 
+            if (owatchers > 0)
+                message += owatchers + " others watching"; 
+        }
+        $("#editorstatus").html(message); 
+    }
+
     function recordEditorStatus(data) { 
         earliesteditor = data.earliesteditor; 
+        editinguser = data.editinguser; 
+        bcansave = data.cansave; 
+        loggedineditors = data.loggedineditors; 
+        nanonymouseditors = data.nanonymouseditors; 
+
         writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
         if (data.message)
             writeToChat(cgiescape(data.message)); 
+
+        window.setTimeout(function() { updateEditorStatus(); }, 100);  
     }
 
     function startingrun(lrunID) {

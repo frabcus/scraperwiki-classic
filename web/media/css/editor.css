@@ -82,6 +82,9 @@ span.hiddenfields { margin-left:10px; }
 .editor_output div.tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
         border:solid 1px #9a9a9a; border-bottom:none;
         background:#efefef;}
+
+.editor_output div.tabs .right  {position:absolute; right:0.3em; top:0.35em;}
+
 .editor_output div.tabs ul li.selected {border-bottom:solid 1px #fff; position:relative;
         background:#fff;-webkit-box-shadow: 1px 1px 1px #aaa;box-shadow: 1px 1px 1px #aaa;-moz-box-shadow: 1px 1px 1px #aaa;}
 .editor_output div.tabs ul li a {text-decoration:none; color:#000;}
@@ -117,6 +120,7 @@ span.hiddenfields { margin-left:10px; }
 .editor_output tr:nth-child(even) {background:#fafafa;}
 .editor_output tr:hover td {background:#ffffd7;}
 .editor_output td {border-bottom:dotted 1px #ccc; padding:0.3em 0.5em; line-height:1em;}
+
 
 /* Overlays and help */
 
