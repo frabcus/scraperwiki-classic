@@ -358,7 +358,7 @@ class FireStarter :
         try:
             conftxt = urllib2.urlopen(confurl).read().replace('\r', '')
         except:
-            if confurl[:26] == 'http://dev.scraperwiki.com']:
+            if confurl[:26] == 'http://dev.scraperwiki.com':
                 pass  # known problem
             else:
                 print json.dumps({ 'message_type':'console', 'content': "Failed to open: %s" % confurl })

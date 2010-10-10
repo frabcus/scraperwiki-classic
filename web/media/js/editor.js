@@ -6,7 +6,7 @@ $(document).ready(function() {
     var codeeditor;
     var codemirroriframe; // the iframe that needs resizing
     var codemirroriframeheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
-    var previouscodeeditorheight = $("#codeeditordiv").height() * 2/3;    // saved for the double-clicking on the drag bar
+    var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
     var short_name = $('#scraper_short_name').val();
     var guid = $('#scraper_guid').val();
     var username = $('#username').val(); 
@@ -113,7 +113,7 @@ $(document).ready(function() {
                     codemirroriframe = codeeditor.frame // $("#id_code").next().children(":first"); (the object is now a HTMLIFrameElement so you have to set the height as an attribute rather than a function)
                     codemirroriframeheightdiff = codemirroriframe.height - $("#codeeditordiv").height(); 
                     setupKeygrabs();
-                    resizeControls('up');
+                    resizeControls('first');
                     setPageIsDirty(false); // page not dirty at this point
                 } 
           });        
@@ -1089,7 +1089,9 @@ $(document).ready(function() {
     //click bar to resize
     function resizeControls(sDirection) {
     
-        if (sDirection != 'up' && sDirection != 'down')
+        if (sDirection == 'first')
+            previouscodeeditorheight = $(window).height() * 3/5; 
+        else if (sDirection != 'up' && sDirection != 'down')
             sDirection = 'none';
 
         //work out which way to go
@@ -1099,7 +1101,7 @@ $(document).ready(function() {
             previouscodeeditorheight = $("#codeeditordiv").height();
             $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
         } 
-        else if (sDirection == 'none' || ((sDirection == 'up') && ($("#codeeditordiv").height() + 5 >= maxheight)))
+        else if ((sDirection == 'first') || (sDirection == 'none') || ((sDirection == 'up') && ($("#codeeditordiv").height() + 5 >= maxheight)))
             $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
     }
 
