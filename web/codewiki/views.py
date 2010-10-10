@@ -26,6 +26,7 @@ import difflib
 import re
 import csv
 import math
+import urllib
 
 import StringIO, csv, types
 import datetime
@@ -658,17 +659,27 @@ def commit_event(request, event_id):
     return render_to_response('codewiki/commit_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def choose_template(request, wiki_type):
-    form = forms.ChooseTemplateForm(wiki_type)
-    return render_to_response('codewiki/ajax/choose_template.html', {'wiki_type': wiki_type, 'form': form}, context_instance=RequestContext(request))
+    context = {}
+    context['wiki_type'] = wiki_type
+    context['form'] = forms.ChooseTemplateForm(wiki_type)
+    context['scraper_short_name'] = request.GET.get('scraper_short_name', '')
+    return render_to_response('codewiki/ajax/choose_template.html', context, context_instance=RequestContext(request))
 
 
 def chosen_template(request, wiki_type):
     template = request.GET.get('template', None)
     language = request.GET.get('language', None)
-    template_arg = ''
+    scraper_short_name = request.GET.get('scraper_short_name', None)
+    
+    parameters = {}
     if template:
-        template_arg = '?template=' + template
-    return HttpResponseRedirect(reverse('editor', args=(wiki_type, language)) + template_arg)
+        parameters['template'] = template
+    if scraper_short_name:
+        parameters['scraper'] = scraper_short_name
+
+    url = "%s?%s" % (reverse('editor', args=(wiki_type, language)), urllib.urlencode(parameters))
+
+    return HttpResponseRedirect(url)
     
 def delete_draft(request):
     if request.session.get('ScraperDraft', False):
@@ -826,6 +837,7 @@ def edittutorial(request, tutorial_scraper):
 
 
 #Editor form
+blankstartupcode = { 'Python':"# Blank Python", 'PHP':"<?\n# Blank PHP\n?>", 'Ruby':"# Blank Ruby" }
 def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
     #return url (where to exit the editor to)
     return_url = reverse('frontpage')
@@ -864,13 +876,23 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
         else:
             raise Exception, "Invalid wiki type"
 
-        startupcode = "# blank"
+        startupcode = blankstartupcode[language]
         statuptemplate = request.GET.get('template', False)
         if statuptemplate:
-            templatescrapers = models.Code.objects.filter(published=True, language=language, short_name=statuptemplate)
-            if len(templatescrapers):
-                startupcode = templatescrapers[random.randint(0, len(templatescrapers)-1)].saved_code()
-
+            try:
+                templatescraper = models.Code.objects.get(published=True, language=language, short_name=statuptemplate)  # wiki_type as well?
+                startupcode = templatescraper.saved_code()
+                
+                # this replaces the phrase: inputscraper = 'working-example' with inputscraper = 'replacement-name'
+                # which means we can have templates that are valid even without a successful substitution of this one 
+                # value (beyond which we do not have any current plans)
+                inputscrapername = request.GET.get('scraper', False)
+                if inputscrapername:
+                    startupcode = re.sub('''(?<=sourcescraper = ["']).*?(?=["'])''', inputscrapername, startupcode)
+            
+            except models.Code.DoesNotExist:
+                startupcode = startupcode.replace("Blank", "Missing template for")
+            
         scraper.language = language
         code = startupcode
 
@@ -894,3 +916,4 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
     context['selected_tab'] = 'code'
 
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
+

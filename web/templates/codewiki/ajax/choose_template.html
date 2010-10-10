@@ -18,6 +18,8 @@
     </tr>
     </table>
     </div>
-
+    {% if scraper_short_name %}
+    <input type="hidden" name="scraper_short_name" value="{{scraper_short_name}}"/>
+    {% endif %}
     <input type="Submit" value="Start new {{wiki_type}}"/>
 </form>

@@ -3,6 +3,7 @@
 require_once   ('scraperwiki/datastore.php') ;
 require_once   ('scraperwiki/metadata.php' ) ;
 require_once   ('scraperwiki/stacktrace.php' ) ;
+require_once   ('scraperwiki/apiwrapper.php' ) ;
 
 class scraperwiki
 {
@@ -91,6 +92,26 @@ class scraperwiki
       print "Saving " . $metadata_name . ": " . $value . "\n";
       return SW_MetadataClient::create()->save($metadata_name, $value);
    }
+
+
+    static function apiwrapper_getKeys($name) {
+        return SW_APIWrapperClass::getKeys($name); 
+    }
+    static function apiwrapper_getData($name, $limit= -1, $offset= 0) {
+        return SW_APIWrapperClass::generateData($name, $limit, $offset); 
+    }
+
+    static function apiwrapper_getDataByDate($name, $start_date, $end_date, $limit= -1, $offset= 0) {
+        return SW_APIWrapperClass::getDataByDate($name, $start_date, $end_date, $limit, $offset); 
+    }
+    
+    static function apiwrapper_getDataByLocation($name, $lat, $lng, $limit= -1, $offset= 0) { 
+        return SW_APIWrapperClass::getDataByLocation($name, $lat, $lng, $limit, $offset); 
+    }
+        
+    static function apiwrapper_search($name, $filterdict, $limit= -1, $offset= 0) {
+        return SW_APIWrapperClass::search($name, $filterdict, $limit, $offset);
+    }
 }
 
 ?>

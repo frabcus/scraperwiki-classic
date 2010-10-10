@@ -8,7 +8,7 @@ function exceptionHandler($exception, $script)
     for ($i = count($trace) - 2; $i >= 0; $i--)
     {
         $stackPoint = $trace[$i]; 
-        $linenumber = $stackPoint["line"]-1; 
+        $linenumber = $stackPoint["line"]; 
         $stackentry = array("linenumber" => $linenumber, "duplicates" => 1); 
         $stackentry["file"] = ($stackPoint["file"] == $script ? "<string>" : $stackPoint["file"]); 
 
@@ -25,7 +25,7 @@ function exceptionHandler($exception, $script)
         $stackdump[] = $stackentry; 
     }
     
-    $linenumber = $exception->getLine()-1; 
+    $linenumber = $exception->getLine(); 
     $finalentry = array("linenumber" => $linenumber, "duplicates" => 1); 
     $finalentry["file"] = ($exception->getFile() == $script ? "<string>" : $exception->getFile()); 
     if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
@@ -42,7 +42,7 @@ function errorParser($errno, $errstr, $errfile, $errline, $script)
         // this function could use debug_backtrace() to obtain the whole stack for this error
     $stackdump = array(); 
     $scriptlines = explode("\n", file_get_contents($script)); 
-    $linenumber = $errline-1; 
+    $linenumber = $errline; 
     $errorentry = array("linenumber" => $linenumber, "duplicates" => 1); 
     $errorentry["file"] = ($errfile == $script ? "<string>" : $errfile); 
     if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
