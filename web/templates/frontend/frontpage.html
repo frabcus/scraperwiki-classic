@@ -5,18 +5,18 @@
 {% block content  %}
     <div class="page_title">
         <h1>Welcome to ScraperWiki</h1>
-        {% if 0 %}  {# should be user #}
+        {% if user.code_set.all|length %}  
         <p>
-          You have a stake in {{user.code_set.all|length}} scrapers.
+          You have a stake in <a href="{% url dashboard %}">{{user.code_set.all|length}} scrapers</a>.
         </p>
         {% else %}
         <p>
             <ul>
-              <li><b>Web Scraper</b> 
-                A specialized computer program that copies structured information from webpages and puts it into a database
-              <small>[<a href="http://en.wikipedia.org/wiki/Web_scraping">wikipedia def</a>]</small></li>
-              <li><b>ScraperWiki</b>
-                A website where people can write and repair public web scrapers, and use the output databases</li>
+              <li><a href="http://en.wikipedia.org/wiki/Web_scraping" title="Wikipedia definition"><b>Web Scraper</b></a> - 
+                A specialized computer program that copies structured information from webpages into a database
+              </li>
+              <li><a href="{% url about %}" title="About ScraperWiki"><b>ScraperWiki</b></a> - 
+                A website where people can write and repair public web scrapers and invent uses for the data</li>
             </ul>
         </p>
         {% endif %}
