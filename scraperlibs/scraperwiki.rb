@@ -49,8 +49,8 @@ module ScraperWiki
         return res[1]
     end
 
-    def ScraperWiki.get_metadata(metadata_name, default = null)
-        return SW_MetadataClient.create().get(metadata_name)
+    def ScraperWiki.get_metadata(metadata_name, default = nil)
+        return SW_MetadataClient.create().get(metadata_name, default)
     end
 
     def ScraperWiki.save_metadata(metadata_name, value)
