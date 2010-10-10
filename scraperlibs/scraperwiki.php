@@ -98,7 +98,7 @@ class scraperwiki
         return SW_APIWrapperClass::getKeys($name); 
     }
     static function apiwrapper_getData($name, $limit= -1, $offset= 0) {
-        return SW_APIWrapperClass::generateData($name, $limit, $offset); 
+        return SW_APIWrapperClass::getData($name, $limit, $offset); 
     }
 
     static function apiwrapper_getDataByDate($name, $start_date, $end_date, $limit= -1, $offset= 0) {
