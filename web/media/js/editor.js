@@ -21,6 +21,7 @@ $(document).ready(function() {
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
     var conn; // Orbited connection
     var bConnected = false; 
+    var bSuppressDisconnectionMessages = false; 
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
@@ -127,7 +128,9 @@ $(document).ready(function() {
         buffer = " "; 
         sChatTabMessage = 'Connecting...'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
-        $(window).unload( function () { conn.close();  } );  // this close function needs some kind of pause to allow the disconnection message to go through
+
+            // this close function needs some kind of pause to allow the disconnection message to go through
+        $(window).unload( function () { bSuppressDisconnectionMessages = true; conn.close();  } );  
     }
     
     //Setup Keygrabs
@@ -327,9 +330,12 @@ $(document).ready(function() {
         bConnected = false; 
 
         // couldn't find a way to make a reconnect button work!
-        writeToChat('<b>You will need to reload the page to reconnect</b>');  
-        writeToConsole("Connection to runner lost, you will need to reload this page.", "exception"); 
-        writeToConsole("(You can still save your work)", "exception"); 
+        if (!bSuppressDisconnectionMessages)
+        {
+            writeToChat('<b>You will need to reload the page to reconnect</b>');  
+            writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
+            writeToConsole("(You can still save your work)", "exceptionnoesc"); 
+        }
         $('.editor_controls #run').val('Unconnected');
         $('.editor_controls #run').unbind('click.run');
         $('.editor_controls #run').unbind('click.abort');
