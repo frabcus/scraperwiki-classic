@@ -46,21 +46,21 @@ class SW_APIWrapperClass
     {
         global $apiurl; 
         $urlbase = "{$apiurl}getdata?name={$name}"; 
-        return generateData($urlbase, $limit, $offset); 
+        return SW_APIWrapperClass::generateData($urlbase, $limit, $offset); 
     }
 
     static function getDataByDate($name, $start_date, $end_date, $limit= -1, $offset= 0)
     {
         global $apiurl; 
         $urlbase = "{$apiurl}getdatabydate?name={$name}&start_date={$start_date}&end_date={$end_date}"; 
-        return generateData($urlbase, $limit, $offset); 
+        return SW_APIWrapperClass::generateData($urlbase, $limit, $offset); 
     }
     
     static function getDataByLocation($name, $lat, $lng, $limit= -1, $offset= 0)
     {
         global $apiurl; 
         $urlbase = "{$apiurl}getdatabylocation?name={$name}&lat={$lat}&lng={$lng}"; 
-        return generateData($urlbase, $limit, $offset); 
+        return SW_APIWrapperClass::generateData($urlbase, $limit, $offset); 
     }
         
     static function search($name, $filterdict, $limit= -1, $offset= 0)
@@ -74,7 +74,7 @@ class SW_APIWrapperClass
             $filter .= urlencode($key).",".urlencode($value); 
         }
         $urlbase = "{$apiurl}search?name={$name}&filter={$filter}"; 
-        return generateData($urlbase, $limit, $offset); 
+        return SW_APIWrapperClass::generateData($urlbase, $limit, $offset); 
     }
     
     
