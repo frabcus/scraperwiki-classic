@@ -879,14 +879,20 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
         startupcode = blankstartupcode[language]
         statuptemplate = request.GET.get('template', False)
         if statuptemplate:
-            templatescraper = get_object_or_404(models.Code, published=True, language=language, short_name=statuptemplate)
-
-            mapping = {}
-            for k, v in request.GET.items():
-                mapping["{{%s}}" % k] = v
-
-            startupcode = populate_template(templatescraper.saved_code(), mapping)
-
+            try:
+                templatescraper = models.Code.objects.get(published=True, language=language, short_name=statuptemplate)  # wiki_type as well?
+                startupcode = templatescraper.saved_code()
+                
+                # this replaces the phrase: inputscraper = 'working-example' with inputscraper = 'replacement-name'
+                # which means we can have templates that are valid even without a successful substitution of this one 
+                # value (beyond which we do not have any current plans)
+                inputscrapername = request.GET.get('scraper', False)
+                if inputscrapername:
+                    startupcode = re.sub('''(?<=sourcescraper = ["']).*?(?=["'])''', inputscrapername, startupcode)
+            
+            except models.Code.DoesNotExist:
+                startupcode = startupcode.replace("Blank", "Missing template for")
+            
         scraper.language = language
         code = startupcode
 
@@ -911,12 +917,3 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
 
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
 
-def populate_template(code, mapping):
-    """
-    Allow template scrapers/views to contain placeholders 
-    e.g. views can be passed the name of the scraper which they should use the data of
-    """
-    # Simple first implementation - replace each key with its value
-    for k,v in mapping.items():
-        code = code.replace(k, v)
-    return code
