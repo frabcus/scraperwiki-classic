@@ -3,7 +3,7 @@
 {% load markup %}
 {% block tab %}
 
-    <iframe class="view" width="100%" height="400px" src="{% url rpcexecute scraper.short_name %}">
+    <iframe class="view" width="100%" height="400px" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">
     </iframe>
 
     <div class="content full">
@@ -33,7 +33,7 @@
       <h3>Add this view to your site</h3>
       <code>
       {% filter force_escape %}
-        <iframe class="view" width="100%" height="400px" src="{% url rpcexecute scraper.short_name %}"></iframe>
+        <iframe width="100%" height="400px" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}"></iframe>
       {% endfilter %}
       </code>
     </div>

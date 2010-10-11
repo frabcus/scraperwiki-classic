@@ -31,9 +31,9 @@
             <a href="http://twitter.com/share" class="twitter-share-button" data-count="none">Tweet</a>
         </p>
         <a href="{%url frontpage %}" id="powered"><span class="hide">Powered by ScraperWiki</span></a>
-        <a id="close" href="{% url rpcexecute scraper.short_name %}">x</a>
+        <a id="close" href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">x</a>
     </div>
-    <iframe class="view autoHeight" width="100%" height="100%" src="{% url rpcexecute scraper.short_name %}">
+    <iframe class="view autoHeight" width="100%" height="100%" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">
         
     </iframe>
 </body>
