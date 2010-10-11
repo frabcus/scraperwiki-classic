@@ -3,7 +3,7 @@ $(document).ready(function() {
     //variables
     var pageIsDirty = true;
     var editor_id = 'id_code';
-    var codeeditor;
+    var codeeditor = undefined;
     var codemirroriframe; // the iframe that needs resizing
     var codemirroriframeheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
@@ -18,7 +18,7 @@ $(document).ready(function() {
     var wiki_type = $('#id_wiki_type').val(); 
     var viewrunurl = $('#viewrunurl').val(); 
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
-    var conn; // Orbited connection
+    var conn = undefined; // Orbited connection
     var bConnected = false; 
     var bSuppressDisconnectionMessages = false; 
     var buffer = "";
@@ -114,6 +114,7 @@ $(document).ready(function() {
             autoMatchParens: true,
             width: '100%',
             parserConfig: parserConfig[scraperlanguage],
+            enterMode: "flat", // default is "indent" (which I have found buggy),  also can be "keep"
             onChange: function ()  { setPageIsDirty(true); },
 
             // this is called once the codemirror window has finished initializing itself
@@ -166,9 +167,11 @@ $(document).ready(function() {
         $('#chat_line').bind('keypress', function(eventObject) {
             var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
             var target = eventObject.target.tagName.toLowerCase();
-            if (key === 13 && target === 'input') {
+            if (key === 13 && target === 'input') 
+            {
                 eventObject.preventDefault();
-                sendChat(); 
+                if (bConnected) 
+                    sendChat(); 
                 return false; 
             }
             return true; 

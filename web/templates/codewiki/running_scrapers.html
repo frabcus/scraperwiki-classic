@@ -1,6 +1,98 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js?{{settings.REVISION}}"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>		
+    <script src="http://{{ settings.ORBETED_DOMAIN }}:{{ settings.ORBETED_PORT }}/static/Orbited.js"></script>
+
+    {# Needed for orbited, dont remove #}
+    <script>document.domain = document.domain;</script>
+    <script>Orbited.settings.streaming = false</script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    var bConnected = false; 
+    var username = $('#username').val(); 
+    var userrealname = $('#userrealname').val(); 
+    var isstaff = $('#isstaff').val(); 
+
+    TCPSocket = Orbited.TCPSocket;
+    var conn = new TCPSocket(); 
+    conn.open('localhost', '9010'); 
+
+
+    conn.onopen = function(code)
+    {
+        if (conn.readyState == conn.READY_STATE_OPEN)
+            mreadystate = 'Ready'; 
+        else
+            mreadystate = 'readystate=' + conn.readyState;
+        alert('Connection opened: ' + mreadystate); 
+        bConnected = true; 
+        data = { "command":'connection_open', 
+                 "umlmonitoring":"yes",
+                 "username":username, 
+                 "userrealname":userrealname, 
+                 "isstaff":isstaff };
+        send(data);
+    }
+
+    conn.onclose = function(code)
+    {
+        if (code == Orbited.Statuses.ServerClosedConnection)
+            mcode = 'ServerClosedConnection'; 
+        else if (code == Orbited.Errors.ConnectionTimeout)
+            mcode = 'ConnectionTimeout'; 
+        else  
+            mcode = 'code=' + code;
+        alert(mcode); 
+    }
+
+    // should post up status in a little box
+    conn.onread = function(ldata) 
+    {
+        alert(ldata); 
+    }
+
+    //send a message to the server
+    function send(json_data) 
+    {
+        try {
+            conn.send($.toJSON(json_data));  
+        } catch(err) {
+            alert("Send error: " + err); 
+        }
+    }
+
+}); 
+</script>
+
+    <title>ScraperWiki UML status</title>
+</head>
+
+<body>
+<div id="divLogo" style="float:left">
+    <p>
+        <a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a>
+    </p>
+</div>
+
+<form>
+<fieldset>
+    {# Hidden inputs for passing to js #}
+    <input type="hidden" id="username" value="{{ user.username }}"/>
+    <input type="hidden" id="userrealname" value="{{ user.get_profile.name }}"/>
+    <input type="hidden" id="isstaff" value="{% if user.is_staff %}yes{% endif %}"/>
+</fieldset>
+</form>
 
 <h1>UML Status</h1>
-<table border="1">
+<table border="1" style="width:auto; margin:auto">
 <tr><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>
 {% for status in statusscrapers %}
   <tr>
@@ -40,7 +132,7 @@
 
 
 <h1>Recent runs</h1>
-<table border=1>
+<table border="1" style="width:auto; margin:auto">
   <tr>
     <th>Scraper</th>
     <th>Started</th>
@@ -57,8 +149,8 @@
 {% endfor %}
 </table>
 
-<h1><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h1>
 
+<h1><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h1>
 <table>
 <tr>
   <th><a href="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki.html">Django server (horsell)</a></th>
@@ -77,5 +169,5 @@
 </tr>
 </table>
 
-http://munin.scraperwiki.com/scraperwiki/uml001.scraperwiki-load-day.png
-
+</body>
+</html>
