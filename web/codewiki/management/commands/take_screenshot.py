@@ -9,6 +9,8 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--short_name', '-s', dest='short_name',
                         help='Short name of the scraper to run'),
+        make_option('--domain', '-d', dest='domain',
+                        help='Domain on which the views are running'),
         make_option('--verbose', dest='verbose', action="store_true",
                         help='Print lots'),
     )
@@ -22,11 +24,15 @@ class Command(BaseCommand):
             print "Taking screenshot of %s" % view.short_name
 
         for size in settings.SCREENSHOT_SIZES.keys():
-            self.screenshooter.add_shot(url = view.get_screenshot_url(), 
+            self.screenshooter.add_shot(url = view.get_screenshot_url(options['domain']), 
                                         filename = view.get_screenshot_filepath(size),
                                         size = settings.SCREENSHOT_SIZES[size])
 
     def handle(self, *args, **options):
+        if not options['domain']:
+            print "You must provide the domain on which the views are running"
+            return
+
         if options['short_name']:
             views = View.unfiltered.filter(short_name=options['short_name'], published=True)
         else:

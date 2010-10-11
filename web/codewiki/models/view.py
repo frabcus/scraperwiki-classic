@@ -34,8 +34,8 @@ class View (code.Code):
         self.wiki_type = 'view'
         super(View, self).save(*args, **kwargs)
 
-    def get_screenshot_url(self):
-        return 'http://%s%s' % (Site.objects.get_current().domain, reverse('rpcexecute', args=[self.short_name]))
+    def get_screenshot_url(self, domain):
+        return 'http://%s%s' % (domain, reverse('rpcexecute', args=[self.short_name]))
 
     def content_type(self):
         return ContentType.objects.get(app_label="codewiki", model="View")
