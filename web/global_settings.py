@@ -166,6 +166,7 @@ TEMPLATE_SETTINGS = [
  'MAX_DATA_POINTS',
  'MAX_MAP_POINTS',
  'REVISION',
+ 'VIEW_DOMAIN',
 ]
 
 #sparklines and graphs
