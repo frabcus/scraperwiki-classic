@@ -3,6 +3,7 @@
 from webkit2png import WebkitRenderer
 from PyQt4.QtGui import QApplication
 from PyQt4.QtCore import QTimer, Qt
+from PyQt4.QtWebKit import QWebSettings
 import sys, signal
 
 
@@ -18,6 +19,7 @@ class ScreenShooter(object):
             return self.renderers[(width, height)]
         except:
             renderer = WebkitRenderer(scaleRatio='crop', scaleTransform='smooth', scaleToWidth=width, scaleToHeight=height)
+            renderer.qWebSettings[QWebSettings.JavascriptEnabled] = True
             self.renderers[(width, height)] = renderer
             return renderer
         
