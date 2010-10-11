@@ -15,18 +15,7 @@ def dev():
     env.activate = env.path + '/bin/activate'
     env.user = 'scraperdeploy'
     env.virtualhost_path = "/"
-    env.deploy_version = "Dev"
-
-def alpha():
-    "On the scrpaerwiki server, accessible from http://alpha.scraperwiki.com"
-    env.hosts = ['212.84.75.28']
-    env.path = '/var/www/alpha.scraperwiki.com'
-    env.branch = 'stable'
-    env.web_path = 'file:///home/scraperwiki/scraperwiki'
-    env.activate = env.path + '/bin/activate'
-    env.user = 'scraperdeploy'
-    env.virtualhost_path = "/"
-    env.deploy_version = "Alpha"
+    env.deploy_version = "dev"
 
 def www():
     "The main www server (horsell)"
@@ -76,7 +65,7 @@ def update_revision():
     virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
 
 def install_cron():
-    virtualenv('crontab crontab')
+    virtualenv('crontab crontab.%s' % env.deploy_version)
 
 def deploy():
     """
