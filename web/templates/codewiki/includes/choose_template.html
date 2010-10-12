@@ -6,14 +6,14 @@
             <a href="{% url chosen_template wiki_type %}?language=python{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}" class="screenshot">
                 <br/>                
                 <img src="{{MEDIA_URL}}/images/icons/{{language_name|lower}}.png" alt="{{language_name}}"/>                
-                <br/>                
+                <br/>
                 Blank {{language_name}} {{wiki_type}}
             </a>                
         </li>
     {% endfor %}
     {% if templates %}
         {% for template in templates %}
-            <li>                                                                             
+            <li>
                 <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}&language={{template.language|lower}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}" class="screenshot">
                     {% screen_shot template 'small' %}
                 </a>

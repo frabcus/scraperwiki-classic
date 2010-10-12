@@ -14,13 +14,13 @@ $(function(){
 
 function newCodeObject(wiki_type){
 
-    var oPopup = $('<div id="popup"></div>');
+    var oPopup = $('<div id="template_popup"></div>');
     oPopup.modal();
     url = '/' + wiki_type + 's/new/choose_template/?ajax=1';
     if (scraper_short_name != ''){
         url += '&scraper_short_name=' + scraper_short_name
     }
-    $('#popup').load(url, 
+    $('#template_popup').load(url, 
             function(){
                 $('#simplemodal-container').css('height', 'auto');    
                 $(window).resize();

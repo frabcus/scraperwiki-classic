@@ -479,8 +479,7 @@ h4 a.edit {font-size:0.8em;}
 
 
 /* template picker */
-#popup h1 {font-size:1.2em;}
-#popup li {position:relative; left:67px;text-align:center;}
-#popup li a {font-size:0.9em;display:block;text-decoration:none;}
-
-#popup img.lang_icon {position:relative; top:4px;}
+#template_popup h1 {font-size:1.2em;}
+#template_popup li {position:relative; left:67px;text-align:center; font-size:0.9em;}
+#template_popup li a {font-size:0.9em;display:block;text-decoration:none;}
+#template_popup img.lang_icon {position:relative; top:4px;}
