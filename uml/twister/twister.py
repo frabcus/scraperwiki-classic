@@ -158,6 +158,12 @@ class RunnerProtocol(protocol.Protocol):
                     self.kill_run()
                 
                 # someone who didn't start it going hits kill
+                # this really needs to be done through the EditorsOnOneScraper structure 
+                # once we have established a firmer foundation for running things yoked.  
+                # anonymous users who don't want to play this game could preferably derive a 
+                # draft scraper from this as a template to that they are fully independent.
+                # Unlikely use case of editing and running without cooperation, and then 
+                # being able to commit without serious code clashing issues.  
                 elif self.isstaff:
                     for client in self.factory.clients:
                         if client.guid == self.guid and client.running:
@@ -286,8 +292,10 @@ class StringProducer(object):
 
 
 class EditorsOnOneScraper:
-    def __init__(self, guid):
+    def __init__(self, guid, scrapername, scraperlanguage):
         self.guid = guid
+        self.scrapername = scrapername
+        self.scraperlanguage = scraperlanguage
         self.sessionstarts = datetime.datetime.now()  # replaces earliesteditor
         self.anonymouseditors = [ ]
         self.usereditors = [ ]  # list of lists of clients
@@ -394,11 +402,28 @@ class RunnerFactory(protocol.ServerFactory):
             if client.guid == guid and client != nomessageclient and client.isstaff:
                 client.write(format_message(message, message_type='chat'))
         
-    # should make a more detailed monitoring timeline message that we then send to everyone
+        
+    # throw in the kitchen sink to get the features.  optimize for changes later
     def notifyMonitoringClients(self, message):
+        assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
+        umlstatusdata = {'message_type':"umlstatus" }; 
+        umlstatusdata["umlmonitoringusers"] = [ client.chatname  for client in self.umlmonitoringclients ]
+        umlstatusdata["draftscraperusers"] = [ client.chatname  for client in self.draftscraperclients ]
+        scraperentries = { }
+        for guid, eoos in self.guidclientmap.items():
+            scrapereditors = [ ]
+            for userclients in eoos.usereditors:
+                scrapereditors.append(userclients[0].chatname)
+            for client in eoos.anonymouseditors:
+                scrapereditors.append(client.chatname)
+            
+            scraperentry = { "scrapername": eoos.scrapername, "scraperlanguage":eoos.scraperlanguage, "editors":scrapereditors }
+            scraperentries[guid] = scraperentry
+        umlstatusdata["scraperentries"] = scraperentries
+        
         for client in self.umlmonitoringclients:
-            client.write(format_message(message, message_type='chat'))
-    
+            client.write(json.dumps(umlstatusdata)) 
+
 
     def clientConnectionMade(self, client):
         client.clientnumber = self.clientcount
@@ -419,7 +444,7 @@ class RunnerFactory(protocol.ServerFactory):
         
         else:
             if client.guid not in self.guidclientmap:
-                self.guidclientmap[client.guid] = EditorsOnOneScraper(client.guid)
+                self.guidclientmap[client.guid] = EditorsOnOneScraper(client.guid, client.scrapername, client.scraperlanguage)
             self.guidclientmap[client.guid].AddClient(client)
 
         # check that all clients are accounted for

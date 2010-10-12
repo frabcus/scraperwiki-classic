@@ -23,8 +23,9 @@ $(document).ready(function() {
 
     TCPSocket = Orbited.TCPSocket;
     var conn = new TCPSocket(); 
+    var buffer = ""; 
+    var receiverecordqueue = [ ]; 
     conn.open('localhost', '9010'); 
-
 
     conn.onopen = function(code)
     {
@@ -32,14 +33,14 @@ $(document).ready(function() {
             mreadystate = 'Ready'; 
         else
             mreadystate = 'readystate=' + conn.readyState;
-        alert('Connection opened: ' + mreadystate); 
+        $("#monitoroutput #connectionstatus").html('Connection opened: ' + mreadystate); 
         bConnected = true; 
-        data = { "command":'connection_open', 
-                 "umlmonitoring":"yes",
-                 "username":username, 
-                 "userrealname":userrealname, 
-                 "isstaff":isstaff };
-        send(data);
+        jdata = { "command":'connection_open', 
+                  "umlmonitoring":"yes",
+                  "username":username, 
+                  "userrealname":userrealname, 
+                  "isstaff":isstaff };
+        send(jdata);
     }
 
     conn.onclose = function(code)
@@ -50,20 +51,86 @@ $(document).ready(function() {
             mcode = 'ConnectionTimeout'; 
         else  
             mcode = 'code=' + code;
-        alert(mcode); 
+        $("#monitoroutput #connectionstatus").html('Connection closed: ' + mcode); 
     }
 
     // should post up status in a little box
     conn.onread = function(ldata) 
     {
-        alert(ldata); 
+        $("#monitoroutput #jdatareceived").html(ldata); 
+        buffer = buffer+ldata;
+        while (true) 
+        {
+            var linefeed = buffer.indexOf("\n"); 
+            if (linefeed == -1)
+                break; 
+            sdata = buffer.substring(0, linefeed); 
+            buffer = buffer.substring(linefeed+1); 
+            sdata = sdata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
+            if (sdata.length == 0)
+                continue; 
+            var jdata = undefined; 
+            try {
+                jdata = $.evalJSON(sdata);
+            } catch(err) {
+                alert("Malformed json: '''" + sdata + "'''"); 
+            }
+
+            if (jdata != undefined) 
+            {
+                receiverecordqueue.push(jdata); 
+                if (receiverecordqueue.length == 1)
+                    window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  
+            }
+        }
+    }
+
+    function receiveRecordFromQueue() 
+    {
+        var jdata = undefined; 
+        if (receiverecordqueue.length > 0) 
+        {
+            jdata = receiverecordqueue.shift(); 
+            receiveRecord(jdata);
+            if (receiverecordqueue.length >= 1)
+                window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
+        }
+    }
+
+    //read data back from twisted
+    function receiveRecord(jdata) 
+    {
+        if (jdata.message)
+            $("#monitoroutput #message").html(jdata.message); 
+        if (jdata.message_type == "umlstatus")
+        {
+            s = "UMLMonitoring: ";
+            for (i = 0; i < jdata.umlmonitoringusers.length; i++)
+                s += (i == 0 ? "" : ", ") + jdata.umlmonitoringusers[i]; 
+            $("#monitoroutput #monitoringusers").html(s); 
+
+            s = "Drafts: ";
+            for (i = 0; i < jdata.draftscraperusers.length; i++)
+                s += (i == 0 ? "" : ", ") + jdata.draftscraperusers[i]; 
+            $("#monitoroutput #draftscraperusers").html(s); 
+
+            $("#monitoroutput #scrapereditors").html("");
+            for (guid in jdata.scraperentries)
+            {
+                scraperentry = jdata.scraperentries[guid]; 
+                s = scraperentry["scrapername"] + " ("+scraperentry["scraperlanguage"]+") "; 
+                for (i = 0; i < scraperentry.editors.length; i++)
+                    s += (i == 0 ? "" : ", ") + scraperentry.editors[i]; 
+                $("#monitoroutput #scrapereditors").append("<li id=\""+guid+"\">"+s+"</li>"); 
+            }
+        }
     }
 
     //send a message to the server
-    function send(json_data) 
+    function send(jdata) 
     {
         try {
-            conn.send($.toJSON(json_data));  
+            conn.send($.toJSON(jdata));  
         } catch(err) {
             alert("Send error: " + err); 
         }
@@ -77,9 +144,15 @@ $(document).ready(function() {
 
 <body>
 <div id="divLogo" style="float:left">
-    <p>
-        <a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a>
-    </p>
+    <p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
+</div>
+<div id="monitoroutput" style="float:right; width:20%">
+    <div id="connectionstatus" style="border: thin black solid; overflow:auto">...</div>
+    <div id="jdatareceived" style="border: thin black solid; overflow:auto">...</div>
+    <div id="monitoringusers" style="border: thin black solid; overflow:auto">...</div>
+    <div id="draftscraperusers" style="border: thin black solid; overflow:auto">...</div>
+    <ul id="scrapereditors" style="border: thin black solid; overflow:auto">...</ul>
+    <div id="message" style="border: thin black solid; overflow:auto">...</div>
 </div>
 
 <form>
