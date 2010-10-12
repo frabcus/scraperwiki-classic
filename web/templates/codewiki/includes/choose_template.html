@@ -1,27 +1,28 @@
 {% load screen_shot %}
 <h1>Choose a template</h1>
-<ul class="views">
+<ul class="views small">
     {% if templates %}
+        <li>
+            <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}" class="screenshot"><br/>Blank {{wiki_type}}</a>
+            <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}">{{template.title}}</a>                
+        </li>
         {% for template in templates %}
             <li>
-                <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}" class="screenshot">{% screen_shot template %}</a>
+                <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}" class="screenshot">{% screen_shot template 'small' %}</a>
                 <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}">{{template.title}}</a>                
             </li>
         {% endfor %}
         {% for template in templates %}
             <li>
-                <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}" class="screenshot">{% screen_shot template %}</a>
+                <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}" class="screenshot">{% screen_shot template  'small'%}</a>
                 <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}">{{template.title}}</a>                
             </li>
         {% endfor %}
         {% for template in templates %}
             <li>
-                <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}" class="screenshot">{% screen_shot template %}</a>
+                <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}" class="screenshot">{% screen_shot template  'small' %}</a>
                 <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}">{{template.title}}</a>                
             </li>
         {% endfor %}
-        
-    {% else %}
-        <p>No templates are available</p>
     {% endif %}
 </ul>
