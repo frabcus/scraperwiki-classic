@@ -16,4 +16,10 @@ function newCodeObject(wiki_type){
 
     var oPopup = $('<div id="popup"></div>');
     oPopup.modal();
-    $('#popup').load('/' + wiki_type + 's/new/choose_template/?ajax=1&scraper_short_name=' + scraper_short_name')
+    url = '/' + wiki_type + 's/new/choose_template/?ajax=1';
+    if (scraper_short_name != ''){
+        url += '&scraper_short_name=' + scraper_short_name
+    }
+    $('#popup').load(url);
+    
+}
