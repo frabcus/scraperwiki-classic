@@ -39,7 +39,7 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 .editor_controls input:active {color:#2680c6;}
 
 .editor_controls .save, #meta_form .save {background-image:url(../images/icons/disk.png)}
-.editor_controls #run {background-image:url(../images/icons/cog.png)}
+.editor_controls #run {background-image:url(../images/icons/control_play.png)}
 .editor_controls #run.running {color:red;}
 .editor_controls #reload {background-image:url(../images/icons/arrow_refresh.png)}
 .editor_controls #diff {background-image:url(../images/icons/diff.png)}

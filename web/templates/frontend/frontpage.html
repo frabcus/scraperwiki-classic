@@ -4,21 +4,22 @@
 {% block title %}Welcome{% endblock %}
 {% block content  %}
     <div class="page_title">
-        <h1>Welcome to ScraperWiki</h1>
+        <h1 class="welcome">Welcome to ScraperWiki</h1>
         {% if user.code_set.all|length %}  
-        <p>
-          You have a stake in <a href="{% url dashboard %}">{{user.code_set.all|length}} scrapers</a>.
-        </p>
+            <p>
+              You have a stake in <a href="{% url dashboard %}">{{user.code_set.all|length}} scrapers</a>.
+            </p>
         {% else %}
-        <p>
-            <ul>
-              <li><a href="http://en.wikipedia.org/wiki/Web_scraping" title="Wikipedia definition"><b>Web Scraper</b></a> - 
-                A specialized computer program that copies structured information from webpages into a database
-              </li>
-              <li><a href="{% url about %}" title="About ScraperWiki"><b>ScraperWiki</b></a> - 
-                A website where people can write and repair public web scrapers and invent uses for the data</li>
-            </ul>
-        </p>
+        <div class="definition">
+            <p>
+                    <a href="http://en.wikipedia.org/wiki/Web_scraping" title="Wikipedia definition"><strong>Scraper</strong></a>: 
+                  a computer program that copies structured information from webpages into a database
+            </p>                            
+            <p>              
+                  <a href="{% url about %}" title="About ScraperWiki"><strong>ScraperWiki</strong></a>: 
+                a website where people can write and repair public web scrapers and invent uses for the data
+            </p>
+        </div>
         {% endif %}
     </div>
 
@@ -29,7 +30,6 @@
     		  {% include 'frontend/includes/code_object_line.html' %}
     		{% endfor %}
     	</ul>
-
         <p>
             <a href="{% url scraper_list_wiki_type 'scraper' %}" title="Browse all scrapers" class="more_link">Browse all scrapers</a>
         </p>

@@ -12,6 +12,7 @@ function setupCodeViewer(iLineCount, scraperlanguage) {
     }; 
 
     $(document).ready(function(){
+
         var parsers = Array();
         parsers['python'] = '../contrib/python/js/parsepython.js';
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];

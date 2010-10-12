@@ -648,22 +648,26 @@ def twisterstatus(request):
             # or could use the field: closedsince  = models.DateTimeField(blank=True, null=True)
     return HttpResponse("Howdy ppp ")
 
-
 def htmlview(request, scraper_short_name):
     view = get_object_or_404(models.View.objects, short_name=scraper_short_name)
     return HttpResponse(view.saved_code())
-
 
 def commit_event(request, event_id):
     event = get_object_or_404(models.CodeCommitEvent, id=event_id)
     return render_to_response('codewiki/commit_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def choose_template(request, wiki_type):
-    context = {}
-    context['wiki_type'] = wiki_type
-    context['form'] = forms.ChooseTemplateForm(wiki_type)
-    context['scraper_short_name'] = request.GET.get('scraper_short_name', '')
-    return render_to_response('codewiki/ajax/choose_template.html', context, context_instance=RequestContext(request))
+
+    form = forms.ChooseTemplateForm(wiki_type)
+
+    #get templates
+    templates = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).order_by('language')
+
+    #choose template (ajax vs normal)
+    template = 'codewiki/choose_template.html'
+    if request.GET.get('ajax', False):
+        template = 'codewiki/includes/choose_template.html'        
+    return render_to_response(template, {'wiki_type': wiki_type, 'templates': templates, 'languages': models.code.LANGUAGES}, context_instance=RequestContext(request))
 
 
 def chosen_template(request, wiki_type):
