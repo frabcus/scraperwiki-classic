@@ -52,21 +52,11 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 .content_footer.right {text-align:right;}
 .content_footer p, .content_footer ul {margin-top:0;}
 
-/* Data scroller */
-div.scroller {background:#fafafa;}
 
-div.scroller {height:200px; position:relative; -moz-box-shadow:inset 1px 1px 1px 1px #a7a6a6;
-        -moz-border-radius: 8px; -webkit-border-radius: 8px; moz-border-radius: 8px; 
-}
-div.scroller a.scroll_left, div.scroller a.scroll_right {display:block; height:100%; width:30px;
-    position:absolute;outline: none;}
-div.scroller a.scroll_left {left:0; top:0; background:url(../images/scroll_left.png) no-repeat 10px 50%;}
-div.scroller a.scroll_right {right:0; top:0;background:url(../images/scroll_right.png) no-repeat 0 50%;}
-
-div.scroller_wrapper {margin:0 40px; padding-top:15px;overflow-x:hidden; height:100%;}
-div.scroller div.scroll_items {height:170px;position:relative; width:10000px;}
-div.scroller div.scroll_item {background:#fff;width:400px; float:left; height:150px; color:#000; 
-    padding:10px;margin-right:20px;border:solid 1px #ccc;-moz-box-shadow:1px 1px 1px 1px #ccc;-webkit-box-shadow:1px 1px 1px #ccc; position:relative;}
+/* intro */
+h1.welcome {background:url(../images/languages.png) no-repeat top right;padding:9px 0;}
+.definition {font-family:georgia; font-size:1.1em; font-style:italic; background:#fafafa; padding:0.3em 1em;
+    border:dotted 1px #ccc; margin:1em 0;}
 
 /* Sldieshow */
 .slide_show {background:#fff;}
