@@ -841,10 +841,12 @@ def edittutorial(request, tutorial_scraper):
 
 
 #Editor form
-blankstartupcode = { 'Python':"# Blank Python", 'PHP':"<?\n# Blank PHP\n?>", 'Ruby':"# Blank Ruby" }
-def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
+blankstartupcode = { 'python':"# Blank Python", 'php':"<?\n# Blank PHP\n?>", 'ruby':"# Blank Ruby" }
+def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     #return url (where to exit the editor to)
     return_url = reverse('frontpage')
+
+    language = language.lower()
 
     # identify the scraper (including if there was a draft one backed up)
     has_draft = False
@@ -869,8 +871,8 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='Python'):
 
     # Create a new scraper
     else:
-        if language not in ['Python', 'PHP', 'Ruby']:
-            language = 'Python'
+        if language not in ['python', 'php', 'ruby']:
+            language = 'python'
 
         scraper = None
         if wiki_type == 'scraper':
