@@ -13,6 +13,7 @@
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jeditable.js"></script>		
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.textbox-hinter.js"></script>
+		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/flexigrid.js"></script>			
 		<script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror/js/codemirror.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>		
@@ -83,7 +84,7 @@
 				        <a href="{% url dashboard %}" title="Manage your scrapers" class="dashboard">Your dashboard</a>
 				    </li>
 				    <li>
-				        <a href="#" title="Create a new screen scraper" class="editor_scraper">New scraper</a>
+				        <a href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a>
 				    </li>
 				    <li>
 				        <a href="{% url get_involved %}" title="Create a new screen scraper">Get involved!</a>
@@ -215,9 +216,6 @@
 			             </ul>
 		           </dd>
 		       </dl>
-                <a id="a4IP" href="http://www.4ip.org.uk">
-			        <img src="{{ MEDIA_URL }}images/4ip.png" title="Supported by 4iP Logo" alt="4iP" height="85" width="100"/>
-			    </a>
 				<div id="divCopyright">
 				        &copy; ScraperWiki Ltd
 				</div>

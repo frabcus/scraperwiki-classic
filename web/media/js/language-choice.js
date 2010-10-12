@@ -13,21 +13,17 @@ $(function(){
 });
 
 function newCodeObject(wiki_type){
-    var oPopup = $('<div id="popup" class="popup_item">');
-    var oOverlay = $('<div id="overlay"></div></div>');
 
-    oOverlay.show();
-    $('body').append(oOverlay);
-    $('body').append(oPopup);        
+    var oPopup = $('<div id="template_popup"></div>');
+    oPopup.modal();
+    url = '/' + wiki_type + 's/new/choose_template/?ajax=1';
+    if (scraper_short_name != ''){
+        url += '&scraper_short_name=' + scraper_short_name
+    }
+    $('#template_popup').load(url, 
+            function(){
+                $('#simplemodal-container').css('height', 'auto');    
+                $(window).resize();
+        });
 
-    // scraper_short_name is set in templates/codewiki/scraper_overview.html  ** BOLLOCKS IT IS
-    $('#popup').load('/' + wiki_type + 's/new/choose_template/?scraper_short_name=' + scraper_short_name,
-        function() {
-            $('#popup .popupClose').click(function(){
-                $('#overlay').remove();
-                $('#popup').remove();        
-                return false;
-            });
-        }
-    );
 }

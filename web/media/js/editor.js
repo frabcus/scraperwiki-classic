@@ -247,7 +247,7 @@ $(document).ready(function() {
         $('.popupReady').click(
             function() {
                 hidePopup();
-                return false;                
+                return false;
             }
         );
 
@@ -261,7 +261,8 @@ $(document).ready(function() {
     function showPopup(sId) {
 
         $('.popup_error').hide();
-
+        $(sId).modal();
+        /*
         //show or hide the relivant block
         $('#popups div.popup_item').each(function(i) {
             if (this.id == sId) {
@@ -287,6 +288,7 @@ $(document).ready(function() {
                 this.style.display = "none";
             }
         });
+        */
     }
 
     // show the bottom grey sliding up message

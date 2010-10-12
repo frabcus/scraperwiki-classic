@@ -50,9 +50,9 @@ class ViewAdministrationForm (forms.ModelForm):
     class Meta:
         model = View
         fields = ('title', 'description', 'published', 'featured')
-        
+
 class ChooseTemplateForm (forms.Form):
-    language = forms.ChoiceField(required=True, label="Language", choices = code.LANGUAGES, widget=forms.RadioSelect, initial='Python')
+    language = forms.ChoiceField(required=True, label="Language", choices = code.LANGUAGES, initial='Python')
     template = forms.ChoiceField(required=True, label="Template", choices = [], widget=forms.RadioSelect, initial='')    
 
     def __init__(self, wiki_type, *args, **kwargs):
@@ -62,7 +62,7 @@ class ChooseTemplateForm (forms.Form):
         templates = [('', 'Blank ' + wiki_type)]
         template_objects = Code.objects.filter(deleted=False, published=True, isstartup=True, wiki_type=wiki_type)
         for template_object in template_objects:
-            templates.append((template_object.short_name, template_object.title))
+            templates.append((template_object.short_name, template_object.title, template_object.language))
 
         #set the templates
         self.fields['template'].choices = templates

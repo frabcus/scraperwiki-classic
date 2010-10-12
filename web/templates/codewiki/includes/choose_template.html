@@ -1,0 +1,27 @@
+{% load screen_shot %}
+<h1>Choose a template</h1>
+<ul class="views small">
+    {% for language_name, language_other in languages %}
+        <li>
+            <a href="{% url chosen_template wiki_type %}?language=python{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}" class="screenshot">
+                <br/>                
+                <img src="{{MEDIA_URL}}/images/icons/{{language_name|lower}}.png" alt="{{language_name}}"/>                
+                <br/>
+                Blank {{language_name}} {{wiki_type}}
+            </a>                
+        </li>
+    {% endfor %}
+    {% if templates %}
+        {% for template in templates %}
+            <li>
+                <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}&language={{template.language|lower}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}" class="screenshot">
+                    {% screen_shot template 'small' %}
+                </a>
+                <a href="{% url chosen_template wiki_type %}?template={{template.short_name}}&language={{template.language|lower}}{% if scraper_short_name %}&scraper_short_name={{scraper_short_name}}{% endif %}">
+                    <img  class="lang_icon" src="{{MEDIA_URL}}/images/icons/{{template.language|lower}}.png" alt="{{template.language}}"/>                    
+                    {{template.title}}
+                </a>     
+            </li>
+        {% endfor %}
+    {% endif %}
+</ul>
