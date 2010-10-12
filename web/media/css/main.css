@@ -405,9 +405,9 @@ div.mercurialcommitlog ul { padding:0; margin:0; }
 #simplemodal-overlay {background-color:#9f9f9f; cursor:wait;}
 
 /* Container */
-#simplemodal-container {height:320px; width:600px; background-color:#fff; border:1px solid #9f9f9f; padding:12px;}
+#simplemodal-container {height:320px; width:500px; background-color:#fff; border:1px solid #9f9f9f; padding:12px;}
 #simplemodal-container code {background:#141414; border-left:3px solid #65B43D; color:#bbb; display:block; margin-bottom:12px; padding:4px 6px 6px;}
-#simplemodal-container a {color:#ddd;}
+
 #simplemodal-container a.modalCloseImg {background:url(../images/x.png) no-repeat; width:25px; height:29px; display:inline; z-index:3200; position:absolute; top:-15px; right:-16px; cursor:pointer;}
 #simplemodal-container #basic-modal-content {padding:8px;}
 
@@ -475,3 +475,7 @@ h4 a.edit {font-size:0.8em;}
 .task_complete {min-height:150px;}
 .task_complete img.dial, .task_complete img.photo {float:left; margin-right:20px;}
 .task_complete p, .task_complete form {padding-left:220px;}
+
+
+/* template picker */
+#popup li {position:relative; left:18px;}

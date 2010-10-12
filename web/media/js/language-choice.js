@@ -20,6 +20,10 @@ function newCodeObject(wiki_type){
     if (scraper_short_name != ''){
         url += '&scraper_short_name=' + scraper_short_name
     }
-    $('#popup').load(url);
-    
+    $('#popup').load(url, 
+            function(){
+                $('#simplemodal-container').css('height', 'auto');    
+                $(window).resize();
+        });
+
 }
