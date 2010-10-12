@@ -1,6 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js?{{settings.REVISION}}"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>		
+    <script src="http://{{ settings.ORBETED_DOMAIN }}:{{ settings.ORBETED_PORT }}/static/Orbited.js"></script>
+
+    {# Needed for orbited, dont remove #}
+    <script>document.domain = document.domain;</script>
+    <script>Orbited.settings.streaming = false</script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+    var bConnected = false; 
+    var username = $('#username').val(); 
+    var userrealname = $('#userrealname').val(); 
+    var isstaff = $('#isstaff').val(); 
+
+    TCPSocket = Orbited.TCPSocket;
+    var conn = new TCPSocket(); 
+    var buffer = ""; 
+    var receiverecordqueue = [ ]; 
+    conn.open('localhost', '9010'); 
+
+    conn.onopen = function(code)
+    {
+        if (conn.readyState == conn.READY_STATE_OPEN)
+            mreadystate = 'Ready'; 
+        else
+            mreadystate = 'readystate=' + conn.readyState;
+        $("#monitoroutput #connectionstatus").html('Connection opened: ' + mreadystate); 
+        bConnected = true; 
+        jdata = { "command":'connection_open', 
+                  "umlmonitoring":"yes",
+                  "username":username, 
+                  "userrealname":userrealname, 
+                  "isstaff":isstaff };
+        send(jdata);
+    }
+
+    conn.onclose = function(code)
+    {
+        if (code == Orbited.Statuses.ServerClosedConnection)
+            mcode = 'ServerClosedConnection'; 
+        else if (code == Orbited.Errors.ConnectionTimeout)
+            mcode = 'ConnectionTimeout'; 
+        else  
+            mcode = 'code=' + code;
+        $("#monitoroutput #connectionstatus").html('Connection closed: ' + mcode); 
+    }
+
+    // should post up status in a little box
+    conn.onread = function(ldata) 
+    {
+        $("#monitoroutput #jdatareceived").html(ldata); 
+        buffer = buffer+ldata;
+        while (true) 
+        {
+            var linefeed = buffer.indexOf("\n"); 
+            if (linefeed == -1)
+                break; 
+            sdata = buffer.substring(0, linefeed); 
+            buffer = buffer.substring(linefeed+1); 
+            sdata = sdata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
+            if (sdata.length == 0)
+                continue; 
+            var jdata = undefined; 
+            try {
+                jdata = $.evalJSON(sdata);
+            } catch(err) {
+                alert("Malformed json: '''" + sdata + "'''"); 
+            }
+
+            if (jdata != undefined) 
+            {
+                receiverecordqueue.push(jdata); 
+                if (receiverecordqueue.length == 1)
+                    window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  
+            }
+        }
+    }
+
+    function receiveRecordFromQueue() 
+    {
+        var jdata = undefined; 
+        if (receiverecordqueue.length > 0) 
+        {
+            jdata = receiverecordqueue.shift(); 
+            receiveRecord(jdata);
+            if (receiverecordqueue.length >= 1)
+                window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
+        }
+    }
+
+    //read data back from twisted
+    function receiveRecord(jdata) 
+    {
+        if (jdata.message)
+            $("#monitoroutput #message").html(jdata.message); 
+        if (jdata.message_type == "umlstatus")
+        {
+            s = "UMLMonitoring: ";
+            for (i = 0; i < jdata.umlmonitoringusers.length; i++)
+                s += (i == 0 ? "" : ", ") + jdata.umlmonitoringusers[i]; 
+            $("#monitoroutput #monitoringusers").html(s); 
+
+            s = "Drafts: ";
+            for (i = 0; i < jdata.draftscraperusers.length; i++)
+                s += (i == 0 ? "" : ", ") + jdata.draftscraperusers[i]; 
+            $("#monitoroutput #draftscraperusers").html(s); 
+
+            $("#monitoroutput #scrapereditors").html("");
+            for (guid in jdata.scraperentries)
+            {
+                scraperentry = jdata.scraperentries[guid]; 
+                s = scraperentry["scrapername"] + " ("+scraperentry["scraperlanguage"]+") "; 
+                for (i = 0; i < scraperentry.editors.length; i++)
+                    s += (i == 0 ? "" : ", ") + scraperentry.editors[i]; 
+                $("#monitoroutput #scrapereditors").append("<li id=\""+guid+"\">"+s+"</li>"); 
+            }
+        }
+    }
+
+    //send a message to the server
+    function send(jdata) 
+    {
+        try {
+            conn.send($.toJSON(jdata));  
+        } catch(err) {
+            alert("Send error: " + err); 
+        }
+    }
+
+}); 
+</script>
+
+    <title>ScraperWiki UML status</title>
+</head>
+
+<body>
+<div id="divLogo" style="float:left">
+    <p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
+</div>
+<div id="monitoroutput" style="float:right; width:20%">
+    <div id="connectionstatus" style="border: thin black solid; overflow:auto">...</div>
+    <div id="jdatareceived" style="border: thin black solid; overflow:auto">...</div>
+    <div id="monitoringusers" style="border: thin black solid; overflow:auto">...</div>
+    <div id="draftscraperusers" style="border: thin black solid; overflow:auto">...</div>
+    <ul id="scrapereditors" style="border: thin black solid; overflow:auto">...</ul>
+    <div id="message" style="border: thin black solid; overflow:auto">...</div>
+</div>
+
+<form>
+<fieldset>
+    {# Hidden inputs for passing to js #}
+    <input type="hidden" id="username" value="{{ user.username }}"/>
+    <input type="hidden" id="userrealname" value="{{ user.get_profile.name }}"/>
+    <input type="hidden" id="isstaff" value="{% if user.is_staff %}yes{% endif %}"/>
+</fieldset>
+</form>
 
 <h1>UML Status</h1>
-<table border="1">
+<table border="1" style="width:auto; margin:auto">
 <tr><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>
 {% for status in statusscrapers %}
   <tr>
@@ -40,7 +205,7 @@
 
 
 <h1>Recent runs</h1>
-<table border=1>
+<table border="1" style="width:auto; margin:auto">
   <tr>
     <th>Scraper</th>
     <th>Started</th>
@@ -56,3 +221,26 @@
   </tr>
 {% endfor %}
 </table>
+
+
+<h1><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h1>
+<table>
+<tr>
+  <th><a href="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki.html">Django server (horsell)</a></th>
+  <th><a href="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki.html">Datastore server (burbage)</a></th>
+</tr>
+
+<tr>
+  <td><img src="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki-cpu-day.png"></td>
+  <td><img src="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki-mysql_queries-day.png"></td>
+</tr>
+
+<tr><th colspan="2"><a href="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki.html">UML server (rush)</a></th></tr>
+<tr>
+  <td><img src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-cpu-day.png"></td>
+  <td><img src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-load-day.png"></td>
+</tr>
+</table>
+
+</body>
+</html>
