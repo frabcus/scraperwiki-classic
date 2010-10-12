@@ -662,13 +662,12 @@ def choose_template(request, wiki_type):
 
     #get templates
     templates = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).order_by('language')
-    print templates
 
     #choose template (ajax vs normal)
     template = 'codewiki/choose_template.html'
     if request.GET.get('ajax', False):
         template = 'codewiki/includes/choose_template.html'        
-    return render_to_response(template, {'wiki_type': wiki_type, 'templates': templates}, context_instance=RequestContext(request))
+    return render_to_response(template, {'wiki_type': wiki_type, 'templates': templates, 'languages': models.code.LANGUAGES}, context_instance=RequestContext(request))
 
 
 def chosen_template(request, wiki_type):
