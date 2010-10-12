@@ -258,7 +258,7 @@ class RunnerProtocol(protocol.Protocol):
             self.chatname = "Anonymous%d" % self.factory.anonymouscount
             self.factory.anonymouscount += 1
             
-        self.factory.clientConnectionRegistered(self)
+        self.factory.clientConnectionRegistered(self)  # this will cause a notifyEditorClients to be called for everyone on this scraper
         self.factory.notifytwisterstatus()
         
 
@@ -309,7 +309,7 @@ class EditorsOnOneScraper:
                 self.usereditors.append([client])
         else:
             self.anonymouseditors.append(client)
-        self.notifyEditorClients()
+        self.notifyEditorClients("%s enters" % client.chatname)
         
     def RemoveClient(self, client):
         assert client.guid == self.guid
@@ -330,19 +330,23 @@ class EditorsOnOneScraper:
             assert False
         else:
             self.anonymouseditors.remove(client)
-        self.notifyEditorClients()
+        self.notifyEditorClients("%s leaves" % client.chatname)
         return self.usereditors or self.anonymouseditors
         
         
-    def notifyEditorClients(self):
-        editorstatusdata = {'message_type' : "editorstatus", 'earliesteditor' : self.sessionstarts.isoformat(), "editinguser":self.editinguser, "cansave":False}; 
-        editorstatusdata["message"] = "%d anonymous editors, %d logged editors with %d windows" % (len(self.anonymouseditors), len(self.usereditors), sum(map(len, self.usereditors)))
+    def notifyEditorClients(self, message):
+        editorstatusdata = {'message_type':"editorstatus", 'earliesteditor':self.sessionstarts.isoformat(), "editinguser":self.editinguser, "cansave":False}; 
+        editorstatusdata["loggedineditors"] = [ userclients[0].username  for userclients in self.usereditors ]
+        editorstatusdata["nanonymouseditors"] = len(self.anonymouseditors)
+        editorstatusdata["message"] = message
         for client in self.anonymouseditors:
+            editorstatusdata["chatname"] = client.chatname
             client.write(json.dumps(editorstatusdata)); 
         for editorlist in self.usereditors:
             editorstatusdata["cansave"] = (editorlist[0].username == self.editinguser)
             for client in editorlist:
-                client.write(json.dumps(editorstatusdata)); 
+                editorstatusdata["chatname"] = client.chatname
+                client.write(json.dumps(editorstatusdata)) 
         
 
 class RunnerFactory(protocol.ServerFactory):
@@ -392,8 +396,12 @@ class RunnerFactory(protocol.ServerFactory):
         # will call next function when some actual data gets sent
 
     def clientConnectionRegistered(self, client):
-        if not client.guid:
+        if not client.guid:   # draft scraper type
+            editorstatusdata = {'message_type':"editorstatus", "cansave":True, "loggedineditors":[], "nanonymouseditors":1, 
+                                "editinguser":client.username, "chatname":client.chatname, "message":"Draft scraper connection"} 
+            client.write(json.dumps(editorstatusdata)); 
             return
+        
         if client.guid not in self.guidclientmap:
             self.guidclientmap[client.guid] = EditorsOnOneScraper(client.guid)
         self.guidclientmap[client.guid].AddClient(client)
@@ -406,6 +414,7 @@ class RunnerFactory(protocol.ServerFactory):
             if not self.guidclientmap[client.guid].RemoveClient(client):
                 del self.guidclientmap[client.guid]
 
+    # this might be deprecated when we can poll twister directly for the state of activity in some kind of ajax or iframe call
     def notifytwisterstatus(self):
         clientlist = [ ]
         for client in self.clients:

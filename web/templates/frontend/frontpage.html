@@ -5,9 +5,21 @@
 {% block content  %}
     <div class="page_title">
         <h1>Welcome to ScraperWiki</h1>
+        {% if user.code_set.all|length %}  
         <p>
-            All the tools you need for screen scraping{% if user.is_staff %}, data mining &amp; visualisation{% endif %}.
+          You have a stake in <a href="{% url dashboard %}">{{user.code_set.all|length}} scrapers</a>.
         </p>
+        {% else %}
+        <p>
+            <ul>
+              <li><a href="http://en.wikipedia.org/wiki/Web_scraping" title="Wikipedia definition"><b>Web Scraper</b></a> - 
+                A specialized computer program that copies structured information from webpages into a database
+              </li>
+              <li><a href="{% url about %}" title="About ScraperWiki"><b>ScraperWiki</b></a> - 
+                A website where people can write and repair public web scrapers and invent uses for the data</li>
+            </ul>
+        </p>
+        {% endif %}
     </div>
 
     <div class="content {% if user.is_staff %}half left{% else %}full{% endif %}">

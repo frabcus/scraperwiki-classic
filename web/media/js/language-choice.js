@@ -1,3 +1,5 @@
+var scraper_short_name = '';  // reset in templates/codewiki/scraper_overview.html
+
 $(function(){
     $('a.editor_view').click(function(){
         newCodeObject('view')
@@ -14,15 +16,4 @@ function newCodeObject(wiki_type){
 
     var oPopup = $('<div id="popup"></div>');
     oPopup.modal();
-
-    $('#popup').load('/' + wiki_type + 's/new/choose_template/?ajax=1',
-        function() {
-            $('#popup .popupClose').click(function(){
-                $('#overlay').remove();
-                $('#popup').remove();        
-                return false;
-            });
-        }
-    );
-
-}
+    $('#popup').load('/' + wiki_type + 's/new/choose_template/?ajax=1&scraper_short_name=' + scraper_short_name')

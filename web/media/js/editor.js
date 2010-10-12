@@ -6,7 +6,7 @@ $(document).ready(function() {
     var codeeditor;
     var codemirroriframe; // the iframe that needs resizing
     var codemirroriframeheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
-    var previouscodeeditorheight = $("#codeeditordiv").height() * 2/3;    // saved for the double-clicking on the drag bar
+    var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
     var short_name = $('#scraper_short_name').val();
     var guid = $('#scraper_guid').val();
     var username = $('#username').val(); 
@@ -15,12 +15,12 @@ $(document).ready(function() {
     var scraperlanguage = $('#scraperlanguage').val(); 
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
-    var earliesteditor = ""; 
     var wiki_type = $('#id_wiki_type').val(); 
     var viewrunurl = $('#viewrunurl').val(); 
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
     var conn; // Orbited connection
     var bConnected = false; 
+    var bSuppressDisconnectionMessages = false; 
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
@@ -31,6 +31,20 @@ $(document).ready(function() {
     var receiverecordqueue = [ ]; 
     var receivechatqueue = [ ]; 
     var runID = ''; 
+
+    // information handling who else is watching and editing during this session
+    var earliesteditor = ""; 
+    var editinguser = ""; 
+    var bcansave = true; 
+    var loggedineditors = [ ]; // list of who else is here and their windows open
+    var nanonymouseditors = 0; 
+    var chatname = ""   // special in case of Anonymous users
+
+    var parsers = Array();
+    var stylesheets = Array();
+    var indentUnits = Array();
+    var parserConfig = Array();
+    var parserName = Array();
 
     $.ajaxSetup({
         timeout: 10000,
@@ -57,23 +71,34 @@ $(document).ready(function() {
 
     //setup code editor
     function setupCodeEditor(){
-        var parsers = Array();
-        parsers['python'] = '../contrib/python/js/parsepython.js';
-        parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];
+        parsers['python'] = ['../contrib/python/js/parsepython.js'];
+        parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
         parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
         parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
 
-        var stylesheets = Array();
         stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['php'] = [codemirror_url+'contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['ruby'] = [codemirror_url+'../ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['html'] = [codemirror_url+'/css/xmlcolors.css', codemirror_url+'/css/jscolors.css', codemirror_url+'/css/csscolors.css', '/media/css/codemirrorcolours.css']; 
 
-        var indentUnits = Array();
         indentUnits['python'] = 4;
         indentUnits['php'] = 4;
         indentUnits['ruby'] = 2;
         indentUnits['html'] = 4;
+
+        parserConfig['python'] = {'pythonVersion': 2, 'strictErrors': true}; 
+        parserConfig['php'] = {'strictErrors': true}; 
+        parserConfig['ruby'] = {'strictErrors': true}; 
+        parserConfig['html'] = {'strictErrors': true}; 
+
+        parserName['python'] = 'PythonParser';
+        parserName['php'] = 'PHPHTMLMixedParser'; // 'PHPParser';
+        parserName['ruby'] = 'RubyParser';
+        parserName['html'] = 'HTMLMixedParser';
+
+        // allow php to access HTML style parser
+        parsers['php'] = parsers['html'].concat(parsers['php']);
+        stylesheets['php'] = stylesheets['html'].concat(stylesheets['php']); 
 
         codeeditor = CodeMirror.fromTextArea("id_code", {
             parserfile: parsers[scraperlanguage],
@@ -88,17 +113,16 @@ $(document).ready(function() {
             disableSpellcheck: true,
             autoMatchParens: true,
             width: '100%',
-            parserConfig: {'pythonVersion': 2, 'strictErrors': true},
+            parserConfig: parserConfig[scraperlanguage],
             onChange: function ()  { setPageIsDirty(true); },
 
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
-                    codemirroriframe = $("#id_code").next().children(":first"); 
-                    codemirroriframeheightdiff = codemirroriframe.height() - $("#codeeditordiv").height(); 
+                    codemirroriframe = codeeditor.frame // $("#id_code").next().children(":first"); (the object is now a HTMLIFrameElement so you have to set the height as an attribute rather than a function)
+                    codemirroriframeheightdiff = codemirroriframe.height - $("#codeeditordiv").height(); 
                     setupKeygrabs();
-                    resizeControls('up');
+                    resizeControls('first');
                     setPageIsDirty(false); // page not dirty at this point
-                    
                 } 
           });        
     }
@@ -111,7 +135,9 @@ $(document).ready(function() {
         buffer = " "; 
         sChatTabMessage = 'Connecting...'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
-        $(window).unload( function () { conn.close();  } );  // this close function needs some kind of pause to allow the disconnection message to go through
+
+            // this close function needs some kind of pause to allow the disconnection message to go through
+        $(window).unload( function () { bSuppressDisconnectionMessages = true; conn.close();  } );  
     }
     
     //Setup Keygrabs
@@ -313,9 +339,12 @@ $(document).ready(function() {
         bConnected = false; 
 
         // couldn't find a way to make a reconnect button work!
-        writeToChat('<b>You will need to reload the page to reconnect</b>');  
-        writeToConsole("Connection to runner lost, you will need to reload this page.", "exception"); 
-        writeToConsole("(You can still save your work)", "exception"); 
+        if (!bSuppressDisconnectionMessages)
+        {
+            writeToChat('<b>You will need to reload the page to reconnect</b>');  
+            writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
+            writeToConsole("(You can still save your work)", "exceptionnoesc"); 
+        }
         $('.editor_controls #run').val('Unconnected');
         $('.editor_controls #run').unbind('click.run');
         $('.editor_controls #run').unbind('click.abort');
@@ -340,6 +369,7 @@ $(document).ready(function() {
 
             var jdata = undefined; 
             try {
+                //writeToChat(cgiescape(sdata)); // for debug of what's coming out
                 jdata = $.evalJSON(sdata);
             } catch(err) {
                 alert("Malformed json: '''" + sdata + "'''"); 
@@ -485,11 +515,50 @@ $(document).ready(function() {
             saveScraper(); 
     }
 
+    function updateEditorStatus() { 
+        // Construct a message that reflects the situation for now.  
+        // Later on add in options to allow auto-reload and ability to find the names of those who are watching
+        var message = "";
+        var nwatchers = loggedineditors.length + nanonymouseditors; 
+        if (username)
+        {
+            if (editinguser == username)
+            {
+                if (nwatchers > 1)
+                    message += (nwatchers-1) + " watching"; 
+            }
+            else
+            {
+                message += editinguser + " is editing; "; 
+                message += "you"; 
+                if (nwatchers > 2)
+                    message += " (+ " + (nwatchers-2) + " others)"; 
+                message += " are watching"; 
+            }
+        }
+        else
+        {
+            if (editinguser)
+                message += editinguser + " is editing; "; 
+            var owatchers = nwatchers - 1 - (editinguser ? 1 : 0); 
+            if (owatchers > 0)
+                message += owatchers + " others watching"; 
+        }
+        $("#editorstatus").html(message); 
+    }
+
     function recordEditorStatus(data) { 
         earliesteditor = data.earliesteditor; 
+        editinguser = data.editinguser; 
+        bcansave = data.cansave; 
+        loggedineditors = data.loggedineditors; 
+        nanonymouseditors = data.nanonymouseditors; 
+
         writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
         if (data.message)
             writeToChat(cgiescape(data.message)); 
+
+        window.setTimeout(function() { updateEditorStatus(); }, 100);  
     }
 
     function startingrun(lrunID) {
@@ -668,6 +737,20 @@ $(document).ready(function() {
         else
             $('.editor_controls #preview').hide();
 
+        // available only for php cases
+        $('#togglelanguage').bind('click', function () 
+        { 
+            if (!$(this).hasClass('htmltoggled')) {
+                $(this).html('toggle PHP');
+                $(this).addClass('htmltoggled');
+                codeeditor.setParser(parserName["html"], parserConfig["php"]); 
+            } else {
+                $(this).html('toggle HTML');
+                $(this).removeClass('htmltoggled');
+                codeeditor.setParser(parserName["php"], parserConfig["php"]); 
+            }
+        }); 
+
         if (scraperlanguage == 'html')
             $('.editor_controls #run').hide();
         else
@@ -825,8 +908,8 @@ $(document).ready(function() {
                                  }
                              }); 
 
-           // bind the double-click 
-           $(".ui-resizable-s").bind("dblclick", resizeControls);
+           // bind the double-click (causes problems with the jquery interface as it doesn't notice the mouse exiting the frame
+           // $(".ui-resizable-s").bind("dblclick", resizeControls);
     }
 
     function shortNameIsSet(){
@@ -1042,7 +1125,7 @@ $(document).ready(function() {
    function resizeCodeEditor(){
       if (codemirroriframe){
           //resize the iFrame inside the editor wrapping div
-          codemirroriframe.height(($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px');
+          codemirroriframe.height = (($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px');
           //resize the output area so the console scrolls correclty
           iWindowHeight = $(window).height();
           iEditorHeight = $("#codeeditordiv").height();
@@ -1061,7 +1144,9 @@ $(document).ready(function() {
     //click bar to resize
     function resizeControls(sDirection) {
     
-        if (sDirection != 'up' && sDirection != 'down')
+        if (sDirection == 'first')
+            previouscodeeditorheight = $(window).height() * 3/5; 
+        else if (sDirection != 'up' && sDirection != 'down')
             sDirection = 'none';
 
         //work out which way to go
@@ -1071,7 +1156,7 @@ $(document).ready(function() {
             previouscodeeditorheight = $("#codeeditordiv").height();
             $("#codeeditordiv").animate({ height: maxheight }, 100, "swing", resizeCodeEditor); 
         } 
-        else if (sDirection == 'none' || ((sDirection == 'up') && ($("#codeeditordiv").height() + 5 >= maxheight)))
+        else if ((sDirection == 'first') || (sDirection == 'none') || ((sDirection == 'up') && ($("#codeeditordiv").height() + 5 >= maxheight)))
             $("#codeeditordiv").animate({ height: Math.min(previouscodeeditorheight, maxheight - 5) }, 100, "swing", resizeCodeEditor); 
     }
 

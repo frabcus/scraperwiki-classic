@@ -75,4 +75,5 @@ GDOCS_UPLOAD_PASSWORD = ''
 GDOCS_UPLOAD_FOLDER_URI = '' #you will probably want to set the permissions on this folder to be public
 GDOCS_UPLOAD_MAX = 1048576 #1MB upload max set by google
 
-SCREENSHOT_DIR = ''
+SCREENSHOT_DIR = '/tmp/'
+VIEW_DOMAIN = 'localhost'

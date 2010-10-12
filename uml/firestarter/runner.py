@@ -67,9 +67,6 @@ def execute (code, options) :
     code = string.replace (code, '\r', '')
     
     # would prefer this block wrapping was done in the controller to make eval easy to use.
-    if options.language == "php" :
-        code = "<?php\n%s\n?>\n" % code
-
     res = fs.execute (code, True)
     if res is None :
         sys.stdout.write (json.dumps({ 'message_type' : 'fail', 'content' : fs.error() }) + '\r\n')

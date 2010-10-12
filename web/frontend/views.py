@@ -255,7 +255,7 @@ def get_involved(request):
 
         scraper_count = Scraper.objects.count()
         view_count = View.objects.count()
-
+        
         #no description
         scraper_no_description_count = Scraper.objects.filter(description='').count()
         scraper_description_percent = 100 - int(scraper_no_description_count / float(scraper_count) * 100)

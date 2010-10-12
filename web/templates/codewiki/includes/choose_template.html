@@ -1,13 +1,10 @@
 <form method="get" action="{% url chosen_template wiki_type %}">
-    
+    {% if scraper_short_name %}
+        <input type="hidden" name="scraper_short_name" value="{{scraper_short_name}}"/>
+    {% endif %}
+
     <h3>Choose a language</h3>
     {{form.language}}
     
-    <h3>Choose a template</h3>
-
-    {% for template in templates %}
-        
-    {% endfor %}    
-
     <input type="Submit" value="Start new {{wiki_type}}"/>
 </form>
