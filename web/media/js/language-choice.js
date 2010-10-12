@@ -11,15 +11,11 @@ $(function(){
 });
 
 function newCodeObject(wiki_type){
-    var oPopup = $('<div id="popup" class="popup_item">');
-    var oOverlay = $('<div id="overlay"></div></div>');
 
-    oOverlay.show();
-    $('body').append(oOverlay);
-    $('body').append(oPopup);        
+    var oPopup = $('<div id="popup"></div>');
+    oPopup.modal();
 
-    
-    $('#popup').load('/' + wiki_type + 's/new/choose_template/',
+    $('#popup').load('/' + wiki_type + 's/new/choose_template/?ajax=1',
         function() {
             $('#popup .popupClose').click(function(){
                 $('#overlay').remove();
@@ -28,4 +24,5 @@ function newCodeObject(wiki_type){
             });
         }
     );
+
 }

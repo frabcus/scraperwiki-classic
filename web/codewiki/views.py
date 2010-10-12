@@ -652,14 +652,28 @@ def htmlview(request, scraper_short_name):
     view = get_object_or_404(models.View.objects, short_name=scraper_short_name)
     return HttpResponse(view.saved_code())
 
-
 def commit_event(request, event_id):
     event = get_object_or_404(models.CodeCommitEvent, id=event_id)
     return render_to_response('codewiki/commit_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def choose_template(request, wiki_type):
     form = forms.ChooseTemplateForm(wiki_type)
-    return render_to_response('codewiki/ajax/choose_template.html', {'wiki_type': wiki_type, 'form': form}, context_instance=RequestContext(request))
+
+    #get templates
+    templates = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).order_by('language')
+    
+    #sort into languages
+    partitioned = []
+    language = ''
+    for template in templates:
+        if template.language language:
+            language = template.language
+
+    #choose template (ajax vs normal)
+    template = 'codewiki/choose_template.html'
+    if request.GET.get('ajax', False):
+        template = 'codewiki/ajax/choose_template.html'        
+    return render_to_response(template, {'wiki_type': wiki_type, 'form': form, 'templates': templates}, context_instance=RequestContext(request))
 
 
 def chosen_template(request, wiki_type):
