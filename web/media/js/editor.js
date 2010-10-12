@@ -56,7 +56,6 @@ $(document).ready(function() {
     setupMenu();
     setupOrbited();
     setupTabs();
-    setupPopups();
     setupToolbar();
     setupResizeEvents();
 
@@ -156,10 +155,10 @@ $(document).ready(function() {
     //Setup Menu
     function setupMenu(){
         $('#menu_settings').click(function(){
-            showPopup('popup_settings'); 
+            showPopup('#popup_settings'); 
         });
         $('#menu_tutorials').click(function(){
-            showPopup('popup_tutorials'); 
+            showPopup('#popup_tutorials'); 
         });
         $('form#editor').submit(function() { 
             saveScraper(); 
@@ -232,68 +231,9 @@ $(document).ready(function() {
         showTab('console'); 
     }
     
-    //Setup Popups
-    function setupPopups(){
-        popupStatus = 0
-        //assign escape key to close popups
-        $(document).keypress(function(e) {
-            if (e.keyCode == 27 && popupStatus == 1) {
-                hidePopup();
-            }
-        });
-
-        //setup evnts
-        $('.popupClose').click(
-            function() {
-                hidePopup();
-                return false;
-            }
-        );
-        $('.popupReady').click(
-            function() {
-                hidePopup();
-                return false;
-            }
-        );
-
-        $('#overlay').click(
-            function() {
-                hidePopup();
-            }
-        );   
-    }
-
     function showPopup(sId) {
-
         $('.popup_error').hide();
         $(sId).modal();
-        /*
-        //show or hide the relivant block
-        $('#popups div.popup_item').each(function(i) {
-            if (this.id == sId) {
-                
-                popupStatus = 1;
-                //show
-                $(this).css({
-                    // display:'block',
-                    height: $(window).height() - 100,
-                    "margin-top": 50,
-                    position: 'absolute'
-                });
-                $(this).fadeIn("fast")
-
-                //add background
-                $('#popups #overlay').css({
-                    width: $(window).width(),
-                    height: $(window).height()
-                });
-                $('#popups #overlay').fadeIn("fast")
-
-            } else {
-                this.style.display = "none";
-            }
-        });
-        */
     }
 
     // show the bottom grey sliding up message
@@ -624,7 +564,7 @@ $(document).ready(function() {
             dataType: "html",
             success: function(diff) {
                 $('#diff pre').text(diff);
-                showPopup('diff');
+                showPopup('#diff');
             }
         });
     }
@@ -641,7 +581,7 @@ $(document).ready(function() {
     function reloadScraper(){
         if (shortNameIsSet() == false){
             $('#diff pre').text("Cannot reload draft scraper");
-            showPopup('diff');
+            showPopup('#diff');
             return; 
         }
 
@@ -786,11 +726,11 @@ $(document).ready(function() {
         ifrm = document.getElementById('previewiframe');// $('#popup_preview iframe#previewiframe'); 
         activepreviewiframe = (ifrm.contentWindow) ? ifrm.contentWindow : (ifrm.contentDocument.document) ? ifrm.contentDocument.document : ifrm.contentDocument;
         activepreviewiframe.document.open(); 
-
         sendCode(); // do the running the standard way
 
-        showPopup('popup_preview'); 
+        showPopup('#popup_preview'); 
     }
+
     //Save
     function saveScraper(){
         var bSuccess = false;
@@ -876,7 +816,7 @@ $(document).ready(function() {
     //Show random text popup
     function showTextPopup(sMessage, sMessageType){
         $('#popup_text .output pre').html(sMessage);
-        showPopup('popup_text');
+        showPopup('#popup_text');
     }
     
     function setupResizeEvents(){
@@ -963,7 +903,7 @@ $(document).ready(function() {
 
     function writeRunOutput(sMessage) {
         writeToConsole(sMessage, 'console'); 
-        if (activepreviewiframe != undefined) 
+        if ((activepreviewiframe != undefined) && (activepreviewiframe.document != undefined))
             activepreviewiframe.document.write(sMessage); 
     }
 

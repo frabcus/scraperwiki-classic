@@ -171,7 +171,6 @@
             <div id="diff" class="popup_item">
                 <div class="popup_header">
                     <h2>Diff with the published version</h2>
-                    <a class="popupClose">close</a>
                 </div>
                 <div class="output">
                     <pre></pre>
@@ -179,22 +178,17 @@
             </div>
 
             <div id="popup_text" class="popup_item">
-                <div class="popup_header">
-                    <a class="popupClose">close</a>
-                </div>
                 <div class="output"><pre></pre></div>
             </div>
 
             <div id="popup_exception" class="popup_item">
                 <div class="popup_header">
                     <h3>Traceback</h3>            
-                    <a class="popupClose">close</a>
                 </div>
                 <div class="output"><pre></pre></div>
             </div>
 
             <div id="popup_tutorials" class="popup_item">
-                <a class="popupClose">close</a>
                 <h3>Quick help <small><a href="{% url help %}" target="_blank">Full documentation (new window)</a></small></h3>
                 <div class="output">
                     {% include quick_help_template %}           
@@ -202,7 +196,6 @@
              </div>
 
             <div id="popup_preview" class="popup_item">
-                <a class="popupClose">close</a>
                 <h3>View preview <small id="previewmessage"></small></h3>
                 <div class="iframeoutput">
                 <iframe id="previewiframe" width="100%" height="100px" src="">
