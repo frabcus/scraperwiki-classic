@@ -964,7 +964,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
                 startupcode = startupcode.replace("Blank", "Missing template for")
             
         # replaces the phrase: sourcescraper = 'working-example' with sourcescraper = 'replacement-name'
-        inputscrapername = request.GET.get('scraper', False)
+        inputscrapername = request.GET.get('sourcescraper', False)
         if inputscrapername:
             startupcode = re.sub('''(?<=sourcescraper = ["']).*?(?=["'])''', inputscrapername, startupcode)
         
@@ -989,6 +989,5 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     context['user'] = request.user
     context['quick_help_template'] = 'codewiki/includes/quick_help_%s.html' % scraper.language.lower()
     context['selected_tab'] = 'code'
-    print     context['quick_help_template']
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
 

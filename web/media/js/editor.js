@@ -137,9 +137,6 @@ $(document).ready(function() {
         buffer = " "; 
         sChatTabMessage = 'Connecting...'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
-
-            // this close function needs some kind of pause to allow the disconnection message to go through
-        $(window).unload( function () { bSuppressDisconnectionMessages = true; conn.close();  } );  
     }
     
     //Setup Keygrabs
@@ -283,12 +280,15 @@ $(document).ready(function() {
         bConnected = false; 
 
         // couldn't find a way to make a reconnect button work!
+            // the bSuppressDisconnectionMessages technique doesn't seem to work (unload is not invoked), so delay message  in the hope that window will close first
         if (!bSuppressDisconnectionMessages)
-        {
-            writeToChat('<b>You will need to reload the page to reconnect</b>');  
-            writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
-            writeToConsole("(You can still save your work)", "exceptionnoesc"); 
-        }
+            setTimeout(function() {
+                writeToChat('<b>You will need to reload the page to reconnect</b>');  
+                writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
+                writeToConsole("(You can still save your work)", "exceptionnoesc"); }, 
+                25); 
+
+
         $('.editor_controls #run').val('Unconnected');
         $('.editor_controls #run').unbind('click.run');
         $('.editor_controls #run').unbind('click.abort');
@@ -665,15 +665,19 @@ $(document).ready(function() {
         //close editor link
         $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(
             function (){
-                var bReturn = true;
-                if (pageIsDirty){
-                    if(confirm("You have unsaved changes, close the editor anyway?") == false){
-                        bReturn = false
-                    }
-                }
-                return bReturn;
+                if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
+                    return false; 
+                bSuppressDisconnectionMessages = true; 
+                if (conn)  conn.close();  
+                return true;
             }
         );
+
+        $(window).unload( function () { 
+            bSuppressDisconnectionMessages = true; 
+            writeToConsole('window unload'); 
+            if (conn)  conn.close();  
+        });  
 
 
         if (wiki_type == 'view')
