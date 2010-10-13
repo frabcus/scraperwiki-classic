@@ -33,8 +33,8 @@
         <a href="{%url frontpage %}" id="powered"><span class="hide">Powered by ScraperWiki</span></a>
         <a id="close" href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">x</a>
     </div>
-    <iframe class="view autoHeight" width="100%" height="100%" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">
-        
+
+    <iframe class="view autoHeight" width="100%" height="500" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">
     </iframe>
 </body>
 </html>

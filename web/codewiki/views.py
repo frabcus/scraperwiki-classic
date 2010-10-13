@@ -890,13 +890,14 @@ def saveeditedscraper(request, lscraper):
         return HttpResponse(json.dumps({'status':status, 'draft':'True', 'url':response_url}))
 
 
-def edittutorial(request, tutorial_scraper):
+def edittutorial(request, short_name):
     code = get_code_object_or_none(models.Code, short_name=short_name)
     if not code:
         return code_error_response(models.Code, short_name=short_name, request=request)
 
     qtemplate = "?template="+code.short_name
     return HttpResponseRedirect(reverse('editor', args=[code.wiki_type, code.language]) + qtemplate)
+
 
 
 #Editor form
