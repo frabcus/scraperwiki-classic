@@ -23,7 +23,7 @@
         {% endif %}
     </div>
 
-    <div class="content {% if user.is_staff %}half left{% else %}full{% endif %}">
+    <div class="content half left">
         <h2>Featured scrapers</h2>        
         <ul class="scraper_list">
     		{% for code in featured_scrapers %}
@@ -35,8 +35,7 @@
         </p>
     </div>
 
-    {% if user.is_staff %}
-    <div class="content half right staff">
+    <div class="content half right">
         <h2>Featured views</h2>
         <ul>
     		{% for code in featured_views %}
@@ -44,7 +43,7 @@
     		{% endfor %}
     	</ul>
     </div>
-    {% endif %}
+
     <br class="clear"/>
     <div class="content full divider">
         <h3>Popular tags</h3>
