@@ -20,17 +20,17 @@ class ScraperViewsTests(TestCase):
         
     def test_scraper_overview(self):
         response = self.client.get(reverse('code_overview', 
-                            kwargs={'wiki_type':'scraper', 'scraper_short_name': 'test_scraper'}))
+                            kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
     
     def test_scraper_map(self):
         response = self.client.get(reverse('scraper_map', 
-                            kwargs={'scraper_short_name': 'test_scraper'}))
+                            kwargs={'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
     
     def test_scraper_history(self):
         response = self.client.get(reverse('scraper_history',
-                            kwargs={'scraper_short_name': 'test_scraper'}))
+                            kwargs={'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
         
     def test_scraper_stringnot(self):
@@ -38,17 +38,17 @@ class ScraperViewsTests(TestCase):
     
     def test_scraper_comments(self):
         response = self.client.get(reverse('scraper_comments',
-                            kwargs={'scraper_short_name': 'test_scraper'}))
+                            kwargs={'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
     
     def test_scraper_download(self):
         response = self.client.get(reverse('scraper_download',
-                            kwargs={'scraper_short_name': 'test_scraper'}))
+                            kwargs={'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
 
     def test_scraper_export_csv(self):
         response = self.client.get(reverse('export_csv',
-                            kwargs={'scraper_short_name': 'test_scraper'}))
+                            kwargs={'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
 
     def test_scraper_all_tags(self):
@@ -65,12 +65,12 @@ class ScraperViewsTests(TestCase):
     def test_scraper_follow(self):
         self.client.login(username='test_user', password='123456')
         response = self.client.get(reverse('scraper_follow',
-                kwargs={'scraper_short_name': 'test_scraper'}))
+                kwargs={'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 302)
 
     def test_scraper_unfollow(self):
         self.client.login(username='test_user', password='123456')
         response = self.client.get(reverse('scraper_unfollow',
-                kwargs={'scraper_short_name': 'test_scraper'}))
+                kwargs={'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 302)
 

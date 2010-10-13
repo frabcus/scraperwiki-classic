@@ -22,7 +22,7 @@ try:                import json
 except ImportError: import simplejson as json
 
 
-def rpcexecute_dummy(request, scraper_short_name, revision = None):
+def rpcexecute_dummy(request, short_name, revision = None):
     response = HttpResponse()
     response.write('''
     <html>
@@ -68,12 +68,12 @@ def rpcexecute_dummy(request, scraper_short_name, revision = None):
 # quick hack the manage the RPC execute feature 
 # to test this locally you need to use python manage.py runserver twice, on 8000 and on 8010, 
 # and view the webpage on 8010
-def rpcexecute(request, scraper_short_name, revision = None):
+def rpcexecute(request, short_name, revision = None):
     
     #if settings.USE_DUMMY_VIEWS == True:
-    #    return rpcexecute_dummy(request, scraper_short_name, revision)
+    #    return rpcexecute_dummy(request, short_name, revision)
     
-    scraper = get_object_or_404(models.View.objects, short_name=scraper_short_name)
+    scraper = get_object_or_404(models.View.objects, short_name=short_name)
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
     failed = False
 

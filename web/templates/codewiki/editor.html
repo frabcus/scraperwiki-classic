@@ -33,7 +33,7 @@
     <form method="POST" accept-charset="utf-8" id="editor" action="">
         <fieldset>
             {# Hidden inputs for passing to js #}
-            <input type="hidden" id="scraper_short_name" value="{{ scraper.short_name }}"/>
+            <input type="hidden" id="short_name" value="{{ scraper.short_name }}"/>
             <input type="hidden" id="scraper_guid" value="{{ scraper.guid }}"/>
             <input type="hidden" id="username" value="{{ user.username }}"/>
             <input type="hidden" id="userrealname" value="{{ user.get_profile.name }}"/>

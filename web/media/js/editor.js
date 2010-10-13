@@ -8,7 +8,7 @@ $(document).ready(function() {
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
-    var short_name = $('#scraper_short_name').val();
+    var short_name = $('#short_name').val();
     var guid = $('#scraper_guid').val();
     var username = $('#username').val(); 
     var userrealname = $('#userrealname').val(); 
