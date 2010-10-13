@@ -1,4 +1,4 @@
-var scraper_short_name = '';  // reset in templates/codewiki/scraper_overview.html
+var short_name = '';  // reset in templates/codewiki/scraper_overview.html
 
 $(function(){
     $('a.editor_view').click(function(){
@@ -17,8 +17,8 @@ function newCodeObject(wiki_type){
     var oPopup = $('<div id="template_popup"></div>');
     oPopup.modal();
     url = '/' + wiki_type + 's/new/choose_template/?ajax=1';
-    if (scraper_short_name != ''){
-        url += '&scraper_short_name=' + scraper_short_name
+    if (short_name != ''){
+        url += '&short_name=' + short_name
     }
     $('#template_popup').load(url, 
             function(){

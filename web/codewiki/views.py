@@ -35,18 +35,34 @@ import gdata.docs.service
 try:                import json
 except ImportError: import simplejson as json
 
+def get_code_object_or_none(klass, short_name):
+    try:
+        return klass.objects.get(short_name=short_name)
+    except:
+        return None
+
+def code_error_response(klass, short_name, request):
+    if klass.unfiltered.filter(short_name=short_name, deleted=True).count() == 1:
+        body = 'Sorry, this %s has been deleted by the owner' % klass.__name__
+        string = render_to_string('404.html', {'heading': 'Deleted', 'body': body}, context_instance=RequestContext(request))
+        return HttpResponseNotFound(string)
+    else:
+        raise Http404
+
 def code_overview(request, wiki_type, short_name):
     if wiki_type == 'scraper':
         return scraper_overview(request, short_name)
     else:
         return view_overview(request, short_name)
 
-def scraper_overview(request, scraper_short_name):
+def scraper_overview(request, short_name):
     """
     Shows info on the scraper plus example data.
     """
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -97,8 +113,10 @@ def view_admin (request, short_name):
     response = None
 
     user = request.user
-    view = get_object_or_404(
-        models.View.objects, short_name=short_name)
+    view = get_code_object_or_none(models.View, short_name=short_name)
+    if not view:
+        return code_error_response(models.View, short_name=short_name, request)
+
     user_owns_it = (view.owner() == user)
 
     form = forms.ViewAdministrationForm(instance=view)
@@ -151,8 +169,9 @@ def scraper_admin (request, short_name):
     response = None
 
     user = request.user
-    scraper = get_object_or_404(
-        models.Scraper.objects, short_name=short_name)
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request)
     user_owns_it = (scraper.owner() == user)
 
     form = forms.ScraperAdministrationForm(instance=scraper)
@@ -208,27 +227,36 @@ def scraper_admin (request, short_name):
     return response
 
 
-def scraper_delete_data(request, scraper_short_name):
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+def scraper_delete_data(request, short_name):
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request)
+
     if scraper.owner() != request.user:
         raise Http404
     if request.POST.get('delete_data', None) == '1':
         models.Scraper.objects.clear_datastore(scraper_id=scraper.guid)
-    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, scraper_short_name]))
+    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 # implemented by setting last_run to None
-def scraper_schedule_scraper(request, scraper_short_name):
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+def scraper_schedule_scraper(request, short_name):
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request)
+
     if scraper.owner() != request.user and not request.user.is_staff:
         raise Http404
     if request.POST.get('schedule_scraper', None) == '1':
         scraper.last_run = None
         scraper.save()
-    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, scraper_short_name]))
+    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
-def scraper_run_scraper(request, scraper_short_name):
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+def scraper_run_scraper(request, short_name):
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request)
+
     if not request.user.is_staff:
         raise Http404
     if request.POST.get('run_scraper', None) == '1':
@@ -236,13 +264,16 @@ def scraper_run_scraper(request, scraper_short_name):
         t = ScraperRunner(scraper, True)
         t.start()
     
-    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, scraper_short_name]))
+    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
 # should be generalized to both wikitypes
-def scraper_delete_scraper(request, scraper_short_name):
+def scraper_delete_scraper(request, short_name):
     user = request.user
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request)
+
     if scraper.owner() != request.user:
         raise Http404
     if request.POST.get('delete_scraper', None) == '1':
@@ -250,12 +281,14 @@ def scraper_delete_scraper(request, scraper_short_name):
         scraper.save()
         request.notifications.add("Your scraper has been deleted")
         return HttpResponseRedirect('/')
-    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, scraper_short_name]))
+    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
 def view_overview (request, view_short_name):
     user = request.user
-    scraper = get_object_or_404(models.View.objects, short_name=view_short_name)
+    scraper = get_code_object_or_none(models.View, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.View, short_name=short_name, request)
 
     scraper_tags = Tag.objects.get_for_object(scraper)
     
@@ -268,14 +301,18 @@ def view_overview (request, view_short_name):
     
 def view_fullscreen (request, short_name):
     user = request.user
-    scraper = get_object_or_404(models.View.objects, short_name=short_name)
+    scraper = get_code_object_or_none(models.View, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.View, short_name=short_name, request)
 
     return render_to_response('codewiki/view_fullscreen.html', {'scraper': scraper}, context_instance=RequestContext(request))
 
 def comments(request, wiki_type, short_name):
 
     user = request.user
-    scraper = get_object_or_404(models.Code.objects, short_name=short_name)
+    scraper = get_code_object_or_none(models.Code, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Code, short_name=short_name, request)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -307,7 +344,9 @@ def scraper_history(request, wiki_type, short_name):
         mercurialinterface.updateallcommitalerts()
         return HttpResponse("Updated commit alerts from mercurial for:" + lrepopath, mimetype="text/plain")
     
-    scraper = get_object_or_404(models.Code.objects, short_name=short_name)
+    scraper = get_code_object_or_none(models.Code, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Code, short_name=short_name, request)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -393,7 +432,9 @@ def scraper_history(request, wiki_type, short_name):
 
 def code(request, wiki_type, short_name):
     user = request.user
-    scraper = get_object_or_404(models.Code.objects, short_name=short_name)
+    scraper = get_code_object_or_none(models.Code, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Code, short_name=short_name, request)
 
     # Only logged in users should be able to see unpublished scrapers
     if not scraper.published and not user.is_authenticated():
@@ -424,7 +465,10 @@ def code(request, wiki_type, short_name):
 
 
 def raw_about_markup(request, wiki_type, short_name):
-    code_object = get_object_or_404(models.Code.objects, short_name=short_name)
+    code_object = get_code_object_or_none(models.Code, short_name=short_name)
+    if not code_object:
+        return code_error_response(models.Code, short_name=short_name, request)
+
     response = HttpResponse(mimetype='text/x-web-textile')
     response.write(code_object.description)
     return response
@@ -481,24 +525,29 @@ def stream_csv(scraper, step=5000, max_rows=1000000):
 
 # see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
 @condition(etag_func=None)
-def export_csv(request, scraper_short_name):
+def export_csv(request, short_name):
     """
     This could have been done by having linked directly to the api/csvout, but
     difficult to make the urlreverse for something in a different app code here
     itentical to scraperwiki/web/api/emitters.py CSVEmitter render()
     """
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request)
+
     response = HttpResponse(stream_csv(scraper), mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper_short_name)
+    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (short_name)
     return response
 
-def export_gdocs_spreadsheet(request, scraper_short_name):
+def export_gdocs_spreadsheet(request, short_name):
     #TODO: this funciton needs to change to cache things on disc and read the size from tehre rather than in memory
-    scraper = get_object_or_404(models.Scraper.objects, short_name=scraper_short_name)
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request)
 
     #get the csv, it's size and choose a title for the file
     title = scraper.title + " - from ScraperWiki.com"
-    csv_url = 'http://%s%s' % (Site.objects.get_current().domain,  reverse('export_csv', kwargs={'scraper_short_name': scraper.short_name}))
+    csv_url = 'http://%s%s' % (Site.objects.get_current().domain,  reverse('export_csv', kwargs={'short_name': scraper.short_name}))
 
     # the lack of a list of keys for the table makes a more elegant solution difficult to obtain
     # as it is necessary to take a selection of rows in order to derive the set of columns used
@@ -568,21 +617,25 @@ def scraper_table(request):
     
 
 
-def download(request, scraper_short_name):
+def download(request, short_name):
     """
     TODO: DELETE?
     """
-    scraper = get_object_or_404(models.Scraper.objects, 
-                                short_name=scraper_short_name)
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request)
+
     response = HttpResponse(scraper.saved_code(), mimetype="text/plain")
     response['Content-Disposition'] = \
         'attachment; filename=%s.py' % (scraper.short_name)
     return response
 
 
-def follow (request, scraper_short_name):
-    scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
+def follow (request, short_name):
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request)
+
     user = request.user
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
@@ -592,9 +645,11 @@ def follow (request, scraper_short_name):
     return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
 
 
-def unfollow(request, scraper_short_name):
-    scraper = get_object_or_404(
-        models.Scraper.objects, short_name=scraper_short_name)
+def unfollow(request, short_name):
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request)
+
     user = request.user
     user_owns_it = (scraper.owner() == user)
     user_follows_it = (user in scraper.followers())
@@ -649,8 +704,11 @@ def twisterstatus(request):
             # or could use the field: closedsince  = models.DateTimeField(blank=True, null=True)
     return HttpResponse("Howdy ppp ")
 
-def htmlview(request, scraper_short_name):
-    view = get_object_or_404(models.View.objects, short_name=scraper_short_name)
+def htmlview(request, short_name):
+    view = get_code_object_or_none(models.View, short_name=short_name)
+    if not view:
+        return code_error_response(models.View, short_name=short_name, request)
+
     return HttpResponse(view.saved_code())
 
 def commit_event(request, event_id):
@@ -674,13 +732,13 @@ def choose_template(request, wiki_type):
 def chosen_template(request, wiki_type):
     template = request.GET.get('template', None)
     language = request.GET.get('language', None)
-    scraper_short_name = request.GET.get('scraper_short_name', None)
+    short_name = request.GET.get('short_name', None)
     
     parameters = {}
     if template:
         parameters['template'] = template
-    if scraper_short_name:
-        parameters['scraper'] = scraper_short_name
+    if short_name:
+        parameters['scraper'] = short_name
 
     url = "%s?%s" % (reverse('editor', args=(wiki_type, language)), urllib.urlencode(parameters))
 
@@ -701,14 +759,22 @@ def diff(request, short_name=None):
     code = request.POST.get('code', None)    
     if not code:
         return HttpResponse("Programme error: No code sent up to diff against", mimetype='text')
-    scraper = get_object_or_404(models.Code, short_name=short_name)
+
+    scraper = get_code_object_or_none(models.Code, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Code, short_name=short_name, request)
+
     result = '\n'.join(difflib.unified_diff(scraper.saved_code().splitlines(), code.splitlines(), lineterm=''))
     return HttpResponse("::::" + result, mimetype='text')
 
 def raw(request, short_name=None):
     if not short_name or short_name == "__new__":
         return HttpResponse("Draft scraper, shouldn't do reload", mimetype='text')
-    scraper = get_object_or_404(models.Code, short_name=short_name)
+
+    scraper = get_code_object_or_none(models.Code, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Code, short_name=short_name, request)
+
     oldcodeineditor = request.POST.get('oldcode', None)
     newcode = scraper.saved_code()
     if oldcodeineditor:
@@ -836,7 +902,10 @@ def saveeditedscraper(request, lscraper):
 
 
 def edittutorial(request, tutorial_scraper):
-    code = get_object_or_404(models.Code, short_name=tutorial_scraper)
+    code = get_code_object_or_none(models.Code, short_name=short_name)
+    if not code:
+        return code_error_response(models.Code, short_name=short_name, request)
+
     qtemplate = "?template="+code.short_name
     return HttpResponseRedirect(reverse('editor', args=[code.wiki_type, code.language]) + qtemplate)
 
@@ -864,7 +933,9 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
 
     # Try and load an existing scraper
     elif short_name is not "__new__":
-        scraper = get_object_or_404(models.Code, short_name=short_name)
+        scraper = get_code_object_or_none(models.Code, short_name=short_name)
+        if not scraper:
+            return code_error_response(models.Code, short_name=short_name, request)
         code = scraper.saved_code()
         return_url = reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
         if not scraper.published:

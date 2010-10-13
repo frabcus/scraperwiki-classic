@@ -17,11 +17,3 @@ class Test__unicode__(TransactionTestCase):
             'Test Scraper',
             unicode(models.Scraper(title='Test Scraper'))
         )
-
-    def test_scraper_short_name(self):
-        self.assertEqual(
-            'Test Scraper',
-            unicode(models.Scraper(title='Test Scraper'))
-        )
-    
-    
