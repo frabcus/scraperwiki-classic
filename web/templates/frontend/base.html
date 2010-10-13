@@ -12,7 +12,6 @@
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>		
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jeditable.js"></script>		
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.textbox-hinter.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>
 		<script type="text/javascript" src="{{ MEDIA_URL }}js/flexigrid.js"></script>			
 		<script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror/js/codemirror.js"></script>
@@ -106,7 +105,6 @@
 				</ul>
 
                 <form id="divSidebarSearch" action="/search/" method="post">
-                    <label for="q" class="hide">Search ScraperWiki</label>
                     <input type="text" id="q" name="q"/>
                     <input type="submit" value="Go" />
                 </form>
@@ -223,7 +221,7 @@
 		{% endblock %}
 		
 	    <script type="text/javascript" defer="defer">
-	        setupHints();
+	        setupSearchBoxHint();
 	        {% block run_script %}{% endblock %}
         </script>
         {% if not debug %}

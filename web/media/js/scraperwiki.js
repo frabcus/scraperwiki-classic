@@ -141,11 +141,22 @@ function setupButtonConfirmation(sId, sMessage){
     );
 }
 
-function setupHints(){
-    $('#q').tbHinter({
-    	text: 'Search ScraperWiki',
-    	class: 'hint'
+function setupSearchBoxHint(){
+    $('#divSidebarSearch input:text').focus(function() {
+        if ($('#divSidebarSearch input:submit').attr('disabled')) {
+            $(this).val('');
+            $(this).removeClass('hint');
+            $('#divSidebarSearch input:submit').removeAttr('disabled'); 
+        }
     });
+    $('#divSidebarSearch input:text').blur(function() {
+        if(!$('#divSidebarSearch input:submit').attr('disabled') && ($(this).val() == '')) {
+            $(this).val('Search ScraperWiki');
+            $(this).addClass('hint');
+            $('#divSidebarSearch input:submit').attr('disabled', 'disabled'); 
+        }
+    });
+    $('#divSidebarSearch input:text').blur();
 }
 
 function setupScroller(){

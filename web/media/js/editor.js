@@ -186,22 +186,19 @@ $(document).ready(function() {
             return true; 
         })
 
-        // code scavenged from the flawed tbHinter plugin that uses value of text rather than value of class to tell whether the box is really empty
-        var urlqueryobj = $('#id_urlquery'); 
-		$('#id_urlquery').focus(function() {
+        $('#id_urlquery').focus(function() {
             if ($(this).hasClass('hint')) {
                 $(this).val('');
-				$(this).removeClass('hint');
-			}
-		});
-		$('#id_urlquery').blur(function() {
-			if(!$(this).hasClass() && ($(this).val() == '')) {
-				$(this).val('urlquery');
-				$(this).addClass('hint');
-			}
-		});
+                $(this).removeClass('hint');
+            }
+        });
+        $('#id_urlquery').blur(function() {
+            if(!$(this).hasClass('hint') && ($(this).val() == '')) {
+                $(this).val('urlquery');
+                $(this).addClass('hint');
+            }
+        });
         $('#id_urlquery').blur();
-
     }
     
     //Setup Tabs
