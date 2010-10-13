@@ -103,7 +103,6 @@ span.faux_link {color:#ccc;}
 a.more_link {font-weight:bold; font-style:italic;}
 
 /* Code */
-.code {font-family: 'Courier New',Courier,monospace;}
 pre.scraperoutput {background-color: aliceblue; padding: 0.5em;}
 pre.scrapercode {background-color: lemonchiffon; padding: 0.5em;}
 
@@ -397,7 +396,6 @@ div.mercurialcommitlog ul { padding:0; margin:0; }
 
 /* Container */
 #simplemodal-container {height:320px; width:500px; background-color:#fff; border:1px solid #9f9f9f; padding:12px;}
-#simplemodal-container code {background:#141414; border-left:3px solid #65B43D; color:#bbb; display:block; margin-bottom:12px; padding:4px 6px 6px;}
 
 #simplemodal-container a.modalCloseImg {background:url(../images/x.png) no-repeat; width:25px; height:29px; display:inline; z-index:3200; position:absolute; top:-15px; right:-16px; cursor:pointer;}
 #simplemodal-container #basic-modal-content {padding:8px;}
@@ -455,7 +453,6 @@ h2 a.edit {font-size:0.6em;}
 h3 a.edit {font-size:0.7em;}
 h4 a.edit {font-size:0.8em;}
 
-
 /* market */
 .completeometer {position:absolute; top:0; right:0;}
 /* flag stuff that is seen by staff only */
@@ -473,3 +470,10 @@ h4 a.edit {font-size:0.8em;}
 #template_popup li {position:relative; left:67px;text-align:center; font-size:0.9em;}
 #template_popup li a {font-size:0.9em;display:block;text-decoration:none;}
 #template_popup img.lang_icon {position:relative; top:4px;}
+
+/* funciton docmentation */
+dl.functiondocs {border-bottom:solid 1px #ccc;margin:1em 0 1em 0;}
+dl.functiondocs dt {padding-bottom:0.5em;}
+dl.functiondocs dd {padding-left:0;margin-left:0;padding-bottom:1em;}
+dl.functiondocs dd code {background:#000; color:#fff; font-size:1.2em;padding:0.3em;display:block;}
+dl.functiondocs dd p {font-size:0.9em;padding:1em 0 0 0;margin:0;}

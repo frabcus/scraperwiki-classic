@@ -166,11 +166,25 @@
       <div id="feedback_messages">
       </div>
 
-      <div id="popup_tutorials">
-        <h3>Quick help <small><a href="{% url help %}" target="_blank">Full documentation (new window)</a></small></h3>
-        <div class="output">
+      <div id="popup_tutorials" class="quickhelp">
+        <h3>
+            <img src="{{MEDIA_URL}}/images/icons/{{ scraper.language }}.png"/>
+            {% if scraper.language == 'php'%}
+                PHP
+            {% endif %}
+            {% if scraper.language == 'ruby'%}
+                Ruby
+            {% endif %}
+            {% if scraper.language == 'python'%}
+                Python
+            {% endif %}
+            {{scraper.wiki_type}}
+            - quick help
+        </h3>
+        <p>
+            <a href="{% url help %}" target="_blank">View full documentation (new window)</a> or try a <a href="{% url help_tutorials %}" title="Tutorials">tutorial (new window)</a>
+        </p>
             {% include quick_help_template %}
-        </div>
       </div>
 
       </form>
