@@ -8,19 +8,19 @@ urlpatterns = patterns('',
     url(r'^table/$',                                      views.scraper_table,          name='scraper_table'),
 
     # special views functionality
-    url(r'^run/(?P<scraper_short_name>[\w_\-]+)/(?P<revision>\d+/)?$', 
+    url(r'^run/(?P<short_name>[\w_\-]+)/(?P<revision>\d+/)?$', 
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    
-    url(r'^views/(?P<scraper_short_name>[\w_\-]+)/html/$',views.htmlview,               name='htmlview'),
+    url(r'^views/(?P<short_name>[\w_\-]+)/html/$',        views.htmlview,               name='htmlview'),
     url(r'^views/(?P<short_name>[\w_\-]+)/full/$',        views.view_fullscreen,        name='view_fullscreen'),   
     url(r'^views/(?P<short_name>[\w_\-]+)/admin/$',       views.view_admin,             name='view_admin'),    
     
-    url(r'^scrapers/delete-data/(?P<scraper_short_name>[\w_\-]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
-    url(r'^scrapers/download/(?P<scraper_short_name>[\w_\-]+)/$', views.download,       name='scraper_download'),
-    url(r'^scrapers/export/(?P<scraper_short_name>[\w_\-]+)/$', views.export_csv,       name='export_csv'),
-    url(r'^scrapers/export2/(?P<scraper_short_name>[\w_\-]+)/$', views.export_gdocs_spreadsheet,       name='export_gdocs_spreadsheet'),    
+    url(r'^scrapers/delete-data/(?P<short_name>[\w_\-]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
+    url(r'^scrapers/download/(?P<short_name>[\w_\-]+)/$', views.download,               name='scraper_download'),
+    url(r'^scrapers/export/(?P<short_name>[\w_\-]+)/$', views.export_csv,               name='export_csv'),
+    url(r'^scrapers/export2/(?P<short_name>[\w_\-]+)/$', views.export_gdocs_spreadsheet,name='export_gdocs_spreadsheet'),    
     
-    url(r'^scrapers/follow/(?P<scraper_short_name>[\w_\-]+)/$', views.follow,           name='scraper_follow'),
-    url(r'^scrapers/unfollow/(?P<scraper_short_name>[\w_\-]+)/$', views.unfollow,       name='scraper_unfollow'),
+    url(r'^scrapers/follow/(?P<short_name>[\w_\-]+)/$', views.follow,           name='scraper_follow'),
+    url(r'^scrapers/unfollow/(?P<short_name>[\w_\-]+)/$', views.unfollow,       name='scraper_unfollow'),
     
     url(r'^scrapers/metadata_api/', include('codewiki.metadata_api.urls')),
 
@@ -31,11 +31,11 @@ urlpatterns = patterns('',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),
         
     url(r'^scrapers/commit/(?P<event_id>\d+)/$',          views.commit_event,           name='commit_event'),
-    url(r'^scrapers/schedule-scraper/(?P<scraper_short_name>[\w_\-]+)/$', 
+    url(r'^scrapers/schedule-scraper/(?P<short_name>[\w_\-]+)/$', 
                                                           views.scraper_schedule_scraper,name='scraper_schedule_scraper'),
-    url(r'^scrapers/delete-scraper/(?P<scraper_short_name>[\w_\-]+)/$', 
+    url(r'^scrapers/delete-scraper/(?P<short_name>[\w_\-]+)/$', 
                                                           views.scraper_delete_scraper, name='scraper_delete_scraper'),
-    url(r'^scrapers/run-scraper/(?P<scraper_short_name>[\w_\-]+)/$', 
+    url(r'^scrapers/run-scraper/(?P<short_name>[\w_\-]+)/$', 
                                                           views.scraper_run_scraper,    name='scraper_run_scraper'),
     
     url(r'^scrapers/twister/status$', views.twisterstatus, name='twisterstatus'),

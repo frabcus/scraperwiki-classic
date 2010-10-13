@@ -33,7 +33,7 @@
     <form method="POST" accept-charset="utf-8" id="editor" action="">
         <fieldset>
             {# Hidden inputs for passing to js #}
-            <input type="hidden" id="scraper_short_name" value="{{ scraper.short_name }}"/>
+            <input type="hidden" id="short_name" value="{{ scraper.short_name }}"/>
             <input type="hidden" id="scraper_guid" value="{{ scraper.guid }}"/>
             <input type="hidden" id="username" value="{{ user.username }}"/>
             <input type="hidden" id="userrealname" value="{{ user.get_profile.name }}"/>
@@ -166,11 +166,25 @@
       <div id="feedback_messages">
       </div>
 
-      <div id="popup_tutorials">
-        <h3>Quick help <small><a href="{% url help %}" target="_blank">Full documentation (new window)</a></small></h3>
-        <div class="output">
+      <div id="popup_tutorials" class="quickhelp">
+        <h3>
+            <img src="{{MEDIA_URL}}/images/icons/{{ scraper.language }}.png"/>
+            {% ifequal scraper.language 'php'%}
+                PHP
+            {% endifequal %}
+            {% ifequal scraper.language 'ruby'%}
+                Ruby
+            {% endifequal %}
+            {% ifequal scraper.language 'python'%}
+                Python
+            {% endifequal %}
+            {{scraper.wiki_type}}
+            - quick help
+        </h3>
+        <p>
+            <a href="{% url help %}" target="_blank">View full documentation (new window)</a> or try a <a href="{% url help_tutorials %}" title="Tutorials">tutorial (new window)</a>
+        </p>
             {% include quick_help_template %}
-        </div>
       </div>
 
       </form>

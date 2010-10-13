@@ -2,9 +2,11 @@
 {% load humanize %}
 {% load markup %}
 {% block tab %}
+{% load screen_shot %}
 
-    <iframe class="view" width="100%" height="400px" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">
-    </iframe>
+    <div class="content full">
+      <a href="{% url view_fullscreen scraper.short_name %}">{% screen_shot scraper 'large' %}</a>
+    </div>
 
     <div class="content full">
         <h2>About this view {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'view' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}</h2>        

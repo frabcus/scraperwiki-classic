@@ -132,29 +132,12 @@ span.hiddenfields { margin-left:10px; }
 
 .popup_item .popup_header {margin:0 0 0 0;height:4%; position:relative;}
 
-.popupoutput {text-align:left; overflow-y:auto; background:#000!important; color:#3cef3b;}
-.popupoutput pre {white-space: pre-wrap;white-space: -moz-pre-wrap;
+pre.popupoutput {text-align:left; overflow-y:auto; background:#000!important; color:#3cef3b;}
+pre.popupoutput {white-space: pre-wrap;white-space: -moz-pre-wrap;
     white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;
     }
 
-.popup_item .popup_error {background:#a22424; padding:0.1em 0; margin:0; text-align:center; position:relative; top:-1em;color:#fff;}
-
-#popup_exception, #popup_text {background:#000!important; color:#3cef3b;}
-#popup_exception h3, #popup_text h3 {border-bottom:solid 1px #089608; padding-bottom:0.7em;}
-#popup_exception pre, #popup_text pre {white-space: pre-wrap;white-space: -moz-pre-wrap;
-    white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;}
-#popup_exception a.popupClose, #popup_text a.popupClose {color:#fff;}
-
-
-
-#popup_tutorials {text-align:left; overflow-y:auto; }
-#popup_tutorials {display:none; }
-
-
-.popupClose {right:0; top:0; position:absolute; color:#000; background-color:#fcc; display:block; cursor:pointer;}
-.popupReady {font-weight:bold;}
-.popup_controls {padding-top:1em; margin-top:1em;border-top:solid 1px #808080;position:relative;}
-.popup_controls .right {position:absolute; right:0; top:1em; }
+#popup_tutorials {text-align:left; overflow-y:auto; display:none; }
 
 dl.quick_help dt code {font-size:1.3em;}
 dl.quick_help dd {font-size:0.8em; padding:0.5em 0 1.2em 0; margin:0;}
@@ -165,25 +148,6 @@ dl.quick_help a { font-size:0.8em; font-style:italic;}
 dl.quick_help ul { padding:0 0 0 1em; margin: 0; }
 dl.quick_help li { padding:0 0 0 0; margin: 0; }
 dl.quick_help li code {font-size:1.1em; }
-
-
-/*
-#meta_fields_mini .field { display:inline; }
-#meta_fields_mini .field input, #meta_fields_mini .field textarea {height:10px;}
-#meta_fields_mini .field ul.errorlist, #meta_fields_mini .field ul.errorlist li {display:inline; margin:0; padding:0; color:red;}
-
-#meta_fields .field-description {float:left; margin-right:10%;}
-#meta_fields .field-license {clear:both; float:left; margin-right:10%;}
-#meta_fields .field-tags {clear:both; float:left; margin-right:10%;}
-
-#meta_form .field { margin-bottom:5px;}
-#meta_form .button { float:right;}
-#meta_form .field label { display:block; float:left; width:10em;}
-#meta_form .field input { width:21em;}
-#meta_form .field-commit_message { clear:both; width:100%; }
-#meta_form .field-commit_message input { width:80%; vertical-align:center;}
-#meta_form .field-commit_message labal { width:20%; vertical-align:center;}
-*/
 
 #meta_form li.hidden { display:none; }
 
@@ -197,3 +161,7 @@ a.cached { background-color: #e0e0e0; }
 
 
 
+/* quickhelp */
+div.quickhelp {padding:1em; font-size:0.9em;}
+div.quickhelp h3 {font-size:1.3em;}
+div.quickhelp h4 {font-size:1.1em;}

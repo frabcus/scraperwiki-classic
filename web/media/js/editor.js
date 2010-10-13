@@ -8,7 +8,7 @@ $(document).ready(function() {
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
-    var short_name = $('#scraper_short_name').val();
+    var short_name = $('#short_name').val();
     var guid = $('#scraper_guid').val();
     var username = $('#username').val(); 
     var userrealname = $('#userrealname').val(); 
@@ -137,9 +137,6 @@ $(document).ready(function() {
         buffer = " "; 
         sChatTabMessage = 'Connecting...'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
-
-            // this close function needs some kind of pause to allow the disconnection message to go through
-        $(window).unload( function () { bSuppressDisconnectionMessages = true; conn.close();  } );  
     }
     
     //Setup Keygrabs
@@ -157,7 +154,8 @@ $(document).ready(function() {
         $('#menu_tutorials').click(function(){
             $('#popup_tutorials').modal({
                  overlayClose: true, 
-                 containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }
+                 containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
+                 overlayCss: { cursor:"auto" }
                 });
         });
         $('form#editor').submit(function() { 
@@ -189,22 +187,19 @@ $(document).ready(function() {
             return true; 
         })
 
-        // code scavenged from the flawed tbHinter plugin that uses value of text rather than value of class to tell whether the box is really empty
-        var urlqueryobj = $('#id_urlquery'); 
-		$('#id_urlquery').focus(function() {
+        $('#id_urlquery').focus(function() {
             if ($(this).hasClass('hint')) {
                 $(this).val('');
-				$(this).removeClass('hint');
-			}
-		});
-		$('#id_urlquery').blur(function() {
-			if(!$(this).hasClass() && ($(this).val() == '')) {
-				$(this).val('urlquery');
-				$(this).addClass('hint');
-			}
-		});
+                $(this).removeClass('hint');
+            }
+        });
+        $('#id_urlquery').blur(function() {
+            if(!$(this).hasClass('hint') && ($(this).val() == '')) {
+                $(this).val('urlquery');
+                $(this).addClass('hint');
+            }
+        });
         $('#id_urlquery').blur();
-
     }
     
     //Setup Tabs
@@ -231,10 +226,6 @@ $(document).ready(function() {
         showTab('console'); 
     }
     
-    function showPopup(sId) {
-        $(sId).modal({overlayClose: true});
-    }
-
     // show the bottom grey sliding up message
     function showFeedbackMessage(sMessage){
        $('#feedback_messages').html(sMessage)
@@ -283,12 +274,15 @@ $(document).ready(function() {
         bConnected = false; 
 
         // couldn't find a way to make a reconnect button work!
+            // the bSuppressDisconnectionMessages technique doesn't seem to work (unload is not invoked), so delay message  in the hope that window will close first
         if (!bSuppressDisconnectionMessages)
-        {
-            writeToChat('<b>You will need to reload the page to reconnect</b>');  
-            writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
-            writeToConsole("(You can still save your work)", "exceptionnoesc"); 
-        }
+            setTimeout(function() {
+                writeToChat('<b>You will need to reload the page to reconnect</b>');  
+                writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
+                writeToConsole("(You can still save your work)", "exceptionnoesc"); }, 
+                25); 
+
+
         $('.editor_controls #run').val('Unconnected');
         $('.editor_controls #run').unbind('click.run');
         $('.editor_controls #run').unbind('click.abort');
@@ -562,8 +556,9 @@ $(document).ready(function() {
                 }),
             dataType: "html",
             success: function(diff) {
-                $.modal('<div class="popupoutput"><pre>'+cgiescape(diff)+'</pre></div>', 
-                        {overlayClose: true});
+                $.modal('<pre class="popupoutput">'+cgiescape(diff)+'</pre>', {
+                        overlayClose: true 
+                       });
             }
         });
     }
@@ -578,9 +573,8 @@ $(document).ready(function() {
     }
 
     function reloadScraper(){
-        if (shortNameIsSet() == false){
-            $('#diff pre').text("Cannot reload draft scraper");
-            showPopup('#diff');
+        if (shortNameIsSet() == false) {
+            alert("Cannot reload draft scraper");
             return; 
         }
 
@@ -665,15 +659,19 @@ $(document).ready(function() {
         //close editor link
         $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(
             function (){
-                var bReturn = true;
-                if (pageIsDirty){
-                    if(confirm("You have unsaved changes, close the editor anyway?") == false){
-                        bReturn = false
-                    }
-                }
-                return bReturn;
+                if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
+                    return false; 
+                bSuppressDisconnectionMessages = true; 
+                if (conn)  conn.close();  
+                return true;
             }
         );
+
+        $(window).unload( function () { 
+            bSuppressDisconnectionMessages = true; 
+            writeToConsole('window unload'); 
+            if (conn)  conn.close();  
+        });  
 
 
         if (wiki_type == 'view')
@@ -720,6 +718,7 @@ $(document).ready(function() {
         $.modal(previewscreen, { 
             overlayClose: true,
             containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
+            overlayCss: { cursor:"auto" }, 
             onShow: function(d) {
                 ifrm = document.getElementById('previewiframe');
                 activepreviewiframe = (ifrm.contentWindow ? ifrm.contentWindow : (ifrm.contentDocument.document ? ifrm.contentDocument.document : ifrm.contentDocument));
@@ -900,9 +899,10 @@ $(document).ready(function() {
     }
 
     function showTextPopup(sLongMessage) {
-        $.modal('<div class="popupoutput"><pre>'+cgiescape(sLongMessage)+'</pre></div>', 
+        $.modal('<pre class="popupoutput">'+cgiescape(sLongMessage)+'</pre>', 
                 {overlayClose: true, 
-                 containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%" }
+                 containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
+                 overlayCss: { cursor:"auto" }
                 });
     }
 
