@@ -472,6 +472,7 @@ class RunnerFactory(protocol.ServerFactory):
     
     # this might be deprecated when we can poll twister directly for the state of activity in some kind of ajax or iframe call
     def notifytwisterstatus(self):
+        return
         clientlist = [ ]
         for client in self.clients:
             clientdata = { "clientnumber":client.clientnumber, "guid":client.guid, 

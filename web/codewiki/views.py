@@ -192,6 +192,7 @@ def scraper_admin (request, short_name):
             #save scraper
             scraper.save()
             response.write(response_text)
+            
         #saved by form 
         else:
             form = forms.ScraperAdministrationForm(request.POST, instance=scraper)

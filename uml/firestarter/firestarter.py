@@ -355,14 +355,18 @@ class FireStarter :
         """
 
         confurl = self.m_conf.get('dispatcher', 'confurl')
-        try:
-            conftxt = urllib2.urlopen(confurl).read().replace('\r', '')
-        except:
-            if confurl[:26] == 'http://dev.scraperwiki.com':
-                pass  # known problem
-            else:
-                print json.dumps({ 'message_type':'console', 'content': "Failed to open: %s" % confurl })
-            conftxt = ""
+        if confurl != "allwhite":
+            try:
+                conftxt = urllib2.urlopen(confurl).read().replace('\r', '')
+            except:
+                if confurl[:26] == 'http://dev.scraperwiki.com':
+                    pass  # known problem
+                else:
+                    print json.dumps({ 'message_type':'console', 'content': "Failed to open: %s" % confurl })
+                conftxt = ""
+        else:
+            conftxt = "white=.*"  # hard code the whitelist to avoid accessing it (better for local versions)
+            
         for line in conftxt.split('\n') :
             try :
                 key, value = line.split('=')

@@ -154,11 +154,10 @@ $(document).ready(function() {
 
     //Setup Menu
     function setupMenu(){
-        $('#menu_settings').click(function(){
-            showPopup('#popup_settings'); 
-        });
         $('#menu_tutorials').click(function(){
-            showPopup('#popup_tutorials'); 
+            $('#popup_tutorials').modal({overlayClose: true, 
+                 containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }
+                });
         });
         $('form#editor').submit(function() { 
             saveScraper(); 
@@ -232,8 +231,7 @@ $(document).ready(function() {
     }
     
     function showPopup(sId) {
-        $('.popup_error').hide();
-        $(sId).modal();
+        $(sId).modal({overlayClose: true});
     }
 
     // show the bottom grey sliding up message
@@ -563,8 +561,8 @@ $(document).ready(function() {
                 }),
             dataType: "html",
             success: function(diff) {
-                $('#diff pre').text(diff);
-                showPopup('#diff');
+                $.modal('<div class="popupoutput"><pre>'+cgiescape(diff)+'</pre></div>', 
+                        {overlayClose: true});
             }
         });
     }
@@ -713,22 +711,21 @@ $(document).ready(function() {
             else
                 previewmessage = ' [' + urlquery + '] is an invalid query string'; 
         }
-        previewmessage = '<a href="' + viewurl + '" target="_blank">' + viewurl + '</a>' + previewmessage; 
 
-        $('#previewmessage').html(previewmessage); 
-        $('#popup_preview iframe#previewiframe').css({height: $(window).height() - 180}); 
+        previewscreen = '<h3>View preview <small><a href="'+viewurl+'" target="_blank">'+viewurl+'</a>'+previewmessage+'</small></h3>'; 
+        isrc = ""; // isrc = viewurl; (would allow direct inclusion from saved version)
+        previewscreen += '<div><iframe id="previewiframe" width="100%" height="'+($(window).height()-180)+'px" src="'+isrc+'"></iframe></div>'; 
 
-        // direct method of importing from a view run
-        // $('#popup_preview iframe.view').attr('src', viewurl);  
-
-        // indirect method of directing the run panel into the iframe (works for drafts and without saving)
-        $('#popup_preview iframe#previewiframe').attr('src', 'about:blank');  
-        ifrm = document.getElementById('previewiframe');// $('#popup_preview iframe#previewiframe'); 
-        activepreviewiframe = (ifrm.contentWindow) ? ifrm.contentWindow : (ifrm.contentDocument.document) ? ifrm.contentDocument.document : ifrm.contentDocument;
-        activepreviewiframe.document.open(); 
-        sendCode(); // do the running the standard way
-
-        showPopup('#popup_preview'); 
+        $.modal(previewscreen, { 
+            overlayClose: true,
+            containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
+            onShow: function (d) {
+                ifrm = document.getElementById('previewiframe');
+                activepreviewiframe = (ifrm.contentWindow ? ifrm.contentWindow : (ifrm.contentDocument.document ? ifrm.contentDocument.document : ifrm.contentDocument));
+                activepreviewiframe.document.open(); 
+                sendCode(); // trigger the running once we're ready for the output
+            }
+        }); 
     }
 
     //Save
@@ -769,8 +766,7 @@ $(document).ready(function() {
 
                     //failed
                     if (res.status == 'Failed'){
-                        $('#meta_form .popup_error').show();
-                        $('#meta_form .popup_error').html("Failed to save, please make sure you have entered a title, a description and a commit message");
+                        alert("Save failed error message.  Shouldn't happen"); 
 
                     //success    
                     }else{
@@ -813,11 +809,6 @@ $(document).ready(function() {
         }
     }
 
-    //Show random text popup
-    function showTextPopup(sMessage, sMessageType){
-        $('#popup_text .output pre').html(sMessage);
-        showPopup('#popup_text');
-    }
     
     function setupResizeEvents(){
         
@@ -907,6 +898,13 @@ $(document).ready(function() {
             activepreviewiframe.document.write(sMessage); 
     }
 
+    function showTextPopup(sLongMessage) {
+        $.modal('<div class="popupoutput"><pre>'+cgiescape(sLongMessage)+'</pre></div>', 
+                {overlayClose: true, 
+                 containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%" }
+                });
+    }
+
     //Write to console/data/sources
     function writeToConsole(sMessage, sMessageType, iLine) {
 
@@ -942,7 +940,7 @@ $(document).ready(function() {
             oMoreLink.text(sExpand)
             oMoreLink.longMessage = sLongMessage;
             oConsoleItem.append(oMoreLink);
-            oMoreLink.click(function() { showTextPopup(cgiescape(sLongMessage)); });
+            oMoreLink.click(function() { showTextPopup(sLongMessage); });
         }
 
         // add clickable line number link
