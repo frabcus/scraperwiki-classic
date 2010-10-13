@@ -713,7 +713,8 @@ $(document).ready(function() {
 
         previewscreen = '<h3>View preview <small><a href="'+viewurl+'" target="_blank">'+viewurl+'</a>'+previewmessage+'</small></h3>'; 
         isrc = ""; // isrc = viewurl; (would allow direct inclusion from saved version)
-        previewscreen += '<div><iframe id="previewiframe" width="100%" height="'+($(window).height()-180)+'px" src="'+isrc+'"></iframe></div>'; 
+            // force the preview iframe to fill most of what it should.  needs more work
+        previewscreen += '<iframe id="previewiframe" width="100%" height="'+($(window).height()*8/10-50)+'px" src="'+isrc+'"></iframe>'; 
 
         $.modal(previewscreen, { 
             overlayClose: true,
