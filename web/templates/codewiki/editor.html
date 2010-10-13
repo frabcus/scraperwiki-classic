@@ -169,15 +169,15 @@
       <div id="popup_tutorials" class="quickhelp">
         <h3>
             <img src="{{MEDIA_URL}}/images/icons/{{ scraper.language }}.png"/>
-            {% if scraper.language == 'php'%}
+            {% ifequal scraper.language 'php'%}
                 PHP
-            {% endif %}
-            {% if scraper.language == 'ruby'%}
+            {% endifequal %}
+            {% ifequal scraper.language 'ruby'%}
                 Ruby
-            {% endif %}
-            {% if scraper.language == 'python'%}
+            {% endifequal %}
+            {% ifequal scraper.language 'python'%}
                 Python
-            {% endif %}
+            {% endifequal %}
             {{scraper.wiki_type}}
             - quick help
         </h3>
