@@ -17,7 +17,6 @@ from django.utils.encoding import smart_str
 
 from codewiki import models
 from codewiki import forms
-from codewiki.forms import ChooseTemplateForm
 from api.emitters import CSVEmitter 
 import vc
 import frontend
@@ -658,33 +657,20 @@ def commit_event(request, event_id):
     return render_to_response('codewiki/commit_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def choose_template(request, wiki_type):
-
-    form = forms.ChooseTemplateForm(wiki_type)
-
     #get templates
     templates = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).order_by('language')
+    sourcescraper = request.GET.get('sourcescraper', '')
+    print "sourcescraper", sourcescraper
 
     #choose template (ajax vs normal)
     template = 'codewiki/choose_template.html'
     if request.GET.get('ajax', False):
         template = 'codewiki/includes/choose_template.html'        
-    return render_to_response(template, {'wiki_type': wiki_type, 'templates': templates, 'languages': models.code.LANGUAGES}, context_instance=RequestContext(request))
+    return render_to_response(template, {'wiki_type': wiki_type, 'templates': templates, 
+                                         'languages': [ ll[0]   for ll in models.code.LANGUAGES ], 
+                                         'sourcescraper':sourcescraper }, 
+                              context_instance=RequestContext(request))
 
-
-def chosen_template(request, wiki_type):
-    template = request.GET.get('template', None)
-    language = request.GET.get('language', None)
-    scraper_short_name = request.GET.get('scraper_short_name', None)
-    
-    parameters = {}
-    if template:
-        parameters['template'] = template
-    if scraper_short_name:
-        parameters['scraper'] = scraper_short_name
-
-    url = "%s?%s" % (reverse('editor', args=(wiki_type, language)), urllib.urlencode(parameters))
-
-    return HttpResponseRedirect(url)
     
 def delete_draft(request):
     if request.session.get('ScraperDraft', False):
@@ -842,7 +828,16 @@ def edittutorial(request, tutorial_scraper):
 
 
 #Editor form
-blankstartupcode = { 'python':"# Blank Python", 'php':"<?\n# Blank PHP\n?>", 'ruby':"# Blank Ruby" }
+blankstartupcode = { 'scraper' : { 'python': "# Blank Python\n", 
+                                    'php':   "<?php\n# Blank PHP\n?>\n", 
+                                    'ruby':  "# Blank Ruby\n" 
+                                 }, 
+                     'view'    : { 'python': "# Blank Python\nsourcescraper = ''\n", 
+                                   'php':    "<?php\n# Blank PHP\n$sourcescraper = ''\n?>\n", 
+                                   'ruby':   "# Blank Ruby\nsourcescraper = ''\n" 
+                                  }
+                   }
+                   
 def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     #return url (where to exit the editor to)
     return_url = reverse('frontpage')
@@ -883,22 +878,22 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         else:
             raise Exception, "Invalid wiki type"
 
-        startupcode = blankstartupcode[language]
+        startupcode = blankstartupcode[wiki_type][language]
         statuptemplate = request.GET.get('template', False)
         if statuptemplate:
             try:
                 templatescraper = models.Code.objects.get(published=True, language=language, short_name=statuptemplate)  # wiki_type as well?
                 startupcode = templatescraper.saved_code()
                 
-                # this replaces the phrase: sourcescraper = 'working-example' with sourcescraper = 'replacement-name'
-                # which means we can have templates that are valid even without a successful substitution of this one 
-                # value (beyond which we do not have any current plans)
-                inputscrapername = request.GET.get('scraper', False)
-                if inputscrapername:
-                    startupcode = re.sub('''(?<=sourcescraper = ["']).*?(?=["'])''', inputscrapername, startupcode)
-            
             except models.Code.DoesNotExist:
                 startupcode = startupcode.replace("Blank", "Missing template for")
+            
+        # this replaces the phrase: sourcescraper = 'working-example' with sourcescraper = 'replacement-name'
+        # which means we can have templates that are valid even without a successful substitution of this one 
+        # value (beyond which we do not have any current plans)
+        inputscrapername = request.GET.get('sourcescraper', False)
+        if inputscrapername:
+            startupcode = re.sub('''(?<=sourcescraper = ["']).*?(?=["'])''', inputscrapername, startupcode)
             
         scraper.language = language
         code = startupcode

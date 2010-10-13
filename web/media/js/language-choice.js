@@ -13,17 +13,14 @@ $(function(){
 });
 
 function newCodeObject(wiki_type){
-
-    var oPopup = $('<div id="template_popup"></div>');
-    oPopup.modal();
     url = '/' + wiki_type + 's/new/choose_template/?ajax=1';
-    if (scraper_short_name != ''){
-        url += '&scraper_short_name=' + scraper_short_name
-    }
-    $('#template_popup').load(url, 
-            function(){
-                $('#simplemodal-container').css('height', 'auto');    
-                $(window).resize();
-        });
-
+    if (scraper_short_name != '')
+        url += '&sourcescraper=' + scraper_short_name; 
+    $.get(url, function(data) {
+                    $.modal('<div id="template_popup">'+data+'</div>', {
+                             overlayClose: true, 
+                             autoResize: true, 
+                             containerCss:{ borderColor:"#0ff", width:"500px" }, 
+                           });
+         });
 }

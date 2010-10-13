@@ -167,6 +167,7 @@ br.clear {clear:both;}
     font-size:2em; background:url(../images/transparent.png) repeat 0 0; line-height:1.3em;}
 #divAboutScraper textarea {margin-bottom:1em;height:15em!important;}
 #divMarkupHint {padding-top:1em;}
+
 .views li {float:left;}
 .views li a {display:block;width:220px; text-align:center;}
 .views.small li a {width:110px;}
