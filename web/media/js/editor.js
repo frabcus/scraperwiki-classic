@@ -154,7 +154,8 @@ $(document).ready(function() {
         $('#menu_tutorials').click(function(){
             $('#popup_tutorials').modal({
                  overlayClose: true, 
-                 containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }
+                 containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
+                 overlayCss: { cursor:"auto" }
                 });
         });
         $('form#editor').submit(function() { 
@@ -225,10 +226,6 @@ $(document).ready(function() {
         showTab('console'); 
     }
     
-    function showPopup(sId) {
-        $(sId).modal({overlayClose: true});
-    }
-
     // show the bottom grey sliding up message
     function showFeedbackMessage(sMessage){
        $('#feedback_messages').html(sMessage)
@@ -559,8 +556,9 @@ $(document).ready(function() {
                 }),
             dataType: "html",
             success: function(diff) {
-                $.modal('<div class="popupoutput"><pre>'+cgiescape(diff)+'</pre></div>', 
-                        {overlayClose: true});
+                $.modal('<pre class="popupoutput">'+cgiescape(diff)+'</pre>', {
+                        overlayClose: true 
+                       });
             }
         });
     }
@@ -575,9 +573,8 @@ $(document).ready(function() {
     }
 
     function reloadScraper(){
-        if (shortNameIsSet() == false){
-            $('#diff pre').text("Cannot reload draft scraper");
-            showPopup('#diff');
+        if (shortNameIsSet() == false) {
+            alert("Cannot reload draft scraper");
             return; 
         }
 
@@ -721,6 +718,7 @@ $(document).ready(function() {
         $.modal(previewscreen, { 
             overlayClose: true,
             containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
+            overlayCss: { cursor:"auto" }, 
             onShow: function(d) {
                 ifrm = document.getElementById('previewiframe');
                 activepreviewiframe = (ifrm.contentWindow ? ifrm.contentWindow : (ifrm.contentDocument.document ? ifrm.contentDocument.document : ifrm.contentDocument));
@@ -901,9 +899,10 @@ $(document).ready(function() {
     }
 
     function showTextPopup(sLongMessage) {
-        $.modal('<div class="popupoutput"><pre>'+cgiescape(sLongMessage)+'</pre></div>', 
+        $.modal('<pre class="popupoutput">'+cgiescape(sLongMessage)+'</pre>', 
                 {overlayClose: true, 
-                 containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%" }
+                 containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
+                 overlayCss: { cursor:"auto" }
                 });
     }
 

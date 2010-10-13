@@ -283,7 +283,7 @@ def scraper_delete_scraper(request, short_name):
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
-def view_overview (request, view_short_name):
+def view_overview (request, short_name):
     user = request.user
     scraper = get_code_object_or_none(models.View, short_name=short_name)
     if not scraper:

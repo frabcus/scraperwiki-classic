@@ -22,6 +22,7 @@ function newCodeObject(wiki_type){
                              overlayClose: true, 
                              autoResize: true, 
                              containerCss:{ borderColor:"#0ff", width:"500px" }, 
+                             overlayCss: { cursor:"auto" }
                            });
          });
 }

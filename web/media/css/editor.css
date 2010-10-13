@@ -132,31 +132,12 @@ span.hiddenfields { margin-left:10px; }
 
 .popup_item .popup_header {margin:0 0 0 0;height:4%; position:relative;}
 
-.popupoutput {text-align:left; overflow-y:auto; background:#000!important; color:#3cef3b;}
-.popupoutput pre {white-space: pre-wrap;white-space: -moz-pre-wrap;
+pre.popupoutput {text-align:left; overflow-y:auto; background:#000!important; color:#3cef3b;}
+pre.popupoutput {white-space: pre-wrap;white-space: -moz-pre-wrap;
     white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;
     }
-    
-.popupoutput #simplemodal-container code {background:#141414; border-left:3px solid #65B43D; color:#bbb; display:block; margin-bottom:12px; padding:4px 6px 6px;}
 
-.popup_item .popup_error {background:#a22424; padding:0.1em 0; margin:0; text-align:center; position:relative; top:-1em;color:#fff;}
-
-#popup_exception, #popup_text {background:#000!important; color:#3cef3b;}
-#popup_exception h3, #popup_text h3 {border-bottom:solid 1px #089608; padding-bottom:0.7em;}
-#popup_exception pre, #popup_text pre {white-space: pre-wrap;white-space: -moz-pre-wrap;
-    white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;}
-#popup_exception a.popupClose, #popup_text a.popupClose {color:#fff;}
-
-
-
-#popup_tutorials {text-align:left; overflow-y:auto; }
-#popup_tutorials {display:none; }
-
-
-.popupClose {right:0; top:0; position:absolute; color:#000; background-color:#fcc; display:block; cursor:pointer;}
-.popupReady {font-weight:bold;}
-.popup_controls {padding-top:1em; margin-top:1em;border-top:solid 1px #808080;position:relative;}
-.popup_controls .right {position:absolute; right:0; top:1em; }
+#popup_tutorials {text-align:left; overflow-y:auto; display:none; }
 
 dl.quick_help dt code {font-size:1.3em;}
 dl.quick_help dd {font-size:0.8em; padding:0.5em 0 1.2em 0; margin:0;}
