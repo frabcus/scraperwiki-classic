@@ -564,7 +564,6 @@ $(document).ready(function() {
             success: function(diff) {
                 $.modal('<div class="popupoutput"><pre>'+cgiescape(diff)+'</pre></div>', 
                         {overlayClose: true});
-                $.modal.css({'background': '#000')
             }
         });
     }
