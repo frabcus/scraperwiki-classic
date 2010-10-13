@@ -926,7 +926,7 @@ $(document).ready(function() {
         }
         else if (sMessage.length > 110) {
             sLongMessage = sMessage; 
-            escsMessage = cgiescape(sMessage.substring(0, 100)); 
+            escsMessage = cgiescape(sMessage.replace(/^\s+|\s+$/g, "").substring(0, 100)); 
         }
 
         //create new item
