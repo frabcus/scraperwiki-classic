@@ -125,12 +125,18 @@ span.hiddenfields { margin-left:10px; }
 /* Overlays and help */
 
 /* note that height of popup is set from editor.js showPopup() */
-#popups .popup_item {border: 10px solid #333;height:300px;background:#fff;
+.popup_item {border: 10px solid #333;height:300px;background:#fff;
     z-index:110; position:absolute; top:0; left:0; width:86%; margin:4%; padding:0 2%;
     text-align:left; display:none; }
 
+
 .popup_item .popup_header {margin:0 0 0 0;height:4%; position:relative;}
-.popup_item .output {overflow-y:auto; height:88%;}
+
+.popupoutput {text-align:left; overflow-y:auto; background:#000!important; color:#3cef3b;}
+.popupoutput pre {white-space: pre-wrap;white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;
+    }
+
 .popup_item .popup_error {background:#a22424; padding:0.1em 0; margin:0; text-align:center; position:relative; top:-1em;color:#fff;}
 
 #popup_exception, #popup_text {background:#000!important; color:#3cef3b;}
@@ -139,11 +145,14 @@ span.hiddenfields { margin-left:10px; }
     white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;}
 #popup_exception a.popupClose, #popup_text a.popupClose {color:#fff;}
 
-#popups .popup_item#popup_tutorials {padding-right:0;}
+
+
+#popup_tutorials {text-align:left; overflow-y:auto; }
+#popup_tutorials {display:none; }
+
 
 .popupClose {right:0; top:0; position:absolute; color:#000; background-color:#fcc; display:block; cursor:pointer;}
 .popupReady {font-weight:bold;}
-
 .popup_controls {padding-top:1em; margin-top:1em;border-top:solid 1px #808080;position:relative;}
 .popup_controls .right {position:absolute; right:0; top:1em; }
 

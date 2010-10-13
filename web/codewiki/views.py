@@ -192,6 +192,7 @@ def scraper_admin (request, short_name):
             #save scraper
             scraper.save()
             response.write(response_text)
+            
         #saved by form 
         else:
             form = forms.ScraperAdministrationForm(request.POST, instance=scraper)
@@ -889,7 +890,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
                 templatescraper = models.Code.objects.get(published=True, language=language, short_name=statuptemplate)  # wiki_type as well?
                 startupcode = templatescraper.saved_code()
                 
-                # this replaces the phrase: inputscraper = 'working-example' with inputscraper = 'replacement-name'
+                # this replaces the phrase: sourcescraper = 'working-example' with sourcescraper = 'replacement-name'
                 # which means we can have templates that are valid even without a successful substitution of this one 
                 # value (beyond which we do not have any current plans)
                 inputscrapername = request.GET.get('scraper', False)

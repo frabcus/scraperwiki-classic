@@ -2,7 +2,7 @@
 host	= 127.0.0.1
 port	= 9000
 umllist	= uml001
-confurl	= http://localhost:8000/whitelist/config
+confurl	= allwhite
 path    = /home/goatchurch/scraperwiki/scraperlibs
 
 [twister]

@@ -3,9 +3,10 @@ $(document).ready(function() {
     //variables
     var pageIsDirty = true;
     var editor_id = 'id_code';
-    var codeeditor;
+    var codeeditor = undefined;
     var codemirroriframe; // the iframe that needs resizing
-    var codemirroriframeheightdiff; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
+    var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
+    var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
     var short_name = $('#scraper_short_name').val();
     var guid = $('#scraper_guid').val();
@@ -18,7 +19,7 @@ $(document).ready(function() {
     var wiki_type = $('#id_wiki_type').val(); 
     var viewrunurl = $('#viewrunurl').val(); 
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
-    var conn; // Orbited connection
+    var conn = undefined; // Orbited connection
     var bConnected = false; 
     var bSuppressDisconnectionMessages = false; 
     var buffer = "";
@@ -55,7 +56,6 @@ $(document).ready(function() {
     setupMenu();
     setupOrbited();
     setupTabs();
-    setupPopups();
     setupToolbar();
     setupResizeEvents();
 
@@ -114,12 +114,14 @@ $(document).ready(function() {
             autoMatchParens: true,
             width: '100%',
             parserConfig: parserConfig[scraperlanguage],
+            enterMode: "flat", // default is "indent" (which I have found buggy),  also can be "keep"
             onChange: function ()  { setPageIsDirty(true); },
 
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
                     codemirroriframe = codeeditor.frame // $("#id_code").next().children(":first"); (the object is now a HTMLIFrameElement so you have to set the height as an attribute rather than a function)
                     codemirroriframeheightdiff = codemirroriframe.height - $("#codeeditordiv").height(); 
+                    codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
                     setupKeygrabs();
                     resizeControls('first');
                     setPageIsDirty(false); // page not dirty at this point
@@ -152,11 +154,10 @@ $(document).ready(function() {
 
     //Setup Menu
     function setupMenu(){
-        $('#menu_settings').click(function(){
-            showPopup('popup_settings'); 
-        });
         $('#menu_tutorials').click(function(){
-            showPopup('popup_tutorials'); 
+            $('#popup_tutorials').modal({overlayClose: true, 
+                 containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }
+                });
         });
         $('form#editor').submit(function() { 
             saveScraper(); 
@@ -166,9 +167,11 @@ $(document).ready(function() {
         $('#chat_line').bind('keypress', function(eventObject) {
             var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
             var target = eventObject.target.tagName.toLowerCase();
-            if (key === 13 && target === 'input') {
+            if (key === 13 && target === 'input') 
+            {
                 eventObject.preventDefault();
-                sendChat(); 
+                if (bConnected) 
+                    sendChat(); 
                 return false; 
             }
             return true; 
@@ -227,68 +230,8 @@ $(document).ready(function() {
         showTab('console'); 
     }
     
-    //Setup Popups
-    function setupPopups(){
-        popupStatus = 0
-        //assign escape key to close popups
-        $(document).keypress(function(e) {
-            if (e.keyCode == 27 && popupStatus == 1) {
-                hidePopup();
-            }
-        });
-
-        //setup evnts
-        $('.popupClose').click(
-            function() {
-                hidePopup();
-                return false;
-            }
-        );
-        $('.popupReady').click(
-            function() {
-                hidePopup();
-                return false;
-            }
-        );
-
-        $('#overlay').click(
-            function() {
-                hidePopup();
-            }
-        );   
-    }
-
     function showPopup(sId) {
-
-        $('.popup_error').hide();
-        $(sId).modal();
-        /*
-        //show or hide the relivant block
-        $('#popups div.popup_item').each(function(i) {
-            if (this.id == sId) {
-                
-                popupStatus = 1;
-                //show
-                $(this).css({
-                    // display:'block',
-                    height: $(window).height() - 100,
-                    "margin-top": 50,
-                    position: 'absolute'
-                });
-                $(this).fadeIn("fast")
-
-                //add background
-                $('#popups #overlay').css({
-                    width: $(window).width(),
-                    height: $(window).height()
-                });
-                $('#popups #overlay').fadeIn("fast")
-
-            } else {
-                this.style.display = "none";
-            }
-        });
-        */
+        $(sId).modal({overlayClose: true});
     }
 
     // show the bottom grey sliding up message
@@ -316,7 +259,7 @@ $(document).ready(function() {
                  "username":username, 
                  "userrealname":userrealname, 
                  "language":scraperlanguage, 
-                 "scraper-name":short_name, 
+                 "scrapername":short_name, 
                  "isstaff":isstaff };
         send(data);
     }
@@ -618,8 +561,8 @@ $(document).ready(function() {
                 }),
             dataType: "html",
             success: function(diff) {
-                $('#diff pre').text(diff);
-                showPopup('diff');
+                $.modal('<div class="popupoutput"><pre>'+cgiescape(diff)+'</pre></div>', 
+                        {overlayClose: true});
             }
         });
     }
@@ -636,7 +579,7 @@ $(document).ready(function() {
     function reloadScraper(){
         if (shortNameIsSet() == false){
             $('#diff pre').text("Cannot reload draft scraper");
-            showPopup('diff');
+            showPopup('#diff');
             return; 
         }
 
@@ -768,24 +711,23 @@ $(document).ready(function() {
             else
                 previewmessage = ' [' + urlquery + '] is an invalid query string'; 
         }
-        previewmessage = '<a href="' + viewurl + '" target="_blank">' + viewurl + '</a>' + previewmessage; 
 
-        $('#previewmessage').html(previewmessage); 
-        $('#popup_preview iframe#previewiframe').css({height: $(window).height() - 180}); 
+        previewscreen = '<h3>View preview <small><a href="'+viewurl+'" target="_blank">'+viewurl+'</a>'+previewmessage+'</small></h3>'; 
+        isrc = ""; // isrc = viewurl; (would allow direct inclusion from saved version)
+        previewscreen += '<div><iframe id="previewiframe" width="100%" height="'+($(window).height()-180)+'px" src="'+isrc+'"></iframe></div>'; 
 
-        // direct method of importing from a view run
-        // $('#popup_preview iframe.view').attr('src', viewurl);  
-
-        // indirect method of directing the run panel into the iframe (works for drafts and without saving)
-        $('#popup_preview iframe#previewiframe').attr('src', 'about:blank');  
-        ifrm = document.getElementById('previewiframe');// $('#popup_preview iframe#previewiframe'); 
-        activepreviewiframe = (ifrm.contentWindow) ? ifrm.contentWindow : (ifrm.contentDocument.document) ? ifrm.contentDocument.document : ifrm.contentDocument;
-        activepreviewiframe.document.open(); 
-
-        sendCode(); // do the running the standard way
-
-        showPopup('popup_preview'); 
+        $.modal(previewscreen, { 
+            overlayClose: true,
+            containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
+            onShow: function (d) {
+                ifrm = document.getElementById('previewiframe');
+                activepreviewiframe = (ifrm.contentWindow ? ifrm.contentWindow : (ifrm.contentDocument.document ? ifrm.contentDocument.document : ifrm.contentDocument));
+                activepreviewiframe.document.open(); 
+                sendCode(); // trigger the running once we're ready for the output
+            }
+        }); 
     }
+
     //Save
     function saveScraper(){
         var bSuccess = false;
@@ -824,8 +766,7 @@ $(document).ready(function() {
 
                     //failed
                     if (res.status == 'Failed'){
-                        $('#meta_form .popup_error').show();
-                        $('#meta_form .popup_error').html("Failed to save, please make sure you have entered a title, a description and a commit message");
+                        alert("Save failed error message.  Shouldn't happen"); 
 
                     //success    
                     }else{
@@ -868,11 +809,6 @@ $(document).ready(function() {
         }
     }
 
-    //Show random text popup
-    function showTextPopup(sMessage, sMessageType){
-        $('#popup_text .output pre').html(sMessage);
-        showPopup('popup_text');
-    }
     
     function setupResizeEvents(){
         
@@ -958,8 +894,15 @@ $(document).ready(function() {
 
     function writeRunOutput(sMessage) {
         writeToConsole(sMessage, 'console'); 
-        if (activepreviewiframe != undefined) 
+        if ((activepreviewiframe != undefined) && (activepreviewiframe.document != undefined))
             activepreviewiframe.document.write(sMessage); 
+    }
+
+    function showTextPopup(sLongMessage) {
+        $.modal('<div class="popupoutput"><pre>'+cgiescape(sLongMessage)+'</pre></div>', 
+                {overlayClose: true, 
+                 containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%" }
+                });
     }
 
     //Write to console/data/sources
@@ -997,7 +940,7 @@ $(document).ready(function() {
             oMoreLink.text(sExpand)
             oMoreLink.longMessage = sLongMessage;
             oConsoleItem.append(oMoreLink);
-            oMoreLink.click(function() { showTextPopup(cgiescape(sLongMessage)); });
+            oMoreLink.click(function() { showTextPopup(sLongMessage); });
         }
 
         // add clickable line number link
@@ -1126,6 +1069,8 @@ $(document).ready(function() {
       if (codemirroriframe){
           //resize the iFrame inside the editor wrapping div
           codemirroriframe.height = (($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px');
+          codemirroriframe.width = (($("#codeeditordiv").width() + codemirroriframewidthdiff) + 'px');
+
           //resize the output area so the console scrolls correclty
           iWindowHeight = $(window).height();
           iEditorHeight = $("#codeeditordiv").height();
@@ -1136,7 +1081,7 @@ $(document).ready(function() {
           $("#outputeditordiv").height(iOutputEditorDiv + 'px');   
           //$("#outputeditordiv .info").height($("#outputeditordiv").height() - parseInt($("#outputeditordiv .info").position().top) + 'px');
           $("#outputeditordiv .info").height((iOutputEditorDiv - iOutputEditorTabs) + 'px');
-//iOutputEditorTabs
+          //iOutputEditorTabs
       }
     };
     
