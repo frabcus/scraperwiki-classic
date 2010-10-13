@@ -136,6 +136,8 @@ span.hiddenfields { margin-left:10px; }
 .popupoutput pre {white-space: pre-wrap;white-space: -moz-pre-wrap;
     white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;
     }
+    
+.popupoutput #simplemodal-container code {background:#141414; border-left:3px solid #65B43D; color:#bbb; display:block; margin-bottom:12px; padding:4px 6px 6px;}
 
 .popup_item .popup_error {background:#a22424; padding:0.1em 0; margin:0; text-align:center; position:relative; top:-1em;color:#fff;}
 
