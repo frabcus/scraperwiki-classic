@@ -155,7 +155,8 @@ $(document).ready(function() {
     //Setup Menu
     function setupMenu(){
         $('#menu_tutorials').click(function(){
-            $('#popup_tutorials').modal({overlayClose: true, 
+            $('#popup_tutorials').modal({
+                 overlayClose: true, 
                  containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }
                 });
         });
@@ -719,7 +720,7 @@ $(document).ready(function() {
         $.modal(previewscreen, { 
             overlayClose: true,
             containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
-            onShow: function (d) {
+            onShow: function(d) {
                 ifrm = document.getElementById('previewiframe');
                 activepreviewiframe = (ifrm.contentWindow ? ifrm.contentWindow : (ifrm.contentDocument.document ? ifrm.contentDocument.document : ifrm.contentDocument));
                 activepreviewiframe.document.open(); 

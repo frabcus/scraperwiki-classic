@@ -29,7 +29,6 @@ class editorForm(forms.ModelForm):
 
 
 class CodeTagForm (forms.Form):
-
         tags = forms.CharField(required=False, label="Add new tags (comma separated)")
 
 class ScraperAdministrationForm (forms.ModelForm):
@@ -51,18 +50,3 @@ class ViewAdministrationForm (forms.ModelForm):
         model = View
         fields = ('title', 'description', 'published', 'featured')
 
-class ChooseTemplateForm (forms.Form):
-    language = forms.ChoiceField(required=True, label="Language", choices = code.LANGUAGES, initial='Python')
-    template = forms.ChoiceField(required=True, label="Template", choices = [], widget=forms.RadioSelect, initial='')    
-
-    def __init__(self, wiki_type, *args, **kwargs):
-        super(ChooseTemplateForm, self).__init__(*args, **kwargs)
-
-        #get the relivent templates for this type of code object
-        templates = [('', 'Blank ' + wiki_type)]
-        template_objects = Code.objects.filter(deleted=False, published=True, isstartup=True, wiki_type=wiki_type)
-        for template_object in template_objects:
-            templates.append((template_object.short_name, template_object.title, template_object.language))
-
-        #set the templates
-        self.fields['template'].choices = templates

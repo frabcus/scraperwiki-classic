@@ -21,7 +21,6 @@ from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
 from registration.backends import get_backend
 from profiles import views as profile_views
-from codewiki.forms import ChooseTemplateForm
 import django.contrib.auth.views
 import os
 import re
