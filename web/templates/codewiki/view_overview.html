@@ -19,21 +19,30 @@
             <div id="divAboutScraper">{{ scraper.description|textile }}</div>
         </div>
     </div>
-    
     <div class="content col left">
         <h3>Contributors</h3>
         {% include 'codewiki/includes/contributors.html' %}
     </div>
-    {% if related_scrapers %}
         <div class="content col right">
-            <h3>Scrapers used in the making of this view</h3>
-            <ul>
-                {% for related_scraper in related_scrapers %}
-                    <a href="{% url code_overview related_scraper.wiki_type related_scraper.short_name %}">{{related_scraper.title}}</a>
-                {% endfor %}
-            </ul>
+            {% if related_scrapers %}            
+                <h3>Scrapers used in the making of this view</h3>
+                <ul>
+                    {% for related_scraper in related_scrapers %}
+                        <a href="{% url code_overview related_scraper.wiki_type related_scraper.short_name %}">{{related_scraper.title}}</a>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <h3>Delete &amp; reset</h3>
+             {% if user_owns_it %}    
+                 <form action="{% url scraper_delete_scraper 'view' scraper.short_name %}" method="post">
+                     <input type="hidden" name="delete_scraper" value="1" />
+                     <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
+                     <p>Deletes this view. There is no undo.</p>
+                 </form>
+             {% else %}
+                 <p class="infobox">Only the creator of a view can delete it.</p>
+             {% endif %}
         </div>
-    {% endif %}
     <br class="clear"/>    
     <div class="content full">
       <a name="embed"></a>
@@ -44,10 +53,11 @@
       {% endfilter %}
       </code>
     </div>
-    <br class="clear"/>    
+    <br class="clear"/>  
 {% endblock %}
 {% block run_script %}
     {% if user.is_authenticated %}
         setupScraperEditInPlace('view', '{{scraper.short_name}}');
+        setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this view.");
     {% endif %}
 {% endblock %}
