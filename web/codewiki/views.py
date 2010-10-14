@@ -267,22 +267,35 @@ def scraper_run_scraper(request, short_name):
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
-# should be generalized to both wikitypes
-def scraper_delete_scraper(request, short_name):
+# TODO: refactor - remove duplication
+def scraper_delete_scraper(request, wiki_type, short_name):
     user = request.user
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
+    if wiki_type == 'scraper':
+        scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+        if not scraper:
+            return code_error_response(models.Scraper, short_name=short_name, request=request)
 
-    if scraper.owner() != request.user:
-        raise Http404
-    if request.POST.get('delete_scraper', None) == '1':
-        scraper.deleted = True
-        scraper.save()
-        request.notifications.add("Your scraper has been deleted")
-        return HttpResponseRedirect('/')
-    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
-
+        if scraper.owner() != request.user:
+            raise Http404
+        if request.POST.get('delete_scraper', None) == '1':
+            scraper.deleted = True
+            scraper.save()
+            request.notifications.add("Your scraper has been deleted")
+            return HttpResponseRedirect('/')
+        return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
+    else:
+        view = get_code_object_or_none(models.View, short_name=short_name)
+        if not view:
+            return code_error_response(models.View, short_name=short_name, request=request)
+        if view.owner() != request.user:
+            raise Http404
+        if request.POST.get('delete_scraper', None) == '1':
+            view.deleted = True
+            view.save()
+            request.notifications.add("Your view has been deleted")
+            return HttpResponseRedirect('/')
+        return HttpResponseRedirect(reverse('code_overview', args=[view.wiki_type, short_name]))
+        
 
 def view_overview (request, short_name):
     user = request.user
@@ -291,11 +304,12 @@ def view_overview (request, short_name):
         return code_error_response(models.View, short_name=short_name, request=request)
 
     scraper_tags = Tag.objects.get_for_object(scraper)
+    user_owns_it = (scraper.owner() == user)
     
     #get scrapers used in this view
     related_scrapers = scraper.relations.filter(wiki_type='scraper')
     
-    context = {'selected_tab': 'overview', 'scraper': scraper, 'scraper_tags': scraper_tags, 'related_scrapers': related_scrapers, }
+    context = {'selected_tab': 'overview', 'scraper': scraper, 'scraper_tags': scraper_tags, 'related_scrapers': related_scrapers, 'user_owns_it': user_owns_it}
     return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
     
     
@@ -1002,7 +1016,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     context['has_draft'] = has_draft
     context['user'] = request.user
     context['source_scraper'] = source_scraper
-    context['quick_help_template'] = 'codewiki/includes/quick_help_%s.html' % scraper.language.lower()
+    context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())
     context['selected_tab'] = 'code'
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
 
