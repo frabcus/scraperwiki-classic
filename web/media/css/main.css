@@ -176,6 +176,12 @@ br.clear {clear:both;}
 .views li.new {border:dashed 1px #ccc; width:220px;height:145px;background:#fafafa; padding:0;}
 .views li.new a {margin-top:26%;}
 
+.screenshot_large {position:relative;border:solid;width:800px; height:600px;border:dotted 1px #808080;}
+.screenshot_large a {display:block; width:100%; height:100%;position:absolute; top:0; left:0;
+    z-index:99;}
+.screenshot_large span {background:#fff;opacity:0.8;-mozopacity:0.8;-webkitopacity:0.8;opacity:0.8;filter:alpha(opacity='80');text-align:center;
+    font-size:2em;display:block;padding:1em;margin:250px 100px 0 100px;}
+
 #divEditTags form input {height:1.3em!important; width:200px!important;}
 
 /* View pages */

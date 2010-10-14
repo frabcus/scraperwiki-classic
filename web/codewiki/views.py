@@ -775,7 +775,7 @@ def raw(request, short_name=None):
     return HttpResponse(result, mimetype="text/plain")
 
 #save a code object
-def save_code(code_object, user, code_text, earliesteditor, commitmessage):
+def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourcescraper = ''):
 
     code_object.line_count = int(code_text.count("\n"))
     
@@ -786,7 +786,13 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage):
         code_object.scraper.save()
     else:
         code_object.update_meta()
-        code_object.save()   
+        code_object.save()
+
+        #make link to source scraper
+        if sourcescraper:
+            scraper = get_code_object_or_none(models.Code, short_name=sourcescraper)
+            if scraper:
+                code_object.relations.add(scraper)
 
     # save code and commit code through the mercurialinterface
     lcommitmessage = earliesteditor and ("%s|||%s" % (earliesteditor, commitmessage)) or commitmessage
@@ -823,10 +829,10 @@ def handle_session_draft(request, action):
     draft_scraper.save()
     #draft_commit_message = action.startswith('commit') and session_scraper_draft.get('commit_message') or None
     draft_code = session_scraper_draft.get('code')
-
-    commitmessage = request.POST.get('commit_message', "")
-    earliesteditor = request.POST.get('earliesteditor', "")
-    save_code(draft_scraper, request.user, draft_code, earliesteditor, commitmessage)
+    sourcescraper = session_scraper_draft.get('sourcescraper')
+    commitmessage = session_scraper_draft.get('commit_message', "") # needed?
+    earliesteditor = session_scraper_draft.get('earliesteditor', "") #needed?
+    save_code(draft_scraper, request.user, draft_code, earliesteditor, commitmessage, sourcescraper)
 
     # work out where to send them next
     #go to the scraper page if commited, or the editor if not
@@ -855,12 +861,13 @@ def saveeditedscraper(request, lscraper):
 
     # Add some more fields to the form
     code = form.cleaned_data['code']
+    commitmessage = request.POST.get('commit_message', "")
+    sourcescraper = request.POST.get('sourcescraper', "")    
     
     # User is signed in, we can save the scraper
     if request.user.is_authenticated():
-        commitmessage = request.POST.get('commit_message', "")
         earliesteditor = request.POST.get('earliesteditor', "")
-        save_code(scraper, request.user, code, earliesteditor, commitmessage)  
+        save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
 
         # Work out the URL to return in the JSON object
         url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name':scraper.short_name})
@@ -873,7 +880,7 @@ def saveeditedscraper(request, lscraper):
 
     # User is not logged in, save the scraper to the session
     else:
-        draft_session_scraper = { 'scraper':scraper, 'code':code, 'commit_message': request.POST.get('commit_message')}
+        draft_session_scraper = { 'scraper':scraper, 'code':code, 'commit_message': request.POST.get('commit_message'), 'sourcescraper': sourcescraper}
         request.session['ScraperDraft'] = draft_session_scraper
 
         # Set a message with django_notify telling the user their scraper is safe
@@ -984,11 +991,17 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
 
         tutorial_scrapers = models.Code.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
 
+    #if a source scraper has been set, then pass it to the page
+    source_scraper = ''
+    if scraper.wiki_type == 'view' and request.GET.get('sourcescraper', False):
+       source_scraper =  request.GET.get('sourcescraper', False)
+
     context = {}
     context['form'] = form
     context['scraper'] = scraper
     context['has_draft'] = has_draft
     context['user'] = request.user
+    context['source_scraper'] = source_scraper
     context['quick_help_template'] = 'codewiki/includes/quick_help_%s.html' % scraper.language.lower()
     context['selected_tab'] = 'code'
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
