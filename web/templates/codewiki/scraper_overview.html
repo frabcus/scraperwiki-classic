@@ -156,7 +156,7 @@
             <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
             <p>Removes all data for this scraper. There is no undo.</p>
         </form>
-        <form action="{% url scraper_delete_scraper scraper.short_name %}" method="post">
+        <form action="{% url scraper_delete_scraper 'scraper' scraper.short_name %}" method="post">
             <input type="hidden" name="delete_scraper" value="1" />
             <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
             <p>Deletes this scraper and all its data. There is no undo.</p>
