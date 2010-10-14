@@ -158,6 +158,7 @@ function setupSearchBoxHint(){
     });
     $('#divSidebarSearch input:text').blur();
 }
+$(document).ready(function(){ setupSearchBoxHint(); }); 
 
 function setupScroller(){
     
@@ -259,7 +260,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
              loadurl: 'raw_about_markup/',
              event: 'dblclick',
              submitdata : {js: 1, short_name: short_name},
-             placeholder: '',             
+             placeholder: ''       
          });
 
     $('#aEditAboutScraper').click(
@@ -279,7 +280,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
              submit    : 'Save',
              event: 'dblclick',
              placeholder: '',             
-             submitdata : {js: 1, short_name: short_name},
+             submitdata : {js: 1, short_name: short_name}
          });
          
     $('#aEditTitle').click(
@@ -310,7 +311,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
                  };
                  //clear out the textbox for next time
                  $('#divEditTags').html('');
-            },
+            }
          });
     $('#aAddTags').click (
          function(){
@@ -330,7 +331,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
               type   : 'select',
               event: 'dblclick',
               placeholder: '',
-              submitdata : {js: 1, short_name: short_name},
+              submitdata : {js: 1, short_name: short_name}
           });
       
       $('#aEditSchedule').click (
