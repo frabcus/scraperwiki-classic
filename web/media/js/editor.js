@@ -283,7 +283,7 @@ $(document).ready(function() {
                 writeToChat('<b>You will need to reload the page to reconnect</b>');  
                 writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
                 writeToConsole("(You can still save your work)", "exceptionnoesc"); }, 
-                25); 
+                250); 
 
 
         $('.editor_controls #run').val('Unconnected');
@@ -416,7 +416,7 @@ $(document).ready(function() {
         try {
             conn.send($.toJSON(json_data));  
         } catch(err) {
-            alert("Send error: " + err); 
+            writeToConsole("Send error: " + err, "exceptionnoesc"); 
         }
     }
 
@@ -666,7 +666,7 @@ $(document).ready(function() {
                     return false; 
                 bSuppressDisconnectionMessages = true; 
                 send({"command":'loseconnection'}) 
-                // if (conn)  conn.close();  
+                //if (conn)  conn.close();  
                 return true;
             }
         );
@@ -674,7 +674,8 @@ $(document).ready(function() {
         $(window).unload( function () { 
             bSuppressDisconnectionMessages = true; 
             writeToConsole('window unload'); 
-            if (conn)  conn.close();  
+            send({"command":'loseconnection'}) 
+            //if (conn)  conn.close();  
         });  
 
 
