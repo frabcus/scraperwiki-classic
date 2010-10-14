@@ -125,6 +125,7 @@ class RunnerProtocol(protocol.Protocol):
         self.username = ""
         self.userrealname = ""
         self.chatname = ""
+        self.cchatname = ""            # combined version delimited with | for sending to umlmonitor
         self.clientnumber = -1         # number for whole operation of twisted
         self.scrapereditornumber = -1  # number out of all people editing a particular scraper
         self.earliesteditor = datetime.datetime.now()  # used to group together everything in one editing session
@@ -146,6 +147,7 @@ class RunnerProtocol(protocol.Protocol):
                 line = json.dumps({'message_type' : "saved", 'content' : "%s saved" % self.chatname})
                 otherline = json.dumps({'message_type' : "othersaved", 'content' : "%s saved" % self.chatname})
                 self.writeall(line, otherline)
+                self.factory.notifyMonitoringClientsSave(self)
             
             elif parsed_data['command'] == 'run' and not self.running:
                 if 'code' in parsed_data:
@@ -180,8 +182,8 @@ class RunnerProtocol(protocol.Protocol):
                 else:   
                     self.write(format_message(message, message_type='chat'))  # write it back to itself
         
-            # this message helps kill it better 
-            elif parse_data['command'] == 'loseconnection':
+            # this message helps kill it better and killing it from the browser end
+            elif parsed_data['command'] == 'loseconnection':
                 self.transport.loseConnection()
         
         except Exception, e:
@@ -272,7 +274,7 @@ class RunnerProtocol(protocol.Protocol):
         else:
             self.chatname = "Anonymous%d" % self.factory.anonymouscount
             self.factory.anonymouscount += 1
-            
+        self.cchatname = "%s|%s" % (self.username, self.chatname)
         self.factory.clientConnectionRegistered(self)  # this will cause a notifyEditorClients to be called for everyone on this scraper
         self.factory.notifytwisterstatus()
         
@@ -418,23 +420,23 @@ class RunnerFactory(protocol.ServerFactory):
         umlstatuschanges = {'message_type':"umlchanges" }; 
         umlstatusdata = (cclient.isumlmonitoring and {'message_type':"umlstatus" } or None)
         
-# the chatnames have spaces in them.  must use username everywhere for purpose of forming classes in the html
+        # the cchatnames are username|chatname, so the javascript has something to handle for cases of "|Anonymous5" vs "username|username"
         
         # handle updates and changes in the monitoring users
-        umlmonitoringusers = set([ client.chatname  for client in self.umlmonitoringclients ])
+        umlmonitoringusers = set([ client.cchatname  for client in self.umlmonitoringclients ])
         if umlstatusdata:
             umlstatusdata["umlmonitoringusers"] = [ (chatname, True)  for chatname in umlmonitoringusers ]
         if cclient.isumlmonitoring:
-            umlstatuschanges["umlmonitoringusers"] = [ ( cclient.chatname, (cclient.chatname in umlmonitoringusers) ) ]
+            umlstatuschanges["umlmonitoringusers"] = [ ( cclient.cchatname, (cclient.cchatname in umlmonitoringusers) ) ]
         
         # handle draft scraper users and the run states (one for each user, though there may be multiple draft scrapers for them)
         draftscraperusers = { }
         for client in self.draftscraperclients:
-            draftscraperusers[client.chatname] = bool(client.running) or draftscraperusers.get(client.chatname, False)
+            draftscraperusers[client.cchatname] = bool(client.running) or draftscraperusers.get(client.cchatname, False)
         if umlstatusdata:
             umlstatusdata["draftscraperusers"] = [ (chatname, True, crunning)  for chatname, crunning in draftscraperusers.items() ]
-        if not cclient.isumlmonitoring and not client.guid:
-            umlstatuschanges["draftscraperusers"] = [ ( cclient.chatname, (cclient.chatname in draftscraperusers), draftscraperusers.get(cclient.chatname, False) ) ]
+        if not cclient.isumlmonitoring and not cclient.guid:
+            umlstatuschanges["draftscraperusers"] = [ ( cclient.cchatname, (cclient.cchatname in draftscraperusers), draftscraperusers.get(cclient.cchatname, False) ) ]
                 
         
         # the complexity here reflects the complexity of the structure.  the running flag could be set on any one of the clients
@@ -443,17 +445,16 @@ class RunnerFactory(protocol.ServerFactory):
             running = False
             
             for userclients in eoos.usereditors:
-                scrapereditors.add(userclients[0].chatname)
+                scrapereditors.add(userclients[0].cchatname)
                 for uclient in userclients:
                     running = running or bool(uclient.running)
             for uclient in eoos.anonymouseditors:
-                scrapereditors.add(uclient.chatname)
+                scrapereditors.add(uclient.cchatname)
                 running = running or bool(uclient.running)
-            
             if cclient:
-                scraperusers = [ ( cclient.chatname, (cclient.chatname in scrapereditors)) ]
+                scraperusers = [ ( cclient.cchatname, (cclient.cchatname in scrapereditors)) ]
             else:
-                scraperusers = [ (chatname, True)  for chatname in scrapereditors ]
+                scraperusers = [ (cchatname, True)  for cchatname in scrapereditors ]
             
             return (eoos.scrapername, True, running, scraperusers)
         
@@ -475,6 +476,13 @@ class RunnerFactory(protocol.ServerFactory):
             if client != cclient:
                 client.write(json.dumps(umlstatuschanges)) 
 
+    # just a signal sent for the latest event
+    def notifyMonitoringClientsSave(self, cclient):
+        if cclient.guid:
+            umlsavenotification = {'message_type':"umlsavenote", "scrapername":cclient.scrapername, "cchatname":cclient.cchatname }
+            for client in self.umlmonitoringclients:
+                client.write(json.dumps(umlsavenotification)) 
+            
 
     def clientConnectionMade(self, client):
         client.clientnumber = self.clientcount
