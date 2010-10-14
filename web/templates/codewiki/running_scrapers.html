@@ -25,7 +25,7 @@ div#monitoroutput div#draftscraperusers li.running {  background-color:#afa;   }
 
 div#monitoroutput ul#scraperentries {  display:block;  }
 div#monitoroutput ul#scraperentries li.scraper {  border: thin red solid; display:block;  }
-div#monitoroutput ul#scraperentries li.running {  background-color:#aaf; }
+div#monitoroutput ul#scraperentries li.running {  background-color:#afa; }
 div#monitoroutput ul#scraperentries li.scraper ul {  display:inline;  }
 div#monitoroutput ul#scraperentries li.scraper ul li {  border: thin black solid; display:inline;  }
 
@@ -239,7 +239,7 @@ $(document).ready(function() {
         if (jdata.message_type == "umlsavenote")
         {
             hidcchatname = "#SCR_" + jdata.scrapername + "_CHA_" + getIDfromCChatname(jdata.cchatname); 
-            $(hidcchatname).css("background", "#bfb"); 
+            $(hidcchatname).css("background", "#f9f"); 
             setTimeout('$(hidcchatname).css("background", "white");', 2500);
         }
     }
@@ -254,6 +254,27 @@ $(document).ready(function() {
         }
     }
 
+
+    var imgrefresharr = [ ]; 
+    function refreshImages()
+    {
+        q = (new Date())
+        $("#murefsh").html(q.toUTCString()); 
+        for (i = 0; i < imgrefresharr.length; i++)
+            $(imgrefresharr[i][0]).attr("src", imgrefresharr[i][1]+"?"+q.getTime()); 
+        window.setTimeout(refreshImages, 2*60*1000);  
+    }
+
+    function refreshImagesInit()
+    {
+        $("img.irefresh").each(function(i) { 
+            sidr = "ImgIR_"+i; 
+            $(this).attr("id", sidr)
+            imgrefresharr[i] = [ "#"+sidr, $(this).attr("src") ] 
+        }); 
+        window.setTimeout(refreshImages, 4000);  
+    }
+    refreshImagesInit(); 
 }); 
 </script>
 
@@ -281,11 +302,32 @@ $(document).ready(function() {
     <div id="message">...</div>
 </div>
 
+<h3><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h3>
+<small>refreshed: <span id="murefsh"></span></small>
+<table>
+<tr>
+  <th><a href="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki.html">Django server (horsell)</a></th>
+  <th><a href="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki.html">Datastore server (burbage)</a></th>
+</tr>
+
+<tr>
+  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki-cpu-day.png"></td>
+  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki-mysql_queries-day.png"></td>
+</tr>
+
+<tr><th colspan="2"><a href="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki.html">UML server (rush)</a></th></tr>
+<tr>
+  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-cpu-day.png"></td>
+  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-load-day.png"></td>
+</tr>
+</table>
+
 <div id="divLogo" style="float:left">
     <p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
 </div>
 
 <h1>UML Status</h1>
+(does not update)
 <table border="1" style="width:auto; margin:auto">
 <tr><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>
 {% for status in statusscrapers %}
@@ -343,25 +385,6 @@ $(document).ready(function() {
 {% endfor %}
 </table>
 
-
-<h1><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h1>
-<table>
-<tr>
-  <th><a href="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki.html">Django server (horsell)</a></th>
-  <th><a href="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki.html">Datastore server (burbage)</a></th>
-</tr>
-
-<tr>
-  <td><img src="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki-cpu-day.png"></td>
-  <td><img src="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki-mysql_queries-day.png"></td>
-</tr>
-
-<tr><th colspan="2"><a href="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki.html">UML server (rush)</a></th></tr>
-<tr>
-  <td><img src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-cpu-day.png"></td>
-  <td><img src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-load-day.png"></td>
-</tr>
-</table>
 
 </body>
 </html>
