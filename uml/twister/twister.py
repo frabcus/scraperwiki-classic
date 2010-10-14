@@ -106,6 +106,7 @@ class spawnRunner(protocol.ProcessProtocol):
         self.client.running = False
         self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished'}))
         self.client.factory.notifytwisterstatus()
+        self.client.factory.notifyMonitoringClients(self.client)
         print "run process ended ", data
 
 
@@ -157,7 +158,7 @@ class RunnerProtocol(protocol.Protocol):
                 if self.running:
                     self.kill_run()
                 
-                # someone who didn't start it going hits kill
+                # case of someone who didn't click run, invokes kill
                 # this really needs to be done through the EditorsOnOneScraper structure 
                 # once we have established a firmer foundation for running things yoked.  
                 # anonymous users who don't want to play this game could preferably derive a 
@@ -179,6 +180,9 @@ class RunnerProtocol(protocol.Protocol):
                 else:   
                     self.write(format_message(message, message_type='chat'))  # write it back to itself
         
+            # this message helps kill it better 
+            elif parse_data['command'] == 'loseconnection':
+                self.transport.loseConnection()
         
         except Exception, e:
             self.transport.write(format_message("Command not valid (%s)  %s " % (e, data)))
@@ -250,6 +254,9 @@ class RunnerProtocol(protocol.Protocol):
             self.factory.sendchatmessage(self.guid, message, None)
         else:   
             self.write(format_message(message, message_type='chat'))  # write it back to itself
+        
+        self.factory.notifyMonitoringClients(self)
+
 
     def connectionopen(self, parsed_data):
         self.guid = parsed_data.get('guid', '')
@@ -404,25 +411,67 @@ class RunnerFactory(protocol.ServerFactory):
         
         
     # throw in the kitchen sink to get the features.  optimize for changes later
-    def notifyMonitoringClients(self, message):
+    def notifyMonitoringClients(self, cclient):
         assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
-        umlstatusdata = {'message_type':"umlstatus" }; 
-        umlstatusdata["umlmonitoringusers"] = [ client.chatname  for client in self.umlmonitoringclients ]
-        umlstatusdata["draftscraperusers"] = [ client.chatname  for client in self.draftscraperclients ]
-        scraperentries = { }
-        for guid, eoos in self.guidclientmap.items():
-            scrapereditors = [ ]
-            for userclients in eoos.usereditors:
-                scrapereditors.append(userclients[0].chatname)
-            for client in eoos.anonymouseditors:
-                scrapereditors.append(client.chatname)
-            
-            scraperentry = { "scrapername": eoos.scrapername, "scraperlanguage":eoos.scraperlanguage, "editors":scrapereditors }
-            scraperentries[guid] = scraperentry
-        umlstatusdata["scraperentries"] = scraperentries
         
+        # both of these are in the same format and read the same, but changes are shorter
+        umlstatuschanges = {'message_type':"umlchanges" }; 
+        umlstatusdata = (cclient.isumlmonitoring and {'message_type':"umlstatus" } or None)
+        
+        # handle updates and changes in the monitoring users
+        umlmonitoringusers = set([ client.chatname  for client in self.umlmonitoringclients ])
+        if umlstatusdata:
+            umlstatusdata["umlmonitoringusers"] = [ (chatname, True)  for chatname in umlmonitoringusers ]
+        if cclient.isumlmonitoring:
+            umlstatuschanges["umlmonitoringusers"] = [ ( cclient.chatname, (cclient.chatname in umlmonitoringusers) ) ]
+        
+        # handle draft scraper users and the run states (one for each user, though there may be multiple draft scrapers for them)
+        draftscraperusers = { }
+        for client in self.draftscraperclients:
+            draftscraperusers[client.chatname] = bool(client.running) or draftscraperusers.get(client.chatname, False)
+        if umlstatusdata:
+            umlstatusdata["draftscraperusers"] = [ (chatname, True, crunning)  for chatname, crunning in draftscraperusers.items() ]
+        if not cclient.isumlmonitoring and not client.guid:
+            umlstatuschanges["draftscraperusers"] = [ ( cclient.chatname, (cclient.chatname in draftscraperusers), draftscraperusers.get(cclient.chatname, False) ) ]
+                
+        
+        # the complexity here reflects the complexity of the structure.  the running flag could be set on any one of the clients
+        def scraperentry(eoos, cclient):  # local function
+            scrapereditors = set()
+            running = False
+            
+            for userclients in eoos.usereditors:
+                scrapereditors.add(userclients[0].chatname)
+                for uclient in userclients:
+                    running = running or bool(uclient.running)
+            for uclient in eoos.anonymouseditors:
+                scrapereditors.add(uclient.chatname)
+                running = running or bool(uclient.running)
+            
+            if cclient:
+                scraperusers = [ ( cclient.chatname, (cclient.chatname in scrapereditors)) ]
+            else:
+                scraperusers = [ (chatname, True)  for chatname in scrapereditors ]
+            
+            return (eoos.scrapername, True, running, scraperusers)
+        
+        if umlstatusdata:
+            umlstatusdata["scraperentries"] = [ ]
+            for eoos in self.guidclientmap.values():
+                umlstatusdata["scraperentries"].append(scraperentry(eoos, None))
+        if cclient.guid:
+            if cclient.guid in self.guidclientmap:
+                umlstatuschanges["scraperentries"] = [ scraperentry(self.guidclientmap[cclient.guid], cclient) ]
+            else:
+                umlstatuschanges["scraperentries"] = [ (cclient.scrapername, False, False, [ ]) ]
+        
+        
+        # send the status to the target and updates to everyone else who is monitoring
+        if cclient.isumlmonitoring:
+            cclient.write(json.dumps(umlstatusdata)) 
         for client in self.umlmonitoringclients:
-            client.write(json.dumps(umlstatusdata)) 
+            if client != cclient:
+                client.write(json.dumps(umlstatuschanges)) 
 
 
     def clientConnectionMade(self, client):
@@ -434,7 +483,6 @@ class RunnerFactory(protocol.ServerFactory):
     def clientConnectionRegistered(self, client):
         if client.isumlmonitoring:
             self.umlmonitoringclients.append(client)
-            self.notifyMonitoringClients("%s enters" % client.chatname)
             
         elif not client.guid:   # draft scraper type
             editorstatusdata = {'message_type':"editorstatus", "cansave":True, "loggedineditors":[], "nanonymouseditors":1, 
@@ -449,6 +497,7 @@ class RunnerFactory(protocol.ServerFactory):
 
         # check that all clients are accounted for
         assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
+        self.notifyMonitoringClients(client)
             
     
     def clientConnectionLost(self, client):
@@ -468,6 +517,7 @@ class RunnerFactory(protocol.ServerFactory):
         
         # check that all clients are accounted for
         assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
+        self.notifyMonitoringClients(client)
     
     
     # this might be deprecated when we can poll twister directly for the state of activity in some kind of ajax or iframe call

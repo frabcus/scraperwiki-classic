@@ -662,7 +662,8 @@ $(document).ready(function() {
                 if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
                     return false; 
                 bSuppressDisconnectionMessages = true; 
-                if (conn)  conn.close();  
+                send({"command":'loseconnection'}) 
+                // if (conn)  conn.close();  
                 return true;
             }
         );

@@ -9,6 +9,27 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>		
     <script src="http://{{ settings.ORBETED_DOMAIN }}:{{ settings.ORBETED_PORT }}/static/Orbited.js"></script>
+    <style type="text/css">
+div#monitoroutput div{ border: thin red solid; overflow:auto; }
+
+div#monitoroutput div#monitoringusers ul {  display:inline;   }
+div#monitoroutput div#monitoringusers li {  border: thin blue solid; display:inline;   }
+
+div#monitoroutput div#draftscraperusers ul {  display:inline;   }
+div#monitoroutput div#draftscraperusers li {  border: thin blue solid; display:inline;   }
+div#monitoroutput div#draftscraperusers li.running {  background-color:#afa;   }
+
+div#monitoroutput ul#scraperentries {  display:block;  }
+div#monitoroutput ul#scraperentries li.scraper {  border: thin red solid; display:block;  }
+div#monitoroutput ul#scraperentries li.running {  background-color:#aaf; }
+div#monitoroutput ul#scraperentries li.scraper ul {  display:inline;  }
+div#monitoroutput ul#scraperentries li.scraper ul li {  border: thin black solid; display:inline;  }
+
+div#monitoroutput span.desc { background-color:black; color:white }; 
+div#monitoroutput span.sdesc { background-color:blue; color:white }; 
+
+    </style>
+
 
     {# Needed for orbited, dont remove #}
     <script>document.domain = document.domain;</script>
@@ -51,13 +72,13 @@ $(document).ready(function() {
             mcode = 'ConnectionTimeout'; 
         else  
             mcode = 'code=' + code;
-        $("#monitoroutput #connectionstatus").html('Connection closed: ' + mcode); 
+        $("#monitoroutput #connectionstatus").html('<span style="background-color:black; color:white">Connection closed: ' + mcode+"</span>"); 
     }
 
     // should post up status in a little box
     conn.onread = function(ldata) 
     {
-        $("#monitoroutput #jdatareceived").html(ldata); 
+        //alert(ldata); 
         buffer = buffer+ldata;
         while (true) 
         {
@@ -100,28 +121,94 @@ $(document).ready(function() {
     //read data back from twisted
     function receiveRecord(jdata) 
     {
+        $("#monitoroutput #jdatareceived").html($.toJSON(jdata)); 
+        //alert($.toJSON(jdata)); 
+
         if (jdata.message)
             $("#monitoroutput #message").html(jdata.message); 
-        if (jdata.message_type == "umlstatus")
+
+        if (jdata.umlmonitoringusers)
         {
-            s = "UMLMonitoring: ";
+            if (jdata.message_type == "umlstatus")
+                $("#monitoroutput #monitoringusers ul").html(""); 
             for (i = 0; i < jdata.umlmonitoringusers.length; i++)
-                s += (i == 0 ? "" : ", ") + jdata.umlmonitoringusers[i]; 
-            $("#monitoroutput #monitoringusers").html(s); 
-
-            s = "Drafts: ";
-            for (i = 0; i < jdata.draftscraperusers.length; i++)
-                s += (i == 0 ? "" : ", ") + jdata.draftscraperusers[i]; 
-            $("#monitoroutput #draftscraperusers").html(s); 
-
-            $("#monitoroutput #scrapereditors").html("");
-            for (guid in jdata.scraperentries)
             {
-                scraperentry = jdata.scraperentries[guid]; 
-                s = scraperentry["scrapername"] + " ("+scraperentry["scraperlanguage"]+") "; 
-                for (i = 0; i < scraperentry.editors.length; i++)
-                    s += (i == 0 ? "" : ", ") + scraperentry.editors[i]; 
-                $("#monitoroutput #scrapereditors").append("<li id=\""+guid+"\">"+s+"</li>"); 
+                chatname = jdata.umlmonitoringusers[i][0]; 
+                idchatname = "MON_" + chatname; 
+                present = jdata.umlmonitoringusers[i][1]; 
+                ele = "#monitoroutput #monitoringusers ul li#"+idchatname; 
+                if (present)
+                {
+                    if (!$(ele).attr("id"))
+                        $("#monitoroutput #monitoringusers ul").append("<li id=\""+idchatname+"\">"+chatname+"</li>"); 
+                }
+                else
+                    $(ele).remove(); 
+            }
+        }
+
+        if (jdata.draftscraperusers)
+        {
+            if (jdata.message_type == "umlstatus")
+                $("#monitoroutput #draftscraperusers ul").html(""); 
+            for (i = 0; i < jdata.draftscraperusers.length; i++)
+            {
+                chatname = jdata.draftscraperusers[i][0]; 
+                idchatname = "DRA_" + chatname; 
+                present = jdata.draftscraperusers[i][1]; 
+                running = jdata.draftscraperusers[i][2]; 
+                ele = "#monitoroutput #draftscraperusers ul li#"+idchatname; 
+                if (present)
+                {
+                    if (!$(ele).attr("id"))
+                        $("#monitoroutput #draftscraperusers ul").append("<li id=\""+idchatname+"\">"+chatname+"</li>"); 
+                    if (running)
+                        $(ele).addClass("running"); 
+                    else
+                        $(ele).removeClass("running"); 
+                }
+                else
+                    $(ele).remove(); 
+            }
+        }
+
+        if (jdata.scraperentries)
+        {
+            if (jdata.message_type == "umlstatus")
+                $("#monitoroutput ul#scraperentries").html(""); 
+            for (i = 0; i < jdata.scraperentries.length; i++)
+            {
+                scrapername = jdata.scraperentries[i][0]; 
+                idscrapername = "SCR_" + scrapername; 
+                present = jdata.scraperentries[i][1]; 
+                running = jdata.scraperentries[i][2]; 
+                scraperusers = jdata.scraperentries[i][3]; 
+                ele = "#monitoroutput ul#scraperentries li#"+idscrapername; 
+                if (present)
+                {
+                    if (!$(ele).attr("id"))
+                        $("#monitoroutput ul#scraperentries").append("<li id=\""+idscrapername+"\" class=\"scraper\"><span style=\"background-color:blue; color:white\">"+scrapername+"</span> <ul></ul></li>"); 
+                    if (running)
+                        $(ele).addClass("running"); 
+                    else
+                        $(ele).removeClass("running"); 
+                    for (j = 0; j < scraperusers.length; j++)
+                    {
+                        chatname = scraperusers[j][0]; 
+                        idcchatname = idscrapername + "_CHA_" + chatname; 
+                        cpresent = scraperusers[j][1]; 
+                        cele = ele + " ul li#"+idcchatname; 
+                        if (cpresent)
+                        {
+                            if (!$(cele).attr("id"))
+                                $(ele+" ul").append("<li id=\""+idcchatname+"\">"+chatname+"</li>"); 
+                        }
+                        else
+                            $(cele).remove(); 
+                    }
+                }
+                else
+                    $(ele).remove(); 
             }
         }
     }
@@ -139,20 +226,22 @@ $(document).ready(function() {
 }); 
 </script>
 
-    <title>ScraperWiki UML status</title>
+<title>ScraperWiki UML status</title>
 </head>
 
 <body>
+
 <div id="divLogo" style="float:left">
     <p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
 </div>
+
 <div id="monitoroutput" style="float:right; width:20%">
-    <div id="connectionstatus" style="border: thin black solid; overflow:auto">...</div>
-    <div id="jdatareceived" style="border: thin black solid; overflow:auto">...</div>
-    <div id="monitoringusers" style="border: thin black solid; overflow:auto">...</div>
-    <div id="draftscraperusers" style="border: thin black solid; overflow:auto">...</div>
-    <ul id="scrapereditors" style="border: thin black solid; overflow:auto">...</ul>
-    <div id="message" style="border: thin black solid; overflow:auto">...</div>
+    <div id="connectionstatus">...</div>
+    <div id="monitoringusers"><span class="desc">Monitoring:</span> <ul></ul></div>
+    <div id="draftscraperusers"><span class="desc">Drafts:</span> <ul></ul></div>
+    <ul id="scraperentries"></ul>
+    <div id="jdatareceived">...</div>
+    <div id="message">...</div>
 </div>
 
 <form>
