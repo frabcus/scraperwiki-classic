@@ -1,5 +1,6 @@
 from django.contrib.sites.models import Site
 from django.template import RequestContext
+from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
