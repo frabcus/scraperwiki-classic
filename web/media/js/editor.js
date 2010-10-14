@@ -756,6 +756,7 @@ $(document).ready(function() {
               data: ({
                 title : $('#id_title').val(),
                 commit_message: "cccommit",
+                sourcescraper: $('sourcescraper').val(),
                 wiki_type: wiki_type,
                 code : codeeditor.getCode(),
                 earliesteditor : earliesteditor, 
