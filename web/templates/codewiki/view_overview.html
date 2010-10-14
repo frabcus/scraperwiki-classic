@@ -5,7 +5,12 @@
 {% load screen_shot %}
 
     <div class="content full">
-      <a href="{% url view_fullscreen scraper.short_name %}">{% screen_shot scraper 'large' %}</a>
+        <div class="screenshot_large">
+          <a href="{% url view_fullscreen scraper.short_name %}">
+              <span>Click to open this view</span>
+          </a>
+          {% screen_shot scraper 'large' %}
+       </div>
     </div>
 
     <div class="content full">
