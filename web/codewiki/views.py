@@ -790,7 +790,7 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourc
 
         #make link to source scraper
         if sourcescraper:
-            scraper = get_code_object_or_none(short_name=sourcescraper)
+            scraper = get_code_object_or_none(models.Code, short_name=sourcescraper)
             if scraper:
                 code_object.relations.add(scraper)
 
