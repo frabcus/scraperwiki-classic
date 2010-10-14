@@ -24,7 +24,7 @@ class SW_APIWrapperClass
         {
             $llimit = ($limit == -1 ? $apilimit : min($apilimit, $limit-$count)); 
                 
-            $url = "{$urlbase}&limit={$llimit}&offset=".($offset+$loffset); 
+            $url = "{$urapiwrapperlbase}&limit={$llimit}&offset=".($offset+$loffset); 
             $handle = fopen($url, "r"); 
             $ljson = stream_get_contents($handle); 
             fclose($handle);

@@ -94,22 +94,22 @@ class scraperwiki
    }
 
 
-    static function apiwrapper_getKeys($name) {
+    static function getKeys($name) {
         return SW_APIWrapperClass::getKeys($name); 
     }
-    static function apiwrapper_getData($name, $limit= -1, $offset= 0) {
+    static function getData($name, $limit= -1, $offset= 0) {
         return SW_APIWrapperClass::getData($name, $limit, $offset); 
     }
 
-    static function apiwrapper_getDataByDate($name, $start_date, $end_date, $limit= -1, $offset= 0) {
+    static function getDataByDate($name, $start_date, $end_date, $limit= -1, $offset= 0) {
         return SW_APIWrapperClass::getDataByDate($name, $start_date, $end_date, $limit, $offset); 
     }
     
-    static function apiwrapper_getDataByLocation($name, $lat, $lng, $limit= -1, $offset= 0) { 
+    static function getDataByLocation($name, $lat, $lng, $limit= -1, $offset= 0) { 
         return SW_APIWrapperClass::getDataByLocation($name, $lat, $lng, $limit, $offset); 
     }
         
-    static function apiwrapper_search($name, $filterdict, $limit= -1, $offset= 0) {
+    static function search($name, $filterdict, $limit= -1, $offset= 0) {
         return SW_APIWrapperClass::search($name, $filterdict, $limit, $offset);
     }
 }

@@ -74,6 +74,7 @@ $(document).ready(function() {
         parsers['python'] = ['../contrib/python/js/parsepython.js'];
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
         parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
+        //parsers['ruby'] = [ 'parsedummy.js'];   // in case Ruby needs disabling due to too much bugs
         parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
 
         stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
@@ -94,6 +95,7 @@ $(document).ready(function() {
         parserName['python'] = 'PythonParser';
         parserName['php'] = 'PHPHTMLMixedParser'; // 'PHPParser';
         parserName['ruby'] = 'RubyParser';
+        //parserName['ruby'] = 'DummyParser';
         parserName['html'] = 'HTMLMixedParser';
 
         // allow php to access HTML style parser
@@ -115,6 +117,7 @@ $(document).ready(function() {
             width: '100%',
             parserConfig: parserConfig[scraperlanguage],
             enterMode: "flat", // default is "indent" (which I have found buggy),  also can be "keep"
+            reindentOnLoad: false, 
             onChange: function ()  { setPageIsDirty(true); },
 
             // this is called once the codemirror window has finished initializing itself

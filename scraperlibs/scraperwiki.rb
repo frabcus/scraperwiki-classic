@@ -3,6 +3,7 @@ require	'uri'
 require	'net/http'
 require 'scraperwiki/datastore'
 require 'scraperwiki/metadata'
+require 'scraperwiki/apiwrapper'
 
 module ScraperWiki
 
@@ -56,6 +57,38 @@ module ScraperWiki
     def ScraperWiki.save_metadata(metadata_name, value)
         ScraperWiki::dumpMessage({'message_type' => 'console', 'content' => 'Saving %s: %s' % [metadata_name, value]})
         return SW_MetadataClient.create().save(metadata_name, value)
+    end
+
+
+
+    def ScraperWiki.save(unique_keys, data, date = nil, latlng = nil)
+        res = SW_DataStore.create().save(unique_keys, data, date, latlng)
+        if ! res[0]
+            raise res[1]
+        end
+        ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => data})
+    end
+
+
+    def ScraperWiki.getKeys(name)
+        return SW_APIWrapper.getKeys(name)
+    end
+
+    # these are all done as generators.  they don't seem to pass through as easily as python generators
+    def ScraperWiki.getData(name, limit=-1, offset=0)
+        SW_APIWrapper.getData(name, limit, offset) {|i| yield i}
+    end
+    
+    def ScraperWiki.getDataByDate(name, start_date, end_date, limit=-1, offset=0)
+        SW_APIWrapper.getDataByDate(name, start_date, end_date, limit, offset) {|i| yield i}
+    end
+    
+    def ScraperWiki.getDataByLocation(name, lat, lng, limit=-1, offset=0)
+        SW_APIWrapper.getDataByLocation(name, lat, lng, limit, offset) {|i| yield i}
+    end
+        
+    def ScraperWiki.search(name, filterdict, limit=-1, offset=0)
+        SW_APIWrapper.search(name, filterdict, limit, offset) {|i| yield i}
     end
 
 end
