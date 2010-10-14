@@ -418,6 +418,8 @@ class RunnerFactory(protocol.ServerFactory):
         umlstatuschanges = {'message_type':"umlchanges" }; 
         umlstatusdata = (cclient.isumlmonitoring and {'message_type':"umlstatus" } or None)
         
+# the chatnames have spaces in them.  must use username everywhere for purpose of forming classes in the html
+        
         # handle updates and changes in the monitoring users
         umlmonitoringusers = set([ client.chatname  for client in self.umlmonitoringclients ])
         if umlstatusdata:

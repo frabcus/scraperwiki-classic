@@ -134,7 +134,7 @@ $(document).ready(function() {
             for (i = 0; i < jdata.umlmonitoringusers.length; i++)
             {
                 chatname = jdata.umlmonitoringusers[i][0]; 
-                idchatname = "MON_" + chatname; 
+                idchatname = "MON_" + chatname.replace(/\s+/g, "_"); 
                 present = jdata.umlmonitoringusers[i][1]; 
                 ele = "#monitoroutput #monitoringusers ul li#"+idchatname; 
                 if (present)
@@ -154,7 +154,7 @@ $(document).ready(function() {
             for (i = 0; i < jdata.draftscraperusers.length; i++)
             {
                 chatname = jdata.draftscraperusers[i][0]; 
-                idchatname = "DRA_" + chatname; 
+                idchatname = "DRA_" + chatname.replace(/\s+/g, "_"); 
                 present = jdata.draftscraperusers[i][1]; 
                 running = jdata.draftscraperusers[i][2]; 
                 ele = "#monitoroutput #draftscraperusers ul li#"+idchatname; 
@@ -195,7 +195,7 @@ $(document).ready(function() {
                     for (j = 0; j < scraperusers.length; j++)
                     {
                         chatname = scraperusers[j][0]; 
-                        idcchatname = idscrapername + "_CHA_" + chatname; 
+                        idcchatname = idscrapername + "_CHA_" + chatname.replace(/\s+/g, "_"); 
                         cpresent = scraperusers[j][1]; 
                         cele = ele + " ul li#"+idcchatname; 
                         if (cpresent)
