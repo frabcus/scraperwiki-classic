@@ -221,8 +221,8 @@
 		{% endblock %}
 		
 	    <script type="text/javascript" defer="defer">
-	        setupSearchBoxHint();
-	        {% block run_script %}{% endblock %}
+	        {% block run_script %}
+{% endblock %}
         </script>
         {% if not debug %}
             <script type="text/javascript">

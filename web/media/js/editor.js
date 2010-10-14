@@ -48,7 +48,7 @@ $(document).ready(function() {
     var parserName = Array();
 
     $.ajaxSetup({
-        timeout: 10000,
+        timeout: 10000
     });
 
     //constructor functions
