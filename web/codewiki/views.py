@@ -864,7 +864,6 @@ def saveeditedscraper(request, lscraper):
     commitmessage = request.POST.get('commit_message', "")
     sourcescraper = request.POST.get('sourcescraper', "")    
     
-    
     # User is signed in, we can save the scraper
     if request.user.is_authenticated():
         earliesteditor = request.POST.get('earliesteditor', "")

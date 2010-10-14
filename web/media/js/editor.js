@@ -746,8 +746,7 @@ $(document).ready(function() {
         }else{
             bSuccess = true;
         }
-        
-        if(bSuccess == true){          
+        if(bSuccess == true){      
             $.ajax({
               type : 'POST',
               contentType : "application/json",
@@ -756,7 +755,7 @@ $(document).ready(function() {
               data: ({
                 title : $('#id_title').val(),
                 commit_message: "cccommit",
-                sourcescraper: $('sourcescraper').val(),
+                sourcescraper: $('#sourcescraper').val(),
                 wiki_type: wiki_type,
                 code : codeeditor.getCode(),
                 earliesteditor : earliesteditor, 
