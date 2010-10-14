@@ -2,7 +2,7 @@
 <dl class="functiondocs">
     <dt>Return the source text of a web page as a string:</dt>        
     <dd>
-        <code>html = scraperwiki::scrape($url)</code>
+        <code>html = scraperwiki::scrape($url);</code>
     </dd>
 </dl>     
 <h4>Parsing (simple examples)</h4>
@@ -29,7 +29,7 @@
     </dt>
     <dd>
         <code>
-            scraperwiki::save($unique_keys=array(), $data=array(), <em>$date=null</em>, <em>$latlng=null</em>)
+            scraperwiki::save($unique_keys=array(), $data=array(), <em>$date=null</em>, <em>$latlng=null</em>);
         </code>
         <p>
             Saves a key-value array, <em>data</em>, to the datastore. <em>unique_keys</em> is a list of keys appearing in the dictionary used to determine if if a record should be inserted or updated. 
@@ -44,7 +44,7 @@
   </dt>
   <dd>
       <code>
-          scraperwiki::save_metadata($key, $value)
+          scraperwiki::save_metadata($key, $value);
       </code>
   </dd>
   <dt>
@@ -52,7 +52,7 @@
   </dt>
   <dd>
       <code>
-          scraperwiki::get_metadata($key, $default=null)
+          scraperwiki::get_metadata($key, $default=null);
       </code>
   </dd>
 </dl>
@@ -64,7 +64,7 @@
   </dt>
   <dd>
       <code>
-          lat_lng = scraperwiki::gb_postcode_to_latlng(postcode)
+          lat_lng = scraperwiki::gb_postcode_to_latlng(postcode);
       </code>
   </dd>
 </dl>

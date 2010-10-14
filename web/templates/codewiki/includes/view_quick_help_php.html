@@ -2,12 +2,12 @@
 <dl class="functiondocs">
     <dt>Get all data</dt>        
     <dd>
-        <code>data = ScraperWiki::getData(short_name, limit=-1, offset=0)</code>
+        <code>data = ScraperWiki::getData($short_name, $limit=-1, $offset=0);</code>
         <p>Use the <em>limit</em> and <em>offset</em> to control how many records are returned</p>
     </dd>
     <dt>Get by location</dt>        
     <dd>
-        <code>data = ScraperWiki::getDataByLocation(short_name, lat, lng, limit=-1, offset=0)</code>
+        <code>data = ScraperWiki::getDataByLocation($short_name, $lat, $lng, $limit=-1, $offset=0);</code>
         <p>Items are returned ordered by distance away from the specified latitude and longitude.
             Use the <em>limit</em> and <em>offset</em> to control how many records are returned.
             To make use of this, the scraper must have used the <em>latlng</em> variable in <em>datastore.save()</em>.
@@ -15,13 +15,13 @@
     </dd>
     <dt>Get by date range</dt>        
     <dd>
-        <code>data = ScraperWiki::getDataByDate(short_name, start_date, end_date, limit=-1, offset=0)</code>
+        <code>data = ScraperWiki::getDataByDate($short_name, $start_date, $end_date, $limit=-1, $offset=0);</code>
         <p>  Use the <em>limit</em> and <em>offset</em> to control how many records are returned.
             To make use of this, the scraper must have used the <em>date</em> variable in <em>datastore.save()</em>.
         </p>
     </dd>
     <dt>Get keys for a scraper</dt>        
     <dd>
-        <code>keys = ScraperWiki::getKeys(short_name)</code>
+        <code>keys = ScraperWiki::getKeys($short_name)</code>
     </dd>
 </dl>
