@@ -48,8 +48,11 @@
       <a name="embed"></a>
       <h3>Add this view to your site</h3>
       <code>
-      {% filter force_escape %}
-        <iframe width="100%" height="400px" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}"></iframe>
+      {% filter force_escape|linebreaksbr %}
+        <div>
+          <iframe width="100%" height="400px" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}"></iframe>
+          <img src="http://scraperwiki.com/media/images/powered.png" alt="Powered by ScraperWiki.com" />
+        </div>
       {% endfilter %}
       </code>
     </div>
