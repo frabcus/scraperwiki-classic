@@ -306,7 +306,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
                  aItems = data.split(',');
                  $('#divScraperTags ul').html('');
                  for (var i=0; i < aItems.length; i++) {
-                    url = '/' + wiki_type + 's/tags/' + escape(aItems[i].trim())
+                    url = '/tags/' + escape(aItems[i].trim())
                     $('#divScraperTags ul').append($('<li><a href="' + url +'">' + aItems[i].trim() + '</a></li>'))
                  };
                  //clear out the textbox for next time
