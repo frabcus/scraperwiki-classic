@@ -37,11 +37,14 @@
 
     <div class="content half right">
         <h2>Featured views</h2>
-        <ul>
+        <ul class="scraper_list">
     		{% for code in featured_views %}
     		  {% include 'frontend/includes/code_object_line.html' %}
     		{% endfor %}
     	</ul>
+    	<p>
+            <a href="{% url scraper_list_wiki_type 'scraper' %}" title="Browse all scrapers" class="more_link">Browse all views</a>
+        </p>
     </div>
 
     <br class="clear"/>
