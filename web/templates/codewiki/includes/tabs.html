@@ -1,8 +1,8 @@
 <ul>
     {% load comments %}
+    {% get_comment_count for codewiki.Code scraper.id as cc %}
     <li{% ifequal selected_tab "comments" %} class="selected"{% endifequal %}>
-        <a href="{% url scraper_comments scraper.wiki_type scraper.short_name %}">Discussion
-           {% get_comment_count for scraper as cc %}({{ cc }})</a>
+        <a href="{% url scraper_comments scraper.wiki_type scraper.short_name %}">Discussion ({{ cc }})</a>
     </li>
     <li{% ifequal selected_tab "history" %} class="selected"{% endifequal %}>
         <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}">History</a>
