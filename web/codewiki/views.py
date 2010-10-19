@@ -504,8 +504,7 @@ def stringnot(v):
         return v.encode("utf-8")
     return v
 
-def generate_csv(dictlist, offset):
-    keylist = [ ]
+def generate_csv(dictlist, offset, max_length=None):
     keyset = set()
     for row in dictlist:
         if "latlng" in row:   # split the latlng
@@ -513,25 +512,28 @@ def generate_csv(dictlist, offset):
         row.pop("date_scraped", None) 
         keyset.update(row.keys())
 
-    for key in sorted(keyset):
-        if key not in keylist:
-            keylist.append(key)
-
     fout = StringIO.StringIO()
     writer = csv.writer(fout, dialect='excel')
+    truncated = False
+
     if offset == 0:
-        writer.writerow([k.encode("utf-8") for k in keylist])
+        writer.writerow([k.encode("utf-8") for k in keyset])
     for rowdict in dictlist:
-        writer.writerow([stringnot(rowdict.get(key))  for key in keylist])
+        row_keys = [stringnot(rowdict.get(key)) for key in keyset]
+        row_length = reduce(lambda x, y: x+len(str(y)), row_keys, 0)  + 1 # Remember the newline
+        if max_length and (fout.len + row_length) > max_length:
+            truncated = True
+            break
+        writer.writerow(row_keys)
     result = fout.getvalue()
     fout.close()
-    return result
+    return result, truncated
 
 def stream_csv(scraper, step=5000, max_rows=1000000):
     for offset in range(0, max_rows, step):
         dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=step, offset=offset)
         
-        yield generate_csv(dictlist, offset)
+        yield generate_csv(dictlist, offset)[0]
         if len(dictlist) != limit:
             #we'ver reached the end of the data
             break
@@ -563,39 +565,20 @@ def export_gdocs_spreadsheet(request, short_name):
     title = scraper.title + " - from ScraperWiki.com"
     csv_url = 'http://%s%s' % (Site.objects.get_current().domain,  reverse('export_csv', kwargs={'short_name': scraper.short_name}))
 
-    # the lack of a list of keys for the table makes a more elegant solution difficult to obtain
-    # as it is necessary to take a selection of rows in order to derive the set of columns used
-    
     row_limit = 5000
-    csv_data = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=row_limit), 0)
 
-    document_size = len(csv_data)
-    #print "Document size: " + str(document_size)
-    percent_of_max = ((float(document_size) / float(settings.GDOCS_UPLOAD_MAX)) * 100) - 100.0
-
-    #if we are within 1% of maximum, don't upload
-    if percent_of_max > -1:
-        #print "File is " + str(percent_of_max) + "% too large to upload"
-
-        #upload a subset of records with a note at the top and bottom
-        #this calculation is a little crude as it assumes each row is of a simular size. To take account of this, a buffer of 5% is added 
-        row_buffer = 5
-        split = csv_data.split('\n')
-        new_row_count = int(math.floor(len(split) / 100.0 * (100 - (percent_of_max + row_buffer))))
-        #print "New row count: " + str(new_row_count)
-
-        #set the new title, data and a warning
-        title = title + ' [SUBSET ONLY]'
-
-        csv_data = 'THIS IS A SUBSET OF THE DATA ONLY. GOOGLE DOCS LIMITS FILES TO 1MB. DOWNLOAD THE FULL DATASET AS CSV HERE: %s \n' % str(csv_url)
-            # csv_data must not be unicode if it is added to a utf8 string
-        csv_data = csv_data + '\n'.join(split[0:new_row_count - 1])
+    truncated_message = 'THIS IS A SUBSET OF THE DATA ONLY. GOOGLE DOCS LIMITS FILES TO 1MB. DOWNLOAD THE FULL DATASET AS CSV HERE: %s\n' % str(csv_url)
+    subset_message = 'THIS IS A SUBSET OF THE DATA ONLY. A MAXIMUM OF %s RECORDS CAN BE UPLOADED FROM SCRAPERWIKI. DOWNLOAD THE FULL DATASET AS CSV HERE: %s\n' % (str(row_limit), csv_url)
     
+    max_length = settings.GDOCS_UPLOAD_MAX - max(len(truncated_message), len(subset_message))
+    csv_data, truncated = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=row_limit), 0, max_length)
+
+    if truncated:
+        title = title + ' [SUBSET ONLY]'
+        csv_data = truncated_message + csv_data
     elif scraper.record_count > row_limit:
-        warning_row = 'THIS IS A SUBSET OF THE DATA ONLY. A MAXIMUM OF %s RECORDS CAN BE UPLOADED FROM SCRAPERWIKI. DOWNLOAD THE FULL DATASET AS CSV HERE: %s' % (str(row_limit), csv_url)
-        csv_data = warning_row + csv_data
-        
-        
+        csv_data = subset_message + csv_data
+
     #create client and authenticate
     client = gdata.docs.service.DocsService()
     client.ClientLogin(settings.GDOCS_UPLOAD_USER, settings.GDOCS_UPLOAD_PASSWORD)
