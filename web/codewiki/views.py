@@ -28,7 +28,8 @@ import csv
 import math
 import urllib
 
-import cStringIO, csv, types
+from cStringIO import StringIO
+import csv, types
 import datetime
 import gdata.docs.service
 
@@ -512,7 +513,7 @@ def generate_csv(dictlist, offset, max_length=None):
         row.pop("date_scraped", None) 
         keyset.update(row.keys())
 
-    fout = StringIO.StringIO()
+    fout = StringIO()
     writer = csv.writer(fout, dialect='excel')
     truncated = False
 
@@ -590,7 +591,7 @@ def export_gdocs_spreadsheet(request, short_name):
     client.ClientLogin(settings.GDOCS_UPLOAD_USER, settings.GDOCS_UPLOAD_PASSWORD)
 
     #create a document reference
-    ms = gdata.MediaSource(file_handle=StringIO.StringIO(csv_data), content_type=gdata.docs.service.SUPPORTED_FILETYPES['CSV'], content_length=len(csv_data))
+    ms = gdata.MediaSource(file_handle=StringIO(csv_data), content_type=gdata.docs.service.SUPPORTED_FILETYPES['CSV'], content_length=len(csv_data))
 
     #try to upload it
     #try:
