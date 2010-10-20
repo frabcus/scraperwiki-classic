@@ -74,21 +74,20 @@ module ScraperWiki
         return SW_APIWrapper.getKeys(name)
     end
 
-    # these are all done as generators.  they don't seem to pass through as easily as python generators
     def ScraperWiki.getData(name, limit=-1, offset=0)
-        SW_APIWrapper.getData(name, limit, offset) {|i| yield i}
+        SW_APIWrapper.getData(name, limit, offset)
     end
     
     def ScraperWiki.getDataByDate(name, start_date, end_date, limit=-1, offset=0)
-        SW_APIWrapper.getDataByDate(name, start_date, end_date, limit, offset) {|i| yield i}
+        SW_APIWrapper.getDataByDate(name, start_date, end_date, limit, offset)
     end
     
     def ScraperWiki.getDataByLocation(name, lat, lng, limit=-1, offset=0)
-        SW_APIWrapper.getDataByLocation(name, lat, lng, limit, offset) {|i| yield i}
+        SW_APIWrapper.getDataByLocation(name, lat, lng, limit, offset)
     end
         
     def ScraperWiki.search(name, filterdict, limit=-1, offset=0)
-        SW_APIWrapper.search(name, filterdict, limit, offset) {|i| yield i}
+        SW_APIWrapper.search(name, filterdict, limit, offset)
     end
 
 end
