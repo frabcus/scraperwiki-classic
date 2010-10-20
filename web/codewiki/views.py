@@ -732,7 +732,7 @@ def choose_template(request, wiki_type):
         template = 'codewiki/includes/choose_template.html'
         
     return render_to_response(template, {'wiki_type': wiki_type, 'templates': templates, 
-                                         'languages': [ ll[0]   for ll in models.code.LANGUAGES ], 
+                                         'languages': sorted([ ll[0] for ll in models.code.LANGUAGES ]), 
                                          'sourcescraper':sourcescraper }, 
                               context_instance=RequestContext(request))
 
