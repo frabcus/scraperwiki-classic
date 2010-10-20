@@ -28,7 +28,7 @@ import csv
 import math
 import urllib
 
-import StringIO, csv, types
+import cStringIO, csv, types
 import datetime
 import gdata.docs.service
 
@@ -519,13 +519,19 @@ def generate_csv(dictlist, offset, max_length=None):
     if offset == 0:
         writer.writerow([k.encode("utf-8") for k in keyset])
     for rowdict in dictlist:
-        row_keys = [stringnot(rowdict.get(key)) for key in keyset]
-        row_length = reduce(lambda x, y: x+len(str(y)), row_keys, 0)  + 1 # Remember the newline
-        if max_length and (fout.len + row_length) > max_length:
+        if max_length:
+            # Save the length of the file in case adding
+            # the next line takes it over the limit
+            last_good_length = fout.tell()
+            
+        writer.writerow([stringnot(rowdict.get(key)) for key in keyset])
+
+        if max_length and fout.tell() > max_length:
+            fout.seek(last_good_length)
             truncated = True
             break
-        writer.writerow(row_keys)
-    result = fout.getvalue()
+
+    result = fout.getvalue(True)
     fout.close()
     return result, truncated
 
