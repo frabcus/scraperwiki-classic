@@ -13,7 +13,7 @@
            <a href="{% url help_code_documentation %}">here</a>.</p>
     </div>
 
-<div class="content {% if user.is_staff %}half left{% else %}full{% endif %}">
+<div class="content half left">
   <h2>Tutorial scrapers</h2>
   {% for key, value in tutorials.items %}
   <h3 id="{{ key }}_tutorials">{{ key }} tutorials</h3>
@@ -28,7 +28,6 @@
   {% endfor %}
 </div>
 
-{% if user.is_staff %}
 <div class="content half right">
   <h2>Tutorial views</h2>
   {% for key, value in viewtutorials.items %}
@@ -43,7 +42,6 @@
   </dl>
   {% endfor %}
 </div>
-{% endif %}
 
 <br class="clear"/>
 
