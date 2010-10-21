@@ -36,11 +36,13 @@
         {% endif %}
     </small>
     
-    {% if code.description %}
         <p>
+    {% if code.description %}
             {{ code.description|textile|striptags|truncatewords:75 }}            
-        </p>
+    {% else %}
+            &nbsp;
     {% endif %}
+        </p>
     
 </li>
 
