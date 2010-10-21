@@ -73,7 +73,7 @@ def rpcexecute(request, short_name, revision = None):
     #if settings.USE_DUMMY_VIEWS == True:
     #    return rpcexecute_dummy(request, short_name, revision)
     
-    scraper = get_object_or_404(models.View.objects, short_name=short_name)
+    scraper = get_object_or_404(models.Code.objects, short_name=short_name)
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
     failed = False
 
