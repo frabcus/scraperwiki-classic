@@ -1,2 +1,2 @@
 User-agent: *
-Disallow: /scrapers/search/
+Disallow: {% url search %}
