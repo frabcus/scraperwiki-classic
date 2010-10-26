@@ -479,9 +479,15 @@ h4 a.edit {font-size:0.8em;}
 #template_popup li a {font-size:0.9em;display:block;text-decoration:none;}
 #template_popup img.lang_icon {position:relative; top:4px;}
 
-/* funciton docmentation */
+/* function docmentation */
 dl.functiondocs {border-bottom:solid 1px #ccc;margin:1em 0 1em 0;}
 dl.functiondocs dt {padding-bottom:0.5em;}
 dl.functiondocs dd {padding-left:0;margin-left:0;padding-bottom:1em;}
 dl.functiondocs dd code {background:#000; color:#fff; font-size:1.2em;padding:0.3em;display:block;}
 dl.functiondocs dd p {font-size:0.9em;padding:1em 0 0 0;margin:0;}
+
+div.pdfpagediv { text-align:center;  }
+div.dpdfpagediv { margin: auto; display: inline-block; border: thin black solid; } 
+#consolidatelink { background-color:#cfd; }
+p#share_links input { width: 350px; }
+

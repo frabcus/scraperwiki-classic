@@ -116,6 +116,7 @@ INSTALLED_APPS = [
   	'market',
   	'api',
     'whitelist',
+    'cropper',
     #'devserver',
 ]
 

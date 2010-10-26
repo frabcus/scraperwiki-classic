@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>PDF Cropper</title>
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>	
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.autoheight.js"></script>	
+    <script type="text/javascript" src="{{ MEDIA_URL }}/js/jquery.Jcrop.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />	
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery.Jcrop.css" />	
+    <script type="text/javascript">
+        function setCrop(c)
+        {
+            var width = $('#pdfpageid').attr('width'); 
+            var height = $('#pdfpageid').attr('height'); 
+            ix1 = Math.ceil(c.x * 1000 / width);
+            iy1 = Math.ceil(c.y * 1000 / width);
+            ix2 = Math.ceil(c.x2 * 1000 / width); 
+            iy2 = Math.ceil(c.y2 * 1000 / width);
+            var lk = "rect_" + ix1 + "," + iy1 + "_" + ix2 + "," + iy2; 
+            if ((ix1 == ix2) || (iy1 == iy2))
+                lk = ""; 
+            $('#consolidatelink').text(lk); 
+            $('#consolidatelink').attr('href', lk); 
+        };
+        $(document).ready(function() 
+        { 
+            $('#pdfpageid').load(function() 
+            { 
+                $('#loadingmess').hide();  
+                $('#pdfpageid').Jcrop( { onSelect: setCrop, onChange: setCrop } ); 
+            }); 
+
+            $('p#share_links input').attr('value', '<a title="PDF excerpt" href="http://scraperwiki.com/{% url croppage tinyurl page cropping %}"><img src="{% url cropimg tinyurl page cropping %}"></a>'); 
+        });
+    </script>
+</head>
+<body class="fullscreen">
+
+<div id="full_bar">
+    <h1>Page {{page}} /{{Pages}} of <a href="http://tinyurl.com/{{tinyurl}}" title="Go original pdf">tinyurl.com/{{tinyurl}}</a>
+    </h1>
+    <p id="share_links">Embed image: <input style="text" readonly value=""></p>
+    <a href="{%url frontpage %}" id="powered"><span class="hide">Powered by ScraperWiki</span></a>
+</div> 
+
+<p>
+    {% if prevpage %}
+        <a href="{% url croppage tinyurl prevpage %}">(&lt;&lt; previous)</a>
+    {% endif %}
+    {% if nextpage %}
+        <a href="{% url croppage tinyurl nextpage %}">(next &gt;&gt;)</a>
+    {% endif %}
+
+    {% if losecroppings %}
+        Lose cropping: 
+        {% for m, rcropping in losecroppings %}
+          <a href="{% url croppage tinyurl page rcropping %}">{{m}}</a>
+        {% endfor %}
+    {% endif %}
+
+    <a href="" id="consolidatelink" title="Click here to consolidate the highlight">Drag and select area</a>
+</div>
+
+
+<div class="pdfpagediv">
+    <div class="dpdfpagediv">
+    <h1 id="loadingmess">LOADING</h1>
+    <img id="pdfpageid" src="{% url cropimg tinyurl page cropping %}">
+    </div>
+</div>
+
+<p style="clear:both">
+    {% if prevpage %}
+        <a href="{% url croppage tinyurl prevpage %}">(&lt;&lt; previous)</a>
+    {% endif %}
+    {% if nextpage %}
+        <a href="{% url croppage tinyurl nextpage %}">(next &gt;&gt;)</a>
+    {% endif %}
+</p>
+
+</body>
+</html>
