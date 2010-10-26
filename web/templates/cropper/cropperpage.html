@@ -19,11 +19,12 @@
             iy1 = Math.ceil(c.y * 1000 / width);
             ix2 = Math.ceil(c.x2 * 1000 / width); 
             iy2 = Math.ceil(c.y2 * 1000 / width);
-            var lk = "rect_" + ix1 + "," + iy1 + "_" + ix2 + "," + iy2; 
-            if ((ix1 == ix2) || (iy1 == iy2))
-                lk = ""; 
-            $('#consolidatelink').text(lk); 
-            $('#consolidatelink').attr('href', lk); 
+            var dlk = ix1 + "," + iy1 + "_" + ix2 + "," + iy2; 
+            var bvisibility = (((ix1 == ix2) || (iy1 == iy2)) ? "none" : "inline"); 
+
+            $('#consolidatelink').text("rect_"+dlk)
+            $('#consolidateclicklink').attr('href', "clip_"+dlk).css({'display':bvisibility}); ; 
+            $('#consolidatelink').attr('href', "rect_"+dlk).css({'display':bvisibility}); 
         };
         $(document).ready(function() 
         { 
@@ -33,7 +34,7 @@
                 $('#pdfpageid').Jcrop( { onSelect: setCrop, onChange: setCrop } ); 
             }); 
 
-            $('p#share_links input').attr('value', '<a title="PDF excerpt" href="http://scraperwiki.com/{% url croppage tinyurl page cropping %}"><img src="{% url cropimg tinyurl page cropping %}"></a>'); 
+            $('p#share_links input').attr('value', '<a title="PDF excerpt" href="http://scraperwiki.com/{% url croppage tinyurl page cropping %}"><img src="{% url cropimg 'png' tinyurl page cropping %}"></a>'); 
         });
     </script>
 </head>
@@ -62,13 +63,14 @@
     {% endif %}
 
     <a href="" id="consolidatelink" title="Click here to consolidate the highlight">Drag and select area</a>
+    <a href="" id="consolidateclicklink" title="Click here to clip the selection">Clip area</a>
 </div>
 
 
 <div class="pdfpagediv">
     <div class="dpdfpagediv">
     <h1 id="loadingmess">LOADING</h1>
-    <img id="pdfpageid" src="{% url cropimg tinyurl page cropping %}">
+    <img id="pdfpageid" src="{% url cropimg 'pngprev' tinyurl page cropping %}">
     </div>
 </div>
 

@@ -33,9 +33,30 @@ def pdfinfo(pdffile):
     return result
         
         
+def ParseSortCropping(cropping):
+    if not cropping:
+        cropping = ""
+    croppings = [ ]
+    clippings = [ ]
+    for crop in cropping.split("/"):
+        mhr = re.match('(rect|clip)_(\d+),(\d+)_(\d+),(\d+)$', crop)
+        if mhr:
+            if mhr.group(1) == "rect":
+                croppings.append(crop)
+            else:
+                clippings.append(crop)
+    if len(clippings) >= 2:
+        del clippings[:-1]
+    croppings = croppings + clippings
+    newcropping = "/".join(croppings)
+    if newcropping:
+        newcropping += '/'
+    return croppings, newcropping
+        
+        
 def croppage(request, tinyurl, page, cropping):
     page = int(page)
-    cropping = cropping or ""
+    croppings, cropping = ParseSortCropping(cropping)
     
     # download file if it doesn't exist
     pdffile = os.path.join(settings.CROPPER_SOURCE_DIR, "%s.pdf" % tinyurl)
@@ -50,7 +71,6 @@ def croppage(request, tinyurl, page, cropping):
     data = { "page":int(page), "tinyurl":tinyurl, "cropping":cropping }
     data.update(pdfinfo(pdffile))
     
-    croppings = filter(lambda x:x, cropping.split("/"))
     data["losecroppings"] = [ ]
     if len(croppings) > 1:
         for i, lcropping in enumerate(croppings):
@@ -66,7 +86,8 @@ def croppage(request, tinyurl, page, cropping):
     return render_to_response('cropper/cropperpage.html', data, context_instance=RequestContext(request))
 
 
-def cropimg(request, tinyurl, page, cropping):
+
+def cropimg(request, format, tinyurl, page, cropping):
     page = int(page)
     cropping = cropping or ""
     
@@ -81,27 +102,42 @@ def cropimg(request, tinyurl, page, cropping):
     if not croppings:
         return HttpResponse(open(imgfile, "rb"), mimetype='image/png')
 
-    highlightrects = [ ]
-    for crop in croppings:
-        mhr = re.match('rect_(\d+),(\d+)_(\d+),(\d+)$', crop)
-        if mhr:
-            highlightrects.append((int(mhr.group(1)), int(mhr.group(2)), int(mhr.group(3)), int(mhr.group(4))))
-        
-    dkpercent = 70
-
-    p1 = Image.new("RGB", (500, 500))
-
     pfp = Image.open(imgfile)
     swid, shig = pfp.getbbox()[2:]
 
-    dpfp = ImageEnhance.Brightness(pfp).enhance(dkpercent / 100.0)
-    ddpfp = ImageDraw.Draw(dpfp)
-    for rect in highlightrects:
-        srect = (rect[0] * swid / 1000, rect[1] * swid / 1000, rect[2] * swid / 1000, rect[3] * swid / 1000)
-        ddpfp.rectangle(srect, (255, 255, 255))
+    highlightrects = [ ]
+    clip = None
+    for crop in croppings:
+        mhr = re.match('(rect|clip)_(\d+),(\d+)_(\d+),(\d+)$', crop)
+        if mhr:
+            dim = (int(mhr.group(2))*swid/1000, int(mhr.group(3))*swid/1000, int(mhr.group(4))*swid/1000, int(mhr.group(5))*swid/1000)
+            if mhr.group(1) == "rect":
+                highlightrects.append(dim)
+            if mhr.group(1) == "clip":
+                clip = dim
+        
+        
+    # build the mask
+    if highlightrects:
+        dkpercent = 70
+        dpfp = ImageEnhance.Brightness(pfp).enhance(dkpercent / 100.0)
+        ddpfp = ImageDraw.Draw(dpfp)
+        for rect in highlightrects:
+            ddpfp.rectangle(rect, (255, 255, 255))
+        cpfp = ImageChops.darker(pfp, dpfp) # makes darker of the two
+    else:
+        cpfp = pfp
 
-    cpfp = ImageChops.darker(pfp, dpfp)
-
+    if clip:
+        if format == "pngprev":
+            p1 = Image.new("RGB", (swid, shig))
+            dp1 = ImageDraw.Draw(p1)
+            dp1.rectangle((0,0,swid,shig), (155, 10, 10))
+            dp1.rectangle(clip, (255, 255, 255))
+            cpfp = ImageChops.darker(p1, cpfp) # makes darker of the two
+        else:
+            cpfp = cpfp.crop(clip)
+    
     imgout = cStringIO.StringIO()
     cpfp.save(imgout, "png")
     imgout.seek(0)

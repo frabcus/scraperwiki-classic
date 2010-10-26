@@ -489,5 +489,6 @@ dl.functiondocs dd p {font-size:0.9em;padding:1em 0 0 0;margin:0;}
 div.pdfpagediv { text-align:center;  }
 div.dpdfpagediv { margin: auto; display: inline-block; border: thin black solid; } 
 #consolidatelink { background-color:#cfd; }
+#consolidateclicklink { background-color:#fdd; display: none; }
 p#share_links input { width: 350px; }
 
