@@ -4,8 +4,11 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
 from django.core.urlresolvers import reverse
 import re, os, urlparse, urllib, cStringIO
-import Image, ImageDraw, ImageEnhance, ImageChops
 import tempfile, shutil
+try:
+    import Image, ImageDraw, ImageEnhance, ImageChops
+except ImportError:
+    print "Too bad"
 
 
 #There is an API  http://tinyurl.com/api-create.php?url='.$u
