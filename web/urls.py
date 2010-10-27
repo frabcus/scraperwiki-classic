@@ -63,6 +63,9 @@ urlpatterns = patterns('',
     # Black/Whitelist management
     (r'^whitelist/', include('whitelist.urls')),
     
+    # pdf cropper technology
+    (r'^cropper/', include('cropper.urls')),
+    
     # static media server for the dev sites / local dev
     url(r'^media/(?P<path>.*)$',       'django.views.static.serve', {'document_root': settings.MEDIA_DIR, 'show_indexes':True}),
     url(r'^media-admin/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ADMIN_DIR, 'show_indexes':True}),

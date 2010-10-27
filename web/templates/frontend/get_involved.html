@@ -90,27 +90,25 @@
         {% endifequal %}
     </div>
 
-    {% if user.is_staff %}
-        <div class="task_complete staff">
-            <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_description">
-                {% dial view_description_percent 200 100 %}
-            </a>
-            <h3>Add a description to a view <small>({{view_description_percent}}% complete)</small></h3>
-            {% ifequal view_no_description_count 0 %}
-                <p>No need! They've all been done.</p>
-            {% else %}
-                <p>{{view_no_description_count}} out of {{view_count}} views have no description. Help make ScraperWiki better by <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_description">adding a description to some random views</a>.</p>
-                
-                <p>
-                    <strong>{{view_no_description_count}} out of {{view_count}}</strong> views are currently missing a description. Help out by adding one that describes what the view shows and what data it uses.
-                </p>
-                <form action="{% url scraper_list_wiki_type 'view' %}" method="get">
-                    <input type="hidden" name="filter" value="no_description"/>                    
-                    <input type="submit" value="Show me views with no description"/>
-                </form>
-            {% endifequal %}
-        </div>
-    {% endif %}
+     <div class="task_complete">
+         <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_description">
+             {% dial view_description_percent 200 100 %}
+         </a>
+         <h3>Add a description to a view <small>({{view_description_percent}}% complete)</small></h3>
+         {% ifequal view_no_description_count 0 %}
+             <p>No need! They've all been done.</p>
+         {% else %}
+             <p>{{view_no_description_count}} out of {{view_count}} views have no description. Help make ScraperWiki better by <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_description">adding a description to some random views</a>.</p>
+             
+             <p>
+                 <strong>{{view_no_description_count}} out of {{view_count}}</strong> views are currently missing a description. Help out by adding one that describes what the view shows and what data it uses.
+             </p>
+             <form action="{% url scraper_list_wiki_type 'view' %}" method="get">
+                 <input type="hidden" name="filter" value="no_description"/>                    
+                 <input type="submit" value="Show me views with no description"/>
+             </form>
+         {% endifequal %}
+     </div>
 
     <div class="task_complete">
         <a href="{% url scraper_list_wiki_type 'scraper' %}?filter=no_tags">
@@ -132,27 +130,25 @@
         {% endifequal %}
     </div>
 
-    {% if user.is_staff %}    
-        <div class="task_complete staff">
-            <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_tags">
-                {% dial view_description_percent 200 100 %}
-            </a>
-            <h3>Add some tags to a view <small>({{view_tags_percent}}% complete)</small></h3>
-            {% ifequal view_no_tags_count 0 %}
-                <p>No need! They've all been done.</p>
-            {% else %}
-            <p>
-                <strong>{{view_no_tags_count}} out of {{view_count}}</strong> scrapers are currently not tagged. Help out by adding some tags that describe the view.
-                This will help make the view easier to find for other people.
-            </p>
-            <form action="{% url scraper_list_wiki_type 'scraper' %}?filter=no_tags" method="get">
-                <input type="hidden" name="filter" value="no_tags"/>                
-                <input type="submit" value="Show me scrapers with no description"/>
-            </form>
-        
-            {% endifequal %}
-        </div>
-    {% endif %}    
+    <div class="task_complete">
+        <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_tags">
+            {% dial view_description_percent 200 100 %}
+        </a>
+        <h3>Add some tags to a view <small>({{view_tags_percent}}% complete)</small></h3>
+        {% ifequal view_no_tags_count 0 %}
+            <p>No need! They've all been done.</p>
+        {% else %}
+        <p>
+            <strong>{{view_no_tags_count}} out of {{view_count}}</strong> scrapers are currently not tagged. Help out by adding some tags that describe the view.
+            This will help make the view easier to find for other people.
+        </p>
+        <form action="{% url scraper_list_wiki_type 'scraper' %}?filter=no_tags" method="get">
+            <input type="hidden" name="filter" value="no_tags"/>                
+            <input type="submit" value="Show me scrapers with no description"/>
+        </form>
+    
+        {% endifequal %}
+    </div>
 </div>
 
 
