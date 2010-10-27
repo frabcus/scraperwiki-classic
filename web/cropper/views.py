@@ -2,10 +2,14 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
+from django.core.urlresolvers import reverse
 import re, os, urlparse, urllib, cStringIO
 import Image, ImageDraw, ImageEnhance, ImageChops
 import tempfile, shutil
 
+
+#There is an API  http://tinyurl.com/api-create.php?url='.$u
+# need a form that submits and makes this possible.  (checking it's for a PDF as well)
 
 """Creator:        TOSHIBA e-STUDIO520
 Producer:       MFPImgLib V1.0
@@ -54,21 +58,42 @@ def ParseSortCropping(cropping):
     return croppings, newcropping
         
         
-def croppage(request, tinyurl, page, cropping):
+def cropdoc(request):
+    url = request.GET.get("url")
+    if not url:
+        return HttpResponseRedirect(reverse('croppage', args=['t.2wk7srh', 1])) 
+    
+    return HttpResponseRedirect("%s?url=%s" % (reverse('croppage', args=['u', 1]), urllib.quote(url))) 
+    
+def GetSrcDoc(request, srcdoc):
+    if srcdoc[:2] == 't.':
+        pdfurl = urlparse.urljoin("http://tinyurl.com/", srcdoc[2:])
+        pdffile = os.path.join(settings.CROPPER_SOURCE_DIR, "%s.pdf" % srcdoc)
+        imgstem = os.path.join(settings.CROPPER_IMG_DIR, srcdoc)
+        qtail = ""
+    elif srcdoc == "u":
+        pdfurl = request.GET.get("url")
+        lsrcdoc = pdfurl.replace('/', '|')
+        pdffile = os.path.join(settings.CROPPER_SOURCE_DIR, lsrcdoc)
+        imgstem = os.path.join(settings.CROPPER_IMG_DIR, lsrcdoc)
+        qtail = "?%s" % urllib.urlencode({"url":pdfurl})
+    return pdfurl, pdffile, imgstem, qtail
+        
+        
+def croppage(request, srcdoc, page, cropping):
     page = int(page)
     croppings, cropping = ParseSortCropping(cropping)
     
-    # download file if it doesn't exist
-    pdffile = os.path.join(settings.CROPPER_SOURCE_DIR, "%s.pdf" % tinyurl)
-    if not os.path.isfile(pdffile):
-        url = urlparse.urljoin("http://tinyurl.com/", tinyurl)
+    pdfurl, pdffile, imgstem, qtail = GetSrcDoc(request, srcdoc)
+    if not os.path.isfile(pdffile):  # download file if it doesn't exist
         tpdffile = tempfile.NamedTemporaryFile(suffix='.pdf')
-        filename, headers = urllib.urlretrieve(url, tpdffile)
+        filename, headers = urllib.urlretrieve(pdfurl, tpdffile.name)
         if headers.subtype != 'pdf':
             return HttpResponse("%s is not pdf type" % url)
-        shutils.copy(tpdffile.name, pdffile)
+        print (tpdffile.name, pdffile)
+        shutil.copy(tpdffile.name, pdffile)
     
-    data = { "page":int(page), "tinyurl":tinyurl, "cropping":cropping }
+    data = { "page":int(page), "srcdoc":srcdoc, "cropping":cropping, "qtail":qtail, "pdfurl":pdfurl }
     data.update(pdfinfo(pdffile))
     
     data["losecroppings"] = [ ]
@@ -87,15 +112,15 @@ def croppage(request, tinyurl, page, cropping):
 
 
 
-def cropimg(request, format, tinyurl, page, cropping):
+def cropimg(request, format, srcdoc, page, cropping):
     page = int(page)
     cropping = cropping or ""
     
-    imgfile = os.path.join(settings.CROPPER_IMG_DIR, "%s_%04d.png" % (tinyurl, page))
+    pdfurl, pdffile, imgstem, qtail = GetSrcDoc(request, srcdoc)
+    imgfile = "%s_%04d.png" % (imgstem, page)
     if not os.path.isfile(imgfile):
-        pdffile = os.path.join(settings.CROPPER_SOURCE_DIR, "%s.pdf" % tinyurl)
         imgpixwidth = 800
-        cmd = 'convert -quiet -density 192 %s[%d] -resize %d %s > /dev/null 2>&1' % (pdffile, page-1, imgpixwidth, imgfile)
+        cmd = 'convert -quiet -density 192 "%s[%d]" -resize %d "%s" > /dev/null 2>&1' % (pdffile, page-1, imgpixwidth, imgfile)
         os.system(cmd)
     
     croppings = filter(lambda x:x, cropping.split("/"))
@@ -142,3 +167,4 @@ def cropimg(request, format, tinyurl, page, cropping):
     cpfp.save(imgout, "png")
     imgout.seek(0)
     return HttpResponse(imgout, mimetype='image/png')
+
