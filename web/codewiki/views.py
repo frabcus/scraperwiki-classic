@@ -582,9 +582,9 @@ def export_gdocs_spreadsheet(request, short_name):
 
     if truncated:
         title = title + ' [SUBSET ONLY]'
-        csv_data = truncated_message + csv_data
+        csv_data = truncated_message.encode('utf-8') + csv_data
     elif scraper.record_count > row_limit:
-        csv_data = subset_message + csv_data
+        csv_data = subset_message.encode('utf-8') + csv_data
 
     #create client and authenticate
     client = gdata.docs.service.DocsService()
