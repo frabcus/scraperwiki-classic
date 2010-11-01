@@ -108,7 +108,7 @@ def explorer_user_run(request):
     uri = "%s?" % post_data.pop('uri')[0]
     post_data['explorer_user_run'] = ['1']
 
-    querystring = urllib.urlencode([(k,v[0]) for k,v in post_data.items()])
+    querystring = urllib.urlencode([(k.encode('utf-8'),v[0].encode('utf-8')) for k,v in post_data.items()])
     uri += querystring
 
     # Grab the API response
