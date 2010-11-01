@@ -19,7 +19,7 @@ import urllib
 import re
 import os
 import signal
-
+import urlparse
 
 
 
@@ -95,8 +95,12 @@ class ScraperRunner(threading.Thread):
         event.save()
 
         # a partial implementation of editor.js
-        bexception = False
-        bcompleted = False
+        exceptionmessage = [ ]
+        completionmessage = [ ]
+        outputmessages = [ ]
+        firsturl = ''  # to be a member of event
+        domainscrapes = { }  # domain: [domain, pages, bytes] 
+        
         while True:
             line = runner.stdout.readline()
             if not line:
@@ -108,41 +112,62 @@ class ScraperRunner(threading.Thread):
             
             message_type = data.get('message_type')
             content = data.get("content")
-            loutput = ''
-            lchanged = False
+            
             if message_type == 'executionstatus':
                 if content == "startingrun":
-                    event.run_id = data.get("runID")
+                    event.run_id = data.get("runID")  # allocated by the UML
                 elif content == "runcompleted":
-                    loutput = "Finished:: %s seconds elapsed, %s CPU seconds used" % (data.get("elapsed_seconds"), data.get("CPU_seconds")); 
-                    bcompleted = True
-                #elif content == "killsignal":  # will not happen as it's generated in twister
-                elif content == "runfinished":
-                    loutput += "Run finished\n"
+                    completionmessage.append("Finished:: %s seconds elapsed, %s CPU seconds used" % (data.get("elapsed_seconds"), data.get("CPU_seconds"))) 
 
-            elif message_type == "sources":
-                event.pages_scraped += 1    # data.url, data.bytes
-                lchanged = True
+            elif message_type == "sources":   # data.url, data.bytes
+                event.pages_scraped += 1  # soon to be deprecated 
+                netloc = urlparse.urlparse(data.url)[1]
+                if not firsturl and netloc != 'api.scraperwiki.com':
+                    firsturl = data.url
+                if netloc and netloc not in domainscrapes:
+                    domainscrapes[netloc] = [netloc, 0, 0]  # should be an object
+                domainscrapes[netloc][1] += 1
+                domainscrapes[netloc][2] += data.bytes
+            
             elif message_type == "data":
                 event.records_produced += 1
-                lchanged = True
-            elif message_type == "exception":
-                loutput = str(data.get("jtraceback"))+"\n"  # should parse this out properly
-                bexception = True
-            elif message_type == "console":
-                loutput = content
-            else:
-                loutput = "Unknown: %s\n" % line
+            
+            elif message_type == "exception":   # only one of these ever
+                for stackentry in data.get("stackdump"):
+                    sMessage = stackentry.get('file')
+                    if sMessage:
+                        if sMessage == "<string>":
+                            sMessage = "Line %d: %s" % (stackentry.get('linenumber', -1), stackentry.get('linetext'))
+                        if stackentry.get('furtherlinetext'):
+                            sMessage += " -- " + stackentry.get('furtherlinetext') 
+                        exceptionmessage.append(sMessage)
+                if stackentry.get('duplicates') and stackentry.get('duplicates') > 1:
+                    exceptionmessage.append("  + %d duplicates" % stackentry.duplicates)
                 
-            if loutput:
-                event.output += loutput
-            if loutput or lchanged:
+                if data.get("blockedurl"):
+                    exceptionmessage.append("Blocked URL: %s" % data.get("blockedurl"))
+                exceptionmessage.append(data.get('exceptiondescription'))
+            
+            elif message_type == "console":
+                outputmessage.append(content)
+            else:
+                outputmessage.append("Unknown: %s\n" % line)
+                
+            
+            # inefficient live update of event output so we can watch it when debugging scraperwiki platform
+            if outputmessage:
+                event.output = "%s%s" % (event.output, "".join(outputmessage))
+                outputmessage = [ ]
                 event.run_ended = datetime.datetime.now()
                 event.save()
 
-        # completion state
-        if not bcompleted:
-            event.output += "Run did not complete\n"
+        if exceptionmessage:
+            event.output = "%s\n\n*** Exception ***\n\n%s\n" % (event.output, "\n".join(exceptionmessage))
+        if completionmessage:
+            event.output = "%s\n\n%s" % (event.output, "".join(completionmessage))
+        elif not exceptionmessage:
+            event.output = "%s\n\nRun was interrupted (possibly by a timeout)\n" % (event.output)
+        
         event.run_ended = datetime.datetime.now()
         event.pid = -1  # disable it
         event.save()
@@ -152,15 +177,10 @@ class ScraperRunner(threading.Thread):
         # Update the scrapers meta information
         self.scraper.update_meta()
         self.scraper.last_run = datetime.datetime.now()
-
-        #set the status of the scraper which is used to highlight scrapers that need fixing
-        #(TODO: this needs to expand with time to include scrapes that havent returned any records in $n days)
-        if bexception:
+        if exceptionmessage:
             self.scraper.status = 'sick'
         else:
             self.scraper.status = 'ok'
-
-        #save scraper
         self.scraper.save()
                     
         # Log this run event to the history table
@@ -169,6 +189,7 @@ class ScraperRunner(threading.Thread):
         #alert.content_object = self.scraper.code   # saves it as the wrong type
         alert.content_object = Code.objects.get(pk=self.scraper.pk)  # don't have a way to down-cast the scraper object for this useless unhelpful interface
         
+            # this is bad, unnecessary and inconsistent with information in the ScraperRunEvent and the scraper.status
         alert.message_type = (bexception or not bcompleted) and 'run_success' or 'run_fail'
         alert.message_value = elapsed
         alert.event_object = event
