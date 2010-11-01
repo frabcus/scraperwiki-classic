@@ -97,7 +97,7 @@ class ScraperRunner(threading.Thread):
         # a partial implementation of editor.js
         exceptionmessage = [ ]
         completionmessage = [ ]
-        outputmessages = [ ]
+        outputmessage = [ ]
         firsturl = ''  # to be a member of event
         domainscrapes = { }  # domain: [domain, pages, bytes] 
         

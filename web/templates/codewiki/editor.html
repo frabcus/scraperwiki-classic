@@ -117,7 +117,7 @@
                     {% else %}
                         <a id="aCloseEditor1" href="{% url frontpage %}">close editor</a>
                     {% endif %}
-                    <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save {% ifequal scraper.wiki_type 'scraper' %}{{scraper.wiki_type}}{% endifequal %}" title="Save this scraper (Ctrl + S)"/>
+                    <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save" title="Save this {{scraper.wiki_type}} (Ctrl + S)"/>
                 </div>
             </div>
 
