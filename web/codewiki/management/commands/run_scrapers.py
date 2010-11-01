@@ -7,7 +7,7 @@ except: import simplejson as json
 
 import subprocess
 
-from codewiki.models import Code, Scraper, ScraperRunEvent
+from codewiki.models import Code, Scraper, ScraperRunEvent, DomainScrape
 from frontend.models import Alerts
 import frontend
 import settings
@@ -87,7 +87,7 @@ class ScraperRunner(threading.Thread):
         
         event = ScraperRunEvent()
         event.scraper = self.scraper
-        event.run_id = '???'   # should allow empty
+        event.run_id = ''
         event.pid = runner.pid # only applies when this runner is active
         event.run_started = datetime.datetime.now()
         event.run_ended = event.run_started  # actually used as last_updated
@@ -100,6 +100,7 @@ class ScraperRunner(threading.Thread):
         outputmessage = [ ]
         firsturl = ''  # to be a member of event
         domainscrapes = { }  # domain: [domain, pages, bytes] 
+        
         
         while True:
             line = runner.stdout.readline()
@@ -119,15 +120,17 @@ class ScraperRunner(threading.Thread):
                 elif content == "runcompleted":
                     completionmessage.append("Finished:: %s seconds elapsed, %s CPU seconds used" % (data.get("elapsed_seconds"), data.get("CPU_seconds"))) 
 
-            elif message_type == "sources":   # data.url, data.bytes
+            elif message_type == "sources":
                 event.pages_scraped += 1  # soon to be deprecated 
+                
                 netloc = urlparse.urlparse(data.url)[1]
-                if not firsturl and netloc != 'api.scraperwiki.com':
+                if not firsturl and netloc and netloc != 'api.scraperwiki.com':
                     firsturl = data.url
-                if netloc and netloc not in domainscrapes:
-                    domainscrapes[netloc] = [netloc, 0, 0]  # should be an object
-                domainscrapes[netloc][1] += 1
-                domainscrapes[netloc][2] += data.bytes
+                if netloc:
+                    if netloc not in domainscrapes:
+                        domainscrapes[netloc] = DomainScrape(scraper_run_event=event, domain=netloc)
+                domainscrapes[netloc].pages_scraped += 1
+                domainscrapes[netloc].bytes_scraped += data.bytes
             
             elif message_type == "data":
                 event.records_produced += 1
@@ -171,6 +174,9 @@ class ScraperRunner(threading.Thread):
         event.run_ended = datetime.datetime.now()
         event.pid = -1  # disable it
         event.save()
+        
+        for domainscrape in domainscrapes.values():
+            domainscrape.save()
         
         elapsed = (time.time() - start)
 

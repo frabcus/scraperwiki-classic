@@ -172,8 +172,8 @@ class ScraperRunEvent(models.Model):
 class DomainScrape(models.Model):
     scraper_run_event = models.ForeignKey(ScraperRunEvent)
     domain            = models.CharField(max_length=128)
-    bytes_scraped     = models.IntegerField()
-    pages_scraped     = models.IntegerField()
+    bytes_scraped     = models.IntegerField(default=0)
+    pages_scraped     = models.IntegerField(default=0)
 
     class Meta:
         app_label = 'codewiki'

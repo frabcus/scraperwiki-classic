@@ -796,8 +796,8 @@ wiki_type
 
                         // orginary save case.  show the slider up that it has been saved
                         if (res.draft != 'True') {
-                            $('.editor_controls #btnCommitPopup').val('Saved').css('background-color', '#FFFF00');
-                            window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3'); }, 1900);  
+                            $('.editor_controls #btnCommitPopup').val('Saved').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
+                            window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
                             //showFeedbackMessage("Your code has been saved.");
                             if (bConnected)
                                 send({"command":'saved'}); 
