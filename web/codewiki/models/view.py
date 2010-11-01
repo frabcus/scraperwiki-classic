@@ -22,9 +22,10 @@ except:
 
 class View (code.Code):
 
-    mime_type = models.CharField(max_length=255, null=True)
+    mime_type = models.CharField(max_length=255, blank=True, null=True)
     objects = ViewManager()    
     unfiltered = models.Manager() # django admin gets all confused if this lives in the parent class, so duplicated in child classes
+    render_time = models.IntegerField(blank=True, null=True)
 
     def __init__(self, *args, **kwargs):
         super(View, self).__init__(*args, **kwargs)
