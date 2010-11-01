@@ -20,6 +20,7 @@ import signal
 from codewiki.management.commands.run_scrapers import GetUMLrunningstatus, kill_running_runid
 from viewsrpc import testactiveumls
 
+
 def run_event(request, event_id):
     user = request.user
     event = get_object_or_404(ScraperRunEvent, id=event_id)

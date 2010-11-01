@@ -98,7 +98,6 @@ class ScraperRunner(threading.Thread):
         exceptionmessage = [ ]
         completionmessage = [ ]
         outputmessage = [ ]
-        firsturl = ''  # to be a member of event
         domainscrapes = { }  # domain: [domain, pages, bytes] 
         
         
@@ -123,14 +122,14 @@ class ScraperRunner(threading.Thread):
             elif message_type == "sources":
                 event.pages_scraped += 1  # soon to be deprecated 
                 
-                netloc = urlparse.urlparse(data.url)[1]
-                if not firsturl and netloc and netloc != 'api.scraperwiki.com':
-                    firsturl = data.url
+                netloc = "%s://%s" % urlparse.urlparse(data.get('url'))[:2]
+                if not event.first_url_scraped and netloc and netloc != 'http://api.scraperwiki.com':
+                    event.first_url_scraped = data.get('url')
                 if netloc:
                     if netloc not in domainscrapes:
                         domainscrapes[netloc] = DomainScrape(scraper_run_event=event, domain=netloc)
-                domainscrapes[netloc].pages_scraped += 1
-                domainscrapes[netloc].bytes_scraped += data.bytes
+                    domainscrapes[netloc].pages_scraped += 1
+                    domainscrapes[netloc].bytes_scraped += data.get('bytes')
             
             elif message_type == "data":
                 event.records_produced += 1
@@ -196,7 +195,7 @@ class ScraperRunner(threading.Thread):
         alert.content_object = Code.objects.get(pk=self.scraper.pk)  # don't have a way to down-cast the scraper object for this useless unhelpful interface
         
             # this is bad, unnecessary and inconsistent with information in the ScraperRunEvent and the scraper.status
-        alert.message_type = (bexception or not bcompleted) and 'run_success' or 'run_fail'
+        alert.message_type = (exceptionmessage or not completionmessage) and 'run_success' or 'run_fail'
         alert.message_value = elapsed
         alert.event_object = event
         alert.save()

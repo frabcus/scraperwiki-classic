@@ -39,6 +39,16 @@
         {% endif %}
         <p><b>Records produced:</b> {{event.records_produced}}; <b>Pages scraped:</b> {{event.pages_scraped}}</p>
 
+        {% if event.first_url_scraped %}
+          <p>First url scraped (for use as screenshot): <a href="{{event.first_url_scraped}}">{{event.first_url_scraped}}</a></p>
+        {% endif %}
+
+        <ul>
+        {% for domainscrape in event.domainscrape_set.all %}
+          <li><a href="{{domainscrape.domain}}">{{domainscrape.domain}}</a> -- {{domainscrape.bytes_scraped}} bytes, {{domainscrape.pages_scraped}} pages</li>
+        {% endfor %}
+        </ul>
+
         <textarea style="width:100%; height:20em">
             {{event.output}}
         </textarea>

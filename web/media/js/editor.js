@@ -759,7 +759,6 @@ $(document).ready(function() {
             $.ajax({
               type : 'POST',
               contentType : "application/json",
-              URL : window.location.pathname,
 
               data: ({
                 title : $('#id_title').val(),
