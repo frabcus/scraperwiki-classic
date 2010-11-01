@@ -741,7 +741,6 @@ $(document).ready(function() {
     //Save
     function saveScraper(){
         var bSuccess = false;
-wiki_type
 
         //if saving then check if the title is set (must be if guid is set)
         if(shortNameIsSet() == false){
