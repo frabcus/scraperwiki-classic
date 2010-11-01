@@ -663,6 +663,7 @@ def unfollow(request, short_name):
     return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
 
 
+# this function to be deleted
 def twisterstatus(request):
     if 'value' not in request.POST:
         return HttpResponse("needs value=")

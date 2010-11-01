@@ -18,6 +18,7 @@ import os
 import signal
 
 from codewiki.management.commands.run_scrapers import GetUMLrunningstatus, kill_running_runid
+from viewsrpc import testactiveumls
 
 def run_event(request, event_id):
     user = request.user
@@ -30,11 +31,13 @@ def run_event(request, event_id):
             context['status'] = status
     
     context['scraper'] = event.scraper
-    context['selected_tab'] = ''
+    context['selected_tab'] = '' and message.get('message_sub_type') != 'consolestatus'
     context['user_owns_it'] = (event.scraper.owner() == user)
     
     return render_to_response('codewiki/run_event.html', context, context_instance=RequestContext(request))
 
+
+            
 
 def running_scrapers(request):
     user = request.user
@@ -53,6 +56,8 @@ def running_scrapers(request):
                 status['killable'] = True
 
     context = { 'statusscrapers': statusscrapers, 'events':recentevents }
+    context['activeumls'] = testactiveumls(5)
+
     return render_to_response('codewiki/running_scrapers.html', context, context_instance=RequestContext(request))
 
 

@@ -22,56 +22,7 @@ try:                import json
 except ImportError: import simplejson as json
 
 
-def rpcexecute_dummy(request, short_name, revision = None):
-    response = HttpResponse()
-    response.write('''
-    <html>
-      <head>
-        <script type='text/javascript' src='http://www.google.com/jsapi'></script>
-        <script type='text/javascript'>
-          google.load('visualization', '1', {'packages':['annotatedtimeline']});
-          google.setOnLoadCallback(drawChart);
-          function drawChart() {
-            var data = new google.visualization.DataTable();
-            data.addColumn('date', 'Date');
-            data.addColumn('number', 'Sold Pencils');
-            data.addColumn('string', 'title1');
-            data.addColumn('string', 'text1');
-            data.addColumn('number', 'Sold Pens');
-            data.addColumn('string', 'title2');
-            data.addColumn('string', 'text2');
-            data.addRows([
-              [new Date(2008, 1 ,1), 30000, undefined, undefined, 40645, undefined, undefined],
-              [new Date(2008, 1 ,2), 14045, undefined, undefined, 20374, undefined, undefined],
-              [new Date(2008, 1 ,3), 55022, undefined, undefined, 50766, undefined, undefined],
-              [new Date(2008, 1 ,4), 75284, undefined, undefined, 14334, 'Out of Stock','Ran out of stock on pens at 4pm'],
-              [new Date(2008, 1 ,5), 41476, 'Bought Pens','Bought 200k pens', 66467, undefined, undefined],
-              [new Date(2008, 1 ,6), 33322, undefined, undefined, 39463, undefined, undefined]
-            ]);
-
-            var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));
-            chart.draw(data, {displayAnnotations: true});
-          }
-        </script>
-      </head>
-
-      <body style="height:10000px;">
-        <div id='chart_div' style='width: 700px; height: 240px;'></div>
-
-      </body>
-    </html>
-    '''
-    )
-    return response
-                        
-                        
-# quick hack the manage the RPC execute feature 
-# to test this locally you need to use python manage.py runserver twice, on 8000 and on 8010, 
-# and view the webpage on 8010
 def rpcexecute(request, short_name, revision = None):
-    
-    #if settings.USE_DUMMY_VIEWS == True:
-    #    return rpcexecute_dummy(request, short_name, revision)
     
     scraper = get_object_or_404(models.Code.objects, short_name=short_name)
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
@@ -111,19 +62,47 @@ def rpcexecute(request, short_name, revision = None):
     for line in runner.stdout:
         try:
             message = json.loads(line)
-            print "mmmm", message
             if message['message_type'] == 'fail':
                 failed = True
             elif message['message_type'] == 'exception':
                 response.write("<h3>%s</h3>\n" % str(message["jtraceback"].get("exceptiondescription")).replace("<", "&lt;"))
                 for stackentry in message["jtraceback"]["stackdump"]:
                     response.write("<h3>%s</h3>\n" % re.replace("<", "&lt;", str(stackentry).replace("<", "&lt;")))
+            elif message['message_type'] == "executionstatus":
+                pass
 
-            # recover the message from all the escaping
-            if message['message_type'] == "console" and message.get('message_sub_type') != 'consolestatus':
+            elif message['message_type'] == "console":
                 response.write(message["content"])
 
         except:
             pass
         
     return response
+                
+                
+                
+def testactiveumls(n):
+    result = [ ]
+    code = "from subprocess import Popen, PIPE\nprint Popen(['hostname'], stdout=PIPE).communicate()[0]"
+    
+    runner_path = "%s/runner.py" % settings.FIREBOX_PATH
+    args = [runner_path, '--language=python', '--cpulimit=80']
+    
+    for i in range(n):
+        runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        runner.stdin.write(code)
+        runner.stdin.close()
+        
+        lns = [ ]
+        for line in runner.stdout:
+            message = json.loads(line)
+            if message['message_type'] == "console":
+                if message.get('message_sub_type') != 'consolestatus':
+                    lns.append(message['content'].strip())
+            elif message['message_type'] == "executionstatus":
+                pass
+            else:
+                lns.append(line)
+        result.append('\n'.join(lns))
+    return result
+
