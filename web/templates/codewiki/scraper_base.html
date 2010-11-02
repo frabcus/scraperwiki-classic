@@ -33,14 +33,19 @@
     </div>
     <div class="content full">
         {% ifequal scraper.status 'sick' %}
+          {% if lastscraperrunevent.id %}
+          {% ifequal lastscraperrunevent.pid -1 %}
             <p class="sick">
-                <strong>Maintenance required!</strong> This {{scraper.wiki_type}} might be broken (it generated an exception on its <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}">last run</a>).
+                <strong>Maintenance required!</strong> This {{scraper.wiki_type}} might be broken 
+                (it generated an exception on its <a href="{% url run_event lastscraperrunevent.id %}">last run</a>).
                 {% ifequal scraper.owner.get_profile user %}
                     <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit this {{scraper.wiki_type}}</a>.
                 {% else %}
                     Do you know any {{scraper.language}}? Could you help {{scraper.owner.get_profile.name}} <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">fix this {{scraper.wiki_type}}</a>?
                 {% endifequal %}
             </p>
+          {% endifequal %}
+          {% endif %}
         {% endifequal %}
         <div class="page_tab_body">
                     

@@ -233,7 +233,7 @@ $(document).ready(function() {
     function showFeedbackMessage(sMessage){
        $('#feedback_messages').html(sMessage)
        $('#feedback_messages').slideToggle(200);
-       setTimeout('$("#feedback_messages").slideToggle();', 2500);
+       window.setTimeout('$("#feedback_messages").slideToggle();', 2500);
     }
 
 
@@ -279,7 +279,7 @@ $(document).ready(function() {
         // couldn't find a way to make a reconnect button work!
             // the bSuppressDisconnectionMessages technique doesn't seem to work (unload is not invoked), so delay message  in the hope that window will close first
         if (!bSuppressDisconnectionMessages)
-            setTimeout(function() {
+            window.setTimeout(function() {
                 writeToChat('<b>You will need to reload the page to reconnect</b>');  
                 writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
                 writeToConsole("(You can still save your work)", "exceptionnoesc"); }, 
@@ -446,6 +446,8 @@ $(document).ready(function() {
             "code" : codeeditor.getCode(),
             "urlquery" : ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val())
         }
+        $('.editor_controls #run').val('Sending');
+
         send(data)
 
         // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
@@ -640,20 +642,22 @@ $(document).ready(function() {
     function setupToolbar(){
 
         // actually the save button
-        $('#btnCommitPopup').live('click', function (){
+        $('.editor_controls #btnCommitPopup').live('click', function (){
             saveScraper();  
             return false;
         });
         
+        $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')); 
+
         //diff button (hidden)
-         $('.editor_controls #diff').click(function() {
+        $('.editor_controls #diff').click(function() {
                 viewDiff(); 
                 return false; 
             }
         ); 
 
         //reload button (hidden)
-         $('.editor_controls #reload').click(function() {
+        $('.editor_controls #reload').click(function() {
                 reloadScraper(); 
                 return false; 
             }
@@ -750,11 +754,11 @@ $(document).ready(function() {
         }else{
             bSuccess = true;
         }
+
         if(bSuccess == true){      
             $.ajax({
               type : 'POST',
               contentType : "application/json",
-              URL : window.location.pathname,
 
               data: ({
                 title : $('#id_title').val(),
@@ -790,10 +794,11 @@ $(document).ready(function() {
 
                         // orginary save case.  show the slider up that it has been saved
                         if (res.draft != 'True') {
-                            showFeedbackMessage("Your code has been saved.");
-                            if (bConnected){
+                            $('.editor_controls #btnCommitPopup').val('Saved').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
+                            window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
+                            //showFeedbackMessage("Your code has been saved.");
+                            if (bConnected)
                                 send({"command":'saved'}); 
-                            }
                         }
                         setPageIsDirty(false); 
                     }
@@ -804,6 +809,8 @@ $(document).ready(function() {
                 document.write(response.responseText); // Uncomment to get the actual error page
               }
             });
+            
+            $('.editor_controls #btnCommitPopup').val('Saving ...');
         }
     }
 

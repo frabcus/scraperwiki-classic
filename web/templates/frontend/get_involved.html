@@ -124,7 +124,7 @@
         </p>
         <form action="{% url scraper_list_wiki_type 'scraper' %}" method="get">
             <input type="hidden" name="filter" value="no_tags"/>
-            <input type="submit" value="Show me scrapers with no description"/>
+            <input type="submit" value="Show me scrapers with no tags"/>
         </form>
     
         {% endifequal %}
@@ -142,9 +142,9 @@
             <strong>{{view_no_tags_count}} out of {{view_count}}</strong> scrapers are currently not tagged. Help out by adding some tags that describe the view.
             This will help make the view easier to find for other people.
         </p>
-        <form action="{% url scraper_list_wiki_type 'scraper' %}?filter=no_tags" method="get">
+        <form action="{% url scraper_list_wiki_type 'view' %}?filter=no_tags" method="get">
             <input type="hidden" name="filter" value="no_tags"/>                
-            <input type="submit" value="Show me scrapers with no description"/>
+            <input type="submit" value="Show me views with no tags"/>
         </form>
     
         {% endifequal %}

@@ -181,7 +181,10 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
         all_code_objects = all_code_objects.filter(description='')
     elif special_filter == 'no_tags':
         #hack to get scrapers with no tags (tags don't recognise inheritance)
-        all_code_objects = TaggedItem.objects.get_no_tags(Scraper.objects.all().order_by('-created_at') )
+        if wiki_type == 'scraper':
+            all_code_objects = TaggedItem.objects.get_no_tags(Scraper.objects.all().order_by('-created_at') )
+        else:
+            all_code_objects = TaggedItem.objects.get_no_tags(View.objects.all().order_by('-created_at') )
 
 
     # filter out scrapers that have no records
