@@ -42,6 +42,10 @@
           {% ifequal item.message_type|lower "run_success" %}
             Scraper run success after {{ item.message_value|floatformat }} seconds
           {% endifequal %}
+
+          {% ifequal item.message_type|lower "run_halted" %}
+            Scraper ran out of time
+          {% endifequal %}
           
           {% if item.user %}
             by 
