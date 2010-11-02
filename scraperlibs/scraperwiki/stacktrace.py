@@ -3,6 +3,7 @@ import inspect
 import traceback
 import re
 import urllib
+from urllib2 import HTTPError
 
 
 def formatvalue(value):
@@ -60,12 +61,10 @@ def getExceptionTraceback(code):
     result = { "exceptiondescription":repr(exc_value), "stackdump":stackdump }
     
     #raise IOError('http error', 403, 'Scraperwiki blocked access to "http://tits.ru/".  Click <a href="/whitelist/?url=http%3A//tits.ru/">here</a> for details.', <httplib.HTTPMessage instance at 0x84c318c>)
-    if exc_type == IOError and len(exc_value.args) >= 2 and exc_value.args[1] == 403:
-        mblockaccess = re.match('Scraperwiki blocked access to "(.*?)"', str(exc_value.args[2]))
+    if exc_type == HTTPError and exc_value.code == 403:
+        mblockaccess = re.search('Scraperwiki blocked access to "(.*)"', exc_value.msg)
         if mblockaccess:
             result["blockedurl"] = mblockaccess.group(1)
             result["blockedurlquoted"] = urllib.quote(mblockaccess.group(1))
     
     return result
-
-
