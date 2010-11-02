@@ -5,10 +5,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 import re, os, urlparse, urllib, cStringIO
 import tempfile, shutil
-try:
-    import Image, ImageDraw, ImageEnhance, ImageChops
-except ImportError:
-    print "Too bad"
+import Image, ImageDraw, ImageEnhance, ImageChops
 
 
 #There is an API  http://tinyurl.com/api-create.php?url='.$u
