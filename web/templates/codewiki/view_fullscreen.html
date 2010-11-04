@@ -8,7 +8,16 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>	
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.autoheight.js"></script>	
-    <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>	
+    <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script> 
+    <script type="text/javascript">
+        $(document).ready(function() 
+        { 
+            $('#embedbutton').click(function() 
+            {
+                $('#embedinstructions').slideToggle();
+            }); 
+        }); 
+    </script>
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />	
 </head>
 <body class="fullscreen">
@@ -20,8 +29,7 @@
       };
       (function() {
         var e = document.createElement('script'); e.async = true;
-        e.src = document.location.protocol +
-          '//connect.facebook.net/en_US/all.js';
+        e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
         document.getElementById('fb-root').appendChild(e);
       }());
     </script>
@@ -30,11 +38,16 @@
         <p id="share_links">
             <fb:like href="{%url view_fullscreen scraper.short_name %}" layout="button_count" font="arial"></fb:like>
             <a href="http://twitter.com/share" class="twitter-share-button" data-count="none">Tweet</a>
+            <a class="lkbutton" id="embedbutton" title="Get HTML code to embed this view">Embed</a>
+            <a class="lkbutton" title="Edit the source code for this view" href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit</a>
         </p>
         <a href="{%url frontpage %}" id="powered"><span class="hide">Powered by ScraperWiki</span></a>
-        <a id="close" href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">x</a>
+        <a id="close" title="Show page unembedded" href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}?{{urlquerystring}}">X</a>
     </div>
-
+    <div id="embedinstructions">
+       Copy and paste the following code into your HTML<br/>
+       <textarea>&lt;iframe class="view autoHeight" width="100%" height="500" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}?{{urlquerystring}}"&gt;</textarea>
+    </div>
     <iframe class="view autoHeight" width="100%" height="500" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}?{{urlquerystring}}">
     </iframe>
 </body>

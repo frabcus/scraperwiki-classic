@@ -436,7 +436,13 @@ body.fullscreen .hide {display:none;}
 body.fullscreen iframe.view {border:none;}
 body.fullscreen #powered {display:block;width:175px; height:20px; background:url(../images/powered.png) no-repeat;
     position:absolute; right:2em; top:7px;}
-body.fullscreen #close {position:absolute; right:1em; top:6px;}
+body.fullscreen #close {position:absolute; right:1em; top:6px; background-color:#efefef; border: thin black solid; }
+
+body.fullscreen #full_bar a.lkbutton { position:relative; top:-4px; background-color:#efefef; border: thin black solid;}
+body.fullscreen #full_bar a.lkbutton:hover { text-decoration:none; background-color:#e1e1ef; color:#000000; }
+body.fullscreen #embedinstructions { background-color: #ffe; display:none; }
+body.fullscreen #embedinstructions textarea { width:500px; }
+
 
 /* textwiki */
 .text_wiki {background:#fafafa; padding:0.7em; border:solid 1px #ccc;}
