@@ -60,7 +60,10 @@ $(document).ready(function() {
     setupResizeEvents();
 
     function setPageIsDirty(lpageIsDirty) {
-$('#CODEMIRRORDEBUG').text($.toJSON(codeeditor.historySize())); 
+
+// replaces incoming parameter
+lpageIsDirty = (codeeditor.historySize().undo != 0); 
+
         if (pageIsDirty == lpageIsDirty)
             return; 
         pageIsDirty = lpageIsDirty; 
@@ -120,7 +123,7 @@ $('#CODEMIRRORDEBUG').text($.toJSON(codeeditor.historySize()));
             enterMode: "flat", // default is "indent" (which I have found buggy),  also can be "keep"
             reindentOnLoad: false, 
             onChange: function ()  { setPageIsDirty(true); },
-            noScriptCaching: true, // CODEMIRRORDEBUG
+            //noScriptCaching: true, // essential when hacking the codemirror libraries
 
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
