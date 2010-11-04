@@ -41,7 +41,7 @@
                 {% ifequal scraper.owner.get_profile user %}
                     <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit this {{scraper.wiki_type}}</a>.
                 {% else %}
-                    Do you know any {{scraper.language}}? Could you help {{scraper.owner.get_profile.name}} <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">fix this {{scraper.wiki_type}}</a>?
+                    Do you know {{scraper.language}}? Could you help <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">fix this {{scraper.wiki_type}}</a>?
                 {% endifequal %}
             </p>
           {% endifequal %}

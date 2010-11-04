@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
     //variables
-    var pageIsDirty = true;
+    var pageIsDirty = false;
     var editor_id = 'id_code';
     var codeeditor = undefined;
     var codemirroriframe; // the iframe that needs resizing
