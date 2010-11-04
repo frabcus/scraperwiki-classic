@@ -28,7 +28,6 @@ def rpcexecute(request, short_name, revision = None):
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
     failed = False
 
-    
     urlquerystring = request.META["QUERY_STRING"]
     # derive the function and arguments from the urlargs
     # (soon to be deprecated)
@@ -48,9 +47,11 @@ def rpcexecute(request, short_name, revision = None):
     args.append('--name=%s' % scraper.short_name)
     args.append('--cpulimit=80')
     args.append('--urlquery=%s' % urlquerystring)
+    args = [i.encode('utf8') for i in args]
     
     runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    runner.stdin.write(scraper.saved_code(revision))
+    code = scraper.saved_code(revision)
+    runner.stdin.write(code.encode('utf8'))
     
     # append in the single line at the bottom that gets the rpc executed with the right function and arguments
     #if func:
