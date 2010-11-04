@@ -132,7 +132,9 @@ ul.title_links li.csv a {background:url(../images/icons/csv_download.png) no-rep
 ul.title_links li.api a {background:url(../images/icons/api.png) no-repeat;}
 ul.title_links li.gdocs a {background:url(../images/icons/google.png) no-repeat;}
 ul.title_links li.full_screen a {background:url(../images/icons/zoom.png) no-repeat;}
-ul.title_links li.embed a {background:url(../images/icons/script_code_red.png) no-repeat;}
+ul.title_links li.view a {background:url(../images/icons/view.png) no-repeat;}
+ul.title_links li.scraper a {background:url(../images/icons/scraper.png) no-repeat;}
+ul.title_links li.rss a {background:url(../images/icons/csv_download.png) no-repeat;}
 
 /* Page tabs */
 div.page_tabs {background:#fafafa; padding-right:0.2em;height:1.65em; }

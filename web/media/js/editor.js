@@ -60,6 +60,7 @@ $(document).ready(function() {
     setupResizeEvents();
 
     function setPageIsDirty(lpageIsDirty) {
+$('#CODEMIRRORDEBUG').text($.toJSON(codeeditor.historySize())); 
         if (pageIsDirty == lpageIsDirty)
             return; 
         pageIsDirty = lpageIsDirty; 
@@ -119,6 +120,7 @@ $(document).ready(function() {
             enterMode: "flat", // default is "indent" (which I have found buggy),  also can be "keep"
             reindentOnLoad: false, 
             onChange: function ()  { setPageIsDirty(true); },
+            noScriptCaching: true, // CODEMIRRORDEBUG
 
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
@@ -602,7 +604,7 @@ $(document).ready(function() {
             selrange = $.evalJSON(selrange); 
         }
 
-        codeeditor.setCode(newcode); // see setupTutorial() for way to leave control-Z in place
+        codeeditor.setCode(newcode); 
         codeeditor.focus(); 
         setPageIsDirty(false); 
 

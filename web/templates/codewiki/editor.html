@@ -91,7 +91,7 @@
                 {% if scraper.id %}
                     <input type="checkbox" value="autosavecheck" name="autosavecheck" id="id_autosavecheck" {% if user.username %}checked{% endif %} />autosave
                 {% endif %}
-
+CODEMIRRORDEBUG:<b id="CODEMIRRORDEBUG">---</b>
                 {% ifequal scraper.wiki_type 'view' %}
                   <label for="id_urlquery" class="hide">Urlquery:</label>
                   <input id="id_urlquery" type="text" class="text" name="urlquery" title="URL query string passed to the view" /> 
