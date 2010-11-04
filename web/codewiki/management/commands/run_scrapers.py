@@ -125,7 +125,7 @@ class ScraperRunner(threading.Thread):
                 event.pages_scraped += 1  # soon to be deprecated 
                 
                 netloc = "%s://%s" % urlparse.urlparse(data.get('url'))[:2]
-                if not event.first_url_scraped and netloc and netloc != 'http://api.scraperwiki.com':
+                if not event.first_url_scraped and netloc and netloc[-16:] != '.scraperwiki.com':
                     event.first_url_scraped = data.get('url')
                 if netloc:
                     if netloc not in domainscrapes:
