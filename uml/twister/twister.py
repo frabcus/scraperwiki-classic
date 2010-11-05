@@ -215,17 +215,14 @@ class RunnerProtocol(protocol.Protocol):
         scrapername = parsed_data.get('scrapername', '')
         scraperlanguage = parsed_data.get('language', '')
         urlquery = parsed_data.get('urlquery', '')
-        
+
         assert guid == self.guid
         args = ['./firestarter/runner.py']
         args.append('--guid=%s' % guid)
         args.append('--language=%s' % scraperlanguage)
         args.append('--name=%s' % scrapername)
         args.append('--urlquery=%s' % urlquery)
-        
-        # args must be an ancoded string, not a unicode object
         args = [i.encode('utf8') for i in args]
-
         print "./firestarter/runner.py: %s" % args
 
         # from here we should somehow get the runid

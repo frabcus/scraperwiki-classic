@@ -62,6 +62,11 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
     border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;}
 .helplink a {text-decoration:none;}
 
+select#automode {font-size:0.8em;
+    -webkit-border-radius: 4px;-moz-border-radius: 4px; 
+    background-color:#e3e3e3; background-repeat:no-repeat; background-position:2px 49%;
+        padding:0.2em 0.1em 0.2em 12px;border:solid 1px #9f9f9f; color:#333; font-weight:bold; }
+
 #meta_form {overflow: auto;}
 #meta_form p {margin:2.5em 0 2em 0;padding:0.5em 0 0.5em 0; border-top:solid 1px #808080;border-bottom:solid 1px #808080;}
     
