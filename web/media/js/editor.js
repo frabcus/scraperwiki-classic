@@ -506,8 +506,8 @@ $(document).ready(function() {
 
         //CodeMirrorConfig.readOnly = blockediting;    // doesn't work!
         //$('.editor_controls #run').attr("disabled", blockediting);
-        //  $('.editor_controls #btnCommitPopup').attr("disabled", blockediting);
-        $('.editor_controls #preview').attr("disabled", blockediting);
+        //$('.editor_controls #btnCommitPopup').attr("disabled", blockediting);
+        //$('.editor_controls #preview').attr("disabled", blockediting);
 
         codeeditor.win.document.body.style.backgroundColor = (blockediting ? '#e8d0d0' : '#fff');
         codeeditor.win.document.body.style.backgroundImage = (blockediting ? 'url(/media/images/staff.png)' : 'none'); //
@@ -594,13 +594,13 @@ $(document).ready(function() {
         });
     }
 
-    function clearOutput(){
-        $('#output_console div').html('');    
-        $('#output_sources div').html('');    
-        $('#output_data table').html('');                    
+    function clearOutput() {
+        $('#output_console div').html('');
+        $('#output_sources div').html('');
+        $('#output_data table').html('');
         $('.editor_output div.tabs li.console').removeClass('new');
-        $('.editor_output div.tabs li.data').removeClass('new');        
-        $('.editor_output div.tabs li.sources').removeClass('new');        
+        $('.editor_output div.tabs li.data').removeClass('new');
+        $('.editor_output div.tabs li.sources').removeClass('new');
     }
 
     function reloadScraper(){
@@ -667,7 +667,6 @@ $(document).ready(function() {
     
     //Setup toolbar
     function setupToolbar(){
-
         // actually the save button
         $('.editor_controls #btnCommitPopup').live('click', function (){
             saveScraper();  
@@ -677,30 +676,29 @@ $(document).ready(function() {
         $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')); 
 
         //diff button (hidden)
-        $('.editor_controls #diff').click(function() {
+        $('.editor_controls #diff').click(function() 
+        {
                 viewDiff(); 
                 return false; 
-            }
-        ); 
+        }); 
 
         //reload button (hidden)
-        $('.editor_controls #reload').click(function() {
+        $('.editor_controls #reload').click(function() 
+        {
                 reloadScraper(); 
                 return false; 
-            }
-        );
+        });
 
         //close editor link
-        $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(
-            function (){
-                if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
-                    return false; 
-                bSuppressDisconnectionMessages = true; 
-                send({"command":'loseconnection'}) 
-                //if (conn)  conn.close();  
-                return true;
-            }
-        );
+        $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(function ()
+        {
+            if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
+                return false; 
+            bSuppressDisconnectionMessages = true; 
+            send({"command":'loseconnection'}) 
+            //if (conn)  conn.close();  
+            return true;
+        });
 
         $(window).unload( function () { 
             bSuppressDisconnectionMessages = true; 
@@ -735,7 +733,8 @@ $(document).ready(function() {
             $('.editor_controls #run').bind('click.run', sendCode);
     }
 
-    function popupPreview() {
+    function popupPreview() 
+    {
         var viewurl = viewrunurl; 
         var urlquery = ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
         var viewurl = viewrunurl; 
@@ -800,29 +799,31 @@ $(document).ready(function() {
                 earliesteditor : earliesteditor, 
                 action : 'commit'
                 }),
-              success: function(response){
+
+              success: function(response)
+                {
                     res = $.evalJSON(response);
 
                     //failed
-                    if (res.status == 'Failed'){
+                    if (res.status == 'Failed')
                         alert("Save failed error message.  Shouldn't happen"); 
 
                     //success    
-                    }else{
+                    else
+                    {
                         //pageTracker._trackPageview('/scraper_committed_goal');  		
 
                         // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
-                        if (res.draft == 'True') {
+                        if (res.draft == 'True')
                             $('#divDraftSavedWarning').show();
-                        }
 
                         // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
-                        if (res.url && window.location.pathname != res.url) {
+                        if (res.url && window.location.pathname != res.url)
                             window.location = res.url;
-                        };
 
                         // orginary save case.  show the slider up that it has been saved
-                        if (res.draft != 'True') {
+                        if (res.draft != 'True') 
+                        {
                             $('.editor_controls #btnCommitPopup').val('Saved').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
                             window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
                             //showFeedbackMessage("Your code has been saved.");
@@ -844,16 +845,14 @@ $(document).ready(function() {
         }
     }
 
-    function cgiescape(text) {
-        if(text){
-            return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-        }else{
-            return "";
-        }
+    function cgiescape(text) 
+    {
+        return (text ? text.replace(/&/g, '&amp;').replace(/</g, '&lt;') : "");
     }
 
     
-    function setupResizeEvents(){
+    function setupResizeEvents()
+    {
         
         //window
         $(window).resize(onWindowResize);
@@ -1010,8 +1009,8 @@ $(document).ready(function() {
     };
 
 
-    function writeToSources(sUrl, bytes, failedmessage, cached, cacheid) {
-
+    function writeToSources(sUrl, bytes, failedmessage, cached, cacheid) 
+    {
         //remove items if over max
         if ($('#output_sources div.output_content').children().size() >= outputMaxItems) {
             $('#output_sources div.output_content').children(':first').remove();

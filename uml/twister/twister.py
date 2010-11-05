@@ -147,7 +147,7 @@ class RunnerProtocol(protocol.Protocol):
                 # draft scraper from this as a template to that they are fully independent.
                 # Unlikely use case of editing and running without cooperation, and then 
                 # being able to commit without serious code clashing issues.  
-                elif self.isstaff:
+                else:
                     for client in self.factory.clients:
                         if client.guid == self.guid and client.running:
                             client.kill_run()
@@ -174,21 +174,26 @@ class RunnerProtocol(protocol.Protocol):
             self.kill_run(reason='connection lost')
         self.factory.clientConnectionLost(self)
 
-    # this should be replaced by guidclienteditors.notifyEditorClients()
     def writeall(self, line, otherline=""):
-        if line:
+        if line: 
             self.write(line)  
         
-        if not otherline:
-            otherline = line
-        
-        # send any destination output to any staff who are watching
-        if self.guid:
-            for client in self.factory.clients:
-                if client.guid == self.guid and client != self:
-                    client.write(otherline)  
-    
-    
+        if self.guidclienteditors:
+            if not otherline:
+                otherline = line
+            
+            for client in self.guidclienteditors.anonymouseditors:
+                if client != self:
+                    client.write(otherline); 
+            
+            for usereditor in self.guidclienteditors.usereditormap.values():
+                for client in usereditor.userclients:
+                    if client != self:
+                        client.write(otherline); 
+        else:
+            assert not self.guid
+            
+            
     def kill_run(self, reason=''):
         msg = 'Script cancelled'
         if reason:
@@ -289,7 +294,6 @@ class EditorsOnOneScraper:
                     self.editinguser = client.username
         else:
             self.anonymouseditors.append(client)
-        
         self.notifyEditorClients("%s enters" % client.chatname)
         
     def RemoveClient(self, client):
