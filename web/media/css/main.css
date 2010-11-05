@@ -436,14 +436,15 @@ body.fullscreen #full_bar #share_links iframe {border:none!important;width:55px!
 body.fullscreen #full_bar #share_links .fb_iframe_widget {position:relative; top:-4px;}
 body.fullscreen .hide {display:none;}
 body.fullscreen iframe.view {border:none;}
-body.fullscreen #powered {display:block;width:175px; height:20px; background:url(../images/powered.png) no-repeat;
-    position:absolute; right:2em; top:7px;}
-body.fullscreen #close {position:absolute; right:1em; top:6px; background-color:#efefef; border: thin black solid; }
+body.fullscreen #powered {display:block;width:175px; height:20px; background:url(../images/powered.png) no-repeat; position:absolute; right:2em; top:7px;}
+body.fullscreen #close {position:absolute; font-size:0.8em; right:1em; top:5px; background:#f0ba98; border:solid 1px #bf6312!important; padding:0.0em 0.2em!important; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px; }
 
-body.fullscreen #full_bar a.lkbutton { position:relative; top:-4px; background-color:#efefef; border: thin black solid;}
+body.fullscreen #full_bar a.lkbutton { font-family:helvetica, arial, sans-serif; font-size:0.8em; position:relative; top:-5px; background-color:#f1f1ff; border:solid 1px #bbb; padding:0.0em 0.2em!important; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;}
 body.fullscreen #full_bar a.lkbutton:hover { text-decoration:none; background-color:#e1e1ef; color:#000000; }
+
 body.fullscreen #embedinstructions { background-color: #ffe; display:none; }
 body.fullscreen #embedinstructions textarea { width:500px; }
+
 
 
 /* textwiki */

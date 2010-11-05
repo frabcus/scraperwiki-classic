@@ -99,6 +99,7 @@
                     <option name="autoload" id="id_autoload" disabled>autoload</option>
                   {% endif %}
                 </select>
+
                 {% ifequal scraper.wiki_type 'view' %}
                   <label for="id_urlquery" class="hide">Urlquery:</label>
                   <input id="id_urlquery" type="text" class="text" name="urlquery" title="URL query string passed to the view" /> 

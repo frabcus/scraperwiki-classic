@@ -107,6 +107,7 @@ class RunnerProtocol(protocol.Protocol):
         self.scrapereditornumber = -1  # number out of all people editing a particular scraper
         self.earliesteditor = datetime.datetime.now()  # used to group together everything in one editing session
         self.guidclienteditors = None  # the EditorsOnOneScraper object
+        self.isdraft = False           # true when not autosave or autoload
         
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
