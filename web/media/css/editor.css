@@ -20,6 +20,7 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 
 /* Code */
 .editor_code {padding:0;border:none;position:relative;width:100%; }
+
 .CodeMirror-line-numbers {width: 2.2em;color: #888;background:#fafafa;text-align: right;
         padding: 0.4em 1.1em 0 0.2em;margin: 0;font-family: monaco, monospace;font-size: 10pt;line-height: 1.1em;
         border-right:solid 1px #9f9f9f;position:relative;}

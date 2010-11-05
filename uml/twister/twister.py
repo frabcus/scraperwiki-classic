@@ -129,7 +129,8 @@ class RunnerProtocol(protocol.Protocol):
         self.clientnumber = -1         # number for whole operation of twisted
         self.scrapereditornumber = -1  # number out of all people editing a particular scraper
         self.earliesteditor = datetime.datetime.now()  # used to group together everything in one editing session
-
+        self.guidclienteditors = None  # the EditorsOnOneScraper object
+        
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
         # we don't know what scraper they've actually opened until we get the dataReceived
@@ -174,13 +175,7 @@ class RunnerProtocol(protocol.Protocol):
 
             elif parsed_data['command'] == 'chat':
                 message = "%s: %s" % (self.chatname, parsed_data['text'])
-                
-                if self.guid:
-                    self.factory.sendchatmessage(self.guid, message, None)
-                
-                # unsaved scraper case (just talking to self)
-                else:   
-                    self.write(format_message(message, message_type='chat'))  # write it back to itself
+                self.writeall(format_message(message, message_type='chat'))
         
             # this message helps kill it better and killing it from the browser end
             elif parsed_data['command'] == 'loseconnection':
@@ -197,13 +192,13 @@ class RunnerProtocol(protocol.Protocol):
     def connectionLost(self, reason):
         if self.running:
             self.kill_run(reason='connection lost')
-        if self.guid:
-            self.factory.sendchatmessage(self.guid, "%s leaves" % self.chatname, self)
         self.factory.clientConnectionLost(self)
         self.factory.notifytwisterstatus()
 
+    # this should be replaced by guidclienteditors.notifyEditorClients()
     def writeall(self, line, otherline=""):
-        self.write(line)  
+        if line:
+            self.write(line)  
         
         if not otherline:
             otherline = line
@@ -211,7 +206,7 @@ class RunnerProtocol(protocol.Protocol):
         # send any destination output to any staff who are watching
         if self.guid:
             for client in self.factory.clients:
-                if client.guid == self.guid and client != self and client.isstaff:
+                if client.guid == self.guid and client != self:
                     client.write(otherline)  
     
     def kill_run(self, reason=''):
@@ -250,13 +245,7 @@ class RunnerProtocol(protocol.Protocol):
 
         # from here we should somehow get the runid
         self.running = reactor.spawnProcess(spawnRunner(self, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
-
-        message = "%s runs scraper" % self.chatname
-        if self.guid:
-            self.factory.sendchatmessage(self.guid, message, None)
-        else:   
-            self.write(format_message(message, message_type='chat'))  # write it back to itself
-        
+        self.writeall(format_message("%s runs scraper" % self.chatname, message_type='chat'))
         self.factory.notifyMonitoringClients(self)
 
 
@@ -312,6 +301,7 @@ class EditorsOnOneScraper:
         
     def AddClient(self, client):
         assert client.guid == self.guid
+        client.guidclienteditors = self
         client.earliesteditor = self.sessionstarts
         if client.username:
             bnomatch = True
@@ -332,6 +322,8 @@ class EditorsOnOneScraper:
         
     def RemoveClient(self, client):
         assert client.guid == self.guid
+        assert client.guidclienteditors == self
+        client.guidclienteditors = None
         if client.username:
             for i in range(len(self.usereditors)):
                 if self.usereditors[i][0].username == client.username:
@@ -405,12 +397,6 @@ class RunnerFactory(protocol.ServerFactory):
             client.write(format_message("%d c %d clients, running:%s" % (self.announcecount, len(self.clients), "".join(res)), message_type='chat'))
 
 
-    # could get rid of this and replace everywhere with writeall
-    def sendchatmessage(self, guid, message, nomessageclient):
-        for client in self.clients:
-            if client.guid == guid and client != nomessageclient and client.isstaff:
-                client.write(format_message(message, message_type='chat'))
-        
         
     # throw in the kitchen sink to get the features.  optimize for changes later
     def notifyMonitoringClients(self, cclient):

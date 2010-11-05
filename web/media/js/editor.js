@@ -1,10 +1,9 @@
 $(document).ready(function() {
 
     //variables
-    var pageIsDirty = false;
     var editor_id = 'id_code';
     var codeeditor = undefined;
-    var codemirroriframe; // the iframe that needs resizing
+    var codemirroriframe; // the actual iframe of codemirror that needs resizing
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
@@ -46,10 +45,12 @@ $(document).ready(function() {
     var indentUnits = Array();
     var parserConfig = Array();
     var parserName = Array();
+    var codemirroroptions = undefined; 
+    var pageIsDirty = false;
+    var atsavedundo = 0; 
+    var savedundo = 0; 
 
-    $.ajaxSetup({
-        timeout: 10000
-    });
+    $.ajaxSetup({timeout: 10000});
 
     //constructor functions
     setupCodeEditor();
@@ -59,11 +60,12 @@ $(document).ready(function() {
     setupToolbar();
     setupResizeEvents();
 
-    function setPageIsDirty(lpageIsDirty) {
-
-// replaces incoming parameter
-lpageIsDirty = (codeeditor.historySize().undo != 0); 
-
+    function UpdatePageDirtiness() 
+    {
+        var historysize = codeeditor.historySize(); 
+        if (historysize.undo + historysize.redo < savedundo)
+            savedundo = -1; 
+        var lpageIsDirty = (historysize.undo != savedundo); 
         if (pageIsDirty == lpageIsDirty)
             return; 
         pageIsDirty = lpageIsDirty; 
@@ -99,14 +101,14 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
         parserName['python'] = 'PythonParser';
         parserName['php'] = 'PHPHTMLMixedParser'; // 'PHPParser';
         parserName['ruby'] = 'RubyParser';
-        //parserName['ruby'] = 'DummyParser';
+        //parserName['ruby'] = 'DummyParser';  // for bugs
         parserName['html'] = 'HTMLMixedParser';
 
         // allow php to access HTML style parser
         parsers['php'] = parsers['html'].concat(parsers['php']);
         stylesheets['php'] = stylesheets['html'].concat(stylesheets['php']); 
 
-        codeeditor = CodeMirror.fromTextArea("id_code", {
+        codemirroroptions = {
             parserfile: parsers[scraperlanguage],
             stylesheet: stylesheets[scraperlanguage],
             path: codemirror_url + "js/",
@@ -114,7 +116,8 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
             textWrapping: true,
             lineNumbers: true,
             indentUnit: indentUnits[scraperlanguage],
-            readOnly: false,
+            readOnly: false, // cannot be changed once started up
+            undoDepth: 200,  // defaults to 50.  wait till we get lostundo value
             tabMode: "shift", 
             disableSpellcheck: true,
             autoMatchParens: true,
@@ -122,7 +125,7 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
             parserConfig: parserConfig[scraperlanguage],
             enterMode: "flat", // default is "indent" (which I have found buggy),  also can be "keep"
             reindentOnLoad: false, 
-            onChange: function ()  { setPageIsDirty(true); },
+            onChange: function ()  { UpdatePageDirtiness(); },
             //noScriptCaching: true, // essential when hacking the codemirror libraries
 
             // this is called once the codemirror window has finished initializing itself
@@ -132,9 +135,11 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
                     codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
                     setupKeygrabs();
                     resizeControls('first');
-                    setPageIsDirty(false); // page not dirty at this point
+                    UpdatePageDirtiness(); // page should not be dirty at this point
                 } 
-          });        
+          };
+
+          codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
     }
 
     
@@ -421,7 +426,8 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
         try {
             conn.send($.toJSON(json_data));  
         } catch(err) {
-            writeToConsole("Send error: " + err, "exceptionnoesc"); 
+            if (!bSuppressDisconnectionMessages)
+                writeToConsole("Send error: " + err, "exceptionnoesc"); 
         }
     }
 
@@ -441,6 +447,7 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
 
     
         //send the data
+        code = codeeditor.getCode(); 
         data = {
             "command" : "run",
             "guid" : guid,
@@ -448,18 +455,17 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
             "userrealname" : userrealname, 
             "language":scraperlanguage, 
             "scraper-name":short_name,
-            "code" : codeeditor.getCode(),
+            "code" : code,
             "urlquery" : ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val())
         }
         $('.editor_controls #run').val('Sending');
-
         send(data)
 
         // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
         // means we can have simultaneous running for staff overview
 
         // new auto-save every time 
-        if (guid && $('#id_autosavecheck').attr('checked') && pageIsDirty)
+        if (($('select#automode').attr('selectedIndex') == 1) && pageIsDirty)
             saveScraper(); 
     }
 
@@ -468,6 +474,7 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
         // Later on add in options to allow auto-reload and ability to find the names of those who are watching
         var message = "";
         var nwatchers = loggedineditors.length + nanonymouseditors; 
+        var blockediting = false; 
         if (username)
         {
             if (editinguser == username)
@@ -482,16 +489,30 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
                 if (nwatchers > 2)
                     message += " (+ " + (nwatchers-2) + " others)"; 
                 message += " are watching"; 
+                blockediting = true; 
             }
         }
         else
         {
             if (editinguser)
+            {
                 message += editinguser + " is editing; "; 
+                blockediting = true; 
+            }
             var owatchers = nwatchers - 1 - (editinguser ? 1 : 0); 
             if (owatchers > 0)
                 message += owatchers + " others watching"; 
         }
+
+        //CodeMirrorConfig.readOnly = blockediting;    // doesn't work!
+        //$('.editor_controls #run').attr("disabled", blockediting);
+        //  $('.editor_controls #btnCommitPopup').attr("disabled", blockediting);
+        $('.editor_controls #preview').attr("disabled", blockediting);
+
+        codeeditor.win.document.body.style.backgroundColor = (blockediting ? '#e8d0d0' : '#fff');
+        codeeditor.win.document.body.style.backgroundImage = (blockediting ? 'url(/media/images/staff.png)' : 'none'); //
+
+        //alert(codemirroriframe.style.backgroundColor = 'red'; // doesn't work
         $("#editorstatus").html(message); 
     }
 
@@ -502,7 +523,7 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
         loggedineditors = data.loggedineditors; 
         nanonymouseditors = data.nanonymouseditors; 
 
-        writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
+        //writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
         if (data.message)
             writeToChat(cgiescape(data.message)); 
 
@@ -609,7 +630,8 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
 
         codeeditor.setCode(newcode); 
         codeeditor.focus(); 
-        setPageIsDirty(false); 
+        savedundo = codeeditor.historySize().undo; 
+        UpdatePageDirtiness(); 
 
         // make the selection
         if (!((selrange[2] == 0) && (selrange[3] == 0))){
@@ -760,22 +782,24 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
             bSuccess = true;
         }
 
-        if(bSuccess == true){      
+        if(bSuccess == true)
+        {
+            code = codeeditor.getCode(); 
+            atsavedundo = codeeditor.historySize().undo;  // update only when success
             $.ajax({
               type : 'POST',
               contentType : "application/json",
+              dataType: "html",
 
               data: ({
                 title : $('#id_title').val(),
                 commit_message: "cccommit",
                 sourcescraper: $('#sourcescraper').val(),
                 wiki_type: wiki_type,
-                code : codeeditor.getCode(),
+                code : code,
                 earliesteditor : earliesteditor, 
                 action : 'commit'
                 }),
-
-              dataType: "html",
               success: function(response){
                     res = $.evalJSON(response);
 
@@ -805,7 +829,8 @@ lpageIsDirty = (codeeditor.historySize().undo != 0);
                             if (bConnected)
                                 send({"command":'saved'}); 
                         }
-                        setPageIsDirty(false); 
+                        savedundo = atsavedundo; 
+                        UpdatePageDirtiness(); 
                     }
                 },
 
