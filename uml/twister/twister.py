@@ -71,11 +71,12 @@ class spawnRunner(protocol.ProcessProtocol):
     # messages from the UML
     def outReceived(self, data):
         print "out", self.client.guid, data[:100]
+        # although the client can parse the records itself, it is necessary to split them up here correctly so that 
+        # this code can insert its own records into the stream.
         lines  = (self.buffer+data).split("\r\n")
         self.buffer = lines.pop(-1)
         for line in lines:
-            if line:
-                self.client.writeall(line)
+            self.client.writeall(line)
 
     def processEnded(self, reason):
         self.client.running = False
@@ -246,79 +247,87 @@ class RunnerProtocol(protocol.Protocol):
         self.factory.clientConnectionRegistered(self)  # this will cause a notifyEditorClients to be called for everyone on this scraper
         
 
-
+class UserEditorsOnOneScraper:
+    def __init__(self, client):
+        self.username = client.username
+        self.userclients = [ ]
+        self.AddUserClient(client)
+    
+    def AddUserClient(self, client):
+        assert self.username == client.username
+        self.userclients.append(client)
+        
+    def RemoveUserClient(self, client):
+        assert self.username == client.username
+        assert client in self.userclients
+        self.userclients.remove(client)
+        return len(self.userclients)
+        
+        
 class EditorsOnOneScraper:
     def __init__(self, guid, scrapername, scraperlanguage):
         self.guid = guid
         self.scrapername = scrapername
         self.scraperlanguage = scraperlanguage
         self.sessionstarts = datetime.datetime.now()  # replaces earliesteditor
-        self.anonymouseditors = [ ]
-        self.usereditors = [ ]  # list of lists of clients
         self.editinguser = ""
+        self.anonymouseditors = [ ]
+        self.usereditormap = { }  # maps username to UserEditorsOnOneScraper
         
     def AddClient(self, client):
         assert client.guid == self.guid
         client.guidclienteditors = self
         client.earliesteditor = self.sessionstarts
+        
         if client.username:
-            bnomatch = True
-            for userclients in self.usereditors:
-                if userclients[0].username == client.username:
-                    userclients.append(client)  # new window by same user
-                    bnomatch = False  # this signal is case for use of an else statement on the for
-                    break
-            if not self.usereditors:
-                self.editinguser = client.username
+            if client.username in self.usereditormap:
+                self.usereditormap[client.username].AddUserClient(client)
             else:
-                assert self.editinguser
-            if bnomatch:
-                self.usereditors.append([client])
+                self.usereditormap[client.username] = UserEditorsOnOneScraper(client)
+                if not self.editinguser:
+                    self.editinguser = client.username
         else:
             self.anonymouseditors.append(client)
+        
         self.notifyEditorClients("%s enters" % client.chatname)
         
     def RemoveClient(self, client):
         assert client.guid == self.guid
         assert client.guidclienteditors == self
         client.guidclienteditors = None
+        
         if client.username:
-            for i in range(len(self.usereditors)):
-                if self.usereditors[i][0].username == client.username:
-                    self.usereditors[i].remove(client)  
-                    if not self.usereditors[i]:
-                        del self.usereditors[i]
-                        
-                        # fairly inelegant logic to handle passing editing user on to next person
-                        if self.editinguser == client.username:
-                            if self.usereditors:
-                                self.editinguser = self.usereditors[0][0].username
-                            else:
-                                self.editinguser = ""
-                    break
-            assert False
+            assert client.username in self.usereditormap
+            if not self.usereditormap[client.username].RemoveUserClient(client):
+                del self.usereditormap[client.username]
+                if self.editinguser == client.username:
+                    self.editinguser = ''
+                    if self.usereditormap:
+                        self.editinguser = self.usereditormap.keys()[0]
         else:
+            assert client in self.anonymouseditors
             self.anonymouseditors.remove(client)
         self.notifyEditorClients("%s leaves" % client.chatname)
-        return self.usereditors or self.anonymouseditors
+        return self.usereditormap or self.anonymouseditors
         
         
     def notifyEditorClients(self, message):
         editorstatusdata = {'message_type':"editorstatus", 'earliesteditor':self.sessionstarts.isoformat(), "editinguser":self.editinguser, "cansave":False}; 
-        editorstatusdata["loggedineditors"] = [ userclients[0].username  for userclients in self.usereditors ]
+        editorstatusdata["loggedineditors"] = self.usereditormap.keys()
         editorstatusdata["nanonymouseditors"] = len(self.anonymouseditors)
         editorstatusdata["message"] = message
         for client in self.anonymouseditors:
             editorstatusdata["chatname"] = client.chatname
             client.write(json.dumps(editorstatusdata)); 
-        for editorlist in self.usereditors:
-            editorstatusdata["cansave"] = (editorlist[0].username == self.editinguser)
-            for client in editorlist:
+        
+        for usereditor in self.usereditormap.values():
+            editorstatusdata["cansave"] = (usereditor.username == self.editinguser)
+            for client in usereditor.userclients:
                 editorstatusdata["chatname"] = client.chatname
                 client.write(json.dumps(editorstatusdata)) 
     
     def Dcountclients(self):
-        return len(self.anonymouseditors) + sum([len(editorlist)  for editorlist in self.usereditors])
+        return len(self.anonymouseditors) + sum([len(usereditor.userclients)  for usereditor in self.usereditormap.values()])
 
 
 class RunnerFactory(protocol.ServerFactory):
@@ -388,9 +397,9 @@ class RunnerFactory(protocol.ServerFactory):
             scrapereditors = set()
             running = False
             
-            for userclients in eoos.usereditors:
-                scrapereditors.add(userclients[0].cchatname)
-                for uclient in userclients:
+            for usereditor in eoos.usereditormap.values():
+                scrapereditors.add(usereditor.userclients[0].cchatname)
+                for uclient in usereditor.userclients:
                     running = running or bool(uclient.running)
             for uclient in eoos.anonymouseditors:
                 scrapereditors.add(uclient.cchatname)
