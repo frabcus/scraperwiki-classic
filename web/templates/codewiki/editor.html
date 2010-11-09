@@ -90,13 +90,13 @@
 
                 <select id="automode">
                   {% if scraper.id %}
-                    <option name="draft" id="id_draft">draft</option>
-                    <option name="autosave" id="id_autosave" selected>autosave</option>
-                    <option name="autoload" id="id_autoload" disabled>autoload</option>
+                    <option name="autosave" id="id_autosave" selected>editing</option>
+                    <option name="draft" id="id_draft">draft editing</option>
+                    <option name="autoload" id="id_autoload" disabled>watching</option>
                   {% else %}
-                    <option name="draft" id="id_draft" selected>draft</option>
-                    <option name="autosave" id="id_autosave" disabled>autosave</option>
-                    <option name="autoload" id="id_autoload" disabled>autoload</option>
+                    <option name="autosave" id="id_autosave" disabled>editing</option>
+                    <option name="draft" id="id_draft" selected>draft editing</option>
+                    <option name="autoload" id="id_autoload" disabled>watching</option>
                   {% endif %}
                 </select>
 
@@ -108,6 +108,7 @@
                 {% endifequal %}
 
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
+                <span id="watcherstatus"></span>
             
                 <div class="right">
                     <ul class="code_about">
@@ -146,9 +147,6 @@
                             <a href="#" title="Communicate to others">Chat</a>                            
                         </li>
                     </ul>
-                    <div class="right" id="editorstatus">
-                    <span>---</span> {# this text gets deleted when javascript working properly #}
-                    </div>
                 </div>
                 <div class="info">
                     <div id="output_console" class="output">

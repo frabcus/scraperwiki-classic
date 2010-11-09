@@ -156,11 +156,12 @@ class RunnerProtocol(protocol.Protocol):
             usereditor = self.guidclienteditors.usereditormap[self.username]
             if automode == 'draft':
                 usereditor.nondraftcount -= 1
-            elif self.automode == 'draft':
+            elif self.automode == 'draft':  # change back from draft (won't happen for now)
                 usereditor.nondraftcount += 1
             self.automode = automode
             assert usereditor.nondraftcount == len([lclient  for lclient in usereditor.userclients  if lclient.automode != 'draft'])
             
+            self.guidclienteditors.notifyEditorClients("")
             self.factory.notifyMonitoringClients(self)
 
         # this message helps kill it better and killing it from the browser end
@@ -190,12 +191,12 @@ class RunnerProtocol(protocol.Protocol):
                 otherline = line
             
             for client in self.guidclienteditors.anonymouseditors:
-                if client != self:
+                if client != self and client.automode != 'draft':
                     client.writeline(otherline); 
             
             for usereditor in self.guidclienteditors.usereditormap.values():
                 for client in usereditor.userclients:
-                    if client != self:
+                    if client != self and client.automode != 'draft':
                         client.writeline(otherline); 
         else:
             assert not self.guid
@@ -292,7 +293,6 @@ class EditorsOnOneScraper:
         self.scrapername = scrapername
         self.scraperlanguage = scraperlanguage
         self.scrapersessionbegan = None
-        self.editinguser = ""     # will be a member of self.usereditormap
         self.anonymouseditors = [ ]
         self.usereditormap = { }  # maps username to UserEditorsOnOneScraper
         
@@ -308,14 +308,10 @@ class EditorsOnOneScraper:
                 self.usereditormap[client.username].AddUserClient(client)
             else:
                 self.usereditormap[client.username] = UserEditorsOnOneScraper(client)
-                if not self.editinguser:
-                    self.editinguser = client.username
         else:
             self.anonymouseditors.append(client)
         
         client.guidclienteditors = self
-        
-        self.notifyEditorClients("%s enters" % client.chatname)
         
     def RemoveClient(self, client):
         assert client.guid == self.guid
@@ -326,21 +322,20 @@ class EditorsOnOneScraper:
             assert client.username in self.usereditormap
             if not self.usereditormap[client.username].RemoveUserClient(client):
                 del self.usereditormap[client.username]
-                if self.editinguser == client.username:
-                    self.editinguser = ''
-                    if self.usereditormap:
-                        self.editinguser = self.usereditormap.keys()[0]
         else:
             assert client in self.anonymouseditors
             self.anonymouseditors.remove(client)
-        self.notifyEditorClients("%s leaves" % client.chatname)
         return self.usereditormap or self.anonymouseditors
         
         
     def notifyEditorClients(self, message):
-        editorstatusdata = {'message_type':"editorstatus", 'earliesteditor':self.scrapersessionbegan.isoformat(), 
-                            "editinguser":self.editinguser, "cansave":False}; 
-        editorstatusdata["loggedineditors"] = self.usereditormap.keys()
+        editorstatusdata = {'message_type':"editorstatus", 'earliesteditor':self.scrapersessionbegan.isoformat()}; 
+        
+        # order is important to determin who is the editor
+        usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
+        usereditors.sort(key=lambda x: x.usersessionbegan)
+        editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors ]
+        
         editorstatusdata["nanonymouseditors"] = len(self.anonymouseditors)
         editorstatusdata["message"] = message
         for client in self.anonymouseditors:
@@ -348,7 +343,6 @@ class EditorsOnOneScraper:
             client.writejson(editorstatusdata); 
         
         for usereditor in self.usereditormap.values():
-            editorstatusdata["cansave"] = (usereditor.username == self.editinguser)
             for client in usereditor.userclients:
                 editorstatusdata["chatname"] = client.chatname
                 client.writejson(editorstatusdata) 
@@ -490,17 +484,25 @@ class RunnerFactory(protocol.ServerFactory):
         if client.isumlmonitoring:
             self.umlmonitoringclients.append(client)
             
-        elif not client.guid:   # draft scraper type
-            editorstatusdata = {'message_type':"editorstatus", "cansave":True, "loggedineditors":[], "nanonymouseditors":1, 
-                                "editinguser":client.username, "chatname":client.chatname, "message":"Draft scraper connection"} 
+        elif client.guid:
+            if client.guid not in self.guidclientmap:
+                self.guidclientmap[client.guid] = EditorsOnOneScraper(client.guid, client.scrapername, client.scraperlanguage)
+            
+            if client.username in self.guidclientmap[client.guid].usereditormap:
+                message = "%s opens another window" % client.chatname
+            else:
+                message = "%s enters" % client.chatname
+            
+            self.guidclientmap[client.guid].AddClient(client)
+            self.guidclientmap[client.guid].notifyEditorClients(message)
+
+        else:   # draft scraper type
+            editorstatusdata = {'message_type':"editorstatus", "loggedineditors":[], "nanonymouseditors":1, 
+                                "chatname":client.chatname, "message":"Draft scraper connection"} 
             client.writejson(editorstatusdata); 
             self.draftscraperclients.append(client)
         
-        else:
-            if client.guid not in self.guidclientmap:
-                self.guidclientmap[client.guid] = EditorsOnOneScraper(client.guid, client.scrapername, client.scraperlanguage)
-            self.guidclientmap[client.guid].AddClient(client)
-
+        
         # check that all clients are accounted for
         assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
         self.notifyMonitoringClients(client)
@@ -518,6 +520,12 @@ class RunnerFactory(protocol.ServerFactory):
         elif (client.guid in self.guidclientmap):   
             if not self.guidclientmap[client.guid].RemoveClient(client):
                 del self.guidclientmap[client.guid]
+            else:
+                if client.username in self.guidclientmap[client.guid].usereditormap:
+                    message = "%s closes a window" % client.chatname
+                else:
+                    message = "%s leaves" % client.chatname
+                self.guidclientmap[client.guid].notifyEditorClients(message)
         else:
             pass  # shouldn't happen
         

@@ -35,7 +35,6 @@ $(document).ready(function() {
     // information handling who else is watching and editing during this session
     var earliesteditor = ""; 
     var editinguser = ""; 
-    var bcansave = true; 
     var loggedineditors = [ ]; // list of who else is here and their windows open
     var nanonymouseditors = 0; 
     var chatname = ""   // special in case of Anonymous users
@@ -200,13 +199,16 @@ $(document).ready(function() {
             return true; 
         })
 
-        $('#id_urlquery').focus(function() {
+        // somehow this system fails if you do a browser back button to the editor
+        $('#id_urlquery').focus(function() 
+        {
             if ($(this).hasClass('hint')) {
                 $(this).val('');
                 $(this).removeClass('hint');
             }
         });
-        $('#id_urlquery').blur(function() {
+        $('#id_urlquery').blur(function() 
+        {
             if(!$(this).hasClass('hint') && ($(this).val() == '')) {
                 $(this).val('urlquery');
                 $(this).addClass('hint');
@@ -214,12 +216,7 @@ $(document).ready(function() {
         });
         $('#id_urlquery').blur();
 
-        $('select#automode').change(function() 
-        {
-            var iautomode = $('select#automode').attr('selectedIndex'); 
-            var automode = (iautomode == 0 ? "draft" : (iautomode == 1 ? "autosave" : "autoload")); 
-            sendjson({"command":'automode', "automode":automode}); 
-        }); 
+        $('select#automode').change(changeAutomode); 
     }
     
     //Setup Tabs
@@ -318,9 +315,11 @@ $(document).ready(function() {
     }
 
     //read data back from twisted
-    conn.onread = function(ldata) {
+    conn.onread = function(ldata) 
+    {
         buffer = buffer+ldata;
-        while (true) {
+        while (true) 
+        {
             var linefeed = buffer.indexOf("\n"); 
             if (linefeed == -1)
                 break; 
@@ -330,34 +329,37 @@ $(document).ready(function() {
             if (sdata.length == 0)
                 continue; 
 
-            var jdata = undefined; 
-            try {
+            var jdata; 
+            try 
+            {
                 //writeToChat(cgiescape(sdata)); // for debug of what's coming out
                 jdata = $.evalJSON(sdata);
-            } catch(err) {
+            } 
+            catch(err) 
+            {
                 alert("Malformed json: '''" + sdata + "'''"); 
+                continue
             }
 
-            if (jdata != undefined) {
-                if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
-                    receivechatqueue.push(jdata); 
-                else
-                    receiverecordqueue.push(jdata); 
+            if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
+                receivechatqueue.push(jdata); 
+            else
+                receiverecordqueue.push(jdata); 
 
-                // allow the user to clear the choked data if they want
-                if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'runfinished')) {
-                        $('.editor_controls #run').val('Finishing');
-                        $('.editor_controls #run').unbind('click.abort');
-                        $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
-                }
-
-                if (receiverecordqueue.length + receivechatqueue.length == 1)
-                    window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  // delay of 1ms makes it work better in FireFox (possibly so it doesn't take priority over the similar function calls in Orbited.js)
-
-                // clear batched up data that's choking the system
-                if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
-                    window.setTimeout(clearJunkFromQueue, 1); 
+            // allow the user to clear the choked data if they want
+            if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'runfinished')) 
+            {
+                $('.editor_controls #run').val('Finishing');
+                $('.editor_controls #run').unbind('click.abort');
+                $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
             }
+
+            if (receiverecordqueue.length + receivechatqueue.length == 1)
+                window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  // delay of 1ms makes it work better in FireFox (possibly so it doesn't take priority over the similar function calls in Orbited.js)
+
+            // clear batched up data that's choking the system
+            if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
+                window.setTimeout(clearJunkFromQueue, 1); 
         }
     }
 
@@ -376,14 +378,16 @@ $(document).ready(function() {
     }
 
     // run our own queue not in the timeout system (letting chat messages get to the front)
-    function receiveRecordFromQueue() {
+    function receiveRecordFromQueue() 
+    {
         var jdata = undefined; 
         if (receivechatqueue.length > 0)
             jdata = receivechatqueue.shift(); 
         else if (receiverecordqueue.length > 0) 
             jdata = receiverecordqueue.shift(); 
 
-        if (jdata != undefined) {
+        if (jdata != undefined) 
+        {
             receiveRecord(jdata);
             if (receiverecordqueue.length + receivechatqueue.length >= 1)
                 window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
@@ -482,69 +486,85 @@ $(document).ready(function() {
         // means we can have simultaneous running for staff overview
 
         // new auto-save every time 
-        if (($('select#automode').attr('selectedIndex') == 1) && pageIsDirty)
+        if (($('select#automode').attr('selectedIndex') == 0) && pageIsDirty)
             saveScraper(); 
-    }
+    } 
 
-    function updateEditorStatus() { 
-        // Construct a message that reflects the situation for now.  
-        // Later on add in options to allow auto-reload and ability to find the names of those who are watching
-        var message = "";
-        var nwatchers = loggedineditors.length + nanonymouseditors; 
-        var blockediting = false; 
+
+    function changeAutomode() 
+    {
+        var iautomode = $('select#automode').attr('selectedIndex'); 
+        if (iautomode == 1)
+        {
+            $('#watcherstatus').text("draft mode"); 
+            codeeditor.win.document.body.style.backgroundImage = 'none'; 
+
+            // for now you can never go back
+            $('select#automode #id_autosave').attr('disabled', true); 
+            $('select#automode #id_autoload').attr('disabled', true); 
+            $('.editor_controls #btnCommitPopup').val('Save disabled'); 
+            $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+        }
+        var automode = (iautomode == 1 ? "draft" : (iautomode == 0 ? "autosave" : "autoload")); 
+        writeToChat('Changed automode: ' + automode); 
+        sendjson({"command":'automode', "automode":automode}); 
+    }; 
+
+    function recordEditorStatus(data) 
+    { 
+        earliesteditor = data.earliesteditor; 
+        editinguser = (data.loggedineditors ? data.loggedineditors[0] : ''); 
+        loggedineditors = data.loggedineditors; 
+        nanonymouseditors = data.nanonymouseditors; 
+
+        writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
+        if (data.message)
+            writeToChat(cgiescape(data.message)); 
+
+        // draft editing do not disturb
+        if ($('select#automode').attr('selectedIndex') == 1) 
+            return; 
+
         if (username)
         {
             if (editinguser == username)
             {
-                if (nwatchers > 1)
-                    message += (nwatchers-1) + " watching"; 
+                $('select#automode #id_autosave').attr('disabled', false); 
+                $('select#automode').attr('selectedIndex', 0); // editing
+                $('select#automode #id_autoload').attr('disabled', (loggedineditors.length == 1)); // disable if no one else is editing
+                if (loggedineditors.length >= 2)
+                    $('#watcherstatus').text(loggedineditors[1] + (loggedineditors.length >=3 ? " (+"+(loggedineditors.length-2)+")" : "") + " is watching"); 
+                else
+                    $('#watcherstatus').text(""); 
+                codeeditor.win.document.body.style.backgroundImage = 'none';
             }
             else
             {
-                message += editinguser + " is editing; "; 
-                message += "you"; 
-                if (nwatchers > 2)
-                    message += " (+ " + (nwatchers-2) + " others)"; 
-                message += " are watching"; 
-                blockediting = true; 
+                $('select#automode #id_autoload').attr('disabled', false); 
+                $('select#automode').attr('selectedIndex', 2); // watching
+                $('select#automode #id_autosave').attr('disabled', true); 
+                $('#watcherstatus').text(editinguser + " is editing"); 
+                codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
             }
         }
+
         else
         {
             if (editinguser)
             {
-                message += editinguser + " is editing; "; 
-                blockediting = true; 
+                $('select#automode #id_autoload').attr('disabled', false); 
+                $('select#automode').attr('selectedIndex', 2); // watching
+                $('#watcherstatus').text(editinguser + " is editing"); 
+                codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
             }
-            var owatchers = nwatchers - 1 - (editinguser ? 1 : 0); 
-            if (owatchers > 0)
-                message += owatchers + " others watching"; 
+            else
+            {
+                $('select#automode').attr('selectedIndex', 0); // editing
+                $('select#automode #id_autoload').attr('disabled', true); 
+                $('#watcherstatus').text(""); 
+                codeeditor.win.document.body.style.backgroundImage = 'none'; 
+            }
         }
-
-        //CodeMirrorConfig.readOnly = blockediting;    // doesn't work!
-        //$('.editor_controls #run').attr("disabled", blockediting);
-        //$('.editor_controls #btnCommitPopup').attr("disabled", blockediting);
-        //$('.editor_controls #preview').attr("disabled", blockediting);
-
-        codeeditor.win.document.body.style.backgroundColor = (blockediting ? '#e8d0d0' : '#fff');
-        codeeditor.win.document.body.style.backgroundImage = (blockediting ? 'url(/media/images/staff.png)' : 'none'); //
-
-        //alert(codemirroriframe.style.backgroundColor = 'red'; // doesn't work
-        $("#editorstatus").html(message); 
-    }
-
-    function recordEditorStatus(data) { 
-        earliesteditor = data.earliesteditor; 
-        editinguser = data.editinguser; 
-        bcansave = data.cansave; 
-        loggedineditors = data.loggedineditors; 
-        nanonymouseditors = data.nanonymouseditors; 
-
-        //writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
-        if (data.message)
-            writeToChat(cgiescape(data.message)); 
-
-        window.setTimeout(function() { updateEditorStatus(); }, 100);  
     }
 
     function startingrun(lrunID) {
