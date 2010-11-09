@@ -56,34 +56,39 @@
 
 <div class="content half right">
   <div>
-    <h2>Sample data</h2>
+    <h2>Running this scraper</h2>
     <p>
-        This dataset has a total of {{ scraper.record_count }} records and 
         {% if lastscraperrunevent %}
             {% ifequal lastscraperrunevent.pid -1 %}
-                last ran {{lastscraperrunevent.run_started|timesince}} ago 
+                Last run {{lastscraperrunevent.run_started|timesince}} ago 
                 for <a href="{% url run_event lastscraperrunevent.id%}">{{lastscraperrunevent.getduration}} seconds</a>.
             {% else %}
                 <a href="{% url run_event lastscraperrunevent.id%}">is currently running</a>.
             {% endifequal %}
         {% else %}
-            has not been run yet.
+            Has not run yet.
         {% endif %}
-
+        {% ifnotequal scraper.next_run.year 9999 %}
+            Next run after {{scraper.next_run|timeuntil}}.
+        {% endifnotequal %}
+     </p>
+     <p>
+        This dataset has a total of {{ scraper.record_count }} records.
         {% if scraper.license_link %}
-            The license for this data is {{scraper.license|lower|default:"&nbsp;"}} and a copy can be found on <a href="{{scraper.license_link}}">this page</a>.
+            The license is {{scraper.license|lower|default:"&nbsp;"}} and a copy can be found on <a href="{{scraper.license_link}}">this page</a>.
             {% if user.is_authenticated %}
                 <a href="{% url scraper_admin scraper.short_name %}">[edit license]</a>
             {% else %}
                 <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">[sign in to edit license]</a>
             {% endif %}
         {% else %}
-            The license for this dataset is unknown, {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}">please add a link to the license if you are able to locate it</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">please sign in and add a link to the license if you are able to locate it</a>{% endif %}.
+            The license is unknown, {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}">please add a link to the license if you are able to locate it</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">please sign in and add a link to the license if you are able to locate it</a>{% endif %}.
         {% endif %}
     </p>
   </div>
 
   <div class="data_viewer">
+  <h3>Sample data</h3>
   {% if datarows %}
     <table class="data">
     <tbody>
@@ -118,7 +123,7 @@
   </div>
 
   <div>
-    <h2>Schedule {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h2>
+    <h3>Schedule {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
     <div style="float:right">{% sparkline scraper.scraper_sparkline_csv 'medium' %}</div>
     <p>
       This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
