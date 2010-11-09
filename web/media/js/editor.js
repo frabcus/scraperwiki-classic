@@ -55,10 +55,10 @@ $(document).ready(function() {
     //constructor functions
     setupCodeEditor();
     setupMenu();
-    setupOrbited();
     setupTabs();
     setupToolbar();
     setupResizeEvents();
+    setupOrbited();
 
     function UpdatePageDirtiness() 
     {
@@ -80,7 +80,7 @@ $(document).ready(function() {
         parsers['python'] = ['../contrib/python/js/parsepython.js'];
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
         parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
-        //parsers['ruby'] = [ 'parsedummy.js'];   // in case Ruby needs disabling due to too much bugs
+        //parsers['ruby'] = [ 'parsedummy.js'];   // in case Ruby parser needs disabling due to too many bugs
         parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
 
         stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
@@ -177,7 +177,7 @@ $(document).ready(function() {
         })
 
         $('#chat_line').bind('keypress', function(eventObject) {
-            var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
+            var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
             var target = eventObject.target.tagName.toLowerCase();
             if (key === 13 && target === 'input') 
             {
@@ -190,7 +190,7 @@ $(document).ready(function() {
         })
 
         $('#id_urlquery').bind('keypress', function(eventObject) {
-            var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
+            var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
             var target = eventObject.target.tagName.toLowerCase();
             if (key === 13 && target === 'input') {
                 eventObject.preventDefault();
@@ -213,11 +213,18 @@ $(document).ready(function() {
             }
         });
         $('#id_urlquery').blur();
+
+        $('select#automode').change(function() 
+        {
+            var iautomode = $('select#automode').attr('selectedIndex'); 
+            var automode = (iautomode == 0 ? "draft" : (iautomode == 1 ? "autosave" : "autoload")); 
+            sendjson({"command":'automode', "automode":automode}); 
+        }); 
     }
     
     //Setup Tabs
-    function setupTabs(){
-        
+    function setupTabs()
+    {
         $('.editor_output .console a').click(function(){
             showTab('console');
             return false;
@@ -266,21 +273,26 @@ $(document).ready(function() {
                  "language":scraperlanguage, 
                  "scrapername":short_name, 
                  "isstaff":isstaff };
-        send(data);
+        sendjson(data);
     }
 
-    conn.onclose = function(code){
+    conn.onclose = function(code)
+    {
         if (code == Orbited.Statuses.ServerClosedConnection)
             mcode = 'ServerClosedConnection'; 
         else if (code == Orbited.Errors.ConnectionTimeout)
             mcode = 'ConnectionTimeout'; 
-        else  
-            // http://orbited.org/wiki/TCPSocket documents: 
-            //    Orbited.Errors.InvalidHandshake = 102
-            //    Orbited.Errors.UserConnectionReset = 103
-            //    Orbited.Errors.Unauthorized = 106
-            //    Orbited.Errors.RemoteConnectionFailed = 108
-            //    Orbited.Statuses.SocketControlKilled = 301
+        else if (code == Orbited.Errors.InvalidHandshake)
+            mcode = 'InvalidHandshake'; 
+        else if (code == Orbited.Errors.UserConnectionReset)
+            mcode = 'UserConnectionReset'; 
+        else if (code == Orbited.Errors.Unauthorized)
+            mcode = 'Unauthorized'; 
+        else if (code == Orbited.Errors.RemoteConnectionFailed)
+            mcode = 'RemoteConnectionFailed'; 
+        else if (code == Orbited.Statuses.SocketControlKilled)
+            mcode = 'SocketControlKilled'; 
+        else
             mcode = 'code=' + code;
 
         writeToChat('Connection closed: ' + mcode); 
@@ -417,31 +429,36 @@ $(document).ready(function() {
     function sendChat() 
     {
         data = {"command":'chat', "guid":guid, "username":username, "text":$('#chat_line').val()};
-        send(data); 
+        sendjson(data); 
         $('#chat_line').val(''); 
     }
 
     //send a message to the server
-    function send(json_data) {
-        try {
+    function sendjson(json_data) 
+    {
+        try 
+        {
             conn.send($.toJSON(json_data));  
-        } catch(err) {
+        } 
+        catch(err) 
+        {
             if (!bSuppressDisconnectionMessages)
                 writeToConsole("Send error: " + err, "exceptionnoesc"); 
         }
     }
 
-    //send a 'kill' message
-    function sendKill() {
-        data = {"command" : 'kill'};
-        send(data);
+    function sendKill() 
+    {
+        sendjson({"command" : 'kill'});
     }
 
     //send code request run
-    function sendCode() {
+    function sendCode() 
+    {
         // protect not-ready case
-        if (conn.readyState != conn.READY_STATE_OPEN) { 
-            alert("Not ready, readyState=" + conn.readyState); 
+        if ((conn == undefined) || (conn.readyState != conn.READY_STATE_OPEN)) 
+        { 
+            alert("Not ready, readyState=" + (conn == undefined ? "undefined" : conn.readyState)); 
             return; 
         }
 
@@ -459,7 +476,7 @@ $(document).ready(function() {
             "urlquery" : ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val())
         }
         $('.editor_controls #run').val('Sending');
-        send(data)
+        sendjson(data); 
 
         // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
         // means we can have simultaneous running for staff overview
@@ -695,15 +712,14 @@ $(document).ready(function() {
             if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
                 return false; 
             bSuppressDisconnectionMessages = true; 
-            send({"command":'loseconnection'}) 
-            //if (conn)  conn.close();  
+            sendjson({"command":'loseconnection'});   //if (conn)  conn.close(); not as effective 
             return true;
         });
 
         $(window).unload( function () { 
             bSuppressDisconnectionMessages = true; 
             writeToConsole('window unload'); 
-            send({"command":'loseconnection'}) 
+            sendjson({"command":'loseconnection'}); 
             //if (conn)  conn.close();  
         });  
 
@@ -828,7 +844,7 @@ $(document).ready(function() {
                             window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
                             //showFeedbackMessage("Your code has been saved.");
                             if (bConnected)
-                                send({"command":'saved'}); 
+                                sendjson({"command":'saved'}); 
                         }
                         savedundo = atsavedundo; 
                         UpdatePageDirtiness(); 

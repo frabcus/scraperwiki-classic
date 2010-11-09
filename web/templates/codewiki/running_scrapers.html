@@ -202,11 +202,13 @@ $(document).ready(function() {
                 $("#monitoroutput ul#scraperentries").html(""); 
             for (i = 0; i < jdata.scraperentries.length; i++)
             {
-                scrapername = jdata.scraperentries[i][0]; 
+                var scraperentry = jdata.scraperentries[i]; 
+                var scrapername = scraperentry.scrapername; 
+                var present = scraperentry.present; 
+                var running = scraperentry.running; 
+                var scraperusers = scraperentry.scraperusers; 
+
                 idscrapername = "SCR_" + scrapername; 
-                present = jdata.scraperentries[i][1]; 
-                running = jdata.scraperentries[i][2]; 
-                scraperusers = jdata.scraperentries[i][3]; 
                 ele = "#monitoroutput ul#scraperentries li#"+idscrapername; 
                 if (present)
                 {
@@ -218,9 +220,10 @@ $(document).ready(function() {
                         $(ele).removeClass("running"); 
                     for (j = 0; j < scraperusers.length; j++)
                     {
-                        chatname = scraperusers[j][0]; 
+                        var scraperuser = scraperusers[j]; 
+                        chatname = scraperuser.chatname; 
                         idcchatname = idscrapername + "_CHA_" + getIDfromCChatname(chatname); 
-                        cpresent = scraperusers[j][1]; 
+                        cpresent = scraperuser.present; 
                         cele = ele + " ul li#"+idcchatname; 
                         if (cpresent)
                         {
