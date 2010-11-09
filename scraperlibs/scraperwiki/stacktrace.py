@@ -64,7 +64,7 @@ def getExceptionTraceback(code):
     if exc_type == HTTPError and exc_value.code == 403:
         mblockaccess = re.search('Scraperwiki blocked access to "(.*)"', exc_value.msg)
         if mblockaccess:
-            result["blockedurl"] = mblockaccess.group(1)
-            result["blockedurlquoted"] = urllib.quote(mblockaccess.group(1))
+            result["blockedurl"] = urllib.unquote(mblockaccess.group(1))
+            result["blockedurlquoted"] = mblockaccess.group(1)
     
     return result
