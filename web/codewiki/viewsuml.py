@@ -47,7 +47,9 @@ def running_scrapers(request):
     statusscrapers = GetUMLrunningstatus()
     for status in statusscrapers:
         if status['scraperID']:
-            status['scraper'] = Code.objects.get(guid=status['scraperID'])   # could throw ObjectDoesNotExist
+            scrapers = Code.objects.filter(guid=status['scraperID'])
+            if scrapers:
+                status['scraper'] = scrapers[0]
         
         scraperrunevents = ScraperRunEvent.objects.filter(run_id=status['runID'])
         status['killable'] = user.is_staff

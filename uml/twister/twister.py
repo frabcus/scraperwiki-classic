@@ -72,7 +72,7 @@ class spawnRunner(protocol.ProcessProtocol):
             self.client.writeall(line)
 
     def processEnded(self, reason):
-        self.client.running = False
+        self.client.processrunning = None
         self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished'}))
         self.client.factory.notifyMonitoringClients(self.client)
         if reason.type == 'twisted.internet.error.ProcessDone':
@@ -88,7 +88,7 @@ class RunnerProtocol(protocol.Protocol):
     def __init__(self):
         # Set if a run is currently taking place, to make sure we don't run 
         # more than one scraper at a time.
-        self.running = False
+        self.processrunning = None
         self.guid = ""
         self.scrapername = ""
         self.isstaff = False
@@ -99,7 +99,7 @@ class RunnerProtocol(protocol.Protocol):
         self.clientnumber = -1         # number for whole operation of twisted
         self.clientsessionbegan = datetime.datetime.now()
         self.guidclienteditors = None  # the EditorsOnOneScraper object
-        self.automode = ''             # true when not autosave or autoload mode
+        self.automode = 'autosave'             # draft, autosave, autoload
         
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
@@ -125,17 +125,25 @@ class RunnerProtocol(protocol.Protocol):
             self.writeall(line, otherline)
             self.factory.notifyMonitoringClientsSave(self)
         
-        elif command == 'run' and not self.running:
+        elif command == 'run':
+            if self.processrunning:
+                self.writejson({'content':"Already running! (shouldn't happen)", 'message_type':'console'}); 
+                return 
+            if self.username:
+                if self.automode == 'autoload':
+                    self.writejson({'content':"Not supposed to run! "+self.automode, 'message_type':'console'}); 
+                    return 
+            
             self.runcode(parsed_data)
         
         elif command == "kill":
             # Kill the running process (or other if staff)
-            if self.running:
+            if self.processrunning:
                 self.kill_run()
-            
-            else:
-                for client in self.factory.clients:
-                    if client.guid == self.guid and client.running:
+            elif self.username:
+                usereditor = self.guidclienteditors.usereditormap[self.username]
+                for client in usereditor.userclients:
+                    if client.automode != 'draft' and client.processrunning:
                         client.kill_run()
 
         elif command == 'chat':
@@ -156,6 +164,9 @@ class RunnerProtocol(protocol.Protocol):
             usereditor = self.guidclienteditors.usereditormap[self.username]
             if automode == 'draft':
                 usereditor.nondraftcount -= 1
+                if self.processrunning:
+                    self.kill_run(reason='convert to draft')
+                
             elif self.automode == 'draft':  # change back from draft (won't happen for now)
                 usereditor.nondraftcount += 1
             self.automode = automode
@@ -167,8 +178,6 @@ class RunnerProtocol(protocol.Protocol):
         # this message helps kill it better and killing it from the browser end
         elif command == 'loseconnection':
             self.transport.loseConnection()
-        
-
     
     # message to the client
     def writeline(self, line):
@@ -178,7 +187,7 @@ class RunnerProtocol(protocol.Protocol):
         self.writeline(json.dumps(data))
     
     def connectionLost(self, reason):
-        if self.running:
+        if self.processrunning:
             self.kill_run(reason='connection lost')
         self.factory.clientConnectionLost(self)
 
@@ -186,7 +195,9 @@ class RunnerProtocol(protocol.Protocol):
         if line: 
             self.writeline(line)  
         
-        if self.guidclienteditors:
+        if self.automode == 'draft':
+            pass
+        elif self.guidclienteditors:
             if not otherline:
                 otherline = line
             
@@ -205,15 +216,16 @@ class RunnerProtocol(protocol.Protocol):
     def kill_run(self, reason=''):
         msg = 'Script cancelled'
         if reason:
-            msg += " (%s)" % reason
+            msg = "%s (%s)" % (msg, reason)
         self.writeall(json.dumps({'message_type':'executionstatus', 'content':'killsignal', 'message':msg}))
         print msg
-        try:      # should kill using the new dispatcher call
-            os.kill(self.running.pid, signal.SIGKILL)
+        try:      # (should kill using the new dispatcher call)
+            os.kill(self.processrunning.pid, signal.SIGKILL)
         except:
             pass
 
     def runcode(self, parsed_data):
+        
         code = parsed_data.get('code', '')
         code = code.encode('utf8')
         
@@ -234,9 +246,11 @@ class RunnerProtocol(protocol.Protocol):
         print "./firestarter/runner.py: %s" % args
 
         # from here we should somehow get the runid
-        self.running = reactor.spawnProcess(spawnRunner(self, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
-        line = json.dumps({'content':"%s runs scraper" % self.chatname, 'message_type':'chat'})
-        self.writeall(line)
+        self.processrunning = reactor.spawnProcess(spawnRunner(self, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
+        if self.automode != 'draft':
+            line = json.dumps({'content':"%s runs scraper" % self.chatname, 'message_type':'chat'})
+            self.writeall(line)
+        
         self.factory.notifyMonitoringClients(self)
 
 
@@ -376,14 +390,7 @@ class RunnerFactory(protocol.ServerFactory):
 
     # every 10 seconds sends out a quiet poll
     def announce(self):
-        self.announcecount += 1
-        for client in self.clients:
-            res = []
-            for c in self.clients:
-                res.append(c == client and "T" or "-")
-                res.append(c.running and "R" or ".")
-            client.writejson({'content':"%d c %d clients, running:%s" % (self.announcecount, len(self.clients), "".join(res)), 'message_type':'chat'})
-
+        pass
 
         
     # throw in the kitchen sink to get the features.  optimize for changes later
@@ -406,7 +413,7 @@ class RunnerFactory(protocol.ServerFactory):
         # handle draft scraper users and the run states (one for each user, though there may be multiple draft scrapers for them)
         draftscraperusers = { }
         for client in self.draftscraperclients:
-            draftscraperusers[client.cchatname] = bool(client.running) or draftscraperusers.get(client.cchatname, False)
+            draftscraperusers[client.cchatname] = bool(client.processrunning) or draftscraperusers.get(client.cchatname, False)
         if umlstatusdata:
             umlstatusdata["draftscraperusers"] = [ (chatname, True, crunning)  for chatname, crunning in draftscraperusers.items() ]
         if not cclient.isumlmonitoring and not cclient.guid:
@@ -426,14 +433,14 @@ class RunnerFactory(protocol.ServerFactory):
                     scraperdrafteditors.append(usereditor.userclients[0].cchatname)
                     
                 for uclient in usereditor.userclients:
-                    running = running or bool(uclient.running)
+                    running = running or bool(uclient.processrunning)
             
             for uclient in eoos.anonymouseditors:
                 if uclient.automode != 'draft': 
                     scrapereditors.append(uclient.cchatname)
                 else:
                     scraperdrafteditors.append(uclient.cchatname)
-                running = running or bool(uclient.running)
+                running = running or bool(uclient.processrunning)
             
             ### scraperdrafteditors
             if cclient:

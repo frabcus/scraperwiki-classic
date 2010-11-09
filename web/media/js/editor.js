@@ -34,7 +34,7 @@ $(document).ready(function() {
 
     // information handling who else is watching and editing during this session
     var earliesteditor = ""; 
-    var editinguser = ""; 
+    var editingusername = ""; 
     var loggedineditors = [ ]; // list of who else is here and their windows open
     var nanonymouseditors = 0; 
     var chatname = ""   // special in case of Anonymous users
@@ -502,22 +502,23 @@ $(document).ready(function() {
             // for now you can never go back
             $('select#automode #id_autosave').attr('disabled', true); 
             $('select#automode #id_autoload').attr('disabled', true); 
-            $('.editor_controls #btnCommitPopup').val('Save disabled'); 
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+            $('.editor_controls #run').attr('disabled', false);
         }
         var automode = (iautomode == 1 ? "draft" : (iautomode == 0 ? "autosave" : "autoload")); 
         writeToChat('Changed automode: ' + automode); 
         sendjson({"command":'automode', "automode":automode}); 
     }; 
 
+    // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
     { 
         earliesteditor = data.earliesteditor; 
-        editinguser = (data.loggedineditors ? data.loggedineditors[0] : ''); 
+        editingusername = (data.loggedineditors ? data.loggedineditors[0] : ''); 
         loggedineditors = data.loggedineditors; 
         nanonymouseditors = data.nanonymouseditors; 
 
-        writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
+        //writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
         if (data.message)
             writeToChat(cgiescape(data.message)); 
 
@@ -527,47 +528,78 @@ $(document).ready(function() {
 
         if (username)
         {
-            if (editinguser == username)
+            if (editingusername == username)
             {
-                $('select#automode #id_autosave').attr('disabled', false); 
-                $('select#automode').attr('selectedIndex', 0); // editing
                 $('select#automode #id_autoload').attr('disabled', (loggedineditors.length == 1)); // disable if no one else is editing
+                var wstatus = "";
                 if (loggedineditors.length >= 2)
-                    $('#watcherstatus').text(loggedineditors[1] + (loggedineditors.length >=3 ? " (+"+(loggedineditors.length-2)+")" : "") + " is watching"); 
-                else
-                    $('#watcherstatus').text(""); 
-                codeeditor.win.document.body.style.backgroundImage = 'none';
+                {
+                    wstatus = '<a href="/profiles/'+loggedineditors[1]+'" target="_blank">'+loggedineditors[1]+'</a>'; 
+                    if (loggedineditors.length >= 3)
+                        wstatus += ' (+' + (loggedineditors.length-2) + ')'; 
+                    wstatus += ' is watching'; 
+                }
+                $('#watcherstatus').html(wstatus); 
+
+                if ($('select#automode').attr('selectedIndex') != 0)
+                {
+                    codeeditor.win.document.body.style.backgroundImage = 'none';
+                    $('select#automode #id_autosave').attr('disabled', false); 
+                    $('select#automode').attr('selectedIndex', 0); // editing
+                    $('.editor_controls #run').attr('disabled', false);
+                    $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+                    sendjson({"command":'automode', "automode":'autosave'}); 
+                }
             }
             else
             {
-                $('select#automode #id_autoload').attr('disabled', false); 
-                $('select#automode').attr('selectedIndex', 2); // watching
-                $('select#automode #id_autosave').attr('disabled', true); 
-                $('#watcherstatus').text(editinguser + " is editing"); 
-                codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
+                $('#watcherstatus').html('<a href="/profiles/'+editingusername+'" target="_blank">'+editingusername+'</a> is editing'); 
+                if ($('select#automode').attr('selectedIndex') != 2)
+                {
+                    $('select#automode #id_autoload').attr('disabled', false); 
+                    $('select#automode').attr('selectedIndex', 2); // watching
+                    $('select#automode #id_autosave').attr('disabled', true); 
+                    codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
+                    $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+                    $('.editor_controls #run').attr('disabled', true);
+                    sendjson({"command":'automode', "automode":'autoload'}); 
+                }
             }
         }
 
         else
         {
-            if (editinguser)
+            if (editingusername)
             {
-                $('select#automode #id_autoload').attr('disabled', false); 
-                $('select#automode').attr('selectedIndex', 2); // watching
-                $('#watcherstatus').text(editinguser + " is editing"); 
-                codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
+                $('#watcherstatus').text(editingusername + " is editing"); 
+                if ($('select#automode').attr('selectedIndex') != 2)
+                {
+                    $('select#automode #id_autoload').attr('disabled', false); 
+                    $('select#automode').attr('selectedIndex', 2); // watching
+                    codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
+                    $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+                    $('.editor_controls #run').attr('disabled', true);
+                    sendjson({"command":'automode', "automode":'autoload'}); 
+                }
             }
             else
             {
-                $('select#automode').attr('selectedIndex', 0); // editing
-                $('select#automode #id_autoload').attr('disabled', true); 
                 $('#watcherstatus').text(""); 
-                codeeditor.win.document.body.style.backgroundImage = 'none'; 
+                if ($('select#automode').attr('selectedIndex') != 0)
+                {
+                    $('select#automode').attr('selectedIndex', 0); // editing
+                    $('select#automode #id_autoload').attr('disabled', true); 
+                    codeeditor.win.document.body.style.backgroundImage = 'none'; 
+                    $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+                    $('.editor_controls #run').attr('disabled', false);
+                    sendjson({"command":'automode', "automode":'autosave'}); 
+                }
             }
         }
     }
 
-    function startingrun(lrunID) {
+    function startingrun(lrunID) 
+    {
         //show the output area
         resizeControls('up');
         
@@ -677,7 +709,9 @@ $(document).ready(function() {
             codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
         }
 
-        showFeedbackMessage("This scraper has been reloaded.");
+        $('.editor_controls #btnCommitPopup').val('Loading...').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
+        window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
+        //showFeedbackMessage("This scraper has been loaded.");
     }; 
 
 

@@ -42,6 +42,7 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 .editor_controls .save, #meta_form .save {background-image:url(../images/icons/disk.png)}
 .editor_controls #run {background-image:url(../images/icons/control_play.png)}
 .editor_controls #run.running {color:red;}
+.editor_controls #run:disabled, .editor_controls #btnCommitPopup:disabled { background-color:#ddd; border-color:#ccc;color:#999; }
 .editor_controls #reload {background-image:url(../images/icons/arrow_refresh.png)}
 .editor_controls #diff {background-image:url(../images/icons/diff.png)}
 .editor_controls #preview {background-image:url(../images/icons/script_code_red.png)}
@@ -65,7 +66,7 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 select#automode {font-size:0.8em;
     -webkit-border-radius: 4px;-moz-border-radius: 4px; 
     background-color:#e3e3e3; background-repeat:no-repeat; background-position:2px 49%;
-        padding:0.2em 0.1em 0.2em 12px;border:solid 1px #9f9f9f; color:#333; font-weight:bold; }
+        padding:0.2em 0.1em 0.3em 12px;border:solid 1px #9f9f9f; color:#333; font-weight:bold; }
 
 #meta_form {overflow: auto;}
 #meta_form p {margin:2.5em 0 2em 0;padding:0.5em 0 0.5em 0; border-top:solid 1px #808080;border-bottom:solid 1px #808080;}
