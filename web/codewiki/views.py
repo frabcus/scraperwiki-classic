@@ -112,6 +112,8 @@ def scraper_overview(request, short_name):
     if data['rows']:
         context['datasinglerow'] = zip(data['headings'], data['rows'][0])
     
+    context['data'] = data
+    
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
