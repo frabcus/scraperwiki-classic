@@ -112,7 +112,7 @@
             
                 <div class="right">
                     <ul class="code_about">
-                        {# <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li> #}
+                        <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
               	        <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
                         {# the php/html mixed parser appears good enough to handle all of this without a mode switch! #}
                         {% if 0 %}   
@@ -197,6 +197,7 @@
 
     {# Not convinced it's appropriate to load analytics code into the editor.  Consider removing it #}
     {% if 0 %}
+    // The real problem is this wholly blocks the editor from responding if there is a slow or nonexistent connection to it!
     <script type="text/javascript">
         var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
         document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));

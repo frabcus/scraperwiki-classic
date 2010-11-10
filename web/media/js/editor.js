@@ -504,6 +504,7 @@ $(document).ready(function() {
             $('select#automode #id_autoload').attr('disabled', true); 
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
             $('.editor_controls #run').attr('disabled', false);
+            $('.editor_controls #preview').attr('disabled', true);
         }
         var automode = (iautomode == 1 ? "draft" : (iautomode == 0 ? "autosave" : "autoload")); 
         writeToChat('Changed automode: ' + automode); 
@@ -525,6 +526,11 @@ $(document).ready(function() {
         // draft editing do not disturb
         if ($('select#automode').attr('selectedIndex') == 1) 
             return; 
+
+        if (username ? (loggedineditors.length >= 2) : (loggedineditors.length >= 1))
+            $('select#automode').show(); 
+        else
+            $('select#automode').hide(); 
 
         if (username)
         {
