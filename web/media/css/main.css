@@ -109,7 +109,7 @@ pre.scrapercode {background-color: lemonchiffon; padding: 0.5em;}
 /* Tables */
 table {width:100%; border-collapse:collapse;}
 table.data {margin-top:1em; margin-bottom:1em;}
-table.data th {font-weight:normal;background:#f8e8f8; color:#808080;padding:0.3em 0.5em;
+table.data th {font-weight:normal;background:#f8f8f8; color:#808080;padding:0.3em 0.5em;
 border-top:solid 1px #ccc; border-bottom:solid 1px #ccc;padding:0.4em 0.6em;}
 
 table.data tr:nth-child(odd) td {background:#f4f3e8;} 
