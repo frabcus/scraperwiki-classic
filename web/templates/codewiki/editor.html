@@ -56,7 +56,7 @@
             <div class="editor_header">
                 <div class="title">
                     <a id="aCloseEditor" href="{% url frontpage %}" title="Home">
-                        <img src="{{ MEDIA_URL }}/images/editor_logo.png" width="39" height="25"/>
+                        <img src="{{ MEDIA_URL }}images/editor_logo.png" width="39" height="25"/>
                     </a>
                     {{ form.title }}
                     <div class="page_tabs small">
@@ -88,9 +88,17 @@
                     <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P)"/>
                 {% endifequal %}
 
-                {% if scraper.id %}
-                    <input type="checkbox" value="autosavecheck" name="autosavecheck" id="id_autosavecheck" {% if user.username %}checked{% endif %} />autosave
-                {% endif %}
+                <select id="automode">
+                  {% if scraper.id %}
+                    <option name="autosave" id="id_autosave" selected>editing</option>
+                    <option name="draft" id="id_draft">draft editing</option>
+                    <option name="autoload" id="id_autoload" disabled>watching</option>
+                  {% else %}
+                    <option name="autosave" id="id_autosave" disabled>editing</option>
+                    <option name="draft" id="id_draft" selected>draft editing</option>
+                    <option name="autoload" id="id_autoload" disabled>watching</option>
+                  {% endif %}
+                </select>
 
                 {% ifequal scraper.wiki_type 'view' %}
                   <label for="id_urlquery" class="hide">Urlquery:</label>
@@ -100,10 +108,11 @@
                 {% endifequal %}
 
                 <img id="running_annimation" src="{{ MEDIA_URL }}/images/running.gif"/>
+                <span id="watcherstatus"></span>
             
                 <div class="right">
                     <ul class="code_about">
-                        <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
+                        {# <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li> #}
               	        <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
                         {# the php/html mixed parser appears good enough to handle all of this without a mode switch! #}
                         {% if 0 %}   
@@ -134,13 +143,10 @@
                         <li class="sources">
                             <a href="#" title="Pages you are scraping">Sources</a>                            
                         </li>
-                        <li class="chat{% if not user.is_staff %} chathidden{% endif %}">
+                        <li class="chat">
                             <a href="#" title="Communicate to others">Chat</a>                            
                         </li>
                     </ul>
-                    <div class="right" id="editorstatus">
-                    <span>---</span> {# this text gets deleted when javascript working properly #}
-                    </div>
                 </div>
                 <div class="info">
                     <div id="output_console" class="output">
@@ -169,7 +175,7 @@
 
       <div id="popup_tutorials" class="quickhelp">
         <h3>
-            <img src="{{MEDIA_URL}}/images/icons/{{ scraper.language }}.png"/>
+            <img src="{{MEDIA_URL}}images/icons/{{ scraper.language }}.png"/>
             {% ifequal scraper.language 'php'%}
                 PHP
             {% endifequal %}
@@ -187,9 +193,10 @@
         </p>
             {% include quick_help_template %}
       </div>
-
     </form>
 
+    {# Not convinced it's appropriate to load analytics code into the editor.  Consider removing it #}
+    {% if 0 %}
     <script type="text/javascript">
         var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
         document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
@@ -200,5 +207,7 @@
             pageTracker._trackPageview();
         } catch(err) {}
     </script>
+    {% endif %}
+
 </body>
 </html>

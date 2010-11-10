@@ -23,6 +23,7 @@ import codewiki.util
 import codewiki.vc
 import code
 import view
+import urllib2
 
 try:
     import json
@@ -105,6 +106,25 @@ class Scraper (code.Code):
         return self.last_run + datetime.timedelta(0, self.run_interval, 0)
 
     def get_screenshot_url(self, domain):
+        try:
+            url = self.scraperrunevent_set.latest('run_started').first_url_scraped
+        except:
+            url = None
+
+        if url:
+            if url.endswith('robots.txt'):
+                url = url.replace('robots.txt', '')
+
+            class HeadRequest(urllib2.Request):
+                def get_method(self):
+                    return "HEAD"
+
+            try:
+                urllib2.urlopen(HeadRequest(url))
+                return url
+            except:
+                pass
+
         return 'http://%s%s' % (domain, reverse('scraper_code', args=[self.wiki_type, self.short_name]))
 
     class Meta:

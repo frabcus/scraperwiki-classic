@@ -87,9 +87,12 @@ def croppage(request, srcdoc, page, cropping):
     pdfurl, pdffile, imgstem, qtail = GetSrcDoc(request, srcdoc)
     if not os.path.isfile(pdffile):  # download file if it doesn't exist
         tpdffile = tempfile.NamedTemporaryFile(suffix='.pdf')
-        filename, headers = urllib.urlretrieve(pdfurl, tpdffile.name)
+        try:
+            filename, headers = urllib.urlretrieve(pdfurl, tpdffile.name)
+        except ValueError:
+            return HttpResponse("Error fetching: %s " % pdfurl)
         if headers.subtype != 'pdf':
-            return HttpResponse("%s is not pdf type" % url)
+            return HttpResponse("%s is not pdf type; it's \"%s\"" % (pdfurl, headers.subtype))
         print (tpdffile.name, pdffile)
         shutil.copy(tpdffile.name, pdffile)
     

@@ -92,6 +92,7 @@ class ScraperRunner(threading.Thread):
         event.run_started = datetime.datetime.now()
         event.run_ended = event.run_started  # actually used as last_updated
         event.output = ""
+        approxlenoutputlimit = 3000
         event.save()
 
         # a partial implementation of editor.js
@@ -101,6 +102,7 @@ class ScraperRunner(threading.Thread):
         domainscrapes = { }  # domain: [domain, pages, bytes] 
         
         
+        temptailmessage = "\n\n[further output lines suppressed]\n"
         while True:
             line = runner.stdout.readline()
             if not line:
@@ -122,14 +124,15 @@ class ScraperRunner(threading.Thread):
             elif message_type == "sources":
                 event.pages_scraped += 1  # soon to be deprecated 
                 
-                netloc = "%s://%s" % urlparse.urlparse(data.get('url'))[:2]
-                if not event.first_url_scraped and netloc and netloc != 'http://api.scraperwiki.com':
+                url = data.get('url')
+                netloc = "%s://%s" % urlparse.urlparse(url)[:2]
+                if not event.first_url_scraped and url and netloc[-16:] != '.scraperwiki.com' and url[-10:] != 'robots.txt':
                     event.first_url_scraped = data.get('url')
                 if netloc:
                     if netloc not in domainscrapes:
                         domainscrapes[netloc] = DomainScrape(scraper_run_event=event, domain=netloc)
                     domainscrapes[netloc].pages_scraped += 1
-                    domainscrapes[netloc].bytes_scraped += data.get('bytes')
+                    domainscrapes[netloc].bytes_scraped += int(data.get('bytes'))
             
             elif message_type == "data":
                 event.records_produced += 1
@@ -139,7 +142,7 @@ class ScraperRunner(threading.Thread):
                     sMessage = stackentry.get('file')
                     if sMessage:
                         if sMessage == "<string>":
-                            sMessage = "Line %d: %s" % (stackentry.get('linenumber', -1), stackentry.get('linetext'))
+                            sMessage = "\nLine %d: %s" % (stackentry.get('linenumber', -1), stackentry.get('linetext'))
                         if stackentry.get('furtherlinetext'):
                             sMessage += " -- " + stackentry.get('furtherlinetext') 
                         exceptionmessage.append(sMessage)
@@ -151,24 +154,43 @@ class ScraperRunner(threading.Thread):
                 exceptionmessage.append(data.get('exceptiondescription'))
             
             elif message_type == "console":
-                outputmessage.append(content)
+                while content:
+                    outputmessage.append(content[:approxlenoutputlimit])
+                    content = content[approxlenoutputlimit:]
             else:
                 outputmessage.append("Unknown: %s\n" % line)
                 
             
-            # inefficient live update of event output so we can watch it when debugging scraperwiki platform
-            if outputmessage:
-                event.output = "%s%s" % (event.output, "".join(outputmessage))
-                outputmessage = [ ]
+            # live update of event output so we can watch it when debugging scraperwiki platform
+            if outputmessage and len(event.output) < approxlenoutputlimit:
+                while outputmessage:
+                    event.output = "%s%s" % (event.output, outputmessage.pop(0))
+                    if len(event.output) >= approxlenoutputlimit:
+                        event.output = "%s%s" % (event.output, temptailmessage)
+                        break
                 event.run_ended = datetime.datetime.now()
                 event.save()
+
+        # append last few lines
+        if outputmessage:
+            #assert len(event.output) >= approxlenoutputlimit
+            outputtail = [ outputmessage.pop() ] 
+            while outputmessage and len(outputtail) < 5 and sum(map(len, outputtail)) < approxlenoutputlimit:
+                outputtail.append(outputmessage.pop())
+            outputtail.reverse()
+                
+            midmessage = ''
+            if outputmessage:
+                midmessage = "\n    [%d lines, %d characters omitted]\n\n" % (len(outputmessage), sum(map(len, outputmessage)))
+            event.output = "%s%s%s" % (event.output[:-len(temptailmessage)], midmessage, "".join(outputtail))
+            
 
         if exceptionmessage:
             event.output = "%s\n\n*** Exception ***\n\n%s\n" % (event.output, "\n".join(exceptionmessage))
         if completionmessage:
             event.output = "%s\n\n%s" % (event.output, "".join(completionmessage))
         elif not exceptionmessage:
-            event.output = "%s\n\nRun was interrupted (possibly by a timeout)\n" % (event.output)
+            event.output = "%s\n\n[Run was interrupted (possibly by a timeout)]\n" % (event.output)
         
         event.run_ended = datetime.datetime.now()
         event.pid = -1  # disable it

@@ -1,10 +1,9 @@
 $(document).ready(function() {
 
     //variables
-    var pageIsDirty = true;
     var editor_id = 'id_code';
     var codeeditor = undefined;
-    var codemirroriframe; // the iframe that needs resizing
+    var codemirroriframe; // the actual iframe of codemirror that needs resizing
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
@@ -35,8 +34,7 @@ $(document).ready(function() {
 
     // information handling who else is watching and editing during this session
     var earliesteditor = ""; 
-    var editinguser = ""; 
-    var bcansave = true; 
+    var editingusername = ""; 
     var loggedineditors = [ ]; // list of who else is here and their windows open
     var nanonymouseditors = 0; 
     var chatname = ""   // special in case of Anonymous users
@@ -46,20 +44,27 @@ $(document).ready(function() {
     var indentUnits = Array();
     var parserConfig = Array();
     var parserName = Array();
+    var codemirroroptions = undefined; 
+    var pageIsDirty = false;
+    var atsavedundo = 0; 
+    var savedundo = 0; 
 
-    $.ajaxSetup({
-        timeout: 10000
-    });
+    $.ajaxSetup({timeout: 10000});
 
     //constructor functions
     setupCodeEditor();
     setupMenu();
-    setupOrbited();
     setupTabs();
     setupToolbar();
     setupResizeEvents();
+    setupOrbited();
 
-    function setPageIsDirty(lpageIsDirty) {
+    function UpdatePageDirtiness() 
+    {
+        var historysize = codeeditor.historySize(); 
+        if (historysize.undo + historysize.redo < savedundo)
+            savedundo = -1; 
+        var lpageIsDirty = (historysize.undo != savedundo); 
         if (pageIsDirty == lpageIsDirty)
             return; 
         pageIsDirty = lpageIsDirty; 
@@ -74,7 +79,7 @@ $(document).ready(function() {
         parsers['python'] = ['../contrib/python/js/parsepython.js'];
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
         parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
-        //parsers['ruby'] = [ 'parsedummy.js'];   // in case Ruby needs disabling due to too much bugs
+        //parsers['ruby'] = [ 'parsedummy.js'];   // in case Ruby parser needs disabling due to too many bugs
         parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
 
         stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
@@ -95,14 +100,14 @@ $(document).ready(function() {
         parserName['python'] = 'PythonParser';
         parserName['php'] = 'PHPHTMLMixedParser'; // 'PHPParser';
         parserName['ruby'] = 'RubyParser';
-        //parserName['ruby'] = 'DummyParser';
+        //parserName['ruby'] = 'DummyParser';  // for bugs
         parserName['html'] = 'HTMLMixedParser';
 
         // allow php to access HTML style parser
         parsers['php'] = parsers['html'].concat(parsers['php']);
         stylesheets['php'] = stylesheets['html'].concat(stylesheets['php']); 
 
-        codeeditor = CodeMirror.fromTextArea("id_code", {
+        codemirroroptions = {
             parserfile: parsers[scraperlanguage],
             stylesheet: stylesheets[scraperlanguage],
             path: codemirror_url + "js/",
@@ -110,7 +115,8 @@ $(document).ready(function() {
             textWrapping: true,
             lineNumbers: true,
             indentUnit: indentUnits[scraperlanguage],
-            readOnly: false,
+            readOnly: false, // cannot be changed once started up
+            undoDepth: 200,  // defaults to 50.  wait till we get lostundo value
             tabMode: "shift", 
             disableSpellcheck: true,
             autoMatchParens: true,
@@ -118,7 +124,8 @@ $(document).ready(function() {
             parserConfig: parserConfig[scraperlanguage],
             enterMode: "flat", // default is "indent" (which I have found buggy),  also can be "keep"
             reindentOnLoad: false, 
-            onChange: function ()  { setPageIsDirty(true); },
+            onChange: function ()  { UpdatePageDirtiness(); },
+            //noScriptCaching: true, // essential when hacking the codemirror libraries
 
             // this is called once the codemirror window has finished initializing itself
             initCallback: function() {
@@ -127,9 +134,11 @@ $(document).ready(function() {
                     codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
                     setupKeygrabs();
                     resizeControls('first');
-                    setPageIsDirty(false); // page not dirty at this point
+                    UpdatePageDirtiness(); // page should not be dirty at this point
                 } 
-          });        
+          };
+
+          codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
     }
 
     
@@ -167,7 +176,7 @@ $(document).ready(function() {
         })
 
         $('#chat_line').bind('keypress', function(eventObject) {
-            var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
+            var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
             var target = eventObject.target.tagName.toLowerCase();
             if (key === 13 && target === 'input') 
             {
@@ -180,7 +189,7 @@ $(document).ready(function() {
         })
 
         $('#id_urlquery').bind('keypress', function(eventObject) {
-            var key = eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0;
+            var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
             var target = eventObject.target.tagName.toLowerCase();
             if (key === 13 && target === 'input') {
                 eventObject.preventDefault();
@@ -190,24 +199,29 @@ $(document).ready(function() {
             return true; 
         })
 
-        $('#id_urlquery').focus(function() {
+        // somehow this system fails if you do a browser back button to the editor
+        $('#id_urlquery').focus(function() 
+        {
             if ($(this).hasClass('hint')) {
                 $(this).val('');
                 $(this).removeClass('hint');
             }
         });
-        $('#id_urlquery').blur(function() {
+        $('#id_urlquery').blur(function() 
+        {
             if(!$(this).hasClass('hint') && ($(this).val() == '')) {
                 $(this).val('urlquery');
                 $(this).addClass('hint');
             }
         });
         $('#id_urlquery').blur();
+
+        $('select#automode').change(changeAutomode); 
     }
     
     //Setup Tabs
-    function setupTabs(){
-        
+    function setupTabs()
+    {
         $('.editor_output .console a').click(function(){
             showTab('console');
             return false;
@@ -256,21 +270,26 @@ $(document).ready(function() {
                  "language":scraperlanguage, 
                  "scrapername":short_name, 
                  "isstaff":isstaff };
-        send(data);
+        sendjson(data);
     }
 
-    conn.onclose = function(code){
+    conn.onclose = function(code)
+    {
         if (code == Orbited.Statuses.ServerClosedConnection)
             mcode = 'ServerClosedConnection'; 
         else if (code == Orbited.Errors.ConnectionTimeout)
             mcode = 'ConnectionTimeout'; 
-        else  
-            // http://orbited.org/wiki/TCPSocket documents: 
-            //    Orbited.Errors.InvalidHandshake = 102
-            //    Orbited.Errors.UserConnectionReset = 103
-            //    Orbited.Errors.Unauthorized = 106
-            //    Orbited.Errors.RemoteConnectionFailed = 108
-            //    Orbited.Statuses.SocketControlKilled = 301
+        else if (code == Orbited.Errors.InvalidHandshake)
+            mcode = 'InvalidHandshake'; 
+        else if (code == Orbited.Errors.UserConnectionReset)
+            mcode = 'UserConnectionReset'; 
+        else if (code == Orbited.Errors.Unauthorized)
+            mcode = 'Unauthorized'; 
+        else if (code == Orbited.Errors.RemoteConnectionFailed)
+            mcode = 'RemoteConnectionFailed'; 
+        else if (code == Orbited.Statuses.SocketControlKilled)
+            mcode = 'SocketControlKilled'; 
+        else
             mcode = 'code=' + code;
 
         writeToChat('Connection closed: ' + mcode); 
@@ -296,9 +315,11 @@ $(document).ready(function() {
     }
 
     //read data back from twisted
-    conn.onread = function(ldata) {
+    conn.onread = function(ldata) 
+    {
         buffer = buffer+ldata;
-        while (true) {
+        while (true) 
+        {
             var linefeed = buffer.indexOf("\n"); 
             if (linefeed == -1)
                 break; 
@@ -308,34 +329,37 @@ $(document).ready(function() {
             if (sdata.length == 0)
                 continue; 
 
-            var jdata = undefined; 
-            try {
+            var jdata; 
+            try 
+            {
                 //writeToChat(cgiescape(sdata)); // for debug of what's coming out
                 jdata = $.evalJSON(sdata);
-            } catch(err) {
+            } 
+            catch(err) 
+            {
                 alert("Malformed json: '''" + sdata + "'''"); 
+                continue
             }
 
-            if (jdata != undefined) {
-                if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
-                    receivechatqueue.push(jdata); 
-                else
-                    receiverecordqueue.push(jdata); 
+            if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
+                receivechatqueue.push(jdata); 
+            else
+                receiverecordqueue.push(jdata); 
 
-                // allow the user to clear the choked data if they want
-                if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'runfinished')) {
-                        $('.editor_controls #run').val('Finishing');
-                        $('.editor_controls #run').unbind('click.abort');
-                        $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
-                }
-
-                if (receiverecordqueue.length + receivechatqueue.length == 1)
-                    window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  // delay of 1ms makes it work better in FireFox (possibly so it doesn't take priority over the similar function calls in Orbited.js)
-
-                // clear batched up data that's choking the system
-                if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
-                    window.setTimeout(clearJunkFromQueue, 1); 
+            // allow the user to clear the choked data if they want
+            if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'runfinished')) 
+            {
+                $('.editor_controls #run').val('Finishing');
+                $('.editor_controls #run').unbind('click.abort');
+                $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
             }
+
+            if (receiverecordqueue.length + receivechatqueue.length == 1)
+                window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  // delay of 1ms makes it work better in FireFox (possibly so it doesn't take priority over the similar function calls in Orbited.js)
+
+            // clear batched up data that's choking the system
+            if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
+                window.setTimeout(clearJunkFromQueue, 1); 
         }
     }
 
@@ -354,14 +378,16 @@ $(document).ready(function() {
     }
 
     // run our own queue not in the timeout system (letting chat messages get to the front)
-    function receiveRecordFromQueue() {
+    function receiveRecordFromQueue() 
+    {
         var jdata = undefined; 
         if (receivechatqueue.length > 0)
             jdata = receivechatqueue.shift(); 
         else if (receiverecordqueue.length > 0) 
             jdata = receiverecordqueue.shift(); 
 
-        if (jdata != undefined) {
+        if (jdata != undefined) 
+        {
             receiveRecord(jdata);
             if (receiverecordqueue.length + receivechatqueue.length >= 1)
                 window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
@@ -407,35 +433,42 @@ $(document).ready(function() {
     function sendChat() 
     {
         data = {"command":'chat', "guid":guid, "username":username, "text":$('#chat_line').val()};
-        send(data); 
+        sendjson(data); 
         $('#chat_line').val(''); 
     }
 
     //send a message to the server
-    function send(json_data) {
-        try {
+    function sendjson(json_data) 
+    {
+        try 
+        {
             conn.send($.toJSON(json_data));  
-        } catch(err) {
-            writeToConsole("Send error: " + err, "exceptionnoesc"); 
+        } 
+        catch(err) 
+        {
+            if (!bSuppressDisconnectionMessages)
+                writeToConsole("Send error: " + err, "exceptionnoesc"); 
         }
     }
 
-    //send a 'kill' message
-    function sendKill() {
-        data = {"command" : 'kill'};
-        send(data);
+    function sendKill() 
+    {
+        sendjson({"command" : 'kill'});
     }
 
     //send code request run
-    function sendCode() {
+    function sendCode() 
+    {
         // protect not-ready case
-        if (conn.readyState != conn.READY_STATE_OPEN) { 
-            alert("Not ready, readyState=" + conn.readyState); 
+        if ((conn == undefined) || (conn.readyState != conn.READY_STATE_OPEN)) 
+        { 
+            alert("Not ready, readyState=" + (conn == undefined ? "undefined" : conn.readyState)); 
             return; 
         }
 
     
         //send the data
+        code = codeeditor.getCode(); 
         data = {
             "command" : "run",
             "guid" : guid,
@@ -443,68 +476,130 @@ $(document).ready(function() {
             "userrealname" : userrealname, 
             "language":scraperlanguage, 
             "scraper-name":short_name,
-            "code" : codeeditor.getCode(),
+            "code" : code,
             "urlquery" : ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val())
         }
         $('.editor_controls #run').val('Sending');
-
-        send(data)
+        sendjson(data); 
 
         // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
         // means we can have simultaneous running for staff overview
 
         // new auto-save every time 
-        if (guid && $('#id_autosavecheck').attr('checked') && pageIsDirty)
+        if (($('select#automode').attr('selectedIndex') == 0) && pageIsDirty)
             saveScraper(); 
-    }
+    } 
 
-    function updateEditorStatus() { 
-        // Construct a message that reflects the situation for now.  
-        // Later on add in options to allow auto-reload and ability to find the names of those who are watching
-        var message = "";
-        var nwatchers = loggedineditors.length + nanonymouseditors; 
-        if (username)
-        {
-            if (editinguser == username)
-            {
-                if (nwatchers > 1)
-                    message += (nwatchers-1) + " watching"; 
-            }
-            else
-            {
-                message += editinguser + " is editing; "; 
-                message += "you"; 
-                if (nwatchers > 2)
-                    message += " (+ " + (nwatchers-2) + " others)"; 
-                message += " are watching"; 
-            }
-        }
-        else
-        {
-            if (editinguser)
-                message += editinguser + " is editing; "; 
-            var owatchers = nwatchers - 1 - (editinguser ? 1 : 0); 
-            if (owatchers > 0)
-                message += owatchers + " others watching"; 
-        }
-        $("#editorstatus").html(message); 
-    }
 
-    function recordEditorStatus(data) { 
+    function changeAutomode() 
+    {
+        var iautomode = $('select#automode').attr('selectedIndex'); 
+        if (iautomode == 1)
+        {
+            $('#watcherstatus').text("draft mode"); 
+            codeeditor.win.document.body.style.backgroundImage = 'none'; 
+
+            // for now you can never go back
+            $('select#automode #id_autosave').attr('disabled', true); 
+            $('select#automode #id_autoload').attr('disabled', true); 
+            $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+            $('.editor_controls #run').attr('disabled', false);
+        }
+        var automode = (iautomode == 1 ? "draft" : (iautomode == 0 ? "autosave" : "autoload")); 
+        writeToChat('Changed automode: ' + automode); 
+        sendjson({"command":'automode', "automode":automode}); 
+    }; 
+
+    // when the editor status is determined it is sent back to the server
+    function recordEditorStatus(data) 
+    { 
         earliesteditor = data.earliesteditor; 
-        editinguser = data.editinguser; 
-        bcansave = data.cansave; 
+        editingusername = (data.loggedineditors ? data.loggedineditors[0] : ''); 
         loggedineditors = data.loggedineditors; 
         nanonymouseditors = data.nanonymouseditors; 
 
-        writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
+        //writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
         if (data.message)
             writeToChat(cgiescape(data.message)); 
 
-        window.setTimeout(function() { updateEditorStatus(); }, 100);  
+        // draft editing do not disturb
+        if ($('select#automode').attr('selectedIndex') == 1) 
+            return; 
+
+        if (username)
+        {
+            if (editingusername == username)
+            {
+                $('select#automode #id_autoload').attr('disabled', (loggedineditors.length == 1)); // disable if no one else is editing
+                var wstatus = "";
+                if (loggedineditors.length >= 2)
+                {
+                    wstatus = '<a href="/profiles/'+loggedineditors[1]+'" target="_blank">'+loggedineditors[1]+'</a>'; 
+                    if (loggedineditors.length >= 3)
+                        wstatus += ' (+' + (loggedineditors.length-2) + ')'; 
+                    wstatus += ' is watching'; 
+                }
+                $('#watcherstatus').html(wstatus); 
+
+                if ($('select#automode').attr('selectedIndex') != 0)
+                {
+                    codeeditor.win.document.body.style.backgroundImage = 'none';
+                    $('select#automode #id_autosave').attr('disabled', false); 
+                    $('select#automode').attr('selectedIndex', 0); // editing
+                    $('.editor_controls #run').attr('disabled', false);
+                    $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+                    sendjson({"command":'automode', "automode":'autosave'}); 
+                }
+            }
+            else
+            {
+                $('#watcherstatus').html('<a href="/profiles/'+editingusername+'" target="_blank">'+editingusername+'</a> is editing'); 
+                if ($('select#automode').attr('selectedIndex') != 2)
+                {
+                    $('select#automode #id_autoload').attr('disabled', false); 
+                    $('select#automode').attr('selectedIndex', 2); // watching
+                    $('select#automode #id_autosave').attr('disabled', true); 
+                    codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
+                    $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+                    $('.editor_controls #run').attr('disabled', true);
+                    sendjson({"command":'automode', "automode":'autoload'}); 
+                }
+            }
+        }
+
+        else
+        {
+            if (editingusername)
+            {
+                $('#watcherstatus').text(editingusername + " is editing"); 
+                if ($('select#automode').attr('selectedIndex') != 2)
+                {
+                    $('select#automode #id_autoload').attr('disabled', false); 
+                    $('select#automode').attr('selectedIndex', 2); // watching
+                    codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
+                    $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+                    $('.editor_controls #run').attr('disabled', true);
+                    sendjson({"command":'automode', "automode":'autoload'}); 
+                }
+            }
+            else
+            {
+                $('#watcherstatus').text(""); 
+                if ($('select#automode').attr('selectedIndex') != 0)
+                {
+                    $('select#automode').attr('selectedIndex', 0); // editing
+                    $('select#automode #id_autoload').attr('disabled', true); 
+                    codeeditor.win.document.body.style.backgroundImage = 'none'; 
+                    $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+                    $('.editor_controls #run').attr('disabled', false);
+                    sendjson({"command":'automode', "automode":'autosave'}); 
+                }
+            }
+        }
     }
 
-    function startingrun(lrunID) {
+    function startingrun(lrunID) 
+    {
         //show the output area
         resizeControls('up');
         
@@ -568,13 +663,13 @@ $(document).ready(function() {
         });
     }
 
-    function clearOutput(){
-        $('#output_console div').html('');    
-        $('#output_sources div').html('');    
-        $('#output_data table').html('');                    
+    function clearOutput() {
+        $('#output_console div').html('');
+        $('#output_sources div').html('');
+        $('#output_data table').html('');
         $('.editor_output div.tabs li.console').removeClass('new');
-        $('.editor_output div.tabs li.data').removeClass('new');        
-        $('.editor_output div.tabs li.sources').removeClass('new');        
+        $('.editor_output div.tabs li.data').removeClass('new');
+        $('.editor_output div.tabs li.sources').removeClass('new');
     }
 
     function reloadScraper(){
@@ -602,9 +697,10 @@ $(document).ready(function() {
             selrange = $.evalJSON(selrange); 
         }
 
-        codeeditor.setCode(newcode); // see setupTutorial() for way to leave control-Z in place
+        codeeditor.setCode(newcode); 
         codeeditor.focus(); 
-        setPageIsDirty(false); 
+        savedundo = codeeditor.historySize().undo; 
+        UpdatePageDirtiness(); 
 
         // make the selection
         if (!((selrange[2] == 0) && (selrange[3] == 0))){
@@ -613,7 +709,9 @@ $(document).ready(function() {
             codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
         }
 
-        showFeedbackMessage("This scraper has been reloaded.");
+        $('.editor_controls #btnCommitPopup').val('Loading...').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
+        window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
+        //showFeedbackMessage("This scraper has been loaded.");
     }; 
 
 
@@ -640,7 +738,6 @@ $(document).ready(function() {
     
     //Setup toolbar
     function setupToolbar(){
-
         // actually the save button
         $('.editor_controls #btnCommitPopup').live('click', function (){
             saveScraper();  
@@ -650,35 +747,33 @@ $(document).ready(function() {
         $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')); 
 
         //diff button (hidden)
-        $('.editor_controls #diff').click(function() {
+        $('.editor_controls #diff').click(function() 
+        {
                 viewDiff(); 
                 return false; 
-            }
-        ); 
+        }); 
 
         //reload button (hidden)
-        $('.editor_controls #reload').click(function() {
+        $('.editor_controls #reload').click(function() 
+        {
                 reloadScraper(); 
                 return false; 
-            }
-        );
+        });
 
         //close editor link
-        $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(
-            function (){
-                if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
-                    return false; 
-                bSuppressDisconnectionMessages = true; 
-                send({"command":'loseconnection'}) 
-                //if (conn)  conn.close();  
-                return true;
-            }
-        );
+        $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(function ()
+        {
+            if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
+                return false; 
+            bSuppressDisconnectionMessages = true; 
+            sendjson({"command":'loseconnection'});   //if (conn)  conn.close(); not as effective 
+            return true;
+        });
 
         $(window).unload( function () { 
             bSuppressDisconnectionMessages = true; 
             writeToConsole('window unload'); 
-            send({"command":'loseconnection'}) 
+            sendjson({"command":'loseconnection'}); 
             //if (conn)  conn.close();  
         });  
 
@@ -708,7 +803,8 @@ $(document).ready(function() {
             $('.editor_controls #run').bind('click.run', sendCode);
     }
 
-    function popupPreview() {
+    function popupPreview() 
+    {
         var viewurl = viewrunurl; 
         var urlquery = ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
         var viewurl = viewrunurl; 
@@ -755,52 +851,57 @@ $(document).ready(function() {
             bSuccess = true;
         }
 
-        if(bSuccess == true){      
+        if(bSuccess == true)
+        {
+            code = codeeditor.getCode(); 
+            atsavedundo = codeeditor.historySize().undo;  // update only when success
             $.ajax({
               type : 'POST',
               contentType : "application/json",
+              dataType: "html",
 
               data: ({
                 title : $('#id_title').val(),
                 commit_message: "cccommit",
                 sourcescraper: $('#sourcescraper').val(),
                 wiki_type: wiki_type,
-                code : codeeditor.getCode(),
+                code : code,
                 earliesteditor : earliesteditor, 
                 action : 'commit'
                 }),
 
-              dataType: "html",
-              success: function(response){
+              success: function(response)
+                {
                     res = $.evalJSON(response);
 
                     //failed
-                    if (res.status == 'Failed'){
+                    if (res.status == 'Failed')
                         alert("Save failed error message.  Shouldn't happen"); 
 
                     //success    
-                    }else{
+                    else
+                    {
                         //pageTracker._trackPageview('/scraper_committed_goal');  		
 
                         // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
-                        if (res.draft == 'True') {
+                        if (res.draft == 'True')
                             $('#divDraftSavedWarning').show();
-                        }
 
                         // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
-                        if (res.url && window.location.pathname != res.url) {
+                        if (res.url && window.location.pathname != res.url)
                             window.location = res.url;
-                        };
 
                         // orginary save case.  show the slider up that it has been saved
-                        if (res.draft != 'True') {
+                        if (res.draft != 'True') 
+                        {
                             $('.editor_controls #btnCommitPopup').val('Saved').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
                             window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
                             //showFeedbackMessage("Your code has been saved.");
                             if (bConnected)
-                                send({"command":'saved'}); 
+                                sendjson({"command":'saved'}); 
                         }
-                        setPageIsDirty(false); 
+                        savedundo = atsavedundo; 
+                        UpdatePageDirtiness(); 
                     }
                 },
 
@@ -814,16 +915,14 @@ $(document).ready(function() {
         }
     }
 
-    function cgiescape(text) {
-        if(text){
-            return text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-        }else{
-            return "";
-        }
+    function cgiescape(text) 
+    {
+        return (text ? text.replace(/&/g, '&amp;').replace(/</g, '&lt;') : "");
     }
 
     
-    function setupResizeEvents(){
+    function setupResizeEvents()
+    {
         
         //window
         $(window).resize(onWindowResize);
@@ -980,8 +1079,8 @@ $(document).ready(function() {
     };
 
 
-    function writeToSources(sUrl, bytes, failedmessage, cached, cacheid) {
-
+    function writeToSources(sUrl, bytes, failedmessage, cached, cacheid) 
+    {
         //remove items if over max
         if ($('#output_sources div.output_content').children().size() >= outputMaxItems) {
             $('#output_sources div.output_content').children(':first').remove();

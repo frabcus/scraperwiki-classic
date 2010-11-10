@@ -78,36 +78,41 @@ def scraper_overview(request, short_name):
     scraper_contributors = scraper.contributors()
     scraper_requesters = scraper.requesters()    
     scraper_tags = Tag.objects.get_for_object(scraper)
-    print scraper_requesters
-    column_order = scraper.get_metadata('data_columns')
-    if not user_owns_it:
-        private_columns = scraper.get_metadata('private_columns')
-    else:
-        private_columns = None
+    
 
     lscraperrunevents = scraper.scraperrunevent_set.all().order_by("-id")[:1] # can't use date as it's unindexed
     lastscraperrunevent = lscraperrunevents and lscraperrunevents[0] or None
 
-    #get data for this scaper
-    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
-                                               limit=settings.DATA_TABLE_ROWS, 
-                                               column_order=column_order,
-                                               private_columns=private_columns)
-
-    # replicates output from data_summary_tables
-    return render_to_response('codewiki/scraper_overview.html', {
+    context = {
         'scraper_tags': scraper_tags,
         'selected_tab': 'overview',
         'scraper': scraper,
         'lastscraperrunevent':lastscraperrunevent,
         'user_owns_it': user_owns_it,
         'user_follows_it': user_follows_it,
-        'data': data,
         'scraper_contributors': scraper_contributors,
         'scraper_requesters': scraper_requesters,
         'related_views': related_views,
         'schedule_options': models.SCHEDULE_OPTIONS,
-        }, context_instance=RequestContext(request))
+        }
+    
+    #get data for this scaper in a way that we can see exactly what is being transferred
+    column_order = scraper.get_metadata('data_columns')
+    if not user_owns_it:
+        private_columns = scraper.get_metadata('private_columns')
+    else:
+        private_columns = None
+    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
+                                               limit=settings.DATA_TABLE_ROWS, 
+                                               column_order=column_order,
+                                               private_columns=private_columns)
+    context['dataheadings'] = data['headings'],
+    context['datarows'] = data['rows']
+    context['datasinglerow'] = { }
+    if data['rows']:
+        context['datasinglerow'] = zip(data['headings'], data['rows'][0])
+    
+    return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
 def view_admin (request, short_name):
@@ -316,11 +321,13 @@ def view_overview (request, short_name):
     
 def view_fullscreen (request, short_name):
     user = request.user
+    urlquerystring = request.META["QUERY_STRING"]
+
     scraper = get_code_object_or_none(models.View, short_name=short_name)
     if not scraper:
         return code_error_response(models.View, short_name=short_name, request=request)
 
-    return render_to_response('codewiki/view_fullscreen.html', {'scraper': scraper}, context_instance=RequestContext(request))
+    return render_to_response('codewiki/view_fullscreen.html', {'scraper': scraper, 'urlquerystring':urlquerystring}, context_instance=RequestContext(request))
 
 def comments(request, wiki_type, short_name):
 
