@@ -67,6 +67,7 @@ select#automode {font-size:0.8em;
     -webkit-border-radius: 4px;-moz-border-radius: 4px; 
     background-color:#e3e3e3; background-repeat:no-repeat; background-position:2px 49%;
         padding:0.2em 0.1em 0.3em 12px;border:solid 1px #9f9f9f; color:#333; font-weight:bold; }
+select#automode { display:none }
 
 #meta_form {overflow: auto;}
 #meta_form p {margin:2.5em 0 2em 0;padding:0.5em 0 0.5em 0; border-top:solid 1px #808080;border-bottom:solid 1px #808080;}
