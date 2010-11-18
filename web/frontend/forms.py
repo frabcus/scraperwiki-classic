@@ -32,9 +32,12 @@ class UserProfileForm (forms.ModelForm):
         fields = ('bio', 'name', 'alert_frequency', 'alert_types')
 
 class scraperContactForm(ContactForm):
-  subject_dropdown = forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request a private scraper'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))
-  title = forms.CharField(widget=forms.TextInput(), label=u'Subject')
-  recipient_list = [settings.FEEDBACK_EMAIL]
+    subject_dropdown = forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request a private scraper'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))
+    title = forms.CharField(widget=forms.TextInput(), label=u'Subject')
+    recipient_list = [settings.FEEDBACK_EMAIL]
+
+    def from_email(self):
+        return self.cleaned_data['email']
 
 
 class SigninForm (AuthenticationForm):
