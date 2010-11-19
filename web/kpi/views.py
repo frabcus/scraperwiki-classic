@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.template import RequestContext
 
 from codewiki.models import Scraper, Code, ScraperRunEvent
 import datetime, calendar
@@ -59,11 +60,11 @@ def index(request):
     if user.is_authenticated() and user.is_superuser:
         years_list = []
 
-        for year in range(START_YEAR, datetime.date.today().year + 1):
+        for i, year in enumerate(range(START_YEAR, datetime.date.today().year + 1)):
             months_list = []
             for month in range(1, 13):
                 month_data = {}
-                month_data['month'] = calendar.month_name[month]
+                month_data['month'] = calendar.month_abbr[month]
                 next_month = one_month_in_the_future(month, year) 
                 month_data['total_scrapers'] = Scraper.objects.filter(first_published_at__lte=next_month).count()
                 month_data['this_months_scrapers'] = Scraper.objects.filter(first_published_at__year=year, first_published_at__month=month).count()
@@ -74,12 +75,12 @@ def index(request):
                 if next_month > datetime.date.today():
                     # There shouldn't be any data for the future!
                     break
-            years_list.append({'year': year, 'months': months_list})
+            years_list.append({'year': year, 'months': months_list, 'offset': i * 12})
 
         context['data'] = years_list 
         context['total_chart_url'], context['new_chart_url'] = generate_chart_urls(years_list)
         
-        return render_to_response('kpi/index.html', context)
+        return render_to_response('kpi/index.html', context, context_instance = RequestContext(request))
     else:
         raise PermissionDenied
     
