@@ -1,10 +1,77 @@
 <html>
-<head><title>Key Performance Indicators</title></head>
+<head>
+<title>Key Performance Indicators</title>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.js"></script>
+<script>
+$(function(){
+  var ticks = new Array();
+  var total_scrapers = new Array();
+  var total_users = new Array();
+  var months_scrapers = new Array();
+  var months_users = new Array();
+
+  {% for year in data %}
+    {% for month in year.months %}
+      ticks.push([{{forloop.counter0|add:year.offset}}, '{{month.month}} {{year.year}}']);
+      total_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.total_scrapers}}]);
+      total_users.push([{{forloop.counter0|add:year.offset}}, {{month.total_users}}]);
+      months_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_scrapers}}]);
+      months_users.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_users}}]);
+    {% endfor %}
+  {% endfor %}
+
+  $("#placeholder1").width(ticks.length * 50);
+  $("#placeholder2").width(ticks.length * 50);
+
+  $.plot($("#placeholder1"), [
+        {
+            data: total_scrapers, 
+            label: 'Total Scrapers',
+            lines: { show: true },
+            points: { show: true }
+        },
+        {
+            data: total_users,
+            label: 'Total Users',
+            lines: { show: true },
+            points: { show: true }
+        }],
+        {
+          xaxis: {
+              ticks: ticks
+          }
+        });
+
+  $.plot($("#placeholder2"), [
+        {
+            data: months_scrapers,
+            label: 'New Scrapers',
+            lines: { show: true },
+            points: { show: true }
+        },
+        {
+            data: months_users,
+            label: 'New Users',
+            lines: { show: true },
+            points: { show: true }
+        }],
+        {
+          xaxis: {
+              ticks: ticks
+          }
+        });
+
+  $('.legend').css('left', '30px');
+
+});
+</script>
+</head>
 <body>
 <h1>Key Performance Indicators</h1>
 
-<img src="{{total_chart_url}}"/>
-<img src="{{new_chart_url}}"/>
+<div id="placeholder1" style="width:200px;height:200px"></div>
+<div id="placeholder2" style="width:200px;height:200px"></div>
 
 {% for year in data %}
   <h2>{{year.year}}</h2>
