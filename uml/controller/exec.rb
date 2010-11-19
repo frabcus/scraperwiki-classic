@@ -21,6 +21,10 @@ class ConsoleStream
         end
     end
 
+    def <<(text)
+       write text
+    end
+
     def flush
       if @text != ''
           message = { 'message_type' => 'console', 'content' => @text }
