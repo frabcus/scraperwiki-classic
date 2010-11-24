@@ -1,7 +1,7 @@
 import urllib
 
 from django.template import RequestContext, loader, Context
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
@@ -35,14 +35,12 @@ def keys(request):
     return render_to_response('api/keys.html', {'keys' : users_keys,'form' : form}, context_instance=RequestContext(request))
 
 def explore_scraper_search_1_0(request):
-    
     user = request.user
     users_keys = api_key.objects.filter(user=user)
     
     return render_to_response('api/scraper_search_1.0.html', {'keys' : users_keys, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_search')}, context_instance=RequestContext(request))
 
 def explore_scraper_getinfo_1_0(request):
-
     user = request.user
     scrapers = Scraper.objects.example_scrapers(user, 5)
     users_keys = api_key.objects.filter(user=user)
@@ -62,9 +60,8 @@ def explore_datastore_search_1_0(request):
     scrapers = Scraper.objects.example_scrapers(user, 5)
 
     return render_to_response('api/datastore_search_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_datastore_search')}, context_instance=RequestContext(request))
-            
-def explore_scraper_getdata_1_0(request):
 
+def explore_scraper_getdata_1_0(request):
     short_name = request.GET.get('name', '')
 
     scrapers = []
@@ -91,13 +88,18 @@ def explore_scraper_getdatabylocation_1_0(request):
 def explore_geo_postcodetolatlng_1_0(request):
     return render_to_response('api/geo_postcodetolatlng_1.0.html', {'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_geo_postcode_to_latlng')}, context_instance=RequestContext(request))    
 
+
 def explorer_example(request, method):
     return render_to_response('api/explorer_example.html', {'method' : method}, context_instance=RequestContext(request))    
+
+
+
+
 
 def explorer_user_run(request):
     #make sure it's a post
     if not request.POST:
-        raise Http404
+        return HttpResponseNotFound('Must be a POST request')
     
     #build up the URL
     post_data = dict(request.POST)
@@ -105,14 +107,14 @@ def explorer_user_run(request):
         if not v[0]: 
             del post_data[k]
 
-    uri = "%s?" % post_data.pop('uri')[0]
+    uri = post_data.pop('uri')[0]
     post_data['explorer_user_run'] = ['1']
 
     querystring = urllib.urlencode([(k.encode('utf-8'),v[0].encode('utf-8')) for k,v in post_data.items()])
-    uri += querystring
-
+    url = "%s?%s" % (uri, querystring)
+    
     # Grab the API response
-    result = urllib.urlopen(uri).read()
+    result = urllib.urlopen(url).read()
     
     return render_to_response('api/explorer_user_run.html', 
                               {'result' : result}, 

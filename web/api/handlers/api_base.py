@@ -56,6 +56,7 @@ class APIBase(BaseHandler):
                 self.error_response.write(": Missing required argument '%s'" % required_argument)
                 break
 
+    
     def read(self, request):
 
         #reset previous value, piston will persist instances of this class across calls
@@ -69,7 +70,7 @@ class APIBase(BaseHandler):
 
             if cached_result != None:
                 self.error_response = cached_result['error_response']
-                self.result = cached_result['result']                
+                self.result = cached_result['result']
 
         # validate and set the result (unless we have already retrieved the answer from cache)
         if self.result == None:
@@ -86,9 +87,11 @@ class APIBase(BaseHandler):
 
         #we have an error, return the error response
         if self.error_response != False:
-            return None, self.error_response
+            return self.error_response
         else:
             return self.result
+
+
 
     def get_scraper(self, request):
         try:
