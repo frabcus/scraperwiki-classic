@@ -527,10 +527,11 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         UMLLock.acquire()
 
-        UMLList.append (UML(name, host, via, count))
-        for i in range(len(UMLList)) :
-            UMLList[i].setNextUML(UMLList[(i+1) % len(UMLList)])
-        UMLPtr  = UMLList[0]
+        if name not in [uml.name() for uml in UMLList]:
+            UMLList.append (UML(name, host, via, count))
+            for i in range(len(UMLList)) :
+                UMLList[i].setNextUML(UMLList[(i+1) % len(UMLList)])
+            UMLPtr  = UMLList[0]
 
         UMLLock.release()
 

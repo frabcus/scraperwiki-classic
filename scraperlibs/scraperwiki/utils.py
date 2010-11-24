@@ -136,7 +136,6 @@ def parse_html(text):
 def pdftoxml(pdfdata):
     """converts pdf file to xml file"""
     pdffout = tempfile.NamedTemporaryFile(suffix='.pdf')
-    print pdffout.name
     pdffout.write(pdfdata)
     pdffout.flush()
 
