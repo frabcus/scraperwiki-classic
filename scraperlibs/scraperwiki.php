@@ -69,7 +69,7 @@ class scraperwiki
       curl_setopt ($curl, CURLOPT_RETURNTRANSFER, true) ;
       $res  = curl_exec ($curl) ;
       curl_close ($curl) ;
-      return   $res  ;
+      return   utf8_encode($res)  ;
    }
 
    static function cache ($enable = true)
