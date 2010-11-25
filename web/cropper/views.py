@@ -66,17 +66,20 @@ def cropdoc(request):
     return HttpResponseRedirect("%s?url=%s" % (reverse('croppage', args=['u', 1]), urllib.quote(url))) 
     
 def GetSrcDoc(request, srcdoc):
+    url = request.GET.get("url")
     if srcdoc[:2] == 't.':
         pdfurl = urlparse.urljoin("http://tinyurl.com/", srcdoc[2:])
         pdffile = os.path.join(settings.CROPPER_SOURCE_DIR, "%s.pdf" % srcdoc)
         imgstem = os.path.join(settings.CROPPER_IMG_DIR, srcdoc)
         qtail = ""
-    elif srcdoc == "u":
-        pdfurl = request.GET.get("url")
+    elif srcdoc == "u" and url:
+        pdfurl = url
         lsrcdoc = pdfurl.replace('/', '|')
         pdffile = os.path.join(settings.CROPPER_SOURCE_DIR, lsrcdoc)
         imgstem = os.path.join(settings.CROPPER_IMG_DIR, lsrcdoc)
         qtail = "?%s" % urllib.urlencode({"url":pdfurl})
+    else:
+        pdfurl, pdffile, imgstem, qtail = None, None, None, None
     return pdfurl, pdffile, imgstem, qtail
         
         
@@ -85,6 +88,9 @@ def croppage(request, srcdoc, page, cropping):
     croppings, cropping = ParseSortCropping(cropping)
     
     pdfurl, pdffile, imgstem, qtail = GetSrcDoc(request, srcdoc)
+    if not pdfurl:
+        return HttpResponseRedirect(reverse('croppage', args=['t.2wk7srh', 1])) 
+        
     if not os.path.isfile(pdffile):  # download file if it doesn't exist
         tpdffile = tempfile.NamedTemporaryFile(suffix='.pdf')
         try:
