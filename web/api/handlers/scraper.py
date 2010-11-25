@@ -88,7 +88,7 @@ class GetInfo(APIBase):
 
 
 class GetRunInfo(APIBase):
-    required_arguments = ['name', 'runid']
+    required_arguments = ['name']
     
     def value(self, request):
         scraper = self.get_scraper(request)
