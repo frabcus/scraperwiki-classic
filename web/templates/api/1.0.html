@@ -142,38 +142,26 @@
         </p>
     {% endcomment %}
     <h4>API functions</h4>
+
     <h5>Scrapers</h5>
     <ul>
-        <li>
-            <a href="{% url api:scraper_search %}">scraperwiki.scraper.search</a>
-        </li>
-        <li>
-            <a href="{% url api:scraper_getinfo %}">scraperwiki.scraper.getInfo</a>
-        </li>
+        <li><a href="{% url api:scraper_search %}">scraperwiki.scraper.search</a></li>
+        <li><a href="{% url api:scraper_getinfo %}">scraperwiki.scraper.getInfo</a></li>
+        <li><a href="{% url api:scraper_getruninfo %}">scraperwiki.scraper.getRunInfo</a></li>
     </ul>
+
     <h5>Datastore</h5>
     <ul>
-        <li>
-            <a href="{% url api:datastore_getkeys %}">scraperwiki.datastore.getKeys</a>
-        </li>
-        <li>
-            <a href="{% url api:scraper_getdata %}">scraperwiki.datastore.getData</a>
-        </li>
-        <li>
-            <a href="{% url api:scraper_getdatabydate %}">scraperwiki.datastore.getDataByDate</a>
-        </li>
-        <li>
-            <a href="{% url api:scraper_getdatabylocation %}">scraperwiki.datastore.getDataByLocation</a>
-        </li>
-        <li>
-            <a href="{% url api:datastore_search %}">scraperwiki.datastore.search</a>
-        </li>
+        <li><a href="{% url api:datastore_getkeys %}">scraperwiki.datastore.getKeys</a></li>
+        <li><a href="{% url api:scraper_getdata %}">scraperwiki.datastore.getData</a></li>
+        <li><a href="{% url api:scraper_getdatabydate %}">scraperwiki.datastore.getDataByDate</a></li>
+        <li><a href="{% url api:scraper_getdatabylocation %}">scraperwiki.datastore.getDataByLocation</a></li>
+        <li><a href="{% url api:datastore_search %}">scraperwiki.datastore.search</a></li>
     </ul>
+
     <h5>Geo</h5>    
     <ul>
-        <li>
-            <a href="{% url api:geo_postcodetolatlng %}">scraperwiki.geo.postcodeToLocation</a>
-        </li>
+        <li><a href="{% url api:geo_postcodetolatlng %}">scraperwiki.geo.postcodeToLocation</a></li>
     </ul>
 </div>
 

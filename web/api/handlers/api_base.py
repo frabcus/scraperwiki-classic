@@ -1,11 +1,12 @@
 from django.core.cache import cache
-from web.codewiki.models import Scraper
+from web.codewiki.models import Scraper, Code
 from piston.handler import BaseHandler
 from piston.utils import rc
 from piston.emitters import Emitter
 from api.models import api_key
 from api.emitters import CSVEmitter, PHPEmitter, GVizEmitter
 from settings import MAX_API_ITEMS, DEFAULT_API_ITEMS
+import datetime
 import sys
 
 Emitter.register('csv', CSVEmitter, 'text/csv; charset=utf-8')
@@ -75,10 +76,11 @@ class APIBase(BaseHandler):
         return result
 
 
-    # note; we cannot find views!!!
-    def get_scraper(self, request):
+    def get_scraper(self, request, wiki_type='scraper'):
         try:
-            return Scraper.objects.get(short_name=request.GET.get('name'), published=True)
+            if wiki_type == 'scraper':  # (still working around the damage caused by the scraper/view object fork!)
+                return Scraper.objects.get(short_name=request.GET.get('name'), published=True)
+            return Code.objects.get(short_name=request.GET.get('name'), published=True)
         except:
             raise InvalidScraperException()
 
@@ -99,3 +101,12 @@ class APIBase(BaseHandler):
         if limit == 0 or limit > MAX_API_ITEMS:
             limit = MAX_API_ITEMS
         return limit
+
+    def convert_date(self, date_str):
+        if not date_str:
+            return None
+        try:
+            return datetime.datetime.strptime(date_str, '%Y-%m-%d')
+        except ValueError:
+            return None
+    

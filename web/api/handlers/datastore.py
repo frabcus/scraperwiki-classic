@@ -58,12 +58,6 @@ class DataByLocation(APIBase):
 class DataByDate(APIBase):
     required_arguments = ['name', 'start_date', 'end_date']
 
-    def convert_date(self, date_str):
-        try:
-            return datetime.datetime.strptime(date_str, '%Y-%m-%d')
-        except ValueError:
-            return None
-    
     def value(self, request):
         limit, offset = self.get_limit_and_offset(request)
         start_date = self.convert_date(request.GET.get('start_date', None))
