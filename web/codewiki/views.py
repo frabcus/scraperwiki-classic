@@ -550,9 +550,8 @@ def stream_csv(scraper, step=5000, max_rows=1000000):
         dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=step, offset=offset)
         
         yield generate_csv(dictlist, offset)[0]
-        if len(dictlist) != limit:
-            #we'ver reached the end of the data
-            break
+        if len(dictlist) != step:
+            break   #we've reached the end of the data
 
 
 # see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
@@ -570,6 +569,7 @@ def export_csv(request, short_name):
     response = HttpResponse(stream_csv(scraper), mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (short_name)
     return response
+
 
 def export_gdocs_spreadsheet(request, short_name):
     #TODO: this funciton needs to change to cache things on disc and read the size from tehre rather than in memory
