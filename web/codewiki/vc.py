@@ -191,21 +191,24 @@ class MercurialInterface:
             commitlog = self.getcommitlog(scraper)
             if commitlog:
                 irev = len(commitlog)
-                if rev != -1:
+                if rev < 0:
+                    irev = len(commitlog) + (rev+1)
+                else:
                     for lirev in range(len(commitlog)):
                         if commitlog[lirev]["rev"] == rev:
                             irev = lirev
                             break
+
                 if 0 <= irev < len(commitlog):
                     status["currcommit"] = commitlog[irev]
                 if 0 <= irev - 1 < len(commitlog):
                     status["prevcommit"] = commitlog[irev - 1]
                 if 0 <= irev + 1 < len(commitlog):
                     status["nextcommit"] = commitlog[irev + 1]
-                    
+        
         # fetch code from reversion or the file
         if "currcommit" in status:
-            reversion = self.getreversion(rev)
+            reversion = self.getreversion(status["currcommit"]["rev"])
             status["code"] = reversion["text"].get(scraperfile)
         
         # get information about the saved file (which we will if there's no current revision selected -- eg when rev in [-1, None]
@@ -218,11 +221,10 @@ class MercurialInterface:
         if "prevcommit" in status:
             reversion = self.getreversion(status["prevcommit"]["rev"])
             prevcode = reversion["text"].get(scraperfile)
-            if prevcode:
+            if prevcode and status["code"]:
                 status["matchlines"] = list(DiffLineSequenceChanges(prevcode, status["code"]))
-    
+        
         return status
-
 
 
 

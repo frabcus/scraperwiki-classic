@@ -6,8 +6,8 @@ from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from settings import MAX_API_ITEMS, API_DOMAIN
-from codewiki.models import Scraper
 
+from codewiki.models import Scraper, Code
 from external.datastore import Datastore
 
 from django.contrib.auth.decorators import login_required
@@ -34,6 +34,7 @@ def keys(request):
 
     return render_to_response('api/keys.html', {'keys' : users_keys,'form' : form}, context_instance=RequestContext(request))
 
+
 def explore_scraper_search_1_0(request):
     user = request.user
     users_keys = api_key.objects.filter(user=user)
@@ -42,10 +43,17 @@ def explore_scraper_search_1_0(request):
 
 def explore_scraper_getinfo_1_0(request):
     user = request.user
-    scrapers = Scraper.objects.example_scrapers(user, 5)
+    scrapers = Code.objects.example_scrapers(user, 5)
     users_keys = api_key.objects.filter(user=user)
         
     return render_to_response('api/scraper_getinfo_1.0.html', {'keys' : users_keys, 'scrapers': scrapers, 'has_scrapers': True, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getinfo')}, context_instance=RequestContext(request))
+
+def explore_scraper_getruninfo_1_0(request):
+    user = request.user
+    scrapers = Code.objects.example_scrapers(user, 5)
+    users_keys = api_key.objects.filter(user=user)
+        
+    return render_to_response('api/scraper_getruninfo_1.0.html', {'keys' : users_keys, 'scrapers': scrapers, 'has_scrapers': True, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getruninfo')}, context_instance=RequestContext(request))
 
 def explore_scraper_getkeys_1_0(request):
     scrapers = []
@@ -71,14 +79,12 @@ def explore_scraper_getdata_1_0(request):
     return render_to_response('api/scraper_getdata_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdata'), 'short_name': short_name}, context_instance=RequestContext(request))
 
 def explore_scraper_getdatabydate_1_0(request):
-
     scrapers = []
     user = request.user
     scrapers = Scraper.objects.example_scrapers(user, 5)
     return render_to_response('api/scraper_getdatabydate_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdatabydate')}, context_instance=RequestContext(request))    
 
 def explore_scraper_getdatabylocation_1_0(request):
-
     scrapers = []
     user = request.user
     scrapers = Scraper.objects.example_scrapers(user, 5)
@@ -87,10 +93,6 @@ def explore_scraper_getdatabylocation_1_0(request):
 
 def explore_geo_postcodetolatlng_1_0(request):
     return render_to_response('api/geo_postcodetolatlng_1.0.html', {'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_geo_postcode_to_latlng')}, context_instance=RequestContext(request))    
-
-
-def explorer_example(request, method):
-    return render_to_response('api/explorer_example.html', {'method' : method}, context_instance=RequestContext(request))    
 
 
 
@@ -119,4 +121,9 @@ def explorer_user_run(request):
     return render_to_response('api/explorer_user_run.html', 
                               {'result' : result}, 
                               context_instance=RequestContext(request))
+
+# fills in that black iframe initially (prob was supposed to have further documentation)
+def explorer_example(request, method):
+    return render_to_response('api/explorer_example.html', {'method' : method}, context_instance=RequestContext(request))    
+
 

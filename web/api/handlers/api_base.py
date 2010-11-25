@@ -1,11 +1,12 @@
 from django.core.cache import cache
-from web.codewiki.models import Scraper
+from web.codewiki.models import Scraper, Code
 from piston.handler import BaseHandler
 from piston.utils import rc
 from piston.emitters import Emitter
 from api.models import api_key
 from api.emitters import CSVEmitter, PHPEmitter, GVizEmitter
 from settings import MAX_API_ITEMS, DEFAULT_API_ITEMS
+import datetime
 import sys
 
 Emitter.register('csv', CSVEmitter, 'text/csv; charset=utf-8')
@@ -18,7 +19,6 @@ class APIBase(BaseHandler):
     allowed_methods = ('GET',)
     result = None
     error_response = False
-    cache_duration = 0
     required_arguments = []
 
     def has_errors(self):
@@ -42,60 +42,45 @@ class APIBase(BaseHandler):
         #return result
         return True
 
-    def validate(self, request):
-
+    
+    
+    def validate_argsapikey(self, request):
         #valid API key?
         if not self.is_valid_api_key(request):
-            self.error_response = rc.FORBIDDEN
-            self.error_response.write(": Invalid or inactive API key")
+            error_response = rc.FORBIDDEN   # these rc.ERROR things return a "fresh" instance of the object
+            error_response.write(": Invalid or inactive API key")
+            return error_response
 
         #all required arguments passed?
         for required_argument in self.required_arguments:
             if required_argument not in request.GET:
-                self.error_response = rc.BAD_REQUEST
-                self.error_response.write(": Missing required argument '%s'" % required_argument)
-                break
-
+                error_response = rc.BAD_REQUEST
+                error_response.write(": Missing required argument '%s'" % required_argument)
+                return error_response
+        
+        return None
+    
     
     def read(self, request):
-
-        #reset previous value, piston will persist instances of this class across calls
-        self.result = None
-        self.error_response = False
-
-        #get the result out of cache if it is there and this call is set to be cached
-        if self.cache_duration > 0:
-            key = request.path_info + request.META['QUERY_STRING']
-            cached_result = cache.get(key)
-
-            if cached_result != None:
-                self.error_response = cached_result['error_response']
-                self.result = cached_result['result']
-
-        # validate and set the result (unless we have already retrieved the answer from cache)
-        if self.result == None:
-            try:
-                self.validate(request)
-            except InvalidScraperException:
-                self.error_response = rc.NOT_FOUND
-                self.error_response.write(": Scraper not found")
-
-        #if this call is set to cache, save the result
-        if self.cache_duration > 0:
-            result_to_cache = {'error_response': self.error_response, 'result': self.result}
-            cache.set(key, result_to_cache, 30)
-
-        #we have an error, return the error response
-        if self.error_response != False:
-            return self.error_response
-        else:
-            return self.result
-
-
-
-    def get_scraper(self, request):
+        error_response = self.validate_argsapikey(request)
+        if error_response:
+            return error_response
+        
         try:
-            return Scraper.objects.get(short_name=request.GET.get('name'), published=True)
+            result = self.value(request)
+        except InvalidScraperException:
+            error_response = rc.NOT_FOUND
+            error_response.write(": Scraper not found")
+            return error_response
+
+        return result
+
+
+    def get_scraper(self, request, wiki_type='scraper'):
+        try:
+            if wiki_type == 'scraper':  # (still working around the damage caused by the scraper/view object fork!)
+                return Scraper.objects.get(short_name=request.GET.get('name'), published=True)
+            return Code.objects.get(short_name=request.GET.get('name'), published=True)
         except:
             raise InvalidScraperException()
 
@@ -116,3 +101,12 @@ class APIBase(BaseHandler):
         if limit == 0 or limit > MAX_API_ITEMS:
             limit = MAX_API_ITEMS
         return limit
+
+    def convert_date(self, date_str):
+        if not date_str:
+            return None
+        try:
+            return datetime.datetime.strptime(date_str, '%Y-%m-%d')
+        except ValueError:
+            return None
+    

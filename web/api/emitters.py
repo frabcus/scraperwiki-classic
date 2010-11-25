@@ -78,30 +78,26 @@ class PHPEmitter(Emitter):
     """
     
     def format_values(self, value):
-        for item in value.items():
-            if isinstance(item[1], datetime.datetime):
-                value[item[0]] = time.mktime(item[1].timetuple())
-        return value
+        if isinstance(value, dict):
+            keys = value.keys()
+        elif isinstance(value, list):
+            keys = range(len(value))
+        else:
+            return
+        
+        for k in keys:
+            v = value[k]
+            tv = type(v)
+            if tv == datetime.datetime:
+                value[k] = time.mktime(v.timetuple())
+            elif tv == list or tv == dict:
+                self.format_values(v)  # recursive
+                
         
     def render(self, request):
-
         dictlist = self.construct()
-        return_content = []
-        
-        # identify and deal with the case of getKeys which is a list of strings
-        if dictlist and type(dictlist[0]) != dict:
-            return_content = dictlist
-        
-        else:
-            for rowdict in dictlist:
-                for key in rowdict.keys():
-                    # convert datetime to Epoch time
-                    if isinstance(rowdict[key], datetime.datetime):
-                        rowdict[key] = time.mktime(rowdict[key].timetuple())
-                return_content.append(rowdict)
-        result = phpserialize.dumps(return_content)
-        
-        return result
+        self.format_values(dictlist)
+        return phpserialize.dumps(dictlist)
 
 
 class GVizEmitter(Emitter):

@@ -1,9 +1,9 @@
 {% extends "api/function_base.html" %}
 
-{% block title %}scraperwiki.scraper.getInfo | API{% endblock %}
+{% block title %}scraperwiki.scraper.getRunInfo | API{% endblock %}
 
-{% block heading %}scraperwiki.scraper.getInfo{% endblock %}
-{% block subheading %}Returns information about a scraper{% endblock %}
+{% block heading %}scraperwiki.scraper.getRunInfo{% endblock %}
+{% block subheading %}Returns information about a single run of the scraper{% endblock %}
 {% block arguments %}
     {% comment %}
         <dt><code>key</code> (required)</dt>
@@ -14,12 +14,10 @@
     <dd>The format you would like the response in. <input type="text" name="format" id="format" size="4"/></dd>
     <dt><code>name</code> (required)</dt>
     <dd>The short name for a scraper. <input type="text" name="name" id="name"/></dd>
-    <dt><code>version</code> (optional)</dt>
-    <dd>The version number of the scraper. <input type="text" name="version" id="version"/></dd>
-    <dt><code>history_start_date</code> (optional)</dt>
-    <dd>The start date for history data. <small>(e.g. 2009-01-10)</small> <input type="text" name="history_start_date" id="history_start_date" size="9"/></dd>    
+    <dt><code>runid</code> (required)</dt>
+    <dd>The run number of the scraper. <input type="text" name="runid" id="runid"/></dd>
     <dt><code>callback</code> (optional)</dt>
     <dd><a href="http://en.wikipedia.org/wiki/JSONP#JSONP">JSONP</a> callback function. Only useful when requesting JSON data. <input type="text" name="callback" id="callback"/></dd>
 {% endblock %}
 
-{% block example_url %}{% url api:explorer_example method='scraper.getinfo_1.0' %}{% endblock %}
+{% block example_url %}{% url api:explorer_example method='scraper.getruninfo_1.0' %}{% endblock %}

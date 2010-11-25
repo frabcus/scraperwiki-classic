@@ -192,6 +192,7 @@ class Code(models.Model):
         app_label = 'codewiki'
 
 
+# this is defunct.  should go
 class UserCodeEditing(models.Model):
     """
     Updated by Twisted to state which scrapers/views are being editing at this moment
