@@ -44,7 +44,6 @@ class GetInfo(APIBase):
         info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
         if scraper.wiki_type == 'scraper':
             info['license']     = scraper.scraper.license
-            info['last_run']    = scraper.scraper.last_run
             info['records']     = scraper.scraper.record_count
         
         try: 
