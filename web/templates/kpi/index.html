@@ -7,16 +7,20 @@
 $(function(){
   var ticks = new Array();
   var total_scrapers = new Array();
+  var total_views = new Array();
   var total_users = new Array();
   var months_scrapers = new Array();
+  var months_views = new Array();
   var months_users = new Array();
 
   {% for year in data %}
     {% for month in year.months %}
       ticks.push([{{forloop.counter0|add:year.offset}}, '{{month.month}} {{year.year}}']);
       total_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.total_scrapers}}]);
+      total_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.total_views}}]);
       total_users.push([{{forloop.counter0|add:year.offset}}, {{month.total_users}}]);
       months_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_scrapers}}]);
+      months_views.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_views}}]);
       months_users.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_users}}]);
     {% endfor %}
   {% endfor %}
@@ -28,6 +32,12 @@ $(function(){
         {
             data: total_scrapers, 
             label: 'Total Scrapers',
+            lines: { show: true },
+            points: { show: true }
+        },
+        {
+            data: total_views, 
+            label: 'Total Views',
             lines: { show: true },
             points: { show: true }
         },
@@ -47,6 +57,12 @@ $(function(){
         {
             data: months_scrapers,
             label: 'New Scrapers',
+            lines: { show: true },
+            points: { show: true }
+        },
+        {
+            data: months_views,
+            label: 'New Views',
             lines: { show: true },
             points: { show: true }
         },
@@ -83,7 +99,7 @@ $(function(){
      {% endfor %}
     </tr>
     <tr>
-       <th>This Month's Scrapers</th>
+       <th>New Scrapers</th>
      {% for month in year.months %}
        <th>{{month.this_months_scrapers}}</th>
      {% endfor %}
@@ -95,7 +111,19 @@ $(function(){
      {% endfor %}
     </tr>
     <tr>
-       <th>This Month's Users</th>
+       <th>New Views</th>
+     {% for month in year.months %}
+       <th>{{month.this_months_views}}</th>
+     {% endfor %}
+    </tr>
+    <tr>
+       <th>Total Views</th>
+     {% for month in year.months %}
+       <th>{{month.total_views}}</th>
+     {% endfor %}
+    </tr>
+    <tr>
+       <th>New Users</th>
      {% for month in year.months %}
        <th>{{month.this_months_users}}</th>
      {% endfor %}
