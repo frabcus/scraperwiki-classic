@@ -17,7 +17,7 @@ $(function(){
     {% for month in year.months %}
       ticks.push([{{forloop.counter0|add:year.offset}}, '{{month.month}} {{year.year}}']);
       total_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.total_scrapers}}]);
-      total_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.total_views}}]);
+      total_views.push([{{forloop.counter0|add:year.offset}}, {{month.total_views}}]);
       total_users.push([{{forloop.counter0|add:year.offset}}, {{month.total_users}}]);
       months_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_scrapers}}]);
       months_views.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_views}}]);
