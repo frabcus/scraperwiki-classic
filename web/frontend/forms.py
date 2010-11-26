@@ -6,6 +6,7 @@ from registration.forms import RegistrationForm
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
+from captcha.fields import CaptchaField
 
 
 #from django.forms.extras.widgets import Textarea
@@ -32,6 +33,11 @@ class UserProfileForm (forms.ModelForm):
         fields = ('bio', 'name', 'alert_frequency', 'alert_types')
 
 class scraperContactForm(ContactForm):
+    def __init__(self, data=None, files=None, request=None, *args, **kwargs):
+        super(scraperContactForm, self).__init__(data=data, files=files, request=request, *args, **kwargs)
+        if not request.user.is_authenticated():
+            self.fields['captcha'] = CaptchaField()
+        
     subject_dropdown = forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request a private scraper'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))
     title = forms.CharField(widget=forms.TextInput(), label=u'Subject')
     recipient_list = [settings.FEEDBACK_EMAIL]

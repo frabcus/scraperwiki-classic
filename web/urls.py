@@ -35,6 +35,7 @@ urlpatterns = patterns('',
     url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name="logout"), 
     url(r'^accounts/', include('registration.urls')),
     url(r'^comments/', include('django.contrib.comments.urls')),
+    url(r'^captcha/', include('captcha.urls')),
     
     # allows direct viewing of the django tables
     url(r'^admin/(.*)', admin.site.root, name="admin"),
