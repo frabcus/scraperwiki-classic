@@ -42,6 +42,7 @@ class GetInfo(APIBase):
         info['title']       = scraper.title
         info['description'] = scraper.description
         info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
+        info['wiki_type']   = scraper.wiki_type
         if scraper.wiki_type == 'scraper':
             info['license']     = scraper.scraper.license
             info['records']     = scraper.scraper.record_count

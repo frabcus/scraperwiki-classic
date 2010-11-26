@@ -138,6 +138,8 @@ class ScraperRunner(threading.Thread):
                 event.records_produced += 1
             
             elif message_type == "exception":   # only one of these ever
+                event.exception_message = data.get('exceptiondescription')
+                
                 for stackentry in data.get("stackdump"):
                     sMessage = stackentry.get('file')
                     if sMessage:
@@ -151,6 +153,7 @@ class ScraperRunner(threading.Thread):
                 
                 if data.get("blockedurl"):
                     exceptionmessage.append("Blocked URL: %s" % data.get("blockedurl"))
+                exceptionmessage.append('')
                 exceptionmessage.append(data.get('exceptiondescription'))
             
             elif message_type == "console":
