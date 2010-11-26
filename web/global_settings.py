@@ -100,13 +100,14 @@ INSTALLED_APPS = [
     'registration',
     'south',
     'profiles',
-  	'django.contrib.humanize',
-  	'paypal.standard.ipn',
-  	'django_notify',
-  	'tagging',
-  	'mailer',
-  	'contact_form',
-  	'piston',      # needs 'django-piston' and 'phpserialize'
+    'django.contrib.humanize',
+    'paypal.standard.ipn',
+    'django_notify',
+    'tagging',
+    'mailer',
+    'contact_form',
+    'piston',      # needs 'django-piston' and 'phpserialize'
+    'captcha',
     
     # the following are scraperwiki apps
     'frontend',
