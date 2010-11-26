@@ -49,7 +49,7 @@ def virtualenv(command):
 
 
 def buildout():
-    virtualenv('buildout')
+    virtualenv('buildout -N')
 
 def write_changeset():
     try:
@@ -87,6 +87,7 @@ def deploy():
         hg update -C %s""" % (env.path,
                               env.branch))
     
+    buildout()
     migrate()
     write_changeset()
     install_cron()
