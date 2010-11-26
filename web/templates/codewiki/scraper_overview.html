@@ -61,9 +61,9 @@
                 {% if lastscraperrunevent %}
                   {% ifequal lastscraperrunevent.pid -1 %}
                      last ran {{lastscraperrunevent.run_started|timesince}} ago 
-                     for <a href="{% url run_event lastscraperrunevent.id%}">{{lastscraperrunevent.getduration}} seconds</a>.
+                     for <a href="{% url run_event lastscraperrunevent.run_id%}">{{lastscraperrunevent.getduration}} seconds</a>.
                   {% else %}
-                     <a href="{% url run_event lastscraperrunevent.id%}">is currently running</a>.
+                     <a href="{% url run_event lastscraperrunevent.run_id%}">is currently running</a>.
                   {% endifequal %}
                 {% else %}
                    has not been run yet.

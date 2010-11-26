@@ -80,7 +80,7 @@
   {% ifequal item.type 'runevent' %}
   <tr>
     <td>
-      <a href="{% url run_event item.runevent.id%}" class="staff">{{item.runevent.run_started|date:"H:i, j F Y" }}</a>
+      <a href="{% url run_event item.runevent.run_id %}" class="staff">{{item.runevent.run_started|date:"H:i, j F Y" }}</a>
       {% ifequal item.runevent.pid -1 %}
       {% else %}
          <b>Still running</b>

@@ -184,7 +184,7 @@ class ScraperRunEvent(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('run_event', [self.id])
+        return ('run_event', [self.run_id])
 
     class Meta:
         app_label = 'codewiki'
