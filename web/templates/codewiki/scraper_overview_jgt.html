@@ -1,0 +1,194 @@
+{% extends "codewiki/scraper_base.html" %}
+{% load humanize %}
+{% load sparkline %}
+{% load schedule %}
+{% block tab %}
+{% load markup %}
+{% load screen_shot %}
+
+<fieldset>
+    <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} }" />
+</fieldset>
+<div style="float:right; border:thin red solid; background:#fea; width:20%; margin-top:-50px">This is Julian Todd's private page layout</div>
+
+<div class="content half left">
+  <h2>About this scraper {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}</h2>
+  <div class="text_wiki">
+    <div id="divAboutScraper">{{ scraper.description|textile }}</div>
+  </div>
+
+  <div id="divScraperTags">
+    <h3>Tags {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aAddTags" class="edit">[add a tag]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to add a tag]</a>{% endif %}</h3>
+    <ul class="tags">
+        {% for tag in scraper_tags %}
+            <li><a href="{% url single_tag tag %}">{{ tag }}</a></li>
+        {% endfor %}
+    </ul>
+    {% if not scraper_tags %}
+        <p>
+            Adding tags make sense of all the datasets on ScraperWiki
+        </p>
+    {% endif %}
+    <div id="divEditTags"></div>
+  </div>
+
+  <div>
+    <h3>Views using this data from this scraper</h3>
+    <ul class="views">
+        {% if related_views %}
+            {% for related_view in related_views %}
+                <li>
+                    <a href="{% url code_overview related_view.wiki_type related_view.short_name %}" class="screenshot">{% screen_shot related_view %}</a>
+                    <a href="{% url code_overview related_view.wiki_type related_view.short_name %}">{{related_view.title}}</a>
+                </li>
+            {% endfor %}
+        {% endif %}        
+        <li class="new"><a href="{% url choose_template 'view' %}" class="editor_view">Create a new view</a></li>
+    </ul>
+    <br class="clear"/>
+  </div>
+
+  <div class="content col left">
+    <h3>Contributors</h3>
+    {% include 'codewiki/includes/contributors.html' %}
+  </div>
+
+</div>
+
+<div class="content half right">
+  <div>
+    <h2>Running this scraper</h2>
+    <p>
+        {% if lastscraperrunevent %}
+            {% ifequal lastscraperrunevent.pid -1 %}
+                Last run {{lastscraperrunevent.run_started|timesince}} ago 
+                for <a href="{% url run_event lastscraperrunevent.run_id%}">{{lastscraperrunevent.getduration}} seconds</a>.
+            {% else %}
+                <a href="{% url run_event lastscraperrunevent.run_id%}">is currently running</a>.
+            {% endifequal %}
+        {% else %}
+            Has not run yet.
+        {% endif %}
+        {% ifnotequal scraper.next_run.year 9999 %}
+            Next run after {{scraper.next_run|timeuntil}}.
+        {% endifnotequal %}
+     </p>
+     <p>
+        This dataset has a total of {{ scraper.record_count }} records.
+        {% if scraper.license_link %}
+            The license is {{scraper.license|lower|default:"&nbsp;"}} and a copy can be found on <a href="{{scraper.license_link}}">this page</a>.
+            {% if user.is_authenticated %}
+                <a href="{% url scraper_admin scraper.short_name %}">[edit license]</a>
+            {% else %}
+                <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">[sign in to edit license]</a>
+            {% endif %}
+        {% else %}
+            The license is unknown, {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}">please add a link to the license if you are able to locate it</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">please sign in and add a link to the license if you are able to locate it</a>{% endif %}.
+        {% endif %}
+    </p>
+  </div>
+
+  <div class="data_viewer">
+  <h3>Sample data</h3>
+  {% if datarows %}
+    <table class="data">
+    <tbody>
+        {% for heading, value in datasinglerow %}
+            <tr>
+                <th>{{ heading }}</th>
+                <td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+  {% else %}
+    <table class="data">
+            <tbody>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td>&nbsp;</td></tr>
+            </tbody>
+    </table>
+    <div class="info_unpublished">
+            This scraper is being worked on <br/>and there is no data to display yet
+    </div>
+  {% endif %}
+  </div>
+
+  <div>
+    <h3>Schedule {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
+    <div style="float:right">{% sparkline scraper.scraper_sparkline_csv 'medium' %}</div>
+    <p>
+      This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
+      {% ifnotequal scraper.next_run.year 9999 %}
+         (next in {{scraper.next_run|timeuntil}}).
+      {% endifnotequal %}
+    </p>
+
+    {% if user_owns_it and not scraper.published %}
+      <div id="publishScraper">
+        <h3>Publish</h3>
+        <p>By default all scrapers are now published. This scraper was created before that policy. This button allows you to publish this scraper.</p>
+        <form>
+          <input type="submit" class="small button" id="publishScraperButton" value="Publish"/>
+        </form>
+        <br/>
+      </div>
+    {% endif %}
+    
+    <h3>Delete &amp; reset</h3>
+    {% if user_owns_it %}    
+        <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
+            <p>Remove all data for this scraper: 
+            <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
+            <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
+            <em>There is no undo.</em>
+            </p>
+        </form>
+        <form action="{% url scraper_delete_scraper 'scraper' scraper.short_name %}" method="post">
+            <p>Deletes this scraper entirely: <input type="hidden" name="delete_scraper" value="1" />
+            <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
+            </p>
+        </form>
+        <form action="{% url scraper_schedule_scraper scraper.short_name %}" method="post">
+            <p>Run this scraper at next opportunity:
+            <input type="hidden" name="schedule_scraper" value="1" />
+            <input type="submit" id="btnScheduleScraper" class="danger" value="Schedule this scraper?" />
+            </p>
+        </form>
+    {% else %}
+        <p class="infobox">Only the creator of a scraper can delete or reset it.</p>
+    {% endif %}
+
+    {% if user.is_staff %}
+    <form action="{% url scraper_run_scraper scraper.short_name %}" method="post" class="staff">
+        <p>Runs this scraper as though from the schedule. (Staff only)
+        <input type="hidden" name="run_scraper" value="1" />
+        <input type="submit" id="btnRunScraper" class="danger" value="Run this scraper?" />
+        </p>
+    </form>
+    {% endif %}
+  </div>
+
+</div>
+
+
+<br class="clear"/>
+{% endblock %}
+
+{% block run_script %}
+    scraper_short_name = '{{scraper.short_name}}';
+    {% if user.is_authenticated %}
+        setupScraperEditInPlace('scraper', '{{scraper.short_name}}');
+        setupButtonConfirmation("btnClearDatastore", "Are you sure you want to CLEAR ALL YOUR DATA?");
+        setupButtonConfirmation("btnDeleteScraper", "Are you sure you want to DELETE THIS SCRAPER?");
+    {% endif %}
+{% endblock %}
