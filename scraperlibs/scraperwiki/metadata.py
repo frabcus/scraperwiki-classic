@@ -60,10 +60,10 @@ class MetadataClient(object):
             self.metadata_local[metadata_name] = value
             return
 
-        if self.get(metadata_name):
-            method = 'PUT'
-        else:
+        if self.get(metadata_name) == None:
             method = 'POST'
+        else:
+            method = 'PUT'
 
         parameters = {}
         parameters['run_id'] = self.run_id
