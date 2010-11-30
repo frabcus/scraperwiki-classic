@@ -172,7 +172,7 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
     if wiki_type == None:
         all_code_objects = Code.objects.filter(published=True).order_by('-created_at')
     else:
-        all_code_objects = Code.objects.filter(wiki_type=wiki_type).order_by('-created_at') 
+        all_code_objects = Code.objects.filter(wiki_type=wiki_type, published=True).order_by('-created_at') 
 
     #extra filters (broken scraper lists etc)
     if special_filter == 'sick':
