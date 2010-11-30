@@ -80,7 +80,7 @@ def scraper_overview(request, short_name):
     scraper_tags = Tag.objects.get_for_object(scraper)
     
 
-    lscraperrunevents = scraper.scraperrunevent_set.all().order_by("-id")[:1] # can't use date as it's unindexed
+    lscraperrunevents = scraper.scraperrunevent_set.all().order_by("-run_started")[:1] 
     lastscraperrunevent = lscraperrunevents and lscraperrunevents[0] or None
 
     context = {
