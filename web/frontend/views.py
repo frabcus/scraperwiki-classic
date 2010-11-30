@@ -212,11 +212,7 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
 
     form = SearchForm()
 
-    # put number of people here so we can see it
-    #npeople = UserCodeEditing in models.UserCodeEditing.objects.all().count()
-    # there might be a slick way of counting this, but I don't know it.
-    npeople = len(set([usercodeediting.user for usercodeediting in UserCodeEditing.objects.all() ]))
-    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, "npeople": npeople, 'special_filter': special_filter}
+    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, 'special_filter': special_filter}
     return render_to_response('frontend/browse.html', dictionary, context_instance=RequestContext(request))
 
 

@@ -618,12 +618,6 @@ def export_gdocs_spreadsheet(request, short_name):
 def scraper_table(request):
     dictionary = { }
     dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
-    dictionary["loggedinusers"] = set([ usercodeediting.user  for usercodeediting in models.UserCodeEditing.objects.filter(user__isnull=False)])
-    dictionary["loggedinusers"] = set([ usercodeediting.user  for usercodeediting in models.UserCodeEditing.objects.filter(user__isnull=False)])
-    dictionary["numloggedoutusers"] = models.UserCodeEditing.objects.filter(user__isnull=True).count()
-    dictionary["numdraftscrapersediting"] = models.UserCodeEditing.objects.filter(code__isnull=True).count()
-    dictionary["numpublishedscrapersediting"] = models.UserCodeEditing.objects.filter(code__published=True).count()
-    dictionary["numunpublishedscrapersediting"] = models.UserCodeEditing.objects.filter(code__published=False).count()
     dictionary["numpublishedscraperstotal"] = dictionary["scrapers"].count()
     dictionary["numunpublishedscraperstotal"] = models.Scraper.objects.filter(published=False).count()
     dictionary["numdeletedscrapers"] = models.Scraper.unfiltered.filter(deleted=True).count()
@@ -674,51 +668,6 @@ def unfollow(request, short_name):
     return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
 
 
-# this function to be deleted
-def twisterstatus(request):
-    if 'value' not in request.POST:
-        return HttpResponse("needs value=")
-    tstatus = json.loads(request.POST.get('value'))
-
-    twisterclientnumbers = set()  # used to delete the ones that no longer exist
-
-    # we are making objects in django to represent the objects in twister for editor windows open
-    for client in tstatus["clientlist"]:
-        # fixed attributes of the object
-        twisterclientnumber = client["clientnumber"]
-        twisterclientnumbers.add(twisterclientnumber)
-        try:
-            user = client['username'] and User.objects.get(username=client['username']) or None
-            scraper = client['guid'] and models.Scraper.objects.get(guid=client['guid']) or None
-        except:
-            continue
-
-        # identify or create the editing object
-        try:
-            usercodeediting = models.UserCodeEditing.objects.create(user=user, code=scraper, twisterclientnumber=twisterclientnumber)
-            usercodeediting.editingsince = datetime.datetime.now()
-        except IntegrityError:
-            usercodeediting = models.UserCodeEditing.objects.get(twisterclientnumber=twisterclientnumber)
-
-        assert models.UserCodeEditing.objects.filter(twisterclientnumber=twisterclientnumber).count() == 1, client
-
-        # updateable values of the object
-        usercodeediting.twisterscraperpriority = client['scrapereditornumber']
-
-        # this condition could instead reference a running object
-        if client['running'] and not usercodeediting.runningsince:
-            usercodeediting.runningsince = datetime.datetime.now()
-        if not client['running'] and usercodeediting.runningsince:
-            usercodeediting.runningsince = None
-
-        usercodeediting.save()
-
-    # discard now closed values of the object
-    for usercodeediting in models.UserCodeEditing.objects.all():
-        if usercodeediting.twisterclientnumber not in twisterclientnumbers:
-            usercodeediting.delete()
-            # or could use the field: closedsince  = models.DateTimeField(blank=True, null=True)
-    return HttpResponse("Howdy ppp ")
 
 def htmlview(request, short_name):
     view = get_code_object_or_none(models.View, short_name=short_name)

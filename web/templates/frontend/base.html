@@ -28,15 +28,6 @@
 	<body>
 	    <div class="banner">
 	        <ul class="user_menu">
-
-                {% if npeople %}
-                  {% ifequal npeople 1 %}
-                    <li><small>{{ npeople }} person at work</small></li>
-                  {% else %}
-                    <li><small>{{ npeople }} people at work</small></li>
-                  {% endifequal %}
-                {% endif %}
-
 				{% if user.is_authenticated %}
 				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</a></li>
 				  {% comment %}
