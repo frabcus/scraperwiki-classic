@@ -999,7 +999,7 @@
     }, 
     {
         "pk": 1, 
-        "model": "scraper.scraper", 
+        "model": "codewiki.scraper", 
         "fields": {
             "status": "published", 
             "has_geo": 0, 
@@ -1012,7 +1012,6 @@
             "short_name": "test_scraper", 
             "has_temporal": 0, 
             "last_run": null, 
-            "disabled": 0, 
             "source": "", 
             "featured": 0, 
             "line_count": 0, 
@@ -1020,17 +1019,16 @@
             "published": 1, 
             "first_published_at": "2010-02-19 07:08:53", 
             "guid": "0", 
-            "scraper_sparkline_csv": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", 
-            "revision": "0"
+            "scraper_sparkline_csv": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
         }
     }, 
     {
         "pk": 1, 
-        "model": "scraper.usercoderole", 
+        "model": "codewiki.usercoderole", 
         "fields": {
             "role": "owner", 
             "user": 2, 
-            "scraper": 1
+            "code": 1
         }
     }
 ]

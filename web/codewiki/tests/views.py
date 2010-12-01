@@ -6,10 +6,10 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
-import scraper
+import codewiki
 
 class ScraperViewsTests(TestCase):
-    fixtures = ['./fixtures/test_data.json']
+    fixtures = ['test_data.json']
     
     def test_scraper_list(self):
         """
@@ -23,22 +23,17 @@ class ScraperViewsTests(TestCase):
                             kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
     
-    def test_scraper_map(self):
-        response = self.client.get(reverse('scraper_map', 
-                            kwargs={'short_name': 'test_scraper'}))
-        self.assertEqual(response.status_code, 200)
-    
     def test_scraper_history(self):
         response = self.client.get(reverse('scraper_history',
-                            kwargs={'short_name': 'test_scraper'}))
+                            kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
         
     def test_scraper_stringnot(self):
-        self.assertEqual(scraper.views.stringnot('test'), 'test')
+        self.assertEqual(codewiki.views.stringnot('test'), 'test')
     
     def test_scraper_comments(self):
         response = self.client.get(reverse('scraper_comments',
-                            kwargs={'short_name': 'test_scraper'}))
+                            kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
     
     def test_scraper_download(self):
@@ -69,6 +64,7 @@ class ScraperViewsTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_scraper_unfollow(self):
+        print codewiki.models.Scraper.objects.all()
         self.client.login(username='test_user', password='123456')
         response = self.client.get(reverse('scraper_unfollow',
                 kwargs={'short_name': 'test_scraper'}))
