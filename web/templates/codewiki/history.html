@@ -2,122 +2,46 @@
 {% load humanize %}
 {% block tab %}
 
-{% if user.is_staff %}
-<p class="staff"><a href="#mercurialcommitlog">Go to alternative presentation</a></p>
-{% endif %}
 
 <table>
-  <tr>
-    <th>Date</th>
-    <th>Action</th>
-    <th>Message</th>
-  </tr>
-  {% for item in history %}
-    <tr>
-      <td>
-        {% ifequal item.message_type|lower "commit" %}
-          <a href="{% url scraper_code  scraper.wiki_type  scraper.short_name %}?rev={{item.event_object.revision}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
-        {% else %}
-          {% if item.event_object %}
-            <a href="{{item.event_object.get_absolute_url}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
-          {% else %}
-            {{ item.datetime|date:"H:i, j F Y" }}
-          {% endif %}
-        {% endifequal %}
-      </td>
-
-      {% ifequal item.message_type|lower "commit" %}
-      <td>
-      {% else %}
-      <td colspan="2">
-      {% endifequal %}
-          {% ifequal item.message_type|lower "commit" %}
-            Committed
-          {% endifequal %}
-
-          {% ifequal item.message_type|lower "run_fail" %}
-            Scraper run failed after {{ item.message_value|floatformat }} seconds
-          {% endifequal %}
-
-          {% ifequal item.message_type|lower "run_success" %}
-            Scraper run success after {{ item.message_value|floatformat }} seconds
-          {% endifequal %}
-
-          {% ifequal item.message_type|lower "run_halted" %}
-            Scraper ran out of time
-          {% endifequal %}
-          
-          {% if item.user %}
-            by 
-            <a href="{% url profiles_profile_detail item.user.username %}">
-              {% load gravatar %} {% show_gravatar item.user 'small' %}&nbsp;
-              {% if item.user.get_profile.name %}{{item.user.get_profile.name}}{% else %}{{item.user.username}}{% endif %}
-            </a>
-          {% endif %}
-        </td>
-
-      {% ifequal item.message_type|lower "commit" %}
-      <td>
-          <em>{{item.message_value}}</em>  {% if item.historicalgroup %}(group: {{item.historicalgroup}}){% endif %}
-      </td>
-    {% endifequal %}
-    </tr>
-  {% endfor %}
-</table>
-
-
-
-
-
-{% if user.is_staff %}
-<div class="mercurialcommitlog" id="mercurialcommitlog">
-<h3>Commit log extracted directly from repository (without Alert technology)</h3>
-<table>
-  
-  <tr><th>time</th><th>user(s)</th><th>earliesteditor</th><th>desc</th></tr>
   {% for item in itemlog %}
-
-  {% ifequal item.type 'runevent' %}
   <tr>
-    <td>
-      <a href="{% url run_event item.runevent.run_id %}" class="staff">{{item.runevent.run_started|date:"H:i, j F Y" }}</a>
-      {% ifequal item.runevent.pid -1 %}
-      {% else %}
-         <b>Still running</b>
-      {% endifequal %}
-      ({{item.runduration}} min:secs)
-    </td>
-    <td colspan="2">{{item.runevent.outputsummary}}</td>
-  </tr>
-  {% else %}
-  <tr>
-    <td>
+    {% ifequal item.type 'commit' %}
+    <td colspan="2">
       <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
-      {% ifnotequal item.revcount 1 %}({{item.revcount}} edits over {{item.durationminutes}} minutes){% endifnotequal %}
-    </td>
-    <td>
-      {% for user in item.users %}
-      <span class="history-user">
-        <a href="{% url profiles_profile_detail item.user.username %}">
-          {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}
-        </a>
-      </span>
-      {% endfor %}
+      - edited by 
+      <a href="{% url profiles_profile_detail item.user.username %}" class="historyuser">
+        {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}
+      </a>
+      {% ifnotequal item.revcount 1 %}
+        {{item.revcount}} times in {{item.durationminutes}} minutes
+      {% endifnotequal %}
     </td>
 
-    <td>
-      {{item.earliesteditor}}
+    {% else %} {# runevent #}
+    <td colspan="2">
+      <a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% endif %}" class="historyrun">{{item.runevent.run_started|date:"H:i, j F Y" }}</a>
+      {% if item.runevent.run_ended %}
+        {% ifequal item.runevents|length 1 %}
+          - ran for {{item.durationseconds}} seconds
+          ({{item.runevent.pages_scraped}} scraped pages, {{item.runevent.records_produced}} records)
+        {% else %}
+          - {{item.runevents|length}} times from <a href="{% url run_event item.runevents.0.run_id %}">{{item.runevents.0.run_started|date:"j F Y" }}</a>
+          average run of {{item.durationseconds}} seconds 
+        {% endifequal %}
+      {% else %}
+        <b>Still running</b>
+      {% endif %}
+
+      {% if item.runevent.exception_message %}
+        <a href="{% url run_event item.runevent.run_id %}"><span class="historyexception">{{item.runevent.exception_message}}</span></a>
+      {% endif %}
     </td>
-    <td>
-      {{item.description}}
-    </td>
-  </tr>
   {% endifequal %}
+  </tr>
 
   {% endfor %}
 </table>
-</div>
-{% endif %}
 
 {% endblock %}
 

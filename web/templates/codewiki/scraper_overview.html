@@ -57,7 +57,7 @@
         {% endif %}
         <div class="content_footer">
             <p>
-                This dataset has a total of {{ scraper.record_count }} records and 
+                This dataset has a total of {{ scraper.record_count }} records and the scraper 
                 {% if lastscraperrunevent %}
                   {% ifequal lastscraperrunevent.pid -1 %}
                      last ran {{lastscraperrunevent.run_started|timesince}} ago 

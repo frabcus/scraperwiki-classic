@@ -64,7 +64,7 @@
                 Last run {{lastscraperrunevent.run_started|timesince}} ago 
                 for <a href="{% url run_event lastscraperrunevent.run_id%}">{{lastscraperrunevent.getduration}} seconds</a>.
             {% else %}
-                <a href="{% url run_event lastscraperrunevent.run_id%}">is currently running</a>.
+                This scraper <a href="{% url run_event lastscraperrunevent.run_id%}">is currently running</a>.
             {% endifequal %}
         {% else %}
             Has not run yet.

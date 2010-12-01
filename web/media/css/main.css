@@ -387,12 +387,9 @@ form.scraper_admin input#id_published, form.scraper_admin input#id_featured { wi
 .ui-widget input.button {font-size: 0.7em;}
 */
 
-
-div.mercurialcommitlog { padding-top:1em; font-size:80%; background-color:#e0e0e0; }
-div.mercurialcommitlog span.history-user { padding-left:1em; }
-div.mercurialcommitlog h3 { padding:0; margin:0; font-style:italic; }
-div.mercurialcommitlog ul { padding:0; margin:0; }
-
+a.historyuser { padding-left:5px; }
+a.historyrun { padding-left:15px; }
+span.historyexception { color:white; background:#d00; padding-left:2px; padding-right:2px;}
 
 /* Overlays and help */
 /*

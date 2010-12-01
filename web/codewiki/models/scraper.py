@@ -174,7 +174,12 @@ class ScraperRunEvent(models.Model):
     exception_message = models.CharField(max_length=256, blank=True, null=True)
 
     def __unicode__(self):
-        return u'start: %s   end: %s' % (self.run_started, self.run_ended)
+        res = [u'start: %s' % self.run_started]
+        if self.run_ended:
+            res.append(u'end: %s' % self.run_ended)
+        if self.exception_message:
+            res.append(u'exception: %s' % self.exception_message)
+        return u'  '.join(res)
 
     def outputsummary(self):
         return u'records=%d scrapedpages=%d outputlines=%d' % (self.records_produced, self.pages_scraped, self.output.count('\n'))

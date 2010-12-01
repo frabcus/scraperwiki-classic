@@ -360,15 +360,7 @@ def comments(request, wiki_type, short_name):
 
 
 def scraper_history(request, wiki_type, short_name):
-
     user = request.user
-    
-    # refresh the whole set of commit alerts when we have this message
-    if short_name == "updatecommitalertsrev" and user.is_staff:
-        lrepopath = (wiki_type == 'view' and settings.VMODULES_DIR or settings.SMODULES_DIR)
-        mercurialinterface = vc.MercurialInterface(lrepopath)
-        mercurialinterface.updateallcommitalerts()
-        return HttpResponse("Updated commit alerts from mercurial for:" + lrepopath, mimetype="text/plain")
     
     scraper = get_code_object_or_none(models.Code, short_name=short_name)
     if not scraper:
@@ -378,79 +370,67 @@ def scraper_history(request, wiki_type, short_name):
     if not scraper.published and not user.is_authenticated():
         return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
 
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
+    dictionary = { 'selected_tab': 'history', 'scraper': scraper, "user":user }
     
-    # sift through the alerts filtering on the scraper through the annoying content_type field
-    content_type = scraper.content_type() # this one is actually type Code
+    itemlog = [ ]
     
-    # The function updatecommitalertsrev() creates Alerts of content_type.  Make sure it's Code type, not Scraper or View type
-    history = frontend.models.Alerts.objects.filter(content_type=content_type, object_id=scraper.pk).order_by('-datetime')
-    
-    dictionary = { 'selected_tab': 'history', 'scraper': scraper, 'history': history,
-                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it, "user":user }
-    
-    
-    # extract the commit log directly from the mercurial repository without referring to the 'Alerts'
-    # keeping this type of code up-to-date means we still have the chance to ditch the entire of 
-    # the 'Alert' machinery when it becomes too costly to maintain
-    
-    commitlog = [ ]
     mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
     for commitentry in mercurialinterface.getcommitlog(scraper):
         try:    user = User.objects.get(pk=int(commitentry["userid"]))
         except: user = None
         
-        description = commitentry['description']
-        commititem = {"rev":commitentry['rev'], "datetime":commitentry["date"], "user":user}
-        
-        # extract earliesteditor value that has been prepended into the description(commitmessage)
-        mearliesteditor = re.match("(.+?)\|\|\|", description)
-        if mearliesteditor:
-            commititem['earliesteditor'] = mearliesteditor.group(1)
-            description = description[mearliesteditor.end(0):]
-        else:
-            commititem['earliesteditor'] = ""
-        
-        commititem["description"] = description 
-        
-        # aggregate in the commitlog
-        if commitlog and commititem["earliesteditor"] and commitlog[-1]["earliesteditor"] == commititem["earliesteditor"]:
-            lcommititem = commitlog[-1]
-            lcommititem["users"].add(commititem["user"])
-            lcommititem["lastrev"] = commititem["rev"]
-            lcommititem["lastdatetime"] = commititem["datetime"]
-            lcommititem["revcount"] += 1
-        else:
-            commititem["users"] = set([commititem["user"]])
-            commititem["firstrev"] = commititem["rev"]
-            commititem["lastrev"] = commititem["rev"]
-            commititem["firstdatetime"] = commititem["datetime"]
-            commititem["lastdatetime"] = commititem["datetime"]
-            commititem["revcount"] = 1
-            commititem["datetime"] = commititem["datetime"]
-            commititem["type"] = "commit"
-            commitlog.append(commititem)
-    
-    # put in the editing duration ranges
-    for commititem in commitlog:
-        timeduration = commititem["lastdatetime"] - commititem["firstdatetime"]
-        commititem["durationminutes"] = "%.1f" % (timeduration.days*24*60 + timeduration.seconds/60.0)
-        
-    
-    # now obtain the run-events and zip together
-    itemlog = commitlog
-    if scraper.wiki_type == 'scraper':
-        runevents = scraper.scraper.scraperrunevent_set.all().order_by('-run_started')
-        for runevent in runevents:
-            runitem = { "type":"runevent", "runevent":runevent, "datetime":runevent.run_started }
-            if runevent.run_ended:
-                runitem["runduration"] = runevent.run_ended - runevent.run_started
-            itemlog.append(runitem)
-        itemlog.sort(key=lambda x: x["datetime"])
+        item = {"type":"commit", "rev":commitentry['rev'], "datetime":commitentry["date"], "user":user}
+        item['earliesteditor'] = commitentry['description'].split('|||')
+        item["users"] = set([item["user"]])
+        item["firstrev"] = item["rev"]
+        item["firstdatetime"] = item["datetime"]
+        item["revcount"] = 1
+        itemlog.append(item)
     
     itemlog.reverse()
-    dictionary["itemlog"] = itemlog
+    
+    # now obtain the run-events and zip together
+    if scraper.wiki_type == 'scraper':
+        runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started')
+        for runevent in runevents:
+            item = { "type":"runevent", "runevent":runevent, "datetime":runevent.run_started }
+            if runevent.run_ended:
+                runduration = runevent.run_ended - runevent.run_started
+                item["runduration"] = runduration
+                item["durationseconds"] = "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
+            item["runevents"] = [ runevent ]
+            itemlog.append(item)
+        
+        itemlog.sort(key=lambda x: x["datetime"], reverse=True)
+    
+    # aggregate the history list
+    aitemlog = [ ]
+    previtem = None
+    for item in itemlog:
+        if previtem and item["type"] == "commit" and previtem["type"] == "commit" and \
+                                        item["earliesteditor"] == previtem["earliesteditor"]:
+            previtem["users"].add(item["user"])
+            previtem["firstrev"] = item["rev"]
+            previtem["firstdatetime"] = item["datetime"]
+            previtem["revcount"] += 1
+            timeduration = previtem["datetime"] - item["datetime"]
+            previtem["durationminutes"] = "%.0f" % (timeduration.days*24*60 + timeduration.seconds/60.0)
+
+        elif len(aitemlog) >= 3 and aitemlog[-2]["type"] == "runevent" and item["type"] == "runevent" and previtem["type"] == "runevent" and aitemlog[-3]["type"] == "runevent" and \
+                        aitemlog[-2]["runevent"].run_ended and previtem["runevent"].run_ended and \
+                        bool(previtem["runevent"].exception_message) == bool(aitemlog[-2]["runevent"].exception_message):
+            aitemlog[-2]["runevents"].insert(0, previtem["runevent"])
+            aitemlog[-2]["runduration"] += item["runduration"]
+            runduration = aitemlog[-2]["runduration"] / len(aitemlog[-2]["runevents"])  # average
+            aitemlog[-2]["durationseconds"] = "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
+            aitemlog[-1] = item
+            previtem = item
+            
+        else:
+            aitemlog.append(item)
+            previtem = item
+    
+    dictionary["itemlog"] = aitemlog
     dictionary["filestatus"] = mercurialinterface.getfilestatus(scraper)
     
     return render_to_response('codewiki/history.html', dictionary, context_instance=RequestContext(request))
