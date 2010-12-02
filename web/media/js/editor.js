@@ -991,13 +991,15 @@ $(document).ready(function() {
         if (stackdump) {
             for (var i = 0; i < stackdump.length; i++) {
                 var stackentry = stackdump[i]; 
-                sMessage = (stackentry.file != undefined ? (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file) : ""); 
-                if (stackentry.furtherlinetext != undefined)
-                    sMessage += " -- " + stackentry.furtherlinetext; 
+                sMessage = (stackentry.file !== undefined ? (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file) : ""); 
+                if (stackentry.furtherlinetext !== undefined) {
+                    sMessage += " -- " + stackentry.furtherlinetext;
+                }
                 linenumber = (stackentry.file == "<string>" ? stackentry.linenumber : undefined); 
                 writeToConsole(sMessage, 'exceptiondump', linenumber); 
-                if (stackentry.duplicates > 1)
+                if (stackentry.duplicates > 1) {
                     writeToConsole("  + " + stackentry.duplicates + " duplicates", 'exceptionnoesc'); 
+                }
             }
         }
 
@@ -1005,9 +1007,9 @@ $(document).ready(function() {
             sMessage = "The link " + blockedurl.substring(0,50) + " has been blocked. "; 
             sMessage += "Click <a href=\"/whitelist/?url=" + blockedurlquoted + "\" target=\"_blank\">here</a> for details."; 
             writeToConsole(sMessage, 'exceptionnoesc'); 
-        }
-        else
+        } else {
             writeToConsole(exceptiondescription, 'exceptiondump'); 
+        }
     }
 
     function writeRunOutput(sMessage) {
