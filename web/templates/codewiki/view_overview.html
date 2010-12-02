@@ -36,7 +36,7 @@
              {% if user_owns_it %}    
                  <form action="{% url scraper_delete_scraper 'view' scraper.short_name %}" method="post">
                      <input type="hidden" name="delete_scraper" value="1" />
-                     <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
+                     <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this view?" />
                      <p>Deletes this view. There is no undo.</p>
                  </form>
              {% else %}

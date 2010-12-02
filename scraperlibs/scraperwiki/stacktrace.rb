@@ -7,7 +7,6 @@ def getExceptionTraceback(e, code)
     (filename, linenumber) = exceptiondescription.split(":")
     if (filename == "(eval)")
         lbacktrace.push(exceptiondescription)
-        exceptiondescription = ''
     end
 
     stackdump = []

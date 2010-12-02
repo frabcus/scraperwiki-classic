@@ -14,22 +14,31 @@
     <script src="http://{{ settings.ORBETED_DOMAIN }}:{{ settings.ORBETED_PORT }}/static/Orbited.js"></script>
     <script>Orbited.settings.streaming = false</script>
     <style type="text/css">
-div#monitoroutput div{ border: thin red solid; overflow:auto; }
 
-div#monitoroutput div#monitoringusers ul {  display:inline;   }
-div#monitoroutput div#monitoringusers li {  border: thin blue solid; display:inline;   }
+div#monitoroutput { width:80%; margin-left:auto; margin-right:auto; border: thick blue solid; margin-top:5px; }
+
+div#monitoringusers { border: thin red solid; overflow:auto; text-align:left }
+div#draftscraperusers { border: thin red solid; overflow:auto;  text-align:left }
+div#connectionstatus { border: thin red solid; overflow:auto;  text-align:left }
+
+div#monitoringusers ul {  display:inline;   }
+div#monitoringusers li {  border: thin blue solid; display:inline;  }
 
 div#monitoroutput div#draftscraperusers ul {  display:inline;   }
 div#monitoroutput div#draftscraperusers li {  border: thin blue solid; display:inline;   }
-div#monitoroutput div#draftscraperusers li.running {  background-color:#afa;   }
 
-div#monitoroutput ul#scraperentries {  display:block;  }
-div#monitoroutput ul#scraperentries li.scraper {  border: thin red solid; display:block;  }
-div#monitoroutput ul#scraperentries li.running {  background-color:#afa; }
-div#monitoroutput ul#scraperentries li.scraper ul {  display:inline;  }
-div#monitoroutput ul#scraperentries li.scraper ul li {  border: thin black solid; display:inline;  }
+ul#scraperentries {  display:block; text-align:left }
+li.scraper {  border: thin red solid; display:block; }
 
-div#monitoroutput span.desc { background-color:black; color:white }; 
+li.scraper a.scrapername { width:100px; background-color:blue; color:white; display:inline-block; }
+span.desc { background-color:black; color:white; width:100px; display:inline-block; }; 
+
+#monitoroutput ul#scraperentries li.running {  background-color:#afa; font-size:200%;}
+
+ul.scraperusers {  display:inline;  }
+li.luser {  border: thin black solid; display:inline;  }
+
+
 
     </style>
 
@@ -139,7 +148,7 @@ $(document).ready(function() {
 
     function getScraperfromScrapername(scrapername)
     {
-        return "<a href=\"/scrapers/"+scrapername+"/edit/\"style=\"background-color:blue; color:white\">"+scrapername+"</a>"
+        return "<a href=\"/scrapers/"+scrapername+"/edit/\" class=\"scrapername\">"+scrapername+"</a>"
     }
 
     //read data back from twisted
@@ -164,7 +173,7 @@ $(document).ready(function() {
                 if (present)
                 {
                     if (!$(ele).attr("id"))
-                        $("#monitoroutput #monitoringusers ul").append("<li id=\""+idchatname+"\">"+getUserfromCChatname(chatname)+"</li>"); 
+                        $("#monitoroutput #monitoringusers ul").append("<li id=\""+idchatname+"\" class=\"luser\">"+getUserfromCChatname(chatname)+"</li>"); 
                 }
                 else
                     $(ele).remove(); 
@@ -187,9 +196,9 @@ $(document).ready(function() {
                     if (!$(ele).attr("id"))
                         $("#monitoroutput #draftscraperusers ul").append("<li id=\""+idchatname+"\">"+getUserfromCChatname(chatname)+"</li>"); 
                     if (running)
-                        $(ele).addClass("running"); 
+                        $(ele).addClass("running").css("background", '#afa'); 
                     else
-                        $(ele).removeClass("running"); 
+                        $(ele).removeClass("running").css("background", '#fff'); 
                 }
                 else
                     $(ele).remove(); 
@@ -213,11 +222,12 @@ $(document).ready(function() {
                 if (present)
                 {
                     if (!$(ele).attr("id"))
-                        $("#monitoroutput ul#scraperentries").append("<li id=\""+idscrapername+"\" class=\"scraper\">"+getScraperfromScrapername(scrapername)+" <ul></ul></li>"); 
+                        $("#monitoroutput ul#scraperentries").append("<li id=\""+idscrapername+"\" class=\"scraper\">"+getScraperfromScrapername(scrapername)+" <ul class=\"scraperusers\"></ul></li>"); 
                     if (running)
-                        $(ele).addClass("running"); 
+                        //$(ele).css("background", "#0f0"); 
+                        $(ele).addClass("running").css("background", '#afa'); 
                     else
-                        $(ele).removeClass("running"); 
+                        $(ele).removeClass("running").css("background", '#fff'); 
                     for (j = 0; j < scraperusers.length; j++)
                     {
                         var scraperuser = scraperusers[j]; 
@@ -228,7 +238,7 @@ $(document).ready(function() {
                         if (cpresent)
                         {
                             if (!$(cele).attr("id"))
-                                $(ele+" ul").append("<li id=\""+idcchatname+"\">"+getUserfromCChatname(chatname)+"</li>"); 
+                                $(ele+" ul").append("<li id=\""+idcchatname+"\" class=\"luser\">"+getUserfromCChatname(chatname)+"</li>"); 
                         }
                         else
                             $(cele).remove(); 
@@ -296,7 +306,7 @@ $(document).ready(function() {
 </fieldset>
 </form>
 
-<div id="monitoroutput" style="width:80%; margin-left:auto; margin-right:auto; border: thick black solid">
+<div id="monitoroutput">
     <div id="connectionstatus">...</div>
     <div id="monitoringusers"><span class="desc">Monitoring:</span> <ul></ul></div>
     <div id="draftscraperusers"><span class="desc">Drafts:</span> <ul></ul></div>

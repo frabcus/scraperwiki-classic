@@ -21,9 +21,13 @@ from codewiki.management.commands.run_scrapers import GetUMLrunningstatus, kill_
 from viewsrpc import testactiveumls
 
 
-def run_event(request, event_id):
+def run_event(request, run_id):
     user = request.user
-    event = get_object_or_404(ScraperRunEvent, id=event_id)
+    if re.match('\d+$', run_id):
+        # old style (allows access to objects that have not got a run_id due to an error
+        event = get_object_or_404(ScraperRunEvent, id=run_id)  
+    else:
+        event = get_object_or_404(ScraperRunEvent, run_id=run_id)
     
     context = { 'event':event }
     statusscrapers = GetUMLrunningstatus()
@@ -79,6 +83,6 @@ def scraper_killrunning(request, run_id, event_id):
     time.sleep(1)
     
     if event:
-        return HttpResponseRedirect(reverse('run_event', args=[event.id]))
+        return HttpResponseRedirect(reverse('run_event', args=[event.run_id]))
     return HttpResponseRedirect(reverse('running_scrapers'))
 

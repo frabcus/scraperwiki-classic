@@ -80,7 +80,7 @@ def scraper_overview(request, short_name):
     scraper_tags = Tag.objects.get_for_object(scraper)
     
 
-    lscraperrunevents = scraper.scraperrunevent_set.all().order_by("-id")[:1] # can't use date as it's unindexed
+    lscraperrunevents = scraper.scraperrunevent_set.all().order_by("-run_started")[:1] 
     lastscraperrunevent = lscraperrunevents and lscraperrunevents[0] or None
 
     context = {
@@ -114,6 +114,8 @@ def scraper_overview(request, short_name):
     
     context['data'] = data
     
+    if user.username == 'Julian_Todd':
+        return render_to_response('codewiki/scraper_overview_jgt.html', context, context_instance=RequestContext(request))
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
@@ -152,7 +154,7 @@ def view_admin (request, short_name):
                 response_text = view.title
 
             if element_id == 'divEditTags':
-                view.tags = ", ".join([tag.name for tag in view.tags]) + ',' + request.POST.get('value', '')                                                  
+                view.tags = request.POST.get('value', '')                                                  
                 response_text = ", ".join([tag.name for tag in view.tags])
 
             #save view
@@ -205,7 +207,7 @@ def scraper_admin (request, short_name):
                 response_text = scraper.title
 
             if element_id == 'divEditTags':
-                scraper.tags = ", ".join([tag.name for tag in scraper.tags]) + ',' + request.POST.get('value', '')                                                  
+                scraper.tags = request.POST.get('value', '')                                                  
                 response_text = ", ".join([tag.name for tag in scraper.tags])
 
             if element_id == 'spnRunInterval':
@@ -358,15 +360,7 @@ def comments(request, wiki_type, short_name):
 
 
 def scraper_history(request, wiki_type, short_name):
-
     user = request.user
-    
-    # refresh the whole set of commit alerts when we have this message
-    if short_name == "updatecommitalertsrev" and user.is_staff:
-        lrepopath = (wiki_type == 'view' and settings.VMODULES_DIR or settings.SMODULES_DIR)
-        mercurialinterface = vc.MercurialInterface(lrepopath)
-        mercurialinterface.updateallcommitalerts()
-        return HttpResponse("Updated commit alerts from mercurial for:" + lrepopath, mimetype="text/plain")
     
     scraper = get_code_object_or_none(models.Code, short_name=short_name)
     if not scraper:
@@ -376,79 +370,67 @@ def scraper_history(request, wiki_type, short_name):
     if not scraper.published and not user.is_authenticated():
         return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
 
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
+    dictionary = { 'selected_tab': 'history', 'scraper': scraper, "user":user }
     
-    # sift through the alerts filtering on the scraper through the annoying content_type field
-    content_type = scraper.content_type() # this one is actually type Code
+    itemlog = [ ]
     
-    # The function updatecommitalertsrev() creates Alerts of content_type.  Make sure it's Code type, not Scraper or View type
-    history = frontend.models.Alerts.objects.filter(content_type=content_type, object_id=scraper.pk).order_by('-datetime')
-    
-    dictionary = { 'selected_tab': 'history', 'scraper': scraper, 'history': history,
-                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it, "user":user }
-    
-    
-    # extract the commit log directly from the mercurial repository without referring to the 'Alerts'
-    # keeping this type of code up-to-date means we still have the chance to ditch the entire of 
-    # the 'Alert' machinery when it becomes too costly to maintain
-    
-    commitlog = [ ]
     mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
     for commitentry in mercurialinterface.getcommitlog(scraper):
         try:    user = User.objects.get(pk=int(commitentry["userid"]))
         except: user = None
         
-        description = commitentry['description']
-        commititem = {"rev":commitentry['rev'], "datetime":commitentry["date"], "user":user}
-        
-        # extract earliesteditor value that has been prepended into the description(commitmessage)
-        mearliesteditor = re.match("(.+?)\|\|\|", description)
-        if mearliesteditor:
-            commititem['earliesteditor'] = mearliesteditor.group(1)
-            description = description[mearliesteditor.end(0):]
-        else:
-            commititem['earliesteditor'] = ""
-        
-        commititem["description"] = description 
-        
-        # aggregate in the commitlog
-        if commitlog and commititem["earliesteditor"] and commitlog[-1]["earliesteditor"] == commititem["earliesteditor"]:
-            lcommititem = commitlog[-1]
-            lcommititem["users"].add(commititem["user"])
-            lcommititem["lastrev"] = commititem["rev"]
-            lcommititem["lastdatetime"] = commititem["datetime"]
-            lcommititem["revcount"] += 1
-        else:
-            commititem["users"] = set([commititem["user"]])
-            commititem["firstrev"] = commititem["rev"]
-            commititem["lastrev"] = commititem["rev"]
-            commititem["firstdatetime"] = commititem["datetime"]
-            commititem["lastdatetime"] = commititem["datetime"]
-            commititem["revcount"] = 1
-            commititem["datetime"] = commititem["datetime"]
-            commititem["type"] = "commit"
-            commitlog.append(commititem)
-    
-    # put in the editing duration ranges
-    for commititem in commitlog:
-        timeduration = commititem["lastdatetime"] - commititem["firstdatetime"]
-        commititem["durationminutes"] = "%.1f" % (timeduration.days*24*60 + timeduration.seconds/60.0)
-        
-    
-    # now obtain the run-events and zip together
-    itemlog = commitlog
-    if scraper.wiki_type == 'scraper':
-        runevents = scraper.scraper.scraperrunevent_set.all().order_by('-run_started')
-        for runevent in runevents:
-            runitem = { "type":"runevent", "runevent":runevent, "datetime":runevent.run_started }
-            if runevent.run_ended:
-                runitem["runduration"] = runevent.run_ended - runevent.run_started
-            itemlog.append(runitem)
-        itemlog.sort(key=lambda x: x["datetime"])
+        item = {"type":"commit", "rev":commitentry['rev'], "datetime":commitentry["date"], "user":user}
+        item['earliesteditor'] = commitentry['description'].split('|||')
+        item["users"] = set([item["user"]])
+        item["firstrev"] = item["rev"]
+        item["firstdatetime"] = item["datetime"]
+        item["revcount"] = 1
+        itemlog.append(item)
     
     itemlog.reverse()
-    dictionary["itemlog"] = itemlog
+    
+    # now obtain the run-events and zip together
+    if scraper.wiki_type == 'scraper':
+        runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started')
+        for runevent in runevents:
+            item = { "type":"runevent", "runevent":runevent, "datetime":runevent.run_started }
+            if runevent.run_ended:
+                runduration = runevent.run_ended - runevent.run_started
+                item["runduration"] = runduration
+                item["durationseconds"] = "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
+            item["runevents"] = [ runevent ]
+            itemlog.append(item)
+        
+        itemlog.sort(key=lambda x: x["datetime"], reverse=True)
+    
+    # aggregate the history list
+    aitemlog = [ ]
+    previtem = None
+    for item in itemlog:
+        if previtem and item["type"] == "commit" and previtem["type"] == "commit" and \
+                                        item["earliesteditor"] == previtem["earliesteditor"]:
+            previtem["users"].add(item["user"])
+            previtem["firstrev"] = item["rev"]
+            previtem["firstdatetime"] = item["datetime"]
+            previtem["revcount"] += 1
+            timeduration = previtem["datetime"] - item["datetime"]
+            previtem["durationminutes"] = "%.0f" % (timeduration.days*24*60 + timeduration.seconds/60.0)
+
+        elif len(aitemlog) >= 3 and aitemlog[-2]["type"] == "runevent" and item["type"] == "runevent" and previtem["type"] == "runevent" and aitemlog[-3]["type"] == "runevent" and \
+                        aitemlog[-2]["runevent"].run_ended and previtem["runevent"].run_ended and \
+                        bool(previtem["runevent"].exception_message) == bool(aitemlog[-2]["runevent"].exception_message):
+            aitemlog[-2]["runevents"].insert(0, previtem["runevent"])
+            aitemlog[-2]["runduration"] += item["runduration"]
+            runduration = aitemlog[-2]["runduration"] / len(aitemlog[-2]["runevents"])  # average
+            aitemlog[-2]["durationseconds"] = "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
+            aitemlog[-1] = item
+            previtem = item
+            
+        else:
+            aitemlog.append(item)
+            previtem = item
+    
+    dictionary["itemlog"] = aitemlog
     dictionary["filestatus"] = mercurialinterface.getfilestatus(scraper)
     
     return render_to_response('codewiki/history.html', dictionary, context_instance=RequestContext(request))
@@ -486,6 +468,12 @@ def code(request, wiki_type, short_name):
 
     return render_to_response('codewiki/code.html', dictionary, context_instance=RequestContext(request))
 
+def tags(request, wiki_type, short_name):
+    if wiki_type == 'scraper':
+        code_object = get_code_object_or_none(models.Scraper, short_name)
+    else:
+        code_object = get_code_object_or_none(models.View, short_name)
+    return HttpResponse(", ".join([tag.name for tag in code_object.tags]))
 
 
 def raw_about_markup(request, wiki_type, short_name):
@@ -616,12 +604,6 @@ def export_gdocs_spreadsheet(request, short_name):
 def scraper_table(request):
     dictionary = { }
     dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
-    dictionary["loggedinusers"] = set([ usercodeediting.user  for usercodeediting in models.UserCodeEditing.objects.filter(user__isnull=False)])
-    dictionary["loggedinusers"] = set([ usercodeediting.user  for usercodeediting in models.UserCodeEditing.objects.filter(user__isnull=False)])
-    dictionary["numloggedoutusers"] = models.UserCodeEditing.objects.filter(user__isnull=True).count()
-    dictionary["numdraftscrapersediting"] = models.UserCodeEditing.objects.filter(code__isnull=True).count()
-    dictionary["numpublishedscrapersediting"] = models.UserCodeEditing.objects.filter(code__published=True).count()
-    dictionary["numunpublishedscrapersediting"] = models.UserCodeEditing.objects.filter(code__published=False).count()
     dictionary["numpublishedscraperstotal"] = dictionary["scrapers"].count()
     dictionary["numunpublishedscraperstotal"] = models.Scraper.objects.filter(published=False).count()
     dictionary["numdeletedscrapers"] = models.Scraper.unfiltered.filter(deleted=True).count()
@@ -659,9 +641,13 @@ def follow (request, short_name):
 
 
 def unfollow(request, short_name):
+    print "HERE"
+    print models.Scraper.objects.all()
     scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    print scraper
     if not scraper:
         return code_error_response(models.Scraper, short_name=short_name, request=request)
+    print scraper
 
     user = request.user
     user_owns_it = (scraper.owner() == user)
@@ -672,51 +658,6 @@ def unfollow(request, short_name):
     return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
 
 
-# this function to be deleted
-def twisterstatus(request):
-    if 'value' not in request.POST:
-        return HttpResponse("needs value=")
-    tstatus = json.loads(request.POST.get('value'))
-
-    twisterclientnumbers = set()  # used to delete the ones that no longer exist
-
-    # we are making objects in django to represent the objects in twister for editor windows open
-    for client in tstatus["clientlist"]:
-        # fixed attributes of the object
-        twisterclientnumber = client["clientnumber"]
-        twisterclientnumbers.add(twisterclientnumber)
-        try:
-            user = client['username'] and User.objects.get(username=client['username']) or None
-            scraper = client['guid'] and models.Scraper.objects.get(guid=client['guid']) or None
-        except:
-            continue
-
-        # identify or create the editing object
-        try:
-            usercodeediting = models.UserCodeEditing.objects.create(user=user, code=scraper, twisterclientnumber=twisterclientnumber)
-            usercodeediting.editingsince = datetime.datetime.now()
-        except IntegrityError:
-            usercodeediting = models.UserCodeEditing.objects.get(twisterclientnumber=twisterclientnumber)
-
-        assert models.UserCodeEditing.objects.filter(twisterclientnumber=twisterclientnumber).count() == 1, client
-
-        # updateable values of the object
-        usercodeediting.twisterscraperpriority = client['scrapereditornumber']
-
-        # this condition could instead reference a running object
-        if client['running'] and not usercodeediting.runningsince:
-            usercodeediting.runningsince = datetime.datetime.now()
-        if not client['running'] and usercodeediting.runningsince:
-            usercodeediting.runningsince = None
-
-        usercodeediting.save()
-
-    # discard now closed values of the object
-    for usercodeediting in models.UserCodeEditing.objects.all():
-        if usercodeediting.twisterclientnumber not in twisterclientnumbers:
-            usercodeediting.delete()
-            # or could use the field: closedsince  = models.DateTimeField(blank=True, null=True)
-    return HttpResponse("Howdy ppp ")
 
 def htmlview(request, short_name):
     view = get_code_object_or_none(models.View, short_name=short_name)

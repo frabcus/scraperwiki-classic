@@ -26,7 +26,9 @@ urlpatterns = patterns('',
 
     # events and monitoring (pehaps should have both wiki_types possible)
     url(r'^scrapers/running_scrapers/$',                  viewsuml.running_scrapers,    name='running_scrapers'),
-    url(r'^scrapers/run/(?P<event_id>[\w_\-]+)/$',        viewsuml.run_event,           name='run_event'),
+    
+    url(r'^scrapers/run/(?P<run_id>[\w_\-\.\?]+)/$',      viewsuml.run_event,           name='run_event'),  # the ? is due to the temporary holding value in older objects and should be cleared  out
+    
     url(r'^scrapers/scraper_killrunning/(?P<run_id>[\w_\-\.]+)(?:/(?P<event_id>[\w_\-]+))?$',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),
         
@@ -37,9 +39,6 @@ urlpatterns = patterns('',
                                                           views.scraper_delete_scraper, name='scraper_delete_scraper'),
     url(r'^scrapers/run-scraper/(?P<short_name>[\w_\-]+)/$', 
                                                           views.scraper_run_scraper,    name='scraper_run_scraper'),
-    
-    url(r'^scrapers/twister/status$', views.twisterstatus, name='twisterstatus'),  # this to be deleted
-        
         #not deprecated as used in by ajax to implement publishScraperButton
     url(r'^scrapers/(?P<short_name>[\w_\-]+)/admin/$',    views.scraper_admin,          name='scraper_admin'),
         
@@ -47,6 +46,7 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/history/$',  views.scraper_history,  name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/comments/$', views.comments,         name='scraper_comments'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/code/$',     views.code,             name='scraper_code'),    
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/tags/$',     views.tags,             name='scraper_tags'),    
         
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$', views.choose_template, name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        

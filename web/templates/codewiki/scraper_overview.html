@@ -57,13 +57,17 @@
         {% endif %}
         <div class="content_footer">
             <p>
-                This dataset has a total of {{ scraper.record_count }} records and 
+                This dataset has a total of {{ scraper.record_count }} records and the scraper 
                 {% if lastscraperrunevent %}
                   {% ifequal lastscraperrunevent.pid -1 %}
                      last ran {{lastscraperrunevent.run_started|timesince}} ago 
-                     for <a href="{% url run_event lastscraperrunevent.id%}">{{lastscraperrunevent.getduration}} seconds</a>.
+                     for <a href="{% url run_event lastscraperrunevent.run_id%}">{{lastscraperrunevent.getduration}} seconds</a>.
                   {% else %}
-                     <a href="{% url run_event lastscraperrunevent.id%}">is currently running</a>.
+                     {% if lastscraperrunevent.run_id %}
+                        <a href="{% url run_event lastscraperrunevent.run_id %}">is currently running</a>.
+                    {% else %}
+                        <i>is running without an id</i>.
+                     {% endif %}
                   {% endifequal %}
                 {% else %}
                    has not been run yet.
@@ -92,7 +96,7 @@
 </div>
 
 <div id="divScraperTags" class="content full">
-    <h2>Tags {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aAddTags" class="edit">[add a tag]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to add a tag]</a>{% endif %}</h2>
+    <h2>Tags {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditTags" class="edit">[edit tags]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to add a tag]</a>{% endif %}</h2>
     <ul class="tags">
         {% for tag in scraper_tags %}
             <li><a href="{% url single_tag tag %}">{{ tag }}</a></li>
@@ -103,7 +107,7 @@
             Adding tags make sense of all the datasets on ScraperWiki
         </p>
     {% endif %}
-    <div id="divEditTags"></div>
+    <label id="labelEditTags" for="divEditTags">Comma separated list of tags:</label><div id="divEditTags"></div>
 </div>
 
 <div class="content full">

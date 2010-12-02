@@ -11,6 +11,7 @@ except:
 class MetadataTest(TestCase):
     def setUp(self):
         self.scraper = Scraper(title="Test")
+        self.scraper.buildfromfirsttitle()
         self.scraper.save()
 
         self.metadata = ScraperMetadata()
@@ -70,6 +71,13 @@ class MetadataCreateTest(MetadataTest):
 
         resp = self.client.get(reverse('metadata_api', args=[self.scraper.guid, 'new']), {}, HTTP_X_SCRAPERID=self.scraper.guid)
         self.assertEquals('DDD', self.get_metadata_value(resp))
+
+    def test_special_char_keys(self):
+        resp = self.client.post(reverse('metadata_api', args=[self.scraper.guid, 'new.value']), {'value': json.dumps('EEE'), 'run_id': 0}, HTTP_X_SCRAPERID=self.scraper.guid)
+        self.assertEquals(200, resp.status_code)
+
+        resp = self.client.get(reverse('metadata_api', args=[self.scraper.guid, 'new.value']), {}, HTTP_X_SCRAPERID=self.scraper.guid)
+        self.assertEquals('EEE', self.get_metadata_value(resp))
 
 class MetadataUpdateTest(MetadataTest):
     def test_missing_run_id_or_value(self):

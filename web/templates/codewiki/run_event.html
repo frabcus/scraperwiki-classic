@@ -8,7 +8,7 @@
 {% endblock %}
 {% block content %}
     <div class="page_title">
-	    <h1 id="hCodeTitle">{{ scraper.title }} - run event</h1>
+	    <h1 id="hCodeTitle">Run event for scraper <a href="{% url code_overview scraper.wiki_type scraper.short_name %}">{{scraper.title}}</a></h1>
     </div>
     <div class="content full">
         <div class="page_tab_body">
@@ -49,7 +49,11 @@
         {% endfor %}
         </ul>
 
-        <textarea style="width:100%; height:20em">{{event.output}}</textarea>
+        <textarea style="width:100%; height:20em" readonly>{{event.output}}</textarea>
+
+        {% if event.exception_message %}
+          <p><b>Exception output</b>: <input type="text" value="{{event.exception_message}}" style="width:80%" readonly></p>
+        {% endif %}
 
         </div>
         <p class="report">
