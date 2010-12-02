@@ -8,7 +8,7 @@
   <tr>
     {% ifequal item.type 'commit' %}
     <td colspan="2">
-      <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}">{{ item.datetime|date:"H:i, j F Y" }}</a>
+      <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}" class="historysave">{{ item.datetime|date:"H:i, j F Y" }}</a>
       - edited by 
       <a href="{% url profiles_profile_detail item.user.username %}" class="historyuser">
         {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}
@@ -20,13 +20,13 @@
 
     {% else %} {# runevent #}
     <td colspan="2">
-      <a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% endif %}" class="historyrun">{{item.runevent.run_started|date:"H:i, j F Y" }}</a>
+      <a href="{% if item.runevent.run_id %}{% url run_event item.runevents.0.run_id %}{% endif %}" class="historyrun">{{item.runevents.0.run_started|date:"H:i, j F Y" }}</a>
       {% if item.runevent.run_ended %}
         {% ifequal item.runevents|length 1 %}
           - ran for {{item.durationseconds}} seconds
           ({{item.runevent.pages_scraped}} scraped pages, {{item.runevent.records_produced}} records)
         {% else %}
-          - {{item.runevents|length}} times from <a href="{% url run_event item.runevents.0.run_id %}">{{item.runevents.0.run_started|date:"j F Y" }}</a>
+          - {{item.runevents|length}} times until <a href="{% url run_event item.runevent.run_id %}" class="historyrun">{{item.runevent.run_started|date:"j F Y" }}</a>
           average run of {{item.durationseconds}} seconds 
         {% endifequal %}
       {% else %}

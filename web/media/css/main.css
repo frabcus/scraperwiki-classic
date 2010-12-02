@@ -388,7 +388,10 @@ form.scraper_admin input#id_published, form.scraper_admin input#id_featured { wi
 */
 
 a.historyuser { padding-left:5px; }
-a.historyrun { padding-left:15px; }
+a.historyrun { padding-left:15px; background:url(../images/icons/control_play.png) no-repeat;} 
+a.historysave { padding-left:15px; background:url(../images/icons/disk.png) no-repeat;} 
+.editor_controls #run {}
+
 span.historyexception { color:white; background:#d00; padding-left:2px; padding-right:2px;}
 
 /* Overlays and help */
