@@ -177,6 +177,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
              submit    : 'Save',
              type      : 'textarea',
              loadurl: 'raw_about_markup/',
+             onblur: 'ignore',
              event: 'dblclick',
              submitdata : {js: 1, short_name: short_name},
              placeholder: ''       
@@ -197,6 +198,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
              tooltip   : 'Click to edit...',
              cancel    : 'Cancel',
              submit    : 'Save',
+             onblur: 'ignore',
              event: 'dblclick',
              placeholder: '',             
              submitdata : {js: 1, short_name: short_name}
@@ -216,10 +218,13 @@ function setupScraperEditInPlace(wiki_type, short_name){
              indicator : 'Saving...',
              tooltip   : 'Click to edit...',
              cancel    : 'Cancel',
-             submit    : 'Add tags',
+             submit    : 'Save tags',
+             onblur: 'ignore',
              event: 'dblclick',
              placeholder: '',
+             loadurl: 'tags/',
              submitdata : {js: 1, short_name: short_name},
+             onreset: function(){ $('#labelEditTags').hide();},
              callback: function (data){
                  //add the new tags onto the list
                  aItems = data.split(',');
@@ -230,14 +235,18 @@ function setupScraperEditInPlace(wiki_type, short_name){
                  };
                  //clear out the textbox for next time
                  $('#divEditTags').html('');
+                 $('#labelEditTags').hide();
             }
          });
-    $('#aAddTags').click (
+    $('#aEditTags').click (
          function(){
               $('#divEditTags').dblclick();
+              $('#labelEditTags').show();
               return false;
          }
      );
+
+     $('#labelEditTags').hide();
 
      //scheduler
      //alert(schedule_options.length)
@@ -246,6 +255,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
               tooltip   : 'Click to edit...',
               cancel    : 'Cancel',
               submit    : 'Save',
+              onblur: 'ignore',
               data   : $('#hidScheduleOptions').val(),
               type   : 'select',
               event: 'dblclick',
