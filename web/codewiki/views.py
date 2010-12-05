@@ -114,8 +114,8 @@ def scraper_overview(request, short_name):
     
     context['data'] = data
     
-    if user.username == 'Julian_Todd':
-        return render_to_response('codewiki/scraper_overview_jgt.html', context, context_instance=RequestContext(request))
+    #if user.username == 'Julian_Todd':
+    #    return render_to_response('codewiki/scraper_overview_jgt.html', context, context_instance=RequestContext(request))
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
