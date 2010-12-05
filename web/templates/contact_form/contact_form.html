@@ -53,7 +53,8 @@
                     {{ form.body }}
                     {% field_errors form.body %}
                 </li>
-		{% if not request.user.is_authenticated %}
+
+                {% if not request.user.is_authenticated %}
                 <li>
                     {{ form.captcha.label_tag }}                    
                     {{ form.captcha }}
@@ -61,6 +62,9 @@
                 </li>
                 {% endif %}               
             </ul>
+            <p class="report">Please give 
+              relevant information, such as your type of browser (if it's a bug) or the name of the scraper 
+              so we can fix it immediately, if possible.</p>
             <input type="submit" value="Send feedback" />
         </form>
         <br />
