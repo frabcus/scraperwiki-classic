@@ -114,8 +114,8 @@ def scraper_overview(request, short_name):
     
     context['data'] = data
     
-    if user.username == 'Julian_Todd':
-        return render_to_response('codewiki/scraper_overview_jgt.html', context, context_instance=RequestContext(request))
+    #if user.username == 'Julian_Todd':
+    #    return render_to_response('codewiki/scraper_overview_jgt.html', context, context_instance=RequestContext(request))
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
@@ -420,7 +420,7 @@ def scraper_history(request, wiki_type, short_name):
                         aitemlog[-2]["runevent"].run_ended and previtem["runevent"].run_ended and \
                         bool(previtem["runevent"].exception_message) == bool(aitemlog[-2]["runevent"].exception_message):
             aitemlog[-2]["runevents"].insert(0, previtem["runevent"])
-            aitemlog[-2]["runduration"] += item["runduration"]
+            aitemlog[-2]["runduration"] += previtem["runduration"]
             runduration = aitemlog[-2]["runduration"] / len(aitemlog[-2]["runevents"])  # average
             aitemlog[-2]["durationseconds"] = "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
             aitemlog[-1] = item
