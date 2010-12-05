@@ -154,7 +154,7 @@ def view_admin (request, short_name):
                 response_text = view.title
 
             if element_id == 'divEditTags':
-                view.tags = ", ".join([tag.name for tag in view.tags]) + ',' + request.POST.get('value', '')                                                  
+                view.tags = request.POST.get('value', '')                                                  
                 response_text = ", ".join([tag.name for tag in view.tags])
 
             #save view
@@ -207,7 +207,7 @@ def scraper_admin (request, short_name):
                 response_text = scraper.title
 
             if element_id == 'divEditTags':
-                scraper.tags = ", ".join([tag.name for tag in scraper.tags]) + ',' + request.POST.get('value', '')                                                  
+                scraper.tags = request.POST.get('value', '')                                                  
                 response_text = ", ".join([tag.name for tag in scraper.tags])
 
             if element_id == 'spnRunInterval':
@@ -468,6 +468,12 @@ def code(request, wiki_type, short_name):
 
     return render_to_response('codewiki/code.html', dictionary, context_instance=RequestContext(request))
 
+def tags(request, wiki_type, short_name):
+    if wiki_type == 'scraper':
+        code_object = get_code_object_or_none(models.Scraper, short_name)
+    else:
+        code_object = get_code_object_or_none(models.View, short_name)
+    return HttpResponse(", ".join([tag.name for tag in code_object.tags]))
 
 
 def raw_about_markup(request, wiki_type, short_name):
