@@ -27,7 +27,7 @@
           - ran for {{item.durationseconds}} seconds
           ({{item.runevent.pages_scraped}} scraped pages, {{item.runevent.records_produced}} records)
         {% else %}
-          - {{item.runevents|length}} times until <a href="{% url run_event item.runevent.run_id %}" class="historyrun">{{item.runevent.run_started|date:"j F Y" }}</a>
+          - {{item.runevents|length}} times until <a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% endif %}" class="historyrun">{{item.runevent.run_started|date:"j F Y" }}</a>
           average run of {{item.durationseconds}} seconds 
         {% endifequal %}
       {% else %}
