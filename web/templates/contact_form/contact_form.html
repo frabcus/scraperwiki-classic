@@ -23,10 +23,15 @@
     <div class="content left col">
         <form action="/contact/" method="POST">
             <ul class="form">
-		{% if request.user.is_authenticated %}
-				<input id="id_name" name="name" type="hidden" class="required" value="{{ request.user.username }}" />
-				<input id="id_email" name="email" type="hidden" value="{{ request.user.email }}" /> 
-                {% else %}
+            <li>
+                {{ form.subject_dropdown.label_tag }}
+                {{ form.subject_dropdown }}
+                {% field_errors form.subject_dropdown %}
+            </li>
+            {% if request.user.is_authenticated %}
+                <input id="id_name" name="name" type="hidden" class="required" value="{{ request.user.username }}" />
+                <input id="id_email" name="email" type="hidden" value="{{ request.user.email }}" /> 
+            {% else %}
                 <li>
                     {{ form.name.label_tag }}
                     {{ form.name }}
@@ -37,30 +42,27 @@
                     {{ form.email }}
         	        {% field_errors form.email %}                    
                 </li>
-                {% endif %}               
-                <li>
-                    {{ form.subject_dropdown.label_tag }}
-                    {{ form.subject_dropdown }}
-                    {% field_errors form.subject_dropdown %}
-                </li>
-                <li>
-                    {{ form.title.label_tag }}
-                    {{ form.title }}
-                    {% field_errors form.title %}
-                </li>
-                <li>
-                    {{ form.body.label_tag }}                    
-                    {{ form.body }}
-                    {% field_errors form.body %}
-                </li>
-		{% if not request.user.is_authenticated %}
+            {% endif %}               
+            <li>
+                {{ form.title.label_tag }}
+                {{ form.title }}
+                {% field_errors form.title %}
+            </li>
+            <li>
+                {{ form.body.label_tag }}                    
+                {{ form.body }}
+                {% field_errors form.body %}
+            </li>
+
+            {% if not request.user.is_authenticated %}
                 <li>
                     {{ form.captcha.label_tag }}                    
                     {{ form.captcha }}
                     {% field_errors form.captcha %}
                 </li>
-                {% endif %}               
+            {% endif %}               
             </ul>
+            <p class="report">Please give your browser brand and/or name of your scraper if we need to know.</p>
             <input type="submit" value="Send feedback" />
         </form>
         <br />
