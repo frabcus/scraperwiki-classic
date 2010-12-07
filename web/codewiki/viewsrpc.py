@@ -22,8 +22,8 @@ try:                import json
 except ImportError: import simplejson as json
 
 
-def rpcexecute(request, short_name, revision = None):
-    
+
+def MakeRunner(request, short_name, revision = None):
     scraper = get_object_or_404(models.Code.objects, short_name=short_name)
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
     failed = False
@@ -58,26 +58,42 @@ def rpcexecute(request, short_name, revision = None):
     #    runner.stdin.write("\n\n%s(**%s)\n" % (func, repr(rargs)))
 
     runner.stdin.close()
+    return runner
 
-    response = HttpResponse()
+
+def rpcexecute(request, short_name, revision = None):
+    runner = MakeRunner(request, short_name, revision)
+
+    # we build the response on the fly in case we get a contentheader value before anything happens
+    response = None # HttpResponse()
+    
     for line in runner.stdout:
+        print line
         try:
             message = json.loads(line)
-            if message['message_type'] == 'fail':
-                failed = True
-            elif message['message_type'] == 'exception':
-                response.write("<h3>%s</h3>\n" % str(message["jtraceback"].get("exceptiondescription")).replace("<", "&lt;"))
-                for stackentry in message["jtraceback"]["stackdump"]:
-                    response.write("<h3>%s</h3>\n" % re.replace("<", "&lt;", str(stackentry).replace("<", "&lt;")))
-            elif message['message_type'] == "executionstatus":
-                pass
-
-            elif message['message_type'] == "console":
-                response.write(message["content"])
-
         except:
             pass
+            
+        if message['message_type'] == 'exception':
+            if not response:
+                response = HttpResponse()
+            
+            response.write("<h3>%s</h3>\n" % str(message["jtraceback"].get("exceptiondescription")).replace("<", "&lt;"))
+            for stackentry in message["jtraceback"]["stackdump"]:
+                response.write("<h3>%s</h3>\n" % re.replace("<", "&lt;", str(stackentry).replace("<", "&lt;")))
+
+        elif message['message_type'] == "contentheader":
+            if not response:
+                response = HttpResponse(mimetype=re.sub('Content-Type:\s*', '', message['content']))
+            else:
+                response.write("<h3>Error content type added after start of stream: %s</h3>" % message['content'])
         
+        elif message['message_type'] == "console":
+            if not response:
+                response = HttpResponse()
+            
+            response.write(message["content"])
+
     return response
                 
                 

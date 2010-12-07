@@ -31,6 +31,10 @@ def logMessage (message) :
 
     dumpMessage (message_type = 'console', content = message)
 
+def logContentHeader (message) :
+
+    dumpMessage (message_type = 'contentheader', content = message)
+
 def logWarning (message) :
 
     dumpMessage (message_type = 'console', content = 'Warning: ' + message)

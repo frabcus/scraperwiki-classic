@@ -30,6 +30,15 @@ class scraperwiki
          )  )  ;
    }
 
+   static function header ($header)
+   {
+       scraperwiki::sw_dumpMessage
+         (  array
+            (  'message_type' => 'contentheader',
+               'content'      => $header
+         )  )  ;
+   }
+
    static function save ($unique_keys, $data, $date = null, $latlng = null)
    {
       $ds      = SW_DataStoreClass::create () ;
