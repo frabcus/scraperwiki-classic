@@ -103,12 +103,13 @@ def scraper_overview(request, short_name):
     else:
         private_columns = None
     data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
-                                               limit=settings.DATA_TABLE_ROWS, 
+                                               limit=50, 
                                                column_order=column_order,
                                                private_columns=private_columns)
-    context['dataheadings'] = data['headings'],
-    context['datarows'] = data['rows']
-    context['datasinglerow'] = { }
+    if len(data['rows']) > 12:
+        data['morerows'] = data['rows'][9:]
+        data['rows'] = data['rows'][:9]
+    
     if data['rows']:
         context['datasinglerow'] = zip(data['headings'], data['rows'][0])
     

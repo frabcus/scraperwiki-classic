@@ -114,6 +114,10 @@ border-top:solid 1px #ccc; border-bottom:solid 1px #ccc;padding:0.4em 0.6em;}
 
 table.data tr:nth-child(odd) td {background:#f4f3e8;} 
 table.data td {border-top:solid 1px #ebeade;padding:0.3em 0.5em; line-height:1em;} 
+
+table.data tr.morerow { display:none; } 
+table.data th.morerow { display:none; } 
+
 /*table.data tr:nth-child(odd) td, table.data tr:nth-child(odd) th {background:#f4e3e8;}
 table.data td, table.data th {border-top:solid 1px #ebdade;padding:0.3em 0.5em; line-height:1em;
                               border-left:solid 1px #cbcace; border-right:solid 1px #cbcace;}*/
