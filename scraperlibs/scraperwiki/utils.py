@@ -34,6 +34,11 @@ def log(message=""):
     scraperwiki.console.logMessage (logmessage)
 
 
+def httpresponseheader(headerkey, headervalue):
+    ''' eg httpresponseheader('Content-Type', 'text/plain') '''
+    scraperwiki.console.logHTTPResponseHeader (headerkey, headervalue)
+
+
 #  The code will install a set of specific handlers to be used when a URL
 #  is opened. See the "urllibSetup" and "urllib2Setup" functions below.
 #

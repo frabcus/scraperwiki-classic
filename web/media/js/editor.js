@@ -78,13 +78,13 @@ $(document).ready(function() {
     function setupCodeEditor(){
         parsers['python'] = ['../contrib/python/js/parsepython.js'];
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
-        parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
+        parsers['ruby'] = ['../../../ruby-in-codemirror/js/tokenizeruby.js', '../../../ruby-in-codemirror/js/parseruby.js'];
         //parsers['ruby'] = [ 'parsedummy.js'];   // in case Ruby parser needs disabling due to too many bugs
         parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
 
         stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['php'] = [codemirror_url+'contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css'];
-        stylesheets['ruby'] = [codemirror_url+'../ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
+        stylesheets['ruby'] = ['/media/ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['html'] = [codemirror_url+'/css/xmlcolors.css', codemirror_url+'/css/jscolors.css', codemirror_url+'/css/csscolors.css', '/media/css/codemirrorcolours.css']; 
 
         indentUnits['python'] = 4;
@@ -425,6 +425,9 @@ $(document).ready(function() {
               else 
                 writeToConsole(data.content); 
 
+          } else if (data.message_type == "httpresponseheader") {
+              writeToConsole("Header:::", "httpresponseheader"); 
+              writeToConsole(data.headerkey + ": " + data.headervalue, "httpresponseheader"); 
           } else {
               writeToConsole(data.content, data.message_type); 
           }
@@ -1035,6 +1038,9 @@ $(document).ready(function() {
         var sExpand = '...more'
 
         var sLongMessage = undefined; 
+        if (sMessageType == 'httpresponseheader') 
+            sShortClassName = 'exception';
+
         if (sMessageType == 'exceptiondump') 
             sShortClassName = 'exception';
 

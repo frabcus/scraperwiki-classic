@@ -13,6 +13,12 @@
 <div class="content full">
     <div class="data_viewer">
         {% if data.rows %}
+            <ul class="code_about">
+                <li><a id="aHideTable" class="edit">[hide table]</a></li>
+                <li><a id="aShowTable" class="edit">[show table]</a></li>
+                <li><a id="aShowMore" class="edit">[show more]</a></li>
+                <li><a id="aShowLess" class="edit">[show less]</a></li>
+            </ul>
             <div>
                 <table class="data">
                     <thead>
@@ -21,21 +27,31 @@
                                 <th width="120">{{ heading }}</th>
                             {% endfor %}
                         </tr>
+                        <tr>
+                            <th cols="{{data.headings|length}}" class="morerow">...</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for row in data.rows %}
-                            <tr>
+                            <tr class="row">
                                 {% for value in row %}
                                     <td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>
                                 {% endfor %}
                             </tr>
-                        {% endfor %}    
+                        {% endfor %}
+                        {% for row in data.morerows %}
+                            <tr class="morerow">
+                                {% for value in row %}
+                                    <td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
             <div>
-            <table class="data">
+                <table class="data">
                     <tbody>
                     <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
                     <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -51,13 +67,14 @@
                     </tbody>
                 </table>
             </div>
-    	    <div class="info_unpublished">
-    	            This scraper is being worked on <br/>and there is no data to display yet
-    	    </div>
+            <div class="info_unpublished">
+                    This scraper is being worked on <br/>and there is no data to display yet
+            </div>
         {% endif %}
         <div class="content_footer">
             <p>
-                This dataset has a total of {{ scraper.record_count }} records and the scraper 
+                This dataset has a total of {{ scraper.record_count }} records.
+                The scraper 
                 {% if lastscraperrunevent %}
                   {% ifequal lastscraperrunevent.pid -1 %}
                      last ran {{lastscraperrunevent.run_started|timesince}} ago 
@@ -189,7 +206,54 @@
     scraper_short_name = '{{scraper.short_name}}';
     {% if user.is_authenticated %}
         setupScraperEditInPlace('scraper', '{{scraper.short_name}}');
-        setupButtonConfirmation("btnClearDatastore", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete all existing data for this scraper.");
-        setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this scraper and it's data.");
+        setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA.");
+        setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
     {% endif %}
+
+
+    $("a#aShowTable").hide(); 
+    $("a#aShowLess").hide(); 
+
+    $("a#aHideTable").click(function() 
+    {
+        $("a#aHideTable").hide(); 
+        $("a#aShowTable").show(); 
+        $('table.data tbody tr').hide(); 
+        $("a#aShowMore").css('color', '#aaa'); 
+        $("a#aShowLess").css('color', '#aaa'); 
+    }); 
+    $("a#aShowTable").click(function() 
+    {
+        $("a#aShowTable").hide(); 
+        $("a#aHideTable").show(); 
+        $('table.data tbody tr.row').show(); 
+        if ($("a#aShowLess").css('display') == 'inline')
+            $('table.data tbody tr.morerow').show(); 
+        $("a#aShowMore").css('color', 'rgb(38, 128, 198)'); 
+        $("a#aShowLess").css('color', 'rgb(38, 128, 198)'); 
+    }); 
+
+    {% if data.morerows %}
+      $("a#aShowMore").click(function() 
+      {
+          if ($("a#aHideTable").css('display') == 'inline')
+          {
+            $("a#aShowMore").hide(); 
+            $("a#aShowLess").show(); 
+            $('table.data tr.morerow').show(); 
+          }
+      }); 
+      $("a#aShowLess").click(function() 
+      {
+          if ($("a#aHideTable").css('display') == 'inline')
+          {
+            $("a#aShowMore").show(); 
+            $("a#aShowLess").hide(); 
+            $('table.data tr.morerow').hide(); 
+          }
+      }); 
+    {% else %}
+      $("a#aShowMore").hide(); 
+    {% endif %}
+
 {% endblock %}
