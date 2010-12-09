@@ -83,9 +83,9 @@ def rpcexecute(request, short_name, revision = None):
             if not response:
                 response = HttpResponse()
             
-            response.write("<h3>%s</h3>\n" % str(message["jtraceback"].get("exceptiondescription")).replace("<", "&lt;"))
-            for stackentry in message["jtraceback"]["stackdump"]:
-                response.write("<h3>%s</h3>\n" % re.replace("<", "&lt;", str(stackentry).replace("<", "&lt;")))
+            response.write("<h3>%s</h3>\n" % str(message.get("exceptiondescription")).replace("<", "&lt;"))
+            for stackentry in message["stackdump"]:
+                response.write("<h3>%s</h3>\n" % str(stackentry).replace("<", "&lt;"))
 
         
         # parameter values have been borrowed from http://php.net/manual/en/function.header.php
@@ -105,6 +105,8 @@ def rpcexecute(request, short_name, revision = None):
                     response = HttpResponse()
                 response.write("<h3>Error: httpresponseheader(headerkey='%s', '%s'); headerkey can only have values 'Content-Type' or 'Content-Disposition'</h3>" % (message['headerkey'], message['headervalue']))
 
+    if not response:
+        response = HttpResponse('no output for some reason')
     return response
                 
                 
