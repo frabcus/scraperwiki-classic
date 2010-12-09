@@ -14,7 +14,8 @@ class SW_DataStore
 
         rdata = {}
         data.each_pair do |key, value|
-            if     value == nil
+            rkey = key.gsub(' ', '_')
+            if value == nil
                 rvalue  = ''
             elsif  value.eql?(true )
                 rvalue  = '1'
@@ -23,7 +24,7 @@ class SW_DataStore
             else
                 rvalue  = value.to_s
             end
-            rdata[key] = rvalue ;
+            rdata[rkey] = rvalue ;
         end
         return rdata
     end
@@ -76,6 +77,10 @@ class SW_DataStore
         if unique_keys != nil && !unique_keys.kind_of?(Array)
             return [false, 'unique_keys must be nil or an array']
         end
+
+# the following code is for ensuring that the date and latlng values have the 
+# correct type and converting them into appropriate formated strings
+# (not coded in Ruby as I don't know how, but done in PHP and Python)
 
 ##     if date   is not None :
 ##        if type(date) not in [ datetime.datetime, datetime.date ] :

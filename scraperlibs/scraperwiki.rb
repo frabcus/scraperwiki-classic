@@ -70,6 +70,17 @@ module ScraperWiki
         if ! res[0]
             raise res[1]
         end
+
+        pdata = { }
+        data.each_pair do |key, value|
+            key = key.to_s
+            if value == nil
+                value  = ''
+            else
+                value = value.to_s
+            end
+            pdata[key] = value
+        end
         ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => data})
     end
 

@@ -926,6 +926,8 @@ $(document).ready(function() {
 
     function cgiescape(text) 
     {
+        if (typeof text != 'string')
+            return "&lt;NONSTRING&gt;"; // should convert on server
         return (text ? text.replace(/&/g, '&amp;').replace(/</g, '&lt;') : "");
     }
 
