@@ -1,4 +1,4 @@
-function setupCodeViewer(iLineCount, scraperlanguage) {
+function setupCodeViewer(iLineCount, scraperlanguage, codemirror_url) {
     var oCodeEditor;
     if(iLineCount < 20)
         iLineCount = 20;
@@ -20,10 +20,10 @@ function setupCodeViewer(iLineCount, scraperlanguage) {
         parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
 
         var stylesheets = Array();
-        stylesheets['python'] = ['/media/CodeMirror/contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
-        stylesheets['php'] = ['/media/CodeMirror/contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css']; 
+        stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
+        stylesheets['php'] = [codemirror_url+'contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css']; 
         stylesheets['ruby'] = ['/media/ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
-        stylesheets['html'] = ['/media/CodeMirror/css/xmlcolors.css', '/media/CodeMirror/css/jscolors.css', '/media/CodeMirror/css/csscolors.css', '/media/css/codemirrorcolours.css']; 
+        stylesheets['html'] = [codemirror_url+'css/xmlcolors.css', codemirror_url+'css/jscolors.css', codemirror_url+'css/csscolors.css', '/media/css/codemirrorcolours.css']; 
 
         oCodeEditor = CodeMirror.fromTextArea("txtScraperCode", {
             parserfile: parsers[scraperlanguage],

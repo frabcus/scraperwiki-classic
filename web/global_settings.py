@@ -169,6 +169,7 @@ TEMPLATE_SETTINGS = [
  'MAX_MAP_POINTS',
  'REVISION',
  'VIEW_DOMAIN',
+ 'CODEMIRROR_URL',
 ]
 
 #sparklines and graphs
@@ -187,3 +188,6 @@ DATA_TABLE_ROWS = 10
 RSS_ITEMS = 50
 
 SCREENSHOT_SIZES = {'small': (110, 73), 'medium': (220, 145), 'large': (800, 600)}
+
+CODEMIRROR_VERSION = "0.91"
+CODEMIRROR_URL = "CodeMirror-%s/" % CODEMIRROR_VERSION

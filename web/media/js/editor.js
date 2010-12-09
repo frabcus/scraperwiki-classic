@@ -84,7 +84,7 @@ $(document).ready(function() {
 
         stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['php'] = [codemirror_url+'contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css'];
-        stylesheets['ruby'] = [codemirror_url+'../ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
+        stylesheets['ruby'] = ['/media/ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['html'] = [codemirror_url+'/css/xmlcolors.css', codemirror_url+'/css/jscolors.css', codemirror_url+'/css/csscolors.css', '/media/css/codemirrorcolours.css']; 
 
         indentUnits['python'] = 4;

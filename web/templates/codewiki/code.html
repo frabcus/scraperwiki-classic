@@ -51,5 +51,5 @@
 
 {% block run_script %}
     var selrange = {% if status.matchlines %}{{status.matchlines}}{% else %}[0,0,0,0]{% endif %}; 
-    setupCodeViewer({{ line_count }}, '{{ scraper.language|lower }}');
+    setupCodeViewer({{ line_count }}, '{{ scraper.language|lower }}', '{{MEDIA_URL}}{{settings.CODEMIRROR_URL}}');
 {% endblock %}
