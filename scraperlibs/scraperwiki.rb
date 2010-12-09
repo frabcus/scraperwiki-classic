@@ -81,7 +81,7 @@ module ScraperWiki
             end
             pdata[key] = value
         end
-        ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => data})
+        ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => pdata})
     end
 
 
