@@ -425,9 +425,9 @@ $(document).ready(function() {
               else 
                 writeToConsole(data.content); 
 
-          } else if (data.message_type == "contentheader") {
-              writeToConsole("Header:::", "contentheader"); 
-              writeToConsole(data.content, "contentheader"); 
+          } else if (data.message_type == "httpresponseheader") {
+              writeToConsole("Header:::", "httpresponseheader"); 
+              writeToConsole(data.headerkey + ": " + data.headervalue, "httpresponseheader"); 
           } else {
               writeToConsole(data.content, data.message_type); 
           }
@@ -1038,7 +1038,7 @@ $(document).ready(function() {
         var sExpand = '...more'
 
         var sLongMessage = undefined; 
-        if (sMessageType == 'contentheader') 
+        if (sMessageType == 'httpresponseheader') 
             sShortClassName = 'exception';
 
         if (sMessageType == 'exceptiondump') 

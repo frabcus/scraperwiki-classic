@@ -67,14 +67,19 @@ def rpcexecute(request, short_name, revision = None):
     # we build the response on the fly in case we get a contentheader value before anything happens
     response = None # HttpResponse()
     
+    # can't think of a structure that allows for deferred creation of response object in one place
     for line in runner.stdout:
-        print line
         try:
             message = json.loads(line)
         except:
             pass
             
-        if message['message_type'] == 'exception':
+        if message['message_type'] == "console":
+            if not response:
+                response = HttpResponse()
+            response.write(message["content"])
+        
+        elif message['message_type'] == 'exception':
             if not response:
                 response = HttpResponse()
             
@@ -82,17 +87,23 @@ def rpcexecute(request, short_name, revision = None):
             for stackentry in message["jtraceback"]["stackdump"]:
                 response.write("<h3>%s</h3>\n" % re.replace("<", "&lt;", str(stackentry).replace("<", "&lt;")))
 
-        elif message['message_type'] == "contentheader":
-            if not response:
-                response = HttpResponse(mimetype=re.sub('Content-Type:\s*', '', message['content']))
-            else:
-                response.write("<h3>Error content type added after start of stream: %s</h3>" % message['content'])
         
-        elif message['message_type'] == "console":
-            if not response:
-                response = HttpResponse()
-            
-            response.write(message["content"])
+        # parameter values have been borrowed from http://php.net/manual/en/function.header.php
+        elif message['message_type'] == "httpresponseheader":
+            if message['headerkey'] == 'Content-Type':
+                if not response:
+                    response = HttpResponse(mimetype=message['headervalue'])
+                else:
+                    response.write("<h3>Error: httpresponseheader('%s', '%s') called after start of stream</h3>" % (message['headerkey'], message['headervalue']))
+                    
+            elif message['headerkey'] == 'Content-Disposition':
+                if not response:
+                    response = HttpResponse()
+                response['Content-Disposition'] = message['headervalue']
+            else:
+                if not response:
+                    response = HttpResponse()
+                response.write("<h3>Error: httpresponseheader(headerkey='%s', '%s'); headerkey can only have values 'Content-Type' or 'Content-Disposition'</h3>" % (message['headerkey'], message['headervalue']))
 
     return response
                 

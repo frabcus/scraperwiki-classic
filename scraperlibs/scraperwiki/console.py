@@ -31,9 +31,9 @@ def logMessage (message) :
 
     dumpMessage (message_type = 'console', content = message)
 
-def logContentHeader (message) :
+def logHTTPResponseHeader (headerkey, headervalue) :
 
-    dumpMessage (message_type = 'contentheader', content = message)
+    dumpMessage (message_type = 'httpresponseheader', headerkey = headerkey, headervalue = headervalue)
 
 def logWarning (message) :
 

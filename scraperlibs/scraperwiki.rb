@@ -26,6 +26,10 @@ module ScraperWiki
         ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => data})
     end
 
+    def ScraperWiki.httpresponseheader(headerkey, headervalue)
+        ScraperWiki.dumpMessage({'message_type' => 'httpresponseheader', 'headerkey' => headerkey, 'headervalue' => headervalue})
+    end
+
     def ScraperWiki.scrape (url)
         uri  = URI.parse(url)
         data = Net::HTTP.get(uri)

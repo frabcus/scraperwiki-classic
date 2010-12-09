@@ -30,12 +30,13 @@ class scraperwiki
          )  )  ;
    }
 
-   static function header ($header)
+   static function httpresponseheader ($headerkey, $headervalue)
    {
        scraperwiki::sw_dumpMessage
          (  array
-            (  'message_type' => 'contentheader',
-               'content'      => $header
+            (  'message_type' => 'httpresponseheader',
+               'headerkey'    => $headerkey,
+               'headervalue'  => $headervalue
          )  )  ;
    }
 
