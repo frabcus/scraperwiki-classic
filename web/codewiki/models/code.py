@@ -28,7 +28,7 @@ from django.core.mail import send_mail
 LANGUAGES = (
     ('python', 'Python'),
     ('php', 'PHP'),
-    ('puby', 'Ruby'),
+    ('ruby', 'Ruby'),
 )
 
 WIKI_TYPES = (
