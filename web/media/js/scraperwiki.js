@@ -29,7 +29,7 @@ function setupCodeViewer(iLineCount, scraperlanguage, codemirror_url) {
             parserfile: parsers[scraperlanguage],
             stylesheet: stylesheets[scraperlanguage],
 
-            path: "/media/CodeMirror/js/",
+            path: codemirror_url + "js/",
             textWrapping: true, 
             lineNumbers: true, 
             indentUnit: 4,
