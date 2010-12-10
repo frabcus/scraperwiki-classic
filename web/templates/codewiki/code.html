@@ -1,5 +1,64 @@
 {% extends "codewiki/scraper_base.html" %}
 
+{% block javascript %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/codemirror.js"></script>
+
+    {# codemirror includes #}
+    <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/highlight.js" type="text/javascript"></script> 
+    <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/stringstream.js" type="text/javascript"></script> 
+    <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/tokenize.js" type="text/javascript"></script> 
+
+    <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/parsedummy.js" type="text/javascript"></script> 
+    {% ifequal scraper.language|lower 'python' %}
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}/contrib/python/js/parsepython.js" type="text/javascript"></script> 
+    {% endifequal %}
+    {% ifequal scraper.language|lower 'html' %}
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/parsexml.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/parsecss.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/tokenizejavascript.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/parsejavascript.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/parsehtmlmixed.js" type="text/javascript"></script> 
+    {% endifequal %}
+    {% ifequal scraper.language|lower 'php' %}
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/parsexml.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/parsecss.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/tokenizejavascript.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/parsejavascript.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}js/parsehtmlmixed.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}contrib/php/js/tokenizephp.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}contrib/php/js/parsephp.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}contrib/php/js/parsephphtmlmixed.js" type="text/javascript"></script> 
+    {% endifequal %}
+    {% ifequal scraper.language|lower 'ruby' %}
+        <script src="{{ MEDIA_URL }}ruby-in-codemirror/js/tokenizeruby.js" type="text/javascript"></script> 
+        <script src="{{ MEDIA_URL }}ruby-in-codemirror/js/parseruby.js" type="text/javascript"></script> 
+    {% endifequal %}
+
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/codeviewer.js?{{settings.REVISION}}"></script>		
+{% endblock %}
+
+{% block css %}
+    {% ifequal scraper.language|lower 'python' %}
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}contrib/python/css/pythoncolors.css"/> 
+    {% endifequal %}
+    {% ifequal scraper.language|lower 'html' %}
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}css/xmlcolors.css"/> 
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}css/jscolors.css"/> 
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}css/csscolors.css"/> 
+    {% endifequal %}
+    {% ifequal scraper.language|lower 'php' %}
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}css/xmlcolors.css"/> 
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}css/jscolors.css"/> 
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}css/csscolors.css"/> 
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}contrib/php/css/phpcolors.css"/> 
+    {% endifequal %}
+    {% ifequal scraper.language|lower 'ruby' %}
+        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}ruby-in-codemirror/css/rubycolors.css"/> 
+    {% endifequal %}
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/codemirrorcolours.css"/> 
+{% endblock %}
+
+
 {% block tab %}
 <div class="tab_tools">
 
@@ -44,12 +103,35 @@
 {% endif %}
 </div>
 
-<div class="code_viewer">
-  <textarea id="txtScraperCode">{{ status.code }}</textarea>
+
+<pre id="inputcode_main">{{ status.code }}</pre>
+
+<div id="codepreviewer"> 
+  <div id="linenumbers"></div> 
+  <pre id="output"></pre> 
 </div>
+
+
 {% endblock %}
 
 {% block run_script %}
-    var selrange = {% if status.matchlines %}{{status.matchlines}}{% else %}[0,0,0,0]{% endif %}; 
-    setupCodeViewer({{ line_count }}, '{{ scraper.language|lower }}', '{{MEDIA_URL}}{{settings.CODEMIRROR_URL}}');
+    {% ifequal scraper.language|lower 'python' %}
+        var Parser = PythonParser; 
+    {% endifequal %}
+    {% ifequal scraper.language|lower 'html' %}
+        var Parser = HTMLMixedParser; 
+    {% endifequal %}
+    {% ifequal scraper.language|lower 'php' %}
+        var Parser = PHPHTMLMixedParser; 
+    {% endifequal %}
+    {% ifequal scraper.language|lower 'ruby' %}
+        //var Parser = RubyParser; 
+        var Parser = DummyParser; 
+    {% endifequal %}
+
+    $(document).ready(highlightCode); 
+
+    //var selrange = {% if status.matchlines %}{{status.matchlines}}{% else %}[0,0,0,0]{% endif %}; 
+    //setupCodeViewer({{ line_count }}, '{{ scraper.language|lower }}', '{{MEDIA_URL}}{{settings.CODEMIRROR_URL}}');
+
 {% endblock %}

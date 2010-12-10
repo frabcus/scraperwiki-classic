@@ -469,6 +469,7 @@ def code(request, wiki_type, short_name):
 
     return render_to_response('codewiki/code.html', dictionary, context_instance=RequestContext(request))
 
+
 def tags(request, wiki_type, short_name):
     if wiki_type == 'scraper':
         code_object = get_code_object_or_none(models.Scraper, short_name)
