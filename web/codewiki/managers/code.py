@@ -15,7 +15,7 @@ class CodeManager(models.Manager):
     #use_for_related_fields = True
 
     def get_query_set(self):
-        return super(CodeManager, self).get_query_set().filter(deleted=False, published=True)
+        return super(CodeManager, self).get_query_set().filter(deleted=False)
 
         	
     def owns(self):

@@ -22,8 +22,8 @@ try:                import json
 except ImportError: import simplejson as json
 
 
-def rpcexecute(request, short_name, revision = None):
-    
+
+def MakeRunner(request, short_name, revision = None):
     scraper = get_object_or_404(models.Code.objects, short_name=short_name)
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
     failed = False
@@ -58,26 +58,55 @@ def rpcexecute(request, short_name, revision = None):
     #    runner.stdin.write("\n\n%s(**%s)\n" % (func, repr(rargs)))
 
     runner.stdin.close()
+    return runner
 
-    response = HttpResponse()
+
+def rpcexecute(request, short_name, revision = None):
+    runner = MakeRunner(request, short_name, revision)
+
+    # we build the response on the fly in case we get a contentheader value before anything happens
+    response = None # HttpResponse()
+    
+    # can't think of a structure that allows for deferred creation of response object in one place
     for line in runner.stdout:
         try:
             message = json.loads(line)
-            if message['message_type'] == 'fail':
-                failed = True
-            elif message['message_type'] == 'exception':
-                response.write("<h3>%s</h3>\n" % str(message["jtraceback"].get("exceptiondescription")).replace("<", "&lt;"))
-                for stackentry in message["jtraceback"]["stackdump"]:
-                    response.write("<h3>%s</h3>\n" % re.replace("<", "&lt;", str(stackentry).replace("<", "&lt;")))
-            elif message['message_type'] == "executionstatus":
-                pass
-
-            elif message['message_type'] == "console":
-                response.write(message["content"])
-
         except:
             pass
+            
+        if message['message_type'] == "console":
+            if not response:
+                response = HttpResponse()
+            response.write(message["content"])
         
+        elif message['message_type'] == 'exception':
+            if not response:
+                response = HttpResponse()
+            
+            response.write("<h3>%s</h3>\n" % str(message.get("exceptiondescription")).replace("<", "&lt;"))
+            for stackentry in message["stackdump"]:
+                response.write("<h3>%s</h3>\n" % str(stackentry).replace("<", "&lt;"))
+
+        
+        # parameter values have been borrowed from http://php.net/manual/en/function.header.php
+        elif message['message_type'] == "httpresponseheader":
+            if message['headerkey'] == 'Content-Type':
+                if not response:
+                    response = HttpResponse(mimetype=message['headervalue'])
+                else:
+                    response.write("<h3>Error: httpresponseheader('%s', '%s') called after start of stream</h3>" % (message['headerkey'], message['headervalue']))
+                    
+            elif message['headerkey'] == 'Content-Disposition':
+                if not response:
+                    response = HttpResponse()
+                response['Content-Disposition'] = message['headervalue']
+            else:
+                if not response:
+                    response = HttpResponse()
+                response.write("<h3>Error: httpresponseheader(headerkey='%s', '%s'); headerkey can only have values 'Content-Type' or 'Content-Disposition'</h3>" % (message['headerkey'], message['headervalue']))
+
+    if not response:
+        response = HttpResponse('no output for some reason')
     return response
                 
                 

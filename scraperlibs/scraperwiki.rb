@@ -26,6 +26,10 @@ module ScraperWiki
         ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => data})
     end
 
+    def ScraperWiki.httpresponseheader(headerkey, headervalue)
+        ScraperWiki.dumpMessage({'message_type' => 'httpresponseheader', 'headerkey' => headerkey, 'headervalue' => headervalue})
+    end
+
     def ScraperWiki.scrape (url)
         uri  = URI.parse(url)
         data = Net::HTTP.get(uri)
@@ -66,7 +70,18 @@ module ScraperWiki
         if ! res[0]
             raise res[1]
         end
-        ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => data})
+
+        pdata = { }
+        data.each_pair do |key, value|
+            key = key.to_s
+            if value == nil
+                value  = ''
+            else
+                value = value.to_s
+            end
+            pdata[key] = value
+        end
+        ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => pdata})
     end
 
 

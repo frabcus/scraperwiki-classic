@@ -30,6 +30,16 @@ class scraperwiki
          )  )  ;
    }
 
+   static function httpresponseheader ($headerkey, $headervalue)
+   {
+       scraperwiki::sw_dumpMessage
+         (  array
+            (  'message_type' => 'httpresponseheader',
+               'headerkey'    => $headerkey,
+               'headervalue'  => $headervalue
+         )  )  ;
+   }
+
    static function save ($unique_keys, $data, $date = null, $latlng = null)
    {
       $ds      = SW_DataStoreClass::create () ;
@@ -37,7 +47,7 @@ class scraperwiki
       $result  = $ds->save ($unique_keys, $data, $date, $latlng) ;
       if (! $result[0])
          throw new Exception ($result[1]) ;
-   
+
       scraperwiki::sw_dumpMessage (array('message_type' => 'data', 'content' => $data)) ;
    }
 

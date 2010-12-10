@@ -1,42 +1,32 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
    "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en">
-	<head>
-	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
-		{% if has_map %}
-	            <script type="text/javascript" src="http://www.openlayers.org/api/OpenLayers.js"></script>                                        
-                <script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>                                      		                                
-		{% endif %}
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>		
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jeditable.js"></script>		
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/flexigrid.js"></script>			
-		<script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror/js/codemirror.js"></script>
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>		
-		<script type="text/javascript" src="{{ MEDIA_URL }}js/language-choice.js?{{settings.REVISION}}"></script>		
-            <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui.css" />
-	        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/flexigrid.css" />
-	        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
-	    {% block css %}{% endblock %}   
-	    {% block rss %}{% endblock %}
-	    {% block javascript %}{% endblock %}
-	    <title>{% block title %}{% endblock %} | ScraperWiki</title>
-	</head>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>		
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jeditable.js"></script>		
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/flexigrid.js"></script>			
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>		
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/language-choice.js?{{settings.REVISION}}"></script>		
+    {% block javascript %}{% endblock %}
+
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/flexigrid.css" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
+    {% block css %}{% endblock %}   
+
+    {% block rss %}{% endblock %}
+
+    <title>{% block title %}{% endblock %} | ScraperWiki</title>
+</head>
+
 	<body>
 	    <div class="banner">
 	        <ul class="user_menu">
-
-                {% if npeople %}
-                  {% ifequal npeople 1 %}
-                    <li><small>{{ npeople }} person at work</small></li>
-                  {% else %}
-                    <li><small>{{ npeople }} people at work</small></li>
-                  {% endifequal %}
-                {% endif %}
-
 				{% if user.is_authenticated %}
 				  <li>signed in as <a href="{% url profiles_profile_detail user.username %}">{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</a></li>
 				  {% comment %}
@@ -118,7 +108,9 @@
                 </ul>
 			</div>
 	    </div>
+
 	    {% block above_page %}{% endblock %}		    
+
 		<div id="divPage">
 		    <div id="divInfo">
 		        {% if info_messages %}
@@ -211,10 +203,10 @@
 			</div>
 		{% endblock %}
 		
-	    <script type="text/javascript" defer="defer">
-	        {% block run_script %}
-{% endblock %}
-        </script>
+<script type="text/javascript" defer="defer">
+    {% block run_script %}{% endblock %}
+</script>
+
         {% if not debug %}
             <script type="text/javascript">
                 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
