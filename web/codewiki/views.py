@@ -453,21 +453,33 @@ def code(request, wiki_type, short_name):
     mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
     status = mercurialinterface.getstatus(scraper, rev)
 
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
-    scraper_tags = Tag.objects.get_for_object(scraper)
 
-    dictionary = { 'scraper_tags': scraper_tags, 'selected_tab': 'history', 'scraper': scraper,
-                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
+    context = { 'selected_tab': 'history', 'scraper': scraper }
 
     # overcome lack of subtract in template
     if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
         status["modifiedcommitdifference"] = status["filemodifieddate"] - status["prevcommit"]["date"]
 
-    dictionary["status"] = status
-    dictionary["line_count"] = status["code"].count("\n") + 3
+    context["status"] = status
+    context["code"] = status.get('code')
+    
+    context['error_messages'] = [ ]
+    
+    try: otherrev = int(request.GET.get('otherrev', '-1'))
+    except ValueError: otherrev = None
+    
+    if otherrev != -1:
+        try:
+            reversion = mercurialinterface.getreversion(otherrev)
+            context["othercode"] = reversion["text"].get(status['scraperfile'])
+        except IndexError:
+            context['error_messages'].append('Bad otherrev index')
 
-    return render_to_response('codewiki/code.html', dictionary, context_instance=RequestContext(request))
+    if context.get("othercode"):
+        sqm = difflib.SequenceMatcher(None, context["code"].splitlines(), context["othercode"].splitlines())
+        context['matcheropcodes'] = json.dumps(sqm.get_opcodes())
+    
+    return render_to_response('codewiki/code.html', context, context_instance=RequestContext(request))
 
 
 def tags(request, wiki_type, short_name):

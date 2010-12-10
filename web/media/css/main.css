@@ -167,8 +167,6 @@ br.clear {clear:both;}
 
 /* Scraper pages */
 .code_viewer {border:solid 1px #ccc; position:relative;}
-.CodeMirror-line-numbers {width: 2.2em;color: #aaa;background-color: #ddd;text-align: right;
-        padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;line-height: 1.1em;}
 
 .data_viewer {position:relative;}
 
@@ -398,10 +396,12 @@ a.historysave { padding-left:17px; background:url(../images/icons/disk.png) no-r
 
 span.historyexception { color:white; background:#d00; padding-left:2px; padding-right:2px;}
 
-#inputcode_main { display:none } 
-div#codepreviewer div#linenumbers { float: left; width: 2.2em;color: #aaa;background-color: #ddd;text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
-div#codepreviewer pre#output { padding-top:3px; border-top: thin #ddd solid; font-family: monospace;font-size: 10pt; } 
-
+#inputcode_main, #inputcode_other { display:none } 
+#otherlinenumbers { float: left; border-top: thin #ddd solid; width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+#linenumbers { float: left; border-top: thin #ddd solid; width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+#codepreviewer .insert { background:#e2fae2; } 
+#codepreviewer .delete { background:#fae2e2; } 
+#codepreviewer #output { border-top: thin #ddd solid; padding-top:4px; font-family: monospace;font-size: 10pt; } 
 
 
 #basic-modal-content {display:none;}

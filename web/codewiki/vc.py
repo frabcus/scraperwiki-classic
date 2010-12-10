@@ -217,13 +217,8 @@ class MercurialInterface:
             status["code"] = fin.read()
             fin.close()
             status.update(self.getfilestatus(scraper))
-
-        if "prevcommit" in status:
-            reversion = self.getreversion(status["prevcommit"]["rev"])
-            prevcode = reversion["text"].get(scraperfile)
-            if prevcode and status["code"]:
-                status["matchlines"] = list(DiffLineSequenceChanges(prevcode, status["code"]))
         
+        status['scraperfile'] = scraperfile
         return status
 
 

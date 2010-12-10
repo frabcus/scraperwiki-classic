@@ -1,68 +1,85 @@
 
-function highlightCode()
+function highlightCode(code, Parser)
 {
     var lineNo = 1; 
-    var output = $('div#codepreviewer pre#output')[0]; //document.getElementById("output");
-    var numbers = $('div#codepreviewer div#linenumbers')[0]; //document.getElementById("numbers");
+    var output = $('#codepreviewer #output'); 
+    var numbers = $('#codepreviewer #linenumbers')
  
     function addLine(line) 
     {
-        numbers.appendChild(document.createTextNode(String(lineNo++)));
-        numbers.appendChild(document.createElement("BR"));
+        numbers.append(String(lineNo++)+'<br>'); 
+        var kline = $('<span>').css('background-color', '#fae7e7'); 
         for (var i = 0; i < line.length; i++) 
-            output.appendChild(line[i]);
-        output.appendChild(document.createElement("BR"));
+            output.append(line[i]);
+        output.append('<br>')
     }
-    highlightText($('#inputcode_main').text(), addLine, Parser); 
+    highlightText(code, addLine, Parser); 
 }
 
+function highlightOtherCode(code, othercode, matcheropcodes, Parser)
+{
+    var output = $('#codepreviewer #output'); 
+    var numbers = $('#codepreviewer #linenumbers'); 
+    var othernumbers = $('#codepreviewer #otherlinenumbers'); 
 
+    // syntax highlight the two versions of the code
+    var codelines = [ ]
+    var othercodelines = [ ]
+    highlightText(code, function(line) { codelines.push(line) }, Parser); 
+    highlightText(othercode, function(line) { othercodelines.push(line) }, Parser); 
 
-function setupCodeViewer(iLineCount, scraperlanguage, codemirror_url) {
-    var oCodeEditor;
-    if(iLineCount < 20)
-        iLineCount = 20;
+    var flinepadding = 2; 
+    for (var k = 0; k < matcheropcodes.length; k++)
+    {
+        var mc = matcheropcodes[k];  // set from get_opcodes from http://docs.python.org/library/difflib.html
+        var tag = mc[0]; i1 = mc[1]; i2 = mc[2]; j1 = mc[3]; j2 = mc[4]; 
+        if (tag == "equal")
+        {
+            var li1 = (i1 == 0 ? 0 : i1 + flinepadding); 
+            var li2 = (i2 == codelines.length ? i2 : i2 - flinepadding);
+            for (var i = i1; i < i2; i++)
+            {
+                var eclass = ((i >= li1) && (i < li2) ? 'fequal' : 'equal'); 
+                numbers.append('<span class="'+eclass+'">'+String(i+1)+'<br></span>'); 
+                othernumbers.append('<span class="'+eclass+'">'+String(i-i1+j1+1)+'<br></span>'); 
 
-    var selrangefunc = function() {
-        if (!((selrange[2] == 0) && (selrange[3] == 0))){
-            linehandlestart = oCodeEditor.nthLine(selrange[0] + 1); 
-            linehandleend = oCodeEditor.nthLine(selrange[2] + 1); 
-            oCodeEditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
-        }; 
-    }; 
+                var fline = $('<span class="'+eclass+'">'); 
+                var line = codelines[i]; 
+                for (var m = 0; m < line.length; m++) 
+                    fline.append(line[m]);
+                fline.append('<br>'); 
+                output.append(fline);
+            }
+        }
 
-    $(document).ready(function(){
+        else
+        {
+            for (var i = i1; i < i2; i++)
+            {
+                numbers.append('<span class="insert">'+String(i+1)+'<br></span>'); 
+                othernumbers.append('<span class="insert">+<br></span>'); 
 
-        var parsers = Array();
-        parsers['python'] = '../contrib/python/js/parsepython.js';
-        parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js'];
-        parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
-        parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
+                var fline = $('<span class="insert">')
+                var line = codelines[i]; 
+                for (var m = 0; m < line.length; m++) 
+                    fline.append(line[m]);
+                fline.append('<br>'); 
+                output.append(fline);
+            }
 
-        var stylesheets = Array();
-        stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
-        stylesheets['php'] = [codemirror_url+'contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css']; 
-        stylesheets['ruby'] = ['/media/ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
-        stylesheets['html'] = [codemirror_url+'css/xmlcolors.css', codemirror_url+'css/jscolors.css', codemirror_url+'css/csscolors.css', '/media/css/codemirrorcolours.css']; 
+            for (var j = j1; j < j2; j++)
+            {
+                numbers.append('<span class="delete">-<br></span>'); 
+                othernumbers.append('<span class="delete">'+String(j+1)+'<br></span>'); 
 
-        oCodeEditor = CodeMirror.fromTextArea("txtScraperCode", {
-            parserfile: parsers[scraperlanguage],
-            stylesheet: stylesheets[scraperlanguage],
-
-            path: codemirror_url + "js/",
-            textWrapping: true, 
-            lineNumbers: true, 
-            indentUnit: 4,
-            readOnly: true,
-            tabMode: "spaces", 
-            autoMatchParens: true,
-            width: '100%',
-            height: iLineCount + 'em', 
-            parserConfig: {'pythonVersion': 2, 'strictErrors': true}, 
-
-            // this is called once the codemirror window has finished initializing itself, (though happens to early, so that the selection gets deselected.  should file a bug)
-            initCallback: function() { setTimeout(selrangefunc, 1000); }
-        });
-    });
+                var fline = $('<span class="delete">')
+                var line = othercodelines[j]; 
+                for (var m = 0; m < line.length; m++) 
+                    fline.append(line[m]);
+                fline.append('<br>'); 
+                output.append(fline);
+            }
+        }
+    }
 }
 

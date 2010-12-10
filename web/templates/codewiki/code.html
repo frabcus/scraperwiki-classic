@@ -103,14 +103,23 @@
 {% endif %}
 </div>
 
-
-<pre id="inputcode_main">{{ status.code }}</pre>
+<ul class="code_about">
+    <li><a id="aHideEquals" class="edit">[hide equal lines]</a></li>
+    <li><a id="aShowEquals" class="edit">[show equal lines]</a></li>
+</ul>
 
 <div id="codepreviewer"> 
+  {% if othercode %}
+    <div id="otherlinenumbers"></div> 
+  {% endif %}
   <div id="linenumbers"></div> 
   <pre id="output"></pre> 
 </div>
 
+<pre id="inputcode_main">{{ code }}</pre>
+{% if othercode %}
+  <pre id="inputcode_other">{{ othercode }}</pre>
+{% endif %}
 
 {% endblock %}
 
@@ -129,9 +138,28 @@
         var Parser = DummyParser; 
     {% endifequal %}
 
-    $(document).ready(highlightCode); 
+    $(document).ready(function() 
+    {
+    {% if matcheropcodes %}
+        var matcheropcodes = {{matcheropcodes|safe}}; 
+        highlightOtherCode($('#inputcode_main').text(), $('#inputcode_other').text(), matcheropcodes, Parser); 
+    {% else %}
+        highlightCode($('#inputcode_main').text(), Parser); 
+    {% endif %}
+    }); 
 
-    //var selrange = {% if status.matchlines %}{{status.matchlines}}{% else %}[0,0,0,0]{% endif %}; 
-    //setupCodeViewer({{ line_count }}, '{{ scraper.language|lower }}', '{{MEDIA_URL}}{{settings.CODEMIRROR_URL}}');
+    $("a#aShowEquals").hide(); 
+    $("a#aHideEquals").click(function() 
+    {
+        $('#codepreviewer .fequal').hide(); 
+        $("a#aHideEquals").hide(); 
+        $("a#aShowEquals").show(); 
+    }); 
+    $("a#aShowEquals").click(function() 
+    {
+        $("a#aHideEquals").show(); 
+        $("a#aShowEquals").hide(); 
+        $('#codepreviewer .fequal').show(); 
+    }); 
 
 {% endblock %}
