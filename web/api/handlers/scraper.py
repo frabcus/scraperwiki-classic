@@ -24,9 +24,8 @@ class GetInfo(APIBase):
     def convert_run_event(self, runevent):
         result = { "runid":runevent.run_id, "run_started":runevent.run_started, 
                    "records_produced":runevent.records_produced, "pages_scraped":runevent.pages_scraped, 
+                   "still_running":(pid != -1), "last_update":runevent.run_ended, 
                  }
-        if runevent.run_ended:
-            result['run_ended'] = runevent.run_ended
         if runevent.exception_message:
             result['exception_message'] = runevent.exception_message
         return result
