@@ -17,11 +17,11 @@ test -e uml.cfg ||
 	exit	1
 }
 
-test `id -u` = 0 ||
-{
-	echo	bootuml: must be run as root
-	exit	1
-}
+#test `id -u` = 0 ||
+#{
+#	echo	bootuml: must be run as root
+#	exit	1
+#}
 
 unm=$1
 

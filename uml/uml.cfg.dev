@@ -3,6 +3,7 @@ host	= 212.84.75.28
 port	= 9000
 umllist	= uml001
 confurl	= http://dev.scraperwiki.com/whitelist/config
+path	= /scraperwiki/live/scrapers,/scraperwiki/live/scraperlibs
 
 [twister]
 statusurl = http://dev.scraperwiki.com/scrapers/twister/status

@@ -3,7 +3,7 @@ host	= 127.0.0.1
 port	= 9000
 umllist	= uml001
 confurl	= allwhite
-path    = /home/goatchurch/scraperwiki/scraperlibs
+path    = ../scraperlibs
 
 [twister]
 statusurl = http://localhost:8000/scrapers/twister/status
@@ -54,15 +54,6 @@ count	= 25
 host	= 127.0.0.1
 tap	= 192.168.254.101
 eth	= 192.168.254.1
-port	= 9001
-via	= 9001
-mem	= 128M
-count	= 25
-
-[unknown-00-21-e9-d9-c5-07.config]
-host	= 127.0.0.1
-tap	= 127.0.0.1
-eth	= 127.0.0.1
 port	= 9001
 via	= 9001
 mem	= 128M

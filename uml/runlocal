@@ -3,8 +3,66 @@
 #  Run the dispatcher, proxy, firebox and controller servers locally, .ie.,
 #  without using a real UML
 #
-mkdir -p ./var/log
-mkdir -p ./var/run
+[ -f uml.cfg ] || {
+	echo	"runlocal: uml.cfg not found"
+	exit	1
+	}
+
+cmp -s uml.cfg uml.cfg.local || {
+	echo	"runlocal: uml.cfg different to uml.cfg.local"
+	exit	1
+	}
+
+[ -f controller/uml.cfg ] || {
+	echo	"runlocal: controller/uml.cfg not found"
+	exit	1
+	}
+
+[ -h controller/uml.cfg ] && {
+	echo	"runlocal: controller/uml.cfg must not be a symbolic link"
+	exit	1
+	}
+
+cmp -s controller/uml.cfg uml.cfg.local || {
+	echo	"runlocal: controller/uml.cfg different to uml.cfg.local"
+	exit	1
+	}
+
+[ -f twister/orbited.cfg ] || {
+	echo	"runlocal: twister/orbited.cfg not found"
+	exit	1
+}
+
+[ -f dispatcher/swlogger.py ] || {
+	echo	"runlocal: dispatcher/swlogger.py not found"
+	exit	1
+}
+
+[ -f firestarter/swlogger.py ] || {
+	echo	"runlocal: firestarter/swlogger.py not found"
+	exit	1
+}
+
+[ -f httpproxy/swlogger.py ] || {
+	echo	"runlocal: httpproxy/swlogger.py not found"
+	exit	1
+}
+
+[ -f controller/swlogger.py ] || {
+	echo	"runlocal: controller/swlogger.py not found"
+	exit	1
+}
+
+[ -h controller/swlogger.py ] && {
+	echo	"runlocal: controller/swlogger.py must not be a symbolic link"
+	exit	1
+}
+
+
+rm	-rf	./var/log
+rm	-rf	./var/run
+mkdir 	-p 	./var/log
+mkdir 	-p 	./var/run
 
 ./etc/local.d/controller	restart
 ./etc/local.d/dataproxy		restart
