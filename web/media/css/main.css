@@ -403,6 +403,10 @@ span.historyexception { color:white; background:#d00; padding-left:2px; padding-
 #codepreviewer .delete { background:#fae2e2; } 
 #codepreviewer #output { border-top: thin #ddd solid; padding-top:4px; font-family: monospace;font-size: 10pt; } 
 
+ul.commitlist { text-align: left; padding:0; margin:0} 
+ul.commitlist li { padding:0 } 
+ul.commitlist li.current a, ul.commitlist li.current span { font-weight:bold; background-color: #eee; } 
+ul.commitlist li.neweditingsession span { background-color:black; color:white; font-size:50%; }
 
 #basic-modal-content {display:none;}
 

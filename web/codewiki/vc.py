@@ -136,7 +136,9 @@ class MercurialInterface:
 
     
     def getctxrevisionsummary(self, ctx):
-        data = { "rev":ctx.rev(), "userid":ctx.user(), "description":ctx.description() }
+        description = ctx.description()
+        data = { "rev":ctx.rev(), "userid":ctx.user(), "description":description }
+        data['editingsession'] = description.split('|||')[0]
         epochtime, offset = ctx.date()
         ltime = time.localtime(epochtime)
         data["date"] = datetime.datetime(*ltime[:7])

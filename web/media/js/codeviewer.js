@@ -29,6 +29,7 @@ function highlightOtherCode(code, othercode, matcheropcodes, Parser)
     highlightText(othercode, function(line) { othercodelines.push(line) }, Parser); 
 
     var flinepadding = 2; 
+    var fequallines = 0; 
     for (var k = 0; k < matcheropcodes.length; k++)
     {
         var mc = matcheropcodes[k];  // set from get_opcodes from http://docs.python.org/library/difflib.html
@@ -39,7 +40,12 @@ function highlightOtherCode(code, othercode, matcheropcodes, Parser)
             var li2 = (i2 == codelines.length ? i2 : i2 - flinepadding);
             for (var i = i1; i < i2; i++)
             {
-                var eclass = ((i >= li1) && (i < li2) ? 'fequal' : 'equal'); 
+                var eclass = 'equal'; 
+                if ((i >= li1) && (i < li2))
+                {
+                    eclass =  'fequal'; 
+                    fequallines++; 
+                }
                 numbers.append('<span class="'+eclass+'">'+String(i+1)+'<br></span>'); 
                 othernumbers.append('<span class="'+eclass+'">'+String(i-i1+j1+1)+'<br></span>'); 
 
@@ -81,5 +87,6 @@ function highlightOtherCode(code, othercode, matcheropcodes, Parser)
             }
         }
     }
+    return fequallines; 
 }
 

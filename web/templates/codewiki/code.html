@@ -60,32 +60,63 @@
 
 
 {% block tab %}
-<div class="tab_tools">
+<ul class="commitlist">
 
-{# viewing a revision #}
 {% if status.currcommit %}
-  Version from: <b>{{status.currcommit.date|date:"H:i, j F Y" }}</b>
-  <i>({{status.currcommit.description}})</i>
-
   {% if status.prevcommit %}
-    <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}?rev={{status.prevcommit.rev}}">previous commit</a>
-  {% endif %}
+    <li>
+      <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}?rev={{status.prevcommit.rev}}&otherrev={{status.currcommit.rev}}">{{status.prevcommit.date|date:"H:i, j F Y" }}</a>
+      {% if status.prevcommit.user %} 
+        edited by <a href="{% url profiles_profile_detail status.prevcommit.user.username %}" class="historyuser">
+        {% if status.prevcommit.user.get_profile.name %}{{status.prevcommit.user.get_profile.name}}{% else %}{{status.prevcommit.user.username}}{% endif %}
+        </a>
+      {% endif %}
+    </li>
 
-  {% if status.nextcommit %}
-    <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}?rev={{status.nextcommit.rev}}">next commit</a>
-  {% else %}
-    <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}">last saved version</a>
-  {% endif %}
-
-
-{# Viewing the current saved version #}
-{% else %}
-  Saved: {{status.filemodifieddate|date:"H:i, j F Y" }}, 
-  {% if status.prevcommit %}
-    Committed: <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}?rev={{status.prevcommit.rev}}">{{status.prevcommit.date|date:"H:i, j F Y" }}</a>
-    <i>({{status.prevcommit.description}})</i>
+    {% ifnotequal status.prevcommit.editingsession status.currcommit.editingsession %}
+      <li class="neweditingsession"><span>new enditing session</span></li>
+    {% endifnotequal %}
   {% endif %}
   
+  <li class="current">
+  {% if matcheropcodes %}
+    <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}?rev={{status.currcommit.rev}}">{{status.currcommit.date|date:"H:i, j F Y" }}</a>
+  {% else %}
+    <span>{{status.currcommit.date|date:"H:i, j F Y" }}</span>
+  {% endif %}
+  {% if status.currcommit.user %} 
+    edited by <a href="{% url profiles_profile_detail status.currcommit.user.username %}" class="historyuser">
+    {% if status.currcommit.user.get_profile.name %}{{status.currcommit.user.get_profile.name}}{% else %}{{status.currcommit.user.username}}{% endif %}
+    </a>
+  {% endif %}
+  </li>
+
+  {% if status.nextcommit %}
+    {% ifnotequal status.nextcommit.editingsession status.currcommit.editingsession %}
+      <li class="neweditingsession"><span>new enditing session</span></li>
+    {% endifnotequal %}
+
+    <li>
+      <a href="{% url scraper_code scraper.wiki_type scraper.short_name %}?rev={{status.nextcommit.rev}}&otherrev={{status.currcommit.rev}}">{{status.nextcommit.date|date:"H:i, j F Y" }}</a>
+      {% if status.nextcommit.user %} 
+        edited by <a href="{% url profiles_profile_detail status.nextcommit.user.username %}" class="historyuser">
+        {% if status.nextcommit.user.get_profile.name %}{{status.nextcommit.user.get_profile.name}}{% else %}{{status.nextcommit.user.username}}{% endif %}
+        </a>
+      {% endif %}
+    </li>
+
+  {% else %}
+    <li><a href="{% url scraper_code scraper.wiki_type scraper.short_name %}">last saved version</a></li>
+  {% endif %}
+
+{% else %}
+
+  {% if status.prevcommit %}
+    <li><a href="{% url scraper_code scraper.wiki_type scraper.short_name %}?rev={{status.prevcommit.rev}}">{{status.prevcommit.date|date:"H:i, j F Y" }}</a></li>
+  {% endif %}
+
+  <li class="current"><span>
+  Saved: {{status.filemodifieddate|date:"H:i, j F Y" }}, 
   {% if status.ismodified %}
     (modified)
   {% else %}
@@ -99,14 +130,17 @@
       (never committed)
     {% endif %}
   {% endif %}
+  </span></li>
 
 {% endif %}
-</div>
+</ul>
 
+{% if matcheropcodes %}
 <ul class="code_about">
     <li><a id="aHideEquals" class="edit">[hide equal lines]</a></li>
     <li><a id="aShowEquals" class="edit">[show equal lines]</a></li>
 </ul>
+{% endif %}
 
 <div id="codepreviewer"> 
   {% if othercode %}
@@ -142,7 +176,9 @@
     {
     {% if matcheropcodes %}
         var matcheropcodes = {{matcheropcodes|safe}}; 
-        highlightOtherCode($('#inputcode_main').text(), $('#inputcode_other').text(), matcheropcodes, Parser); 
+        var fequallines = highlightOtherCode($('#inputcode_main').text(), $('#inputcode_other').text(), matcheropcodes, Parser); 
+        if (fequallines < 5)
+            $("a#aHideEquals").hide(); // suppress a link that isn't going to achieve anything
     {% else %}
         highlightCode($('#inputcode_main').text(), Parser); 
     {% endif %}
