@@ -3,18 +3,18 @@
 
 
 $USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]' ;
-$cache       = undef ;
-$trace       = undef ;
-$script      = undef ;
-$path        = undef ;
-$scraperID   = undef ;
-$runID       = undef ;
-$httpProxy   = undef ;
-$httpsProxy  = undef ;
-$ftpProxy    = undef ;
-$datastore   = undef ;
-$uid         = undef ;
-$gid         = undef ;
+$cache       = null ;
+$trace       = null ;
+$script      = null ;
+$path        = null ;
+$scraperID   = null ;
+$runID       = null ;
+$httpProxy   = null ;
+$httpsProxy  = null ;
+$ftpProxy    = null ;
+$datastore   = null ;
+$uid         = null ;
+$gid         = null ;
 
 for ($idx = 1 ; $idx < count($argv) ; $idx += 1)
 {
@@ -85,8 +85,6 @@ for ($idx = 1 ; $idx < count($argv) ; $idx += 1)
    exit  (1) ;
 }
 
-// need to comment out for local version
-$logfd = fopen("/proc/self/fd/3", "w") ;
 if (!is_null($gid))
 {
    posix_setgid  ($gid) ;

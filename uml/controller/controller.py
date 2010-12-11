@@ -913,6 +913,7 @@ def autoFirewall () :
         m = re_resolv.match (line)
         if m :
             rules.append ('-A OUTPUT -p udp -d %s --dport 53 -j ACCEPT' % m.group(1))
+    rules.append ('-A OUTPUT -p icmp -j ACCEPT')
     rules.append ('-A OUTPUT -j REJECT')
     rules.append ('COMMIT')
 
