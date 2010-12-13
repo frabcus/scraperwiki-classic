@@ -45,7 +45,7 @@
              {% if user.is_staff %}
                  <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post" class="staff">
                      <input type="hidden" name="screenshoot_scraper" value="1" />
-                     <input type="submit" id="btnScreenshootScraper" class="danger" value="Screenshoot this scraper?" />
+                     <input type="submit" id="btnScreenshootScraper" class="danger" value="Screenshoot this view?" />
                      <p>Take a screenshot of this view. (Staff only)</p>
                  </form>
              {% endif %}
