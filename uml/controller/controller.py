@@ -99,7 +99,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         @param  args    : Arguments to format string
         """
 
-        BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
+        BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, '%5d: %s' % (os.getpid(), format), *args)
         sys.stderr.flush ()
 
     def storeEnvironment (self, rfile, headers, method, query) :
@@ -382,6 +382,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         try     :
             lock.acquire()
             wfile = scrapersByRunID[params['runid'][0]]['wfile']
+        except  :
+            pass
         finally :
             lock.release()
 
@@ -747,7 +749,11 @@ class ScraperController (BaseController) :
                                     if l != '' :
                                         msg = json.loads(l)
                                         if msg['message_type'] == 'exception' :
-                                            swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = msg['content'], arg2 = msg['content_long'])
+                                            try    : arg1 = msg['content']
+                                            except : arg1 = '(no content)'
+                                            try    : arg2 = msg['content_long']
+                                            except : arg2 = '(no content_long)'
+                                            swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = arg1, arg2 = arg2)
 
                 #  Capture the child user and system times as best we can, since this
                 #  is summed over all children.
