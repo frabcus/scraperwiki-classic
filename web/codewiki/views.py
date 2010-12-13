@@ -6,6 +6,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
+from django.core.management import call_command
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
 from django.db import IntegrityError
@@ -79,7 +80,6 @@ def scraper_overview(request, short_name):
     scraper_requesters = scraper.requesters()    
     scraper_tags = Tag.objects.get_for_object(scraper)
     
-
     lscraperrunevents = scraper.scraperrunevent_set.all().order_by("-run_started")[:1] 
     lastscraperrunevent = lscraperrunevents and lscraperrunevents[0] or None
 
@@ -270,43 +270,52 @@ def scraper_run_scraper(request, short_name):
 
     if not request.user.is_staff:
         raise Http404
+
     if request.POST.get('run_scraper', None) == '1':
-        from management.commands.run_scrapers import ScraperRunner
-        t = ScraperRunner(scraper, True)
-        t.start()
+        call_command('run_scrapers', short_name=short_name)
     
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
-
-# TODO: refactor - remove duplication
-def scraper_delete_scraper(request, wiki_type, short_name):
-    user = request.user
+def scraper_screenshoot_scraper(request, wiki_type, short_name):
     if wiki_type == 'scraper':
-        scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-        if not scraper:
+        code_object = get_code_object_or_none(models.Scraper, short_name=short_name)
+        if not code_object:
             return code_error_response(models.Scraper, short_name=short_name, request=request)
-
-        if scraper.owner() != request.user:
-            raise Http404
-        if request.POST.get('delete_scraper', None) == '1':
-            scraper.deleted = True
-            scraper.save()
-            request.notifications.add("Your scraper has been deleted")
-            return HttpResponseRedirect('/')
-        return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
     else:
-        view = get_code_object_or_none(models.View, short_name=short_name)
-        if not view:
+        code_object = get_code_object_or_none(models.View, short_name=short_name)
+        if not code_object:
             return code_error_response(models.View, short_name=short_name, request=request)
-        if view.owner() != request.user:
-            raise Http404
-        if request.POST.get('delete_scraper', None) == '1':
-            view.deleted = True
-            view.save()
-            request.notifications.add("Your view has been deleted")
-            return HttpResponseRedirect('/')
-        return HttpResponseRedirect(reverse('code_overview', args=[view.wiki_type, short_name]))
-        
+
+    if not request.user.is_staff:
+        raise Http404
+
+    if request.POST.get('screenshoot_scraper', None) == '1':
+        call_command('take_screenshot', short_name=short_name, domain=settings.VIEW_DOMAIN, verbose=False)
+    
+    return HttpResponseRedirect(reverse('code_overview', args=[code_object.wiki_type, short_name]))
+
+
+def scraper_delete_scraper(request, wiki_type, short_name):
+    if wiki_type == 'scraper':
+        code_object = get_code_object_or_none(models.Scraper, short_name=short_name)
+        if not code_object:
+            return code_error_response(models.Scraper, short_name=short_name, request=request)
+    else:
+        code_object = get_code_object_or_none(models.View, short_name=short_name)
+        if not code_object:
+            return code_error_response(models.View, short_name=short_name, request=request)
+
+    if code_object.owner() != request.user:
+        raise Http404
+
+    if request.POST.get('delete_scraper', None) == '1':
+        code_object.deleted = True
+        code_object.save()
+        request.notifications.add("Your %s has been deleted" % wiki_type)
+        return HttpResponseRedirect('/')
+
+    return HttpResponseRedirect(reverse('code_overview', args=[code_object.wiki_type, short_name]))
+
 
 def view_overview (request, short_name):
     user = request.user
@@ -453,21 +462,42 @@ def code(request, wiki_type, short_name):
     mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
     status = mercurialinterface.getstatus(scraper, rev)
 
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
-    scraper_tags = Tag.objects.get_for_object(scraper)
 
-    dictionary = { 'scraper_tags': scraper_tags, 'selected_tab': 'history', 'scraper': scraper,
-                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
+    context = { 'selected_tab': 'history', 'scraper': scraper }
 
     # overcome lack of subtract in template
     if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
         status["modifiedcommitdifference"] = status["filemodifieddate"] - status["prevcommit"]["date"]
 
-    dictionary["status"] = status
-    dictionary["line_count"] = status["code"].count("\n") + 3
+    context["status"] = status
+    context["code"] = status.get('code')
+    
+    # hack in link to user (was it a good idea to use userid rather than username?)
+    try:    status["currcommit"]["user"] = User.objects.get(pk=int(status["currcommit"]["userid"]))
+    except: pass
+    try:    status["prevcommit"]["user"] = User.objects.get(pk=int(status["prevcommit"]["userid"]))
+    except: pass
+    try:    status["nextcommit"]["user"] = User.objects.get(pk=int(status["nextcommit"]["userid"]))
+    except: pass
 
-    return render_to_response('codewiki/code.html', dictionary, context_instance=RequestContext(request))
+    context['error_messages'] = [ ]
+    
+    try: otherrev = int(request.GET.get('otherrev', '-1'))
+    except ValueError: otherrev = None
+    
+    if otherrev != -1:
+        try:
+            reversion = mercurialinterface.getreversion(otherrev)
+            context["othercode"] = reversion["text"].get(status['scraperfile'])
+        except IndexError:
+            context['error_messages'].append('Bad otherrev index')
+
+    if context.get("othercode"):
+        sqm = difflib.SequenceMatcher(None, context["code"].splitlines(), context["othercode"].splitlines())
+        context['matcheropcodes'] = json.dumps(sqm.get_opcodes())
+    
+    return render_to_response('codewiki/code.html', context, context_instance=RequestContext(request))
+
 
 def tags(request, wiki_type, short_name):
     if wiki_type == 'scraper':

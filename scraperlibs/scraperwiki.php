@@ -47,7 +47,7 @@ class scraperwiki
       $result  = $ds->save ($unique_keys, $data, $date, $latlng) ;
       if (! $result[0])
          throw new Exception ($result[1]) ;
-   
+
       scraperwiki::sw_dumpMessage (array('message_type' => 'data', 'content' => $data)) ;
    }
 

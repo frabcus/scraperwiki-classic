@@ -120,7 +120,9 @@ def nextItemID () :
     #
     if dbtype == 'mysql'   :
         cursor = execute ('UPDATE `sequences` SET `id` = LAST_INSERT_ID(`id`+1)')
-        return cursor.lastrowid
+        result = cursor.lastrowid
+        db.commit()
+        return result
     if dbtype == 'sqlite3' :
         cursor = execute ('UPDATE `sequences` SET `id` = `id` + 1')
         return execute('SELECT `id` FROM `sequences`').fetchone()[0]
@@ -340,5 +342,7 @@ def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
                             value
                     )
             )
+
+    db.commit()
 
     return  [ True, 'Data record inserted' ]

@@ -167,8 +167,6 @@ br.clear {clear:both;}
 
 /* Scraper pages */
 .code_viewer {border:solid 1px #ccc; position:relative;}
-.CodeMirror-line-numbers {width: 2.2em;color: #aaa;background-color: #ddd;text-align: right;
-        padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;line-height: 1.1em;}
 
 .data_viewer {position:relative;}
 
@@ -398,16 +396,17 @@ a.historysave { padding-left:17px; background:url(../images/icons/disk.png) no-r
 
 span.historyexception { color:white; background:#d00; padding-left:2px; padding-right:2px;}
 
-/* Overlays and help */
-/*
-#overlay {background:black;z-index:100;position:absolute; top:0; left:0; width:100%; height:100%;
-    opacity:0.6;filter: alpha(opacity=60); display:none;}
-.popup_item {border: 10px solid #333;height:300px;background:#fff;
-    z-index:110; position:absolute; top:0; left:0; width:86%; margin:4%; padding:0 2%;
-    text-align:left; }    
-.popupClose {right:0; top:0; position:absolute; color:#000; background-color:#fcc; display:block; cursor:pointer;}
-.popup_item .output {overflow-y:auto; height:230px; }
-*/
+#inputcode_main, #inputcode_other { display:none } 
+#otherlinenumbers { float: left; border-top: thin #ddd solid; width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+#linenumbers { float: left; border-top: thin #ddd solid; width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+#codepreviewer .insert { background:#e2fae2; } 
+#codepreviewer .delete { background:#fae2e2; } 
+#codepreviewer #output { border-top: thin #ddd solid; padding-top:4px; font-family: monospace;font-size: 10pt; } 
+
+ul.commitlist { text-align: left; padding:0; margin:0} 
+ul.commitlist li { padding:0 } 
+ul.commitlist li.current a, ul.commitlist li.current span { font-weight:bold; background-color: #eee; } 
+ul.commitlist li.neweditingsession span { background-color:black; color:white; font-size:50%; }
 
 #basic-modal-content {display:none;}
 

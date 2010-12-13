@@ -131,11 +131,6 @@ class FireStarter :
         s.update(str(time.time (  )))
         self.m_runID       = '%.6f_%s' % (time.time(), s.hexdigest())
 
-        self.setDispatcher  ('%s:%d' % (self.m_conf.get('dispatcher', 'host'), self.m_conf.getint('dispatcher', 'port')))
-
-        if self.m_conf.has_option('dispatcher', 'path'):
-            self.addPaths(*self.m_conf.get('dispatcher', 'path').split(","))
-
         import swlogger
         self.m_swlog = swlogger.SWLogger(config)
         self.m_swlog.connect ()
@@ -378,6 +373,13 @@ class FireStarter :
                     continue
             except :
                 pass
+
+        # Ticket 325
+        #
+        if self.m_conf.has_option ('dispatcher', 'path') :
+            self.addPaths (*self.m_conf.get('dispatcher', 'path').split(','))
+
+        self.setDispatcher  ('%s:%d' % (self.m_conf.get('dispatcher', 'host'), self.m_conf.getint('dispatcher', 'port')))
 
     def addPaths (self, *paths) :
 

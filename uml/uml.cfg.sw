@@ -3,6 +3,7 @@ host	= 89.16.177.212
 port	= 9000
 umllist	= uml001,uml002,uml003,uml004
 confurl	= http://localhost:8080/whitelist/config
+path	= /scraperwiki/live/scrapers,/scraperwiki/live/scraperlibs
 
 [twister]
 statusurl = http://localhost:8080/scrapers/twister/status

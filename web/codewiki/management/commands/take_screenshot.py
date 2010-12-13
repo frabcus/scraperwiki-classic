@@ -5,6 +5,9 @@ from codewiki.models import View, Scraper
 from codewiki.management.screenshooter import ScreenShooter
 from itertools import chain
 
+import logging
+logging.basicConfig()
+
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--short_name', '-s', dest='short_name',

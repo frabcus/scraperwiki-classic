@@ -192,6 +192,31 @@ class Code(models.Model):
         app_label = 'codewiki'
 
 
+
+class UserCodeRole(models.Model):
+    """
+    This embodies the roles associated between particular users and scrapers/views.
+    This should be used to store all user/code relationships, ownership,
+    editorship, whatever.
+    """
+    user    = models.ForeignKey(User)
+    code = models.ForeignKey(Code)
+    role    = models.CharField(max_length=100)
+    
+    # the following will be used in case of email relationship to keep track of last email (text of run object) that has been sent out
+    # lastrunobject = models.ForeignKey(ScraperRunEvent)  
+
+    def __unicode__(self):
+        return "Scraper_id: %s -> User: %s (%s)" % \
+                                        (self.code, self.user, self.role)
+
+    class Meta:
+        app_label = 'codewiki'
+
+
+
+
+
 # this is defunct.  should go
 class UserCodeEditing(models.Model):
     """
@@ -212,23 +237,7 @@ class UserCodeEditing(models.Model):
         app_label = 'codewiki'
         
 
-class UserCodeRole(models.Model):
-    """
-    This embodies the roles associated between particular users and scrapers/views.
-    This should be used to store all user/code relationships, ownership,
-    editorship, whatever.
-    """
-    user    = models.ForeignKey(User)
-    code = models.ForeignKey(Code)
-    role    = models.CharField(max_length=100)
-
-    def __unicode__(self):
-        return "Scraper_id: %s -> User: %s (%s)" % \
-                                        (self.code, self.user, self.role)
-
-    class Meta:
-        app_label = 'codewiki'
-                                                                                
+# this also out of date event and should be abolished
 class CodeCommitEvent(models.Model):
     revision = models.IntegerField()
 
@@ -244,4 +253,3 @@ class CodeCommitEvent(models.Model):
 
     class Meta:
         app_label = 'codewiki'
-                                        

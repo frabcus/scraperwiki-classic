@@ -136,7 +136,9 @@ class MercurialInterface:
 
     
     def getctxrevisionsummary(self, ctx):
-        data = { "rev":ctx.rev(), "userid":ctx.user(), "description":ctx.description() }
+        description = ctx.description()
+        data = { "rev":ctx.rev(), "userid":ctx.user(), "description":description }
+        data['editingsession'] = description.split('|||')[0]
         epochtime, offset = ctx.date()
         ltime = time.localtime(epochtime)
         data["date"] = datetime.datetime(*ltime[:7])
@@ -217,13 +219,8 @@ class MercurialInterface:
             status["code"] = fin.read()
             fin.close()
             status.update(self.getfilestatus(scraper))
-
-        if "prevcommit" in status:
-            reversion = self.getreversion(status["prevcommit"]["rev"])
-            prevcode = reversion["text"].get(scraperfile)
-            if prevcode and status["code"]:
-                status["matchlines"] = list(DiffLineSequenceChanges(prevcode, status["code"]))
         
+        status['scraperfile'] = scraperfile
         return status
 
 

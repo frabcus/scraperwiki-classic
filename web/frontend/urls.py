@@ -1,9 +1,9 @@
 from django.conf.urls.defaults import *
 
-# who thinks replacing dots with underscores here is useful?? --JT
-from profiles import views as profile_views
+
+from profiles import views as profile_views  # a not very well namespaced django plugin class
 from contact_form.views import contact_form
-import frontend.views as frontend_views
+import frontend.views as frontend_views  # who thinks replacing dots with underscores here is useful?? --JT
 import frontend.forms as frontend_forms
 
 from django.views.generic.simple import direct_to_template

@@ -20,7 +20,7 @@ def mangleflattendict(data):
         # but moved here to allow in future a function save_no_mangling()
         # or optional filtering that prevents invalid keys getting into scrapers that are intended to have xml output, 
         # so those that will never have xml output can avoid damage
-        rkey = key.replace(' ', '_')  
+        rkey = key.replace(' ', '_')
         
         # in future this could be json.dumps or something that is better able to manage the 
         # confusion between unicode and str types (and mark them all up to unicode)
@@ -39,7 +39,7 @@ def mangleflattendict(data):
         elif type(value) == types.StringType:
             rvalue = value   # if we knew this was utf8 or latin-1 we'd be able to decode it into unicode!
         else:
-            rvalue = unicode(value)   #
+            rvalue = unicode(value)
             
         rdata[rkey] = rvalue
     return rdata
@@ -120,7 +120,7 @@ class DataStoreClass :
         if type(unique_keys) not in [ types.NoneType, types.ListType, types.TupleType ] :
             return [ False, 'unique_keys must be None, or a list or tuple' ]
  
-        if date   is not None :
+        if date is not None :
             if type(date) not in [ datetime.datetime, datetime.date ] :
                 return [ False, 'date should be a python.datetime (not %s)' % type(date) ]
 
@@ -132,8 +132,8 @@ class DataStoreClass :
             if type(latlng[1]) not in [ types.IntType, types.LongType, types.FloatType ] :
                 return [ False, 'latlng must be a (float,float) list or tuple' ]
 
-        if date   is not None :
-            date   = str(date)
+        if date is not None :
+            date = str(date)
         if latlng is not None :
             latlng = '%010.6f,%010.6f' % tuple(latlng)
 
