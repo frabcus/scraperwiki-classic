@@ -40,7 +40,7 @@ urlpatterns = patterns('',
     url(r'^scrapers/run-scraper/(?P<short_name>[\w_\-]+)/$', 
                                                           views.scraper_run_scraper,    name='scraper_run_scraper'),
     url(r'^(?P<wiki_type>scraper|view)s/screenshoot-scraper/(?P<short_name>[\w_\-]+)/$', 
-                                                          views.scraper_run_scraper,    name='scraper_screenshoot_scraper'),
+                                                          views.scraper_screenshoot_scraper,    name='scraper_screenshoot_scraper'),
         #not deprecated as used in by ajax to implement publishScraperButton
     url(r'^scrapers/(?P<short_name>[\w_\-]+)/admin/$',    views.scraper_admin,          name='scraper_admin'),
         
