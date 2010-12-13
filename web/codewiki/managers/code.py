@@ -49,10 +49,10 @@ class CodeManager(models.Manager):
         return self.owned_count() == 0
 
     def clear_datastore(self, scraper_id):
-
-        #execute
         c = self.datastore_connection.cursor()
-        return c.execute("delete kv items from kv inner join items where items.item_id = kv.item_id and items.scraper_id=%s", (scraper_id,))
+        c.execute("delete kv items from kv inner join items where items.item_id = kv.item_id and items.scraper_id=%s", (scraper_id,))
+        c.close()
+        self.datastore_connection.commit()
 
     def datastore_keys(self, scraper_id):
         result = []
@@ -62,10 +62,10 @@ class CodeManager(models.Manager):
         for key in keys:
             result.append(key[0])
 
+        c.close()
         return result
 
     def data_search(self, scraper_id, key_values, limit=1000, offset=0):   
-
         qquery = ["SELECT items.item_id, COUNT(items.item_id) as item_count"]
         qlist  = [ ]
 
@@ -131,6 +131,8 @@ class CodeManager(models.Manager):
                 rdata.pop("latlng", None)  # make sure this field is always a pair of floats
 
             allitems.append(rdata)
+
+        c.close()
         return allitems
 
     # this accesses the tables defined in scraperlibs/scraperwiki/datastore/scheme.sql and accessed in datastore/save.py
@@ -229,6 +231,8 @@ class CodeManager(models.Manager):
                 rdata.pop("latlng", None)  # make sure this field is always a pair of floats
         
             allitems.append(rdata)
+
+        c.close()
         return allitems
            
               
@@ -270,29 +274,36 @@ class CodeManager(models.Manager):
         sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s'" % guid
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
-        return int(cursor.fetchone()[0])
+        result = int(cursor.fetchone()[0])
+        cursor.close()
+        return result
 
     def has_geo(self, scraper_id):
         sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s' and latlng is not null and latlng <> ''" % scraper_id
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
-        return cursor.fetchone()[0] > 0
+        result = cursor.fetchone()[0] > 0
+        cursor.close()
+        return result
 
     def has_temporal(self, scraper_id):
         sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s' and date is not null" % scraper_id
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
-        return cursor.fetchone()[0] > 0        
+        result = cursor.fetchone()[0] > 0
+        cursor.close()
+        return result       
 
     def item_count_for_tag(self, guids):  # to delete
         guids = ",".join("'%s'" % guid for guid in guids)
         sql = "SELECT COUNT(*) FROM items WHERE scraper_id IN (%(guids)s)" % locals()
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
-        return cursor.fetchone()[0]
+        result = cursor.fetchone()[0]
+        cursor.close()
+        return result
 
     def recent_record_count(self, scraper_id, days):
-
         sql = "SELECT date(date_scraped) as date, count(date_scraped) as count FROM items "
         sql += "WHERE scraper_id='%s' and date_scraped BETWEEN DATE_SUB(CURDATE(), INTERVAL %d DAY) AND DATE_ADD(CURDATE(), INTERVAL 1 DAY)" % (scraper_id, days)
         sql += "GROUP BY date(date_scraped)"
@@ -314,6 +325,7 @@ class CodeManager(models.Manager):
             #add the count to the return list
             return_dates.append(count)
         
+        cursor.close()
         return return_dates
 
     def search(self, query):
