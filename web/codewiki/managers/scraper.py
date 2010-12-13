@@ -93,7 +93,7 @@ class ScraperManager(CodeManager):
         c = self.datastore_connection.cursor()
         c.execute("delete kv items from kv inner join items where items.item_id = kv.item_id and items.scraper_id=%s", (scraper_id,))
         c.close()
-        self.datastore_connection.commit()
+        self.datastore_connection.connection.commit()
 
     def datastore_keys(self, scraper_id):
         result = []
