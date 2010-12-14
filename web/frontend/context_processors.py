@@ -1,5 +1,8 @@
 from django.contrib.sites.models import Site, RequestSite
+from django.utils.safestring import mark_safe
+from frontend.models import Message
 import settings
+import datetime
 
 # Taken from http://www.djangosnippets.org/snippets/1197/
 def site(request):
@@ -35,4 +38,7 @@ def template_settings(request):
         if setting in settings_dict:
             template_settings[setting] = settings_dict[setting]
     return {'settings' : template_settings}
-    
+
+def site_messages(request):
+    message = Message.objects.get_active_message(datetime.datetime.now())
+    return {'site_message': mark_safe(message.text)}

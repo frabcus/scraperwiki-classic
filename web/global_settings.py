@@ -87,6 +87,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
   'django_notify.context_processors.notifications',
   'frontend.context_processors.site',
   'frontend.context_processors.template_settings',
+  'frontend.context_processors.site_messages',
 ]
 
 INSTALLED_APPS = [
