@@ -35,7 +35,6 @@ datastore   = None
 uid         = None
 gid         = None
 
-print sys.argv
 for arg in sys.argv[1:] :
 
     if arg[: 8] == '--cache='       :
