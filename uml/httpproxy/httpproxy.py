@@ -396,7 +396,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                             page
                     from    httpcache
                     where   tag = %s
-                    and     substr(page,1,6) != 'HTTP/1'
+                    and     substr(page,1,6) = 'HTTP/1'
                     and     time_to_sec(timediff(now(), stamp)) < %s
                     order   by id desc
                     limit   1
