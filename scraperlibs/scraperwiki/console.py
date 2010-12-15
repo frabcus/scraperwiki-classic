@@ -4,6 +4,8 @@ except:
   import simplejson as json
 
 import  sys
+import base64
+
 logfd = sys.stderr
 
 def setConsole (_logfd) :
@@ -13,7 +15,9 @@ def setConsole (_logfd) :
 
 def dumpMessage (**message) :
 
-    logfd.write (json.dumps (message) + '\n')
+    logfd.write (json.dumps (message))
+    logfd.write ('\n')
+    logfd.flush()
 
 def logScrapedURL (url, length) :
 
@@ -30,6 +34,10 @@ def logScrapedData (pdata) :
 def logMessage (message) :
 
     dumpMessage (message_type = 'console', content = message)
+
+def logBinaryMessage (message) :
+
+    dumpMessage (message_type = 'console', content = base64.encodestring(message), encoding="base64")
 
 def logHTTPResponseHeader (headerkey, headervalue) :
 

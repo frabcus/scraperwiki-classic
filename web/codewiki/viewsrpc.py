@@ -17,6 +17,7 @@ import urllib
 
 import subprocess
 import re
+import base64
 
 try:                import json
 except ImportError: import simplejson as json
@@ -77,7 +78,11 @@ def rpcexecute(request, short_name, revision = None):
         if message['message_type'] == "console":
             if not response:
                 response = HttpResponse()
-            response.write(message["content"])
+
+            if message.get('encoding') == 'base64':
+                response.write(base64.decodestring(message["content"]))
+            else:
+                response.write(message["content"])
         
         elif message['message_type'] == 'exception':
             if not response:

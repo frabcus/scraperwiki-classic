@@ -13,6 +13,7 @@
             To make use of this, the scraper must have used the <em>latlng</em> variable in <em>datastore.save()</em>.
         </p>
     </dd>
+
     <dt>Get by date range</dt>        
     <dd>
         <code>data = ScraperWiki.getDataByDate(short_name, start_date, end_date, limit=-1, offset=0)</code>
@@ -20,8 +21,15 @@
             To make use of this, the scraper must have used the <em>date</em> variable in <em>datastore.save()</em>.
         </p>
     </dd>
+
     <dt>Get keys for a scraper</dt>        
     <dd>
         <code>keys = ScraperWiki.getKeys(short_name)</code>
     </dd>
+
+    <dt>Set the header</dt>
+    <dd>
+        <code>ScraperWiki.httpresponseheader("Content-Type", "text/plain")</code>
+    </dd>
+
 </dl>

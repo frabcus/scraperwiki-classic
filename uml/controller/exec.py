@@ -75,9 +75,7 @@ class ConsoleStream :
         """
 
         if self.m_text != '' :
-            msg  = { 'message_type' : 'console', 'content' : saveunicode(self.m_text) }
-            self.m_fd.write (json.dumps(msg) + '\n')
-            self.m_fd.flush ()
+            scraperwiki.console.logMessage(saveunicode(self.m_text))
             self.m_text = ''
 
     def close (self) :
