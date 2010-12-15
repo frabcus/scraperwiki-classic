@@ -20,73 +20,6 @@ try    : import json
 except : import simplejson as json
 
 
-def saveunicode(text):
-    try:
-        return unicode(text)
-    except UnicodeDecodeError:
-        pass
-    
-    try:
-        return unicode(text, encoding='utf8')
-    except UnicodeDecodeError:
-        pass
-
-    try:
-        return unicode(text, encoding='latin1')
-    except UnicodeDecodeError:
-        pass
-    
-    return unicode(text, errors='replace')
-
-
-class ConsoleStream :
-
-    """
-    This class is duck-type equivalent to a file object. Used to replace
-    sys.stdout and sys.stderr, to json-ify each chunk of output directly to
-    the logging stream.
-    """
-
-    def __init__ (self, fd) :
-
-        """
-        Constructor. The file descriptor is saved and a local buffer
-        initialised to an empty string.
-        """
-
-        self.m_fd   = fd
-        self.m_text = ''
-
-    def write (self, text) :
-
-        """
-        Write the specified text. This is appened to the local buffer,
-        which is then flushed if it contains a newline.
-        """
-
-        self.m_text += text
-        if len(self.m_text) > 0 and self.m_text[-1] == '\n' :
-            self.flush ()
-
-    def flush (self) :
-
-        """
-        Flush buffered text independent of the presence of newlines.
-        """
-
-        if self.m_text != '' :
-            scraperwiki.console.logMessage(saveunicode(self.m_text))
-            self.m_text = ''
-
-    def close (self) :
-
-        self.m_fd.close ()
-
-    def fileno (self) :
-
-        return self.m_fd.fileno ()
-
-
 USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [--urlquery=str] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
 cache       = None
 trace       = None
@@ -102,6 +35,7 @@ datastore   = None
 uid         = None
 gid         = None
 
+print sys.argv
 for arg in sys.argv[1:] :
 
     if arg[: 8] == '--cache='       :
@@ -176,11 +110,10 @@ import  scraperwiki.datastore
 import  scraperwiki.console
 import  scraperwiki.stacktrace
 
-logfd   = os.fdopen(3, 'w', 0)
-scraperwiki.console.setConsole  (logfd)
+scraperwiki.console.logfd   = os.fdopen(3, 'w', 0)
 
-sys.stdout  = ConsoleStream (logfd) ;
-sys.stderr  = sys.stderr
+sys.stdout  = scraperwiki.console.ConsoleStream (scraperwiki.console.logfd)
+sys.stderr  = scraperwiki.console.ConsoleStream (scraperwiki.console.logfd)
 
 config = ConfigParser.ConfigParser()
 config.add_section ('dataproxy')
@@ -221,16 +154,14 @@ scraperwiki.datastore.DataStore (config)
 
 
 
-
 #  Set up a CPU time limit handler which simply throws a python
 #  exception.
 #
+# (technical question: what happens if the user script traps this exception and ignores it? --JGT)
 def sigXCPU (signum, frame) :
     raise Exception ("CPUTimeExceeded")
 
 signal.signal (signal.SIGXCPU, sigXCPU)
-
-
 
 code = open(script).read()
 try :
@@ -240,9 +171,9 @@ try :
 
 except Exception, e :
     etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
-    scraperwiki.console.dumpMessage(message_type='exception', **etb)
+    assert etb.get('message_type') == 'exception'
+    scraperwiki.console.dumpMessage(etb)
 
-        
 
 sys.stdout.flush()
 sys.stderr.flush()

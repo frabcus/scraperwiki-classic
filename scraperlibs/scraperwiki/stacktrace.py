@@ -58,7 +58,7 @@ def getExceptionTraceback(code):
     if len(stackdump) > 50:
         stackdump = stackdump[:20] + [{"furtherlinetext": "%d entries omitted" % (len(stackdump)-40) }] + stackdump[-20:]
     
-    result = { "exceptiondescription":repr(exc_value), "stackdump":stackdump }
+    result = { "message_type":'exception', "exceptiondescription":repr(exc_value), "stackdump":stackdump }
     
     #raise IOError('http error', 403, 'Scraperwiki blocked access to "http://tits.ru/".  Click <a href="/whitelist/?url=http%3A//tits.ru/">here</a> for details.', <httplib.HTTPMessage instance at 0x84c318c>)
     if exc_type == HTTPError and exc_value.code == 403:
