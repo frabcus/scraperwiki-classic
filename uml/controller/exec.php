@@ -85,6 +85,8 @@ for ($idx = 1 ; $idx < count($argv) ; $idx += 1)
    exit  (1) ;
 }
 
+$logfd = fopen("/proc/self/fd/3", "w") ;
+
 if (!is_null($gid))
 {
    posix_setgid  ($gid) ;
