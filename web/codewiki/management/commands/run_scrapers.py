@@ -29,7 +29,7 @@ def GetUMLrunningstatus():
     now = time.time()
     
     
-    fin = urllib.urlopen('http://localhost:9000/Status')
+    fin = urllib.urlopen(settings.DISPATCHERURL + '/Status')
     lines = fin.readlines()
     for line in lines:
         if re.match("\s*$", line):
@@ -44,11 +44,11 @@ def GetUMLrunningstatus():
 
 
 def is_currently_running(scraper):
-    return urllib.urlopen('http://localhost:9000/Status').read().find(scraper.guid) > 0    
+    return urllib.urlopen(settings.DISPATCHERURL + '/Status').read().find(scraper.guid) > 0    
 
 
 def kill_running_runid(runid):
-    response = urllib.urlopen('http://localhost:9000/Kill?'+runid).read()
+    response = urllib.urlopen(settings.DISPATCHERURL + '/Kill?'+runid).read()
     mresponse = re.match("Scraper (\S+) (killed|not killed|not found)", response)
     print response
     

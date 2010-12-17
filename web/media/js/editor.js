@@ -848,7 +848,8 @@ break;
         var urlquery = ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
         var viewurl = viewrunurl; 
         var previewmessage = ''; 
-        if (urlquery.length != 0) {
+        if (urlquery.length != 0) 
+        {
             if (urlquery.match(/^[\w%_.;&~+=\-]+$/g)) 
                 viewurl = viewurl + '?' + urlquery; 
             else
@@ -857,7 +858,7 @@ break;
 
         previewscreen = '<h3>View preview <small><a href="'+viewurl+'" target="_blank">'+viewurl+'</a>'+previewmessage+'</small></h3>'; 
         isrc = ""; // isrc = viewurl; (would allow direct inclusion from saved version)
-            // force the preview iframe to fill most of what it should.  needs more work
+                   // force the preview iframe to fill most of what it should.  needs more work
         previewscreen += '<iframe id="previewiframe" width="100%" height="'+($(window).height()*8/10-50)+'px" src="'+isrc+'"></iframe>'; 
 
         $.modal(previewscreen, { 
@@ -1032,13 +1033,15 @@ break;
         }
     }
 
-    function writeRunOutput(sMessage) {
+    function writeRunOutput(sMessage) 
+    {
         writeToConsole(sMessage, 'console'); 
         if ((activepreviewiframe != undefined) && (activepreviewiframe.document != undefined))
             activepreviewiframe.document.write(sMessage); 
     }
 
-    function showTextPopup(sLongMessage) {
+    function showTextPopup(sLongMessage) 
+    {
         $.modal('<pre class="popupoutput">'+cgiescape(sLongMessage)+'</pre>', 
                 {overlayClose: true, 
                  containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
@@ -1108,6 +1111,42 @@ break;
         setTabScrollPosition('console', 'bottom'); 
     };
 
+    function popupCached(cacheid)
+    {
+        modaloptions = { overlayClose: true, 
+                         containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
+                         overlayCss: { cursor:"auto" }
+                       }; 
+        if (cachehidlookup[cacheid] == undefined)
+        {
+            modaloptions['onShow'] = function() 
+            { 
+                $.ajax({
+                    type : 'POST',
+                    url  : '/proxycached', 
+                    data: { cacheid: cacheid }, 
+                    success: function(sdata) 
+                { 
+                    var foutput; 
+                    try 
+                    {
+                        cachehidlookup[cacheid] = $.evalJSON(sdata);
+                        foutput = cgiescape(cachehidlookup[cacheid]["content"]); 
+                    } 
+                    catch(err) 
+                    {
+                        foutput = "Malformed json: " + cgiescape(sdata); 
+                    }
+
+                    $('pre.popupoutput').html(foutput); 
+                    $('pre.popupoutput').css("height", $('.simplemodal-wrap').height() + "px");  // forces a scrollbar onto it
+                }})
+            }
+            $.modal('<pre class="popupoutput" style="overflow:auto"><h1>Loading...</h1></pre>', modaloptions); 
+        }
+        else
+            $.modal('<pre class="popupoutput">'+cgiescape(cachehidlookup[cacheid]["content"])+'</pre>', modaloptions); 
+    }
 
     function writeToSources(sUrl, bytes, failedmessage, cached, cacheid) 
     {
@@ -1117,14 +1156,12 @@ break;
 
         //append to sources tab
         var smessage = ""; 
-        var alink = ' <a href' + sUrl + ' target="_new">' + sUrl.substring(0, 100) + '</a>'; 
+        var alink = ' <a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a>'; 
         if ((failedmessage == undefined) || (failedmessage == ''))
         {
+            smessage += bytes + ' bytes loaded'; 
             if (cacheid != undefined)
-                smessage = '<a id="cacheid-'+cacheid+'" title="Popup html">'; 
-            smessage += bytes + 'bytes loaded'; 
-            if (cacheid != undefined)
-                smessage += '</a>'; 
+                smessage += ' <a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'; 
             if (cached == 'True')
                 smessage += ' (from cache)'; 
             smessage += alink; 
@@ -1135,21 +1172,8 @@ break;
         $('#output_sources div.output_content').append('<span class="output_item">' + smessage + '</span>')
         $('.editor_output div.tabs li.sources').addClass('new');
         
-        if (cacheid != undefined)  $('a#cacheid-'+cacheid).click(function () 
-        { alert('hi there '+cacheid); 
-/*            $.modal(, { 
-                overlayClose: true,
-                containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
-                overlayCss: { cursor:"auto" }, 
-                onShow: function(d) {
-                    ifrm = document.getElementById('previewiframe');
-                    activepreviewiframe = (ifrm.contentWindow ? ifrm.contentWindow : (ifrm.contentDocument.document ? ifrm.contentDocument.document : ifrm.contentDocument));
-                    activepreviewiframe.document.open(); 
-                    sendCode(); // trigger the running once we're ready for the output
-                }
-            }); */
-        }); 
-
+        if (cacheid != undefined)  
+            $('a#cacheid-'+cacheid).click(function() { popupCached(cacheid); return false; }); 
 
         setTabScrollPosition('sources', 'bottom'); 
     }

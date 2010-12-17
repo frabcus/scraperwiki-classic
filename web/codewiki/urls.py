@@ -65,6 +65,6 @@ urlpatterns = patterns('',
     url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
     url(r'^editor/diff/(?P<short_name>[\-\w]*)$',         views.diff,         name="diff"),
     url(r'^editor/raw/(?P<short_name>[\-\w]*)$',          views.raw,          name="raw"),   # blank name for draft scraper
-    url(r'^editor/proxycached/(?P<cacheid>[\w_\-\.]+)$',  views.proxycached,  name="proxycachee"), 
+    url(r'^proxycached$',                                 views.proxycached,  name="proxycached"), 
     
 )

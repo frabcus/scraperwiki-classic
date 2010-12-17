@@ -165,8 +165,9 @@ dl.quick_help li code {font-size:1.1em; }
 
 .chathidden {display:none;}
 
-a.cached { background-color: #e0e0e0; }
-
+a.cachepopup { background: url(../images/uup.png) no-repeat center; background-color: #f08a38; color:#fff; 
+               border-radius: 2px; -moz-border-radius: 2px; -webkit-border-radius: 2px; border:solid 1px #bf6312;}
+a.cachepopup:hover { background-color:#ffffd7;; cursor:pointer; text-decoration: none; }
 
 
 /* quickhelp */
