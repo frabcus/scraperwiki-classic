@@ -154,6 +154,17 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         return soc
 
+    def sendReply (self, reply) :
+
+        self.connection.send  ('HTTP/1.0 200 OK\n')
+        self.connection.send  ('Connection: Close\n')
+        self.connection.send  ('Pragma: no-cache\n')
+        self.connection.send  ('Cache-Control: no-cache\n')
+        self.connection.send  ('Content-Type: text/text\n')
+        self.connection.send  ('\n' )
+        self.connection.send  (reply)
+        self.connection.send  ('\n' )
+
     def sendStatus (self) :
 
         """
@@ -173,14 +184,32 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             pass
         statusLock.release()
 
-        self.connection.send  ('HTTP/1.0 200 OK\n')
-        self.connection.send  ('Connection: Close\n')
-        self.connection.send  ('Pragma: no-cache\n')
-        self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/text\n')
-        self.connection.send  ('\n')
-        self.connection.send  (string.join(status, '\n'))
-        self.connection.send  ('\n')
+        self.sendReply  (string.join(status, '\n'))
+
+    def sendPage (self, id) :
+
+        try :
+            import MySQLdb
+            db      = MySQLdb.connect \
+                    (    host       = config.get (varName, 'dbhost'), 
+                         user       = config.get (varName, 'user'  ), 
+                         passwd     = config.get (varName, 'passwd'),
+                         db         = config.get (varName, 'db'    ),
+                         charset    = 'utf8'
+                    )
+        except :
+            self.sendReply ('Cannot connect to database')
+            return
+
+        cursor = db.cursor()
+        cursor.execute ('select page from httpcache where id = %s', [ id ])
+        try :
+            page = cursor.fetchone()[0]
+        except :
+            self.sendReply ('Page not found')
+            return
+
+        self.connection.sendall (page)
 
     def ident (self) :
 
@@ -294,6 +323,11 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.sendStatus ()
             self.connection.close()
             return
+
+        if path == '/Page' :
+            self.sendPage   (query)
+            self.connection.close()
+            return            
 
         scraperID, runID, cache = self.ident ()
         self.swlog().log (scraperID, runID, 'P.GET', arg1 = self.path)
@@ -538,9 +572,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     def do_GET (self) :
 
-        print "XXXGET ...."
         self.retrieve ("GET" )
-        print "XXXDONE GET ...."
 
     def do_POST (self) :
 
