@@ -24,7 +24,6 @@ $(document).ready(function() {
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
-    var popupStatus = 0
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 
     var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
@@ -49,6 +48,7 @@ $(document).ready(function() {
     var atsavedundo = 0; // recorded at start of save operation
     var savedundo = 0; 
     var lastundo = 0; 
+    var cachehidlookup = { }; 
 
     $.ajaxSetup({timeout: 10000});
 
@@ -1005,23 +1005,9 @@ break;
         return sTitle != 'Untitled' && sTitle != '' && sTitle != undefined && sTitle != false;
     }
 
-    //Hide popup
-    function hidePopup() {
 
-        // Hide popups
-        $('#popups div.popup_item').each(function(i) {
-            $(this).fadeOut("fast")
-        });
-
-        //hide overlay
-        $('#popups #overlay').fadeOut("fast")
-        popupStatus = 0;
-                
-        // set focus to the code editor so we can carry on typing
-        codeeditor.focus(); 
-    }
-
-    function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blockedurlquoted) {
+    function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blockedurlquoted) 
+    {
         if (stackdump) {
             for (var i = 0; i < stackdump.length; i++) {
                 var stackentry = stackdump[i]; 
@@ -1112,9 +1098,8 @@ break;
 
         
         //remove items if over max
-        if ($('#output_console div.output_content').children().size() >= outputMaxItems) {
+        while ($('#output_console div.output_content').children().size() >= outputMaxItems) 
             $('#output_console div.output_content').children(':first').remove();
-        }
 
         //append to console
         $('#output_console div.output_content').append(oConsoleItem);
@@ -1127,27 +1112,53 @@ break;
     function writeToSources(sUrl, bytes, failedmessage, cached, cacheid) 
     {
         //remove items if over max
-        if ($('#output_sources div.output_content').children().size() >= outputMaxItems) {
+        while ($('#output_sources div.output_content').children().size() >= outputMaxItems) 
             $('#output_sources div.output_content').children(':first').remove();
-        }
 
         //append to sources tab
-        if (cacheid != undefined)
-            malink = 'class="cached" href="/cachedscrape/' + cacheid + '"'; 
+        var smessage = ""; 
+        var alink = ' <a href' + sUrl + ' target="_new">' + sUrl.substring(0, 100) + '</a>'; 
+        if ((failedmessage == undefined) || (failedmessage == ''))
+        {
+            if (cacheid != undefined)
+                smessage = '<a id="cacheid-'+cacheid+'" title="Popup html">'; 
+            smessage += bytes + 'bytes loaded'; 
+            if (cacheid != undefined)
+                smessage += '</a>'; 
+            if (cached == 'True')
+                smessage += ' (from cache)'; 
+            smessage += alink; 
+        }
         else
-            malink = 'href="' + sUrl + '"'; 
-        alink = '<a ' + malink + ' target="_new">' + sUrl.substring(0, 100) + '</a> '; 
-        if ((failedmessage != undefined) && (failedmessage != ''))
             smessage = failedmessage + alink; 
-        else
-            smessage = bytes + ' bytes loaded ' + (cached == 'True' ? '(from cache) ' : '') + alink; 
 
         $('#output_sources div.output_content').append('<span class="output_item">' + smessage + '</span>')
         $('.editor_output div.tabs li.sources').addClass('new');
+        
+        if (cacheid != undefined)  $('a#cacheid-'+cacheid).click(function () 
+        { alert('hi there '+cacheid); 
+/*            $.modal(, { 
+                overlayClose: true,
+                containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
+                overlayCss: { cursor:"auto" }, 
+                onShow: function(d) {
+                    ifrm = document.getElementById('previewiframe');
+                    activepreviewiframe = (ifrm.contentWindow ? ifrm.contentWindow : (ifrm.contentDocument.document ? ifrm.contentDocument.document : ifrm.contentDocument));
+                    activepreviewiframe.document.open(); 
+                    sendCode(); // trigger the running once we're ready for the output
+                }
+            }); */
+        }); 
+
+
         setTabScrollPosition('sources', 'bottom'); 
     }
 
-    function writeToData(aRowData) {
+    function writeToData(aRowData) 
+    {
+        while ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) 
+            $('#output_data table.output_content tbody').children(':first').remove();
+
         var oRow = $('<tr></tr>');
 
         $.each(aRowData, function(i){
@@ -1156,9 +1167,6 @@ break;
             oRow.append(oCell);
         })
 
-        if ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) {
-            $('#output_data table.output_content tbody').children(':first').remove();
-        }
         
         $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
 
@@ -1167,16 +1175,15 @@ break;
         $('.editor_output div.tabs li.data').addClass('new');
     }
 
-    function writeToChat(seMessage) {
+    function writeToChat(seMessage) 
+    {
+        while ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) 
+            $('#output_chat table.output_content tbody').children(':first').remove();
+
         var oRow = $('<tr></tr>');
         var oCell = $('<td></td>');
         oCell.html(seMessage);
         oRow.append(oCell);
-        
-
-        if ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) {
-            $('#output_chat table.output_content tbody').children(':first').remove();
-        }
 
         $('#output_chat table.output_content').append(oRow);
 

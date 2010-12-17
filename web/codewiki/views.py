@@ -760,6 +760,12 @@ def raw(request, short_name=None):
         result = newcode
     return HttpResponse(result, mimetype="text/plain")
 
+
+def proxycached(request, cacheid):
+    cachedtext = "<h1>This is the cached text for cacheid=%s</h1>" % cacheid
+    return HttpResponse(cachedtext, mimetype="text/plain")
+
+
 #save a code object
 def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourcescraper = ''):
 

@@ -16,10 +16,10 @@ urlpatterns = patterns('',
     
     url(r'^scrapers/delete-data/(?P<short_name>[\w_\-]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
     url(r'^scrapers/download/(?P<short_name>[\w_\-]+)/$', views.download,               name='scraper_download'),
-    url(r'^scrapers/export/(?P<short_name>[\w_\-]+)/$', views.export_csv,               name='export_csv'),
-    url(r'^scrapers/export2/(?P<short_name>[\w_\-]+)/$', views.export_gdocs_spreadsheet,name='export_gdocs_spreadsheet'),    
+    url(r'^scrapers/export/(?P<short_name>[\w_\-]+)/$',   views.export_csv,               name='export_csv'),
+    url(r'^scrapers/export2/(?P<short_name>[\w_\-]+)/$',  views.export_gdocs_spreadsheet,name='export_gdocs_spreadsheet'),    
     
-    url(r'^scrapers/follow/(?P<short_name>[\w_\-]+)/$', views.follow,           name='scraper_follow'),
+    url(r'^scrapers/follow/(?P<short_name>[\w_\-]+)/$',   views.follow,           name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-]+)/$', views.unfollow,       name='scraper_unfollow'),
     
     url(r'^scrapers/metadata_api/', include('codewiki.metadata_api.urls')),
@@ -57,14 +57,14 @@ urlpatterns = patterns('',
     
         
     url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',  views.edit, name="editor"),
-    url(r'^editor/template/(?P<short_name>[\-\w]+)$',         views.edittutorial, name="tutorial"),
+    url(r'^editor/template/(?P<short_name>[\-\w]+)$',     views.edittutorial, name="tutorial"),
 
-    url(r'^handle_session_draft/(?P<action>[\-\w]+)$',              views.handle_session_draft, name="handle_session_draft"),
+    url(r'^handle_session_draft/(?P<action>[\-\w]+)$',    views.handle_session_draft, name="handle_session_draft"),
     
     # call-backs from ajax for reloading and diff
-    url(r'^editor/draft/delete/$',                             views.delete_draft, name="delete_draft"),
-    url(r'^editor/diff/(?P<short_name>[\-\w]*)$',              views.diff,         name="diff"),
-    url(r'^editor/raw/(?P<short_name>[\-\w]*)$',               views.raw,          name="raw"),   # blank name for draft scraper
-
+    url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
+    url(r'^editor/diff/(?P<short_name>[\-\w]*)$',         views.diff,         name="diff"),
+    url(r'^editor/raw/(?P<short_name>[\-\w]*)$',          views.raw,          name="raw"),   # blank name for draft scraper
+    url(r'^editor/proxycached/(?P<cacheid>[\w_\-\.]+)$',  views.proxycached,  name="proxycachee"), 
     
 )
