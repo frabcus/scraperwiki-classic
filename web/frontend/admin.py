@@ -13,9 +13,11 @@ class AlertsAdmin(admin.ModelAdmin):
         'message_level',)
     list_filter = ('message_type', 'datetime', 'message_level',)
 
-
+class MessageAdmin(admin.ModelAdmin):
+    pass
 
 admin.site.register(UserProfile)
 admin.site.register(UserToUserRole)
 admin.site.register(AlertTypes, AlertTypesAdmin)
 admin.site.register(Alerts, AlertsAdmin)
+admin.site.register(Message, MessageAdmin)

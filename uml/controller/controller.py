@@ -99,7 +99,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         @param  args    : Arguments to format string
         """
 
-        BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
+        BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, '%5d: %s' % (os.getpid(), format), *args)
         sys.stderr.flush ()
 
     def storeEnvironment (self, rfile, headers, method, query) :
@@ -382,6 +382,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         try     :
             lock.acquire()
             wfile = scrapersByRunID[params['runid'][0]]['wfile']
+        except  :
+            pass
         finally :
             lock.release()
 
@@ -701,41 +703,48 @@ class ScraperController (BaseController) :
                         #  Otherwise should have been from child ...
                         #
                         if fd in fdmap :
+                            mapped = fdmap[fd]
                             #
                             #  Read some text. If none then the child has closed the connection
                             #  so unregister here and decrement count of open child connections.
                             #
-                            try    : line = fdmap[fd][0].recv(8192)
-                            except : line = os.read (fdmap[fd][0], 8192)
-                            if line == '' :
+                            line = None
+                            if line is None :
+                                try    : line = mapped[0].recv(8192)
+                                except : pass
+                            if line is None :
+                                try    : line = os.read (mapped[0], 8192)
+                                except : pass
+                            if line in [ '', None ] :
                                 p.unregister (fd)
+                                del fdmap[fd]
                                 busy -= 1
                             #
                             #  If data received and data does not end in a newline the add to
                             #  any prior data from the connection and loop.
                             #
                             if len(line) > 0 and line[-1] != '\n' :
-                                fdmap[fd][1] = fdmap[fd][1] + line
+                                mapped[1] = mapped[1] + line
                                 continue
                             #
                             #  Prepend prior data to the current data and clear the prior
                             #  data. If still nothing then loop.
                             #
-                            line = fdmap[fd][1] + line
-                            fdmap[fd][1] = ''
-                            if line == '' :
+                            text = mapped[1] + line
+                            mapped[1] = ''
+                            if text == '' :
                                 continue
                             #
                             #  If data is from the print connection then json-format as a console
                             #  message; data from logging connection should be already formatted.
                             #
                             if fd == psock[0].fileno() :
-                                msg  = { 'message_type' : 'console', 'content' : line }
-                                line = json.dumps(msg) + '\n'
+                                msg  = { 'message_type' : 'console', 'content' : text }
+                                text = json.dumps(msg) + '\n'
                             #
                             #  Send data back towards the client.
                             #
-                            self.wfile.write (line)
+                            self.wfile.write (text)
                             self.wfile.flush ()
                             #
                             #  If the data came from the logging connection and was an error the
@@ -743,11 +752,15 @@ class ScraperController (BaseController) :
                             #  so split up.
                             #
                             if fd == lpipe[0] :
-                                for l in string.split(line, '\n') :
+                                for l in string.split(text, '\n') :
                                     if l != '' :
                                         msg = json.loads(l)
                                         if msg['message_type'] == 'exception' :
-                                            swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = msg['content'], arg2 = msg['content_long'])
+                                            try    : arg1 = msg['content']
+                                            except : arg1 = '(no content)'
+                                            try    : arg2 = msg['content_long']
+                                            except : arg2 = '(no content_long)'
+                                            swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = arg1, arg2 = arg2)
 
                 #  Capture the child user and system times as best we can, since this
                 #  is summed over all children.
@@ -777,6 +790,8 @@ class ScraperController (BaseController) :
 
             except Exception, e :
 
+                import traceback
+                sys.stderr.write(traceback.format_exc())
                 self.log_request('Copying results failed: %s' % repr(e))
 
             finally :

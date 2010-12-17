@@ -390,7 +390,19 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #
         try    :
             cursor    = db.cursor()
-            cursor.execute ('select id, page from httpcache where tag = %s and time_to_sec(timediff(now(), stamp)) < %s', [ ctag, cache ])
+            cursor.execute \
+                (   '''
+                    select  id,
+                            page
+                    from    httpcache
+                    where   tag = %s
+                    and     substr(page,1,6) = 'HTTP/1'
+                    and     time_to_sec(timediff(now(), stamp)) < %s
+                    order   by id desc
+                    limit   1
+                    ''',
+                    [ ctag, cache ]
+                )
             cacheid, page  = cursor.fetchone()
             cursor    = db.cursor()
             cursor.execute ('update httpcache set stamp = now(), hits = hits + 1 where tag = %s', [ ctag ])

@@ -46,12 +46,12 @@ $(document).ready(function() {
     var parserName = Array();
     var codemirroroptions = undefined; 
     var pageIsDirty = false;
-    var atsavedundo = 0; 
+    var atsavedundo = 0; // recorded at start of save operation
     var savedundo = 0; 
+    var lastundo = 0; 
 
     $.ajaxSetup({timeout: 10000});
 
-    //constructor functions
     setupCodeEditor();
     setupMenu();
     setupTabs();
@@ -59,20 +59,52 @@ $(document).ready(function() {
     setupResizeEvents();
     setupOrbited();
 
-    function UpdatePageDirtiness() 
+    function ChangeInEditor(changetype) 
     {
         var historysize = codeeditor.historySize(); 
+
+        if (changetype == "saved")
+            savedundo = atsavedundo; 
+        if (changetype == "reload")
+            savedundo = historysize.undo; 
+
         if (historysize.undo + historysize.redo < savedundo)
             savedundo = -1; 
         var lpageIsDirty = (historysize.undo != savedundo); 
-        if (pageIsDirty == lpageIsDirty)
-            return; 
-        pageIsDirty = lpageIsDirty; 
-        if (pageIsDirty && guid)
-            $('#aCloseEditor1').css("font-style", "italic"); 
-        else
-            $('#aCloseEditor1').css("font-style", "normal"); 
+
+        if (pageIsDirty != lpageIsDirty)
+        {
+            pageIsDirty = lpageIsDirty; 
+            $('#aCloseEditor1').css("font-style", ((pageIsDirty && guid) ? "italic" : "normal")); 
+        }
+
+        // send any edits up the line (first to the chat page to show we can decode it)
+        var historystack = codeeditor.editor.history.history; 
+        while (lastundo < historystack.length)
+        {
+break; 
+            var chains = historystack[lastundo]; 
+            var mess = ""; 
+            for (var i = 0; i < chains.length; i++)
+            {
+                var chain = chains[i]; 
+                var from = chain[0].from, end = chain[chain.length - 1].to;
+                var pos = from ? from.nextSibling : codeeditor.editor.container.firstChild;
+                while (pos != end) {
+                    var temp = pos.nextSibling;
+                    mess += pos.nodeValue; 
+                    console.log(pos)
+                    pos = temp;
+                }
+            }
+
+            writeToChat(String(lastundo) + "  chains:" + mess); 
+            console.log(chains[0][0].text)
+            lastundo++; 
+        }
     }
+
+
 
     //setup code editor
     function setupCodeEditor(){
@@ -124,7 +156,7 @@ $(document).ready(function() {
             parserConfig: parserConfig[scraperlanguage],
             enterMode: "flat", // default is "indent" (which I have found buggy),  also can be "keep"
             reindentOnLoad: false, 
-            onChange: function ()  { UpdatePageDirtiness(); },
+            onChange: function ()  { ChangeInEditor("edit"); },
             //noScriptCaching: true, // essential when hacking the codemirror libraries
 
             // this is called once the codemirror window has finished initializing itself
@@ -134,14 +166,14 @@ $(document).ready(function() {
                     codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
                     setupKeygrabs();
                     resizeControls('first');
-                    UpdatePageDirtiness(); // page should not be dirty at this point
+                    ChangeInEditor("initialized"); 
                 } 
           };
 
           codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
     }
 
-    
+
     function setupOrbited() {
         TCPSocket = Orbited.TCPSocket;
         conn = new TCPSocket(); 
@@ -150,8 +182,6 @@ $(document).ready(function() {
         sChatTabMessage = 'Connecting...'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
     }
-    
-    //Setup Keygrabs
 
     function setupKeygrabs(){
         addHotkey('ctrl+r', sendCode);
@@ -159,7 +189,7 @@ $(document).ready(function() {
         addHotkey('ctrl+d', viewDiff);
         addHotkey('ctrl+p', popupPreview); 
     };
-    
+
 
     //Setup Menu
     function setupMenu(){
@@ -708,8 +738,8 @@ $(document).ready(function() {
 
         codeeditor.setCode(newcode); 
         codeeditor.focus(); 
-        savedundo = codeeditor.historySize().undo; 
-        UpdatePageDirtiness(); 
+
+        ChangeInEditor("reload"); 
 
         // make the selection
         if (!((selrange[2] == 0) && (selrange[3] == 0))){
@@ -909,8 +939,7 @@ $(document).ready(function() {
                             if (bConnected)
                                 sendjson({"command":'saved'}); 
                         }
-                        savedundo = atsavedundo; 
-                        UpdatePageDirtiness(); 
+                        ChangeInEditor("saved"); 
                     }
                 },
 
