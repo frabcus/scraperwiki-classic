@@ -10,7 +10,7 @@
     <td colspan="2">
       <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}" class="historysave"> {{ item.datetime|date:"H:i, j F Y" }}</a>
       - edited by 
-      <a href="{% url profiles_profile_detail item.user.username %}" class="historyuser">
+      <a href="{% if item.user.username %}{% url profiles_profile_detail item.user.username %}{% endif %}" class="historyuser">
         {% if item.user.get_profile.name %}{{item.user.get_profile.name}}{% else %}{{item.user.username}}{% endif %}
       </a>
       {% ifnotequal item.revcount 1 %}
