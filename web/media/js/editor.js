@@ -49,6 +49,7 @@ $(document).ready(function() {
     var atsavedundo = 0; // recorded at start of save operation
     var savedundo = 0; 
     var lastundo = 0; 
+
     var cachehidlookup = { }; 
 
     $.ajaxSetup({timeout: 10000});
@@ -59,6 +60,47 @@ $(document).ready(function() {
     setupToolbar();
     setupResizeEvents();
     setupOrbited();
+
+
+    function CM_cleanText(text)  { return text.replace(/\u00a0/g, " ").replace(/\u200b/g, ""); }
+    function CM_isBR(node)  { var nn = node.nodeName; return nn == "BR" || nn == "br"; }
+    function CM_nodeText(node)  { return node.textContent || node.innerText || node.nodeValue || ""; }
+    function CM_lineNumber(node)
+    {
+        if (node == null)
+            return 1; 
+        if (node.parentNode != codeeditor.win.document.body)
+            return -1; 
+        var num = 1;
+        while (node)
+        {
+            num++; 
+            node = node.previousSibling; 
+            while (node && !CM_isBR(node))
+                 node = node.previousSibling; 
+        }
+        return num;
+    }
+
+    function CM_newLines(from, to) 
+    {
+        var lines = [ ]
+        var text = [ ];
+        for (var cur = (from ? from.nextSibling : codeeditor.editor.container.firstChild); cur != to; cur = cur.nextSibling)
+        {
+            if (CM_isBR(cur))
+            {
+                lines.push(CM_cleanText(text.join(""))); 
+                text = [ ]
+            }
+            else
+                text.push(CM_nodeText(cur)); 
+        }
+        lines.push(CM_cleanText(text.join(""))); 
+        return lines; 
+    }
+
+
 
     function ChangeInEditor(changetype) 
     {
@@ -79,29 +121,41 @@ $(document).ready(function() {
             $('#aCloseEditor1').css("font-style", ((pageIsDirty && guid) ? "italic" : "normal")); 
         }
 
+        if (!$("#uploadchanges").attr('checked'))
+            return; 
+
         // send any edits up the line (first to the chat page to show we can decode it)
         var historystack = codeeditor.editor.history.history; 
-        while (lastundo < historystack.length)
+        var redohistorystack = codeeditor.editor.history.redoHistory; 
+        var rdhL = redohistorystack.length - 1; 
+        while (lastundo != historystack.length)
         {
-break; 
-            var chains = historystack[lastundo]; 
-            var mess = ""; 
+            var chains; 
+            if (lastundo < historystack.length)
+                chains = historystack[lastundo++]; 
+            else if (rdhL >= 0)
+            {
+                chains = redohistorystack[rdhL--]; 
+                lastundo--; 
+            }
+            else
+                break; 
+
             for (var i = 0; i < chains.length; i++)
             {
+                var mess = ""; 
                 var chain = chains[i]; 
-                var from = chain[0].from, end = chain[chain.length - 1].to;
-                var pos = from ? from.nextSibling : codeeditor.editor.container.firstChild;
-                while (pos != end) {
-                    var temp = pos.nextSibling;
-                    mess += pos.nodeValue; 
-                    console.log(pos)
-                    pos = temp;
-                }
-            }
+                mess += "Removing:\n"; 
+                for (var k = 0; k < chain.length; k++)
+                    mess += "-["+k+"] " + chain[k].text + "\n"; 
 
-            writeToChat(String(lastundo) + "  chains:" + mess); 
-            console.log(chains[0][0].text)
-            lastundo++; 
+                mess += "\nInserting on line " + CM_lineNumber(chain[0].from) + "\n"; 
+                CM_lineNumber
+                var lines = CM_newLines(chain[0].from, chain[chain.length - 1].to); 
+                for (var j = 0; j < lines.length; j++)
+                    mess += "+["+j+"] "+ lines[j] + "\n";  
+                writeToConsole(String(lastundo) + "." + i + "  chains:                                                                       \n\n" + mess); 
+            }
         }
     }
 
@@ -220,7 +274,7 @@ break;
     function setupMenu(){
         $('#menu_tutorials').click(function(){
             $('#popup_tutorials').modal({
-                 overlayClose: true, 
+                 overlayClose: true, persist: true, 
                  containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
                  overlayCss: { cursor:"auto" }
                 });
@@ -601,7 +655,7 @@ break;
                     wstatus = '<a href="/profiles/'+loggedineditors[1]+'" target="_blank">'+loggedineditors[1]+'</a>'; 
                     if (loggedineditors.length >= 3)
                         wstatus += ' (+' + (loggedineditors.length-2) + ')'; 
-                    wstatus += ' is watching'; 
+                    wstatus += ' is looking'; 
                 }
                 $('#watcherstatus').html(wstatus); 
 
