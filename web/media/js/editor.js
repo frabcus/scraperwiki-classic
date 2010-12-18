@@ -3,7 +3,8 @@ $(document).ready(function() {
     //variables
     var editor_id = 'id_code';
     var codeeditor = undefined;
-    var codemirroriframe; // the actual iframe of codemirror that needs resizing
+    var codemirroriframe = undefined; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
+    var codeeditorbackgroundimage = 'none'; 
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
@@ -166,6 +167,7 @@ break;
                     codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
                     setupKeygrabs();
                     resizeControls('first');
+                    setCodeeditorBackgroundImage(codeeditorbackgroundimage); // in case the signal got in first
                     ChangeInEditor("initialized"); 
                 } 
           };
@@ -181,6 +183,29 @@ break;
         buffer = " "; 
         sChatTabMessage = 'Connecting...'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
+    }
+
+
+    function setCodeeditorBackgroundImage(lcodeeditorbackgroundimage)
+    {
+        codeeditorbackgroundimage = lcodeeditorbackgroundimage; 
+        if (codemirroriframe != undefined) // also signifies the frame has been built
+            codeeditor.win.document.body.style.backgroundImage = codeeditorbackgroundimage; 
+    }
+
+    //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
+    //which means we have to do some seemingly random binds/unbinds
+    function addHotkey(sKeyCombination, oFunction){
+
+        $(document).bind('keydown', sKeyCombination, function(){return false;});
+        $(codeeditor.win.document).unbind('keydown', sKeyCombination);
+        $(codeeditor.win.document).bind('keydown', sKeyCombination,
+            function(oEvent){
+                oFunction();
+
+                return false;                            
+            }
+        );
     }
 
     function setupKeygrabs(){
@@ -530,9 +555,9 @@ break;
         if (iautomode == 1)
         {
             $('#watcherstatus').text("draft mode"); 
-            codeeditor.win.document.body.style.backgroundImage = 'none'; 
+            setCodeeditorBackgroundImage('none')
 
-            // for now you can never go back
+        // for now you can never go back
             $('select#automode #id_autosave').attr('disabled', true); 
             $('select#automode #id_autoload').attr('disabled', true); 
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
@@ -582,7 +607,7 @@ break;
 
                 if ($('select#automode').attr('selectedIndex') != 0)
                 {
-                    codeeditor.win.document.body.style.backgroundImage = 'none';
+                    setCodeeditorBackgroundImage('none')
                     $('select#automode #id_autosave').attr('disabled', false); 
                     $('select#automode').attr('selectedIndex', 0); // editing
                     $('.editor_controls #run').attr('disabled', false);
@@ -598,7 +623,7 @@ break;
                     $('select#automode #id_autoload').attr('disabled', false); 
                     $('select#automode').attr('selectedIndex', 2); // watching
                     $('select#automode #id_autosave').attr('disabled', true); 
-                    codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
+                    setCodeeditorBackgroundImage('url(/media/images/staff.png)')
                     $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                     $('.editor_controls #run').attr('disabled', true);
                     sendjson({"command":'automode', "automode":'autoload'}); 
@@ -615,7 +640,7 @@ break;
                 {
                     $('select#automode #id_autoload').attr('disabled', false); 
                     $('select#automode').attr('selectedIndex', 2); // watching
-                    codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
+                    setCodeeditorBackgroundImage('url(/media/images/staff.png)')
                     $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                     $('.editor_controls #run').attr('disabled', true);
                     sendjson({"command":'automode', "automode":'autoload'}); 
@@ -628,7 +653,7 @@ break;
                 {
                     $('select#automode').attr('selectedIndex', 0); // editing
                     $('select#automode #id_autoload').attr('disabled', true); 
-                    codeeditor.win.document.body.style.backgroundImage = 'none'; 
+                    setCodeeditorBackgroundImage('none')
                     $('.editor_controls #btnCommitPopup').attr('disabled', false); 
                     $('.editor_controls #run').attr('disabled', false);
                     sendjson({"command":'automode', "automode":'autosave'}); 
@@ -1302,20 +1327,6 @@ break;
         resizeCodeEditor();
     }
 
-    //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
-    //which means we have to do some seemingly random binds/unbinds
-    function addHotkey(sKeyCombination, oFunction){
-
-        $(document).bind('keydown', sKeyCombination, function(){return false;});
-        $(codeeditor.win.document).unbind('keydown', sKeyCombination);
-        $(codeeditor.win.document).bind('keydown', sKeyCombination,
-            function(oEvent){
-                oFunction();
-
-                return false;                            
-            }
-        );
-    }
    
    
 });
