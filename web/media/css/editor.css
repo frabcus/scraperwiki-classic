@@ -105,7 +105,7 @@ span.hiddenfields { margin-left:10px; }
 .editor_output .info {clear:left; overflow:hidden }
 .editor_output .info div.output {height:100%;  width:100%; position:relative;}
 .editor_output .info div.output div.output_content {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
-.editor_output .info #output_data {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
+.editor_output .info #output_data {height:100%; width:100%;overflow:auto; overflow-y:scroll;}
 .editor_output .info div.output div.output_content .long_message {display:none;}
 
 .editor_output .info #output_chat {overflow:auto;}
