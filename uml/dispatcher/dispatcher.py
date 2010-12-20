@@ -166,8 +166,8 @@ class UML :
 
         @type   status  : Dictionary
         @param  status  : Status information
-        @rtype      	: UUID
-        @return     	: Request identifier
+        @rtype          : UUID
+        @return         : Request identifier
         """
 
         #  The status is marked as state=W(aiting) before the UML
@@ -382,14 +382,18 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             try    : os.remove (name)
             except : pass
 
-    def swlog (self) :
+        self.swlog().log (scraperID, runID, 'D.START', arg1 = self.path)
 
-        if self.m_swlog is None :
-            import swlogger
-            self.m_swlog = swlogger.SWLogger(config)
-            self.m_swlog.connect ()
+    def swlog (self, scraperid, runid, event, arg1 = None, arg2 = None) :
 
-        return self.m_swlog
+        try    :
+            if self.m_swlog is None :
+                import swlogger
+                self.m_swlog = swlogger.SWLogger(config)
+                self.m_swlog.connect ()
+            self.m_swlog.log (scraperid, runid, event, arg1 = None, arg2 = None)
+        except :
+            pass
 
     def _connect_to (self, server, port, soc) :
 
@@ -658,17 +662,17 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    : runID      = self.headers['x-runid'     ]
         except : runID      = ''
 
-        self.swlog().log (scraperID, runID, 'D.START', arg1 = self.path)
+        self.swlog(scraperID, runID, 'D.START', arg1 = self.path)
 
         if scm != 'http' or fragment or netloc :
             self.send_error (400, "bad url %s" % self.path)
-            self.swlog().log (scraperID, runID, 'D.ERROR', arg1 = 'Bad URL', arg2 = self.path)
+            self.swlog(scraperID, runID, 'D.ERROR', arg1 = 'Bad URL', arg2 = self.path)
             return
 
         uml, id = allocateUML (enqueue, scraperID = scraperID, runID = runID, testName = testName)
         if uml is None :
             self.send_error (400, "No server free to run your scraper, please try again in a few minutes")
-            self.swlog().log (scraperID, runID, 'D.ERROR', arg1 = 'No UML', arg2 = '%s' % (self.path))
+            self.swlog(scraperID, runID, 'D.ERROR', arg1 = 'No UML', arg2 = '%s' % (self.path))
             return
 
         soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -688,14 +692,14 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 for name, value in self.headers.items() :
                     soc.send ("%s: %s\r\n" % (name, value))
                 soc.send ("\r\n")
-                self.swlog().log (scraperID, runID, 'D.REQUEST')
+                self.swlog(scraperID, runID, 'D.REQUEST')
                 self._read_write (soc)
 
         finally :
             soc            .close()
             self.connection.close()
 
-        self.swlog().log (scraperID, runID, 'D.END')
+        self.swlog(scraperID, runID, 'D.END')
         releaseUML       (uml, id)
 
     def _read_write (self, soc, idle = 0x7ffffff) :

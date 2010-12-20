@@ -1,6 +1,6 @@
-import	time
-import	ConfigParser
-import	types
+import  time
+import  ConfigParser
+import  types
 
 class SWLogger :
 
@@ -21,22 +21,22 @@ class SWLogger :
         else :
             conf = config
 
-        self.m_host	= conf.get ('swlogger', 'host'  )
-        self.m_db	= conf.get ('swlogger', 'db'    )
-        self.m_user	= conf.get ('swlogger', 'user'  )
-        self.m_passwd	= conf.get ('swlogger', 'passwd')
-        self.m_mysql	= None
+        self.m_host = conf.get ('swlogger', 'host'  )
+        self.m_db   = conf.get ('swlogger', 'db'    )
+        self.m_user = conf.get ('swlogger', 'user'  )
+        self.m_passwd   = conf.get ('swlogger', 'passwd')
+        self.m_mysql    = None
 
     def setHost (self, host) :
 
         """
         Explicitely set the host.
 
-        @type	host	: String
-	@param	host	: Database host name or IP address
+        @type   host    : String
+        @param  host    : Database host name or IP address
         """
 
-        self.m_host	= host
+        self.m_host = host
 
     def connect (self) :
 
@@ -47,7 +47,7 @@ class SWLogger :
 
         if self.m_host :
             import MySQLdb
-            self.m_mysql	= MySQLdb.connect (host = self.m_host, db = self.m_db, user = self.m_user, passwd = self.m_passwd)
+            self.m_mysql    = MySQLdb.connect (host = self.m_host, db = self.m_db, user = self.m_user, passwd = self.m_passwd)
 
     def close (self) :
 
@@ -55,43 +55,43 @@ class SWLogger :
         Close database connection.
         """
 
-        self.m_mysql	= None
+        self.m_mysql    = None
 
     def log (self, scraperid, runid, event, arg1 = None, arg2 = None) :
 
         """
         Log an event.
 
-        @type	scraperid	: String
-	@param	scraperid	: Scraper identifier
-        @type	runid		: String
-	@param	runid		: Run identifier
-        @type	event		: String
-	@param	event		: Event string
-        @type	arg1		: Any
-	@param	arg1		: First optional argument
-        @type	arg2		: Any
-	@param	arg2		: Second optional argument
+        @type   scraperid   : String
+        @param  scraperid   : Scraper identifier
+        @type   runid       : String
+        @param  runid       : Run identifier
+        @type   event       : String
+        @param  event       : Event string
+        @type   arg1        : Any
+        @param  arg1        : First optional argument
+        @type   arg2        : Any
+        @param  arg2        : Second optional argument
         """
 
         if self.m_mysql :
 
             cursor = self.m_mysql.cursor()
             cursor.execute \
-    		(	"""
-    			insert into log (scraperid, runid, pytime, event, arg1, arg2)
-    			       values   (%s, %s, %s, %s, %s, %s)
-    			""",
-    			[ scraperid, runid, time.time(), event, arg1, arg2 ]
-    		)
+            (   """
+                insert into log (scraperid, runid, pytime, event, arg1, arg2)
+                       values   (%s, %s, %s, %s, %s, %s)
+                """,
+                [ scraperid, runid, time.time(), event, arg1, arg2 ]
+            )
 
     def clean (self, runid) :
 
         """
         Remove all entries for a specified run identifier.
 
-        @type	runid		: String
-	@param	runid		: Run identifier
+        @type   runid       : String
+        @param  runid       : Run identifier
         """
 
         if self.m_mysql :
@@ -102,6 +102,7 @@ class SWLogger :
             
             
 # To whom it may concern, the table definition is: 
+#
 """CREATE TABLE `log` (
   `id` int(11) NOT NULL auto_increment,
   `stamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
