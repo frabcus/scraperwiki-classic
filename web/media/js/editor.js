@@ -121,6 +121,13 @@ $(document).ready(function() {
             $('#aCloseEditor1').css("font-style", ((pageIsDirty && guid) ? "italic" : "normal")); 
         }
 
+        // bail out if draft mode
+        if ($('select#automode').attr('selectedIndex') == 1) 
+            return; 
+
+        sendjson({"command":'typing'}); 
+
+        // bail out if not set
         if (!$("#uploadchanges").attr('checked'))
             return; 
 
@@ -522,6 +529,7 @@ $(document).ready(function() {
               writeToData(data.content);
           } else if (data.message_type == "exception") {
               writeExceptionDump(data.exceptiondescription, data.stackdump, data.blockedurl, data.blockedurlquoted); 
+
           } else if (data.message_type == "executionstatus") {
               if (data.content == "startingrun")
                 startingrun(data.runID);
@@ -540,7 +548,7 @@ $(document).ready(function() {
           } else {
               writeToConsole(data.content, data.message_type); 
           }
-      }        
+      }
 
     function sendChat() 
     {
@@ -634,6 +642,9 @@ $(document).ready(function() {
         //writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
         if (data.message)
             writeToChat(cgiescape(data.message)); 
+
+        //if (data.lasttouch)
+        //    writeToChat("LAST TOUCHED " + data.lasttouch)
 
         // draft editing do not disturb
         if ($('select#automode').attr('selectedIndex') == 1) 
@@ -1010,7 +1021,7 @@ $(document).ready(function() {
                         if (res.url && window.location.pathname != res.url)
                             window.location = res.url;
 
-                        // orginary save case.  show the slider up that it has been saved
+                        // ordinary save case.
                         if (res.draft != 'True') 
                         {
                             $('.editor_controls #btnCommitPopup').val('Saved').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
