@@ -125,7 +125,8 @@ $(document).ready(function() {
         if ($('select#automode').attr('selectedIndex') == 1) 
             return; 
 
-        sendjson({"command":'typing'}); 
+        if (bConnected)
+            sendjson({"command":'typing'}); 
 
         // bail out if not set
         if (!$("#uploadchanges").attr('checked'))
@@ -545,6 +546,10 @@ $(document).ready(function() {
           } else if (data.message_type == "httpresponseheader") {
               writeToConsole("Header:::", "httpresponseheader"); 
               writeToConsole(data.headerkey + ": " + data.headervalue, "httpresponseheader"); 
+          } else if (data.message_type == "typing") {
+              ; 
+          } else if (data.message_type == "othertyping") {
+              writeToChat(cgiescape(data.content)); // says who's typing
           } else {
               writeToConsole(data.content, data.message_type); 
           }
@@ -567,7 +572,10 @@ $(document).ready(function() {
         catch(err) 
         {
             if (!bSuppressDisconnectionMessages)
+            {
                 writeToConsole("Send error: " + err, "exceptionnoesc"); 
+                writeToChat($.toJSON(json_data)); 
+            }
         }
     }
 
