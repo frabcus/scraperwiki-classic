@@ -1240,7 +1240,7 @@ $(document).ready(function() {
                     $('pre.popupoutput').css("height", $('.simplemodal-wrap').height() + "px");  // forces a scrollbar onto it
                 }})
             }
-            $.modal('<pre class="popupoutput" style="overflow:auto"><h1>Loading...</h1></pre>', modaloptions); 
+            $.modal('<pre class="popupoutput" style="overflow:auto"><h1>Loading... ['+cacheid+']</h1></pre>', modaloptions); 
         }
         else
             $.modal('<pre class="popupoutput">'+cgiescape(cachehidlookup[cacheid]["content"])+'</pre>', modaloptions); 
