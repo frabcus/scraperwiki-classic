@@ -27,7 +27,8 @@ import difflib
 import re
 import csv
 import math
-import urllib
+import urllib2
+import base64
 
 from cStringIO import StringIO
 import csv, types
@@ -759,6 +760,28 @@ def raw(request, short_name=None):
     else:
         result = newcode
     return HttpResponse(result, mimetype="text/plain")
+
+
+def proxycached(request):
+    cacheid = request.POST.get('cacheid')
+    
+    # delete this later when no more need for debugging
+    if not cacheid:  
+        cacheid = request.GET.get('cacheid')
+    
+    if not cacheid:
+        return HttpResponse(json.dumps({'message':"No cacheid found"}), mimetype="text/plain")
+    
+    fin = urllib2.urlopen(settings.HTTPPROXYURL + "/Page?" + cacheid)
+    res = { 'type':fin.headers.type, 'url':fin.geturl(), 'cacheid':cacheid }
+    if fin.headers.maintype == 'text':
+        res['content'] = fin.read()
+    else:
+        res['content'] = base64.encodestring(fin.read())
+        res['encoding'] = "base64"
+        
+    return HttpResponse(json.dumps(res), mimetype="text/plain")
+
 
 #save a code object
 def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourcescraper = ''):

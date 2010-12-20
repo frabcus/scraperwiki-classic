@@ -46,7 +46,6 @@ from twisted.internet.defer import succeed
 
 agent = Agent(reactor)
 
-
 class spawnRunner(protocol.ProcessProtocol):
     
     def __init__(self, client, code):
@@ -84,7 +83,7 @@ class spawnRunner(protocol.ProcessProtocol):
 
 # There's one of these 'clients' per editor window open.  All connecting to same factory
 class RunnerProtocol(protocol.Protocol):
-     
+
     def __init__(self):
         # Set if a run is currently taking place, to make sure we don't run 
         # more than one scraper at a time.
@@ -98,6 +97,7 @@ class RunnerProtocol(protocol.Protocol):
         self.cchatname = ""            # combined real/chatname version delimited with | for sending to umlmonitor
         self.clientnumber = -1         # number for whole operation of twisted
         self.clientsessionbegan = datetime.datetime.now()
+        self.clientlasttouch = self.clientsessionbegan
         self.guidclienteditors = None  # the EditorsOnOneScraper object
         self.automode = 'autosave'             # draft, autosave, autoload
         
@@ -114,6 +114,7 @@ class RunnerProtocol(protocol.Protocol):
             return
             
         command = parsed_data.get('command')
+        self.clientlasttouch = datetime.datetime.now()
         
         # data uploaded when a new connection is made from the editor
         if command == 'connection_open':
@@ -124,6 +125,11 @@ class RunnerProtocol(protocol.Protocol):
             otherline = json.dumps({'message_type' : "othersaved", 'content' : "%s saved" % self.chatname})
             self.writeall(line, otherline)
             self.factory.notifyMonitoringClientsSave(self)
+        
+        elif command == 'typing':
+            line = json.dumps({'message_type' : "typing", 'content' : "%s typing" % self.chatname})
+            otherline = json.dumps({'message_type' : "othertyping", 'content' : "%s typing" % self.chatname})
+            self.writeall(line, otherline)
         
         elif command == 'run':
             if self.processrunning:
@@ -137,7 +143,6 @@ class RunnerProtocol(protocol.Protocol):
             self.runcode(parsed_data)
         
         elif command == "kill":
-            # Kill the running process (or other if staff)
             if self.processrunning:
                 self.kill_run()
             elif self.username:
@@ -349,6 +354,8 @@ class EditorsOnOneScraper:
         usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
         usereditors.sort(key=lambda x: x.usersessionbegan)
         editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors ]
+        editorstatusdata["lasttouch"] = max([userclient.clientlasttouch  for userclient in usereditors[0].userclients]).isoformat()
+        
         
         editorstatusdata["nanonymouseditors"] = len(self.anonymouseditors)
         editorstatusdata["message"] = message
@@ -505,7 +512,8 @@ class RunnerFactory(protocol.ServerFactory):
 
         else:   # draft scraper type
             editorstatusdata = {'message_type':"editorstatus", "loggedineditors":[], "nanonymouseditors":1, 
-                                "chatname":client.chatname, "message":"Draft scraper connection"} 
+                                "chatname":client.chatname, "message":"Draft scraper connection", "lasttouch":client.clientlasttouch.isoformat() } 
+            
             client.writejson(editorstatusdata); 
             self.draftscraperclients.append(client)
         

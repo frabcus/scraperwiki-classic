@@ -72,9 +72,8 @@
                         your record which are together unique. e.g. <code>['id']</code> or
                         <code>['cattery', 'cat_number']</code>. Any existing data with
                         the same values for those attributes as your new data
-                        will be replaced. If there is no such existing data, or
-                        if <code>unique_keys</code> is an empty array, 
-                        it always creates a new record.
+                        will be replaced. If there is no such existing data it creates a new record.
+                        Must contain at least one element.
                         </dd>
                     <dt><code>data</code></dt>
                         <dd>A dictionary containing the data in your record.  The

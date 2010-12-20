@@ -3,7 +3,8 @@ $(document).ready(function() {
     //variables
     var editor_id = 'id_code';
     var codeeditor = undefined;
-    var codemirroriframe; // the actual iframe of codemirror that needs resizing
+    var codemirroriframe = undefined; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
+    var codeeditorbackgroundimage = 'none'; 
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
@@ -24,7 +25,6 @@ $(document).ready(function() {
     var buffer = "";
     var selectedTab = 'console';
     var outputMaxItems = 400;
-    var popupStatus = 0
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 
     var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
@@ -50,6 +50,8 @@ $(document).ready(function() {
     var savedundo = 0; 
     var lastundo = 0; 
 
+    var cachehidlookup = { }; 
+
     $.ajaxSetup({timeout: 10000});
 
     setupCodeEditor();
@@ -58,6 +60,47 @@ $(document).ready(function() {
     setupToolbar();
     setupResizeEvents();
     setupOrbited();
+
+
+    function CM_cleanText(text)  { return text.replace(/\u00a0/g, " ").replace(/\u200b/g, ""); }
+    function CM_isBR(node)  { var nn = node.nodeName; return nn == "BR" || nn == "br"; }
+    function CM_nodeText(node)  { return node.textContent || node.innerText || node.nodeValue || ""; }
+    function CM_lineNumber(node)
+    {
+        if (node == null)
+            return 1; 
+        if (node.parentNode != codeeditor.win.document.body)
+            return -1; 
+        var num = 1;
+        while (node)
+        {
+            num++; 
+            node = node.previousSibling; 
+            while (node && !CM_isBR(node))
+                 node = node.previousSibling; 
+        }
+        return num;
+    }
+
+    function CM_newLines(from, to) 
+    {
+        var lines = [ ]
+        var text = [ ];
+        for (var cur = (from ? from.nextSibling : codeeditor.editor.container.firstChild); cur != to; cur = cur.nextSibling)
+        {
+            if (CM_isBR(cur))
+            {
+                lines.push(CM_cleanText(text.join(""))); 
+                text = [ ]
+            }
+            else
+                text.push(CM_nodeText(cur)); 
+        }
+        lines.push(CM_cleanText(text.join(""))); 
+        return lines; 
+    }
+
+
 
     function ChangeInEditor(changetype) 
     {
@@ -78,29 +121,49 @@ $(document).ready(function() {
             $('#aCloseEditor1').css("font-style", ((pageIsDirty && guid) ? "italic" : "normal")); 
         }
 
+        // bail out if draft mode
+        if ($('select#automode').attr('selectedIndex') == 1) 
+            return; 
+
+        if (bConnected)
+            sendjson({"command":'typing'}); 
+
+        // bail out if not set
+        if (!$("#uploadchanges").attr('checked'))
+            return; 
+
         // send any edits up the line (first to the chat page to show we can decode it)
         var historystack = codeeditor.editor.history.history; 
-        while (lastundo < historystack.length)
+        var redohistorystack = codeeditor.editor.history.redoHistory; 
+        var rdhL = redohistorystack.length - 1; 
+        while (lastundo != historystack.length)
         {
-break; 
-            var chains = historystack[lastundo]; 
-            var mess = ""; 
+            var chains; 
+            if (lastundo < historystack.length)
+                chains = historystack[lastundo++]; 
+            else if (rdhL >= 0)
+            {
+                chains = redohistorystack[rdhL--]; 
+                lastundo--; 
+            }
+            else
+                break; 
+
             for (var i = 0; i < chains.length; i++)
             {
+                var mess = ""; 
                 var chain = chains[i]; 
-                var from = chain[0].from, end = chain[chain.length - 1].to;
-                var pos = from ? from.nextSibling : codeeditor.editor.container.firstChild;
-                while (pos != end) {
-                    var temp = pos.nextSibling;
-                    mess += pos.nodeValue; 
-                    console.log(pos)
-                    pos = temp;
-                }
-            }
+                mess += "Removing:\n"; 
+                for (var k = 0; k < chain.length; k++)
+                    mess += "-["+k+"] " + chain[k].text + "\n"; 
 
-            writeToChat(String(lastundo) + "  chains:" + mess); 
-            console.log(chains[0][0].text)
-            lastundo++; 
+                mess += "\nInserting on line " + CM_lineNumber(chain[0].from) + "\n"; 
+                CM_lineNumber
+                var lines = CM_newLines(chain[0].from, chain[chain.length - 1].to); 
+                for (var j = 0; j < lines.length; j++)
+                    mess += "+["+j+"] "+ lines[j] + "\n";  
+                writeToConsole(String(lastundo) + "." + i + "  chains:                                                                       \n\n" + mess); 
+            }
         }
     }
 
@@ -166,6 +229,7 @@ break;
                     codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
                     setupKeygrabs();
                     resizeControls('first');
+                    setCodeeditorBackgroundImage(codeeditorbackgroundimage); // in case the signal got in first
                     ChangeInEditor("initialized"); 
                 } 
           };
@@ -183,6 +247,29 @@ break;
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
     }
 
+
+    function setCodeeditorBackgroundImage(lcodeeditorbackgroundimage)
+    {
+        codeeditorbackgroundimage = lcodeeditorbackgroundimage; 
+        if (codemirroriframe != undefined) // also signifies the frame has been built
+            codeeditor.win.document.body.style.backgroundImage = codeeditorbackgroundimage; 
+    }
+
+    //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
+    //which means we have to do some seemingly random binds/unbinds
+    function addHotkey(sKeyCombination, oFunction){
+
+        $(document).bind('keydown', sKeyCombination, function(){return false;});
+        $(codeeditor.win.document).unbind('keydown', sKeyCombination);
+        $(codeeditor.win.document).bind('keydown', sKeyCombination,
+            function(oEvent){
+                oFunction();
+
+                return false;                            
+            }
+        );
+    }
+
     function setupKeygrabs(){
         addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+s', saveScraper); 
@@ -195,7 +282,7 @@ break;
     function setupMenu(){
         $('#menu_tutorials').click(function(){
             $('#popup_tutorials').modal({
-                 overlayClose: true, 
+                 overlayClose: true, persist: true, 
                  containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
                  overlayCss: { cursor:"auto" }
                 });
@@ -443,6 +530,7 @@ break;
               writeToData(data.content);
           } else if (data.message_type == "exception") {
               writeExceptionDump(data.exceptiondescription, data.stackdump, data.blockedurl, data.blockedurlquoted); 
+
           } else if (data.message_type == "executionstatus") {
               if (data.content == "startingrun")
                 startingrun(data.runID);
@@ -458,10 +546,14 @@ break;
           } else if (data.message_type == "httpresponseheader") {
               writeToConsole("Header:::", "httpresponseheader"); 
               writeToConsole(data.headerkey + ": " + data.headervalue, "httpresponseheader"); 
+          } else if (data.message_type == "typing") {
+              ; 
+          } else if (data.message_type == "othertyping") {
+              writeToChat(cgiescape(data.content)); // says who's typing
           } else {
               writeToConsole(data.content, data.message_type); 
           }
-      }        
+      }
 
     function sendChat() 
     {
@@ -480,7 +572,10 @@ break;
         catch(err) 
         {
             if (!bSuppressDisconnectionMessages)
+            {
                 writeToConsole("Send error: " + err, "exceptionnoesc"); 
+                writeToChat($.toJSON(json_data)); 
+            }
         }
     }
 
@@ -530,9 +625,9 @@ break;
         if (iautomode == 1)
         {
             $('#watcherstatus').text("draft mode"); 
-            codeeditor.win.document.body.style.backgroundImage = 'none'; 
+            setCodeeditorBackgroundImage('none')
 
-            // for now you can never go back
+        // for now you can never go back
             $('select#automode #id_autosave').attr('disabled', true); 
             $('select#automode #id_autoload').attr('disabled', true); 
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
@@ -556,6 +651,9 @@ break;
         if (data.message)
             writeToChat(cgiescape(data.message)); 
 
+        //if (data.lasttouch)
+        //    writeToChat("LAST TOUCHED " + data.lasttouch)
+
         // draft editing do not disturb
         if ($('select#automode').attr('selectedIndex') == 1) 
             return; 
@@ -576,13 +674,13 @@ break;
                     wstatus = '<a href="/profiles/'+loggedineditors[1]+'" target="_blank">'+loggedineditors[1]+'</a>'; 
                     if (loggedineditors.length >= 3)
                         wstatus += ' (+' + (loggedineditors.length-2) + ')'; 
-                    wstatus += ' is watching'; 
+                    wstatus += ' is looking'; 
                 }
                 $('#watcherstatus').html(wstatus); 
 
                 if ($('select#automode').attr('selectedIndex') != 0)
                 {
-                    codeeditor.win.document.body.style.backgroundImage = 'none';
+                    setCodeeditorBackgroundImage('none')
                     $('select#automode #id_autosave').attr('disabled', false); 
                     $('select#automode').attr('selectedIndex', 0); // editing
                     $('.editor_controls #run').attr('disabled', false);
@@ -598,7 +696,7 @@ break;
                     $('select#automode #id_autoload').attr('disabled', false); 
                     $('select#automode').attr('selectedIndex', 2); // watching
                     $('select#automode #id_autosave').attr('disabled', true); 
-                    codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
+                    setCodeeditorBackgroundImage('url(/media/images/staff.png)')
                     $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                     $('.editor_controls #run').attr('disabled', true);
                     sendjson({"command":'automode', "automode":'autoload'}); 
@@ -615,7 +713,7 @@ break;
                 {
                     $('select#automode #id_autoload').attr('disabled', false); 
                     $('select#automode').attr('selectedIndex', 2); // watching
-                    codeeditor.win.document.body.style.backgroundImage = 'url(/media/images/staff.png)'; 
+                    setCodeeditorBackgroundImage('url(/media/images/staff.png)')
                     $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                     $('.editor_controls #run').attr('disabled', true);
                     sendjson({"command":'automode', "automode":'autoload'}); 
@@ -628,7 +726,7 @@ break;
                 {
                     $('select#automode').attr('selectedIndex', 0); // editing
                     $('select#automode #id_autoload').attr('disabled', true); 
-                    codeeditor.win.document.body.style.backgroundImage = 'none'; 
+                    setCodeeditorBackgroundImage('none')
                     $('.editor_controls #btnCommitPopup').attr('disabled', false); 
                     $('.editor_controls #run').attr('disabled', false);
                     sendjson({"command":'automode', "automode":'autosave'}); 
@@ -848,7 +946,8 @@ break;
         var urlquery = ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
         var viewurl = viewrunurl; 
         var previewmessage = ''; 
-        if (urlquery.length != 0) {
+        if (urlquery.length != 0) 
+        {
             if (urlquery.match(/^[\w%_.;&~+=\-]+$/g)) 
                 viewurl = viewurl + '?' + urlquery; 
             else
@@ -857,7 +956,7 @@ break;
 
         previewscreen = '<h3>View preview <small><a href="'+viewurl+'" target="_blank">'+viewurl+'</a>'+previewmessage+'</small></h3>'; 
         isrc = ""; // isrc = viewurl; (would allow direct inclusion from saved version)
-            // force the preview iframe to fill most of what it should.  needs more work
+                   // force the preview iframe to fill most of what it should.  needs more work
         previewscreen += '<iframe id="previewiframe" width="100%" height="'+($(window).height()*8/10-50)+'px" src="'+isrc+'"></iframe>'; 
 
         $.modal(previewscreen, { 
@@ -930,7 +1029,7 @@ break;
                         if (res.url && window.location.pathname != res.url)
                             window.location = res.url;
 
-                        // orginary save case.  show the slider up that it has been saved
+                        // ordinary save case.
                         if (res.draft != 'True') 
                         {
                             $('.editor_controls #btnCommitPopup').val('Saved').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
@@ -1005,23 +1104,9 @@ break;
         return sTitle != 'Untitled' && sTitle != '' && sTitle != undefined && sTitle != false;
     }
 
-    //Hide popup
-    function hidePopup() {
 
-        // Hide popups
-        $('#popups div.popup_item').each(function(i) {
-            $(this).fadeOut("fast")
-        });
-
-        //hide overlay
-        $('#popups #overlay').fadeOut("fast")
-        popupStatus = 0;
-                
-        // set focus to the code editor so we can carry on typing
-        codeeditor.focus(); 
-    }
-
-    function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blockedurlquoted) {
+    function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blockedurlquoted) 
+    {
         if (stackdump) {
             for (var i = 0; i < stackdump.length; i++) {
                 var stackentry = stackdump[i]; 
@@ -1046,13 +1131,15 @@ break;
         }
     }
 
-    function writeRunOutput(sMessage) {
+    function writeRunOutput(sMessage) 
+    {
         writeToConsole(sMessage, 'console'); 
         if ((activepreviewiframe != undefined) && (activepreviewiframe.document != undefined))
             activepreviewiframe.document.write(sMessage); 
     }
 
-    function showTextPopup(sLongMessage) {
+    function showTextPopup(sLongMessage) 
+    {
         $.modal('<pre class="popupoutput">'+cgiescape(sLongMessage)+'</pre>', 
                 {overlayClose: true, 
                  containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
@@ -1112,9 +1199,8 @@ break;
 
         
         //remove items if over max
-        if ($('#output_console div.output_content').children().size() >= outputMaxItems) {
+        while ($('#output_console div.output_content').children().size() >= outputMaxItems) 
             $('#output_console div.output_content').children(':first').remove();
-        }
 
         //append to console
         $('#output_console div.output_content').append(oConsoleItem);
@@ -1123,31 +1209,78 @@ break;
         setTabScrollPosition('console', 'bottom'); 
     };
 
+    function popupCached(cacheid)
+    {
+        modaloptions = { overlayClose: true, 
+                         containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
+                         overlayCss: { cursor:"auto" }
+                       }; 
+        if (cachehidlookup[cacheid] == undefined)
+        {
+            modaloptions['onShow'] = function() 
+            { 
+                $.ajax({
+                    type : 'POST',
+                    url  : '/proxycached', 
+                    data: { cacheid: cacheid }, 
+                    success: function(sdata) 
+                { 
+                    var foutput; 
+                    try 
+                    {
+                        cachehidlookup[cacheid] = $.evalJSON(sdata);
+                        foutput = cgiescape(cachehidlookup[cacheid]["content"]); 
+                    } 
+                    catch(err) 
+                    {
+                        foutput = "Malformed json: " + cgiescape(sdata); 
+                    }
+
+                    $('pre.popupoutput').html(foutput); 
+                    $('pre.popupoutput').css("height", $('.simplemodal-wrap').height() + "px");  // forces a scrollbar onto it
+                }})
+            }
+            $.modal('<pre class="popupoutput" style="overflow:auto"><h1>Loading... ['+cacheid+']</h1></pre>', modaloptions); 
+        }
+        else
+            $.modal('<pre class="popupoutput">'+cgiescape(cachehidlookup[cacheid]["content"])+'</pre>', modaloptions); 
+    }
 
     function writeToSources(sUrl, bytes, failedmessage, cached, cacheid) 
     {
         //remove items if over max
-        if ($('#output_sources div.output_content').children().size() >= outputMaxItems) {
+        while ($('#output_sources div.output_content').children().size() >= outputMaxItems) 
             $('#output_sources div.output_content').children(':first').remove();
-        }
 
         //append to sources tab
-        if (cacheid != undefined)
-            malink = 'class="cached" href="/cachedscrape/' + cacheid + '"'; 
+        var smessage = ""; 
+        var alink = ' <a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a>'; 
+        if ((failedmessage == undefined) || (failedmessage == ''))
+        {
+            smessage += bytes + ' bytes loaded'; 
+            if (cacheid != undefined)
+                smessage += ' <a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'; 
+            if (cached == 'True')
+                smessage += ' (from cache)'; 
+            smessage += alink; 
+        }
         else
-            malink = 'href="' + sUrl + '"'; 
-        alink = '<a ' + malink + ' target="_new">' + sUrl.substring(0, 100) + '</a> '; 
-        if ((failedmessage != undefined) && (failedmessage != ''))
             smessage = failedmessage + alink; 
-        else
-            smessage = bytes + ' bytes loaded ' + (cached == 'True' ? '(from cache) ' : '') + alink; 
 
         $('#output_sources div.output_content').append('<span class="output_item">' + smessage + '</span>')
         $('.editor_output div.tabs li.sources').addClass('new');
+        
+        if (cacheid != undefined)  
+            $('a#cacheid-'+cacheid).click(function() { popupCached(cacheid); return false; }); 
+
         setTabScrollPosition('sources', 'bottom'); 
     }
 
-    function writeToData(aRowData) {
+    function writeToData(aRowData) 
+    {
+        while ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) 
+            $('#output_data table.output_content tbody').children(':first').remove();
+
         var oRow = $('<tr></tr>');
 
         $.each(aRowData, function(i){
@@ -1156,9 +1289,6 @@ break;
             oRow.append(oCell);
         })
 
-        if ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) {
-            $('#output_data table.output_content tbody').children(':first').remove();
-        }
         
         $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
 
@@ -1167,16 +1297,15 @@ break;
         $('.editor_output div.tabs li.data').addClass('new');
     }
 
-    function writeToChat(seMessage) {
+    function writeToChat(seMessage) 
+    {
+        while ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) 
+            $('#output_chat table.output_content tbody').children(':first').remove();
+
         var oRow = $('<tr></tr>');
         var oCell = $('<td></td>');
         oCell.html(seMessage);
         oRow.append(oCell);
-        
-
-        if ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) {
-            $('#output_chat table.output_content tbody').children(':first').remove();
-        }
 
         $('#output_chat table.output_content').append(oRow);
 
@@ -1271,20 +1400,6 @@ break;
         resizeCodeEditor();
     }
 
-    //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
-    //which means we have to do some seemingly random binds/unbinds
-    function addHotkey(sKeyCombination, oFunction){
-
-        $(document).bind('keydown', sKeyCombination, function(){return false;});
-        $(codeeditor.win.document).unbind('keydown', sKeyCombination);
-        $(codeeditor.win.document).bind('keydown', sKeyCombination,
-            function(oEvent){
-                oFunction();
-
-                return false;                            
-            }
-        );
-    }
    
    
 });

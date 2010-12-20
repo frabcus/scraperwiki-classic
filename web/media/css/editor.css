@@ -105,7 +105,7 @@ span.hiddenfields { margin-left:10px; }
 .editor_output .info {clear:left; overflow:hidden }
 .editor_output .info div.output {height:100%;  width:100%; position:relative;}
 .editor_output .info div.output div.output_content {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
-.editor_output .info #output_data {height:100%; width:100%;overflow:hidden; overflow-y:scroll;}
+.editor_output .info #output_data {height:100%; width:100%;overflow:auto; overflow-y:scroll;}
 .editor_output .info div.output div.output_content .long_message {display:none;}
 
 .editor_output .info #output_chat {overflow:auto;}
@@ -165,8 +165,9 @@ dl.quick_help li code {font-size:1.1em; }
 
 .chathidden {display:none;}
 
-a.cached { background-color: #e0e0e0; }
-
+a.cachepopup { background: url(../images/uup.png) no-repeat center; background-color: #f08a38; color:#fff; 
+               border-radius: 2px; -moz-border-radius: 2px; -webkit-border-radius: 2px; border:solid 1px #bf6312;}
+a.cachepopup:hover { background-color:#ffffd7;; cursor:pointer; text-decoration: none; }
 
 
 /* quickhelp */
