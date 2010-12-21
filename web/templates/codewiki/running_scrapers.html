@@ -166,12 +166,16 @@ $(document).ready(function() {
     {
         return "<span class=\"lasttouchdiff\"><span class=\"lasttouch\">"+datetime.getTime()+"</span><span></span></span>"; 
     }
+    function parseISOdate(sdatetime)
+    {
+        return new Date(sdatetime.replace(/-|T|\.\d*/g, " ")); 
+    }
 
     //read data back from twisted
     function receiveRecord(jdata) 
     {
         $("#monitoroutput #jdatareceived").html($.toJSON(jdata)); 
-        servernowtime = new Date(jdata.nowtime.replace(/-|T|\.\d*/g, " ")); 
+        servernowtime = parseISOdate(jdata.nowtime); 
         $("#monitoroutput #servernowtime").html(servernowtime.toUTCString()); 
 
         if (jdata.message)
@@ -187,7 +191,7 @@ $(document).ready(function() {
                 var chatname = umlmonitoringuser.chatname; 
                 var idchatname = "MON_" + getIDfromCChatname(chatname); 
                 var present = umlmonitoringuser.present; 
-                var lasttouch = new Date(umlmonitoringuser.lasttouch.replace(/-|T|\.\d*/g, " ")); 
+                var lasttouch = parseISOdate(umlmonitoringuser.lasttouch); 
                 var ele = "#monitoroutput #monitoringusers ul li#"+idchatname; 
                 if (present)
                 {
@@ -207,10 +211,10 @@ $(document).ready(function() {
                 $("#monitoroutput #draftscraperusers ul").html(""); 
             for (i = 0; i < jdata.draftscraperusers.length; i++)
             {
-                chatname = jdata.draftscraperusers[i][0]; 
-                idchatname = "DRA_" + getIDfromCChatname(chatname); 
-                present = jdata.draftscraperusers[i][1]; 
-                running = jdata.draftscraperusers[i][2]; 
+                var chatname = jdata.draftscraperusers[i].chatname; 
+                var idchatname = "DRA_" + getIDfromCChatname(chatname); 
+                var present = jdata.draftscraperusers[i].present; 
+                var running = jdata.draftscraperusers[i].running; 
                 ele = "#monitoroutput #draftscraperusers ul li#"+idchatname; 
                 if (present)
                 {
@@ -234,13 +238,13 @@ $(document).ready(function() {
             {
                 var scraperentry = jdata.scraperentries[i]; 
                 var scrapername = scraperentry.scrapername; 
-                var present = scraperentry.present; 
+                var scraperpresent = scraperentry.present; 
                 var running = scraperentry.running; 
                 var scraperusers = scraperentry.scraperusers; 
 
                 idscrapername = "SCR_" + scrapername; 
                 ele = "#monitoroutput ul#scraperentries li#"+idscrapername; 
-                if (present)
+                if (scraperpresent)
                 {
                     if (!$(ele).attr("id"))
                         $("#monitoroutput ul#scraperentries").append("<li id=\""+idscrapername+"\" class=\"scraper\">"+getScraperfromScrapername(scrapername)+" <ul class=\"scraperusers\"></ul></li>"); 
@@ -249,17 +253,21 @@ $(document).ready(function() {
                         $(ele).addClass("running").css("background", '#afa'); 
                     else
                         $(ele).removeClass("running").css("background", '#fff'); 
+
                     for (j = 0; j < scraperusers.length; j++)
                     {
                         var scraperuser = scraperusers[j]; 
-                        chatname = scraperuser.chatname; 
-                        idcchatname = idscrapername + "_CHA_" + getIDfromCChatname(chatname); 
-                        cpresent = scraperuser.present; 
-                        cele = ele + " ul li#"+idcchatname; 
+                        var chatname = scraperuser.chatname; 
+                        var idcchatname = idscrapername + "_CHA_" + getIDfromCChatname(chatname); 
+                        var cpresent = scraperuser.present; 
+                        var userlasttouch = parseISOdate(scraperuser.userlasttouch); 
+                        var cele = ele + " ul li#"+idcchatname; 
                         if (cpresent)
                         {
                             if (!$(cele).attr("id"))
-                                $(ele+" ul").append("<li id=\""+idcchatname+"\" class=\"luser\">"+getUserfromCChatname(chatname)+"</li>"); 
+                                $(ele+" ul").append("<li id=\""+idcchatname+"\" class=\"luser\">"+getUserfromCChatname(chatname)+" "+ getNewDatetimeSpan(userlasttouch) +"</li>"); 
+                            else
+                                $(cele + " .lasttouchdiff .lasttouch").text(String(userlasttouch.getTime())); 
                         }
                         else
                             $(cele).remove(); 

@@ -348,12 +348,11 @@ class EditorsOnOneScraper:
     def notifyEditorClients(self, message):
         editorstatusdata = {'message_type':"editorstatus", 'earliesteditor':self.scrapersessionbegan.isoformat()}; 
         
-        # order is important to determin who is the editor
+        # order by who has first session in order to determin who is the editor
         usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
         usereditors.sort(key=lambda x: x.usersessionbegan)
         editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors ]
-        editorstatusdata["lasttouch"] = max([userclient.clientlasttouch  for userclient in usereditors[0].userclients]).isoformat()
-        
+        editorstatusdata["scraperlasttouch"] = self.scraperlasttouch.isoformat()
         
         editorstatusdata["nanonymouseditors"] = len(self.anonymouseditors)
         editorstatusdata["message"] = message
@@ -429,20 +428,19 @@ class RunnerFactory(protocol.ServerFactory):
         for client in self.draftscraperclients:
             draftscraperusers[client.cchatname] = bool(client.processrunning) or draftscraperusers.get(client.cchatname, False)
         if umlstatusdata:
-            umlstatusdata["draftscraperusers"] = [ (chatname, True, crunning)  for chatname, crunning in draftscraperusers.items() ]
+            umlstatusdata["draftscraperusers"] = [ {"chatname":chatname, "present":True, "running":crunning }  for chatname, crunning in draftscraperusers.items() ]
         if not cclient.isumlmonitoring and not cclient.guid:
-            umlstatuschanges["draftscraperusers"] = [ ( cclient.cchatname, (cclient.cchatname in draftscraperusers), draftscraperusers.get(cclient.cchatname, False) ) ]
+            umlstatuschanges["draftscraperusers"] = [ { "chatname":cclient.cchatname, "present":(cclient.cchatname in draftscraperusers), "running":draftscraperusers.get(cclient.cchatname, False) } ]
         
         # the complexity here reflects the complexity of the structure.  the running flag could be set on any one of the clients
         def scraperentry(eoos, cclient):  # local function
-            scrapereditors = [ ]
+            scrapereditors = { }   # chatname to lasttouch
             scraperdrafteditors = [ ]
-            running = False
-            lasttouch = None
+            running = False        # we could make this an updated member of EditorsOnOneScraper like lasttouch
             
             for usereditor in eoos.usereditormap.values():
                 if usereditor.nondraftcount != 0:
-                    scrapereditors.append(usereditor.userclients[0].cchatname)
+                    scrapereditors[usereditor.userclients[0].cchatname] = usereditor.userlasttouch
                 else:
                     scraperdrafteditors.append(usereditor.userclients[0].cchatname)
                     
@@ -451,18 +449,19 @@ class RunnerFactory(protocol.ServerFactory):
             
             for uclient in eoos.anonymouseditors:
                 if uclient.automode != 'draft': 
-                    scrapereditors.append(uclient.cchatname)
+                    scrapereditors[uclient.cchatname] = uclient.clientlasttouch
                 else:
                     scraperdrafteditors.append(uclient.cchatname)
                 running = running or bool(uclient.processrunning)
             
             ### scraperdrafteditors
             if cclient:
-                scraperusers = [ {'chatname':cclient.cchatname, 'present':(cclient.cchatname in scrapereditors)} ]
+                scraperusers = [ {'chatname':cclient.cchatname, 'present':(cclient.cchatname in scrapereditors), 'userlasttouch':cclient.clientlasttouch.isoformat() } ]
             else:
-                scraperusers = [ {'chatname':cchatname, 'present':True}  for cchatname in scrapereditors ]
+                scraperusers = [ {'chatname':cchatname, 'present':True, 'userlasttouch':userlasttouch.isoformat() }  for cchatname, userlasttouch in scrapereditors.items() ]
             
-            return {'scrapername':eoos.scrapername, 'present':True, 'running':running, 'scraperusers':scraperusers}
+            return {'scrapername':eoos.scrapername, 'present':True, 'running':running, 'scraperusers':scraperusers, 'scraperlasttouch':eoos.scraperlasttouch.isoformat() }
+        
         
         if umlstatusdata:
             umlstatusdata["scraperentries"] = [ ]
