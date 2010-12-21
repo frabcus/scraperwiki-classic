@@ -38,6 +38,9 @@ DATASTORE_DATABASE_USER       = ''   # Not used with sqlite3.
 DATASTORE_DATABASE_PASSWORD   = ''         # Not used with sqlite3.
 DATASTORE_DATABASE_PORT   = ''
 
+DATAPROXY_HOST  = ''	# Host running data proxy - see uml.cfg
+DATAPROXY_PORT  = 0	# Dataproxy port - see uml.cfg
+
 FEEDBACK_EMAIL = 'feedback@somedomain.com'
 FEEDBACK_EMAIL_TITLE = '[ScraperWiki Feedback]'
 

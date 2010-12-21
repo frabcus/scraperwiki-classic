@@ -43,6 +43,10 @@ port	= 9003
 user	= scraperwiki
 passwd	= scraperwiki
 db	= scraperwiki_datastore
+secure	= 192.168.1.66
+
+#dbtype	= sqlite3
+#db	= /tmp/%{scraperid}.sq3
 
 [metadata]
 host    = 192.168.1.66

@@ -11,11 +11,11 @@ test $# = 0 ||
 	exit	1
 }
 
-test `id -u` = 0 ||
-{
-	echo	rawuml: must be run as root
-	exit	1
-}
+#test `id -u` = 0 ||
+#{
+#	echo	rawuml: must be run as root
+#	exit	1
+#}
 
 echo	-n "This will destroy all COW files: continue [y/N]: "
 read	resp
