@@ -18,7 +18,7 @@
 div#monitoroutput { width:80%; margin-left:auto; margin-right:auto; border: thick blue solid; margin-top:5px; }
 
 div#monitoringusers { border: thin red solid; overflow:auto; text-align:left }
-div#draftscraperusers { border: thin red solid; overflow:auto;  text-align:left }
+div#draftscraperusers { border: thin red solid; overflow:auto; text-align:left }
 div#connectionstatusdiv { border: thin red solid; overflow:auto;  text-align:left }
 
 div#monitoringusers ul {  display:inline;   }
@@ -31,6 +31,10 @@ ul#scraperentries {  display:block; text-align:left }
 li.scraper {  border: thin red solid; display:block; }
 
 li.scraper a.scrapername { width:100px; background-color:blue; color:white; display:inline-block; }
+ul.scraperusers {  display:inline; vertical-align:top; height:100%; border:0; padding:0; margin:0 }
+li.luser {  border: thin black solid; display:inline;  }
+
+
 span.desc { background-color:black; color:white; width:100px; display:inline-block; } 
 
 .lasttouchdiff { color: green; font-size:75%; }
@@ -38,8 +42,8 @@ span.desc { background-color:black; color:white; width:100px; display:inline-blo
 
 #monitoroutput ul#scraperentries li.running {  background-color:#afa; font-size:200%;}
 
-ul.scraperusers {  display:inline;  }
-li.luser {  border: thin black solid; display:inline;  }
+#jdatareceived { font-size:75%; overflow-x: auto; white-space:nowrap; height:10em; } 
+
 
 
 
@@ -174,7 +178,10 @@ $(document).ready(function() {
     //read data back from twisted
     function receiveRecord(jdata) 
     {
-        $("#monitoroutput #jdatareceived").html($.toJSON(jdata)); 
+        $("#monitoroutput #jdatareceived").append('<div>'+$.toJSON(jdata)+'</div>'); 
+        while ($('#monitoroutput #jdatareceived').children().size() >= 10) 
+            $('#monitoroutput #jdatareceived').children(':first').remove();
+
         servernowtime = parseISOdate(jdata.nowtime); 
         $("#monitoroutput #servernowtime").html(servernowtime.toUTCString()); 
 
@@ -348,8 +355,8 @@ $(document).ready(function() {
     <div id="monitoringusers"><span class="desc">Monitoring:</span> <ul></ul></div>
     <div id="draftscraperusers"><span class="desc">Drafts:</span> <ul></ul></div>
     <ul id="scraperentries"></ul>
-    <div id="jdatareceived">...</div>
     <div id="message">...</div>
+    <div id="jdatareceived"></div>
 </div>
 
 <h3><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h3>
