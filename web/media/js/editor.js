@@ -335,6 +335,7 @@ $(document).ready(function() {
         $('#id_urlquery').blur();
 
         $('select#automode').change(changeAutomode); 
+        $('input#showautomode').change(showhideAutomode); 
     }
     
     //Setup Tabs
@@ -563,7 +564,7 @@ $(document).ready(function() {
         $('#chat_line').val(''); 
     }
 
-    //send a message to the server
+    //send a message to the server (should this be asynchronous?)
     function sendjson(json_data) 
     {
         try 
@@ -640,6 +641,14 @@ $(document).ready(function() {
         sendjson({"command":'automode', "automode":automode}); 
     }; 
 
+    function showhideAutomode()
+    {
+        if ($('input#showautomode').attr('checked') || (username ? (loggedineditors.length >= 2) : (loggedineditors.length >= 1)))
+            $('select#automode').show(); 
+        else
+            $('select#automode').hide(); 
+    }
+
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
     { 
@@ -654,15 +663,11 @@ $(document).ready(function() {
 
         //if (data.lasttouch)
         //    writeToChat("LAST TOUCHED " + data.lasttouch)
+        showhideAutomode(); 
 
         // draft editing do not disturb
         if ($('select#automode').attr('selectedIndex') == 1) 
             return; 
-
-        if (username ? (loggedineditors.length >= 2) : (loggedineditors.length >= 1))
-            $('select#automode').show(); 
-        else
-            $('select#automode').hide(); 
 
         if (username)
         {

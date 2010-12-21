@@ -90,13 +90,13 @@
 
                 <select id="automode">
                   {% if scraper.id %}
-                    <option name="autosave" id="id_autosave" selected>editing</option>
-                    <option name="draft" id="id_draft">draft editing</option>
-                    <option name="autoload" id="id_autoload" disabled>watching</option>
+                    <option name="autosave" value="autosave" id="id_autosave" selected>editing</option>
+                    <option name="draft"    value="draft"    id="id_draft">draft editing</option>
+                    <option name="autoload" value="autoload" id="id_autoload" disabled>watching</option>
                   {% else %}
-                    <option name="autosave" id="id_autosave" disabled>editing</option>
-                    <option name="draft" id="id_draft" selected>draft editing</option>
-                    <option name="autoload" id="id_autoload" disabled>watching</option>
+                    <option name="autosave" value="autosave" id="id_autosave" disabled>editing</option>
+                    <option name="draft"    value="draft"    id="id_draft" selected>draft editing</option>
+                    <option name="autoload" value="autload"  id="id_autoload" disabled>watching</option>
                   {% endif %}
                 </select>
 
@@ -175,9 +175,8 @@
 
       <div id="popup_tutorials" class="quickhelp">
         {% if user.is_staff %}
-            <p class="staff"><input type="checkbox" id="uploadchanges" />
-            Upload changes as you type
-            </p>
+          <p class="staff"><input type="checkbox" id="uploadchanges" />Upload changes as you type</p>
+          <p class="staff"><input type="checkbox" id="showautomode" />Always show automode</p>
         {% endif %}
 
         <h3>

@@ -376,9 +376,18 @@ $(document).ready(function() {
     <p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
 </div>
 
-<h1>UML Status</h1>
-(does not update)
-<p>Active UMLs: {% for activeuml in activeumls %}{{activeuml}}, {% endfor %}</p>
+<h1 id="umlstatus"><a href="#umlstatus">#</a> UML Status</h1>
+  (does not update)
+  <p>Active UMLs: 
+  {% for umlname, umlstatus in activeumls.items %}
+    {{umlname}}:
+    {% if umlstatus.error %}
+      <b>{{umlstatus.error}}</b>
+    {% else %}
+      [{{umlstatus.runids|length}}] runids
+    {% endif %}
+  {% endfor %}
+  </p>
 
 <table border="1" style="width:auto; margin:auto">
 <tr><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>

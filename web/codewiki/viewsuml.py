@@ -17,8 +17,8 @@ import time
 import os
 import signal
 
-from codewiki.management.commands.run_scrapers import GetUMLrunningstatus, kill_running_runid
-from viewsrpc import testactiveumls
+from codewiki.management.commands.run_scrapers import GetDispatcherStatus, GetUMLstatuses, kill_running_runid
+from viewsrpc import testactiveumls  # not to use
 
 
 def run_event(request, run_id):
@@ -30,7 +30,7 @@ def run_event(request, run_id):
         event = get_object_or_404(ScraperRunEvent, run_id=run_id)
     
     context = { 'event':event }
-    statusscrapers = GetUMLrunningstatus()
+    statusscrapers = GetDispatcherStatus()
     for status in statusscrapers:
         if status['runID'] == event.run_id:
             context['status'] = status
@@ -42,13 +42,11 @@ def run_event(request, run_id):
     return render_to_response('codewiki/run_event.html', context, context_instance=RequestContext(request))
 
 
-            
-
 def running_scrapers(request):
     user = request.user
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:10]  
     
-    statusscrapers = GetUMLrunningstatus()
+    statusscrapers = GetDispatcherStatus()
     for status in statusscrapers:
         if status['scraperID']:
             scrapers = Code.objects.filter(guid=status['scraperID'])
@@ -63,7 +61,7 @@ def running_scrapers(request):
                 status['killable'] = True
 
     context = { 'statusscrapers': statusscrapers, 'events':recentevents }
-    context['activeumls'] = testactiveumls(5)
+    context['activeumls'] = GetUMLstatuses()
 
     return render_to_response('codewiki/running_scrapers.html', context, context_instance=RequestContext(request))
 
