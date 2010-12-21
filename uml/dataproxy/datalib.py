@@ -297,6 +297,8 @@ def save (scraperID, unique_keys, scraped_data, date = None, latlng = None) :
                         ''',
                         [   value, idlist[0], key   ]
                     )
+
+        db.commit()
         return  [ True, 'Data record updated' ]
 
     #  New data to be inserted. Get a new item identifier and then insert
