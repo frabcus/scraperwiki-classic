@@ -212,6 +212,7 @@ $(document).ready(function() {
             indentUnit: indentUnits[scraperlanguage],
             readOnly: false, // cannot be changed once started up
             undoDepth: 200,  // defaults to 50.  wait till we get lostundo value
+            undoDelay: 2000, // 2 seconds  (default is 800)
             tabMode: "shift", 
             disableSpellcheck: true,
             autoMatchParens: true,
@@ -1240,7 +1241,7 @@ $(document).ready(function() {
                     $('pre.popupoutput').css("height", $('.simplemodal-wrap').height() + "px");  // forces a scrollbar onto it
                 }})
             }
-            $.modal('<pre class="popupoutput" style="overflow:auto"><h1>Loading... ['+cacheid+']</h1></pre>', modaloptions); 
+            $.modal('<pre class="popupoutput" style="overflow:auto"><h1>Loading ['+cacheid+'] ...</h1></pre>', modaloptions); 
         }
         else
             $.modal('<pre class="popupoutput">'+cgiescape(cachehidlookup[cacheid]["content"])+'</pre>', modaloptions); 

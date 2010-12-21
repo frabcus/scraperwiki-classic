@@ -2,18 +2,14 @@
 "exec" "python" "-O" "$0" "$@"
 
 """
-This script is the interface between the UML/firebox set up and the frontend 
-Orbited TCP socket.  
+This script is the interface between the UML/firebox set up and the frontend Orbited TCP socket.  
 
-When a connection is made RunnerProtocol listens for data coming from the 
-client.  This can be anything
-
-
-class RunnerProtocol(protocol.Protocol):
-class RunnerFactory(protocol.ServerFactory):
-    protocol = RunnerProtocol
-
-class spawnRunner(protocol.ProcessProtocol)
+There is one client object (class RunnerProtocol) per editor window
+These recieve and send all messages between the browser and the UML
+An instance of a scraper running in the UML is spawnRunner
+The RunnerFactory organizes lists of these clients and manages their states
+There is one UserEditorsOnOneScraper per user per scraper to handle one user opening multiple windows onto the same scraper
+There is one EditorsOnOneScraper per scraper which bundles logged in users into a list of UserEditorsOnOneScrapers
 
 """
 
@@ -23,18 +19,12 @@ import signal
 import time
 from optparse import OptionParser
 import ConfigParser
-import urllib2
-import urllib      #  do some asynchronous calls
 import datetime
 
 varDir = './var'
 
-# 'json' is only included in python2.6.  For previous versions you need to
-# Install siplejson manually.
-try:
-  import json
-except:
-  import simplejson as json
+try:    import json
+except: import simplejson as json
 
 from twisted.internet import protocol, utils, reactor, task
 
@@ -99,7 +89,7 @@ class RunnerProtocol(protocol.Protocol):
         self.clientsessionbegan = datetime.datetime.now()
         self.clientlasttouch = self.clientsessionbegan
         self.guidclienteditors = None  # the EditorsOnOneScraper object
-        self.automode = 'autosave'             # draft, autosave, autoload
+        self.automode = 'autosave'     # draft, autosave, autoload
         
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
@@ -114,8 +104,14 @@ class RunnerProtocol(protocol.Protocol):
             return
             
         command = parsed_data.get('command')
-        self.clientlasttouch = datetime.datetime.now()
         
+        # touch all the relevent systems
+        self.clientlasttouch = datetime.datetime.now()
+        if self.guid and self.automode != 'draft' and self.username:
+            assert self.username in self.guidclienteditors.usereditormap
+            self.guidclienteditors.usereditormap[self.username].userlasttouch = self.clientlasttouch
+            self.guidclienteditors.scraperlasttouch = self.clientlasttouch
+
         # data uploaded when a new connection is made from the editor
         if command == 'connection_open':
             self.connectionopen(parsed_data)
@@ -284,6 +280,7 @@ class UserEditorsOnOneScraper:
         self.userclients = [ ]
         self.usersessionbegan = None
         self.nondraftcount = 0
+        self.userlasttouch = datetime.datetime.now()
         self.AddUserClient(client)
     
     def AddUserClient(self, client):
@@ -313,6 +310,7 @@ class EditorsOnOneScraper:
         self.scraperlanguage = scraperlanguage
         self.scrapersessionbegan = None
         self.anonymouseditors = [ ]
+        self.scraperlasttouch = datetime.datetime.now()
         self.usereditormap = { }  # maps username to UserEditorsOnOneScraper
         
     def AddClient(self, client):
@@ -405,17 +403,26 @@ class RunnerFactory(protocol.ServerFactory):
         assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
         
         # both of these are in the same format and read the same, but changes are shorter
-        umlstatuschanges = {'message_type':"umlchanges" }; 
-        umlstatusdata = (cclient.isumlmonitoring and {'message_type':"umlstatus" } or None)
+        umlstatuschanges = {'message_type':"umlchanges", "nowtime":datetime.datetime.now().isoformat() }; 
+        if cclient.isumlmonitoring:
+             umlstatusdata = {'message_type':"umlstatus", "nowtime":umlstatuschanges["nowtime"]}
+        else:
+             umlstatusdata = None
         
         # the cchatnames are username|chatname, so the javascript has something to handle for cases of "|Anonymous5" vs "username|username"
         
-        # handle updates and changes in the monitoring users
-        umlmonitoringusers = set([ client.cchatname  for client in self.umlmonitoringclients ])
+        # handle updates and changes in the set of clients that have the monitoring window open
+        umlmonitoringusers = { }
+        for client in self.umlmonitoringclients:
+            if client.cchatname in umlmonitoringusers:
+                umlmonitoringusers[client.cchatname] = max(client.clientlasttouch, umlmonitoringusers[client.cchatname])
+            else:
+                umlmonitoringusers[client.cchatname] = client.clientlasttouch
+        #umlmonitoringusers = set([ client.cchatname  for client in self.umlmonitoringclients ])
         if umlstatusdata:
-            umlstatusdata["umlmonitoringusers"] = [ (chatname, True)  for chatname in umlmonitoringusers ]
+            umlstatusdata["umlmonitoringusers"] = [ {"chatname":chatname, "present":True, "lasttouch":chatnamelasttouch.isoformat() }  for chatname, chatnamelasttouch in umlmonitoringusers.items() ]
         if cclient.isumlmonitoring:
-            umlstatuschanges["umlmonitoringusers"] = [ ( cclient.cchatname, (cclient.cchatname in umlmonitoringusers) ) ]
+            umlstatuschanges["umlmonitoringusers"] = [ {"chatname":cclient.cchatname, "present":(cclient.cchatname in umlmonitoringusers), "lasttouch":cclient.clientlasttouch.isoformat() } ]
         
         # handle draft scraper users and the run states (one for each user, though there may be multiple draft scrapers for them)
         draftscraperusers = { }
@@ -425,13 +432,13 @@ class RunnerFactory(protocol.ServerFactory):
             umlstatusdata["draftscraperusers"] = [ (chatname, True, crunning)  for chatname, crunning in draftscraperusers.items() ]
         if not cclient.isumlmonitoring and not cclient.guid:
             umlstatuschanges["draftscraperusers"] = [ ( cclient.cchatname, (cclient.cchatname in draftscraperusers), draftscraperusers.get(cclient.cchatname, False) ) ]
-                
         
         # the complexity here reflects the complexity of the structure.  the running flag could be set on any one of the clients
         def scraperentry(eoos, cclient):  # local function
             scrapereditors = [ ]
             scraperdrafteditors = [ ]
             running = False
+            lasttouch = None
             
             for usereditor in eoos.usereditormap.values():
                 if usereditor.nondraftcount != 0:
@@ -468,8 +475,8 @@ class RunnerFactory(protocol.ServerFactory):
             else:
                 umlstatuschanges["scraperentries"] = [ { 'scrapername':cclient.scrapername, 'present':False, 'running':False, 'scraperusers':[ ] } ]
         
-        
         # send the status to the target and updates to everyone else who is monitoring
+        #print "\numlstatus", umlstatusdata
         
         # new monitoring client
         if cclient.isumlmonitoring:

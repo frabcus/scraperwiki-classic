@@ -762,7 +762,7 @@ def raw(request, short_name=None):
     return HttpResponse(result, mimetype="text/plain")
 
 
-def convtounicode(text)
+def convtounicode(text):
     try:   return unicode(text)
     except UnicodeDecodeError:  pass
         
