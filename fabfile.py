@@ -82,10 +82,7 @@ def deploy():
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
 
-    run("""cd %s; 
-        hg pull https://kforgehosting.com/scraperwiki/hg; 
-        hg update -C %s""" % (env.path,
-                              env.branch))
+    run("cd %s; hg pull; hg update -C %s" % (env.path, env.branch))
     
     buildout()
     migrate()
