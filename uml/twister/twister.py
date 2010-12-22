@@ -89,7 +89,7 @@ class RunnerProtocol(protocol.Protocol):
         self.clientsessionbegan = datetime.datetime.now()
         self.clientlasttouch = self.clientsessionbegan
         self.guidclienteditors = None  # the EditorsOnOneScraper object
-        self.automode = 'autosave'     # draft, autosave, autoload
+        self.automode = 'autosave'     # draft, autosave, autoload, autotype
         
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
@@ -105,7 +105,7 @@ class RunnerProtocol(protocol.Protocol):
             
         command = parsed_data.get('command')
         
-        # touch all the relevent systems
+        # update the lasttouch values on associated aggregations
         if command != 'automode':
             self.clientlasttouch = datetime.datetime.now()
             if self.guid and self.automode != 'draft' and self.username:
@@ -122,12 +122,20 @@ class RunnerProtocol(protocol.Protocol):
             otherline = json.dumps({'message_type' : "othersaved", 'content' : "%s saved" % self.chatname})
             self.writeall(line, otherline)
             self.factory.notifyMonitoringClientsSave(self)
-        
+
+
+    # this signal needs to be more organized, esp to send out the the monitoring users to update the activity
+    # and find a way for showing to watching users if anything at all is going on in the last hour
+    # Long term inactivity will be the trigger that allows someone else to grab the editorship from another user.  
         elif command == 'typing':
-            line = json.dumps({'message_type' : "typing", 'content' : "%s typing" % self.chatname})
-            otherline = json.dumps({'message_type' : "othertyping", 'content' : "%s typing" % self.chatname})
-            self.writeall(line, otherline)
-        
+            jline = {'message_type' : "typing", 'content' : "%s typing" % self.chatname}
+            jotherline = {'message_type' : "othertyping", 'content' : "%s typing" % self.chatname}
+            if "insertlinenumber" in parsed_data:
+                jotherline["insertlinenumber"] = parsed_data["insertlinenumber"]
+                jotherline["deletions"] = parsed_data["deletions"]
+                jotherline["insertions"] = parsed_data["insertions"]
+            self.writeall(json.dumps(jline), json.dumps(jotherline))
+            
         elif command == 'run':
             if self.processrunning:
                 self.writejson({'content':"Already running! (shouldn't happen)", 'message_type':'console'}); 

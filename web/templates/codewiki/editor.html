@@ -88,16 +88,12 @@
                     <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P)"/>
                 {% endifequal %}
 
+                {# hidden if not necessary #}
                 <select id="automode">
-                  {% if scraper.id %}
-                    <option name="autosave" value="autosave" id="id_autosave" selected>editing</option>
-                    <option name="draft"    value="draft"    id="id_draft">draft editing</option>
+                    <option name="autotype" value="autotype" id="id_autotype">broadcast</option>
+                    <option name="autosave" value="autosave" id="id_autosave"  {% if scraper.id %}selected{% endif %}>editing</option>
+                    <option name="draft"    value="draft"    id="id_draft" {% if not scraper.id %}selected{% endif %}>draft editing</option>
                     <option name="autoload" value="autoload" id="id_autoload" disabled>watching</option>
-                  {% else %}
-                    <option name="autosave" value="autosave" id="id_autosave" disabled>editing</option>
-                    <option name="draft"    value="draft"    id="id_draft" selected>draft editing</option>
-                    <option name="autoload" value="autload"  id="id_autoload" disabled>watching</option>
-                  {% endif %}
                 </select>
 
                 {% ifequal scraper.wiki_type 'view' %}
@@ -174,10 +170,7 @@
       </div>
 
       <div id="popup_tutorials" class="quickhelp">
-        {% if user.is_staff %}
-          <p class="staff"><input type="checkbox" id="uploadchanges" />Upload changes as you type</p>
-          <p class="staff"><input type="checkbox" id="showautomode" />Always show automode</p>
-        {% endif %}
+        <p><input type="checkbox" id="showautomode" {% if user.is_staff %}checked{% endif %}/>Always show automode dropdown</p>
 
         <h3>
             <img src="{{MEDIA_URL}}images/icons/{{ scraper.language|lower }}.png"/>
