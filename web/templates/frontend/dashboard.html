@@ -9,6 +9,7 @@
 </div>
 
 <div class="content">
+    <h2>Scrapers and Views you own</h2>
     {% if owned_scrapers %}
       <ul class="scraper_list">
       {% for code in owned_scrapers %}
@@ -17,6 +18,14 @@
       </ul>
     {% else %}
       <p>You do not own any scrapers</p>
+    {% endif %}
+    {% if contribution_scrapers %}
+      <h2>Scrapers and Views you have contributed to</h2>
+      <ul class="scraper_list">
+      {% for code in contribution_scrapers %}
+        {% include 'frontend/includes/code_object_line.html' %}
+      {% endfor %}
+      </ul>
     {% endif %}
 </div>
 

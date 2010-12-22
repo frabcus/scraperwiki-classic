@@ -2,18 +2,14 @@
 "exec" "python" "-O" "$0" "$@"
 
 """
-This script is the interface between the UML/firebox set up and the frontend 
-Orbited TCP socket.  
+This script is the interface between the UML/firebox set up and the frontend Orbited TCP socket.  
 
-When a connection is made RunnerProtocol listens for data coming from the 
-client.  This can be anything
-
-
-class RunnerProtocol(protocol.Protocol):
-class RunnerFactory(protocol.ServerFactory):
-    protocol = RunnerProtocol
-
-class spawnRunner(protocol.ProcessProtocol)
+There is one client object (class RunnerProtocol) per editor window
+These recieve and send all messages between the browser and the UML
+An instance of a scraper running in the UML is spawnRunner
+The RunnerFactory organizes lists of these clients and manages their states
+There is one UserEditorsOnOneScraper per user per scraper to handle one user opening multiple windows onto the same scraper
+There is one EditorsOnOneScraper per scraper which bundles logged in users into a list of UserEditorsOnOneScrapers
 
 """
 
@@ -23,18 +19,12 @@ import signal
 import time
 from optparse import OptionParser
 import ConfigParser
-import urllib2
-import urllib      #  do some asynchronous calls
 import datetime
 
 varDir = './var'
 
-# 'json' is only included in python2.6.  For previous versions you need to
-# Install siplejson manually.
-try:
-  import json
-except:
-  import simplejson as json
+try:    import json
+except: import simplejson as json
 
 from twisted.internet import protocol, utils, reactor, task
 
@@ -99,7 +89,7 @@ class RunnerProtocol(protocol.Protocol):
         self.clientsessionbegan = datetime.datetime.now()
         self.clientlasttouch = self.clientsessionbegan
         self.guidclienteditors = None  # the EditorsOnOneScraper object
-        self.automode = 'autosave'             # draft, autosave, autoload
+        self.automode = 'autosave'     # draft, autosave, autoload, autotype
         
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
@@ -114,8 +104,15 @@ class RunnerProtocol(protocol.Protocol):
             return
             
         command = parsed_data.get('command')
-        self.clientlasttouch = datetime.datetime.now()
         
+        # update the lasttouch values on associated aggregations
+        if command != 'automode':
+            self.clientlasttouch = datetime.datetime.now()
+            if self.guid and self.automode != 'draft' and self.username:
+                assert self.username in self.guidclienteditors.usereditormap
+                self.guidclienteditors.usereditormap[self.username].userlasttouch = self.clientlasttouch
+                self.guidclienteditors.scraperlasttouch = self.clientlasttouch
+
         # data uploaded when a new connection is made from the editor
         if command == 'connection_open':
             self.connectionopen(parsed_data)
@@ -125,12 +122,20 @@ class RunnerProtocol(protocol.Protocol):
             otherline = json.dumps({'message_type' : "othersaved", 'content' : "%s saved" % self.chatname})
             self.writeall(line, otherline)
             self.factory.notifyMonitoringClientsSave(self)
-        
+
+
+    # this signal needs to be more organized, esp to send out the the monitoring users to update the activity
+    # and find a way for showing to watching users if anything at all is going on in the last hour
+    # Long term inactivity will be the trigger that allows someone else to grab the editorship from another user.  
         elif command == 'typing':
-            line = json.dumps({'message_type' : "typing", 'content' : "%s typing" % self.chatname})
-            otherline = json.dumps({'message_type' : "othertyping", 'content' : "%s typing" % self.chatname})
-            self.writeall(line, otherline)
-        
+            jline = {'message_type' : "typing", 'content' : "%s typing" % self.chatname}
+            jotherline = {'message_type' : "othertyping", 'content' : "%s typing" % self.chatname}
+            if "insertlinenumber" in parsed_data:
+                jotherline["insertlinenumber"] = parsed_data["insertlinenumber"]
+                jotherline["deletions"] = parsed_data["deletions"]
+                jotherline["insertions"] = parsed_data["insertions"]
+            self.writeall(json.dumps(jline), json.dumps(jotherline))
+            
         elif command == 'run':
             if self.processrunning:
                 self.writejson({'content':"Already running! (shouldn't happen)", 'message_type':'console'}); 
@@ -284,6 +289,10 @@ class UserEditorsOnOneScraper:
         self.userclients = [ ]
         self.usersessionbegan = None
         self.nondraftcount = 0
+                # need another value to mark which are the watchers and which are the editors (or derive this)
+                # the states are enacted by the browser (by changing the dropdown or allowing user to change the drop down)
+                # on the basis of the information supplied to it
+        self.userlasttouch = datetime.datetime.now()
         self.AddUserClient(client)
     
     def AddUserClient(self, client):
@@ -313,6 +322,7 @@ class EditorsOnOneScraper:
         self.scraperlanguage = scraperlanguage
         self.scrapersessionbegan = None
         self.anonymouseditors = [ ]
+        self.scraperlasttouch = datetime.datetime.now()
         self.usereditormap = { }  # maps username to UserEditorsOnOneScraper
         
     def AddClient(self, client):
@@ -350,12 +360,11 @@ class EditorsOnOneScraper:
     def notifyEditorClients(self, message):
         editorstatusdata = {'message_type':"editorstatus", 'earliesteditor':self.scrapersessionbegan.isoformat()}; 
         
-        # order is important to determin who is the editor
+        # order by who has first session in order to determin who is the editor
         usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
         usereditors.sort(key=lambda x: x.usersessionbegan)
         editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors ]
-        editorstatusdata["lasttouch"] = max([userclient.clientlasttouch  for userclient in usereditors[0].userclients]).isoformat()
-        
+        editorstatusdata["scraperlasttouch"] = self.scraperlasttouch.isoformat()
         
         editorstatusdata["nanonymouseditors"] = len(self.anonymouseditors)
         editorstatusdata["message"] = message
@@ -401,41 +410,50 @@ class RunnerFactory(protocol.ServerFactory):
 
         
     # throw in the kitchen sink to get the features.  optimize for changes later
+    # should also allocate an automode (from among the windows that a scraper user has)
     def notifyMonitoringClients(self, cclient):  # cclient is the one whose state has changed (it can be normal editor or a umlmonitoring case)
         assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
         
         # both of these are in the same format and read the same, but changes are shorter
-        umlstatuschanges = {'message_type':"umlchanges" }; 
-        umlstatusdata = (cclient.isumlmonitoring and {'message_type':"umlstatus" } or None)
+        umlstatuschanges = {'message_type':"umlchanges", "nowtime":datetime.datetime.now().isoformat() }; 
+        if cclient.isumlmonitoring:
+             umlstatusdata = {'message_type':"umlstatus", "nowtime":umlstatuschanges["nowtime"]}
+        else:
+             umlstatusdata = None
         
         # the cchatnames are username|chatname, so the javascript has something to handle for cases of "|Anonymous5" vs "username|username"
         
-        # handle updates and changes in the monitoring users
-        umlmonitoringusers = set([ client.cchatname  for client in self.umlmonitoringclients ])
+        # handle updates and changes in the set of clients that have the monitoring window open
+        umlmonitoringusers = { }
+        for client in self.umlmonitoringclients:
+            if client.cchatname in umlmonitoringusers:
+                umlmonitoringusers[client.cchatname] = max(client.clientlasttouch, umlmonitoringusers[client.cchatname])
+            else:
+                umlmonitoringusers[client.cchatname] = client.clientlasttouch
+        #umlmonitoringusers = set([ client.cchatname  for client in self.umlmonitoringclients ])
         if umlstatusdata:
-            umlstatusdata["umlmonitoringusers"] = [ (chatname, True)  for chatname in umlmonitoringusers ]
+            umlstatusdata["umlmonitoringusers"] = [ {"chatname":chatname, "present":True, "lasttouch":chatnamelasttouch.isoformat() }  for chatname, chatnamelasttouch in umlmonitoringusers.items() ]
         if cclient.isumlmonitoring:
-            umlstatuschanges["umlmonitoringusers"] = [ ( cclient.cchatname, (cclient.cchatname in umlmonitoringusers) ) ]
+            umlstatuschanges["umlmonitoringusers"] = [ {"chatname":cclient.cchatname, "present":(cclient.cchatname in umlmonitoringusers), "lasttouch":cclient.clientlasttouch.isoformat() } ]
         
         # handle draft scraper users and the run states (one for each user, though there may be multiple draft scrapers for them)
-        draftscraperusers = { }
+        draftscraperusers = { }  # chatname -> running state
         for client in self.draftscraperclients:
             draftscraperusers[client.cchatname] = bool(client.processrunning) or draftscraperusers.get(client.cchatname, False)
         if umlstatusdata:
-            umlstatusdata["draftscraperusers"] = [ (chatname, True, crunning)  for chatname, crunning in draftscraperusers.items() ]
+            umlstatusdata["draftscraperusers"] = [ {"chatname":chatname, "present":True, "running":crunning }  for chatname, crunning in draftscraperusers.items() ]
         if not cclient.isumlmonitoring and not cclient.guid:
-            umlstatuschanges["draftscraperusers"] = [ ( cclient.cchatname, (cclient.cchatname in draftscraperusers), draftscraperusers.get(cclient.cchatname, False) ) ]
-                
+            umlstatuschanges["draftscraperusers"] = [ { "chatname":cclient.cchatname, "present":(cclient.cchatname in draftscraperusers), "running":draftscraperusers.get(cclient.cchatname, False) } ]
         
         # the complexity here reflects the complexity of the structure.  the running flag could be set on any one of the clients
         def scraperentry(eoos, cclient):  # local function
-            scrapereditors = [ ]
+            scrapereditors = { }   # chatname -> lasttouch
             scraperdrafteditors = [ ]
-            running = False
+            running = False        # we could make this an updated member of EditorsOnOneScraper like lasttouch
             
             for usereditor in eoos.usereditormap.values():
                 if usereditor.nondraftcount != 0:
-                    scrapereditors.append(usereditor.userclients[0].cchatname)
+                    scrapereditors[usereditor.userclients[0].cchatname] = usereditor.userlasttouch
                 else:
                     scraperdrafteditors.append(usereditor.userclients[0].cchatname)
                     
@@ -444,18 +462,19 @@ class RunnerFactory(protocol.ServerFactory):
             
             for uclient in eoos.anonymouseditors:
                 if uclient.automode != 'draft': 
-                    scrapereditors.append(uclient.cchatname)
+                    scrapereditors[uclient.cchatname] = uclient.clientlasttouch
                 else:
                     scraperdrafteditors.append(uclient.cchatname)
                 running = running or bool(uclient.processrunning)
             
             ### scraperdrafteditors
             if cclient:
-                scraperusers = [ {'chatname':cclient.cchatname, 'present':(cclient.cchatname in scrapereditors)} ]
+                scraperusers = [ {'chatname':cclient.cchatname, 'present':(cclient.cchatname in scrapereditors), 'userlasttouch':cclient.clientlasttouch.isoformat() } ]
             else:
-                scraperusers = [ {'chatname':cchatname, 'present':True}  for cchatname in scrapereditors ]
+                scraperusers = [ {'chatname':cchatname, 'present':True, 'userlasttouch':userlasttouch.isoformat() }  for cchatname, userlasttouch in scrapereditors.items() ]
             
-            return {'scrapername':eoos.scrapername, 'present':True, 'running':running, 'scraperusers':scraperusers}
+            return {'scrapername':eoos.scrapername, 'present':True, 'running':running, 'scraperusers':scraperusers, 'scraperlasttouch':eoos.scraperlasttouch.isoformat() }
+        
         
         if umlstatusdata:
             umlstatusdata["scraperentries"] = [ ]
@@ -468,8 +487,8 @@ class RunnerFactory(protocol.ServerFactory):
             else:
                 umlstatuschanges["scraperentries"] = [ { 'scrapername':cclient.scrapername, 'present':False, 'running':False, 'scraperusers':[ ] } ]
         
-        
         # send the status to the target and updates to everyone else who is monitoring
+        #print "\numlstatus", umlstatusdata
         
         # new monitoring client
         if cclient.isumlmonitoring:

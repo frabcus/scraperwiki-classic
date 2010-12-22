@@ -51,6 +51,7 @@ $(document).ready(function() {
     var lastundo = 0; 
 
     var cachehidlookup = { }; 
+    var chainpatches = [ ]; 
 
     $.ajaxSetup({timeout: 10000});
 
@@ -100,16 +101,29 @@ $(document).ready(function() {
         return lines; 
     }
 
+    // keep delivery load of chain patches down and remove excess typing signals
+    function sendChainPatches()
+    {
+        if (chainpatches.length > 0)
+            sendjson(chainpatches.shift()); 
+
+        while ((chainpatches.length > 0) && (chainpatches[0].insertlinenumber == undefined))
+            chainpatches.shift(); 
+
+        if (chainpatches.length > 0)
+            setTimeout(sendChainPatches, 800); 
+    }
 
 
     function ChangeInEditor(changetype) 
     {
-        var historysize = codeeditor.historySize(); 
+        var historysize = codeeditor.historySize(); // should have (+ historysize.shiftedoffstack)
+        var automode = $('select#automode option:selected').val(); 
 
         if (changetype == "saved")
-            savedundo = atsavedundo; 
+            savedundo = atsavedundo;    // (+historysize.shiftedoffstack)
         if (changetype == "reload")
-            savedundo = historysize.undo; 
+            savedundo = historysize.undo;   // (+historysize.shiftedoffstack) 
 
         if (historysize.undo + historysize.redo < savedundo)
             savedundo = -1; 
@@ -119,52 +133,70 @@ $(document).ready(function() {
         {
             pageIsDirty = lpageIsDirty; 
             $('#aCloseEditor1').css("font-style", ((pageIsDirty && guid) ? "italic" : "normal")); 
+
+        // we can only enter broadcast mode from a clean file
+        // in the future we could maintain a stack of patches here and upload them when the broadcast mode is entered
+        // so that they apply retrospectively.  
+        // also we can do the saving through twister and bank a stack of patches there
+        // that will be applied when someone else opens a window
+            if (pageIsDirty && (automode != 'autotype'))
+                $('select#automode #id_autotype').attr('disabled', true); 
+            else if (!pageIsDirty && !$('select#automode #id_autosave').attr('disabled'))
+                $('select#automode #id_autotype').attr('disabled', false); 
         }
 
-        // bail out if draft mode
-        if ($('select#automode').attr('selectedIndex') == 1) 
+        if (changetype != "edit")
             return; 
 
-        if (bConnected)
-            sendjson({"command":'typing'}); 
+    // to do: arrange for there to be only one autotype/broadcast window for a user
+    // if the set it for one clients, then any other client that is in this mode gets 
+    // reverted back to editing.  So it's clear which window is actually active and sending signals
 
-        // bail out if not set
-        if (!$("#uploadchanges").attr('checked'))
-            return; 
-
-        // send any edits up the line (first to the chat page to show we can decode it)
-        var historystack = codeeditor.editor.history.history; 
-        var redohistorystack = codeeditor.editor.history.redoHistory; 
-        var rdhL = redohistorystack.length - 1; 
-        while (lastundo != historystack.length)
+    // also may want a facility for a watching user to be able to select an area in his window
+    // and make it appear selected for the broadcast user
+        if (automode == 'autotype')
         {
-            var chains; 
-            if (lastundo < historystack.length)
-                chains = historystack[lastundo++]; 
-            else if (rdhL >= 0)
+            // send any edits up the line (first to the chat page to show we can decode it)
+            var historystack = codeeditor.editor.history.history; 
+            var redohistorystack = codeeditor.editor.history.redoHistory; 
+            var rdhL = redohistorystack.length - 1; 
+            while (lastundo != historystack.length)
             {
-                chains = redohistorystack[rdhL--]; 
-                lastundo--; 
-            }
-            else
-                break; 
-
-            for (var i = 0; i < chains.length; i++)
-            {
-                var mess = ""; 
-                var chain = chains[i]; 
-                mess += "Removing:\n"; 
-                for (var k = 0; k < chain.length; k++)
-                    mess += "-["+k+"] " + chain[k].text + "\n"; 
-
-                mess += "\nInserting on line " + CM_lineNumber(chain[0].from) + "\n"; 
-                CM_lineNumber
-                var lines = CM_newLines(chain[0].from, chain[chain.length - 1].to); 
-                for (var j = 0; j < lines.length; j++)
-                    mess += "+["+j+"] "+ lines[j] + "\n";  
-                writeToConsole(String(lastundo) + "." + i + "  chains:                                                                       \n\n" + mess); 
+                var chains; 
+                if (lastundo < historystack.length)
+                    chains = historystack[lastundo++]; 
+                else if (rdhL >= 0)
+                {
+                    chains = redohistorystack[rdhL--]; 
+                    lastundo--; 
+                }
+                else
+                    break; 
+    
+                var lchainpatches = [ ]
+                for (var i = 0; i < chains.length; i++)
+                {
+                    var chain = chains[i]; 
+                    var chainpatch = { "command":'typing', "insertlinenumber":CM_lineNumber(chain[0].from), "deletions":[ ], "insertions":[ ] }
+                    for (var k = 0; k < chain.length; k++)
+                        chainpatch["deletions"].push(chain[k].text); 
+    
+                    var lines = CM_newLines(chain[0].from, chain[chain.length - 1].to); 
+                    for (var j = 0; j < lines.length; j++)
+                        chainpatch["insertions"].push(lines[j]); 
+                    lchainpatches.push(chainpatch); 
+                }
+                lchainpatches.sort(function(a,b) {return a["insertlinenumber"] - b["insertlinenumber"]});  // ascending order so we do the lower ones first (using pop)
+                while (lchainpatches.length)
+                    chainpatches.push(lchainpatches.pop()); 
             }
         }
+
+        else if ((automode == 'autosave') && bConnected)
+            chainpatches.push({"command":'typing'}); 
+
+        if (chainpatches.length > 0)
+            sendChainPatches(); 
     }
 
 
@@ -173,7 +205,7 @@ $(document).ready(function() {
     function setupCodeEditor(){
         parsers['python'] = ['../contrib/python/js/parsepython.js'];
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
-        parsers['ruby'] = ['../../../ruby-in-codemirror/js/tokenizeruby.js', '../../../ruby-in-codemirror/js/parseruby.js'];
+        parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
         //parsers['ruby'] = [ 'parsedummy.js'];   // in case Ruby parser needs disabling due to too many bugs
         parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
 
@@ -212,6 +244,7 @@ $(document).ready(function() {
             indentUnit: indentUnits[scraperlanguage],
             readOnly: false, // cannot be changed once started up
             undoDepth: 200,  // defaults to 50.  wait till we get lostundo value
+            undoDelay: 2000, // 2 seconds  (default is 800)
             tabMode: "shift", 
             disableSpellcheck: true,
             autoMatchParens: true,
@@ -219,7 +252,7 @@ $(document).ready(function() {
             parserConfig: parserConfig[scraperlanguage],
             enterMode: "flat", // default is "indent" (which I have found buggy),  also can be "keep"
             reindentOnLoad: false, 
-            onChange: function ()  { ChangeInEditor("edit"); },
+            onChange: function ()  { ChangeInEditor("edit"); },  // (prob impossible to tell difference between actual typing and patch insertions from another window)
             //noScriptCaching: true, // essential when hacking the codemirror libraries
 
             // this is called once the codemirror window has finished initializing itself
@@ -334,6 +367,7 @@ $(document).ready(function() {
         $('#id_urlquery').blur();
 
         $('select#automode').change(changeAutomode); 
+        $('input#showautomode').change(showhideAutomodeSelector); 
     }
     
     //Setup Tabs
@@ -547,9 +581,11 @@ $(document).ready(function() {
               writeToConsole("Header:::", "httpresponseheader"); 
               writeToConsole(data.headerkey + ": " + data.headervalue, "httpresponseheader"); 
           } else if (data.message_type == "typing") {
-              ; 
+              $('#lasttypedtimestamp').text(String(new Date())); 
           } else if (data.message_type == "othertyping") {
-              writeToChat(cgiescape(data.content)); // says who's typing
+              $('#lasttypedtimestamp').text(String(new Date())); 
+              if (data.insertlinenumber != undefined)
+                  recordOtherTyping(data); 
           } else {
               writeToConsole(data.content, data.message_type); 
           }
@@ -562,7 +598,7 @@ $(document).ready(function() {
         $('#chat_line').val(''); 
     }
 
-    //send a message to the server
+    //send a message to the server (should this be asynchronous?)
     function sendjson(json_data) 
     {
         try 
@@ -577,11 +613,6 @@ $(document).ready(function() {
                 writeToChat($.toJSON(json_data)); 
             }
         }
-    }
-
-    function sendKill() 
-    {
-        sendjson({"command" : 'kill'});
     }
 
     //send code request run
@@ -614,36 +645,49 @@ $(document).ready(function() {
         // means we can have simultaneous running for staff overview
 
         // new auto-save every time 
-        if (($('select#automode').attr('selectedIndex') == 0) && pageIsDirty)
+        if (($('select#automode option:selected').val() == 'autosave') && pageIsDirty)
             saveScraper(); 
     } 
 
 
     function changeAutomode() 
     {
-        var iautomode = $('select#automode').attr('selectedIndex'); 
-        if (iautomode == 1)
+        var automode = $('select#automode option:selected').val(); 
+        if (automode == 'draft')
         {
-            $('#watcherstatus').text("draft mode"); 
+            $('#watcherstatus').text("draft mode"); // consider also hiding select#automode
             setCodeeditorBackgroundImage('none')
 
-        // for now you can never go back
+        // You can never go back from draft mode. (what if someone else (including you) had edited?)
+        // often you will do this in a duplicate window that you take into draft mode and then discard,
+        // though the UI for making these duplicate windows is a pain as you have to fully close the editor, and then open two editors from the overview page
+        // because you can't clone from the close window button as it's activated to disconnect the connection to the editor
+        // Draft windows will be able to pop up a diff with the current saved version, so using this as a patch could readily provide a route back through a reload
             $('select#automode #id_autosave').attr('disabled', true); 
             $('select#automode #id_autoload').attr('disabled', true); 
+            $('select#automode #id_autotype').attr('disabled', true); 
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
             $('.editor_controls #run').attr('disabled', false);
             $('.editor_controls #preview').attr('disabled', true);
         }
-        var automode = (iautomode == 1 ? "draft" : (iautomode == 0 ? "autosave" : "autoload")); 
         writeToChat('Changed automode: ' + automode); 
         sendjson({"command":'automode', "automode":automode}); 
     }; 
+
+    function showhideAutomodeSelector()
+    {
+        var automode = $('select#automode option:selected').val(); 
+        if ($('input#showautomode').attr('checked') || (automode == 'autotype') || (username ? (loggedineditors.length >= 2) : (loggedineditors.length >= 1)))
+            $('select#automode').show(); 
+        else
+            $('select#automode').hide(); 
+    }
 
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
     { 
         earliesteditor = data.earliesteditor; 
-        editingusername = (data.loggedineditors ? data.loggedineditors[0] : ''); 
+        editingusername = (data.loggedineditors ? data.loggedineditors[0] : '');  // the first in the list is the editor
         loggedineditors = data.loggedineditors; 
         nanonymouseditors = data.nanonymouseditors; 
 
@@ -653,85 +697,166 @@ $(document).ready(function() {
 
         //if (data.lasttouch)
         //    writeToChat("LAST TOUCHED " + data.lasttouch)
+        showhideAutomodeSelector(); 
+
+        var automode = $('select#automode option:selected').val(); 
 
         // draft editing do not disturb
-        if ($('select#automode').attr('selectedIndex') == 1) 
-            return; 
-
-        if (username ? (loggedineditors.length >= 2) : (loggedineditors.length >= 1))
-            $('select#automode').show(); 
-        else
-            $('select#automode').hide(); 
-
-        if (username)
+        if (automode == 'draft') 
         {
-            if (editingusername == username)
-            {
-                $('select#automode #id_autoload').attr('disabled', (loggedineditors.length == 1)); // disable if no one else is editing
-                var wstatus = "";
-                if (loggedineditors.length >= 2)
-                {
-                    wstatus = '<a href="/profiles/'+loggedineditors[1]+'" target="_blank">'+loggedineditors[1]+'</a>'; 
-                    if (loggedineditors.length >= 3)
-                        wstatus += ' (+' + (loggedineditors.length-2) + ')'; 
-                    wstatus += ' is looking'; 
-                }
-                $('#watcherstatus').html(wstatus); 
+            ;
+        }
 
-                if ($('select#automode').attr('selectedIndex') != 0)
-                {
-                    setCodeeditorBackgroundImage('none')
-                    $('select#automode #id_autosave').attr('disabled', false); 
-                    $('select#automode').attr('selectedIndex', 0); // editing
-                    $('.editor_controls #run').attr('disabled', false);
-                    $('.editor_controls #btnCommitPopup').attr('disabled', false); 
-                    sendjson({"command":'automode', "automode":'autosave'}); 
-                }
-            }
-            else
+        // you are the editing user
+        else if (username && (editingusername == username))
+        {
+            $('select#automode #id_autoload').attr('disabled', (loggedineditors.length == 1)); // no point in being a watcher if no one else is available to edit
+            var wstatus = "";
+            if (loggedineditors.length >= 2)
             {
-                $('#watcherstatus').html('<a href="/profiles/'+editingusername+'" target="_blank">'+editingusername+'</a> is editing'); 
-                if ($('select#automode').attr('selectedIndex') != 2)
-                {
-                    $('select#automode #id_autoload').attr('disabled', false); 
-                    $('select#automode').attr('selectedIndex', 2); // watching
-                    $('select#automode #id_autosave').attr('disabled', true); 
-                    setCodeeditorBackgroundImage('url(/media/images/staff.png)')
-                    $('.editor_controls #btnCommitPopup').attr('disabled', true); 
-                    $('.editor_controls #run').attr('disabled', true);
-                    sendjson({"command":'automode', "automode":'autoload'}); 
-                }
+                wstatus = '<a href="/profiles/'+loggedineditors[1]+'" target="_blank">'+loggedineditors[1]+'</a>'; 
+                if (loggedineditors.length >= 3)
+                    wstatus += ' (+' + (loggedineditors.length-2) + ')'; 
+                wstatus += ' is looking'; 
+            }
+            $('#watcherstatus').html(wstatus); 
+
+            if ((automode != 'autosave') && (automode != 'autotype'))
+            {
+                setCodeeditorBackgroundImage('none')
+                $('select#automode #id_autosave').attr('disabled', false); 
+                $('select#automode #id_autotype').attr('disabled', false); 
+                $('select#automode').val('autosave'); // editing
+                $('.editor_controls #run').attr('disabled', false);
+                $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+                sendjson({"command":'automode', "automode":'autosave'}); 
             }
         }
 
+        // you are not the editing user, someone else is
+        else if (editingusername)
+        {
+            $('#watcherstatus').html('<a href="/profiles/'+editingusername+'" target="_blank">'+editingusername+'</a> is editing'); 
+            if (automode != 'autoload')
+            {
+                $('select#automode #id_autoload').attr('disabled', false); 
+                $('select#automode').val('autoload'); // watching
+                $('select#automode #id_autosave').attr('disabled', true); 
+                $('select#automode #id_autotype').attr('disabled', true); 
+                setCodeeditorBackgroundImage('url(/media/images/staff.png)')
+                $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+                $('.editor_controls #run').attr('disabled', true);
+                sendjson({"command":'automode', "automode":'autoload'}); 
+            }
+        }
+
+        // you are not logged in and the only person looking at the scraper
         else
         {
-            if (editingusername)
+            $('#watcherstatus').text(""); 
+            if (automode != 'draft')
             {
-                $('#watcherstatus').text(editingusername + " is editing"); 
-                if ($('select#automode').attr('selectedIndex') != 2)
+                $('select#automode #id_autosave').attr('disabled', false); 
+                $('select#automode #id_autotype').attr('disabled', true); 
+                $('select#automode').val('autosave'); // editing
+                $('select#automode #id_autoload').attr('disabled', true); 
+                setCodeeditorBackgroundImage('none')
+                $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+                $('.editor_controls #run').attr('disabled', false);
+                sendjson({"command":'automode', "automode":'autosave'}); 
+            }
+        }
+    }
+
+    function recordOtherTyping(chainpatch)
+    {
+        var linehandle = codeeditor.nthLine(chainpatch["insertlinenumber"]); 
+
+        // change within a single line
+        if ((chainpatch["deletions"].length == 1) && (chainpatch["insertions"].length == 1))
+        {
+            var linecontent = codeeditor.lineContent(linehandle); 
+            var deletestr = chainpatch["deletions"][0]; 
+            var insertstr = chainpatch["insertions"][0]; 
+            if (linecontent != deletestr)
+            {
+                writeToChat("Lines disagree " + $.toJSON(chainpatch)); 
+                return; 
+            }
+
+            codeeditor.setLineContent(linehandle, insertstr); 
+            var ifront = 0; 
+            while ((ifront < deletestr.length) && (ifront < insertstr.length) && (deletestr.charAt(ifront) == insertstr.charAt(ifront)))
+                ifront++; 
+            if (ifront < insertstr.length)
+            {
+                var iback = insertstr.length - 1; 
+                while ((iback > ifront) && (iback - insertstr.length + deletestr.length > 0) && (deletestr.charAt(iback - insertstr.length + deletestr.length) == insertstr.charAt(iback)))
+                    iback--; 
+                codeeditor.selectLines(linehandle, ifront, linehandle, iback+1); 
+            }
+
+            else 
+                codeeditor.selectLines(linehandle, ifront, codeeditor.nextLine(linehandle), 0); 
+        }
+
+        // change across multiple lines
+        else
+        {
+            var insertions = chainpatch["insertions"]; 
+            var deletions = chainpatch["deletions"]; 
+            if (true) // check line content
+            {
+                var dlinehandle = linehandle; 
+                for (var i = 0; i < deletions.length; i++)
                 {
-                    $('select#automode #id_autoload').attr('disabled', false); 
-                    $('select#automode').attr('selectedIndex', 2); // watching
-                    setCodeeditorBackgroundImage('url(/media/images/staff.png)')
-                    $('.editor_controls #btnCommitPopup').attr('disabled', true); 
-                    $('.editor_controls #run').attr('disabled', true);
-                    sendjson({"command":'automode', "automode":'autoload'}); 
+                    if (codeeditor.lineContent(dlinehandle) != deletions[i])
+                    {
+                        writeToChat("Lines disagree " + $.toJSON(chainpatch)); 
+                        return; 
+                    }
+                    dlinehandle = codeeditor.nextLine(dlinehandle); 
                 }
+            }
+
+            // apply the patch
+            var nlinehandle = linehandle; 
+            var il = 0; 
+            while ((il < deletions.length - 1) && (il < insertions.length))
+            {
+                codeeditor.setLineContent(nlinehandle, insertions[il]); 
+                nlinehandle = codeeditor.nextLine(nlinehandle); 
+                il++; 
+            }
+            if (il == insertions.length)
+            {
+                while (il < deletions.length)
+                {
+                    codeeditor.removeLine(nlinehandle); 
+                    il++; 
+                }
+                nlinehandle = codeeditor.prevLine(nlinehandle); 
             }
             else
+                codeeditor.setLineContent(nlinehandle, insertions.slice(il).join("\n"));  // all remaining lines replace the last line
+
+            // find the selection range
+            var ifront = 0; 
+            while ((ifront < insertions[0].length) && (ifront < deletions[0].length) && (insertions[0].charAt(ifront) == deletions[0].charAt(ifront)))
+                ifront++; 
+            var finsertstr = insertions[insertions.length-1]; 
+            var fdeletestr = deletions[deletions.length-1]; 
+            var iback = finsertstr.length - 1; 
+            while ((iback >= 0) && (iback - finsertstr.length + fdeletestr.length > 0) && (fdeletestr.charAt(iback - finsertstr.length + fdeletestr.length) == finsertstr.charAt(iback)))
+                iback--; 
+            if ((insertions.length == 0) && (iback < ifront))
+                iback = ifront; 
+            if (iback == finsertstr.length - 1)
             {
-                $('#watcherstatus').text(""); 
-                if ($('select#automode').attr('selectedIndex') != 0)
-                {
-                    $('select#automode').attr('selectedIndex', 0); // editing
-                    $('select#automode #id_autoload').attr('disabled', true); 
-                    setCodeeditorBackgroundImage('none')
-                    $('.editor_controls #btnCommitPopup').attr('disabled', false); 
-                    $('.editor_controls #run').attr('disabled', false);
-                    sendjson({"command":'automode', "automode":'autosave'}); 
-                }
+                nlinehandle = codeeditor.nextLine(nlinehandle); 
+                iback = 0; 
             }
+            codeeditor.selectLines(linehandle, ifront, nlinehandle, iback); 
         }
     }
 
@@ -754,8 +879,9 @@ $(document).ready(function() {
         $('.editor_controls #run').addClass('running').val('Stop');
 
         //bind abort button
-        $('.editor_controls #run').bind('click.abort', function() {
-            sendKill();
+        $('.editor_controls #run').bind('click.abort', function() 
+        {
+            sendjson({"command" : 'kill'}); 
             $('.editor_controls #run').val('Stopping');
             $('.editor_controls #run').unbind('click.abort');
             $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
@@ -809,7 +935,8 @@ $(document).ready(function() {
         $('.editor_output div.tabs li.sources').removeClass('new');
     }
 
-    function reloadScraper(){
+    function reloadScraper()
+    {
         if (shortNameIsSet() == false) {
             alert("Cannot reload draft scraper");
             return; 
@@ -828,7 +955,8 @@ $(document).ready(function() {
         var selrangedelimeter = ":::sElEcT rAnGe:::"; 
         var iselrangedelimeter = newcode.indexOf(selrangedelimeter); 
         var selrange = [0,0,0,0];
-        if (iselrangedelimeter != -1) {
+        if (iselrangedelimeter != -1) 
+        {
             var selrange = newcode.substring(0, iselrangedelimeter); 
             newcode = newcode.substring(iselrangedelimeter + selrangedelimeter.length); 
             selrange = $.evalJSON(selrange); 
@@ -840,9 +968,10 @@ $(document).ready(function() {
         ChangeInEditor("reload"); 
 
         // make the selection
-        if (!((selrange[2] == 0) && (selrange[3] == 0))){
-            linehandlestart = codeeditor.nthLine(selrange[0] + 1); 
-            linehandleend = codeeditor.nthLine(selrange[2] + 1); 
+        if (!((selrange[2] == 0) && (selrange[3] == 0)))
+        {
+            var linehandlestart = codeeditor.nthLine(selrange[0] + 1); 
+            var linehandleend = codeeditor.nthLine(selrange[2] + 1); 
             codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
         }
 
@@ -852,25 +981,26 @@ $(document).ready(function() {
     }; 
 
 
-    function run_abort() {
-            runRequest = runScraper();
-            $('.editor_controls #run').unbind('click.run');
-            $('.editor_controls #run').addClass('running').val('Stop');
-            $('.editor_controls #run').bind('click.abort', function() {
-                sendKill();
-                $('.editor_controls #run').removeClass('running').val('run');
-                $('.editor_controls #run').unbind('click.abort');
-                writeToConsole('Run Aborted'); 
-                $('.editor_controls #run').bind('click.run', run_abort);
-                
-                //hide annimation
-                $('#running_annimation').hide();
-                
-                //change title
-                document.title = document.title.replace(' *', '');
-            });
+    function run_abort() 
+    {
+        runRequest = runScraper();
+        $('.editor_controls #run').unbind('click.run');
+        $('.editor_controls #run').addClass('running').val('Stop');
+        $('.editor_controls #run').bind('click.abort', function() 
+        {
+            sendjson({"command" : 'kill'}); 
+            $('.editor_controls #run').removeClass('running').val('run');
+            $('.editor_controls #run').unbind('click.abort');
+            writeToConsole('Run Aborted'); 
+            $('.editor_controls #run').bind('click.run', run_abort);
             
-        }
+            //hide annimation
+            $('#running_annimation').hide();
+            
+            //change title
+            document.title = document.title.replace(' *', '');
+        });
+    }
     
     
     //Setup toolbar
@@ -1240,7 +1370,7 @@ $(document).ready(function() {
                     $('pre.popupoutput').css("height", $('.simplemodal-wrap').height() + "px");  // forces a scrollbar onto it
                 }})
             }
-            $.modal('<pre class="popupoutput" style="overflow:auto"><h1>Loading... ['+cacheid+']</h1></pre>', modaloptions); 
+            $.modal('<pre class="popupoutput" style="overflow:auto"><h1>Loading ['+cacheid+'] ...</h1></pre>', modaloptions); 
         }
         else
             $.modal('<pre class="popupoutput">'+cgiescape(cachehidlookup[cacheid]["content"])+'</pre>', modaloptions); 

@@ -18,8 +18,8 @@
 div#monitoroutput { width:80%; margin-left:auto; margin-right:auto; border: thick blue solid; margin-top:5px; }
 
 div#monitoringusers { border: thin red solid; overflow:auto; text-align:left }
-div#draftscraperusers { border: thin red solid; overflow:auto;  text-align:left }
-div#connectionstatus { border: thin red solid; overflow:auto;  text-align:left }
+div#draftscraperusers { border: thin red solid; overflow:auto; text-align:left }
+div#connectionstatusdiv { border: thin red solid; overflow:auto;  text-align:left }
 
 div#monitoringusers ul {  display:inline;   }
 div#monitoringusers li {  border: thin blue solid; display:inline;  }
@@ -31,12 +31,19 @@ ul#scraperentries {  display:block; text-align:left }
 li.scraper {  border: thin red solid; display:block; }
 
 li.scraper a.scrapername { width:100px; background-color:blue; color:white; display:inline-block; }
-span.desc { background-color:black; color:white; width:100px; display:inline-block; }; 
+ul.scraperusers {  display:inline; vertical-align:top; height:100%; border:0; padding:0; margin:0 }
+li.luser {  border: thin black solid; display:inline;  }
+
+
+span.desc { background-color:black; color:white; width:100px; display:inline-block; } 
+
+.lasttouchdiff { color: green; font-size:75%; }
+.lasttouchdiff .lasttouch { display:none; }
 
 #monitoroutput ul#scraperentries li.running {  background-color:#afa; font-size:200%;}
 
-ul.scraperusers {  display:inline;  }
-li.luser {  border: thin black solid; display:inline;  }
+#jdatareceived { font-size:75%; overflow-x: auto; white-space:nowrap; height:10em; } 
+
 
 
 
@@ -53,11 +60,19 @@ $(document).ready(function() {
     var username = $('#username').val(); 
     var userrealname = $('#userrealname').val(); 
     var isstaff = $('#isstaff').val(); 
+    var servernowtime = new Date(); // set by the server
 
     TCPSocket = Orbited.TCPSocket;
     var conn = new TCPSocket(); 
     var buffer = ""; 
     var receiverecordqueue = [ ]; 
+    
+    // Doesn't work; receives a ServerClosedConnection without the server actually getting the message and before unload is invoked
+    // $(window).unload( function ()  { sendjson({"command":'loseconnection'}); });  
+    // poss could utilize $(window).bind('beforeunload', function ()) which works for IE
+    // As a consequence, the connections only disappear by timing out
+    // Maybe there is a new version of Orbited at some point fixing this.
+
     conn.open('localhost', '9010'); 
 
     conn.onopen = function(code)
@@ -73,7 +88,7 @@ $(document).ready(function() {
                   "username":username, 
                   "userrealname":userrealname, 
                   "isstaff":isstaff };
-        send(jdata);
+        sendjson(jdata);
     }
 
     conn.onclose = function(code)
@@ -151,11 +166,24 @@ $(document).ready(function() {
         return "<a href=\"/scrapers/"+scrapername+"/edit/\" class=\"scrapername\">"+scrapername+"</a>"
     }
 
+    function getNewDatetimeSpan(datetime)
+    {
+        return "<span class=\"lasttouchdiff\"><span class=\"lasttouch\">"+datetime.getTime()+"</span><span></span></span>"; 
+    }
+    function parseISOdate(sdatetime)
+    {
+        return new Date(sdatetime.replace(/-|T|\.\d*/g, " ")); 
+    }
+
     //read data back from twisted
     function receiveRecord(jdata) 
     {
-        $("#monitoroutput #jdatareceived").html($.toJSON(jdata)); 
-        //alert($.toJSON(jdata)); 
+        $("#monitoroutput #jdatareceived").append('<div>'+$.toJSON(jdata)+'</div>'); 
+        while ($('#monitoroutput #jdatareceived').children().size() >= 10) 
+            $('#monitoroutput #jdatareceived').children(':first').remove();
+
+        servernowtime = parseISOdate(jdata.nowtime); 
+        $("#monitoroutput #servernowtime").html(servernowtime.toUTCString()); 
 
         if (jdata.message)
             $("#monitoroutput #message").html(jdata.message); 
@@ -166,14 +194,18 @@ $(document).ready(function() {
                 $("#monitoroutput #monitoringusers ul").html(""); 
             for (i = 0; i < jdata.umlmonitoringusers.length; i++)
             {
-                chatname = jdata.umlmonitoringusers[i][0]; 
-                idchatname = "MON_" + getIDfromCChatname(chatname); 
-                present = jdata.umlmonitoringusers[i][1]; 
-                ele = "#monitoroutput #monitoringusers ul li#"+idchatname; 
+                var umlmonitoringuser = jdata.umlmonitoringusers[i]; 
+                var chatname = umlmonitoringuser.chatname; 
+                var idchatname = "MON_" + getIDfromCChatname(chatname); 
+                var present = umlmonitoringuser.present; 
+                var lasttouch = parseISOdate(umlmonitoringuser.lasttouch); 
+                var ele = "#monitoroutput #monitoringusers ul li#"+idchatname; 
                 if (present)
                 {
                     if (!$(ele).attr("id"))
-                        $("#monitoroutput #monitoringusers ul").append("<li id=\""+idchatname+"\" class=\"luser\">"+getUserfromCChatname(chatname)+"</li>"); 
+                        $("#monitoroutput #monitoringusers ul").append("<li id=\""+idchatname+"\" class=\"luser\">"+getUserfromCChatname(chatname)+" " + getNewDatetimeSpan(lasttouch)+"</li>"); 
+                    else
+                        $(ele + " .lasttouchdiff .lasttouch").text(String(lasttouch.getTime())); 
                 }
                 else
                     $(ele).remove(); 
@@ -186,10 +218,10 @@ $(document).ready(function() {
                 $("#monitoroutput #draftscraperusers ul").html(""); 
             for (i = 0; i < jdata.draftscraperusers.length; i++)
             {
-                chatname = jdata.draftscraperusers[i][0]; 
-                idchatname = "DRA_" + getIDfromCChatname(chatname); 
-                present = jdata.draftscraperusers[i][1]; 
-                running = jdata.draftscraperusers[i][2]; 
+                var chatname = jdata.draftscraperusers[i].chatname; 
+                var idchatname = "DRA_" + getIDfromCChatname(chatname); 
+                var present = jdata.draftscraperusers[i].present; 
+                var running = jdata.draftscraperusers[i].running; 
                 ele = "#monitoroutput #draftscraperusers ul li#"+idchatname; 
                 if (present)
                 {
@@ -213,13 +245,13 @@ $(document).ready(function() {
             {
                 var scraperentry = jdata.scraperentries[i]; 
                 var scrapername = scraperentry.scrapername; 
-                var present = scraperentry.present; 
+                var scraperpresent = scraperentry.present; 
                 var running = scraperentry.running; 
                 var scraperusers = scraperentry.scraperusers; 
 
                 idscrapername = "SCR_" + scrapername; 
                 ele = "#monitoroutput ul#scraperentries li#"+idscrapername; 
-                if (present)
+                if (scraperpresent)
                 {
                     if (!$(ele).attr("id"))
                         $("#monitoroutput ul#scraperentries").append("<li id=\""+idscrapername+"\" class=\"scraper\">"+getScraperfromScrapername(scrapername)+" <ul class=\"scraperusers\"></ul></li>"); 
@@ -228,17 +260,21 @@ $(document).ready(function() {
                         $(ele).addClass("running").css("background", '#afa'); 
                     else
                         $(ele).removeClass("running").css("background", '#fff'); 
+
                     for (j = 0; j < scraperusers.length; j++)
                     {
                         var scraperuser = scraperusers[j]; 
-                        chatname = scraperuser.chatname; 
-                        idcchatname = idscrapername + "_CHA_" + getIDfromCChatname(chatname); 
-                        cpresent = scraperuser.present; 
-                        cele = ele + " ul li#"+idcchatname; 
+                        var chatname = scraperuser.chatname; 
+                        var idcchatname = idscrapername + "_CHA_" + getIDfromCChatname(chatname); 
+                        var cpresent = scraperuser.present; 
+                        var userlasttouch = parseISOdate(scraperuser.userlasttouch); 
+                        var cele = ele + " ul li#"+idcchatname; 
                         if (cpresent)
                         {
                             if (!$(cele).attr("id"))
-                                $(ele+" ul").append("<li id=\""+idcchatname+"\" class=\"luser\">"+getUserfromCChatname(chatname)+"</li>"); 
+                                $(ele+" ul").append("<li id=\""+idcchatname+"\" class=\"luser\">"+getUserfromCChatname(chatname)+" "+ getNewDatetimeSpan(userlasttouch) +"</li>"); 
+                            else
+                                $(cele + " .lasttouchdiff .lasttouch").text(String(userlasttouch.getTime())); 
                         }
                         else
                             $(cele).remove(); 
@@ -255,15 +291,23 @@ $(document).ready(function() {
             $(hidcchatname).css("background", "#f9f"); 
             setTimeout('$(hidcchatname).css("background", "white");', 2500);
         }
+
+        // update all the timeagos
+        $(".lasttouchdiff .lasttouch").each( function(index) 
+        { 
+            var seconds = (servernowtime.getTime() - parseInt($(this).text()))/1000; 
+            var mess = (seconds < 120 ? seconds.toFixed(0) + "s ago" : (seconds/60).toFixed(1) + "min ago"); 
+            $(this).next().text(mess); 
+        }); 
     }
 
     //send a message to the server
-    function send(jdata) 
+    function sendjson(jdata) 
     {
         try {
             conn.send($.toJSON(jdata));  
         } catch(err) {
-            alert("Send error: " + err); 
+            alert("Send error: " + $.toJSON(err)); 
         }
     }
 
@@ -307,12 +351,12 @@ $(document).ready(function() {
 </form>
 
 <div id="monitoroutput">
-    <div id="connectionstatus">...</div>
+    <div id="connectionstatusdiv"><span id="connectionstatus">...</span> Servertime: <span id="servernowtime"></span></div>
     <div id="monitoringusers"><span class="desc">Monitoring:</span> <ul></ul></div>
     <div id="draftscraperusers"><span class="desc">Drafts:</span> <ul></ul></div>
     <ul id="scraperentries"></ul>
-    <div id="jdatareceived">...</div>
     <div id="message">...</div>
+    <div id="jdatareceived"></div>
 </div>
 
 <h3><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h3>
@@ -339,9 +383,18 @@ $(document).ready(function() {
     <p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
 </div>
 
-<h1>UML Status</h1>
-(does not update)
-<p>Active UMLs: {% for activeuml in activeumls %}{{activeuml}}, {% endfor %}</p>
+<h1 id="umlstatus"><a href="#umlstatus">#</a> UML Status</h1>
+  (does not update)
+  <p>Active UMLs: 
+  {% for umlname, umlstatus in activeumls.items %}
+    {{umlname}}:
+    {% if umlstatus.error %}
+      <b>{{umlstatus.error}}</b>
+    {% else %}
+      [{{umlstatus.runids|length}}] runids
+    {% endif %}
+  {% endfor %}
+  </p>
 
 <table border="1" style="width:auto; margin:auto">
 <tr><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>

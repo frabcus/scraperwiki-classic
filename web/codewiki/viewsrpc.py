@@ -115,7 +115,8 @@ def rpcexecute(request, short_name, revision = None):
     return response
                 
                 
-                
+
+# liable to hang if UMLs not operative
 def testactiveumls(n):
     result = [ ]
     code = "from subprocess import Popen, PIPE\nprint Popen(['hostname'], stdout=PIPE).communicate()[0]"

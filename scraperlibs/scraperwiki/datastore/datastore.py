@@ -60,7 +60,7 @@ class DataStoreClass :
         self.m_socket    = None
         self.m_config    = config
 
-    def connect (self) :
+    def connect (self, scraperID = '') :
 
         """
         Connect to the data proxy. The data proxy will need to make an Ident call
@@ -79,7 +79,7 @@ class DataStoreClass :
             port = conf.getint ('dataproxy', 'port')
             self.m_socket    = socket.socket()
             self.m_socket.connect ((host, port))
-            self.m_socket.send ('GET /?uml=%s&port=%d HTTP/1.1\n\n' % (socket.gethostname(), self.m_socket.getsockname()[1]))
+            self.m_socket.send ('GET /?uml=%s&port=%d&scraperid=%s HTTP/1.1\n\n' % (socket.gethostname(), self.m_socket.getsockname()[1], scraperID))
             rc, arg = json.loads (self.m_socket.recv (1024))
             if not rc : raise Exception (arg)
 
@@ -140,11 +140,14 @@ class DataStoreClass :
         #  Data must be JSON-encodable. Brute force attack, try each data value
         #  in turn and stringify any that bork.
         
-        # flatten everything into strings here rather than in the dataproxy/datalib where 
-        js_data = mangleflattendict(scraper_data)
+        #  Flatten everything into strings here rather than in the dataproxy/datalib.
+        #  See comment against "mangleflattendict"
+        #
+        js_data = mangleflattendict (scraper_data)
 
-        # unique_keys need to be mangled too so that they match
-        uunique_keys = mangleflattenkeys(unique_keys)
+        #  Unique_keys need to be mangled too so that they match
+        #
+        uunique_keys = mangleflattenkeys (unique_keys)
         
         return self.request (('save', uunique_keys, js_data, date, latlng))
 

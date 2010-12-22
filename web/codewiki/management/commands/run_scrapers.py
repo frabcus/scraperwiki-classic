@@ -14,7 +14,7 @@ import settings
 import datetime
 import time
 import threading
-import urllib
+import urllib2
 
 import re
 import os
@@ -22,14 +22,12 @@ import signal
 import urlparse
 
 
-
 # useful function for polling the UML for its current position (don't know where to keep it)
-def GetUMLrunningstatus():
+def GetDispatcherStatus():
     result = [ ]
     now = time.time()
     
-    
-    fin = urllib.urlopen(settings.DISPATCHERURL + '/Status')
+    fin = urllib2.urlopen(settings.DISPATCHERURL + '/Status')
     lines = fin.readlines()
     for line in lines:
         if re.match("\s*$", line):
@@ -42,13 +40,30 @@ def GetUMLrunningstatus():
                             'runtime':now - float(mline.group(5)) } )
     return result
 
+def GetUMLstatuses():
+    result = { }
+    for umlurl in settings.UMLURLS:
+        umlname = "uml0"+umlurl[-2:] # make its name
+        try:
+            stat = urllib2.urlopen(umlurl + "/Status", timeout=2).read()
+            result[umlname] = { "runids":re.findall("runID=(.*)\n", stat) }
+        except urllib2.URLError, e:
+            result[umlname] = { "error":e.reason }
+    
+    # fake data
+    if not settings.UMLURLS:
+        result["uml001"] = { "runids":["zzzz.xxx_1", "zzzz.xxx_2"] }
+        result["uml002"] = { "error":"bugger bogner" }
+
+    return result
+
 
 def is_currently_running(scraper):
-    return urllib.urlopen(settings.DISPATCHERURL + '/Status').read().find(scraper.guid) > 0    
+    return urllibw.urlopen(settings.DISPATCHERURL + '/Status').read().find(scraper.guid) > 0    
 
 
 def kill_running_runid(runid):
-    response = urllib.urlopen(settings.DISPATCHERURL + '/Kill?'+runid).read()
+    response = urllib2.urlopen(settings.DISPATCHERURL + '/Kill?'+runid).read()
     mresponse = re.match("Scraper (\S+) (killed|not killed|not found)", response)
     print response
     

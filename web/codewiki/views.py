@@ -762,6 +762,19 @@ def raw(request, short_name=None):
     return HttpResponse(result, mimetype="text/plain")
 
 
+def convtounicode(text):
+    try:   return unicode(text)
+    except UnicodeDecodeError:  pass
+        
+    try:   return unicode(text, encoding='utf8')
+    except UnicodeDecodeError:  pass
+    
+    try:   return unicode(text, encoding='latin1')
+    except UnicodeDecodeError:  pass
+        
+    return unicode(text, errors='replace')
+
+
 def proxycached(request):
     cacheid = request.POST.get('cacheid')
     
@@ -775,12 +788,13 @@ def proxycached(request):
     fin = urllib2.urlopen(settings.HTTPPROXYURL + "/Page?" + cacheid)
     res = { 'type':fin.headers.type, 'url':fin.geturl(), 'cacheid':cacheid }
     if fin.headers.maintype == 'text':
-        res['content'] = fin.read()
+        res['content'] = convtounicode(fin.read())
     else:
         res['content'] = base64.encodestring(fin.read())
         res['encoding'] = "base64"
         
     return HttpResponse(json.dumps(res), mimetype="text/plain")
+
 
 
 #save a code object

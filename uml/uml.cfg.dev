@@ -43,6 +43,7 @@ port	= 9003
 user	= datastore
 passwd	= 3jFjLrje6dFJ7cQE
 db	= scraperwiki_datastore_dev
+secure	= 212.84.75.28
 
 [metadata]
 host    = dev.scraperwiki.com
