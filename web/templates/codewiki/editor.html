@@ -170,8 +170,10 @@
       </div>
 
       <div id="popup_tutorials" class="quickhelp">
-        <p><input type="checkbox" id="showautomode" {% if user.is_staff %}checked{% endif %}/>Always show automode dropdown</p>
-
+        <p>
+          <input type="checkbox" id="showautomode" {% if user.is_staff %}checked{% endif %}/>Always show automode dropdown.  
+          <span class="staff" id="lasttypedtimestamp">...</span>
+        </p>
         <h3>
             <img src="{{MEDIA_URL}}images/icons/{{ scraper.language|lower }}.png"/>
             {% ifequal scraper.language 'php'%}

@@ -117,12 +117,13 @@ $(document).ready(function() {
 
     function ChangeInEditor(changetype) 
     {
-        var historysize = codeeditor.historySize(); 
+        var historysize = codeeditor.historySize(); // should have (+ historysize.shiftedoffstack)
+        var automode = $('select#automode option:selected').val(); 
 
         if (changetype == "saved")
-            savedundo = atsavedundo; 
+            savedundo = atsavedundo;    // (+historysize.shiftedoffstack)
         if (changetype == "reload")
-            savedundo = historysize.undo; 
+            savedundo = historysize.undo;   // (+historysize.shiftedoffstack) 
 
         if (historysize.undo + historysize.redo < savedundo)
             savedundo = -1; 
@@ -132,7 +133,20 @@ $(document).ready(function() {
         {
             pageIsDirty = lpageIsDirty; 
             $('#aCloseEditor1').css("font-style", ((pageIsDirty && guid) ? "italic" : "normal")); 
+
+        // we can only enter broadcast mode from a clean file
+        // in the future we could maintain a stack of patches here and upload them when the broadcast mode is entered
+        // so that they apply retrospectively.  
+        // also we can do the saving through twister and bank a stack of patches there
+        // that will be applied when someone else opens a window
+            if (pageIsDirty && (automode != 'autotype'))
+                $('select#automode #id_autotype').attr('disabled', true); 
+            else if (!pageIsDirty && !$('select#automode #id_autosave').attr('disabled'))
+                $('select#automode #id_autotype').attr('disabled', false); 
         }
+
+        if (changetype != "edit")
+            return; 
 
     // to do: arrange for there to be only one autotype/broadcast window for a user
     // if the set it for one clients, then any other client that is in this mode gets 
@@ -140,8 +154,6 @@ $(document).ready(function() {
 
     // also may want a facility for a watching user to be able to select an area in his window
     // and make it appear selected for the broadcast user
-
-        var automode = $('select#automode option:selected').val(); 
         if (automode == 'autotype')
         {
             // send any edits up the line (first to the chat page to show we can decode it)
@@ -240,7 +252,7 @@ $(document).ready(function() {
             parserConfig: parserConfig[scraperlanguage],
             enterMode: "flat", // default is "indent" (which I have found buggy),  also can be "keep"
             reindentOnLoad: false, 
-            onChange: function ()  { ChangeInEditor("edit"); },
+            onChange: function ()  { ChangeInEditor("edit"); },  // (prob impossible to tell difference between actual typing and patch insertions from another window)
             //noScriptCaching: true, // essential when hacking the codemirror libraries
 
             // this is called once the codemirror window has finished initializing itself
@@ -569,9 +581,9 @@ $(document).ready(function() {
               writeToConsole("Header:::", "httpresponseheader"); 
               writeToConsole(data.headerkey + ": " + data.headervalue, "httpresponseheader"); 
           } else if (data.message_type == "typing") {
-              writeToConsole("kk" + $.toJSON(data)); 
+              $('#lasttypedtimestamp').text(String(new Date())); 
           } else if (data.message_type == "othertyping") {
-              writeToConsole($.toJSON(data)); // says who's typing
+              $('#lasttypedtimestamp').text(String(new Date())); 
               if (data.insertlinenumber != undefined)
                   recordOtherTyping(data); 
           } else {
@@ -643,12 +655,17 @@ $(document).ready(function() {
         var automode = $('select#automode option:selected').val(); 
         if (automode == 'draft')
         {
-            $('#watcherstatus').text("draft mode"); 
+            $('#watcherstatus').text("draft mode"); // consider also hiding select#automode
             setCodeeditorBackgroundImage('none')
 
-        // for now you can never go back
+        // You can never go back from draft mode. (what if someone else (including you) had edited?)
+        // often you will do this in a duplicate window that you take into draft mode and then discard,
+        // though the UI for making these duplicate windows is a pain as you have to fully close the editor, and then open two editors from the overview page
+        // because you can't clone from the close window button as it's activated to disconnect the connection to the editor
+        // Draft windows will be able to pop up a diff with the current saved version, so using this as a patch could readily provide a route back through a reload
             $('select#automode #id_autosave').attr('disabled', true); 
             $('select#automode #id_autoload').attr('disabled', true); 
+            $('select#automode #id_autotype').attr('disabled', true); 
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
             $('.editor_controls #run').attr('disabled', false);
             $('.editor_controls #preview').attr('disabled', true);
