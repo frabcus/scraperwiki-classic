@@ -116,7 +116,7 @@ def login(request):
 
                 else:
                     # Account exists, but not activated                    
-                    error_messages.append("This account has not been activated, please check your email and click on the link to confirm your account")
+                    error_messages.append("This account has not been activated (ScraperWiki will have allowed you to use the site before activation for your first time). Please check your email (including the spam folder) and click on the link to confirm your account. If you have lost the email or the link has expired please send an email to feedback@scraperwiki.com asking for your account to be activated.")
 
             else:
                 # Account not found                  
