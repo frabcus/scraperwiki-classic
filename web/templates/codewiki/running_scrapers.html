@@ -385,16 +385,24 @@ $(document).ready(function() {
 
 <h1 id="umlstatus"><a href="#umlstatus">#</a> UML Status</h1>
   (does not update)
-  <p>Active UMLs: 
-  {% for umlname, umlstatus in activeumls.items %}
-    {{umlname}}:
+
+<table border="1" style="width:auto; margin:auto">
+{% for umlname, umlstatus in activeumls.items %}
+  <tr><th>{{umlname}}</th>
+    <td>
     {% if umlstatus.error %}
       <b>{{umlstatus.error}}</b>
     {% else %}
-      [{{umlstatus.runids|length}}] runids
+      {% if umlstatus.runids %}
+        {% for runid in umlstatus.runids %}<a href="{% url run_event runid %}">*</a>{% endfor %}
+      {% else %}
+        no running processes
+      {% endif %}
     {% endif %}
-  {% endfor %}
-  </p>
+    </td>
+  </tr>
+{% endfor %}
+</table>
 
 <table border="1" style="width:auto; margin:auto">
 <tr><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>
