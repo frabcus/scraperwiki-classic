@@ -943,10 +943,12 @@ blankstartupcode = { 'scraper' : { 'python': "# Blank Python\n",
                    }
 
 def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
-    #return url (where to exit the editor to)
     return_url = reverse('frontpage')
-
     language = language.lower()
+    
+    codemirrorversion = request.GET.get('codemirrorversion', '')
+    if not re.match('[\d\.]+$', codemirrorversion):
+        codemirrorversion = settings.CODEMIRROR_VERSION
 
     # identify the scraper (including if there was a draft one backed up)
     has_draft = False
@@ -1027,5 +1029,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     context['source_scraper'] = source_scraper
     context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())
     context['selected_tab'] = 'code'
+    context['codemirrorversion'] = codemirrorversion
+    
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
 
