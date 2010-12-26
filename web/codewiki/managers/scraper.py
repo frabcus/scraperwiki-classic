@@ -198,7 +198,7 @@ class ScraperManager(CodeManager):
         try:
             allitems = self.data_dictlist(scraper_id, limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
         except ValueError, e:
-            return [{"Unfortunate datastore error":str(e)}]
+            allitems = [{"Unfortunate datastore error":str(e)}]
         return convert_dictlist_to_datalist(allitems, column_order, private_columns)
 
 
