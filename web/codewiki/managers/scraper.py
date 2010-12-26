@@ -195,7 +195,10 @@ class ScraperManager(CodeManager):
 
     def data_summary(self, scraper_id=0, limit=1000, offset=0, start_date=None, end_date=None, latlng=None, column_order=None, private_columns=None):
         '''single table of all rows for a scraper'''
-        allitems = self.data_dictlist(scraper_id, limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
+        try:
+          allitems = self.data_dictlist(scraper_id, limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
+        except ValueError, e:
+          allitems = [{"Datastore error":str(e)}]
         return convert_dictlist_to_datalist(allitems, column_order, private_columns)
 
 
