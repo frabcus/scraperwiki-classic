@@ -4,7 +4,10 @@ from django.db import models
 from market.models import *
 
 class Migration:
-    
+    depends_on = (
+        ("codewiki", "0001_initial"),
+    )
+
     def forwards(self, orm):
         
         # Adding model 'SolicitationStatus'
@@ -84,7 +87,7 @@ class Migration:
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'link': ('django.db.models.fields.URLField', [], {'max_length': '200'}),
             'price': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'scraper': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['scraper.Scraper']", 'null': 'True', 'blank': 'True'}),
+            'scraper': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['codewiki.Scraper']", 'null': 'True', 'blank': 'True'}),
             'status': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['market.SolicitationStatus']"}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'user_created': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
@@ -94,14 +97,14 @@ class Migration:
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'status': ('django.db.models.fields.CharField', [], {'max_length': '50'})
         },
-        'scraper.scraper': {
+        'codewiki.scraper': {
             'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'deleted': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'disabled': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'first_published_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             'guid': ('django.db.models.fields.CharField', [], {'max_length': '1000'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'code_ptr_id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_run': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'license': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
             'published': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),

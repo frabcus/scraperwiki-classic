@@ -673,8 +673,6 @@ def follow (request, short_name):
 
 
 def unfollow(request, short_name):
-    print "HERE"
-    print models.Scraper.objects.all()
     scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
     print scraper
     if not scraper:

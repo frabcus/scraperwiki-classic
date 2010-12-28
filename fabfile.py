@@ -123,3 +123,9 @@ def restart_webserver():
 
 def create_tarball():
     virtualenv("mkdir -p ./web/media/src/; hg archive -t tgz ./web/media/src/scraperwiki.tar.gz")
+
+def test():
+    if env.deploy_version != "www":
+        print "Testing can only be done on the dev machine"
+    else:
+        virtualenv('cd web; python manage.py test')

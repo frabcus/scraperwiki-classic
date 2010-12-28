@@ -6,23 +6,12 @@ from frontend.models import *
 class Migration:
     
     def forwards(self, orm):
-        
-        # Adding model 'Message'
-        db.create_table('frontend_message', (
-            ('id', orm['frontend.message:id']),
-            ('text', orm['frontend.message:text']),
-            ('start', orm['frontend.message:start']),
-            ('finish', orm['frontend.message:finish']),
-        ))
-        db.send_create_signal('frontend', ['Message'])
+        from django.core.management import call_command
+        call_command("loaddata", "message.json")
     
     
     def backwards(self, orm):
-        
-        # Deleting model 'Message'
-        db.delete_table('frontend_message')
-        
-    
+        pass
     
     models = {
         'auth.group': {
