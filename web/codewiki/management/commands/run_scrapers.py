@@ -59,7 +59,7 @@ def GetUMLstatuses():
 
 
 def is_currently_running(scraper):
-    return urllibw.urlopen(settings.DISPATCHERURL + '/Status').read().find(scraper.guid) > 0    
+    return urllib2.urlopen(settings.DISPATCHERURL + '/Status').read().find(scraper.guid) > 0    
 
 
 def kill_running_runid(runid):
