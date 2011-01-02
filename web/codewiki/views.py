@@ -945,7 +945,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     language = language.lower()
     
     codemirrorversion = request.GET.get('codemirrorversion', '')
-    if not re.match('[\d\.]+$', codemirrorversion):
+    if not re.match('[\d\.\w]+$', codemirrorversion):
         codemirrorversion = settings.CODEMIRROR_VERSION
 
     # identify the scraper (including if there was a draft one backed up)
