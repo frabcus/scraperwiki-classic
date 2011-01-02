@@ -135,7 +135,8 @@ class ScraperRunner(threading.Thread):
                     event.run_id = data.get("runID")  # allocated by the UML
                 elif content == "runcompleted":
                     completionmessage.append("Finished:: %s seconds elapsed, %s CPU seconds used" % (data.get("elapsed_seconds"), data.get("CPU_seconds"))) 
-
+                event.save()
+                
             elif message_type == "sources":
                 event.pages_scraped += 1  # soon to be deprecated 
                 
@@ -189,7 +190,7 @@ class ScraperRunner(threading.Thread):
                 event.run_ended = datetime.datetime.now()
                 event.save()
 
-        # append last few lines
+        # append last few lines of the output
         if outputmessage:
             #assert len(event.output) >= approxlenoutputlimit
             outputtail = [ outputmessage.pop() ] 
