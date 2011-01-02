@@ -131,9 +131,9 @@ class Code(models.Model):
         Deliberately not making this generic, as you can't stop being an owner
         or editor
         """
-        UserCodeRole.objects.filter(scraper=self, 
-                                       user=user, 
-                                       role='follow').delete()
+        UserCodeRole.objects.filter(code=self, 
+                                    user=user, 
+                                    role='follow').delete()
         return True
 
     def followers(self):

@@ -999,6 +999,13 @@
     }, 
     {
         "pk": 1, 
+        "model": "codewiki.code", 
+        "fields": {
+            "short_name": "test_scraper" 
+        }
+    },
+    {
+        "pk": 1, 
         "model": "codewiki.scraper", 
         "fields": {
             "status": "published", 
@@ -1009,7 +1016,6 @@
             "title": "Test Scraper", 
             "deleted": 0, 
             "created_at": "2010-02-19 07:09:14", 
-            "short_name": "test_scraper", 
             "has_temporal": 0, 
             "last_run": null, 
             "source": "", 

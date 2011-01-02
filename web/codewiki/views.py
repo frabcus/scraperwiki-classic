@@ -673,8 +673,6 @@ def follow (request, short_name):
 
 
 def unfollow(request, short_name):
-    print "HERE"
-    print models.Scraper.objects.all()
     scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
     print scraper
     if not scraper:
@@ -947,7 +945,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     language = language.lower()
     
     codemirrorversion = request.GET.get('codemirrorversion', '')
-    if not re.match('[\d\.]+$', codemirrorversion):
+    if not re.match('[\d\.\w]+$', codemirrorversion):
         codemirrorversion = settings.CODEMIRROR_VERSION
 
     # identify the scraper (including if there was a draft one backed up)

@@ -64,7 +64,6 @@ class ScraperViewsTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_scraper_unfollow(self):
-        print codewiki.models.Scraper.objects.all()
         self.client.login(username='test_user', password='123456')
         response = self.client.get(reverse('scraper_unfollow',
                 kwargs={'short_name': 'test_scraper'}))

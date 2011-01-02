@@ -15,10 +15,6 @@ class Migration:
             ('finish', orm['frontend.message:finish']),
         ))
         db.send_create_signal('frontend', ['Message'])
-
-        from django.core.management import call_command
-        call_command("loaddata", "message.json")
-        
     
     
     def backwards(self, orm):
