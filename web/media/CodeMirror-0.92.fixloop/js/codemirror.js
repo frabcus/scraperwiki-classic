@@ -413,7 +413,11 @@ var CodeMirror = (function(){
             setNum(next++, node.previousSibling);
             for (; node && !win.isBR(node); node = node.nextSibling) {
               var bott = node.offsetTop + node.offsetHeight;
-              while (scroller.offsetHeight && bott - 3 > pos) setNum("&nbsp;");
+              while (scroller.offsetHeight && bott - 3 > pos) 
+{
+setNum("&nbsp;");
+if (scroller.childNodes.length > 500) { console.log("Aborting loop in codemirror.js at scroller.length=" + scroller.childNodes.length + "  pos="+pos); break }
+}
             }
             if (node) node = node.nextSibling;
             if (new Date().getTime() > endTime) {
