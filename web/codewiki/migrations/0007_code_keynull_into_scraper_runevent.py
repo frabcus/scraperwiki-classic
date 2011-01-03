@@ -98,7 +98,7 @@ class Migration:
             'value': ('django.db.models.fields.TextField', [], {})
         },
         'codewiki.scraperrunevent': {
-            'code': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'+'", 'to': "orm['codewiki.Code']"}),
+            'code': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'+'", 'null': 'True', 'to': "orm['codewiki.Code']"}),
             'exception_message': ('django.db.models.fields.CharField', [], {'max_length': '256', 'null': 'True', 'blank': 'True'}),
             'first_url_scraped': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),

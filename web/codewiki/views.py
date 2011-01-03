@@ -402,7 +402,7 @@ def scraper_history(request, wiki_type, short_name):
     
     # now obtain the run-events and zip together
     if scraper.wiki_type == 'scraper':
-        runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started')
+        runevents = scraper.scraperrunevent_set.all().order_by('run_started')
         for runevent in runevents:
             item = { "type":"runevent", "runevent":runevent, "datetime":runevent.run_started }
             if runevent.run_ended:
