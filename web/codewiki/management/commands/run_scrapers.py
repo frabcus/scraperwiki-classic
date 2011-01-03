@@ -207,7 +207,7 @@ class ScraperRunner(threading.Thread):
         if exceptionmessage:
             event.output = "%s\n\n*** Exception ***\n\n%s\n" % (event.output, "\n".join(exceptionmessage))
         if completionmessage:
-            event.output = "%s\n\n%s" % (event.output, "".join(completionmessage))
+            pass #  event.output = "%s\n\n%s" % (event.output, "".join(completionmessage))
         elif not exceptionmessage:
             event.output = "%s\n\n[Run was interrupted (possibly by a timeout)]\n" % (event.output)
         
