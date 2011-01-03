@@ -9,6 +9,7 @@ class Migration:
     def forwards(self, orm):
         for s in orm.ScraperRunEvent.objects.all():
             s.code = orm.Code.objects.get(pk=s.scraper.pk)
+            s.save()
     
     def backwards(self, orm):
         pass
