@@ -7,9 +7,19 @@ class Migration:
     no_dry_run = True
     
     def forwards(self, orm):
-        for s in orm.ScraperRunEvent.objects.all():
-            s.code = orm.Code.objects.get(pk=s.scraper.pk)
-            s.save()
+        n = orm.ScraperRunEvent.objects.count()
+        print "Number runevents", n
+        p = 20000
+        while True:
+            print p
+            sv =  orm.ScraperRunEvent.objects.all()[p:p+100]
+            for s in sv:
+                s.code = orm.Code.objects.get(pk=s.scraper.pk)
+                s.save()
+            if len(sv) < 100:
+                break
+            p += 100
+
     
     def backwards(self, orm):
         pass
