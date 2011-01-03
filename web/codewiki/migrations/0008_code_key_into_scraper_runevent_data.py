@@ -9,7 +9,7 @@ class Migration:
     def forwards(self, orm):
         n = orm.ScraperRunEvent.objects.count()
         print "Number runevents", n
-        p = 20000
+        p = 0
         while True:
             print p
             sv =  orm.ScraperRunEvent.objects.all()[p:p+100]
@@ -20,7 +20,6 @@ class Migration:
                 break
             p += 100
 
-    
     def backwards(self, orm):
         pass
     

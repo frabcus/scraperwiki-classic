@@ -160,14 +160,18 @@ class ScraperMetadata(models.Model):
         verbose_name_plural = 'scraper metadata'
 
 
-# could have a last_update time in here so we can tell if it's hanging when we view this object as a run_event
+# Plans: (1) move related_name=+ across to scraper,  
+#        (2) move this class inco code.py,  
+#        (3) add in lastrunobject into the UserCodeRole
 class ScraperRunEvent(models.Model):
     scraper           = models.ForeignKey(Scraper)
     code              = models.ForeignKey(code.Code, null=True, related_name="+")
     run_id            = models.CharField(max_length=100, db_index=True, blank=True, null=True)
     pid               = models.IntegerField()   # will only be temporarily valid and probably doesn't belong here
     run_started       = models.DateTimeField(db_index=True)
-    run_ended         = models.DateTimeField(null=True)   # missnamed. used as last_updated so you can see if the scraper is hanging
+    
+        # missnamed. used as last_updated so you can see if the scraper is hanging
+    run_ended         = models.DateTimeField(null=True)   
     records_produced  = models.IntegerField(default=0)
     pages_scraped     = models.IntegerField(default=0)
     output            = models.TextField()
