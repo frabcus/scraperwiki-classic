@@ -14,7 +14,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag
-from codewiki.models import Code, Scraper, View, UserCodeEditing
+from codewiki.models import Code, Scraper, View
 from tagging.models import Tag, TaggedItem
 from market.models import Solicitation, SolicitationStatus
 from frontend.forms import CreateAccountForm

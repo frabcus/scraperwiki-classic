@@ -200,15 +200,14 @@ class UserCodeRole(models.Model):
     editorship, whatever.
     """
     user    = models.ForeignKey(User)
-    code = models.ForeignKey(Code)
+    code    = models.ForeignKey(Code)
     role    = models.CharField(max_length=100)
     
     # the following will be used in case of email relationship to keep track of last email (text of run object) that has been sent out
-    # lastrunobject = models.ForeignKey(ScraperRunEvent)  
+    #lastrunobject = models.ForeignKey(ScraperRunEvent, null=True)
 
     def __unicode__(self):
-        return "Scraper_id: %s -> User: %s (%s)" % \
-                                        (self.code, self.user, self.role)
+        return "Scraper_id: %s -> User: %s (%s)" % (self.code, self.user, self.role)
 
     class Meta:
         app_label = 'codewiki'
