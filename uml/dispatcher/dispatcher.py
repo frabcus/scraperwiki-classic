@@ -382,7 +382,6 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             try    : os.remove (name)
             except : pass
 
-        self.swlog().log (scraperID, runID, 'D.START', arg1 = self.path)
 
     def swlog (self, scraperid, runid, event, arg1 = None, arg2 = None) :
 

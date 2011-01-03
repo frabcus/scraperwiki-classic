@@ -57,6 +57,7 @@ def execute (code, options) :
 
     fs.loadConfiguration()
 
+    # it would be useful if we could return the uml name in this output as well, though it appears to be known only in a local variable in the dispatcher
     sys.stdout.write (json.dumps({ 'message_type':'executionstatus', 'content':'startingrun', 'runID':fs.m_runID }) + '\r\n')
     sys.stdout.flush ()
     

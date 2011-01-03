@@ -204,7 +204,8 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                             (   self.request.getpeername()[0],
                                 runid   = runID,
                                 url     = url,
-                                content = '%d bytes from %s' % (len(data), url)
+                                bytes   = len(data)
+                                # also need to implement failedmessage, cacheid, and cached to make it the same interface as httpproxy
                             )
 
                         self.m_pasv.send (data)
