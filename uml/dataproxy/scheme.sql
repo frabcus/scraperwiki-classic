@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `items` (
   `latlng`          varchar(100)    NULL,            -- this will be converted to fancy object like Point for filtering by distance (see ScraperManager.data_dictlist)
   `date_scraped`    datetime        NULL,
   KEY `item_id` (`item_id`,`unique_hash`,`scraper_id`,`date`,`latlng`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 CREATE INDEX scraper_id ON items (scraper_id);
 CREATE INDEX unique_hash ON items (unique_hash);
@@ -22,14 +22,14 @@ CREATE TABLE IF NOT EXISTS `kv` (
   `key`             text            NOT NULL,
   `value`           longtext        NOT NULL,
   KEY `item_id` (`item_id`)
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 
 -- There is only one of these, and it sequences the item_id
 DROP TABLE IF EXISTS `sequences`;
 CREATE TABLE IF NOT EXISTS `sequences` (
   `id` bigint NOT NULL
-  ) ENGINE=MyISAM;
+  ) ENGINE=InnoDB;
 
 
 DROP TABLE IF EXISTS `pages`;
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `pages` (
   `name`            text            NULL,
   `text`            longtext        NOT NULL
   -- KEY? how to add unique(scraper_id, name)?
-) ENGINE=MyISAM;  
+) ENGINE=InnoDB;  
 
 -- global persistant variables can be implemented by (tag="variable", name="variablename", text="variablevalue")
 
@@ -50,9 +50,8 @@ CREATE TABLE postcode_lookup (
     postcode varchar(10) NOT NULL,
     location POINT NOT NULL,
     country_code CHAR(2) NOT NULL
-) ENGINE=MyISAM;
+) ENGINE=InnoDB;
 
 ALTER TABLE `postcode_lookup` ADD UNIQUE INDEX postcode_unique(`postcode`),
  ADD INDEX country_code(`country_code`),
  ADD INDEX postcode(`postcode`);
-
