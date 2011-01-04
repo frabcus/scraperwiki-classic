@@ -599,19 +599,26 @@ $(document).ready(function() {
         $('#chat_line').val(''); 
     }
 
-    //send a message to the server (should this be asynchronous?)
+    //send a message to the server (needs linefeed delimeter because sometimes records get concattenated)
     function sendjson(json_data) 
     {
+        var jdata = $.toJSON(json_data); 
         try 
         {
-            conn.send($.toJSON(json_data));  
+            if (jdata.length < 10000)  // only concatenate for smallish strings
+                conn.send(jdata + "\r\n");  
+            else
+            {
+                conn.send(jdata);  
+                conn.send("\r\n");  // this goes out in a second chunk
+            }
         } 
         catch(err) 
         {
             if (!bSuppressDisconnectionMessages)
             {
                 writeToConsole("Send error: " + err, "exceptionnoesc"); 
-                writeToChat($.toJSON(json_data)); 
+                writeToChat(jdata); 
             }
         }
     }
@@ -718,7 +725,7 @@ $(document).ready(function() {
                 wstatus = '<a href="/profiles/'+loggedineditors[1]+'" target="_blank">'+loggedineditors[1]+'</a>'; 
                 if (loggedineditors.length >= 3)
                     wstatus += ' (+' + (loggedineditors.length-2) + ')'; 
-                wstatus += ' is looking'; 
+                wstatus += ' is watching'; 
             }
             $('#watcherstatus').html(wstatus); 
 

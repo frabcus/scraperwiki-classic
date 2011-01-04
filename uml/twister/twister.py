@@ -72,7 +72,7 @@ class spawnRunner(protocol.ProcessProtocol):
 
 
 # There's one of these 'clients' per editor window open.  All connecting to same factory
-class RunnerProtocol(protocol.Protocol):
+class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a LineReceiver?
 
     def __init__(self):
         # Set if a run is currently taking place, to make sure we don't run 
@@ -97,13 +97,21 @@ class RunnerProtocol(protocol.Protocol):
         
     # messages from the client
     def dataReceived(self, data):
-        try:
-            parsed_data = json.loads(data)
-        except ValueError:
-            self.writejson({'content':"Command not json parsable:  %s " % data, 'message_type':'console'})
-            return
+        # chunking has recently become necessary because records (particularly from typing) can get concatenated
+        # probably shows we should be using LineReceiver
+        for lline in data.split("\r\n"):
+            line = lline.strip()
+            if line:
+                try:
+                    parsed_data = json.loads(line)
+                except ValueError:
+                    self.writejson({'content':"Command not json parsable:  %s " % line, 'message_type':'console'})
+                    continue
+                command = parsed_data.get('command')
+                self.clientCommand(command, parsed_data)
+        
             
-        command = parsed_data.get('command')
+    def clientCommand(self, command, parsed_data):
         
         # update the lasttouch values on associated aggregations
         if command != 'automode':
