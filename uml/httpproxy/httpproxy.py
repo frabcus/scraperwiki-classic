@@ -517,7 +517,15 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             else :
                 failedmessage = 'Failed: (code missing)'
             
-            self.notify (self.connection.getpeername()[0], runid = runID, url = self.path, failedmessage = failedmessage, bytes = bytes, cacheid = cacheid, cached = (used == 'CACHED'))
+            self.notify \
+                (   self.connection.getpeername()[0],
+                    runid           = runID,
+                    url             = self.path,
+                    failedmessage   = failedmessage,
+                    bytes           = bytes,
+                    cacheid         = cacheid,
+                    cached          = (used == 'CACHED')
+                )
 
             self.connection.sendall (page)
             self.connection.close()
