@@ -178,7 +178,9 @@
         var matcheropcodes = {{matcheropcodes|safe}}; 
         var fequallines = highlightOtherCode($('#inputcode_main').text(), $('#inputcode_other').text(), matcheropcodes, Parser); 
         if (fequallines < 5)
-            $("a#aHideEquals").hide(); // suppress a link that isn't going to achieve anything
+            $("a#aHideEquals").hide();  // suppress a link that isn't going to achieve anything
+        else
+            $("a#aHideEquals").click(); // start with it hidden by default
     {% else %}
         highlightCode($('#inputcode_main').text(), Parser); 
     {% endif %}
@@ -197,5 +199,6 @@
         $("a#aShowEquals").hide(); 
         $('#codepreviewer .fequal').show(); 
     }); 
+
 
 {% endblock %}

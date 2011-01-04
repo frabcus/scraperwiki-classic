@@ -403,7 +403,8 @@ $(document).ready(function() {
     }
 
 
-    conn.onopen = function(code){
+    conn.onopen = function(code)
+    {
         sChatTabMessage = 'Chat'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
 
