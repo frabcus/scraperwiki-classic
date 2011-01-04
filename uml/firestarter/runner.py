@@ -24,22 +24,6 @@ import firestarter
 
 def execute (code, options) :
 
-    # small transform function that used to cgi.escape the messages, 
-    # now it removes the content_long field inserted at in controller.fnExecute
-    # once that stops happening, we can lose this function entirely and simply stream 
-    # the data across from the controller
-    def format_json(line):
-        try:
-            message = json.loads(line)
-        except:
-            # this only seems to get one line out when there 
-            message = { 'message_type':'console', 'content': "JSONERROR: %s" % line }
-            
-        if message.get('message_type') == 'console' and message.get('content_long'):
-            message['content'] = message.pop('content_long')
-        return json.dumps(message)
-
-
     fs  = firestarter.FireStarter('/var/www/scraperwiki/uml/uml.cfg')
     cpulimit = int(options.cpulimit)
     
@@ -57,13 +41,10 @@ def execute (code, options) :
 
     fs.loadConfiguration()
 
-    # it would be useful if we could return the uml name in this output as well, though it appears to be known only in a local variable in the dispatcher
-    sys.stdout.write (json.dumps({ 'message_type':'executionstatus', 'content':'startingrun', 'runID':fs.m_runID }) + '\r\n')
-    sys.stdout.flush ()
-    
     code = string.replace (code, '\r', '')
     
-    # would prefer this block wrapping was done in the controller to make eval easy to use.
+    #  Would prefer this block wrapping was done in the controller to make eval easy to use.
+    #
     res = fs.execute (code, True)
     if res is None :
         sys.stdout.write (json.dumps({ 'message_type' : 'fail', 'content' : fs.error() }) + '\r\n')
@@ -72,14 +53,14 @@ def execute (code, options) :
 
     line = res.readline()
     while line != '' and line is not None :
-        sys.stdout.write (format_json(line) + "\r\n")
+        sys.stdout.write (line.strip() + "\r\n")
         sys.stdout.flush ()
         line = res.readline()
 
 
-# You can test this script by typing:
-# echo "print 1" | python runner.py
-
+#  You can test this script by typing:
+#       echo "print 1" | python runner.py
+#
 if __name__ == "__main__":
     
     

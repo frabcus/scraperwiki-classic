@@ -196,28 +196,33 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                         self.swlog().log (scraperID, runID, 'T.ERROR', arg1 = 'Denied', arg2 = url)
                         continue
 
+                    bytes           = 0
+                    failedmessage   = ''
                     self.request.send ("150 File follows.\n")
+
                     try :
-                        data = urllib2.urlopen(url).read()
-
-                        self.notify \
-                            (   self.request.getpeername()[0],
-                                runid   = runID,
-                                url     = url,
-                                bytes   = len(data)
-                                # also need to implement failedmessage, cacheid, and cached to make it the same interface as httpproxy
-                            )
-
-                        self.m_pasv.send (data)
-                        self.m_pasv.close()
-                        self.m_pasv = None
+                        data    = urllib2.urlopen(url).read()
+                        bytes   = len(data)
+                        self.m_pasv.send  (data)
                         self.request.send ("200 OK.\n")
                     except :
-                        self.m_pasv.close()
-                        self.m_pasv = None
                         self.request.send ("500 Transfer failed.\n")
+                        failedmessage = "Transfer failed"
 
-                    self.swlog().log (scraperID, runID, 'T.DONE', arg1 = url)
+                    self.notify \
+                        (   self.request.getpeername()[0],
+                            runid           = runID,
+                            url             = url,
+                            failedmessage   = failedmessage,
+                            bytes           = len(data),
+                            cacheid         = None,
+                            cached          = False
+                        )
+
+                    self.m_pasv.close()
+                    self.m_pasv = None
+
+                    self.swlog().log (scraperID, runID, 'T.DONE', arg1 = url, arg2 = failedmessage)
                     continue
 
                 self.swlog().log (scraperID, runID, 'T.COMMAND', arg1 = args[0])

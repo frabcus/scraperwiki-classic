@@ -1,6 +1,7 @@
 import django
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
+from django.core.mail import send_mail
 
 try:    import json
 except: import simplejson as json
@@ -22,6 +23,7 @@ import signal
 import urlparse
 
 
+
 # useful function for polling the UML for its current position (don't know where to keep it)
 def GetDispatcherStatus():
     result = [ ]
@@ -32,14 +34,18 @@ def GetDispatcherStatus():
     for line in lines:
         if re.match("\s*$", line):
             continue
-        mline = re.match('name=\w+;scraperID=([\w\._]*?);testName=([^;]*?);state=(\w);runID=([\w.]*);time=([\d.]*)\s*$', line)
-        assert mline, line
-        if mline:
-            result.append( {'scraperID':mline.group(1), 'testName':mline.group(2), 
-                            'state':mline.group(3), 'runID':mline.group(4), 
-                            'runtime':now - float(mline.group(5)) } )
+        # Lines are in the form key1=value1;key2=value2;..... Split on ; and then on = and assemble
+        # results dictionary. This makes the code independent of ordering. At the end, calculate
+        # the run time.
+        #
+        data = {}
+        for pair in line.strip().split(';') :
+            key, value = pair.split ('=')
+            data[key] = value
+        data['runtime'] = now - float(data['time'])
+        result.append(data)
     return result
-
+        
 def GetUMLstatuses():
     result = { }
     for umlurl in settings.UMLURLS:
@@ -101,25 +107,24 @@ class ScraperRunner(threading.Thread):
         runner.stdin.close()
         
         event = ScraperRunEvent()
-        event.scraper = self.scraper  # could be pointing directly to a code object
-        event.run_id = ''
-        event.pid = runner.pid # only applies when this runner is active
-        event.run_started = datetime.datetime.now()
+        event.scraper = self.scraper    # better to pointing directly to a code object
+        event.pid = runner.pid          # only applies when this runner is active
+        event.run_id = ''               # set by execution status
+        event.run_started = datetime.datetime.now()   # reset by execution status
         event.run_ended = event.run_started  # actually used as last_updated
         event.output = ""
-        approxlenoutputlimit = 3000
+        approxlenoutputlimit = 3000     # should move into settings
         event.save()
 
         # a partial implementation of editor.js
         exceptionmessage = [ ]
-        completionmessage = [ ]
+        completiondata = None
         outputmessage = [ ]
         domainscrapes = { }  # domain: [domain, pages, bytes] 
         
-        
         temptailmessage = "\n\n[further output lines suppressed]\n"
         while True:
-            line = runner.stdout.readline()
+            line = runner.stdout.readline().strip()
             if not line:
                 break
             try:
@@ -132,9 +137,11 @@ class ScraperRunner(threading.Thread):
             
             if message_type == 'executionstatus':
                 if content == "startingrun":
-                    event.run_id = data.get("runID")  # allocated by the UML
+                    event.run_id = data.get("runID")
+                    event.output = "%s\nEXECUTIONSTATUS: uml=%s runid=%s\n" % (event.output, data.get("uml"), data.get("runID"))
                 elif content == "runcompleted":
-                    completionmessage.append("Finished:: %s seconds elapsed, %s CPU seconds used" % (data.get("elapsed_seconds"), data.get("CPU_seconds"))) 
+                    completiondata = data
+                    event.output = "%s\nEXECUTIONSTATUS: seconds_elapsed=%s CPU_seconds_used=%s\n" % (event.output, data.get("elapsed_seconds"), data.get("CPU_seconds")) 
                 event.save()
                 
             elif message_type == "sources":
@@ -206,10 +213,8 @@ class ScraperRunner(threading.Thread):
 
         if exceptionmessage:
             event.output = "%s\n\n*** Exception ***\n\n%s\n" % (event.output, "\n".join(exceptionmessage))
-        if completionmessage:
-            pass #  event.output = "%s\n\n%s" % (event.output, "".join(completionmessage))
-        elif not exceptionmessage:
-            event.output = "%s\n\n[Run was interrupted (possibly by a timeout)]\n" % (event.output)
+        if not completiondata:
+            event.output = "%s\nEXECUTIONSTATUS:\n[Run was interrupted (possibly by a timeout)]\n" % (event.output)
         
         event.run_ended = datetime.datetime.now()
         event.pid = -1  # disable it
@@ -228,6 +233,14 @@ class ScraperRunner(threading.Thread):
         else:
             self.scraper.status = 'ok'
         self.scraper.save()
+
+        # Send email if this is an email scraper
+        for role in self.scraper.usercoderole_set.filter(role='email'):
+            send_mail(subject='Your ScraperWiki Email - %s' % self.scraper.short_name,
+                      message=event.output,
+                      from_email=settings.EMAIL_FROM,
+                      recipient_list=[role.user.email],
+                      fail_silently=True)
                     
         # Log this run event to the history table
         alert = Alerts()

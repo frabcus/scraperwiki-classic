@@ -758,9 +758,7 @@ class ScraperController (BaseController) :
                                         if msg['message_type'] == 'exception' :
                                             try    : arg1 = msg['content']
                                             except : arg1 = '(no content)'
-                                            try    : arg2 = msg['content_long']
-                                            except : arg2 = '(no content_long)'
-                                            swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = arg1, arg2 = arg2)
+                                            swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = arg1, arg2 = None)
 
                 #  Capture the child user and system times as best we can, since this
                 #  is summed over all children.
