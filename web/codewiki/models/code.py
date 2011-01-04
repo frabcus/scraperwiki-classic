@@ -204,6 +204,7 @@ class UserCodeRole(models.Model):
     role    = models.CharField(max_length=100)
     
     # the following will be used in case of email relationship to keep track of last email (text of run object) that has been sent out
+    # however it has been decided simply to drop the ScraperRunEvents onto a queue to be emailed, so we don't need this placeholder
     #lastrunobject = models.ForeignKey(ScraperRunEvent, null=True)
 
     def __unicode__(self):

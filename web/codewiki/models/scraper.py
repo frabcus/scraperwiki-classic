@@ -165,7 +165,14 @@ class ScraperMetadata(models.Model):
 #        (3) add in lastrunobject into the UserCodeRole
 class ScraperRunEvent(models.Model):
     scraper           = models.ForeignKey(Scraper)
-    code              = models.ForeignKey(code.Code, null=True, related_name="+")
+    
+    # attempts to migrate this to point to a code object involved adding in the new field
+    #     code              = models.ForeignKey(code.Code, null=True, related_name="+")
+    # and then data migrating over to it with 
+    #     scraperrunevent.code = Code.filter(pk=scraperrunevent.scraper.pk) 
+    # in a loop over all scrapers, (though this crashed and ran out of memory at a limit of 2000)
+    # before abolishing the scraper parameter
+    
     run_id            = models.CharField(max_length=100, db_index=True, blank=True, null=True)
     pid               = models.IntegerField()   # will only be temporarily valid and probably doesn't belong here
     run_started       = models.DateTimeField(db_index=True)

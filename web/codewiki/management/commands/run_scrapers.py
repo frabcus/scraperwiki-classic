@@ -101,8 +101,7 @@ class ScraperRunner(threading.Thread):
         runner.stdin.close()
         
         event = ScraperRunEvent()
-        event.scraper = self.scraper  # GHGH
-        event.code = self.scraper
+        event.scraper = self.scraper  # could be pointing directly to a code object
         event.run_id = ''
         event.pid = runner.pid # only applies when this runner is active
         event.run_started = datetime.datetime.now()
