@@ -31,6 +31,7 @@ $(document).ready(function() {
     var receiverecordqueue = [ ]; 
     var receivechatqueue = [ ]; 
     var runID = ''; 
+    var uml = ''; 
 
     // information handling who else is watching and editing during this session
     var earliesteditor = ""; 
@@ -567,7 +568,7 @@ $(document).ready(function() {
 
           } else if (data.message_type == "executionstatus") {
               if (data.content == "startingrun")
-                startingrun(data.runID);
+                startingrun(data.runID, data.uml);
               else if (data.content == "runcompleted")
                 writeToConsole("Finished: " + data.elapsed_seconds + " seconds elapsed, " + data.CPU_seconds + " CPU seconds used"); 
               else if (data.content == "killsignal")
@@ -576,7 +577,6 @@ $(document).ready(function() {
                 endingrun(data.content); 
               else 
                 writeToConsole(data.content); 
-
           } else if (data.message_type == "httpresponseheader") {
               writeToConsole("Header:::", "httpresponseheader"); 
               writeToConsole(data.headerkey + ": " + data.headervalue, "httpresponseheader"); 
@@ -860,7 +860,7 @@ $(document).ready(function() {
         }
     }
 
-    function startingrun(lrunID) 
+    function startingrun(lrunID, luml) 
     {
         //show the output area
         resizeControls('up');
@@ -869,10 +869,11 @@ $(document).ready(function() {
 
         $('#running_annimation').show();
         runID = lrunID; 
+        uml = luml; 
 
         //clear the tabs
         clearOutput();
-        writeToConsole('Starting run ... '); 
+        writeToConsole('Starting run ... ' + (isstaff ? " [on "+uml+"]" : "")); 
 
         //unbind run button
         $('.editor_controls #run').unbind('click.run')
@@ -901,6 +902,7 @@ $(document).ready(function() {
         //hide annimation
         $('#running_annimation').hide();
         runID = ''; 
+        uml = ''; 
 
         // suppress any more activity to the preview frame
         if (activepreviewiframe != undefined) {
