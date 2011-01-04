@@ -1,6 +1,7 @@
 import django
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
+from django.core.mail import send_mail
 
 try:    import json
 except: import simplejson as json
@@ -235,6 +236,14 @@ class ScraperRunner(threading.Thread):
         else:
             self.scraper.status = 'ok'
         self.scraper.save()
+
+        # Send email if this is an email scraper
+        for role in self.scraper.usercoderole_set.filter(role='email'):
+            send_email(subject='Your ScraperWiki Email - %s' % self.scraper.short_name,
+                       message=event.output,
+                       from_email=settings.EMAIL_FROM,
+                       recipient_list=[role.user.email]
+                       fail_silently=True)
                     
         # Log this run event to the history table
         alert = Alerts()
