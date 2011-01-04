@@ -44,7 +44,8 @@ def GetDispatcherStatus():
             data[key] = value
         data['runtime'] = now - float(data['time'])
         result.append(data)
-
+    return result
+        
 def GetUMLstatuses():
     result = { }
     for umlurl in settings.UMLURLS:
@@ -59,9 +60,6 @@ def GetUMLstatuses():
     if not settings.UMLURLS:
         result["uml001"] = { "runids":["zzzz.xxx_1", "zzzz.xxx_2"] }
         result["uml002"] = { "error":"bugger bogner" }
-
-    return result
-
 
     return result
 
