@@ -236,11 +236,11 @@ class ScraperRunner(threading.Thread):
 
         # Send email if this is an email scraper
         for role in self.scraper.usercoderole_set.filter(role='email'):
-            send_email(subject='Your ScraperWiki Email - %s' % self.scraper.short_name,
-                       message=event.output,
-                       from_email=settings.EMAIL_FROM,
-                       recipient_list=[role.user.email],
-                       fail_silently=True)
+            send_mail(subject='Your ScraperWiki Email - %s' % self.scraper.short_name,
+                      message=event.output,
+                      from_email=settings.EMAIL_FROM,
+                      recipient_list=[role.user.email],
+                      fail_silently=True)
                     
         # Log this run event to the history table
         alert = Alerts()
