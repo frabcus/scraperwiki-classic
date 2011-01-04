@@ -1,6 +1,7 @@
 import django
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
+from django.core.mail import send_mail
 
 try:    import json
 except: import simplejson as json
@@ -22,6 +23,7 @@ import signal
 import urlparse
 
 
+
 # useful function for polling the UML for its current position (don't know where to keep it)
 def GetDispatcherStatus():
     result = [ ]
@@ -32,13 +34,16 @@ def GetDispatcherStatus():
     for line in lines:
         if re.match("\s*$", line):
             continue
-        mline = re.match('name=\w+;scraperID=([\w\._]*?);testName=([^;]*?);state=(\w);runID=([\w.]*);time=([\d.]*)\s*$', line)
-        assert mline, line
-        if mline:
-            result.append( {'scraperID':mline.group(1), 'testName':mline.group(2), 
-                            'state':mline.group(3), 'runID':mline.group(4), 
-                            'runtime':now - float(mline.group(5)) } )
-    return result
+        # Lines are in the form key1=value1;key2=value2;..... Split on ; and then on = and assemble
+        # results dictionary. This makes the code independent of ordering. At the end, calculate
+        # the run time.
+        #
+        data = {}
+        for pair in line.strip().split(';') :
+            key, value = pair.split ('=')
+            data[key] = value
+        data['runtime'] = now - float(data['time'])
+        result.append(data)
 
 def GetUMLstatuses():
     result = { }
@@ -54,6 +59,9 @@ def GetUMLstatuses():
     if not settings.UMLURLS:
         result["uml001"] = { "runids":["zzzz.xxx_1", "zzzz.xxx_2"] }
         result["uml002"] = { "error":"bugger bogner" }
+
+    return result
+
 
     return result
 
@@ -101,7 +109,7 @@ class ScraperRunner(threading.Thread):
         runner.stdin.close()
         
         event = ScraperRunEvent()
-        event.scraper = self.scraper
+        event.scraper = self.scraper  # could be pointing directly to a code object
         event.run_id = ''
         event.pid = runner.pid # only applies when this runner is active
         event.run_started = datetime.datetime.now()
@@ -228,6 +236,14 @@ class ScraperRunner(threading.Thread):
         else:
             self.scraper.status = 'ok'
         self.scraper.save()
+
+        # Send email if this is an email scraper
+        for role in self.scraper.usercoderole_set.filter(role='email'):
+            send_email(subject='Your ScraperWiki Email - %s' % self.scraper.short_name,
+                       message=event.output,
+                       from_email=settings.EMAIL_FROM,
+                       recipient_list=[role.user.email],
+                       fail_silently=True)
                     
         # Log this run event to the history table
         alert = Alerts()

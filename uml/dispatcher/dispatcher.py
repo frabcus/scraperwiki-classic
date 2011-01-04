@@ -22,21 +22,24 @@ import string
 import uuid
 import ConfigParser
 
+try    : import json
+except : import simplejson as json
+
 global config
 
-USAGE      = " [--varDir=dir] [--enqueue] [--subproc] [--daemon] [--config=file] [--name=name]"
-child      = None
-umlAddr    = []
-varDir     = '/var'
-config     = None
-name       = 'dispatcher'
-enqueue    = False
-uid    = None
-gid    = None
+USAGE   = " [--varDir=dir] [--enqueue] [--subproc] [--daemon] [--config=file] [--name=name] [--monitor]"
+child   = None
+umlAddr = []
+varDir  = '/var'
+config  = None
+name    = 'dispatcher'
+enqueue = False
+uid     = None
+gid     = None
 
-UMLList    = []
-UMLLock    = None
-UMLPtr     = None
+UMLList = []
+UMLLock = None
+UMLPtr  = None
 
 class Scraper :
 
@@ -89,6 +92,7 @@ class UML :
         self.m_scrapers = {}
         self.m_lock     = threading.Semaphore(count)
         self.m_next     = None
+        self.m_dead     = False
 
     def setNextUML (self, next) :
 
@@ -149,7 +153,9 @@ class UML :
         @return     : True if server is free
         """
 
-        return self.m_free > 0
+        if self.m_dead      : return False
+        if self.m_free <= 0 : return False
+        return True
 
     def active (self) :
 
@@ -213,13 +219,14 @@ class UML :
         """
 
         config.append \
-                (       "name=%s;server=%s;port=%d;count=%d;free=%d;closing=%s" % \
+                (       "name=%s;server=%s;port=%d;count=%d;free=%d;closing=%s;dead=%s" % \
                         (       self.m_name,
                                 self.m_server,
                                 self.m_port,
                                 self.m_count,
                                 self.m_free,
-                                self.m_closing
+                                self.m_closing,
+                                self.m_dead
                 )       )
                 
 
@@ -236,9 +243,9 @@ class UML :
         for key, value in self.m_scrapers.items() :
            status.append (string.join([ '%s=%s' % (k,v) for k, v in value.m_status.items()], ';'))
 
-        # The above output is interpreted in web/codewiki/management/commands/run_scrapers.py by:
-        #   re.match("name=\w+;scraperID=([\w\._]*?);testName=([^;]*?);state=(\w);runID=([\w.]*);time=([\d.]*)\s*"
-        # Now I would have thought creating the output explicitly as it is done in line 215 so you knew all the keys available somewhat more helpful, but then I don't have a brain the size of a planet --JGT
+        # The above output is interpreted in web/codewiki/management/commands/run_scrapers.py by
+        # splitting on ; and then =. Doing it this way means that m_status can be used to accumulate
+        # information without needing the code here to be changed.
 
     def close (self) :
 
@@ -258,6 +265,26 @@ class UML :
                 except :
                     return False
         return None
+
+    def killAll (self) :
+
+        for key, scraper in self.m_scrapers.items() :
+            try    : scraper.socket().close()
+            except : pass
+
+    def scan (self) :
+
+        try    :
+            import urllib2
+            print >>sys.stderr, "http://%s:%s/Status" % (self.m_server, self.m_port)
+            res = urllib2.urlopen("http://%s:%s/Status" % (self.m_server, self.m_port), timeout = 2).read()
+            self.m_dead = False
+            return
+        except :
+            pass
+        self.m_dead = True
+        self.killAll ()
+
 
 def allocateUML (queue = False, **status) :
 
@@ -381,7 +408,6 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         for name in self.m_toRemove :
             try    : os.remove (name)
             except : pass
-
 
     def swlog (self, scraperid, runid, event, arg1 = None, arg2 = None) :
 
@@ -661,7 +687,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    : runID      = self.headers['x-runid'     ]
         except : runID      = ''
 
-        self.swlog(scraperID, runID, 'D.START', arg1 = self.path)
+        self.swlog (scraperID, runID, 'D.START', arg1 = self.path)
 
         if scm != 'http' or fragment or netloc :
             self.send_error (400, "bad url %s" % self.path)
@@ -673,6 +699,16 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.send_error (400, "No server free to run your scraper, please try again in a few minutes")
             self.swlog(scraperID, runID, 'D.ERROR', arg1 = 'No UML', arg2 = '%s' % (self.path))
             return
+
+        self.connection.send \
+            (   json.dumps \
+                (   {   'message_type'  : 'executionstatus',
+                        'content'       : 'startingrun',
+                        'runID'         : runID,
+                        'uml'           : uml.name()
+                    }
+                )   + '\n'
+            )
 
         soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         uml.setSocket (id, soc)
@@ -746,6 +782,36 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     do_DELETE = do_GET
 
 
+class UMLScanner (threading.Thread) :
+
+    def __init__ (self) :
+
+        threading.Thread.__init__ (self)
+
+    def run (self) :
+
+        global UMLPtr
+        global UMLLock
+
+        while True :
+            time.sleep(10)
+            print >>sys.stderr, "MONITOR"
+            UMLLock.acquire()
+            if UMLPtr is None :
+                UMLLock.release()
+                continue
+            umlList = []
+            uml = UMLPtr
+            while True :
+                umlList.append (uml)
+                uml = uml.nextUML()
+                if uml is UMLPtr :
+                    break
+            UMLLock.release()
+            for uml in umlList :
+                uml.scan ()
+
+
 class DispatcherHTTPServer \
         (   SocketServer.ThreadingMixIn,
             BaseHTTPServer.HTTPServer
@@ -778,6 +844,7 @@ if __name__ == '__main__' :
 
     subproc = False
     daemon  = False
+    monitor = False
     confnam = 'uml.cfg'
 
     for arg in sys.argv[1:] :
@@ -812,6 +879,10 @@ if __name__ == '__main__' :
 
         if arg == '--daemon'  :
             daemon  = True
+            continue
+
+        if arg == '--monitor' :
+            monitor = True
             continue
 
         if arg == '--enqueue' :
@@ -889,5 +960,10 @@ if __name__ == '__main__' :
 
     UMLPtr  = len(UMLList) > 0 and UMLList[0] or None
     UMLLock = threading.Lock()
+
+    if monitor :
+
+        mtr = UMLScanner ()
+        mtr.start ()
 
     execute (config.getint (name, 'port'))
