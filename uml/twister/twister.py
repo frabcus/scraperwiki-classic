@@ -41,23 +41,31 @@ class spawnRunner(protocol.ProcessProtocol):
     def __init__(self, client, code):
         self.client = client
         self.code = code
+        self.runID = None
+        self.umlname = ''
         self.buffer = ''
     
     def connectionMade(self):
         print "Starting run"
         self.transport.write(self.code)
         self.transport.closeStdin()
-        # line below is in runner.py where the runID is allocated and known
-        #   self.client.writeall(json.dumps({'message_type' : "startingrun", 'content' : "starting run"}))
     
     # messages from the UML
     def outReceived(self, data):
         print "out", self.client.guid, data[:100]
-        # although the client can parse the records itself, it is necessary to split them up here correctly so that 
-        # this code can insert its own records into the stream.
+            # although the client can parse the records itself, it is necessary to split them up here correctly so that this code can insert its own records into the stream.
         lines  = (self.buffer+data).split("\r\n")
-        self.buffer = lines.pop(-1)
+        self.buffer = lines.pop(-1)  # usually an empty
+        
         for line in lines:
+            if not self.runID:  # intercept the first record to record its state and add in further data
+                parsed_data = json.loads(line)
+                if parsed_data.get('message_type') == 'executionstatus' and parsed_data.get('content') == 'startingrun':
+                    self.runID = parsed_data.get('runID')
+                    self.umlname = parsed_data.get('uml')
+                    parsed_data['chatname'] = self.client.chatname
+                    parsed_data['nowtime'] = datetime.datetime.now().isoformat()
+                    line = json.dumps(parsed_data)  # inject values into the field
             self.client.writeall(line)
 
     def processEnded(self, reason):
@@ -165,8 +173,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                         client.kill_run()
 
         elif command == 'chat':
-            message = "%s: %s" % (self.chatname, parsed_data.get('text'))
-            line = json.dumps({'content':message, 'message_type':'chat'})
+            line = json.dumps({'message_type':'chat', 'chatname':self.chatname, 'message':parsed_data.get('text'), 'nowtime':datetime.datetime.now().isoformat()})
             self.writeall(line)
         
         elif command == 'automode':
@@ -265,10 +272,6 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
         # from here we should somehow get the runid
         self.processrunning = reactor.spawnProcess(spawnRunner(self, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
-        if self.automode != 'draft':
-            line = json.dumps({'content':"%s runs scraper" % self.chatname, 'message_type':'chat'})
-            self.writeall(line)
-        
         self.factory.notifyMonitoringClients(self)
 
 

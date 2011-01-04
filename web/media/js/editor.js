@@ -37,11 +37,12 @@ $(document).ready(function() {
     var editingusername = "";  // primary editor
     var loggedineditors = [ ]; // list of who else is here and their windows open
     var nanonymouseditors = 0; // number of anonymous editors
-    var chatname = ""          // special in case of Anonymous users
+    var chatname = ""          // special in case of Anonymous users (yes, this unnecessarily gets set every time we call recordEditorStatus)
+    var chatpeopletimes = { }; // last time each person made a chat message
 
-    // these get set by the server
-    var servernowtime = undefined; 
-    var earliesteditor = new Date();   
+    // these actually get set by the server
+    var servernowtime = new Date(); 
+    var earliesteditor = servernowtime; 
     var lasttouchedtime = undefined; 
 
     var parsers = Array();
@@ -302,8 +303,7 @@ $(document).ready(function() {
         $(codeeditor.win.document).bind('keydown', sKeyCombination,
             function(oEvent){
                 oFunction();
-
-                return false;                            
+                return false; 
             }
         );
     }
@@ -399,13 +399,6 @@ $(document).ready(function() {
         showTab('console'); 
     }
     
-    // show the bottom grey sliding up message
-    function showFeedbackMessage(sMessage){
-       $('#feedback_messages').html(sMessage)
-       $('#feedback_messages').slideToggle(200);
-       window.setTimeout('$("#feedback_messages").slideToggle();', 2500);
-    }
-
 
     conn.onopen = function(code)
     {
@@ -553,6 +546,9 @@ $(document).ready(function() {
 
     //read data back from twisted
     function receiveRecord(data) {
+        if (data.nowtime)
+            servernowtime = parseISOdate(data.nowtime); 
+
           if (data.message_type == "console") {
               writeRunOutput(data.content);     // able to divert text to the preview iframe
           } else if (data.message_type == "sources") {
@@ -560,12 +556,12 @@ $(document).ready(function() {
           } else if (data.message_type == "editorstatus") {
               recordEditorStatus(data); 
           } else if (data.message_type == "chat") {
-              writeToChat(cgiescape(data.content))
+              writeToChat(cgiescape(data.message), data.chatname); 
           } else if (data.message_type == "saved") {
-              writeToChat(cgiescape(data.content))
+writeToChat(cgiescape(data.content));  // should know the name of person and be italics
           } else if (data.message_type == "othersaved") {
               reloadScraper();
-              writeToChat("OOO: " + cgiescape(data.content))
+writeToChat("OOO: " + cgiescape(data.content))  // should know the name of person and be italics
           } else if (data.message_type == "data") {
               writeToData(data.content);
           } else if (data.message_type == "exception") {
@@ -573,7 +569,7 @@ $(document).ready(function() {
 
           } else if (data.message_type == "executionstatus") {
               if (data.content == "startingrun")
-                startingrun(data.runID, data.uml);
+                startingrun(data.runID, data.uml, data.chatname);
               else if (data.content == "runcompleted")
                 writeToConsole("Finished: " + data.elapsed_seconds + " seconds elapsed, " + data.CPU_seconds + " CPU seconds used"); 
               else if (data.content == "killsignal")
@@ -709,7 +705,7 @@ $(document).ready(function() {
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
     { 
-        var boutputstatus = (servernowtime == undefined); 
+        var boutputstatus = (lasttouchedtime == undefined); 
 
         servernowtime = parseISOdate(data.nowtime); 
         earliesteditor = parseISOdate(data.earliesteditor); 
@@ -718,9 +714,10 @@ $(document).ready(function() {
         editingusername = (data.loggedineditors ? data.loggedineditors[0] : '');  // the first in the list is the primary editor
         loggedineditors = data.loggedineditors;  // this is a list
         nanonymouseditors = data.nanonymouseditors; 
+        chatname = data.chatname; 
 
         if (data.message)
-            writeToChat(cgiescape(data.message)); 
+            writeToChat('<i>'+cgiescape(data.message)+'</i>'); 
 
         if (boutputstatus)
         {
@@ -903,7 +900,7 @@ $(document).ready(function() {
         }
     }
 
-    function startingrun(lrunID, luml) 
+    function startingrun(lrunID, luml, lchatname) 
     {
         //show the output area
         resizeControls('up');
@@ -917,6 +914,7 @@ $(document).ready(function() {
         //clear the tabs
         clearOutput();
         writeToConsole('Starting run ... ' + (isstaff ? " [on "+uml+"]" : "")); 
+        writeToChat('<i>' + lchatname + ' runs scraper</i>'); 
 
         //unbind run button
         $('.editor_controls #run').unbind('click.run')
@@ -1020,9 +1018,8 @@ $(document).ready(function() {
             codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
         }
 
-        $('.editor_controls #btnCommitPopup').val('Loading...').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
-        window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
-        //showFeedbackMessage("This scraper has been loaded.");
+        $('.editor_controls #btnCommitPopup').val('Loading...').addClass('darkness');
+        window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
     }; 
 
 
@@ -1200,8 +1197,8 @@ $(document).ready(function() {
             // ordinary save case.
             if (res.draft != 'True') 
             {
-                $('.editor_controls #btnCommitPopup').val('Saved').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
-                window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
+                $('.editor_controls #btnCommitPopup').val('Saved').addClass('darkness'); 
+                window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
                 //showFeedbackMessage("Your code has been saved.");
                 if (bConnected)
                     sendjson({"command":'saved'}); 
@@ -1454,21 +1451,26 @@ $(document).ready(function() {
         $('.editor_output div.tabs li.data').addClass('new');
     }
 
-    function writeToChat(seMessage) 
+    function writeToChat(seMessage, sechatname) 
     {
         while ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) 
             $('#output_chat table.output_content tbody').children(':first').remove();
 
-        var oRow = $('<tr></tr>');
-        var oCell = $('<td></td>');
-        oCell.html(seMessage);
-        oRow.append(oCell);
-
+        var oRow = $('<tr><td>' + (sechatname ? sechatname + ": " : "") + seMessage + '</td></tr>');
         $('#output_chat table.output_content').append(oRow);
-
         setTabScrollPosition('chat', 'bottom'); 
-
         $('.editor_output div.tabs li.chat').addClass('new');
+
+        if (sechatname && (sechatname != chatname))
+        {
+                // currently highlights when there is more than a minute gap.  But could be longer
+            if ((chatpeopletimes[sechatname] == undefined) || ((servernowtime.getTime() - chatpeopletimes[sechatname].getTime())/1000 > 60))
+            {
+                chatpeopletimes[sechatname] = servernowtime; 
+                $('.editor_output div.tabs li.chat').addClass('improved');
+                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('improved'); }, 4100); 
+            }
+        }
     }
 
     // some are implemented with tables, and some with span rows.  
