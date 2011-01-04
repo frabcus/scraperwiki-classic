@@ -577,6 +577,7 @@ $(document).ready(function() {
                 endingrun(data.content); 
               else 
                 writeToConsole(data.content); 
+
           } else if (data.message_type == "httpresponseheader") {
               writeToConsole("Header:::", "httpresponseheader"); 
               writeToConsole(data.headerkey + ": " + data.headervalue, "httpresponseheader"); 
