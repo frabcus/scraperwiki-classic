@@ -366,13 +366,16 @@ class EditorsOnOneScraper:
         
         
     def notifyEditorClients(self, message):
-        editorstatusdata = {'message_type':"editorstatus", 'earliesteditor':self.scrapersessionbegan.isoformat()}; 
+        editorstatusdata = {'message_type':"editorstatus" }
+        
+        editorstatusdata["nowtime"] = datetime.datetime.now().isoformat()
+        editorstatusdata['earliesteditor'] = self.scrapersessionbegan.isoformat()
+        editorstatusdata["scraperlasttouch"] = self.scraperlasttouch.isoformat()
         
         # order by who has first session in order to determin who is the editor
         usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
         usereditors.sort(key=lambda x: x.usersessionbegan)
         editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors ]
-        editorstatusdata["scraperlasttouch"] = self.scraperlasttouch.isoformat()
         
         editorstatusdata["nanonymouseditors"] = len(self.anonymouseditors)
         editorstatusdata["message"] = message

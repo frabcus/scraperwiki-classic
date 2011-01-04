@@ -34,11 +34,15 @@ $(document).ready(function() {
     var uml = ''; 
 
     // information handling who else is watching and editing during this session
-    var earliesteditor = ""; 
-    var editingusername = ""; 
+    var editingusername = "";  // primary editor
     var loggedineditors = [ ]; // list of who else is here and their windows open
-    var nanonymouseditors = 0; 
-    var chatname = ""   // special in case of Anonymous users
+    var nanonymouseditors = 0; // number of anonymous editors
+    var chatname = ""          // special in case of Anonymous users
+
+    // these get set by the server
+    var servernowtime = undefined; 
+    var earliesteditor = new Date();   
+    var lasttouchedtime = undefined; 
 
     var parsers = Array();
     var stylesheets = Array();
@@ -692,20 +696,50 @@ $(document).ready(function() {
             $('select#automode').hide(); 
     }
 
+    function parseISOdate(sdatetime)
+    {
+        return new Date(sdatetime.replace(/-|T|\.\d*/g, " ")); 
+    }
+    function timeago(ctime, servernowtime)
+    {
+        var seconds = (servernowtime.getTime() - ctime.getTime())/1000; 
+        return (seconds < 120 ? seconds.toFixed(0) + " seconds" : (seconds/60).toFixed(1) + " minutes"); 
+    }
+
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
     { 
-        earliesteditor = data.earliesteditor; 
-        editingusername = (data.loggedineditors ? data.loggedineditors[0] : '');  // the first in the list is the editor
-        loggedineditors = data.loggedineditors; 
+        var boutputstatus = (servernowtime == undefined); 
+
+        servernowtime = parseISOdate(data.nowtime); 
+        earliesteditor = parseISOdate(data.earliesteditor); 
+        lasttouchedtime = parseISOdate(data.scraperlasttouch); 
+
+        editingusername = (data.loggedineditors ? data.loggedineditors[0] : '');  // the first in the list is the primary editor
+        loggedineditors = data.loggedineditors;  // this is a list
         nanonymouseditors = data.nanonymouseditors; 
 
-        //writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
         if (data.message)
             writeToChat(cgiescape(data.message)); 
 
-        //if (data.lasttouch)
-        //    writeToChat("LAST TOUCHED " + data.lasttouch)
+        if (boutputstatus)
+        {
+            stext = [ ]; 
+            stext.push("Editing began " + timeago(earliesteditor, servernowtime) + " ago, last touched " + timeago(lasttouchedtime, servernowtime) + " ago"); 
+            var othereditors = [ ]; 
+            for (var i = 0; i < data.loggedineditors.length; i++) 
+            {
+                if (data.loggedineditors[i] != username)
+                    othereditors.push(data.loggedineditors[i]); 
+            }
+            if (othereditors.length)
+                stext.push("; Other editors: " + othereditors.join(", ")); 
+            if (nanonymouseditors - (username ? 0 : 1) > 0) 
+                stext.push("; there are " + (nanonymouseditors-(username ? 0 : 1)) + " anonymous editors watching"); 
+            stext.push("."); 
+            writeToChat(cgiescape(stext.join(""))); 
+        }
+
         showhideAutomodeSelector(); 
 
         var automode = $('select#automode option:selected').val(); 
@@ -1114,83 +1148,73 @@ $(document).ready(function() {
     }
 
     //Save
-    function saveScraper(){
+    function saveScraper()
+    {
         var bSuccess = false;
 
         //if saving then check if the title is set (must be if guid is set)
-        if(shortNameIsSet() == false){
+        if(shortNameIsSet() == false)
+        {
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
-            if (sResult != false && sResult != '' && sResult != 'Untitled') {
+            if (sResult != false && sResult != '' && sResult != 'Untitled') 
+            {
                 $('#id_title').val(sResult);
                 aPageTitle = document.title.split('|')
                 document.title = sResult + ' | ' + aPageTitle[1]
                 bSuccess = true;
             }
-        }else{
+        }
+        else
             bSuccess = true;
-        }
 
-        if(bSuccess == true)
-        {
-            code = codeeditor.getCode(); 
-            atsavedundo = codeeditor.historySize().undo;  // update only when success
-            $.ajax({
-              type : 'POST',
-              contentType : "application/json",
-              dataType: "html",
+        if (!bSuccess)
+            return; 
 
-              data: ({
-                title : $('#id_title').val(),
-                commit_message: "cccommit",
-                sourcescraper: $('#sourcescraper').val(),
-                wiki_type: wiki_type,
-                code : code,
-                earliesteditor : earliesteditor, 
-                action : 'commit'
-                }),
-
-              success: function(response)
-                {
-                    res = $.evalJSON(response);
-
-                    //failed
-                    if (res.status == 'Failed')
-                        alert("Save failed error message.  Shouldn't happen"); 
-
-                    //success    
-                    else
-                    {
-                        //pageTracker._trackPageview('/scraper_committed_goal');  		
-
-                        // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
-                        if (res.draft == 'True')
-                            $('#divDraftSavedWarning').show();
-
-                        // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
-                        if (res.url && window.location.pathname != res.url)
-                            window.location = res.url;
-
-                        // ordinary save case.
-                        if (res.draft != 'True') 
-                        {
-                            $('.editor_controls #btnCommitPopup').val('Saved').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
-                            window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
-                            //showFeedbackMessage("Your code has been saved.");
-                            if (bConnected)
-                                sendjson({"command":'saved'}); 
-                        }
-                        ChangeInEditor("saved"); 
+        atsavedundo = codeeditor.historySize().undo;  // update only when success
+        var sdata = {
+                        title : $('#id_title').val(),
+                        commit_message: "cccommit",   // could get some use out of this if we wanted to
+                        sourcescraper: $('#sourcescraper').val(),
+                        wiki_type: wiki_type,
+                        code : codeeditor.getCode(),
+                        earliesteditor : earliesteditor.toUTCString(), // goes into the comment of the commit to help batch sessions
+                        action : 'commit'
                     }
-                },
+        $.ajax({ type : 'POST', contentType : "application/json", dataType: "html", data: sdata, success: function(response)
+        {
+            res = $.evalJSON(response);
+            if (res.status == 'Failed')
+            {
+                alert("Save failed error message.  Shouldn't happen"); 
+                return; 
+            }
 
-            error: function(response){
-                alert('Sorry, something went wrong, please try copying your code and then reloading the page');
-                document.write(response.responseText); // Uncomment to get the actual error page
-              }
-            });
-            
-            $('.editor_controls #btnCommitPopup').val('Saving ...');
-        }
+            // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
+            if (res.draft == 'True')
+                $('#divDraftSavedWarning').show();
+
+            // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
+            if (res.url && window.location.pathname != res.url)
+                window.location = res.url;
+
+            // ordinary save case.
+            if (res.draft != 'True') 
+            {
+                $('.editor_controls #btnCommitPopup').val('Saved').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
+                window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
+                //showFeedbackMessage("Your code has been saved.");
+                if (bConnected)
+                    sendjson({"command":'saved'}); 
+            }
+            ChangeInEditor("saved"); 
+        },
+        error: function(response)
+        {
+            alert('Sorry, something went wrong, please try copying your code and then reloading the page');
+            writeToChat("Response error: " + response.responseText); 
+        }});
+
+        $('.editor_controls #btnCommitPopup').val('Saving ...');
     }
 
     function cgiescape(text) 
@@ -1203,44 +1227,36 @@ $(document).ready(function() {
     
     function setupResizeEvents()
     {
-        
-        //window
         $(window).resize(onWindowResize);
-        
-        //editor
-        $("#codeeditordiv").resizable({
-                         handles: 's',   
-                         autoHide: false, 
-                         start: function(event, ui) 
-                             {
-                                 var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top;
 
-                                 $("#codeeditordiv").resizable('option', 'maxHeight', maxheight);
+        $("#codeeditordiv").resizable(
+        {
+            handles: 's',   
+            autoHide: false, 
+            start: function(event, ui) 
+            {
+                var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top;
 
-                                 //cover iframe
-                                 var oFrameMask = $('<div id="framemask"></div>');
-                                 oFrameMask.css({
-                                     position: 'absolute',
-                                     top: 0,
-                                     left:0,
-                                     background:'none',
-                                     zindex: 200,
-                                     width: '100%',
-                                     height: '100%'
-                                 })
-                                 $(".editor_code").append(oFrameMask)
-                             },
-                         stop: function(event, ui)  { 
-                                     resizeCodeEditor(); 
-                                     $('#framemask').remove();
-                                 }
-                             }); 
+                $("#codeeditordiv").resizable('option', 'maxHeight', maxheight);
 
-           // bind the double-click (causes problems with the jquery interface as it doesn't notice the mouse exiting the frame
-           // $(".ui-resizable-s").bind("dblclick", resizeControls);
+                //cover iframe
+                var oFrameMask = $('<div id="framemask"></div>');
+                oFrameMask.css({ position: 'absolute', top: 0, left:0, background:'none', zindex: 200, width: '100%', height: '100%' }); 
+                $(".editor_code").append(oFrameMask); 
+            },
+            stop: function(event, ui)  
+            { 
+                resizeCodeEditor(); 
+                $('#framemask').remove();
+            }
+        }); 
+
+        // bind the double-click (causes problems with the jquery interface as it doesn't notice the mouse exiting the frame
+        // $(".ui-resizable-s").bind("dblclick", resizeControls);
     }
 
-    function shortNameIsSet(){
+    function shortNameIsSet()
+    {
         var sTitle = jQuery.trim($('#id_title').val());
         return sTitle != 'Untitled' && sTitle != '' && sTitle != undefined && sTitle != false;
     }
