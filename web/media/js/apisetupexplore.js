@@ -31,21 +31,33 @@ function APISetupExploreFunction(){
         }
     );
 
-    $('#ulScraperShortNames li code').each(
-        function(){
-            var sText = $(this).html();
-            var aLink = $('<a>' + sText + '</a>');
-            aLink.click(
-                function (){
-                    $('#name').val(sText);
-                    $('#name').focus();
-                    rewriteApiUrl();
-                    return false;
-                }
-            );
-            $(this).html(aLink);
-        }
-    );
+    $('#ulScraperShortNames li code').each(function()
+    {
+        var sText = $(this).html();
+        var aLink = $('<a>' + sText + '</a>');
+        aLink.click(function ()
+        {
+            $('#name').val(sText);
+            $('#name').focus();
+            rewriteApiUrl();
+            return false;
+        });
+        $(this).html(aLink);
+    });
+
+    $('#ulUserNames li code').each(function()
+    {
+        var sText = $(this).html();
+        var aLink = $('<a>' + sText + '</a>');
+        aLink.click(function ()
+        {
+            $('#username').val(sText);
+            $('#username').focus();
+            rewriteApiUrl();
+            return false;
+        });
+        $(this).html(aLink);
+    });
 
     $('#ulApiKeys li code').each(
         function(){

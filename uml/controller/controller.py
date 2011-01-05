@@ -80,6 +80,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.m_stdout       = sys.stdout
         self.m_stderr       = sys.stderr
         self.m_scraperID    = None
+        self.m_scraperName  = None
         self.m_runID        = None
         self.m_urlquery     = None
         self.m_uid          = None
@@ -218,6 +219,15 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if 'x-scraperid'  in self.headers :
             self.m_scraperID = os.environ['SCRAPER_GUID'] = self.headers['x-scraperid']
+    
+    def setScraperName (self) :
+
+        """
+        If the \em x-testname header is present then set that as the scraper Name.
+        """
+
+        if 'x-testname'  in self.headers :
+            self.m_scraperID = os.environ['SCRAPER_NAME'] = self.headers['x-testname']
 
     def setRunID (self) :
 
@@ -593,6 +603,7 @@ class ScraperController (BaseController) :
         self.addPaths       ()
         self.addEnvironment ()
         self.setScraperID   ()
+        self.setScraperName ()
         self.setRunID       ()
         self.setUrlquery    ()
 
@@ -621,6 +632,7 @@ class ScraperController (BaseController) :
         if not self.checkGroup() : return
 
         self.setScraperID   ()
+        self.setScraperName ()
         self.setRunID       ()
         self.setUrlquery    ()
 

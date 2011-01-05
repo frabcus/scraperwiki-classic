@@ -5,12 +5,14 @@ import urllib
 try: import json
 except: import simplejson as json
 
-
-apiurl = "http://api.scraperwiki.com/api/1.0/datastore/"
+apiurl = "http://api.scraperwiki.com/api/1.0/"
+#apiurl = "http://localhost:8010/api/1.0/"   # for local operation
 apilimit = 500
 
+
 def getKeys(name):
-    url = "%sgetkeys?&name=%s" % (apiurl, name)
+    query = {"name":name}
+    url = "%sdatastore/getkeys?%s" % (apiurl, urllib.urlencode(query))
     ljson = urllib.urlopen(url).read()
     return json.loads(ljson)
 
@@ -40,45 +42,50 @@ def generateData(urlbase, limit, offset):
         loffset += llimit
 
 def getData(name, limit=-1, offset=0):
-    urlbase = "%sgetdata?name=%s" % (apiurl, name)
+    urlbase = "%sdatastore/getdata?name=%s" % (apiurl, name)
     return generateData(urlbase, limit, offset)
 
 def getDataByDate(name, start_date, end_date, limit=-1, offset=0):
-    urlbase = "%sgetdatabydate?name=%s&start_date=%s&end_date=%s" % (apiurl, name, start_date, end_date)
+    urlbase = "%sdatastore/getdatabydate?name=%s&start_date=%s&end_date=%s" % (apiurl, name, start_date, end_date)
     return generateData(urlbase, limit, offset)
 
 def getDataByLocation(name, lat, lng, limit=-1, offset=0):
-    urlbase = "%sgetdatabylocation?name=%s&lat=%f&lng=%f" % (apiurl, name, lat, lng)
+    urlbase = "%sdatastore/getdatabylocation?name=%s&lat=%f&lng=%f" % (apiurl, name, lat, lng)
     return generateData(urlbase, limit, offset)
     
 def search(name, filterdict, limit=-1, offset=0):
     filter = "|".join(map(lambda x: "%s,%s" % (urllib.quote(x[0]), urllib.quote(x[1])), filterdict.items()))
-    urlbase = "%ssearch?name=%s&filter=%s" % (apiurl, name, filter)
+    urlbase = "%sdatastore/search?name=%s&filter=%s" % (apiurl, name, filter)
     return generateData(urlbase, limit, offset)
 
 
-def Tests():
-    global apilimit
-    apilimit = 50  # easier to test
 
-    name1 = "uk-offshore-oil-wells"
-    name2 = "uk-lottery-grants"
-    
-    print getKeys(name1)
-    
-    for i, s in enumerate(getData(name1, limit=110)):
-        print i, s
-        
-    print "get data by date"
-    for i, s in enumerate(getDataByDate(name2, start_date="2009-01-01", end_date="2009-01-12")):
-        print i, s
+def getInfo(name, version=None, history_start_date=None):
+    query = {"name":name}
+    if version:
+        query["version"] = version
+    if history_start_date:
+        query["history_start_date"] = history_start_date
+    url = "%sscraper/getinfo?%s" % (apiurl, urllib.urlencode(query))
+    ljson = urllib.urlopen(url).read()
+    return json.loads(ljson)
 
-    print "get data by location"
-    for i, s in enumerate(getDataByLocation(name1, lat=59.033358, lng=1.0486569, limit=60)):
-        print i, s
-    
-    print "search test"
-    filterdict = {'Distributing_Body': 'UK Sport', "Region":"London"}
-    for i, s in enumerate(search(name2, filterdict, offset=5, limit=17)):
-        print i, s
-        
+def getRunInfo(name, runid=None):
+    query = {"name":name}
+    if runid:
+        query["runid"] = runid
+    url = "%sscraper/getruninfo?%s" % (apiurl, urllib.urlencode(query))
+    ljson = urllib.urlopen(url).read()
+    return json.loads(ljson)
+
+def getUserInfo(username):
+    query = {"username":username}
+    url = "%sscraper/getuserinfo?%s" % (apiurl, urllib.urlencode(query))
+    ljson = urllib.urlopen(url).read()
+    return json.loads(ljson)
+
+def scraperSearch(lquery):
+    query = {"query":lquery}
+    url = "%sscraper/search?%s" % (apiurl, urllib.urlencode(query))
+    ljson = urllib.urlopen(url).read()
+    return json.loads(ljson)

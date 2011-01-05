@@ -4,5 +4,4 @@ from datastore import fetch
 from datastore import retrieve
 
 from scraperwiki.apiwrapper import getKeys, getData, getDataByDate, getDataByLocation, search
-# need these for the in-scraper unit tests
-#from save import retrieve, delete, insert
+from scraperwiki.apiwrapper import getInfo, getRunInfo, getUserInfo, scraperSearch
