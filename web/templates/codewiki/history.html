@@ -21,13 +21,13 @@
     {% else %} {# runevent #}
     <td colspan="2">
       {# the if run_id is because some of the older entries are blank and haven't been cleared out #}
-      <a href="{% if item.runevents.0.run_id %}{% url run_event item.runevents.0.run_id %}{% endif %}" class="historyrun">{{item.runevents.0.run_started|date:"H:i, j F Y" }}</a>
+      <a href="{% if item.runevents.0.run_id %}{% url run_event item.runevents.0.run_id %}{% else %}{% url run_event item.runevents.0.id %}{% endif %}" class="historyrun">{{item.runevents.0.run_started|date:"H:i, j F Y" }}</a>
       {% if item.runevent.run_ended %}
         {% ifequal item.runevents|length 1 %}
           - ran for {{item.durationseconds}} seconds
           ({{item.runevent.pages_scraped}} scraped pages, {{item.runevent.records_produced}} records)
         {% else %}
-          - {{item.runevents|length}} times until <a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% endif %}" class="historyrun">{{item.runevent.run_started|date:"j F Y" }}</a>
+          - {{item.runevents|length}} times until <a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% else %}{% url run_event item.runevent.id %}{% endif %}" class="historyrun">{{item.runevent.run_started|date:"j F Y" }}</a>
           average run of {{item.durationseconds}} seconds 
         {% endifequal %}
       {% else %}
@@ -35,7 +35,7 @@
       {% endif %}
 
       {% if item.runevent.exception_message %}
-        <a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% endif %}"><span class="historyexception">{{item.runevent.exception_message}}</span></a>
+        <a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% else %}{% url run_event item.runevent.id %}{% endif %}"><span class="historyexception">{{item.runevent.exception_message}}</span></a>
       {% endif %}
     </td>
   {% endifequal %}

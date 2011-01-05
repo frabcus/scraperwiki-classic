@@ -20,7 +20,7 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 .helplink a {text-decoration:none;color:#fff;}
 
 /* Header */
-#divHeader {padding:0 1.5% 0 1.5%; margin-bottom:1em; width:150px; float:left;
+#divHeader {padding:0 1em 0 1em; margin-bottom:1em; width:150px; float:left;
     position:relative;text-align:left;}
 #divLogo {height:149px; width:144px; }
 #divLogo p {margin:0; padding:10px 0 5px 0;}

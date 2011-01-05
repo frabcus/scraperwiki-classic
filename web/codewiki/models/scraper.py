@@ -160,9 +160,6 @@ class ScraperMetadata(models.Model):
         verbose_name_plural = 'scraper metadata'
 
 
-# Plans: (1) move related_name=+ across to scraper,  
-#        (2) move this class inco code.py,  
-#        (3) add in lastrunobject into the UserCodeRole
 class ScraperRunEvent(models.Model):
     scraper           = models.ForeignKey(Scraper)
     
