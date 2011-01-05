@@ -547,13 +547,13 @@ $(document).ready(function() {
 
     //read data back from twisted
     function receiveRecord(data) {
-        if (data.nowtime)
-            servernowtime = parseISOdate(data.nowtime); 
+          if (data.nowtime)
+             servernowtime = parseISOdate(data.nowtime); 
 
           if (data.message_type == "console") {
               writeRunOutput(data.content);     // able to divert text to the preview iframe
           } else if (data.message_type == "sources") {
-              writeToSources(data.url, data.bytes, data.failedmessage, data.cached, data.cacheid)
+              writeToSources(data.url, "text/html", data.bytes, data.failedmessage, data.cached, data.cacheid)
           } else if (data.message_type == "editorstatus") {
               recordEditorStatus(data); 
           } else if (data.message_type == "chat") {
@@ -1365,7 +1365,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
     };
 
 
-    function parsehighlightcode(sdata)
+    function parsehighlightcode(sdata, lmimetype)
     {
         var cachejson; 
         try 
@@ -1375,6 +1375,12 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         catch (err) 
         {
             return { "objcontent": $('<pre class="popupoutput">Malformed json: ' + cgiescape(sdata) + "</pre>") }; 
+        }
+
+        if (lmimetype != "text/html")
+        {
+            cachejson["objcontent"] = $('<pre class="popupoutput">'+cgiescape(cachejson["content"]) + "</pre>"); 
+            return cachejson; 
         }
 
         var lineNo = 1; 
@@ -1387,7 +1393,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             var kline = $('<span>').css('background-color', '#fae7e7'); 
             for (var i = 0; i < line.length; i++) 
                 cpoutput.append(line[i]);
-            cpoutput.append('<br>')
+            cpoutput.append('<br>'); 
         }
         highlightText(cachejson["content"], addLine, HTMLMixedParser); 
         cachejson["objcontent"] = $('<div id="cp_whole"></div>'); 
@@ -1399,7 +1405,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
 
 
 
-    function popupCached(cacheid)
+    function popupCached(cacheid, lmimetype)
     {
         modaloptions = { overlayClose: true, 
                          overlayCss: { cursor:"auto" }, 
@@ -1414,7 +1420,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             { 
                 $.ajax({type : 'POST', url  : '/proxycached', data: { cacheid: cacheid }, success: function(sdata) 
                 {
-                    cachejson = parsehighlightcode(sdata); 
+                    cachejson = parsehighlightcode(sdata, lmimetype); 
                     cachehidlookup[cacheid] = cachejson; 
 
                     var wrapheight = $('.simplemodal-wrap').height(); 
@@ -1429,32 +1435,34 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             $.modal(cachejson["objcontent"], modaloptions); 
     }
 
-    function writeToSources(sUrl, bytes, failedmessage, cached, cacheid) 
+    function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid) 
     {
         //remove items if over max
         while ($('#output_sources div.output_content').children().size() >= outputMaxItems) 
             $('#output_sources div.output_content').children(':first').remove();
 
         //append to sources tab
-        var smessage = ""; 
-        var alink = ' <a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a>'; 
+        var smessage = [ ]; 
+        var alink = '<a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a>'; 
         if ((failedmessage == undefined) || (failedmessage == ''))
         {
-            smessage += bytes + ' bytes loaded'; 
+            smessage.push(bytes + ' bytes loaded'); 
+            if (lmimetype != "text/html")
+                smessage.push("<b>"+lmimetype+"</b>"); 
             if (cacheid != undefined)
-                smessage += ' <a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'; 
+                smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
             if (cached == 'True')
-                smessage += ' (from cache)'; 
-            smessage += alink; 
+                smessage.push('(from cache)'); 
         }
         else
-            smessage = failedmessage + alink; 
+            smessage.push(failedmessage); 
+        smessage.push(alink); 
 
-        $('#output_sources div.output_content').append('<span class="output_item">' + smessage + '</span>')
+        $('#output_sources div.output_content').append('<span class="output_item">' + smessage.join(" ") + '</span>')
         $('.editor_output div.tabs li.sources').addClass('new');
         
         if (cacheid != undefined)  
-            $('a#cacheid-'+cacheid).click(function() { popupCached(cacheid); return false; }); 
+            $('a#cacheid-'+cacheid).click(function() { popupCached(cacheid, lmimetype); return false; }); 
 
         setTabScrollPosition('sources', 'bottom'); 
     }
