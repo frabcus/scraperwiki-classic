@@ -781,17 +781,23 @@ def proxycached(request):
         cacheid = request.GET.get('cacheid')
     
     if not cacheid:
-        return HttpResponse(json.dumps({'message':"No cacheid found"}), mimetype="text/plain")
+        return HttpResponse(json.dumps({'type':'error', 'content':"No cacheid found"}), mimetype="text/plain")
     
-    fin = urllib2.urlopen(settings.HTTPPROXYURL + "/Page?" + cacheid)
-    res = { 'type':fin.headers.type, 'url':fin.geturl(), 'cacheid':cacheid }
-    if fin.headers.maintype == 'text':
-        res['content'] = convtounicode(fin.read())
-    else:
-        res['content'] = base64.encodestring(fin.read())
-        res['encoding'] = "base64"
-        
-    return HttpResponse(json.dumps(res), mimetype="text/plain")
+    proxyurl = settings.HTTPPROXYURL + "/Page?" + cacheid
+    result = { 'proxyurl':proxyurl, 'cacheid':cacheid }
+    try:
+        fin = urllib2.urlopen(proxyurl)
+        result["mimetype"] = fin.headers.type
+        if fin.headers.maintype == 'text':
+            result['content'] = convtounicode(fin.read())
+        else:
+            result['content'] = base64.encodestring(fin.read())
+            result['encoding'] = "base64"
+    except URLError, e: 
+        result['type'] = 'exception'
+        result['content'] = str(e)
+    
+    return HttpResponse(json.dumps(result), mimetype="text/plain")
 
 
 
