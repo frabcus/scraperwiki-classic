@@ -277,7 +277,8 @@ $(document).ready(function() {
     }
 
 
-    function setupOrbited() {
+    function setupOrbited() 
+    {
         TCPSocket = Orbited.TCPSocket;
         conn = new TCPSocket(); 
         conn.open('localhost', '9010'); 
@@ -296,8 +297,8 @@ $(document).ready(function() {
 
     //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
     //which means we have to do some seemingly random binds/unbinds
-    function addHotkey(sKeyCombination, oFunction){
-
+    function addHotkey(sKeyCombination, oFunction)
+    {
         $(document).bind('keydown', sKeyCombination, function(){return false;});
         $(codeeditor.win.document).unbind('keydown', sKeyCombination);
         $(codeeditor.win.document).bind('keydown', sKeyCombination,
@@ -1363,41 +1364,69 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         setTabScrollPosition('console', 'bottom'); 
     };
 
+
+    function parsehighlightcode(sdata)
+    {
+        var cachejson; 
+        try 
+        {
+            cachejson = $.evalJSON(sdata);
+        } 
+        catch (err) 
+        {
+            return { "objcontent": $('<pre class="popupoutput">Malformed json: ' + cgiescape(sdata) + "</pre>") }; 
+        }
+
+        var lineNo = 1; 
+        var cpnumbers= ($('input#popuplinenumbers').attr('checked') ? $('<div id="cp_linenumbers"></div>') : undefined); 
+        var cpoutput = $('<div id="cp_output"></div>'); 
+        function addLine(line) 
+        {
+            if (cpnumbers)
+                cpnumbers.append(String(lineNo++)+'<br>'); 
+            var kline = $('<span>').css('background-color', '#fae7e7'); 
+            for (var i = 0; i < line.length; i++) 
+                cpoutput.append(line[i]);
+            cpoutput.append('<br>')
+        }
+        highlightText(cachejson["content"], addLine, HTMLMixedParser); 
+        cachejson["objcontent"] = $('<div id="cp_whole"></div>'); 
+        if (cpnumbers)
+            cachejson["objcontent"].append(cpnumbers); 
+        cachejson["objcontent"].append(cpoutput); 
+        return cachejson; 
+    }
+
+
+
     function popupCached(cacheid)
     {
         modaloptions = { overlayClose: true, 
-                         containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
-                         overlayCss: { cursor:"auto" }
+                         overlayCss: { cursor:"auto" }, 
+                         containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:0, width:"90%", "text-align":"left", cursor:"auto" }, 
+                         containerId: 'simplemodal-container', 
                        }; 
-        if (cachehidlookup[cacheid] == undefined)
+
+        var cachejson = cachehidlookup[cacheid]; 
+        if (cachejson == undefined)
         {
             modaloptions['onShow'] = function() 
             { 
-                $.ajax({
-                    type : 'POST',
-                    url  : '/proxycached', 
-                    data: { cacheid: cacheid }, 
-                    success: function(sdata) 
-                { 
-                    var foutput; 
-                    try 
-                    {
-                        cachehidlookup[cacheid] = $.evalJSON(sdata);
-                        foutput = cgiescape(cachehidlookup[cacheid]["content"]); 
-                    } 
-                    catch(err) 
-                    {
-                        foutput = "Malformed json: " + cgiescape(sdata); 
-                    }
+                $.ajax({type : 'POST', url  : '/proxycached', data: { cacheid: cacheid }, success: function(sdata) 
+                {
+                    cachejson = parsehighlightcode(sdata); 
+                    cachehidlookup[cacheid] = cachejson; 
 
-                    $('pre.popupoutput').html(foutput); 
-                    $('pre.popupoutput').css("height", $('.simplemodal-wrap').height() + "px");  // forces a scrollbar onto it
+                    var wrapheight = $('.simplemodal-wrap').height(); 
+                    $('.simplemodal-wrap #loadingheader').remove(); 
+                    $('.simplemodal-wrap').append(cachejson["objcontent"]); 
+                    $('.simplemodal-wrap').css("height", wrapheight + "px").css("overflow", "auto"); 
                 }})
             }
-            $.modal('<pre class="popupoutput" style="overflow:auto"><h1>Loading ['+cacheid+'] ...</h1></pre>', modaloptions); 
+            $.modal('<h1 id="loadingheader">Loading ['+cacheid+'] ...</h1>', modaloptions); 
         }
         else
-            $.modal('<pre class="popupoutput">'+cgiescape(cachehidlookup[cacheid]["content"])+'</pre>', modaloptions); 
+            $.modal(cachejson["objcontent"], modaloptions); 
     }
 
     function writeToSources(sUrl, bytes, failedmessage, cached, cacheid) 

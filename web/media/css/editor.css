@@ -177,3 +177,7 @@ a.cachepopup:hover { background-color:#ffffd7;; cursor:pointer; text-decoration:
 div.quickhelp {padding:1em; font-size:0.9em;}
 div.quickhelp h3 {font-size:1.3em;}
 div.quickhelp h4 {font-size:1.1em;}
+
+
+#cp_linenumbers { float: left; border-top: thin #ddd solid; width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+#cp_output { border-top: thin #ddd solid; padding-top:4px; font-family: monospace;font-size: 10pt; } 
