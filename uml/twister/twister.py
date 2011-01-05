@@ -41,23 +41,31 @@ class spawnRunner(protocol.ProcessProtocol):
     def __init__(self, client, code):
         self.client = client
         self.code = code
+        self.runID = None
+        self.umlname = ''
         self.buffer = ''
     
     def connectionMade(self):
         print "Starting run"
         self.transport.write(self.code)
         self.transport.closeStdin()
-        # line below is in runner.py where the runID is allocated and known
-        #   self.client.writeall(json.dumps({'message_type' : "startingrun", 'content' : "starting run"}))
     
     # messages from the UML
     def outReceived(self, data):
         print "out", self.client.guid, data[:100]
-        # although the client can parse the records itself, it is necessary to split them up here correctly so that 
-        # this code can insert its own records into the stream.
+            # although the client can parse the records itself, it is necessary to split them up here correctly so that this code can insert its own records into the stream.
         lines  = (self.buffer+data).split("\r\n")
-        self.buffer = lines.pop(-1)
+        self.buffer = lines.pop(-1)  # usually an empty
+        
         for line in lines:
+            if not self.runID:  # intercept the first record to record its state and add in further data
+                parsed_data = json.loads(line)
+                if parsed_data.get('message_type') == 'executionstatus' and parsed_data.get('content') == 'startingrun':
+                    self.runID = parsed_data.get('runID')
+                    self.umlname = parsed_data.get('uml')
+                    parsed_data['chatname'] = self.client.chatname
+                    parsed_data['nowtime'] = datetime.datetime.now().isoformat()
+                    line = json.dumps(parsed_data)  # inject values into the field
             self.client.writeall(line)
 
     def processEnded(self, reason):
@@ -72,7 +80,7 @@ class spawnRunner(protocol.ProcessProtocol):
 
 
 # There's one of these 'clients' per editor window open.  All connecting to same factory
-class RunnerProtocol(protocol.Protocol):
+class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a LineReceiver?
 
     def __init__(self):
         # Set if a run is currently taking place, to make sure we don't run 
@@ -90,20 +98,54 @@ class RunnerProtocol(protocol.Protocol):
         self.clientlasttouch = self.clientsessionbegan
         self.guidclienteditors = None  # the EditorsOnOneScraper object
         self.automode = 'autosave'     # draft, autosave, autoload, autotype
-        
+        self.isumlmonitoring = None  # used to designate as not being initialized at all (bug if connection lost before it was successfully connected)
+
     def connectionMade(self):
         self.factory.clientConnectionMade(self)
-        # we don't know what scraper they've actually opened until we get the dataReceived
+            # we don't know what scraper they've opened until information is send with first clientcommmand
+    
+    # message from the clientclientsessionbegan via dataReceived
+    def lconnectionopen(self, parsed_data):
+        self.guid = parsed_data.get('guid', '')
+        self.username = parsed_data.get('username', '')
+        self.userrealname = parsed_data.get('userrealname', self.username)
+        self.scrapername = parsed_data.get('scrapername', '')
+        self.scraperlanguage = parsed_data.get('language', '')
+        self.isstaff = (parsed_data.get('isstaff') == "yes")
+        self.isumlmonitoring = (parsed_data.get('umlmonitoring') == "yes")
+        
+        if self.username:
+            self.chatname = self.userrealname or self.username
+        else:
+            self.chatname = "Anonymous%d" % self.factory.anonymouscount
+            self.factory.anonymouscount += 1
+        self.cchatname = "%s|%s" % (self.username, self.chatname)
+        self.factory.clientConnectionRegistered(self)  # this will cause a notifyEditorClients to be called for everyone on this scraper
+
+
+    def connectionLost(self, reason):
+        if self.processrunning:
+            self.kill_run(reason='connection lost')
+        self.factory.clientConnectionLost(self)
+
         
     # messages from the client
     def dataReceived(self, data):
-        try:
-            parsed_data = json.loads(data)
-        except ValueError:
-            self.writejson({'content':"Command not json parsable:  %s " % data, 'message_type':'console'})
-            return
+        # chunking has recently become necessary because records (particularly from typing) can get concatenated
+        # probably shows we should be using LineReceiver
+        for lline in data.split("\r\n"):
+            line = lline.strip()
+            if line:
+                try:
+                    parsed_data = json.loads(line)
+                except ValueError:
+                    self.writejson({'content':"Command not json parsable:  %s " % line, 'message_type':'console'})
+                    continue
+                command = parsed_data.get('command')
+                self.clientcommand(command, parsed_data)
+        
             
-        command = parsed_data.get('command')
+    def clientcommand(self, command, parsed_data):
         
         # update the lasttouch values on associated aggregations
         if command != 'automode':
@@ -115,7 +157,7 @@ class RunnerProtocol(protocol.Protocol):
 
         # data uploaded when a new connection is made from the editor
         if command == 'connection_open':
-            self.connectionopen(parsed_data)
+            self.lconnectionopen(parsed_data)
             
         elif command == 'saved':
             line = json.dumps({'message_type' : "saved", 'content' : "%s saved" % self.chatname})
@@ -150,15 +192,14 @@ class RunnerProtocol(protocol.Protocol):
         elif command == "kill":
             if self.processrunning:
                 self.kill_run()
-            elif self.username:
+            elif self.username and self.guid:   # allows the killing of a process in another open window by same user
                 usereditor = self.guidclienteditors.usereditormap[self.username]
                 for client in usereditor.userclients:
                     if client.automode != 'draft' and client.processrunning:
                         client.kill_run()
 
         elif command == 'chat':
-            message = "%s: %s" % (self.chatname, parsed_data.get('text'))
-            line = json.dumps({'content':message, 'message_type':'chat'})
+            line = json.dumps({'message_type':'chat', 'chatname':self.chatname, 'message':parsed_data.get('text'), 'nowtime':datetime.datetime.now().isoformat()})
             self.writeall(line)
         
         elif command == 'automode':
@@ -196,10 +237,6 @@ class RunnerProtocol(protocol.Protocol):
     def writejson(self, data):
         self.writeline(json.dumps(data))
     
-    def connectionLost(self, reason):
-        if self.processrunning:
-            self.kill_run(reason='connection lost')
-        self.factory.clientConnectionLost(self)
 
     def writeall(self, line, otherline=""):
         if line: 
@@ -257,30 +294,9 @@ class RunnerProtocol(protocol.Protocol):
 
         # from here we should somehow get the runid
         self.processrunning = reactor.spawnProcess(spawnRunner(self, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
-        if self.automode != 'draft':
-            line = json.dumps({'content':"%s runs scraper" % self.chatname, 'message_type':'chat'})
-            self.writeall(line)
-        
         self.factory.notifyMonitoringClients(self)
 
 
-    # message from the clientclientsessionbegan via dataReceived
-    def connectionopen(self, parsed_data):
-        self.guid = parsed_data.get('guid', '')
-        self.username = parsed_data.get('username', '')
-        self.userrealname = parsed_data.get('userrealname', self.username)
-        self.scrapername = parsed_data.get('scrapername', '')
-        self.scraperlanguage = parsed_data.get('language', '')
-        self.isstaff = (parsed_data.get('isstaff') == "yes")
-        self.isumlmonitoring = (parsed_data.get('umlmonitoring') == "yes")
-        
-        if self.username:
-            self.chatname = self.userrealname or self.username
-        else:
-            self.chatname = "Anonymous%d" % self.factory.anonymouscount
-            self.factory.anonymouscount += 1
-        self.cchatname = "%s|%s" % (self.username, self.chatname)
-        self.factory.clientConnectionRegistered(self)  # this will cause a notifyEditorClients to be called for everyone on this scraper
         
 
 class UserEditorsOnOneScraper:
@@ -358,13 +374,16 @@ class EditorsOnOneScraper:
         
         
     def notifyEditorClients(self, message):
-        editorstatusdata = {'message_type':"editorstatus", 'earliesteditor':self.scrapersessionbegan.isoformat()}; 
+        editorstatusdata = {'message_type':"editorstatus" }
+        
+        editorstatusdata["nowtime"] = datetime.datetime.now().isoformat()
+        editorstatusdata['earliesteditor'] = self.scrapersessionbegan.isoformat()
+        editorstatusdata["scraperlasttouch"] = self.scraperlasttouch.isoformat()
         
         # order by who has first session in order to determin who is the editor
         usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
         usereditors.sort(key=lambda x: x.usersessionbegan)
         editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors ]
-        editorstatusdata["scraperlasttouch"] = self.scraperlasttouch.isoformat()
         
         editorstatusdata["nanonymouseditors"] = len(self.anonymouseditors)
         editorstatusdata["message"] = message
@@ -508,12 +527,15 @@ class RunnerFactory(protocol.ServerFactory):
             
 
     def clientConnectionMade(self, client):
+        assert client.isumlmonitoring == None
         client.clientnumber = self.clientcount
         self.clients.append(client)
         self.clientcount += 1
             # next function will be called when some actual data gets sent
 
     def clientConnectionRegistered(self, client):
+        assert client.isumlmonitoring != None
+        
         if client.isumlmonitoring:
             self.umlmonitoringclients.append(client)
             
@@ -545,7 +567,10 @@ class RunnerFactory(protocol.ServerFactory):
     def clientConnectionLost(self, client):
         self.clients.remove(client)  # main list
         
-        if client.isumlmonitoring:
+        if client.isumlmonitoring == None:
+            pass  # didn't even get to connection open
+        
+        elif client.isumlmonitoring:
             self.umlmonitoringclients.remove(client)
 
         elif not client.guid:
@@ -566,9 +591,11 @@ class RunnerFactory(protocol.ServerFactory):
         # check that all clients are accounted for
         assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
         self.notifyMonitoringClients(client)
-    
-    
-        
+
+
+
+
+
 
 def execute (port) :
     runnerfactory = RunnerFactory()

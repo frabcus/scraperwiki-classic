@@ -34,11 +34,16 @@ $(document).ready(function() {
     var uml = ''; 
 
     // information handling who else is watching and editing during this session
-    var earliesteditor = ""; 
-    var editingusername = ""; 
+    var editingusername = "";  // primary editor
     var loggedineditors = [ ]; // list of who else is here and their windows open
-    var nanonymouseditors = 0; 
-    var chatname = ""   // special in case of Anonymous users
+    var nanonymouseditors = 0; // number of anonymous editors
+    var chatname = ""          // special in case of Anonymous users (yes, this unnecessarily gets set every time we call recordEditorStatus)
+    var chatpeopletimes = { }; // last time each person made a chat message
+
+    // these actually get set by the server
+    var servernowtime = new Date(); 
+    var earliesteditor = servernowtime; 
+    var lasttouchedtime = undefined; 
 
     var parsers = Array();
     var stylesheets = Array();
@@ -272,7 +277,8 @@ $(document).ready(function() {
     }
 
 
-    function setupOrbited() {
+    function setupOrbited() 
+    {
         TCPSocket = Orbited.TCPSocket;
         conn = new TCPSocket(); 
         conn.open('localhost', '9010'); 
@@ -291,15 +297,14 @@ $(document).ready(function() {
 
     //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
     //which means we have to do some seemingly random binds/unbinds
-    function addHotkey(sKeyCombination, oFunction){
-
+    function addHotkey(sKeyCombination, oFunction)
+    {
         $(document).bind('keydown', sKeyCombination, function(){return false;});
         $(codeeditor.win.document).unbind('keydown', sKeyCombination);
         $(codeeditor.win.document).bind('keydown', sKeyCombination,
             function(oEvent){
                 oFunction();
-
-                return false;                            
+                return false; 
             }
         );
     }
@@ -395,15 +400,9 @@ $(document).ready(function() {
         showTab('console'); 
     }
     
-    // show the bottom grey sliding up message
-    function showFeedbackMessage(sMessage){
-       $('#feedback_messages').html(sMessage)
-       $('#feedback_messages').slideToggle(200);
-       window.setTimeout('$("#feedback_messages").slideToggle();', 2500);
-    }
 
-
-    conn.onopen = function(code){
+    conn.onopen = function(code)
+    {
         sChatTabMessage = 'Chat'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
 
@@ -548,19 +547,22 @@ $(document).ready(function() {
 
     //read data back from twisted
     function receiveRecord(data) {
+          if (data.nowtime)
+             servernowtime = parseISOdate(data.nowtime); 
+
           if (data.message_type == "console") {
               writeRunOutput(data.content);     // able to divert text to the preview iframe
           } else if (data.message_type == "sources") {
-              writeToSources(data.url, data.bytes, data.failedmessage, data.cached, data.cacheid)
+              writeToSources(data.url, "text/html", data.bytes, data.failedmessage, data.cached, data.cacheid)
           } else if (data.message_type == "editorstatus") {
               recordEditorStatus(data); 
           } else if (data.message_type == "chat") {
-              writeToChat(cgiescape(data.content))
+              writeToChat(cgiescape(data.message), data.chatname); 
           } else if (data.message_type == "saved") {
-              writeToChat(cgiescape(data.content))
+writeToChat(cgiescape(data.content));  // should know the name of person and be italics
           } else if (data.message_type == "othersaved") {
               reloadScraper();
-              writeToChat("OOO: " + cgiescape(data.content))
+writeToChat("OOO: " + cgiescape(data.content))  // should know the name of person and be italics
           } else if (data.message_type == "data") {
               writeToData(data.content);
           } else if (data.message_type == "exception") {
@@ -568,7 +570,7 @@ $(document).ready(function() {
 
           } else if (data.message_type == "executionstatus") {
               if (data.content == "startingrun")
-                startingrun(data.runID, data.uml);
+                startingrun(data.runID, data.uml, data.chatname);
               else if (data.content == "runcompleted")
                 writeToConsole("Finished: " + data.elapsed_seconds + " seconds elapsed, " + data.CPU_seconds + " CPU seconds used"); 
               else if (data.content == "killsignal")
@@ -599,19 +601,26 @@ $(document).ready(function() {
         $('#chat_line').val(''); 
     }
 
-    //send a message to the server (should this be asynchronous?)
+    //send a message to the server (needs linefeed delimeter because sometimes records get concattenated)
     function sendjson(json_data) 
     {
+        var jdata = $.toJSON(json_data); 
         try 
         {
-            conn.send($.toJSON(json_data));  
+            if (jdata.length < 10000)  // only concatenate for smallish strings
+                conn.send(jdata + "\r\n");  
+            else
+            {
+                conn.send(jdata);  
+                conn.send("\r\n");  // this goes out in a second chunk
+            }
         } 
         catch(err) 
         {
             if (!bSuppressDisconnectionMessages)
             {
                 writeToConsole("Send error: " + err, "exceptionnoesc"); 
-                writeToChat($.toJSON(json_data)); 
+                writeToChat(jdata); 
             }
         }
     }
@@ -684,20 +693,51 @@ $(document).ready(function() {
             $('select#automode').hide(); 
     }
 
+    function parseISOdate(sdatetime)
+    {
+        return new Date(sdatetime.replace(/-|T|\.\d*/g, " ")); 
+    }
+    function timeago(ctime, servernowtime)
+    {
+        var seconds = (servernowtime.getTime() - ctime.getTime())/1000; 
+        return (seconds < 120 ? seconds.toFixed(0) + " seconds" : (seconds/60).toFixed(1) + " minutes"); 
+    }
+
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
     { 
-        earliesteditor = data.earliesteditor; 
-        editingusername = (data.loggedineditors ? data.loggedineditors[0] : '');  // the first in the list is the editor
-        loggedineditors = data.loggedineditors; 
+        var boutputstatus = (lasttouchedtime == undefined); 
+
+        servernowtime = parseISOdate(data.nowtime); 
+        earliesteditor = parseISOdate(data.earliesteditor); 
+        lasttouchedtime = parseISOdate(data.scraperlasttouch); 
+
+        editingusername = (data.loggedineditors ? data.loggedineditors[0] : '');  // the first in the list is the primary editor
+        loggedineditors = data.loggedineditors;  // this is a list
         nanonymouseditors = data.nanonymouseditors; 
+        chatname = data.chatname; 
 
-        //writeToChat(cgiescape("editorstatusdata: " + $.toJSON(data))); 
         if (data.message)
-            writeToChat(cgiescape(data.message)); 
+            writeToChat('<i>'+cgiescape(data.message)+'</i>'); 
 
-        //if (data.lasttouch)
-        //    writeToChat("LAST TOUCHED " + data.lasttouch)
+        if (boutputstatus)
+        {
+            stext = [ ]; 
+            stext.push("Editing began " + timeago(earliesteditor, servernowtime) + " ago, last touched " + timeago(lasttouchedtime, servernowtime) + " ago"); 
+            var othereditors = [ ]; 
+            for (var i = 0; i < data.loggedineditors.length; i++) 
+            {
+                if (data.loggedineditors[i] != username)
+                    othereditors.push(data.loggedineditors[i]); 
+            }
+            if (othereditors.length)
+                stext.push("; Other editors: " + othereditors.join(", ")); 
+            if (nanonymouseditors - (username ? 0 : 1) > 0) 
+                stext.push("; there are " + (nanonymouseditors-(username ? 0 : 1)) + " anonymous editors watching"); 
+            stext.push("."); 
+            writeToChat(cgiescape(stext.join(""))); 
+        }
+
         showhideAutomodeSelector(); 
 
         var automode = $('select#automode option:selected').val(); 
@@ -718,7 +758,7 @@ $(document).ready(function() {
                 wstatus = '<a href="/profiles/'+loggedineditors[1]+'" target="_blank">'+loggedineditors[1]+'</a>'; 
                 if (loggedineditors.length >= 3)
                     wstatus += ' (+' + (loggedineditors.length-2) + ')'; 
-                wstatus += ' is looking'; 
+                wstatus += ' is watching'; 
             }
             $('#watcherstatus').html(wstatus); 
 
@@ -861,7 +901,7 @@ $(document).ready(function() {
         }
     }
 
-    function startingrun(lrunID, luml) 
+    function startingrun(lrunID, luml, lchatname) 
     {
         //show the output area
         resizeControls('up');
@@ -875,6 +915,7 @@ $(document).ready(function() {
         //clear the tabs
         clearOutput();
         writeToConsole('Starting run ... ' + (isstaff ? " [on "+uml+"]" : "")); 
+        writeToChat('<i>' + lchatname + ' runs scraper</i>'); 
 
         //unbind run button
         $('.editor_controls #run').unbind('click.run')
@@ -978,9 +1019,8 @@ $(document).ready(function() {
             codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
         }
 
-        $('.editor_controls #btnCommitPopup').val('Loading...').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
-        window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
-        //showFeedbackMessage("This scraper has been loaded.");
+        $('.editor_controls #btnCommitPopup').val('Loading...').addClass('darkness');
+        window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
     }; 
 
 
@@ -1106,83 +1146,73 @@ $(document).ready(function() {
     }
 
     //Save
-    function saveScraper(){
+    function saveScraper()
+    {
         var bSuccess = false;
 
         //if saving then check if the title is set (must be if guid is set)
-        if(shortNameIsSet() == false){
+        if(shortNameIsSet() == false)
+        {
             var sResult = jQuery.trim(prompt('Please enter a title for your scraper'));
-            if (sResult != false && sResult != '' && sResult != 'Untitled') {
+            if (sResult != false && sResult != '' && sResult != 'Untitled') 
+            {
                 $('#id_title').val(sResult);
                 aPageTitle = document.title.split('|')
                 document.title = sResult + ' | ' + aPageTitle[1]
                 bSuccess = true;
             }
-        }else{
+        }
+        else
             bSuccess = true;
-        }
 
-        if(bSuccess == true)
-        {
-            code = codeeditor.getCode(); 
-            atsavedundo = codeeditor.historySize().undo;  // update only when success
-            $.ajax({
-              type : 'POST',
-              contentType : "application/json",
-              dataType: "html",
+        if (!bSuccess)
+            return; 
 
-              data: ({
-                title : $('#id_title').val(),
-                commit_message: "cccommit",
-                sourcescraper: $('#sourcescraper').val(),
-                wiki_type: wiki_type,
-                code : code,
-                earliesteditor : earliesteditor, 
-                action : 'commit'
-                }),
-
-              success: function(response)
-                {
-                    res = $.evalJSON(response);
-
-                    //failed
-                    if (res.status == 'Failed')
-                        alert("Save failed error message.  Shouldn't happen"); 
-
-                    //success    
-                    else
-                    {
-                        //pageTracker._trackPageview('/scraper_committed_goal');  		
-
-                        // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
-                        if (res.draft == 'True')
-                            $('#divDraftSavedWarning').show();
-
-                        // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
-                        if (res.url && window.location.pathname != res.url)
-                            window.location = res.url;
-
-                        // ordinary save case.
-                        if (res.draft != 'True') 
-                        {
-                            $('.editor_controls #btnCommitPopup').val('Saved').css('background-color', '#2F4F4F').css('color', '#FFFFFF');
-                            window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).css('background-color','#e3e3e3').css('color', '#333'); }, 1100);  
-                            //showFeedbackMessage("Your code has been saved.");
-                            if (bConnected)
-                                sendjson({"command":'saved'}); 
-                        }
-                        ChangeInEditor("saved"); 
+        atsavedundo = codeeditor.historySize().undo;  // update only when success
+        var sdata = {
+                        title : $('#id_title').val(),
+                        commit_message: "cccommit",   // could get some use out of this if we wanted to
+                        sourcescraper: $('#sourcescraper').val(),
+                        wiki_type: wiki_type,
+                        code : codeeditor.getCode(),
+                        earliesteditor : earliesteditor.toUTCString(), // goes into the comment of the commit to help batch sessions
+                        action : 'commit'
                     }
-                },
+        $.ajax({ type : 'POST', contentType : "application/json", dataType: "html", data: sdata, success: function(response)
+        {
+            res = $.evalJSON(response);
+            if (res.status == 'Failed')
+            {
+                alert("Save failed error message.  Shouldn't happen"); 
+                return; 
+            }
 
-            error: function(response){
-                alert('Sorry, something went wrong, please try copying your code and then reloading the page');
-                document.write(response.responseText); // Uncomment to get the actual error page
-              }
-            });
-            
-            $('.editor_controls #btnCommitPopup').val('Saving ...');
-        }
+            // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
+            if (res.draft == 'True')
+                $('#divDraftSavedWarning').show();
+
+            // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
+            if (res.url && window.location.pathname != res.url)
+                window.location = res.url;
+
+            // ordinary save case.
+            if (res.draft != 'True') 
+            {
+                $('.editor_controls #btnCommitPopup').val('Saved').addClass('darkness'); 
+                window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
+                //showFeedbackMessage("Your code has been saved.");
+                if (bConnected)
+                    sendjson({"command":'saved'}); 
+            }
+            ChangeInEditor("saved"); 
+        },
+        error: function(response)
+        {
+            alert('Sorry, something went wrong, please try copying your code and then reloading the page');
+            writeToChat("Response error: " + response.responseText); 
+        }});
+
+        $('.editor_controls #btnCommitPopup').val('Saving ...');
     }
 
     function cgiescape(text) 
@@ -1195,44 +1225,36 @@ $(document).ready(function() {
     
     function setupResizeEvents()
     {
-        
-        //window
         $(window).resize(onWindowResize);
-        
-        //editor
-        $("#codeeditordiv").resizable({
-                         handles: 's',   
-                         autoHide: false, 
-                         start: function(event, ui) 
-                             {
-                                 var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top;
 
-                                 $("#codeeditordiv").resizable('option', 'maxHeight', maxheight);
+        $("#codeeditordiv").resizable(
+        {
+            handles: 's',   
+            autoHide: false, 
+            start: function(event, ui) 
+            {
+                var maxheight = $("#codeeditordiv").height() + $(window).height() - $("#outputeditordiv").position().top;
 
-                                 //cover iframe
-                                 var oFrameMask = $('<div id="framemask"></div>');
-                                 oFrameMask.css({
-                                     position: 'absolute',
-                                     top: 0,
-                                     left:0,
-                                     background:'none',
-                                     zindex: 200,
-                                     width: '100%',
-                                     height: '100%'
-                                 })
-                                 $(".editor_code").append(oFrameMask)
-                             },
-                         stop: function(event, ui)  { 
-                                     resizeCodeEditor(); 
-                                     $('#framemask').remove();
-                                 }
-                             }); 
+                $("#codeeditordiv").resizable('option', 'maxHeight', maxheight);
 
-           // bind the double-click (causes problems with the jquery interface as it doesn't notice the mouse exiting the frame
-           // $(".ui-resizable-s").bind("dblclick", resizeControls);
+                //cover iframe
+                var oFrameMask = $('<div id="framemask"></div>');
+                oFrameMask.css({ position: 'absolute', top: 0, left:0, background:'none', zindex: 200, width: '100%', height: '100%' }); 
+                $(".editor_code").append(oFrameMask); 
+            },
+            stop: function(event, ui)  
+            { 
+                resizeCodeEditor(); 
+                $('#framemask').remove();
+            }
+        }); 
+
+        // bind the double-click (causes problems with the jquery interface as it doesn't notice the mouse exiting the frame
+        // $(".ui-resizable-s").bind("dblclick", resizeControls);
     }
 
-    function shortNameIsSet(){
+    function shortNameIsSet()
+    {
         var sTitle = jQuery.trim($('#id_title').val());
         return sTitle != 'Untitled' && sTitle != '' && sTitle != undefined && sTitle != false;
     }
@@ -1342,69 +1364,105 @@ $(document).ready(function() {
         setTabScrollPosition('console', 'bottom'); 
     };
 
-    function popupCached(cacheid)
+
+    function parsehighlightcode(sdata, lmimetype)
+    {
+        var cachejson; 
+        try 
+        {
+            cachejson = $.evalJSON(sdata);
+        } 
+        catch (err) 
+        {
+            return { "objcontent": $('<pre class="popupoutput">Malformed json: ' + cgiescape(sdata) + "</pre>") }; 
+        }
+
+        if (lmimetype != "text/html")
+        {
+            cachejson["objcontent"] = $('<pre class="popupoutput">'+cgiescape(cachejson["content"]) + "</pre>"); 
+            return cachejson; 
+        }
+
+        var lineNo = 1; 
+        var cpnumbers= ($('input#popuplinenumbers').attr('checked') ? $('<div id="cp_linenumbers"></div>') : undefined); 
+        var cpoutput = $('<div id="cp_output"></div>'); 
+        function addLine(line) 
+        {
+            if (cpnumbers)
+                cpnumbers.append(String(lineNo++)+'<br>'); 
+            var kline = $('<span>').css('background-color', '#fae7e7'); 
+            for (var i = 0; i < line.length; i++) 
+                cpoutput.append(line[i]);
+            cpoutput.append('<br>'); 
+        }
+        highlightText(cachejson["content"], addLine, HTMLMixedParser); 
+        cachejson["objcontent"] = $('<div id="cp_whole"></div>'); 
+        if (cpnumbers)
+            cachejson["objcontent"].append(cpnumbers); 
+        cachejson["objcontent"].append(cpoutput); 
+        return cachejson; 
+    }
+
+
+
+    function popupCached(cacheid, lmimetype)
     {
         modaloptions = { overlayClose: true, 
-                         containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
-                         overlayCss: { cursor:"auto" }
+                         overlayCss: { cursor:"auto" }, 
+                         containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:0, width:"90%", "text-align":"left", cursor:"auto" }, 
+                         containerId: 'simplemodal-container', 
                        }; 
-        if (cachehidlookup[cacheid] == undefined)
+
+        var cachejson = cachehidlookup[cacheid]; 
+        if (cachejson == undefined)
         {
             modaloptions['onShow'] = function() 
             { 
-                $.ajax({
-                    type : 'POST',
-                    url  : '/proxycached', 
-                    data: { cacheid: cacheid }, 
-                    success: function(sdata) 
-                { 
-                    var foutput; 
-                    try 
-                    {
-                        cachehidlookup[cacheid] = $.evalJSON(sdata);
-                        foutput = cgiescape(cachehidlookup[cacheid]["content"]); 
-                    } 
-                    catch(err) 
-                    {
-                        foutput = "Malformed json: " + cgiescape(sdata); 
-                    }
+                $.ajax({type : 'POST', url  : '/proxycached', data: { cacheid: cacheid }, success: function(sdata) 
+                {
+                    cachejson = parsehighlightcode(sdata, lmimetype); 
+                    cachehidlookup[cacheid] = cachejson; 
 
-                    $('pre.popupoutput').html(foutput); 
-                    $('pre.popupoutput').css("height", $('.simplemodal-wrap').height() + "px");  // forces a scrollbar onto it
+                    var wrapheight = $('.simplemodal-wrap').height(); 
+                    $('.simplemodal-wrap #loadingheader').remove(); 
+                    $('.simplemodal-wrap').append(cachejson["objcontent"]); 
+                    $('.simplemodal-wrap').css("height", wrapheight + "px").css("overflow", "auto"); 
                 }})
             }
-            $.modal('<pre class="popupoutput" style="overflow:auto"><h1>Loading ['+cacheid+'] ...</h1></pre>', modaloptions); 
+            $.modal('<h1 id="loadingheader">Loading ['+cacheid+'] ...</h1>', modaloptions); 
         }
         else
-            $.modal('<pre class="popupoutput">'+cgiescape(cachehidlookup[cacheid]["content"])+'</pre>', modaloptions); 
+            $.modal(cachejson["objcontent"], modaloptions); 
     }
 
-    function writeToSources(sUrl, bytes, failedmessage, cached, cacheid) 
+    function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid) 
     {
         //remove items if over max
         while ($('#output_sources div.output_content').children().size() >= outputMaxItems) 
             $('#output_sources div.output_content').children(':first').remove();
 
         //append to sources tab
-        var smessage = ""; 
-        var alink = ' <a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a>'; 
+        var smessage = [ ]; 
+        var alink = '<a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a>'; 
         if ((failedmessage == undefined) || (failedmessage == ''))
         {
-            smessage += bytes + ' bytes loaded'; 
+            smessage.push(bytes + ' bytes loaded'); 
+            if (lmimetype != "text/html")
+                smessage.push("<b>"+lmimetype+"</b>"); 
             if (cacheid != undefined)
-                smessage += ' <a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'; 
+                smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
             if (cached == 'True')
-                smessage += ' (from cache)'; 
-            smessage += alink; 
+                smessage.push('(from cache)'); 
         }
         else
-            smessage = failedmessage + alink; 
+            smessage.push(failedmessage); 
+        smessage.push(alink); 
 
-        $('#output_sources div.output_content').append('<span class="output_item">' + smessage + '</span>')
+        $('#output_sources div.output_content').append('<span class="output_item">' + smessage.join(" ") + '</span>')
         $('.editor_output div.tabs li.sources').addClass('new');
         
         if (cacheid != undefined)  
-            $('a#cacheid-'+cacheid).click(function() { popupCached(cacheid); return false; }); 
+            $('a#cacheid-'+cacheid).click(function() { popupCached(cacheid, lmimetype); return false; }); 
 
         setTabScrollPosition('sources', 'bottom'); 
     }
@@ -1430,21 +1488,26 @@ $(document).ready(function() {
         $('.editor_output div.tabs li.data').addClass('new');
     }
 
-    function writeToChat(seMessage) 
+    function writeToChat(seMessage, sechatname) 
     {
         while ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) 
             $('#output_chat table.output_content tbody').children(':first').remove();
 
-        var oRow = $('<tr></tr>');
-        var oCell = $('<td></td>');
-        oCell.html(seMessage);
-        oRow.append(oCell);
-
+        var oRow = $('<tr><td>' + (sechatname ? sechatname + ": " : "") + seMessage + '</td></tr>');
         $('#output_chat table.output_content').append(oRow);
-
         setTabScrollPosition('chat', 'bottom'); 
-
         $('.editor_output div.tabs li.chat').addClass('new');
+
+        if (sechatname && (sechatname != chatname))
+        {
+                // currently highlights when there is more than a minute gap.  But could be longer
+            if ((chatpeopletimes[sechatname] == undefined) || ((servernowtime.getTime() - chatpeopletimes[sechatname].getTime())/1000 > 60))
+            {
+                chatpeopletimes[sechatname] = servernowtime; 
+                $('.editor_output div.tabs li.chat').addClass('improved');
+                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('improved'); }, 4100); 
+            }
+        }
     }
 
     // some are implemented with tables, and some with span rows.  
