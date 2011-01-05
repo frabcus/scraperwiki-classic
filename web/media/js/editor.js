@@ -1377,7 +1377,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             return { "objcontent": $('<pre class="popupoutput">Malformed json: ' + cgiescape(sdata) + "</pre>") }; 
         }
 
-        if (lmimetype != "text/html")
+        if ((lmimetype != "text/html") || (cachejson["content"].length > 20000))
         {
             cachejson["objcontent"] = $('<pre class="popupoutput">'+cgiescape(cachejson["content"]) + "</pre>"); 
             return cachejson; 
@@ -1421,7 +1421,8 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
                 $.ajax({type : 'POST', url  : '/proxycached', data: { cacheid: cacheid }, success: function(sdata) 
                 {
                     cachejson = parsehighlightcode(sdata, lmimetype); 
-                    cachehidlookup[cacheid] = cachejson; 
+                    if (cachejson["content"].length < 15000)  // don't cache huge things
+                        cachehidlookup[cacheid] = cachejson; 
 
                     var wrapheight = $('.simplemodal-wrap').height(); 
                     $('.simplemodal-wrap #loadingheader').remove(); 
