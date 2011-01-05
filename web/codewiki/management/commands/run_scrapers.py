@@ -171,8 +171,8 @@ class ScraperRunner(threading.Thread):
                         if stackentry.get('furtherlinetext'):
                             sMessage += " -- " + stackentry.get('furtherlinetext') 
                         exceptionmessage.append(sMessage)
-                if stackentry.get('duplicates') and stackentry.get('duplicates') > 1:
-                    exceptionmessage.append("  + %d duplicates" % stackentry.duplicates)
+                    if stackentry.get('duplicates') and stackentry.get('duplicates') > 1:
+                        exceptionmessage.append("  + %d duplicates" % stackentry.duplicates)
                 
                 if data.get("blockedurl"):
                     exceptionmessage.append("Blocked URL: %s" % data.get("blockedurl"))
