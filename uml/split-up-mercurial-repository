@@ -1,0 +1,53 @@
+#!/bin/bash
+set -e
+#set -x
+
+# Split up a Mercurial repository containing all scrapers into separate ones for each.
+# One shot use script for migration.
+
+# Background information about how to do this:
+# http://www.selenic.com/pipermail/mercurial/2008-July/020265.html
+# http://mercurial.selenic.com/wiki/ConvertExtension
+
+die () {
+    echo -e "$@" 1>&2
+    exit 1
+}
+
+# Check we have Mercurial convert extension set up. To do so, put this in ~/.hgrc:
+# [extensions]
+# hgext.convert=
+hg convert --help >/dev/null 2>/dev/null || die "Please set up 'hg convert' extension see comments for details"
+
+
+REPOS=$1
+DEST=$2
+[ -e "$REPOS" ] || die "Can't find repository (first parameter)"
+[ -e "$DEST" ] || die "Can't find destination directory (second parameter)"
+MAP=/tmp/split-up-mercurial-respository-$RANDOM-$RANDOM-$RANDOM-$RANDOM
+
+function pull_out_one_scraper {
+    SCRAPER=$1
+    [ -e "$REPOS/$SCRAPER/__init__.py" ] || die "Couldn't find __init__.py in scraper $SCRAPER in repos $REPOS"
+    [ -e "$DEST/$SCRAPER" ] && die "Scraper repository $SCRAPER already exists in destination dir $DEST"
+    cat  >$MAP <<END
+include "$SCRAPER"
+rename "$SCRAPER/__init__.py" "code"
+END
+    hg --quiet convert --filemap $MAP $REPOS $DEST/$SCRAPER
+    cd $DEST/$SCRAPER
+    hg --quiet checkout tip
+    cd - >/dev/null
+}
+
+#pull_out_one_scraper arts-and-humanities
+#exit 0
+
+for SCRAPER in $REPOS/*
+do
+    SCRAPER=${SCRAPER#$REPOS/}
+    echo "Processing scraper $SCRAPER"
+    pull_out_one_scraper $SCRAPER
+done
+
+
