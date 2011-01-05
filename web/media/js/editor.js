@@ -639,14 +639,14 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         //send the data
         code = codeeditor.getCode(); 
         data = {
-            "command" : "run",
-            "guid" : guid,
-            "username" : username, 
+            "command"   : "run",
+            "guid"      : guid,
+            "username"  : username, 
             "userrealname" : userrealname, 
-            "language":scraperlanguage, 
-            "scraper-name":short_name,
-            "code" : code,
-            "urlquery" : ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val())
+            "language"  : scraperlanguage, 
+            "scrapername":short_name,
+            "code"      : code,
+            "urlquery"  : ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val())
         }
         $('.editor_controls #run').val('Sending');
         sendjson(data); 
