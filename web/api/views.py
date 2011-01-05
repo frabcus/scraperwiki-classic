@@ -67,7 +67,7 @@ def explore_scraper_getruninfo_1_0(request):
 
 def explore_scraper_getuserinfo_1_0(request):
     user = request.user
-    users = list(User.objects.all()[:5])
+    users = list(User.objects.all().order_by('-date_joined')[:5])
     if user.is_authenticated():
         users.insert(0, user)
     users_keys = api_key.objects.filter(user=user)
