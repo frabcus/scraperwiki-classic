@@ -46,6 +46,13 @@ class GetInfo(APIBase):
             info['license']     = scraper.scraper.license
             info['records']     = scraper.scraper.record_count
         
+        info['userroles']   = { }
+        for ucrole in scraper.usercoderole_set.filter():
+            if ucrole.role not in info['userroles']:
+                info['userroles'][ucrole.role] = [ ]
+            info['userroles'][ucrole.role].append(ucrole.user.username)
+            
+                
         try: 
             rev = int(request.GET.get('version', ''))
         except ValueError: 
