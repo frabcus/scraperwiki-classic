@@ -1379,7 +1379,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
 
         if ((lmimetype != "text/html") || (cachejson["content"].length > 20000))
         {
-            cachejson["objcontent"] = $('<pre class="popupoutput">'+cgiescape(cachejson["content"]) + "</pre>"); 
+            cachejson["objcontent"] = $('<pre>'+cgiescape(cachejson["content"]) + "</pre>"); 
             return cachejson; 
         }
 
