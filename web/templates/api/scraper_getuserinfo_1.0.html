@@ -1,0 +1,21 @@
+{% extends "api/function_base.html" %}
+
+{% block title %}scraperwiki.scraper.getUserInfo | API{% endblock %}
+
+{% block heading %}scraperwiki.scraper.getUserInfo{% endblock %}
+{% block subheading %}Returns information about a user of ScraperWiki{% endblock %}
+{% block arguments %}
+    {% comment %}
+        <dt><code>key</code> (required)</dt>
+        <dd>A valid API key.{% if user.is_authenticated and keys %} <input type="text" name="key" id="key" />{% endif %}</dd>
+    {% endcomment %}    
+
+    <dt><code>format</code></dt>
+    <dd>The format you would like the response in. <input type="text" name="format" id="format" size="4"/></dd>
+    <dt><code>username</code> (required)</dt>
+    <dd>The user name of the person. <input type="text" name="username" id="username"/></dd>
+    <dt><code>callback</code> (optional)</dt>
+    <dd><a href="http://en.wikipedia.org/wiki/JSONP#JSONP">JSONP</a> callback function. Only useful when requesting JSON data. <input type="text" name="callback" id="callback"/></dd>
+{% endblock %}
+
+{% block example_url %}{% url api:explorer_example method='scraper.getruninfo_1.0' %}{% endblock %}

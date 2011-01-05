@@ -10,6 +10,7 @@ from api import views
 scrapersearch_handler   = Resource(scraper.Search)
 scraperinfo_handler     = Resource(scraper.GetInfo)
 scraperruninfo_handler  = Resource(scraper.GetRunInfo)
+scraperuserinfo_handler = Resource(scraper.GetUserInfo)
 
 data_handler            = Resource(datastore.Data)
 keys_handler            = Resource(datastore.Keys)
@@ -37,6 +38,8 @@ urlpatterns = patterns('',
     url(r'^1\.0/explore/scraperwiki.scraper.search$',       views.explore_scraper_search_1_0,       name='scraper_search'),
     url(r'^1\.0/explore/scraperwiki.scraper.getinfo$',      views.explore_scraper_getinfo_1_0,      name='scraper_getinfo'),
     url(r'^1\.0/explore/scraperwiki.scraper.getruninfo$',   views.explore_scraper_getruninfo_1_0,   name='scraper_getruninfo'),    
+    url(r'^1\.0/explore/scraperwiki.scraper.getuserinfo$',  views.explore_scraper_getuserinfo_1_0,  name='scraper_getuserinfo'),
+    
     url(r'^1\.0/explore/scraperwiki.datastore.getkeys$',    views.explore_scraper_getkeys_1_0,      name='datastore_getkeys'),    
     url(r'^1\.0/explore/scraperwiki.datastore.search$',     views.explore_datastore_search_1_0,     name='datastore_search'),        
     url(r'^1\.0/explore/scraperwiki.datastore.getdata$',    views.explore_scraper_getdata_1_0,      name='scraper_getdata'),    
@@ -49,6 +52,7 @@ urlpatterns = patterns('',
     url(r'^1\.0/scraper/search$',       scrapersearch_handler,      name="method_search"),
     url(r'^1\.0/scraper/getinfo$',      scraperinfo_handler,        name="method_getinfo"),
     url(r'^1\.0/scraper/getruninfo$',   scraperruninfo_handler,     name="method_getruninfo"),
+    url(r'^1\.0/scraper/getuserinfo$',  scraperuserinfo_handler,    name="method_getuserinfo"),
     url(r'^1\.0/datastore/search$',     datastore_search_handler,   name="method_datastore_search"),
     url(r'^1\.0/datastore/getdata$',    data_handler,               name="method_getdata"),
     url(r'^1\.0/datastore/getkeys$',    keys_handler,               name="method_getkeys"),
@@ -56,6 +60,4 @@ urlpatterns = patterns('',
     url(r'^1\.0/datastore/getdatabylocation$', getdatabylocation_handler, name="method_getdatabylocation"),
 
     url(r'^1\.0/geo/postcodetolatlng/$',geo_postcode_to_latlng_handler, name="method_geo_postcode_to_latlng"),
-    
-    
 )

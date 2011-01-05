@@ -8,7 +8,7 @@
 
     <div class="page_title">
         <h1>{% block heading %}{% endblock %}</h1>
-        <p>{% block subheading %}{% endblock %}</p>
+        <p>{% block subheading %}{% endblock %}   <small><a href="{% url api:index %}">(return to api overview)</a></small></p>
         <p><a id="aApiLink" class="api_link" href="http://{{api_domain}}{{api_uri}}">http://{{api_domain}}{{api_uri}}<span></span></a></p>        
     </div>
 
@@ -63,6 +63,16 @@
             {% endfor %}	                
         </ul>
         {% endif %}
+
+        {% if users %}
+        <h4>User names</h4>        
+        <ul id="ulUserNames" class="api_suggest">
+            {% for user in users %}
+                <li><code title="{{user.get_profile.name}}">{{user.username}}</code></li>
+            {% endfor %}	                
+        </ul>
+        {% endif %}
+
     </div>
     
 {% endblock %}

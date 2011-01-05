@@ -1,5 +1,6 @@
 from web.codewiki.models import Scraper, ScraperRunEvent
 from django.contrib.auth.models import User
+from frontend.models import UserToUserRole
 from api.handlers.api_base import APIBase
 from tagging.models import Tag
 from piston.utils import rc
@@ -47,7 +48,7 @@ class GetInfo(APIBase):
             info['records']     = scraper.scraper.record_count
         
         info['userroles']   = { }
-        for ucrole in scraper.usercoderole_set.filter():
+        for ucrole in scraper.usercoderole_set.all():
             if ucrole.role not in info['userroles']:
                 info['userroles'][ucrole.role] = [ ]
             info['userroles'][ucrole.role].append(ucrole.user.username)
@@ -150,4 +151,35 @@ class Search(APIBase):
         result = [ ]  # list of dicts
         for scraper in Scraper.objects.search(query):
             result.append({'short_name':scraper.short_name, 'title':scraper.title, 'description':scraper.description, 'created':scraper.created_at})
+        return result
+
+
+class GetUserInfo(APIBase):
+    required_arguments = ['username']
+
+    def value(self, request):
+        username = request.GET.get('username', "") 
+        users = User.objects.filter(username=username)
+        result = [ ]
+        for user in users:  # list of users is normally 1
+            info = { "username":user.username, "profilename":user.get_profile().name, "datejoined":user.date_joined }
+            info['coderoles'] = { }
+            for ucrole in user.usercoderole_set.all():
+                if ucrole.role not in info['coderoles']:
+                    info['coderoles'][ucrole.role] = [ ]
+                info['coderoles'][ucrole.role].append(ucrole.code.short_name)
+
+            info['fromuserroles'] = { }
+            for fromuserrole in user.from_user.all():
+                if fromuserrole.role not in info['fromuserroles']:
+                    info['fromuserroles'][fromuserrole.role] = [ ]
+                info['fromuserroles'][fromuserrole.role].append(fromuserrole.from_user.username)
+            
+            info['touserroles'] = { }
+            for touserrole in user.to_user.all():
+                if touserrole.role not in info['touserroles']:
+                    info['touserroles'][touserrole.role] = [ ]
+                info['touserroles'][touserrole.role].append(touserrole.to_user.username)
+            
+            result.append(info)
         return result
