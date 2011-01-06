@@ -8,6 +8,7 @@ from api.emitters import CSVEmitter, PHPEmitter, GVizEmitter
 from settings import MAX_API_ITEMS, DEFAULT_API_ITEMS
 import datetime
 import sys
+import re
 
 Emitter.register('csv', CSVEmitter, 'text/csv; charset=utf-8')
 Emitter.register('php', PHPEmitter, 'text/plain; charset=utf-8')
@@ -76,13 +77,20 @@ class APIBase(BaseHandler):
         return result
 
 
-    def get_scraper(self, request, wiki_type='scraper'):
+    def get_scraper_lsm(self, name):
         try:
-            if wiki_type == 'scraper':  # (still working around the damage caused by the scraper/view object fork!)
-                return Scraper.objects.get(short_name=request.GET.get('name'), published=True)
-            return Code.objects.get(short_name=request.GET.get('name'), published=True)
+            code = Code.unfiltered.get(short_name=name)   # unfiltered is objects, but working around the "convenient" filter that has been injected into the manager
         except:
-            raise InvalidScraperException()
+            return None, { "status":"Does not exist" }
+        
+        if code.wiki_type == "scraper":
+            code = code.scraper
+        if code.deleted:
+            return code, { "status":"deleted" }
+        if not code.published:
+            return code, { "status":"unpublished" }
+        return code, None
+        
 
     def get_limit_and_offset(self, request):
         try:
@@ -106,7 +114,8 @@ class APIBase(BaseHandler):
         if not date_str:
             return None
         try:
-            return datetime.datetime.strptime(date_str, '%Y-%m-%d')
+            #return datetime.datetime.strptime(date_str, '%Y-%m-%d')
+            return datetime.datetime(*map(int, re.findall("\d+", date_str)))  # should handle 2011-01-05 21:30:37
         except ValueError:
             return None
     
