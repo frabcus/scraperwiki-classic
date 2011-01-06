@@ -556,6 +556,8 @@ $(document).ready(function() {
               writeToSources(data.url, "text/html", data.bytes, data.failedmessage, data.cached, data.cacheid)
           } else if (data.message_type == "editorstatus") {
               recordEditorStatus(data); 
+          } else if (data.message_type == "setnewautomode") {
+              setNewAutoMode(data.newautomode); 
           } else if (data.message_type == "chat") {
               writeToChat(cgiescape(data.message), data.chatname); 
           } else if (data.message_type == "saved") {
@@ -703,6 +705,16 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         return (seconds < 120 ? seconds.toFixed(0) + " seconds" : (seconds/60).toFixed(1) + " minutes"); 
     }
 
+    function setNewAutoMode(newautomode) 
+    { 
+        var automode = $('select#automode option:selected').val(); 
+        if (automode == newautomode)
+            return; 
+        if (((automode == "autosave") && (newautomode == "autotype")) || ((automode == "autotype") && (newautomode == "autosave")))
+            $('select#automode').val(newautomode).trigger("change"); 
+        showhideAutomodeSelector(); 
+    }
+
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
     { 
@@ -720,7 +732,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         if (data.message)
             writeToChat('<i>'+cgiescape(data.message)+'</i>'); 
 
-        if (boutputstatus)
+        if (boutputstatus)  // first time
         {
             stext = [ ]; 
             stext.push("Editing began " + timeago(earliesteditor, servernowtime) + " ago, last touched " + timeago(lasttouchedtime, servernowtime) + " ago"); 
@@ -736,6 +748,8 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
                 stext.push("; there are " + (nanonymouseditors-(username ? 0 : 1)) + " anonymous editors watching"); 
             stext.push("."); 
             writeToChat(cgiescape(stext.join(""))); 
+            if (data.newautomode == "autotype")
+                setNewAutoMode(data.newautomode);   // open to an initial autotype automode
         }
 
         showhideAutomodeSelector(); 
@@ -1506,7 +1520,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             {
                 chatpeopletimes[sechatname] = servernowtime; 
                 $('.editor_output div.tabs li.chat').addClass('improved');
-                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('improved'); }, 4100); 
+                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('improved'); }, 1500); 
             }
         }
     }
