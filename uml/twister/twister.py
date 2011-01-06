@@ -221,11 +221,6 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             elif self.automode == 'draft':  # change back from draft (can't happen for now)
                 usereditor.nondraftcount += 1
                 
-            # bump the entire user to and from broadcast mode
-            elif (self.automode == "autosave" and automode == "autotype") or (self.automode == "autotype" and automode == "autosave"):
-                for lclient in usereditor.userclients:
-                    if lclient != self and lclient.automode == self.automode:
-                        lclient.writeline(json.dumps({'message_type':'setnewautomode', 'newautomode':automode}))
                         
             self.automode = automode
             assert usereditor.nondraftcount == len([lclient  for lclient in usereditor.userclients  if lclient.automode != 'draft'])
@@ -392,12 +387,13 @@ class EditorsOnOneScraper:
         usereditors.sort(key=lambda x: x.usersessionbegan)
         editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors ]
         
-        # handle initial automode problem
-        if usereditors:
-            for userclient in usereditors[0].userclients:
-                if userclient.automode == 'autotype':
-                    editorstatusdata['newautomode'] = userclient.automode
-
+        # notify if there is a broadcasting editor so the windows can sort out which one's are autoloading
+        for usereditor in usereditors:  
+            for client in usereditor.userclients:
+                if client.automode == 'autotype':
+                    editorstatusdata["broadcastingeditor"] = usereditor.username
+                    
+        
         editorstatusdata["nanonymouseditors"] = len(self.anonymouseditors)
         editorstatusdata["message"] = message
         for client in self.anonymouseditors:

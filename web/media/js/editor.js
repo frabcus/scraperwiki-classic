@@ -117,7 +117,7 @@ $(document).ready(function() {
             chainpatches.shift(); 
 
         if (chainpatches.length > 0)
-            setTimeout(sendChainPatches, 800); 
+            setTimeout(sendChainPatches, 2); 
     }
 
 
@@ -250,7 +250,7 @@ $(document).ready(function() {
             indentUnit: indentUnits[scraperlanguage],
             readOnly: false, // cannot be changed once started up
             undoDepth: 200,  // defaults to 50.  wait till we get lostundo value
-            undoDelay: 2000, // 2 seconds  (default is 800)
+            undoDelay: 800, // 2 seconds  (default is 800)
             tabMode: "shift", 
             disableSpellcheck: true,
             autoMatchParens: true,
@@ -556,8 +556,6 @@ $(document).ready(function() {
               writeToSources(data.url, "text/html", data.bytes, data.failedmessage, data.cached, data.cacheid)
           } else if (data.message_type == "editorstatus") {
               recordEditorStatus(data); 
-          } else if (data.message_type == "setnewautomode") {
-              setNewAutoMode(data.newautomode); 
           } else if (data.message_type == "chat") {
               writeToChat(cgiescape(data.message), data.chatname); 
           } else if (data.message_type == "saved") {
@@ -705,15 +703,6 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         return (seconds < 120 ? seconds.toFixed(0) + " seconds" : (seconds/60).toFixed(1) + " minutes"); 
     }
 
-    function setNewAutoMode(newautomode) 
-    { 
-        var automode = $('select#automode option:selected').val(); 
-        if (automode == newautomode)
-            return; 
-        if (((automode == "autosave") && (newautomode == "autotype")) || ((automode == "autotype") && (newautomode == "autosave")))
-            $('select#automode').val(newautomode).trigger("change"); 
-        showhideAutomodeSelector(); 
-    }
 
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
@@ -748,8 +737,6 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
                 stext.push("; there are " + (nanonymouseditors-(username ? 0 : 1)) + " anonymous editors watching"); 
             stext.push("."); 
             writeToChat(cgiescape(stext.join(""))); 
-            if (data.newautomode == "autotype")
-                setNewAutoMode(data.newautomode);   // open to an initial autotype automode
         }
 
         showhideAutomodeSelector(); 
@@ -776,7 +763,21 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             }
             $('#watcherstatus').html(wstatus); 
 
-            if ((automode != 'autosave') && (automode != 'autotype'))
+            if (data.broadcastingeditor == username)   // handle turning one window of many
+            {
+                if (automode == 'autosave')
+                {
+                    $('select#automode #id_autoload').attr('disabled', false); 
+                    $('select#automode').val('autoload'); // watching
+                    $('select#automode #id_autosave').attr('disabled', true); 
+                    $('select#automode #id_autotype').attr('disabled', true); 
+                    setCodeeditorBackgroundImage('url(/media/images/staff.png)')
+                    $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+                    $('.editor_controls #run').attr('disabled', true);
+                    sendjson({"command":'automode', "automode":'autoload'}); 
+                }
+            }
+            else if ((automode != 'autosave') && (automode != 'autotype'))
             {
                 setCodeeditorBackgroundImage('none')
                 $('select#automode #id_autosave').attr('disabled', false); 
@@ -836,6 +837,8 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             if (linecontent != deletestr)
             {
                 writeToChat("Lines disagree " + $.toJSON(chainpatch)); 
+                writeToChat(linecontent); 
+                writeToChat(deletestr); 
                 return; 
             }
 
@@ -867,7 +870,9 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
                 {
                     if (codeeditor.lineContent(dlinehandle) != deletions[i])
                     {
-                        writeToChat("Lines disagree " + $.toJSON(chainpatch)); 
+                        writeToChat("Lines " + i + " disagree " + $.toJSON(chainpatch)); 
+                        writeToChat(codeeditor.lineContent(dlinehandle)); 
+                        writeToChat(deletions[i]); 
                         return; 
                     }
                     dlinehandle = codeeditor.nextLine(dlinehandle); 
