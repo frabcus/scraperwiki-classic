@@ -535,6 +535,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         elif cached  is not None : cacheid, page = cached
         else                     : cacheid, page = '', ''
 
+        if cacheid is None       : cacheid = ''
+
         bodyat  = self.bodyOffset (page)
         headers = page[:bodyat]
         bytes   = len(page) - bodyat
@@ -557,7 +559,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 failedmessage = 'Failed:' + m.group(1) + "  " + m.group(2)
         else :
             failedmessage = 'Failed: (code missing)'
-            
+
         self.notify \
             (   self.connection.getpeername()[0],
                 runid           = runID,
@@ -567,8 +569,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 bytes           = bytes,
                 mimetype        = mimetype,
                 cacheid         = cacheid,
-                last_cacheid    = cached is not None and cached[0] or '',
-                cached          = cached is not None
+                last_cacheid    = cached  is not None and cached[0] or '',
+                cached          = cached  is not None
             )
 
         self.connection.sendall (page)
