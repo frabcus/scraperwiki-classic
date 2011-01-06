@@ -544,7 +544,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             if line.find(':') > 0 :
                 name, value = line.split(':', 1)
                 if name.lower() == 'content-type' :
-                    if value.find(';') :
+                    if value.find(';') > 0 :
                         value, rest = value.split(';',1)
                         mimetype = value.strip()
 
