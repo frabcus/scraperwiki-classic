@@ -218,8 +218,10 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                 if self.processrunning:
                     self.kill_run(reason='convert to draft')
                 
-            elif self.automode == 'draft':  # change back from draft (won't happen for now)
+            elif self.automode == 'draft':  # change back from draft (can't happen for now)
                 usereditor.nondraftcount += 1
+                
+                        
             self.automode = automode
             assert usereditor.nondraftcount == len([lclient  for lclient in usereditor.userclients  if lclient.automode != 'draft'])
             
@@ -380,10 +382,17 @@ class EditorsOnOneScraper:
         editorstatusdata['earliesteditor'] = self.scrapersessionbegan.isoformat()
         editorstatusdata["scraperlasttouch"] = self.scraperlasttouch.isoformat()
         
-        # order by who has first session in order to determin who is the editor
+                # order by who has first session (and not all draft mode) in order to determin who is the editor
         usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
         usereditors.sort(key=lambda x: x.usersessionbegan)
         editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors ]
+        
+        # notify if there is a broadcasting editor so the windows can sort out which one's are autoloading
+        for usereditor in usereditors:  
+            for client in usereditor.userclients:
+                if client.automode == 'autotype':
+                    editorstatusdata["broadcastingeditor"] = usereditor.username
+                    
         
         editorstatusdata["nanonymouseditors"] = len(self.anonymouseditors)
         editorstatusdata["message"] = message

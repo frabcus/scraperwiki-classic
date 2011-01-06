@@ -117,7 +117,7 @@ $(document).ready(function() {
             chainpatches.shift(); 
 
         if (chainpatches.length > 0)
-            setTimeout(sendChainPatches, 800); 
+            setTimeout(sendChainPatches, 2); 
     }
 
 
@@ -250,7 +250,7 @@ $(document).ready(function() {
             indentUnit: indentUnits[scraperlanguage],
             readOnly: false, // cannot be changed once started up
             undoDepth: 200,  // defaults to 50.  wait till we get lostundo value
-            undoDelay: 2000, // 2 seconds  (default is 800)
+            undoDelay: 800, // 2 seconds  (default is 800)
             tabMode: "shift", 
             disableSpellcheck: true,
             autoMatchParens: true,
@@ -703,6 +703,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         return (seconds < 120 ? seconds.toFixed(0) + " seconds" : (seconds/60).toFixed(1) + " minutes"); 
     }
 
+
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
     { 
@@ -720,7 +721,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         if (data.message)
             writeToChat('<i>'+cgiescape(data.message)+'</i>'); 
 
-        if (boutputstatus)
+        if (boutputstatus)  // first time
         {
             stext = [ ]; 
             stext.push("Editing began " + timeago(earliesteditor, servernowtime) + " ago, last touched " + timeago(lasttouchedtime, servernowtime) + " ago"); 
@@ -762,7 +763,21 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             }
             $('#watcherstatus').html(wstatus); 
 
-            if ((automode != 'autosave') && (automode != 'autotype'))
+            if (data.broadcastingeditor == username)   // handle turning one window of many
+            {
+                if (automode == 'autosave')
+                {
+                    $('select#automode #id_autoload').attr('disabled', false); 
+                    $('select#automode').val('autoload'); // watching
+                    $('select#automode #id_autosave').attr('disabled', true); 
+                    $('select#automode #id_autotype').attr('disabled', true); 
+                    setCodeeditorBackgroundImage('url(/media/images/staff.png)')
+                    $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+                    $('.editor_controls #run').attr('disabled', true);
+                    sendjson({"command":'automode', "automode":'autoload'}); 
+                }
+            }
+            else if ((automode != 'autosave') && (automode != 'autotype'))
             {
                 setCodeeditorBackgroundImage('none')
                 $('select#automode #id_autosave').attr('disabled', false); 
@@ -822,6 +837,8 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             if (linecontent != deletestr)
             {
                 writeToChat("Lines disagree " + $.toJSON(chainpatch)); 
+                writeToChat(linecontent); 
+                writeToChat(deletestr); 
                 return; 
             }
 
@@ -853,7 +870,9 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
                 {
                     if (codeeditor.lineContent(dlinehandle) != deletions[i])
                     {
-                        writeToChat("Lines disagree " + $.toJSON(chainpatch)); 
+                        writeToChat("Lines " + i + " disagree " + $.toJSON(chainpatch)); 
+                        writeToChat(codeeditor.lineContent(dlinehandle)); 
+                        writeToChat(deletions[i]); 
                         return; 
                     }
                     dlinehandle = codeeditor.nextLine(dlinehandle); 
@@ -1506,7 +1525,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             {
                 chatpeopletimes[sechatname] = servernowtime; 
                 $('.editor_output div.tabs li.chat').addClass('improved');
-                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('improved'); }, 4100); 
+                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('improved'); }, 1500); 
             }
         }
     }

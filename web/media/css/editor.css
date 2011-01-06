@@ -124,7 +124,7 @@ span.hiddenfields { margin-left:10px; }
 .message_expander:hover {text-decoration:underline;}
 
 .editor_output div.tabs ul li.new a {color:green; font-weight:bold;}
-.editor_output div.tabs ul li.improved {background:#fffe88; }
+.editor_output div.tabs ul li.improved { background-color:#ffffd7;}
 .editor_output div.controls { padding:0 1em;}
 
 .editor_output table {width:100%; border-collapse:collapse;}
