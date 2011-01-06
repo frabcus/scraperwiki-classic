@@ -499,7 +499,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     soc.send ("\r\n")
                     if content :
                         soc.send (content)
-                    fetched  = [ None, self.getResponse(soc) ]
+                    fetched  = [ None, self.getResponse(soc), 0 ]
                     if db :
                         if self.fetchedDiffers (fetched, cached) :
                             cursor = db.cursor()
@@ -531,9 +531,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 if soc is not None :
                     soc.close()
 
-        if   fetched is not None : cacheid, page = fetched
-        elif cached  is not None : cacheid, page = cached
-        else                     : cacheid, page = '', ''
+        if   fetched is not None : cacheid, page, age = fetched
+        elif cached  is not None : cacheid, page, age = cached
+        else                     : cacheid, page, age = '', ''
 
         if cacheid is None       : cacheid = ''
 
