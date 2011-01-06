@@ -87,7 +87,7 @@ class GetInfo(APIBase):
         
         if scraper.wiki_type == 'scraper':
             if history_start_date:
-                runevents = scraper.scraper.scraperrunevent_set.filter(run_started__gt=history_start_date).order_by('-run_started')
+                runevents = scraper.scraper.scraperrunevent_set.filter(run_ended__gte=history_start_date).order_by('-run_started')
             else:
                 runevents = scraper.scraper.scraperrunevent_set.all().order_by('-run_started')[:2]
                 

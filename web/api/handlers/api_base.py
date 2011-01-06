@@ -8,6 +8,7 @@ from api.emitters import CSVEmitter, PHPEmitter, GVizEmitter
 from settings import MAX_API_ITEMS, DEFAULT_API_ITEMS
 import datetime
 import sys
+import re
 
 Emitter.register('csv', CSVEmitter, 'text/csv; charset=utf-8')
 Emitter.register('php', PHPEmitter, 'text/plain; charset=utf-8')
@@ -113,7 +114,8 @@ class APIBase(BaseHandler):
         if not date_str:
             return None
         try:
-            return datetime.datetime.strptime(date_str, '%Y-%m-%d')
+            #return datetime.datetime.strptime(date_str, '%Y-%m-%d')
+            return datetime.datetime(*map(int, re.findall("\d+", date_str)))  # should handle 2011-01-05 21:30:37
         except ValueError:
             return None
     
