@@ -251,7 +251,7 @@ class ScraperRunner(threading.Thread):
             # this is bad, unnecessary and inconsistent with information in the ScraperRunEvent and the scraper.status
         if exceptionmessage:
             alert.message_type = 'run_fail'
-        elif not completionmessage:
+        elif not completiondata:
             alert.message_type = 'run_halted'
         else:
             alert.message_type = 'run_success'
