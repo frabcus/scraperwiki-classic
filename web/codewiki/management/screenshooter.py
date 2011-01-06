@@ -13,6 +13,7 @@ class ScreenShooter(object):
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         self.shots = []
         self.renderers = {}
+        self.verbose = False
 
     def _get_renderer(self, width, height):
         try:
@@ -25,6 +26,8 @@ class ScreenShooter(object):
         
     def __take_screenshots(self):
         for shot in self.shots:
+            if self.verbose:
+                print "Taking screenshot %s" % shot['filename']
             image = self._get_renderer(shot['size'][0], shot['size'][1]).render(shot['url'])
             image.save(shot['filename'], 'png')
         sys.exit(0)
@@ -32,12 +35,13 @@ class ScreenShooter(object):
     def add_shot(self, url, filename, size):
         self.shots.append({'url': url, 'filename': filename, 'size': size})
         
-    def run(self):
+    def run(self, verbose=False):
+        self.verbose = verbose
         QTimer().singleShot(0, self.__take_screenshots)
         self.app.exec_()
 
 if __name__ == '__main__':
     s = ScreenShooter()
-    s.add_shot('http://google.com', 'google.png')
-    s.add_shot('http://amazon.com', 'amazon.png')
+    s.add_shot('http://google.com', 'google.png', (200, 200))
+    s.add_shot('http://amazon.com', 'amazon.png', (200, 200))
     s.run()

@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     def add_screenshots(self, view, options):
         if options['verbose']:
-            print "Taking screenshot of %s" % view.short_name
+            print "Adding screenshot of %s" % view.short_name
 
         for size in settings.SCREENSHOT_SIZES.keys():
             self.screenshooter.add_shot(url = view.get_screenshot_url(options['domain']), 
@@ -61,4 +61,7 @@ class Command(BaseCommand):
                 print "Error taking screenshot of %s" % obj.short_name
                 print ex
 
-        self.screenshooter.run()
+        if options['verbose']:
+            print "------ Starting Screenshooting ------"
+
+        self.screenshooter.run(options['verbose'])
