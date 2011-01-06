@@ -76,13 +76,20 @@ class APIBase(BaseHandler):
         return result
 
 
-    def get_scraper(self, request, wiki_type='scraper'):
+    def get_scraper_lsm(self, name):
         try:
-            if wiki_type == 'scraper':  # (still working around the damage caused by the scraper/view object fork!)
-                return Scraper.objects.get(short_name=request.GET.get('name'), published=True)
-            return Code.objects.get(short_name=request.GET.get('name'), published=True)
+            code = Code.unfiltered.get(short_name=name)   # unfiltered is objects, but working around the "convenient" filter that has been injected into the manager
         except:
-            raise InvalidScraperException()
+            return None, { "status":"Does not exist" }
+        
+        if code.wiki_type == "scraper":
+            code = code.scraper
+        if code.deleted:
+            return code, { "status":"deleted" }
+        if not code.published:
+            return code, { "status":"unpublished" }
+        return code, None
+        
 
     def get_limit_and_offset(self, request):
         try:

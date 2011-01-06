@@ -32,13 +32,16 @@ class GetInfo(APIBase):
         return result
 
     def value(self, request):
-        scraper = self.get_scraper(request, wiki_type='')   # returns a Code object
+        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
+        if lsm:
+            return [lsm]
         history_start_date = self.convert_date(request.GET.get('history_start_date', None))
             
         info = { }
         info['short_name']  = scraper.short_name
         info['language']    = scraper.language
         info['created']     = scraper.created_at
+        
         info['title']       = scraper.title
         info['description'] = scraper.description
         info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
@@ -92,14 +95,16 @@ class GetInfo(APIBase):
             for runevent in runevents:
                 info['runevents'].append(self.convert_run_event(runevent))
 
-        return [info,]      # a list with one element
+        return [info]      # a list with one element
 
 
 class GetRunInfo(APIBase):
     required_arguments = ['name']
     
     def value(self, request):
-        scraper = self.get_scraper(request)
+        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
+        if lsm:
+            return [lsm]
         runid = request.GET.get('runid', '-1')
         
         runevent = None
@@ -140,7 +145,7 @@ class GetRunInfo(APIBase):
         if domainsscraped:
             info['domainsscraped'] = domainsscraped
             
-        return [info,]      # a list with one element
+        return [info]      # a list with one element
 
 
 class Search(APIBase):
@@ -164,7 +169,7 @@ class GetUserInfo(APIBase):
         for user in users:  # list of users is normally 1
             info = { "username":user.username, "profilename":user.get_profile().name, "datejoined":user.date_joined }
             info['coderoles'] = { }
-            for ucrole in user.usercoderole_set.all():
+            for ucrole in user.usercoderole_set.filter(code__deleted=False, code__published=True):
                 if ucrole.role not in info['coderoles']:
                     info['coderoles'][ucrole.role] = [ ]
                 info['coderoles'][ucrole.role].append(ucrole.code.short_name)

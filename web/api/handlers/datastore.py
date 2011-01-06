@@ -3,17 +3,27 @@ from web.codewiki.models import Scraper
 import datetime
 from piston.utils import rc
 
+
 class Keys(APIBase):
     required_arguments = ['name']
 
     def value(self, request):
-        scraper = self.get_scraper(request)
+        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
+        if lsm:
+            return [lsm]
+        
+        if not scraper.published:
+            return [{"status":"unpublished"}]
         return Scraper.objects.datastore_keys(scraper_id=scraper.guid)
 
 class Search(APIBase):
     required_arguments = ['name', 'filter']
 
     def value(self, request):
+        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
+        if lsm:
+            return [lsm]
+        
         key_values = []
         kv_string = request.GET.get('filter', None)
         kv_split = kv_string.split('|') 
@@ -26,7 +36,8 @@ class Search(APIBase):
             return rc.BAD_REQUEST
         
         limit, offset = self.get_limit_and_offset(request)
-        scraper = self.get_scraper(request)
+        
+        
         return Scraper.objects.data_search(scraper_id=scraper.guid, key_values=key_values, limit=limit, offset=offset)
     
 
@@ -34,8 +45,11 @@ class Data(APIBase):
     required_arguments = ['name']
     
     def value(self, request):
+        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
+        if lsm:
+            return [lsm]
+        
         limit, offset = self.get_limit_and_offset(request)
-        scraper = self.get_scraper(request)
         return Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset)
 
 
@@ -43,15 +57,18 @@ class DataByLocation(APIBase):
     required_arguments = ['name', 'lat', 'lng']
 
     def value(self, request):
+        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
+        if lsm:
+            return [lsm]
+        
         limit, offset = self.get_limit_and_offset(request)
         try:
-            latlng = (float(request.GET.get('lat', None)), float(request.GET.get('lng', None)))            
+            latlng = (float(request.GET.get('lat', None)), float(request.GET.get('lng', None)))
         except:
             error_response = rc.BAD_REQUEST
             error_response.write(": Invalid lat/lng format")
             return error_response
 
-        scraper = self.get_scraper(request)
         return Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, latlng=latlng)
 
 
@@ -59,6 +76,10 @@ class DataByDate(APIBase):
     required_arguments = ['name', 'start_date', 'end_date']
 
     def value(self, request):
+        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
+        if lsm:
+            return [lsm]
+        
         limit, offset = self.get_limit_and_offset(request)
         start_date = self.convert_date(request.GET.get('start_date', None))
         end_date = self.convert_date(request.GET.get('end_date', None))
@@ -68,6 +89,5 @@ class DataByDate(APIBase):
             error_response.write(": Invalid date format")
             return error_response
                 
-        scraper = self.get_scraper(request)
         return Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, start_date=start_date, end_date=end_date)
 
