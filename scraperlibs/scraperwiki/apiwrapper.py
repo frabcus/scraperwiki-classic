@@ -60,12 +60,14 @@ def search(name, filterdict, limit=-1, offset=0):
 
 
 
-def getInfo(name, version=None, history_start_date=None):
+def getInfo(name, version=None, history_start_date=None, quietfields=None):
     query = {"name":name}
     if version:
         query["version"] = version
     if history_start_date:
         query["history_start_date"] = history_start_date
+    if quietfields:
+        query["quietfields"] = quietfields
     url = "%sscraper/getinfo?%s" % (apiurl, urllib.urlencode(query))
     ljson = urllib.urlopen(url).read()
     return json.loads(ljson)

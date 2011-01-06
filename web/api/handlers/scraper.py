@@ -15,6 +15,8 @@ class GetInfo(APIBase):
         try:    
             user = User.objects.get(pk=int(commitentry["userid"]))
             result['user'] = user.username
+        except ValueError: 
+            pass
         except User.DoesNotExist: 
             pass
         lsession = commitentry['description'].split('|||')
