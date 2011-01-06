@@ -12,6 +12,10 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--short_name', '-s', dest='short_name',
                         help='Short name of the scraper to run'),
+        make_option('--run_scrapers', dest='run_scrapers', action="store_true",
+                        help='Should the Scrapers be run?'),
+        make_option('--run_views', dest='run_views', action="store_true",
+                        help='Should the Views be run?'),
         make_option('--domain', '-d', dest='domain',
                         help='Domain on which the views are running'),
         make_option('--verbose', dest='verbose', action="store_true",
@@ -38,13 +42,17 @@ class Command(BaseCommand):
 
         if options['short_name']:
             views = View.unfiltered.filter(short_name=options['short_name'], published=True)
-        else:
+        elif run_views:
             views = View.unfiltered.filter(published=True)
+        else:
+            views = []
 
         if options['short_name']:
             scrapers = Scraper.unfiltered.filter(short_name=options['short_name'], published=True)
-        else:
+        elif run_scrapers:
             scrapers = Scraper.unfiltered.filter(published=True)
+        else:
+            scrapers = []
 
         for obj in chain(views, scrapers):
             try:
