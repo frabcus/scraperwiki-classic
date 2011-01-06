@@ -15,6 +15,8 @@ class GetInfo(APIBase):
         try:    
             user = User.objects.get(pk=int(commitentry["userid"]))
             result['user'] = user.username
+        except ValueError: 
+            pass
         except User.DoesNotExist: 
             pass
         lsession = commitentry['description'].split('|||')
@@ -36,6 +38,7 @@ class GetInfo(APIBase):
         if lsm:
             return [lsm]
         history_start_date = self.convert_date(request.GET.get('history_start_date', None))
+        quietfields        = request.GET.get('quietfields', "").split("|")
             
         info = { }
         info['short_name']  = scraper.short_name
@@ -50,11 +53,12 @@ class GetInfo(APIBase):
             info['license']     = scraper.scraper.license
             info['records']     = scraper.scraper.record_count
         
-        info['userroles']   = { }
-        for ucrole in scraper.usercoderole_set.all():
-            if ucrole.role not in info['userroles']:
-                info['userroles'][ucrole.role] = [ ]
-            info['userroles'][ucrole.role].append(ucrole.user.username)
+        if 'userroles' not in quietfields:
+            info['userroles']   = { }
+            for ucrole in scraper.usercoderole_set.all():
+                if ucrole.role not in info['userroles']:
+                    info['userroles'][ucrole.role] = [ ]
+                info['userroles'][ucrole.role].append(ucrole.user.username)
             
                 
         try: 
@@ -64,7 +68,8 @@ class GetInfo(APIBase):
             
         mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
         status = mercurialinterface.getstatus(scraper, rev)
-        info['code']        = status["code"]
+        if 'code' not in quietfields:
+            info['code']        = status["code"]
         
         for committag in ["currcommit", "prevcommit", "nextcommit"]:
             if committag in status:
