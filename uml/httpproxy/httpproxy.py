@@ -331,6 +331,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #  This ensures that we only add headers into requests that are going into the scraperwiki
         #  system (or a runlocal sw system)
         #
+        #  Future: make useCache a regexp to identify ULRs which should be cached. This
+        #          can subsume isSW
+        #
         (scheme, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
         isSW = netloc.endswith('scraperwiki.com')
         if netloc[:9] == '127.0.0.1':
@@ -369,98 +372,90 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             except : pass
             statusLock.release ()
 
-        ctag    = None
-        content = None
-        bytes   = 0
-        cached  = None
-        fetched = None
+        ctag     = None
+        content  = None
+        bytes    = 0
+        cached   = None
+        fetched  = None
+        ddiffers = False
 
-        #  Generate a hash on the request unless this is a request for a scraperwiki.com
-        #  page
+        #  Generate a hash on the request ...
+        #  "cbits" will be set to a 3-element list comprising the path (including
+        #  query bits), the url-encoded content if any, and the cookie string, if any.
         #
-        if not isSW :
-            #
-            #  "cbits" will be set to a 3-element list comprising the path (including
-            #  query bits), the url-encoded content if any, and the cookie string, if any.
-            #
-            cbits = None
+        cbits = None
 
-            #  GET is easy, note the path, the content is empty. Cookies will be set
-            #  later.
-            #
-            if method == "GET" :
-                cbits = [ self.path, '', '' ]
+        #  GET is easy, note the path, the content is empty. Cookies will be set
+        #  later.
+        #
+        if method == "GET" :
+            cbits = [ self.path, '', '' ]
 
-            #  For POST, check that 'content-type' is 'application/x-www-form-urlencoded'
-            #  and that we have a content length. If so then the content is read and
-            #  noted along with the path. The content will be passed on later.
-            #
-            if method == "POST" \
-                and 'content-length' in self.headers \
-                and 'content-type'   in self.headers \
-                and self.headers['content-type'] == 'application/x-www-form-urlencoded' :
+        #  For POST, check that 'content-type' is 'application/x-www-form-urlencoded'
+        #  and that we have a content length. If so then the content is read and
+        #  noted along with the path. The content will be passed on later.
+        #
+        if method == "POST" \
+            and 'content-length' in self.headers \
+            and 'content-type'   in self.headers \
+            and self.headers['content-type'] == 'application/x-www-form-urlencoded' :
     
-                clen    = int(self.headers['content-length'])
-                content = ''
-                while len(content) < clen :
-                    data = self.connection.recv (clen - len(content))
-                    if data is None or data == '' :
-                        break
-                    content += data
+            clen    = int(self.headers['content-length'])
+            content = ''
+            while len(content) < clen :
+                data = self.connection.recv (clen - len(content))
+                if data is None or data == '' :
+                    break
+                content += data
 
-                cbits = [ self.path, content, '' ]
+            cbits = [ self.path, content, '' ]
 
-            #  If we can cache then add cookies if any, and calculate a hash on
-            #  the path, content and cookies.
-            #
-            if cbits is not None :
+        #  If we can cache then add cookies if any, and calculate a hash on
+        #  the path, content and cookies.
+        #
+        if cbits is not None :
 
-                if 'cookie' in self.headers :
-                    cbits[2] = self.headers['cookie']
+            if 'cookie' in self.headers :
+                cbits[2] = self.headers['cookie']
+            ctag = hashlib.sha1(string.join (cbits, '____')).hexdigest()
 
-                ctag = hashlib.sha1(string.join (cbits, '____')).hexdigest()
-
-        #  If we have a cache tag then connect to the database. If this fails
-        #  then continue without it so the system continues to work in a
-        #  degraded way.
+        #  Connect to the database. If this fails then continue without it
+        #  so the system continues to work in a degraded way.
         #
         db = None
-        if ctag is not None :
-            try :
-                import MySQLdb
-                db      = MySQLdb.connect \
-                        (    host       = config.get (varName, 'dbhost'), 
-                             user       = config.get (varName, 'user'  ), 
-                             passwd     = config.get (varName, 'passwd'),
-                             db         = config.get (varName, 'db'    ),
-                             charset    = 'utf8'
-                        )
-            except :
-                pass
+        try :
+            import MySQLdb
+            db      = MySQLdb.connect \
+                    (    host       = config.get (varName, 'dbhost'), 
+                         user       = config.get (varName, 'user'  ), 
+                         passwd     = config.get (varName, 'passwd'),
+                         db         = config.get (varName, 'db'    ),
+                         charset    = 'utf8'
+                    )
+        except :
+            pass
 
         #  See if the page can be retrieved from the database. If so then
         #  update the last-accessed stamp to now and increment the hit count.
         #
-        if db is not None :
-            cursor    = db.cursor()
-            cursor.execute \
-                (   '''
-                    select  id,
-                            page,
-                            time_to_sec(timediff(now(), stamp))
-                    from    httpcache
-                    where   tag = %s
-                    and     substr(page,1,6) = 'HTTP/1'
-                    order   by id desc
-                    limit   1
-                    ''',
-                    [ ctag ]  #, cacheFor ]
-                )
-##                   and     time_to_sec(timediff(now(), stamp)) < %s
-            cached  = cursor.fetchone()
-            if cached is not None :
-                cursor  = db.cursor()
-                cursor.execute ('update httpcache set stamp = now(), hits = hits + 1 where id = %s', [ cached[0] ])
+        cursor    = db.cursor()
+        cursor.execute \
+            (   '''
+                select  id,
+                        page,
+                        time_to_sec(timediff(now(), stamp))
+                from    httpcache
+                where   tag = %s
+                and     substr(page,1,6) = 'HTTP/1'
+                order   by id desc
+                limit   1
+                ''',
+                [ ctag ]
+            )
+        cached  = cursor.fetchone()
+        if cached is not None :
+            cursor  = db.cursor()
+            cursor.execute ('update httpcache set stamp = now(), hits = hits + 1 where id = %s', [ cached[0] ])
 
         #  Actually fetch the page if:
         #   * There is no cache tag
@@ -469,7 +464,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #   * Page was not in the cache anyway
         #   * Cached page is too old
         #
-        if ctag is None or not useCache or cacheFor <= 0 or cached is None or cached[2] > cacheFor :
+        if isSW or not useCache or cacheFor <= 0 or cached is None or cached[2] > cacheFor :
 
             startat = time.strftime ('%Y-%m-%d %H:%M:%S')
             try :
@@ -524,6 +519,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                                 except : pass
                                 return None
                             fetched[0] = iid(cursor)
+                            ddiffers   = cached is not None
                         else :
                             fetched[0] = cached[0]
 
@@ -570,7 +566,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 mimetype        = mimetype,
                 cacheid         = cacheid,
                 last_cacheid    = cached  is not None and cached[0] or '',
-                cached          = cached  is not None
+                cached          = cached  is not None,
+                ddiffers        = ddiffers
             )
 
         self.connection.sendall (page)
