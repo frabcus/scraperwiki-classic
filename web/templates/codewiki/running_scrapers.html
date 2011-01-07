@@ -40,7 +40,9 @@ span.desc { background-color:black; color:white; width:100px; display:inline-blo
 .lasttouchdiff { color: green; font-size:75%; }
 .lasttouchdiff .lasttouch { display:none; }
 
-#monitoroutput ul#scraperentries li.running {  background-color:#afa; font-size:200%;}
+#monitoroutput ul#scraperentries li.bkrunning {  background-color:#aff; border:thick red solid;}
+#monitoroutput ul#scraperentries ul.scraperusers li.bksaving {  background-color:#f99; border:thick green solid;}
+#monitoroutput ul#scraperentries ul.scraperusers li.bktyping {  background-color:#000; }
 
 #jdatareceived { font-size:75%; overflow-x: auto; white-space:nowrap; height:10em; } 
 
@@ -228,9 +230,9 @@ $(document).ready(function() {
                     if (!$(ele).attr("id"))
                         $("#monitoroutput #draftscraperusers ul").append("<li id=\""+idchatname+"\">"+getUserfromCChatname(chatname)+"</li>"); 
                     if (running)
-                        $(ele).addClass("running").css("background", '#afa'); 
+                        $(ele).addClass("bkrunning"); 
                     else
-                        $(ele).removeClass("running").css("background", '#fff'); 
+                        $(ele).removeClass("bkrunning"); 
                 }
                 else
                     $(ele).remove(); 
@@ -256,10 +258,9 @@ $(document).ready(function() {
                     if (!$(ele).attr("id"))
                         $("#monitoroutput ul#scraperentries").append("<li id=\""+idscrapername+"\" class=\"scraper\">"+getScraperfromScrapername(scrapername)+" <ul class=\"scraperusers\"></ul></li>"); 
                     if (running)
-                        //$(ele).css("background", "#0f0"); 
-                        $(ele).addClass("running").css("background", '#afa'); 
+                        $(ele).addClass("bkrunning"); 
                     else
-                        $(ele).removeClass("running").css("background", '#fff'); 
+                        $(ele).removeClass("bkrunning"); 
 
                     for (j = 0; j < scraperusers.length; j++)
                     {
@@ -285,11 +286,19 @@ $(document).ready(function() {
             }
         }
 
-        if (jdata.message_type == "umlsavenote")
+        if (jdata.message_type == "savenote")
         {
             hidcchatname = "#SCR_" + jdata.scrapername + "_CHA_" + getIDfromCChatname(jdata.cchatname); 
-            $(hidcchatname).css("background", "#f9f"); 
-            setTimeout('$(hidcchatname).css("background", "white");', 2500);
+            $(hidcchatname).addClass("bksaving"); 
+            window.setTimeout(function() { $(hidcchatname).removeClass("bksaving") }, 2500);
+            $(hidcchatname + " .lasttouchdiff .lasttouch").text(String(servernowtime.getTime())); 
+        }
+        if (jdata.message_type == "typingnote")
+        {
+            hidcchatname = "#SCR_" + jdata.scrapername + "_CHA_" + getIDfromCChatname(jdata.cchatname); 
+            $(hidcchatname).addClass("bktyping"); 
+            window.setTimeout(function() { $(hidcchatname).removeClass("bktyping") }, 250);
+            $(hidcchatname + " .lasttouchdiff .lasttouch").text(String(servernowtime.getTime())); 
         }
 
         // update all the timeagos

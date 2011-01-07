@@ -163,7 +163,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             line = json.dumps({'message_type' : "saved", 'content' : "%s saved" % self.chatname})
             otherline = json.dumps({'message_type' : "othersaved", 'content' : "%s saved" % self.chatname})
             self.writeall(line, otherline)
-            self.factory.notifyMonitoringClientsSave(self)
+            self.factory.notifyMonitoringClientsSmallmessage(self, "savenote")
 
 
     # this signal needs to be more organized, esp to send out the the monitoring users to update the activity
@@ -177,6 +177,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                 jotherline["deletions"] = parsed_data["deletions"]
                 jotherline["insertions"] = parsed_data["insertions"]
             self.writeall(json.dumps(jline), json.dumps(jotherline))
+            self.factory.notifyMonitoringClientsSmallmessage(self, "typingnote")
             
         elif command == 'run':
             if self.processrunning:
@@ -528,9 +529,9 @@ class RunnerFactory(protocol.ServerFactory):
                 client.writejson(umlstatuschanges) 
 
     # just a signal sent for the latest event
-    def notifyMonitoringClientsSave(self, cclient):
+    def notifyMonitoringClientsSmallmessage(self, cclient, smallmessage):
         if cclient.guid:
-            umlsavenotification = {'message_type':"umlsavenote", "scrapername":cclient.scrapername, "cchatname":cclient.cchatname }
+            umlsavenotification = {'message_type':smallmessage, "scrapername":cclient.scrapername, "cchatname":cclient.cchatname, "nowtime":datetime.datetime.now().isoformat() }
             for client in self.umlmonitoringclients:
                 client.writejson(umlsavenotification) 
             
