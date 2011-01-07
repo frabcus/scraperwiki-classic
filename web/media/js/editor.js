@@ -553,7 +553,7 @@ $(document).ready(function() {
           if (data.message_type == "console") {
               writeRunOutput(data.content);     // able to divert text to the preview iframe
           } else if (data.message_type == "sources") {
-              writeToSources(data.url, "text/html", data.bytes, data.failedmessage, data.cached, data.cacheid)
+              writeToSources(data.url, data.mimetype, data.bytes, data.failedmessage, data.cached, data.cacheid)
           } else if (data.message_type == "editorstatus") {
               recordEditorStatus(data); 
           } else if (data.message_type == "chat") {
@@ -1429,7 +1429,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         modaloptions = { overlayClose: true, 
                          overlayCss: { cursor:"auto" }, 
                          containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:0, width:"90%", "text-align":"left", cursor:"auto" }, 
-                         containerId: 'simplemodal-container', 
+                         containerId: 'simplemodal-container' 
                        }; 
 
         var cachejson = cachehidlookup[cacheid]; 
