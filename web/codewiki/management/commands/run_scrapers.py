@@ -307,7 +307,7 @@ class Command(BaseCommand):
                     import time
                     time.sleep(5)
                 else:
-                    if 'verbose' in options:
+                    if options.get('verbose', False):
                         print "%s is already running" % scraper.short_name
             except Exception, e:
                 print "Error running scraper: " + scraper.short_name
