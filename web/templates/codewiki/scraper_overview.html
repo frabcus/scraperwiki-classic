@@ -153,9 +153,17 @@
     <p>
       This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
       {% ifnotequal scraper.next_run.year 9999 %}
-         (next in {{scraper.next_run|timeuntil}})
+        {% ifequal scraper.next_run|timeuntil '0 minutes' %}
+          (next run ASAP).
+        {% else %}
+          (next in {{scraper.next_run|timeuntil}}).
+        {% endifequal %} 
+      {% else %}
+        (no future run scheduled).
       {% endifnotequal %}
+      {% if user.is_staff %}<span class="staff">Next run datetime: {{scraper.next_run}}</span>{% endif %}
     </p>
+
     <p>{% sparkline scraper.scraper_sparkline_csv 'medium' %}</p>
 
     {% if user_owns_it and not scraper.published %}
