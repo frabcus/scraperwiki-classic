@@ -227,7 +227,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         if 'x-testname'  in self.headers :
-            self.m_scraperID = os.environ['SCRAPER_NAME'] = self.headers['x-testname']
+            self.m_scraperName = os.environ['SCRAPER_NAME'] = self.headers['x-testname']
 
     def setRunID (self) :
 
