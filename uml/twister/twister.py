@@ -160,8 +160,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             self.lconnectionopen(parsed_data)
             
         elif command == 'saved':
-            line = json.dumps({'message_type' : "saved", 'content' : "%s saved" % self.chatname})
-            otherline = json.dumps({'message_type' : "othersaved", 'content' : "%s saved" % self.chatname})
+            line = json.dumps({'message_type' : "saved", 'chatname' : self.chatname})
+            otherline = json.dumps({'message_type' : "othersaved", 'chatname' : self.chatname})
             self.writeall(line, otherline)
             self.factory.notifyMonitoringClientsSmallmessage(self, "savenote")
 

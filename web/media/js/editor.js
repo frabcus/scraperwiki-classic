@@ -553,16 +553,16 @@ $(document).ready(function() {
           if (data.message_type == "console") {
               writeRunOutput(data.content);     // able to divert text to the preview iframe
           } else if (data.message_type == "sources") {
-              writeToSources(data.url, data.mimetype, data.bytes, data.failedmessage, data.cached, data.cacheid)
+              writeToSources(data.url, data.mimetype, data.bytes, data.failedmessage, data.cached, data.cacheid, data.ddiffer)
           } else if (data.message_type == "editorstatus") {
               recordEditorStatus(data); 
           } else if (data.message_type == "chat") {
               writeToChat(cgiescape(data.message), data.chatname); 
           } else if (data.message_type == "saved") {
-writeToChat(cgiescape(data.content));  // should know the name of person and be italics
+              writeToChat("<i>saved</i>", data.chatname);  
           } else if (data.message_type == "othersaved") {
               reloadScraper();
-writeToChat("OOO: " + cgiescape(data.content))  // should know the name of person and be italics
+              writeToChat("<i>saved in another window</i>", data.chatname);  
           } else if (data.message_type == "data") {
               writeToData(data.content);
           } else if (data.message_type == "exception") {
@@ -1456,7 +1456,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             $.modal(cachejson["objcontent"], modaloptions); 
     }
 
-    function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid) 
+    function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, ddiffer) 
     {
         //remove items if over max
         while ($('#output_sources div.output_content').children().size() >= outputMaxItems) 
@@ -1485,6 +1485,9 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         }
         else
             smessage.push(failedmessage); 
+        if (ddiffer == "True")
+            smessage.push('<span style="background:rad"><b>BAD CACHE</b></span>'); 
+
         smessage.push(alink); 
 
         $('#output_sources div.output_content').append('<span class="output_item">' + smessage.join(" ") + '</span>')
