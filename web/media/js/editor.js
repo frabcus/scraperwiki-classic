@@ -1401,6 +1401,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             cachejson["objcontent"] = $('<pre>'+cgiescape(cachejson["content"]) + "</pre>"); 
             return cachejson; 
         }
+        // could highlight text/javascript and text/css
 
         var lineNo = 1; 
         var cpnumbers= ($('input#popuplinenumbers').attr('checked') ? $('<div id="cp_linenumbers"></div>') : undefined); 
@@ -1461,13 +1462,21 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         while ($('#output_sources div.output_content').children().size() >= outputMaxItems) 
             $('#output_sources div.output_content').children(':first').remove();
 
+        // normalize the mimetypes
+        if (lmimetype == undefined)
+            lmimetype = "text/html"; 
+        else if (lmimetype == "text/html")
+            ; 
+        else if (lmimetype == "application/json")
+            lmimetype = "text/json"; 
+
         //append to sources tab
         var smessage = [ ]; 
         var alink = '<a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a>'; 
         if ((failedmessage == undefined) || (failedmessage == ''))
         {
             smessage.push(bytes + ' bytes loaded'); 
-            if (lmimetype != "text/html")
+            if (lmimetype.substring(0, 5) != "text/") 
                 smessage.push("<b>"+lmimetype+"</b>"); 
             if (cacheid != undefined)
                 smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
