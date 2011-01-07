@@ -788,7 +788,7 @@ def proxycached(request):
     try:
         fin = urllib2.urlopen(proxyurl)
         result["mimetype"] = fin.headers.type
-        if fin.headers.maintype == 'text':
+        if fin.headers.maintype == 'text' or fin.headers.type == "application/json":
             result['content'] = convtounicode(fin.read())
         else:
             result['content'] = base64.encodestring(fin.read())

@@ -553,16 +553,16 @@ $(document).ready(function() {
           if (data.message_type == "console") {
               writeRunOutput(data.content);     // able to divert text to the preview iframe
           } else if (data.message_type == "sources") {
-              writeToSources(data.url, data.mimetype, data.bytes, data.failedmessage, data.cached, data.cacheid)
+              writeToSources(data.url, data.mimetype, data.bytes, data.failedmessage, data.cached, data.cacheid, data.ddiffer)
           } else if (data.message_type == "editorstatus") {
               recordEditorStatus(data); 
           } else if (data.message_type == "chat") {
               writeToChat(cgiescape(data.message), data.chatname); 
           } else if (data.message_type == "saved") {
-writeToChat(cgiescape(data.content));  // should know the name of person and be italics
+              writeToChat("<i>saved</i>", data.chatname);  
           } else if (data.message_type == "othersaved") {
               reloadScraper();
-writeToChat("OOO: " + cgiescape(data.content))  // should know the name of person and be italics
+              writeToChat("<i>saved in another window</i>", data.chatname);  
           } else if (data.message_type == "data") {
               writeToData(data.content);
           } else if (data.message_type == "exception") {
@@ -1401,6 +1401,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             cachejson["objcontent"] = $('<pre>'+cgiescape(cachejson["content"]) + "</pre>"); 
             return cachejson; 
         }
+        // could highlight text/javascript and text/css
 
         var lineNo = 1; 
         var cpnumbers= ($('input#popuplinenumbers').attr('checked') ? $('<div id="cp_linenumbers"></div>') : undefined); 
@@ -1455,11 +1456,19 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
             $.modal(cachejson["objcontent"], modaloptions); 
     }
 
-    function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid) 
+    function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, ddiffer) 
     {
         //remove items if over max
         while ($('#output_sources div.output_content').children().size() >= outputMaxItems) 
             $('#output_sources div.output_content').children(':first').remove();
+
+        // normalize the mimetypes
+        if (lmimetype == undefined)
+            lmimetype = "text/html"; 
+        else if (lmimetype == "text/html")
+            ; 
+        else if (lmimetype == "application/json")
+            lmimetype = "text/json"; 
 
         //append to sources tab
         var smessage = [ ]; 
@@ -1467,7 +1476,7 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         if ((failedmessage == undefined) || (failedmessage == ''))
         {
             smessage.push(bytes + ' bytes loaded'); 
-            if (lmimetype != "text/html")
+            if (lmimetype.substring(0, 5) != "text/") 
                 smessage.push("<b>"+lmimetype+"</b>"); 
             if (cacheid != undefined)
                 smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
@@ -1476,6 +1485,9 @@ writeToChat("OOO: " + cgiescape(data.content))  // should know the name of perso
         }
         else
             smessage.push(failedmessage); 
+        if (ddiffer == "True")
+            smessage.push('<span style="background:rad"><b>BAD CACHE</b></span>'); 
+
         smessage.push(alink); 
 
         $('#output_sources div.output_content').append('<span class="output_item">' + smessage.join(" ") + '</span>')
