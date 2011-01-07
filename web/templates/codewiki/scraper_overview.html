@@ -191,6 +191,8 @@
     {% endif %}
 
     {% if user.is_staff %}
+    <p class="staff"><b>Go to scraper on <a href="/admin/codewiki/scraper/{{scraper.pk}}/">admin page</a></b></p>
+
     <form action="{% url scraper_run_scraper scraper.short_name %}" method="post" class="staff">
         <input type="hidden" name="run_scraper" value="1" />
         <input type="submit" id="btnRunScraper" class="danger" value="Run this scraper?" />
