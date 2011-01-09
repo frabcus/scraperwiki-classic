@@ -693,10 +693,9 @@ $(document).ready(function() {
             $('select#automode').hide(); 
     }
 
-    function parseISOdate(sdatetime)
-    {
-        return new Date(sdatetime.replace(/-|T|\.\d*/g, " ")); 
-    }
+    function parseISOdate(sdatetime) // used to try and parse an ISOdate, but it's highly irregular and IE can't do it
+        {  return new Date(parseInt(sdatetime)); }
+
     function timeago(ctime, servernowtime)
     {
         var seconds = (servernowtime.getTime() - ctime.getTime())/1000; 
