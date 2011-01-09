@@ -651,11 +651,9 @@ $(document).ready(function() {
         $('.editor_controls #run').val('Sending');
         sendjson(data); 
 
-        // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
-        // means we can have simultaneous running for staff overview
-
-        // new auto-save every time 
-        if (($('select#automode option:selected').val() == 'autosave') && pageIsDirty)
+        // do a save to the system every time we run (this would better be done via twisted at some point)
+        var automode = $('select#automode option:selected').val(); 
+        if (pageIsDirty && ((automode == 'autosave') || (automode == 'autotype')))
             saveScraper(); 
     } 
 
