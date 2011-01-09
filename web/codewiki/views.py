@@ -696,9 +696,6 @@ def htmlview(request, short_name):
 
     return HttpResponse(view.saved_code())
 
-def commit_event(request, event_id):
-    event = get_object_or_404(models.CodeCommitEvent, id=event_id)
-    return render_to_response('codewiki/commit_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def choose_template(request, wiki_type):
 
@@ -822,11 +819,10 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourc
                 code_object.relations.add(scraper)
 
     # save code and commit code through the mercurialinterface
-    lcommitmessage = earliesteditor and ("%s|||%s" % (earliesteditor, commitmessage)) or commitmessage
     mercurialinterface = vc.MercurialInterface(code_object.get_repo_path())
-    mercurialinterface.save(code_object, code_text)
+    mercurialinterface.savecode(code_object, code_text)  # creates directory 
+    lcommitmessage = earliesteditor and ("%s|||%s" % (earliesteditor, commitmessage)) or commitmessage
     rev = mercurialinterface.commit(code_object, message=lcommitmessage, user=user)
-    mercurialinterface.updatecommitalertsrev(rev)
 
     # Add user roles
     if code_object.owner():

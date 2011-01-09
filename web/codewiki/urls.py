@@ -32,7 +32,6 @@ urlpatterns = patterns('',
     url(r'^scrapers/scraper_killrunning/(?P<run_id>[\w_\-\.]+)(?:/(?P<event_id>[\w_\-]+))?$',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),
         
-    url(r'^scrapers/commit/(?P<event_id>\d+)/$',          views.commit_event,           name='commit_event'),
     url(r'^scrapers/schedule-scraper/(?P<short_name>[\w_\-]+)/$', 
                                                           views.scraper_schedule_scraper,name='scraper_schedule_scraper'),
     url(r'^(?P<wiki_type>scraper|view)s/delete-scraper/(?P<short_name>[\w_\-]+)/$', 

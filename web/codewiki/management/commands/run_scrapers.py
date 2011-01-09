@@ -120,6 +120,7 @@ class ScraperRunner(threading.Thread):
         exceptionmessage = [ ]
         completiondata = None
         outputmessage = [ ]
+        tailmessage = [ ]
         domainscrapes = { }  # domain: [domain, pages, bytes] 
         
         temptailmessage = "\n\n[further output lines suppressed]\n"
@@ -141,7 +142,7 @@ class ScraperRunner(threading.Thread):
                     event.output = "%s\nEXECUTIONSTATUS: uml=%s runid=%s\n" % (event.output, data.get("uml"), data.get("runID"))
                 elif content == "runcompleted":
                     completiondata = data
-                    event.output = "%s\nEXECUTIONSTATUS: seconds_elapsed=%s CPU_seconds_used=%s\n" % (event.output, data.get("elapsed_seconds"), data.get("CPU_seconds")) 
+                    tailmessage.append("\nEXECUTIONSTATUS: seconds_elapsed=%s CPU_seconds_used=%s\n" % (data.get("elapsed_seconds"), data.get("CPU_seconds"))) 
                 event.save()
                 
             elif message_type == "sources":
@@ -205,10 +206,9 @@ class ScraperRunner(threading.Thread):
                 outputtail.append(outputmessage.pop())
             outputtail.reverse()
                 
-            midmessage = ''
             if outputmessage:
-                midmessage = "\n    [%d lines, %d characters omitted]\n\n" % (len(outputmessage), sum(map(len, outputmessage)))
-            event.output = "%s%s%s" % (event.output[:-len(temptailmessage)], midmessage, "".join(outputtail))
+                tailmessage.insert(0, "\n    [%d lines, %d characters omitted]\n\n" % (len(outputmessage), sum(map(len, outputmessage))))
+            event.output = "%s%s%s" % (event.output[:-len(temptailmessage)], "\n".join(tailmessage), "".join(outputtail))
             
 
         if exceptionmessage:

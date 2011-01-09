@@ -709,9 +709,12 @@ $(document).ready(function() {
     { 
         var boutputstatus = (lasttouchedtime == undefined); 
 
-        servernowtime = parseISOdate(data.nowtime); 
-        earliesteditor = parseISOdate(data.earliesteditor); 
-        lasttouchedtime = parseISOdate(data.scraperlasttouch); 
+        if (data.nowtime)
+            servernowtime = parseISOdate(data.nowtime); 
+        if (data.earliesteditor)
+            earliesteditor = parseISOdate(data.earliesteditor); 
+        if (data.scraperlasttouch)
+            lasttouchedtime = parseISOdate(data.scraperlasttouch); 
 
         editingusername = (data.loggedineditors ? data.loggedineditors[0] : '');  // the first in the list is the primary editor
         loggedineditors = data.loggedineditors;  // this is a list

@@ -147,11 +147,14 @@ class Code(models.Model):
         return vc.MercurialInterface(self.get_repo_path()).getstatus(self, revision)["code"]
 
     def get_repo_path(self):
+        if settings.SPLITSCRAPERS_DIR:
+            return os.path.join(settings.SPLITSCRAPERS_DIR, self.short_name)
+        
         result = None
         if self.wiki_type == 'view':
             result = settings.VMODULES_DIR
         else:
-            result = settings.SMODULES_DIR        
+            result = settings.SMODULES_DIR
         return result
 
     @models.permalink
@@ -237,7 +240,7 @@ class UserCodeEditing(models.Model):
         app_label = 'codewiki'
         
 
-# this also out of date event and should be abolished
+# This should be deleted
 class CodeCommitEvent(models.Model):
     revision = models.IntegerField()
 

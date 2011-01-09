@@ -1,7 +1,6 @@
 import sys
 import difflib
 import re
-sys.path.append('../../web')
 
 import os
 from django.conf import settings
@@ -19,19 +18,36 @@ import mercurial.hg
 # (although can't be done for repo.commit as this is in hgext.mq, which I can't find)
 # mercurial.commands module is mostly a wrapper on the functionality of the repo object
 
+# this class only used in codewiki/views.py and api/handlers/scraper.py
+# currently in transition from one repo all scrapers to one repo per scraper via the uml/split-up-mercurial-repository script
 class MercurialInterface:
     def __init__(self, repo_path):
         self.ui = mercurial.ui.ui()
         self.ui.setconfig('ui', 'interactive', 'off')
         self.ui.setconfig('ui', 'verbose', 'on')
-        self.repopath = os.path.normpath(os.path.abspath(repo_path))  # probably to handle windows values
+        self.repopath = os.path.normpath(os.path.abspath(repo_path))  # (hg possibly over-sensitive to back-slashes)
+        
+            # !!! infer from the directory path if we are using the split scraper (every scraper in its own repo) technique
+        self.usesplitpath = repo_path.find("split") >= 0
         
         # danger with member copy of repo as not sure if it updates with commits
         # (definitely doesn't update if commit is done against a second repo object)
-        self.repo = mercurial.hg.repository(self.ui, self.repopath)    
+        
+        if self.usesplitpath:
+            self.repo = mercurial.hg.repository(self.ui, self.repopath, create=not os.path.exists(self.repopath))    
+        else:
+            self.repo = mercurial.hg.repository(self.ui, self.repopath)    
     
     
-    def save(self, scraper, code):
+    def savecode(self, scraper, code):
+        if self.usesplitpath:
+            assert os.path.exists(self.repopath)
+            scraperpath = os.path.join(self.repopath, "code")
+            fout = codecs.open(scraperpath, mode='w', encoding='utf-8')
+            fout.write(code)
+            fout.close()
+            return
+        
         scraperfolder = os.path.join(self.repopath, scraper.short_name)
         scraperfile = os.path.join(scraper.short_name, "__init__.py")
         scraperpath = os.path.join(scraperfolder, "__init__.py")
@@ -46,6 +62,20 @@ class MercurialInterface:
     
     # need to dig into the commit command to find the rev
     def commit(self, scraper, message="changed", user="unknown"): 
+        if self.usesplitpath:
+            assert os.path.exists(os.path.join(self.repopath, "code"))
+            if "code" not in self.repo.dirstate:
+                self.repo.add(["code"])   
+            
+            if message is None:
+                message = "changed"
+    
+            node = self.repo.commit(message, str(user.pk))  # (maybe we should be committing proper usernames here so it's comprehensible outside)
+            if not node:
+                return None
+            return self.repo.changelog.rev(node)
+        
+        
         scraperfile = os.path.join(scraper.short_name, "__init__.py")
         scraperpath = os.path.join(self.repopath, scraper.short_name, "__init__.py")
         
@@ -55,84 +85,11 @@ class MercurialInterface:
         
         if message is None:
             message = "changed"
-
+        
         node = self.repo.commit(message, str(user.pk))  
         if not node:
             return None
         return self.repo.changelog.rev(node)
-
-    
-    # this function possibly in wrong place (which makes the imports awkward)
-    def updatecommitalertsrev(self, rev):
-        from codewiki.models import Code, CodeCommitEvent
-        from frontend.models import Alerts
-        from django.contrib.auth.models import User
-
-        
-        # discard all alerts and commit events for this revision (made complex due to the indirection through CodeCommitEvent for a integer)
-        for codecommitevent in CodeCommitEvent.objects.filter(revision=rev):
-            for alert in Alerts.objects.filter(event_type=codecommitevent.content_type(), event_id=codecommitevent.id):
-                alert.delete()
-            codecommitevent.delete()
-        
-        warnings = [ ]
-        
-        ctx = self.repo[rev]
-        commitentry = self.getctxrevisionsummary(ctx)
-        
-        user = None
-        try:    
-            user = User.objects.get(id=int(commitentry["userid"]))
-        except: 
-            warnings.append("Unmatched userid: %s" % commitentry.get("userid"))
-        
-        # there should actually be only one file in this batch, if everything is going right
-        if len(ctx.files()) != 1:
-            warnings.append("More than one file in rev: %s" % ctx.files())
-        for scraperfile in ctx.files():
-            mscraper = re.match("(.*?)/__init__.py", scraperfile)
-            if not mscraper:
-                warnings.append("unrecognized scraperfile: %s" % scraperfile)
-                continue
-            scrapers = Code.objects.filter(short_name=mscraper.group(1))
-            if len(scrapers) != 1:
-                warnings.append("scraperfile unmatched to scraper: %s" % scraperfile)
-                continue
-            scraper = scrapers[0]
-    
-            # yes, the allocation of information (eg the date) between the Alert and the CodeCommitEvent looks in fact arbitrary.  
-            codecommitevent = CodeCommitEvent(revision=rev)
-            codecommitevent.save()
-            
-            # extract earliesteditor from commit message
-            description = commitentry["description"]
-            earliesteditor = ''
-            mearliesteditor = re.match("(.+?)\|\|\|", commitentry["description"])
-            if mearliesteditor:
-                earliesteditor = mearliesteditor.group(1)
-                description = description[mearliesteditor.end(0):]
-            
-            alert = Alerts(content_object=scraper, message_type='commit', message_value=description, historicalgroup=earliesteditor, 
-                           user=user, event_object=codecommitevent, datetime=commitentry["date"])
-            alert.save()
-        return warnings
-    
-    
-    # delete and rebuild all the CodeCommitEvents and related alerts 
-    # to make migration easy (and question whether these objects really need to exist)
-    def updateallcommitalerts(self):
-        from codewiki.models import Scraper, CodeCommitEvent
-        from frontend.models import Alerts
-        from django.contrib.auth.models import User
-        
-        # remove all alerts and commit events 
-        Alerts.objects.filter(message_type='commit').delete()
-        CodeCommitEvent.objects.all().delete()
-        
-        for rev in self.repo:
-            warnings = self.updatecommitalertsrev(rev)
-            if warnings:
-                print "updateallcommitalerts warnings", warnings
 
     
     def getctxrevisionsummary(self, ctx):
@@ -147,6 +104,7 @@ class MercurialInterface:
         return data
             
     
+            # this function is used externally when getting a second version to diff against
     def getreversion(self, rev):
         ctx = self.repo[rev]
         result = self.getctxrevisionsummary(ctx)
@@ -158,16 +116,39 @@ class MercurialInterface:
         
 	            
     def getcommitlog(self, scraper):
-        scraperfile = os.path.join(scraper.short_name, "__init__.py")
-        result = [ ]
+        if self.usesplitpath:
+            result = [ ]
+            for rev in self.repo:
+                ctx = self.repo[rev]
+                if "code" in ctx.files():   # could get both if changes in description
+                    result.append(self.getctxrevisionsummary(ctx))
+            return result
         
+        # old version
+        result = [ ]
+        scraperfile = os.path.join(scraper.short_name, "__init__.py")
         for rev in self.repo:
             ctx = self.repo[rev]
             if scraperfile in ctx.files():
                 result.append(self.getctxrevisionsummary(ctx))
         return result
-            
+    
     def getfilestatus(self, scraper):
+        if self.usesplitpath:
+            status = { }
+            scraperpath = os.path.join(self.repopath, "code")
+            
+            lmtime = time.localtime(os.stat(scraperpath).st_mtime)
+            status["filemodifieddate"] = datetime.datetime(*lmtime[:7])
+            modified, added, removed, deleted, unknown, ignored, clean = self.repo.status()
+            
+            #print "sssss", (modified, added, removed, deleted, unknown, ignored, clean)
+            status["ismodified"] = ("code" in modified)
+            status["isadded"] = ("code" in added)
+            return status
+        
+        
+        # old version
         status = { }
         scraperfile = os.path.join(scraper.short_name, "__init__.py")
         scraperpath = os.path.join(self.repopath, scraperfile)
@@ -185,9 +166,13 @@ class MercurialInterface:
 
     def getstatus(self, scraper, rev=None):
         status = { }
-        scraperfile = os.path.join(scraper.short_name, "__init__.py")
-        scraperpath = os.path.join(self.repopath, scraperfile)
-
+        if self.usesplitpath:
+            scraperfile = "code"
+            scraperpath = os.path.join(self.repopath, "code")
+        else:
+            scraperfile = os.path.join(scraper.short_name, "__init__.py")
+            scraperpath = os.path.join(self.repopath, scraperfile)
+        
         # adjacent commit informations
         if rev != None:
             commitlog = self.getcommitlog(scraper)
