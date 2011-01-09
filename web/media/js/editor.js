@@ -310,8 +310,8 @@ $(document).ready(function() {
     }
 
     function setupKeygrabs(){
-        addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+s', saveScraper); 
+        addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+d', viewDiff);
         addHotkey('ctrl+p', popupPreview); 
     };
@@ -344,7 +344,8 @@ $(document).ready(function() {
             return true; 
         })
 
-        $('#id_urlquery').bind('keypress', function(eventObject) {
+        $('#id_urlquery').bind('keypress', function(eventObject) 
+        {
             var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
             var target = eventObject.target.tagName.toLowerCase();
             if (key === 13 && target === 'input') {
@@ -628,6 +629,9 @@ $(document).ready(function() {
     //send code request run
     function sendCode() 
     {
+        if ($('.editor_controls #run').attr('disabled'))
+            return; 
+
         // protect not-ready case
         if ((conn == undefined) || (conn.readyState != conn.READY_STATE_OPEN)) 
         { 
@@ -676,7 +680,7 @@ $(document).ready(function() {
             $('select#automode #id_autotype').attr('disabled', true); 
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
             $('.editor_controls #run').attr('disabled', false);
-            $('.editor_controls #preview').attr('disabled', true);
+            $('.editor_controls #preview').attr('disabled', false);
         }
         writeToChat('Changed automode: ' + automode); 
         sendjson({"command":'automode', "automode":automode}); 
@@ -774,6 +778,7 @@ $(document).ready(function() {
                     setCodeeditorBackgroundImage('url(/media/images/staff.png)')
                     $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                     $('.editor_controls #run').attr('disabled', true);
+                    $('.editor_controls #preview').attr('disabled', true);
                     sendjson({"command":'automode', "automode":'autoload'}); 
                 }
             }
@@ -784,6 +789,7 @@ $(document).ready(function() {
                 $('select#automode #id_autotype').attr('disabled', false); 
                 $('select#automode').val('autosave'); // editing
                 $('.editor_controls #run').attr('disabled', false);
+                $('.editor_controls #preview').attr('disabled', false);
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
                 sendjson({"command":'automode', "automode":'autosave'}); 
             }
@@ -802,6 +808,7 @@ $(document).ready(function() {
                 setCodeeditorBackgroundImage('url(/media/images/staff.png)')
                 $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                 $('.editor_controls #run').attr('disabled', true);
+                $('.editor_controls #preview').attr('disabled', true);
                 sendjson({"command":'automode', "automode":'autoload'}); 
             }
         }
@@ -819,6 +826,7 @@ $(document).ready(function() {
                 setCodeeditorBackgroundImage('none')
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
                 $('.editor_controls #run').attr('disabled', false);
+                $('.editor_controls #preview').attr('disabled', false);
                 sendjson({"command":'automode', "automode":'autosave'}); 
             }
         }
@@ -1134,6 +1142,9 @@ $(document).ready(function() {
 
     function popupPreview() 
     {
+        if ($('.editor_controls #preview').attr('disabled'))
+            return; 
+
         var viewurl = viewrunurl; 
         var urlquery = ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
         var viewurl = viewrunurl; 
@@ -1167,6 +1178,9 @@ $(document).ready(function() {
     //Save
     function saveScraper()
     {
+        if ($('.editor_controls #btnCommitPopup').attr('disabled'))
+            return; 
+
         var bSuccess = false;
 
         //if saving then check if the title is set (must be if guid is set)
@@ -1353,7 +1367,8 @@ $(document).ready(function() {
         
         oConsoleItem.html(escsMessage); 
 
-        if(sLongMessage != undefined) {
+        if(sLongMessage != undefined) 
+        {
             oMoreLink = $('<a href="#"></a>');
             oMoreLink.addClass('expand_link');
             oMoreLink.text(sExpand)
