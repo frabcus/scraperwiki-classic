@@ -24,7 +24,7 @@ class MercurialInterface:
     def __init__(self, repo_path):
         self.ui = mercurial.ui.ui()
         self.ui.setconfig('ui', 'interactive', 'off')
-        self.ui.setconfig('ui', 'verbose', 'on')
+        self.ui.setconfig('ui', 'verbose', 'off')
         self.repopath = os.path.normpath(os.path.abspath(repo_path))  # (hg possibly over-sensitive to back-slashes)
         
             # !!! infer from the directory path if we are using the split scraper (every scraper in its own repo) technique
