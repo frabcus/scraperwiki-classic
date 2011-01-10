@@ -68,12 +68,8 @@ class Scraper (code.Code):
         return int(Scraper.objects.item_count(self.guid))
 
 
-    # update scraper meta data (lines of code etc)    
+            # It would be good to kill this function off and move its functionality into being properties of the database
     def update_meta(self):
-
-        # runs Code.update_meta
-        super(Scraper, self).update_meta()
-
         #update line counts etc
         self.record_count = self.count_records()
         self.has_geo = bool(Scraper.objects.has_geo(self.guid))

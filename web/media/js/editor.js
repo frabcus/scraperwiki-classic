@@ -709,7 +709,7 @@ $(document).ready(function() {
     function recordEditorStatus(data) 
     { 
         var boutputstatus = (lasttouchedtime == undefined); 
-
+        //console.log($.toJSON(data)); 
         if (data.nowtime)
             servernowtime = parseISOdate(data.nowtime); 
         if (data.earliesteditor)
@@ -1203,15 +1203,16 @@ $(document).ready(function() {
 
         atsavedundo = codeeditor.historySize().undo;  // update only when success
         var sdata = {
-                        title : $('#id_title').val(),
-                        commit_message: "cccommit",   // could get some use out of this if we wanted to
-                        sourcescraper: $('#sourcescraper').val(),
-                        wiki_type: wiki_type,
-                        code : codeeditor.getCode(),
-                        earliesteditor : earliesteditor.toUTCString(), // goes into the comment of the commit to help batch sessions
-                        action : 'commit'
+                        title           : $('#id_title').val(),
+                        commit_message  : "cccommit",   // could get some use out of this if we wanted to
+                        sourcescraper   : $('#sourcescraper').val(),
+                        wiki_type       : wiki_type,
+                        code            : codeeditor.getCode(),
+                        earliesteditor  : earliesteditor.toUTCString(), // goes into the comment of the commit to help batch sessions
+                        action          : 'commit'
                     }
-        $.ajax({ type : 'POST', contentType : "application/json", dataType: "html", data: sdata, success: function(response)
+
+        $.ajax({ type:'POST', contentType:"application/json", dataType:"html", data:sdata, success:function(response)
         {
             res = $.evalJSON(response);
             if (res.status == 'Failed')
@@ -1233,9 +1234,9 @@ $(document).ready(function() {
             {
                 $('.editor_controls #btnCommitPopup').val('Saved').addClass('darkness'); 
                 window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
-                //showFeedbackMessage("Your code has been saved.");
+writeToChat("Saved rev number: " + res.rev); 
                 if (bConnected)
-                    sendjson({"command":'saved'}); 
+                    sendjson({"command":'saved', "rev":res.rev}); 
             }
             ChangeInEditor("saved"); 
         },

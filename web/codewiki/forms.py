@@ -11,6 +11,7 @@ LICENSE_CHOICES = (
     ('Unknown', 'Unknown'),
 )
 
+    # this form seems like an obstruction as well - there's nothing in it
 class editorForm(forms.ModelForm):
 
     class Meta:
@@ -29,7 +30,7 @@ class editorForm(forms.ModelForm):
 
 
 class CodeTagForm (forms.Form):
-        tags = forms.CharField(required=False, label="Add new tags (comma separated)")
+    tags = forms.CharField(required=False, label="Add new tags (comma separated)")
 
 class ScraperAdministrationForm (forms.ModelForm):
     run_interval = forms.ChoiceField(required=True, label="Re-run this scraper", choices = SCHEDULE_OPTIONS)

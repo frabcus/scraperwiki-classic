@@ -24,7 +24,7 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?{{settings.REVISION}}"></script>
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>    
 
-    {# popup preview of cached HTML #}
+    {# for the popup preview of cached HTML #}
         <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/highlight.js" type="text/javascript"></script> 
         <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/stringstream.js" type="text/javascript"></script> 
         <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/tokenize.js" type="text/javascript"></script> 
@@ -50,6 +50,7 @@
             <input type="hidden" id="userrealname" value="{{ user.get_profile.name }}"/>
             <input type="hidden" id="isstaff" value="{% if user.is_staff %}yes{% endif %}"/>
             <input type="hidden" id="scraperlanguage" value="{{ scraper.language|lower }}"/>
+            <input type="hidden" id="rev" value="{{rev}}"/>
             <input type="hidden" id="codemirror_url" value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
             <input type="hidden" id="viewrunurl" value="{% if scraper.short_name %}{% url view_fullscreen scraper.short_name %}{% endif %}"/>
             {{form.wiki_type}}
@@ -58,9 +59,11 @@
             <div id="divDraftSavedWarning" class="draft_warning" style="display:none;">
                 A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next={% url handle_session_draft 'save' %}">sign in or create an account</a>.
             </div>
-            <div class="draft_warning"{% if not has_draft %} style="display:none;"{% endif %}>
-                Warning: this scraper has not been saved or committed. <a href="{% url login %}?next={% url handle_session_draft 'save' %}">Sign in or create an account</a> to save it permanently, or <a href="{% url delete_draft %}">discard changes</a>
-            </div>
+            {% ifequal rev 'draft' %}
+                <div class="draft_warning">
+                    Warning: this scraper has not been saved or committed. <a href="{% url login %}?next={% url handle_session_draft 'save' %}">Sign in or create an account</a> to save it permanently, or <a href="{% url delete_draft %}">discard changes</a>
+                </div>
+            {% endifequal %}
 
             {# Header #}
             <div class="editor_header">

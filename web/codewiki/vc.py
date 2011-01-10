@@ -203,7 +203,7 @@ class MercurialInterface:
             fin = codecs.open(scraperpath, mode='rU', encoding='utf-8')
             status["code"] = fin.read()
             fin.close()
-            status.update(self.getfilestatus(scraper))
+            status.update(self.getfilestatus(scraper)) # keys: filemodifieddate, isadded, ismodified
         
         status['scraperfile'] = scraperfile
         return status

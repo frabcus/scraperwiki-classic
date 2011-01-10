@@ -167,9 +167,7 @@ class Code(models.Model):
 
     # update scraper meta data (lines of code etc)    
     def update_meta(self):
-        # if publishing for the first time set the first published date
-        if self.published and self.first_published_at == None:
-            self.first_published_at = datetime.datetime.today()
+        pass
 
     # this is just to handle the general pointer put into Alerts
     def content_type(self):
