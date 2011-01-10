@@ -18,7 +18,6 @@ from django.conf import settings
 from django.utils.encoding import smart_str
 
 from codewiki import models
-from codewiki import forms
 from api.emitters import CSVEmitter 
 import vc
 import frontend
@@ -35,8 +34,11 @@ import csv, types
 import datetime
 import gdata.docs.service
 
+
 try:                import json
 except ImportError: import simplejson as json
+
+
 
 
 # duplicated function
@@ -209,23 +211,22 @@ def handle_session_draft(request, action):
 
 
 # called from the edit function
-def saveeditedscraper(request, lscraper):
-    form = forms.editorForm(request.POST, instance=lscraper)
-    
-    #validate
-    if not form.is_valid() or 'action' not in request.POST:
-        return HttpResponse(json.dumps({'status' : 'Failed'}))
+def saveeditedscraper(request, scraper):
+    if 'action' not in request.POST:
+        return HttpResponse(json.dumps({'status' : 'Failed', 'message':"action not in POST"}))
 
     action = request.POST.get('action').lower()
     # assert action == 'commit'
 
-    # recover the altered object from the form, without saving it to django database - http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method
-    scraper = form.save(commit=False)
+    scraper.title = request.POST.get('title', '')
+    scraper.wiki_type = request.POST.get('wiki_type', '')
+    if not scraper.title or scraper.title.lower() == 'untitled':
+        return HttpResponse(json.dumps({'status' : 'Failed', 'message':"title is blank or untitled"}))
+    
     if not scraper.guid:
         scraper.buildfromfirsttitle()
 
-    # Add some more fields to the form
-    code = form.cleaned_data['code']
+    code = request.POST.get('code', "")
     commitmessage = request.POST.get('commit_message', "")
     sourcescraper = request.POST.get('sourcescraper', "")
     
@@ -264,7 +265,6 @@ def saveeditedscraper(request, lscraper):
 
 
 
-#Editor form
 blankstartupcode = { 'scraper' : { 'python': "# Blank Python\n", 
                                     'php':   "<?php\n# Blank PHP\n?>\n", 
                                     'ruby':  "# Blank Ruby\n" 
@@ -339,21 +339,15 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     # if it's a post-back (save) then execute that
     if request.POST:
         return saveeditedscraper(request, scraper)
-    else:
-        # Else build the page
-        form = forms.editorForm(instance=scraper)
-        form.fields['code'].initial = code
-
-        tutorial_scrapers = models.Code.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
-
+    
     #if a source scraper has been set, then pass it to the page
     source_scraper = ''
     if scraper.wiki_type == 'view' and request.GET.get('sourcescraper', False):
        source_scraper =  request.GET.get('sourcescraper', False)
 
     context = {}
-    context['form']             = form
     context['scraper']          = scraper
+    context['code']             = code
     context['user']             = request.user
     context['source_scraper']   = source_scraper
     context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())

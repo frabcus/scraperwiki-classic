@@ -40,7 +40,6 @@
 </head>
 
 <body>
-    <form method="POST" accept-charset="utf-8" id="editor" action="">
         <fieldset>
             {# Hidden inputs for passing to js #}
             <input type="hidden" id="short_name" value="{{ scraper.short_name }}"/>
@@ -53,7 +52,7 @@
             <input type="hidden" id="rev" value="{{rev}}"/>
             <input type="hidden" id="codemirror_url" value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
             <input type="hidden" id="viewrunurl" value="{% if scraper.short_name %}{% url view_fullscreen scraper.short_name %}{% endif %}"/>
-            {{form.wiki_type}}
+            <input type="hidden" id="id_wiki_type" value="{{scraper.wiki_type}}" name="wiki_type"/>
         </fieldset>
         <div class="editor">
             <div id="divDraftSavedWarning" class="draft_warning" style="display:none;">
@@ -71,7 +70,7 @@
                     <a id="aCloseEditor" href="{% url frontpage %}" title="Home">
                         <img src="{{ MEDIA_URL }}images/editor_logo.png" width="39" height="25"/>
                     </a>
-                    {{ form.title }}
+                    <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
                     <div class="page_tabs small">
                         {% if scraper.id %}
                             {% include 'codewiki/includes/tabs.html' %}
@@ -86,7 +85,7 @@
 
             {# Code editor #}
             <div class="editor_code" id="codeeditordiv">
-                {{ form.code }}
+               <textarea id="id_code" style="width:90%" rows="10" cols="80" name="code">{{code}}</textarea>
             </div>
 
             {# Controls #}

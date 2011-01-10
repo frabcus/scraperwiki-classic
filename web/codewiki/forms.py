@@ -11,24 +11,6 @@ LICENSE_CHOICES = (
     ('Unknown', 'Unknown'),
 )
 
-    # this form seems like an obstruction as well - there's nothing in it
-class editorForm(forms.ModelForm):
-
-    class Meta:
-        model = Code
-        fields = ('title', 'code', 'wiki_type')
-        
-    title =     forms.CharField(widget=forms.TextInput(attrs={'title' : 'Untitled'}), label="Title*",)
-    wiki_type = forms.ChoiceField(choices=code.WIKI_TYPES, widget=forms.HiddenInput())    
-    code =      forms.CharField(widget=widgets.Textarea(attrs={'cols':'80', 'rows':'10', 'style':'width:90%'}))
-    
-    def clean_title(self):
-        title = self.cleaned_data['title']
-        if not title or title == '' or title.lower() == 'untitled':
-            raise forms.ValidationError("Scraper needs a title")
-        return title
-
-
 class CodeTagForm (forms.Form):
     tags = forms.CharField(required=False, label="Add new tags (comma separated)")
 
