@@ -202,7 +202,7 @@ class Database :
         return [ True, res ]
 
 
-    def postcodeToLatLng (scraperID, postcode) :   
+    def postcodeToLatLng (self, scraperID, postcode) :   
 
         postcode = postcode.upper().replace(' ', '')
         cursor   = self.execute ('select x(location), y(location) from `postcode_lookup` where `postcode` = %s', [ postcode ])
@@ -212,7 +212,7 @@ class Database :
         except :
             return [ False, 'Postcode not found' ]
 
-    def retrieve (scraperID, matchrecord) :   
+    def retrieve (self, scraperID, matchrecord) :   
 
         """
         Retrieve matched values ignoring hashcode technology
