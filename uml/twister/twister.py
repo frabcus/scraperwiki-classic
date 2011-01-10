@@ -564,9 +564,12 @@ class RunnerFactory(protocol.ServerFactory):
             self.guidclientmap[client.guid].AddClient(client)
             self.guidclientmap[client.guid].notifyEditorClients(message)
 
-        else:   # draft scraper type
-            editorstatusdata = {'message_type':"editorstatus", "loggedineditors":[], "nanonymouseditors":1, 
-                                "chatname":client.chatname, "message":"Draft scraper connection", "lasttouch":jstime(client.clientlasttouch) } 
+        
+        else:   # draft scraper type (hardcode the output that would have gone with notifyEditorClients
+            editorstatusdata = {'message_type':"editorstatus", "loggedineditors":[], "nanonymouseditors":1, "chatname":client.chatname, "message":"Draft scraper connection" }
+            editorstatusdata["nowtime"] = jstime(datetime.datetime.now())
+            editorstatusdata['earliesteditor'] = jstime(client.clientsessionbegan)
+            editorstatusdata["scraperlasttouch"] = jstime(client.clientlasttouch)
             
             client.writejson(editorstatusdata); 
             self.draftscraperclients.append(client)
