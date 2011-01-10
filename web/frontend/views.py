@@ -222,10 +222,14 @@ def search(request, q=""):
         form = SearchForm(initial={'q': q})
         q = q.strip()
 
+        tags = Tag.objects.filter(name__icontains=q)
         scrapers = Code.objects.search(q)
+        num_results = tags.count() + scrapers.count()
         return render_to_response('frontend/search_results.html',
             {
                 'scrapers': scrapers,
+                'tags': tags,
+                'num_results': num_results,
                 'form': form,
                 'query': q,},
             context_instance=RequestContext(request))
