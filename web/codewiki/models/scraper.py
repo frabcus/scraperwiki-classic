@@ -175,7 +175,7 @@ class ScraperRunEvent(models.Model):
     records_produced  = models.IntegerField(default=0)
     pages_scraped     = models.IntegerField(default=0)
     output            = models.TextField()
-    first_url_scraped = models.CharField(max_length=128, blank=True, null=True)
+    first_url_scraped = models.CharField(max_length=256, blank=True, null=True)
     exception_message = models.CharField(max_length=256, blank=True, null=True)
 
     def __unicode__(self):

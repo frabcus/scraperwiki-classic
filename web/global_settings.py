@@ -112,13 +112,14 @@ INSTALLED_APPS = [
     
     # the following are scraperwiki apps
     'frontend',
-  	'codewiki',
-  	'notification',
-  	'payment',  	
-  	'market',
-  	'api',
+    'codewiki',
+    'notification',
+    'payment',  	
+    'market',
+    'api',
     'whitelist',
     'cropper',
+    'kpi',
     #'devserver',
 ]
 

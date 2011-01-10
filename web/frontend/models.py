@@ -61,7 +61,7 @@ class Alerts(models.Model):
     # the object about which the alert is about, eg codewiki.models.Code or User, 
     # notwithstanding the fact that there is a user field already below
     content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveSmallIntegerField(blank=True, null=True)
+    object_id = models.PositiveIntegerField(blank=True, null=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     
     # assumes this represents the actual type of the alert (although you will have to dig into the special kind of alert to represent it properly in ways not covered by message_value)
@@ -76,7 +76,7 @@ class Alerts(models.Model):
 
     # links to the object with further event information (either codewiki.models.Code.CodeCommitEvent or codewiki.models.Scraper.ScraperRunEvent)
     event_type = models.ForeignKey(ContentType, null=True, related_name='event_alerts_set')
-    event_id = models.PositiveSmallIntegerField(blank=True, null=True)
+    event_id = models.PositiveIntegerField(blank=True, null=True)
     event_object = generic.GenericForeignKey('event_type', 'event_id')
 
 
