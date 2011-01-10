@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-from codewiki import views, viewsrpc, viewsuml
+from codewiki import views, viewsrpc, viewsuml, viewseditor
 
 urlpatterns = patterns('',
     
@@ -45,24 +45,24 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/$',          views.code_overview,    name='code_overview'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/history/$',  views.scraper_history,  name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/comments/$', views.comments,         name='scraper_comments'),
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/code/$',     views.code,             name='scraper_code'),    
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/code/$',     viewseditor.code,       name='scraper_code'),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/tags/$',     views.tags,             name='scraper_tags'),    
         
-    url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$', views.choose_template, name='choose_template'),    
+    url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$',               views.choose_template, name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        
     
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/edit/$', views.edit, name="editor_edit"),    
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/edit/$',     viewseditor.edit, name="editor_edit"),    
+    url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',            viewseditor.edit, name="editor"),
     
-        
-    url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',  views.edit, name="editor"),
-    url(r'^editor/template/(?P<short_name>[\-\w]+)$',     views.edittutorial, name="tutorial"),
+        # redirects to new scraper?template=
+    url(r'^editor/template/(?P<short_name>[\-\w]+)$',     viewseditor.edittutorial, name="tutorial"),  
 
-    url(r'^handle_session_draft/(?P<action>[\-\w]+)$',    views.handle_session_draft, name="handle_session_draft"),
+    url(r'^handle_session_draft/(?P<action>[\-\w]+)$',    viewseditor.handle_session_draft, name="handle_session_draft"),
     
     # call-backs from ajax for reloading and diff
     url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
-    url(r'^editor/diff/(?P<short_name>[\-\w]*)$',         views.diff,         name="diff"),
-    url(r'^editor/raw/(?P<short_name>[\-\w]*)$',          views.raw,          name="raw"),   # blank name for draft scraper
+    url(r'^editor/diff/(?P<short_name>[\-\w]*)$',         viewseditor.diff,   name="diff"),
+    url(r'^editor/raw/(?P<short_name>[\-\w]*)$',          viewseditor.raw,    name="raw"),   # blank name for draft scraper
     url(r'^proxycached$',                                 views.proxycached,  name="proxycached"), 
     
 )
