@@ -20,47 +20,54 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.htmlClean-min.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js?{{settings.REVISION}}"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/codemirror.js"></script> {# uses codemirrorversion so we can change it dynamically #}
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?{{settings.REVISION}}"></script>
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>    
+    <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/codemirror.js"></script>
 
     {# for the popup preview of cached HTML #}
-        <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/highlight.js" type="text/javascript"></script> 
-        <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/stringstream.js" type="text/javascript"></script> 
-        <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/tokenize.js" type="text/javascript"></script> 
-        <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsexml.js" type="text/javascript"></script> 
-        <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsecss.js" type="text/javascript"></script> 
-        <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/tokenizejavascript.js" type="text/javascript"></script> 
-        <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsejavascript.js" type="text/javascript"></script> 
-        <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsehtmlmixed.js" type="text/javascript"></script> 
+    <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/highlight.js" type="text/javascript"></script> 
+    <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/stringstream.js" type="text/javascript"></script> 
+    <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/tokenize.js" type="text/javascript"></script> 
+    <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsexml.js" type="text/javascript"></script> 
+    <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsecss.js" type="text/javascript"></script> 
+    <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/tokenizejavascript.js" type="text/javascript"></script> 
+    <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsejavascript.js" type="text/javascript"></script> 
+    <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsehtmlmixed.js" type="text/javascript"></script> 
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/xmlcolors.css"/> 
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/jscolors.css"/> 
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/csscolors.css"/> 
 
-        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/xmlcolors.css"/> 
-        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/jscolors.css"/> 
-        <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/css/csscolors.css"/> 
+    {# the primary library #}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?{{settings.REVISION}}"></script>
 </head>
 
 <body>
-        <fieldset>
-            {# Hidden inputs for passing to js #}
-            <input type="hidden" id="short_name" value="{{ scraper.short_name }}"/>
-            <input type="hidden" id="scraper_guid" value="{{ scraper.guid }}"/>
-            <input type="hidden" id="sourcescraper" value="{{ source_scraper }}"/>            
-            <input type="hidden" id="username" value="{{ user.username }}"/>
-            <input type="hidden" id="userrealname" value="{{ user.get_profile.name }}"/>
-            <input type="hidden" id="isstaff" value="{% if user.is_staff %}yes{% endif %}"/>
-            <input type="hidden" id="scraperlanguage" value="{{ scraper.language|lower }}"/>
-            <input type="hidden" id="rev" value="{{rev}}"/>
-            <input type="hidden" id="codemirror_url" value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
-            <input type="hidden" id="viewrunurl" value="{% if scraper.short_name %}{% url view_fullscreen scraper.short_name %}{% endif %}"/>
-            <input type="hidden" id="id_wiki_type" value="{{scraper.wiki_type}}" name="wiki_type"/>
-        </fieldset>
+    {# Hidden inputs for passing to js #}
+    <input type="hidden" id="short_name"        value="{{ scraper.short_name }}"/>
+    <input type="hidden" id="scraper_guid"      value="{{ scraper.guid }}"/>
+    <input type="hidden" id="sourcescraper"     value="{{ source_scraper }}"/>            
+    <input type="hidden" id="username"          value="{{ request.user.username }}"/>
+    <input type="hidden" id="userrealname"      value="{{ request.user.get_profile.name }}"/>
+    <input type="hidden" id="isstaff"           value="{% if request.user.is_staff %}yes{% endif %}"/>
+    <input type="hidden" id="scraperlanguage"   value="{{ scraper.language|lower }}"/>
+    <input type="hidden" id="rev"               value="{{rev}}"/>
+    <input type="hidden" id="codemirror_url"    value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
+    <input type="hidden" id="id_wiki_type"      value="{{scraper.wiki_type}}"/>
+
+    <input type="hidden" id="saveurl"           value="{% url handle_editor_save %}"/>
+    <input type="hidden" id="proxycachedurl"    value="{% url handle_editor_save %}"/>
+    {% if scraper.short_name %}
+        <input type="hidden" id="viewrunurl"    value="{% url view_fullscreen scraper.short_name %}"/>
+        <input type="hidden" id="editordiffurl" value="{% url diff scraper.short_name %}"/>
+        <input type="hidden" id="editorrawurl"  value="{% url raw scraper.short_name %}"/>
+    {% endif %}
+
         <div class="editor">
             <div id="divDraftSavedWarning" class="draft_warning" style="display:none;">
-                A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next={% url handle_session_draft 'save' %}">sign in or create an account</a>.
+                A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next={% url handle_session_draft %}">sign in or create an account</a>.
             </div>
             {% ifequal rev 'draft' %}
                 <div class="draft_warning">
-                    Warning: this scraper has not been saved or committed. <a href="{% url login %}?next={% url handle_session_draft 'save' %}">Sign in or create an account</a> to save it permanently, or <a href="{% url delete_draft %}">discard changes</a>
+                    Warning: this scraper has not been saved or committed. <a href="{% url login %}?next={% url handle_session_draft %}">Sign in or create an account</a> to save it permanently, or <a href="{% url delete_draft %}">discard changes</a>
                 </div>
             {% endifequal %}
 
@@ -183,10 +190,10 @@
 
       <div id="popup_tutorials" class="quickhelp">
         <p>
-          <input type="checkbox" id="showautomode" {% if user.is_staff %}checked{% endif %}/>Always show automode dropdown.  
+          <input type="checkbox" id="showautomode" {% if request.user.is_staff %}checked{% endif %}/>Always show automode dropdown.  
           <input type="checkbox" id="popuplinenumbers"/>Show line numbers in popup of cached page.
         </p>
-        {% if user.is_staff %}
+        {% if request.user.is_staff %}
           <p class="staff">
           You are using Codemirror-{{codemirrorversion}}.
           Last typed timestamp: <span class="staff" id="lasttypedtimestamp">...</span>
@@ -212,22 +219,6 @@
         </p>
             {% include quick_help_template %}
       </div>
-    </form>
-
-    {# Not convinced it's appropriate to load analytics code into the editor.  Consider removing it #}
-    {% if 0 %}
-    // The real problem is this wholly blocks the editor from responding if there is a slow or nonexistent connection to it!
-    <script type="text/javascript">
-        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-    </script>
-    <script type="text/javascript">
-        try {
-            var pageTracker = _gat._getTracker("UA-321882-15");
-            pageTracker._trackPageview();
-        } catch(err) {}
-    </script>
-    {% endif %}
 
 </body>
 </html>

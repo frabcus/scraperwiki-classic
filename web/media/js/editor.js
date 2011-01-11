@@ -8,19 +8,20 @@ $(document).ready(function() {
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
-    var short_name = $('#short_name').val();
-    var guid = $('#scraper_guid').val();
-    var username = $('#username').val(); 
-    var userrealname = $('#userrealname').val(); 
-    var isstaff = $('#isstaff').val(); 
+
+    var short_name      = $('#short_name').val();
+    var guid            = $('#scraper_guid').val();
+    var username        = $('#username').val(); 
+    var userrealname    = $('#userrealname').val(); 
+    var isstaff         = $('#isstaff').val(); 
     var scraperlanguage = $('#scraperlanguage').val(); 
-    var run_type = $('#code_running_mode').val();
-    var codemirror_url = $('#codemirror_url').val();
-    var wiki_type = $('#id_wiki_type').val(); 
-    var viewrunurl = $('#viewrunurl').val(); 
+    var run_type        = $('#code_running_mode').val();
+    var codemirror_url  = $('#codemirror_url').val();
+    var wiki_type       = $('#id_wiki_type').val(); 
+
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
     var conn = undefined; // Orbited connection
-    var bConnected = false; 
+    var bConnected  = false; 
     var bSuppressDisconnectionMessages = false; 
     var buffer = "";
     var selectedTab = 'console';
@@ -980,14 +981,12 @@ $(document).ready(function() {
         }
     }
 
-
+    // prob replace this with proper example diffing against previous versions
     function viewDiff(){
         $.ajax({
-            type: 'POST',
-            url: '/editor/diff/' + short_name,
-            data: ({
-                code: codeeditor.getCode()
-                }),
+            type:   'POST',
+            url:    $('input#editordiffurl').val(),
+            data:   { code: codeeditor.getCode()},
             dataType: "html",
             success: function(diff) {
                 $.modal('<pre class="popupoutput">'+cgiescape(diff)+'</pre>', {
@@ -997,7 +996,8 @@ $(document).ready(function() {
         });
     }
 
-    function clearOutput() {
+    function clearOutput() 
+    {
         $('#output_console div').html('');
         $('#output_sources div').html('');
         $('#output_data table').html('');
@@ -1016,10 +1016,10 @@ $(document).ready(function() {
 
         // send current code up to the server and get a copy of new code
         var newcode = $.ajax({
-                         url: '/editor/raw/' + short_name, 
+                         url: $('input#editorrawurl').val(),
                          async: false, 
                          type: 'POST', 
-                         data: ({oldcode: codeeditor.getCode()}) 
+                         data: {oldcode: codeeditor.getCode()} 
                        }).responseText; 
 
         // extract the (changed) select range information from the header of return data
@@ -1145,9 +1145,8 @@ $(document).ready(function() {
         if ($('.editor_controls #preview').attr('disabled'))
             return; 
 
-        var viewurl = viewrunurl; 
         var urlquery = ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
-        var viewurl = viewrunurl; 
+        var viewurl = $('input#viewrunurl').val(); 
         var previewmessage = ''; 
         if (urlquery.length != 0) 
         {
@@ -1207,12 +1206,13 @@ $(document).ready(function() {
                         commit_message  : "cccommit",   // could get some use out of this if we wanted to
                         sourcescraper   : $('#sourcescraper').val(),
                         wiki_type       : wiki_type,
+                        guid            : guid,
+                        language        : scraperlanguage,
                         code            : codeeditor.getCode(),
                         earliesteditor  : earliesteditor.toUTCString(), // goes into the comment of the commit to help batch sessions
-                        action          : 'commit'
                     }
 
-        $.ajax({ type:'POST', contentType:"application/json", dataType:"html", data:sdata, success:function(response)
+        $.ajax({ url:$('input#saveurl').val(), type:'POST', contentType:"application/json", dataType:"html", data:sdata, success:function(response) 
         {
             res = $.evalJSON(response);
             if (res.status == 'Failed')
@@ -1454,7 +1454,7 @@ writeToChat("Saved rev number: " + res.rev);
         {
             modaloptions['onShow'] = function() 
             { 
-                $.ajax({type : 'POST', url  : '/proxycached', data: { cacheid: cacheid }, success: function(sdata) 
+                $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, success: function(sdata) 
                 {
                     cachejson = parsehighlightcode(sdata, lmimetype); 
                     if (cachejson["content"].length < 15000)  // don't cache huge things
