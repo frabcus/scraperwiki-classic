@@ -14,7 +14,6 @@ def screen_shot(code_object, size='medium'):
     else:
         has_screenshot = False
         url = settings.MEDIA_URL + 'images/testcard_' + size + '.png'
-    print url
     return {
         'url': url,
         'has_screenshot': has_screenshot,        

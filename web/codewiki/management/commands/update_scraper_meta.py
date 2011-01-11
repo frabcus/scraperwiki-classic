@@ -5,6 +5,7 @@ from django.core.management.base import BaseCommand, CommandError
 from codewiki.models import Scraper
 
 # this command looks like a botch.  why isn't this data updated when it's run
+# Is this command ever invoked anyway
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (

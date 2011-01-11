@@ -7,10 +7,17 @@
             {{ form.q }}
             <input type="submit" value="Go" />
         </form></h1>
-        <p>{{ scrapers|length }} {% ifequal scrapers|length 1 %}result{% else %}results{% endifequal %} found</p>
+        <p>{{ num_results }} {% ifequal num_results 1 %}result{% else %}results{% endifequal %} found</p>
             <a href="/feeds/latest_code_objects_by_search_term/{{ query }}">RSS feed for this search term</a>            
     </div>
     <div class="content">
+        {% if tags %}
+            <ul class="tag_list tags">
+                {% for tag in tags %}
+                <li><a href="{% url single_tag tag.name %}">{{tag.name}}</a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
 
         {% if scrapers %}
             <ul class="scraper_list">

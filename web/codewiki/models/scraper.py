@@ -68,12 +68,8 @@ class Scraper (code.Code):
         return int(Scraper.objects.item_count(self.guid))
 
 
-    # update scraper meta data (lines of code etc)    
+            # It would be good to kill this function off and move its functionality into being properties of the database
     def update_meta(self):
-
-        # runs Code.update_meta
-        super(Scraper, self).update_meta()
-
         #update line counts etc
         self.record_count = self.count_records()
         self.has_geo = bool(Scraper.objects.has_geo(self.guid))
@@ -179,7 +175,7 @@ class ScraperRunEvent(models.Model):
     records_produced  = models.IntegerField(default=0)
     pages_scraped     = models.IntegerField(default=0)
     output            = models.TextField()
-    first_url_scraped = models.CharField(max_length=128, blank=True, null=True)
+    first_url_scraped = models.CharField(max_length=256, blank=True, null=True)
     exception_message = models.CharField(max_length=256, blank=True, null=True)
 
     def __unicode__(self):

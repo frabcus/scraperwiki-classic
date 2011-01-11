@@ -8,19 +8,20 @@ $(document).ready(function() {
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
-    var short_name = $('#short_name').val();
-    var guid = $('#scraper_guid').val();
-    var username = $('#username').val(); 
-    var userrealname = $('#userrealname').val(); 
-    var isstaff = $('#isstaff').val(); 
+
+    var short_name      = $('#short_name').val();
+    var guid            = $('#scraper_guid').val();
+    var username        = $('#username').val(); 
+    var userrealname    = $('#userrealname').val(); 
+    var isstaff         = $('#isstaff').val(); 
     var scraperlanguage = $('#scraperlanguage').val(); 
-    var run_type = $('#code_running_mode').val();
-    var codemirror_url = $('#codemirror_url').val();
-    var wiki_type = $('#id_wiki_type').val(); 
-    var viewrunurl = $('#viewrunurl').val(); 
+    var run_type        = $('#code_running_mode').val();
+    var codemirror_url  = $('#codemirror_url').val();
+    var wiki_type       = $('#id_wiki_type').val(); 
+
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
     var conn = undefined; // Orbited connection
-    var bConnected = false; 
+    var bConnected  = false; 
     var bSuppressDisconnectionMessages = false; 
     var buffer = "";
     var selectedTab = 'console';
@@ -309,29 +310,50 @@ $(document).ready(function() {
         );
     }
 
-    function setupKeygrabs(){
-        addHotkey('ctrl+r', sendCode);
+    function setupKeygrabs()
+    {
         addHotkey('ctrl+s', saveScraper); 
+        addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+d', viewDiff);
         addHotkey('ctrl+p', popupPreview); 
+        addHotkey('ctrl+p', popupHelp); 
     };
 
-
-    //Setup Menu
-    function setupMenu(){
-        $('#menu_tutorials').click(function(){
-            $('#popup_tutorials').modal({
+    function popupHelp()
+    {
+        var quickhelpurl = $('input#quickhelpurl').val(); 
+        if (quickhelpurl)
+        {
+            // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
+            var cursorpos = codeeditor.cursorPosition(true); 
+            var cursorendpos = codeeditor.cursorPosition(false); 
+            var quickhelpparams = { language:scraperlanguage, line:codeeditor.lineContent(cursorpos.line), character:cursorpos.character }; 
+            if (cursorpos.line == cursorendpos.line)
+                quickhelpparams["endcharacter"] = cursorendpos.character; 
+            $.modal('<iframe width="100%" height="100%" src='+quickhelpurl+'?'+$.param(quickhelpparams)+'></iframe>', 
+            {
+                overlayClose: true,
+                containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
+                overlayCss: { cursor:"auto" }, 
+            }); 
+        }
+        else
+        {
+            $('#popup_tutorials').modal(
+            {
                  overlayClose: true, persist: true, 
                  containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
                  overlayCss: { cursor:"auto" }
-                });
-        });
-        $('form#editor').submit(function() { 
-            saveScraper(); 
-            return false; 
-        })
+            });
+        };
+    }
 
-        $('#chat_line').bind('keypress', function(eventObject) {
+    //Setup Menu
+    function setupMenu()
+    {
+        $('#menu_tutorials').click(popupHelp); 
+        $('#chat_line').bind('keypress', function(eventObject) 
+        {
             var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
             var target = eventObject.target.tagName.toLowerCase();
             if (key === 13 && target === 'input') 
@@ -344,10 +366,12 @@ $(document).ready(function() {
             return true; 
         })
 
-        $('#id_urlquery').bind('keypress', function(eventObject) {
+        $('#id_urlquery').bind('keypress', function(eventObject) 
+        {
             var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
             var target = eventObject.target.tagName.toLowerCase();
-            if (key === 13 && target === 'input') {
+            if (key === 13 && target === 'input') 
+            {
                 eventObject.preventDefault();
                 sendCode(); 
                 return false; 
@@ -628,6 +652,9 @@ $(document).ready(function() {
     //send code request run
     function sendCode() 
     {
+        if ($('.editor_controls #run').attr('disabled'))
+            return; 
+
         // protect not-ready case
         if ((conn == undefined) || (conn.readyState != conn.READY_STATE_OPEN)) 
         { 
@@ -651,11 +678,9 @@ $(document).ready(function() {
         $('.editor_controls #run').val('Sending');
         sendjson(data); 
 
-        // the rest of the activity happens in startingrun when we get the startingrun message come back from twisted
-        // means we can have simultaneous running for staff overview
-
-        // new auto-save every time 
-        if (($('select#automode option:selected').val() == 'autosave') && pageIsDirty)
+        // do a save to the system every time we run (this would better be done via twisted at some point)
+        var automode = $('select#automode option:selected').val(); 
+        if (pageIsDirty && ((automode == 'autosave') || (automode == 'autotype')))
             saveScraper(); 
     } 
 
@@ -678,7 +703,7 @@ $(document).ready(function() {
             $('select#automode #id_autotype').attr('disabled', true); 
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
             $('.editor_controls #run').attr('disabled', false);
-            $('.editor_controls #preview').attr('disabled', true);
+            $('.editor_controls #preview').attr('disabled', false);
         }
         writeToChat('Changed automode: ' + automode); 
         sendjson({"command":'automode', "automode":automode}); 
@@ -693,10 +718,9 @@ $(document).ready(function() {
             $('select#automode').hide(); 
     }
 
-    function parseISOdate(sdatetime)
-    {
-        return new Date(sdatetime.replace(/-|T|\.\d*/g, " ")); 
-    }
+    function parseISOdate(sdatetime) // used to try and parse an ISOdate, but it's highly irregular and IE can't do it
+        {  return new Date(parseInt(sdatetime)); }
+
     function timeago(ctime, servernowtime)
     {
         var seconds = (servernowtime.getTime() - ctime.getTime())/1000; 
@@ -708,10 +732,13 @@ $(document).ready(function() {
     function recordEditorStatus(data) 
     { 
         var boutputstatus = (lasttouchedtime == undefined); 
-
-        servernowtime = parseISOdate(data.nowtime); 
-        earliesteditor = parseISOdate(data.earliesteditor); 
-        lasttouchedtime = parseISOdate(data.scraperlasttouch); 
+        //console.log($.toJSON(data)); 
+        if (data.nowtime)
+            servernowtime = parseISOdate(data.nowtime); 
+        if (data.earliesteditor)
+            earliesteditor = parseISOdate(data.earliesteditor); 
+        if (data.scraperlasttouch)
+            lasttouchedtime = parseISOdate(data.scraperlasttouch); 
 
         editingusername = (data.loggedineditors ? data.loggedineditors[0] : '');  // the first in the list is the primary editor
         loggedineditors = data.loggedineditors;  // this is a list
@@ -774,6 +801,7 @@ $(document).ready(function() {
                     setCodeeditorBackgroundImage('url(/media/images/staff.png)')
                     $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                     $('.editor_controls #run').attr('disabled', true);
+                    $('.editor_controls #preview').attr('disabled', true);
                     sendjson({"command":'automode', "automode":'autoload'}); 
                 }
             }
@@ -784,6 +812,7 @@ $(document).ready(function() {
                 $('select#automode #id_autotype').attr('disabled', false); 
                 $('select#automode').val('autosave'); // editing
                 $('.editor_controls #run').attr('disabled', false);
+                $('.editor_controls #preview').attr('disabled', false);
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
                 sendjson({"command":'automode', "automode":'autosave'}); 
             }
@@ -802,6 +831,7 @@ $(document).ready(function() {
                 setCodeeditorBackgroundImage('url(/media/images/staff.png)')
                 $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                 $('.editor_controls #run').attr('disabled', true);
+                $('.editor_controls #preview').attr('disabled', true);
                 sendjson({"command":'automode', "automode":'autoload'}); 
             }
         }
@@ -819,6 +849,7 @@ $(document).ready(function() {
                 setCodeeditorBackgroundImage('none')
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
                 $('.editor_controls #run').attr('disabled', false);
+                $('.editor_controls #preview').attr('disabled', false);
                 sendjson({"command":'automode', "automode":'autosave'}); 
             }
         }
@@ -950,7 +981,8 @@ $(document).ready(function() {
         });
     }
     
-    function endingrun(content) {
+    function endingrun(content) 
+    {
         $('.editor_controls #run').removeClass('running').val('run');
         $('.editor_controls #run').unbind('click.abort');
         $('.editor_controls #run').unbind('click.stopping');
@@ -972,24 +1004,18 @@ $(document).ready(function() {
         }
     }
 
+    // prob replace this with proper example diffing against previous versions
+    function viewDiff() { $.ajax( 
+    {
+        type:   'POST',
+        url:    $('input#editordiffurl').val(),
+        data:   { code: codeeditor.getCode()},
+        dataType: "html",
+        success: function(diff) { $.modal('<pre class="popupoutput">'+cgiescape(diff)+'</pre>', { overlayClose: true }); } 
+    })}
 
-    function viewDiff(){
-        $.ajax({
-            type: 'POST',
-            url: '/editor/diff/' + short_name,
-            data: ({
-                code: codeeditor.getCode()
-                }),
-            dataType: "html",
-            success: function(diff) {
-                $.modal('<pre class="popupoutput">'+cgiescape(diff)+'</pre>', {
-                        overlayClose: true 
-                       });
-            }
-        });
-    }
-
-    function clearOutput() {
+    function clearOutput() 
+    {
         $('#output_console div').html('');
         $('#output_sources div').html('');
         $('#output_data table').html('');
@@ -1008,10 +1034,10 @@ $(document).ready(function() {
 
         // send current code up to the server and get a copy of new code
         var newcode = $.ajax({
-                         url: '/editor/raw/' + short_name, 
+                         url: $('input#editorrawurl').val(),
                          async: false, 
                          type: 'POST', 
-                         data: ({oldcode: codeeditor.getCode()}) 
+                         data: {oldcode: codeeditor.getCode()} 
                        }).responseText; 
 
         // extract the (changed) select range information from the header of return data
@@ -1134,9 +1160,11 @@ $(document).ready(function() {
 
     function popupPreview() 
     {
-        var viewurl = viewrunurl; 
+        if ($('.editor_controls #preview').attr('disabled'))
+            return; 
+
         var urlquery = ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
-        var viewurl = viewrunurl; 
+        var viewurl = $('input#viewrunurl').val(); 
         var previewmessage = ''; 
         if (urlquery.length != 0) 
         {
@@ -1167,6 +1195,9 @@ $(document).ready(function() {
     //Save
     function saveScraper()
     {
+        if ($('.editor_controls #btnCommitPopup').attr('disabled'))
+            return; 
+
         var bSuccess = false;
 
         //if saving then check if the title is set (must be if guid is set)
@@ -1189,15 +1220,17 @@ $(document).ready(function() {
 
         atsavedundo = codeeditor.historySize().undo;  // update only when success
         var sdata = {
-                        title : $('#id_title').val(),
-                        commit_message: "cccommit",   // could get some use out of this if we wanted to
-                        sourcescraper: $('#sourcescraper').val(),
-                        wiki_type: wiki_type,
-                        code : codeeditor.getCode(),
-                        earliesteditor : earliesteditor.toUTCString(), // goes into the comment of the commit to help batch sessions
-                        action : 'commit'
+                        title           : $('#id_title').val(),
+                        commit_message  : "cccommit",   // could get some use out of this if we wanted to
+                        sourcescraper   : $('#sourcescraper').val(),
+                        wiki_type       : wiki_type,
+                        guid            : guid,
+                        language        : scraperlanguage,
+                        code            : codeeditor.getCode(),
+                        earliesteditor  : earliesteditor.toUTCString(), // goes into the comment of the commit to help batch sessions
                     }
-        $.ajax({ type : 'POST', contentType : "application/json", dataType: "html", data: sdata, success: function(response)
+
+        $.ajax({ url:$('input#saveurl').val(), type:'POST', contentType:"application/json", dataType:"html", data:sdata, success:function(response) 
         {
             res = $.evalJSON(response);
             if (res.status == 'Failed')
@@ -1219,9 +1252,9 @@ $(document).ready(function() {
             {
                 $('.editor_controls #btnCommitPopup').val('Saved').addClass('darkness'); 
                 window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
-                //showFeedbackMessage("Your code has been saved.");
+writeToChat("Saved rev number: " + res.rev); 
                 if (bConnected)
-                    sendjson({"command":'saved'}); 
+                    sendjson({"command":'saved', "rev":res.rev}); 
             }
             ChangeInEditor("saved"); 
         },
@@ -1353,7 +1386,8 @@ $(document).ready(function() {
         
         oConsoleItem.html(escsMessage); 
 
-        if(sLongMessage != undefined) {
+        if(sLongMessage != undefined) 
+        {
             oMoreLink = $('<a href="#"></a>');
             oMoreLink.addClass('expand_link');
             oMoreLink.text(sExpand)
@@ -1438,7 +1472,7 @@ $(document).ready(function() {
         {
             modaloptions['onShow'] = function() 
             { 
-                $.ajax({type : 'POST', url  : '/proxycached', data: { cacheid: cacheid }, success: function(sdata) 
+                $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, success: function(sdata) 
                 {
                     cachejson = parsehighlightcode(sdata, lmimetype); 
                     if (cachejson["content"].length < 15000)  // don't cache huge things

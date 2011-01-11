@@ -36,10 +36,6 @@ class ScraperViewsTests(TestCase):
                             kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
     
-    def test_scraper_download(self):
-        response = self.client.get(reverse('scraper_download',
-                            kwargs={'short_name': 'test_scraper'}))
-        self.assertEqual(response.status_code, 200)
 
     def test_scraper_export_csv(self):
         response = self.client.get(reverse('export_csv',

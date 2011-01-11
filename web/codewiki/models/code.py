@@ -60,7 +60,7 @@ class Code(models.Model):
     isstartup          = models.BooleanField(default=False)
     language           = models.CharField(max_length=32, choices=LANGUAGES, default='Python')
     wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
-    relations          = models.ManyToManyField("self", blank=True)  #manage.py refuses to generate the tabel for this, so you haev to do it manually.
+    relations          = models.ManyToManyField("self", blank=True)  # manage.py refuses to generate the tabel for this, so you haev to do it manually.
     
     # managers
     objects = CodeManager()
@@ -73,7 +73,7 @@ class Code(models.Model):
         assert not self.short_name and not self.guid
         import hashlib
         self.short_name = util.SlugifyUniquely(self.title, Code, slugfield='short_name', instance=self)
-        self.created_at = datetime.datetime.today()  # perhaps this should be moved out to the draft scraper
+        self.created_at = datetime.datetime.today()  
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
     def owner(self):
@@ -147,11 +147,14 @@ class Code(models.Model):
         return vc.MercurialInterface(self.get_repo_path()).getstatus(self, revision)["code"]
 
     def get_repo_path(self):
+        if settings.SPLITSCRAPERS_DIR:
+            return os.path.join(settings.SPLITSCRAPERS_DIR, self.short_name)
+        
         result = None
         if self.wiki_type == 'view':
             result = settings.VMODULES_DIR
         else:
-            result = settings.SMODULES_DIR        
+            result = settings.SMODULES_DIR
         return result
 
     @models.permalink
@@ -164,9 +167,7 @@ class Code(models.Model):
 
     # update scraper meta data (lines of code etc)    
     def update_meta(self):
-        # if publishing for the first time set the first published date
-        if self.published and self.first_published_at == None:
-            self.first_published_at = datetime.datetime.today()
+        pass
 
     # this is just to handle the general pointer put into Alerts
     def content_type(self):
@@ -237,7 +238,7 @@ class UserCodeEditing(models.Model):
         app_label = 'codewiki'
         
 
-# this also out of date event and should be abolished
+# This should be deleted
 class CodeCommitEvent(models.Model):
     revision = models.IntegerField()
 

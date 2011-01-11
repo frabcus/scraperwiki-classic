@@ -429,6 +429,7 @@ ul.commitlist li.neweditingsession span { background-color:black; color:white; f
 
 /* Search results */
 .page_title input {font-size:1em;}
+.tag_list {border-bottom:dotted 1px #ccc;padding-bottom:2em; margin-bottom:2em;}
 
 
 /* Full screen */
