@@ -240,9 +240,9 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourc
 
         #make link to source scraper
         if sourcescraper:
-            scraper = get_code_object(sourcescraper, request)
-            if isinstance(scraper, Code):
-                code_object.relations.add(scraper)
+            lsourcescraper = models.Code.objects.filter(short_name=sourcescraper)
+            if lsourcescraper:
+                code_object.relations.add(lsourcescraper[0])
 
     # save code and commit code through the mercurialinterface
     mercurialinterface = vc.MercurialInterface(code_object.get_repo_path())

@@ -15,11 +15,11 @@ urlpatterns = patterns('',
     url(r'^views/(?P<short_name>[\w_\-]+)/admin/$',       views.view_admin,             name='view_admin'),    
     
     url(r'^scrapers/delete-data/(?P<short_name>[\w_\-]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
-    url(r'^scrapers/export/(?P<short_name>[\w_\-]+)/$',   views.export_csv,               name='export_csv'),
+    url(r'^scrapers/export/(?P<short_name>[\w_\-]+)/$',   views.export_csv,             name='export_csv'),
     url(r'^scrapers/export2/(?P<short_name>[\w_\-]+)/$',  views.export_gdocs_spreadsheet,name='export_gdocs_spreadsheet'),    
     
-    url(r'^scrapers/follow/(?P<short_name>[\w_\-]+)/$',   views.follow,           name='scraper_follow'),
-    url(r'^scrapers/unfollow/(?P<short_name>[\w_\-]+)/$', views.unfollow,       name='scraper_unfollow'),
+    url(r'^scrapers/follow/(?P<short_name>[\w_\-]+)/$',   views.follow,                 name='scraper_follow'),
+    url(r'^scrapers/unfollow/(?P<short_name>[\w_\-]+)/$', views.unfollow,               name='scraper_unfollow'),
     
     url(r'^scrapers/metadata_api/', include('codewiki.metadata_api.urls')),
 
@@ -61,7 +61,7 @@ urlpatterns = patterns('',
     url(r'^proxycached$',                                 views.proxycached,  name="proxycached"), 
     
     # editor (the action stuff is deprecated)
-    url(r'^handle_session_draft/$',                      viewseditor.handle_session_draft, name="handle_session_draft"),
+    url(r'^handle_session_draft/$',                       viewseditor.handle_session_draft, name="handle_session_draft"),
     url(r'^handle_editor_save/$',                         viewseditor.handle_editor_save,   name="handle_editor_save"),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/edit/$',     viewseditor.edit, name="editor_edit"),    
     url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',            viewseditor.edit, name="editor"),

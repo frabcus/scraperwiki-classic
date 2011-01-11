@@ -60,7 +60,7 @@ class Code(models.Model):
     isstartup          = models.BooleanField(default=False)
     language           = models.CharField(max_length=32, choices=LANGUAGES, default='Python')
     wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
-    relations          = models.ManyToManyField("self", blank=True)  #manage.py refuses to generate the tabel for this, so you haev to do it manually.
+    relations          = models.ManyToManyField("self", blank=True)  # manage.py refuses to generate the tabel for this, so you haev to do it manually.
     
     # managers
     objects = CodeManager()
@@ -73,7 +73,7 @@ class Code(models.Model):
         assert not self.short_name and not self.guid
         import hashlib
         self.short_name = util.SlugifyUniquely(self.title, Code, slugfield='short_name', instance=self)
-        self.created_at = datetime.datetime.today()  # perhaps this should be moved out to the draft scraper
+        self.created_at = datetime.datetime.today()  
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
     def owner(self):

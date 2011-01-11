@@ -310,29 +310,50 @@ $(document).ready(function() {
         );
     }
 
-    function setupKeygrabs(){
+    function setupKeygrabs()
+    {
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+d', viewDiff);
         addHotkey('ctrl+p', popupPreview); 
+        addHotkey('ctrl+p', popupHelp); 
     };
 
-
-    //Setup Menu
-    function setupMenu(){
-        $('#menu_tutorials').click(function(){
-            $('#popup_tutorials').modal({
+    function popupHelp()
+    {
+        var quickhelpurl = $('input#quickhelpurl').val(); 
+        if (quickhelpurl)
+        {
+            // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
+            var cursorpos = codeeditor.cursorPosition(true); 
+            var cursorendpos = codeeditor.cursorPosition(false); 
+            var quickhelpparams = { language:scraperlanguage, line:codeeditor.lineContent(cursorpos.line), character:cursorpos.character }; 
+            if (cursorpos.line == cursorendpos.line)
+                quickhelpparams["endcharacter"] = cursorendpos.character; 
+            $.modal('<iframe width="100%" height="100%" src='+quickhelpurl+'?'+$.param(quickhelpparams)+'></iframe>', 
+            {
+                overlayClose: true,
+                containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
+                overlayCss: { cursor:"auto" }, 
+            }); 
+        }
+        else
+        {
+            $('#popup_tutorials').modal(
+            {
                  overlayClose: true, persist: true, 
                  containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
                  overlayCss: { cursor:"auto" }
-                });
-        });
-        $('form#editor').submit(function() { 
-            saveScraper(); 
-            return false; 
-        })
+            });
+        };
+    }
 
-        $('#chat_line').bind('keypress', function(eventObject) {
+    //Setup Menu
+    function setupMenu()
+    {
+        $('#menu_tutorials').click(popupHelp); 
+        $('#chat_line').bind('keypress', function(eventObject) 
+        {
             var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
             var target = eventObject.target.tagName.toLowerCase();
             if (key === 13 && target === 'input') 
@@ -349,7 +370,8 @@ $(document).ready(function() {
         {
             var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
             var target = eventObject.target.tagName.toLowerCase();
-            if (key === 13 && target === 'input') {
+            if (key === 13 && target === 'input') 
+            {
                 eventObject.preventDefault();
                 sendCode(); 
                 return false; 
@@ -959,7 +981,8 @@ $(document).ready(function() {
         });
     }
     
-    function endingrun(content) {
+    function endingrun(content) 
+    {
         $('.editor_controls #run').removeClass('running').val('run');
         $('.editor_controls #run').unbind('click.abort');
         $('.editor_controls #run').unbind('click.stopping');
@@ -982,19 +1005,14 @@ $(document).ready(function() {
     }
 
     // prob replace this with proper example diffing against previous versions
-    function viewDiff(){
-        $.ajax({
-            type:   'POST',
-            url:    $('input#editordiffurl').val(),
-            data:   { code: codeeditor.getCode()},
-            dataType: "html",
-            success: function(diff) {
-                $.modal('<pre class="popupoutput">'+cgiescape(diff)+'</pre>', {
-                        overlayClose: true 
-                       });
-            }
-        });
-    }
+    function viewDiff() { $.ajax( 
+    {
+        type:   'POST',
+        url:    $('input#editordiffurl').val(),
+        data:   { code: codeeditor.getCode()},
+        dataType: "html",
+        success: function(diff) { $.modal('<pre class="popupoutput">'+cgiescape(diff)+'</pre>', { overlayClose: true }); } 
+    })}
 
     function clearOutput() 
     {
