@@ -138,7 +138,7 @@ def raw(request, short_name=None):
   # try to get rid of this
 def edittutorial(request, short_name):
     code = get_code_object(short_name, request)
-    if isinstance(scraper, HttpResponseNotFound):
+    if isinstance(code, HttpResponseNotFound):
         return scraper
 
     qtemplate = "?template="+code.short_name
