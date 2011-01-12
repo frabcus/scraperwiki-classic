@@ -222,7 +222,7 @@
     scraper_short_name = '{{scraper.short_name}}';
     {% if user.is_authenticated %}
         setupScraperEditInPlace('scraper', '{{scraper.short_name}}');
-        setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA.");
+        setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
         setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
     {% endif %}
 
