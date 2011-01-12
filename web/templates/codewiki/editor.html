@@ -53,13 +53,13 @@
     <input type="hidden" id="codemirror_url"    value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
     <input type="hidden" id="id_wiki_type"      value="{{scraper.wiki_type}}"/>
 
+    {# declare all the URLs the javascript is going to want access to #}
+    <input type="hidden" id="userprofileurl"    value="{% url profiles_profile_detail 'XXX' %}"/>
     <input type="hidden" id="saveurl"           value="{% url handle_editor_save %}"/>
     <input type="hidden" id="proxycachedurl"    value="{% url proxycached %}"/>
-
     {% if request.user.is_staff %}
       <input type="hidden" id="quickhelpurl"    value="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'general_quickhelp' %}"/>
     {% endif %}
-
     {% if scraper.short_name %}
         <input type="hidden" id="viewrunurl"    value="{% url view_fullscreen scraper.short_name %}"/>
         <input type="hidden" id="editordiffurl" value="{% url diff scraper.short_name %}"/>

@@ -37,6 +37,7 @@ $(document).ready(function() {
     // information handling who else is watching and editing during this session
     var editingusername = "";  // primary editor
     var loggedineditors = [ ]; // list of who else is here and their windows open
+    var iselectednexteditor = 1; 
     var nanonymouseditors = 0; // number of anonymous editors
     var chatname = ""          // special in case of Anonymous users (yes, this unnecessarily gets set every time we call recordEditorStatus)
     var chatpeopletimes = { }; // last time each person made a chat message
@@ -152,7 +153,7 @@ $(document).ready(function() {
                 $('select#automode #id_autotype').attr('disabled', false); 
         }
 
-        if (changetype != "edit")
+        if (changetype != 'edit')
             return; 
 
     // to do: arrange for there to be only one autotype/broadcast window for a user
@@ -541,7 +542,8 @@ $(document).ready(function() {
         }
     }
 
-    function clearJunkFromQueue() {
+    function clearJunkFromQueue() 
+    {
         var lreceiverecordqueue = [ ]; 
         for (var i = 0; i < receiverecordqueue.length; i++) {
             jdata = receiverecordqueue[i]; 
@@ -708,8 +710,22 @@ $(document).ready(function() {
             $('.editor_controls #run').attr('disabled', false);
             $('.editor_controls #preview').attr('disabled', false);
         }
+                // self demote from editing to watching
+        else if (automode == 'autoload')
+        {
+            $('select#automode #id_autosave').attr('disabled', true); 
+            $('select#automode #id_autotype').attr('disabled', true); 
+            setCodeeditorBackgroundImage('url(/media/images/staff.png)')
+            $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+            $('.editor_controls #run').attr('disabled', true);
+            $('.editor_controls #preview').attr('disabled', true);
+        }
         writeToChat('Changed automode: ' + automode); 
-        sendjson({"command":'automode', "automode":automode}); 
+
+        data = {"command":'automode', "automode":automode}; 
+        if ((automode == "autoload") && (loggedineditors.length >= 3))
+            data["selectednexteditor"] = loggedineditors[iselectednexteditor]; 
+        sendjson(data); 
     }; 
 
     function showhideAutomodeSelector()
@@ -730,6 +746,19 @@ $(document).ready(function() {
         return (seconds < 120 ? seconds.toFixed(0) + " seconds" : (seconds/60).toFixed(1) + " minutes"); 
     }
 
+    function setwatcherstatusmultieditinguser()
+    {
+        if (iselectednexteditor >= loggedineditors.length)
+            iselectednexteditor = 1; 
+        var selectednexteditor = loggedineditors[iselectednexteditor]; 
+        wstatus = '<a href="'+ $('input#userprofileurl').val().replace(/XXX/g, selectednexteditor) +'" target="_blank">'+selectednexteditor+'</a>'; 
+        if (loggedineditors.length >= 3)
+            wstatus += ' (<a class="plusone">+' + (loggedineditors.length-2) + '</a>)'; 
+        wstatus += ' is watching'; 
+        $('#watcherstatus').html(wstatus); 
+        if (loggedineditors.length >= 3)
+            $('#watcherstatus .plusone').click(function() { iselectednexteditor += 1; setwatcherstatusmultieditinguser() }); 
+    }
 
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
@@ -768,7 +797,6 @@ $(document).ready(function() {
             stext.push("."); 
             writeToChat(cgiescape(stext.join(""))); 
         }
-
         showhideAutomodeSelector(); 
 
         var automode = $('select#automode option:selected').val(); 
@@ -783,23 +811,20 @@ $(document).ready(function() {
         else if (username && (editingusername == username))
         {
             $('select#automode #id_autoload').attr('disabled', (loggedineditors.length == 1)); // no point in being a watcher if no one else is available to edit
-            var wstatus = "";
-            if (loggedineditors.length >= 2)
-            {
-                wstatus = '<a href="/profiles/'+loggedineditors[1]+'" target="_blank">'+loggedineditors[1]+'</a>'; 
-                if (loggedineditors.length >= 3)
-                    wstatus += ' (+' + (loggedineditors.length-2) + ')'; 
-                wstatus += ' is watching'; 
-            }
-            $('#watcherstatus').html(wstatus); 
 
-            if (data.broadcastingeditor == username)   // handle turning one window of many
+            if (loggedineditors.length >= 2)
+                setwatcherstatusmultieditinguser(); // sets links to call self
+            else
+                $('#watcherstatus').html(""); 
+
+            if (data.broadcastingeditor == username)   
             {
+                    // convert all the autosaving pages to watching (apart from the one that the user changed to autotype)
                 if (automode == 'autosave')
                 {
                     $('select#automode #id_autoload').attr('disabled', false); 
                     $('select#automode').val('autoload'); // watching
-                    $('select#automode #id_autosave').attr('disabled', true); 
+                    $('select#automode #id_autosave').attr('disabled', false); 
                     $('select#automode #id_autotype').attr('disabled', true); 
                     setCodeeditorBackgroundImage('url(/media/images/staff.png)')
                     $('.editor_controls #btnCommitPopup').attr('disabled', true); 
@@ -808,7 +833,7 @@ $(document).ready(function() {
                     sendjson({"command":'automode', "automode":'autoload'}); 
                 }
             }
-            else if ((automode != 'autosave') && (automode != 'autotype'))
+            else if (((automode != 'autosave') && (automode != 'autotype')) || (data.broadcastingeditor == undefined))
             {
                 setCodeeditorBackgroundImage('none')
                 $('select#automode #id_autosave').attr('disabled', false); 
@@ -824,7 +849,7 @@ $(document).ready(function() {
         // you are not the editing user, someone else is
         else if (editingusername)
         {
-            $('#watcherstatus').html('<a href="/profiles/'+editingusername+'" target="_blank">'+editingusername+'</a> is editing'); 
+            $('#watcherstatus').html('<a href="'+$('input#userprofileurl').val().replace(/XXX/g, editingusername)+'" target="_blank">'+editingusername+'</a> is editing'); 
             if (automode != 'autoload')
             {
                 $('select#automode #id_autoload').attr('disabled', false); 
@@ -1358,8 +1383,8 @@ writeToChat("Saved rev number: " + res.rev);
     }
 
     //Write to console/data/sources
-    function writeToConsole(sMessage, sMessageType, iLine) {
-
+    function writeToConsole(sMessage, sMessageType, iLine) 
+    {
         // if an exception set the class accordingly
         var sShortClassName = '';
         var sLongClassName = 'message_expander';
@@ -1573,8 +1598,8 @@ writeToChat("Saved rev number: " + res.rev);
             if ((chatpeopletimes[sechatname] == undefined) || ((servernowtime.getTime() - chatpeopletimes[sechatname].getTime())/1000 > 60))
             {
                 chatpeopletimes[sechatname] = servernowtime; 
-                $('.editor_output div.tabs li.chat').addClass('improved');
-                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('improved'); }, 1500); 
+                $('.editor_output div.tabs li.chat').addClass('chatimproved');
+                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('chatimproved'); }, 1500); 
             }
         }
     }

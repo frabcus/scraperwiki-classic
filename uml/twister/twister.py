@@ -223,9 +223,25 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                     self.kill_run(reason='convert to draft')
                 
             elif self.automode == 'draft':  # change back from draft (can't happen for now)
+                assert False
                 usereditor.nondraftcount += 1
-                
-                        
+
+                # self-demote to autoload mode while choosing to promote a particular person to editing mode
+            elif automode == 'autoload':
+                selectednexteditor = parsed_data.get('selectednexteditor')
+                if selectednexteditor and selectednexteditor in self.guidclienteditors.usereditormap:
+                    assert self.guidclienteditors.usereditormap[selectednexteditor].usersessionpriority >= usereditor.usersessionpriority
+                    self.guidclienteditors.usereditormap[selectednexteditor].usersessionpriority = usereditor.usersessionpriority
+                usereditor.usersessionpriority = self.guidclienteditors.usersessionprioritynext
+                self.guidclienteditors.usersessionprioritynext += 1
+                selectednexteditor
+            
+                # another of the same users windows takes it out of autotype mode
+            elif automode == 'autosave':
+                for client in usereditor.userclients:
+                    if client.automode == 'autotype':
+                        client.automode = 'autosave'
+            
             self.automode = automode
             assert usereditor.nondraftcount == len([lclient  for lclient in usereditor.userclients  if lclient.automode != 'draft'])
             
@@ -306,10 +322,11 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         
 
 class UserEditorsOnOneScraper:
-    def __init__(self, client):
-        self.username = client.username
+    def __init__(self, client, lusersessionpriority):
+        self.username = client.username 
         self.userclients = [ ]
         self.usersessionbegan = None
+        self.usersessionpriority = lusersessionpriority  # list of users on a scraper sorted by this number, and first one in list gets the editorship
         self.nondraftcount = 0
                 # need another value to mark which are the watchers and which are the editors (or derive this)
                 # the states are enacted by the browser (by changing the dropdown or allowing user to change the drop down)
@@ -346,6 +363,7 @@ class EditorsOnOneScraper:
         self.anonymouseditors = [ ]
         self.scraperlasttouch = datetime.datetime.now()
         self.usereditormap = { }  # maps username to UserEditorsOnOneScraper
+        self.usersessionprioritynext = 0
         
     def AddClient(self, client):
         assert client.guid == self.guid
@@ -358,7 +376,8 @@ class EditorsOnOneScraper:
             if client.username in self.usereditormap:
                 self.usereditormap[client.username].AddUserClient(client)
             else:
-                self.usereditormap[client.username] = UserEditorsOnOneScraper(client)
+                self.usereditormap[client.username] = UserEditorsOnOneScraper(client, self.usersessionprioritynext)
+                self.usersessionprioritynext += 1
         else:
             self.anonymouseditors.append(client)
         
@@ -380,7 +399,7 @@ class EditorsOnOneScraper:
         
         
     def notifyEditorClients(self, message):
-        editorstatusdata = {'message_type':"editorstatus" }
+        editorstatusdata = { 'message_type':"editorstatus" }
         
         editorstatusdata["nowtime"] = jstime(datetime.datetime.now())
         editorstatusdata['earliesteditor'] = jstime(self.scrapersessionbegan)
@@ -388,11 +407,11 @@ class EditorsOnOneScraper:
         
                 # order by who has first session (and not all draft mode) in order to determin who is the editor
         usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
-        usereditors.sort(key=lambda x: x.usersessionbegan)
+        usereditors.sort(key=lambda x: x.usersessionpriority)
         editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors ]
         
         # notify if there is a broadcasting editor so the windows can sort out which one's are autoloading
-        for usereditor in usereditors:  
+        for usereditor in usereditors:
             for client in usereditor.userclients:
                 if client.automode == 'autotype':
                     editorstatusdata["broadcastingeditor"] = usereditor.username
@@ -479,13 +498,13 @@ class RunnerFactory(protocol.ServerFactory):
         
         # the complexity here reflects the complexity of the structure.  the running flag could be set on any one of the clients
         def scraperentry(eoos, cclient):  # local function
-            scrapereditors = { }   # chatname -> lasttouch
+            scrapereditors = { }   # chatname -> (lasttouch, nondraftcount)
             scraperdrafteditors = [ ]
             running = False        # we could make this an updated member of EditorsOnOneScraper like lasttouch
             
             for usereditor in eoos.usereditormap.values():
                 if usereditor.nondraftcount != 0:
-                    scrapereditors[usereditor.userclients[0].cchatname] = usereditor.userlasttouch
+                    scrapereditors[usereditor.userclients[0].cchatname] = (usereditor.userlasttouch, usereditor.nondraftcount)
                 else:
                     scraperdrafteditors.append(usereditor.userclients[0].cchatname)
                     
@@ -494,16 +513,19 @@ class RunnerFactory(protocol.ServerFactory):
             
             for uclient in eoos.anonymouseditors:
                 if uclient.automode != 'draft': 
-                    scrapereditors[uclient.cchatname] = uclient.clientlasttouch
+                    scrapereditors[uclient.cchatname] = (uclient.clientlasttouch, 1)
                 else:
                     scraperdrafteditors.append(uclient.cchatname)
                 running = running or bool(uclient.processrunning)
             
             ### scraperdrafteditors
             if cclient:
-                scraperusers = [ {'chatname':cclient.cchatname, 'present':(cclient.cchatname in scrapereditors), 'userlasttouch':jstime(cclient.clientlasttouch) } ]
+                scraperusercclient = {'chatname':cclient.cchatname, 'present':(cclient.cchatname in scrapereditors), 'userlasttouch':jstime(cclient.clientlasttouch) }
+                if scraperusercclient['present']:
+                    scraperusercclient['nondraftcount'] = (not cclient.username and 1 or eoos.usereditormap[cclient.username].nondraftcount)
+                scraperusers = [ scraperusercclient ]
             else:
-                scraperusers = [ {'chatname':cchatname, 'present':True, 'userlasttouch':jstime(userlasttouch) }  for cchatname, userlasttouch in scrapereditors.items() ]
+                scraperusers = [ {'chatname':cchatname, 'present':True, 'userlasttouch':jstime(ultc[0]), 'nondraftcount':ultc[1] }  for cchatname, ultc in scrapereditors.items() ]
             
             return {'scrapername':eoos.scrapername, 'present':True, 'running':running, 'scraperusers':scraperusers, 'scraperlasttouch':jstime(eoos.scraperlasttouch) }
         
