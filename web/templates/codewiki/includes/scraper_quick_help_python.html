@@ -1,95 +1,40 @@
-    <h4>Scraping a web page</h4>
-    <dl class="functiondocs">
-        <dt>Return the source text of a web page as a string:</dt>        
+    <h4>How do I get the text of a web page?</h4>
+    <dl class="functiondocs">     
         <dd>
-            <code>html = scraperwiki.scrape(url)</code>
+            <code>
+             import scraperwiki<br/>
+             html = scraperwiki.scrape("http://scraperwiki.com/hello_world.html")<br/>
+             print html
+            </code>
         </dd>
     </dl>     
-    <h4>Parsing (simple examples)</h4>
+    <h4>How do I retrieve the bits I care about?</h4>
     <dl class="functiondocs">
-        <dt>Extract data using BeautifulSoup</dt>
         <dd>
             <code>
+            import BeautifulSoup<br/>
             soup = BeautifulSoup.BeautifulSoup(html)<br/>
-            table = soup.find('TABLE_ID')<br/>
-            for td in table.findAll('td'):<br/>
+            for td in soup.findAll('td'):<br/>
             &nbsp;&nbsp;&nbsp;&nbsp;print td.string<br/>
             </code>
-            <p>
-                <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">Full documentation for BeautifulSoup (new window)</a>
-            </p>
         </dd>
     </dl>
-    <h4>Saving data</h4>
+    <h4>How do I save that data to the datastore?</h4>
     <dl class="functiondocs">
-        <dt>
-            Save to the datastore:
-        </dt>
         <dd>
             <code>
-                scraperwiki.datastore.save(unique_keys=[], data={}, <em>date=None</em>, <em>latlng=[None,None]</em>)
+            for td in soup.findAll('td'):<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;scraperwiki.datastore.save(unique_keys=['table_cell'], data={'table_cell':td.string})
             </code>
-            <p>
-                Saves a dictionary, <em>data</em>, to the datastore. <em>unique_keys</em> is a list of keys appearing in the dictionary used to determine if if a record should be inserted or updated. 
-                <em>date</em> and <em>latlng</em> are optional special fields  for indexing each record.
-            </p>
         </dd>
     </dl>
-    <h4>Scraper meta data</h4>
+    <h4>How do I geocode data?</h4>
     <dl class="functiondocs">
-      <dt>
-        Save a persistent variable accessible during another run
-      </dt>
       <dd>
           <code>
-              scraperwiki.metadata.save(key, value)
-          </code>
-      </dd>
-      <dt>
-          Retrieve a persistent variable saved by this scraper
-      </dt>
-      <dd>
-          <code>
-              scraperwiki.metadata.get(key, default=None)
+              postcode = scraperwiki.geo.extract_gb_postcode("10 Downing Street, London SW1A 2AA")<br/>
+              lat_lng = scraperwiki.geo.gb_postcode_to_latlng(postcode)<br/>
+              print lat_lng
           </code>
       </dd>
     </dl>
-    
-    <h4>Geocoding</h4>
-    <dl class="functiondocs">
-      <dt>
-            Convert a UK postcode to a (lat,lng) pair:
-      </dt>
-      <dd>
-          <code>
-              lat_lng = scraperwiki.geo.gb_postcode_to_latlng(postcode)
-          </code>
-      </dd>
-      <dt>
-          Convert an OSGB easting, northing to a (lat,lng) pair:          
-      </dt>
-      <dd>
-          <code>
-              lat_lng = scraperwiki.geo.os_easting_northing_to_latlng(easting, northing)
-          </code>
-      </dd>
-      <dt>
-          Extract a UK postcode form a string:
-      </dt>
-      <dd>
-          <code>
-              postcode = scraperwiki.geo.extract_gb_postcode(string)
-          </code>
-          <p>
-            Returns False if no postcode can be found
-          </p>
-      </dd>
-    </dl>
-    <h4>Recommended libraries</h4>
-    <ul>
-        <li><strong>urllib2, urlparse</strong> - standard Python libraries for opening URLs. <a href="http://docs.python.org/library/urllib2.html" target="_blank">Full documentation (new window)</a></li>
-        <li><strong>BeautifulSoup</strong> - for parsing HTML and XML.  <a href="http://www.crummy.com/software/BeautifulSoup/" target="_new">Full documentation (new window)</a></li>
-        <li><strong>Mechanize</strong> - automates submitting forms. <a href="http://wwwsearch.sourceforge.net/mechanize/" target="_new">Full documentation (new window)</a></li>
-        <li><strong>lxml</strong> - for parsing html and accessing it using cssselect.</li>
-        <li><strong>pdftoxml</strong> - converts the binary data of a PDF file into a parsable XML string</li>
-    </ul>
