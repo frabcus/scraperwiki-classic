@@ -180,7 +180,7 @@ $(document).ready(function() {
                 else
                     break; 
     
-                var lchainpatches = [ ]
+                var lchainpatches = [ ]; 
                 for (var i = 0; i < chains.length; i++)
                 {
                     var chain = chains[i]; 
@@ -193,7 +193,10 @@ $(document).ready(function() {
                         chainpatch["insertions"].push(lines[j]); 
                     lchainpatches.push(chainpatch); 
                 }
-                lchainpatches.sort(function(a,b) {return a["insertlinenumber"] - b["insertlinenumber"]});  // ascending order so we do the lower ones first (using pop)
+
+                    // arrange for the chainpatches list (which is reversed) to add the upper ones first, because the line numbering 
+                    // is detected against the final version after this chainpatch group has been done, so upper ones have occurred
+                lchainpatches.sort(function(a,b) {return b["insertlinenumber"] - a["insertlinenumber"]});  
                 while (lchainpatches.length)
                     chainpatches.push(lchainpatches.pop()); 
             }
@@ -316,7 +319,7 @@ $(document).ready(function() {
         addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+d', viewDiff);
         addHotkey('ctrl+p', popupPreview); 
-        addHotkey('ctrl+p', popupHelp); 
+        addHotkey('ctrl+h', popupHelp); 
     };
 
     function popupHelp()

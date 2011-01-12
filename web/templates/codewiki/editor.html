@@ -54,7 +54,7 @@
     <input type="hidden" id="id_wiki_type"      value="{{scraper.wiki_type}}"/>
 
     <input type="hidden" id="saveurl"           value="{% url handle_editor_save %}"/>
-    <input type="hidden" id="proxycachedurl"    value="{% url handle_editor_save %}"/>
+    <input type="hidden" id="proxycachedurl"    value="{% url proxycached %}"/>
 
     {% if request.user.is_staff %}
       <input type="hidden" id="quickhelpurl"    value="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'general_quickhelp' %}"/>
