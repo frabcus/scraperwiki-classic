@@ -194,11 +194,11 @@
       </div>
 
       <div id="popup_tutorials" class="quickhelp">
+        {% if request.user.is_staff %}
         <p>
-          <input type="checkbox" id="showautomode" {% if request.user.is_staff %}checked{% endif %}/>Always show automode dropdown.  
+          <input type="checkbox" id="showautomode" checked />Always show automode dropdown.  
           <input type="checkbox" id="popuplinenumbers"/>Show line numbers in popup of cached page.
         </p>
-        {% if request.user.is_staff %}
           <p class="staff">
           You are using Codemirror-{{codemirrorversion}}.
           Last typed timestamp: <span class="staff" id="lasttypedtimestamp">...</span>
