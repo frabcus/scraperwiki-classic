@@ -28,7 +28,7 @@ urlpatterns = patterns('',
     url(r'^scrapers/follow/(?P<short_name>[\w_\-]+)/$',   views.follow,                 name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-]+)/$', views.unfollow,               name='scraper_unfollow'),
     
-    url('^(?P<scraper_guid>[\w_\-]+)/(?P<metadata_name>.+)/$', metadata, name='metadata_api'),
+    url(r'^scrapers/metadata_api/(?P<scraper_guid>[\w_\-]+)/(?P<metadata_name>.+)/$', metadata, name='metadata_api'),
 
     # events and monitoring (pehaps should have both wiki_types possible)
     url(r'^scrapers/running_scrapers/$',                  viewsuml.running_scrapers,    name='running_scrapers'),
