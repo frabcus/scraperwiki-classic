@@ -2,6 +2,13 @@ from django.conf.urls.defaults import *
 
 from codewiki import views, viewsrpc, viewsuml, viewseditor
 
+from django.conf.urls.defaults import *
+from piston.resource import Resource
+
+from handlers import ScraperMetadataHandler
+
+metadata = Resource(handler=ScraperMetadataHandler)
+
 urlpatterns = patterns('',
     
     # use this to monitor the site
@@ -21,7 +28,7 @@ urlpatterns = patterns('',
     url(r'^scrapers/follow/(?P<short_name>[\w_\-]+)/$',   views.follow,                 name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-]+)/$', views.unfollow,               name='scraper_unfollow'),
     
-    url(r'^scrapers/metadata_api/', include('codewiki.metadata_api.urls')),
+    url('^(?P<scraper_guid>[\w_\-]+)/(?P<metadata_name>.+)/$', metadata, name='metadata_api'),
 
     # events and monitoring (pehaps should have both wiki_types possible)
     url(r'^scrapers/running_scrapers/$',                  viewsuml.running_scrapers,    name='running_scrapers'),
