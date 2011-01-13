@@ -49,21 +49,21 @@
     <input type="hidden" id="userrealname"      value="{{ request.user.get_profile.name }}"/>
     <input type="hidden" id="isstaff"           value="{% if request.user.is_staff %}yes{% endif %}"/>
     <input type="hidden" id="scraperlanguage"   value="{{ scraper.language|lower }}"/>
-    <input type="hidden" id="rev"               value="{{rev}}"/>
+    <input type="hidden" id="originalrev"       value="{{rev}}"/>
     <input type="hidden" id="codemirror_url"    value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
     <input type="hidden" id="id_wiki_type"      value="{{scraper.wiki_type}}"/>
 
+    {# declare all the URLs the javascript is going to want access to #}
+    <input type="hidden" id="userprofileurl"    value="{% url profiles_profile_detail 'XXX' %}"/>
     <input type="hidden" id="saveurl"           value="{% url handle_editor_save %}"/>
-    <input type="hidden" id="proxycachedurl"    value="{% url handle_editor_save %}"/>
-
+    <input type="hidden" id="proxycachedurl"    value="{% url proxycached %}"/>
     {% if request.user.is_staff %}
       <input type="hidden" id="quickhelpurl"    value="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'general_quickhelp' %}"/>
     {% endif %}
-
     {% if scraper.short_name %}
         <input type="hidden" id="viewrunurl"    value="{% url view_fullscreen scraper.short_name %}"/>
         <input type="hidden" id="editordiffurl" value="{% url diff scraper.short_name %}"/>
-        <input type="hidden" id="editorrawurl"  value="{% url raw scraper.short_name %}"/>
+        <input type="hidden" id="editorreloadurl" value="{% url reload scraper.short_name %}"/>
     {% endif %}
 
         <div class="editor">
@@ -103,10 +103,6 @@
             {# Controls #}
             <div class="editor_controls">
                 <a id="menu_tutorials" class="helplink" href="#" title="Show useful commands">Quick help</a>
-                {% if 0 %}
-                    <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
-                {% endif %}
-
                 <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R)"/>
                 {% ifequal scraper.wiki_type 'view' %}
                     <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P)"/>
@@ -116,8 +112,8 @@
                 <select id="automode">
                     <option name="autotype" value="autotype" id="id_autotype">broadcast</option>
                     <option name="autosave" value="autosave" id="id_autosave"  {% if scraper.id %}selected{% endif %}>editing</option>
-                    <option name="draft"    value="draft"    id="id_draft" {% if not scraper.id %}selected{% endif %}>draft editing</option>
                     <option name="autoload" value="autoload" id="id_autoload" disabled>watching</option>
+                    <option name="draft"    value="draft"    id="id_draft" {% if not scraper.id %}selected{% endif %}>draft editing</option>
                 </select>
 
                 {% ifequal scraper.wiki_type 'view' %}
@@ -194,17 +190,19 @@
       </div>
 
       <div id="popup_tutorials" class="quickhelp">
+        {% if request.user.is_staff %}
         <p>
-          <input type="checkbox" id="showautomode" {% if request.user.is_staff %}checked{% endif %}/>Always show automode dropdown.  
+          <input type="checkbox" id="showautomode" checked />Always show automode dropdown.  
           <input type="checkbox" id="popuplinenumbers"/>Show line numbers in popup of cached page.
         </p>
-        {% if request.user.is_staff %}
           <p class="staff">
           You are using Codemirror-{{codemirrorversion}}.
           Last typed timestamp: <span class="staff" id="lasttypedtimestamp">...</span>
           </p>
         {% endif %}
-
+        <p style="float: right;">
+       <strong>Question not answered here?</strong> <a href="{% url help %}" target="_blank">Help (new window)</a>
+        </p>
         <h3>
             <img src="{{MEDIA_URL}}images/icons/{{ scraper.language|lower }}.png"/>
             {% ifequal scraper.language 'php'%}
@@ -219,9 +217,7 @@
             {{scraper.wiki_type}}
             - quick help
         </h3>
-        <p>
-            <a href="{% url help_code_documentation %}" target="_blank">View full documentation (new window)</a> or try a <a href="{% url help_tutorials %}" title="Tutorials">tutorial (new window)</a>
-        </p>
+        <br/>
             {% include quick_help_template %}
       </div>
 

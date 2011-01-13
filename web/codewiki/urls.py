@@ -2,6 +2,13 @@ from django.conf.urls.defaults import *
 
 from codewiki import views, viewsrpc, viewsuml, viewseditor
 
+from django.conf.urls.defaults import *
+from piston.resource import Resource
+
+from handlers import ScraperMetadataHandler
+
+metadata = Resource(handler=ScraperMetadataHandler)
+
 urlpatterns = patterns('',
     
     # use this to monitor the site
@@ -21,7 +28,7 @@ urlpatterns = patterns('',
     url(r'^scrapers/follow/(?P<short_name>[\w_\-]+)/$',   views.follow,                 name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-]+)/$', views.unfollow,               name='scraper_unfollow'),
     
-    url(r'^scrapers/metadata_api/', include('codewiki.metadata_api.urls')),
+    url(r'^scrapers/metadata_api/(?P<scraper_guid>[\w_\-]+)/(?P<metadata_name>.+)/$', metadata, name='metadata_api'),
 
     # events and monitoring (pehaps should have both wiki_types possible)
     url(r'^scrapers/running_scrapers/$',                  viewsuml.running_scrapers,    name='running_scrapers'),
@@ -39,6 +46,7 @@ urlpatterns = patterns('',
                                                           views.scraper_run_scraper,    name='scraper_run_scraper'),
     url(r'^(?P<wiki_type>scraper|view)s/screenshoot-scraper/(?P<short_name>[\w_\-]+)/$', 
                                                           views.scraper_screenshoot_scraper,    name='scraper_screenshoot_scraper'),
+        
         #not deprecated as used in by ajax to implement publishScraperButton
     url(r'^scrapers/(?P<short_name>[\w_\-]+)/admin/$',    views.scraper_admin,          name='scraper_admin'),
         
@@ -56,13 +64,15 @@ urlpatterns = patterns('',
 
     # call-backs from ajax for reloading and diff
     url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
-    url(r'^editor/diff/(?P<short_name>[\-\w]*)$',         viewseditor.diff,   name="diff"),
-    url(r'^editor/raw/(?P<short_name>[\-\w]*)$',          viewseditor.raw,    name="raw"),   # blank name for draft scraper
-    url(r'^proxycached$',                                 views.proxycached,  name="proxycached"), 
+    url(r'^editor/diff/(?P<short_name>[\-\w]+)$',         viewseditor.diff,   name="diff"),  # maybe defunct, but could use for diffing against previous versions while in editor window
+    url(r'^editor/raw/(?P<short_name>[\-\w]+)$',          viewseditor.raw,    name="raw"),   # raw code not wrapped in javascript
+    url(r'^editor/reload/(?P<short_name>[\-\w]+)$',       viewseditor.reload, name="reload"),   
+    url(r'^proxycached$',                                 views.proxycached,  name="proxycached"), # ?cachedid=1234
     
-    # editor (the action stuff is deprecated)
+    # editor 
     url(r'^handle_session_draft/$',                       viewseditor.handle_session_draft, name="handle_session_draft"),
     url(r'^handle_editor_save/$',                         viewseditor.handle_editor_save,   name="handle_editor_save"),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/edit/$',     viewseditor.edit, name="editor_edit"),    
     url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',            viewseditor.edit, name="editor"),
 )
+

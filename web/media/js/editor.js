@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-    //variables
+    // editor window dimensions
     var editor_id = 'id_code';
     var codeeditor = undefined;
     var codemirroriframe = undefined; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
@@ -9,6 +9,7 @@ $(document).ready(function() {
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
 
+    // variable transmitted through the html
     var short_name      = $('#short_name').val();
     var guid            = $('#scraper_guid').val();
     var username        = $('#username').val(); 
@@ -18,7 +19,9 @@ $(document).ready(function() {
     var run_type        = $('#code_running_mode').val();
     var codemirror_url  = $('#codemirror_url').val();
     var wiki_type       = $('#id_wiki_type').val(); 
+    var rev             = $('#originalrev').val(); 
 
+    // runtime information
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
     var conn = undefined; // Orbited connection
     var bConnected  = false; 
@@ -37,6 +40,7 @@ $(document).ready(function() {
     // information handling who else is watching and editing during this session
     var editingusername = "";  // primary editor
     var loggedineditors = [ ]; // list of who else is here and their windows open
+    var iselectednexteditor = 1; 
     var nanonymouseditors = 0; // number of anonymous editors
     var chatname = ""          // special in case of Anonymous users (yes, this unnecessarily gets set every time we call recordEditorStatus)
     var chatpeopletimes = { }; // last time each person made a chat message
@@ -57,8 +61,11 @@ $(document).ready(function() {
     var savedundo = 0; 
     var lastundo = 0; 
 
-    var cachehidlookup = { }; 
+    var cachehidlookup = { }; // this itself is a cache of a cache
+    
     var chainpatches = [ ]; 
+    var chainpatchnumber = 0; // counts them going out
+    var lasttypetime = new Date(); 
 
     $.ajaxSetup({timeout: 10000});
 
@@ -114,6 +121,7 @@ $(document).ready(function() {
         if (chainpatches.length > 0)
             sendjson(chainpatches.shift()); 
 
+        // clear out the ones that are pure typing messages sent in non-broadcast mode
         while ((chainpatches.length > 0) && (chainpatches[0].insertlinenumber == undefined))
             chainpatches.shift(); 
 
@@ -124,6 +132,7 @@ $(document).ready(function() {
 
     function ChangeInEditor(changetype) 
     {
+        lasttypetime = new Date(); 
         var historysize = codeeditor.historySize(); // should have (+ historysize.shiftedoffstack)
         var automode = $('select#automode option:selected').val(); 
 
@@ -152,7 +161,7 @@ $(document).ready(function() {
                 $('select#automode #id_autotype').attr('disabled', false); 
         }
 
-        if (changetype != "edit")
+        if (changetype != 'edit')
             return; 
 
     // to do: arrange for there to be only one autotype/broadcast window for a user
@@ -180,11 +189,11 @@ $(document).ready(function() {
                 else
                     break; 
     
-                var lchainpatches = [ ]
+                var lchainpatches = [ ]; 
                 for (var i = 0; i < chains.length; i++)
                 {
                     var chain = chains[i]; 
-                    var chainpatch = { "command":'typing', "insertlinenumber":CM_lineNumber(chain[0].from), "deletions":[ ], "insertions":[ ] }
+                    var chainpatch = { command:'typing', insertlinenumber:CM_lineNumber(chain[0].from), deletions:[ ], insertions:[ ], "chainpatchnumber":(chainpatchnumber++), "rev":rev }
                     for (var k = 0; k < chain.length; k++)
                         chainpatch["deletions"].push(chain[k].text); 
     
@@ -193,7 +202,10 @@ $(document).ready(function() {
                         chainpatch["insertions"].push(lines[j]); 
                     lchainpatches.push(chainpatch); 
                 }
-                lchainpatches.sort(function(a,b) {return a["insertlinenumber"] - b["insertlinenumber"]});  // ascending order so we do the lower ones first (using pop)
+
+                    // arrange for the chainpatches list (which is reversed) to add the upper ones first, because the line numbering 
+                    // is detected against the final version after this chainpatch group has been done, so upper ones have occurred
+                lchainpatches.sort(function(a,b) {return b["insertlinenumber"] - a["insertlinenumber"]});  
                 while (lchainpatches.length)
                     chainpatches.push(lchainpatches.pop()); 
             }
@@ -314,9 +326,8 @@ $(document).ready(function() {
     {
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+r', sendCode);
-        addHotkey('ctrl+d', viewDiff);
         addHotkey('ctrl+p', popupPreview); 
-        addHotkey('ctrl+p', popupHelp); 
+        addHotkey('ctrl+h', popupHelp); 
     };
 
     function popupHelp()
@@ -472,12 +483,15 @@ $(document).ready(function() {
 
         // couldn't find a way to make a reconnect button work!
             // the bSuppressDisconnectionMessages technique doesn't seem to work (unload is not invoked), so delay message  in the hope that window will close first
-        if (!bSuppressDisconnectionMessages)
-            window.setTimeout(function() {
+        window.setTimeout(function() 
+        {
+            if (!bSuppressDisconnectionMessages)
+            {
                 writeToChat('<b>You will need to reload the page to reconnect</b>');  
                 writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
-                writeToConsole("(You can still save your work)", "exceptionnoesc"); }, 
-                250); 
+                writeToConsole("(You can still save your work)", "exceptionnoesc"); 
+            }
+        }, 250); 
 
 
         $('.editor_controls #run').val('Unconnected');
@@ -538,7 +552,8 @@ $(document).ready(function() {
         }
     }
 
-    function clearJunkFromQueue() {
+    function clearJunkFromQueue() 
+    {
         var lreceiverecordqueue = [ ]; 
         for (var i = 0; i < receiverecordqueue.length; i++) {
             jdata = receiverecordqueue[i]; 
@@ -587,11 +602,19 @@ $(document).ready(function() {
           } else if (data.message_type == "othersaved") {
               reloadScraper();
               writeToChat("<i>saved in another window</i>", data.chatname);  
+          } else if (data.message_type == "requestededitcontrol") {
+
+// this should popup something if there has been no activity for a while with a count-down timer that eventually sets the editinguser down and
+// self-demotes to autoload with the right value of iselectednexteditor selected
+writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit control but you have last typed " + (new Date() - lasttypetime)/1000 + " seconds ago"); 
+
+          } else if (data.message_type == "giveselrange") {
+              writeToChat("<b>selrange: "+data.chatname+" has made a select range: "+$.toJSON(data.selrange)+"</b>"); 
+              makeSelection(data.selrange); // do it anyway
           } else if (data.message_type == "data") {
               writeToData(data.content);
           } else if (data.message_type == "exception") {
               writeExceptionDump(data.exceptiondescription, data.stackdump, data.blockedurl, data.blockedurlquoted); 
-
           } else if (data.message_type == "executionstatus") {
               if (data.content == "startingrun")
                 startingrun(data.runID, data.uml, data.chatname);
@@ -620,6 +643,7 @@ $(document).ready(function() {
 
     function sendChat() 
     {
+        lasttypetime = new Date(); 
         data = {"command":'chat', "guid":guid, "username":username, "text":$('#chat_line').val()};
         sendjson(data); 
         $('#chat_line').val(''); 
@@ -687,6 +711,7 @@ $(document).ready(function() {
 
     function changeAutomode() 
     {
+        lasttypetime = new Date(); 
         var automode = $('select#automode option:selected').val(); 
         if (automode == 'draft')
         {
@@ -705,8 +730,22 @@ $(document).ready(function() {
             $('.editor_controls #run').attr('disabled', false);
             $('.editor_controls #preview').attr('disabled', false);
         }
+                // self demote from editing to watching
+        else if (automode == 'autoload')
+        {
+            $('select#automode #id_autosave').attr('disabled', true); 
+            $('select#automode #id_autotype').attr('disabled', true); 
+            setCodeeditorBackgroundImage('url(/media/images/staff.png)')
+            $('.editor_controls #btnCommitPopup').attr('disabled', true); 
+            $('.editor_controls #run').attr('disabled', true);
+            $('.editor_controls #preview').attr('disabled', true);
+        }
         writeToChat('Changed automode: ' + automode); 
-        sendjson({"command":'automode', "automode":automode}); 
+
+        data = {"command":'automode', "automode":automode}; 
+        if ((automode == "autoload") && (loggedineditors.length >= 3))
+            data["selectednexteditor"] = loggedineditors[iselectednexteditor]; 
+        sendjson(data); 
     }; 
 
     function showhideAutomodeSelector()
@@ -727,6 +766,20 @@ $(document).ready(function() {
         return (seconds < 120 ? seconds.toFixed(0) + " seconds" : (seconds/60).toFixed(1) + " minutes"); 
     }
 
+    function setwatcherstatusmultieditinguser()
+    {
+        if (iselectednexteditor >= loggedineditors.length)
+            iselectednexteditor = 1; 
+        var selectednexteditor = loggedineditors[iselectednexteditor]; 
+        wstatus = '<a href="'+ $('input#userprofileurl').val().replace(/XXX/g, selectednexteditor) +'" target="_blank">'+selectednexteditor+'</a>'; 
+        if (loggedineditors.length >= 3)
+            wstatus += ' (<a class="plusone">+' + (loggedineditors.length-2) + '</a>)'; 
+        wstatus += ' <a class="plusoneselect">is</a> watching'; 
+        $('#watcherstatus').html(wstatus); 
+        if (loggedineditors.length >= 3)
+            $('#watcherstatus .plusone').click(function() { iselectednexteditor += 1; setwatcherstatusmultieditinguser() }); 
+        $('#watcherstatus .plusoneselect').click(transmitSelection); 
+    }
 
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
@@ -765,7 +818,6 @@ $(document).ready(function() {
             stext.push("."); 
             writeToChat(cgiescape(stext.join(""))); 
         }
-
         showhideAutomodeSelector(); 
 
         var automode = $('select#automode option:selected').val(); 
@@ -780,23 +832,20 @@ $(document).ready(function() {
         else if (username && (editingusername == username))
         {
             $('select#automode #id_autoload').attr('disabled', (loggedineditors.length == 1)); // no point in being a watcher if no one else is available to edit
-            var wstatus = "";
-            if (loggedineditors.length >= 2)
-            {
-                wstatus = '<a href="/profiles/'+loggedineditors[1]+'" target="_blank">'+loggedineditors[1]+'</a>'; 
-                if (loggedineditors.length >= 3)
-                    wstatus += ' (+' + (loggedineditors.length-2) + ')'; 
-                wstatus += ' is watching'; 
-            }
-            $('#watcherstatus').html(wstatus); 
 
-            if (data.broadcastingeditor == username)   // handle turning one window of many
+            if (loggedineditors.length >= 2)
+                setwatcherstatusmultieditinguser(); // sets links to call self
+            else
+                $('#watcherstatus').html(""); 
+
+            if (data.broadcastingeditor == username)   
             {
+                    // convert all the autosaving pages to watching (apart from the one that the user changed to autotype)
                 if (automode == 'autosave')
                 {
                     $('select#automode #id_autoload').attr('disabled', false); 
                     $('select#automode').val('autoload'); // watching
-                    $('select#automode #id_autosave').attr('disabled', true); 
+                    $('select#automode #id_autosave').attr('disabled', false); 
                     $('select#automode #id_autotype').attr('disabled', true); 
                     setCodeeditorBackgroundImage('url(/media/images/staff.png)')
                     $('.editor_controls #btnCommitPopup').attr('disabled', true); 
@@ -805,7 +854,7 @@ $(document).ready(function() {
                     sendjson({"command":'automode', "automode":'autoload'}); 
                 }
             }
-            else if ((automode != 'autosave') && (automode != 'autotype'))
+            else if (((automode != 'autosave') && (automode != 'autotype')) || (data.broadcastingeditor == undefined))
             {
                 setCodeeditorBackgroundImage('none')
                 $('select#automode #id_autosave').attr('disabled', false); 
@@ -821,7 +870,11 @@ $(document).ready(function() {
         // you are not the editing user, someone else is
         else if (editingusername)
         {
-            $('#watcherstatus').html('<a href="/profiles/'+editingusername+'" target="_blank">'+editingusername+'</a> is editing'); 
+            $('#watcherstatus').html('<a href="'+$('input#userprofileurl').val().replace(/XXX/g, editingusername)+'" target="_blank">'+editingusername+'</a> <a class="plusoneselect">is</a> <a class="plusoneediting">editing</a>'); 
+            if (username)
+                $('#watcherstatus .plusoneediting').click(function() { sendjson({"command":'requesteditcontrol', "user":username}); }); 
+            $('#watcherstatus .plusoneselect').click(transmitSelection); 
+
             if (automode != 'autoload')
             {
                 $('select#automode #id_autoload').attr('disabled', false); 
@@ -1004,15 +1057,6 @@ $(document).ready(function() {
         }
     }
 
-    // prob replace this with proper example diffing against previous versions
-    function viewDiff() { $.ajax( 
-    {
-        type:   'POST',
-        url:    $('input#editordiffurl').val(),
-        data:   { code: codeeditor.getCode()},
-        dataType: "html",
-        success: function(diff) { $.modal('<pre class="popupoutput">'+cgiescape(diff)+'</pre>', { overlayClose: true }); } 
-    })}
 
     function clearOutput() 
     {
@@ -1024,47 +1068,35 @@ $(document).ready(function() {
         $('.editor_output div.tabs li.sources').removeClass('new');
     }
 
+    function makeSelection(selrange)
+    {
+        var linehandlestart = codeeditor.nthLine(selrange.startline + 1); 
+        var linehandleend = (selrange.endline == selrange.startline ? linehandlestart : codeeditor.nthLine(selrange.endline + 1)); 
+        codeeditor.selectLines(linehandlestart, selrange.startoffset, linehandleend, selrange.endoffset); 
+    }
+
+    function transmitSelection()
+    {
+        var curposstart = codeeditor.cursorPosition(true); 
+
+        var curposend = codeeditor.cursorPosition(false); 
+        var selrange = { startline:codeeditor.lineNumber(curposstart.line)-1, startoffset:curposstart.character, 
+                         endline:codeeditor.lineNumber(curposend.line)-1, endoffset:curposend.character }; 
+        sendjson({"command":'giveselrange', "selrange":selrange, "username":username}); 
+    }
+
     function reloadScraper()
     {
-        if (shortNameIsSet() == false) {
-            alert("Cannot reload draft scraper");
-            return; 
-        }
-
-
-        // send current code up to the server and get a copy of new code
-        var newcode = $.ajax({
-                         url: $('input#editorrawurl').val(),
-                         async: false, 
-                         type: 'POST', 
-                         data: {oldcode: codeeditor.getCode()} 
-                       }).responseText; 
-
-        // extract the (changed) select range information from the header of return data
-        var selrangedelimeter = ":::sElEcT rAnGe:::"; 
-        var iselrangedelimeter = newcode.indexOf(selrangedelimeter); 
-        var selrange = [0,0,0,0];
-        if (iselrangedelimeter != -1) 
-        {
-            var selrange = newcode.substring(0, iselrangedelimeter); 
-            newcode = newcode.substring(iselrangedelimeter + selrangedelimeter.length); 
-            selrange = $.evalJSON(selrange); 
-        }
-
-        codeeditor.setCode(newcode); 
-        codeeditor.focus(); 
-
-        ChangeInEditor("reload"); 
-
-        // make the selection
-        if (!((selrange[2] == 0) && (selrange[3] == 0)))
-        {
-            var linehandlestart = codeeditor.nthLine(selrange[0] + 1); 
-            var linehandleend = codeeditor.nthLine(selrange[2] + 1); 
-            codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
-        }
-
         $('.editor_controls #btnCommitPopup').val('Loading...').addClass('darkness');
+        var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: codeeditor.getCode() } }); 
+        var reloaddata = $.evalJSON(reloadajax.responseText); 
+        codeeditor.setCode(reloaddata.code); 
+        rev = reloaddata.rev; 
+        chainpatchnumber = 0; 
+        codeeditor.focus(); 
+        if (reloaddata.selrange)
+            makeSelection(reloaddata.selrange); 
+        ChangeInEditor("reload"); 
         window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
     }; 
 
@@ -1100,20 +1132,6 @@ $(document).ready(function() {
         });
         
         $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')); 
-
-        //diff button (hidden)
-        $('.editor_controls #diff').click(function() 
-        {
-                viewDiff(); 
-                return false; 
-        }); 
-
-        //reload button (hidden)
-        $('.editor_controls #reload').click(function() 
-        {
-                reloadScraper(); 
-                return false; 
-        });
 
         //close editor link
         $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(function ()
@@ -1355,8 +1373,8 @@ writeToChat("Saved rev number: " + res.rev);
     }
 
     //Write to console/data/sources
-    function writeToConsole(sMessage, sMessageType, iLine) {
-
+    function writeToConsole(sMessage, sMessageType, iLine) 
+    {
         // if an exception set the class accordingly
         var sShortClassName = '';
         var sLongClassName = 'message_expander';
@@ -1570,14 +1588,15 @@ writeToChat("Saved rev number: " + res.rev);
             if ((chatpeopletimes[sechatname] == undefined) || ((servernowtime.getTime() - chatpeopletimes[sechatname].getTime())/1000 > 60))
             {
                 chatpeopletimes[sechatname] = servernowtime; 
-                $('.editor_output div.tabs li.chat').addClass('improved');
-                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('improved'); }, 1500); 
+                $('.editor_output div.tabs li.chat').addClass('chatalert');
+                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('chatalert'); }, 1500); 
             }
         }
     }
 
     // some are implemented with tables, and some with span rows.  
-    function setTabScrollPosition(sTab, command) {
+    function setTabScrollPosition(sTab, command) 
+    {
         divtab = '#output_' + sTab; 
         contenttab = '#output_' + sTab; 
 

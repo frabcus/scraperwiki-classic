@@ -273,9 +273,15 @@ $(document).ready(function() {
                         if (cpresent)
                         {
                             if (!$(cele).attr("id"))
-                                $(ele+" ul").append("<li id=\""+idcchatname+"\" class=\"luser\">"+getUserfromCChatname(chatname)+" "+ getNewDatetimeSpan(userlasttouch) +"</li>"); 
+                                $(ele+" ul").append("<li id=\""+idcchatname+"\" class=\"luser\">"
+                                                    +getUserfromCChatname(chatname)+" "
+                                                    +getNewDatetimeSpan(userlasttouch)
+                                                    +' (<span class="nondraftcount">'+scraperuser.nondraftcount+"</span>)</li>"); 
                             else
+                            {
                                 $(cele + " .lasttouchdiff .lasttouch").text(String(userlasttouch.getTime())); 
+                                $(cele + " .nondraftcount").text(String(scraperuser.nondraftcount)); 
+                            }
                         }
                         else
                             $(cele).remove(); 
