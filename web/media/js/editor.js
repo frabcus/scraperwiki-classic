@@ -858,7 +858,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             {
                 setCodeeditorBackgroundImage('none')
                 $('select#automode #id_autosave').attr('disabled', false); 
-                $('select#automode #id_autotype').attr('disabled', false); 
+                $('select#automode #id_autotype').attr('disabled', pageIsDirty); 
                 $('select#automode').val('autosave'); // editing
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
