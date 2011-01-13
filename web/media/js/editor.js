@@ -1048,6 +1048,13 @@ $(document).ready(function() {
         $('.editor_output div.tabs li.sources').removeClass('new');
     }
 
+    function makeSelection(selrange)
+    {
+        var linehandlestart = codeeditor.nthLine(selrange.startline + 1); 
+        var linehandleend = (selrange.endline == selrange.startline ? linehandlestart : codeeditor.nthLine(selrange.endline + 1)); 
+        codeeditor.selectLines(linehandlestart, selrange.startoffset, linehandleend, selrange.endoffset); 
+    }
+
     function reloadScraper()
     {
         $('.editor_controls #btnCommitPopup').val('Loading...').addClass('darkness');
@@ -1055,15 +1062,9 @@ $(document).ready(function() {
         var reloaddata = $.evalJSON(reloadajax.responseText); 
         codeeditor.setCode(reloaddata.code); 
         codeeditor.focus(); 
+        if (reloaddata.selrange)
+            makeSelection(reloaddata.selrange); 
         ChangeInEditor("reload"); 
-        // make the selection
-        if (reloaddata.selrange && !((reloaddata.selrange[2] == 0) && (reloaddata.selrange[3] == 0)))
-        {
-            var linehandlestart = codeeditor.nthLine(reloaddata.selrange[0] + 1); 
-            var linehandleend = codeeditor.nthLine(reloaddata.selrange[2] + 1); 
-            codeeditor.selectLines(linehandlestart, reloaddata.selrange[1], linehandleend, reloaddata.selrange[3]); 
-        }
-
         window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
     }; 
 

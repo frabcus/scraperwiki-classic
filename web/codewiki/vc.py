@@ -236,7 +236,7 @@ def DiffLineSequenceChanges(oldcode, newcode):
 
     # no difference case
     if matchlinesbackb == -1:
-        return (0, 0, 0, 0)  
+        return None  
     
     # lines have been cleanly deleted, so highlight first character where it happens
     if matchlinesbackb < matchlinesfront:
@@ -262,10 +262,7 @@ def DiffLineSequenceChanges(oldcode, newcode):
     else:
         matchcharsback = 0
     matchcharsbackb = len(b[matchlinesbackb]) - matchcharsback
-    return (matchlinesfront, matchcharsfront, matchlinesbackb, matchcharsbackb)
-      #, matchingcblocksback, (len(a[matchlinesbacka]) -
-      #  matchingcblocksback[-2][2], len(b[matchlinesbackb]) - 
-      #  matchingcblocksback[-2][2]))
+    return { "startline":matchlinesfront, "startoffset":matchcharsfront, "endline":matchlinesbackb, "endoffset":matchcharsbackb }
 
 
 
