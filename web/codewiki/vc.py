@@ -144,7 +144,7 @@ class MercurialInterface:
             
             #print "sssss", (modified, added, removed, deleted, unknown, ignored, clean)
             status["ismodified"] = ("code" in modified)
-            status["isadded"] = ("code" in added)
+            status["isadded"] = ("code" in added)  # false if actually committed (ie true means we're in an awkward state)
             return status
         
         

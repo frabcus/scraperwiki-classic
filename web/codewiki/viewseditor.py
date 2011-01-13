@@ -129,10 +129,10 @@ def reload(request, short_name):
         return HttpResponse(json.dumps({'status' : 'Failed', 'message':"scraper not available to reload"}))
 
     oldcodeineditor = request.POST.get('oldcode')
-    newcode = scraper.saved_code()
-    result = { "code": newcode }
+    status = vc.MercurialInterface(scraper.get_repo_path()).getstatus(scraper, -1)
+    result = { "code": status["code"], "rev":status.get('prevcommit',{}).get('rev') }
     if oldcodeineditor:
-        result["selrange"] = vc.DiffLineSequenceChanges(oldcodeineditor, newcode)
+        result["selrange"] = vc.DiffLineSequenceChanges(oldcodeineditor, status["code"])
     return HttpResponse(json.dumps(result))
   
   # try to get rid of this

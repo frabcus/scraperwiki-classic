@@ -114,8 +114,7 @@ span.hiddenfields { margin-left:10px; }
 .editor_output .info #chat_line {width:90%;}
 
 
-.editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.3em 1em;
-    height:1.4em;}
+.editor_output .info span.output_item {border-bottom:dotted 1px #ccc; display:block; padding:0.3em 1em; height:1.4em;}
 .editor_output .info span.exception {background:#fafafa url(../images/icons/bug_error.png) no-repeat 5px 3px; padding-left:25px; font-weight:bold;}
 .editor_output .info span.output_item:hover {background-color:#ffffd7;}
 .editor_output .info span.output_item.run_end {border-bottom:solid 1px #aaa;}
@@ -132,6 +131,8 @@ span.hiddenfields { margin-left:10px; }
 .editor_output tr:hover td {background:#ffffd7;}
 .editor_output td {border-bottom:dotted 1px #ccc; padding:0.3em 0.5em; line-height:1em;}
 
+#watcherstatus .plusone { color:black; cursor:pointer; }
+#watcherstatus .plusoneediting { color:black; cursor:pointer; }
 
 /* Overlays and help */
 

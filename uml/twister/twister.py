@@ -206,6 +206,13 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             line = json.dumps({'message_type':'chat', 'chatname':self.chatname, 'message':parsed_data.get('text'), 'nowtime':jstime(datetime.datetime.now()) })
             self.writeall(line)
         
+        elif command == 'requesteditcontrol':
+            for usereditor in self.guidclienteditors.usereditormap.values():
+                if usereditor.nondraftcount:
+                    for client in usereditor.userclients:
+                        if client.automode == 'autotype' or client.automode == 'autosave':
+                            client.writejson({'message_type':'requestededitcontrol', "username":self.username})
+        
         elif command == 'automode':
             automode = parsed_data.get('automode')
             if automode == self.automode:
@@ -255,10 +262,9 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
     # message to the client
     def writeline(self, line):
         self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together
-    
+
     def writejson(self, data):
         self.writeline(json.dumps(data))
-    
 
     def writeall(self, line, otherline=""):
         if line: 

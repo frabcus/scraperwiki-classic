@@ -65,6 +65,7 @@ $(document).ready(function() {
     
     var chainpatches = [ ]; 
     var chainpatchnumber = 0; // counts them going out
+    var lasttypetime = new Date(); 
 
     $.ajaxSetup({timeout: 10000});
 
@@ -131,6 +132,7 @@ $(document).ready(function() {
 
     function ChangeInEditor(changetype) 
     {
+        lasttypetime = new Date(); 
         var historysize = codeeditor.historySize(); // should have (+ historysize.shiftedoffstack)
         var automode = $('select#automode option:selected').val(); 
 
@@ -191,7 +193,7 @@ $(document).ready(function() {
                 for (var i = 0; i < chains.length; i++)
                 {
                     var chain = chains[i]; 
-                    var chainpatch = { command:'typing', insertlinenumber:CM_lineNumber(chain[0].from), deletions:[ ], insertions:[ ], "chainpatchnumber":(chainpatchnumber++) }
+                    var chainpatch = { command:'typing', insertlinenumber:CM_lineNumber(chain[0].from), deletions:[ ], insertions:[ ], "chainpatchnumber":(chainpatchnumber++), "rev":rev }
                     for (var k = 0; k < chain.length; k++)
                         chainpatch["deletions"].push(chain[k].text); 
     
@@ -481,12 +483,15 @@ $(document).ready(function() {
 
         // couldn't find a way to make a reconnect button work!
             // the bSuppressDisconnectionMessages technique doesn't seem to work (unload is not invoked), so delay message  in the hope that window will close first
-        if (!bSuppressDisconnectionMessages)
-            window.setTimeout(function() {
+        window.setTimeout(function() 
+        {
+            if (!bSuppressDisconnectionMessages)
+            {
                 writeToChat('<b>You will need to reload the page to reconnect</b>');  
                 writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
-                writeToConsole("(You can still save your work)", "exceptionnoesc"); }, 
-                250); 
+                writeToConsole("(You can still save your work)", "exceptionnoesc"); 
+            }
+        }, 250); 
 
 
         $('.editor_controls #run').val('Unconnected');
@@ -597,11 +602,12 @@ $(document).ready(function() {
           } else if (data.message_type == "othersaved") {
               reloadScraper();
               writeToChat("<i>saved in another window</i>", data.chatname);  
+          } else if (data.message_type == "requestededitcontrol") {
+              writeToChat("<b>requestededitcontrol: "+username+ " has requested edit control but you have last typed " + (new Date() - lasttypetime)/1000 + " seconds ago"); 
           } else if (data.message_type == "data") {
               writeToData(data.content);
           } else if (data.message_type == "exception") {
               writeExceptionDump(data.exceptiondescription, data.stackdump, data.blockedurl, data.blockedurlquoted); 
-
           } else if (data.message_type == "executionstatus") {
               if (data.content == "startingrun")
                 startingrun(data.runID, data.uml, data.chatname);
@@ -630,6 +636,7 @@ $(document).ready(function() {
 
     function sendChat() 
     {
+        lasttypetime = new Date(); 
         data = {"command":'chat', "guid":guid, "username":username, "text":$('#chat_line').val()};
         sendjson(data); 
         $('#chat_line').val(''); 
@@ -697,6 +704,7 @@ $(document).ready(function() {
 
     function changeAutomode() 
     {
+        lasttypetime = new Date(); 
         var automode = $('select#automode option:selected').val(); 
         if (automode == 'draft')
         {
@@ -854,7 +862,10 @@ $(document).ready(function() {
         // you are not the editing user, someone else is
         else if (editingusername)
         {
-            $('#watcherstatus').html('<a href="'+$('input#userprofileurl').val().replace(/XXX/g, editingusername)+'" target="_blank">'+editingusername+'</a> is editing'); 
+            $('#watcherstatus').html('<a href="'+$('input#userprofileurl').val().replace(/XXX/g, editingusername)+'" target="_blank">'+editingusername+'</a> is <a class="plusoneediting">editing</a>'); 
+            if (username)
+                $('#watcherstatus .plusoneediting').click(function() { sendjson({"command":'requesteditcontrol', "user":'username'}); }); 
+
             if (automode != 'autoload')
             {
                 $('select#automode #id_autoload').attr('disabled', false); 
@@ -1061,6 +1072,8 @@ $(document).ready(function() {
         var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: codeeditor.getCode() } }); 
         var reloaddata = $.evalJSON(reloadajax.responseText); 
         codeeditor.setCode(reloaddata.code); 
+        rev = reloaddata.rev; 
+        chainpatchnumber = 0; 
         codeeditor.focus(); 
         if (reloaddata.selrange)
             makeSelection(reloaddata.selrange); 
