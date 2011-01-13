@@ -151,7 +151,7 @@ pre.popupoutput {white-space: pre-wrap;white-space: -moz-pre-wrap;
     white-space: -pre-wrap;white-space: -o-pre-wrap; word-wrap: break-word;
     }
 
-#popup_tutorials {text-align:left; overflow-y:auto; display:none; }
+#popup_tutorials { text-align:left; overflow-y:auto; display:none; }
 
 dl.quick_help dt code {font-size:1.3em;}
 dl.quick_help dd {font-size:0.8em; padding:0.5em 0 1.2em 0; margin:0;}

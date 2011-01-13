@@ -332,31 +332,25 @@ $(document).ready(function() {
 
     function popupHelp()
     {
-        var quickhelpurl = $('input#quickhelpurl').val(); 
-        if (quickhelpurl)
+        // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
+        var cursorpos = codeeditor.cursorPosition(true); 
+        var cursorendpos = codeeditor.cursorPosition(false); 
+        var quickhelpparams = { language:scraperlanguage, wiki_type:wiki_type, line:codeeditor.lineContent(cursorpos.line), character:cursorpos.character }; 
+        if (cursorpos.line == cursorendpos.line)
+            quickhelpparams["endcharacter"] = cursorendpos.character; 
+
+        $.modal('<iframe width="100%" height="100%" src='+$('input#quickhelpurl').val()+'?'+$.param(quickhelpparams)+'></iframe>', 
         {
-            // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
-            var cursorpos = codeeditor.cursorPosition(true); 
-            var cursorendpos = codeeditor.cursorPosition(false); 
-            var quickhelpparams = { language:scraperlanguage, line:codeeditor.lineContent(cursorpos.line), character:cursorpos.character }; 
-            if (cursorpos.line == cursorendpos.line)
-                quickhelpparams["endcharacter"] = cursorendpos.character; 
-            $.modal('<iframe width="100%" height="100%" src='+quickhelpurl+'?'+$.param(quickhelpparams)+'></iframe>', 
+            overlayClose: true,
+            containerCss: { borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
+            overlayCss: { cursor:"auto" }, 
+            onShow: function() 
             {
-                overlayClose: true,
-                containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
-                overlayCss: { cursor:"auto" }, 
-            }); 
-        }
-        else
-        {
-            $('#popup_tutorials').modal(
-            {
-                 overlayClose: true, persist: true, 
-                 containerCss:{ borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
-                 overlayCss: { cursor:"auto" }
-            });
-        };
+                var wrapheight = $('.simplemodal-wrap').height(); 
+                $('.simplemodal-wrap').css("overflow", "hidden"); 
+                $('.simplemodal-wrap iframe').width( $('.simplemodal-wrap').width()-2); 
+            }
+        }); 
     }
 
     //Setup Menu
@@ -1057,7 +1051,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         }
     }
 
-
     function clearOutput() 
     {
         $('#output_console div').html('');
@@ -1124,7 +1117,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     
     
     //Setup toolbar
-    function setupToolbar(){
+    function setupToolbar()
+    {
         // actually the save button
         $('.editor_controls #btnCommitPopup').live('click', function (){
             saveScraper();  
@@ -1197,11 +1191,13 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                    // force the preview iframe to fill most of what it should.  needs more work
         previewscreen += '<iframe id="previewiframe" width="100%" height="'+($(window).height()*8/10-50)+'px" src="'+isrc+'"></iframe>'; 
 
-        $.modal(previewscreen, { 
+        $.modal(previewscreen, 
+        { 
             overlayClose: true,
             containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
             overlayCss: { cursor:"auto" }, 
-            onShow: function(d) {
+            onShow: function() 
+            {
                 ifrm = document.getElementById('previewiframe');
                 activepreviewiframe = (ifrm.contentWindow ? ifrm.contentWindow : (ifrm.contentDocument.document ? ifrm.contentDocument.document : ifrm.contentDocument));
                 activepreviewiframe.document.open(); 
@@ -1210,7 +1206,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         }); 
     }
 
-    //Save
     function saveScraper()
     {
         if ($('.editor_controls #btnCommitPopup').attr('disabled'))

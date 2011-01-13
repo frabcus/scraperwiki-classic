@@ -499,6 +499,7 @@ h4 a.edit {font-size:0.8em;}
 #template_popup img.lang_icon {position:relative; top:4px;}
 
 /* function docmentation */
+div#divQuickHelp { text-align: left }
 dl.functiondocs {border-bottom:solid 1px #ccc;margin:1em 0 1em 0;}
 dl.functiondocs dt {padding-bottom:0.5em;}
 dl.functiondocs dd {padding-left:0;margin-left:0;padding-bottom:1em;}

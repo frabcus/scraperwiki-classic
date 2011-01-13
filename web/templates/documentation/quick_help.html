@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css?{{settings.REVISION}}" />
+</head>
+
+<body>
+  <div id="divQuickHelp">
+  <p style="float: right;">
+    <strong>Question not answered here?</strong> <a href="{% url help %}" >Help (new window)</a>
+  </p>
+  <h3>
+    <img src="{{MEDIA_URL}}images/icons/{{ language|lower }}.png"/>
+    {% ifequal language 'php'%}PHP{% endifequal %}
+    {% ifequal language 'ruby'%}Ruby{% endifequal %}
+    {% ifequal scraper.language 'python'%}Python{% endifequal %}
+    {{wiki_type}}
+    - quick help
+  </h3>
+  <br/>
+  {% include quick_help_template %}
+  </div>
+</body>
+
+</html>
+

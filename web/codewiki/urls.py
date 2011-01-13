@@ -64,11 +64,11 @@ urlpatterns = patterns('',
 
     # call-backs from ajax for reloading and diff
     url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
-    url(r'^editor/diff/(?P<short_name>[\-\w]+)$',         viewseditor.diff,   name="diff"),  # maybe defunct, but could use for diffing against previous versions while in editor window
     url(r'^editor/raw/(?P<short_name>[\-\w]+)$',          viewseditor.raw,    name="raw"),   # raw code not wrapped in javascript
     url(r'^editor/reload/(?P<short_name>[\-\w]+)$',       viewseditor.reload, name="reload"),   
     url(r'^proxycached$',                                 views.proxycached,  name="proxycached"), # ?cachedid=1234
-    
+    url(r'^editor/quickhelp$',                            viewseditor.quickhelp, name="quickhelp"), # ?language&wiki_type&line&character
+
     # editor 
     url(r'^handle_session_draft/$',                       viewseditor.handle_session_draft, name="handle_session_draft"),
     url(r'^handle_editor_save/$',                         viewseditor.handle_editor_save,   name="handle_editor_save"),    

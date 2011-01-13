@@ -100,28 +100,11 @@ def code(request, wiki_type, short_name):
     return render_to_response('codewiki/code.html', context, context_instance=RequestContext(request))
 
 
-# could be upgraded to make diff with previous commit versions
-def diff(request, short_name=None):
-    if not short_name or short_name == "__new__":
-        return HttpResponse("Draft scraper, nothing to diff against", mimetype='text')
-    code = request.POST.get('code', None)    
-    if not code:
-        return HttpResponse("Programme error: No code sent up to diff against", mimetype='text')
-
-    scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponseNotFound):
-        return scraper
-
-    result = '\n'.join(difflib.unified_diff(scraper.saved_code().splitlines(), code.splitlines(), lineterm=''))
-    return HttpResponse("::::" + result, mimetype='text')
-
-
 def raw(request, short_name=None):
     scraper = get_code_object_or_notfoundresponse(short_name, request)
     if isinstance(scraper, HttpResponseNotFound):
         return scraper
     return HttpResponse(scraper.saved_code(), mimetype="text/plain")
-
 
 def reload(request, short_name):
     scraper = get_code_object_or_notfoundresponse(short_name, request)
@@ -136,7 +119,7 @@ def reload(request, short_name):
     return HttpResponse(json.dumps(result))
 
 
-  # try to get rid of this
+    # try to get rid of this
 def edittutorial(request, short_name):
     code = get_code_object_or_notfoundresponse(short_name, request)
     if isinstance(code, HttpResponseNotFound):
@@ -157,7 +140,6 @@ blankstartupcode = { 'scraper' : { 'python': "# Blank Python\n",
                                    'ruby':   "# Blank Ruby\nsourcescraper = ''\n" 
                                   }
                    }
-
 
 def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     language = language.lower()
@@ -223,9 +205,10 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
 
 
 
-#save a code object (source scraper is to make thin link from the view to the scraper
+    # save a code object (source scraper is to make thin link from the view to the scraper
+    # this is called in two places, due to those draft scrapers saved in the session
+    # would be better if the saving was deferred and not done right following a sign in
 def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourcescraper = ''):
-
     code_object.line_count = int(code_text.count("\n"))
     if code_object.published and code_object.first_published_at == None:
         code_object.first_published_at = datetime.datetime.today()
@@ -262,7 +245,7 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourc
     return rev # None if no change
 
 
-# called from the edit function
+    # called from the editor
 def handle_editor_save(request):
     guid = request.POST.get('guid', '')
     title = request.POST.get('title', '')
@@ -327,5 +310,15 @@ def handle_session_draft(request):
 
     response_url = reverse('editor_edit', kwargs={'wiki_type': draft_scraper.wiki_type, 'short_name' : draft_scraper.short_name})
     return HttpResponseRedirect(response_url)
+
+
+def quickhelp(request):
+    language = request.GET.get('language', '').lower()
+    wiki_type = request.GET.get('wiki_type', '')
+    line = request.GET.get('line')
+    character = request.GET.get('character')
+    context = { "wiki_type":wiki_type, "language":language }
+    context['quick_help_template'] = 'documentation/%s_quick_help_%s.html' % (wiki_type, language)
+    return render_to_response('documentation/quick_help.html', context, context_instance=RequestContext(request))
 
 
