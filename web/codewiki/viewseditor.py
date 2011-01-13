@@ -26,7 +26,7 @@ import difflib
 import re
 import csv
 import math
-import urllib2
+import urllib2, urllib
 import base64
 
 from cStringIO import StringIO
@@ -319,6 +319,7 @@ def quickhelp(request):
     character = request.GET.get('character')
     context = { "wiki_type":wiki_type, "language":language }
     context['quick_help_template'] = 'documentation/%s_quick_help_%s.html' % (wiki_type, language)
+    context['cheatsheetquery'] = urllib.urlencode({'line':line, 'character':character, 'language':language})
     return render_to_response('documentation/quick_help.html', context, context_instance=RequestContext(request))
 
 
