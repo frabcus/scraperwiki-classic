@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-    //variables
+    // editor window dimensions
     var editor_id = 'id_code';
     var codeeditor = undefined;
     var codemirroriframe = undefined; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
@@ -9,6 +9,7 @@ $(document).ready(function() {
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
 
+    // variable transmitted through the html
     var short_name      = $('#short_name').val();
     var guid            = $('#scraper_guid').val();
     var username        = $('#username').val(); 
@@ -18,7 +19,9 @@ $(document).ready(function() {
     var run_type        = $('#code_running_mode').val();
     var codemirror_url  = $('#codemirror_url').val();
     var wiki_type       = $('#id_wiki_type').val(); 
+    var rev             = $('#originalrev').val(); 
 
+    // runtime information
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
     var conn = undefined; // Orbited connection
     var bConnected  = false; 
@@ -58,8 +61,10 @@ $(document).ready(function() {
     var savedundo = 0; 
     var lastundo = 0; 
 
-    var cachehidlookup = { }; 
+    var cachehidlookup = { }; // this itself is a cache of a cache
+    
     var chainpatches = [ ]; 
+    var chainpatchnumber = 0; // counts them going out
 
     $.ajaxSetup({timeout: 10000});
 
@@ -115,6 +120,7 @@ $(document).ready(function() {
         if (chainpatches.length > 0)
             sendjson(chainpatches.shift()); 
 
+        // clear out the ones that are pure typing messages sent in non-broadcast mode
         while ((chainpatches.length > 0) && (chainpatches[0].insertlinenumber == undefined))
             chainpatches.shift(); 
 
@@ -185,7 +191,7 @@ $(document).ready(function() {
                 for (var i = 0; i < chains.length; i++)
                 {
                     var chain = chains[i]; 
-                    var chainpatch = { "command":'typing', "insertlinenumber":CM_lineNumber(chain[0].from), "deletions":[ ], "insertions":[ ] }
+                    var chainpatch = { command:'typing', insertlinenumber:CM_lineNumber(chain[0].from), deletions:[ ], insertions:[ ], "chainpatchnumber":(chainpatchnumber++) }
                     for (var k = 0; k < chain.length; k++)
                         chainpatch["deletions"].push(chain[k].text); 
     
@@ -318,7 +324,6 @@ $(document).ready(function() {
     {
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+r', sendCode);
-        addHotkey('ctrl+d', viewDiff);
         addHotkey('ctrl+p', popupPreview); 
         addHotkey('ctrl+h', popupHelp); 
     };
@@ -1032,15 +1037,6 @@ $(document).ready(function() {
         }
     }
 
-    // prob replace this with proper example diffing against previous versions
-    function viewDiff() { $.ajax( 
-    {
-        type:   'POST',
-        url:    $('input#editordiffurl').val(),
-        data:   { code: codeeditor.getCode()},
-        dataType: "html",
-        success: function(diff) { $.modal('<pre class="popupoutput">'+cgiescape(diff)+'</pre>', { overlayClose: true }); } 
-    })}
 
     function clearOutput() 
     {
@@ -1054,45 +1050,20 @@ $(document).ready(function() {
 
     function reloadScraper()
     {
-        if (shortNameIsSet() == false) {
-            alert("Cannot reload draft scraper");
-            return; 
-        }
-
-
-        // send current code up to the server and get a copy of new code
-        var newcode = $.ajax({
-                         url: $('input#editorrawurl').val(),
-                         async: false, 
-                         type: 'POST', 
-                         data: {oldcode: codeeditor.getCode()} 
-                       }).responseText; 
-
-        // extract the (changed) select range information from the header of return data
-        var selrangedelimeter = ":::sElEcT rAnGe:::"; 
-        var iselrangedelimeter = newcode.indexOf(selrangedelimeter); 
-        var selrange = [0,0,0,0];
-        if (iselrangedelimeter != -1) 
-        {
-            var selrange = newcode.substring(0, iselrangedelimeter); 
-            newcode = newcode.substring(iselrangedelimeter + selrangedelimeter.length); 
-            selrange = $.evalJSON(selrange); 
-        }
-
-        codeeditor.setCode(newcode); 
-        codeeditor.focus(); 
-
-        ChangeInEditor("reload"); 
-
-        // make the selection
-        if (!((selrange[2] == 0) && (selrange[3] == 0)))
-        {
-            var linehandlestart = codeeditor.nthLine(selrange[0] + 1); 
-            var linehandleend = codeeditor.nthLine(selrange[2] + 1); 
-            codeeditor.selectLines(linehandlestart, selrange[1], linehandleend, selrange[3]); 
-        }
-
         $('.editor_controls #btnCommitPopup').val('Loading...').addClass('darkness');
+        var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: codeeditor.getCode() } }); 
+        var reloaddata = $.evalJSON(reloadajax.responseText); 
+        codeeditor.setCode(reloaddata.code); 
+        codeeditor.focus(); 
+        ChangeInEditor("reload"); 
+        // make the selection
+        if (reloaddata.selrange && !((reloaddata.selrange[2] == 0) && (reloaddata.selrange[3] == 0)))
+        {
+            var linehandlestart = codeeditor.nthLine(reloaddata.selrange[0] + 1); 
+            var linehandleend = codeeditor.nthLine(reloaddata.selrange[2] + 1); 
+            codeeditor.selectLines(linehandlestart, reloaddata.selrange[1], linehandleend, reloaddata.selrange[3]); 
+        }
+
         window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
     }; 
 
@@ -1128,20 +1099,6 @@ $(document).ready(function() {
         });
         
         $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')); 
-
-        //diff button (hidden)
-        $('.editor_controls #diff').click(function() 
-        {
-                viewDiff(); 
-                return false; 
-        }); 
-
-        //reload button (hidden)
-        $('.editor_controls #reload').click(function() 
-        {
-                reloadScraper(); 
-                return false; 
-        });
 
         //close editor link
         $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(function ()
@@ -1598,14 +1555,15 @@ writeToChat("Saved rev number: " + res.rev);
             if ((chatpeopletimes[sechatname] == undefined) || ((servernowtime.getTime() - chatpeopletimes[sechatname].getTime())/1000 > 60))
             {
                 chatpeopletimes[sechatname] = servernowtime; 
-                $('.editor_output div.tabs li.chat').addClass('chatimproved');
-                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('chatimproved'); }, 1500); 
+                $('.editor_output div.tabs li.chat').addClass('chatalert');
+                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('chatalert'); }, 1500); 
             }
         }
     }
 
     // some are implemented with tables, and some with span rows.  
-    function setTabScrollPosition(sTab, command) {
+    function setTabScrollPosition(sTab, command) 
+    {
         divtab = '#output_' + sTab; 
         contenttab = '#output_' + sTab; 
 

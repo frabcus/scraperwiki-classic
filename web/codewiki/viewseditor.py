@@ -39,7 +39,7 @@ try:                import json
 except ImportError: import simplejson as json
 
 # kick this function out to the model module so it can be used elsewhere
-def get_code_object(short_name, request):
+def get_code_object_or_notfoundresponse(short_name, request):
     lcodeobject = models.Code.unfiltered.filter(short_name=short_name)
     assert len(lcodeobject) <= 1
     if len(lcodeobject) == 0:
@@ -54,7 +54,7 @@ def get_code_object(short_name, request):
 
 # preview of the code diffed
 def code(request, wiki_type, short_name):
-    scraper = get_code_object(short_name, request)
+    scraper = get_code_object_or_notfoundresponse(short_name, request)
     if isinstance(scraper, HttpResponseNotFound):
         return scraper
 
@@ -100,7 +100,7 @@ def code(request, wiki_type, short_name):
     return render_to_response('codewiki/code.html', context, context_instance=RequestContext(request))
 
 
-  # combine these two
+# could be upgraded to make diff with previous commit versions
 def diff(request, short_name=None):
     if not short_name or short_name == "__new__":
         return HttpResponse("Draft scraper, nothing to diff against", mimetype='text')
@@ -108,7 +108,7 @@ def diff(request, short_name=None):
     if not code:
         return HttpResponse("Programme error: No code sent up to diff against", mimetype='text')
 
-    scraper = get_code_object(short_name, request)
+    scraper = get_code_object_or_notfoundresponse(short_name, request)
     if isinstance(scraper, HttpResponseNotFound):
         return scraper
 
@@ -116,28 +116,28 @@ def diff(request, short_name=None):
     return HttpResponse("::::" + result, mimetype='text')
 
 
-  # obviously did not know about json technology here
 def raw(request, short_name=None):
-    if not short_name or short_name == "__new__":
-        return HttpResponse("Draft scraper, shouldn't do reload", mimetype='text')
-
-    scraper = get_code_object(short_name, request)
+    scraper = get_code_object_or_notfoundresponse(short_name, request)
     if isinstance(scraper, HttpResponseNotFound):
         return scraper
+    return HttpResponse(scraper.saved_code(), mimetype="text/plain")
 
-    oldcodeineditor = request.POST.get('oldcode', None)
+
+def reload(request, short_name):
+    scraper = get_code_object_or_notfoundresponse(short_name, request)
+    if isinstance(scraper, HttpResponseNotFound):
+        return HttpResponse(json.dumps({'status' : 'Failed', 'message':"scraper not available to reload"}))
+
+    oldcodeineditor = request.POST.get('oldcode')
     newcode = scraper.saved_code()
+    result = { "code": newcode }
     if oldcodeineditor:
-        sequencechange = vc.DiffLineSequenceChanges(oldcodeineditor, newcode)
-        result = "%s:::sElEcT rAnGe:::%s" % (json.dumps(list(sequencechange)), newcode)   # a delimeter that the javascript can find, in absence of using json
-    else:
-        result = newcode
-    return HttpResponse(result, mimetype="text/plain")
-
+        result["selrange"] = vc.DiffLineSequenceChanges(oldcodeineditor, newcode)
+    return HttpResponse(json.dumps(result))
   
   # try to get rid of this
 def edittutorial(request, short_name):
-    code = get_code_object(short_name, request)
+    code = get_code_object_or_notfoundresponse(short_name, request)
     if isinstance(code, HttpResponseNotFound):
         return scraper
 
@@ -177,7 +177,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     
     # Load an existing scraper preference
     elif short_name != "__new__":
-        scraper = get_code_object(short_name, request)
+        scraper = get_code_object_or_notfoundresponse(short_name, request)
         if isinstance(scraper, HttpResponseNotFound):
             return scraper
         status = vc.MercurialInterface(scraper.get_repo_path()).getstatus(scraper, -1)

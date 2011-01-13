@@ -49,7 +49,7 @@
     <input type="hidden" id="userrealname"      value="{{ request.user.get_profile.name }}"/>
     <input type="hidden" id="isstaff"           value="{% if request.user.is_staff %}yes{% endif %}"/>
     <input type="hidden" id="scraperlanguage"   value="{{ scraper.language|lower }}"/>
-    <input type="hidden" id="rev"               value="{{rev}}"/>
+    <input type="hidden" id="originalrev"       value="{{rev}}"/>
     <input type="hidden" id="codemirror_url"    value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
     <input type="hidden" id="id_wiki_type"      value="{{scraper.wiki_type}}"/>
 
@@ -63,7 +63,7 @@
     {% if scraper.short_name %}
         <input type="hidden" id="viewrunurl"    value="{% url view_fullscreen scraper.short_name %}"/>
         <input type="hidden" id="editordiffurl" value="{% url diff scraper.short_name %}"/>
-        <input type="hidden" id="editorrawurl"  value="{% url raw scraper.short_name %}"/>
+        <input type="hidden" id="editorreloadurl" value="{% url reload scraper.short_name %}"/>
     {% endif %}
 
         <div class="editor">
@@ -103,10 +103,6 @@
             {# Controls #}
             <div class="editor_controls">
                 <a id="menu_tutorials" class="helplink" href="#" title="Show useful commands">Quick help</a>
-                {% if 0 %}
-                    <input type="button" value="Diff" name="diff" id="diff" title="View diff with the saved version (Ctrl + D)"/>
-                {% endif %}
-
                 <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R)"/>
                 {% ifequal scraper.wiki_type 'view' %}
                     <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P)"/>
