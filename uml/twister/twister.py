@@ -213,6 +213,10 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                         if client.automode == 'autotype' or client.automode == 'autosave':
                             client.writejson({'message_type':'requestededitcontrol', "username":self.username})
         
+        elif command == 'giveselrange':
+            self.writeall(None, json.dumps({'message_type':'giveselrange', 'selrange':parsed_data.get('selrange'), 'chatname':self.chatname }))
+            
+        
         elif command == 'automode':
             automode = parsed_data.get('automode')
             if automode == self.automode:

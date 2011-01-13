@@ -133,6 +133,8 @@ span.hiddenfields { margin-left:10px; }
 
 #watcherstatus .plusone { color:black; cursor:pointer; }
 #watcherstatus .plusoneediting { color:black; cursor:pointer; }
+#watcherstatus .plusoneselect { color:black; cursor:pointer; }
+
 
 /* Overlays and help */
 

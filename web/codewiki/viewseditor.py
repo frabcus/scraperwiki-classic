@@ -134,7 +134,8 @@ def reload(request, short_name):
     if oldcodeineditor:
         result["selrange"] = vc.DiffLineSequenceChanges(oldcodeineditor, status["code"])
     return HttpResponse(json.dumps(result))
-  
+
+
   # try to get rid of this
 def edittutorial(request, short_name):
     code = get_code_object_or_notfoundresponse(short_name, request)

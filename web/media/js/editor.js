@@ -603,7 +603,14 @@ $(document).ready(function() {
               reloadScraper();
               writeToChat("<i>saved in another window</i>", data.chatname);  
           } else if (data.message_type == "requestededitcontrol") {
-              writeToChat("<b>requestededitcontrol: "+username+ " has requested edit control but you have last typed " + (new Date() - lasttypetime)/1000 + " seconds ago"); 
+
+// this should popup something if there has been no activity for a while with a count-down timer that eventually sets the editinguser down and
+// self-demotes to autoload with the right value of iselectednexteditor selected
+writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit control but you have last typed " + (new Date() - lasttypetime)/1000 + " seconds ago"); 
+
+          } else if (data.message_type == "giveselrange") {
+              writeToChat("<b>selrange: "+data.chatname+" has made a select range: "+$.toJSON(data.selrange)+"</b>"); 
+              makeSelection(data.selrange); // do it anyway
           } else if (data.message_type == "data") {
               writeToData(data.content);
           } else if (data.message_type == "exception") {
@@ -767,10 +774,11 @@ $(document).ready(function() {
         wstatus = '<a href="'+ $('input#userprofileurl').val().replace(/XXX/g, selectednexteditor) +'" target="_blank">'+selectednexteditor+'</a>'; 
         if (loggedineditors.length >= 3)
             wstatus += ' (<a class="plusone">+' + (loggedineditors.length-2) + '</a>)'; 
-        wstatus += ' is watching'; 
+        wstatus += ' <a class="plusoneselect">is</a> watching'; 
         $('#watcherstatus').html(wstatus); 
         if (loggedineditors.length >= 3)
             $('#watcherstatus .plusone').click(function() { iselectednexteditor += 1; setwatcherstatusmultieditinguser() }); 
+        $('#watcherstatus .plusoneselect').click(transmitSelection); 
     }
 
     // when the editor status is determined it is sent back to the server
@@ -862,9 +870,10 @@ $(document).ready(function() {
         // you are not the editing user, someone else is
         else if (editingusername)
         {
-            $('#watcherstatus').html('<a href="'+$('input#userprofileurl').val().replace(/XXX/g, editingusername)+'" target="_blank">'+editingusername+'</a> is <a class="plusoneediting">editing</a>'); 
+            $('#watcherstatus').html('<a href="'+$('input#userprofileurl').val().replace(/XXX/g, editingusername)+'" target="_blank">'+editingusername+'</a> <a class="plusoneselect">is</a> <a class="plusoneediting">editing</a>'); 
             if (username)
-                $('#watcherstatus .plusoneediting').click(function() { sendjson({"command":'requesteditcontrol', "user":'username'}); }); 
+                $('#watcherstatus .plusoneediting').click(function() { sendjson({"command":'requesteditcontrol', "user":username}); }); 
+            $('#watcherstatus .plusoneselect').click(transmitSelection); 
 
             if (automode != 'autoload')
             {
@@ -1064,6 +1073,16 @@ $(document).ready(function() {
         var linehandlestart = codeeditor.nthLine(selrange.startline + 1); 
         var linehandleend = (selrange.endline == selrange.startline ? linehandlestart : codeeditor.nthLine(selrange.endline + 1)); 
         codeeditor.selectLines(linehandlestart, selrange.startoffset, linehandleend, selrange.endoffset); 
+    }
+
+    function transmitSelection()
+    {
+        var curposstart = codeeditor.cursorPosition(true); 
+
+        var curposend = codeeditor.cursorPosition(false); 
+        var selrange = { startline:codeeditor.lineNumber(curposstart.line)-1, startoffset:curposstart.character, 
+                         endline:codeeditor.lineNumber(curposend.line)-1, endoffset:curposend.character }; 
+        sendjson({"command":'giveselrange', "selrange":selrange, "username":username}); 
     }
 
     function reloadScraper()
