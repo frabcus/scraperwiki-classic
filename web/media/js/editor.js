@@ -609,7 +609,7 @@ $(document).ready(function() {
 writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit control but you have last typed " + (new Date() - lasttypetime)/1000 + " seconds ago"); 
 
           } else if (data.message_type == "giveselrange") {
-              writeToChat("<b>selrange: "+data.chatname+" has made a select range: "+$.toJSON(data.selrange)+"</b>"); 
+              //writeToChat("<b>selrange: "+data.chatname+" has made a select range: "+$.toJSON(data.selrange)+"</b>"); 
               makeSelection(data.selrange); // do it anyway
           } else if (data.message_type == "data") {
               writeToData(data.content);
@@ -851,7 +851,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                     $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                     $('.editor_controls #run').attr('disabled', true);
                     $('.editor_controls #preview').attr('disabled', true);
-                    sendjson({"command":'automode', "automode":'autoload'}); 
+                    sendjson({"command":'automode', "automode":'autoload-nodemote'}); 
                 }
             }
             else if (((automode != 'autosave') && (automode != 'autotype')) || (data.broadcastingeditor == undefined))
@@ -1093,7 +1093,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         codeeditor.setCode(reloaddata.code); 
         rev = reloaddata.rev; 
         chainpatchnumber = 0; 
-        codeeditor.focus(); 
+        //codeeditor.focus(); 
         if (reloaddata.selrange)
             makeSelection(reloaddata.selrange); 
         ChangeInEditor("reload"); 

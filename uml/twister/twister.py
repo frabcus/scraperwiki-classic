@@ -221,7 +221,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             automode = parsed_data.get('automode')
             if automode == self.automode:
                 return
-            
+
             if not self.username:
                 self.automode = automode
                 self.factory.notifyMonitoringClients(self)
@@ -245,13 +245,16 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                     self.guidclienteditors.usereditormap[selectednexteditor].usersessionpriority = usereditor.usersessionpriority
                 usereditor.usersessionpriority = self.guidclienteditors.usersessionprioritynext
                 self.guidclienteditors.usersessionprioritynext += 1
-                selectednexteditor
             
                 # another of the same users windows takes it out of autotype mode
             elif automode == 'autosave':
                 for client in usereditor.userclients:
                     if client.automode == 'autotype':
                         client.automode = 'autosave'
+            
+                # for the watching windows of same broadcast user to not demote the main window
+            elif automode == 'autoload-nodemote':
+                automode = 'autoload'
             
             self.automode = automode
             assert usereditor.nondraftcount == len([lclient  for lclient in usereditor.userclients  if lclient.automode != 'draft'])
