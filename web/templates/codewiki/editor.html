@@ -112,8 +112,8 @@
                 <select id="automode">
                     <option name="autotype" value="autotype" id="id_autotype">broadcast</option>
                     <option name="autosave" value="autosave" id="id_autosave"  {% if scraper.id %}selected{% endif %}>editing</option>
-                    <option name="draft"    value="draft"    id="id_draft" {% if not scraper.id %}selected{% endif %}>draft editing</option>
                     <option name="autoload" value="autoload" id="id_autoload" disabled>watching</option>
+                    <option name="draft"    value="draft"    id="id_draft" {% if not scraper.id %}selected{% endif %}>draft editing</option>
                 </select>
 
                 {% ifequal scraper.wiki_type 'view' %}

@@ -182,7 +182,8 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         if isinstance(scraper, HttpResponseNotFound):
             return scraper
         status = vc.MercurialInterface(scraper.get_repo_path()).getstatus(scraper, -1)
-        assert 'currcommit' not in status and not status['ismodified']
+        assert 'currcommit' not in status 
+        #assert not status['ismodified']  # there are some very old scrapers which haven't been properly committed
         context['code'] = status["code"]
         context['rev'] = status['prevcommit']
 
