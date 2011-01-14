@@ -131,7 +131,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
              loadurl: 'raw_about_markup/',
              onblur: 'ignore',
              event: 'dblclick',
-             submitdata : {js: 1, short_name: short_name},
+             submitdata : {short_name: short_name},
              placeholder: ''       
          });
 
@@ -153,7 +153,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
              onblur: 'ignore',
              event: 'dblclick',
              placeholder: '',             
-             submitdata : {js: 1, short_name: short_name}
+             submitdata : {short_name: short_name}
          });
          
     $('#aEditTitle').click(
@@ -175,7 +175,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
              event: 'dblclick',
              placeholder: '',
              loadurl: 'tags/',
-             submitdata : {js: 1, short_name: short_name},
+             submitdata : {short_name: short_name},
              onreset: function(){ $('#labelEditTags').hide();},
              callback: function (data){
                  //add the new tags onto the list
@@ -212,7 +212,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
               type   : 'select',
               event: 'dblclick',
               placeholder: '',
-              submitdata : {js: 1, short_name: short_name}
+              submitdata : {short_name: short_name}
           });
       
       $('#aEditSchedule').click (
