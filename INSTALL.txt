@@ -96,7 +96,7 @@ Now try running django:
 
 > $ python manage.py runserver
 
-Assuming no errors you should be able to visit http://localhost:8000/ and see the scraperwiki home page.
+Assuming no errors you should be able to visit http://localhost:8000/ and see the scraperwiki home page. If you do encounter an error that appears to be a problem with imports (Empty Value) then go and run step 7 before coming back here to continue with this step.
 
 You should go to http://localhost:8000/admin and configure the 'sites' section.
 
