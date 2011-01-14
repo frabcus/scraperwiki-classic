@@ -36,11 +36,11 @@ SCHEDULE_OPTIONS = ((-1, 'never'), (3600*24, 'once a day'), (3600*24*2, 'every t
 SCHEDULE_OPTIONS_DICT = dict(SCHEDULE_OPTIONS)
 
 LICENSE_CHOICES = (
+    ('Unknown', 'Unknown'),
     ('Public domain', 'Public domain'),
     ('Share-alike', 'Share-alike'),
     ('Crown copyright', 'Crown copyright'),
     ('Other', 'Other'),
-    ('Unknown', 'Unknown'),
 )
 
 class Scraper (code.Code):
