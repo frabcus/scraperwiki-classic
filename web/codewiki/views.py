@@ -95,6 +95,7 @@ def scraper_overview(request, short_name):
         'scraper_requesters': scraper_requesters,
         'related_views': related_views,
         'schedule_options': models.SCHEDULE_OPTIONS,
+        'license_choices': models.LICENSE_CHOICES,
         }
     
     #get data for this scaper in a way that we can see exactly what is being transferred
@@ -182,6 +183,10 @@ def scraper_admin(request, short_name):
         if element_id == 'spnRunInterval':
             scraper.run_interval = int(request.POST.get('value', None))
             response_text = models.SCHEDULE_OPTIONS_DICT[scraper.run_interval]
+
+        if element_id == 'spnLicenseChoice':
+            scraper.license = request.POST.get('value', None)
+            response_text = scraper.license
 
         if element_id == 'publishScraperButton':
             scraper.published = True

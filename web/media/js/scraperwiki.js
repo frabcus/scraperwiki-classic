@@ -201,7 +201,6 @@ function setupScraperEditInPlace(wiki_type, short_name){
      $('#labelEditTags').hide();
 
      //scheduler
-     //alert(schedule_options.length)
      $('#spnRunInterval').editable('admin/', {
               indicator : 'Saving...',
               tooltip   : 'Click to edit...',
@@ -214,7 +213,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
               placeholder: '',
               submitdata : {short_name: short_name}
           });
-      
+
       $('#aEditSchedule').click (
            function(){
                 sCurrent = $('#spnRunInterval').html().trim();               
@@ -223,6 +222,31 @@ function setupScraperEditInPlace(wiki_type, short_name){
                 return false;
            }
        );          
+
+     //license
+     $('#spnLicenseChoice').editable('admin/', {
+              indicator : 'Saving...',
+              tooltip   : 'Click to edit...',
+              cancel    : 'Cancel',
+              submit    : 'Save',
+              onblur: 'ignore',
+              data   : $('#hidLicenseChoices').val(),
+              type   : 'select',
+              event: 'dblclick',
+              placeholder: '',
+              submitdata : {short_name: short_name}
+          });
+
+      $('#aEditLicense').click (
+           function(){
+                sCurrent = $('#spnLicenseChoice').html().trim();               
+                $('#spnLicenseChoice').dblclick();
+                $('#spnLicenseChoice select').val(sCurrent);
+                return false;
+           }
+       );          
+      
+
        $('#publishScraperButton').click(function(){
            $.ajax({
                url: 'admin/',
