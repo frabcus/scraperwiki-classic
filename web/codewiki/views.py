@@ -18,7 +18,6 @@ from django.conf import settings
 from django.utils.encoding import smart_str
 
 from codewiki import models
-from codewiki import forms
 from api.emitters import CSVEmitter 
 import vc
 import frontend
