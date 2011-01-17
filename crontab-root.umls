@@ -1,0 +1,8 @@
+MAILTO=cron@scraperwiki.com
+SHELL=/bin/bash
+
+# m h  dom mon dow   command
+0 4 * * * tar zcfP /root/backup/scraperwiki.tar.gz /var/www/scraperwiki --exclude "/var/www/scraperwiki/uml/data" --exclude "*.cow"
+0 4 * * * tar zcfP /root/backup/etc.tar.gz /etc
+0 4 * * * ls -rt /var/www/scraperwiki/uml/data | tail -10 | xargs tar cf /root/backup/data-last-10.tar
+0 6 * * * rsync -qazr /root/backup umi.backup.bytemark.co.uk::umi/
