@@ -289,10 +289,8 @@ var RubyParser = Editor.Parser = (function() {
       }
       
       if (token.style == KEWORDCLASS && token.content == "end") {
-        if (context.block && context.block > 0) {
+        if (context && context.block && context.block > 0) {
           context.block -= 1;
-        } else {
-            popcontext();
         }
       }      
       if (token.style == INSTANCEMETHODCALLCLASS) {
