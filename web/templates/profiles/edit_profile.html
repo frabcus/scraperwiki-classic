@@ -41,9 +41,9 @@
                     {% field_errors form.bio %}                      
                 </li>
             </ul>
-            <h3>Email alerts</h3>
+            <h3><a name="alerts">Email alerts</a></h3>
             <p>
-            ScraperWiki can email you when to let you know if your scrapers are working, if someone else edits them, and when they were last run. You can control the type and frequency of these below.
+            ScraperWiki can email you when to let you know if your scrapers are working or if someone else edits them. You can control the type and frequency of these below.
             </p>
             <ul class="form"> 
                 <li{% if form.alert_frequency.errors %} class="error"{% endif %}>
