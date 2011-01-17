@@ -108,11 +108,11 @@ def deploy():
     if env.webserver:
         buildout()
         migrate()
-        write_changeset()
         create_tarball()
         update_revision()
         restart_webserver()   
 
+    write_changeset()
     install_cron()
     email(message)
 
