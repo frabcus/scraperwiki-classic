@@ -90,6 +90,20 @@ TEMPLATE_CONTEXT_PROCESSORS = [
   'frontend.context_processors.site_messages',
 ]
 
+SCRAPERWIKI_APPS = [
+    # the following are scraperwiki apps
+    'frontend',
+    'codewiki',
+    'notification',
+    'payment',  	
+    'market',
+    'api',
+    'whitelist',
+    'cropper',
+    'kpi',
+    #'devserver',
+]
+
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -109,20 +123,10 @@ INSTALLED_APPS = [
     'contact_form',
     'piston',      # needs 'django-piston' and 'phpserialize'
     'captcha',
-    
-    # the following are scraperwiki apps
-    'frontend',
-    'codewiki',
-    'notification',
-    'payment',  	
-    'market',
-    'api',
-    'whitelist',
-    'cropper',
-    'kpi',
-    #'devserver',
-]
+] + SCRAPERWIKI_APPS
 
+
+TEST_RUNNER = 'scraperwiki_tests.run_tests' 
 
 ACCOUNT_ACTIVATION_DAYS = 14
 

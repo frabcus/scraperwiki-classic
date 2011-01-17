@@ -147,7 +147,6 @@ class MercurialInterface:
             status["isadded"] = ("code" in added)  # false if actually committed (ie true means we're in an awkward state)
             return status
         
-        
         # old version
         status = { }
         scraperfile = os.path.join(scraper.short_name, "__init__.py")

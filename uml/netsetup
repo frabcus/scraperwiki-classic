@@ -64,6 +64,10 @@ iptables	-A INPUT	-p tcp -s 89.16.177.176	--sport 9003		-j ACCEPT
 iptables	-A INPUT  -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED	  -j ACCEPT
 iptables	-A OUTPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISHED,RELATED -j ACCEPT
 
+# Allow connections from backup machine for rsync and NFS
+#
+iptables   -A INPUT    -s 212.110.161.108  -j ACCEPT
+
 # All other input traffic is rejected
 #
 iptables 	-A INPUT							-j REJECT
