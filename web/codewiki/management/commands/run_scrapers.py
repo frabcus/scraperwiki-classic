@@ -9,7 +9,6 @@ except: import simplejson as json
 import subprocess
 
 from codewiki.models import Code, Scraper, ScraperRunEvent, DomainScrape
-from frontend.models import Alerts
 import frontend
 import settings
 import datetime
@@ -82,6 +81,126 @@ def kill_running_runid(runid):
     return False
 
 
+
+def runmessageloop(runner, event, approxlenoutputlimit):
+    # a partial implementation of editor.js
+    exceptionmessage = [ ]
+    completiondata = None
+    outputmessage = [ ]
+    tailmessage = [ ]
+    domainscrapes = { }  # domain: [domain, pages, bytes] 
+    
+    temptailmessage = "\n\n[further output lines suppressed]\n"
+    while True:
+        line = runner.stdout.readline().strip()
+        if not line:
+            break
+        try:
+            data = json.loads(line)
+        except:
+            data = { 'message_type':'console', 'content':"JSONERROR: "+line }
+        
+        message_type = data.get('message_type')
+        content = data.get("content")
+        
+        if message_type == 'executionstatus':
+            if content == "startingrun":
+                event.run_id = data.get("runID")
+                event.output = "%s\nEXECUTIONSTATUS: uml=%s runid=%s\n" % (event.output, data.get("uml"), data.get("runID"))
+            elif content == "runcompleted":
+                completiondata = data
+                tailmessage.append("\nEXECUTIONSTATUS: seconds_elapsed=%s CPU_seconds_used=%s\n" % (data.get("elapsed_seconds"), data.get("CPU_seconds"))) 
+            event.save()
+            
+        elif message_type == "sources":
+            event.pages_scraped += 1  # soon to be deprecated 
+            
+            url = data.get('url')
+            netloc = "%s://%s" % urlparse.urlparse(url)[:2]
+            if not event.first_url_scraped and url and netloc[-16:] != '.scraperwiki.com' and url[-10:] != 'robots.txt':
+                event.first_url_scraped = data.get('url')
+            if netloc:
+                if netloc not in domainscrapes:
+                    domainscrapes[netloc] = DomainScrape(scraper_run_event=event, domain=netloc)
+                domainscrapes[netloc].pages_scraped += 1
+                domainscrapes[netloc].bytes_scraped += int(data.get('bytes'))
+        
+        elif message_type == "data":
+            event.records_produced += 1
+        
+        elif message_type == "exception":   # only one of these ever
+            event.exception_message = data.get('exceptiondescription')
+            
+            for stackentry in data.get("stackdump"):
+                sMessage = stackentry.get('file')
+                if sMessage:
+                    if sMessage == "<string>":
+                        sMessage = "\nLine %d: %s" % (stackentry.get('linenumber', -1), stackentry.get('linetext'))
+                    if stackentry.get('furtherlinetext'):
+                        sMessage += " -- " + stackentry.get('furtherlinetext') 
+                    exceptionmessage.append(sMessage)
+                if stackentry.get('duplicates') and stackentry.get('duplicates') > 1:
+                    exceptionmessage.append("  + %d duplicates" % stackentry.duplicates)
+            
+            if data.get("blockedurl"):
+                exceptionmessage.append("Blocked URL: %s" % data.get("blockedurl"))
+            exceptionmessage.append('')
+            exceptionmessage.append(data.get('exceptiondescription'))
+        
+        elif message_type == "console":
+            while content:
+                outputmessage.append(content[:approxlenoutputlimit])
+                content = content[approxlenoutputlimit:]
+        else:
+            outputmessage.append("Unknown: %s\n" % line)
+            
+        
+        # live update of event output so we can watch it when debugging scraperwiki platform
+        if outputmessage and len(event.output) < approxlenoutputlimit:
+            while outputmessage:
+                event.output = "%s%s" % (event.output, outputmessage.pop(0))
+                if len(event.output) >= approxlenoutputlimit:
+                    event.output = "%s%s" % (event.output, temptailmessage)
+                    break
+            event.run_ended = datetime.datetime.now()
+            event.save()
+
+    # append last few lines of the output
+    if outputmessage:
+        #assert len(event.output) >= approxlenoutputlimit
+        outputtail = [ outputmessage.pop() ] 
+        while outputmessage and len(outputtail) < 5 and sum(map(len, outputtail)) < approxlenoutputlimit:
+            outputtail.append(outputmessage.pop())
+        outputtail.reverse()
+            
+        if outputmessage:
+            tailmessage.insert(0, "\n    [%d lines, %d characters omitted]\n\n" % (len(outputmessage), sum(map(len, outputmessage))))
+        event.output = "%s%s%s" % (event.output[:-len(temptailmessage)], "\n".join(tailmessage), "".join(outputtail))
+        
+
+    if exceptionmessage:
+        event.output = "%s\n\n*** Exception ***\n\n%s\n" % (event.output, "\n".join(exceptionmessage))
+    if not completiondata:
+        event.output = "%s\nEXECUTIONSTATUS: [Run was interrupted (possibly by a timeout)]\n" % (event.output)
+    
+    for domainscrape in domainscrapes.values():
+        domainscrape.save()
+
+
+    # maybe detect the subject title here
+def getemailtext(event):
+    message = re.sub("(?:^|\n)EXECUTIONSTATUS:.*", "", message).strip()
+    
+    msubject = re.search("(?:^|\n)EMAILSUBJECT:(.*)", message)
+    if msubject:
+        subject = msubject.group(2)    # snip out the subject
+        message = "%s%s" % (message[:msubject.start(0)], message[msubject.end(0):])
+    else:
+        subject = 'Your ScraperWiki Email - %s' % event.scraper.short_name
+    
+    return subject, message
+
+
 # class to manage running one scraper
 class ScraperRunner(threading.Thread):
     def __init__(self, scraper, verbose):
@@ -113,115 +232,13 @@ class ScraperRunner(threading.Thread):
         event.run_started = datetime.datetime.now()   # reset by execution status
         event.run_ended = event.run_started  # actually used as last_updated
         event.output = ""
-        approxlenoutputlimit = 3000     # should move into settings
         event.save()
 
-        # a partial implementation of editor.js
-        exceptionmessage = [ ]
-        completiondata = None
-        outputmessage = [ ]
-        tailmessage = [ ]
-        domainscrapes = { }  # domain: [domain, pages, bytes] 
-        
-        temptailmessage = "\n\n[further output lines suppressed]\n"
-        while True:
-            line = runner.stdout.readline().strip()
-            if not line:
-                break
-            try:
-                data = json.loads(line)
-            except:
-                data = { 'message_type':'console', 'content':"JSONERROR: "+line }
-            
-            message_type = data.get('message_type')
-            content = data.get("content")
-            
-            if message_type == 'executionstatus':
-                if content == "startingrun":
-                    event.run_id = data.get("runID")
-                    event.output = "%s\nEXECUTIONSTATUS: uml=%s runid=%s\n" % (event.output, data.get("uml"), data.get("runID"))
-                elif content == "runcompleted":
-                    completiondata = data
-                    tailmessage.append("\nEXECUTIONSTATUS: seconds_elapsed=%s CPU_seconds_used=%s\n" % (data.get("elapsed_seconds"), data.get("CPU_seconds"))) 
-                event.save()
-                
-            elif message_type == "sources":
-                event.pages_scraped += 1  # soon to be deprecated 
-                
-                url = data.get('url')
-                netloc = "%s://%s" % urlparse.urlparse(url)[:2]
-                if not event.first_url_scraped and url and netloc[-16:] != '.scraperwiki.com' and url[-10:] != 'robots.txt':
-                    event.first_url_scraped = data.get('url')
-                if netloc:
-                    if netloc not in domainscrapes:
-                        domainscrapes[netloc] = DomainScrape(scraper_run_event=event, domain=netloc)
-                    domainscrapes[netloc].pages_scraped += 1
-                    domainscrapes[netloc].bytes_scraped += int(data.get('bytes'))
-            
-            elif message_type == "data":
-                event.records_produced += 1
-            
-            elif message_type == "exception":   # only one of these ever
-                event.exception_message = data.get('exceptiondescription')
-                
-                for stackentry in data.get("stackdump"):
-                    sMessage = stackentry.get('file')
-                    if sMessage:
-                        if sMessage == "<string>":
-                            sMessage = "\nLine %d: %s" % (stackentry.get('linenumber', -1), stackentry.get('linetext'))
-                        if stackentry.get('furtherlinetext'):
-                            sMessage += " -- " + stackentry.get('furtherlinetext') 
-                        exceptionmessage.append(sMessage)
-                    if stackentry.get('duplicates') and stackentry.get('duplicates') > 1:
-                        exceptionmessage.append("  + %d duplicates" % stackentry.duplicates)
-                
-                if data.get("blockedurl"):
-                    exceptionmessage.append("Blocked URL: %s" % data.get("blockedurl"))
-                exceptionmessage.append('')
-                exceptionmessage.append(data.get('exceptiondescription'))
-            
-            elif message_type == "console":
-                while content:
-                    outputmessage.append(content[:approxlenoutputlimit])
-                    content = content[approxlenoutputlimit:]
-            else:
-                outputmessage.append("Unknown: %s\n" % line)
-                
-            
-            # live update of event output so we can watch it when debugging scraperwiki platform
-            if outputmessage and len(event.output) < approxlenoutputlimit:
-                while outputmessage:
-                    event.output = "%s%s" % (event.output, outputmessage.pop(0))
-                    if len(event.output) >= approxlenoutputlimit:
-                        event.output = "%s%s" % (event.output, temptailmessage)
-                        break
-                event.run_ended = datetime.datetime.now()
-                event.save()
-
-        # append last few lines of the output
-        if outputmessage:
-            #assert len(event.output) >= approxlenoutputlimit
-            outputtail = [ outputmessage.pop() ] 
-            while outputmessage and len(outputtail) < 5 and sum(map(len, outputtail)) < approxlenoutputlimit:
-                outputtail.append(outputmessage.pop())
-            outputtail.reverse()
-                
-            if outputmessage:
-                tailmessage.insert(0, "\n    [%d lines, %d characters omitted]\n\n" % (len(outputmessage), sum(map(len, outputmessage))))
-            event.output = "%s%s%s" % (event.output[:-len(temptailmessage)], "\n".join(tailmessage), "".join(outputtail))
-            
-
-        if exceptionmessage:
-            event.output = "%s\n\n*** Exception ***\n\n%s\n" % (event.output, "\n".join(exceptionmessage))
-        if not completiondata:
-            event.output = "%s\nEXECUTIONSTATUS:\n[Run was interrupted (possibly by a timeout)]\n" % (event.output)
+        runmessageloop(runner, event, settings.APPROXLENOUTPUTLIMIT)
         
         event.run_ended = datetime.datetime.now()
         event.pid = -1  # disable it
         event.save()
-        
-        for domainscrape in domainscrapes.values():
-            domainscrape.save()
         
         elapsed = (time.time() - start)
 
@@ -235,30 +252,12 @@ class ScraperRunner(threading.Thread):
         self.scraper.save()
 
         # Send email if this is an email scraper
-        for role in self.scraper.usercoderole_set.filter(role='email'):
-            send_mail(subject='Your ScraperWiki Email - %s' % self.scraper.short_name,
-                      message=event.output,
-                      from_email=settings.EMAIL_FROM,
-                      recipient_list=[role.user.email],
-                      fail_silently=True)
-                    
-        # Log this run event to the history table
-        alert = Alerts()
-
-        #alert.content_object = self.scraper.code   # saves it as the wrong type
-        alert.content_object = Code.objects.get(pk=self.scraper.pk)  # don't have a way to down-cast the scraper object for this useless unhelpful interface
-        
-            # this is bad, unnecessary and inconsistent with information in the ScraperRunEvent and the scraper.status
-        if exceptionmessage:
-            alert.message_type = 'run_fail'
-        elif not completiondata:
-            alert.message_type = 'run_halted'
-        else:
-            alert.message_type = 'run_success'
-        alert.message_value = elapsed
-        alert.event_object = event
-        alert.save()
-
+        emailers = list(self.scraper.usercoderole_set.filter(role='email'))
+        if emailers:
+            subject, message = getemailtext(event)
+            if message:  # no email if blank
+                for role in emailers:
+                    send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[role.user.email], fail_silently=True)
 
 
 # this is invoked by the crontab with the function

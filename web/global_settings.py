@@ -194,8 +194,12 @@ SCREENSHOT_SIZES = {'small': (110, 73), 'medium': (220, 145), 'large': (800, 600
 CODEMIRROR_VERSION = "0.92"
 CODEMIRROR_URL = "CodeMirror-%s/" % CODEMIRROR_VERSION
 
+APPROXLENOUTPUTLIMIT = 3000
+
 HTTPPROXYURL = "http://localhost:9005"
 DISPATCHERURL = "http://localhost:9000"
+
+    # should be in localsettings instead
 UMLURLS = ["http://89.16.177.195:9101", "http://89.16.177.195:9102", "http://89.16.177.195:9103", "http://89.16.177.195:9104"]
 
 
