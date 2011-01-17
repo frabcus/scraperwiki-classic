@@ -129,8 +129,13 @@ var tokenizeRuby = (function() {
 				  var ch = source.next();
 				  // Skip escaped characters
 				  if (ch == '\\') {
-					ch = source.next();
-					ch = source.next();
+					if ( source.peek() != '\n' )				      
+					    ch = source.next();
+					// The next char might be \n if the previous token was "\ and in
+					// this case it will get confused as to where it is.  We should try
+					// and peek at this value 
+					if ( source.peek() != '\n' )					
+					    ch = source.next();
 				  }
 				  if (ch == ending_char) {
 				   //popState(setState);
