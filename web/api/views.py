@@ -16,6 +16,13 @@ from django.contrib.auth.decorators import login_required
 from models import api_key
 from forms import applyForm
 
+# The API explorer requires two connections to the server, which is not supported by manage.py runserver
+# To run locally, you need to ensure that settings.py contains API_DOMAIN = 'localhost:8010'
+# and you run the server twice in two separate shells
+#python manage.py runserver 8000
+#python manage.py runserver 8010
+# And then you use browse at http://localhost:8000/api/1.0/explore/scraperwiki.scraper.getinfo
+
 @login_required
 def keys(request):
 
