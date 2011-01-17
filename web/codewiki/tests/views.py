@@ -23,20 +23,47 @@ class ScraperViewsTests(TestCase):
                             kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
     
+    
+    def _repo_exists( self, name ):
+        """
+        Check whether the repo exists, and create it if it does not. This is only used
+        for testing and so should be safe.
+        """
+        from codewiki.vc import MercurialInterface
+        from django.conf import settings
+        from codewiki.models.scraper import Scraper
+        
+        m = MercurialInterface( settings.SMODULES_DIR )                    
+        try:
+            m.getfilestatus( 'test_scraper' )
+        except:
+            s = Scraper.objects.get(short_name=name)
+            m.savecode(s, '#Test scraper for testing purposes only')
+            return False
+        return True
+    
+    
     def test_scraper_history(self):
+        if not self._repo_exists( 'test_scraper'):
+            print "\n'test_scraper' doesn't exist - it is being created"
+            
         response = self.client.get(reverse('scraper_history',
                             kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
         
+        
     def test_scraper_stringnot(self):
         self.assertEqual(codewiki.views.stringnot('test'), 'test')
     
+    
     def test_scraper_comments(self):
-        # This may fail if there has never been a scraper called test_scraper checked 
-        # into the scraper repository
+        if not self._repo_exists( 'test_scraper'):
+            print "\n'test_scraper' doesn't exist - it is being created"
+            
         response = self.client.get(reverse('scraper_comments',
                             kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
+
 
     def test_scraper_export_csv(self):
         response = self.client.get(reverse('export_csv',
