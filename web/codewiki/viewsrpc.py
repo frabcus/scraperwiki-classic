@@ -24,8 +24,7 @@ except ImportError: import simplejson as json
 
 
 
-def MakeRunner(request, short_name, revision = None):
-    scraper = get_object_or_404(models.Code.objects, short_name=short_name)
+def MakeRunner(request, scraper, code):
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
     failed = False
 
@@ -51,7 +50,6 @@ def MakeRunner(request, short_name, revision = None):
     args = [i.encode('utf8') for i in args]
     
     runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    code = scraper.saved_code(revision)
     runner.stdin.write(code.encode('utf8'))
     
     # append in the single line at the bottom that gets the rpc executed with the right function and arguments
@@ -63,12 +61,17 @@ def MakeRunner(request, short_name, revision = None):
 
 
 def rpcexecute(request, short_name, revision = None):
-    runner = MakeRunner(request, short_name, revision)
-
-    # we build the response on the fly in case we get a contentheader value before anything happens
-    response = None # HttpResponse()
+    scraper = get_object_or_404(models.Code.objects, short_name=short_name)
+    code = scraper.saved_code(revision)
     
-    # can't think of a structure that allows for deferred creation of response object in one place
+    # quick case where we have PHP with no PHP code in it (it's all pure HTML)
+    if scraper.language == 'php' and not re.search('<\?', code):
+        return HttpResponse(code)
+
+    runner = MakeRunner(request, scraper, code)
+
+        # we build the response on the fly in case we get a contentheader value before anything happens
+    response = None 
     for line in runner.stdout:
         try:
             message = json.loads(line)
@@ -105,11 +108,19 @@ def rpcexecute(request, short_name, revision = None):
                 if not response:
                     response = HttpResponse()
                 response['Content-Disposition'] = message['headervalue']
+            
+            elif message['headerkey'] == 'Location':
+                if not response:
+                    response = HttpResponseRedirect(message['headervalue'])
+                else:
+                    response.write("<h3>Error: httpresponseheader('%s', '%s') called after start of stream</h3>" % (message['headerkey'], message['headervalue']))
+            
             else:
                 if not response:
                     response = HttpResponse()
                 response.write("<h3>Error: httpresponseheader(headerkey='%s', '%s'); headerkey can only have values 'Content-Type' or 'Content-Disposition'</h3>" % (message['headerkey'], message['headervalue']))
-
+            
+                    
     if not response:
         response = HttpResponse('no output for some reason')
     return response
