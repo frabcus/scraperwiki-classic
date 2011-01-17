@@ -85,7 +85,6 @@ var RubyParser = Editor.Parser = (function() {
     // Context contains information about the current local scope, the
     // variables defined in that, and the scopes above it.
     var context = {prev: null, vars: {"this": true, "arguments": true, 'block' : 0}};
-    
     // The lexical scope, used mostly for indentation.
     var lexical = new JSLexical((basecolumn || 0) - indentUnit, 0, "block", false);
     // Current column, and the indentation at the start of the current
@@ -292,8 +291,6 @@ var RubyParser = Editor.Parser = (function() {
       if (token.style == KEWORDCLASS && token.content == "end") {
         if (context && context.block && context.block > 0) {
           context.block -= 1;
-        } else{
-          //popcontext();
         }
       }      
       if (token.style == INSTANCEMETHODCALLCLASS) {
