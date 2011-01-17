@@ -35,12 +35,20 @@ from django.core.mail import send_mail
 SCHEDULE_OPTIONS = ((-1, 'never'), (3600*24, 'once a day'), (3600*24*2, 'every two days'), (3600*24*3, 'every three days'),                                                                 (3600*24*7, 'once a week'), (3600*24*14, 'every two weeks'), (3600*24*31, 'once a month'), (3600*24*63, 'every two months'), (3600*24*182, 'every six months'),)
 SCHEDULE_OPTIONS_DICT = dict(SCHEDULE_OPTIONS)
 
+LICENSE_CHOICES = (
+    ('Unknown', 'Unknown'),
+    ('Public domain', 'Public domain'),
+    ('Share-alike', 'Share-alike'),
+    ('Crown copyright', 'Crown copyright'),
+    ('Other', 'Other'),
+)
+
 class Scraper (code.Code):
 
     has_geo      = models.BooleanField(default=False)
     has_temporal = models.BooleanField(default=False)    
     last_run     = models.DateTimeField(blank=True, null=True)    
-    license      = models.CharField(max_length=100, blank=True)
+    license      = models.CharField(max_length=100, blank=True, choices=LICENSE_CHOICES, default='Unknown')
     license_link = models.URLField(verify_exists=False, null=True, blank=True)
     record_count = models.IntegerField(default=0)        
     scraper_sparkline_csv = models.CharField(max_length=255, null=True)
@@ -52,7 +60,6 @@ class Scraper (code.Code):
     def __init__(self, *args, **kwargs):
         super(Scraper, self).__init__(*args, **kwargs)
         self.wiki_type = 'scraper'
-        self.license = 'Unknown'
 
     def clean(self):
         if self.run_interval == 'draft' and self.pub_date is not None:
@@ -68,12 +75,8 @@ class Scraper (code.Code):
         return int(Scraper.objects.item_count(self.guid))
 
 
-    # update scraper meta data (lines of code etc)    
+            # It would be good to kill this function off and move its functionality into being properties of the database
     def update_meta(self):
-
-        # runs Code.update_meta
-        super(Scraper, self).update_meta()
-
         #update line counts etc
         self.record_count = self.count_records()
         self.has_geo = bool(Scraper.objects.has_geo(self.guid))
@@ -179,7 +182,7 @@ class ScraperRunEvent(models.Model):
     records_produced  = models.IntegerField(default=0)
     pages_scraped     = models.IntegerField(default=0)
     output            = models.TextField()
-    first_url_scraped = models.CharField(max_length=128, blank=True, null=True)
+    first_url_scraped = models.CharField(max_length=256, blank=True, null=True)
     exception_message = models.CharField(max_length=256, blank=True, null=True)
 
     def __unicode__(self):

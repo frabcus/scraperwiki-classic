@@ -8,6 +8,7 @@
 
 <fieldset>
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} }" />
+    <input type="hidden" id="hidLicenseChoices" value="{ {% for name, text in license_choices %}'{{name}}':'{{text}}', {% endfor %} }" />
 </fieldset>
 
 <div class="content full">
@@ -89,17 +90,6 @@
                 {% else %}
                    has not been run yet.
                 {% endif %}
-
-                {% if scraper.license_link %}
-                    The license for this data is {{scraper.license|lower|default:"&nbsp;"}} and a copy can be found on <a href="{{scraper.license_link}}">this page</a>.
-                    {% if user.is_authenticated %}
-                        <a href="{% url scraper_admin scraper.short_name %}">[edit license]</a>
-                    {% else %}
-                        <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">[sign in to edit license]</a>
-                    {% endif %}
-                {% else %}
-                    The license for this dataset is unknown, {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}">please add a link to the license if you are able to locate it</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">please sign in and add a link to the license if you are able to locate it</a>{% endif %}.
-                {% endif %}
             </p>
         </div>
     </div>
@@ -146,6 +136,8 @@
 <div class="content col left">
     <h3>Contributors</h3>
     {% include 'codewiki/includes/contributors.html' %}
+    <h3>License {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditLicense" class="edit">[edit license]</a>{% endif %}</h3>
+    This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.license}}</span>
 </div>
 
 <div class="content col right">
@@ -153,9 +145,17 @@
     <p>
       This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
       {% ifnotequal scraper.next_run.year 9999 %}
-         (next in {{scraper.next_run|timeuntil}})
+        {% ifequal scraper.next_run|timeuntil '0 minutes' %}
+          (next run ASAP).
+        {% else %}
+          (next in {{scraper.next_run|timeuntil}}).
+        {% endifequal %} 
+      {% else %}
+        (no future run scheduled).
       {% endifnotequal %}
+      {% if user.is_staff %}<span class="staff">Next run datetime: {{scraper.next_run}}</span>{% endif %}
     </p>
+
     <p>{% sparkline scraper.scraper_sparkline_csv 'medium' %}</p>
 
     {% if user_owns_it and not scraper.published %}
@@ -191,6 +191,8 @@
     {% endif %}
 
     {% if user.is_staff %}
+    <p class="staff"><b>Go to scraper on <a href="/admin/codewiki/scraper/{{scraper.pk}}/">admin page</a></b></p>
+
     <form action="{% url scraper_run_scraper scraper.short_name %}" method="post" class="staff">
         <input type="hidden" name="run_scraper" value="1" />
         <input type="submit" id="btnRunScraper" class="danger" value="Run this scraper?" />
@@ -212,7 +214,7 @@
     scraper_short_name = '{{scraper.short_name}}';
     {% if user.is_authenticated %}
         setupScraperEditInPlace('scraper', '{{scraper.short_name}}');
-        setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA.");
+        setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
         setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
     {% endif %}
 

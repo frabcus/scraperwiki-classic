@@ -95,6 +95,7 @@ def scraper_overview(request, short_name):
         'scraper_requesters': scraper_requesters,
         'related_views': related_views,
         'schedule_options': models.SCHEDULE_OPTIONS,
+        'license_choices': models.LICENSE_CHOICES,
         }
     
     #get data for this scaper in a way that we can see exactly what is being transferred
@@ -121,122 +122,82 @@ def scraper_overview(request, short_name):
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
-def view_admin (request, short_name):
-    response = None
-
-    user = request.user
+def view_admin(request, short_name):
     view = get_code_object_or_none(models.View, short_name=short_name)
     if not view:
         return code_error_response(models.View, short_name=short_name, request=request)
 
-    user_owns_it = (view.owner() == user)
-
-    form = forms.ViewAdministrationForm(instance=view)
-    #form.fields['tags'].initial = ", ".join([tag.name for tag in view.tags])
-    response = render_to_response('codewiki/view_admin.html', {'selected_tab': 'overview','scraper': view,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
-
     #you can only get here if you are signed in
-    if not user.is_authenticated():
+    if not request.user.is_authenticated():
         raise Http404
 
-    if request.method == 'POST':
-        #is this an ajax post of a single value?
-        js = request.POST.get('js', None)
-        #single fields saved via ajax
-        if js:
-            response = HttpResponse()
-            response_text = ''
-            element_id = request.POST.get('id', None)       
-            if element_id == 'divAboutScraper':
-                view.description = request.POST.get('value', None)                                                  
-                response_text = textile.textile(view.description)
+    if request.method == 'POST' and request.is_ajax():
+        response = HttpResponse()
+        response_text = ''
+        element_id = request.POST.get('id', None)
+        if element_id == 'divAboutScraper':
+            view.description = request.POST.get('value', None)
+            response_text = textile.textile(view.description)
 
-            if element_id == 'hCodeTitle':
-                view.title = request.POST.get('value', None)                                                  
-                response_text = view.title
+        if element_id == 'hCodeTitle':
+            view.title = request.POST.get('value', None)
+            response_text = view.title
 
-            if element_id == 'divEditTags':
-                view.tags = request.POST.get('value', '')                                                  
-                response_text = ", ".join([tag.name for tag in view.tags])
+        if element_id == 'divEditTags':
+            view.tags = request.POST.get('value', '')
+            response_text = ", ".join([tag.name for tag in view.tags])
 
-            #save view
-            view.save()
-            response.write(response_text)
-        #saved by form 
-        else:
-            form = forms.ViewAdministrationForm(request.POST, instance=view)
-            response =  HttpResponseRedirect(reverse('code_overview', args=[view.wiki_type, view.short_name]))
-
-            if form.is_valid():
-                s = form.save()
-                s.tags = form.cleaned_data['tags']
-            else:
-                response = render_to_response('codewiki/scraper_admin.html', {'selected_tab': 'overview','scraper': view,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
-
-    # send back whatever responbse we have
-    return response
+        #save view
+        view.save()
+        response.write(response_text)
+        return response
+    else:
+        raise Http404
     
     
-def scraper_admin (request, short_name):
-    response = None
-
-    user = request.user
+def scraper_admin(request, short_name):
     scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
     if not scraper:
         return code_error_response(models.Scraper, short_name=short_name, request=request)
-    user_owns_it = (scraper.owner() == user)
-
-    form = forms.ScraperAdministrationForm(instance=scraper)
-    form.fields['tags'].initial = ", ".join([tag.name for tag in scraper.tags])
-    response = render_to_response('codewiki/scraper_admin.html', {'selected_tab': 'overview','scraper': scraper,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
 
     #you can only get here if you are signed in
-    if not user.is_authenticated():
+    if not request.user.is_authenticated():
         raise Http404
 
-    if request.method == 'POST':
-        #single fields saved via ajax
-        if request.is_ajax():
-            response = HttpResponse()
-            response_text = ''
-            element_id = request.POST.get('id', None)
-            if element_id == 'divAboutScraper':
-                scraper.description = request.POST.get('value', None)                                                  
-                response_text = textile.textile(scraper.description)
-                
-            if element_id == 'hCodeTitle':
-                scraper.title = request.POST.get('value', None)                                                  
-                response_text = scraper.title
-
-            if element_id == 'divEditTags':
-                scraper.tags = request.POST.get('value', '')                                                  
-                response_text = ", ".join([tag.name for tag in scraper.tags])
-
-            if element_id == 'spnRunInterval':
-                scraper.run_interval = int(request.POST.get('value', None))
-                response_text = models.SCHEDULE_OPTIONS_DICT[scraper.run_interval]
-
-            if element_id == 'publishScraperButton':
-                scraper.published = True
-                response_text = ''
-
-            #save scraper
-            scraper.save()
-            response.write(response_text)
+    if request.method == 'POST' and request.is_ajax():
+        response = HttpResponse()
+        response_text = ''
+        element_id = request.POST.get('id', None)
+        if element_id == 'divAboutScraper':
+            scraper.description = request.POST.get('value', None)
+            response_text = textile.textile(scraper.description)
             
-        #saved by form 
-        else:
-            form = forms.ScraperAdministrationForm(request.POST, instance=scraper)
-            response =  HttpResponseRedirect(reverse('code_overview', args=['scraper', short_name]))
+        if element_id == 'hCodeTitle':
+            scraper.title = request.POST.get('value', None)
+            response_text = scraper.title
 
-            if form.is_valid():
-                s = form.save()
-                s.tags = form.cleaned_data['tags']
-            else:
-                response = render_to_response('codewiki/scraper_admin.html', {'selected_tab': 'overview','scraper': scraper,'user_owns_it': user_owns_it, 'form': form,}, context_instance=RequestContext(request))
+        if element_id == 'divEditTags':
+            scraper.tags = request.POST.get('value', '')
+            response_text = ", ".join([tag.name for tag in scraper.tags])
 
-    # send back whatever responbse we have
-    return response
+        if element_id == 'spnRunInterval':
+            scraper.run_interval = int(request.POST.get('value', None))
+            response_text = models.SCHEDULE_OPTIONS_DICT[scraper.run_interval]
+
+        if element_id == 'spnLicenseChoice':
+            scraper.license = request.POST.get('value', None)
+            response_text = scraper.license
+
+        if element_id == 'publishScraperButton':
+            scraper.published = True
+            response_text = ''
+
+        #save scraper
+        scraper.save()
+        response.write(response_text)
+        return response
+    else:
+        raise Http404
 
 
 def scraper_delete_data(request, short_name):
@@ -248,6 +209,8 @@ def scraper_delete_data(request, short_name):
         raise Http404
     if request.POST.get('delete_data', None) == '1':
         models.Scraper.objects.clear_datastore(scraper_id=scraper.guid)
+        scraper.scrapermetadata_set.all().delete()
+
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 # implemented by setting last_run to None
@@ -447,58 +410,6 @@ def scraper_history(request, wiki_type, short_name):
     return render_to_response('codewiki/history.html', dictionary, context_instance=RequestContext(request))
 
 
-def code(request, wiki_type, short_name):
-    user = request.user
-    scraper = get_code_object_or_none(models.Code, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Code, short_name=short_name, request=request)
-
-    # Only logged in users should be able to see unpublished scrapers
-    if not scraper.published and not user.is_authenticated():
-        return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
-
-    try: rev = int(request.GET.get('rev', '-1'))
-    except ValueError: rev = -1
-
-    mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
-    status = mercurialinterface.getstatus(scraper, rev)
-
-
-    context = { 'selected_tab': 'history', 'scraper': scraper }
-
-    # overcome lack of subtract in template
-    if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
-        status["modifiedcommitdifference"] = status["filemodifieddate"] - status["prevcommit"]["date"]
-
-    context["status"] = status
-    context["code"] = status.get('code')
-    
-    # hack in link to user (was it a good idea to use userid rather than username?)
-    try:    status["currcommit"]["user"] = User.objects.get(pk=int(status["currcommit"]["userid"]))
-    except: pass
-    try:    status["prevcommit"]["user"] = User.objects.get(pk=int(status["prevcommit"]["userid"]))
-    except: pass
-    try:    status["nextcommit"]["user"] = User.objects.get(pk=int(status["nextcommit"]["userid"]))
-    except: pass
-
-    context['error_messages'] = [ ]
-    
-    try: otherrev = int(request.GET.get('otherrev', '-1'))
-    except ValueError: otherrev = None
-    
-    if otherrev != -1:
-        try:
-            reversion = mercurialinterface.getreversion(otherrev)
-            context["othercode"] = reversion["text"].get(status['scraperfile'])
-        except IndexError:
-            context['error_messages'].append('Bad otherrev index')
-
-    if context.get("othercode"):
-        sqm = difflib.SequenceMatcher(None, context["code"].splitlines(), context["othercode"].splitlines())
-        context['matcheropcodes'] = json.dumps(sqm.get_opcodes())
-    
-    return render_to_response('codewiki/code.html', context, context_instance=RequestContext(request))
-
 
 def tags(request, wiki_type, short_name):
     if wiki_type == 'scraper':
@@ -641,21 +552,7 @@ def scraper_table(request):
     dictionary["numdeletedscrapers"] = models.Scraper.unfiltered.filter(deleted=True).count()
     dictionary["user"] = request.user
     return render_to_response('codewiki/scraper_table.html', dictionary, context_instance=RequestContext(request))
-    
 
-
-def download(request, short_name):
-    """
-    TODO: DELETE?
-    """
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
-
-    response = HttpResponse(scraper.saved_code(), mimetype="text/plain")
-    response['Content-Disposition'] = \
-        'attachment; filename=%s.py' % (scraper.short_name)
-    return response
 
 
 def follow (request, short_name):
@@ -696,9 +593,6 @@ def htmlview(request, short_name):
 
     return HttpResponse(view.saved_code())
 
-def commit_event(request, event_id):
-    event = get_object_or_404(models.CodeCommitEvent, id=event_id)
-    return render_to_response('codewiki/commit_event.html', {'event': event}, context_instance=RequestContext(request))
 
 def choose_template(request, wiki_type):
 
@@ -727,37 +621,6 @@ def delete_draft(request):
     request.notifications.used = True
 
     return HttpResponseRedirect(reverse('frontpage'))
-
-def diff(request, short_name=None):
-    if not short_name or short_name == "__new__":
-        return HttpResponse("Draft scraper, nothing to diff against", mimetype='text')
-    code = request.POST.get('code', None)    
-    if not code:
-        return HttpResponse("Programme error: No code sent up to diff against", mimetype='text')
-
-    scraper = get_code_object_or_none(models.Code, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Code, short_name=short_name, request=request)
-
-    result = '\n'.join(difflib.unified_diff(scraper.saved_code().splitlines(), code.splitlines(), lineterm=''))
-    return HttpResponse("::::" + result, mimetype='text')
-
-def raw(request, short_name=None):
-    if not short_name or short_name == "__new__":
-        return HttpResponse("Draft scraper, shouldn't do reload", mimetype='text')
-
-    scraper = get_code_object_or_none(models.Code, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Code, short_name=short_name, request=request)
-
-    oldcodeineditor = request.POST.get('oldcode', None)
-    newcode = scraper.saved_code()
-    if oldcodeineditor:
-        sequencechange = vc.DiffLineSequenceChanges(oldcodeineditor, newcode)
-        result = "%s:::sElEcT rAnGe:::%s" % (json.dumps(list(sequencechange)), newcode)   # a delimeter that the javascript can find, in absence of using json
-    else:
-        result = newcode
-    return HttpResponse(result, mimetype="text/plain")
 
 
 def convtounicode(text):
@@ -788,7 +651,7 @@ def proxycached(request):
     try:
         fin = urllib2.urlopen(proxyurl)
         result["mimetype"] = fin.headers.type
-        if fin.headers.maintype == 'text':
+        if fin.headers.maintype == 'text' or fin.headers.type == "application/json":
             result['content'] = convtounicode(fin.read())
         else:
             result['content'] = base64.encodestring(fin.read())
@@ -800,240 +663,4 @@ def proxycached(request):
     return HttpResponse(json.dumps(result), mimetype="text/plain")
 
 
-
-#save a code object
-def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourcescraper = ''):
-
-    code_object.line_count = int(code_text.count("\n"))
-    
-    # perhaps the base class should call the upper class updates, not the other way round
-    if code_object.wiki_type == "scraper":
-        code_object.save()  # save the object using the base class (otherwise causes a major failure if it doesn't exist)
-        code_object.scraper.update_meta()
-        code_object.scraper.save()
-    else:
-        code_object.update_meta()
-        code_object.save()
-
-        #make link to source scraper
-        if sourcescraper:
-            scraper = get_code_object_or_none(models.Code, short_name=sourcescraper)
-            if scraper:
-                code_object.relations.add(scraper)
-
-    # save code and commit code through the mercurialinterface
-    lcommitmessage = earliesteditor and ("%s|||%s" % (earliesteditor, commitmessage)) or commitmessage
-    mercurialinterface = vc.MercurialInterface(code_object.get_repo_path())
-    mercurialinterface.save(code_object, code_text)
-    rev = mercurialinterface.commit(code_object, message=lcommitmessage, user=user)
-    mercurialinterface.updatecommitalertsrev(rev)
-
-    # Add user roles
-    if code_object.owner():
-        if code_object.owner().pk != user.pk:
-            code_object.add_user_role(user, 'editor')
-    else:
-        code_object.add_user_role(user, 'owner')
-
-# Handle Session Draft
-# A non-served page for saving scrapers that have been stored in the session for non-signed in users
-def handle_session_draft(request, action):
-
-    # check if they are signed in, if no, they shouldent be here, off to the signin page
-    if not request.user.is_authenticated():
-        response_url =  reverse('login') + "?next=%s" % reverse('handle_session_draft', kwargs={'action': action})
-        return HttpResponseRedirect(response_url)
-
-    #check if anything in the session        
-    session_scraper_draft = request.session.pop('ScraperDraft', None)
-
-    # shouldn't be here
-    if not session_scraper_draft:
-        response_url = reverse('frontpage')
-        return HttpResponseRedirect(response_url)
-
-    draft_scraper = session_scraper_draft.get('scraper', None)
-    draft_scraper.save()
-    #draft_commit_message = action.startswith('commit') and session_scraper_draft.get('commit_message') or None
-    draft_code = session_scraper_draft.get('code')
-    sourcescraper = session_scraper_draft.get('sourcescraper')
-    commitmessage = session_scraper_draft.get('commit_message', "") # needed?
-    earliesteditor = session_scraper_draft.get('earliesteditor', "") #needed?
-    save_code(draft_scraper, request.user, draft_code, earliesteditor, commitmessage, sourcescraper)
-
-    # work out where to send them next
-    #go to the scraper page if commited, or the editor if not
-    if action == 'save':
-        response_url = reverse('editor_edit', kwargs={'wiki_type': draft_scraper.wiki_type, 'short_name' : draft_scraper.short_name})
-    elif action == 'commit':
-        response_url = reverse('editor_edit', kwargs={'wiki_type': draft_scraper.wiki_type, 'short_name' : draft_scraper.short_name})
-
-    return HttpResponseRedirect(response_url)
-
-# called from the edit function
-def saveeditedscraper(request, lscraper):
-    form = forms.editorForm(request.POST, instance=lscraper)
-    
-    #validate
-    if not form.is_valid() or 'action' not in request.POST:
-        return HttpResponse(json.dumps({'status' : 'Failed'}))
-
-    action = request.POST.get('action').lower()
-    # assert action == 'commit'
-
-    # recover the altered object from the form, without saving it to django database - http://docs.djangoproject.com/en/dev/topics/forms/modelforms/#the-save-method
-    scraper = form.save(commit=False)
-    if not scraper.guid:
-        scraper.buildfromfirsttitle()
-
-    # Add some more fields to the form
-    code = form.cleaned_data['code']
-    commitmessage = request.POST.get('commit_message', "")
-    sourcescraper = request.POST.get('sourcescraper', "")    
-    
-    # User is signed in, we can save the scraper
-    if request.user.is_authenticated():
-        earliesteditor = request.POST.get('earliesteditor', "")
-        save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
-
-        # Work out the URL to return in the JSON object
-        url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name':scraper.short_name})
-        if action.startswith("commit"):
-            response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
-
-        # Build the JSON object and return it
-        res = json.dumps({'redirect':'true', 'url':response_url,})
-        return HttpResponse(res)
-
-    # User is not logged in, save the scraper to the session
-    else:
-        draft_session_scraper = { 'scraper':scraper, 'code':code, 'commit_message': request.POST.get('commit_message'), 'sourcescraper': sourcescraper}
-        request.session['ScraperDraft'] = draft_session_scraper
-
-        # Set a message with django_notify telling the user their scraper is safe
-        request.notifications.add("You need to sign in or create an account - don't worry, your scraper is safe ")
-        scraper.action = action
-
-        status = 'Failed'
-        response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
-        if action == 'save':
-            status = 'OK'
-        elif action == 'commit':
-            #!response_url =  reverse('login') + "?next=%s" % reverse('handle_session_draft', kwargs={'action': action})
-            status = 'OK'
-
-        return HttpResponse(json.dumps({'status':status, 'draft':'True', 'url':response_url}))
-
-
-def edittutorial(request, short_name):
-    code = get_code_object_or_none(models.Code, short_name=short_name)
-    if not code:
-        return code_error_response(models.Code, short_name=short_name, request=request)
-
-    qtemplate = "?template="+code.short_name
-    return HttpResponseRedirect(reverse('editor', args=[code.wiki_type, code.language]) + qtemplate)
-
-
-
-#Editor form
-blankstartupcode = { 'scraper' : { 'python': "# Blank Python\n", 
-                                    'php':   "<?php\n# Blank PHP\n?>\n", 
-                                    'ruby':  "# Blank Ruby\n" 
-                                 }, 
-                     'view'    : { 'python': "# Blank Python\nsourcescraper = ''\n", 
-                                   'php':    "<?php\n# Blank PHP\n$sourcescraper = ''\n?>\n", 
-                                   'ruby':   "# Blank Ruby\nsourcescraper = ''\n" 
-                                  }
-                   }
-
-def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
-    return_url = reverse('frontpage')
-    language = language.lower()
-    
-    codemirrorversion = request.GET.get('codemirrorversion', '')
-    if not re.match('[\d\.\w]+$', codemirrorversion):
-        codemirrorversion = settings.CODEMIRROR_VERSION
-
-    # identify the scraper (including if there was a draft one backed up)
-    has_draft = False
-    if request.session.get('ScraperDraft', None):
-        draft = request.session['ScraperDraft'].get('scraper', None)
-        if draft:
-            has_draft  = True
-
-    commit_message = ''
-    if has_draft:
-        scraper = draft
-        commit_message = request.session['ScraperDraft'].get('commit_message', '')        
-        code = request.session['ScraperDraft'].get('code', ' missing')
-
-    # Try and load an existing scraper
-    elif short_name is not "__new__":
-        scraper = get_code_object_or_none(models.Code, short_name=short_name)
-        if not scraper:
-            return code_error_response(models.Code, short_name=short_name, request=request)
-        code = scraper.saved_code()
-        return_url = reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
-        if not scraper.published:
-            commit_message = 'Scraper created'
-
-    # Create a new scraper
-    else:
-        if language not in ['python', 'php', 'ruby']:
-            language = 'python'
-
-        scraper = None
-        if wiki_type == 'scraper':
-            scraper = models.Scraper()
-        elif  wiki_type == 'view':
-            scraper = models.View()
-        else:
-            raise Exception, "Invalid wiki type"
-
-        startupcode = blankstartupcode[wiki_type][language]
-        statuptemplate = request.GET.get('template', False)
-        if statuptemplate:
-            try:
-                templatescraper = models.Code.objects.get(published=True, language=language, short_name=statuptemplate)  # wiki_type as well?
-                startupcode = templatescraper.saved_code()
-                
-            
-            except models.Code.DoesNotExist:
-                startupcode = startupcode.replace("Blank", "Missing template for")
-            
-        # replaces the phrase: sourcescraper = 'working-example' with sourcescraper = 'replacement-name'
-        inputscrapername = request.GET.get('sourcescraper', False)
-        if inputscrapername:
-            startupcode = re.sub('''(?<=sourcescraper = ["']).*?(?=["'])''', inputscrapername, startupcode)
-        
-        scraper.language = language
-        code = startupcode
-
-
-    # if it's a post-back (save) then execute that
-    if request.POST:
-        return saveeditedscraper(request, scraper)
-    else:
-        # Else build the page
-        form = forms.editorForm(instance=scraper)
-        form.fields['code'].initial = code
-
-        tutorial_scrapers = models.Code.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
-
-    #if a source scraper has been set, then pass it to the page
-    source_scraper = ''
-    if scraper.wiki_type == 'view' and request.GET.get('sourcescraper', False):
-       source_scraper =  request.GET.get('sourcescraper', False)
-
-    context = {}
-    context['form'] = form
-    context['scraper'] = scraper
-    context['has_draft'] = has_draft
-    context['user'] = request.user
-    context['source_scraper'] = source_scraper
-    context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())
-    context['selected_tab'] = 'code'
-    context['codemirrorversion'] = codemirrorversion
-    
-    return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
 

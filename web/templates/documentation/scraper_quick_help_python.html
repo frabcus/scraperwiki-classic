@@ -1,0 +1,40 @@
+    <h4>How do I get the text of a web page?</h4>
+    <dl class="functiondocs">     
+        <dd>
+            <code>
+             import scraperwiki<br/>
+             html = scraperwiki.scrape("http://scraperwiki.com/hello_world.html")<br/>
+             print html
+            </code>
+        </dd>
+    </dl>     
+    <h4>How do I retrieve the bits I care about?</h4>
+    <dl class="functiondocs">
+        <dd>
+            <code>
+            import BeautifulSoup<br/>
+            soup = BeautifulSoup.BeautifulSoup(html)<br/>
+            for td in soup.findAll('td'):<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;print td.string<br/>
+            </code>
+        </dd>
+    </dl>
+    <h4>How do I save that data to the datastore?</h4>
+    <dl class="functiondocs">
+        <dd>
+            <code>
+            for td in soup.findAll('td'):<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;scraperwiki.datastore.save(unique_keys=['table_cell'], data={'table_cell':td.string})
+            </code>
+        </dd>
+    </dl>
+    <h4>How do I geocode data?</h4>
+    <dl class="functiondocs">
+      <dd>
+          <code>
+              postcode = scraperwiki.geo.extract_gb_postcode("10 Downing Street, London SW1A 2AA")<br/>
+              lat_lng = scraperwiki.geo.gb_postcode_to_latlng(postcode)<br/>
+              print lat_lng
+          </code>
+      </dd>
+    </dl>

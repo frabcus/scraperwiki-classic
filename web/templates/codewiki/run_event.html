@@ -17,7 +17,7 @@
         {% if status %}
           <p>
           <form action="{% url scraper_killrunning event.run_id event.id %}" method="post">
-            Still running {{status.runtime|floatformat}} seconds.  
+            <b>Still running {{status.runtime|floatformat}} seconds.</b>  
 
             {% if user_owns_it %}
               <input type="submit" id="btnKillRun" class="danger" value="Kill running scraper" />
