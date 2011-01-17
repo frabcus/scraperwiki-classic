@@ -9,6 +9,11 @@ set -e
 # http://www.selenic.com/pipermail/mercurial/2008-July/020265.html
 # http://mercurial.selenic.com/wiki/ConvertExtension
 
+# If it is very slow, you might have hit this bug:
+# http://mercurial.selenic.com/bts/issue991
+# This patch to "hg convert" extension may help
+# http://mercurial.selenic.com/bts/file1167/convert-faster-991.diff
+
 die () {
     echo -e "$@" 1>&2
     exit 1

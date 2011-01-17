@@ -7,15 +7,15 @@ PROJECT_NAME = 'ScraperWiki'
 
 # environments
 def dev():
-    "On the scrpaerwiki server, accessible from http://dev.scraperwiki.com"
+    "On the scraperwiki server, accessible from http://dev.scraperwiki.com"
     env.hosts = ['212.84.75.28']
     env.path = '/var/www/dev.scraperwiki.com'
     env.branch = 'default'
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
     env.activate = env.path + '/bin/activate'
     env.user = 'scraperdeploy'
-    env.virtualhost_path = "/"
     env.deploy_version = "dev"
+    env.webserver = True
 
 def www():
     "The main www server (horsell)"
@@ -25,8 +25,30 @@ def www():
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
     env.activate = env.path + '/bin/activate'
     env.user = 'scraperdeploy'
-    env.virtualhost_path = "/"
     env.deploy_version = "www"
+    env.webserver = True
+
+def umls():
+    "The UML server (rush)"
+    env.hosts = ['89.16.177.195:7822']
+    env.path = '/var/www/scraperwiki'
+    env.branch = 'stable'
+    env.web_path = 'file:///home/scraperwiki/scraperwiki'
+    env.activate = env.path + '/bin/activate'
+    env.user = 'scraperdeploy'
+    env.deploy_version = "umls"
+    env.webserver = False
+
+def datastore():
+    "The datastore server (burbage)"
+    env.hosts = ['89.16.177.176:7822']
+    env.path = '/var/www/scraperwiki'
+    env.branch = 'stable'
+    env.web_path = 'file:///home/scraperwiki/scraperwiki'
+    env.activate = env.path + '/bin/activate'
+    env.user = 'scraperdeploy'
+    env.deploy_version = "datastore"
+    env.webserver = False
 
 def setup():
     """
@@ -47,7 +69,6 @@ def virtualenv(command):
     temp = 'cd %s; source ' % env.path
     return run(temp + env.activate + '&&' + command)
 
-
 def buildout():
     virtualenv('buildout -N')
 
@@ -65,7 +86,8 @@ def update_revision():
     virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
 
 def install_cron():
-    virtualenv('crontab crontab.%s' % env.deploy_version)
+    run('crontab %s/crontab.%s' % (env.path, env.deploy_version))
+    sudo('crontab %s/crontab-root.%s' % (env.path, env.deploy_version))
 
 def deploy():
     """
@@ -73,7 +95,6 @@ def deploy():
     required third party modules, install the virtual host and 
     then restart the webserver
     """
-
 
     print "***************** DEPLOY *****************"
     print "Please Enter your deploy message: \r"
@@ -84,13 +105,15 @@ def deploy():
 
     run("cd %s; hg pull; hg update -C %s" % (env.path, env.branch))
     
-    buildout()
-    migrate()
-    write_changeset()
+    if env.webserver:
+        buildout()
+        migrate()
+        write_changeset()
+        create_tarball()
+        update_revision()
+        restart_webserver()   
+
     install_cron()
-    create_tarball()
-    update_revision()
-    restart_webserver()   
     email(message)
 
 def email(message_body=None):

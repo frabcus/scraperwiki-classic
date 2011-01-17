@@ -1,0 +1,8 @@
+MAILTO=cron@scraperwiki.com
+SHELL=/bin/bash
+
+# m h  dom mon dow   command
+0 5 * * * mysqldump -u backup --database scraperwiki_live --single-transaction --quick | gzip > /root/backup/mysql-backup.sql.gz
+0 5 * * * tar zcfP /root/backup/scraperwiki.tar.gz /var/www/scraperwiki --exclude "/var/www/scraperwiki/croppercache"
+0 5 * * * tar zcfP /root/backup/etc.tar.gz /etc
+0 7 * * * rsync -qazr /root/backup scraperwiki-web.backup.bytemark.co.uk::scraperwiki-web/
