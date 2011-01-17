@@ -32,10 +32,11 @@ class ScraperViewsTests(TestCase):
         self.assertEqual(codewiki.views.stringnot('test'), 'test')
     
     def test_scraper_comments(self):
+        # This may fail if there has never been a scraper called test_scraper checked 
+        # into the scraper repository
         response = self.client.get(reverse('scraper_comments',
                             kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
-    
 
     def test_scraper_export_csv(self):
         response = self.client.get(reverse('export_csv',
