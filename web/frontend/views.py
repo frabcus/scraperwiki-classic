@@ -13,7 +13,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from tagging.models import Tag, TaggedItem
-from tagging.utils import get_tag
+from tagging.utils import get_tag, calculate_cloud, LOGARITHMIC
 from codewiki.models import Code, Scraper, View
 from tagging.models import Tag, TaggedItem
 from market.models import Solicitation, SolicitationStatus
@@ -26,6 +26,7 @@ import os
 import re
 import datetime
 import urllib
+import itertools
 
 from utilities import location
 
@@ -309,23 +310,20 @@ def stats(request):
 
 #hack - get a merged list of scraper and soplicitation tags
 def _get_merged_tags(min_count = None):
-    scraper_tags =  Tag.objects.cloud_for_model(Scraper)
-    solicitation_tags =  Tag.objects.cloud_for_model(Solicitation, min_count=min_count)
-    all_tags = scraper_tags
-    
-    #merge both tag lists
-    for solicitation_tag in solicitation_tags:
-        found = False
-        for scraper_tag in all_tags:
-            if scraper_tag.name == solicitation_tag.name:
-                found = True
-                if solicitation_tag.font_size > scraper_tag.font_size:
-                    scraper_tag.font_size = solicitation_tag.font_size
-                    
-        if not found:
-            all_tags.append(solicitation_tag)
+    scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True)
+    view_tags = Tag.objects.usage_for_model(View, counts=True)
+    solicitation_tags = Tag.objects.usage_for_model(Solicitation, counts=True)
 
-    return all_tags    
+    all_tags = {}
+
+    for tag in itertools.chain(scraper_tags, view_tags, solicitation_tags):
+        existing = all_tags.get(tag.name, None)
+        if existing:
+            existing.count += tag.count
+        else:
+            all_tags[tag.name] = tag
+
+    return calculate_cloud(all_tags.values(), steps=4, distribution=LOGARITHMIC)
     
 
 def tags(request):
@@ -339,32 +337,35 @@ def tag(request, tag):
     if not tag:
         raise Http404
 
-
-    #get all scrapers with this tag
+    #get all scrapers and views with this tag
     scrapers = TaggedItem.objects.get_by_model(Scraper.objects.all(), tag)
+    views = TaggedItem.objects.get_by_model(View.objects.all(), tag)
+    code_objects = sorted(list(scrapers) + list(views), key=lambda x: x.created_at, reverse=True)
     
     #get all open and pending solicitations with this tag
     solicitations_open = Solicitation.objects.filter(deleted=False, status=SolicitationStatus.objects.get(status='open')).order_by('created_at')
     solicitations_pending = Solicitation.objects.filter(deleted=False, status=SolicitationStatus.objects.get(status='pending')).order_by('created_at')
+    solicitations_completed = Solicitation.objects.filter(deleted=False, status=SolicitationStatus.objects.get(status='completed')).order_by('created_at')
 
     solicitations_open = TaggedItem.objects.get_by_model(solicitations_open, tag)
     solicitations_pending = TaggedItem.objects.get_by_model(solicitations_pending, tag)
+    solicitations_completed = TaggedItem.objects.get_by_model(solicitations_completed, tag)
 
     #do some maths to work out how complete the tag is at the moment
     solicitations_percent_complete = 0
-    if scrapers.count() + solicitations_open.count() + solicitations_pending.count() > 0:
-        solicitations_percent_complete = float(scrapers.count()) / float(scrapers.count() + solicitations_open.count() + solicitations_pending.count()) * 100
+    total_solicitations = solicitations_completed.count() + solicitations_open.count() + solicitations_pending.count()
+    if total_solicitations > 0:
+        solicitations_percent_complete = float(solicitations_completed.count()) / float(total_solicitations) * 100
+
     scrapers_fixed_percentage = 0
     if scrapers.count() > 0:
         scrapers_fixed_percentage = 100.0 - float(scrapers.filter(status='sick').count()) / float(scrapers.count()) * 100
         
     return render_to_response('frontend/tag.html', {
         'tag' : tag,
-        'scrapers': scrapers,
+        'scrapers': code_objects,
         'solicitations_open':solicitations_open,
-        'solicitations_pending':solicitations_pending,        
+        'solicitations_pending':solicitations_pending,
         'solicitations_percent_complete': solicitations_percent_complete,
         'scrapers_fixed_percentage': scrapers_fixed_percentage,
     }, context_instance = RequestContext(request))
-    
-    

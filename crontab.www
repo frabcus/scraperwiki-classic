@@ -2,8 +2,8 @@ MAILTO=cron@scraperwiki.com
 SHELL=/bin/bash
 
 # m h  dom mon dow   command
-0 0,12 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web &&  xvfb-run --server-args=":1 -screen 0, 1440x900x24" python manage.py take_screenshot --verbose --domain=scraperwikiviews.com --run_scrapers
-0 6,18 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web &&  xvfb-run --server-args=":2 -screen 0, 1440x900x24" python manage.py take_screenshot --verbose --domain=scraperwikiviews.com --run_views
+0 0,12 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web &&  xvfb-run --auto-servernum --server-args="-screen 0, 1440x900x24" python manage.py take_screenshot --verbose --domain=scraperwikiviews.com --run_scrapers
+0 6,18 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web &&  xvfb-run --auto-servernum --server-args="-screen 0, 1440x900x24" python manage.py take_screenshot --verbose --domain=scraperwikiviews.com --run_views
 
 */15 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py run_scrapers -m 20
 
