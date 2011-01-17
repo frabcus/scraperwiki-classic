@@ -655,7 +655,7 @@ def proxycached(request):
         else:
             result['content'] = base64.encodestring(fin.read())
             result['encoding'] = "base64"
-    except URLError, e: 
+    except urllib2.URLError, e: 
         result['type'] = 'exception'
         result['content'] = str(e)
     
