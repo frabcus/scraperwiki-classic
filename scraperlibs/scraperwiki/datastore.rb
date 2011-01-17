@@ -108,6 +108,10 @@ class SW_DataStore
         return request(['save', uunique_keys, js_data, date, latlng])
     end
 
+    def postcodeToLatLng(postcode)
+        return request(['postcodetolatlng', postcode])
+    end
+
     def SW_DataStore.create(host = nil, port = nil)
         if ! $M_DS
             $M_DS = SW_DataStore.new(host, port)
