@@ -411,9 +411,17 @@ var CodeMirror = (function(){
           var endTime = new Date().getTime() + self.options.lineNumberTime;
           while (node) {
             setNum(next++, node.previousSibling);
+            var lastOffset = 0;
+            
             for (; node && !win.isBR(node); node = node.nextSibling) {
               var bott = node.offsetTop + node.offsetHeight;
-              while (scroller.offsetHeight && bott - 3 > pos) setNum("&nbsp;");
+
+              while (scroller.offsetHeight &&  bott - 3 >= pos)  {
+                if ( bott - 3 == lastOffset )
+                    break;
+                lastOffset  = bott - 3;                  
+                setNum("&nbsp;");
+              }
             }
             if (node) node = node.nextSibling;
             if (new Date().getTime() > endTime) {
