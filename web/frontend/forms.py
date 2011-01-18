@@ -7,30 +7,47 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 from captcha.fields import CaptchaField
+from codewiki.models import SCHEDULE_OPTIONS, Scraper
 
 
 #from django.forms.extras.widgets import Textarea
 class SearchForm(forms.Form):
     q = forms.CharField(label='Find datasets', max_length=50)
     
-class UserProfileForm (forms.ModelForm):
-    alert_frequency = forms.ChoiceField(required=False, label="How often do you want to be emailed?", choices = (
-                                (-1, 'Never'), 
-                                (3600*24, 'Once a day'),
-                                (3600*24*3, 'Every couple of days'),                                
-                                (3600*24*7, 'Once a week'),
-                                (3600*24*7*2, 'Every two weeks'),))
+class UserProfileForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(UserProfileForm, self).__init__(*args, **kwargs)
 
-    options = []
-    for item in AlertTypes.objects.all():
-        options.append((item.pk, item.label))
+        self.user = self.instance.user
+        self.emailer = Scraper.objects.emailer_for_user(self.user)
 
-    alert_types = forms.MultipleChoiceField(options, widget=forms.CheckboxSelectMultiple())
+        if self.emailer:
+            self.fields['alert_frequency'].initial = self.emailer.run_interval
+        else:
+            # Fallback on frequency in profile while not all users have an emailer
+            self.fields['alert_frequency'].initial = self.instance.alert_frequency
+
+        self.fields['email'].initial = self.user.email
+
+    alert_frequency = forms.ChoiceField(required=False, 
+                                        label="How often do you want to be emailed?", 
+                                        choices = SCHEDULE_OPTIONS)
     bio = forms.CharField(label="A bit about you", widget=forms.Textarea(), required=False)
+    email = forms.EmailField(label="Email Address")
     
     class Meta:
         model = UserProfile
-        fields = ('bio', 'name', 'alert_frequency', 'alert_types')
+        fields = ('bio', 'name')
+
+    def save(self, *args, **kwargs):
+        self.user.email = self.cleaned_data['email']
+        self.user.save()
+
+        if self.emailer:
+            self.emailer.run_interval = self.cleaned_data['alert_frequency']
+            self.emailer.save()
+
+        return super(UserProfileForm, self).save(*args,**kwargs)
 
 class scraperContactForm(ContactForm):
     def __init__(self, data=None, files=None, request=None, *args, **kwargs):
