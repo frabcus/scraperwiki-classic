@@ -142,7 +142,11 @@ blankstartupcode = { 'scraper' : { 'python': "# Blank Python\n",
                    }
 
 def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
+    
+        # quick and dirty corrections to incoming urls, which should really be filtered in the url.py settings
     language = language.lower()
+    if language not in blankstartupcode['scraper']:
+        language = 'python'
     
     context = {'selected_tab':'code'}
     

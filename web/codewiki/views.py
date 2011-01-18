@@ -18,7 +18,6 @@ from django.conf import settings
 from django.utils.encoding import smart_str
 
 from codewiki import models
-from codewiki import forms
 from api.emitters import CSVEmitter 
 import vc
 import frontend
@@ -656,7 +655,7 @@ def proxycached(request):
         else:
             result['content'] = base64.encodestring(fin.read())
             result['encoding'] = "base64"
-    except URLError, e: 
+    except urllib2.URLError, e: 
         result['type'] = 'exception'
         result['content'] = str(e)
     

@@ -1,6 +1,7 @@
 import django.db
 from django.db import models
 from django.db import connection, backend, models
+from django.db.models import Q
 import settings
 from collections import defaultdict
 import re
@@ -405,3 +406,12 @@ class ScraperManager(CodeManager):
             scrapers = self.filter(deleted=False, featured=True).order_by('first_published_at')[:count]
         
         return scrapers
+
+    def emailer_for_user(self, user):
+        try:
+            queryset = self.get_query_set()
+            queryset = queryset.filter(Q(usercoderole__role='owner') & Q(usercoderole__user=user))
+            queryset = queryset.filter(Q(usercoderole__role='email') & Q(usercoderole__user=user))
+            return queryset.latest('id')
+        except:
+            return None

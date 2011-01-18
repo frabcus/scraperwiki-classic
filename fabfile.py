@@ -86,8 +86,8 @@ def update_revision():
     virtualenv("hg identify | awk '{print $1}' > web/revision.txt")
 
 def install_cron():
-    run('crontab %s/crontab.%s' % (env.path, env.deploy_version))
-    sudo('crontab %s/crontab-root.%s' % (env.path, env.deploy_version))
+    run('crontab %s/cron/crontab.%s' % (env.path, env.deploy_version))
+    sudo('crontab %s/cron/crontab-root.%s' % (env.path, env.deploy_version))
 
 def deploy():
     """

@@ -1,74 +1,40 @@
-<h4>Scraping a web page</h4>
-<dl class="functiondocs">
-    <dt>Return the source text of a web page as a string:</dt>        
-    <dd>
-        <code>html = ScraperWiki.scrape(url)</code>
-    </dd>
-</dl>
-<h4>Parsing (simple examples)</h4>
-<dl class="functiondocs">
-    <dt>Extract data using Nokogiri</dt>
-    <dd>
-        <code>
-            doc = Nokogiri::HTML(html)<br/>
-            doc.search('td').each do |td|<br/>
-            &nbsp;&nbsp;puts td.inner_html<br/>
-            &nbsp;&nbsp;print {'td' => td.inner_html}<br/>
-        </code>
-        <p>
-            <a href="http://nokogiri.org/" target="_new">Full documentation for Nokogiri (new window)</a>
-        </p>
-    </dd>
-</dl>
-<h4>Saving data</h4>
-<dl class="functiondocs">
-    <dt>
-        Save to the datastore:
-    </dt>
-    <dd>
-        <code>
-            ScraperWiki.save(unique_keys=[], data={}, <em>date=nil</em>, <em>latlng=nil</em>)
-        </code>
-        <p>
-            Saves <em>data</em> to the datastore. <em>unique_keys</em> is a list of keys appearing in the dictionary used to determine if if a record should be inserted or updated. 
-            <em>date</em> and <em>latlng</em> are optional special fields  for indexing each record.
-        </p>
-    </dd>
-</dl>
-<h4>Scraper meta data</h4>
-<dl class="functiondocs">
-  <dt>
-    Save a persistent variable accessible during another run
-  </dt>
-  <dd>
-      <code>
-          ScraperWiki.save_metadata(metadata_name, value)
-      </code>
-  </dd>
-  <dt>
-      Retrieve a persistent variable saved by this scraper
-  </dt>
-  <dd>
-      <code>
-          ScraperWiki.get_metadata(metadata_name, default=nil)
-      </code>
-  </dd>
-</dl>
-
-<h4>Geocoding</h4>
-<dl class="functiondocs">
-  <dt>
-        Convert a UK postcode to a lat,lng pair:
-  </dt>
-  <dd>
-      <code>
-          lat_lng = ScraperWiki.gb_postcode_to_latlng(postcode)
-      </code>
-  </dd>
-</dl>
-<h4>Recommended libraries</h4>
-<ul>
-    <li><strong>Nokogiri</strong> - for parsing HTML and XML.  <a href="http://nokogiri.org/" target="_new">Full documentation (new window)</a></li>
-    <li><strong>Hpricot</strong> - another HTML parser.  <a href="http://wiki.github.com/hpricot/hpricot/" target="_new">Full documentation (new window)</a></li>
-    <li><strong>libxml-ruby</strong> - for parsing html and accessing it using cssselect. <a href="http://libxml.rubyforge.org/" target="_new">Full documentation (new window)</a></li>
-</ul>
+    <h4>How do I get the text of a web page?</h4>
+    <dl class="functiondocs">
+        <dd>
+            <code>
+             html = ScraperWiki.scrape("http://scraperwiki.com/hello_world.html")<br/>
+             puts html
+            </code>
+        </dd>
+    </dl>
+    <h4>How do I retrieve the bits I care about?</h4>
+    <dl class="functiondocs">
+        <dd>
+            <code>
+              require 'nokogiri'<br/>
+              doc = Nokogiri::HTML(html)<br/>
+              doc.search('td').each do |td|<br/>
+              &nbsp;&nbsp;puts td.inner_html<br/>
+              end<br/>
+            </code>
+        </dd>
+    </dl>
+    <h4>How do I save that data to the datastore?</h4>
+    <dl class="functiondocs">
+        <dd>
+            <code>
+              doc.search('td').each do |td|<br/>
+              &nbsp;&nbsp;ScraperWiki.save(unique_keys=['table_cell',], data={'table_cell' =&gt; td.inner_html})<br/>
+              end<br/>
+            </code>
+        </dd>
+    </dl>
+    <h4>How do I geocode data?</h4>
+    <dl class="functiondocs">
+      <dd>
+          <code>
+              lat_lng = ScraperWiki.gb_postcode_to_latlng("SW1A 2AA")<br/>
+              puts lat_lng
+          </code>
+      </dd>
+    </dl>

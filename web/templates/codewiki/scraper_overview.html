@@ -150,10 +150,10 @@
         {% else %}
           (next in {{scraper.next_run|timeuntil}}).
         {% endifequal %} 
+        {% if user.is_staff %}<span class="staff">Next run datetime: {{scraper.next_run}}</span>{% endif %}
       {% else %}
         (no future run scheduled).
       {% endifnotequal %}
-      {% if user.is_staff %}<span class="staff">Next run datetime: {{scraper.next_run}}</span>{% endif %}
     </p>
 
     <p>{% sparkline scraper.scraper_sparkline_csv 'medium' %}</p>

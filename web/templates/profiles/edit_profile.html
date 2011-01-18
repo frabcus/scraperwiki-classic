@@ -29,6 +29,11 @@
                   {{ form.name }}
                   {% field_errors form.name %}                      
                 </li>
+                <li>
+                  {{ form.email.label_tag }}
+                  {{ form.email }}
+                  {% field_errors form.email %}                      
+                </li>
                 <li> 
                     <label>Profile picture</label> 
                     {% load gravatar %}
