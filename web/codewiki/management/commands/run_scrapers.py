@@ -186,6 +186,8 @@ def runmessageloop(runner, event, approxlenoutputlimit):
     for domainscrape in domainscrapes.values():
         domainscrape.save()
 
+    return exceptionmessage
+
 
     # maybe detect the subject title here
 def getemailtext(event):
@@ -234,7 +236,7 @@ class ScraperRunner(threading.Thread):
         event.output = ""
         event.save()
 
-        runmessageloop(runner, event, settings.APPROXLENOUTPUTLIMIT)
+        exceptionmessage = runmessageloop(runner, event, settings.APPROXLENOUTPUTLIMIT)
         
         event.run_ended = datetime.datetime.now()
         event.pid = -1  # disable it
