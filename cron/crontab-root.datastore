@@ -1,0 +1,8 @@
+MAILTO=cron@scraperwiki.com
+SHELL=/bin/bash
+
+# m h  dom mon dow   command
+0 3 * * * mysqldump -u backup --database datastore_live --single-transaction --quick | gzip > /root/backup/mysql-backup.sql.gz
+0 3 * * * tar zcfP /root/backup/scraperwiki.tar.gz /var/www/scraperwiki
+0 3 * * * tar zcfP /root/backup/etc.tar.gz /etc
+0 5 * * * rsync -qazr /root/backup datastore.backup.bytemark.co.uk::datastore/
