@@ -405,3 +405,9 @@ class ScraperManager(CodeManager):
             scrapers = self.filter(deleted=False, featured=True).order_by('first_published_at')[:count]
         
         return scrapers
+
+    def emailer_for_user(self, user):
+        try:
+            return self.get_query_set().filter(usercoderole__role='owner').get(usercoderole__role='email')
+        except:
+            return None

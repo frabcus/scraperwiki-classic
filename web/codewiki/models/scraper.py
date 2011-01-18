@@ -102,7 +102,7 @@ class Scraper (code.Code):
 
     # perhaps should be a member variable so we can sort directly on it (and set it when we want something to run immediately)
     def next_run(self):
-        if not self.run_interval:
+        if not self.run_interval or self.run_interval == -1:
             return datetime.datetime(9999, 12, 31)
         if not self.last_run:
             return datetime.datetime.now() - datetime.timedelta(1, 0, 0)  # one day ago
