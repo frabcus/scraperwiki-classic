@@ -1,6 +1,7 @@
 import django.db
 from django.db import models
 from django.db import connection, backend, models
+from django.db.models import Q
 import settings
 from collections import defaultdict
 import re
