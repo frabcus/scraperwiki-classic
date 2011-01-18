@@ -54,6 +54,8 @@ var CodeMirror = (function(){
     height: "300px",
     minHeight: 100,
     autoMatchParens: false,
+    markParen: null,
+    unmarkParen: null,
     parserConfig: null,
     tabMode: "indent", // or "spaces", "default", "shift"
     enterMode: "indent", // or "keep", "flat"
@@ -66,7 +68,8 @@ var CodeMirror = (function(){
     onLineNumberClick: null,
     indentUnit: 2,
     domain: null,
-    noScriptCaching: false
+    noScriptCaching: false,
+    incrementalLoading: false
   });
 
   function addLineNumberDiv(container, firstNum) {
@@ -409,19 +412,17 @@ var CodeMirror = (function(){
           if (!scroller.parentNode || scroller.parentNode != self.lineNumbers) return;
 
           var endTime = new Date().getTime() + self.options.lineNumberTime;
-          
           while (node) {
-            var lastPos = pos;              
+            var lastPos = pos;                            
             setNum(next++, node.previousSibling);
-            
             for (; node && !win.isBR(node); node = node.nextSibling) {
               var bott = node.offsetTop + node.offsetHeight;
-
               while (scroller.offsetHeight &&  bott - 3 >= pos)  {
                 if ( lastPos == pos ) break;
                 lastPos = pos;
                 setNum("&nbsp;");
               }
+
             }
             if (node) node = node.nextSibling;
             if (new Date().getTime() > endTime) {
@@ -545,6 +546,7 @@ var CodeMirror = (function(){
 
     area.style.display = "none";
     var mirror = new CodeMirror(insert, options);
+    mirror.save = updateField;
     mirror.toTextArea = function() {
       updateField();
       area.parentNode.removeChild(mirror.wrapping);
