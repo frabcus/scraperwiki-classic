@@ -191,6 +191,7 @@ def runmessageloop(runner, event, approxlenoutputlimit):
 
     # maybe detect the subject title here
 def getemailtext(event):
+    message = event.output
     message = re.sub("(?:^|\n)EXECUTIONSTATUS:.*", "", message).strip()
     
     msubject = re.search("(?:^|\n)EMAILSUBJECT:(.*)", message)
