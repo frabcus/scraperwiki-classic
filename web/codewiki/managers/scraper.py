@@ -107,6 +107,14 @@ class ScraperManager(CodeManager):
         self.datastore_connection.connection.commit()
 
 
+    def NEWPROXYCODE_datastore_keys(self, scraper_id):
+
+        proxy   = self.dataproxy(scraper_id)
+        rc, arg = proxy.datastore_keys()
+        if not rc :
+            raise Exception(arg)
+        return arg
+
     def datastore_keys(self, scraper_id):
 
         result = []
@@ -118,6 +126,14 @@ class ScraperManager(CodeManager):
 
         c.close()
         return result
+
+    def NEWPROXYCODE_data_search(self, scraper_id, key_values, limit=1000, offset=0):   
+
+        proxy   = self.dataproxy(scraper_id)
+        rc, arg = proxy.data_search(key_values, limit, offset)
+        if not rc :
+            raise Exception(arg)
+        return arg
 
     def data_search(self, scraper_id, key_values, limit=1000, offset=0):   
 
@@ -197,8 +213,7 @@ class ScraperManager(CodeManager):
         rc, arg = proxy.data_dictlist(limit, offset, start_date, end_date, latlng)
         if not rc :
             raise Exception(arg)
-        allitems = arg
-        return allitems
+        return arg
 
     # this accesses the tables defined in scraperlibs/scraperwiki/datastore/scheme.sql and accessed in datastore/save.py
     def data_dictlist(self, scraper_id, limit=1000, offset=0, start_date=None, end_date=None, latlng=None):   
@@ -338,13 +353,20 @@ class ScraperManager(CodeManager):
         data_tables[table] = { 'headings' : headings, 'rows' : rows }
       return data_tables
           
-    def item_count(self, guid):
-        sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s'" % guid
+    def item_count(self, scraper_id):
+        sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s'" % scraper_id
         cursor = self.datastore_connection.cursor()
         cursor.execute(sql)
         result = int(cursor.fetchone()[0])
         cursor.close()
         return result
+
+    def NEWPROXYCODE_item_count(self, scraper_id):
+        proxy   = self.dataproxy(scraper_id)
+        rc, arg = proxy.item_count()
+        if not rc :
+            raise Exception(arg)
+        return arg
 
     def has_geo(self, scraper_id):
         sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s' and latlng is not null and latlng <> ''" % scraper_id
@@ -354,6 +376,13 @@ class ScraperManager(CodeManager):
         cursor.close()
         return result
 
+    def NEWPROXYCODE_has_geo(self, scraper_id):
+        proxy   = self.dataproxy(scraper_id)
+        rc, arg = proxy.has_geo()
+        if not rc :
+            raise Exception(arg)
+        return arg
+
     def has_temporal(self, scraper_id):
         sql = "SELECT COUNT(item_id) FROM items WHERE scraper_id='%s' and date is not null" % scraper_id
         cursor = self.datastore_connection.cursor()
@@ -361,6 +390,13 @@ class ScraperManager(CodeManager):
         result = cursor.fetchone()[0] > 0
         cursor.close()
         return result
+
+    def NEWPROXYCODE_has_temporal(self, scraper_id):
+        proxy   = self.dataproxy(scraper_id)
+        rc, arg = proxy.has_temporal()
+        if not rc :
+            raise Exception(arg)
+        return arg
 
     def item_count_for_tag(self, guids):  # to delete
         guids = ",".join("'%s'" % guid for guid in guids)
@@ -396,6 +432,13 @@ class ScraperManager(CodeManager):
         
         cursor.close()
         return return_dates
+
+    def NEWPROXYCODE_recent_record_count(self, scraper_id, days):
+        proxy   = self.dataproxy(scraper_id)
+        rc, arg = proxy.recent_record_count(days)
+        if not rc :
+            raise Exception(arg)
+        return arg
 
     #for example lists
     def example_scrapers(self, user, count):

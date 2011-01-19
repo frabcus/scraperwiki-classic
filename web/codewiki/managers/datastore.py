@@ -52,6 +52,30 @@ class DataStoreClass :
 
         return self.request (('clear_datastore',))
 
+    def datastore_keys (self) :
+
+        return self.request (('datastore_keys',))
+
+    def data_search (self, key_values, limit, offset) :
+
+        return self.request (('data_search', key_values, limit, offset))
+
+    def item_count (self) :
+
+        return self.request (('item_count',))
+
+    def has_geo (self) :
+
+        return self.request (('has_geo',))
+
+    def has_temporal (self) :
+
+        return self.request (('has_temporal',))
+
+    def recent_record_count (self, days) :
+
+        return self.request (('recent_record_count', days))
+
     def close (self) :
 
         self.m_socket.send ('.\n')
