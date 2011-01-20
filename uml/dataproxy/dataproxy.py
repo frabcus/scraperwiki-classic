@@ -192,35 +192,47 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     def data_dictlist (self, db, scraperID, runID, limit, offset, start_date, end_date, latlng) :
 
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = 'data_dictlist'
-            except : pass
-
         rc, arg = db.data_dictlist (scraperID, limit, offset, start_date, end_date, latlng)
         self.connection.send (json.dumps ((rc, arg)) + '\n')
 
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = None
-            except : pass
-
     def clear_datastore (self, db, scraperID, runID) :
-
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = 'clear_datastore'
-            except : pass
 
         rc, arg = db.clear_datastore (scraperID)
         self.connection.send (json.dumps ((rc, arg)) + '\n')
 
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = None
-            except : pass
+    def datastore_keys (self, db, scraperID, runID) :
 
+        rc, arg = db.datastore_keys (scraperID)
+        self.connection.send (json.dumps ((rc, arg)) + '\n')
+
+    def data_search (self, db, scraperID, runID, key_values, limit, offset) :
+
+        rc, arg = db.data_search  (scraperID, key_values, limit, offset)
+        self.connection.send (json.dumps ((rc, arg)) + '\n')
+
+    def item_count (self, db, scraperID, runID) :
+
+        rc, arg = db.item_count  (scraperID)
+        self.connection.send (json.dumps ((rc, arg)) + '\n')
+
+    def has_geo (self, db, scraperID, runID) :
+
+        rc, arg = db.has_geo  (scraperID)
+        self.connection.send (json.dumps ((rc, arg)) + '\n')
+
+    def has_temporal (self, db, scraperID, runID) :
+
+        rc, arg = db.has_temporal  (scraperID)
+        self.connection.send (json.dumps ((rc, arg)) + '\n')
+
+    def recent_record_count (self, db, scraperID, runID, days) :
+
+        rc, arg = db.recent_record_count  (scraperID, days)
+        self.connection.send (json.dumps ((rc, arg)) + '\n')
 
     def process (self, db, scraperID, runID, line) :
 
         request = json.loads(line) 
-
         if request [0] == 'save'  :
             self.save     (db, scraperID, runID, request[1], request[2], request[3], request[4])
             return
@@ -243,6 +255,30 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if request[0] == 'clear_datastore' :
             self.clear_datastore  (db, scraperID, runID)
+            return
+
+        if request[0] == 'datastore_keys' :
+            self.datastore_keys  (db, scraperID, runID)
+            return
+
+        if request[0] == 'data_search' :
+            self.data_search  (db, scraperID, runID, request[1], request[2], request[3])
+            return
+
+        if request[0] == 'item_count' :
+            self.item_count  (db, scraperID, runID)
+            return
+
+        if request[0] == 'has_geo' :
+            self.has_geo  (db, scraperID, runID)
+            return
+
+        if request[0] == 'has_temporal' :
+            self.has_temporal  (db, scraperID, runID)
+            return
+
+        if request[0] == 'recent_record_count' :
+            self.recent_record_count  (db, scraperID, runID, request[1])
             return
 
         self.connection.send (json.dumps ((False, 'Unknown datastore command: %s' % request[0])) + '\n')

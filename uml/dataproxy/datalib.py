@@ -5,7 +5,7 @@ import  os
 import  string
 import  time
 import  types
-
+import  datetime
 
 class Database :
 
@@ -473,8 +473,117 @@ class Database :
         return [ True, allitems ]
 
     def clear_datastore (self, scraperID) :
-
+                # this line is very slow due to sub-tables.  
+                # could it be done with self.execute ("delete from `kv` where inner join `items` on `kv`.`item_id` = `items`.`item_id` where `items`.`scraper_id` = %s)", (scraperID,))
         self.execute ("delete from `kv` where `item_id` in (select `item_id` from `items` where `scraper_id` = %s)", (scraperID,))
         self.execute ("delete from `items` where `scraper_id` = %s", (scraperID,))
         self.m_db.commit()
         return [ True, None ]
+
+    def datastore_keys (self, scraperID) :
+
+        result = []
+        cursor = self.execute("select distinct `kv`.`key` from `items` inner join `kv` on `kv`.`item_id` = `items`.`item_id` where `items`.`scraper_id` = %s", (scraperID,))
+        result = [ record[0] for record in cursor.fetchall() ]
+        return [ True, result ]
+
+    def data_search (self, scraperID, key_values, limit, offset) :   
+
+        qquery  = [ "select `items`.`item_id`, count(`items`.`item_id`) as `item_count` from `items` inner join `kv` on `items`.`item_id` = `kv`.`item_id` where `items`.`scraper_id` = %s" ]
+        qparams = [ scraperID ]
+
+        filters = []
+        for key_value in key_values:
+            filters.append ("( `kv`.`key` = %s and `kv`.`value` = %s)" )
+            qparams.append (key_value[0])
+            qparams.append (key_value[1])
+
+        qquery .append ("and (%s)" % " or ".join(filters))
+        qquery .append ("group by `items`.`item_id`")
+        qquery .append ("having `item_count` = %s")
+        qparams.append (len(key_values))
+        
+        qquery .append ("limit %s,%s")
+        qparams.append (offset)
+        qparams.append (limit)
+
+        #execute
+        cursor = self.execute(" ".join(qquery), tuple(qparams))
+        item_idlist = cursor.fetchall()
+
+        allitems = [ ]
+        for item_idl in item_idlist:
+
+            #get the item ID and create an object for the data to live in
+            item_id = item_idl[0]
+            rdata = { }
+
+            #add distance if present
+            if len(item_idl) > 1:
+                rdata['distance'] = item_idl[1]
+
+            # header records
+            cursor = self.execute("SELECT `date`, latlng, `date_scraped` FROM items WHERE item_id=%s", (item_id,))
+            if cursor is None :
+                continue  #TODO: raise an exception 
+            item = cursor.fetchone()
+
+            if item[0]:
+                rdata["date"] = str(item[0])
+            if item[2]:
+                rdata["date_scraped"] = str(item[2])
+
+            # put the key values in
+            cursor = self.execute("select `key`, `value` from `kv` where `item_id` = %s", (item_id,))
+            for key, value in cursor.fetchall():
+                rdata[key] = value
+
+            # over-ride any values with latlng (we could break it into two values) (may need to wrap in a try to protect)
+            if item[1]:
+                rdata["latlng"] = tuple(map(float, item[1].split(",")))
+            else:
+                rdata.pop("latlng", None)  # make sure this field is always a pair of floats
+
+            allitems.append(rdata)
+
+        return [ True, allitems ]
+
+    def item_count (self, scraperID) :
+
+        cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s", (scraperID, ))
+        return [ True, int(cursor.fetchone()[0]) ]
+
+    def has_geo (self, scraperID) :
+
+        cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s and latlng is not null and latlng != ''", (scraperID,))
+        return [ True, int(cursor.fetchone()[0]) > 0 ]
+
+    def has_temporal (self, scraperID) :
+
+        cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s and date is not null", (scraperID,))
+        return [ True, int(cursor.fetchone()[0]) > 9 ]
+
+    def recent_record_count (self, scraperID, days) :
+
+        sql = '''
+              select date(`date_scraped`) as date, count(`date_scraped`) as count from `items`
+                     where `scraper_id` = %s and `date_scraped` between date_sub(curdate(), interval %s day) and date_add(curdate(), interval 1 day)
+                     group by date(`date_scraped`)
+              '''
+        cursor = self.execute (sql, (scraperID, days))
+        date_counts = cursor.fetchall()
+
+        #make a store, 
+        return_dates = []
+        all_dates    = [datetime.datetime.now() + datetime.timedelta(i)  for i in range(-days, 1)]
+        for all_date in  all_dates:
+            #try and find an entry for this date in the query results
+            count = 0
+            for date_count in date_counts :
+                if str(date_count[0]) == all_date.strftime("%Y-%m-%d") :
+                    count = date_count[1]
+
+            #add the count to the return list
+            return_dates.append(count)
+        
+        return [ True, return_dates ]
