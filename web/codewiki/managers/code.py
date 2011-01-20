@@ -72,22 +72,6 @@ class CodeManager(models.Manager):
     def dont_own_any(self):
         return self.owned_count() == 0
 
-    def clear_datastore(self, scraper_id):
-        c = self.datastore_connection.cursor()
-        c.execute("delete kv items from kv inner join items where items.item_id = kv.item_id and items.scraper_id=%s", (scraper_id,))
-        c.close()
-        self.datastore_connection.commit()
-
-    def datastore_keys(self, scraper_id):
-        result = []
-        c = self.datastore_connection.cursor()
-        c.execute("select distinct kv.key from items inner join kv on kv.item_id=items.item_id WHERE items.scraper_id=%s", (scraper_id,))        
-        keys = c.fetchall()
-        for key in keys:
-            result.append(key[0])
-
-        c.close()
-        return result
 
     def data_search(self, scraper_id, key_values, limit=1000, offset=0):   
 
