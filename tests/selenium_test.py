@@ -4,11 +4,30 @@ from selenium import selenium
 
 class SeleniumTest(unittest.TestCase):
 
+    _valid_username = ''
+    _valid_password = ''    
+
     def setUp(self):
         self.verificationErrors = []
         self.selenium = selenium("localhost", 4444, "*firefox", "http://localhost:8000/")
         self.selenium.start()
 
+    def login(self, username, password):
+        s = self.selenium
+        s.open("/")
+        s.click("link=Sign in or create an account")
+        s.wait_for_page_to_load("30000")
+
+        s.type( 'id_user_or_email', username)
+        s.type( 'id_password', password)        
+        
+        s.click('login')
+        s.wait_for_page_to_load("30000")                      
+ #       if s.is_text_present("Please review the form and try again."):
+ #           print s.get_body_text()
+#            self.fail()
+#        self.failIf(not s.is_text_present("Please review the form and try again."))
+        
 
     def type_dictionary(self, d):
         for k,v in d.iteritems():
