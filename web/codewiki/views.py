@@ -209,6 +209,8 @@ def scraper_delete_data(request, short_name):
     if request.POST.get('delete_data', None) == '1':
         models.Scraper.objects.clear_datastore(scraper_id=scraper.guid)
         scraper.scrapermetadata_set.all().delete()
+        scraper.update_meta()
+
 
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 

@@ -5,7 +5,7 @@ import  os
 import  string
 import  time
 import  types
-
+import  datetime
 
 class Database :
 
@@ -473,7 +473,8 @@ class Database :
         return [ True, allitems ]
 
     def clear_datastore (self, scraperID) :
-
+                # this line is very slow due to sub-tables.  
+                # could it be done with self.execute ("delete from `kv` where inner join `items` on `kv`.`item_id` = `items`.`item_id` where `items`.`scraper_id` = %s)", (scraperID,))
         self.execute ("delete from `kv` where `item_id` in (select `item_id` from `items` where `scraper_id` = %s)", (scraperID,))
         self.execute ("delete from `items` where `scraper_id` = %s", (scraperID,))
         self.m_db.commit()
@@ -569,7 +570,6 @@ class Database :
                      where `scraper_id` = %s and `date_scraped` between date_sub(curdate(), interval %s day) and date_add(curdate(), interval 1 day)
                      group by date(`date_scraped`)
               '''
-
         cursor = self.execute (sql, (scraperID, days))
         date_counts = cursor.fetchall()
 

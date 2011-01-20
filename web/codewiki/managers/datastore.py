@@ -26,7 +26,6 @@ class DataStoreClass :
         if not rc : raise Exception (arg)
 
     def request (self, req) :
-
         self.m_socket.send (json.dumps (req) + '\n')
 
         text = ''
@@ -37,7 +36,6 @@ class DataStoreClass :
             text += data
             if text[-1] == '\n' :
                 break
-
         return json.loads (text)
 
     def data_dictlist (self, limit = 1000, offset = 0, start_date = None, end_date = None, latlng = None) :

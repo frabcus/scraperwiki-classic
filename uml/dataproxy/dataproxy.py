@@ -233,7 +233,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     def process (self, db, scraperID, runID, line) :
 
         request = json.loads(line) 
-
         if request [0] == 'save'  :
             self.save     (db, scraperID, runID, request[1], request[2], request[3], request[4])
             return
@@ -279,7 +278,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
 
         if request[0] == 'recent_record_count' :
-            self.has_temporal  (db, scraperID, runID, request[1])
+            self.recent_record_count  (db, scraperID, runID, request[1])
             return
 
         self.connection.send (json.dumps ((False, 'Unknown datastore command: %s' % request[0])) + '\n')
