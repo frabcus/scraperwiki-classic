@@ -24,7 +24,8 @@ class TestRegistration(SeleniumTest):
         username = str( uuid.uuid4() ).replace('-', '_')
 
         d = deepcopy( self.default_values )
-        d["id_username"] = "test_%s" % (username,)                               
+        d["id_username"] = "test_%s" % (username,)        
+        d["id_email"] = "test_%s@scraperwiki.com"                       
         print 'Username is %s' % (d["id_username"],)
         
         self.type_dictionary( d )
@@ -34,6 +35,26 @@ class TestRegistration(SeleniumTest):
         s.wait_for_page_to_load("30000")
         
         self.failUnless(s.is_text_present("signed in as"))
+        s.click('link=sign out')
+        s.wait_for_page_to_load("30000")        
+
+
+    def test_invalid_email(self):
+        s = self.selenium
+        s.open("/")
+        s.click("link=Sign in or create an account")
+        s.wait_for_page_to_load("30000")
+
+        d = deepcopy( self.default_values )
+        d["email"] = "notanemail"
+        
+        self.type_dictionary( d )
+        s.click( 'id_tos' )
+        
+        s.click('register')
+        s.wait_for_page_to_load("30000")
+        
+        self.failUnless(s.is_text_present("Enter a valid e-mail address."))
 
 
 
