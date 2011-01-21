@@ -10,7 +10,7 @@ class TestRegistration(SeleniumTest):
     registration being required by further tests so that they can 
     log on.
     """
-    
+    login_fail = "Sorry, but we could not find that username or email address"
     default_values = {
         "id_name" : "test user",
         "id_username": "test",
@@ -146,7 +146,7 @@ class TestRegistration(SeleniumTest):
 
         s.click('login')
         s.wait_for_page_to_load("30000")                      
-        self.failUnless(s.is_text_present("Sorry, but we could not find that username or email address"))        
+        self.failUnless(s.is_text_present(self.login_fail))        
         
     def test_login_only_username(self):
         s = self.selenium
@@ -157,7 +157,7 @@ class TestRegistration(SeleniumTest):
         s.type( 'id_user_or_email', 'abcdefghijklmnopqrstuvwxyz')
         s.click('login')
         s.wait_for_page_to_load("30000")                      
-        self.failUnless(s.is_text_present("Sorry, but we could not find that username or email address"))                
+        self.failUnless(s.is_text_present(self.login_fail))                
         
     def test_login_junk_details(self):
         s = self.selenium
@@ -171,4 +171,4 @@ class TestRegistration(SeleniumTest):
         
         s.click('login')
         s.wait_for_page_to_load("30000")                      
-        self.failUnless(s.is_text_present("Sorry, but we could not find that username or email address"))                        
+        self.failUnless(s.is_text_present(self.login_fail))                        
