@@ -6,6 +6,8 @@ import  string
 import  time
 import  types
 import  datetime
+import  sqlite3
+
 
 class Database :
 
@@ -66,6 +68,9 @@ class Database :
         """
 
         self.m_db = None
+        
+        self.m_sqlitedbconn = None
+        self.m_sqlitedbcursor = None
 
         if type(config) == types.StringType :
             conf = ConfigParser.ConfigParser()
@@ -74,6 +79,7 @@ class Database :
             conf = config
 
         self.m_dbtype = conf.get ('dataproxy', 'dbtype')
+        self.m_resourcedir = conf.get('dataproxy', 'resourcedir')
 
         if self.m_dbtype == 'mysql'   :
             try    :
@@ -587,3 +593,28 @@ class Database :
             return_dates.append(count)
         
         return [ True, return_dates ]
+                
+    
+        # general experimental single file sqlite access
+    def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
+        if not self.m_sqlitedbconn:
+            scraperresourcedir = os.path.join(self.m_resourcedir, scraperID)
+            if not os.path.isdir(scraperresourcedir):
+                os.mkdir(scraperresourcedir)
+            scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+            self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
+            # conn.set_authorizer(authorizer_func)  # would control access for this connection
+            self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
+        
+        if command == "execute":
+            try:
+                if val2:
+                    self.m_sqlitedbcursor.execute(val1, val2)  # handle "(?,?,?)", (val, val, val)
+                else:
+                    self.m_sqlitedbcursor.execute(val1)
+                return list(self.m_sqlitedbcursor); 
+            except sqlite3.Error, e:
+                return "sqlite3.Error: "+str(e)
+                
+        if command == "commit":
+            self.m_sqlitedbconn.commit()
