@@ -63,6 +63,7 @@ class TestScrapers(SeleniumTest):
         if not s.is_text_present('runfinished'):
             self.fail('Running the scraper seemed to fail')
         self._check_dashboard_count()                
+        self._create_view('Blank Ruby view', 'ruby', name )        
                 
     def test_php_create(self):   
         s = self.selenium                     
@@ -112,7 +113,7 @@ class TestScrapers(SeleniumTest):
         # Unfortunately we were dependant on specifying an 
         # existing user as we haven't yet activated the new account 
         # that we created earlier. So for now, we'll create a new 
-        # user for each scraper.
+        # user for each scraper/view pair
         self._create_user()
         
         s.answer_on_next_prompt( name )        
@@ -145,14 +146,13 @@ class TestScrapers(SeleniumTest):
         s.click( 'link=%s' % link_name )
         s.wait_for_page_to_load("30000")      
         code = self._load_data(type,obj='view')
-        code = "sourcescraper = '%s'\r\n%s" % (name,code,)
+        code = code.replace('{{sourcescraper}}', name)
         
         s.type('//body[@class="editbox"]', "%s" % code)        
         s.click('btnCommitPopup')
         s.wait_for_page_to_load("30000")      
         time.sleep(1)
         
-        print s.get_location()
         
         return name
 

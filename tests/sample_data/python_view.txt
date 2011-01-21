@@ -1,6 +1,7 @@
 
 from scraperwiki.apiwrapper import getKeys, getData, getDataByDate, getDataByLocation
 
+sourcescraper = '{{sourcescraper}}'
 limit = 20
 offset = 0
 
