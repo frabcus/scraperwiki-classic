@@ -8,15 +8,20 @@ from selenium_test import SeleniumTest
 class TestScrapers(SeleniumTest):
     """
     Creates and runs some scrapers in the three main supported languages. 
+    
+    Create
+    Run
+    Check
+    "/scrapers/short_name/
     """
-    def _load_scraper(self, type='python'):
-        thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_scraper.txt' % type)
+    def _load_data(self, type='python', obj='scraper'):
+        thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_%s.txt' % (type, obj,))
         try:
             f = open(thefile)
             code = f.read()
             f.close()
         except:
-            code = '# No test scraper'
+            code = '# No test object'
     
         return code
         
@@ -40,17 +45,20 @@ class TestScrapers(SeleniumTest):
     
     def test_python_create(self):
         s = self.selenium        
-        self.create_type( 'Blank Python scraper', 'python')
+        name = self._create_type( 'Blank Python scraper', 'python')
         s.click('run')
         time.sleep(3)
         if not s.is_text_present('runfinished'):
             self.fail('Running the scraper seemed to fail')
         self._check_dashboard_count()
-        
+    
+        self._create_view('Blank Python view', 'python', name )
+#    prepend 'sourcescraper = ""'
+#    def _create_view(self, link_name, type, shortname):        
                      
     def test_ruby_create(self):  
         s = self.selenium                      
-        self.create_type( 'Blank Ruby scraper', 'ruby')
+        self._create_type( 'Blank Ruby scraper', 'ruby')
         s.click('run')
         time.sleep(3)
         if not s.is_text_present('runfinished'):
@@ -59,7 +67,7 @@ class TestScrapers(SeleniumTest):
                 
     def test_php_create(self):   
         s = self.selenium                     
-        self.create_type( 'Blank PHP scraper', 'php')   
+        self._create_type( 'Blank PHP scraper', 'php')   
         s.click('run')
         time.sleep(3)
         if not s.is_text_present('runfinished'):
@@ -95,8 +103,7 @@ class TestScrapers(SeleniumTest):
         
         self.failUnless(s.is_text_present("signed in as"))
         
-            
-    def create_type(self, link_name, type):
+    def _create_type(self, link_name, type):
         name = str( uuid.uuid4() )
         print '%s scraper will be called %s' % (type, name,)
         
@@ -115,12 +122,35 @@ class TestScrapers(SeleniumTest):
         s.click( 'link=%s' % link_name )
         s.wait_for_page_to_load("30000")      
         
-        code = self._load_scraper(type)
+        code = self._load_data(type)
         s.type('//body[@class="editbox"]', "%s" % code)        
         s.click('btnCommitPopup')
         s.wait_for_page_to_load("30000")      
         time.sleep(1)
-
+        return name
+            
+            
+    def _create_view(self, link_name, type, shortname):
+        """ Must be on the scraper homepage """
+        s = self.selenium
+        name = str( uuid.uuid4() )
+        print '%s view will be called %s' % (type, name,)
+        
+        s.open('/scrapers/%s' % shortname)
+        s.wait_for_page_to_load("30000")      
+                
+        s.answer_on_next_prompt( name )        
+        s.click('link=Create a new view')        
+        time.sleep(1)        
+                
+        s.click( 'link=%s' % link_name )
+        s.wait_for_page_to_load("30000")      
+        code = self._load_data(type,obj='view')
+        s.type('//body[@class="editbox"]', "%s" % code)        
+        s.click('btnCommitPopup')
+        s.wait_for_page_to_load("30000")      
+        time.sleep(1)
+        return name
 
 
         
