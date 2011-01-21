@@ -64,6 +64,7 @@ class TestScrapers(SeleniumTest):
             self.fail('Running the scraper seemed to fail')
         self._check_dashboard_count()                
         self._create_view('Blank Ruby view', 'ruby', name )        
+        
                 
     def test_php_create(self):   
         s = self.selenium                     
@@ -73,6 +74,9 @@ class TestScrapers(SeleniumTest):
         if not s.is_text_present('runfinished'):
             self.fail('Running the scraper seemed to fail')
         self._check_dashboard_count()
+    
+        self._create_view('Blank PHP view', 'php', name )                
+        
                     
     def _create_user(self):
         s = self.selenium
