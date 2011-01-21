@@ -18,7 +18,7 @@ class TestScrapers(SeleniumTest):
         thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_%s.txt' % (type, obj,))
         try:
             f = open(thefile)
-            code = f.read()
+            code = f.read().replace('\n', '\r\n')
             f.close()
         except:
             code = '# No test object'
@@ -53,8 +53,7 @@ class TestScrapers(SeleniumTest):
         self._check_dashboard_count()
     
         self._create_view('Blank Python view', 'python', name )
-#    prepend 'sourcescraper = ""'
-#    def _create_view(self, link_name, type, shortname):        
+
                      
     def test_ruby_create(self):  
         s = self.selenium                      
@@ -146,10 +145,15 @@ class TestScrapers(SeleniumTest):
         s.click( 'link=%s' % link_name )
         s.wait_for_page_to_load("30000")      
         code = self._load_data(type,obj='view')
+        code = "sourcescraper = '%s'\r\n%s" % (name,code,)
+        
         s.type('//body[@class="editbox"]', "%s" % code)        
         s.click('btnCommitPopup')
         s.wait_for_page_to_load("30000")      
         time.sleep(1)
+        
+        print s.get_location()
+        
         return name
 
 
