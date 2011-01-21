@@ -137,3 +137,38 @@ class TestRegistration(SeleniumTest):
         s.click('register')
         s.wait_for_page_to_load("30000")
         self.failUnless(s.is_text_present("You must agree to the ScraperWiki terms and conditions "))
+
+    def test_login_no_details(self):
+        s = self.selenium
+        s.open("/")
+        s.click("link=Sign in or create an account")
+        s.wait_for_page_to_load("30000")
+
+        s.click('login')
+        s.wait_for_page_to_load("30000")                      
+        self.failUnless(s.is_text_present("Sorry, but we could not find that username or email address"))        
+        
+    def test_login_only_username(self):
+        s = self.selenium
+        s.open("/")
+        s.click("link=Sign in or create an account")
+        s.wait_for_page_to_load("30000")
+
+        s.type( 'id_user_or_email', 'abcdefghijklmnopqrstuvwxyz')
+        s.click('login')
+        s.wait_for_page_to_load("30000")                      
+        self.failUnless(s.is_text_present("Sorry, but we could not find that username or email address"))                
+        
+    def test_login_junk_details(self):
+        s = self.selenium
+        s.open("/")
+        s.click("link=Sign in or create an account")
+        s.wait_for_page_to_load("30000")
+
+        s.type( 'id_user_or_email', 'abcdefghijklmnopqrstuvwxyz')
+        s.type( 'id_password', 'abcdefghijklmnopqrstuvwxyz')
+        
+        
+        s.click('login')
+        s.wait_for_page_to_load("30000")                      
+        self.failUnless(s.is_text_present("Sorry, but we could not find that username or email address"))                        

@@ -57,7 +57,7 @@ class TestScrapers(SeleniumTest):
                      
     def test_ruby_create(self):  
         s = self.selenium                      
-        self._create_type( 'Blank Ruby scraper', 'ruby')
+        name = self._create_type( 'Blank Ruby scraper', 'ruby')
         s.click('run')
         time.sleep(3)
         if not s.is_text_present('runfinished'):
@@ -68,7 +68,7 @@ class TestScrapers(SeleniumTest):
                 
     def test_php_create(self):   
         s = self.selenium                     
-        self._create_type( 'Blank PHP scraper', 'php')   
+        name = self._create_type( 'Blank PHP scraper', 'php')   
         s.click('run')
         time.sleep(3)
         if not s.is_text_present('runfinished'):
