@@ -120,7 +120,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         via       = config.get (uml, 'via' )
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
-        ident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()
+        ident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()   # (lucky this doesn't clash with the function we are in, eh -- JT)
 
         for line in string.split (ident, '\n') :
             if line == '' :
@@ -279,6 +279,16 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if request[0] == 'recent_record_count' :
             self.recent_record_count  (db, scraperID, runID, request[1])
+            return
+
+            # new experimental QD sqlite interface
+        if request[0] == 'sqlitecommand':
+            if runID is not None :
+                statusInfo[runID]['action'] = 'sqlitecommand'
+            result = db.sqlitecommand(scraperID, runID, short_name=request[1], command=request[2], val1=request[3], val2=request[4])
+            self.connection.send(json.dumps(result) + '\n')
+            if runID is not None :
+                statusInfo[runID]['action'] = None
             return
 
         self.connection.send (json.dumps ((False, 'Unknown datastore command: %s' % request[0])) + '\n')

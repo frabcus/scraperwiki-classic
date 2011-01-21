@@ -126,6 +126,9 @@ def cropimg(request, format, srcdoc, page, cropping):
     cropping = cropping or ""
     
     pdfurl, pdffile, imgstem, qtail = GetSrcDoc(request, srcdoc)
+    if not pdfurl:
+        return HttpResponse(open(os.path.join(settings.MEDIA_DIR, 'images', '404.png'), "rb"), mimetype='image/png')
+        
     imgfile = "%s_%04d.png" % (imgstem, page)
     if not os.path.isfile(imgfile):
         imgpixwidth = 800
