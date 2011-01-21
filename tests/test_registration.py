@@ -35,7 +35,6 @@ class TestRegistration(SeleniumTest):
         d["id_email"]   = email
         d["password1"]  = password
         d["password2"]  = password        
-        print 'Username is %s' % (d["id_username"],)
         
         self.type_dictionary( d )
         s.click( 'id_tos' )
@@ -69,6 +68,43 @@ class TestRegistration(SeleniumTest):
         
         self.failUnless(s.is_text_present("Enter a valid e-mail address."))
 
+    def test_no_data(self):
+        s = self.selenium
+        s.open("/")
+        s.click("link=Sign in or create an account")
+        s.wait_for_page_to_load("30000")
+        
+        s.click('register')
+        s.wait_for_page_to_load("30000")
+        
+        self.failUnless(s.is_text_present("Please review the form and try again."))
+
+
+    def test_dupe_email(self):
+        expected = 'This email address is already in use. Please supply a different email address. '
+        s = self.selenium
+
+        email = 'test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
+        for x in xrange(0,2):
+            s.open("/")            
+            s.click("link=Sign in or create an account")
+            s.wait_for_page_to_load("30000")
+            
+            username = str( uuid.uuid4() ).replace('-', '_')
+
+            self.default_values["id_username"] = "test_%s" % (username,)        
+            self.default_values["id_email"]   = email
+            self.type_dictionary( self.default_values )
+            
+            s.click( 'id_tos' )
+            s.click('register')
+            s.wait_for_page_to_load("30000")    
+            
+            if x == 0:
+                s.click("link=sign out")
+                s.wait_for_page_to_load("30000")
+                
+        self.failUnless(s.is_text_present(expected))
 
 
     def test_nonmatching_passwords(self):

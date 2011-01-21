@@ -3,8 +3,8 @@ import sys,unittest
 from selenium_test import SeleniumTest
 from optparse import OptionParser
 
-#from test_registration import TestRegistration
-from test_scrapers import TestScrapers
+from test_registration import TestRegistration
+#from test_scrapers import TestScrapers
 
 if __name__ == '__main__':
     parser = OptionParser()

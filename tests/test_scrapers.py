@@ -107,6 +107,7 @@ class TestScrapers(SeleniumTest):
         
         self.failUnless(s.is_text_present("signed in as"))
         
+        
     def _create_type(self, link_name, type):
         name = str( uuid.uuid4() )
         print '%s scraper will be called %s' % (type, name,)
