@@ -42,7 +42,7 @@ $(document).ready(function() {
     var loggedineditors = [ ]; // list of who else is here and their windows open
     var iselectednexteditor = 1; 
     var nanonymouseditors = 0; // number of anonymous editors
-    var chatname = ""          // special in case of Anonymous users (yes, this unnecessarily gets set every time we call recordEditorStatus)
+    var chatname = "";         // special in case of Anonymous users (yes, this unnecessarily gets set every time we call recordEditorStatus)
     var chatpeopletimes = { }; // last time each person made a chat message
 
     // these actually get set by the server
@@ -99,14 +99,14 @@ $(document).ready(function() {
 
     function CM_newLines(from, to) 
     {
-        var lines = [ ]
+        var lines = [ ];
         var text = [ ];
         for (var cur = (from ? from.nextSibling : codeeditor.editor.container.firstChild); cur != to; cur = cur.nextSibling)
         {
             if (CM_isBR(cur))
             {
                 lines.push(CM_cleanText(text.join(""))); 
-                text = [ ]
+                text = [ ];
             }
             else
                 text.push(CM_nodeText(cur)); 
@@ -385,8 +385,7 @@ $(document).ready(function() {
         })
 
         // somehow this system fails if you do a browser back button to the editor
-        $('#id_urlquery').focus(function() 
-        {
+        $('#id_urlquery').focus(function(){
             if ($(this).hasClass('hint')) {
                 $(this).val('');
                 $(this).removeClass('hint');
@@ -1557,7 +1556,7 @@ writeToChat("Saved rev number: " + res.rev);
             var oCell = $('<td></td>');
             oCell.html(cgiescape(aRowData[i]));
             oRow.append(oCell);
-        })
+        });
 
         
         $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
@@ -1637,16 +1636,16 @@ writeToChat("Saved rev number: " + res.rev);
           //resize the output area so the console scrolls correclty
           iWindowHeight = $(window).height();
           iEditorHeight = $("#codeeditordiv").height();
-          iControlsHeight = $('.editor_controls').height()
+          iControlsHeight = $('.editor_controls').height();
           iCodeEditorTop = parseInt($("#codeeditordiv").position().top);
-          iOutputEditorTabs = $('#outputeditordiv .tabs').height()
+          iOutputEditorTabs = $('#outputeditordiv .tabs').height();
           iOutputEditorDiv = iWindowHeight - (iEditorHeight + iControlsHeight + iCodeEditorTop) - 30; 
           $("#outputeditordiv").height(iOutputEditorDiv + 'px');   
           //$("#outputeditordiv .info").height($("#outputeditordiv").height() - parseInt($("#outputeditordiv .info").position().top) + 'px');
           $("#outputeditordiv .info").height((iOutputEditorDiv - iOutputEditorTabs) + 'px');
           //iOutputEditorTabs
       }
-    };
+    }
     
 
     //click bar to resize
