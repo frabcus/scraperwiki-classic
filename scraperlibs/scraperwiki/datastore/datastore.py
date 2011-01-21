@@ -163,7 +163,7 @@ class DataStoreClass :
 
 
 # manage local copy of the above class in the global space of this module
-# (this function is first called from controller.execPython)
+# (this function is first called from controller.exec.py where a 3 line config is locally generated)
 ds = None
 def DataStore (config) :
     global ds
@@ -172,7 +172,7 @@ def DataStore (config) :
     return ds
 
 
-# functions moved from the out of date code into here to manage their development
+# functions moved from the out of data code into here to manage their development
 def save (unique_keys, data, date = None, latlng = None, silent = False) :
     ds = DataStore(None)
     rc, arg = ds.save (unique_keys, data, date, latlng)
@@ -213,3 +213,8 @@ def retrieve (unique_keys) :
 
     return arg
 
+
+# experimental sqlite access function
+def sqlitecommand(command, val1=None, val2=None):
+    ds = DataStore(None)
+    return ds.request (('sqlitecommand', "unknownshortname", command, val1, val2))
