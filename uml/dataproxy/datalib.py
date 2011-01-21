@@ -435,9 +435,9 @@ class Database :
         else :
             qquery .append("order by `date_scraped` desc")
 
-#       qquery .append("limit %s,%s")
-#       qparams.append(offset)
-#       qparams.append(limit)
+        qquery .append("limit %s,%s")
+        qparams.append(offset)
+        qparams.append(limit)
 
         cursor = self.execute (" ".join(qquery), tuple(qparams))
         item_idlist = cursor.fetchall ()
