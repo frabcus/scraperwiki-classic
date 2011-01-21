@@ -7,7 +7,7 @@ import  time
 import  types
 import  datetime
 import  sqlite3
-
+import  signal
 
 class Database :
 
@@ -608,13 +608,18 @@ class Database :
         
         if command == "execute":
             try:
+                signal.alarm (10)
                 if val2:
                     self.m_sqlitedbcursor.execute(val1, val2)  # handle "(?,?,?)", (val, val, val)
                 else:
                     self.m_sqlitedbcursor.execute(val1)
+                signal.alarm (0)
                 return list(self.m_sqlitedbcursor); 
             except sqlite3.Error, e:
                 return "sqlite3.Error: "+str(e)
                 
         if command == "commit":
+            signal.alarm (10)
             self.m_sqlitedbconn.commit()
+            signal.alarm (0)
+            return

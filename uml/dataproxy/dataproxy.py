@@ -107,8 +107,9 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         from the scraper running under the controller.
         """
 
-        scraperID = None
-        runID     = None
+        scraperID   = None
+        runID       = None
+        scraperName = None
 
         #  Determin the caller host address and the port to call on that host from
         #  the configuration since the request will be from UML running inside that
@@ -126,14 +127,17 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             if line == '' :
                 continue
             key, value = string.split (line, '=')
-            if key == 'runid' :
-                runID     = value
+            if key == 'runid'       :
+                runID       = value
                 continue
-            if key == 'scraperid' :
-                scraperID = value
+            if key == 'scraperid'   :
+                scraperID   = value
+                continue
+            if key == 'scrapername' :
+                scraperName = value
                 continue
 
-        return scraperID, runID
+        return scraperID, runID, scraperName
 
     def postcodeToLatLng (self, db, scraperID, runID, postcode) :
 
@@ -230,7 +234,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         rc, arg = db.recent_record_count  (scraperID, days)
         self.connection.send (json.dumps ((rc, arg)) + '\n')
 
-    def process (self, db, scraperID, runID, line) :
+    def process (self, db, scraperID, runID, scraperName, line) :
 
         request = json.loads(line) 
         if request [0] == 'save'  :
@@ -285,7 +289,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if request[0] == 'sqlitecommand':
             if runID is not None :
                 statusInfo[runID]['action'] = 'sqlitecommand'
-            result = db.sqlitecommand(scraperID, runID, short_name=request[1], command=request[2], val1=request[3], val2=request[4])
+            result = db.sqlitecommand(scraperID, runID, scraperName, command=request[1], val1=request[2], val2=request[3])
             self.connection.send(json.dumps(result) + '\n')
             if runID is not None :
                 statusInfo[runID]['action'] = None
@@ -313,11 +317,11 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if 'scraperid' in params and params['scraperid'][0] not in [ '', None ] :
             if self.connection.getpeername()[0] != config.get ('dataproxy', 'secure') :
-                self.connection.send (json.dumps ((False, "ScraperID only accepted from securte hosts")) + '\n')
+                self.connection.send (json.dumps ((False, "ScraperID only accepted from secure hosts")) + '\n')
                 return
-            scraperID, runID = params['scraperid'][0], '%s.%s' % (params['scraperid'][0], time.time())
+            scraperID, runID, scraperName = params['scraperid'][0], '%s.%s' % (params['scraperid'][0], time.time()), None
         else :
-            scraperID, runID = self.ident (params['uml'][0], params['port'][0])
+            scraperID, runID, scraperName = self.ident (params['uml'][0], params['port'][0])
 
         if path == '' or path is None :
             path = '/'
@@ -351,7 +355,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     break
                 lines  = string.split (buffer, '\n')
                 for line in lines[:-1] :
-                    self.process (db, scraperID, runID, line)
+                    self.process (db, scraperID, runID, scraperName, line)
                 buffer = lines[-1]
         finally :
             self.connection.close()
