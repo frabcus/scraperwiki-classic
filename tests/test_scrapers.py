@@ -7,10 +7,9 @@ from selenium_test import SeleniumTest
 
 class TestScrapers(SeleniumTest):
     """
-    Creates and runs some scrapers in various languages.  Unfortunately we 
-    can't 
+    Creates and runs some scrapers in the three main supported languages. 
     """
-    def load_scraper(self, type='python'):
+    def _load_scraper(self, type='python'):
         thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_scraper.txt' % type)
         try:
             f = open(thefile)
@@ -22,6 +21,23 @@ class TestScrapers(SeleniumTest):
         return code
         
     
+    def _check_dashboard_count(self):
+        """ 
+        Go to the current user's dashboard and make sure they 
+        have a scraper there 
+        """
+        s = self.selenium
+        
+        s.click('aCloseEditor1')
+        s.wait_for_page_to_load("30000")        
+        
+        s.click('link=Your dashboard')
+        s.wait_for_page_to_load("30000")
+        
+        scraper_count = s.get_xpath_count('//li[@class="code_object_line"]')        
+        self.failUnless( u"1" == scraper_count )
+        
+    
     def test_python_create(self):
         s = self.selenium        
         self.create_type( 'Blank Python scraper', 'python')
@@ -29,6 +45,8 @@ class TestScrapers(SeleniumTest):
         time.sleep(3)
         if not s.is_text_present('runfinished'):
             self.fail('Running the scraper seemed to fail')
+        self._check_dashboard_count()
+        
                      
     def test_ruby_create(self):  
         s = self.selenium                      
@@ -37,6 +55,7 @@ class TestScrapers(SeleniumTest):
         time.sleep(3)
         if not s.is_text_present('runfinished'):
             self.fail('Running the scraper seemed to fail')
+        self._check_dashboard_count()                
                 
     def test_php_create(self):   
         s = self.selenium                     
@@ -45,8 +64,9 @@ class TestScrapers(SeleniumTest):
         time.sleep(3)
         if not s.is_text_present('runfinished'):
             self.fail('Running the scraper seemed to fail')
-            
-    def create_user(self):
+        self._check_dashboard_count()
+                    
+    def _create_user(self):
         s = self.selenium
         s.click("link=Sign in or create an account")
         s.wait_for_page_to_load("30000")
@@ -83,11 +103,11 @@ class TestScrapers(SeleniumTest):
         s = self.selenium
         s.open("/logout")
         
-        # Unfortunately currently we are dependant on specifying an 
+        # Unfortunately we were dependant on specifying an 
         # existing user as we haven't yet activated the new account 
-        # that we created earlier.  
-        #self.login( 'wewe', 'pass' )
-        self.create_user()
+        # that we created earlier. So for now, we'll create a new 
+        # user for each scraper.
+        self._create_user()
         
         s.answer_on_next_prompt( name )        
         s.click('link=New scraper')        
@@ -95,7 +115,7 @@ class TestScrapers(SeleniumTest):
         s.click( 'link=%s' % link_name )
         s.wait_for_page_to_load("30000")      
         
-        code = self.load_scraper(type)
+        code = self._load_scraper(type)
         s.type('//body[@class="editbox"]', "%s" % code)        
         s.click('btnCommitPopup')
         s.wait_for_page_to_load("30000")      
