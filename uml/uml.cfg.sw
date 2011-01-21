@@ -43,6 +43,8 @@ port    = 9003
 user    = datastore
 passwd  = 3jFjLrje6dFJ7cQE
 db      = datastore_live
+secure  = 89.16.177.212
+resourcedir = ../resourcedir
 
 [metadata]
 host    = scraperwiki.com

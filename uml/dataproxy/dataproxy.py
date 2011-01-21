@@ -319,7 +319,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             if self.connection.getpeername()[0] != config.get ('dataproxy', 'secure') :
                 self.connection.send (json.dumps ((False, "ScraperID only accepted from secure hosts")) + '\n')
                 return
-            scraperID, runID, None        = params['scraperid'][0], '%s.%s' % (params['scraperid'][0], time.time())
+            scraperID, runID, scraperName = params['scraperid'][0], '%s.%s' % (params['scraperid'][0], time.time()), None
         else :
             scraperID, runID, scraperName = self.ident (params['uml'][0], params['port'][0])
 
