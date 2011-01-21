@@ -23,10 +23,6 @@ class SeleniumTest(unittest.TestCase):
         
         s.click('login')
         s.wait_for_page_to_load("30000")                      
- #       if s.is_text_present("Please review the form and try again."):
- #           print s.get_body_text()
-#            self.fail()
-#        self.failIf(not s.is_text_present("Please review the form and try again."))
         
 
     def type_dictionary(self, d):
