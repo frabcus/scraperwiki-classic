@@ -95,11 +95,15 @@ class APIBase(BaseHandler):
     def get_limit_and_offset(self, request):
         try:
             limit = self.clamp_limit(int(request.GET.get('limit')))
+            if limit < 1:
+                limit = DEFAULT_API_ITEMS
         except:
             limit = DEFAULT_API_ITEMS
 
         try:
             offset = int(request.GET.get('offset'))
+            if offset < 0:
+                offset = 0
         except:
             offset = 0
 

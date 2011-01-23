@@ -1,8 +1,8 @@
 SHELL=/bin/bash
 
 # m h  dom mon dow   command
-* */8 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web &&  xvfb-run --auto-servernum --server-args="-screen 0, 1440x900x24" python manage.py take_screenshot --verbose --domain=scraperwikiviews.com --run_scrapers
-* */8 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web &&  xvfb-run --auto-servernum --server-args="-screen 0, 1440x900x24" python manage.py take_screenshot --verbose --domain=scraperwikiviews.com --run_views
+0 */8 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web &&  xvfb-run --auto-servernum --server-args="-screen 0, 1440x900x24" python manage.py take_screenshot --verbose --domain=dev.scraperwiki.com --run_scrapers
+0 */8 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web &&  xvfb-run --auto-servernum --server-args="-screen 0, 1440x900x24" python manage.py take_screenshot --verbose --domain=dev.scraperwiki.com.com --run_views
 
 */15 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py run_scrapers -m 20
 

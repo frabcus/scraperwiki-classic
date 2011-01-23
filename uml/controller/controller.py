@@ -637,8 +637,9 @@ class ScraperController (BaseController) :
         self.setUrlquery    ()
 
         idents = []
-        if self.m_scraperID is not None : idents.append ('scraperid=%s' % self.m_scraperID)
-        if self.m_runID     is not None : idents.append ('runid=%s'     % self.m_runID    )
+        if self.m_scraperID   is not None : idents.append ('scraperid=%s'   % self.m_scraperID  )
+        if self.m_runID       is not None : idents.append ('runid=%s'       % self.m_runID      )
+        if self.m_scraperName is not None : idents.append ('scrapername=%s' % self.m_scraperName)
         for name, value in self.headers.items() :
             if name[:17] == 'x-addallowedsite-' :
                 idents.append ('allow=%s' % value)

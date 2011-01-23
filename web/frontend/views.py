@@ -277,8 +277,11 @@ def get_involved(request):
         #scraper requests
         status = SolicitationStatus.objects.get(status='open')
         solicitation_count = Solicitation.objects.filter().count()
-        solicitation_open_count = Solicitation.objects.filter(status=status).count()        
-        solicitation_percent = int(solicitation_open_count / float(solicitation_count) * 100)        
+        solicitation_open_count = Solicitation.objects.filter(status=status).count()    
+        try:
+            solicitation_percent = int(solicitation_open_count / float(solicitation_count) * 100)        
+        except ZeroDivisionError:
+            solicitation_percent = 100
         
         #scraper status
         scraper_sick_count = Scraper.objects.filter(status='sick').count()

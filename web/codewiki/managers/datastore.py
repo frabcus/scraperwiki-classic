@@ -26,7 +26,6 @@ class DataStoreClass :
         if not rc : raise Exception (arg)
 
     def request (self, req) :
-
         self.m_socket.send (json.dumps (req) + '\n')
 
         text = ''
@@ -37,7 +36,6 @@ class DataStoreClass :
             text += data
             if text[-1] == '\n' :
                 break
-
         return json.loads (text)
 
     def data_dictlist (self, limit = 1000, offset = 0, start_date = None, end_date = None, latlng = None) :
@@ -51,6 +49,30 @@ class DataStoreClass :
     def clear_datastore (self) :
 
         return self.request (('clear_datastore',))
+
+    def datastore_keys (self) :
+
+        return self.request (('datastore_keys',))
+
+    def data_search (self, key_values, limit, offset) :
+
+        return self.request (('data_search', key_values, limit, offset))
+
+    def item_count (self) :
+
+        return self.request (('item_count',))
+
+    def has_geo (self) :
+
+        return self.request (('has_geo',))
+
+    def has_temporal (self) :
+
+        return self.request (('has_temporal',))
+
+    def recent_record_count (self, days) :
+
+        return self.request (('recent_record_count', days))
 
     def close (self) :
 
