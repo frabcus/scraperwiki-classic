@@ -3,7 +3,7 @@ import sys,unittest
 from selenium_test import SeleniumTest
 from optparse import OptionParser
 
-from test_registration import TestRegistration
+#from test_registration import TestRegistration
 from test_scrapers import TestScrapers
 
 if __name__ == '__main__':
@@ -30,5 +30,3 @@ if __name__ == '__main__':
     print 'Test cases loaded from current module - %s' % repr(module)        
 
     unittest.TextTestRunner( verbosity=2 ).run( loader )
-    print SeleniumTest._valid_username
-    print SeleniumTest._valid_password    
