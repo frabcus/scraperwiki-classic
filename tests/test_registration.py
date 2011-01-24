@@ -18,7 +18,52 @@ class TestRegistration(SeleniumTest):
         "id_password1": "password",                
         "id_password2": "password",                               
     }
-    
+
+    def test_manage_profile(self):
+        s = self.selenium
+        s.open("/")
+        s.click("link=Sign in or create an account")
+        s.wait_for_page_to_load("30000")
+
+        username = str( uuid.uuid4() ).replace('-', '_')
+        email    = 'test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
+        password = str( uuid.uuid4() ).replace('-', '_')
+        
+        d = deepcopy( self.default_values )
+        d["id_username"] = "test_%s" % (username,)        
+        d["id_email"]   = email
+        d["password1"]  = password
+        d["password2"]  = password        
+        
+        self.type_dictionary( d )
+        s.click( 'id_tos' )
+        
+        s.click('register')
+        s.wait_for_page_to_load("30000")
+        
+        self.failUnless(s.is_text_present("signed in as"))
+        
+        
+        bio = 'A short description about this user'
+        
+        # Click on username to view the profile
+        s.click('link=%s' % d['id_name'])
+        s.wait_for_page_to_load("30000")
+        
+        # Edit your profile
+        s.click('link=Edit your profile')
+        s.wait_for_page_to_load("30000")
+        
+        # Change the name, bio and alert frequency before saving changes
+        s.type('id_name','not just a test user')
+        s.type('id_bio', bio)
+        s.select('id_alert_frequency', 'label=never')
+        s.click("//input[@value='Save changes']")
+        s.wait_for_page_to_load("30000")
+        
+        # Make sure that the bio we set is present
+        self.failUnless(s.is_text_present("Registered email address"))        
+        self.failUnless(s.is_text_present(bio))                
 
     def test_create_valid(self):
         s = self.selenium
