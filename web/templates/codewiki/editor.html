@@ -186,7 +186,8 @@
       <div id="feedback_messages">
       </div>
 
-     {% if request.user.is_staff %}
+     {% comment %}
+      {% if request.user.is_staff %}
       <div style="hidden">  {# for temporary safekeeping #}
         <p>
           <input type="checkbox" id="showautomode" checked />Always show automode dropdown.  
@@ -197,7 +198,8 @@
           Last typed timestamp: <span class="staff" id="lasttypedtimestamp">...</span>
           </p>
       </div>
-    {% endif %}
+     {% endif %}
+    {% endcomment %}
 
 
 </body>
