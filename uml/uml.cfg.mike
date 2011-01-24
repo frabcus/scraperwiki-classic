@@ -44,6 +44,7 @@ user	= scraperwiki
 passwd	= scraperwiki
 db	= scraperwiki_datastore
 secure	= 192.168.1.66
+max_api_distance = 10
 
 #dbtype	= sqlite3
 #db	= /tmp/%{scraperid}.sq3

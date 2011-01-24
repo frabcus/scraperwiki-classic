@@ -80,6 +80,7 @@ class Database :
 
         self.m_dbtype = conf.get ('dataproxy', 'dbtype')
         self.m_resourcedir = conf.get('dataproxy', 'resourcedir')
+        self.m_max_api_distance = conf.get('dataproxy', 'max_api_distance')
 
         if self.m_dbtype == 'mysql'   :
             try    :
@@ -430,7 +431,7 @@ class Database :
         if latlng :
             qquery .append("and `items`.`latlng` is not null")            
             qquery .append("having distance < %s" )
-            qparams.append(settings.MAX_API_DISTANCE_KM)            
+            qparams.append(self.m_max_api_distance)            
             qquery .append("order by distance asc")
         else :
             qquery .append("order by `date_scraped` desc")
@@ -479,10 +480,7 @@ class Database :
         return [ True, allitems ]
 
     def clear_datastore (self, scraperID) :
-                # this line is very slow due to sub-tables.  
-                # could it be done with self.execute ("delete from `kv` where inner join `items` on `kv`.`item_id` = `items`.`item_id` where `items`.`scraper_id` = %s)", (scraperID,))
-        self.execute ("delete from `kv` where `item_id` in (select `item_id` from `items` where `scraper_id` = %s)", (scraperID,))
-        self.execute ("delete from `items` where `scraper_id` = %s", (scraperID,))
+        self.execute("delete kv, items from kv join items on kv.item_id = items.item_id where scraper_id = %s" % scraperID)
         self.m_db.commit()
         return [ True, None ]
 
