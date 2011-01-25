@@ -45,6 +45,7 @@ passwd  = 3jFjLrje6dFJ7cQE
 db      = datastore_live
 secure  = 89.16.177.212
 resourcedir = ../resourcedir
+max_api_distance = 10
 
 [metadata]
 host    = scraperwiki.com

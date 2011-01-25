@@ -80,6 +80,7 @@ class Database :
 
         self.m_dbtype = conf.get ('dataproxy', 'dbtype')
         self.m_resourcedir = conf.get('dataproxy', 'resourcedir')
+        self.m_max_api_distance = conf.get('dataproxy', 'max_api_distance')
 
         if self.m_dbtype == 'mysql'   :
             try    :
@@ -430,7 +431,7 @@ class Database :
         if latlng :
             qquery .append("and `items`.`latlng` is not null")            
             qquery .append("having distance < %s" )
-            qparams.append(settings.MAX_API_DISTANCE_KM)            
+            qparams.append(self.m_max_api_distance)            
             qquery .append("order by distance asc")
         else :
             qquery .append("order by `date_scraped` desc")
@@ -479,10 +480,7 @@ class Database :
         return [ True, allitems ]
 
     def clear_datastore (self, scraperID) :
-                # this line is very slow due to sub-tables.  
-                # could it be done with self.execute ("delete from `kv` where inner join `items` on `kv`.`item_id` = `items`.`item_id` where `items`.`scraper_id` = %s)", (scraperID,))
-        self.execute ("delete from `kv` where `item_id` in (select `item_id` from `items` where `scraper_id` = %s)", (scraperID,))
-        self.execute ("delete from `items` where `scraper_id` = %s", (scraperID,))
+        self.execute("delete kv, items from kv join items on kv.item_id = items.item_id where scraper_id = '%s'" % scraperID)
         self.m_db.commit()
         return [ True, None ]
 
@@ -597,27 +595,43 @@ class Database :
     
         # general experimental single file sqlite access
     def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
+                # make a connection and file if not seen anywhere
         if not self.m_sqlitedbconn:
-            scraperresourcedir = os.path.join(self.m_resourcedir, scraperID)
-            if not os.path.isdir(scraperresourcedir):
-                os.mkdir(scraperresourcedir)
-            scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
-            self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
-            # conn.set_authorizer(authorizer_func)  # would control access for this connection
+            if short_name:
+                scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+                if not os.path.isdir(scraperresourcedir):
+                    os.mkdir(scraperresourcedir)
+                scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+                self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
+            else:
+                self.m_sqlitedbconn = sqlite3.connect(":memory:")   # draft scrapers make a local version
+                    
+                    # conn.set_authorizer(authorizer_func)  # would control access for this connection
+                    # particularly in reslect to attach and writing to attached files
             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
         
         if command == "execute":
             try:
-                signal.alarm (10)
+                    # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
+                    # 
+                signal.alarm (10)  
                 if val2:
                     self.m_sqlitedbcursor.execute(val1, val2)  # handle "(?,?,?)", (val, val, val)
                 else:
                     self.m_sqlitedbcursor.execute(val1)
                 signal.alarm (0)
-                return list(self.m_sqlitedbcursor); 
+                
+                keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
+                data = list(self.m_sqlitedbcursor)
+                return {"keys":keys, "data":data} 
+            
             except sqlite3.Error, e:
                 return "sqlite3.Error: "+str(e)
                 
+        if command == "attach":
+            attachscrapersqlitefile = os.path.join(self.m_resourcedir, val1, "defaultdb.sqlite")
+            self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, val2))
+        
         if command == "commit":
             signal.alarm (10)
             self.m_sqlitedbconn.commit()
