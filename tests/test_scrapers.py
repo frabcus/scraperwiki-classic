@@ -130,6 +130,11 @@ class TestScrapers(SeleniumTest):
             time.sleep(3)
             total_checks -= 1
             
+        if self.selenium.is_text_present('seconds elapsed:'):
+            # If the scraper has executed check that we have the expected output
+            self.failUnless( self.selenium.is_text_present('hello') and self.selenium.is_text_present('world')) 
+            print 'Scraper returned some data!!!'
+            
     
     def test_python_create(self):
         s = self.selenium        
