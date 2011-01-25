@@ -255,8 +255,8 @@ class ScraperRunner(threading.Thread):
         self.scraper.save()
 
         # Send email if this is an email scraper
-        emailers = list(self.scraper.usercoderole_set.filter(role='email'))
-        if emailers:
+        emailers = self.scraper.emailers()
+        if emailers.count() > 0:
             subject, message = getemailtext(event)
             if message:  # no email if blank
                 for role in emailers:
