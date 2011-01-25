@@ -26,35 +26,15 @@ class MercurialInterface:
         self.ui.setconfig('ui', 'interactive', 'off')
         self.ui.setconfig('ui', 'verbose', 'off')
         self.repopath = os.path.normpath(os.path.abspath(repo_path))  # (hg possibly over-sensitive to back-slashes)
-        
-            # !!! infer from the directory path if we are using the split scraper (every scraper in its own repo) technique
-        self.usesplitpath = repo_path.find("split") >= 0
-        
-        # danger with member copy of repo as not sure if it updates with commits
-        # (definitely doesn't update if commit is done against a second repo object)
-        
-        if self.usesplitpath:
-            self.repo = mercurial.hg.repository(self.ui, self.repopath, create=not os.path.exists(self.repopath))    
-        else:
-            self.repo = mercurial.hg.repository(self.ui, self.repopath)    
+            
+            # danger with member copy of repo as not sure if it updates with commits
+            # (definitely doesn't update if commit is done against a second repo object)
+        self.repo = mercurial.hg.repository(self.ui, self.repopath, create=not os.path.exists(self.repopath))    
     
     
     def savecode(self, scraper, code):
-        if self.usesplitpath:
-            assert os.path.exists(self.repopath)
-            scraperpath = os.path.join(self.repopath, "code")
-            fout = codecs.open(scraperpath, mode='w', encoding='utf-8')
-            fout.write(code)
-            fout.close()
-            return
-        
-        scraperfolder = os.path.join(self.repopath, scraper.short_name)
-        scraperfile = os.path.join(scraper.short_name, "__init__.py")
-        scraperpath = os.path.join(scraperfolder, "__init__.py")
-        
-        if not os.path.exists(scraperfolder):
-            os.makedirs(scraperfolder)
-        
+        assert os.path.exists(self.repopath)
+        scraperpath = os.path.join(self.repopath, "code")   # 'code' is the default name for the only file in each repo (for now)
         fout = codecs.open(scraperpath, mode='w', encoding='utf-8')
         fout.write(code)
         fout.close()
@@ -62,35 +42,18 @@ class MercurialInterface:
     
     # need to dig into the commit command to find the rev
     def commit(self, scraper, message="changed", user="unknown"): 
-        if self.usesplitpath:
-            assert os.path.exists(os.path.join(self.repopath, "code"))
-            if "code" not in self.repo.dirstate:
-                self.repo.add(["code"])   
-            
-            if message is None:
-                message = "changed"
-    
-            node = self.repo.commit(message, str(user.pk))  # (maybe we should be committing proper usernames here so it's comprehensible outside)
-            if not node:
-                return None
-            return self.repo.changelog.rev(node)
-        
-        
-        scraperfile = os.path.join(scraper.short_name, "__init__.py")
-        scraperpath = os.path.join(self.repopath, scraper.short_name, "__init__.py")
-        
-        # add into mercurial (must be relative to repopath)
-        if scraperfile not in self.repo.dirstate:
-            self.repo.add([scraperfile])   
+        assert os.path.exists(os.path.join(self.repopath, "code"))
+        if "code" not in self.repo.dirstate:
+            self.repo.add(["code"])   
         
         if message is None:
             message = "changed"
-        
-        node = self.repo.commit(message, str(user.pk))  
+
+        node = self.repo.commit(message, str(user.pk))  # (maybe we should be committing proper usernames here so it's comprehensible outside)
         if not node:
             return None
         return self.repo.changelog.rev(node)
-
+        
     
     def getctxrevisionsummary(self, ctx):
         description = ctx.description()
@@ -116,61 +79,32 @@ class MercurialInterface:
         
 	            
     def getcommitlog(self, scraper):
-        if self.usesplitpath:
-            result = [ ]
-            for rev in self.repo:
-                ctx = self.repo[rev]
-                if "code" in ctx.files():   # could get both if changes in description
-                    result.append(self.getctxrevisionsummary(ctx))
-            return result
-        
-        # old version
         result = [ ]
-        scraperfile = os.path.join(scraper.short_name, "__init__.py")
         for rev in self.repo:
             ctx = self.repo[rev]
-            if scraperfile in ctx.files():
+            if "code" in ctx.files():   # could get both if changes in description
                 result.append(self.getctxrevisionsummary(ctx))
         return result
+        
     
     def getfilestatus(self, scraper):
-        if self.usesplitpath:
-            status = { }
-            scraperpath = os.path.join(self.repopath, "code")
-            
-            lmtime = time.localtime(os.stat(scraperpath).st_mtime)
-            status["filemodifieddate"] = datetime.datetime(*lmtime[:7])
-            modified, added, removed, deleted, unknown, ignored, clean = self.repo.status()
-            
-            #print "sssss", (modified, added, removed, deleted, unknown, ignored, clean)
-            status["ismodified"] = ("code" in modified)
-            status["isadded"] = ("code" in added)  # false if actually committed (ie true means we're in an awkward state)
-            return status
-        
-        # old version
         status = { }
-        scraperfile = os.path.join(scraper.short_name, "__init__.py")
-        scraperpath = os.path.join(self.repopath, scraperfile)
+        scraperpath = os.path.join(self.repopath, "code")
         
         lmtime = time.localtime(os.stat(scraperpath).st_mtime)
         status["filemodifieddate"] = datetime.datetime(*lmtime[:7])
         modified, added, removed, deleted, unknown, ignored, clean = self.repo.status()
         
         #print "sssss", (modified, added, removed, deleted, unknown, ignored, clean)
-        status["ismodified"] = (scraperfile in modified)
-        status["isadded"] = (scraperfile in added)
-        
+        status["ismodified"] = ("code" in modified)
+        status["isadded"] = ("code" in added)  # false if actually committed (ie true means we're in an awkward state)
         return status
-
+        
 
     def getstatus(self, scraper, rev=None):
         status = { }
-        if self.usesplitpath:
-            scraperfile = "code"
-            scraperpath = os.path.join(self.repopath, "code")
-        else:
-            scraperfile = os.path.join(scraper.short_name, "__init__.py")
-            scraperpath = os.path.join(self.repopath, scraperfile)
+        scraperfile = "code"
+        scraperpath = os.path.join(self.repopath, "code")
         
         # adjacent commit informations
         if rev != None:

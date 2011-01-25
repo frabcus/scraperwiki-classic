@@ -30,11 +30,7 @@ SCRAPERWIKI_DIR     = HOME_DIR + '/web/'      # top level directory of the insta
 SCRAPERWIKI_DIR     = os.path.dirname(os.path.realpath(__file__)) # top level directory of the installation
 HOME_DIR            = os.path.dirname(SCRAPERWIKI_DIR) # the parent directory of SCRAPERWIKI_DIR
 
-SMODULES_DIR        = HOME_DIR + '/scrapers/'                # directory containing scrapers
-VMODULES_DIR        = HOME_DIR + '/views/'                # directory containing views
-
-SPLITSCRAPERS_DIR   = ""   # disables the new split repo code
-# SPLITSCRAPERS_DIR   = HOME_DIR + '/splitscrapers/'
+SPLITSCRAPERS_DIR   = HOME_DIR + '/splitscrapers/'
 
 DATASTORE_DATABASE_ENGINE     = ''       # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATASTORE_DATABASE_HOST     = ''      
