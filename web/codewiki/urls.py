@@ -48,13 +48,13 @@ urlpatterns = patterns('',
                                                           views.scraper_screenshoot_scraper,    name='scraper_screenshoot_scraper'),
         
         #not deprecated as used in by ajax to implement publishScraperButton
-    url(r'^scrapers/(?P<short_name>[\w_\-]+)/admin/$',    views.scraper_admin,          name='scraper_admin'),
+    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/$',    views.scraper_admin,          name='scraper_admin'),
         
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/$',          views.code_overview,    name='code_overview'),
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/history/$',  views.scraper_history,  name='scraper_history'),
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/comments/$', views.comments,         name='scraper_comments'),
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/code/$',     viewseditor.code,       name='scraper_code'),    
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/tags/$',     views.tags,             name='scraper_tags'),    
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',  views.scraper_history,  name='scraper_history'),
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/comments/$', views.comments,         name='scraper_comments'),
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/code/$',     viewseditor.code,       name='scraper_code'),    
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/tags/$',     views.tags,             name='scraper_tags'),    
         
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$',               views.choose_template, name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        

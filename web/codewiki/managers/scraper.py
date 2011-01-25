@@ -14,31 +14,9 @@ from datastore import  DataStore
 
 class ScraperManager(CodeManager):
     #use_for_related_fields = True
-    def __init__(self, *args, **kwargs):
-
-        #datastore connection - these names seems to change based on the OS?
-        backend = django.db.load_backend(settings.DATASTORE_DATABASE_ENGINE)
-        self.datastore_connection = backend.DatabaseWrapper({
-            'HOST': settings.DATASTORE_DATABASE_HOST,
-            'NAME': settings.DATASTORE_DATABASE_NAME,
-            'OPTIONS': {},
-            'PASSWORD': settings.DATASTORE_DATABASE_PASSWORD,
-            'PORT': settings.DATASTORE_DATABASE_PORT,
-            'USER': settings.DATASTORE_DATABASE_USER,
-            'TIME_ZONE': settings.TIME_ZONE,
-            'DATABASE_HOST': settings.DATASTORE_DATABASE_HOST,
-            'DATABASE_NAME': settings.DATASTORE_DATABASE_NAME,
-            'DATABASE_OPTIONS': {},
-            'DATABASE_PASSWORD': settings.DATASTORE_DATABASE_PASSWORD,
-            'DATABASE_PORT': settings.DATASTORE_DATABASE_PORT,
-            'DATABASE_USER': settings.DATASTORE_DATABASE_USER,
-            'DATABASE_TIME_ZONE': settings.TIME_ZONE,
-        })
-        super(ScraperManager, self).__init__(*args, **kwargs)
 
     def get_query_set(self):
         return super(ScraperManager, self).get_query_set().filter(deleted=False)
-        
             
     def owns(self):
         return self.get_query_set().filter(usercoderole__role='owner')
@@ -81,7 +59,7 @@ class ScraperManager(CodeManager):
         
         return scrapers
 
-    def emailer_for_user(self, user):
+    def get_emailer_for_user(self, user):
         try:
             queryset = self.get_query_set()
             queryset = queryset.filter(Q(usercoderole__role='owner') & Q(usercoderole__user=user))
@@ -89,3 +67,17 @@ class ScraperManager(CodeManager):
             return queryset.latest('id')
         except:
             return None
+
+    def create_emailer_for_user(self, user):
+        scraper = self.create(title="%s's Email Alert Scraper" % (user.get_profile().name or user.username),
+                              short_name="%s.emailer" % user.username,
+                              published=True)
+        scraper.commit_code("""
+import scraperwiki
+emaillibrary = scraperwiki.utils.swimport("general-emails-on-scrapers")
+print emaillibrary.EmailMessage()
+                            """,
+                            'Initial Commit',
+                            user)
+        scraper.add_user_role(user, 'owner')
+        scraper.add_user_role(user, 'email')
