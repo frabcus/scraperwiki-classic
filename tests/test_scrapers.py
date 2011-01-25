@@ -180,7 +180,7 @@ class TestScrapers(SeleniumTest):
         
         
     def _create_type(self, link_name, type):
-        name = str( uuid.uuid4() )
+        name = 'se_test_%s' % ( str( uuid.uuid4() ), )
         
         s = self.selenium
         s.open("/logout")
@@ -208,7 +208,8 @@ class TestScrapers(SeleniumTest):
     def _create_view(self, link_name, type, shortname):
         """ Must be on the scraper homepage """
         s = self.selenium
-        name = str( uuid.uuid4() )
+        name = 'se_test_%s' % (str( uuid.uuid4() ),)
+        print name
         
         s.open('/scrapers/%s' % shortname)
         s.wait_for_page_to_load("30000")      

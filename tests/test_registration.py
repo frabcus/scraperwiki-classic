@@ -31,7 +31,7 @@ class TestRegistration(SeleniumTest):
         password = str( uuid.uuid4() ).replace('-', '_')
         
         d = deepcopy( self.default_values )
-        d["id_username"] = "test_%s" % (username,)        
+        d["id_username"] = "se_test_%s" % (username,)        
         d["id_email"]   = email
         d["password1"]  = password
         d["password2"]  = password        
