@@ -26,6 +26,31 @@ class TestScrapers(SeleniumTest):
         return code
         
     
+    def _add_comment(self, name):
+        s = self.selenium
+        
+        s.open('/scrapers/%s/' % name)        
+        self.wait_for_page('view the scraper page')        
+        
+        s.click('link=Discussion (0)')    
+        self.wait_for_page('visiting discussion')
+        comment = 'A test comment'
+        s.type('id_comment', comment)
+        s.click('id_submit')
+        time.sleep(2)
+
+        # Currently we expect _add_comment to fail due to CSRF issues, but it will 
+        # not fail on live. To resolve this we'll currently handle both cases :(
+        if s.is_text_present(comment):
+            self.failUnless(s.is_text_present(comment))
+            self.failUnless(s.is_text_present("Discussion (1)"))        
+        else:
+            self.failUnless(s.is_text_present('CSRF verification failed. Request aborted.'))
+
+        s.open('/scrapers/%s/' % name)        
+        self.wait_for_page('view the scraper page')        
+        
+        
     def _check_dashboard_count(self, count=1):
         """ 
         Go to the current user's dashboard and make sure they 
@@ -112,6 +137,8 @@ class TestScrapers(SeleniumTest):
         s.click('aCloseEditor1')
         self.wait_for_page()
             
+        self._add_comment(name)
+            
         self._check_dashboard_count()
         view_name = self._create_view('Blank Python view', 'python', name )
         self._check_clear_data( name )
@@ -126,6 +153,8 @@ class TestScrapers(SeleniumTest):
                     
         s.click('aCloseEditor1')
         self.wait_for_page()
+            
+        self._add_comment(name)            
             
         self._check_dashboard_count()                
         view_name = self._create_view('Blank Ruby view', 'ruby', name )        
@@ -142,6 +171,8 @@ class TestScrapers(SeleniumTest):
         
         s.click('aCloseEditor1')
         self.wait_for_page()
+            
+        self._add_comment(name)            
             
         self._check_dashboard_count()
         view_name = self._create_view('Blank PHP view', 'php', name )                
