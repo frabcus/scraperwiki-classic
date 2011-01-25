@@ -37,12 +37,15 @@ host	= 89.16.177.195
 port	= 9004
 
 [dataproxy]
-dbtype  = mysql                                                                                                                             
+dbtype  = mysql
 host    = 89.16.177.176
 port    = 9003
 user    = datastore
 passwd  = 3jFjLrje6dFJ7cQE
 db      = datastore_live
+secure  = 89.16.177.212
+resourcedir = /var/www/scraperwiki/resourcedir
+max_api_distance = 10
 
 [metadata]
 host    = scraperwiki.com

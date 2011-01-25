@@ -44,6 +44,8 @@ user	= datastore
 passwd	= 3jFjLrje6dFJ7cQE
 db	= scraperwiki_datastore_dev
 secure	= 212.84.75.28
+resourcedir = /var/www/scraperwiki/resourcedir
+max_api_distance = 10
 
 [metadata]
 host    = dev.scraperwiki.com

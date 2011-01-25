@@ -17,6 +17,26 @@ class SeleniumTest(unittest.TestCase):
                         "*firefox", SeleniumTest._app_url)
         self.selenium.start()
 
+    def wait_for_page(self, doing=None):
+        hit_limit = True
+        try:
+            self.selenium.wait_for_page_to_load('30000')
+            hit_limit = False
+        except:
+            print 'Failed to load page in first 30 seconds, adding another 30'
+        
+        if hit_limit:
+            try:
+                self.selenium.wait_for_page_to_load('30000')
+                hit_limit = False
+            except:
+                if not doing:
+                    msg = 'It took longer than 60 seconds to visit %s, it may have failed' % self.selenium.get_location()
+                else:
+                    msg = 'It took longer than 60 seconds to: %s' % doing
+                self.fail(msg=msg)
+
+
     def login(self, username, password):
         s = self.selenium
         s.open("/")

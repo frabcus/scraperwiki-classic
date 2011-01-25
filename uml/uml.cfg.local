@@ -32,6 +32,7 @@ user	= scraperwiki
 passwd	= scraperwiki
 db	= scraperwiki_datastore
 resourcedir = ../resourcedir
+max_api_distance = 10
 secure	= 127.0.0.1
 
 [metadata]

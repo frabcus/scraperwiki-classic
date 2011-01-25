@@ -217,4 +217,4 @@ def retrieve (unique_keys) :
 # experimental sqlite access function
 def sqlitecommand(command, val1=None, val2=None):
     ds = DataStore(None)
-    return ds.request (('sqlitecommand', "unknownshortname", command, val1, val2))
+    return ds.request (('sqlitecommand', command, val1, val2))

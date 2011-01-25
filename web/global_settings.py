@@ -160,7 +160,6 @@ SCRAPERS_PER_PAGE = 60
 #API
 MAX_API_ITEMS = 500
 DEFAULT_API_ITEMS = 100
-MAX_API_DISTANCE_KM = 10
 
 
 # Requited for the template_settings context processor. Each varible listed
