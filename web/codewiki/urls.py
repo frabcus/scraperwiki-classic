@@ -18,12 +18,12 @@ urlpatterns = patterns('',
     url(r'^run/(?P<short_name>[\w_\-]+)/(?P<revision>\d+/)?$', 
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    
     url(r'^views/(?P<short_name>[\w_\-]+)/html/$',        views.htmlview,               name='htmlview'),
-    url(r'^views/(?P<short_name>[\w_\-]+)/full/$',        views.view_fullscreen,        name='view_fullscreen'),   
+    url(r'^views/(?P<short_name>[\w_\-\.]+)/full/$',        views.view_fullscreen,        name='view_fullscreen'),   
     url(r'^views/(?P<short_name>[\w_\-]+)/admin/$',       views.view_admin,             name='view_admin'),    
     
-    url(r'^scrapers/delete-data/(?P<short_name>[\w_\-]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
-    url(r'^scrapers/export/(?P<short_name>[\w_\-]+)/$',   views.export_csv,             name='export_csv'),
-    url(r'^scrapers/export2/(?P<short_name>[\w_\-]+)/$',  views.export_gdocs_spreadsheet,name='export_gdocs_spreadsheet'),    
+    url(r'^scrapers/delete-data/(?P<short_name>[\w_\-\.]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
+    url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$',   views.export_csv,             name='export_csv'),
+    url(r'^scrapers/export2/(?P<short_name>[\w_\-\.]+)/$',  views.export_gdocs_spreadsheet,name='export_gdocs_spreadsheet'),    
     
     url(r'^scrapers/follow/(?P<short_name>[\w_\-]+)/$',   views.follow,                 name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-]+)/$', views.unfollow,               name='scraper_unfollow'),
@@ -38,13 +38,13 @@ urlpatterns = patterns('',
     url(r'^scrapers/scraper_killrunning/(?P<run_id>[\w_\-\.]+)(?:/(?P<event_id>[\w_\-]+))?$',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),
         
-    url(r'^scrapers/schedule-scraper/(?P<short_name>[\w_\-]+)/$', 
+    url(r'^scrapers/schedule-scraper/(?P<short_name>[\w_\-\.]+)/$', 
                                                           views.scraper_schedule_scraper,name='scraper_schedule_scraper'),
-    url(r'^(?P<wiki_type>scraper|view)s/delete-scraper/(?P<short_name>[\w_\-]+)/$', 
+    url(r'^(?P<wiki_type>scraper|view)s/delete-scraper/(?P<short_name>[\w_\-\.]+)/$', 
                                                           views.scraper_delete_scraper, name='scraper_delete_scraper'),
-    url(r'^scrapers/run-scraper/(?P<short_name>[\w_\-]+)/$', 
+    url(r'^scrapers/run-scraper/(?P<short_name>[\w_\-\.]+)/$', 
                                                           views.scraper_run_scraper,    name='scraper_run_scraper'),
-    url(r'^(?P<wiki_type>scraper|view)s/screenshoot-scraper/(?P<short_name>[\w_\-]+)/$', 
+    url(r'^(?P<wiki_type>scraper|view)s/screenshoot-scraper/(?P<short_name>[\w_\-\.]+)/$', 
                                                           views.scraper_screenshoot_scraper,    name='scraper_screenshoot_scraper'),
         
         #not deprecated as used in by ajax to implement publishScraperButton
@@ -65,14 +65,14 @@ urlpatterns = patterns('',
     # call-backs from ajax for reloading and diff
     url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
     url(r'^editor/raw/(?P<short_name>[\-\w]+)$',          viewseditor.raw,    name="raw"),   # raw code not wrapped in javascript
-    url(r'^editor/reload/(?P<short_name>[\-\w]+)$',       viewseditor.reload, name="reload"),   
+    url(r'^editor/reload/(?P<short_name>[\-\w\.]+)$',       viewseditor.reload, name="reload"),   
     url(r'^proxycached$',                                 views.proxycached,  name="proxycached"), # ?cachedid=1234
     url(r'^editor/quickhelp$',                            viewseditor.quickhelp, name="quickhelp"), # ?language&wiki_type&line&character
 
     # editor 
     url(r'^handle_session_draft/$',                       viewseditor.handle_session_draft, name="handle_session_draft"),
     url(r'^handle_editor_save/$',                         viewseditor.handle_editor_save,   name="handle_editor_save"),    
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-]+)/edit/$',     viewseditor.edit, name="editor_edit"),    
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/edit/$',     viewseditor.edit, name="editor_edit"),    
     url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',            viewseditor.edit, name="editor"),
 )
 
