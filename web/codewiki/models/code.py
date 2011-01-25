@@ -69,6 +69,24 @@ class Code(models.Model):
     def __unicode__(self):
         return self.short_name
 
+    @property
+    def vcs(self):
+        return vc.MercurialInterface(self.get_repo_path())
+
+    def commit_code(self, code_text, commit_message, user):
+        self.vcs.savecode(self, code_text)  # creates directory 
+        rev = self.vcs.commit(self, message=commit_message, user=user)
+        return rev
+
+    def get_commit_log(self):
+        return self.vcs.getcommitlog(self)
+
+    def get_file_status(self):
+        return self.vcs.getfilestatus(self)
+
+    def get_vcs_status(self, revision = None):
+        return self.vcs.getstatus(self, revision)
+
     def buildfromfirsttitle(self):
         assert not self.short_name and not self.guid
         import hashlib
@@ -92,7 +110,11 @@ class Code(models.Model):
         if self.pk:
             followers = self.users.filter(usercoderole__role='follow')
         return followers
-        
+
+    def emailers(self):
+        if self.pk:
+            emailers = self.users.filter(usercoderole__role='email')
+        return emailers
         
     def requesters(self):
         if self.pk:
@@ -142,9 +164,9 @@ class Code(models.Model):
     # currently, the only editor we have is the owner of the scraper.
     def editors(self):
         return (self.owner(),)
-        
+
     def saved_code(self, revision = None):
-        return vc.MercurialInterface(self.get_repo_path()).getstatus(self, revision)["code"]
+        return self.get_vcs_status(revision)["code"]
 
     def get_repo_path(self):
         if settings.SPLITSCRAPERS_DIR:
