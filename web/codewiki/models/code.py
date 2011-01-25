@@ -4,16 +4,11 @@ import os
 
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
-import settings
+from django.conf import settings
 from codewiki.managers.code import CodeManager
 
-from django.db.models.signals import post_save
-from registration.signals import user_registered
-
-import tagging
-from frontend import models as frontendmodels
+import hashlib
 
 from codewiki import vc
 from codewiki import util
@@ -22,8 +17,6 @@ try:
     import json
 except:
     import simplejson as json
-
-from django.core.mail import send_mail
 
 LANGUAGES = (
     ('python', 'Python'),
@@ -65,15 +58,50 @@ class Code(models.Model):
     # managers
     objects = CodeManager()
     unfiltered = models.Manager()
+
+    def __init__(self, *args, **kwargs):
+        super(Code, self).__init__(*args, **kwargs)
+        self.created_at = datetime.datetime.today()  
+
+    def save(self, *args, **kwargs):
+        if self.published and self.first_published_at == None:
+            self.first_published_at = datetime.datetime.today()
+
+        if not self.guid:
+            self.set_guid()
+
+        super(Code, self).save(*args, **kwargs)
     
     def __unicode__(self):
         return self.short_name
 
+    @property
+    def vcs(self):
+        return vc.MercurialInterface(self.get_repo_path())
+
+    def commit_code(self, code_text, commit_message, user):
+        self.vcs.savecode(self, code_text)  # creates directory 
+        rev = self.vcs.commit(self, message=commit_message, user=user)
+        return rev
+
+    def get_commit_log(self):
+        return self.vcs.getcommitlog(self)
+
+    def get_file_status(self):
+        return self.vcs.getfilestatus(self)
+
+    def get_vcs_status(self, revision = None):
+        return self.vcs.getstatus(self, revision)
+
+    def get_reversion(self, rev):
+        return self.vcs.getreversion(rev)
+
     def buildfromfirsttitle(self):
         assert not self.short_name and not self.guid
-        import hashlib
         self.short_name = util.SlugifyUniquely(self.title, Code, slugfield='short_name', instance=self)
-        self.created_at = datetime.datetime.today()  
+        self.set_guid()
+
+    def set_guid(self):
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
     def owner(self):
@@ -92,7 +120,11 @@ class Code(models.Model):
         if self.pk:
             followers = self.users.filter(usercoderole__role='follow')
         return followers
-        
+
+    def emailers(self):
+        if self.pk:
+            emailers = self.users.filter(usercoderole__role='email')
+        return emailers
         
     def requesters(self):
         if self.pk:
@@ -111,10 +143,11 @@ class Code(models.Model):
           * "editor"
           * "follow"
           * "requester"
+          * "email"
         
         """
 
-        valid_roles = ['owner', 'editor', 'follow', 'requester']
+        valid_roles = ['owner', 'editor', 'follow', 'requester', 'email']
         if role not in valid_roles:
             raise ValueError("""
               %s is not a valid role.  Valid roles are:\n
@@ -142,9 +175,9 @@ class Code(models.Model):
     # currently, the only editor we have is the owner of the scraper.
     def editors(self):
         return (self.owner(),)
-        
+
     def saved_code(self, revision = None):
-        return vc.MercurialInterface(self.get_repo_path()).getstatus(self, revision)["code"]
+        return self.get_vcs_status(revision)["code"]
 
     def get_repo_path(self):
         if settings.SPLITSCRAPERS_DIR:

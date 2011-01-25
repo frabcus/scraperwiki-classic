@@ -1,42 +1,23 @@
-from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.core.management import call_command
-from tagging.models import Tag, TaggedItem
-from tagging.utils import get_tag
-from django.db import IntegrityError
 from django.contrib.auth.models import User
-from django.views.decorators.http import condition
-import textile
-import random
 from django.conf import settings
-from django.utils.encoding import smart_str
 
 from codewiki import models
-from api.emitters import CSVEmitter 
 import vc
-import frontend
 
 import difflib
 import re
-import csv
-import math
-import urllib2, urllib
-import base64
+import urllib
 
-from cStringIO import StringIO
-import csv, types
-import datetime
-import gdata.docs.service
-
-
-try:                import json
-except ImportError: import simplejson as json
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 # kick this function out to the model module so it can be used elsewhere
 def get_code_object_or_notfoundresponse(short_name, request):
@@ -61,8 +42,7 @@ def code(request, wiki_type, short_name):
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
 
-    mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
-    status = mercurialinterface.getstatus(scraper, rev)
+    status = scraper.get_vcs_status(rev)
 
     context = { 'selected_tab': 'history', 'scraper': scraper }
 
@@ -88,7 +68,7 @@ def code(request, wiki_type, short_name):
     
     if otherrev != -1:
         try:
-            reversion = mercurialinterface.getreversion(otherrev)
+            reversion = scraper.get_reversion(otherrev)
             context["othercode"] = reversion["text"].get(status['scraperfile'])
         except IndexError:
             context['error_messages'].append('Bad otherrev index')
@@ -112,7 +92,7 @@ def reload(request, short_name):
         return HttpResponse(json.dumps({'status' : 'Failed', 'message':"scraper not available to reload"}))
 
     oldcodeineditor = request.POST.get('oldcode')
-    status = vc.MercurialInterface(scraper.get_repo_path()).getstatus(scraper, -1)
+    status = scraper.get_vcs_status(-1)
     result = { "code": status["code"], "rev":status.get('prevcommit',{}).get('rev') }
     if oldcodeineditor:
         result["selrange"] = vc.DiffLineSequenceChanges(oldcodeineditor, status["code"])
@@ -167,7 +147,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         scraper = get_code_object_or_notfoundresponse(short_name, request)
         if isinstance(scraper, HttpResponseNotFound):
             return scraper
-        status = vc.MercurialInterface(scraper.get_repo_path()).getstatus(scraper, -1)
+        status = scraper.get_vcs_status(-1)
         assert 'currcommit' not in status 
         #assert not status['ismodified']  # there are some very old scrapers which haven't been properly committed
         context['code'] = status["code"]
@@ -214,30 +194,23 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     # would be better if the saving was deferred and not done right following a sign in
 def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourcescraper = ''):
     code_object.line_count = int(code_text.count("\n"))
-    if code_object.published and code_object.first_published_at == None:
-        code_object.first_published_at = datetime.datetime.today()
     
     # work around the botched code/views/scraper inheretance.  
     # if publishing for the first time set the first published date
     
+    code_object.save()  # save the object using the base class (otherwise causes a major failure if it doesn't exist)
+    commit_message = earliesteditor and ("%s|||%s" % (earliesteditor, commitmessage)) or commitmessage
+    rev = code_object.commit_code(code_text, commit_message, user)
+
     if code_object.wiki_type == "scraper":
-        code_object.save()  # save the object using the base class (otherwise causes a major failure if it doesn't exist)
         code_object.scraper.update_meta()  # would be ideal to in-line this (and render it's functionality defunct as the data is about the database, not the scraper)
         code_object.scraper.save()
     else:
-        code_object.save()
-
         #make link to source scraper
         if sourcescraper:
             lsourcescraper = models.Code.objects.filter(short_name=sourcescraper)
             if lsourcescraper:
                 code_object.relations.add(lsourcescraper[0])
-
-    # save code and commit code through the mercurialinterface
-    mercurialinterface = vc.MercurialInterface(code_object.get_repo_path())
-    mercurialinterface.savecode(code_object, code_text)  # creates directory 
-    lcommitmessage = earliesteditor and ("%s|||%s" % (earliesteditor, commitmessage)) or commitmessage
-    rev = mercurialinterface.commit(code_object, message=lcommitmessage, user=user)
 
     # Add user roles
     if code_object.owner():
