@@ -61,7 +61,8 @@ class Code(models.Model):
 
     def __init__(self, *args, **kwargs):
         super(Code, self).__init__(*args, **kwargs)
-        self.created_at = datetime.datetime.today()  
+        if not self.created_at:
+            self.created_at = datetime.datetime.today()  
 
     def save(self, *args, **kwargs):
         if self.published and self.first_published_at == None:
