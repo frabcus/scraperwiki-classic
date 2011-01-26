@@ -594,12 +594,16 @@ class Database :
                 
     
         # general experimental single file sqlite access
+        # the values of these fields are safe because from the UML they are subject to an ident callback, 
+        # and from the frontend they are subject to a connection from a particular IP number
     def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
                 # make a connection and file if not seen anywhere
         if not self.m_sqlitedbconn:
             if short_name:
                 scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
                 if not os.path.isdir(scraperresourcedir):
+                    if command == "datasummary":
+                        return "No database"   # don't make one if we're just requesting a summary
                     os.mkdir(scraperresourcedir)
                 scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
@@ -613,7 +617,6 @@ class Database :
         if command == "execute":
             try:
                     # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
-                    # 
                 signal.alarm (10)  
                 if val2:
                     self.m_sqlitedbcursor.execute(val1, val2)  # handle "(?,?,?)", (val, val, val)
@@ -628,12 +631,27 @@ class Database :
             except sqlite3.Error, e:
                 return "sqlite3.Error: "+str(e)
                 
-        if command == "attach":
-            attachscrapersqlitefile = os.path.join(self.m_resourcedir, val1, "defaultdb.sqlite")
-            self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, val2))
+        if command == "datasummary":
+            result = { }
+            try:
+                for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master")):
+                    self.m_sqlitedbcursor.execute("select * from `%s` limit ?" % name, ((val1 or 10),))
+                    result[name] = {"keys":map(lambda x:x[0], self.m_sqlitedbcursor.description), "sql":sql, "data":list(self.m_sqlitedbcursor)}
+            except sqlite3.Error, e:
+                return "sqlite3.Error: "+str(e)
+                 
+            return result
         
+        if command == "attach":
+            try:
+                attachscrapersqlitefile = os.path.join(self.m_resourcedir, val1, "defaultdb.sqlite")
+                self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, val2 or val1))
+            except sqlite3.Error, e:
+                return "sqlite3.Error: "+str(e)
+            return "ok"
+
         if command == "commit":
             signal.alarm (10)
             self.m_sqlitedbconn.commit()
             signal.alarm (0)
-            return
+            return "ok"   # doesn't reach here if the signal fails

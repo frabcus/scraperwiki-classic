@@ -217,4 +217,19 @@ def retrieve (unique_keys) :
 # experimental sqlite access function
 def sqlitecommand(command, val1=None, val2=None):
     ds = DataStore(None)
-    return ds.request (('sqlitecommand', command, val1, val2))
+    result = ds.request (('sqlitecommand', command, val1, val2))
+    
+    if command == "attach":
+        if result != "ok":
+            raise Exception(result)
+    if command == "execute":
+        if result == "":
+            raise Exception("possible signal timeout")
+        if type(result) == str:
+            raise Exception(result)
+    if command == "commit":
+        if result != "ok":
+            raise Exception(result)
+            
+    return result
+    
