@@ -225,7 +225,7 @@ def sqlitecommand(command, val1=None, val2=None):
     if command == "execute":
         if result == "":
             raise Exception("possible signal timeout")
-        if type(result) == str:
+        if type(result) in [str, unicode]:
             raise Exception(result)
     if command == "commit":
         if result != "ok":
