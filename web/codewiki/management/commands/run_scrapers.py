@@ -128,6 +128,10 @@ def runmessageloop(runner, event, approxlenoutputlimit):
         elif message_type == "data":
             event.records_produced += 1
         
+        elif message_type == "sqlitecall":
+            if data.get('insert'):
+                event.records_produced += 1
+        
         elif message_type == "exception":   # only one of these ever
             event.exception_message = data.get('exceptiondescription')
             
