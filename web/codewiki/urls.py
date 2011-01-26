@@ -23,6 +23,8 @@ urlpatterns = patterns('',
     
     url(r'^scrapers/delete-data/(?P<short_name>[\w_\-]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
     url(r'^scrapers/export/(?P<short_name>[\w_\-]+)/$',   views.export_csv,             name='export_csv'),
+    url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-]+)/$',  
+                                                          views.export_sqlite,          name='export_sqlite'),
     url(r'^scrapers/export2/(?P<short_name>[\w_\-]+)/$',  views.export_gdocs_spreadsheet,name='export_gdocs_spreadsheet'),    
     
     url(r'^scrapers/follow/(?P<short_name>[\w_\-]+)/$',   views.follow,                 name='scraper_follow'),

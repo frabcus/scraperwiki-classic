@@ -120,7 +120,9 @@ def scraper_overview(request, short_name):
     context['data'] = data
     
     dataproxy = DataStore(scraper.guid, scraper.short_name)
-    context['sqlitedata'] = dataproxy.request(("sqlitecommand", "datasummary", None, None))
+    sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
+    if sqlitedata and type(sqlitedata) not in [str, unicode]:
+        context['sqlitedata'] = sqlitedata
     
     #if user.username == 'Julian_Todd':
     #    return render_to_response('codewiki/scraper_overview_jgt.html', context, context_instance=RequestContext(request))
@@ -506,6 +508,22 @@ def export_csv(request, short_name):
 
     response = HttpResponse(stream_csv(scraper), mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (short_name)
+    return response
+
+def export_sqlite(request, short_name):
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request=request)
+    
+    dataproxy = DataStore(scraper.guid, scraper.short_name)
+    sqlitedata = dataproxy.request(("sqlitecommand", "downloadsqlitefile", None, None))
+    if type(sqlitedata) in [str,unicode]:
+        return HttpResponse(sqlitedata)
+    content = sqlitedata.get("content")
+    if sqlitedata.get("encoding") == "base64":
+        content = base64.decodestring(content)
+    response = HttpResponse(content, mimetype='application/octet-stream')
+    response['Content-Disposition'] = 'attachment; filename=%s.sqlite' % (short_name)
     return response
 
 

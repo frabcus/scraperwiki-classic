@@ -8,6 +8,7 @@ import  types
 import  datetime
 import  sqlite3
 import  signal
+import base64
 
 class Database :
 
@@ -617,13 +618,23 @@ class Database :
                     return sqlite3.SQLITE_DENY
             return sqlite3.SQLITE_OK
 
+        if command == "downloadsqlitefile":
+            scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+            scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+            if not os.path.isfile(scrapersqlitefile):
+                return "No sqlite database"
+            fin = open(scrapersqlitefile, "rb")
+            result = {'content':base64.encodestring(fin.read()), 'encoding':"base64"}
+            print result
+            return result
+            
             # make a new directory and connection if not seen anywhere (unless it's draft)
         if not self.m_sqlitedbconn:
             if short_name:
                 scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
                 if not os.path.isdir(scraperresourcedir):
                     if command == "datasummary":
-                        return "No database"   # don't make one if we're just requesting a summary
+                        return "No sqlite database"   # don't make one if we're just requesting a summary
                     os.mkdir(scraperresourcedir)
                 scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
@@ -678,3 +689,5 @@ class Database :
             self.m_sqlitedbconn.commit()
             signal.alarm (0)
             return "ok"   # doesn't reach here if the signal fails
+
+            
