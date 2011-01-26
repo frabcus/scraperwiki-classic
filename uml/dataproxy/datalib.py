@@ -604,7 +604,7 @@ class Database :
         battaching = False  # maybe should be done using two connections
         def authorizer_func(action_code, tname, cname, sql_location, trigger):
             #print "authorizer_funccccd", (action_code, tname, cname, sql_location, trigger), (short_name, runID)
-            readonlyops = [sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library
+            readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library
             if action_code == sqlite3.SQLITE_ATTACH:
                 if battaching:
                     return sqlite3.SQLITE_OK

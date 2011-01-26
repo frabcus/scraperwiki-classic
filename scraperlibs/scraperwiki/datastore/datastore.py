@@ -171,6 +171,12 @@ def DataStore (config) :
         ds = DataStoreClass(config)
     return ds
 
+def strencode(v):
+    try: 
+        v = str(v)
+    except:
+        v = v.encode('utf-8')
+    return v
 
 # functions moved from the out of data code into here to manage their development
 def save (unique_keys, data, date = None, latlng = None, silent = False) :
@@ -181,11 +187,7 @@ def save (unique_keys, data, date = None, latlng = None, silent = False) :
 
     pdata = {}
     for key, value in data.items():
-        try    : key   = str(key)
-        except : key   = key  .encode('utf-8')
-        try    : value = str(value)
-        except : value = value.encode('utf-8')
-        pdata[key] = value
+        pdata[strencode(key)] = strencode(value)
 
     if not silent :
         scraperwiki.console.logScrapedData (pdata)
@@ -215,7 +217,13 @@ def retrieve (unique_keys) :
 
 
 # experimental sqlite access function
+sqlitecommand_verbose = True
 def sqlitecommand(command, val1=None, val2=None):
+    if command == "verbose":
+        global sqlitecommand_verbose
+        sqlitecommand_verbose = val1
+        return
+    
     ds = DataStore(None)
     result = ds.request (('sqlitecommand', command, val1, val2))
     
@@ -231,5 +239,16 @@ def sqlitecommand(command, val1=None, val2=None):
         if result != "ok":
             raise Exception(result)
             
+    
+    # list type for second field in message dump
+    if not val2:
+        lval2 = [ ]
+    elif type(val2) in [tuple,list]:
+        lval2 = [ strencode(v)  for v in val2 ]
+    elif command == "attach":
+        lval2 = [ val2 ]
+
+    if sqlitecommand_verbose:
+        scraperwiki.console.logSqliteCall(command, val1, lval2)
     return result
     
