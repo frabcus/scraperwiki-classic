@@ -350,8 +350,7 @@ def scraper_history(request, wiki_type, short_name):
     
     itemlog = [ ]
     
-    mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
-    for commitentry in mercurialinterface.getcommitlog(scraper):
+    for commitentry in scraper.get_commit_log():
         try:    user = User.objects.get(pk=int(commitentry["userid"]))
         except: user = None
         
@@ -407,7 +406,7 @@ def scraper_history(request, wiki_type, short_name):
             previtem = item
     
     dictionary["itemlog"] = aitemlog
-    dictionary["filestatus"] = mercurialinterface.getfilestatus(scraper)
+    dictionary["filestatus"] = scraper.get_file_status()
     
     return render_to_response('codewiki/history.html', dictionary, context_instance=RequestContext(request))
 

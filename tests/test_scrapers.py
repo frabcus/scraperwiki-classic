@@ -42,9 +42,11 @@ class TestScrapers(SeleniumTest):
         # Currently we expect _add_comment to fail due to CSRF issues, but it will 
         # not fail on live. To resolve this we'll currently handle both cases :(
         if s.is_text_present(comment):
+            print 'Working comments'
             self.failUnless(s.is_text_present(comment))
             self.failUnless(s.is_text_present("Discussion (1)"))        
         else:
+            print 'Broken comments'            
             self.failUnless(s.is_text_present('CSRF verification failed. Request aborted.'))
 
         s.open('/scrapers/%s/' % name)        
@@ -127,6 +129,11 @@ class TestScrapers(SeleniumTest):
                 return 
             time.sleep(3)
             total_checks -= 1
+            
+        if self.selenium.is_text_present('seconds elapsed:'):
+            # If the scraper has executed check that we have the expected output
+            self.failUnless( self.selenium.is_text_present('hello') and self.selenium.is_text_present('world')) 
+            print 'Scraper returned some data!!!'
             
     
     def test_python_create(self):

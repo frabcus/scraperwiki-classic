@@ -66,8 +66,7 @@ class GetInfo(APIBase):
         except ValueError: 
             rev = None
             
-        mercurialinterface = vc.MercurialInterface(scraper.get_repo_path())
-        status = mercurialinterface.getstatus(scraper, rev)
+        status = scraper.get_vcs_status(rev)
         if 'code' not in quietfields:
             info['code']        = status["code"]
         
@@ -82,7 +81,7 @@ class GetInfo(APIBase):
 
         if history_start_date:
             history = [ ]
-            commitentries = mercurialinterface.getcommitlog(scraper)
+            commitentries = scraper.get_commit_log(scraper)
             for commitentry in commitentries:
                 if commitentry['date'] < history_start_date:
                     continue

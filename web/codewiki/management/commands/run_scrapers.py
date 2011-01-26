@@ -212,6 +212,11 @@ class ScraperRunner(threading.Thread):
         self.verbose = verbose 
     
     def run(self):
+        # Check for possible race condition
+        if scraper.next_run() >= datetime.datetime.now(): 
+            print "Hold on this scraper isn't overdue!!!! %s" % scraper.short_name
+            return
+        
         guid = self.scraper.guid
         code = self.scraper.saved_code().encode('utf-8')
 
@@ -255,8 +260,8 @@ class ScraperRunner(threading.Thread):
         self.scraper.save()
 
         # Send email if this is an email scraper
-        emailers = list(self.scraper.usercoderole_set.filter(role='email'))
-        if emailers:
+        emailers = self.scraper.emailers()
+        if emailers.count() > 0:
             subject, message = getemailtext(event)
             if message:  # no email if blank
                 for role in emailers:
@@ -295,7 +300,7 @@ class Command(BaseCommand):
         
         scrapers = self.get_overdue_scrapers()
 
-        # limit to the first four scrapers
+        # limit to the first n scrapers
         if 'max_concurrent' in options:
             try:
                 scrapers = scrapers[:int(options['max_concurrent'])]
