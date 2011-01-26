@@ -1,5 +1,6 @@
 import  settings
 import  socket
+import  urllib
 
 try   : import json
 except: import simplejson as json
@@ -13,7 +14,7 @@ class DataStoreClass :
         self.m_host     = settings.DATAPROXY_HOST
         self.m_port     = settings.DATAPROXY_PORT
 
-    def connect (self, scraperID) :
+    def connect (self, scraperID, short_name) :
 
         """
         Connect to the data proxy.
@@ -21,7 +22,8 @@ class DataStoreClass :
 
         self.m_socket    = socket.socket()
         self.m_socket.connect ((self.m_host, self.m_port))
-        self.m_socket.send ('GET /?uml=%s&port=%d&scraperid=%s HTTP/1.1\n\n' % (socket.gethostname(), self.m_socket.getsockname()[1], scraperID))
+        data = [ ("uml", socket.gethostname()), ("port", self.m_socket.getsockname()[1]), ("scraperid", scraperID), ("short_name", short_name) ]
+        self.m_socket.send ('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         rc, arg = json.loads (self.m_socket.recv (1024))
         if not rc : raise Exception (arg)
 
@@ -81,7 +83,7 @@ class DataStoreClass :
         self.m_socket = None
 
 
-def DataStore (scraperID) :
+def DataStore (scraperID, short_name) :
     ds = DataStoreClass()
-    ds.connect (scraperID)
+    ds.connect (scraperID, short_name)
     return ds

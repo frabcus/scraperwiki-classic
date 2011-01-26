@@ -597,7 +597,7 @@ class Database :
         # the values of these fields are safe because from the UML they are subject to an ident callback, 
         # and from the frontend they are subject to a connection from a particular IP number
     def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
-                # make a connection and file if not seen anywhere
+                # make a new directory and connection if not seen anywhere (unless it's draft)
         if not self.m_sqlitedbconn:
             if short_name:
                 scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
@@ -634,12 +634,15 @@ class Database :
         if command == "datasummary":
             result = { }
             try:
-                for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master")):
+                for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
                     self.m_sqlitedbcursor.execute("select * from `%s` limit ?" % name, ((val1 or 10),))
-                    result[name] = {"keys":map(lambda x:x[0], self.m_sqlitedbcursor.description), "sql":sql, "data":list(self.m_sqlitedbcursor)}
+                    result[name] = {"sql":sql}
+                    result[name]["rows"] = list(self.m_sqlitedbcursor)
+                    result[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
+                    result[name]["length"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
+                    
             except sqlite3.Error, e:
                 return "sqlite3.Error: "+str(e)
-                 
             return result
         
         if command == "attach":

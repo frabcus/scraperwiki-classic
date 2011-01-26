@@ -163,7 +163,7 @@ class DataStoreClass :
 
 
 # manage local copy of the above class in the global space of this module
-# (this function is first called from controller.exec.py where a 3 line config is locally generated)
+# (this function is first called from controller.exec.py where a little 3 line config file is locally generated -- in case you need help with the spaghetti)
 ds = None
 def DataStore (config) :
     global ds

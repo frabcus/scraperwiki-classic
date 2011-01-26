@@ -17,6 +17,8 @@ import random
 from django.conf import settings
 from django.utils.encoding import smart_str
 
+from managers.datastore import  DataStore
+
 from codewiki import models
 from api.emitters import CSVEmitter 
 import vc
@@ -107,6 +109,7 @@ def scraper_overview(request, short_name):
                                                limit=50, 
                                                column_order=column_order,
                                                private_columns=private_columns)
+
     if len(data['rows']) > 12:
         data['morerows'] = data['rows'][9:]
         data['rows'] = data['rows'][:9]
@@ -115,6 +118,9 @@ def scraper_overview(request, short_name):
         context['datasinglerow'] = zip(data['headings'], data['rows'][0])
     
     context['data'] = data
+    
+    dataproxy = DataStore(scraper.guid, scraper.short_name)
+    context['sqlitedata'] = dataproxy.request(("sqlitecommand", "datasummary", None, None))
     
     #if user.username == 'Julian_Todd':
     #    return render_to_response('codewiki/scraper_overview_jgt.html', context, context_instance=RequestContext(request))
