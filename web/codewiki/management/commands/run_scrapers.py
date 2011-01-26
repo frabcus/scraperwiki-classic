@@ -212,6 +212,10 @@ class ScraperRunner(threading.Thread):
         self.verbose = verbose 
     
     def run(self):
+        # Check for possible race condition
+        if scraper.next_run() >= datetime.datetime.now(): 
+            return
+        
         guid = self.scraper.guid
         code = self.scraper.saved_code().encode('utf-8')
 
@@ -295,7 +299,7 @@ class Command(BaseCommand):
         
         scrapers = self.get_overdue_scrapers()
 
-        # limit to the first four scrapers
+        # limit to the first n scrapers
         if 'max_concurrent' in options:
             try:
                 scrapers = scrapers[:int(options['max_concurrent'])]
