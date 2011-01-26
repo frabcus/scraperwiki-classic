@@ -268,8 +268,8 @@ class ScraperRunner(threading.Thread):
         if emailers.count() > 0:
             subject, message = getemailtext(event)
             if message:  # no email if blank
-                for role in emailers:
-                    send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[role.user.email], fail_silently=True)
+                for user in emailers:
+                    send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[user.email], fail_silently=True)
 
 
 # this is invoked by the crontab with the function
