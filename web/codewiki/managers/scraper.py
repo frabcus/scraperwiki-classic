@@ -68,10 +68,14 @@ class ScraperManager(CodeManager):
         except:
             return None
 
-    def create_emailer_for_user(self, user):
+    def create_emailer_for_user(self, user, last_run=None):
+        if not last_run:
+            last_run = datetime.datatime.now()
+
         scraper = self.create(title="%s's Email Alert Scraper" % (user.get_profile().name or user.username),
                               short_name="%s.emailer" % user.username,
-                              published=True)
+                              published=True,
+                              last_run=last_run)
         scraper.commit_code("""
 import scraperwiki
 emaillibrary = scraperwiki.utils.swimport("general-emails-on-scrapers")
