@@ -122,7 +122,7 @@ def login(request):
 
             else:
                 # Account not found                  
-                error_messages.append("Sorry, but we could not find that username or email address")
+                error_messages.append("Sorry, but we could not find that user, or the password was wrong")
 
 
         #New user is registering
