@@ -213,7 +213,7 @@ class ScraperRunner(threading.Thread):
     
     def run(self):
         # Check for possible race condition
-        if scraper.next_run() >= datetime.datetime.now(): 
+        if self.scraper.next_run() >= datetime.datetime.now(): 
             print "Hold on this scraper isn't overdue!!!! %s" % scraper.short_name
             return
         
