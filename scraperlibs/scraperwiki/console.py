@@ -18,6 +18,9 @@ def logScrapedURL (url, length):
 def logScrapedData(pdata) :
     dumpMessage ({'message_type':'data', 'content': pdata})
 
+def logSqliteCall(command, val1, lval2) :
+    dumpMessage ({'message_type':'sqlitecall', 'command': command, "val1":val1, "lval2":lval2})
+
 def logMessage (message) :
     dumpMessage ({'message_type': 'console', 'content': message})
 

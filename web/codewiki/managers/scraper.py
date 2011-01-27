@@ -70,7 +70,7 @@ class ScraperManager(CodeManager):
 
     def create_emailer_for_user(self, user, last_run=None):
         if not last_run:
-            last_run = datetime.datatime.now()
+            last_run = datetime.datetime.now()
 
         scraper = self.create(title="%s's Email Alert Scraper" % (user.get_profile().name or user.username),
                               short_name="%s.emailer" % user.username,

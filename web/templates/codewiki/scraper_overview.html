@@ -50,7 +50,27 @@
                     </tbody>
                 </table>
             </div>
-        {% else %}
+        {% endif %}
+
+        {% if sqlitedata %}
+          {% for sqltablename, sqltabledata in sqlitedata.items %}
+            <table class="data">
+              <thead>
+                 <tr><th colspan="{{sqltabledata.keys|length}}">
+                    Sample from sqlite table <b><a title="{{sqltabledata.sql}}">{{sqltablename}}</a></b> which has {{sqltabledata.length}} rows
+                 </th></tr>
+                 <tr>{% for heading in sqltabledata.keys %}<th width="120">{{ heading }}</th>{% endfor %}</tr>
+              </thead>
+              <tbody>
+                 {% for row in sqltabledata.rows %}
+                    <tr class="row">{% for value in row %}<td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>{% endfor %}</tr>
+                 {% endfor %}
+              </tbody>
+            </table>
+          {% endfor %}
+        {% endif %}
+
+        {% if not data.rows %}{% if not sqlitedata %}
             <div>
                 <table class="data">
                     <tbody>
@@ -71,7 +91,8 @@
             <div class="info_unpublished">
                     This scraper is being worked on <br/>and there is no data to display yet
             </div>
-        {% endif %}
+        {% endif %}{% endif %}
+
         <div class="content_footer">
             <p>
                 This dataset has a total of {{ scraper.record_count }} records.

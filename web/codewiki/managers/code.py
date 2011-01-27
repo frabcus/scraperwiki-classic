@@ -72,6 +72,13 @@ class CodeManager(models.Manager):
     def dont_own_any(self):
         return self.owned_count() == 0
 
+            # can't be used to access the new sqlite which requires short_names
+            # questions the value of these functions all needing to take scraper_id when they could be members of Code
+            # or simplified and in-lined
+            
+    def dataproxy(self, scraper_id):
+        dataproxy = DataStore(scraper_id, "")  
+        return dataproxy
 
     def data_search(self, scraper_id, key_values, limit=1000, offset=0):   
 
@@ -128,10 +135,6 @@ class CodeManager(models.Manager):
             raise Exception(arg)
         return arg
     
-
-    def dataproxy(self, scraper_id):
-        dataproxy = DataStore(scraper_id)
-        return dataproxy
 
     def clear_datastore(self, scraper_id):
         proxy   = self.dataproxy(scraper_id)

@@ -8,6 +8,7 @@ import  types
 import  datetime
 import  sqlite3
 import  signal
+import base64
 
 class Database :
 
@@ -594,26 +595,57 @@ class Database :
                 
     
         # general experimental single file sqlite access
+        # the values of these fields are safe because from the UML they are subject to an ident callback, 
+        # and from the frontend they are subject to a connection from a particular IP number
     def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
-                # make a connection and file if not seen anywhere
+        #print "XXXXX", (command, val1, val2)
+                
+            # see http://www.sqlite.org/c3ref/c_alter_table.html
+        battaching = False  # maybe should be done using two connections
+        def authorizer_func(action_code, tname, cname, sql_location, trigger):
+            #print "authorizer_funccccd", (action_code, tname, cname, sql_location, trigger), (short_name, runID)
+            readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library
+            if action_code == sqlite3.SQLITE_ATTACH:
+                if battaching:
+                    return sqlite3.SQLITE_OK
+                return sqlite3.SQLITE_DENY
+            
+            if runID[:12] == "fromfrontend":   # front end can only read, not write
+                if action_code not in readonlyops:
+                    return sqlite3.SQLITE_DENY
+            elif sql_location != None and sql_location != 'main':
+                if action_code not in readonlyops:
+                    return sqlite3.SQLITE_DENY
+            return sqlite3.SQLITE_OK
+
+        if command == "downloadsqlitefile":
+            scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+            scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+            if not os.path.isfile(scrapersqlitefile):
+                return "No sqlite database"
+            fin = open(scrapersqlitefile, "rb")
+            result = {'content':base64.encodestring(fin.read()), 'encoding':"base64"}
+            print result
+            return result
+            
+            # make a new directory and connection if not seen anywhere (unless it's draft)
         if not self.m_sqlitedbconn:
             if short_name:
                 scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
                 if not os.path.isdir(scraperresourcedir):
+                    if command == "datasummary":
+                        return "No sqlite database"   # don't make one if we're just requesting a summary
                     os.mkdir(scraperresourcedir)
                 scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:")   # draft scrapers make a local version
-                    
-                    # conn.set_authorizer(authorizer_func)  # would control access for this connection
-                    # particularly in reslect to attach and writing to attached files
+            self.m_sqlitedbconn.set_authorizer(authorizer_func)
             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
         
         if command == "execute":
             try:
                     # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
-                    # 
                 signal.alarm (10)  
                 if val2:
                     self.m_sqlitedbcursor.execute(val1, val2)  # handle "(?,?,?)", (val, val, val)
@@ -628,12 +660,34 @@ class Database :
             except sqlite3.Error, e:
                 return "sqlite3.Error: "+str(e)
                 
-        if command == "attach":
-            attachscrapersqlitefile = os.path.join(self.m_resourcedir, val1, "defaultdb.sqlite")
-            self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, val2))
+        if command == "datasummary":
+            result = { }
+            try:
+                for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
+                    self.m_sqlitedbcursor.execute("select * from `%s` limit ?" % name, ((val1 or 10),))
+                    result[name] = {"sql":sql}
+                    result[name]["rows"] = list(self.m_sqlitedbcursor)
+                    result[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
+                    result[name]["length"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
+                    
+            except sqlite3.Error, e:
+                return "sqlite3.Error: "+str(e)
+            return result
         
+        if command == "attach":
+            try:
+                battaching = True
+                attachscrapersqlitefile = os.path.join(self.m_resourcedir, val1, "defaultdb.sqlite")
+                self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, val2 or val1))
+            except sqlite3.Error, e:
+                return "sqlite3.Error: "+str(e)
+            battaching = False
+            return "ok"
+
         if command == "commit":
             signal.alarm (10)
             self.m_sqlitedbconn.commit()
             signal.alarm (0)
-            return
+            return "ok"   # doesn't reach here if the signal fails
+
+            

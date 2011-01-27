@@ -123,6 +123,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         loc       = self.connection.getsockname()
         ident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()   # (lucky this doesn't clash with the function we are in, eh -- JT)
 
+                # would be a great idea to use cgi.parse_qs(query) technology here -- at both ends -- as it is already used in this module elsewhere!
         for line in string.split (ident, '\n') :
             if line == '' :
                 continue
@@ -319,7 +320,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             if self.connection.getpeername()[0] != config.get ('dataproxy', 'secure') :
                 self.connection.send (json.dumps ((False, "ScraperID only accepted from secure hosts")) + '\n')
                 return
-            scraperID, runID, scraperName = params['scraperid'][0], '%s.%s' % (params['scraperid'][0], time.time()), None
+            scraperID, runID, scraperName = params['scraperid'][0], 'fromfrontend.%s.%s' % (params['scraperid'][0], time.time()), params.get('short_name', [""])[0]
         else :
             scraperID, runID, scraperName = self.ident (params['uml'][0], params['port'][0])
 
