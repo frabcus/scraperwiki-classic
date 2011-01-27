@@ -81,7 +81,7 @@ class GetInfo(APIBase):
 
         if history_start_date:
             history = [ ]
-            commitentries = scraper.get_commit_log(scraper)
+            commitentries = scraper.get_commit_log()
             for commitentry in commitentries:
                 if commitentry['date'] < history_start_date:
                     continue
