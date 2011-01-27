@@ -11,7 +11,7 @@ SHELL=/bin/bash
 */5 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py email_alerts
 
 # Update various bits of meta information for each scraper every hour
-0 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py update_scraper_meta
+8 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py update_scraper_meta
 
 # Send emails with django mailer every minute
 #* * * * * cd /var/www/alpha.scraperwiki.com/ && source bin/activate && cd web && python manage.py email_alerts
