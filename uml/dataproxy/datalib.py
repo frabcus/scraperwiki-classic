@@ -474,7 +474,10 @@ class Database :
             #  over-ride any values with latlng (we could break it into two values) (may need to wrap in a try to protect)
             #
             if item[1] is not None :
-                rdata["latlng"] = tuple(map(float, item[1].split(",")))
+                try:
+                    rdata["latlng"] = tuple(map(float, item[1].split(",")))
+                except:
+                    pass # If the data in the latlng column doesn't convert ignore it
         
             allitems.append (rdata)
 
