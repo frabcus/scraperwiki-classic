@@ -408,9 +408,9 @@ class Database :
         qparams = []
 
         if latlng is not None :
-            qquery .append(", substr(`items`.`latlng`,  1, 20)")
-            qquery .append(", substr(`items`.`latlng`, 21, 41)")
-            qquery .append(", abs(substr(`items`.`latlng`, 1, 20) - %s) + abs(substr(`items`.`latlng`, 21, 41) - %s) as diamdist")
+            #qquery .append(", substr(`items`.`latlng`,  1, 20)")
+            #qquery .append(", substr(`items`.`latlng`, 21, 41)")
+            #qquery .append(", abs(substr(`items`.`latlng`, 1, 20) - %s) + abs(substr(`items`.`latlng`, 21, 41) - %s) as diamdist")
             qquery .append(", ((acos(sin(%s * pi() / 180) * sin(abs(substr(`items`.`latlng`, 1, 20)) * pi() / 180) + cos(%s * pi() / 180) * cos(abs(substr(`items`.`latlng`, 1, 20)) * pi() / 180) * cos((%s - abs(substr(`items`.`latlng`, 21, 41))) * pi() / 180)) * 180 / pi()) * 60 * 1.1515 * 1.609344) as distance")
             qparams.append(latlng[0])
             qparams.append(latlng[0])
