@@ -4,6 +4,9 @@ port	= 9000
 umllist	= uml001
 confurl	= allwhite
 path    = ../scraperlibs
+use_queue = False
+queue_name= test_run_queue
+return_queue_name= test_queue_return
 
 [twister]
 statusurl = http://localhost:8000/scrapers/twister/status
