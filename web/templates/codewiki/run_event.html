@@ -13,7 +13,7 @@
     <div class="content full">
         <div class="page_tab_body">
                     
-        <p><b>Run Started:</b> {{event.run_started|timesince}} ago (<small>{{event.run_started}}</small>)</p>
+        <p><b>Run started:</b> {{event.run_started|timesince}} ago (<small>{{event.run_started}}</small>)</p>
         {% if status %}
           <p>
           <form action="{% url scraper_killrunning event.run_id event.id %}" method="post">
