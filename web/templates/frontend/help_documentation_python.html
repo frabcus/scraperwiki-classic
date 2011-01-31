@@ -1,6 +1,8 @@
 <div class="content col left">
-<h3>Scraperwiki reference</h3>
-<p>ScraperWiki itself offers useful in-built functions for retrieving, geocoding and saving data.</p>
+<h3>Scraperwiki Python documentation</h3>
+
+<p>In your scrapers, you can use ScraperWiki's in-built functions for retrieving, geocoding and saving data. 
+Just add <code>import scraperwiki</code> at the top of your scraper.</p>
 
 <div class="section">
 <h3><span id="scraping"></span>scraperwiki.scrape</h3>
@@ -21,6 +23,7 @@
     </table>
 	<h4>Example</h4>
 	<div class="example"><code>
+	import scraperwiki<br/>
 	html = scraperwiki.scrape('http://www.google.co.uk') # GET request.<br/>
 	html = scraperwiki.scrape('http://www.google.co.uk', { 'key' : value })	# POST request.
 	</code></div>

@@ -1,0 +1,146 @@
+<div class="content">
+       <ul class="list_of_contents">
+           <li><strong>Getting started</strong></li>
+           <li><a href="#what">What is ScraperWiki?</a></li>
+           <li><a href="#who">Who is ScraperWiki for?</a></li>
+           <li><strong>Technical questions</strong></li>
+           <li><a href="#browser">What browsers does this work in?</a></li>
+           <li><a href="#languages">What programming languages can I use to write scrapers?</a></li>
+           <li><a href="#how">How do I write a screen scraper?</a></li>
+           <li><a href="#running">How do I run my scraper?</a></li>
+           <li><a href="#editing">Who can edit a scraper?</a></li>
+           <li><a href="#data">How can I get data out of ScraperWiki?</a></li>
+           <li><a href="#errors">What happens if my scraper breaks?</a></li>
+           <li><strong>Licensing questions</strong></li>
+           <li><a href="#licence">Who owns the code I write on ScraperWiki?</a></li>                                        
+           <li><a href="#data_ownership">Who owns the data in ScraperWiki?</a></li>                                
+           <li><a href="#data_types">What sort of data can/can't I scrape?</a></li>   
+           <li><a href="#source_code">Can I get a copy of the ScraperWiki source code?</a></li>
+           <li><strong>Everything else</strong></li>                                     
+           <li><a href="#security">How secure is your system? Can I try to break it?</a></li>
+           <li><a href="#contact">How do I get in touch with you?</a></li>
+       </ul>
+
+       <dl class="faq">
+           <dt id="what">What is ScraperWiki?</dt>
+
+           <dd>
+               <p>ScraperWiki is a platform for writing and scheduling <a href="http://en.wikipedia.org/wiki/Data_scraping">screen scrapers</a>, and for storing the data they generate. There's lots of useful data locked away on the internet and we want to open it up!
+               </p>
+
+               <p>If you need a parallel, <a href="http://www.dracos.co.uk/play/great-ideas-generator/">and every self respecting website does</a>, then it's like GitHub, except with an execute button and a database behind it.
+               </p>
+           </dd>
+           <dt id="who">Who is ScraperWiki for?<dt>
+
+           <dd>
+               <p>ScraperWiki is useful both for programmers who want to write screen scrapers with less fuss, and for journalists, activists and the general public who want to discover and re-use interesting, useful data.
+               </p>
+           </dd>
+
+           <dt id="browsers">What browsers does this work in?</dt>
+
+           <dd>
+               <p>
+               As we are still in beta mode, we don't have the resources to keep it working in all browsers.  
+               Internet Explorer does not work when you try to run the code, but Google Chrome is able to work everywhere.  
+               There are issues with some of the older versions of FireFox.
+               </p>
+               <p>
+               To reiterate, the code executes on our servers.  It does not run in your browser 
+               in any kind of special plug-in.  What you see is pure HTML and Javascript.  
+               The technical difficulties are in finding the right settings that allow the streaming of data 
+               to the console window to work.
+               </p>
+           </dd>
+
+           <dt id="languages">What programming languages can I use to write scrapers?</dt>
+
+           <dd>
+               <p>
+               We support Python, PHP and Ruby at the moment, but will be adding more languages soon on the basis of who <a href="/contact/">shouts loudest</a>.
+               </p>
+           </dd>
+
+           <dt id="how">How do I write a screen scraper?</dt>
+          <dd>
+           
+           <p>See our <a href="{% url help 'tutorials' language %}">tutorials</a> and <a href="{% url help 'documentation' language %}">documentation</a>.</p>
+           </dd>
+
+           <dt id="running">How do I run my scraper?</dt>
+
+           <dd>
+               <p>
+                         At the moment the published version of each scraper in ScraperWiki is run once a day by our scheduler. We are adding extra controls so you can set how often your scraper needs to run. So if you know a web page only gets updated once a month on a Tuesday, you can set it to run then.
+               </p>
+           </dd>
+           <dt id="editing">Who can edit a scraper?</dt>
+
+           <dd>
+                               <p>At the moment anyone can edit anyone else's scraper; this means other people can help extend or fix your code. We are adding email alerts so you'll know when your scraper is edited and by whom. Eventually you will have the option to keep scrapers private. If you are interested in this, please <a href="/contact/">get in touch</a>. 
+               </p>
+
+           </dd>
+
+           <dt id="data">How can I get data out of ScraperWiki?</dt>
+
+           <dd>
+               <p>The simplest way is to download a CSV file from the link on the scraper page, or you can <a href="{% url api:index %}">use the API</a>.
+               </p>
+           </dd>
+
+
+           <dt id="errors">What happens if my scraper breaks?</dt>
+
+           <dd>
+             <p>We will send you an 
+              <a href="http://blog.scraperwiki.com/2011/01/31/be-alert-your-scrapers-need-lerts/">email alert</a> to warn you if your scraper breaks.
+               </p>
+           </dd>
+
+
+           <dt id="licence">Who owns the code I write on ScraperWiki?</dt>
+
+           <dd>
+               <p>All scraping code hosted on ScraperWiki is licensed under the <a href="http://www.gnu.org/licenses/gpl-3.0.txt">GNU General Public License</a>. By adding your scraper to ScraperWiki you are releasing it under the same licence. For more information please see our <a href="/terms_and_conditions/">terms and conditions</a>.
+               </p>
+           </dd>
+
+           <dt id="data_ownership">Who owns the data in ScraperWiki?</dt>
+
+           <dd>
+              <p>It depends where the data originally came from and how it was derived. When you create a scraper, you are asked to declare the source and licence of the data being scraped.</p>
+           </dd>
+
+           <dt id="data_types">What sort of data can/can't I scrape?</dt>
+
+           <dd>
+                <p>The focus of ScraperWiki is opening up public data. You need to make sure that you conform to our <a href="/terms_and_conditions/">terms and conditions</a>. In short: play nice, and don't do to someone else's website what you wouldn't like done to your own.
+               </p>
+           </dd>
+
+           <dt id="source_code">Can I get a copy of the ScraperWiki source code?</dt>
+
+           <dd>
+               <p>Yes, the source code for the ScraperWiki site is available under the GNU Affero General Public License. You can 
+               <a href="https://bitbucket.org/ScraperWiki/scraperwiki">download the source here</a>.</p>
+           </dd>
+
+           <dt id="security">How secure is your system? Can I try to break it?</dt>
+
+           <dd>
+               <p>The code you write runs in a separate sandboxed system with controlled resources. 
+            If you try to write malicious code (<code>while True:</code>, that kind of thing) you'll just be breaking your own scraper and annoying people, so please don't.
+               </p>
+           </dd>
+
+           <dt id="contact">How do I get in touch with you?</dt>
+
+           <dd>
+               <p>We'd really like to hear your ideas for improving and adding to ScraperWiki. You can contact us <a href="/contact/">here</a> or ask a question on our <a href="http://groups.google.com/group/scraperwiki">email list</a>.
+               </p>
+           </dd>
+
+       </dl>
+   </div>
