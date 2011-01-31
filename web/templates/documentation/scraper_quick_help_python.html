@@ -19,15 +19,6 @@
             </code>
         </dd>
     </dl>
-    <h4>How do I save that data to the datastore?</h4>
-    <dl class="functiondocs">
-        <dd>
-            <code>
-            for td in soup.findAll('td'):<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;scraperwiki.datastore.save(unique_keys=['table_cell'], data={'table_cell':td.string})
-            </code>
-        </dd>
-    </dl>
     <h4>How do I geocode data?</h4>
     <dl class="functiondocs">
       <dd>
@@ -37,4 +28,16 @@
               print lat_lng
           </code>
       </dd>
+    </dl>
+    <h4>How do I save my data to the datastore?</h4>
+    <dl class="functiondocs">
+        <dd>
+            <code>
+            for td in soup.findAll('td'):<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;data = {'table_cell': td.string} # save data in dictionary<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;# Choose unique keyname, add optional date/latlng fields<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;scraperwiki.datastore.save(unique_keys=['table_cell'], data, <br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; date="2009-03-02", latlng=lat_lng)
+            </code>
+        </dd>
     </dl>
