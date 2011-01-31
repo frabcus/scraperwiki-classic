@@ -85,8 +85,8 @@ class Solicitation(models.Model):
         self.save()
 
         #copy over tags, description
-        for tag in tagging.models.Tag.objects.get_for_object(self):
-            tagging.models.Tag.objects.add_tag(self.scraper, tag.name)
+        tags_text = ", ".join([tag.name for tag in tagging.models.Tag.objects.get_for_object(self)])
+        self.scraper.tags = tags_text
 
         if not self.scraper.description or self.scraper.description == '':
             self.scraper.description = self.details

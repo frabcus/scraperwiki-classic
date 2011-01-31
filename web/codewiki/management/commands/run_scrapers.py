@@ -200,7 +200,7 @@ def getemailtext(event):
     
     msubject = re.search("(?:^|\n)EMAILSUBJECT:(.*)", message)
     if msubject:
-        subject = msubject.group(2)    # snip out the subject
+        subject = msubject.group(1)    # snip out the subject
         message = "%s%s" % (message[:msubject.start(0)], message[msubject.end(0):])
     else:
         subject = 'Your ScraperWiki Email - %s' % event.scraper.short_name

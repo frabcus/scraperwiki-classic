@@ -12,7 +12,6 @@ class TestScrapers(SeleniumTest):
     Create
     Run
     Check
-    "/scrapers/short_name/
     """
     def _load_data(self, type='python', obj='scraper'):
         thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_%s.txt' % (type, obj,))
