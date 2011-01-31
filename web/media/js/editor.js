@@ -550,7 +550,7 @@ $(document).ready(function() {
         var lreceiverecordqueue = [ ]; 
         for (var i = 0; i < receiverecordqueue.length; i++) {
             jdata = receiverecordqueue[i]; 
-            if ((jdata.message_type != "data") && (jdata.message_type != "console"))
+            if ((jdata.message_type != "data") && (jdata.message_type != "console") && (jdata.message_type != "sqlitecall"))
                 lreceiverecordqueue.push(jdata); 
         }
         if (receiverecordqueue.length != lreceiverecordqueue.length) {
@@ -606,6 +606,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
               makeSelection(data.selrange); // do it anyway
           } else if (data.message_type == "data") {
               writeToData(data.content);
+          } else if (data.message_type == "sqlitecall") {
+              writeToSqliteData(data.command, data.val1, data.lval2);
           } else if (data.message_type == "exception") {
               writeExceptionDump(data.exceptiondescription, data.stackdump, data.blockedurl, data.blockedurlquoted); 
           } else if (data.message_type == "executionstatus") {
@@ -1558,11 +1560,26 @@ writeToChat("Saved rev number: " + res.rev);
             oRow.append(oCell);
         });
 
-        
         $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
-
         setTabScrollPosition('data', 'bottom'); 
+        $('.editor_output div.tabs li.data').addClass('new');
+    }
 
+    function writeToSqliteData(command, val1, lval2) 
+    {
+        while ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) 
+            $('#output_data table.output_content tbody').children(':first').remove();
+
+        var row = [ ]; 
+        row.push('<tr><td><b>'+cgiescape(command)+'</b></td>'); 
+        if (val1)
+            row.push('<td>'+cgiescape(val1)+'</td>'); 
+        for (var i = 0; i < lval2.length; i++)
+            row.push('<td>'+cgiescape(lval2[i])+'</td>'); 
+        row.push('</tr>'); 
+
+        $('#output_data table.output_content').append($(row.join("")));  
+        setTabScrollPosition('data', 'bottom'); 
         $('.editor_output div.tabs li.data').addClass('new');
     }
 

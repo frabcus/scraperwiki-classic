@@ -19,7 +19,7 @@ class UserProfileForm(forms.ModelForm):
         super(UserProfileForm, self).__init__(*args, **kwargs)
 
         self.user = self.instance.user
-        self.emailer = Scraper.objects.emailer_for_user(self.user)
+        self.emailer = Scraper.objects.get_emailer_for_user(self.user)
 
         if self.emailer:
             self.fields['alert_frequency'].initial = self.emailer.run_interval

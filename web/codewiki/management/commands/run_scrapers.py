@@ -128,6 +128,10 @@ def runmessageloop(runner, event, approxlenoutputlimit):
         elif message_type == "data":
             event.records_produced += 1
         
+        elif message_type == "sqlitecall":
+            if data.get('insert'):
+                event.records_produced += 1
+        
         elif message_type == "exception":   # only one of these ever
             event.exception_message = data.get('exceptiondescription')
             
@@ -196,7 +200,7 @@ def getemailtext(event):
     
     msubject = re.search("(?:^|\n)EMAILSUBJECT:(.*)", message)
     if msubject:
-        subject = msubject.group(2)    # snip out the subject
+        subject = msubject.group(1)    # snip out the subject
         message = "%s%s" % (message[:msubject.start(0)], message[msubject.end(0):])
     else:
         subject = 'Your ScraperWiki Email - %s' % event.scraper.short_name
@@ -212,6 +216,11 @@ class ScraperRunner(threading.Thread):
         self.verbose = verbose 
     
     def run(self):
+        # Check for possible race condition
+        if self.scraper.next_run() >= datetime.datetime.now(): 
+            print "Hold on this scraper isn't overdue!!!! %s" % scraper.short_name
+            return
+        
         guid = self.scraper.guid
         code = self.scraper.saved_code().encode('utf-8')
 
@@ -259,8 +268,8 @@ class ScraperRunner(threading.Thread):
         if emailers.count() > 0:
             subject, message = getemailtext(event)
             if message:  # no email if blank
-                for role in emailers:
-                    send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[role.user.email], fail_silently=True)
+                for user in emailers:
+                    send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[user.email], fail_silently=True)
 
 
 # this is invoked by the crontab with the function
@@ -295,7 +304,7 @@ class Command(BaseCommand):
         
         scrapers = self.get_overdue_scrapers()
 
-        # limit to the first four scrapers
+        # limit to the first n scrapers
         if 'max_concurrent' in options:
             try:
                 scrapers = scrapers[:int(options['max_concurrent'])]
