@@ -19,7 +19,7 @@ syntax: regexp
 ^Scripts$
 ^pip-log.txt$
 ^.hgignore$
-^scraperlibs/scraperwiki/datastore/config.cfg.local$
+^scraperlibs/scraperwiki/datastore/config.cfg$
 ^web/localsettings.py$
 ^web/settings.py$
 ^web/editor/code_runner.py$
@@ -27,4 +27,4 @@ syntax: regexp
 ^web/pip-log.txt$
 ^uml$
 ^web/media/src/scraperwiki.tar.gz
-^ share/doc/urlgrabber$
+^share/doc/urlgrabber-3.1.0/
