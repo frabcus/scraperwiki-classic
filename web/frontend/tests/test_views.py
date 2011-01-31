@@ -51,12 +51,8 @@ class FrontEndViewsTests(TestCase):
         response = self.client.get(reverse('about'))
         self.assertEqual(response.status_code, 200)
 
-    def test_help_code_documentation(self):
-        response = self.client.get(reverse('help_code_documentation'))
-        self.assertEqual(response.status_code, 200)
-
-    def test_help_tutorials(self):
-        response = self.client.get(reverse('help_tutorials'))
+    def test_help(self):
+        response = self.client.get(reverse('help'))
         self.assertEqual(response.status_code, 200)
 
     def test_contact_form(self):
