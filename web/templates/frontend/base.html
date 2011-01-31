@@ -74,7 +74,7 @@
 				        <a href="{% url get_involved %}" title="Get involved">Get involved!</a>
 				    </li>
                     <li>
-			             <a href="{% url help_tutorials %}" title="Help">Help</a>
+			             <a href="{% url help %}" title="Help">Help</a>
 			        </li>
                     {% if user.is_staff %}
   				    <li>
@@ -181,9 +181,9 @@
 		           <dd>
 		             <ul>
 			                 <li><a href="{% url contact_form %}">Contact us</a></li>
-			                 <li><a href="{% url help %}">FAQ</a></li>	
+			                 <li><a href="{% url help 'faq' language %}">FAQ</a></li>	
 			                 <li><a href="{% url whitelist_user %}">Whitelist</a></li>	
-			                 <li><a href="{% url help_code_documentation %}">Code documentation</a></li>			                 
+			                 <li><a href="{% url help 'documentation' language %}">Code documentation</a></li>			                 
 			                 <li><a href="http://groups.google.com/group/scraperwiki">Developers' discussion group</a></li>			                   			                 
 			             </ul>
 		           </dd>

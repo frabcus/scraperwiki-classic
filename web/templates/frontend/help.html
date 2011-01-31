@@ -7,17 +7,19 @@
     </div>
     <div class="content">
     <p>
-        You are reading the help for <strong>Python</strong>: see help for
-         <a href="{% url help 'faq' 'ruby' %}">Ruby</a> or <a href="{% url help 'faq' 'php' %}">PHP</a>.
-        Still stuck? Mail <a href="http://groups.google.com/group/scraperwiki">our developers' list</a>. 
+        You are reading the help for <strong>{{ language.title }}</strong>: see help for
+         {% for other_language in other_languages %}
+         {% if not forloop.first %} or {% endif %}
+         <a href="{% url help mode other_language %}">{{ other_language.title}}</a>{% endfor %}.
+        Still confused? Ask a question on our <a href="http://groups.google.com/group/scraperwiki">developers' list</a>. 
     </p>
 	<div class="page_tabs"> 
         <ul>
             <li{% ifequal mode "libraries" %} class="selected"{% endifequal %}> 
                 <a id="libraries" href="{% url help 'libraries' language %}">Libraries</a> 
             </li>
-            <li{% ifequal mode "reference" %} class="selected"{% endifequal %}> 
-                <a id="reference" href="{% url help 'reference' language %}">Reference</a> 
+            <li{% ifequal mode "documentation" %} class="selected"{% endifequal %}> 
+                <a id="reference" href="{% url help 'documentation' language %}">Documentation</a> 
             </li>
             <li{% ifequal mode "tutorials" %} class="selected"{% endifequal %}> 
                 <a id="tutorials" href="{% url help 'tutorials' language %}">Tutorials</a> 
