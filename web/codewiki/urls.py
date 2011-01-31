@@ -66,8 +66,8 @@ urlpatterns = patterns('',
 
     # call-backs from ajax for reloading and diff
     url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
-    url(r'^editor/raw/(?P<short_name>[\-\w\.]+)$',          viewseditor.raw,    name="raw"),   # raw code not wrapped in javascript
-    url(r'^editor/reload/(?P<short_name>[\-\w\.]+)$',       viewseditor.reload, name="reload"),   
+    url(r'^editor/raw/(?P<short_name>[\-\w\.]+)$',        viewseditor.raw,    name="raw"),   # raw code not wrapped in javascript
+    url(r'^editor/reload/(?P<short_name>[\-\w\.]+)$',     viewseditor.reload, name="reload"),   
     url(r'^proxycached$',                                 views.proxycached,  name="proxycached"), # ?cachedid=1234
     url(r'^editor/quickhelp$',                            viewseditor.quickhelp, name="quickhelp"), # ?language&wiki_type&line&character
 
