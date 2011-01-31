@@ -22,10 +22,7 @@ urlpatterns = patterns('',
     url(r'^about/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/about.html'}, name='about'),
     url(r'^example_data/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/example_data.html'}, name='api'),
     url(r'^help/$',frontend_views.help, name='help'),
-    url(r'^help/(?P<mode>faq|tutorials|reference|libraries)/(?P<language>python|php|ruby)/$',frontend_views.help, name='help'),
-    # TODO: redirect next 2 URLs properly
-    url(r'^help/tutorials/$',frontend_views.tutorials, name='help_tutorials'),
-    url(r'^help/code_documentation/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/code_documentation.html'}, name='help_code_documentation'),
+    url(r'^help/(?P<mode>faq|tutorials|documentation|code_documentation|libraries)/(?P<language>python|php|ruby)/$',frontend_views.help, name='help'),
     url(r'^get_involved/$',frontend_views.get_involved, name='get_involved'),
     
     #hello world

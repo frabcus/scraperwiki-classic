@@ -151,33 +151,31 @@ def login(request):
 
     return render_to_response('registration/extended_login.html', {'registration_form': registration_form, 'login_form': login_form, 'error_messages': error_messages, 'redirect': redirect}, context_instance = RequestContext(request))
 
-def tutorials(request):
-    languages = Scraper.objects.filter(published=True, istutorial=True).values_list('language', flat=True).distinct()
-    tutorials = {}
-    for language in languages:
-        tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
-    
-    languages = View.objects.filter(published=True, istutorial=True).values_list('language', flat=True).distinct()  # might include html
-    viewtutorials = {}
-    for language in languages:
-        viewtutorials[language] = View.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
-    return render_to_response('frontend/tutorials.html', {'tutorials': tutorials, 'viewtutorials': viewtutorials}, context_instance = RequestContext(request))
-
 def help(request, mode=None, language=None):
-    if not mode:
-        mode = "faq"
-        language = "none"
+    tutorials = {}
+    viewtutorials = {}
     if not language:
         language = "python"
-    include_tag = "frontend/help_%s_%s.html" % (mode, language)
+    other_languages = ["php", "python", "ruby"]
+    other_languages.remove(language)
+    if mode=="code_documentation": # Support legacy URL. 
+	    mode="documentation"
+    if not mode or mode=="faq":
+        mode = "faq"
+        include_tag = "frontend/help_faq.html"
+    elif mode=="tutorials":
+        tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
+        viewtutorials[language] = View.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
+        include_tag = "frontend/help_tutorials.html"
+    else: 
+        include_tag = "frontend/help_%s_%s.html" % (mode, language)
     return render_to_response('frontend/help.html', { 'mode' : mode, 'language' : language, \
-             'include_tag' : include_tag }, 
+             'include_tag' : include_tag, 'tutorials': tutorials, 'viewtutorials': viewtutorials, \
+             'other_languages' : other_languages }, 
              context_instance = RequestContext(request))
 
 def browse_wiki_type(request, wiki_type = None, page_number = 1):
-    
     special_filter = request.GET.get('filter', None)
-    
     return browse(request, page_number, wiki_type, special_filter)
 
 def browse(request, page_number = 1, wiki_type = None, special_filter=None):
