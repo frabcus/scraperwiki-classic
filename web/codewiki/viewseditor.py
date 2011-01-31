@@ -160,6 +160,8 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         else:
             scraper = models.Scraper()
 
+        startupcode = blankstartupcode[wiki_type][language]
+
         statuptemplate = request.GET.get('template')
         if statuptemplate:
             try:
@@ -167,8 +169,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
                 startupcode = templatescraper.saved_code()
             except models.Code.DoesNotExist:
                 startupcode = startupcode.replace("Blank", "Missing template for")
-        else:
-            startupcode = blankstartupcode[wiki_type][language]
             
         # replace the phrase: sourcescraper = 'working-example' with sourcescraper = 'replacement-name'
         inputscrapername = request.GET.get('sourcescraper', False)

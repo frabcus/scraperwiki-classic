@@ -204,8 +204,8 @@
         </form>
         <form action="{% url scraper_schedule_scraper scraper.short_name %}" method="post">
             <input type="hidden" name="schedule_scraper" value="1" />
-            <input type="submit" id="btnScheduleScraper" class="danger" value="Schedule this scraper?" />
-            <p>Schedule next</p>
+            <input type="submit" id="btnScheduleScraper" class="" value="Schedule this scraper" />
+            <p>Set scheduler so next run is ASAP</p>
         </form>
     {% else %}
         <p class="infobox">Only the creator of a scraper can delete or reset it.</p>
@@ -216,13 +216,13 @@
 
     <form action="{% url scraper_run_scraper scraper.short_name %}" method="post" class="staff">
         <input type="hidden" name="run_scraper" value="1" />
-        <input type="submit" id="btnRunScraper" class="danger" value="Run this scraper?" />
+        <input type="submit" id="btnRunScraper" class="" value="Run this scraper" />
         <p>Runs this scraper as though from the schedule. (Staff only)</p>
     </form>
 
     <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post" class="staff">
         <input type="hidden" name="screenshoot_scraper" value="1" />
-        <input type="submit" id="btnScreenshootScraper" class="danger" value="Screenshoot this scraper?" />
+        <input type="submit" id="btnScreenshootScraper" class="" value="Screenshoot this scraper" />
         <p>Take a screenshot of this scraper. (Staff only)</p>
     </form>
     {% endif %}
