@@ -14,10 +14,12 @@ statusurl = http://localhost:8000/scrapers/twister/status
 [webproxy]
 host	= 127.0.0.1
 port	= 9002
+cache   = 127.0.0.1:11211
 
 [httpproxy]
 host	= 127.0.0.1
 port	= 9005
+cache   = 127.0.0.1:11211
 
 [httpsproxy]
 host	= 127.0.0.1
