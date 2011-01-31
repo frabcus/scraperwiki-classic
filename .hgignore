@@ -9,6 +9,7 @@ syntax: regexp
 \.installed.cfg
 ^bin$
 ^build$
+^pysqlite-2.6.0$
 ^develop-eggs$
 ^eggs$
 ^include$
@@ -26,3 +27,4 @@ syntax: regexp
 ^web/pip-log.txt$
 ^uml$
 ^web/media/src/scraperwiki.tar.gz
+^ share/doc/urlgrabber$

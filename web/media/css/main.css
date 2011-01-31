@@ -51,7 +51,7 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 .content_footer {font-size:0.9em;color:#808080;}
 .content_footer.right {text-align:right;}
 .content_footer p, .content_footer ul {margin-top:0;}
-
+#help_content { border-top:solid 1px #9f9f9f; background-color: white; z-index: 1000; }
 
 /* intro */
 h1.welcome {background:url(../images/languages.png) no-repeat top right;padding:9px 0;}
@@ -330,7 +330,17 @@ p.report {background:#f8f8a8 url(../images/icons/flag_yellow.png) no-repeat 8px 
 /* Sick */
 p.sick {background:#f3cacb url(../images/icons/eye.png) no-repeat 8px 0.4em;
     font-size:0.8em; border-top:dotted 1px #d5a2a2; border-bottom:dotted 1px #d5a2a2; padding:0.5em 10px 0.5em 30px; margin:0;}
-    
+   
+/* Documentation */
+div.example {
+    margin: 5px 0;
+    padding: 10px;
+    background-color: aliceblue;
+}
+table.example_table {
+    margin-top: 5px;
+}
+
 /* API */
 code.api_call {background:white;display:block;padding:1em;border:dotted 1px #808080; word-wrap: break-word;
     background:#f8f8f8; margin:1em 0; color:#000; font-weight:bold;}
