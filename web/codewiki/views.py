@@ -458,7 +458,10 @@ def generate_csv(dictlist, offset, max_length=None):
     keyset = set()
     for row in dictlist:
         if "latlng" in row:   # split the latlng
-            row["lat"], row["lng"] = row.pop("latlng") 
+            try:
+                row["lat"], row["lng"] = row.pop("latlng") 
+            except:
+                row["lat"], row["lng"] = ("", "")
         row.pop("date_scraped", None) 
         keyset.update(row.keys())
 
