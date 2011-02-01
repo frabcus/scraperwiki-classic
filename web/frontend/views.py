@@ -50,16 +50,16 @@ def frontpage(request, public_profile_field=None):
 
 @login_required
 def dashboard(request):
-	user = request.user
-	owned_scrapers = user.code_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
-	owned_count = len(owned_scrapers) 
-	# needs to be expanded to include scrapers you have edit rights on.
-	contribution_scrapers = user.code_set.filter(usercoderole__role='editor', deleted=False)
-	contribution_count = len(contribution_scrapers)
-	following_scrapers = user.code_set.filter(usercoderole__role='follow', deleted=False)
-	following_count = len(following_scrapers)
+    user = request.user
+    owned_scrapers = user.code_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
+    owned_count = len(owned_scrapers) 
+    # needs to be expanded to include scrapers you have edit rights on.
+    contribution_scrapers = user.code_set.filter(usercoderole__role='editor', deleted=False)
+    contribution_count = len(contribution_scrapers)
+    following_scrapers = user.code_set.filter(usercoderole__role='follow', deleted=False)
+    following_count = len(following_scrapers)
 
-	return render_to_response('frontend/dashboard.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count, }, context_instance = RequestContext(request))
+    return render_to_response('frontend/dashboard.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count, }, context_instance = RequestContext(request))
 
 def profile_detail(request, username):
     
@@ -151,23 +151,31 @@ def login(request):
 
     return render_to_response('registration/extended_login.html', {'registration_form': registration_form, 'login_form': login_form, 'error_messages': error_messages, 'redirect': redirect}, context_instance = RequestContext(request))
 
-def tutorials(request):
-    languages = Scraper.objects.filter(published=True, istutorial=True).values_list('language', flat=True).distinct()
+def help(request, mode=None, language=None):
     tutorials = {}
-    for language in languages:
-        tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
-    
-    languages = View.objects.filter(published=True, istutorial=True).values_list('language', flat=True).distinct()  # might include html
     viewtutorials = {}
-    for language in languages:
+    if not language:
+        language = "python"
+    other_languages = ["php", "python", "ruby"]
+    other_languages.remove(language)
+    if mode=="code_documentation": # Support legacy URL. 
+	    mode="documentation"
+    if not mode or mode=="faq":
+        mode = "faq"
+        include_tag = "frontend/help_faq.html"
+    elif mode=="tutorials":
+        tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
         viewtutorials[language] = View.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
-    return render_to_response('frontend/tutorials.html', {'tutorials': tutorials, 'viewtutorials': viewtutorials}, context_instance = RequestContext(request))
-
+        include_tag = "frontend/help_tutorials.html"
+    else: 
+        include_tag = "frontend/help_%s_%s.html" % (mode, language)
+    return render_to_response('frontend/help.html', { 'mode' : mode, 'language' : language, \
+             'include_tag' : include_tag, 'tutorials': tutorials, 'viewtutorials': viewtutorials, \
+             'other_languages' : other_languages }, 
+             context_instance = RequestContext(request))
 
 def browse_wiki_type(request, wiki_type = None, page_number = 1):
-    
     special_filter = request.GET.get('filter', None)
-    
     return browse(request, page_number, wiki_type, special_filter)
 
 def browse(request, page_number = 1, wiki_type = None, special_filter=None):

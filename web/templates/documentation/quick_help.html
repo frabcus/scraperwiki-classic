@@ -9,9 +9,6 @@
 
 <body>
   <div id="divQuickHelp">
-  <p style="float: right;">
-    <strong>Question not answered here?</strong> <a href="{% url help %}" target="_blank">Help (new window)</a>
-  </p>
   {% if user.is_staff %}
     <p class="staff"> 
       Why not try our patented <a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'general_quickhelp' %}?{{cheatsheetquery}}">cheat sheet technology</a>.</p>
@@ -23,7 +20,7 @@
     {% ifequal language 'ruby'%}Ruby{% endifequal %}
     {% ifequal scraper.language 'python'%}Python{% endifequal %}
     {{wiki_type}}
-    - quick help
+    - quick help (<a href="{% url help %}" target="_blank"><img src="{{ MEDIA_URL }}images/link_go.png" alt="New window" /> more help</a>)
   </h3>
   <br/>
   {% include quick_help_template %}
