@@ -45,7 +45,7 @@ def frontpage(request, public_profile_field=None):
     for tag in tags_sorted:
         tags.append(tag[0])
     
-    data = {'featured_views': featured_views, 'featured_scrapers': featured_scrapers, 'tags': tags}
+    data = {'featured_views': featured_views, 'featured_scrapers': featured_scrapers, 'tags': tags, 'language': 'python'}
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
 
 @login_required
@@ -59,7 +59,7 @@ def dashboard(request):
     following_scrapers = user.code_set.filter(usercoderole__role='follow', deleted=False)
     following_count = len(following_scrapers)
 
-    return render_to_response('frontend/dashboard.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count, }, context_instance = RequestContext(request))
+    return render_to_response('frontend/dashboard.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count,'language':'python' }, context_instance = RequestContext(request))
 
 def profile_detail(request, username):
     
@@ -222,7 +222,7 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
 
     form = SearchForm()
 
-    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, 'special_filter': special_filter}
+    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, 'special_filter': special_filter, 'language': 'python'}
     return render_to_response('frontend/browse.html', dictionary, context_instance=RequestContext(request))
 
 
@@ -311,6 +311,7 @@ def get_involved(request):
             'solicitation_percent': solicitation_percent,
             'scraper_sick_count': scraper_sick_count,
             'scraper_sick_percent': scraper_sick_percent,
+            'language': 'python',
         }
 
         return render_to_response('frontend/get_involved.html', data, context_instance=RequestContext(request))
