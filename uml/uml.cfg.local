@@ -14,14 +14,29 @@ statusurl = http://localhost:8000/scrapers/twister/status
 [webproxy]
 host	= 127.0.0.1
 port	= 9002
+dbhost  = localhost
+user    = scraperwiki
+passwd  = scraperwiki
+db      = scraperwiki_cache
+cache   = 127.0.0.1:11211
 
 [httpproxy]
 host	= 127.0.0.1
-port	= 9005
+port	= 9005 
+dbhost  = localhost
+user    = scraperwiki
+passwd  = scraperwiki
+db      = scraperwiki_cache
+cache   = 127.0.0.1:11211
 
 [httpsproxy]
 host	= 127.0.0.1
 port	= 9006
+dbhost  = localhost 
+user    = scraperwiki
+passwd  = scraperwiki
+db      = scraperwiki_cache
+cache   = 127.0.0.1:11211
 
 [ftpproxy]
 host	= 127.0.0.1
