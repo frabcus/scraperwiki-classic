@@ -181,9 +181,17 @@
 		           <dd>
 		             <ul>
 			                 <li><a href="{% url contact_form %}">Contact us</a></li>
+			{% if language %}
 			                 <li><a href="{% url help 'faq' language %}">FAQ</a></li>	
+			{% else %}
+			                 <li><a href="{% url help 'faq' 'python' %}">FAQ</a></li>				
+			{% endif %}
 			                 <li><a href="{% url whitelist_user %}">Whitelist</a></li>	
+			{% if language %}			
 			                 <li><a href="{% url help 'documentation' language %}">Code documentation</a></li>			                 
+			{% else %}
+			                 <li><a href="{% url help 'documentation' 'python' %}">Code documentation</a></li>			                 			
+			{% endif %}			
 			                 <li><a href="http://groups.google.com/group/scraperwiki">Developers' discussion group</a></li>			                   			                 
 			             </ul>
 		           </dd>
