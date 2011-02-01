@@ -13,7 +13,9 @@ Requirements
 Installation
 ============
 
-The 'root' folder from now on will refer to the root of the mercurial checkout - in other words, the folder containing buildout, web, datastore etc. [In Windows, make sure there are no spaces in the folder names.]
+The 'root' folder from now on will refer to the root of the mercurial checkout
+- in other words, the folder containing buildout, web, datastore etc. [In
+Windows, make sure there are no spaces in the folder names.]
 
 
 1) Set up Virtualenv
@@ -23,7 +25,11 @@ a) From within the root folder, run (note the dot at the end):
 
 > $ virtualenv --no-site-packages .
 
-This will create a new virtualenv with all its folders alongside the scraperwiki code. If virtualenv is not installed, you can download it from http://www.python.org/download or install using macports if you are using OSX. Note: the macports version needs to be called using "> virtualenv2.x  --no-site-packages ."
+This will create a new virtualenv with all its folders alongside the
+scraperwiki code. If virtualenv is not installed, you can download it from
+http://www.python.org/download or install using macports if you are using OSX.
+Note: the macports version needs to be called using "> virtualenv2.x
+--no-site-packages ."
 
 b) Now activate the virtualenv:
 
@@ -31,11 +37,14 @@ b) Now activate the virtualenv:
 
 [[In Windows, type: > Scripts\activate.bat  ]]
 
-Your shell will now show the virtualenv name "> (scraperwiki)$" at the prompt. This indicates the virtualenv is 'active'.  
+Your shell will now show the virtualenv name "> (scraperwiki)$" at the prompt.
+This indicates the virtualenv is 'active'.  
 
-YOU WILL TO DO THIS EACH TIME YOU OPEN A NEW SESSION IN YOUR SHELL. See http://pypi.python.org/pypi/virtualenv for more.
+YOU WILL TO DO THIS EACH TIME YOU OPEN A NEW SESSION IN YOUR SHELL. See
+http://pypi.python.org/pypi/virtualenv for more.
 
-c) Then, get the older version of pip, version 0.6 breaks some old code. Go to [root]\lib\site-packages and remove anything to with pip, then run 
+c) Then, get the older version of pip, version 0.6 breaks some old code. Go to
+[root]/lib/python2.x/site-packages and remove anything to with pip, then run 
 
 > $ easy_install pip==0.5.1
 
@@ -54,19 +63,25 @@ Then run buildout [[except on Windows, see notes below]]:
 
 > $ buildout 
 
-[[ In Windows, this would be, : > "./bin/buildout.exe" - but in fact we need to skip it altogether, so just do "pip install xxx" for each 'install' command in the 'pip' section of buildout.cfg, EXCEPT python-mysql.
-For python-mysql, download MySQL-python-1.2.2.win32-py2.6.exe from http://www.codegood.com/archives/4, install it on your machine, then copy all the python-mysql-related files from C:\Python26\Lib\site-packages or into the lib\site-packages directory of your virtualenv. ]]
+[[ In Windows, this would be, : > "./bin/buildout.exe" - but in fact we need to
+skip it altogether, so just do "pip install xxx" for each 'install' command in
+the 'pip' section of buildout.cfg, EXCEPT python-mysql.  For python-mysql,
+download MySQL-python-1.2.2.win32-py2.6.exe from
+http://www.codegood.com/archives/4, install it on your machine, then copy all
+the python-mysql-related files from C:\Python26\Lib\site-packages or into the
+lib\site-packages directory of your virtualenv. ]]
 
 This will download all the packages needed by scraperwiki.
 
-If you get a weird error something like "setuptools.dist has no 'check_packages' attribute",
-then run this command and then try buildout again:
+If you get a weird error something like "setuptools.dist has no
+'check_packages' attribute", then run this command and then try buildout again:
 
 > $ easy_install -U distribute
 
-Note, sometimes this causes a "SandboxViolation" error, however it's normally 
+Note, sometimes this causes a "SandboxViolation" error, however it's normally
 done what it needs to do before this, so ignore the error and run buildout
 again.
+
 
 3) settings.py
 *******************
@@ -80,7 +95,8 @@ Then edit settings.py to:
 
 a) Add details of your local setup (database etc). Call the database 'scraperwiki'. 
 
-b) Edit HOME_DIR to your scraperwiki home directory. [[In Windows, do use forward slashes in the directory path.]]
+b) Edit HOME_DIR to your scraperwiki home directory. [[In Windows, do use
+forward slashes in the directory path.]]
 
 
 4) Run Django
@@ -96,7 +112,10 @@ Now try running django:
 
 > $ python manage.py runserver
 
-Assuming no errors you should be able to visit http://localhost:8000/ and see the scraperwiki home page. If you do encounter an error that appears to be a problem with imports (Empty Value) then go and run step 7 before coming back here to continue with this step.
+Assuming no errors you should be able to visit http://localhost:8000/ and see
+the scraperwiki home page. If you do encounter an error that appears to be a
+problem with imports (Empty Value) then go and run step 7 before coming back
+here to continue with this step.
 
 You should go to http://localhost:8000/admin and configure the 'sites' section.
 
@@ -112,25 +131,34 @@ cross-site scripting errors relating to the orbited Javascript.
 
 Screen scrapers run inside a virtual machine "firebox" using User Mode Linux (UML).
 
-a) Install twisted and orbited on your machine. e.g. "apt-get install python-twisted", "easy_install orbited"
+a) Install twisted and orbited on your machine. e.g. "apt-get install
+python-twisted", "easy_install orbited"
 
-b) Checkout the separare UML repository. You don't want it in the scraperwiki folder, but in a parallel one.  
+b) Checkout the separare UML repository. You don't want it in the scraperwiki
+folder, but in a parallel one.  
 
 > $ hg clone ssh://scraperwiki@212.84.75.28/UML
 
-c) Copy Server/scripts/runner_config.py.inhg to a version without .inhg and change the paths inside.
+c) Copy Server/scripts/runner_config.py.inhg to a version without .inhg and
+change the paths inside.
 
-d) For development sites, the FireBox subsystem can be run without UML by running the command
+d) For development sites, the FireBox subsystem can be run without UML by
+running the command
 > $ ./runlocal
-It will spawn some magical things in the background. To stop them use killlocal. See UML/LOCAL for more information, including debugging. 
+It will spawn some magical things in the background. To stop them use
+killlocal. See UML/LOCAL for more information, including debugging. 
 
-For live sites, you will need to read UML/HOWTO. XXX It isn't up to date. Please quiz Mike and update it if you do this
+For live sites, you will need to read UML/HOWTO. XXX It isn't up to date.
+Please quiz Mike and update it if you do this
 
-e) In web/localsettings.py set FIREBOX_PATH to the full path of the UML/Server/scripts directory, e.g. '/home/francis/devel/UML/Server/scripts'
+e) In web/localsettings.py set FIREBOX_PATH to the full path of the
+UML/Server/scripts directory, e.g. '/home/francis/devel/UML/Server/scripts'
 
-f) In UML/Server/scripts copy SWConfig.py.in_hg to SWConfig.py and edit it. For now, set "host = None" to disable logging.
-You can make a MySQL database to log into another time. XXX update instructions to explain how to do that when it is
-more stable
+f) In UML/Server/scripts copy SWConfig.py.in_hg to SWConfig.py and edit it. For
+now, set "host = None" to disable logging.
+
+You can make a MySQL database to log into another time. XXX update instructions
+to explain how to do that when it is more stable
 
 
 6) Create the scraper and views Mercurial repositories
@@ -155,11 +183,16 @@ mysql> create database scraperwiki_datastore;
 
 There are two configuration files which need pointing to the database.
 
-a) In web/settings.py, edit the DATASTORE_DATABASE_* entries. This is access for the Django web application, for example for the API to read from the datastore. A read only database user might be enough for this.
+a) In web/settings.py, edit the DATASTORE_DATABASE_* entries. This is access
+for the Django web application, for example for the API to read from the
+datastore. A read only database user might be enough for this.
 
-b) In ./scraperlibs/scraperwiki/datastore, copy config.cfg-inhg to config.cfg.local and edit it. This is the config used by the scrapers to write to the database. You need a user who can read/write to the database.
+b) In ./scraperlibs/scraperwiki/datastore, copy config.cfg-inhg to
+config.cfg.local and edit it. This is the config used by the scrapers to write
+to the database. You need a user who can read/write to the database.
 
-Then change to the dataproxy directory, and use mysql to import the database schema, scheme.sql:
+Then change to the dataproxy directory, and use mysql to import the database
+schema, scheme.sql:
 
 > $ cd uml/dataproxy/
 > $ mysql -u USERNAME -p -h localhost scraperwiki_datastore < scheme.sql
