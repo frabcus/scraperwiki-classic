@@ -199,27 +199,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Code was originally database bound and has been replaced
         with the code below to take the data from the cache
-
-        try :
-            import MySQLdb
-            db      = MySQLdb.connect \
-                    (    host       = config.get (varName, 'dbhost'), 
-                         user       = config.get (varName, 'user'  ), 
-                         passwd     = config.get (varName, 'passwd'),
-                         db         = config.get (varName, 'db'    ),
-                         charset    = 'utf8'
-                    )
-        except :
-            self.sendReply ('Cannot connect to database')
-            return
-
-        cursor = db.cursor()
-        cursor.execute ('select page from httpcache where id = %s', [ id ])
-        try :
-            page = cursor.fetchone()[0]
-        except :
-            self.sendReply ('Page not found')
-            return
         """
 
         # Original code bailed early if we failed to find the data in the 
@@ -455,42 +434,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         # Replaced now with the memcache client above which will fetch from 
         # memcached instead of from the database.
-
-#        db = None
-
-#        try :
-#            import MySQLdb
-#            db      = MySQLdb.connect \
-#                    (    host       = config.get (varName, 'dbhost'), 
-#                         user       = config.get (varName, 'user'  ), 
-#                         passwd     = config.get (varName, 'passwd'),
-#                         db         = config.get (varName, 'db'    ),
-#                         charset    = 'utf8'
-#                    )
-#        except :
-#            pass
-
-        #  See if the page can be retrieved from the database. If so then
-        #  update the last-accessed stamp to now and increment the hit count.
-        #
-#        cursor    = db.cursor()
-#        cursor.execute \
-#            (   '''
-#                select  id,
-#                        page,
-#                        time_to_sec(timediff(now(), stamp))
-#                from    httpcache
-#                where   tag = %s
-#                and     substr(page,1,6) = 'HTTP/1'
-#                order   by id desc
-#                limit   1
-#                ''',
-#                [ ctag ]
-#            )
-#        cached  = cursor.fetchone()
-#        if cached is not None :
-#            cursor  = db.cursor()
-#            cursor.execute ('update httpcache set stamp = now(), hits = hits + 1 where id = %s', [ cached[0] ])
         if cache_client:
             cached = cache_client.get( ctag )
 
@@ -536,41 +479,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                         soc.send (content)
                     fetched  = self.getResponse(soc)
 
-                    print 'X'
-                    print fetched
-                    print 'Y'
                     if cache_client:
                         if self.fetchedDiffers (fetched, cached) :
                             cache_client.set(ctag, fetched)
-
-#                    if db :
-#                        if self.fetchedDiffers (fetched, cached) :
-#                            cursor = db.cursor()
-#                            cursor.execute \
-#                                (   '''
-#                                    insert  into    httpcache
-#                                            (       tag,
-#                                                    url,
-#                                                    page,
-#                                                    hits,
-#                                                    scraperid,
-#                                                    runid
-#                                            )
-#                                    values  ( %s, %s, %s, %s, %s, %s )
-#                                    ''',
-#                                    [   ctag, self.path, fetched[1], 1, scraperID, runID    ]
-#                                )
-#                            def iid (cursor) :
-#                                try    : return cursor.lastrowid
-#                                except : pass
-#                                try    : return cursor.insert_id()
-#                                except : pass
-#                                return None
-#                            fetched[0] = iid(cursor)
-#                            ddiffers   = cached is not None
-#                        else :
-#                            fetched[0] = cached[0]
-
             finally :
                 if soc is not None :
                     soc.close()
