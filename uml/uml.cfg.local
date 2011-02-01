@@ -1,7 +1,7 @@
 [dispatcher]
 host	= 127.0.0.1
 port	= 9000
-umllist	= uml001
+umllist	= ross-desk
 confurl	= allwhite
 path    = ../scraperlibs
 use_queue = False
@@ -47,7 +47,7 @@ user	= scraperlog
 passwd	= scr4p3rl0g
 db	= scraperwiki_log
 
-[ubuntu]
+[ross-desk]
 host	= 127.0.0.1
 tap	= 127.0.0.1
 eth	= 127.0.0.1
