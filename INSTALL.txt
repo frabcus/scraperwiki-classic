@@ -71,6 +71,10 @@ http://www.codegood.com/archives/4, install it on your machine, then copy all
 the python-mysql-related files from C:\Python26\Lib\site-packages or into the
 lib\site-packages directory of your virtualenv. ]]
 
+[[ Francis notes: On Ubuntu 10.04 I had to manually "mkdir downloads"
+before buildout would run properly - without that it downloaded things, but 
+then couldn't find them ]]
+
 This will download all the packages needed by scraperwiki.
 
 If you get a weird error something like "setuptools.dist has no
