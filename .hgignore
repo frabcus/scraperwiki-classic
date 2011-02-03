@@ -4,6 +4,7 @@ syntax: regexp
 \.pyo$
 \.orig$
 \.swp$
+\.swo$
 \.DS_Store
 \.Python
 \.installed.cfg
