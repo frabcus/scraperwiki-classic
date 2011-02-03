@@ -28,3 +28,4 @@ syntax: regexp
 ^uml$
 ^web/media/src/scraperwiki.tar.gz
 ^share/doc/urlgrabber-3.1.0/
+^downloads
