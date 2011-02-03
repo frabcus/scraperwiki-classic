@@ -72,10 +72,7 @@ AUTHENTICATION_BACKENDS = [
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = [
-    SCRAPERWIKI_DIR + 'templates',
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+    join(SCRAPERWIKI_DIR, 'templates'),
 ]
 
 TEMPLATE_CONTEXT_PROCESSORS = [
