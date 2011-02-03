@@ -33,7 +33,8 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-SCRAPERWIKI_DIR = ""
+HOME_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # the parent directory of SCRAPERWIKI_DIR
+SCRAPERWIKI_DIR     = HOME_DIR + '/web/'
 MEDIA_DIR = SCRAPERWIKI_DIR + 'media'
 MEDIA_URL = 'http://media.scraperwiki.com/'
 MEDIA_ADMIN_DIR = SCRAPERWIKI_DIR + '/media-admin'
