@@ -1,48 +1,101 @@
 {% extends "codewiki/scraper_base.html" %}
 {% load humanize %}
+{% load month_name %}
+{% load gravatar %}
 {% block tab %}
 
+<p class="history_bold">Scheduled runs and edits to <span class="history_italic">{{ scraper.title }}</span>.</p>
 
-<table>
-  {% for item in itemlog %}
-  <tr>
-    {% ifequal item.type 'commit' %}
-    <td colspan="2">
-      <a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}" class="historysave"> {{ item.datetime|date:"H:i, j F Y" }}</a>
-      - edited by 
+
+{% regroup itemlog by datetime.year as year_list%}
+{% for year in year_list %}
+
+
+{% regroup year.list by datetime.month as month_list%}
+{% for month in month_list%}
+<div class="history_month">
+{{month.grouper|month_name}} {{year.grouper}}
+
+
+{% for item in month.list %}
+
+{% ifequal item.type 'commit' %}
+
+
+
+
+
+<div class="history_edit">
+      {% show_gravatar item.user 'small' %}
+      Edited by 
       <a href="{% if item.user.username %}{% url profiles_profile_detail item.user.username %}{% endif %}" class="historyuser">
         {% if item.user.get_profile.name %}{{item.user.get_profile.name}}{% else %}{{item.user.username}}{% endif %}
       </a>
       {% ifnotequal item.revcount 1 %}
         {{item.revcount}} times in {{item.durationminutes}} minutes
       {% endifnotequal %}
-    </td>
+<span class="history_date">{{ item.datetime|date:"H:i, j F Y" }}</span>
 
-    {% else %} {# runevent #}
-    <td colspan="2">
-      {# the if run_id is because some of the older entries are blank and haven't been cleared out #}
-      <a href="{% if item.runevents.0.run_id %}{% url run_event item.runevents.0.run_id %}{% else %}{% url run_event item.runevents.0.id %}{% endif %}" class="historyrun">{{item.runevents.0.run_started|date:"H:i, j F Y" }}</a>
-      {% if item.runevent.run_ended %}
-        {% ifequal item.runevents|length 1 %}
-          - ran for {{item.durationseconds}} seconds
-          ({{item.runevent.pages_scraped}} scraped pages, {{item.runevent.records_produced}} records)
-        {% else %}
-          - {{item.runevents|length}} times until <a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% else %}{% url run_event item.runevent.id %}{% endif %}" class="historyrun">{{item.runevent.run_started|date:"j F Y" }}</a>
-          average run of {{item.durationseconds}} seconds 
-        {% endifequal %}
-      {% else %}
-        <b>Still running</b>
-      {% endif %}
+<div class="history_view_changes"><a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}" class=""> View Changes</a></div>
+ </div>
 
+    {% else %} 
+      <div 
       {% if item.runevent.exception_message %}
-        <a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% else %}{% url run_event item.runevent.id %}{% endif %}"><span class="historyexception">{{item.runevent.exception_message}}</span></a>
+        {# error #}
+        class="history_ran_fail">Run failed:
+	<span class="historyexception">{{item.runevent.exception_message}}</span> - ran for {{item.durationseconds}} seconds
+          ({{item.runevent.pages_scraped}} scraped pages, {{item.runevent.records_produced}} records)
+
+      {% else %}
+        {% if item.runevent.run_ended %}
+          {# ran OK #}
+          class="history_ran">Run suceeded:
+   	   {# the if run_id is because some of the older entries are blank and haven't been cleared out #}
+    	  {#<a href="{% if item.runevents.0.run_id %}{% url run_event item.runevents.0.run_id %}{% else %}{% url run_event item.runevents.0.id %}{% endif 		  %}" class="historyrun">{{item.runevents.0.run_started|date:"H:i, j F Y" }}</a>#}
+
+      	  {% ifequal item.runevents|length 1 %}
+            - ran for {{item.durationseconds}} seconds
+            ({{item.runevent.pages_scraped}} scraped pages, {{item.runevent.records_produced}} records)
+          {% else %}
+            - {{item.runevents|length}} times until <a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% else %}{% url run_event item.runevent.id %}{% endif %}" class="historyrun">{{item.runevent.run_started|date:"j F Y" }}</a>
+            average run of {{item.durationseconds}} seconds 
+          {% endifequal %}
+
+        
+	
+	{% else %}
+          {# still running #}
+	  class="history_ran_notfinished">
+          <span class="history_bold">Still running</span>{{item.runevent.run_started|timesince}} ago (<small>{{item.runevent.run_started}}</small>)   
+        {% endif %}
       {% endif %}
-    </td>
+	
+
+	<div class="history_view_details"><a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% else %}{% url run_event 		item.runevent.id %}{% endif %}"> View Details</a></div>
+      </div>
+
+
+
+
+
+
+      
+
+
+
+  
+   
+
   {% endifequal %}
-  </tr>
+
 
   {% endfor %}
-</table>
+{% endfor %}
+{% endfor %}
+
+</div>
+</div>
 
 {% endblock %}
 
