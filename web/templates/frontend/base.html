@@ -52,53 +52,39 @@
 			<p>{{site_message}}</p>
 	    </div>
 
-	    {# Header #}
-	    <div id="divHeader">
-                <div id="divLogo">
-					<p>
-					    <a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a>
-				    </p>
-				</div>
-			<div id="divMenu">
-			    <ul class="main_menu">
-			        <li>
-				        <a href="{% url dashboard %}" title="Manage your scrapers" class="dashboard">Your dashboard</a>
-				    </li>
-				    <li>
-				        <a href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a>
-				    </li>
-				    <li>
-				        <a href="{% url scraper_list %}scrapers" title="Browse all scrapers">Browse scrapers</a>
-				    </li>
-				    <li>
-				        <a href="{% url get_involved %}" title="Get involved">Get involved!</a>
-				    </li>
-                    <li>
-			             <a href="{% url help %}" title="Help">Help</a>
-			        </li>
-                    {% if user.is_staff %}
-  				    <li>
-				        <a href="{% url running_scrapers %}" title="Interact with current UML status" class="staff">UML status</a>
-				    </li>
-                    {% endif %}
-				    <li class="last">
-				        <a href="{% url api:index %}" title="ScraperWiki API">API</a>
-				    </li>
-				</ul>
+    {# Header #}
+    <div id="divHeader">
+       <div id="divLogo">
+          <p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
+       </div>
+       <div id="divMenu">
+          <ul class="main_menu">
+            <li><a href="{% url dashboard %}" title="Manage your scrapers" class="dashboard">Your dashboard</a></li>
+            <li><a href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a></li>
+            <li><a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">New view</a></li>
+            <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers">Browse scrapers</a></li>
+            <li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
+            <li><a href="{% url help %}" title="Help">Help</a></li>
+            {% if user.is_staff %}
+              <li class="staff"><a href="{% url running_scrapers %}" title="Interact with current UML status">UML status</a></li>
+            {% endif %}
+            <li class="last"><a href="{% url api:index %}" title="ScraperWiki API">API</a></li>
+          </ul>
 
-                <form id="divSidebarSearch" action="/search/" method="post">
-                    <input type="text" id="q" name="q"/>
-                    <input type="submit" value="Go" />
-                </form>
-                <ul class="sub_menu">
-                    <li><a href="{% url about %}" title="About ScraperWiki">About ScraperWiki</a></li>
-                    <li><a href="http://blog.scraperwiki.com" title="ScraperWiki Data Blog">Read our blog</a></li>
-                    <li><a href="{% url contact_form %}" title="Feedback form">Feedback</a></li>
-                    <li><a href="http://groups.google.com/group/scraperwiki" title="Google groups">Email list</a></li>
-                    <li><a href="http://twitter.com/scraperwiki" title="Follow us on Twitter">Twitter</a></li>
-                </ul>
-			</div>
-	    </div>
+          <form id="divSidebarSearch" action="/search/" method="post">
+            <input type="text" id="q" name="q"/>
+            <input type="submit" value="Go" />
+          </form>
+
+          <ul class="sub_menu">
+             <li><a href="{% url about %}" title="About ScraperWiki">About ScraperWiki</a></li>
+             <li><a href="http://blog.scraperwiki.com" title="ScraperWiki Data Blog">Read our blog</a></li>
+             <li><a href="{% url contact_form %}" title="Feedback form">Feedback</a></li>
+             <li><a href="http://groups.google.com/group/scraperwiki" title="Google groups">Email list</a></li>
+             <li><a href="http://twitter.com/scraperwiki" title="Follow us on Twitter">Twitter</a></li>
+          </ul>
+        </div>
+     </div>
 
 	    {% block above_page %}{% endblock %}		    
 
