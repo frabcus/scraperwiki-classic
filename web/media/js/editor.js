@@ -269,7 +269,8 @@ $(document).ready(function() {
             autoMatchParens: true,
             width: '100%',
             parserConfig: parserConfig[scraperlanguage],
-            enterMode: "flat", // default is "indent" (which I have found buggy),  also can be "keep"
+            enterMode: "flat",    // default is "indent" (which I have found buggy),  also can be "keep"
+            electricChars: false, // default is on, the auto indent whe { is typed (annoying when doing html)
             reindentOnLoad: false, 
             onChange: function ()  { ChangeInEditor("edit"); },  // (prob impossible to tell difference between actual typing and patch insertions from another window)
             //noScriptCaching: true, // essential when hacking the codemirror libraries
