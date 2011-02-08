@@ -42,8 +42,6 @@ urlpatterns = patterns('',
     # events and monitoring (pehaps should have both wiki_types possible)
     url(r'^scrapers/running_scrapers/$',                  viewsuml.running_scrapers,    name='running_scrapers'),
     
-    url(r'^scrapers/run/(?P<run_id>[\w_\-\.\?]+)/$',      viewsuml.run_event,           name='run_event'),  # the ? is due to the temporary holding value in older objects and should be cleared  out
-    
     url(r'^scrapers/scraper_killrunning/(?P<run_id>[\w_\-\.]+)(?:/(?P<event_id>[\w_\-]+))?$',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),
         
@@ -57,23 +55,28 @@ urlpatterns = patterns('',
                                                           views.scraper_screenshoot_scraper,    name='scraper_screenshoot_scraper'),
         
         #not deprecated as used in by ajax to implement publishScraperButton
-    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/$',    views.scraper_admin,        name='scraper_admin'),
+    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/$',  views.scraper_admin,          name='scraper_admin'),
         
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',  views.scraper_history,  name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/comments/$', views.comments,         name='scraper_comments'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/code/$',     viewseditor.code,       name='scraper_code'),    
+    url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.\?]+)/$',                      viewsuml.run_event,     name='run_event'),  # the ? is due to the temporary holding value in older objects and should be cleared  out
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/tags/$',     views.tags,             name='scraper_tags'),    
         
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$',                 views.choose_template,  name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        
     
         # redirects to new scraper?template=
-    url(r'^editor/template/(?P<short_name>[\-\w\.]+)$',     viewseditor.edittutorial, name="tutorial"),  
+    url(r'^editor/template/(?P<short_name>[\-\w\.]+)$',   viewseditor.edittutorial, name="tutorial"),  
 
-    # call-backs from ajax for reloading and diff
     url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
-    url(r'^editor/raw/(?P<short_name>[\-\w\.]+)$',        viewseditor.raw,    name="raw"),   # raw code not wrapped in javascript
+    
+    # call-backs from ajax for reloading and diff
+    url(r'^editor/raw/(?P<short_name>[\-\w\.]+)$',        viewseditor.raw,    name="raw"),      # raw code not wrapped in javascript
+    url(r'^editor/diffseq/(?P<short_name>[\-\w\.]+)$',    viewseditor.diffseq,name="diffseq"),
+    url(r'^scrapers/run_event_json/(?P<run_id>[\w_\-\.\?]+)/$', viewseditor.run_event_json, name='run_event_json'),  
+    
     url(r'^editor/reload/(?P<short_name>[\-\w\.]+)$',     viewseditor.reload, name="reload"),   
     url(r'^proxycached$',                                 views.proxycached,  name="proxycached"), # ?cachedid=1234
     url(r'^editor/quickhelp$',                            viewseditor.quickhelp, name="quickhelp"), # ?language&wiki_type&line&character

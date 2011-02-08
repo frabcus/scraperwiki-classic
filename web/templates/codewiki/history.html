@@ -1,103 +1,210 @@
 {% extends "codewiki/scraper_base.html" %}
+
 {% load humanize %}
 {% load month_name %}
 {% load gravatar %}
 {% block tab %}
 
+{% block javascript %}
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js"></script>
+
+  {% with scraper.language|lower as language %}
+    {% include 'codewiki/includes/codemirror_parsers.html' %}
+  {% endwith %}
+
+  <script type="text/javascript" src="{{ MEDIA_URL }}js/codeviewer.js?{{settings.REVISION}}"></script>  {# highlightCode(code, Parser), highlightOtherCode(greencode, redcode, matcheropcodes, Parser) #}
+{% endblock %}
+
 <p class="history_bold">Scheduled runs and edits to <span class="history_italic">{{ scraper.title }}</span>.</p>
 
-
-{% regroup itemlog by datetime.year as year_list%}
-{% for year in year_list %}
-
-
-{% regroup year.list by datetime.month as month_list%}
-{% for month in month_list%}
-<div class="history_month">
-{{month.grouper|month_name}} {{year.grouper}}
-
-
-{% for item in month.list %}
-
-{% ifequal item.type 'commit' %}
+<div class="staff">
+  <p><b>comments:</b> I have created the necessary callbacks to make it possible to ajax load the history diffs.  
+  The following are the three links that make the callback possible:
+  <b>To get the code:</b> <input type="text" id="rawcodeurl" value="{% url raw scraper.short_name %}"/>     {# callback url to get code per revision #}
+  <b>To get the patch numbers:</b> <input type="text" id="diffsequrl" value="{% url diffseq scraper.short_name %}"/> {# callback url to get patch per pair of revisions #}
+  <b>To get the runevent:</b> <input type="text" id="run_event_json" value="{% url run_event_json 'XXX' %}"/> {# callback url to get a runevent #}
+  </p>
+  <p><b>To do:</b>  Make the preview types inline their contents cleanly (rolling and unrolling).
+</div>
 
 
+{% regroup itemlog by datetime.year as itemlogyear_list%}
+{% for itemlogyear in itemlogyear_list %}
 
+  {% regroup itemlogyear.list by datetime.month as itemlogmonth_list %}
+  {% for itemlogmonth in itemlogmonth_list %}
 
-
-<div class="history_edit">
-      {% show_gravatar item.user 'small' %}
-      Edited by 
-      <a href="{% if item.user.username %}{% url profiles_profile_detail item.user.username %}{% endif %}" class="historyuser">
-        {% if item.user.get_profile.name %}{{item.user.get_profile.name}}{% else %}{{item.user.username}}{% endif %}
-      </a>
-      {% ifnotequal item.revcount 1 %}
-        {{item.revcount}} times in {{item.durationminutes}} minutes
-      {% endifnotequal %}
-<span class="history_date">{{ item.datetime|date:"H:i, j F Y" }}</span>
-
-<div class="history_view_changes"><a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{item.rev}}" class=""> View Changes</a></div>
- </div>
-
-    {% else %} 
-      <div 
-      {% if item.runevent.exception_message %}
-        {# error #}
-        class="history_ran_fail">Run failed:
-	<span class="historyexception">{{item.runevent.exception_message}}</span> - ran for {{item.durationseconds}} seconds
-          ({{item.runevent.pages_scraped}} scraped pages, {{item.runevent.records_produced}} records)
-
-      {% else %}
-        {% if item.runevent.run_ended %}
-          {# ran OK #}
-          class="history_ran">Run suceeded:
-   	   {# the if run_id is because some of the older entries are blank and haven't been cleared out #}
-    	  {#<a href="{% if item.runevents.0.run_id %}{% url run_event item.runevents.0.run_id %}{% else %}{% url run_event item.runevents.0.id %}{% endif 		  %}" class="historyrun">{{item.runevents.0.run_started|date:"H:i, j F Y" }}</a>#}
-
-      	  {% ifequal item.runevents|length 1 %}
-            - ran for {{item.durationseconds}} seconds
-            ({{item.runevent.pages_scraped}} scraped pages, {{item.runevent.records_produced}} records)
-          {% else %}
-            - {{item.runevents|length}} times until <a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% else %}{% url run_event item.runevent.id %}{% endif %}" class="historyrun">{{item.runevent.run_started|date:"j F Y" }}</a>
-            average run of {{item.durationseconds}} seconds 
-          {% endifequal %}
-
-        
-	
-	{% else %}
-          {# still running #}
-	  class="history_ran_notfinished">
-          <span class="history_bold">Still running</span>{{item.runevent.run_started|timesince}} ago (<small>{{item.runevent.run_started}}</small>)   
-        {% endif %}
-      {% endif %}
-	
-
-	<div class="history_view_details"><a href="{% if item.runevent.run_id %}{% url run_event item.runevent.run_id %}{% else %}{% url run_event 		item.runevent.id %}{% endif %}"> View Details</a></div>
-      </div>
-
-
-
-
-
-
-      
-
-
-
+    <div class="history_month">
+    <b>{{itemlogmonth.grouper|month_name}} {{itemlogyear.grouper}}</b>
   
-   
+    {% regroup itemlogmonth.list by groupkey as itemloggroup_list %}
+    {% for itemloggroup in itemloggroup_list %}
 
-  {% endifequal %}
+      {% with itemloggroup.list|first as itemfirst %}
+      {% with itemloggroup.list|last as itemlast %}
+
+      {% ifequal itemfirst.type 'commit' %}
+        <div class="history_edit">
+          {% show_gravatar itemfirst.user 'small' %} 
+          Edited by 
+          <a href="{% if item.user.username %}{% url profiles_profile_detail itemfirst.user.username %}{% endif %}" class="historyuser">
+            {% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
+          </a>
+          {% ifnotequal itemloggroup.list|length 1 %}
+            {{itemloggroup.list|length}} times
+          {% endifnotequal %}
+          <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
+
+          <div class="history_view_changes">
+            <span class="aprev staff"><u>PreviewChanges</u>
+              <span class="rev">{{itemfirst.rev}}</span>|<span class="firstrev">{{itemlast.rev}}</span>|<span class="prevrev">{{itemlast.prevrev}}</span>
+            </span>
+            <small><a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{itemfirst.rev}}&otherrev={{itemfirst.prevrev}}" class="">View Changes</a></small>
+          </div>
+        </div>
+
+      {% else %} 
+        {% if itemfirst.runevent.exception_message %}
+          <div class="history_ran_fail">Run failed:
+          <span class="historyexception">{{itemfirst.runevent.exception_message}}</span> - ran for {{itemfirst.durationseconds}} seconds
+              ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
+
+        {% else %}
+          {% if itemfirst.runevent.run_ended %}
+            <div class="history_ran">Run suceeded:
+
+            - ran {{itemloggroup|length}} times, most recently for {{itemfirst.durationseconds}} seconds
+            ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
+            <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
+
+          {% else %}
+            <div class="history_ran_notfinished">
+            <span class="history_bold">Still running</span>{{itemfirst.runevent.run_started|timesince}} ago (<small>{{itemfirst.runevent.run_started}}</small>)
+          {% endif %}
+        {% endif %}
+
+          <div class="history_view_details">
+            <span class="arunevent staff"><u>PreviewRunevent</u>
+              <span class="runid">{% if itemfirst.runevent.run_id %}{{itemfirst.runevent.run_id}}{% else %}{{itemfirst.runevent.id}}{% endif %}</span>
+            </span>
+            <a href="{% if itemfirst.runevent.run_id %}{% url run_event itemfirst.runevent.run_id %}{% else %}{% url run_event itemfirst.runevent.id %}{% endif %}">View Details</a>
+          </div>
+        </div>
+
+      {% endifequal %}
+
+      {% endwith %}
+      {% endwith %}
+    {% endfor %} {# group #}
+    </div> {# history_month #}
+  {% endfor %} {# month #}
+{% endfor %} {# year #}
 
 
-  {% endfor %}
-{% endfor %}
-{% endfor %}
+<div class="staff">
+<h2 id="cprev">Code previewer, rev:<span class="rev"></span>, prevrev:<span class="prevrev"></span></h2>
+<ul class="code_about">
+    <li><a id="aHideEquals" class="edit">[hide equal lines]</a></li>
+    <li><a id="aShowEquals" class="edit">[show equal lines]</a></li>
+</ul>
+<div id="codepreviewer"> 
+  <div id="otherlinenumbers"></div> 
+  <div id="linenumbers"></div> 
+  <pre id="output"></pre> 
+</div>
+
+<h2>Run previewer</h2>
+<pre id="runpreview" style="background:#ccf"></pre>
 
 </div>
-</div>
+
 
 {% endblock %}
 
-{% block run_script %}
+
+{% block run_script_outer %}
+<script type="text/javascript" defer="defer">
+var coderevisions = { };                 {# code for different versions #}
+function fetchrevision(rev, callback)
+{
+    if (rev && coderevisions[rev] == undefined)
+    {
+        $.ajax({url:$("#rawcodeurl").val()+"?rev="+rev, success: function(sdata) 
+        {
+            coderevisions[rev] = sdata; 
+            callback(); 
+        }}); 
+    }
+    else
+        callback(); 
+}
+
+function previewchanges()
+{
+    $("#otherlinenumbers").text(""); 
+    $("#linenumbers").text(""); 
+    $("#output").text(""); 
+
+    var rev = $(this).find("span.rev").text();  
+    var prevrev = $(this).find("span.prevrev").text();  
+    fetchrevision(rev, function() { fetchrevision(prevrev, function() 
+    {
+        $("h2#cprev span.rev").text(rev); 
+        $("h2#cprev span.prevrev").text(prevrev); 
+
+        if (prevrev)
+        {
+            $.ajax({url:$("#diffsequrl").val()+"?rev="+rev+"&otherrev="+prevrev, success: function(sdata) 
+            {
+                var matcheropcodes = $.evalJSON(sdata); // [ ("replace|delete|insert|equal", i1, i2, j1, j2) ]
+                var fequallines = highlightOtherCode(coderevisions[rev], coderevisions[prevrev], matcheropcodes, Parser, "codepreviewer"); 
+                $(".code_about").show(); 
+                $(".code_about a#aShowEquals").hide(); 
+                if (fequallines < 5)
+                {
+                    $(".code_about a#aShowEquals").show();
+                    $(".code_about a#aHideEquals").hide();
+                }
+                else
+                    $(".code_about a#aHideEquals").click();
+            }}); 
+        }
+        else
+        {
+            $(".code_about").hide(); 
+            highlightCode(coderevisions[rev], Parser, "codepreviewer"); 
+        }
+    })}); 
+}
+
+function previewrunevent()
+{
+    var runid = $(this).find("span.runid").text();  
+    $.ajax({url:$("#run_event_json").val().replace('XXX', runid), success: function(sdata) 
+    {  
+        var data = $.evalJSON(sdata); 
+        $("pre#runpreview").text(data.output); 
+    }}); 
+}
+
+$(document).ready(function() 
+{ 
+    $(".aprev").click(previewchanges); 
+    $(".arunevent").click(previewrunevent); 
+    $(".code_about").hide(); 
+
+    $("a#aHideEquals").click(function() 
+    {
+        $('#codepreviewer .fequal').hide(); 
+        $(".code_about a#aHideEquals").hide(); 
+        $(".code_about a#aShowEquals").show(); 
+    }); 
+    $("a#aShowEquals").click(function() 
+    {
+        $(".code_about a#aHideEquals").show(); 
+        $(".code_about a#aShowEquals").hide(); 
+        $('#codepreviewer .fequal').show(); 
+    }); 
+}); 
+</script>
 {% endblock %}

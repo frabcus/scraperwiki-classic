@@ -42,6 +42,7 @@ def run_event(request, run_id):
     return render_to_response('codewiki/run_event.html', context, context_instance=RequestContext(request))
 
 
+
 def running_scrapers(request):
     user = request.user
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:10]  

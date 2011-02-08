@@ -188,8 +188,9 @@
 		{% endblock %}
 		
 <script type="text/javascript" defer="defer">
-    {% block run_script %}{% endblock %}
+  {% block run_script %}{% endblock %}
 </script>
+  {% block run_script_outer %}{% endblock %} {# allows us to use script tag and get syntax highlighting in the editor #}
 
         {% if not debug %}
             <script type="text/javascript">

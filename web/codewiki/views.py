@@ -357,22 +357,19 @@ def scraper_history(request, wiki_type, short_name):
     dictionary = { 'selected_tab': 'history', 'scraper': scraper, "user":user }
     
     itemlog = [ ]
-    
     for commitentry in scraper.get_commit_log():
         try:    user = User.objects.get(pk=int(commitentry["userid"]))
         except: user = None
         
         item = {"type":"commit", "rev":commitentry['rev'], "datetime":commitentry["date"], "user":user}
         item['earliesteditor'] = commitentry['description'].split('|||')
-        item["users"] = set([item["user"]])
-        item["firstrev"] = item["rev"]
-        item["firstdatetime"] = item["datetime"]
-        item["revcount"] = 1
+        if itemlog:
+            item["prevrev"] = itemlog[-1]["rev"]
+        item["groupkey"] = "commit|||"+ str(item['earliesteditor'])
         itemlog.append(item)
-    
     itemlog.reverse()
     
-    # now obtain the run-events and zip together
+    # now obtain the run-events and sort together
     if scraper.wiki_type == 'scraper':
         runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started')
         for runevent in runevents:
@@ -381,39 +378,12 @@ def scraper_history(request, wiki_type, short_name):
                 runduration = runevent.run_ended - runevent.run_started
                 item["runduration"] = runduration
                 item["durationseconds"] = "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
-            item["runevents"] = [ runevent ]
+            item["groupkey"] = "runevent|||"+ str(runevent.exception_message)
             itemlog.append(item)
         
         itemlog.sort(key=lambda x: x["datetime"], reverse=True)
     
-    # aggregate the history list
-    aitemlog = [ ]
-    previtem = None
-    for item in itemlog:
-        if previtem and item["type"] == "commit" and previtem["type"] == "commit" and \
-                                        item["earliesteditor"] == previtem["earliesteditor"]:
-            previtem["users"].add(item["user"])
-            previtem["firstrev"] = item["rev"]
-            previtem["firstdatetime"] = item["datetime"]
-            previtem["revcount"] += 1
-            timeduration = previtem["datetime"] - item["datetime"]
-            previtem["durationminutes"] = "%.0f" % (timeduration.days*24*60 + timeduration.seconds/60.0)
-
-        elif len(aitemlog) >= 3 and aitemlog[-2]["type"] == "runevent" and item["type"] == "runevent" and previtem["type"] == "runevent" and aitemlog[-3]["type"] == "runevent" and \
-                        aitemlog[-2]["runevent"].run_ended and previtem["runevent"].run_ended and \
-                        bool(previtem["runevent"].exception_message) == bool(aitemlog[-2]["runevent"].exception_message):
-            aitemlog[-2]["runevents"].insert(0, previtem["runevent"])
-            aitemlog[-2]["runduration"] += previtem["runduration"]
-            runduration = aitemlog[-2]["runduration"] / len(aitemlog[-2]["runevents"])  # average
-            aitemlog[-2]["durationseconds"] = "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
-            aitemlog[-1] = item
-            previtem = item
-            
-        else:
-            aitemlog.append(item)
-            previtem = item
-    
-    dictionary["itemlog"] = aitemlog
+    dictionary["itemlog"] = itemlog
     dictionary["filestatus"] = scraper.get_file_status()
     
     return render_to_response('codewiki/history.html', dictionary, context_instance=RequestContext(request))

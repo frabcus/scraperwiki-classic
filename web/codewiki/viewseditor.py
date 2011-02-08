@@ -8,16 +8,18 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 from codewiki import models
+
 import vc
 
 import difflib
 import re
 import urllib
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+try:                 import json
+except ImportError:  import simplejson as json
+
+from codewiki.management.commands.run_scrapers import GetDispatcherStatus
+
 
 # kick this function out to the model module so it can be used elsewhere
 def get_code_object_or_notfoundresponse(short_name, request):
@@ -31,6 +33,55 @@ def get_code_object_or_notfoundresponse(short_name, request):
     if not codeobject.published and not request.user.is_authenticated():
         return HttpResponseNotFound(render_to_string('404.html', {'heading': 'Access denied', 'body': "Sorry, this scraper is not public"}, context_instance=RequestContext(request)))
     return codeobject
+
+
+
+def raw(request, short_name):
+    scraper = get_code_object_or_notfoundresponse(short_name, request)
+    if isinstance(scraper, HttpResponseNotFound):
+        return scraper
+    try: rev = int(request.GET.get('rev', '-1'))
+    except ValueError: rev = -1
+    code = scraper.get_vcs_status(rev)["code"]
+    return HttpResponse(code, mimetype="text/plain")
+
+
+def diffseq(request, short_name):
+    scraper = get_code_object_or_notfoundresponse(short_name, request)
+    if isinstance(scraper, HttpResponseNotFound):
+        return scraper
+    try: rev = int(request.GET.get('rev', '-1'))
+    except ValueError: rev = -1
+    try: otherrev = int(request.GET.get('otherrev', '-1'))
+    except ValueError: otherrev = None
+
+    code = scraper.get_vcs_status(rev)["code"]
+    othercode = scraper.get_vcs_status(otherrev)["code"]
+
+    sqm = difflib.SequenceMatcher(None, code.splitlines(), othercode.splitlines())
+    result = sqm.get_opcodes()  # [ ("replace|delete|insert|equal", i1, i2, j1, j2) ]
+    return HttpResponse(json.dumps(result))
+
+def run_event_json(request, run_id):
+    user = request.user
+    if re.match('\d+$', run_id):
+        event = get_object_or_404(models.ScraperRunEvent, id=run_id)  
+    else:
+        event = get_object_or_404(models.ScraperRunEvent, run_id=run_id)
+    
+    result = { 'records_produced':event.records_produced, 'pages_scraped':event.pages_scraped, "output":event.output, 
+             'first_url_scraped':event.first_url_scraped, 'exception_message':event.exception_message }
+    if event.run_started:
+        result['run_started'] = event.run_started.isoformat()
+    if event.run_ended:
+        result['run_ended'] = event.run_ended.isoformat()
+    
+    statusscrapers = GetDispatcherStatus()
+    for status in statusscrapers:
+        if status['runID'] == event.run_id:
+            result['dispatcherstatus'] = status
+    
+    return HttpResponse(json.dumps(result))
 
 
 # preview of the code diffed
@@ -80,11 +131,6 @@ def code(request, wiki_type, short_name):
     return render_to_response('codewiki/code.html', context, context_instance=RequestContext(request))
 
 
-def raw(request, short_name=None):
-    scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponseNotFound):
-        return scraper
-    return HttpResponse(scraper.saved_code(), mimetype="text/plain")
 
 def reload(request, short_name):
     scraper = get_code_object_or_notfoundresponse(short_name, request)
