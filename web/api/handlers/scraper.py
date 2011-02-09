@@ -5,6 +5,7 @@ from api.handlers.api_base import APIBase
 from tagging.models import Tag
 from piston.utils import rc
 from codewiki import vc
+from codewiki.managers.datastore import DataStore
 
 
 class GetInfo(APIBase):
@@ -51,7 +52,12 @@ class GetInfo(APIBase):
         info['wiki_type']   = scraper.wiki_type
         if scraper.wiki_type == 'scraper':
             info['license']     = scraper.scraper.license
-            info['records']     = scraper.scraper.record_count
+            info['records']     = scraper.scraper.record_count  # old style datastore
+            
+            dataproxy = DataStore(scraper.guid, scraper.short_name)
+            sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", 0, None))
+            if sqlitedata and type(sqlitedata) not in [str, unicode]:
+                info['datasummary'] = sqlitedata
         
         if 'userroles' not in quietfields:
             info['userroles']   = { }
@@ -128,9 +134,6 @@ class GetRunInfo(APIBase):
                 error_response.write(": Run object not found")
                 return error_response
 
-            
-            
-            
         info = { "runid":runevent.run_id, "run_started":runevent.run_started, 
                  "records_produced":runevent.records_produced, "pages_scraped":runevent.pages_scraped, 
                }

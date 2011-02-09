@@ -17,7 +17,7 @@ import random
 from django.conf import settings
 from django.utils.encoding import smart_str
 
-from managers.datastore import  DataStore
+from managers.datastore import DataStore
 
 from codewiki import models
 from api.emitters import CSVEmitter 
@@ -122,10 +122,8 @@ def scraper_overview(request, short_name):
     dataproxy = DataStore(scraper.guid, scraper.short_name)
     sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
     if sqlitedata and type(sqlitedata) not in [str, unicode]:
-        context['sqlitedata'] = sqlitedata
+        context['sqlitedata'] = sqlitedata["tables"]
     
-    #if user.username == 'Julian_Todd':
-    #    return render_to_response('codewiki/scraper_overview_jgt.html', context, context_instance=RequestContext(request))
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
@@ -482,6 +480,7 @@ def export_csv(request, short_name):
     response = HttpResponse(stream_csv(scraper), mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (short_name)
     return response
+
 
 def export_sqlite(request, short_name):
     scraper = get_code_object_or_none(models.Scraper, short_name=short_name)

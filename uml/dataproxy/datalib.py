@@ -368,7 +368,7 @@ class Database :
             qquery .append(", ((acos(sin(%s * pi() / 180) * sin(abs(substr(`items`.`latlng`, 1, 20)) * pi() / 180) + cos(%s * pi() / 180) * cos(abs(substr(`items`.`latlng`, 1, 20)) * pi() / 180) * cos((%s - abs(substr(`items`.`latlng`, 21, 41))) * pi() / 180)) * 180 / pi()) * 60 * 1.1515 * 1.609344) as distance")
             qparams.append(latlng[0])
             qparams.append(latlng[0])
-            qparams.append(latlng[1])                        
+            qparams.append(latlng[1])
 
         qquery .append("from `items`")
 
@@ -587,7 +587,7 @@ class Database :
                     return sqlite3.SQLITE_DENY
             return sqlite3.SQLITE_OK
 
-                # these needs batching (eg in 1Mb chunks)
+                # this needs batching (eg in 1Mb chunks)
         if command == "downloadsqlitefile":
             scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
             scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
@@ -630,17 +630,25 @@ class Database :
                 return "sqlite3.Error: "+str(e)
                 
         if command == "datasummary":
-            result = { }
+            tables = { }
             try:
                 for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
-                    self.m_sqlitedbcursor.execute("select * from `%s` limit ?" % name, ((val1 or 10),))
-                    result[name] = {"sql":sql}
-                    result[name]["rows"] = list(self.m_sqlitedbcursor)
-                    result[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
-                    result[name]["length"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
+                    tables[name] = {"sql":sql}
+                    self.m_sqlitedbcursor.execute("select * from `%s` limit ?" % name, ((val1 == None and 10 or val1),))
+                    if val1 != 0:
+                        tables[name]["rows"] = list(self.m_sqlitedbcursor)
+                    tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
+                    tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                     
             except sqlite3.Error, e:
                 return "sqlite3.Error: "+str(e)
+            
+            result = {"tables":tables}
+            if short_name:
+                scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+                scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+                if os.path.isfile(scrapersqlitefile):
+                    result["filesize"] = os.path.getsize(scrapersqlitefile)
             return result
         
         if command == "attach":

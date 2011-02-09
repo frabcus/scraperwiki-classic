@@ -81,7 +81,6 @@ class CodeManager(models.Manager):
         return dataproxy
 
     def data_search(self, scraper_id, key_values, limit=1000, offset=0):   
-
         proxy   = self.dataproxy(scraper_id)
         rc, arg = proxy.data_search(key_values, limit, offset)
         if not rc :
@@ -94,7 +93,6 @@ class CodeManager(models.Manager):
         return arg
     
          # summary of old datasets (which should be merged in)
-         # should really use keys and data tags everywhere
     def data_summary(self, scraper_id=0, limit=1000, offset=0, start_date=None, end_date=None, latlng=None, column_order=None, private_columns=None):
         allitems = self.data_dictlist(scraper_id, "", "", limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
         return convert_dictlist_to_datalist(allitems, column_order, private_columns)
