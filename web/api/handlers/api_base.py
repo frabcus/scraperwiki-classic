@@ -5,7 +5,6 @@ from piston.utils import rc
 from piston.emitters import Emitter
 from api.models import api_key
 from api.emitters import CSVEmitter, PHPEmitter, GVizEmitter
-from settings import MAX_API_ITEMS, DEFAULT_API_ITEMS
 import datetime
 import sys
 import re
@@ -90,29 +89,7 @@ class APIBase(BaseHandler):
         if not code.published:
             return code, { "status":"unpublished" }
         return code, None
-        
 
-    def get_limit_and_offset(self, request):
-        try:
-            limit = self.clamp_limit(int(request.GET.get('limit')))
-            if limit < 1:
-                limit = DEFAULT_API_ITEMS
-        except:
-            limit = DEFAULT_API_ITEMS
-
-        try:
-            offset = int(request.GET.get('offset'))
-            if offset < 0:
-                offset = 0
-        except:
-            offset = 0
-
-        return limit, offset
-
-    def clamp_limit(self, limit):
-        if limit == 0 or limit > MAX_API_ITEMS:
-            limit = MAX_API_ITEMS
-        return limit
 
     def convert_date(self, date_str):
         if not date_str:

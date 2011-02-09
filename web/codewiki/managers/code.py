@@ -88,20 +88,15 @@ class CodeManager(models.Manager):
             raise Exception(arg)
         return arg
 
-    def data_dictlist(self, scraper_id, limit=1000, offset=0, start_date=None, end_date=None, latlng=None):   
-        '''map from scraper_id and filters to dict representing row record for a particular scraper'''
-
-        proxy   = self.dataproxy(scraper_id)
-        rc, arg = proxy.data_dictlist(limit, offset, start_date, end_date, latlng)
-        if not rc :
-            raise Exception(arg)
+    def data_dictlist(self, scraper_id, short_name, tablename="", limit=1000, offset=0, start_date=None, end_date=None, latlng=None):
+        dataproxy = DataStore(scraper_id, short_name)  
+        rc, arg = dataproxy.data_dictlist(tablename, limit, offset, start_date, end_date, latlng)
         return arg
-
-
     
+         # summary of old datasets (which should be merged in)
+         # should really use keys and data tags everywhere
     def data_summary(self, scraper_id=0, limit=1000, offset=0, start_date=None, end_date=None, latlng=None, column_order=None, private_columns=None):
-        '''single table of all rows for a scraper'''
-        allitems = self.data_dictlist(scraper_id, limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
+        allitems = self.data_dictlist(scraper_id, "", "", limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
         return convert_dictlist_to_datalist(allitems, column_order, private_columns)
 
     

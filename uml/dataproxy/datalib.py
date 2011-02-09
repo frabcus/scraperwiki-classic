@@ -344,8 +344,20 @@ class Database :
         return  [ True, 'Data record inserted' ]
 
 
-    def data_dictlist (self, scraperID, limit, offset, start_date, end_date, latlng) :
-
+    def data_dictlist (self, scraperID, short_name, tablename, limit, offset, start_date, end_date, latlng) :
+        
+        # quick overload to redirect function to sqlite table if necessary
+        if not tablename and short_name:   # decide if we are to use the sqlite table if available
+            cursor = self.execute("select `item_id` from `items` where `scraper_id` = %s limit 1", (scraperID,))
+            if not cursor.fetchall():
+                tablename = "swdata"
+        if tablename:
+            result = self.sqlitecommand(scraperID, "fromfrontend", short_name, "execute", "select * from `%s` limit ? offset ?" % tablename, (limit, offset))
+            if isinstance(result, str):
+                return [False, result]
+            return [True, [ dict(zip(result["keys"], d))  for d in result["data"] ] ]
+                
+            
         qquery  = [ "select `items`.`item_id` as `item_id`" ]
         qparams = []
 
@@ -433,6 +445,7 @@ class Database :
         scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
         if os.path.isfile(scrapersqlitefile):
             deletedscrapersqlitefile = os.path.join(scraperresourcedir, "DELETED-defaultdb.sqlite")
+            shutil.move(scrapersqlitefile, deletedscrapersqlitefile)
             
         return [ True, None ]
 

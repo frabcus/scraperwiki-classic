@@ -460,7 +460,7 @@ def generate_csv(dictlist, offset, max_length=None):
 
 def stream_csv(scraper, step=5000, max_rows=1000000):
     for offset in range(0, max_rows, step):
-        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=step, offset=offset)
+        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=step, offset=offset)
         
         yield generate_csv(dictlist, offset)[0]
         if len(dictlist) != step:
@@ -516,7 +516,7 @@ def export_gdocs_spreadsheet(request, short_name):
     subset_message = 'THIS IS A SUBSET OF THE DATA ONLY. A MAXIMUM OF %s RECORDS CAN BE UPLOADED FROM SCRAPERWIKI. DOWNLOAD THE FULL DATASET AS CSV HERE: %s\n' % (str(row_limit), csv_url)
     
     max_length = settings.GDOCS_UPLOAD_MAX - max(len(truncated_message), len(subset_message))
-    csv_data, truncated = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=row_limit), 0, max_length)
+    csv_data, truncated = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=row_limit), 0, max_length)
 
     if truncated:
         title = title + ' [SUBSET ONLY]'

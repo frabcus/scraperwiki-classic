@@ -2,6 +2,33 @@ from api.handlers.api_base import APIBase
 from web.codewiki.models import Scraper
 import datetime
 from piston.utils import rc
+from settings import MAX_API_ITEMS, DEFAULT_API_ITEMS
+
+    
+
+def requestvalues(request):
+    try:
+        limit = int(request.GET.get('limit', ""))
+    except ValueError:
+        limit = DEFAULT_API_ITEMS
+    
+    if limit < 1:
+        limit = DEFAULT_API_ITEMS
+    if limit > MAX_API_ITEMS:
+        limit = MAX_API_ITEMS
+        
+    try:
+        offset = int(request.GET.get('offset', ""))
+    except ValueError:
+        offset = 0
+    
+    if offset < 0:
+        offset = 0
+
+    tablename = request.GET.get('tablename', "")
+    
+    return limit, offset, tablename
+
 
 
 class Keys(APIBase):
@@ -35,8 +62,7 @@ class Search(APIBase):
         if len(key_values) == 0:
             return rc.BAD_REQUEST
         
-        limit, offset = self.get_limit_and_offset(request)
-        
+        limit, offset, tablename = requestvalues(request)
         
         return Scraper.objects.data_search(scraper_id=scraper.guid, key_values=key_values, limit=limit, offset=offset)
     
@@ -49,8 +75,8 @@ class Data(APIBase):
         if lsm:
             return [lsm]
         
-        limit, offset = self.get_limit_and_offset(request)
-        return Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset)
+        limit, offset, tablename = requestvalues(request)
+        return Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename=tablename, limit=limit, offset=offset)
 
 
 class DataByLocation(APIBase):
@@ -61,7 +87,7 @@ class DataByLocation(APIBase):
         if lsm:
             return [lsm]
         
-        limit, offset = self.get_limit_and_offset(request)
+        limit, offset, tablename = requestvalues(request)
         try:
             latlng = (float(request.GET.get('lat', None)), float(request.GET.get('lng', None)))
         except:
@@ -69,7 +95,7 @@ class DataByLocation(APIBase):
             error_response.write(": Invalid lat/lng format")
             return error_response
 
-        return Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, latlng=latlng)
+        return Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=limit, offset=offset, latlng=latlng)
 
 
 class DataByDate(APIBase):
@@ -80,7 +106,7 @@ class DataByDate(APIBase):
         if lsm:
             return [lsm]
         
-        limit, offset = self.get_limit_and_offset(request)
+        limit, offset, tablename = requestvalues(request)
         start_date = self.convert_date(request.GET.get('start_date', None))
         end_date = self.convert_date(request.GET.get('end_date', None))
 
@@ -89,5 +115,5 @@ class DataByDate(APIBase):
             error_response.write(": Invalid date format")
             return error_response
                 
-        return Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=limit, offset=offset, start_date=start_date, end_date=end_date)
+        return Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=limit, offset=offset, start_date=start_date, end_date=end_date)
 
