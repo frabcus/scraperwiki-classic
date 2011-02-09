@@ -172,8 +172,8 @@ class DataStoreClass :
         if date is not None :
             scraper_data["date"] = date.isoformat()
         if latlng is not None :
-            scraper_data["latlng_lat"] = latlng[0]
-            scraper_data["latlng_lng"] = latlng[1]
+            scraper_data["latlng_lat"] = float(latlng[0])
+            scraper_data["latlng_lng"] = float(latlng[1])
 
         for key in unique_keys:
             if key not in scraper_data:
@@ -185,8 +185,8 @@ class DataStoreClass :
                 return [ False, 'key must not be blank' ]
             if type(key) not in [unicode, str]:
                 return [ False, 'key must be string type' ]
-            if not re.match("[a-zA-Z0-9\- ]+$", key):
-                return [ False, 'key must not be simple text' ]
+            if not re.match("[a-zA-Z0-9_\- ]+$", key):
+                return [ False, 'key must not be simple text'+key ]
             
             if type(value) in [datetime, date]:
                 value = value.isoformat()
@@ -317,5 +317,5 @@ def save_sqlite(unique_keys, data, date=None, latlng=None, silent=False):
         pdata[strencode(key)] = strencode(value)
 
     if not silent :
-        scraperwiki.console.logScrapedData (pdata)
+        scraperwiki.console.logScrapedData(pdata)
     return arg
