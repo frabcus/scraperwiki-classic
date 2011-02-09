@@ -574,10 +574,15 @@ class Database :
                     return sqlite3.SQLITE_OK
                 return sqlite3.SQLITE_DENY
             
+            if action_code == sqlite3.SQLITE_PRAGMA:
+                if tname == "table_info":
+                    return sqlite3.SQLITE_OK
+                
             if runID[:12] == "fromfrontend":   # front end can only read, not write
                 if action_code not in readonlyops:
                     return sqlite3.SQLITE_DENY
-            elif sql_location != None and sql_location != 'main':
+            
+            elif sql_location != None and sql_location != 'main':  # cannot write to attached database
                 if action_code not in readonlyops:
                     return sqlite3.SQLITE_DENY
             return sqlite3.SQLITE_OK
