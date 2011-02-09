@@ -45,9 +45,9 @@ def keys(request):
 
 def example_scrapers(user, count):
     if user.is_authenticated():
-        scrapers = user.code_set.filter(usercoderole__role='owner', deleted=False, published=True)[:count]
+        scrapers = user.code_set.filter(usercoderole__role='owner', deleted=False, published=True).order_by('-first_published_at')[:count]
     else:
-        scrapers = Code.objects.filter(deleted=False, featured=True).order_by('first_published_at')[:count]
+        scrapers = Code.objects.filter(deleted=False, featured=True).order_by('-first_published_at')[:count]
     
     return scrapers
 
@@ -59,18 +59,18 @@ def explore_scraper_search_1_0(request):
     return render_to_response('api/scraper_search_1.0.html', {'keys' : users_keys, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_search')}, context_instance=RequestContext(request))
 
 def explore_scraper_getinfo_1_0(request):
+    short_name = request.GET.get('name', '')
     user = request.user
     scrapers = example_scrapers(user, 5)
     users_keys = api_key.objects.filter(user=user)
-        
-    return render_to_response('api/scraper_getinfo_1.0.html', {'keys' : users_keys, 'scrapers': scrapers, 'has_scrapers': True, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getinfo')}, context_instance=RequestContext(request))
+    return render_to_response('api/scraper_getinfo_1.0.html', {'keys' : users_keys, 'scrapers': scrapers, 'has_scrapers': True, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getinfo'), "short_name":short_name}, context_instance=RequestContext(request))
 
 def explore_scraper_getruninfo_1_0(request):
+    short_name = request.GET.get('name', '')
     user = request.user
     scrapers = example_scrapers(user, 5)
     users_keys = api_key.objects.filter(user=user)
-        
-    return render_to_response('api/scraper_getruninfo_1.0.html', {'keys' : users_keys, 'scrapers': scrapers, 'has_scrapers': True, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getruninfo')}, context_instance=RequestContext(request))
+    return render_to_response('api/scraper_getruninfo_1.0.html', {'keys' : users_keys, 'scrapers': scrapers, 'has_scrapers': True, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getruninfo'), "short_name":short_name}, context_instance=RequestContext(request))
 
 def explore_scraper_getuserinfo_1_0(request):
     user = request.user
@@ -97,11 +97,9 @@ def explore_datastore_search_1_0(request):
 
 def explore_scraper_getdata_1_0(request):
     short_name = request.GET.get('name', '')
-
     scrapers = []
     user = request.user
     scrapers = example_scrapers(user, 5)
-
     return render_to_response('api/scraper_getdata_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdata'), 'short_name': short_name}, context_instance=RequestContext(request))
 
 def explore_scraper_getdatabydate_1_0(request):
