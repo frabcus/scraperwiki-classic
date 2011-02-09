@@ -72,6 +72,10 @@ class Database :
         
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
+        
+        self.swdatakeys = {}   # default table is always swdata, but allows us to set other table names in future
+        self.swdatatypes = {}
+        self.sqdatatemplate = {}
 
         if type(config) == types.StringType :
             conf = ConfigParser.ConfigParser()
@@ -621,6 +625,7 @@ class Database :
                     return sqlite3.SQLITE_DENY
             return sqlite3.SQLITE_OK
 
+                # these needs batching (eg in 1Mb chunks)
         if command == "downloadsqlitefile":
             scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
             scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
@@ -628,7 +633,6 @@ class Database :
                 return "No sqlite database"
             fin = open(scrapersqlitefile, "rb")
             result = {'content':base64.encodestring(fin.read()), 'encoding':"base64"}
-            print result
             return result
             
             # make a new directory and connection if not seen anywhere (unless it's draft)
@@ -693,4 +697,44 @@ class Database :
             signal.alarm (0)
             return "ok"   # doesn't reach here if the signal fails
 
+
+    def updatesqdatakeys(self, scraperID, runID, short_name, swdatatblname):
+        tblinfo = self.sqlitecommand(scraperID, runID, short_name, "execute", "PRAGMA table_info(%s)" % swdatatblname, None)["data"]
+        self.swdatakeys[swdatatblname] = [ a[1]  for a in tblinfo ]
+        self.swdatatypes[swdatatblname] = [ a[2]  for a in tblinfo ]
+        self.sqdatatemplate[swdatatblname] = "insert or replace into %s values (%s)" % (swdatatblname, ",".join(["?"]*len(self.swdatakeys[swdatatblname])))
+
+
+    def save_sqlite(self, scraperID, runID, short_name, unique_keys, data):
+        swdatatblname = "swdata"
             
+        # establish the sw data table
+        if not self.m_sqlitedbconn or swdatatblname not in self.swdatakeys:
+            self.sqlitecommand(scraperID, runID, short_name, "execute", "create table if not exists %s (`scrape_date` text, `unique_hash` text unique)" % swdatatblname, None)
+        
+        if swdatatblname not in self.swdatakeys:
+            self.updatesqdatakeys(scraperID, runID, short_name, swdatatblname)
+    
+        # add new columns if required
+        for k in data:
+            if k not in self.swdatakeys[swdatatblname]:
+                v = data[k]
+                if v != None:
+                    vt = "text"
+                    if type(v) == int:
+                        vt = "integer"
+                    elif type(v) == float:
+                        vt = "real"
+                    self.sqlitecommand(scraperID, runID, short_name, "execute", "alter table %s add column `%s` %s" % (swdatatblname, k, vt), None)
+                    self.updatesqdatakeys(scraperID, runID, short_name, swdatatblname)  # get again rather than amend
+    
+        # compute the hash key
+        ulist = [ str(data[k])  for k in set(unique_keys) ]
+        data["unique_hash"] = hashlib.md5('\0342\0211\0210\0342\0211\0210\0342\0211\0210'.join(ulist)).hexdigest()
+        data["scrape_date"] = datetime.datetime.now().isoformat()
+        res = self.sqlitecommand(scraperID, runID, short_name, "execute", self.sqdatatemplate[swdatatblname], [ data.get(k)  for k in self.swdatakeys[swdatatblname] ])
+        if type(res) == str:
+            return [ False, res ]
+        self.sqlitecommand(scraperID, runID, short_name, "commit", None, None)
+        return  [ True, 'Data record inserted' ]
+

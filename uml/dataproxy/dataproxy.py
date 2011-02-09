@@ -296,6 +296,11 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 statusInfo[runID]['action'] = None
             return
 
+        if request[0] == 'save_sqlite':
+            result = db.save_sqlite(scraperID, runID, scraperName, unique_keys=request[1], data=request[2])
+            self.connection.send(json.dumps(result) + '\n')
+            return
+        
         self.connection.send (json.dumps ((False, 'Unknown datastore command: %s' % request[0])) + '\n')
 
     def do_GET (self) :

@@ -6,6 +6,7 @@ import  datetime
 import  types
 import  socket
 import  ConfigParser
+import re
 
 try   : import json
 except: import simplejson as json
@@ -116,7 +117,7 @@ class DataStoreClass :
         return self.request (('retrieve', uunique_keys_dict))
     
     def save (self, unique_keys, scraper_data, date = None, latlng = None) :
-
+        
         if type(unique_keys) not in [ types.NoneType, types.ListType, types.TupleType ] :
             return [ False, 'unique_keys must be None, or a list or tuple' ]
  
@@ -151,6 +152,52 @@ class DataStoreClass :
         
         return self.request (('save', uunique_keys, js_data, date, latlng))
 
+    
+    def save_sqlite(self, unique_keys, scraper_data, date=None, latlng=None) :
+        if type(unique_keys) not in [ types.ListType, types.TupleType ]:
+            return [ False, 'unique_keys must a list or tuple' ]
+             
+        if date is not None :
+            if type(date) not in [ datetime.datetime, datetime.date ] :
+                return [ False, 'date should be a python.datetime (not %s)' % type(date) ]
+
+        if latlng is not None :
+            if type(latlng) not in [ types.ListType, types.TupleType ] or len(latlng) != 2:
+                return [ False, 'latlng must be a (float,float) list or tuple' ]
+            if type(latlng[0]) not in [ types.IntType, types.LongType, types.FloatType ]:
+                return [ False, 'latlng must be a (float,float) list or tuple' ]
+            if type(latlng[1]) not in [ types.IntType, types.LongType, types.FloatType ]:
+                return [ False, 'latlng must be a (float,float) list or tuple' ]
+
+        if date is not None :
+            scraper_data["date"] = date.isoformat()
+        if latlng is not None :
+            scraper_data["latlng_lat"] = latlng[0]
+            scraper_data["latlng_lng"] = latlng[1]
+
+        for key in unique_keys:
+            if key not in scraper_data:
+                return [ False, 'unique_keys must be a subset of data' ]
+
+        jdata = { }
+        for key, value in scraper_data.items():
+            if not key:
+                return [ False, 'key must not be blank' ]
+            if type(key) not in [unicode, str]:
+                return [ False, 'key must be string type' ]
+            if not re.match("[a-zA-Z0-9\- ]+$", key):
+                return [ False, 'key must not be simple text' ]
+            
+            if type(value) in [datetime, date]:
+                value = value.isoformat()
+            elif type(value) not in [int, bool, float, unicode, str]:
+                value = unicode(value)
+
+            jdata[key] = value
+        
+        return self.request(('save_sqlite', unique_keys, jdata))
+    
+    
     def postcodeToLatLng (self, postcode) :
 
         return self.request (('postcodetolatlng', postcode))
@@ -172,11 +219,14 @@ def DataStore (config) :
     return ds
 
 def strencode(v):
-    try: 
-        v = str(v)
-    except:
-        v = v.encode('utf-8')
+    try:     v = str(v)
+    except:  v = v.encode('utf-8')
     return v
+
+def ifsencode(v):
+    if type(v) in [int, float]:
+        return v
+    return strencode(v)
 
 # functions moved from the out of data code into here to manage their development
 def save (unique_keys, data, date = None, latlng = None, silent = False) :
@@ -185,6 +235,7 @@ def save (unique_keys, data, date = None, latlng = None, silent = False) :
     if not rc :
         raise Exception (arg) 
 
+    # output for console
     pdata = {}
     for key, value in data.items():
         pdata[strencode(key)] = strencode(value)
@@ -225,7 +276,7 @@ def sqlitecommand(command, val1=None, val2=None):
         return
     
     ds = DataStore(None)
-    result = ds.request (('sqlitecommand', command, val1, val2))
+    result = ds.request(('sqlitecommand', command, val1, val2))
     
     if command == "attach":
         if result != "ok":
@@ -244,7 +295,7 @@ def sqlitecommand(command, val1=None, val2=None):
     if not val2:
         lval2 = [ ]
     elif type(val2) in [tuple,list]:
-        lval2 = [ strencode(v)  for v in val2 ]
+        lval2 = [ ifsencode(v)  for v in val2 ]
     elif command == "attach":
         lval2 = [ val2 ]
 
@@ -252,3 +303,19 @@ def sqlitecommand(command, val1=None, val2=None):
         scraperwiki.console.logSqliteCall(command, val1, lval2)
     return result
     
+
+# functions moved from the out of data code into here to manage their development
+def save_sqlite(unique_keys, data, date=None, latlng=None, silent=False):
+    ds = DataStore(None)
+    rc, arg = ds.save_sqlite(unique_keys, data, date, latlng)
+    if not rc :
+        raise Exception (arg) 
+
+    # output for console
+    pdata = {}
+    for key, value in data.items():
+        pdata[strencode(key)] = strencode(value)
+
+    if not silent :
+        scraperwiki.console.logScrapedData (pdata)
+    return arg
