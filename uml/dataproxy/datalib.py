@@ -8,7 +8,8 @@ import  types
 import  datetime
 import  sqlite3
 import  signal
-import base64
+import  base64
+import  shutil
 
 class Database :
 
@@ -183,36 +184,6 @@ class Database :
             return self.execute('select `id` from `sequences`').fetchone()[0]
         raise Exception("Unrecognised datastore type '%s'" % self.m_dbtype)
 
-    def fetch (self, scraperID, unique_keys) :   # note: unique_keys is a dict in the function, whereas elsewhere it is a list!
-
-        """
-        Fetch values from the datastore.
-        """
-
-        #  Sanity checks
-        #
-        if type(unique_keys) not in [ types.DictType ] or len(unique_keys) == 0 :
-            return [ False, 'unique_keys must be a non-empty dictionary' ]
-
-        if scraperID in [ None, '' ] :
-            return [ False, 'cannot fetch data without a scraper ID' ]
-
-        uhash   = uniqueHash (unique_keys.keys(), unique_keys)
-        cursor1 = self.execute \
-                    (   'select `item_id`, `date`, `latlng`, `date_scraped` from `items` where `scraper_id` = %s and `unique_hash` = %s',
-                        [ scraperID, uhash ]
-                    )
-
-        res     = []
-        for row in cursor1.fetchall() :
-            data   = {}
-            cursor2 = self.execute ('select `key`, `value` from `kv` where `item_id` = %s', [ row[0] ])
-            for pair in cursor2.fetchall() :
-                data[pair[0]] = pair[1]
-            res.append ({ 'date' : str(row[1]), 'latlng' : row[2], 'date_scraped' : str(row[3]), 'data' : data })
-
-        return [ True, res ]
-
 
     def postcodeToLatLng (self, scraperID, postcode) :   
 
@@ -224,39 +195,6 @@ class Database :
         except :
             return [ False, 'Postcode not found' ]
 
-    def retrieve (self, scraperID, matchrecord) :   
-
-        """
-        Retrieve matched values ignoring hashcode technology
-        """
-
-        query  = []
-        values = []
-        slot   = 1
-        query.append('select `items`.`item_id`, `date`, `latlng`, `date_scraped` from `items`')
-        for key, value in matchrecord.items():
-            query .append(' inner join `kv` as kv%03d on kv%03d.`item_id` = `items`.`item_id` and kv%03d.`key` = %%s' % (slot, slot, slot))
-            values.append(key)
-            if value != "":
-            #if value is not None:  # can't transfer None through at the moment
-                query.append(' and kv%03d.`value` = %%s' % (slot))
-                values.append(value)
-            slot += 1
-        query.append(' where `items`.`scraper_id` = %s')
-        values.append(scraperID)
-    
-        cursor1 = self.execute("".join(query), values)
-    
-        # same code as in retrieve
-        res     = []
-        for row in cursor1.fetchall() :
-            data   = {}
-            cursor2 = self.execute ('select `key`, `value` from `kv` where `item_id` = %s', [ row[0] ])
-            for pair in cursor2.fetchall() :
-                data[pair[0]] = pair[1]
-            res.append ({ 'date' : str(row[1]), 'latlng' : row[2], 'date_scraped' : str(row[3]), 'data' : data })
-
-        return [ True, res ]
 
 
     def save (self, scraperID, unique_keys, scraped_data, date = None, latlng = None) :
@@ -487,9 +425,15 @@ class Database :
 
         return [ True, allitems ]
 
-    def clear_datastore (self, scraperID) :
+    def clear_datastore(self, scraperID, short_name):
         self.execute("delete kv, items from kv join items on kv.item_id = items.item_id where scraper_id = '%s'" % scraperID)
         self.m_db.commit()
+            
+        scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+        scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+        if os.path.isfile(scrapersqlitefile):
+            deletedscrapersqlitefile = os.path.join(scraperresourcedir, "DELETED-defaultdb.sqlite")
+            
         return [ True, None ]
 
     def datastore_keys (self, scraperID) :

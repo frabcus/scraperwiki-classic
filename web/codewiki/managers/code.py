@@ -135,12 +135,7 @@ class CodeManager(models.Manager):
             raise Exception(arg)
         return arg
     
-
-    def clear_datastore(self, scraper_id):
-        proxy   = self.dataproxy(scraper_id)
-        rc, arg = proxy.clear_datastore()
-        if not rc :
-            raise Exception(arg)
+    
     
     def datastore_keys(self, scraper_id):
 

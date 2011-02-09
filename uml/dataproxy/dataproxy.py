@@ -154,33 +154,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             except : pass
 
 
-    def fetch (self, db, scraperID, runID, unique) :
-
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = 'fetch'
-            except : pass
-
-        rc, arg = db.fetch (scraperID, unique)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = None
-            except : pass
-
-    def retrieve (self, db, scraperID, runID, unique) :
-
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = 'retrieve'
-            except : pass
-
-        rc, arg = db.retrieve (scraperID, unique)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = None
-            except : pass
-
-
     def save (self, db, scraperID, runID, unique, data, date, latlng) :
 
         if runID is not None :
@@ -200,10 +173,9 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         rc, arg = db.data_dictlist (scraperID, limit, offset, start_date, end_date, latlng)
         self.connection.send (json.dumps ((rc, arg)) + '\n')
 
-    def clear_datastore (self, db, scraperID, runID) :
-
-        rc, arg = db.clear_datastore (scraperID)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
+    def clear_datastore(self, db, scraperID, runID, scraperName):
+        rc, arg = db.clear_datastore(scraperID, scraperName)
+        self.connection.send(json.dumps ((rc, arg)) + '\n')
 
     def datastore_keys (self, db, scraperID, runID) :
 
@@ -242,14 +214,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.save     (db, scraperID, runID, request[1], request[2], request[3], request[4])
             return
 
-        if request[0] == 'fetch' :
-            self.fetch    (db, scraperID, runID, request[1])
-            return
-
-        if request[0] == 'retrieve' :
-            self.retrieve (db, scraperID, runID, request[1])
-            return
-        
         if request[0] == 'postcodetolatlng' :
             self.postcodeToLatLng (db, scraperID, runID, request[1])
             return
@@ -258,8 +222,9 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.data_dictlist    (db, scraperID, runID, request[1], request[2], request[3], request[4], request[5])
             return
 
-        if request[0] == 'clear_datastore' :
-            self.clear_datastore  (db, scraperID, runID)
+        if request[0] == 'clear_datastore':
+            print [db, scraperID, runID, scraperName]
+            self.clear_datastore(db, scraperID, runID, scraperName)
             return
 
         if request[0] == 'datastore_keys' :

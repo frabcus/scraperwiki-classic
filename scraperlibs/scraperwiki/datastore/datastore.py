@@ -6,12 +6,15 @@ import  datetime
 import  types
 import  socket
 import  ConfigParser
-import re
+import  re
 
 try   : import json
 except: import simplejson as json
 
 import  scraperwiki.console
+
+# handles old version of the key-value store
+# intend to make a new sqlite module and access functions into there
 
 def mangleflattendict(data):
     rdata = { }
@@ -100,21 +103,8 @@ class DataStoreClass :
 
         return json.loads (text)
 
-    def fetch (self, unique_keys_dict) :
-
-        if type(unique_keys_dict) not in [ types.DictType ] or len(unique_keys_dict) == 0 :
-            return [ False, 'unique_keys must a non-empty dictionary' ]
-
-        uunique_keys_dict = mangleflattendict(unique_keys_dict)
-        return self.request (('fetch', uunique_keys_dict))
-
-    def retrieve (self, unique_keys_dict) :
-
-        if type(unique_keys_dict) not in [ types.DictType ] or len(unique_keys_dict) == 0 :
-            return [ False, 'unique_keys must a non-empty dictionary' ]
-
-        uunique_keys_dict = mangleflattendict(unique_keys_dict)
-        return self.request (('retrieve', uunique_keys_dict))
+    def uses_old_datastore(self):
+        return self.request(('item_count',))[1] != 0
     
     def save (self, unique_keys, scraper_data, date = None, latlng = None) :
         
@@ -231,7 +221,12 @@ def ifsencode(v):
 # functions moved from the out of data code into here to manage their development
 def save (unique_keys, data, date = None, latlng = None, silent = False) :
     ds = DataStore(None)
-    rc, arg = ds.save (unique_keys, data, date, latlng)
+    
+    if True or ds.uses_old_datastore():
+        rc, arg = ds.save(unique_keys, data, date, latlng)
+    else:
+        rc, arg = ds.save_sqlite(unique_keys, data, date, latlng)
+    
     if not rc :
         raise Exception (arg) 
 
@@ -244,27 +239,6 @@ def save (unique_keys, data, date = None, latlng = None, silent = False) :
         scraperwiki.console.logScrapedData (pdata)
     return arg
 
-
-# undocumented fetch function
-def fetch (unique_keys) :
-    """undocumented - use at your own risk"""
-    ds = DataStore(None)
-    rc, arg = ds.fetch (unique_keys)
-    if not rc :
-        raise Exception (arg) 
-
-    return arg
-
-
-# undocumented retrieve function
-def retrieve (unique_keys) :
-    """undocumented - use at your own risk"""
-    ds = DataStore(None)
-    rc, arg = ds.retrieve (unique_keys)
-    if not rc :
-        raise Exception (arg) 
-
-    return arg
 
 
 # experimental sqlite access function

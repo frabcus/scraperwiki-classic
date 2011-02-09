@@ -48,10 +48,6 @@ class DataStoreClass :
 
         return self.request (('data_dictlist', limit, offset, start_date, end_date, latlng))
 
-    def clear_datastore (self) :
-
-        return self.request (('clear_datastore',))
-
     def datastore_keys (self) :
 
         return self.request (('datastore_keys',))
