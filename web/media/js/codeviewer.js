@@ -1,9 +1,9 @@
 
-function highlightCode(code, Parser)
+function highlightCode(code, Parser, previewerid)
 {
     var lineNo = 1; 
-    var output = $('#codepreviewer #output'); 
-    var numbers = $('#codepreviewer #linenumbers')
+    var output = $('#'+previewerid+' #output'); 
+    var numbers = $('#'+previewerid+' #linenumbers')
  
     function addLine(line) 
     {
@@ -16,11 +16,11 @@ function highlightCode(code, Parser)
     highlightText(code, addLine, Parser); 
 }
 
-function highlightOtherCode(code, othercode, matcheropcodes, Parser)
+function highlightOtherCode(code, othercode, matcheropcodes, Parser, previewerid)
 {
-    var output = $('#codepreviewer #output'); 
-    var numbers = $('#codepreviewer #linenumbers'); 
-    var othernumbers = $('#codepreviewer #otherlinenumbers'); 
+    var output = $('#'+previewerid+' #output'); 
+    var numbers = $('#'+previewerid+' #linenumbers'); 
+    var othernumbers = $('#'+previewerid+' #otherlinenumbers'); 
 
     // syntax highlight the two versions of the code
     var codelines = [ ]

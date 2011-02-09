@@ -32,7 +32,7 @@
             $('#pdfpageid').load(function() 
             { 
                 $('#loadingmess').hide();  
-                $('#pdfpageid').Jcrop( { onSelect: setCrop, onChange: setCrop } ); 
+                $('#pdfpageid').Jcrop( { onSelect: setCrop, onChange: setCrop, keySupport: false } ); 
             }); 
 
             $('p#share_links input').attr('value', '<a title="PDF excerpt" href="http://scraperwiki.com/{% url croppage srcdoc page cropping %}{{qtail}}"><img src="http://scraperwiki.com{% url cropimg 'png' srcdoc page cropping %}{{qtail}}"></a>'); 

@@ -10,7 +10,7 @@ class TestRegistration(SeleniumTest):
     registration being required by further tests so that they can 
     log on.
     """
-    login_fail = "Sorry, but we could not find that username or email address"
+    login_fail = "Sorry, but we could not find that user, or the password was wrong"
     default_values = {
         "id_name" : "test user",
         "id_username": "test",

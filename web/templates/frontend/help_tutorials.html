@@ -1,0 +1,37 @@
+<div class="section">
+	<h3>Screen scraping tutorials</h3>
+	<p>Want to try out ScraperWiki, or learn to screen scrape from scratch?</p>
+    <p>Choose from a wide selection of screen scraping tutorials and examples, from introductory to very specialized.
+        Simply click on a link below, follow the instructions in the comments, and 
+        start hacking.</p>
+</div>
+
+<div class="content half left">
+  {% for key, value in tutorials.items %}
+  <h2 id="{{ key }}_tutorials">{{ key.title }} tutorial scrapers</h2>
+  <dl>
+    {% for scraper in value %}
+    <dt>
+      <a href="{% url tutorial scraper.short_name %}" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
+    </dt>
+    <dd>{{scraper.description}}</dd>
+    {% endfor %}
+  </dl>
+  {% endfor %}
+</div>
+
+<div class="content half right">
+  {% for key, value in viewtutorials.items %}
+  <h2 id="{{ key }}_tutorials">{{ key.title }} tutorial views</h2>
+  <dl>
+    {% for scraper in value %}
+    <dt>
+      <a href="{% url tutorial scraper.short_name %}" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
+    </dt>
+    <dd>{{scraper.description}}</dd>
+    {% endfor %}
+  </dl>
+  {% endfor %}
+</div>
+
+<br class="clear"/>

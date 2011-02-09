@@ -1,6 +1,7 @@
 import  time
 import  ConfigParser
 import  types
+import sys
 
 class SWLogger :
 
@@ -54,8 +55,15 @@ class SWLogger :
         """
         Close database connection.
         """
-
+	if self.m_mysql:
+	    self.m_mysql.close()
         self.m_mysql    = None
+
+    def _functionId(self, nFramesUp):
+        """ Create a string naming the function n frames up on the stack.
+        """
+        co = sys._getframe(nFramesUp+1).f_code
+        return "%s (%s @ %d)" % (co.co_name, co.co_filename, co.co_firstlineno)
 
     def log (self, scraperid, runid, event, arg1 = None, arg2 = None) :
 
@@ -75,6 +83,8 @@ class SWLogger :
         """
 
         if self.m_mysql :
+            # Describe where we've been called from
+            #arg2 = self._functionId(2)
 
             cursor = self.m_mysql.cursor()
             cursor.execute \

@@ -200,7 +200,7 @@ def getemailtext(event):
     
     msubject = re.search("(?:^|\n)EMAILSUBJECT:(.*)", message)
     if msubject:
-        subject = msubject.group(2)    # snip out the subject
+        subject = msubject.group(1)    # snip out the subject
         message = "%s%s" % (message[:msubject.start(0)], message[msubject.end(0):])
     else:
         subject = 'Your ScraperWiki Email - %s' % event.scraper.short_name
@@ -218,7 +218,7 @@ class ScraperRunner(threading.Thread):
     def run(self):
         # Check for possible race condition
         if self.scraper.next_run() >= datetime.datetime.now(): 
-            print "Hold on this scraper isn't overdue!!!! %s" % scraper.short_name
+            print "Hold on this scraper isn't overdue!!!! %s" % self.scraper.short_name
             return
         
         guid = self.scraper.guid

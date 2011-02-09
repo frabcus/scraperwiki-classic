@@ -95,8 +95,10 @@ def croppage(request, srcdoc, page, cropping):
         tpdffile = tempfile.NamedTemporaryFile(suffix='.pdf')
         try:
             filename, headers = urllib.urlretrieve(pdfurl, tpdffile.name)
-        except ValueError:
-            return HttpResponse("Error fetching: %s " % pdfurl)
+        except ValueError, e:
+            return HttpResponse("Error fetching: %s; %s" % (pdfurl, str(e)))
+        except IOError, e:
+            return HttpResponse("Error fetching: %s; %s" % (pdfurl, str(e)))
         if headers.subtype != 'pdf':
             return HttpResponse("%s is not pdf type; it's \"%s\"" % (pdfurl, headers.subtype))
         print (tpdffile.name, pdffile)
@@ -120,25 +122,42 @@ def croppage(request, srcdoc, page, cropping):
     return render_to_response('cropper/cropperpage.html', data, context_instance=RequestContext(request))
 
 
+   
+   # this can send out jpgs if the png versions are too big
+pngfilesizeconsiderlimit = 200000
+pngfilesizejpgfactor = 5
 
 def cropimg(request, format, srcdoc, page, cropping):
     page = int(page)
     cropping = cropping or ""
-    
+
     pdfurl, pdffile, imgstem, qtail = GetSrcDoc(request, srcdoc)
     if not pdfurl:
         return HttpResponse(open(os.path.join(settings.MEDIA_DIR, 'images', '404.png'), "rb"), mimetype='image/png')
-        
+
+
     imgfile = "%s_%04d.png" % (imgstem, page)
+    imgpixwidth = 800
     if not os.path.isfile(imgfile):
-        imgpixwidth = 800
         cmd = 'convert -quiet -density 192 "%s[%d]" -resize %d "%s" > /dev/null 2>&1' % (pdffile, page-1, imgpixwidth, imgfile)
         os.system(cmd)
-    
+
     croppings = filter(lambda x:x, cropping.split("/"))
+    
     if not croppings:
+        if os.path.getsize(imgfile) > pngfilesizeconsiderlimit:
+            jpgimgfile = "%s_%04d.jpg" % (imgstem, page)
+            if not os.path.isfile(jpgimgfile):
+                cmd = 'convert -quiet -density 192 "%s[%d]" -resize %d "%s" > /dev/null 2>&1' % (pdffile, page-1, imgpixwidth, jpgimgfile)
+                os.system(cmd)
+            print "\n\njpg/png sizes", os.path.getsize(jpgimgfile), os.path.getsize(imgfile)
+            if os.path.getsize(jpgimgfile) < os.path.getsize(imgfile) / pngfilesizejpgfactor:
+                return HttpResponse(open(jpgimgfile, "rb"), mimetype='image/jpeg')
         return HttpResponse(open(imgfile, "rb"), mimetype='image/png')
 
+
+
+    # here on is executed only if there is a cropping to be applied
     pfp = Image.open(imgfile)
     swid, shig = pfp.getbbox()[2:]
 
@@ -154,7 +173,9 @@ def cropimg(request, format, srcdoc, page, cropping):
                 clip = dim
         
         
-    # build the mask
+    # build the mask which is a darker version of the original
+    # then plots white rectangle over it, which when ImageChops.darker() is applied 
+    # between the two favours the lighter original in instead of the white rectangles
     if highlightrects:
         dkpercent = 70
         dpfp = ImageEnhance.Brightness(pfp).enhance(dkpercent / 100.0)
@@ -165,6 +186,7 @@ def cropimg(request, format, srcdoc, page, cropping):
     else:
         cpfp = pfp
 
+    # pngprev is about whether the crop is applied or is masked so you can see it in place
     if clip:
         if format == "pngprev":
             p1 = Image.new("RGB", (swid, shig))
@@ -175,8 +197,20 @@ def cropimg(request, format, srcdoc, page, cropping):
         else:
             cpfp = cpfp.crop(clip)
     
+    # actually if the png version is WAY too large we revert to giving you a jpg because it's probably a dirty scan
+    imgmimetype ='image/png'
     imgout = cStringIO.StringIO()
     cpfp.save(imgout, "png")
-    imgout.seek(0)
-    return HttpResponse(imgout, mimetype='image/png')
+    
+    if imgout.tell() > pngfilesizeconsiderlimit:
+        jpgimgout = cStringIO.StringIO()
+        print "png version size", imgout.tell()
+        cpfp.save(jpgimgout, "jpeg")
+        print "Size of jpg/png", jpgimgout.tell(), imgout.tell()
+        if jpgimgout.tell() < imgout.tell() / pngfilesizejpgfactor:
+            imgout = jpgimgout
+            imgmimetype = 'image/jpeg'
+    
+    imgout.reset()
+    return HttpResponse(imgout, mimetype=imgmimetype)
 
