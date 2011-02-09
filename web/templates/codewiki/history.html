@@ -18,7 +18,8 @@
 <p class="history_bold">Scheduled runs and edits to <span class="history_italic">{{ scraper.title }}</span>.</p>
 
 <div class="staff">
-  <p><b>comments:</b> I have created the necessary callbacks to make it possible to ajax load the history diffs.  
+  <p><b>Notes:</b> <em>This page is under development.  Apologies for the inconvenience</p>
+  <p>I have created the necessary callbacks to make it possible to ajax load the history diffs.  
   The following are the three links that make the callback possible:
   <b>To get the code:</b> <input type="text" id="rawcodeurl" value="{% url raw scraper.short_name %}"/>     {# callback url to get code per revision #}
   <b>To get the patch numbers:</b> <input type="text" id="diffsequrl" value="{% url diffseq scraper.short_name %}"/> {# callback url to get patch per pair of revisions #}
