@@ -634,7 +634,7 @@ class Database :
             try:
                 for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
                     tables[name] = {"sql":sql}
-                    self.m_sqlitedbcursor.execute("select * from `%s` limit ?" % name, ((val1 == None and 10 or val1),))
+                    self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, ((val1 == None and 10 or val1),))
                     if val1 != 0:
                         tables[name]["rows"] = list(self.m_sqlitedbcursor)
                     tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
@@ -680,7 +680,7 @@ class Database :
             
         # establish the sw data table
         if not self.m_sqlitedbconn or swdatatblname not in self.swdatakeys:
-            self.sqlitecommand(scraperID, runID, short_name, "execute", "create table if not exists %s (`scrape_date` text, `unique_hash` text unique)" % swdatatblname, None)
+            self.sqlitecommand(scraperID, runID, short_name, "execute", "create table if not exists %s (`date_scraped` text, `unique_hash` text unique)" % swdatatblname, None)
         
         if swdatatblname not in self.swdatakeys:
             self.updatesqdatakeys(scraperID, runID, short_name, swdatatblname)
@@ -701,7 +701,7 @@ class Database :
         # compute the hash key
         ulist = [ str(data[k])  for k in set(unique_keys) ]
         data["unique_hash"] = hashlib.md5('\0342\0211\0210\0342\0211\0210\0342\0211\0210'.join(ulist)).hexdigest()
-        data["scrape_date"] = datetime.datetime.now().isoformat()
+        data["date_scraped"] = datetime.datetime.now().isoformat()
         res = self.sqlitecommand(scraperID, runID, short_name, "execute", self.sqdatatemplate[swdatatblname], [ data.get(k)  for k in self.swdatakeys[swdatatblname] ])
         if type(res) == str:
             return [ False, res ]
