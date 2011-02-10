@@ -24,7 +24,7 @@
                 {% if sqlitedata %}
                     <li class="csv"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download Sqlite3 database</a></li>
                 {% else %}
-                    <li class="gdocs"><a href="{% url export_gdocs_spreadsheet scraper.short_name %}" target="_new" rel="nofollow">Open in Google Docs</a></li>
+                    {#<li class="gdocs"><a href="{% url export_gdocs_spreadsheet scraper.short_name %}" target="_new" rel="nofollow">Open in Google Docs</a></li>#}
                 {% endif %}
             </ul>
         {% endifequal %}

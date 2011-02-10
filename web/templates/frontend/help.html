@@ -1,19 +1,7 @@
 {% extends "frontend/base.html" %}
 
 {% block title %}Help{% endblock %}
-{% block content %}
-    <div class="page_title">
-        <h1>Help</h1>
-    </div>
-    <div class="content">
-    <p>
-        You are reading the help for <strong>{{ language.title }}</strong>: see help for
-         {% for other_language in other_languages %}
-         {% if not forloop.first %} or {% endif %}
-         <a href="{% url help mode other_language %}">{{ other_language.title}}</a>{% endfor %}.
-        Still confused? Ask a question on our <a href="http://groups.google.com/group/scraperwiki">developers' list</a>. 
-    </p>
-	<div class="page_tabs"> 
+{% block tabs %}
         <ul>
             <li{% ifequal mode "libraries" %} class="selected"{% endifequal %}> 
                 <a id="libraries" href="{% url help 'libraries' language %}">Libraries</a> 
@@ -21,14 +9,31 @@
             <li{% ifequal mode "documentation" %} class="selected"{% endifequal %}> 
                 <a id="reference" href="{% url help 'documentation' language %}">Documentation</a> 
             </li>
-            <li{% ifequal mode "tutorials" %} class="selected"{% endifequal %}> 
-                <a id="tutorials" href="{% url help 'tutorials' language %}">Tutorials</a> 
-            </li>
             <li{% ifequal mode "faq" %} class="selected"{% endifequal %}> 
                 <a id="faq" href="{% url help 'faq' language %}">FAQ</a> 
             </li>
+            <li{% ifequal mode "tutorials" %} class="selected"{% endifequal %}> 
+                <a id="tutorials" href="{% url help 'tutorials' language %}">Tutorials</a> 
+            </li>
         </ul> 
+{% endblock %}
+
+{% block content %}
+    <div class="page_title">
+        <h1>Help - {{mode|capfirst}}</h1>
     </div>
+    <div class="content">
+
+    {% ifnotequal mode "faq" %}
+    <p>
+        You are reading the help for <strong class="language {{language}}"> {{language.title}}</strong> 
+         See help also for
+         {% for other_language in other_languages %}
+         {% if not forloop.first %} or {% endif %}
+         <strong class="language {{other_language}}"><a href="{% url help mode other_language %}">{{other_language.title}}</a></strong>{% endfor %}.
+    </p>
+    <p>Still confused? Ask a question on our <a href="http://groups.google.com/group/scraperwiki">developers' list</a>.</p>
+    {% endifnotequal %}
 
     <div id="help_content">
     {% include include_tag %}

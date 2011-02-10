@@ -395,7 +395,7 @@ $(document).ready(function() {
         $('#id_urlquery').blur(function() 
         {
             if(!$(this).hasClass('hint') && ($(this).val() == '')) {
-                $(this).val('urlquery');
+                $(this).val('query_string');
                 $(this).addClass('hint');
             }
         });

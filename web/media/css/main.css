@@ -472,10 +472,10 @@ body.fullscreen #embedinstructions textarea { width:500px; }
 .code_about {color:#808080;font-variant:small-caps;margin:0;padding:0.5em 0;}
 .code_about li {display:inline;padding-right:0.3em!important;}
 
-.code_about li.language {background-repeat:no-repeat; padding-left:22px}
-.code_about li.language.python {background-image:url(../images/icons/python.png);}
-.code_about li.language.php {background-image:url(../images/icons/php.png);}
-.code_about li.language.ruby {background-image:url(../images/icons/ruby.png);}
+.code_about li.language, strong.language {background-repeat:no-repeat; padding-left:22px}
+.code_about li.language.python, strong.language.python {background-image:url(../images/icons/python.png);}
+.code_about li.language.php, strong.language.php {background-image:url(../images/icons/php.png);}
+.code_about li.language.ruby, strong.language.ruby {background-image:url(../images/icons/ruby.png);}
 
 .code_about li.codewiki_type {background-repeat:no-repeat; padding-left:22px;}
 .code_about li.codewiki_type.scraper {background-image:url(../images/icons/scraper.png);}
