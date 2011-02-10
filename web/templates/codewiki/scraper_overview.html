@@ -157,8 +157,18 @@
 <div class="content col left">
     <h3>Contributors</h3>
     {% include 'codewiki/includes/contributors.html' %}
+
     <h3>License {% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditLicense" class="edit">[edit license]</a>{% endif %}</h3>
     This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.license}}</span>
+    <p>  </p>
+    
+    <h3>API explorer</h3>
+    Access the data for other online services
+    <ul>
+        <li><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">scraperwiki.datastore.getData</a></li>
+        <li><a href="{% url api:scraper_getinfo %}?name={{scraper.short_name}}">scraperwiki.scraper.getInfo</a></li>
+    </ul>
+
 </div>
 
 <div class="content col right">

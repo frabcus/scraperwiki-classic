@@ -17,7 +17,7 @@ import random
 from django.conf import settings
 from django.utils.encoding import smart_str
 
-from managers.datastore import  DataStore
+from managers.datastore import DataStore
 
 from codewiki import models
 from api.emitters import CSVEmitter 
@@ -122,10 +122,16 @@ def scraper_overview(request, short_name):
     dataproxy = DataStore(scraper.guid, scraper.short_name)
     sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
     if sqlitedata and type(sqlitedata) not in [str, unicode]:
-        context['sqlitedata'] = sqlitedata
+        context['sqlitedata'] = sqlitedata["tables"]
+        
+            # throw away uniqu_hash rows
+        for table in context['sqlitedata'].values():
+            if "unique_hash" in table["keys"]:
+                iuh = table["keys"].index("unique_hash")
+                del table["keys"][iuh]
+                for row in table["rows"]:
+                    del row[iuh]
     
-    #if user.username == 'Julian_Todd':
-    #    return render_to_response('codewiki/scraper_overview_jgt.html', context, context_instance=RequestContext(request))
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
@@ -215,11 +221,11 @@ def scraper_delete_data(request, short_name):
     if scraper.owner() != request.user:
         raise Http404
     if request.POST.get('delete_data', None) == '1':
-        models.Scraper.objects.clear_datastore(scraper_id=scraper.guid)
+        dataproxy = DataStore(scraper.guid, scraper.short_name)
+        dataproxy.request(("clear_datastore",))
         scraper.scrapermetadata_set.all().delete()
         scraper.update_meta()
         scraper.save()
-
 
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
@@ -460,7 +466,7 @@ def generate_csv(dictlist, offset, max_length=None):
 
 def stream_csv(scraper, step=5000, max_rows=1000000):
     for offset in range(0, max_rows, step):
-        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=step, offset=offset)
+        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=step, offset=offset)
         
         yield generate_csv(dictlist, offset)[0]
         if len(dictlist) != step:
@@ -482,6 +488,7 @@ def export_csv(request, short_name):
     response = HttpResponse(stream_csv(scraper), mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (short_name)
     return response
+
 
 def export_sqlite(request, short_name):
     scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
@@ -516,7 +523,7 @@ def export_gdocs_spreadsheet(request, short_name):
     subset_message = 'THIS IS A SUBSET OF THE DATA ONLY. A MAXIMUM OF %s RECORDS CAN BE UPLOADED FROM SCRAPERWIKI. DOWNLOAD THE FULL DATASET AS CSV HERE: %s\n' % (str(row_limit), csv_url)
     
     max_length = settings.GDOCS_UPLOAD_MAX - max(len(truncated_message), len(subset_message))
-    csv_data, truncated = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, limit=row_limit), 0, max_length)
+    csv_data, truncated = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=row_limit), 0, max_length)
 
     if truncated:
         title = title + ' [SUBSET ONLY]'

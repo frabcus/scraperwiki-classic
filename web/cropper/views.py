@@ -204,13 +204,16 @@ def cropimg(request, format, srcdoc, page, cropping):
     
     if imgout.tell() > pngfilesizeconsiderlimit:
         jpgimgout = cStringIO.StringIO()
-        print "png version size", imgout.tell()
-        cpfp.save(jpgimgout, "jpeg")
-        print "Size of jpg/png", jpgimgout.tell(), imgout.tell()
-        if jpgimgout.tell() < imgout.tell() / pngfilesizejpgfactor:
-            imgout = jpgimgout
-            imgmimetype = 'image/jpeg'
-    
+        
+# Problem - We need horsell to have jpeg writer installed
+        try:  
+            cpfp.save(jpgimgout, "jpeg")
+            if jpgimgout.tell() < imgout.tell() / pngfilesizejpgfactor:
+                imgout = jpgimgout
+                imgmimetype = 'image/jpeg'
+        except IOError, e:
+            assert e.args[0] == 'encoder jpeg not available'
+
     imgout.reset()
     return HttpResponse(imgout, mimetype=imgmimetype)
 

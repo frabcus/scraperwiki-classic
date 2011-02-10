@@ -47,8 +47,11 @@ class SWLogger :
         """
 
         if self.m_host :
-            import MySQLdb
-            self.m_mysql    = MySQLdb.connect (host = self.m_host, db = self.m_db, user = self.m_user, passwd = self.m_passwd)
+            try:
+                import MySQLdb
+                self.m_mysql = MySQLdb.connect (host = self.m_host, db = self.m_db, user = self.m_user, passwd = self.m_passwd)
+            except:
+                self.m_mysql = None
 
     def close (self) :
 

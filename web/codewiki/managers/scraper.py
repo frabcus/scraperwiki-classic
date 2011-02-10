@@ -72,14 +72,18 @@ class ScraperManager(CodeManager):
         if not last_run:
             last_run = datetime.datetime.now()
 
+        # should this also set the language?
         scraper = self.create(title="%s's Email Alert Scraper" % (user.get_profile().name or user.username),
                               short_name="%s.emailer" % user.username,
                               published=True,
                               last_run=last_run)
         scraper.commit_code("""
+# automatically generates your email messages; feel free to edit
 import scraperwiki
 emaillibrary = scraperwiki.utils.swimport("general-emails-on-scrapers")
-print emaillibrary.EmailMessage()
+subjectline, headerlines, bodylines, footerlines = emaillibrary.EmailMessageParts()
+if bodylines:
+    print "\n".join([subjectline] + headerlines + bodylines + footerlines)
                             """,
                             'Initial Commit',
                             user)

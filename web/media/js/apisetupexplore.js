@@ -11,10 +11,22 @@ function rewriteApiUrl (){
     };
     $('#aApiLink span').html(sArgs);
     $('#aApiLink').attr('href', $('#uri').val() + sArgs);
+
+    var aName = $('.api_arguments dl input#name').val(); 
+
+    if (aName)
+    {
+        $('#aScraperLink').show(); 
+        $('#aScraperLink').text(aName); 
+        $('#aScraperLink').attr('href', "/scrapers/"+aName); 
+    }
+    else
+        $('#aScraperLink').hide(); 
 }
 
 
 function APISetupExploreFunction(){
+
     //change the sidebar examples to links where useful
     $('#ulFormats li code').each(
         function(){
@@ -76,13 +88,9 @@ function APISetupExploreFunction(){
     );
 
     //linkup the texboxes to rewrite the API url
-    $('.api_arguments dl input').each(
-        $(this).keyup(
-            function(){
-                rewriteApiUrl();
-            }
-        )
-    );
+    $('.api_arguments dl input').each(function() {$(this).keyup(rewriteApiUrl)}); 
+
+    rewriteApiUrl(); // initialize
 }
 
 

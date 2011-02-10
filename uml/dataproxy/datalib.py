@@ -8,7 +8,8 @@ import  types
 import  datetime
 import  sqlite3
 import  signal
-import base64
+import  base64
+import  shutil
 
 class Database :
 
@@ -72,6 +73,10 @@ class Database :
         
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
+        
+        self.swdatakeys = {}   # default table is always swdata, but allows us to set other table names in future
+        self.swdatatypes = {}
+        self.sqdatatemplate = {}
 
         if type(config) == types.StringType :
             conf = ConfigParser.ConfigParser()
@@ -179,36 +184,6 @@ class Database :
             return self.execute('select `id` from `sequences`').fetchone()[0]
         raise Exception("Unrecognised datastore type '%s'" % self.m_dbtype)
 
-    def fetch (self, scraperID, unique_keys) :   # note: unique_keys is a dict in the function, whereas elsewhere it is a list!
-
-        """
-        Fetch values from the datastore.
-        """
-
-        #  Sanity checks
-        #
-        if type(unique_keys) not in [ types.DictType ] or len(unique_keys) == 0 :
-            return [ False, 'unique_keys must be a non-empty dictionary' ]
-
-        if scraperID in [ None, '' ] :
-            return [ False, 'cannot fetch data without a scraper ID' ]
-
-        uhash   = uniqueHash (unique_keys.keys(), unique_keys)
-        cursor1 = self.execute \
-                    (   'select `item_id`, `date`, `latlng`, `date_scraped` from `items` where `scraper_id` = %s and `unique_hash` = %s',
-                        [ scraperID, uhash ]
-                    )
-
-        res     = []
-        for row in cursor1.fetchall() :
-            data   = {}
-            cursor2 = self.execute ('select `key`, `value` from `kv` where `item_id` = %s', [ row[0] ])
-            for pair in cursor2.fetchall() :
-                data[pair[0]] = pair[1]
-            res.append ({ 'date' : str(row[1]), 'latlng' : row[2], 'date_scraped' : str(row[3]), 'data' : data })
-
-        return [ True, res ]
-
 
     def postcodeToLatLng (self, scraperID, postcode) :   
 
@@ -220,39 +195,6 @@ class Database :
         except :
             return [ False, 'Postcode not found' ]
 
-    def retrieve (self, scraperID, matchrecord) :   
-
-        """
-        Retrieve matched values ignoring hashcode technology
-        """
-
-        query  = []
-        values = []
-        slot   = 1
-        query.append('select `items`.`item_id`, `date`, `latlng`, `date_scraped` from `items`')
-        for key, value in matchrecord.items():
-            query .append(' inner join `kv` as kv%03d on kv%03d.`item_id` = `items`.`item_id` and kv%03d.`key` = %%s' % (slot, slot, slot))
-            values.append(key)
-            if value != "":
-            #if value is not None:  # can't transfer None through at the moment
-                query.append(' and kv%03d.`value` = %%s' % (slot))
-                values.append(value)
-            slot += 1
-        query.append(' where `items`.`scraper_id` = %s')
-        values.append(scraperID)
-    
-        cursor1 = self.execute("".join(query), values)
-    
-        # same code as in retrieve
-        res     = []
-        for row in cursor1.fetchall() :
-            data   = {}
-            cursor2 = self.execute ('select `key`, `value` from `kv` where `item_id` = %s', [ row[0] ])
-            for pair in cursor2.fetchall() :
-                data[pair[0]] = pair[1]
-            res.append ({ 'date' : str(row[1]), 'latlng' : row[2], 'date_scraped' : str(row[3]), 'data' : data })
-
-        return [ True, res ]
 
 
     def save (self, scraperID, unique_keys, scraped_data, date = None, latlng = None) :
@@ -402,8 +344,20 @@ class Database :
         return  [ True, 'Data record inserted' ]
 
 
-    def data_dictlist (self, scraperID, limit, offset, start_date, end_date, latlng) :
-
+    def data_dictlist (self, scraperID, short_name, tablename, limit, offset, start_date, end_date, latlng) :
+        
+        # quick overload to redirect function to sqlite table if necessary
+        if not tablename and short_name:   # decide if we are to use the sqlite table if available
+            cursor = self.execute("select `item_id` from `items` where `scraper_id` = %s limit 1", (scraperID,))
+            if not cursor.fetchall():
+                tablename = "swdata"
+        if tablename:
+            result = self.sqlitecommand(scraperID, "fromfrontend", short_name, "execute", "select * from `%s` limit ? offset ?" % tablename, (limit, offset))
+            if isinstance(result, str):
+                return [False, result]
+            return [True, [ dict(zip(result["keys"], d))  for d in result["data"] ] ]
+                
+            
         qquery  = [ "select `items`.`item_id` as `item_id`" ]
         qparams = []
 
@@ -414,7 +368,7 @@ class Database :
             qquery .append(", ((acos(sin(%s * pi() / 180) * sin(abs(substr(`items`.`latlng`, 1, 20)) * pi() / 180) + cos(%s * pi() / 180) * cos(abs(substr(`items`.`latlng`, 1, 20)) * pi() / 180) * cos((%s - abs(substr(`items`.`latlng`, 21, 41))) * pi() / 180)) * 180 / pi()) * 60 * 1.1515 * 1.609344) as distance")
             qparams.append(latlng[0])
             qparams.append(latlng[0])
-            qparams.append(latlng[1])                        
+            qparams.append(latlng[1])
 
         qquery .append("from `items`")
 
@@ -483,9 +437,16 @@ class Database :
 
         return [ True, allitems ]
 
-    def clear_datastore (self, scraperID) :
+    def clear_datastore(self, scraperID, short_name):
         self.execute("delete kv, items from kv join items on kv.item_id = items.item_id where scraper_id = '%s'" % scraperID)
         self.m_db.commit()
+            
+        scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+        scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+        if os.path.isfile(scrapersqlitefile):
+            deletedscrapersqlitefile = os.path.join(scraperresourcedir, "DELETED-defaultdb.sqlite")
+            shutil.move(scrapersqlitefile, deletedscrapersqlitefile)
+            
         return [ True, None ]
 
     def datastore_keys (self, scraperID) :
@@ -613,14 +574,20 @@ class Database :
                     return sqlite3.SQLITE_OK
                 return sqlite3.SQLITE_DENY
             
+            if action_code == sqlite3.SQLITE_PRAGMA:
+                if tname == "table_info":
+                    return sqlite3.SQLITE_OK
+                
             if runID[:12] == "fromfrontend":   # front end can only read, not write
                 if action_code not in readonlyops:
                     return sqlite3.SQLITE_DENY
-            elif sql_location != None and sql_location != 'main':
+            
+            elif sql_location != None and sql_location != 'main':  # cannot write to attached database
                 if action_code not in readonlyops:
                     return sqlite3.SQLITE_DENY
             return sqlite3.SQLITE_OK
 
+                # this needs batching (eg in 1Mb chunks)
         if command == "downloadsqlitefile":
             scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
             scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
@@ -628,7 +595,6 @@ class Database :
                 return "No sqlite database"
             fin = open(scrapersqlitefile, "rb")
             result = {'content':base64.encodestring(fin.read()), 'encoding':"base64"}
-            print result
             return result
             
             # make a new directory and connection if not seen anywhere (unless it's draft)
@@ -664,17 +630,25 @@ class Database :
                 return "sqlite3.Error: "+str(e)
                 
         if command == "datasummary":
-            result = { }
+            tables = { }
             try:
                 for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
-                    self.m_sqlitedbcursor.execute("select * from `%s` limit ?" % name, ((val1 or 10),))
-                    result[name] = {"sql":sql}
-                    result[name]["rows"] = list(self.m_sqlitedbcursor)
-                    result[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
-                    result[name]["length"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
+                    tables[name] = {"sql":sql}
+                    self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, ((val1 == None and 10 or val1),))
+                    if val1 != 0:
+                        tables[name]["rows"] = list(self.m_sqlitedbcursor)
+                    tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
+                    tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                     
             except sqlite3.Error, e:
                 return "sqlite3.Error: "+str(e)
+            
+            result = {"tables":tables}
+            if short_name:
+                scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+                scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+                if os.path.isfile(scrapersqlitefile):
+                    result["filesize"] = os.path.getsize(scrapersqlitefile)
             return result
         
         if command == "attach":
@@ -693,4 +667,44 @@ class Database :
             signal.alarm (0)
             return "ok"   # doesn't reach here if the signal fails
 
+
+    def updatesqdatakeys(self, scraperID, runID, short_name, swdatatblname):
+        tblinfo = self.sqlitecommand(scraperID, runID, short_name, "execute", "PRAGMA table_info(%s)" % swdatatblname, None)["data"]
+        self.swdatakeys[swdatatblname] = [ a[1]  for a in tblinfo ]
+        self.swdatatypes[swdatatblname] = [ a[2]  for a in tblinfo ]
+        self.sqdatatemplate[swdatatblname] = "insert or replace into %s values (%s)" % (swdatatblname, ",".join(["?"]*len(self.swdatakeys[swdatatblname])))
+
+
+    def save_sqlite(self, scraperID, runID, short_name, unique_keys, data):
+        swdatatblname = "swdata"
             
+        # establish the sw data table
+        if not self.m_sqlitedbconn or swdatatblname not in self.swdatakeys:
+            self.sqlitecommand(scraperID, runID, short_name, "execute", "create table if not exists %s (`date_scraped` text, `unique_hash` text unique)" % swdatatblname, None)
+        
+        if swdatatblname not in self.swdatakeys:
+            self.updatesqdatakeys(scraperID, runID, short_name, swdatatblname)
+    
+        # add new columns if required
+        for k in data:
+            if k not in self.swdatakeys[swdatatblname]:
+                v = data[k]
+                if v != None:
+                    vt = "text"
+                    if type(v) == int:
+                        vt = "integer"
+                    elif type(v) == float:
+                        vt = "real"
+                    self.sqlitecommand(scraperID, runID, short_name, "execute", "alter table %s add column `%s` %s" % (swdatatblname, k, vt), None)
+                    self.updatesqdatakeys(scraperID, runID, short_name, swdatatblname)  # get again rather than amend
+    
+        # compute the hash key
+        ulist = [ str(data[k])  for k in set(unique_keys) ]
+        data["unique_hash"] = hashlib.md5('\0342\0211\0210\0342\0211\0210\0342\0211\0210'.join(ulist)).hexdigest()
+        data["date_scraped"] = datetime.datetime.now().isoformat()
+        res = self.sqlitecommand(scraperID, runID, short_name, "execute", self.sqdatatemplate[swdatatblname], [ data.get(k)  for k in self.swdatakeys[swdatatblname] ])
+        if type(res) == str:
+            return [ False, res ]
+        self.sqlitecommand(scraperID, runID, short_name, "commit", None, None)
+        return  [ True, 'Data record inserted' ]
+
