@@ -13,13 +13,16 @@
 
 <div class="content full">
     <div class="data_viewer">
-        {% if data.rows %}
+        {% if not sqlitedata or not data.rows %}
             <ul class="code_about">
                 <li><a id="aHideTable" class="edit">[hide table]</a></li>
                 <li><a id="aShowTable" class="edit">[show table]</a></li>
                 <li><a id="aShowMore" class="edit">[show more]</a></li>
                 <li><a id="aShowLess" class="edit">[show less]</a></li>
             </ul>
+        {% endif %}
+
+        {% if data.rows %}
             <div>
                 <table class="data">
                     <thead>
@@ -57,7 +60,7 @@
             <table class="data">
               <thead>
                  <tr><th colspan="{{sqltabledata.keys|length}}">
-                    Sample from sqlite table <b><a title="{{sqltabledata.sql}}">{{sqltablename}}</a></b> which has {{sqltabledata.length}} rows
+                    Sample from sqlite table <b><a title="{{sqltabledata.sql}}">{{sqltablename}}</a></b> which has {{sqltabledata.count}} rows
                  </th></tr>
                  <tr>{% for heading in sqltabledata.keys %}<th width="120">{{ heading }}</th>{% endfor %}</tr>
               </thead>
@@ -95,7 +98,7 @@
 
         <div class="content_footer">
             <p>
-                This dataset has a total of {{ scraper.record_count }} records.
+                {% if scraper.record_count %}This dataset has a total of {{ scraper.record_count }} records.{% endif %}
                 The scraper 
                 {% if lastscraperrunevent %}
                   {% ifequal lastscraperrunevent.pid -1 %}
