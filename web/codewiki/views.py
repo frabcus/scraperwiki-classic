@@ -618,7 +618,7 @@ def choose_template(request, wiki_type):
     if wiki_type == "scraper":
         context["languages"] = ["python", "ruby", "php"]
     else:
-        context["languages"] = ["python", "ruby", "php", "html", "javascript"]
+        context["languages"] = ["python", "ruby", "php", "html"]
     
     return render_to_response(template, context, context_instance=RequestContext(request))
 

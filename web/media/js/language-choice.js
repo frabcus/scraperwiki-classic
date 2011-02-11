@@ -24,7 +24,7 @@ function newCodeObject(wiki_type)
         {
             overlayClose: true, 
             autoResize: true, 
-            containerCss:{ borderColor:"#0ff", width:(wiki_type == "scraper" ? 500 : 750)+"px" }, 
+            containerCss:{ borderColor:"#0ff", width:(wiki_type == "scraper" ? 500 : 610)+"px" }, 
             overlayCss: { cursor:"auto" }
         });
     });
