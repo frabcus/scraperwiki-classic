@@ -41,5 +41,5 @@
     <script src="{{ MEDIA_URL }}ruby-in-codemirror/js/tokenizeruby.js" type="text/javascript"></script> 
     <script src="{{ MEDIA_URL }}ruby-in-codemirror/js/parseruby.js" type="text/javascript"></script> 
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}{{settings.CODEMIRROR_URL}}ruby-in-codemirror/css/rubycolors.css"/> 
-    <script>Parser = RubyParser;</script>
+    <script>Parser = DummyParser; // RubyParser does not have matcher() command in it </script>
 {% endifequal %}
