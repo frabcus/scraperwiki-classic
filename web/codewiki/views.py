@@ -308,8 +308,14 @@ def view_overview (request, short_name):
     
     #get scrapers used in this view
     related_scrapers = scraper.relations.filter(wiki_type='scraper')
-    
+        
     context = {'selected_tab': 'overview', 'scraper': scraper, 'scraper_tags': scraper_tags, 'related_scrapers': related_scrapers, 'user_owns_it': user_owns_it}
+    
+    if scraper.language == 'html':
+        code = scraper.saved_code()
+        if re.match('<div\s+class="inline">', code):
+            context["htmlcode"] = code
+    
     return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
     
     
