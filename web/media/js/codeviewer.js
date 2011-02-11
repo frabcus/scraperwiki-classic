@@ -16,9 +16,9 @@ function highlightCode(code, Parser, previewerid)
     highlightText(code, addLine, Parser); 
 }
 
-function highlightOtherCode(code, othercode, matcheropcodes, Parser, previewerid)
+function highlightOtherCode(code, othercode, matcheropcodes, Parser, previewer)
 {
-    var output = $('#'+previewerid+' #output'); 
+    var output = previewer.find('.output'); 
     var numbers = $('#'+previewerid+' #linenumbers'); 
     var othernumbers = $('#'+previewerid+' #otherlinenumbers'); 
 
