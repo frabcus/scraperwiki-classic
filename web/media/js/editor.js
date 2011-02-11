@@ -27,7 +27,6 @@ $(document).ready(function() {
     var bConnected  = false; 
     var bSuppressDisconnectionMessages = false; 
     var buffer = "";
-    var selectedTab = 'console';
     var outputMaxItems = 400;
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 
@@ -225,29 +224,32 @@ $(document).ready(function() {
         parsers['python'] = ['../contrib/python/js/parsepython.js'];
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
         parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
-        //parsers['ruby'] = [ 'parsedummy.js'];   // in case Ruby parser needs disabling due to too many bugs
         parsers['html'] = ['parsexml.js', 'parsecss.js', 'tokenizejavascript.js', 'parsejavascript.js', 'parsehtmlmixed.js']; 
+        parsers['javascript'] = ['tokenizejavascript.js', 'parsejavascript.js']; 
 
         stylesheets['python'] = [codemirror_url+'contrib/python/css/pythoncolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['php'] = [codemirror_url+'contrib/php/css/phpcolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['ruby'] = ['/media/ruby-in-codemirror/css/rubycolors.css', '/media/css/codemirrorcolours.css'];
         stylesheets['html'] = [codemirror_url+'/css/xmlcolors.css', codemirror_url+'/css/jscolors.css', codemirror_url+'/css/csscolors.css', '/media/css/codemirrorcolours.css']; 
+        stylesheets['javascript'] = [codemirror_url+'/css/jscolors.css', '/media/css/codemirrorcolours.css']; 
 
         indentUnits['python'] = 4;
         indentUnits['php'] = 4;
         indentUnits['ruby'] = 2;
         indentUnits['html'] = 4;
+        indentUnits['javascript'] = 4;
 
         parserConfig['python'] = {'pythonVersion': 2, 'strictErrors': true}; 
         parserConfig['php'] = {'strictErrors': true}; 
         parserConfig['ruby'] = {'strictErrors': true}; 
         parserConfig['html'] = {'strictErrors': true}; 
+        parserConfig['javascript'] = {'strictErrors': true}; 
 
         parserName['python'] = 'PythonParser';
         parserName['php'] = 'PHPHTMLMixedParser'; // 'PHPParser';
         parserName['ruby'] = 'RubyParser';
-        //parserName['ruby'] = 'DummyParser';  // for bugs
         parserName['html'] = 'HTMLMixedParser';
+        parserName['javascript'] = 'JSParser';
 
         // allow php to access HTML style parser
         parsers['php'] = parsers['html'].concat(parsers['php']);
@@ -426,7 +428,10 @@ $(document).ready(function() {
         })
 
         //show default tab
-        showTab('console'); 
+       if ($('.editor_output div.tabs li.console').length)
+           showTab('console'); 
+       else
+           showTab('chat'); 
     }
     
 
@@ -672,7 +677,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     //send code request run
     function sendCode() 
     {
-        if ($('.editor_controls #run').attr('disabled'))
+        if (!$('.editor_controls #run').length || $('.editor_controls #run').attr('disabled'))
             return; 
 
         // protect not-ready case
@@ -684,7 +689,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     
         //send the data
-        code = codeeditor.getCode(); 
+        var code = codeeditor.getCode(); 
+        var urlquery = (!$('#id_urlquery').length || $('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
         data = {
             "command"   : "run",
             "guid"      : guid,
@@ -693,7 +699,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             "language"  : scraperlanguage, 
             "scrapername":short_name,
             "code"      : code,
-            "urlquery"  : ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val())
+            "urlquery"  : urlquery
         }
         $('.editor_controls #run').val('Sending');
         sendjson(data); 
@@ -1177,7 +1183,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         if ($('.editor_controls #preview').attr('disabled'))
             return; 
 
-        var urlquery = ($('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
+        var urlquery = (!$('#id_urlquery').length || $('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
         var viewurl = $('input#viewrunurl').val(); 
         var previewmessage = ''; 
         if (urlquery.length != 0) 
@@ -1188,12 +1194,15 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 previewmessage = ' [' + urlquery + '] is an invalid query string'; 
         }
 
-        previewscreen = '<h3>View preview <small><a href="'+viewurl+'" target="_blank">'+viewurl+'</a>'+previewmessage+'</small></h3>'; 
+        previewscreen = ['<h3>View preview'];
+        if (viewurl)
+             previewscreen.push(' <small><a href="'+viewurl+'" target="_blank">'+viewurl+'</a>'+previewmessage+'</small>'); 
+        previewscreen.push('</h3>'); 
         isrc = ""; // isrc = viewurl; (would allow direct inclusion from saved version)
                    // force the preview iframe to fill most of what it should.  needs more work
-        previewscreen += '<iframe id="previewiframe" width="100%" height="'+($(window).height()*8/10-50)+'px" src="'+isrc+'"></iframe>'; 
+        previewscreen.push('<iframe id="previewiframe" width="100%" height="'+($(window).height()*8/10-50)+'px" src="'+isrc+'"></iframe>'); 
 
-        $.modal(previewscreen, 
+        $.modal(previewscreen.join(""), 
         { 
             overlayClose: true,
             containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
@@ -1203,7 +1212,16 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 ifrm = document.getElementById('previewiframe');
                 activepreviewiframe = (ifrm.contentWindow ? ifrm.contentWindow : (ifrm.contentDocument.document ? ifrm.contentDocument.document : ifrm.contentDocument));
                 activepreviewiframe.document.open(); 
-                sendCode(); // trigger the running once we're ready for the output
+
+                // throw the value straight in or run the code which brings it back in via writeRunOutput()
+                if (scraperlanguage == "html")
+                {
+                    activepreviewiframe.document.write(codeeditor.getCode()); 
+                    activepreviewiframe.document.close(); 
+                    activepreviewiframe = undefined; 
+                }
+                else
+                    sendCode(); // trigger the running once we're ready for the output
             }
         }); 
     }
@@ -1628,7 +1646,8 @@ writeToChat("Saved rev number: " + res.rev);
 
 
     //show tab
-    function showTab(sTab){
+    function showTab(sTab)
+    {
         setTabScrollPosition(sTabCurrent, 'hide'); 
         $('.editor_output .info').children().hide();
         $('.editor_output .controls').children().hide();        

@@ -67,6 +67,10 @@ def rpcexecute(request, short_name, revision = None):
     # quick case where we have PHP with no PHP code in it (it's all pure HTML)
     if scraper.language == 'php' and not re.search('<\?', code):
         return HttpResponse(code)
+    if scraper.language == 'html':
+        return HttpResponse(code)
+    if scraper.language == 'javascript':
+        HttpResponse(code, mimetype='application/javascript')
 
     runner = MakeRunner(request, scraper, code)
 

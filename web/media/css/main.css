@@ -475,8 +475,10 @@ body.fullscreen #embedinstructions textarea { width:500px; }
 
 .code_about li.language, strong.language {background-repeat:no-repeat; padding-left:22px}
 .code_about li.language.python, strong.language.python {background-image:url(../images/icons/python.png);}
-.code_about li.language.php, strong.language.php {background-image:url(../images/icons/php.png);}
-.code_about li.language.ruby, strong.language.ruby {background-image:url(../images/icons/ruby.png);}
+.code_about li.language.php,    strong.language.php {background-image:url(../images/icons/php.png);}
+.code_about li.language.ruby,   strong.language.ruby {background-image:url(../images/icons/ruby.png);}
+.code_about li.language.html,   strong.language.html {background-image:url(../images/icons/html.png);}
+.code_about li.language.javascript,strong.language.javascript {background-image:url(../images/icons/javascript.png);}
 
 .code_about li.codewiki_type {background-repeat:no-repeat; padding-left:22px;}
 .code_about li.codewiki_type.scraper {background-image:url(../images/icons/scraper.png);}

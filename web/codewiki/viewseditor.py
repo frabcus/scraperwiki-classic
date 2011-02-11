@@ -159,11 +159,13 @@ def edittutorial(request, short_name):
 
 blankstartupcode = { 'scraper' : { 'python': "# Blank Python\n", 
                                     'php':   "<?php\n# Blank PHP\n?>\n", 
-                                    'ruby':  "# Blank Ruby\n" 
+                                    'ruby':  "# Blank Ruby\n",
                                  }, 
                      'view'    : { 'python': "# Blank Python\nsourcescraper = ''\n", 
                                    'php':    "<?php\n# Blank PHP\n$sourcescraper = ''\n?>\n", 
-                                   'ruby':   "# Blank Ruby\nsourcescraper = ''\n" 
+                                   'ruby':   "# Blank Ruby\nsourcescraper = ''\n",
+                                   'html':   "<p>Blank HTML page</p>\n",
+                                   'javascript':"// Blank javascript\n",
                                   }
                    }
 
@@ -171,7 +173,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     
         # quick and dirty corrections to incoming urls, which should really be filtered in the url.py settings
     language = language.lower()
-    if language not in blankstartupcode['scraper']:
+    if language not in blankstartupcode[wiki_type]:
         language = 'python'
     
     context = {'selected_tab':'code'}

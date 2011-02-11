@@ -26,7 +26,7 @@
 
     {% ifnotequal mode "faq" %}
     <p>
-        You are reading the help for <strong class="language {{language}}"> {{language.title}}</strong> 
+        You are reading the help for <strong class="language {{language}}">{{language.title}}</strong> 
          See help also for
          {% for other_language in other_languages %}
          {% if not forloop.first %} or {% endif %}

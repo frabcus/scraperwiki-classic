@@ -100,10 +100,12 @@
             {# Controls #}
             <div class="editor_controls">
                 <a id="menu_tutorials" class="helplink" href="#" title="Show useful commands">Quick help</a>
-                <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R)"/>
-                {% ifequal scraper.wiki_type 'view' %}
-                    <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P)"/>
-                {% endifequal %}
+                {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
+                  <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R)"/>
+                {% endifnotequal %}{% endifnotequal %}
+                {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'javascript' %}
+                  <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P)"/>
+                {% endifnotequal %}{% endifequal %}
 
                 {# hidden if not necessary #}
                 <select id="automode">
@@ -113,12 +115,10 @@
                     <option name="draft"    value="draft"    id="id_draft" {% if not scraper.id %}selected{% endif %}>draft editing</option>
                 </select>
 
-                {% ifequal scraper.wiki_type 'view' %}
+                {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
                   <label for="id_urlquery" class="hide">Urlquery:</label>
                   <input id="id_urlquery" type="text" class="text" name="urlquery" title="URL query string passed to the view" /> 
-                {% else %}
-                  <input id="id_urlquery" type="hidden" class="text" name="urlquery" /> 
-                {% endifequal %}
+                {% endifnotequal %}{% endifnotequal %}{% endifequal %}
 
                 <img id="running_annimation" src="{{MEDIA_URL}}/images/running.gif"/>
                 <span id="watcherstatus"></span>
@@ -147,6 +147,7 @@
             <div id="outputeditordiv" class="editor_output">
                 <div class="tabs">
                     <ul>
+                    {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
                         <li class="console">
                             <a href="#" title="Console output from scraper">Console</a>
                         </li>
@@ -156,6 +157,7 @@
                         <li class="sources">
                             <a href="#" title="Pages you are scraping">Sources</a>
                         </li>
+                    {% endifnotequal %}{% endifnotequal %}
                         <li class="chat">
                             <a href="#" title="Communicate to others">Chat</a>
                         </li>
