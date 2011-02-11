@@ -17,6 +17,7 @@ import sys
 import traceback
 import datetime
 import tempfile
+import imp
 
 
 import scraperwiki.console
