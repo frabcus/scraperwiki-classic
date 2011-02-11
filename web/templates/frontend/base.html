@@ -60,7 +60,9 @@
           <ul class="main_menu">
             <li><a href="{% url dashboard %}" title="Manage your scrapers" class="dashboard">Your dashboard</a></li>
             <li><a href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a></li>
-            <li><a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">New view</a></li>
+            {% if user.is_staff %}
+              <li class="staff"><a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">New view</a></li>
+            {% endif %}
             <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers">Browse scrapers</a></li>
             <li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
             <li><a href="{% url help 'tutorials' 'python' %}" title="Help">Tutorials</a></li>

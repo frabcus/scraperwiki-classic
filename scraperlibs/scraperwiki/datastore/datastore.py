@@ -208,15 +208,30 @@ def DataStore (config) :
         ds = DataStoreClass(config)
     return ds
 
-def strencode(v):
-    try:     v = str(v)
-    except:  v = v.encode('utf-8')
-    return v
 
-def ifsencode(v):
+
+def strunc(v, t):
+    if not t or len(v) < t:
+        return v
+    return "%s..." % v[:t]
+
+def strencode_trunc(v, t):
+    try:
+        return strunc(str(v), t)
+    except:  
+        pass
+    try:
+        return strunc(v, t).encode('utf-8')
+    except:
+        pass
+    return "---"
+
+
+def ifsencode_trunc(v, t):
     if type(v) in [int, float]:
         return v
-    return strencode(v)
+    return strencode_trunc(v, t)
+
 
 # functions moved from the out of data code into here to manage their development
 def save (unique_keys, data, date = None, latlng = None, silent = False) :
@@ -231,24 +246,19 @@ def save (unique_keys, data, date = None, latlng = None, silent = False) :
         raise Exception (arg) 
 
     # output for console
-    pdata = {}
-    for key, value in data.items():
-        pdata[strencode(key)] = strencode(value)
-
     if not silent :
+        pdata = {}
+        for key, value in data.items():
+            pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
+
         scraperwiki.console.logScrapedData (pdata)
     return arg
 
 
 
-# experimental sqlite access function
-sqlitecommand_verbose = True
-def sqlitecommand(command, val1=None, val2=None):
-    if command == "verbose":
-        global sqlitecommand_verbose
-        sqlitecommand_verbose = val1
-        return
-    
+
+
+def sqlitecommand(command, val1=None, val2=None, verbose=1):
     ds = DataStore(None)
     result = ds.request(('sqlitecommand', command, val1, val2))
     
@@ -266,30 +276,30 @@ def sqlitecommand(command, val1=None, val2=None):
             
     
     # list type for second field in message dump
-    if not val2:
-        lval2 = [ ]
-    elif type(val2) in [tuple,list]:
-        lval2 = [ ifsencode(v)  for v in val2 ]
-    elif command == "attach":
-        lval2 = [ val2 ]
+    if verbose:
+        if not val2:
+            lval2 = [ ]
+        elif type(val2) in [tuple,list]:
+            lval2 = [ ifsencode_trunc(v, 50)  for v in val2 ]
+        elif command == "attach":
+            lval2 = [ val2 ]
 
-    if sqlitecommand_verbose:
         scraperwiki.console.logSqliteCall(command, val1, lval2)
+    
     return result
     
 
-# functions moved from the out of data code into here to manage their development
-def save_sqlite(unique_keys, data, date=None, latlng=None, silent=False):
+def save_sqlite(unique_keys, data, date=None, latlng=None, verbose=1):
     ds = DataStore(None)
     rc, arg = ds.save_sqlite(unique_keys, data, date, latlng)
     if not rc :
         raise Exception (arg) 
 
-    # output for console
-    pdata = {}
-    for key, value in data.items():
-        pdata[strencode(key)] = strencode(value)
-
-    if not silent :
+    if verbose:
+        pdata = {}
+        for key, value in data.items():
+            pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
         scraperwiki.console.logScrapedData(pdata)
+    
     return arg
+

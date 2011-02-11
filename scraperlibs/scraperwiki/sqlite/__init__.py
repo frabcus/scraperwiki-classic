@@ -1,18 +1,19 @@
 from scraperwiki.datastore import save_sqlite as save
 from scraperwiki.datastore import sqlitecommand
 
-def attach(name, asname=None):
+
+def attach(name, asname=None, silent=False):
     return sqlitecommand("attach", name, asname)
     
-def execute(val1, val2=None):
-    return sqlitecommand("execute", val1, val2)
+def execute(val1, val2=None, verbose=1):
+    return sqlitecommand("execute", val1, val2, verbose)
 
-def commit():
-    return sqlitecommand("commit")
+def commit(verbose=1):
+    return sqlitecommand("commit", verbose)
 
 
 
-def select(val1, val2=None):
+def select(val1, val2=None, verbose=1):
     result = sqlitecommand("execute", "select %s" % val1, val2)
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
 
@@ -31,5 +32,3 @@ def table_info(name):
         result = sqlitecommand("execute", "PRAGMA table_info(`%s`)" % name)
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
 
-def verbose(bverbose):
-    sqlitecommand("verbose", bverbose)

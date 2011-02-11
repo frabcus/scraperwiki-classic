@@ -73,6 +73,7 @@ class Database :
         
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
+        self.authorizer_func = None  
         
         self.swdatakeys = {}   # default table is always swdata, but allows us to set other table names in future
         self.swdatatypes = {}
@@ -562,31 +563,37 @@ class Database :
         # the values of these fields are safe because from the UML they are subject to an ident callback, 
         # and from the frontend they are subject to a connection from a particular IP number
     def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
-        #print "XXXXX", (command, val1, val2)
-                
-            # see http://www.sqlite.org/c3ref/c_alter_table.html
-        battaching = False  # maybe should be done using two connections
-        def authorizer_func(action_code, tname, cname, sql_location, trigger):
-            #print "authorizer_funccccd", (action_code, tname, cname, sql_location, trigger), (short_name, runID)
-            readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library
-            if action_code == sqlite3.SQLITE_ATTACH:
-                if battaching:
-                    return sqlite3.SQLITE_OK
-                return sqlite3.SQLITE_DENY
-            
+        #print "XXXXX", (command, runID, val1, val2)
+        
+        def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
+            readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library.  codes: http://www.sqlite.org/c3ref/c_alter_table.html
+            if action_code in readonlyops:
+                return sqlite3.SQLITE_OK
             if action_code == sqlite3.SQLITE_PRAGMA:
                 if tname == "table_info":
                     return sqlite3.SQLITE_OK
-                
-            if runID[:12] == "fromfrontend":   # front end can only read, not write
-                if action_code not in readonlyops:
-                    return sqlite3.SQLITE_DENY
+            return sqlite3.SQLITE_DENY
+        
+        def authorizer_attaching(action_code, tname, cname, sql_location, trigger):
+            if action_code == sqlite3.SQLITE_ATTACH:
+                return sqlite3.SQLITE_OK
+            return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
+        
+        def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
+            if sql_location == None or sql_location == 'main':  
+                return sqlite3.SQLITE_OK
+            return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
             
-            elif sql_location != None and sql_location != 'main':  # cannot write to attached database
-                if action_code not in readonlyops:
-                    return sqlite3.SQLITE_DENY
-            return sqlite3.SQLITE_OK
+                    # apparently not able to reset authorizer function after it has been set once, so have to redirect this way
+        def authorizer_all(action_code, tname, cname, sql_location, trigger):
+            return self.authorizer_func(action_code, tname, cname, sql_location, trigger)
 
+
+        if runID[:12] == "fromfrontend":
+            self.authorizer_func = authorizer_readonly
+        else:
+            self.authorizer_func = authorizer_writemain
+            
                 # this needs batching (eg in 1Mb chunks)
         if command == "downloadsqlitefile":
             scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
@@ -609,13 +616,13 @@ class Database :
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:")   # draft scrapers make a local version
-            self.m_sqlitedbconn.set_authorizer(authorizer_func)
+            self.m_sqlitedbconn.set_authorizer(authorizer_all)
             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
         
         if command == "execute":
             try:
                     # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
-                signal.alarm (10)  
+                signal.alarm (10)  # should use set_progress_handler !!!!
                 if val2:
                     self.m_sqlitedbcursor.execute(val1, val2)  # handle "(?,?,?)", (val, val, val)
                 else:
@@ -630,6 +637,7 @@ class Database :
                 return "sqlite3.Error: "+str(e)
                 
         if command == "datasummary":
+            self.authorizer_func = authorizer_readonly
             tables = { }
             try:
                 for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
@@ -652,13 +660,12 @@ class Database :
             return result
         
         if command == "attach":
+            self.authorizer_func = authorizer_attaching
             try:
-                battaching = True
                 attachscrapersqlitefile = os.path.join(self.m_resourcedir, val1, "defaultdb.sqlite")
                 self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, val2 or val1))
             except sqlite3.Error, e:
                 return "sqlite3.Error: "+str(e)
-            battaching = False
             return "ok"
 
         if command == "commit":
