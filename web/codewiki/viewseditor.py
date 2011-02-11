@@ -340,11 +340,14 @@ def handle_session_draft(request):
 def quickhelp(request):
     language = request.GET.get('language', '').lower()
     wiki_type = request.GET.get('wiki_type', '')
-    line = request.GET.get('line')
-    character = request.GET.get('character')
+    line = request.GET.get('line', "")
+    character = request.GET.get('character', "")
     context = { "wiki_type":wiki_type, "language":language }
     context['quick_help_template'] = 'documentation/%s_quick_help_%s.html' % (wiki_type, language)
     context['cheatsheetquery'] = urllib.urlencode({'line':line, 'character':character, 'language':language})
+    if re.search("Quick help", line):
+        url = "http://%s%s?%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=['general_quickhelp']), context['cheatsheetquery'])
+        return HttpResponseRedirect(url)
     return render_to_response('documentation/quick_help.html', context, context_instance=RequestContext(request))
 
 
