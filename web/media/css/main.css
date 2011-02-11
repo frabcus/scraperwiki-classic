@@ -408,11 +408,11 @@ a.historysave { padding-left:17px; background:url(../images/icons/disk.png) no-r
 span.historyexception { color:white; background:#d00; padding-left:2px; padding-right:2px;}
 
 #inputcode_main, #inputcode_other { display:none } 
-#otherlinenumbers { float: left; border-top: thin #ddd solid; width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
-#linenumbers { float: left; border-top: thin #ddd solid; width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
-#codepreviewer .insert { background:#e2fae2; } 
-#codepreviewer .delete { background:#fae2e2; } 
-#codepreviewer #output { border-top: thin #ddd solid; padding-top:4px; font-family: monospace;font-size: 10pt; } 
+#otherlinenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+#linenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+#codepreviewer .insert { background:#ddffdd; } 
+#codepreviewer .delete { background:#ffdddd; } 
+#codepreviewer #output {  padding-top:0.4em; font-family: monospace;font-size: 10pt; } 
 
 ul.commitlist { text-align: left; padding:0; margin:0} 
 ul.commitlist li { padding:0 } 
@@ -528,16 +528,28 @@ form#newpdfdoclink { }
 
 
 /* History page updates */
-.history_month {margin-bottom:5px;}
-.history_border {background-color:#FF0000; border:solid #000;}
-.history_edit {background-color:#ccc; border:1px #000; padding:10px; margin-bottom:5px; }
-.history_ran {background-color:#777; padding:10px; margin-bottom:5px;}
-.history_ran_fail {background-color:#f00;  padding:10px; margin-bottom:5px;}
-.history_ran_notfinished {background-color:#09f; padding:10px; margin-bottom:5px;}
+.history_month {margin-bottom:20px; }
+.history_border {background-color:#FF0000; border:solid #acacac;}
+.history_edit {background-color:#fbfbfb; border:1px #000; padding:10px; margin-bottom:5px; border:solid #acacac thin;  }
+.history_ran {background-color:#fbfbfc; padding:10px; margin-bottom:5px; border:solid #acacac thin; }
+.history_ran_fail {background-color:#f9d5d4;  padding:10px; margin-bottom:5px; border:solid #acacac thin;}
+.history_ran_notfinished {background-color:#ccc; padding:10px; margin-bottom:5px; border:solid #acacac thin;}
 
 
-.history_view_changes {float:right; margin-right:5px; margin-left:5px;}
-.history_view_details {float:right; margin-right:5px; margin-left:5px;}
+.history_view_changes {float:right; margin-right:5px; margin-left:5px; cursor:pointer;}
+.history_view_details {float:right; margin-right:5px; margin-left:5px; cursor:pointer;}
 .history_italic {font-style:italic;}
 .history_bold {font-weight:bold}
 .history_date {font-size:0.9em; color:#555;}
+
+
+.history_code_border {background-color:#FFF; border:solid #727272 thin;}
+.diff_title{}
+.run_preview{}
+
+.code_about{ padding:0; margin:0; cursor:pointer;}
+.aprev{color:#0097d1;}
+.arunevent{color:#0097d1;}
+
+
+

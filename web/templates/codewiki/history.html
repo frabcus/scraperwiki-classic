@@ -15,10 +15,10 @@
   <script type="text/javascript" src="{{ MEDIA_URL }}js/codeviewer.js?{{settings.REVISION}}"></script>  {# highlightCode(code, Parser), highlightOtherCode(greencode, redcode, matcheropcodes, Parser) #}
 {% endblock %}
 
-<p class="history_bold">Scheduled runs and edits to <span class="history_italic">{{ scraper.title }}</span>.</p>
+<p class="history_bold">Scheduled runs and edits to <span>{{ scraper.title }}</span>.</p>
 
 <div class="staff">
-  <p><b>Notes:</b> <em>This page is under development.  Apologies for the inconvenience</p>
+  <p><b>Notes:</b> <em>This page is under development.  Apologies for the inconvenience</em></p>
   <p>I have created the necessary callbacks to make it possible to ajax load the history diffs.  
   The following are the three links that make the callback possible:
   <b>To get the code:</b> <input type="text" id="rawcodeurl" value="{% url raw scraper.short_name %}"/>     {# callback url to get code per revision #}
@@ -46,10 +46,9 @@
 
       {% ifequal itemfirst.type 'commit' %}
         <div class="history_edit">
-          {% show_gravatar itemfirst.user 'small' %} 
-          Edited by 
+          {% show_gravatar itemfirst.user 'small' %}Edited by 
           <a href="{% if item.user.username %}{% url profiles_profile_detail itemfirst.user.username %}{% endif %}" class="historyuser">
-            {% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
+{% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
           </a>
           {% ifnotequal itemloggroup.list|length 1 %}
             {{itemloggroup.list|length}} times
@@ -57,12 +56,34 @@
           <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
 
           <div class="history_view_changes">
-            <span class="aprev staff"><u>PreviewChanges</u>
-              <span class="rev">{{itemfirst.rev}}</span>|<span class="firstrev">{{itemlast.rev}}</span>|<span class="prevrev">{{itemlast.prevrev}}</span>
-            </span>
-            <small><a href="{% url scraper_code scraper.wiki_type  scraper.short_name %}?rev={{itemfirst.rev}}&otherrev={{itemfirst.prevrev}}" class="">View Changes</a></small>
+           <span class="aprev">View Changes
+           </span>
+           <div class="codepreviewer"> 
+             <div class="otherlinenumbers"></div> 
+             <div class="linenumbers"></div> 
+             <pre class="output"></pre> 
+           </div>           
           </div>
+
+<div class="diff_title">
+<p id="cprev">Difference between, revision <span class="rev"></span> and previous revision <span class="prevrev"></span>
+<span class="code_about">
+    <a id="aHideEquals" class="edit">[hide equal lines]</a>
+    <a id="aShowEquals" class="edit">[show equal lines]</a>
+</span>
+</div>
+<div class="history_code_border">
+
+<div id="codepreviewer"> 
+  <div class="otherlinenumbers"></div> 
+  <div class="linenumbers"></div> 
+  <pre class="output"></pre> 
+</div>
+<div class="run_preview">
+<h2>Run previewer</h2>
+<pre id="runpreview" style="background:#ccf"></pre> </div>
         </div>
+	</div>
 
       {% else %} 
         {% if itemfirst.runevent.exception_message %}
@@ -80,15 +101,13 @@
 
           {% else %}
             <div class="history_ran_notfinished">
-            <span class="history_bold">Still running</span>{{itemfirst.runevent.run_started|timesince}} ago (<small>{{itemfirst.runevent.run_started}}</small>)
+            <span class="history_bold">Still running</span> {{itemfirst.runevent.run_started|timesince}} ago (<small>{{itemfirst.runevent.run_started}}</small>)
           {% endif %}
         {% endif %}
 
           <div class="history_view_details">
-            <span class="arunevent staff"><u>PreviewRunevent</u>
-              <span class="runid">{% if itemfirst.runevent.run_id %}{{itemfirst.runevent.run_id}}{% else %}{{itemfirst.runevent.id}}{% endif %}</span>
-            </span>
-            <a href="{% if itemfirst.runevent.run_id %}{% url run_event itemfirst.runevent.run_id %}{% else %}{% url run_event itemfirst.runevent.id %}{% endif %}">View Details</a>
+            <span class="arunevent">View Details</span>
+
           </div>
         </div>
 
@@ -102,22 +121,7 @@
 {% endfor %} {# year #}
 
 
-<div class="staff">
-<h2 id="cprev">Code previewer, rev:<span class="rev"></span>, prevrev:<span class="prevrev"></span></h2>
-<ul class="code_about">
-    <li><a id="aHideEquals" class="edit">[hide equal lines]</a></li>
-    <li><a id="aShowEquals" class="edit">[show equal lines]</a></li>
-</ul>
-<div id="codepreviewer"> 
-  <div id="otherlinenumbers"></div> 
-  <div id="linenumbers"></div> 
-  <pre id="output"></pre> 
-</div>
 
-<h2>Run previewer</h2>
-<pre id="runpreview" style="background:#ccf"></pre>
-
-</div>
 
 
 {% endblock %}
@@ -142,23 +146,29 @@ function fetchrevision(rev, callback)
 
 function previewchanges()
 {
+    var self = this;
+    var otherlinenumbers = $(this).parent().find(".otherlinenumbers");
     $("#otherlinenumbers").text(""); 
     $("#linenumbers").text(""); 
     $("#output").text(""); 
+    otherlinenumbers.text(""); 
 
     var rev = $(this).find("span.rev").text();  
     var prevrev = $(this).find("span.prevrev").text();  
     fetchrevision(rev, function() { fetchrevision(prevrev, function() 
     {
-        $("h2#cprev span.rev").text(rev); 
-        $("h2#cprev span.prevrev").text(prevrev); 
+        $("p#cprev span.rev").text(rev); 
+        $("p#cprev span.prevrev").text(prevrev); 
+	$(".history_code_border").show();
+        $(".diff_title").show();
+
 
         if (prevrev)
         {
             $.ajax({url:$("#diffsequrl").val()+"?rev="+rev+"&otherrev="+prevrev, success: function(sdata) 
             {
                 var matcheropcodes = $.evalJSON(sdata); // [ ("replace|delete|insert|equal", i1, i2, j1, j2) ]
-                var fequallines = highlightOtherCode(coderevisions[rev], coderevisions[prevrev], matcheropcodes, Parser, "codepreviewer"); 
+                var fequallines = highlightOtherCode(coderevisions[rev], coderevisions[prevrev], matcheropcodes, Parser, $("hcodepreviewer")); 
                 $(".code_about").show(); 
                 $(".code_about a#aShowEquals").hide(); 
                 if (fequallines < 5)
@@ -188,11 +198,23 @@ function previewrunevent()
     }}); 
 }
 
+
+
+
 $(document).ready(function() 
 { 
+   $(".history_code_border").hide();
+   $(".diff_title").hide();
+    $(".run_preview").hide();
     $(".aprev").click(previewchanges); 
     $(".arunevent").click(previewrunevent); 
     $(".code_about").hide(); 
+
+
+
+ 
+
+    
 
     $("a#aHideEquals").click(function() 
     {
