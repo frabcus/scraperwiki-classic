@@ -92,12 +92,12 @@
 </ul>
 {% endif %}
 
-<div id="codepreviewer"> 
+<div id="s_codepreviewer" class="codepreviewer"> 
   {% if othercode %}
-    <div id="otherlinenumbers"></div> 
+    <div class="otherlinenumbers"></div> 
   {% endif %}
-  <div id="linenumbers"></div> 
-  <pre id="output"></pre> 
+  <div class="linenumbers"></div> 
+  <pre class="outputlines"></pre> 
 </div>
 
 <pre id="inputcode_main">{{ code }}</pre>
@@ -112,13 +112,13 @@
     {
     {% if matcheropcodes %}
         var matcheropcodes = {{matcheropcodes|safe}}; 
-        var fequallines = highlightOtherCode($('#inputcode_main').text(), $('#inputcode_other').text(), matcheropcodes, Parser, "codepreviewer"); 
+        var fequallines = highlightOtherCode($('#inputcode_main').text(), $('#inputcode_other').text(), matcheropcodes, Parser, $("#s_codepreviewer")); 
         if (fequallines < 5)
             $("a#aHideEquals").hide();  // suppress a link that isn't going to achieve anything
         else
             $("a#aHideEquals").click(); // start with it hidden by default
     {% else %}
-        highlightCode($('#inputcode_main').text(), Parser, "codepreviewer"); 
+        highlightCode($('#inputcode_main').text(), Parser, $("#s_codepreviewer")); 
     {% endif %}
     }); 
 

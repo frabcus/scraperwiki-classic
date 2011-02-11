@@ -408,11 +408,12 @@ a.historysave { padding-left:17px; background:url(../images/icons/disk.png) no-r
 span.historyexception { color:white; background:#d00; padding-left:2px; padding-right:2px;}
 
 #inputcode_main, #inputcode_other { display:none } 
-#otherlinenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
-#linenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
-#codepreviewer .insert { background:#ddffdd; } 
-#codepreviewer .delete { background:#ffdddd; } 
-#codepreviewer #output {  padding-top:0.4em; font-family: monospace;font-size: 10pt; } 
+
+.codepreviewer .otherlinenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+.codepreviewer .linenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+.codepreviewer .insert { background:#ddffdd; } 
+.codepreviewer .delete { background:#ffdddd; } 
+.codepreviewer .outputlines { padding-top:0.4em; font-family: monospace;font-size: 10pt; } 
 
 ul.commitlist { text-align: left; padding:0; margin:0} 
 ul.commitlist li { padding:0 } 
