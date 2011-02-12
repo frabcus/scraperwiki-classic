@@ -32,9 +32,7 @@
   
     {% regroup itemlogmonth.list by groupkey as itemloggroup_list %}
     {% for itemloggroup in itemloggroup_list %}
-
       {% with itemloggroup.list|first as itemfirst %}
-      {% with itemloggroup.list|last as itemlast %}
 
       {% ifequal itemfirst.type 'commit' %}
       <div class="history_edit">
@@ -56,7 +54,17 @@
            <span class="aprev">
              <a class="showchanges">Show changes</a>
            </span>
-           <span class="rev">{{itemfirst.rev}}</span>|<span class="prevrev">{{itemlast.prevrev}}</span>
+
+           <span class="revlist hide">
+             {% for item in itemloggroup.list %}
+             <span class="revelem">
+               <span class="rev">{{item.rev}}</span>
+               <span class="ihistory_date">{{item.datetime|date:"H:i, j F Y" }}</span>
+               <span class="prevrev">{{item.prevrev}}</span>
+             </span>
+             {% endfor %}
+           </span>
+
           </div>
 
           <div class="codepreviewer"> 
@@ -81,7 +89,7 @@
         {% else %}{% if itemfirst.runevent.run_ended %}
         <div class="history_ran">
           Run suceeded:
-          - ran {{itemloggroup|length}} times, most recently for {{itemfirst.durationseconds}} seconds
+          - ran {{itemloggroup.list|length}} times, most recently for {{itemfirst.durationseconds}} seconds
           ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
           <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
 
@@ -94,7 +102,15 @@
           <div class="history_view_changes">
             <a class="hiderunevent">Hide Details</a>
             <a class="showrunevent">Show Details</a>
-            <span class="hide runid">{% if itemfirst.runevent.run_id %}{{itemfirst.runevent.run_id}}{% else %}{{itemfirst.runevent.id}}{% endif %}</span>
+
+            <span class="runidlist hide">
+              {% for item in itemloggroup.list %}
+              <span class="runidelem">
+                 <span class="runid">{% if item.runevent.run_id %}{{item.runevent.run_id}}{% else %}{{item.runevent.id}}{% endif %}</span>
+                 <span class="history_date">{{ item.datetime|date:"H:i, j F Y" }}</span>
+             </span>
+             {% endfor %}
+           </span>
           </div>
 
           <div class="runpreviewer">
@@ -105,7 +121,6 @@
       </div>
       {% endifequal %}
 
-      {% endwith %}
       {% endwith %}
     {% endfor %} {# group #}
     </div> {# history_month #}
@@ -173,8 +188,8 @@ function previewchanges_show(block)
     block.find(".aprev").hide(); 
     block.find(".aprevB").show(); 
 
-    var rev = block.find("span.rev").text();  
-    var prevrev = block.find("span.prevrev").text();  
+    var rev = block.find("span.revlist span.revelem:first span.rev").text();  
+    var prevrev = block.find("span.revlist span.revelem:last span.prevrev").text();  
 
     var cidrev = "?rev="+rev; 
     var cidprevrev = (prevrev ? "?rev="+prevrev : ""); 
@@ -214,7 +229,7 @@ function previewrunevent_show(block)
     block.find(".showrunevent").hide(); 
     block.find(".hiderunevent").show(); 
 
-    var runid = block.find("span.runid").text();  
+    var runid = block.find("span.runidlist span.runidelem:first span.runid").text();  
     cachefetch(runid, function() 
     { 
         var runevent = $.evalJSON(fetchedcache[runid]); 
