@@ -15,7 +15,7 @@
   <script type="text/javascript" src="{{ MEDIA_URL }}js/codeviewer.js?{{settings.REVISION}}"></script>  {# highlightCode(code, Parser), highlightOtherCode(greencode, redcode, matcheropcodes, Parser) #}
 {% endblock %}
 
-<p class="history_bold">Scheduled runs and edits to <span>{{ scraper.title }}</span>.</p>
+<p class="history_bold">Scheduled runs and edits to <span>"{{scraper.title}}"</span>.</p>
 
 <input type="hidden" id="rawcodeurl" value="{% url raw scraper.short_name %}"/>
 <input type="hidden" id="diffsequrl" value="{% url diffseq scraper.short_name %}"/>
@@ -37,7 +37,8 @@
       {% with itemloggroup.list|last as itemlast %}
 
       {% ifequal itemfirst.type 'commit' %}
-        <div class="history_edit">
+      <div class="history_edit">
+
           {% show_gravatar itemfirst.user 'small' %}Edited by 
           <a href="{% if item.user.username %}{% url profiles_profile_detail itemfirst.user.username %}{% endif %}" class="historyuser">
             {% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
@@ -67,36 +68,41 @@
             </div>
           </div>
 
-        <div class="run_preview">
-        <h2>Run previewer</h2>
-        <pre id="runpreview" style="background:#ccf"></pre> </div>
-            </div>
-
+      </div>
       {% else %} 
+      <div class="history_run_event">
+
         {% if itemfirst.runevent.exception_message %}
-          <div class="history_ran_fail">Run failed:
+        <div class="history_ran_fail">
+          Run failed:
           <span class="historyexception">{{itemfirst.runevent.exception_message}}</span> - ran for {{itemfirst.durationseconds}} seconds
               ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
 
+        {% else %}{% if itemfirst.runevent.run_ended %}
+        <div class="history_ran">
+          Run suceeded:
+          - ran {{itemloggroup|length}} times, most recently for {{itemfirst.durationseconds}} seconds
+          ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
+          <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
+
         {% else %}
-          {% if itemfirst.runevent.run_ended %}
-            <div class="history_ran">Run suceeded:
+        <div class="history_ran_notfinished">
+          <span class="history_bold">Still running</span> 
+          {{itemfirst.runevent.run_started|timesince}} ago (<small>{{itemfirst.runevent.run_started}}</small>)
 
-            - ran {{itemloggroup|length}} times, most recently for {{itemfirst.durationseconds}} seconds
-            ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
-            <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
+        {% endif %}{% endif %}
+          <div class="history_view_changes">
+            <a class="hiderunevent">Hide Details</a>
+            <a class="showrunevent">Show Details</a>
+            <span class="hide runid">{% if itemfirst.runevent.run_id %}{{itemfirst.runevent.run_id}}{% else %}{{itemfirst.runevent.id}}{% endif %}</span>
+          </div>
 
-          {% else %}
-            <div class="history_ran_notfinished">
-            <span class="history_bold">Still running</span> {{itemfirst.runevent.run_started|timesince}} ago (<small>{{itemfirst.runevent.run_started}}</small>)
-          {% endif %}
-        {% endif %}
-
-          <div class="history_view_details">
-            <span class="arunevent">View Details</span>
+          <div class="runpreviewer">
+            <pre class="runpreview"></pre>
           </div>
         </div>
 
+      </div>
       {% endifequal %}
 
       {% endwith %}
@@ -113,7 +119,8 @@
 
 {% block run_script_outer %}
 <script type="text/javascript" defer="defer">
-var coderevisions = { };                 {# code for different versions #}
+
+var coderevisions = { }; // cached code of different versions
 function fetchrevision(rev, callback)
 {
     if (rev && coderevisions[rev] == undefined)
@@ -152,64 +159,88 @@ function previewchanges_hide(block)
 
 function previewchanges_show(block)
 {
-    $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
+    hideallshowhistrun(); 
 
-    var codepreviewerdiv = block.find(".codepreviewer");
     block.find(".aprev").hide(); 
     block.find(".aprevB").show(); 
 
     var rev = block.find("span.rev").text();  
     var prevrev = block.find("span.prevrev").text();  
+
+    var fequallines; 
     fetchrevision(rev, function() { fetchrevision(prevrev, function() 
     {
-        codepreviewerdiv.find(".cprev span.shrev").text(rev); 
+        var codepreviewerdiv = block.find(".codepreviewer");
+        codepreviewerdiv.find(".cprev span.shrev").text(rev);  // could allow for sub-inspection of series
         codepreviewerdiv.find(".cprev span.shprevrev").text(prevrev); 
+
         if (prevrev)
         {
             $.ajax({url:$("#diffsequrl").val()+"?rev="+rev+"&otherrev="+prevrev, success: function(sdata) 
             {
                 var matcheropcodes = $.evalJSON(sdata); // [ ("replace|delete|insert|equal", i1, i2, j1, j2) ]
-                var fequallines = highlightOtherCode(coderevisions[rev], coderevisions[prevrev], matcheropcodes, Parser, codepreviewerdiv); 
-                $(".code_about").show(); 
-                $(".code_about a#aShowEquals").hide(); 
-                if (fequallines < 5)
-                {
-                    $(".code_about a#aShowEquals").show();
-                    $(".code_about a#aHideEquals").hide();
-                }
-                else
-                    $(".code_about a#aHideEquals").click();
+                fequallines = highlightOtherCode(coderevisions[rev], coderevisions[prevrev], matcheropcodes, Parser, codepreviewerdiv); 
             }}); 
         }
         else
-        {
-            $(".code_about").hide(); 
             highlightCode(coderevisions[rev], Parser, codepreviewerdiv); 
-        }
 
-        codepreviewerdiv.show("fast", function()
+        codepreviewerdiv.show(0, function()
         {
-            previewchanges_hideequal(block); 
+            if (fequallines > 5); 
+                previewchanges_hideequal(block); 
         }); 
     })}); 
 }
 
-function previewrunevent()
+
+var runevents = { }; // cached values from different run events
+function fetchrunevent(runid, callback)
 {
-    var runid = $(this).find("span.runid").text();  
-    $.ajax({url:$("#run_event_json").val().replace('XXX', runid), success: function(sdata) 
-    {  
-        var data = $.evalJSON(sdata); 
-        $("pre#runpreview").text(data.output); 
-    }}); 
+    if (runevents[runid] == undefined)
+    {
+        $.ajax({url:$("#run_event_json").val().replace('XXX', runid), success: function(sdata) 
+        {
+            runevents[runid] = $.evalJSON(sdata); 
+            callback(); 
+        }}); 
+    }
+    else
+        callback(); 
 }
 
+function previewrunevent_show(block)
+{
+    hideallshowhistrun(); 
 
+    block.find(".showrunevent").hide(); 
+    block.find(".hiderunevent").show(); 
 
+    var runid = block.find("span.runid").text();  
+    fetchrunevent(runid, function() 
+    { 
+        block.find(".runpreview").text(runevents[runid].output); 
+        block.find(".runpreviewer").show(); 
+    }); 
+}
+
+function previewrunevent_hide(block)
+{
+    block.find(".runpreviewer").hide(); 
+    block.find(".showrunevent").show(); 
+    block.find(".hiderunevent").hide(); 
+}
+
+function hideallshowhistrun()
+{
+    $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
+    $(".history_run_event").each(function(i, el) { previewrunevent_hide($(el)) });
+}
 
 $(document).ready(function() 
 { 
-    $(".run_preview").hide();
+    $(".cprev").hide();     // hide these ugly titles for now
+    hideallshowhistrun(); 
 
     $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
     $(".history_edit .showchanges").click(function() { previewchanges_show($(this).parents(".history_edit")); }); 
@@ -217,10 +248,10 @@ $(document).ready(function()
     $(".history_edit .hideequal").click(function() { previewchanges_hideequal($(this).parents(".history_edit")); }); 
     $(".history_edit .showequal").click(function() { previewchanges_showequal($(this).parents(".history_edit")); }); 
 
-    $("h4.cprev").hide();     //hide title for now
 
-    $(".arunevent").click(previewrunevent); 
-    $(".code_about").hide(); 
+    $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); }); 
+    $(".history_run_event .hiderunevent").click(function() { previewrunevent_hide($(this).parents(".history_run_event")); }); 
 }); 
+
 </script>
 {% endblock %}

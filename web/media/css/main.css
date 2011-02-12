@@ -409,7 +409,6 @@ span.historyexception { color:white; background:#d00; padding-left:2px; padding-
 
 #inputcode_main, #inputcode_other { display:none } 
 
-
 .codepreviewer .insert { background:#ddffdd; } 
 .codepreviewer .delete { background:#ffdddd; } 
 .codepreviewer .otherlinenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
@@ -533,7 +532,7 @@ form#newpdfdoclink { }
 .history_month {margin-bottom:20px; }
 .history_border {background-color:#FF0000; border:solid #acacac;}
 .history_edit {background-color:#fbfbfb; border:1px #000; padding:10px; margin-bottom:5px; border:solid #acacac thin;  }
-.history_ran {background-color:#fbfbfc; padding:10px; margin-bottom:5px; border:solid #acacac thin; }
+.history_ran {background-color:#fbdbfc; padding:10px; margin-bottom:5px; border:solid #acacac thin; }
 .history_ran_fail {background-color:#f9d5d4;  padding:10px; margin-bottom:5px; border:solid #acacac thin;}
 .history_ran_notfinished {background-color:#ccc; padding:10px; margin-bottom:5px; border:solid #acacac thin;}
 
@@ -546,15 +545,17 @@ form#newpdfdoclink { }
 
 
 .history_code_border {margin-left:2em; background-color:#FFF; border:solid #727272 thin;}
-.diff_title{}
-.run_preview{}
+.runpreviewer {margin-left:2em; background-color:#FFF; border:solid #727272 thin;}
+.runpreviewer pre.runpreview   { max-height:20em; overflow:auto }
 
 .code_about{ padding:0; margin:0; cursor:pointer;}
 .aprev {color:#0097d1;}
 .aprevB .span {color:#0097d1;}
 .aprev:hover {color:#9744d1;}
 .aprevB .a:hover {color:#9744d1;}
-.arunevent{color:#0097d1;}
+
+.showrunevent{color:#0097d1;}
+.hiderunevent{color:#0097d1;}
 
 
 
