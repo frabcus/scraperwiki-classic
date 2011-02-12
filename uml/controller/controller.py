@@ -245,7 +245,9 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         if 'x-urlquery'   in self.headers :
-            self.m_urlquery  = os.environ['URLQUERY']        = self.headers['x-urlquery']
+            self.m_urlquery  = self.headers['x-urlquery']
+            os.environ['URLQUERY'] = self.m_urlquery
+            os.environ['QUERY_STRING'] = self.m_urlquery
 
     
     def setRLimit (self) :

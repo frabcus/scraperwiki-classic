@@ -8,8 +8,8 @@ PROJECT_NAME = 'ScraperWiki'
 # environments
 def dev():
     "On the scraperwiki server, accessible from http://dev.scraperwiki.com"
-    env.hosts = ['212.84.75.28']
-    env.path = '/var/www/dev.scraperwiki.com'
+    env.hosts = ['dev.scraperwiki.com']
+    env.path = '/var/www/scraperwiki'
     env.branch = 'default'
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
     env.activate = env.path + '/bin/activate'
@@ -103,7 +103,11 @@ def deploy():
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
 
+    old_revision = run("cd %s; hg identify" % env.path)
+
     run("cd %s; hg pull; hg update -C %s" % (env.path, env.branch))
+
+    new_revision = run("cd %s; hg identify" % env.path)
     
     if env.webserver:
         buildout()
@@ -114,9 +118,13 @@ def deploy():
 
     write_changeset()
     install_cron()
-    email(message)
+    email(message, old_revision, new_revision)
 
-def email(message_body=None):
+    print "Deploy successful"
+    print "Old revision = %s" % old_revision
+    print "New revision = %s" % new_revision
+
+def email(message_body=None, old_revision=None, new_revision=None):
     if not message_body:
         print "Please Enter your deploy message: \r"
         message_body = raw_input()
@@ -128,11 +136,16 @@ Subject: New Scraperwiki Deployment to %(version)s (deployed by %(user)s)
 
 %(message_body)s
 
+Old revision: %(old_revision)s
+New revision: %(new_revision)s
+
 """ % {
         'version' : env.deploy_version,
         'user' : env.name,
         'changeset' : env.changeset,
         'message_body' : message_body,
+        'old_revision': old_revision,
+        'new_revision': new_revision,
         }
     sudo("""echo "%s" | sendmail scrapewiki-commits@googlegroups.com """ % message)
     

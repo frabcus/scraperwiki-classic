@@ -135,13 +135,14 @@ div.page_title {border-bottom:dotted 1px #ccc; padding:1em 0 0.5em 0; position:r
 div.page_title_narrow { width:600px;}
 ul.title_links {position:absolute; top:0; right:0;}
 ul.title_links li a {padding-left:20px;}
-ul.title_links li.csv a {background:url(../images/icons/csv_download.png) no-repeat;}
-ul.title_links li.api a {background:url(../images/icons/api.png) no-repeat;}
-ul.title_links li.gdocs a {background:url(../images/icons/google.png) no-repeat;}
-ul.title_links li.full_screen a {background:url(../images/icons/zoom.png) no-repeat;}
-ul.title_links li.view a {background:url(../images/icons/view.png) no-repeat;}
-ul.title_links li.scraper a {background:url(../images/icons/scraper.png) no-repeat;}
-ul.title_links li.rss a {background:url(../images/icons/csv_download.png) no-repeat;}
+ul.title_links li.csv           a {background:url(../images/icons/csv_download.png) no-repeat;}
+ul.title_links li.api           a {background:url(../images/icons/api.png) no-repeat;}
+ul.title_links li.gdocs         a {background:url(../images/icons/google.png) no-repeat;}
+ul.title_links li.full_screen   a {background:url(../images/icons/zoom.png) no-repeat;}
+ul.title_links li.view          a {background:url(../images/icons/view.png) no-repeat;}
+ul.title_links li.scraper       a {background:url(../images/icons/scraper.png) no-repeat;}
+ul.title_links li.rss           a {background:url(../images/icons/csv_download.png) no-repeat;}
+ul.title_links li.sqlite        a {background:url(../images/icons/sqlite_download.png) no-repeat;}
 
 /* Page tabs */
 div.page_tabs {background:#fafafa; padding-right:0.2em;height:1.65em; }
@@ -407,11 +408,15 @@ a.historysave { padding-left:17px; background:url(../images/icons/disk.png) no-r
 span.historyexception { color:white; background:#d00; padding-left:2px; padding-right:2px;}
 
 #inputcode_main, #inputcode_other { display:none } 
-#otherlinenumbers { float: left; border-top: thin #ddd solid; width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
-#linenumbers { float: left; border-top: thin #ddd solid; width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
-#codepreviewer .insert { background:#e2fae2; } 
-#codepreviewer .delete { background:#fae2e2; } 
-#codepreviewer #output { border-top: thin #ddd solid; padding-top:4px; font-family: monospace;font-size: 10pt; } 
+
+.codepreviewer .insert, .showinsertside { background:#ddffdd; } 
+.codepreviewer .delete, .showdeleteside { background:#ffdddd; } 
+.shcodesel { border:thin black solid; }
+
+.codepreviewer .otherlinenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+.codepreviewer .linenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+.codepreviewer .outputlines { margin-top:0px; padding-top:0.4em; font-family: monospace;font-size: 10pt; overflow-x:auto; } 
+
 
 ul.commitlist { text-align: left; padding:0; margin:0} 
 ul.commitlist li { padding:0 } 
@@ -472,10 +477,12 @@ body.fullscreen #embedinstructions textarea { width:500px; }
 .code_about {color:#808080;font-variant:small-caps;margin:0;padding:0.5em 0;}
 .code_about li {display:inline;padding-right:0.3em!important;}
 
-.code_about li.language {background-repeat:no-repeat; padding-left:22px}
-.code_about li.language.python {background-image:url(../images/icons/python.png);}
-.code_about li.language.php {background-image:url(../images/icons/php.png);}
-.code_about li.language.ruby {background-image:url(../images/icons/ruby.png);}
+.code_about li.language, strong.language {background-repeat:no-repeat; padding-left:22px}
+.code_about li.language.python, strong.language.python {background-image:url(../images/icons/python.png);}
+.code_about li.language.php,    strong.language.php {background-image:url(../images/icons/php.png);}
+.code_about li.language.ruby,   strong.language.ruby {background-image:url(../images/icons/ruby.png);}
+.code_about li.language.html,   strong.language.html {background-image:url(../images/icons/html.png);}
+.code_about li.language.javascript,strong.language.javascript {background-image:url(../images/icons/javascript.png);}
 
 .code_about li.codewiki_type {background-repeat:no-repeat; padding-left:22px;}
 .code_about li.codewiki_type.scraper {background-image:url(../images/icons/scraper.png);}
@@ -525,16 +532,35 @@ form#newpdfdoclink { }
 
 
 /* History page updates */
-.history_month {margin-bottom:5px;}
-.history_border {background-color:#FF0000; border:solid #000;}
-.history_edit {background-color:#ccc; border:1px #000; padding:10px; margin-bottom:5px; }
-.history_ran {background-color:#777; padding:10px; margin-bottom:5px;}
-.history_ran_fail {background-color:#f00;  padding:10px; margin-bottom:5px;}
-.history_ran_notfinished {background-color:#09f; padding:10px; margin-bottom:5px;}
+.history_month {margin-bottom:20px; }
+.history_border {background-color:#FF0000; border:solid #acacac;}
+.history_edit {background-color:#fbfbfb; border:1px #000; padding:10px; margin-bottom:5px; border:solid #acacac thin;  }
+.history_ran {background-color:#fbdbfc; padding:10px; margin-bottom:5px; border:solid #acacac thin; }
+.history_ran_fail {background-color:#f9d5d4;  padding:10px; margin-bottom:5px; border:solid #acacac thin;}
+.history_ran_notfinished {background-color:#ccc; padding:10px; margin-bottom:5px; border:solid #acacac thin;}
 
 
-.history_view_changes {float:right; margin-right:5px; margin-left:5px;}
-.history_view_details {float:right; margin-right:5px; margin-left:5px;}
+.history_view_changes {float:right; margin-right:5px; margin-left:5px; cursor:pointer;}
+.history_view_details {float:right; margin-right:5px; margin-left:5px; cursor:pointer;}
 .history_italic {font-style:italic;}
 .history_bold {font-weight:bold}
 .history_date {font-size:0.9em; color:#555;}
+
+
+.history_code_border {margin-left:2em; background-color:#FFF; border:solid #727272 thin;}
+.runpreviewer {clear: right; margin-left:2em; background-color:#FFF; border:solid #727272 thin;}
+.runpreviewer pre.runpreview   { max-height:20em; overflow:auto }
+
+.code_about{ padding:0; margin:0; cursor:pointer;}
+.aprev {color:#0097d1;}
+.aprevB .span {color:#0097d1;}
+.aprev:hover {color:#9744d1;}
+.aprevB .a:hover {color:#9744d1;}
+
+.showrunevent {color:#0097d1;}
+.hiderunevent {color:#0097d1;}
+
+
+
+
+

@@ -308,8 +308,14 @@ def view_overview (request, short_name):
     
     #get scrapers used in this view
     related_scrapers = scraper.relations.filter(wiki_type='scraper')
-    
+        
     context = {'selected_tab': 'overview', 'scraper': scraper, 'scraper_tags': scraper_tags, 'related_scrapers': related_scrapers, 'user_owns_it': user_owns_it}
+    
+    if scraper.language == 'html':
+        code = scraper.saved_code()
+        if re.match('<div\s+class="inline">', code):
+            context["htmlcode"] = code
+    
     return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
     
     
@@ -600,21 +606,21 @@ def htmlview(request, short_name):
 
 
 def choose_template(request, wiki_type):
-
-    #get templates
-    templates = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).order_by('language')
+    context = { "wiki_type":wiki_type }
+    context["templates"] = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).order_by('language')
+    context["sourcescraper"] = request.GET.get('sourcescraper', '')
     
-    sourcescraper = request.GET.get('sourcescraper', '')
-    
-    #choose template (ajax vs normal)
-    template = 'codewiki/choose_template.html'
-    if request.GET.get('ajax', False):
+    if request.GET.get('ajax'):
         template = 'codewiki/includes/choose_template.html'
-        
-    return render_to_response(template, {'wiki_type': wiki_type, 'templates': templates, 
-                                         'languages': sorted([ ll[1] for ll in models.code.LANGUAGES ]), 
-                                         'sourcescraper':sourcescraper }, 
-                              context_instance=RequestContext(request))
+    else:
+        template = 'codewiki/choose_template.html'
+    
+    if wiki_type == "scraper":
+        context["languages"] = ["python", "ruby", "php"]
+    else:
+        context["languages"] = ["python", "ruby", "php", "html"]
+    
+    return render_to_response(template, context, context_instance=RequestContext(request))
 
 
     

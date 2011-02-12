@@ -17,6 +17,7 @@ import sys
 import traceback
 import datetime
 import tempfile
+import imp
 
 
 import scraperwiki.console
@@ -177,6 +178,36 @@ def swimport(name, swinstance="http://scraperwiki.com"):
     fp = open(modulefile.name)
     return imp.load_module(name, fp, modulefile.name, (".py", "U", 1))
 
+class SWImporter(object):
+    def __init__(self, swinstance="http://scraperwiki.com"):
+        self.swinstance = swinstance
+
+    def find_module(self, name, path=None):
+        return self
+
+    def load_module(self, name):
+        try:
+            return self.use_standard_import(name)
+        except:
+            return self.import_from_scraperwiki(name)
+
+    def use_standard_import(self, name):
+        return imp.load_module(imp.find_module(name))
+
+    def import_from_scraperwiki(self, name):
+        try:
+            url = "%s/editor/raw/%s" % (self.swinstance, name)
+            modulecode = urllib2.urlopen(url).read() + "\n"
+
+            # imp.load_module really needs a file, cannot use StringIO
+            modulefile = tempfile.NamedTemporaryFile(suffix='.py')
+            modulefile.write(modulecode)
+            modulefile.flush()
+
+            with open(modulefile.name) as fp:
+                return imp.load_module(name, fp, modulefile.name, (".py", "U", imp.PY_SOURCE))
+        except:
+            raise ImportError
 
 # callback to a view with parameter lists (cross language capability)
 def jsviewcall(name, **args):

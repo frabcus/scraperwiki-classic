@@ -159,11 +159,13 @@ def edittutorial(request, short_name):
 
 blankstartupcode = { 'scraper' : { 'python': "# Blank Python\n", 
                                     'php':   "<?php\n# Blank PHP\n?>\n", 
-                                    'ruby':  "# Blank Ruby\n" 
+                                    'ruby':  "# Blank Ruby\n",
                                  }, 
                      'view'    : { 'python': "# Blank Python\nsourcescraper = ''\n", 
                                    'php':    "<?php\n# Blank PHP\n$sourcescraper = ''\n?>\n", 
-                                   'ruby':   "# Blank Ruby\nsourcescraper = ''\n" 
+                                   'ruby':   "# Blank Ruby\nsourcescraper = ''\n",
+                                   'html':   "<p>Blank HTML page</p>\n",
+                                   'javascript':"// Blank javascript\n",
                                   }
                    }
 
@@ -171,7 +173,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     
         # quick and dirty corrections to incoming urls, which should really be filtered in the url.py settings
     language = language.lower()
-    if language not in blankstartupcode['scraper']:
+    if language not in blankstartupcode[wiki_type]:
         language = 'python'
     
     context = {'selected_tab':'code'}
@@ -338,11 +340,14 @@ def handle_session_draft(request):
 def quickhelp(request):
     language = request.GET.get('language', '').lower()
     wiki_type = request.GET.get('wiki_type', '')
-    line = request.GET.get('line')
-    character = request.GET.get('character')
+    line = request.GET.get('line', "")
+    character = request.GET.get('character', "")
     context = { "wiki_type":wiki_type, "language":language }
     context['quick_help_template'] = 'documentation/%s_quick_help_%s.html' % (wiki_type, language)
     context['cheatsheetquery'] = urllib.urlencode({'line':line, 'character':character, 'language':language})
+    if re.search("Quick help", line):
+        url = "http://%s%s?%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=['general_quickhelp']), context['cheatsheetquery'])
+        return HttpResponseRedirect(url)
     return render_to_response('documentation/quick_help.html', context, context_instance=RequestContext(request))
 
 
