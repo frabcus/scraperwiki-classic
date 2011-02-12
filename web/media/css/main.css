@@ -413,7 +413,7 @@ span.historyexception { color:white; background:#d00; padding-left:2px; padding-
 .codepreviewer .delete { background:#ffdddd; } 
 .codepreviewer .otherlinenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
 .codepreviewer .linenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
-.codepreviewer .outputlines { margin-top:0px; padding-top:0.4em; font-family: monospace;font-size: 10pt; } 
+.codepreviewer .outputlines { margin-top:0px; padding-top:0.4em; font-family: monospace;font-size: 10pt; overflow-x:auto; } 
 
 ul.commitlist { text-align: left; padding:0; margin:0} 
 ul.commitlist li { padding:0 } 

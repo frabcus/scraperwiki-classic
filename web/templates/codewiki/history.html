@@ -120,20 +120,29 @@
 {% block run_script_outer %}
 <script type="text/javascript" defer="defer">
 
-var coderevisions = { }; // cached code of different versions
-function fetchrevision(rev, callback)
+var fetchedcache = { }; // cached code of different versions
+function cachefetch(cid, callback)
 {
-    if (rev && coderevisions[rev] == undefined)
+    if (cid && (fetchedcache[cid] == undefined))
     {
-        $.ajax({url:$("#rawcodeurl").val()+"?rev="+rev, success: function(sdata) 
+        var url; 
+        if (cid.substring(0, 4) == "?rev")
+            url = $("#rawcodeurl").val()+cid; 
+        else if (cid.substring(0, 9) == "?otherrev")
+            url = $("#diffsequrl").val()+cid; 
+        else
+            url = $("#run_event_json").val().replace('XXX', cid); 
+
+        $.ajax({url:url, success: function(sdata) 
         {
-            coderevisions[rev] = sdata; 
+            fetchedcache[cid] = sdata; 
             callback(); 
         }}); 
     }
     else
         callback(); 
 }
+
 
 function previewchanges_hideequal(block)
 {
@@ -167,47 +176,36 @@ function previewchanges_show(block)
     var rev = block.find("span.rev").text();  
     var prevrev = block.find("span.prevrev").text();  
 
-    var fequallines; 
-    fetchrevision(rev, function() { fetchrevision(prevrev, function() 
+    var cidrev = "?rev="+rev; 
+    var cidprevrev = (prevrev ? "?rev="+prevrev : ""); 
+    var ciddiff = (prevrev ? "?otherrev="+prevrev+"&rev="+rev : ""); 
+
+    cachefetch(cidrev, function() { cachefetch(cidprevrev, function() { cachefetch(ciddiff, function()
     {
         var codepreviewerdiv = block.find(".codepreviewer");
         codepreviewerdiv.find(".cprev span.shrev").text(rev);  // could allow for sub-inspection of series
         codepreviewerdiv.find(".cprev span.shprevrev").text(prevrev); 
 
+        var fequallines = 0; 
         if (prevrev)
         {
-            $.ajax({url:$("#diffsequrl").val()+"?rev="+rev+"&otherrev="+prevrev, success: function(sdata) 
-            {
-                var matcheropcodes = $.evalJSON(sdata); // [ ("replace|delete|insert|equal", i1, i2, j1, j2) ]
-                fequallines = highlightOtherCode(coderevisions[rev], coderevisions[prevrev], matcheropcodes, Parser, codepreviewerdiv); 
-            }}); 
+            var matcheropcodes = $.evalJSON(fetchedcache[ciddiff]); // [ ("replace|delete|insert|equal", i1, i2, j1, j2) ]
+            fequallines = highlightOtherCode(fetchedcache[cidrev], fetchedcache[cidprevrev], matcheropcodes, Parser, codepreviewerdiv); 
         }
         else
-            highlightCode(coderevisions[rev], Parser, codepreviewerdiv); 
+            highlightCode(fetchedcache[cidrev], Parser, codepreviewerdiv); 
 
-        codepreviewerdiv.show(0, function()
+        codepreviewerdiv.show(); 
+        if (fequallines > 5) 
+            previewchanges_hideequal(block); 
+        else
         {
-            if (fequallines > 5); 
-                previewchanges_hideequal(block); 
-        }); 
-    })}); 
+            previewchanges_showequal(block); 
+            block.find(".aprevB .hideequal").hide(); 
+        }
+    })})}); 
 }
 
-
-var runevents = { }; // cached values from different run events
-function fetchrunevent(runid, callback)
-{
-    if (runevents[runid] == undefined)
-    {
-        $.ajax({url:$("#run_event_json").val().replace('XXX', runid), success: function(sdata) 
-        {
-            runevents[runid] = $.evalJSON(sdata); 
-            callback(); 
-        }}); 
-    }
-    else
-        callback(); 
-}
 
 function previewrunevent_show(block)
 {
@@ -217,9 +215,10 @@ function previewrunevent_show(block)
     block.find(".hiderunevent").show(); 
 
     var runid = block.find("span.runid").text();  
-    fetchrunevent(runid, function() 
+    cachefetch(runid, function() 
     { 
-        block.find(".runpreview").text(runevents[runid].output); 
+        var runevent = $.evalJSON(fetchedcache[runid]); 
+        block.find(".runpreview").text(runevent.output); 
         block.find(".runpreviewer").show(); 
     }); 
 }
