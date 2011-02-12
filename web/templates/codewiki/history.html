@@ -17,17 +17,9 @@
 
 <p class="history_bold">Scheduled runs and edits to <span>{{ scraper.title }}</span>.</p>
 
-<div class="staff">
-  <p><b>Notes:</b> <em>This page is under development.  Apologies for the inconvenience</em></p>
-  <p>I have created the necessary callbacks to make it possible to ajax load the history diffs.  
-  The following are the three links that make the callback possible:
-  <b>To get the code:</b> <input type="text" id="rawcodeurl" value="{% url raw scraper.short_name %}"/>     {# callback url to get code per revision #}
-  <b>To get the patch numbers:</b> <input type="text" id="diffsequrl" value="{% url diffseq scraper.short_name %}"/> {# callback url to get patch per pair of revisions #}
-  <b>To get the runevent:</b> <input type="text" id="run_event_json" value="{% url run_event_json 'XXX' %}"/> {# callback url to get a runevent #}
-  </p>
-  <p><b>To do:</b>  Make the preview types inline their contents cleanly (rolling and unrolling).
-</div>
-
+<input type="hidden" id="rawcodeurl" value="{% url raw scraper.short_name %}"/>
+<input type="hidden" id="diffsequrl" value="{% url diffseq scraper.short_name %}"/>
+<input type="hidden" id="run_event_json" value="{% url run_event_json 'XXX' %}"/>
 
 {% regroup itemlog by datetime.year as itemlogyear_list%}
 {% for itemlogyear in itemlogyear_list %}
@@ -48,42 +40,37 @@
         <div class="history_edit">
           {% show_gravatar itemfirst.user 'small' %}Edited by 
           <a href="{% if item.user.username %}{% url profiles_profile_detail itemfirst.user.username %}{% endif %}" class="historyuser">
-{% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
+            {% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
           </a>
           {% ifnotequal itemloggroup.list|length 1 %}
             {{itemloggroup.list|length}} times
           {% endifnotequal %}
           <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
-
           <div class="history_view_changes">
-           <span class="aprev">View Changes
+           <span class="aprevB">
+             <a class="hideequal">[Hide equal]</a>
+             <a class="showequal">[Show equal]</a>
+             <a class="hidechanges">Hide Changes</a>
            </span>
-           <div class="codepreviewer"> 
-             <div class="otherlinenumbers"></div> 
-             <div class="linenumbers"></div> 
-             <pre class="output"></pre> 
-           </div>           
+           <span class="aprev">
+             <a class="showchanges">Show changes</a>
+           </span>
+           <span class="rev">{{itemfirst.rev}}</span>|<span class="prevrev">{{itemlast.prevrev}}</span>
           </div>
 
-<div class="diff_title">
-<p id="cprev">Difference between, revision <span class="rev"></span> and previous revision <span class="prevrev"></span>
-<span class="code_about">
-    <a id="aHideEquals" class="edit">[hide equal lines]</a>
-    <a id="aShowEquals" class="edit">[show equal lines]</a>
-</span>
-</div>
-<div class="history_code_border">
+          <div class="codepreviewer"> 
+            <h4 class="cprev">Difference between, revision <span class="shrev"></span> and previous revision <span class="shprevrev"></span></h4>
+            <div class="history_code_border">
+              <div class="otherlinenumbers"></div> 
+              <div class="linenumbers"></div> 
+              <pre class="outputlines"></pre> 
+            </div>
+          </div>
 
-<div id="codepreviewer"> 
-  <div class="otherlinenumbers"></div> 
-  <div class="linenumbers"></div> 
-  <pre class="output"></pre> 
-</div>
-<div class="run_preview">
-<h2>Run previewer</h2>
-<pre id="runpreview" style="background:#ccf"></pre> </div>
-        </div>
-	</div>
+        <div class="run_preview">
+        <h2>Run previewer</h2>
+        <pre id="runpreview" style="background:#ccf"></pre> </div>
+            </div>
 
       {% else %} 
         {% if itemfirst.runevent.exception_message %}
@@ -107,7 +94,6 @@
 
           <div class="history_view_details">
             <span class="arunevent">View Details</span>
-
           </div>
         </div>
 
@@ -119,8 +105,6 @@
     </div> {# history_month #}
   {% endfor %} {# month #}
 {% endfor %} {# year #}
-
-
 
 
 
@@ -144,31 +128,48 @@ function fetchrevision(rev, callback)
         callback(); 
 }
 
-function previewchanges()
+function previewchanges_hideequal(block)
 {
-    var self = this;
-    var otherlinenumbers = $(this).parent().find(".otherlinenumbers");
-    $("#otherlinenumbers").text(""); 
-    $("#linenumbers").text(""); 
-    $("#output").text(""); 
-    otherlinenumbers.text(""); 
+    block.find('.codepreviewer .fequal').hide(); 
+    block.find(".aprevB .hideequal").hide(); 
+    block.find(".aprevB .showequal").show(); 
+}
 
-    var rev = $(this).find("span.rev").text();  
-    var prevrev = $(this).find("span.prevrev").text();  
+function previewchanges_showequal(block)
+{
+    block.find('.codepreviewer .fequal').show(); 
+    block.find(".aprevB .hideequal").show(); 
+    block.find(".aprevB .showequal").hide(); 
+}
+
+function previewchanges_hide(block)
+{
+    var codepreviewerdiv = block.find(".codepreviewer");
+    codepreviewerdiv.hide(); 
+    block.find(".aprevB").hide(); 
+    block.find(".aprev").show(); 
+}
+
+function previewchanges_show(block)
+{
+    $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
+
+    var codepreviewerdiv = block.find(".codepreviewer");
+    block.find(".aprev").hide(); 
+    block.find(".aprevB").show(); 
+
+    var rev = block.find("span.rev").text();  
+    var prevrev = block.find("span.prevrev").text();  
     fetchrevision(rev, function() { fetchrevision(prevrev, function() 
     {
-        $("p#cprev span.rev").text(rev); 
-        $("p#cprev span.prevrev").text(prevrev); 
-	$(".history_code_border").show();
-        $(".diff_title").show();
-
-
+        codepreviewerdiv.find(".cprev span.shrev").text(rev); 
+        codepreviewerdiv.find(".cprev span.shprevrev").text(prevrev); 
         if (prevrev)
         {
             $.ajax({url:$("#diffsequrl").val()+"?rev="+rev+"&otherrev="+prevrev, success: function(sdata) 
             {
                 var matcheropcodes = $.evalJSON(sdata); // [ ("replace|delete|insert|equal", i1, i2, j1, j2) ]
-                var fequallines = highlightOtherCode(coderevisions[rev], coderevisions[prevrev], matcheropcodes, Parser, $("hcodepreviewer")); 
+                var fequallines = highlightOtherCode(coderevisions[rev], coderevisions[prevrev], matcheropcodes, Parser, codepreviewerdiv); 
                 $(".code_about").show(); 
                 $(".code_about a#aShowEquals").hide(); 
                 if (fequallines < 5)
@@ -183,8 +184,13 @@ function previewchanges()
         else
         {
             $(".code_about").hide(); 
-            highlightCode(coderevisions[rev], Parser, "codepreviewer"); 
+            highlightCode(coderevisions[rev], Parser, codepreviewerdiv); 
         }
+
+        codepreviewerdiv.show("fast", function()
+        {
+            previewchanges_hideequal(block); 
+        }); 
     })}); 
 }
 
@@ -203,31 +209,18 @@ function previewrunevent()
 
 $(document).ready(function() 
 { 
-   $(".history_code_border").hide();
-   $(".diff_title").hide();
     $(".run_preview").hide();
-    $(".aprev").click(previewchanges); 
+
+    $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
+    $(".history_edit .showchanges").click(function() { previewchanges_show($(this).parents(".history_edit")); }); 
+    $(".history_edit .hidechanges").click(function() { previewchanges_hide($(this).parents(".history_edit")); }); 
+    $(".history_edit .hideequal").click(function() { previewchanges_hideequal($(this).parents(".history_edit")); }); 
+    $(".history_edit .showequal").click(function() { previewchanges_showequal($(this).parents(".history_edit")); }); 
+
+    $("h4.cprev").hide();     //hide title for now
+
     $(".arunevent").click(previewrunevent); 
     $(".code_about").hide(); 
-
-
-
- 
-
-    
-
-    $("a#aHideEquals").click(function() 
-    {
-        $('#codepreviewer .fequal').hide(); 
-        $(".code_about a#aHideEquals").hide(); 
-        $(".code_about a#aShowEquals").show(); 
-    }); 
-    $("a#aShowEquals").click(function() 
-    {
-        $(".code_about a#aHideEquals").show(); 
-        $(".code_about a#aShowEquals").hide(); 
-        $('#codepreviewer .fequal').show(); 
-    }); 
 }); 
 </script>
 {% endblock %}

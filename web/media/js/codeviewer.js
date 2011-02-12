@@ -21,6 +21,9 @@ function highlightOtherCode(code, othercode, matcheropcodes, Parser, previewerdi
     var output = previewerdiv.find('.outputlines'); 
     var numbers = previewerdiv.find('.linenumbers'); 
     var othernumbers = previewerdiv.find('.otherlinenumbers'); 
+    output.text(""); 
+    numbers.text(""); 
+    othernumbers.text(""); 
 
     // syntax highlight the two versions of the code
     var codelines = [ ]

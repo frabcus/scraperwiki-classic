@@ -409,11 +409,12 @@ span.historyexception { color:white; background:#d00; padding-left:2px; padding-
 
 #inputcode_main, #inputcode_other { display:none } 
 
-.codepreviewer .otherlinenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
-.codepreviewer .linenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+
 .codepreviewer .insert { background:#ddffdd; } 
 .codepreviewer .delete { background:#ffdddd; } 
-.codepreviewer .outputlines { padding-top:0.4em; font-family: monospace;font-size: 10pt; } 
+.codepreviewer .otherlinenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+.codepreviewer .linenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
+.codepreviewer .outputlines { margin-top:0px; padding-top:0.4em; font-family: monospace;font-size: 10pt; } 
 
 ul.commitlist { text-align: left; padding:0; margin:0} 
 ul.commitlist li { padding:0 } 
@@ -544,12 +545,15 @@ form#newpdfdoclink { }
 .history_date {font-size:0.9em; color:#555;}
 
 
-.history_code_border {background-color:#FFF; border:solid #727272 thin;}
+.history_code_border {margin-left:2em; background-color:#FFF; border:solid #727272 thin;}
 .diff_title{}
 .run_preview{}
 
 .code_about{ padding:0; margin:0; cursor:pointer;}
-.aprev{color:#0097d1;}
+.aprev {color:#0097d1;}
+.aprevB .span {color:#0097d1;}
+.aprev:hover {color:#9744d1;}
+.aprevB .a:hover {color:#9744d1;}
 .arunevent{color:#0097d1;}
 
 
