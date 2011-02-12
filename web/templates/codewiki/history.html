@@ -47,6 +47,12 @@
           <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
           <div class="history_view_changes">
            <span class="aprevB">
+             <span class="showsidecode">
+               (<a class="showinsertside">{{itemfirst.rev}}</a>
+               <a class="showdeleteside">{{itemfirst.prevrev}}</a>
+               <a class="showbothside">N</a>)
+             </span>
+
              <a class="hideequal">[Hide equal]</a>
              <a class="showequal">[Show equal]</a>
              <a class="hidechanges">Hide Changes</a>
@@ -173,6 +179,44 @@ function previewchanges_showequal(block)
     block.find(".aprevB .showequal").hide(); 
 }
 
+function previewchanges_showequal(block)
+{
+    block.find('.codepreviewer .fequal').show(); 
+    block.find(".aprevB .hideequal").show(); 
+    block.find(".aprevB .showequal").hide(); 
+}
+
+function previewchanges_showsidecode()
+{
+    var block = $(this).parents(".history_edit"); 
+    var curr = $(this); 
+
+    if (curr.hasClass("shcodesel") && curr.hasClass("showinsertside"))
+        curr = block.find(".showdeleteside"); 
+    if (curr.hasClass("shcodesel") && curr.hasClass("showdeleteside"))
+        curr = block.find(".showinsertside"); 
+
+    block.find(".showsidecode a").removeClass("shcodesel"); 
+    if (curr.hasClass("showinsertside"))
+    {
+        block.find('.codepreviewer .delete').hide(); 
+        block.find('.codepreviewer .insert').show(); 
+        curr.addClass("shcodesel"); 
+    }
+    else if (curr.hasClass("showdeleteside"))
+    {
+        block.find('.codepreviewer .insert').hide(); 
+        block.find('.codepreviewer .delete').show(); 
+        curr.addClass("shcodesel"); 
+    }
+    else
+    {
+        block.find('.codepreviewer .insert').show(); 
+        block.find('.codepreviewer .delete').show(); 
+    }
+}
+
+
 function previewchanges_hide(block)
 {
     var codepreviewerdiv = block.find(".codepreviewer");
@@ -261,7 +305,7 @@ $(document).ready(function()
     $(".history_edit .hidechanges").click(function() { previewchanges_hide($(this).parents(".history_edit")); }); 
     $(".history_edit .hideequal").click(function() { previewchanges_hideequal($(this).parents(".history_edit")); }); 
     $(".history_edit .showequal").click(function() { previewchanges_showequal($(this).parents(".history_edit")); }); 
-
+    $(".history_edit .showsidecode a").click(previewchanges_showsidecode); 
 
     $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); }); 
     $(".history_run_event .hiderunevent").click(function() { previewrunevent_hide($(this).parents(".history_run_event")); }); 

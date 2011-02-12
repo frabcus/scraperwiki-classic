@@ -409,11 +409,14 @@ span.historyexception { color:white; background:#d00; padding-left:2px; padding-
 
 #inputcode_main, #inputcode_other { display:none } 
 
-.codepreviewer .insert { background:#ddffdd; } 
-.codepreviewer .delete { background:#ffdddd; } 
+.codepreviewer .insert, .showinsertside { background:#ddffdd; } 
+.codepreviewer .delete, .showdeleteside { background:#ffdddd; } 
+.shcodesel { border:thin black solid; }
+
 .codepreviewer .otherlinenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
 .codepreviewer .linenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
 .codepreviewer .outputlines { margin-top:0px; padding-top:0.4em; font-family: monospace;font-size: 10pt; overflow-x:auto; } 
+
 
 ul.commitlist { text-align: left; padding:0; margin:0} 
 ul.commitlist li { padding:0 } 
@@ -554,8 +557,10 @@ form#newpdfdoclink { }
 .aprev:hover {color:#9744d1;}
 .aprevB .a:hover {color:#9744d1;}
 
-.showrunevent{color:#0097d1;}
-.hiderunevent{color:#0097d1;}
+.showrunevent {color:#0097d1;}
+.hiderunevent {color:#0097d1;}
+
+
 
 
 
