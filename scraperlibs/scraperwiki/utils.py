@@ -1,3 +1,4 @@
+from __future__ import with_statement
 __doc__ = """ScraperWiki Utils - to be replaced by proper urllib over-riding"""
 __version__ = "ScraperWiki_0.0.1"
 
@@ -18,7 +19,6 @@ import traceback
 import datetime
 import tempfile
 import imp
-
 
 import scraperwiki.console
 
@@ -194,20 +194,20 @@ class SWImporter(object):
     def use_standard_import(self, name):
         return imp.load_module(imp.find_module(name))
 
-#    def import_from_scraperwiki(self, name):
-#        try:
-#            url = "%s/editor/raw/%s" % (self.swinstance, name)
-#            modulecode = urllib2.urlopen(url).read() + "\n"
-#
-#            # imp.load_module really needs a file, cannot use StringIO
-#            modulefile = tempfile.NamedTemporaryFile(suffix='.py')
-#            modulefile.write(modulecode)
-#            modulefile.flush()
-#
-#            with open(modulefile.name) as fp:
-#                return imp.load_module(name, fp, modulefile.name, (".py", "U", imp.PY_SOURCE))
-#        except:
-#            raise ImportError
+    def import_from_scraperwiki(self, name):
+        try:
+            url = "%s/editor/raw/%s" % (self.swinstance, name)
+            modulecode = urllib2.urlopen(url).read() + "\n"
+
+            # imp.load_module really needs a file, cannot use StringIO
+            modulefile = tempfile.NamedTemporaryFile(suffix='.py')
+            modulefile.write(modulecode)
+            modulefile.flush()
+
+            with open(modulefile.name) as fp:
+                return imp.load_module(name, fp, modulefile.name, (".py", "U", imp.PY_SOURCE))
+        except:
+            raise ImportError
 
 # callback to a view with parameter lists (cross language capability)
 def jsviewcall(name, **args):
