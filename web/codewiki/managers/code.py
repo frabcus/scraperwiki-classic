@@ -90,6 +90,8 @@ class CodeManager(models.Manager):
     def data_dictlist(self, scraper_id, short_name, tablename="", limit=1000, offset=0, start_date=None, end_date=None, latlng=None):
         dataproxy = DataStore(scraper_id, short_name)  
         rc, arg = dataproxy.data_dictlist(tablename, limit, offset, start_date, end_date, latlng)
+        if not rc :
+            raise Exception(arg)
         return arg
     
          # summary of old datasets (which should be merged in)
