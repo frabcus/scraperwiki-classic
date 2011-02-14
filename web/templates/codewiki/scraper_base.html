@@ -15,7 +15,7 @@
            {% if scraper.has_temporal %}
                <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
            {% endif %}
-            <li>{% if user.is_authenticated %}<a href="{% url scraper_admin scraper.short_name %}" id="aEditTitle" class="edit">[edit title]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit title]</a>{% endif %}</li>
+            <li>{% if user.is_authenticated %}<a href="#" id="aEditTitle" class="edit">[edit title]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit title]</a>{% endif %}</li>
 	    </ul>
         {% ifequal scraper.wiki_type 'scraper'%}
             <ul class="title_links">
@@ -60,4 +60,12 @@
             <strong>Important</strong> If you suspect this scraper breaks our <a href="/terms_and_conditions/">Terms &amp; Conditions</a>, please <a href="/contact/">report it</a>
         </p>
     </div>
+{% endblock %}
+
+{% block run_script %}
+     scraper_short_name = '{{scraper.short_name}}';
+
+    {% if user.is_authenticated %}
+        setupScraperEditInPlace('scraper', '{{scraper.short_name}}');
+    {% endif %}
 {% endblock %}

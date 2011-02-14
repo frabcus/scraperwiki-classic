@@ -1,4 +1,4 @@
-var scraper_short_name = '';  // reset in templates/codewiki/scraper_overview.html
+var scraper_short_name = '';  // reset in templates/codewiki/scraper_base.html
 
 $(function(){
     $('a.editor_view').click(function(){
