@@ -43,14 +43,14 @@ class Command(BaseCommand):
         if options['short_name']:
             views = View.unfiltered.filter(short_name=options['short_name'], published=True)
         elif options['run_views']:
-            views = View.unfiltered.filter(published=True)
+            views = View.unfiltered.filter(published=True).order_by("-id")
         else:
             views = []
 
         if options['short_name']:
             scrapers = Scraper.unfiltered.filter(short_name=options['short_name'], published=True)
         elif options['run_scrapers']:
-            scrapers = Scraper.unfiltered.filter(published=True)
+            scrapers = Scraper.unfiltered.filter(published=True).order_by("-id")
         else:
             scrapers = []
 
