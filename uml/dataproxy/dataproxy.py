@@ -260,7 +260,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
 
         if request[0] == 'save_sqlite':
-            result = db.save_sqlite(scraperID, runID, scraperName, unique_keys=request[1], data=request[2])
+            result = db.save_sqlite(scraperID, runID, scraperName, unique_keys=request[1], data=request[2], swdatatblname=request[3])
             self.connection.send(json.dumps(result) + '\n')
             return
         

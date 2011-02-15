@@ -19,7 +19,13 @@ class ScreenShooter(object):
         try:
             return self.renderers[(width, height)]
         except:
-            renderer = WebkitRenderer(scaleRatio='crop', scaleTransform='smooth', scaleToWidth=width, scaleToHeight=height)
+            renderer = WebkitRenderer(scaleRatio='crop', 
+                                      scaleTransform='smooth', 
+                                      scaleToWidth=width, 
+                                      scaleToHeight=height,
+                                      width=1440,
+                                      height=900,
+                                      wait=5)
             renderer.qWebSettings[QWebSettings.JavascriptEnabled] = True
             self.renderers[(width, height)] = renderer
             return renderer

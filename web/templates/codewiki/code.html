@@ -108,6 +108,8 @@
 {% endblock %}
 
 {% block run_script %}
+    {{block.super}}
+
     $(document).ready(function() 
     {
     {% if matcheropcodes %}

@@ -68,6 +68,11 @@ iptables	-A OUTPUT -p tcp --sport 1024: --dport 1024: -m state --state ESTABLISH
 #
 iptables   -A INPUT    -s 212.110.161.108  -j ACCEPT
 
+# Allow NTP traffic
+#
+iptables -A INPUT -p udp --dport 123 -j ACCEPT 
+iptables -A OUTPUT -p udp --sport 123 -j ACCEPT 
+
 # All other input traffic is rejected
 #
 iptables 	-A INPUT							-j REJECT
