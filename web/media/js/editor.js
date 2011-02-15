@@ -1303,7 +1303,7 @@ writeToChat("Saved rev number: " + res.rev);
     function cgiescape(text) 
     {
         if (typeof text != 'string')
-            return "&lt;NONSTRING&gt;"; // should convert on server
+            return "&lt;NONSTRING "+(typeof text)+"&gt;"; // should convert on server
         return (text ? text.replace(/&/g, '&amp;').replace(/</g, '&lt;') : "");
     }
 

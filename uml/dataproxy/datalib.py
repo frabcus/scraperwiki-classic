@@ -682,8 +682,7 @@ class Database :
         self.sqdatatemplate[swdatatblname] = "insert or replace into %s values (%s)" % (swdatatblname, ",".join(["?"]*len(self.swdatakeys[swdatatblname])))
 
 
-    def save_sqlite(self, scraperID, runID, short_name, unique_keys, data):
-        swdatatblname = "swdata"
+    def save_sqlite(self, scraperID, runID, short_name, unique_keys, data, swdatatblname):
             
         # establish the sw data table
         if not self.m_sqlitedbconn or swdatatblname not in self.swdatakeys:
@@ -706,12 +705,15 @@ class Database :
                     self.updatesqdatakeys(scraperID, runID, short_name, swdatatblname)  # get again rather than amend
     
         # compute the hash key
-        ulist = [ str(data[k])  for k in set(unique_keys) ]
+        ulist = [ ]
+        for k in set(unique_keys):
+            try: ulist.append(str(data[k]))
+            except UnicodeEncodeError: ulist.append(data[k].encode("utf-8"))
         data["unique_hash"] = hashlib.md5('\0342\0211\0210\0342\0211\0210\0342\0211\0210'.join(ulist)).hexdigest()
+        
         data["date_scraped"] = datetime.datetime.now().isoformat()
         res = self.sqlitecommand(scraperID, runID, short_name, "execute", self.sqdatatemplate[swdatatblname], [ data.get(k)  for k in self.swdatakeys[swdatatblname] ])
         if type(res) == str:
             return [ False, res ]
-        self.sqlitecommand(scraperID, runID, short_name, "commit", None, None)
         return  [ True, 'Data record inserted' ]
 
