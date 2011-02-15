@@ -78,7 +78,8 @@ class ScraperManager(CodeManager):
                               published=True,
                               last_run=last_run)
         scraper.commit_code("""
-# automatically generates your email messages; feel free to edit
+# The output of this script is emailed to you. You can edit it to create 
+# other custom emails, if you read the code and know what you're doing first!
 import scraperwiki
 emaillibrary = scraperwiki.utils.swimport("general-emails-on-scrapers")
 subjectline, headerlines, bodylines, footerlines = emaillibrary.EmailMessageParts()
