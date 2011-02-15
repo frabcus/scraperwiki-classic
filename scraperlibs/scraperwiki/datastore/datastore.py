@@ -143,7 +143,7 @@ class DataStoreClass :
         return self.request (('save', uunique_keys, js_data, date, latlng))
 
     
-    def save_sqlite(self, unique_keys, scraper_data, date=None, latlng=None) :
+    def save_sqlite(self, unique_keys, scraper_data, date=None, latlng=None, swdatatblname="swdata"):
         if type(unique_keys) not in [ types.ListType, types.TupleType ]:
             return [ False, 'unique_keys must a list or tuple' ]
              
@@ -185,7 +185,7 @@ class DataStoreClass :
 
             jdata[key] = value
         
-        return self.request(('save_sqlite', unique_keys, jdata))
+        return self.request(('save_sqlite', unique_keys, jdata, swdatatblname))
     
     
     def postcodeToLatLng (self, postcode) :
@@ -234,7 +234,7 @@ def ifsencode_trunc(v, t):
 
 
 # functions moved from the out of data code into here to manage their development
-def save (unique_keys, data, date = None, latlng = None, silent = False) :
+def save(unique_keys, data, date = None, latlng = None, silent = False) :
     ds = DataStore(None)
     
     if True or ds.uses_old_datastore():
@@ -289,16 +289,21 @@ def sqlitecommand(command, val1=None, val2=None, verbose=1):
     return result
     
 
-def save_sqlite(unique_keys, data, date=None, latlng=None, verbose=1):
+def save_sqlite(unique_keys, data, date=None, latlng=None, table_name="swdata", commit="True", verbose=2):
     ds = DataStore(None)
-    rc, arg = ds.save_sqlite(unique_keys, data, date, latlng)
+    rc, arg = ds.save_sqlite(unique_keys, data, date, latlng, table_name)   # new columns verbose is verbose=1 (not implemented)
     if not rc :
         raise Exception (arg) 
 
-    if verbose:
+    if commit:
+        sqlitecommand("commit", None, None, 0)
+
+    if verbose >= 2:
         pdata = {}
         for key, value in data.items():
             pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
+        if not commit:
+            pdata["commit"] = "NOT_COMMITTED"
         scraperwiki.console.logScrapedData(pdata)
     
     return arg

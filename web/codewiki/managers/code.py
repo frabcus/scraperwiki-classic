@@ -90,9 +90,15 @@ class CodeManager(models.Manager):
     def data_dictlist(self, scraper_id, short_name, tablename="", limit=1000, offset=0, start_date=None, end_date=None, latlng=None):
         dataproxy = DataStore(scraper_id, short_name)  
         rc, arg = dataproxy.data_dictlist(tablename, limit, offset, start_date, end_date, latlng)
-        if not rc :
-            raise Exception(arg)
-        return arg
+        if rc:
+            return arg
+        
+        # quick helper result for api when it searches on the default table (which is selected deep in the dataproxy after it has checked out the original mysql key-value datastore thing)
+        if arg == "sqlite3.Error: no such table: swdata":
+            sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", 0, None))
+            if sqlitedata and type(sqlitedata) not in [str, unicode]:
+                return [{"error":arg}, {'datasummary':sqlitedata}]
+        raise Exception(arg)
     
          # summary of old datasets (which should be merged in)
     def data_summary(self, scraper_id=0, limit=1000, offset=0, start_date=None, end_date=None, latlng=None, column_order=None, private_columns=None):

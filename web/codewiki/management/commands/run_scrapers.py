@@ -140,12 +140,12 @@ def runmessageloop(runner, event, approxlenoutputlimit):
                 sMessage = stackentry.get('file')
                 if sMessage:
                     if sMessage == "<string>":
-                        sMessage = "\nLine %d: %s" % (stackentry.get('linenumber', -1), stackentry.get('linetext'))
+                        sMessage = "Line %d: %s" % (stackentry.get('linenumber', -1), stackentry.get('linetext'))
                     if stackentry.get('furtherlinetext'):
                         sMessage += " -- " + stackentry.get('furtherlinetext') 
                     exceptionmessage.append(sMessage)
                 if stackentry.get('duplicates') and stackentry.get('duplicates') > 1:
-                    exceptionmessage.append("  + %d duplicates" % stackentry.duplicates)
+                    exceptionmessage.append("  + %d duplicates" % stackentry.get('duplicates'))
             
             if data.get("blockedurl"):
                 exceptionmessage.append("Blocked URL: %s" % data.get("blockedurl"))
@@ -184,7 +184,7 @@ def runmessageloop(runner, event, approxlenoutputlimit):
         
 
     if exceptionmessage:
-        event.output = "%s\n\n*** Exception ***\n\n%s\n" % (event.output, "\n".join(exceptionmessage))
+        event.output = "%s\n\n*** Exception ***\n\n%s\n" % (event.output, "\n\n".join(exceptionmessage))
     if not completiondata:
         event.output = "%s\nEXECUTIONSTATUS: [Run was interrupted (possibly by a timeout)]\n" % (event.output)
     
