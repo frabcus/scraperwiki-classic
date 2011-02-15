@@ -8,7 +8,6 @@ function highlightCode(code, Parser, previewerdiv)
     function addLine(line) 
     {
         numbers.append(String(lineNo++)+'<br>'); 
-        var kline = $('<span>').css('background-color', '#fae7e7'); 
         for (var i = 0; i < line.length; i++) 
             output.append(line[i]);
         output.append('<br>')
@@ -41,6 +40,7 @@ function highlightOtherCode(code, othercode, matcheropcodes, Parser, previewerdi
         {
             var li1 = (i1 == 0 ? 0 : i1 + flinepadding); 
             var li2 = (i2 == codelines.length ? i2 : i2 - flinepadding);
+            var preveclass = ''; 
             for (var i = i1; i < i2; i++)
             {
                 var eclass = 'equal'; 
@@ -49,10 +49,21 @@ function highlightOtherCode(code, othercode, matcheropcodes, Parser, previewerdi
                     eclass =  'fequal'; 
                     fequallines++; 
                 }
+
+                // put in expander area
+                if (preveclass && (eclass != preveclass) && (eclass == 'equal'))
+                {
+                    numbers.append('<span class="expander">.<br></span>'); 
+                    othernumbers.append('<span class="expander">.<br></span>'); 
+                    output.append('<span class="expander">...<br></span>');
+                }
+                preveclass = eclass; 
+
+                // the <br> needs to be inside the span so it can hide with it
                 numbers.append('<span class="'+eclass+'">'+String(i+1)+'<br></span>'); 
                 othernumbers.append('<span class="'+eclass+'">'+String(i-i1+j1+1)+'<br></span>'); 
 
-                var fline = $('<span class="'+eclass+'">'); 
+                var fline = $('<span class="'+eclass+'"/>'); 
                 var line = codelines[i]; 
                 for (var m = 0; m < line.length; m++) 
                     fline.append(line[m]);
@@ -68,7 +79,7 @@ function highlightOtherCode(code, othercode, matcheropcodes, Parser, previewerdi
                 numbers.append('<span class="insert">'+String(i+1)+'<br></span>'); 
                 othernumbers.append('<span class="insert">+<br></span>'); 
 
-                var fline = $('<span class="insert">')
+                var fline = $('<span class="insert"/>')
                 var line = codelines[i]; 
                 for (var m = 0; m < line.length; m++) 
                     fline.append(line[m]);
@@ -81,7 +92,7 @@ function highlightOtherCode(code, othercode, matcheropcodes, Parser, previewerdi
                 numbers.append('<span class="delete">-<br></span>'); 
                 othernumbers.append('<span class="delete">'+String(j+1)+'<br></span>'); 
 
-                var fline = $('<span class="delete">')
+                var fline = $('<span class="delete"/>')
                 var line = othercodelines[j]; 
                 for (var m = 0; m < line.length; m++) 
                     fline.append(line[m]);
