@@ -145,7 +145,7 @@ def runmessageloop(runner, event, approxlenoutputlimit):
                         sMessage += " -- " + stackentry.get('furtherlinetext') 
                     exceptionmessage.append(sMessage)
                 if stackentry.get('duplicates') and stackentry.get('duplicates') > 1:
-                    exceptionmessage.append("  + %d duplicates" % stackentry.duplicates)
+                    exceptionmessage.append("  + %d duplicates" % stackentry.get('duplicates'))
             
             if data.get("blockedurl"):
                 exceptionmessage.append("Blocked URL: %s" % data.get("blockedurl"))
