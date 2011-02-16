@@ -99,7 +99,7 @@ def deploy():
     print "***************** DEPLOY *****************"
     print "Please Enter your deploy message: \r"
     message = raw_input()
-    env.name = raw_input('Your name: ')
+    env.name = getpass.getuser()
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
 
