@@ -97,7 +97,7 @@ def deploy():
     """
 
     print "***************** DEPLOY *****************"
-    print "Please Enter your deploy message: \r"
+    print "Enter your deploy message: \r"
     message = raw_input()
     env.name = getpass.getuser()
     import time
@@ -126,8 +126,7 @@ def deploy():
 
 def email(message_body=None, old_revision=None, new_revision=None):
     if not message_body:
-        print "Please Enter your deploy message: \r"
-        message_body = raw_input()
+        message_body = "(no deploy comment)"
     
     message = """From: ScraperWiki <mercurial@scraperwiki.com>
 Subject: New Scraperwiki Deployment to %(version)s (deployed by %(user)s)
