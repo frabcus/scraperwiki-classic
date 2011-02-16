@@ -55,7 +55,7 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
                         will be overwritten. Must contain at least one element.
                         </dd>
                     <dt><code>data</code></dt>
-                        <dd>Dictionary. The data in your record. Values are converted to strings. e.g.
+                        <dd>Dictionary. The data in your record. Values are converted to strings, e.g.
                         in the example given, 
                         the integer <code>9812301</code> will be stored as a string. A null value
                         (e.g. <code>None</code> in Python) is stored as an empty string.
@@ -66,7 +66,7 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
                         <dd>Special date/time field. You can later retrieve
                         information according to this date using the <a href="{% url api:scraper_getdatabydate %}">getDataByDate</a>
                         function in the external API. You can also store dates
-                        in the data field, but you should put the most important one in this field.
+                        in the data field, but you should put the most important date in this field.
                         The date can be formatted as an ISO date in a string (<code>'2009-11-02'</code>), 
                         can include a time (<code>'2015-01-19 03:14:07'</code>) or can be
                         a date/time object from your language (e.g. <code>datetime.datetime.now() - datetime.timedelta(weeks=2)</code>).
@@ -96,7 +96,7 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
         <div class="section">
 	    <h2><span id="geocoding"></span>Geocoding data</h2>
 	    <p>ScraperWiki provides three useful geocoding functions: extract the postcode from an address;
-	    convert postcode to lat/lng; and convert easting/northing to lat/lng. 
+	    convert postcode to lat/lng; and convert easting/northing to lat/lng.</p> 
 	    <h4>Method</h4>
 	    <table class="api_detail example_table">
 	    <tr><th width="30%">Method</th><th width="20%">Returned value</th><th>Description</th></tr>
@@ -125,7 +125,7 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
 		    </td>
 		    </tr>
 		<tr><td><code>scraperwiki.geo.os_easting_northing_to_latlng
-			      <br/>&nbsp;(easting, northing)</code></td><td>String</td>
+			      <br/>&nbsp;(easting, northing)</code></td><td>List</td>
 		    <td>
 		    <p>
               Convert <a href="http://en.wikipedia.org/wiki/British_national_grid_reference_system">OSGB</a>
@@ -133,17 +133,18 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
             </p>
             <dl>
               <dt><code>easting</code></dt>
-              <dd>The easting of the point to be converted.</dd>
+              <dd>Integer. The easting of the point to be converted.</dd>
               <dt><code>northing</code></dt>
-              <dd>The northing of the point to be converted.</dd>
+              <dd>Integer. The northing of the point to be converted.</dd>
             </dl>
 		    </td>
 		    </tr>	
 	    </table>
 		<h4>Example</h4>
 		<div class="example"><code>
-		postcode = scraperwiki.geo.gb_postcode_to_latlng("10 Downing Street, London, SW1A 2AA")<br/>
-		latlng = scraperwiki.geo.gb_postcode_to_latlng("SW1A 2AA")
+		postcode = scraperwiki.geo.extract_gb_postcode("10 Downing Street, London, SW1A 2AA")<br/>
+		latlng = scraperwiki.geo.gb_postcode_to_latlng("SW1A 2AA")<br/>
+		oslatlng = scraperwiki.geo.os_easting_northing_to_latlng(528882,179839)
 		</code></div>
         </div>
 
@@ -181,6 +182,12 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
 	            </dl></td>
 			    </tr>
 			    </table>
+				<h4>Example</h4>
+				<div class="example"><code>
+				latest_message = scraperwiki.metadata.get('latest_message', default='No message yet')<br/>
+				latest_message = 'Scraper input'<br/>
+				scraperwiki.metadata.save('latest_message',latest_message)
+                </code></div>
 
             <h3>Special Keys</h3>
             <p>
