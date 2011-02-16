@@ -8,7 +8,9 @@
 {% endblock %}
 {% block content %}
     <div class="page_title">
-	    <h1 id="hCodeTitle">{{ scraper.title }}{% if not scraper.published %} (not public){% endif %}</h1>	    
+	    <h1 id="hCodeTitle">
+            {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% if not scraper.published %} (not public){% endif %}
+        </h1>
 	    <ul class="code_about">
 	       <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
 	       <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
