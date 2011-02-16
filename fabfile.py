@@ -147,7 +147,7 @@ New revision: %(new_revision)s
         'old_revision': old_revision,
         'new_revision': new_revision,
         }
-    sudo("""echo "%s" | sendmail scrapewiki-commits@googlegroups.com """ % message)
+    sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
     
 def migrate():
     virtualenv('cd web; python manage.py syncdb')
