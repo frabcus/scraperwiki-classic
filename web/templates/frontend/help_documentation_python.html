@@ -88,7 +88,8 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
 			    data = {}<br/>
 			    data['name'] = 'Fluffles'<br/>
 			    data['breed'] = 'Alsatian'<br/>
-			    scraperwiki.datastore.save(['name'], data, date="2009-03-02", latlng=(-2.983333, 53.4))
+			    crufts_date = datetime.datetime(2003, 8, 4, 12, 30, 45)<br/>
+			    scraperwiki.datastore.save(['name'], data, crufts_date, latlng=(-2.983333, 53.4))
 				</code></div>
             </div>
 
@@ -203,8 +204,8 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
             </table>
 			<h4>Example</h4>
 			<div class="example"><code>
-			scraperwiki.metadata.save(data_columns, ['date', 'name', 'breed', 'latlng'])<br/>
-			scraperwiki.metadata.save(private_columns, ['latlng'])
+			scraperwiki.metadata.save('data_columns', ['date', 'name', 'breed', 'latlng'])<br/>
+			scraperwiki.metadata.save('private_columns', ['latlng'])
 			</code></div>
         </div>
 </div>
