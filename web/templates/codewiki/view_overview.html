@@ -48,6 +48,7 @@
                 <h3>Scrapers used in the making of this view</h3>
                 <ul>
                     {% for related_scraper in related_scrapers %}
+                        <a href="{% url profiles_profile_detail related_scraper.owner.username %}">{% if related_scraper.owner.get_profile.name %}{{ related_scraper.owner.get_profile.name }}{% else %}{{related_scraper.owner.username}}{% endif %}</a> /
                         <a href="{% url code_overview related_scraper.wiki_type related_scraper.short_name %}">{{related_scraper.title}}</a>
                     {% endfor %}
                 </ul>
