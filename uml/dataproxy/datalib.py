@@ -439,7 +439,7 @@ class Database :
         return [ True, allitems ]
 
     def clear_datastore(self, scraperID, short_name):
-        self.execute("delete kv, items from kv join items on kv.item_id = items.item_id where scraper_id = '%s'" % scraperID)
+        self.execute("delete kv, items from kv join items on kv.item_id = items.item_id where scraper_id = %s", (scraperID,))
         self.m_db.commit()
             
         scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
