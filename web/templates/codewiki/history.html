@@ -48,13 +48,13 @@
           <div class="history_view_changes">
            <span class="aprevB">
              <span class="showsidecode">
+
                (<a class="showinsertside">{{itemfirst.rev}}</a>
                <a class="showdeleteside">{{itemfirst.prevrev}}</a>
                <a class="showbothside">N</a>)
+
              </span>
 
-             <a class="hideequal">[Hide equal]</a>
-             <a class="showequal">[Show equal]</a>
              <a class="hidechanges">Hide Changes</a>
            </span>
            <span class="aprev">
@@ -168,22 +168,13 @@ function cachefetch(cid, callback)
 function previewchanges_hideequal(block)
 {
     block.find('.codepreviewer .fequal').hide(); 
-    block.find(".aprevB .hideequal").hide(); 
-    block.find(".aprevB .showequal").show(); 
+    block.find('.codepreviewer .expander').show(); 
 }
 
 function previewchanges_showequal(block)
 {
     block.find('.codepreviewer .fequal').show(); 
-    block.find(".aprevB .hideequal").show(); 
-    block.find(".aprevB .showequal").hide(); 
-}
-
-function previewchanges_showequal(block)
-{
-    block.find('.codepreviewer .fequal').show(); 
-    block.find(".aprevB .hideequal").show(); 
-    block.find(".aprevB .showequal").hide(); 
+    block.find('.codepreviewer .expander').hide(); 
 }
 
 function previewchanges_showsidecode()
@@ -258,10 +249,11 @@ function previewchanges_show(block)
         if (fequallines > 5) 
             previewchanges_hideequal(block); 
         else
-        {
             previewchanges_showequal(block); 
-            block.find(".aprevB .hideequal").hide(); 
-        }
+
+        codepreviewerdiv.find(".expander").click(function() { previewchanges_showequal(block); }); 
+        codepreviewerdiv.find(".fequal").click(function() { previewchanges_hideequal(block); }); 
+
     })})}); 
 }
 
@@ -301,10 +293,11 @@ $(document).ready(function()
     hideallshowhistrun(); 
 
     $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
+
+
     $(".history_edit .showchanges").click(function() { previewchanges_show($(this).parents(".history_edit")); }); 
     $(".history_edit .hidechanges").click(function() { previewchanges_hide($(this).parents(".history_edit")); }); 
-    $(".history_edit .hideequal").click(function() { previewchanges_hideequal($(this).parents(".history_edit")); }); 
-    $(".history_edit .showequal").click(function() { previewchanges_showequal($(this).parents(".history_edit")); }); 
+
     $(".history_edit .showsidecode a").click(previewchanges_showsidecode); 
 
     $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); }); 

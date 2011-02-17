@@ -8,7 +8,9 @@
 {% endblock %}
 {% block content %}
     <div class="page_title">
-	    <h1 id="hCodeTitle">{{ scraper.title }}{% if not scraper.published %} (not public){% endif %}</h1>	    
+	    <h1 id="hCodeTitle">
+            {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% if not scraper.published %} (not public){% endif %}
+        </h1>
 	    <ul class="code_about">
 	       <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
 	       <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
@@ -30,7 +32,7 @@
         {% endifequal %}
         {% ifequal scraper.wiki_type 'view'%}
             <ul class="title_links">
-                <li class="full_screen"><a href="{% url view_fullscreen scraper.short_name %}">View as full page</a></li>
+                <li class="full_screen"><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">View as full page</a></li>
                 <li class="embed"><a href="{% url code_overview scraper.wiki_type scraper.short_name %}#embed" title="click to hide this bar">Add to your site</a></li>                
             </ul>
         {% endifequal %}

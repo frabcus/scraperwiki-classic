@@ -60,15 +60,59 @@ def MakeRunner(request, scraper, code):
     return runner
 
 
-def rpcexecute(request, short_name, revision = None):
+def scraperwikitag(scraper, html, panepresent):
+    mswpane = re.search('(?i)<div[^>]*?id="scraperwikipane"[^>/]*(?:/\s*>|>.*?</div>)', html)
+    if mswpane:
+        startend = (mswpane.start(0), mswpane.end(0))
+        mclass = re.search('class="([^"]*)"', mswpane.group(0))
+        if mclass:
+            paneversion = mclass.group(1)
+        else:
+            paneversion = "version-2"
+        if panepresent != None:
+            panepresent["scraperwikipane"].append(mswpane)
+    elif panepresent == None:
+        startend = (0, 0) # (0,0)
+        paneversion = "version-2"
+    else:
+        if len(panepresent["firstfivelines"]) < 5 and re.search("\S", html):
+            panepresent["firstfivelines"].append(html)
+        return html
+    
+    
+    urlscraperoverview = reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
+    urlscraperedit = reverse('editor_edit', args=[scraper.wiki_type, scraper.short_name])
+    
+    swdivstyle = "border:thin #aaf solid; display:block;width:225px; position:fixed; top:0px; right:0px; background:#eef; "
+    swlinkstyle = "display:block;float:right; width:175px; height:20px; background:url(/media/images/powered.png) no-repeat;"
+    lkbuttonstyle = "font-family:helvetica, arial, sans-serif; font-size:0.8em; position:relative; top:1px; background-color:#f1f1ff; border:solid 1px #bbb; padding:0.0em 0.2em!important; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;"
+    
+    if paneversion == "version-1":
+        swpane = [ '<div id="scraperwikipane" style="%s">' % swdivstyle ]
+        swpane.append('<b><a href="%s" title="Go to overview page">%s</a></b>' % (urlscraperoverview, scraper.title))
+        swpane.append('<br/>')
+        swpane.append('<a href="%s" title="Edit source code for this view" style="%s">Edit</a>' % (urlscraperedit, lkbuttonstyle))
+        swpane.append('<a href="/" id="scraperwikipane" style="%s"><span style="display:none">Powered by ScraperWiki</span></a>' % swlinkstyle)
+        swpane.append('</div>')
+
+    else:
+        swdivstyle = "border:thin #aaf solid; display:block;width:180px; position:fixed; top:0px; right:0px; background:#eef; "
+        swpane = [ '<div id="scraperwikipane" style="%s">' % swdivstyle ]
+        swpane.append('<a href="%s" id="scraperwikipane" style="%s"><span style="display:none">Powered by ScraperWiki</span></a>' % (urlscraperoverview, swlinkstyle))
+        swpane.append('</div>')
+
+    return "%s%s%s" % (html[:startend[0]], "".join(swpane), html[startend[1]:])
+
+
+def rpcexecute(request, short_name, revision=None):
     scraper = get_object_or_404(models.Code.objects, short_name=short_name)
     code = scraper.saved_code(revision)
     
     # quick case where we have PHP with no PHP code in it (it's all pure HTML)
     if scraper.language == 'php' and not re.search('<\?', code):
-        return HttpResponse(code)
+        return HttpResponse(scraperwikitag(scraper, code, None))
     if scraper.language == 'html':
-        return HttpResponse(code)
+        return HttpResponse(scraperwikitag(scraper, code, None))
     if scraper.language == 'javascript':
         HttpResponse(code, mimetype='application/javascript')
 
@@ -76,6 +120,7 @@ def rpcexecute(request, short_name, revision = None):
 
         # we build the response on the fly in case we get a contentheader value before anything happens
     response = None 
+    panepresent = {"scraperwikipane":[], "firstfivelines":[]}
     for line in runner.stdout:
         try:
             message = json.loads(line)
@@ -89,7 +134,7 @@ def rpcexecute(request, short_name, revision = None):
             if message.get('encoding') == 'base64':
                 response.write(base64.decodestring(message["content"]))
             else:
-                response.write(message["content"])
+                response.write(scraperwikitag(scraper, message["content"], panepresent))
         
         elif message['message_type'] == 'exception':
             if not response:
@@ -126,7 +171,17 @@ def rpcexecute(request, short_name, revision = None):
             
                     
     if not response:
-        response = HttpResponse('no output for some reason')
+        response = HttpResponse('no output for some unknown reason')
+        
+    # now decide about inserting the powered by scraperwiki panel (avoid doint it on json)
+    print panepresent
+    if not panepresent["scraperwikipane"]:
+        firstcode = "".join(panepresent["firstfivelines"]).strip()
+        print firstcode
+        if not re.match("[\w_\s=]*[\(\[\{]", firstcode):
+            if re.search("(?i)<\s*(?:b|i|a|h\d|script|ul|table).*?>", firstcode):
+                response.write(scraperwikitag(scraper, '<div id="scraperwikipane" class="version-1"/>', panepresent))
+    
     return response
                 
                 

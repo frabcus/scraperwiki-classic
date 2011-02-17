@@ -25,6 +25,8 @@ urlpatterns = patterns('',
     
     # special views functionality
     url(r'^views/(?P<short_name>[\w_\-\.]+)/html/$',      views.htmlview,               name='htmlview'),
+    
+            # this should be deprecated and redirected to http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}
     url(r'^views/(?P<short_name>[\w_\-\.]+)/full/$',      views.view_fullscreen,        name='view_fullscreen'),   
     url(r'^views/(?P<short_name>[\w_\-\.]+)/admin/$',     views.view_admin,             name='view_admin'),    
     

@@ -16,6 +16,7 @@ def dev():
     env.user = 'scraperdeploy'
     env.deploy_version = "dev"
     env.webserver = True
+    env.email_deploy = False
 
 def www():
     "The main www server (horsell)"
@@ -27,6 +28,7 @@ def www():
     env.user = 'scraperdeploy'
     env.deploy_version = "www"
     env.webserver = True
+    env.email_deploy = "deploy@scraperwiki.com"
 
 def umls():
     "The UML server (rush)"
@@ -38,6 +40,7 @@ def umls():
     env.user = 'scraperdeploy'
     env.deploy_version = "umls"
     env.webserver = False
+    env.email_deploy = "deploy@scraperwiki.com"
 
 def datastore():
     "The datastore server (burbage)"
@@ -49,6 +52,7 @@ def datastore():
     env.user = 'scraperdeploy'
     env.deploy_version = "datastore"
     env.webserver = False
+    env.email_deploy = "deploy@scraperwiki.com"
 
 def setup():
     """
@@ -97,9 +101,11 @@ def deploy():
     """
 
     print "***************** DEPLOY *****************"
-    print "Please Enter your deploy message: \r"
-    message = raw_input()
-    env.name = raw_input('Your name: ')
+    if env.email_deploy:
+        print "(Optional, hit return if it's just routine) Enter your deploy comment: \r"
+        message = raw_input()
+
+    env.name = getpass.getuser()
     import time
     env.release = time.strftime('%Y%m%d%H%M%S')
 
@@ -118,7 +124,8 @@ def deploy():
 
     write_changeset()
     install_cron()
-    email(message, old_revision, new_revision)
+    if env.email_deploy:
+        email(message, old_revision, new_revision)
 
     print "Deploy successful"
     print "Old revision = %s" % old_revision
@@ -126,8 +133,7 @@ def deploy():
 
 def email(message_body=None, old_revision=None, new_revision=None):
     if not message_body:
-        print "Please Enter your deploy message: \r"
-        message_body = raw_input()
+        message_body = "(no deploy comment)"
     
     message = """From: ScraperWiki <mercurial@scraperwiki.com>
 Subject: New Scraperwiki Deployment to %(version)s (deployed by %(user)s)
@@ -147,7 +153,7 @@ New revision: %(new_revision)s
         'old_revision': old_revision,
         'new_revision': new_revision,
         }
-    sudo("""echo "%s" | sendmail scrapewiki-commits@googlegroups.com """ % message)
+    sudo("""echo "%s" | sendmail deploy@scraperwiki.com """ % message)
     
 def migrate():
     virtualenv('cd web; python manage.py syncdb')
