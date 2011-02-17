@@ -12,6 +12,9 @@ import mercurial
 import mercurial.ui
 import mercurial.hg
 
+from django.contrib.auth.models import User
+
+
 
 # The documentation and help strings for this Mercurial interface is inadequate
 # The best bet is to look directly at the source code to work out what attributes exist
@@ -41,7 +44,7 @@ class MercurialInterface:
 
     
     # need to dig into the commit command to find the rev
-    def commit(self, scraper, message="changed", user="unknown"): 
+    def commit(self, scraper, message, user): 
         assert os.path.exists(os.path.join(self.repopath, "code"))
         if "code" not in self.repo.dirstate:
             self.repo.add(["code"])   
@@ -49,7 +52,7 @@ class MercurialInterface:
         if message is None:
             message = "changed"
 
-        node = self.repo.commit(message, str(user.pk))  # (maybe we should be committing proper usernames here so it's comprehensible outside)
+        node = self.repo.commit(message, user.username)
         if not node:
             return None
         return self.repo.changelog.rev(node)
@@ -57,16 +60,25 @@ class MercurialInterface:
     
     def getctxrevisionsummary(self, ctx):
         description = ctx.description()
-        data = { "rev":ctx.rev(), "userid":ctx.user(), "description":description }
+        data = { "rev":ctx.rev(), "userval":ctx.user(), "description":description }
         data['editingsession'] = description.split('|||')[0]
         epochtime, offset = ctx.date()
         ltime = time.localtime(epochtime)
         data["date"] = datetime.datetime(*ltime[:7])
         data["date_isDST"] = ltime[-1]
         data["files"] = ctx.files()
+
+        luser = User.objects.filter(username=data["userval"])
+        if luser:
+            data["user"] = luser[0]
+        elif re.match("\d+$", data["userval"]):    # older ones are by pk rather than username
+            luser = User.objects.filter(pk=int(data["userval"]))
+            if luser:
+                data["user"] = luser[0]
+        
         return data
-            
-    
+
+
             # this function is used externally when getting a second version to diff against
     def getreversion(self, rev):
         ctx = self.repo[rev]
