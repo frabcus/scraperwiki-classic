@@ -47,14 +47,6 @@
           <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
           <div class="history_view_changes">
            <span class="aprevB">
-             <span class="showsidecode">
-
-               (<a class="showinsertside">{{itemfirst.rev}}</a>
-               <a class="showdeleteside">{{itemfirst.prevrev}}</a>
-               <a class="showbothside">N</a>)
-
-             </span>
-
              <a class="hidechanges">Hide Changes</a>
            </span>
            <span class="aprev">
@@ -165,46 +157,87 @@ function cachefetch(cid, callback)
 }
 
 
-function previewchanges_hideequal(block)
+function previewchanges_hideequal(block, curr)
 {
+    var oth = null, currY;  
+    if (curr)
+    {
+        oth = curr; 
+        while (oth && (!oth.hasClass(".fequal") && (oth.attr("display") != "none")))
+            oth = oth.next(); 
+        if (!oth)
+        {
+            oth = curr; 
+            while (oth && (!oth.hasClass(".fequal") && (oth.attr("display") != "none")))
+                oth = oth.prev(); 
+        }
+        currY = curr.offset().top; 
+    }
+
     block.find('.codepreviewer .fequal').hide(); 
     block.find('.codepreviewer .expander').show(); 
+
+    if (oth)
+        $(window).scrollTop($(window).scrollTop() + oth.offset().top - currY); 
 }
 
-function previewchanges_showequal(block)
+function previewchanges_showequal(block, curr)
 {
+    var oth = null, currY;  
+    if (curr)
+    {
+        oth = curr.next(); 
+        if (!oth)
+            oth = curr.prev(); 
+        currY = curr.offset().top; 
+    }
+
     block.find('.codepreviewer .fequal').show(); 
     block.find('.codepreviewer .expander').hide(); 
+
+    if (oth)
+        $(window).scrollTop($(window).scrollTop() + oth.offset().top - currY); 
 }
+
 
 function previewchanges_showsidecode()
 {
     var block = $(this).parents(".history_edit"); 
     var curr = $(this); 
 
-    if (curr.hasClass("shcodesel") && curr.hasClass("showinsertside"))
-        curr = block.find(".showdeleteside"); 
-    if (curr.hasClass("shcodesel") && curr.hasClass("showdeleteside"))
-        curr = block.find(".showinsertside"); 
+    // allow clicking on the inserted or deleted code
+    if (curr.hasClass("delete"))
+        curr = block.find(".otherlinenumbers"); 
+    if (curr.hasClass("insert"))
+        curr = block.find(".linenumbers"); 
 
-    block.find(".showsidecode a").removeClass("shcodesel"); 
-    if (curr.hasClass("showinsertside"))
+    // allow toggling so you don't need to move the mouse
+    if (curr.hasClass("shcodesel") && curr.hasClass("otherlinenumbers"))
+        curr = block.find(".linenumbers"); 
+    if (curr.hasClass("shcodesel") && curr.hasClass("linenumbers"))
+        curr = block.find(".otherlinenumbers"); 
+
+    block.find(".history_code_border div").removeClass("shcodesel"); 
+    if (curr.hasClass("linenumbers"))
     {
         block.find('.codepreviewer .delete').hide(); 
         block.find('.codepreviewer .insert').show(); 
         curr.addClass("shcodesel"); 
     }
-    else if (curr.hasClass("showdeleteside"))
+    else if (curr.hasClass("otherlinenumbers"))
     {
         block.find('.codepreviewer .insert').hide(); 
         block.find('.codepreviewer .delete').show(); 
         curr.addClass("shcodesel"); 
     }
-    else
-    {
-        block.find('.codepreviewer .insert').show(); 
-        block.find('.codepreviewer .delete').show(); 
-    }
+}
+
+
+function previewchanges_showbothcode(block)
+{
+    block.find(".history_code_border div").removeClass("shcodesel"); 
+    block.find('.codepreviewer .insert').show(); 
+    block.find('.codepreviewer .delete').show(); 
 }
 
 
@@ -251,8 +284,11 @@ function previewchanges_show(block)
         else
             previewchanges_showequal(block); 
 
-        codepreviewerdiv.find(".expander").click(function() { previewchanges_showequal(block); }); 
-        codepreviewerdiv.find(".fequal").click(function() { previewchanges_hideequal(block); }); 
+        codepreviewerdiv.find(".outputlines .fequal").click(function() { previewchanges_hideequal(block, $(this)); }); 
+        codepreviewerdiv.find(".outputlines .equal").click(function() { previewchanges_showbothcode(block); }); 
+        codepreviewerdiv.find(".outputlines .delete").click(previewchanges_showsidecode); 
+        codepreviewerdiv.find(".outputlines .insert").click(previewchanges_showsidecode); 
+        codepreviewerdiv.find(".expander").click(function() { previewchanges_showequal(block, $(this)); }); 
 
     })})}); 
 }
@@ -298,7 +334,8 @@ $(document).ready(function()
     $(".history_edit .showchanges").click(function() { previewchanges_show($(this).parents(".history_edit")); }); 
     $(".history_edit .hidechanges").click(function() { previewchanges_hide($(this).parents(".history_edit")); }); 
 
-    $(".history_edit .showsidecode a").click(previewchanges_showsidecode); 
+    $(".history_edit .history_code_border .otherlinenumbers").click(previewchanges_showsidecode); 
+    $(".history_edit .history_code_border .linenumbers").click(previewchanges_showsidecode); 
 
     $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); }); 
     $(".history_run_event .hiderunevent").click(function() { previewrunevent_hide($(this).parents(".history_run_event")); }); 
