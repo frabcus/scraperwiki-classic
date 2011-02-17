@@ -105,10 +105,13 @@ def scraper_overview(request, short_name):
         private_columns = scraper.get_metadata('private_columns')
     else:
         private_columns = None
-    data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
-                                               limit=50, 
-                                               column_order=column_order,
-                                               private_columns=private_columns)
+    try:
+        data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
+                                                   limit=50, 
+                                                   column_order=column_order,
+                                                   private_columns=private_columns)
+    except:
+        data = {'rows': []}
 
     if len(data['rows']) > 12:
         data['morerows'] = data['rows'][9:]
@@ -119,18 +122,21 @@ def scraper_overview(request, short_name):
     
     context['data'] = data
     
-    dataproxy = DataStore(scraper.guid, scraper.short_name)
-    sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
-    if sqlitedata and type(sqlitedata) not in [str, unicode]:
-        context['sqlitedata'] = sqlitedata["tables"]
+    try:
+        dataproxy = DataStore(scraper.guid, scraper.short_name)
+        sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
+        if sqlitedata and type(sqlitedata) not in [str, unicode]:
+            context['sqlitedata'] = sqlitedata["tables"]
         
             # throw away uniqu_hash rows
-        for table in context['sqlitedata'].values():
-            if "unique_hash" in table["keys"]:
-                iuh = table["keys"].index("unique_hash")
-                del table["keys"][iuh]
-                for row in table["rows"]:
-                    del row[iuh]
+            for table in context['sqlitedata'].values():
+                if "unique_hash" in table["keys"]:
+                    iuh = table["keys"].index("unique_hash")
+                    del table["keys"][iuh]
+                    for row in table["rows"]:
+                        del row[iuh]
+    except:
+        pass
     
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 

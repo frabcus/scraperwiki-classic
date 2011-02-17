@@ -353,7 +353,7 @@ class Database :
             if not cursor.fetchall():
                 tablename = "swdata"
         if tablename:
-            result = self.sqlitecommand(scraperID, "fromfrontend", short_name, "execute", "select * from `%s` limit ? offset ?" % tablename, (limit, offset))
+            result = self.sqlitecommand(scraperID, "fromfrontend", short_name, "execute", "select * from `?` limit ? offset ?" % (tablename, limit, offset))
             if isinstance(result, str):
                 return [False, result]
             return [True, [ dict(zip(result["keys"], d))  for d in result["data"] ] ]
@@ -439,7 +439,7 @@ class Database :
         return [ True, allitems ]
 
     def clear_datastore(self, scraperID, short_name):
-        self.execute("delete kv, items from kv join items on kv.item_id = items.item_id where scraper_id = '%s'" % scraperID)
+        self.execute("delete kv, items from kv join items on kv.item_id = items.item_id where scraper_id = %s", (scraperID,))
         self.m_db.commit()
             
         scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
@@ -520,7 +520,7 @@ class Database :
 
     def item_count (self, scraperID) :
 
-        cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s", (scraperID, ))
+        cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s", (scraperID,))
         return [ True, int(cursor.fetchone()[0]) ]
 
     def has_geo (self, scraperID) :
@@ -642,11 +642,11 @@ class Database :
             try:
                 for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
                     tables[name] = {"sql":sql}
-                    self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, ((val1 == None and 10 or val1),))
+                    self.m_sqlitedbcursor.execute("select * from ? order by rowid desc limit ?", (name, (val1 == None and 10 or val1),))
                     if val1 != 0:
                         tables[name]["rows"] = list(self.m_sqlitedbcursor)
                     tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
-                    tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
+                    tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from ?", (name,)))[0][0]
                     
             except sqlite3.Error, e:
                 return "sqlite3.Error: "+str(e)
@@ -676,17 +676,17 @@ class Database :
 
 
     def updatesqdatakeys(self, scraperID, runID, short_name, swdatatblname):
-        tblinfo = self.sqlitecommand(scraperID, runID, short_name, "execute", "PRAGMA table_info(%s)" % swdatatblname, None)["data"]
+        tblinfo = self.sqlitecommand(scraperID, runID, short_name, "execute", "PRAGMA table_info(?)", (swdatatblname,))["data"]
         self.swdatakeys[swdatatblname] = [ a[1]  for a in tblinfo ]
         self.swdatatypes[swdatatblname] = [ a[2]  for a in tblinfo ]
-        self.sqdatatemplate[swdatatblname] = "insert or replace into %s values (%s)" % (swdatatblname, ",".join(["?"]*len(self.swdatakeys[swdatatblname])))
+        self.sqdatatemplate[swdatatblname] = "insert or replace into ? values (%s)" % ",".join(["?"]*len(self.swdatakeys[swdatatblname]))
 
 
     def save_sqlite(self, scraperID, runID, short_name, unique_keys, data, swdatatblname):
             
         # establish the sw data table
         if not self.m_sqlitedbconn or swdatatblname not in self.swdatakeys:
-            self.sqlitecommand(scraperID, runID, short_name, "execute", "create table if not exists %s (`date_scraped` text, `unique_hash` text unique)" % swdatatblname, None)
+            self.sqlitecommand(scraperID, runID, short_name, "execute", "create table if not exists ? (`date_scraped` text, `unique_hash` text unique)", (swdatatblname,))
         
         if swdatatblname not in self.swdatakeys:
             self.updatesqdatakeys(scraperID, runID, short_name, swdatatblname)
@@ -701,7 +701,7 @@ class Database :
                         vt = "integer"
                     elif type(v) == float:
                         vt = "real"
-                    self.sqlitecommand(scraperID, runID, short_name, "execute", "alter table %s add column `%s` %s" % (swdatatblname, k, vt), None)
+                    self.sqlitecommand(scraperID, runID, short_name, "execute", "alter table ? add column ? ?", (swdatatblname, k, vt))
                     self.updatesqdatakeys(scraperID, runID, short_name, swdatatblname)  # get again rather than amend
     
         # compute the hash key
@@ -712,7 +712,7 @@ class Database :
         data["unique_hash"] = hashlib.md5('\0342\0211\0210\0342\0211\0210\0342\0211\0210'.join(ulist)).hexdigest()
         
         data["date_scraped"] = datetime.datetime.now().isoformat()
-        res = self.sqlitecommand(scraperID, runID, short_name, "execute", self.sqdatatemplate[swdatatblname], [ data.get(k)  for k in self.swdatakeys[swdatatblname] ])
+        res = self.sqlitecommand(scraperID, runID, short_name, "execute", self.sqdatatemplate[swdatatblname], [swdatatblname] + [data.get(k) for k in self.swdatakeys[swdatatblname]])
         if type(res) == str:
             return [ False, res ]
         return  [ True, 'Data record inserted' ]

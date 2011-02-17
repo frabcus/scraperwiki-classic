@@ -3,6 +3,9 @@
 <li class="code_object_line">
     <h3>
         <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
+        <a href="{% url profiles_profile_detail code.owner.username %}">
+         {% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}
+        </a> /
         <a href="{% url code_overview code.wiki_type code.short_name %}">
             {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
         </a>
@@ -21,15 +24,9 @@
         </ul>
     </h3>
     <small>
-        Created by
-        {% load gravatar %}
-        {% if code.owner %}
-            {% show_gravatar code.owner 'small' %}
-            {% if code.owner.username %}
-                <a href="{% url profiles_profile_detail code.owner.username %}">{{ code.owner.get_profile.name }}</a>
-            {% endif %}
-        {% endif %}
-        {{code.created_at|timesince}} ago | {% if code.scraper.record_count %}
+        Created
+        {{code.created_at|timesince}} ago | 
+        {% if code.scraper.record_count %}
           ({{ code.scraper.record_count }} records)
         {% else %}
           (no records)

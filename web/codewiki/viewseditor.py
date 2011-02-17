@@ -149,7 +149,7 @@ def reload(request, short_name):
 def edittutorial(request, short_name):
     code = get_code_object_or_notfoundresponse(short_name, request)
     if isinstance(code, HttpResponseNotFound):
-        return scraper
+        return code
 
     qtemplate = "?template="+code.short_name
     return HttpResponseRedirect(reverse('editor', args=[code.wiki_type, code.language]) + qtemplate)
