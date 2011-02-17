@@ -9,7 +9,7 @@
         {{htmlcode|safe}}
     {% else %}
         <div class="screenshot_large">
-          <a href="{% url view_fullscreen scraper.short_name %}">
+          <a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">
               <span>Click to open this view</span>
           </a>
           {% screen_shot scraper 'large' %}

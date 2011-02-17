@@ -325,6 +325,7 @@ def view_overview (request, short_name):
     return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
     
     
+       # this view should be deprecated
 def view_fullscreen (request, short_name):
     user = request.user
     urlquerystring = request.META["QUERY_STRING"]
