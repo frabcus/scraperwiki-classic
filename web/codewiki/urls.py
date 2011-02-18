@@ -14,9 +14,6 @@ metadata = Resource(handler=ScraperMetadataHandler)
 
 urlpatterns = patterns('',
     
-    # use this to monitor the site
-    url(r'^table/$',                                      views.scraper_table,          name='scraper_table'),
-
             # running a scraper by calling a url (from scraperwikiviews.com)
     url(r'^run/(?P<short_name>[\w_\-\.]+)/(?P<revision>\d+/)?$', 
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    

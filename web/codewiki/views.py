@@ -503,7 +503,8 @@ def export_csv(request, short_name):
     response['Content-Disposition'] = 'attachment; filename=%s.csv' % (short_name)
     return response
 
-
+            
+            ## NOT DONE YET
 def stream_sqlite(scraper, memblock=1000000, max_memsize=100000000):
     for offset in range(0, max_rows, step):
         dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=step, offset=offset)
@@ -597,16 +598,6 @@ def export_gdocs_spreadsheet(request, short_name):
         
     #except gdata.service.RequestError:
     #    print "failed to upload for some other reason"
-
-
-def scraper_table(request):
-    dictionary = { }
-    dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
-    dictionary["numpublishedscraperstotal"] = dictionary["scrapers"].count()
-    dictionary["numunpublishedscraperstotal"] = models.Scraper.objects.filter(published=False).count()
-    dictionary["numdeletedscrapers"] = models.Scraper.unfiltered.filter(deleted=True).count()
-    dictionary["user"] = request.user
-    return render_to_response('codewiki/scraper_table.html', dictionary, context_instance=RequestContext(request))
 
 
 
