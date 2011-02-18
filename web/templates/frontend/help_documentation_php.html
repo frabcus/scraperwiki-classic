@@ -171,18 +171,11 @@
                   Store a list of column names here to specify the order in which columns are displayed in the ScraperWiki data table.
                 </td>
               </tr>
-              <tr>
-                <td>private_columns</td>
-                <td>
-                  Store a list of column names here to hide these columns in the ScraperWiki data table from users who do not own the scraper. 
-                </td>
-              </tr>
             </table>
 			<h4>Example</h4>
 			<div class="example"><code>
 			$arr = array("name", "breed");<br/>
-			scraperwiki::save_metadata('data_columns',$arr);<br/>
-			scraperwiki::save_metadata('private_columns','breed');
+			scraperwiki::save_metadata('data_columns',$arr);
 			</code></div>
         </div>
 

@@ -202,17 +202,10 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
                   Store a list of column names here to specify the order in which columns are displayed in the ScraperWiki data table.
                 </td>
               </tr>
-              <tr>
-                <td>private_columns</td>
-                <td>
-                  Store a list of column names here to hide these columns in the ScraperWiki data table from users who do not own the scraper. 
-                </td>
-              </tr>
             </table>
 			<h4>Example</h4>
 			<div class="example"><code>
-			scraperwiki.metadata.save('data_columns', ['date', 'name', 'breed', 'latlng'])<br/>
-			scraperwiki.metadata.save('private_columns', ['latlng'])
+			scraperwiki.metadata.save('data_columns', ['date', 'name', 'breed', 'latlng'])
 			</code></div>
         </div>
 </div>
