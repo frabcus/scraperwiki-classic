@@ -1128,7 +1128,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function setupToolbar()
     {
         // actually the save button
-        $('.editor_controls #btnCommitPopup').live('click', function (){
+        $('.editor_controls #btnCommitPopup').live('click', function ()
+        {
             saveScraper();  
             return false;
         });
@@ -1283,18 +1284,27 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             // ordinary save case.
             if (res.draft != 'True') 
             {
-                $('.editor_controls #btnCommitPopup').val('Saved').addClass('darkness'); 
                 window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
-writeToChat("Saved rev number: " + res.rev); 
-                if (bConnected)
-                    sendjson({"command":'saved', "rev":res.rev}); 
+                if (res.rev == null)
+                {
+                    writeToChat("No difference (null revision number)"); 
+                    $('.editor_controls #btnCommitPopup').val('No change'); 
+                }
+                else 
+                {
+                    writeToChat("Saved rev number: " + res.rev); 
+                    $('.editor_controls #btnCommitPopup').val('Saved').addClass('darkness'); 
+                    if (bConnected)
+                        sendjson({"command":'saved', "rev":res.rev}); 
+                }
             }
             ChangeInEditor("saved"); 
         },
-        error: function(response)
+        error: function(jqXHR, textStatus, errorThrown)
         {
-            alert('Sorry, something went wrong, please try copying your code and then reloading the page');
-            writeToChat("Response error: " + response.responseText); 
+            writeToChat("Response error: " + textStatus + "  :" + jqXHR.responseText); 
+            alert('Sorry, something went wrong with the save, please try copying your code and then reloading the page');
+            window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
         }});
 
         $('.editor_controls #btnCommitPopup').val('Saving ...');

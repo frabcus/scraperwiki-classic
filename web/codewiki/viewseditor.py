@@ -103,15 +103,6 @@ def code(request, wiki_type, short_name):
 
     context["status"] = status
     context["code"] = status.get('code')
-    
-    # hack in link to user (was it a good idea to use userid rather than username?)
-    try:    status["currcommit"]["user"] = User.objects.get(pk=int(status["currcommit"]["userid"]))
-    except: pass
-    try:    status["prevcommit"]["user"] = User.objects.get(pk=int(status["prevcommit"]["userid"]))
-    except: pass
-    try:    status["nextcommit"]["user"] = User.objects.get(pk=int(status["nextcommit"]["userid"]))
-    except: pass
-
     context['error_messages'] = [ ]
     
     try: otherrev = int(request.GET.get('otherrev', '-1'))

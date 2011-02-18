@@ -377,10 +377,9 @@ def scraper_history(request, wiki_type, short_name):
     
     itemlog = [ ]
     for commitentry in scraper.get_commit_log():
-        try:    user = User.objects.get(pk=int(commitentry["userid"]))
-        except: user = None
-        
-        item = {"type":"commit", "rev":commitentry['rev'], "datetime":commitentry["date"], "user":user}
+        item = { "type":"commit", "rev":commitentry['rev'], "datetime":commitentry["date"] }
+        if "user" in commitentry:
+            item["user"] = commitentry["user"]
         item['earliesteditor'] = commitentry['description'].split('|||')
         if itemlog:
             item["prevrev"] = itemlog[-1]["rev"]

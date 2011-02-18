@@ -51,7 +51,7 @@ function highlightOtherCode(code, othercode, matcheropcodes, Parser, previewerdi
                 }
 
                 // put in expander area
-                if (preveclass && (eclass != preveclass) && (eclass == 'equal'))
+                if ((eclass != preveclass) && (eclass == 'fequal'))
                 {
                     numbers.append('<span class="expander">.<br></span>'); 
                     othernumbers.append('<span class="expander">.<br></span>'); 

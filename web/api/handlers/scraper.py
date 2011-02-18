@@ -13,13 +13,8 @@ class GetInfo(APIBase):
     
     def convert_history(self, commitentry):
         result = { 'version':commitentry['rev'], 'date':commitentry['date'] }
-        try:    
-            user = User.objects.get(pk=int(commitentry["userid"]))
-            result['user'] = user.username
-        except ValueError: 
-            pass
-        except User.DoesNotExist: 
-            pass
+        if 'user' in commitentry:
+            result["user"] = commitentry['user'].username
         lsession = commitentry['description'].split('|||')
         if len(lsession) == 2:
             result['session'] = lsession[0]
