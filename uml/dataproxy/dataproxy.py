@@ -284,13 +284,17 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    : params = urlparse.parse_qs(query)
         except : params = cgi     .parse_qs(query)
 
+                # if the scraperid is set then we can assume it's from the frontend, is not authenticated and will have no write permissions
+                # if it is not set, then it is fetched through the ident call and is then authenticated enough for writing purposes in its relevant file
         if 'scraperid' in params and params['scraperid'][0] not in [ '', None ] :
             if self.connection.getpeername()[0] != config.get ('dataproxy', 'secure') :
                 self.connection.send (json.dumps ((False, "ScraperID only accepted from secure hosts")) + '\n')
                 return
             scraperID, runID, scraperName = params['scraperid'][0], 'fromfrontend.%s.%s' % (params['scraperid'][0], time.time()), params.get('short_name', [""])[0]
+        
         else :
             scraperID, runID, scraperName = self.ident (params['uml'][0], params['port'][0])
+
 
         if path == '' or path is None :
             path = '/'

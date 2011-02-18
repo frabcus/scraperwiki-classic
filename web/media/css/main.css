@@ -409,9 +409,9 @@ span.historyexception { color:white; background:#d00; padding-left:2px; padding-
 .codepreviewer .delete, .showdeleteside { background:#ffdddd; } 
 .shcodesel { border:thin #999 dotted; }
 
-.codepreviewer .otherlinenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
-.codepreviewer .linenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt;} 
-.codepreviewer .outputlines { margin-top:0px; padding-top:0.4em; font-family: monospace;font-size: 10pt; overflow-x:auto; } 
+.codepreviewer .otherlinenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt; cursor:pointer;} 
+.codepreviewer .linenumbers { float: left;  width: 1.2em;color: #888;background:#fafafa; text-align: right; padding: 0.4em;margin: 0;font-family: monospace;font-size: 10pt; cursor:pointer;} 
+.codepreviewer .outputlines { margin-top:0px; padding-top:0.4em; font-family: monospace;font-size: 10pt; overflow-x:auto; cursor:pointer;} 
 
 
 ul.commitlist { text-align: left; padding:0; margin:0} 
@@ -535,6 +535,7 @@ form#newpdfdoclink { }
 .history_ran_fail {background-color:#f9d5d4;  padding:10px; margin-bottom:5px; border:solid #acacac thin;}
 .history_ran_notfinished {background-color:#ccc; padding:10px; margin-bottom:5px; border:solid #acacac thin;}
 
+.history_editor_info { vertical-align:super; }
 
 .history_view_changes {float:right; margin-right:5px; margin-left:5px; cursor:pointer;}
 .history_view_details {float:right; margin-right:5px; margin-left:5px; cursor:pointer;}

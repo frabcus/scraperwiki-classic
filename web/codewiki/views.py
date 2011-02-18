@@ -53,6 +53,8 @@ def code_error_response(klass, short_name, request):
     else:
         raise Http404
 
+
+        # should redirect when wrong type
 def code_overview(request, wiki_type, short_name):
     if wiki_type == 'scraper':
         return scraper_overview(request, short_name)
@@ -337,7 +339,6 @@ def view_fullscreen (request, short_name):
     return render_to_response('codewiki/view_fullscreen.html', {'scraper': scraper, 'urlquerystring':urlquerystring}, context_instance=RequestContext(request))
 
 def comments(request, wiki_type, short_name):
-
     user = request.user
     scraper = get_code_object_or_none(models.Code, short_name=short_name)
     if not scraper:
@@ -476,6 +477,7 @@ def generate_csv(dictlist, offset, max_length=None):
     fout.close()
     return result, truncated
 
+
 def stream_csv(scraper, step=5000, max_rows=1000000):
     for offset in range(0, max_rows, step):
         dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=step, offset=offset)
@@ -502,6 +504,15 @@ def export_csv(request, short_name):
     return response
 
 
+def stream_sqlite(scraper, memblock=1000000, max_memsize=100000000):
+    for offset in range(0, max_rows, step):
+        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=step, offset=offset)
+        
+        yield generate_csv(dictlist, offset)[0]
+        if len(dictlist) != step:
+            break   #we've reached the end of the data
+
+
 def export_sqlite(request, short_name):
     scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
     if not scraper:
@@ -509,7 +520,7 @@ def export_sqlite(request, short_name):
     
     dataproxy = DataStore(scraper.guid, scraper.short_name)
     sqlitedata = dataproxy.request(("sqlitecommand", "downloadsqlitefile", None, None))
-    if type(sqlitedata) in [str,unicode]:
+    if type(sqlitedata) in [str, unicode]:
         return HttpResponse(sqlitedata)
     content = sqlitedata.get("content")
     if sqlitedata.get("encoding") == "base64":
@@ -517,6 +528,32 @@ def export_sqlite(request, short_name):
     response = HttpResponse(content, mimetype='application/octet-stream')
     response['Content-Disposition'] = 'attachment; filename=%s.sqlite' % (short_name)
     return response
+
+
+def sqlitequery(request):
+    dataproxy = DataStore("sqlviewquery", "sqlviewquery")
+    for aattach in request.GET.get('attach', '').split(";"):
+        if aattach:
+            aa = aattach.split(",")
+            sqlitedata = dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
+    
+    sqlquery = request.GET.get('query')
+    if not sqlquery:
+        return HttpResponse("Example:  ?attach=scraper_name,src&query=select+*+from+src.swdata+limit+10")
+    
+    sqlitedata = dataproxy.request(("sqlitecommand", "execute", sqlquery, None))
+    #return HttpResponse(json.dumps(sqlitedata), mimetype="application/json")
+    return HttpResponse(json.dumps(sqlitedata), mimetype="text/plain")
+
+
+
+
+
+
+
+
+
+
 
 
 def export_gdocs_spreadsheet(request, short_name):
@@ -561,6 +598,7 @@ def export_gdocs_spreadsheet(request, short_name):
     #except gdata.service.RequestError:
     #    print "failed to upload for some other reason"
 
+
 def scraper_table(request):
     dictionary = { }
     dictionary["scrapers"] = models.Scraper.objects.filter(published=True).order_by('-created_at')
@@ -572,7 +610,7 @@ def scraper_table(request):
 
 
 
-def follow (request, short_name):
+def follow(request, short_name):
     scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
     if not scraper:
         return code_error_response(models.Scraper, short_name=short_name, request=request)
@@ -661,7 +699,7 @@ def proxycached(request):
         cacheid = request.GET.get('cacheid')
     
     if not cacheid:
-        return HttpResponse(json.dumps({'type':'error', 'content':"No cacheid found"}), mimetype="text/plain")
+        return HttpResponse(json.dumps({'type':'error', 'content':"No cacheid found"}), mimetype="application/json")
     
     proxyurl = settings.HTTPPROXYURL + "/Page?" + cacheid
     result = { 'proxyurl':proxyurl, 'cacheid':cacheid }
@@ -677,7 +715,7 @@ def proxycached(request):
         result['type'] = 'exception'
         result['content'] = str(e)
     
-    return HttpResponse(json.dumps(result), mimetype="text/plain")
+    return HttpResponse(json.dumps(result), mimetype="application/json")
 
 
 

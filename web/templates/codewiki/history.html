@@ -32,28 +32,32 @@
   
     {% regroup itemlogmonth.list by groupkey as itemloggroup_list %}
     {% for itemloggroup in itemloggroup_list %}
-      {% with itemloggroup.list|first as itemfirst %}
+      {% with itemloggroup.list|first as itemfirst %}   {# could alternatively refer to itemloggroup.list.0 #}
 
       {% ifequal itemfirst.type 'commit' %}
       <div class="history_edit">
+          {% show_gravatar itemfirst.user 'small' %}
+          <span class="history_editor_info">
+            Edited by 
+            <a href="{% if item.user.username %}{% url profiles_profile_detail itemfirst.user.username %}{% endif %}" class="historyuser">
+              {% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
+            </a>
+            {% ifnotequal itemloggroup.list|length 1 %}
+              {{itemloggroup.list|length}} times
+            {% endifnotequal %}
+            <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
+          </span>
 
-          {% show_gravatar itemfirst.user 'small' %}Edited by 
-          <a href="{% if item.user.username %}{% url profiles_profile_detail itemfirst.user.username %}{% endif %}" class="historyuser">
-            {% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
-          </a>
-          {% ifnotequal itemloggroup.list|length 1 %}
-            {{itemloggroup.list|length}} times
-          {% endifnotequal %}
-          <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
           <div class="history_view_changes">
-           <span class="aprevB">
-             <a class="hidechanges">Hide Changes</a>
-           </span>
-           <span class="aprev">
-             <a class="showchanges">Show changes</a>
-           </span>
+            {% ifnotequal itemfirst.prevrev null %}
+              <a class="hidechanges">Hide changes</a>
+              <a class="showchanges">Show changes</a>
+            {% else %}
+              <a class="hidechanges">Hide first version</a>
+              <a class="showchanges">Show first version</a>
+            {% endifnotequal %}
 
-           <span class="revlist hide">
+            <span class="revlist hide">
              {% for item in itemloggroup.list %}
              <span class="revelem">
                <span class="rev">{{item.rev}}</span>
@@ -61,8 +65,7 @@
                <span class="prevrev">{{item.prevrev}}</span>
              </span>
              {% endfor %}
-           </span>
-
+            </span>
           </div>
 
           <div class="codepreviewer"> 
@@ -83,6 +86,7 @@
           Run failed:
           <span class="historyexception">{{itemfirst.runevent.exception_message}}</span> - ran for {{itemfirst.durationseconds}} seconds
               ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
+          <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
 
         {% else %}{% if itemfirst.runevent.run_ended %}
         <div class="history_ran">
@@ -245,16 +249,16 @@ function previewchanges_hide(block)
 {
     var codepreviewerdiv = block.find(".codepreviewer");
     codepreviewerdiv.hide(); 
-    block.find(".aprevB").hide(); 
-    block.find(".aprev").show(); 
+    block.find(".history_view_changes .hidechanges").hide(); 
+    block.find(".history_view_changes .showchanges").show(); 
 }
 
 function previewchanges_show(block)
 {
     hideallshowhistrun(); 
 
-    block.find(".aprev").hide(); 
-    block.find(".aprevB").show(); 
+    block.find(".history_view_changes .showchanges").hide(); 
+    block.find(".history_view_changes .hidechanges").show(); 
 
     var rev = block.find("span.revlist span.revelem:first span.rev").text();  
     var prevrev = block.find("span.revlist span.revelem:last span.prevrev").text();  
@@ -289,6 +293,8 @@ function previewchanges_show(block)
         codepreviewerdiv.find(".outputlines .delete").click(previewchanges_showsidecode); 
         codepreviewerdiv.find(".outputlines .insert").click(previewchanges_showsidecode); 
         codepreviewerdiv.find(".expander").click(function() { previewchanges_showequal(block, $(this)); }); 
+
+        codepreviewerdiv.find(".expander").attr("title", "Expand to show all unchanged lines"); 
 
     })})}); 
 }
