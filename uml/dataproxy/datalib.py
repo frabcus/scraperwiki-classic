@@ -600,9 +600,26 @@ class Database :
             scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
             if not os.path.isfile(scrapersqlitefile):
                 return "No sqlite database"
+            
+            result = { "filesize": os.path.getsize(scrapersqlitefile) }
             fin = open(scrapersqlitefile, "rb")
-            result = {'content':base64.encodestring(fin.read()), 'encoding':"base64"}
+            if val1:
+                fin.seek(val1)
+                result["seek"] = val1
+            else:
+                result["seek"] = 0
+            
+            if val2:
+                content = fin.read(val2)
+            else:
+                content = fin.read()
+            result["length"] = len(content)
+            result["content"] = base64.encodestring(fin.read())
+            result['encoding'] = "base64"
+            fin.close()
+            
             return result
+            
             
             # make a new directory and connection if not seen anywhere (unless it's draft)
         if not self.m_sqlitedbconn:

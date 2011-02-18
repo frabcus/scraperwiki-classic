@@ -532,7 +532,7 @@ def export_sqlite(request, short_name):
 
 
 def sqlitequery(request):
-    dataproxy = DataStore("sqlviewquery", "sqlviewquery")
+    dataproxy = DataStore("sqlviewquery", "")  # zero length short name means it will open up a :memory: database
     for aattach in request.GET.get('attach', '').split(";"):
         if aattach:
             aa = aattach.split(",")

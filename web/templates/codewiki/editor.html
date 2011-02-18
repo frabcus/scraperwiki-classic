@@ -59,7 +59,7 @@
     <input type="hidden" id="proxycachedurl"    value="{% url proxycached %}"/>
     <input type="hidden" id="quickhelpurl"      value="{% url quickhelp %}"/>
     {% if scraper.short_name %}
-        <input type="hidden" id="viewrunurl"    value="{% url view_fullscreen scraper.short_name %}"/>
+        <input type="hidden" id="viewrunurl"    value="{% url rpcexecute scraper.short_name %}"/>
         <input type="hidden" id="editorreloadurl" value="{% url reload scraper.short_name %}"/>
     {% endif %}
 
