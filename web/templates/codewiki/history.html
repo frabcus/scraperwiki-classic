@@ -32,36 +32,32 @@
   
     {% regroup itemlogmonth.list by groupkey as itemloggroup_list %}
     {% for itemloggroup in itemloggroup_list %}
-      {% with itemloggroup.list|first as itemfirst %}
+      {% with itemloggroup.list|first as itemfirst %}   {# could alternatively refer to itemloggroup.list.0 #}
 
       {% ifequal itemfirst.type 'commit' %}
       <div class="history_edit">
+          {% show_gravatar itemfirst.user 'small' %}
+          <span class="history_editor_info">
+            Edited by 
+            <a href="{% if item.user.username %}{% url profiles_profile_detail itemfirst.user.username %}{% endif %}" class="historyuser">
+              {% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
+            </a>
+            {% ifnotequal itemloggroup.list|length 1 %}
+              {{itemloggroup.list|length}} times
+            {% endifnotequal %}
+            <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
+          </span>
 
-          {% show_gravatar itemfirst.user 'small' %}Edited by 
-          <a href="{% if item.user.username %}{% url profiles_profile_detail itemfirst.user.username %}{% endif %}" class="historyuser">
-            {% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
-          </a>
-          {% ifnotequal itemloggroup.list|length 1 %}
-            {{itemloggroup.list|length}} times
-          {% endifnotequal %}
-          <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
           <div class="history_view_changes">
-           <span class="aprevB">
-             <span class="showsidecode">
-               (<a class="showinsertside">{{itemfirst.rev}}</a>
-               <a class="showdeleteside">{{itemfirst.prevrev}}</a>
-               <a class="showbothside">N</a>)
-             </span>
+            {% ifnotequal itemfirst.prevrev null %}
+              <a class="hidechanges">Hide changes</a>
+              <a class="showchanges">Show changes</a>
+            {% else %}
+              <a class="hidechanges">Hide first version</a>
+              <a class="showchanges">Show first version</a>
+            {% endifnotequal %}
 
-             <a class="hideequal">[Hide equal]</a>
-             <a class="showequal">[Show equal]</a>
-             <a class="hidechanges">Hide Changes</a>
-           </span>
-           <span class="aprev">
-             <a class="showchanges">Show changes</a>
-           </span>
-
-           <span class="revlist hide">
+            <span class="revlist hide">
              {% for item in itemloggroup.list %}
              <span class="revelem">
                <span class="rev">{{item.rev}}</span>
@@ -69,8 +65,7 @@
                <span class="prevrev">{{item.prevrev}}</span>
              </span>
              {% endfor %}
-           </span>
-
+            </span>
           </div>
 
           <div class="codepreviewer"> 
@@ -91,6 +86,7 @@
           Run failed:
           <span class="historyexception">{{itemfirst.runevent.exception_message}}</span> - ran for {{itemfirst.durationseconds}} seconds
               ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
+          <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
 
         {% else %}{% if itemfirst.runevent.run_ended %}
         <div class="history_ran">
@@ -165,55 +161,87 @@ function cachefetch(cid, callback)
 }
 
 
-function previewchanges_hideequal(block)
+function previewchanges_hideequal(block, curr)
 {
+    var oth = null, currY;  
+    if (curr)
+    {
+        oth = curr; 
+        while (oth && (!oth.hasClass(".fequal") && (oth.attr("display") != "none")))
+            oth = oth.next(); 
+        if (!oth)
+        {
+            oth = curr; 
+            while (oth && (!oth.hasClass(".fequal") && (oth.attr("display") != "none")))
+                oth = oth.prev(); 
+        }
+        currY = curr.offset().top; 
+    }
+
     block.find('.codepreviewer .fequal').hide(); 
-    block.find(".aprevB .hideequal").hide(); 
-    block.find(".aprevB .showequal").show(); 
+    block.find('.codepreviewer .expander').show(); 
+
+    if (oth)
+        $(window).scrollTop($(window).scrollTop() + oth.offset().top - currY); 
 }
 
-function previewchanges_showequal(block)
+function previewchanges_showequal(block, curr)
 {
+    var oth = null, currY;  
+    if (curr)
+    {
+        oth = curr.next(); 
+        if (!oth)
+            oth = curr.prev(); 
+        currY = curr.offset().top; 
+    }
+
     block.find('.codepreviewer .fequal').show(); 
-    block.find(".aprevB .hideequal").show(); 
-    block.find(".aprevB .showequal").hide(); 
+    block.find('.codepreviewer .expander').hide(); 
+
+    if (oth)
+        $(window).scrollTop($(window).scrollTop() + oth.offset().top - currY); 
 }
 
-function previewchanges_showequal(block)
-{
-    block.find('.codepreviewer .fequal').show(); 
-    block.find(".aprevB .hideequal").show(); 
-    block.find(".aprevB .showequal").hide(); 
-}
 
 function previewchanges_showsidecode()
 {
     var block = $(this).parents(".history_edit"); 
     var curr = $(this); 
 
-    if (curr.hasClass("shcodesel") && curr.hasClass("showinsertside"))
-        curr = block.find(".showdeleteside"); 
-    if (curr.hasClass("shcodesel") && curr.hasClass("showdeleteside"))
-        curr = block.find(".showinsertside"); 
+    // allow clicking on the inserted or deleted code
+    if (curr.hasClass("delete"))
+        curr = block.find(".otherlinenumbers"); 
+    if (curr.hasClass("insert"))
+        curr = block.find(".linenumbers"); 
 
-    block.find(".showsidecode a").removeClass("shcodesel"); 
-    if (curr.hasClass("showinsertside"))
+    // allow toggling so you don't need to move the mouse
+    if (curr.hasClass("shcodesel") && curr.hasClass("otherlinenumbers"))
+        curr = block.find(".linenumbers"); 
+    if (curr.hasClass("shcodesel") && curr.hasClass("linenumbers"))
+        curr = block.find(".otherlinenumbers"); 
+
+    block.find(".history_code_border div").removeClass("shcodesel"); 
+    if (curr.hasClass("linenumbers"))
     {
         block.find('.codepreviewer .delete').hide(); 
         block.find('.codepreviewer .insert').show(); 
         curr.addClass("shcodesel"); 
     }
-    else if (curr.hasClass("showdeleteside"))
+    else if (curr.hasClass("otherlinenumbers"))
     {
         block.find('.codepreviewer .insert').hide(); 
         block.find('.codepreviewer .delete').show(); 
         curr.addClass("shcodesel"); 
     }
-    else
-    {
-        block.find('.codepreviewer .insert').show(); 
-        block.find('.codepreviewer .delete').show(); 
-    }
+}
+
+
+function previewchanges_showbothcode(block)
+{
+    block.find(".history_code_border div").removeClass("shcodesel"); 
+    block.find('.codepreviewer .insert').show(); 
+    block.find('.codepreviewer .delete').show(); 
 }
 
 
@@ -221,16 +249,16 @@ function previewchanges_hide(block)
 {
     var codepreviewerdiv = block.find(".codepreviewer");
     codepreviewerdiv.hide(); 
-    block.find(".aprevB").hide(); 
-    block.find(".aprev").show(); 
+    block.find(".history_view_changes .hidechanges").hide(); 
+    block.find(".history_view_changes .showchanges").show(); 
 }
 
 function previewchanges_show(block)
 {
     hideallshowhistrun(); 
 
-    block.find(".aprev").hide(); 
-    block.find(".aprevB").show(); 
+    block.find(".history_view_changes .showchanges").hide(); 
+    block.find(".history_view_changes .hidechanges").show(); 
 
     var rev = block.find("span.revlist span.revelem:first span.rev").text();  
     var prevrev = block.find("span.revlist span.revelem:last span.prevrev").text();  
@@ -258,10 +286,16 @@ function previewchanges_show(block)
         if (fequallines > 5) 
             previewchanges_hideequal(block); 
         else
-        {
             previewchanges_showequal(block); 
-            block.find(".aprevB .hideequal").hide(); 
-        }
+
+        codepreviewerdiv.find(".outputlines .fequal").click(function() { previewchanges_hideequal(block, $(this)); }); 
+        codepreviewerdiv.find(".outputlines .equal").click(function() { previewchanges_showbothcode(block); }); 
+        codepreviewerdiv.find(".outputlines .delete").click(previewchanges_showsidecode); 
+        codepreviewerdiv.find(".outputlines .insert").click(previewchanges_showsidecode); 
+        codepreviewerdiv.find(".expander").click(function() { previewchanges_showequal(block, $(this)); }); 
+
+        codepreviewerdiv.find(".expander").attr("title", "Expand to show all unchanged lines"); 
+
     })})}); 
 }
 
@@ -301,11 +335,13 @@ $(document).ready(function()
     hideallshowhistrun(); 
 
     $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
+
+
     $(".history_edit .showchanges").click(function() { previewchanges_show($(this).parents(".history_edit")); }); 
     $(".history_edit .hidechanges").click(function() { previewchanges_hide($(this).parents(".history_edit")); }); 
-    $(".history_edit .hideequal").click(function() { previewchanges_hideequal($(this).parents(".history_edit")); }); 
-    $(".history_edit .showequal").click(function() { previewchanges_showequal($(this).parents(".history_edit")); }); 
-    $(".history_edit .showsidecode a").click(previewchanges_showsidecode); 
+
+    $(".history_edit .history_code_border .otherlinenumbers").click(previewchanges_showsidecode); 
+    $(".history_edit .history_code_border .linenumbers").click(previewchanges_showsidecode); 
 
     $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); }); 
     $(".history_run_event .hiderunevent").click(function() { previewrunevent_hide($(this).parents(".history_run_event")); }); 

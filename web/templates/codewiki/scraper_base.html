@@ -32,7 +32,7 @@
         {% endifequal %}
         {% ifequal scraper.wiki_type 'view'%}
             <ul class="title_links">
-                <li class="full_screen"><a href="{% url view_fullscreen scraper.short_name %}">View as full page</a></li>
+                <li class="full_screen"><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">View as full page</a></li>
                 <li class="embed"><a href="{% url code_overview scraper.wiki_type scraper.short_name %}#embed" title="click to hide this bar">Add to your site</a></li>                
             </ul>
         {% endifequal %}
