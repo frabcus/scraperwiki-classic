@@ -1,9 +1,14 @@
 <ul>
+    {% if scraper.owner %}
     <li>
         <a href="{% url profiles_profile_detail scraper.owner.username %}">
         {% load gravatar %} {% show_gravatar scraper.owner 'medium' %} 
         {{scraper.owner.get_profile.name}}</a> (creator)
     </li>
+    {% else %}
+    <li style="color:red">[Error: this scraper has no creator]</li>
+    {% endif %}
+
     {% if scraper_requesters %}  
       {% for requester in scraper_requesters %}  
         <li>
