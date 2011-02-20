@@ -689,7 +689,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             return; 
         }
 
-    
         //send the data
         var code = codeeditor.getCode(); 
         var urlquery = (!$('#id_urlquery').length || $('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
@@ -708,8 +707,17 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
         // do a save to the system every time we run (this would better be done via twisted at some point)
         var automode = $('select#automode option:selected').val(); 
-        if (pageIsDirty && ((automode == 'autosave') || (automode == 'autotype')))
-            saveScraper(); 
+        if ((automode == 'autosave') || (automode == 'autotype'))
+        {
+            if (pageIsDirty)
+                saveScraper(); 
+            else if (lastsavedcode && (lastsavedcode != code))
+            {
+                var historysize = codeeditor.historySize(); 
+                writeToChat("Page should have been marked dirty but wasn't: historysize="+historysize.undo+"  savedundo="+savedundo); 
+                saveScraper(); 
+            }
+        }
     } 
 
 
