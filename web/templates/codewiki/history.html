@@ -39,7 +39,7 @@
           {% show_gravatar itemfirst.user 'small' %}
           <span class="history_editor_info">
             Edited by 
-            <a href="{% if item.user.username %}{% url profiles_profile_detail itemfirst.user.username %}{% endif %}" class="historyuser">
+            <a href="{% if itemfirst.user.username %}{% url profiles_profile_detail itemfirst.user.username %}{% endif %}" class="historyuser">
               {% if itemfirst.user.get_profile.name %}{{itemfirst.user.get_profile.name}}{% else %}{{itemfirst.user.username}}{% endif %}
             </a>
             {% ifnotequal itemloggroup.list|length 1 %}

@@ -174,10 +174,8 @@ def rpcexecute(request, short_name, revision=None):
         response = HttpResponse('no output for some unknown reason')
         
     # now decide about inserting the powered by scraperwiki panel (avoid doint it on json)
-    print panepresent
     if not panepresent["scraperwikipane"]:
         firstcode = "".join(panepresent["firstfivelines"]).strip()
-        print firstcode
         if not re.match("[\w_\s=]*[\(\[\{]", firstcode):
             if re.search("(?i)<\s*(?:b|i|a|h\d|script|ul|table).*?>", firstcode):
                 response.write(scraperwikitag(scraper, '<div id="scraperwikipane" class="version-1"/>', panepresent))
