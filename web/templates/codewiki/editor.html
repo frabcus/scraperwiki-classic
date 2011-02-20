@@ -80,6 +80,7 @@
                         <img src="{{ MEDIA_URL }}images/editor_logo.png" width="39" height="25"/>
                     </a>
                     <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
+                    <span>Rev: <span id="idlastrevnumber">{{rev.rev}}</span></span>
                     <div class="page_tabs small">
                         {% if scraper.id %}
                             {% include 'codewiki/includes/tabs.html' %}
