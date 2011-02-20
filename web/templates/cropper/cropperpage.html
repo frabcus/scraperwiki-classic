@@ -35,7 +35,10 @@
                 $('#pdfpageid').Jcrop( { onSelect: setCrop, onChange: setCrop, keySupport: false } ); 
             }); 
 
-            $('p#share_links input').attr('value', '<a title="PDF excerpt" href="http://scraperwiki.com/{% url croppage srcdoc page cropping %}{{qtail}}"><img src="http://scraperwiki.com{% url cropimg 'png' srcdoc page cropping %}{{qtail}}"></a>'); 
+            var imglink = "http://scraperwiki.com{% url cropimg 'png' srcdoc page cropping %}{{qtail}}"; 
+            var linkedimg = '<a title="PDF excerpt" href="http://scraperwiki.com/{% url croppage srcdoc page cropping %}{{qtail}}"><img src="'+imglink+'"></a>'; 
+            $('#imglink').attr("href", imglink); 
+            $('p#share_links input').attr('value', linkedimg); 
 
             $('a#instructionslink').click(function () { $('div#instructions').css({'display':'block'}); }); 
         });
@@ -46,7 +49,7 @@
 <div id="full_bar">
     <h1>Page {{page}} of {{Pages}} of <a href="{{pdfurl}}" title="Go original pdf">{{pdfurl|urlizetrunc:25}}</a>
     </h1>
-    <p id="share_links">Embed image: <input type="text" readonly value=""></p>
+    <p id="share_links">Embed <a href="#" id="imglink" style="color:blue">image</a>: <input type="text" readonly value=""></p>
     <a href="{%url frontpage %}" id="powered"><span class="hide">Powered by ScraperWiki</span></a>
 </div> 
 
