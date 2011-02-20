@@ -133,7 +133,4 @@ class Sqlite(APIBase):
                 sqlitedata = dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
         
         sqlquery = request.GET.get('query')
-        if not sqlquery:
-            return HttpResponse("Example:  ?attach=scraper_name,src&query=select+*+from+src.swdata+limit+10")
-        
-        return dataproxy.request(("sqlitecommand", "execute", sqlquery, None))
+        return [ dataproxy.request(("sqlitecommand", "execute", sqlquery, None)) ]
