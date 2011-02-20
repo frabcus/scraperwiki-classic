@@ -102,6 +102,13 @@ def explore_scraper_getdata_1_0(request):
     scrapers = example_scrapers(user, 5)
     return render_to_response('api/scraper_getdata_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdata'), 'short_name': short_name}, context_instance=RequestContext(request))
 
+def explore_scraper_sqlite_1_0(request):
+    short_name = request.GET.get('name', '')
+    scrapers = []
+    user = request.user
+    scrapers = example_scrapers(user, 5)
+    return render_to_response('api/datastore_sqlite_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_sqlite'), 'short_name': short_name}, context_instance=RequestContext(request))
+
 def explore_scraper_getdatabydate_1_0(request):
     scrapers = []
     user = request.user
