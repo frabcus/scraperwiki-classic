@@ -14,7 +14,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, LOGARITHMIC
-from codewiki.models import Code, Scraper, View
+from codewiki.models import Code, Scraper, View, HELP_LANGUAGES, LANGUAGES_DICT
 from tagging.models import Tag, TaggedItem
 from market.models import Solicitation, SolicitationStatus
 from frontend.forms import CreateAccountForm
@@ -156,10 +156,10 @@ def help(request, mode=None, language=None):
     viewtutorials = {}
     if not language:
         language = "python"
-    other_languages = ["php", "python", "ruby"]
-    other_languages.remove(language)
+    display_language = LANGUAGES_DICT[language]
+    other_languages = [ (l, d) for (l, d) in HELP_LANGUAGES if l != language]
     if mode=="code_documentation": # Support legacy URL. 
-	    mode="documentation"
+        mode="documentation"
     if not mode or mode=="faq":
         mode = "faq"
         include_tag = "frontend/help_faq.html"
@@ -169,7 +169,7 @@ def help(request, mode=None, language=None):
         include_tag = "frontend/help_tutorials.html"
     else: 
         include_tag = "frontend/help_%s_%s.html" % (mode, language)
-    return render_to_response('frontend/help.html', { 'mode' : mode, 'language' : language, \
+    return render_to_response('frontend/help.html', { 'mode' : mode, 'language' : language, 'display_language' : display_language, \
              'include_tag' : include_tag, 'tutorials': tutorials, 'viewtutorials': viewtutorials, \
              'other_languages' : other_languages }, 
              context_instance = RequestContext(request))

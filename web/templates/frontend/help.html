@@ -26,11 +26,11 @@
 
     {% ifnotequal mode "faq" %}
     <p>
-        You are reading the help for <strong class="language {{language}}">{{language.title}}</strong> 
+        You are reading the help for <strong class="language {{language}}">{{display_language}}</strong> 
          See help also for
-         {% for other_language in other_languages %}
+         {% for other_language, display_other_language in other_languages %}
          {% if not forloop.first %} or {% endif %}
-         <strong class="language {{other_language}}"><a href="{% url help mode other_language %}">{{other_language.title}}</a></strong>{% endfor %}.
+         <strong class="language {{other_language}}"><a href="{% url help mode other_language %}">{{display_other_language}}</a></strong>{% endfor %}.
     </p>
     <p>Still confused? Ask a question on our <a href="http://groups.google.com/group/scraperwiki">developers' list</a>.</p>
     {% endifnotequal %}
