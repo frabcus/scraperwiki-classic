@@ -124,7 +124,7 @@
                 <span id="watcherstatus"></span>
             
                 <div class="right">
-                    <span class="last_saved">Rev: <span id="idlastrevnumber">{{rev.rev}}</span></span>
+                    <span class="last_saved"><span id="idlastrevnumber">{% if rev.rev %} Rev: {{rev.rev}} {% endif %}</span></span>
                     <ul class="code_about">
                         <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
               	        <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>

@@ -1103,7 +1103,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         var reloaddata = $.evalJSON(reloadajax.responseText); 
         codeeditor.setCode(reloaddata.code); 
         rev = reloaddata.rev; 
-        $("#idlastrevnumber").text(String(rev)); 
+        $("#idlastrevnumber").text("Rev: " + String(rev)); 
         chainpatchnumber = 0; 
         //codeeditor.focus(); 
         if (reloaddata.selrange)
@@ -1298,7 +1298,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             if (res.draft != 'True') 
             {
                 window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
-                $("#idlastrevnumber").text(String(res.rev)); 
+                $("#idlastrevnumber").text("Rev: " + String(res.rev)); 
                 if (res.rev == null)
                 {
                     writeToChat("No difference (null revision number)"); 
