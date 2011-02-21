@@ -80,7 +80,6 @@
                         <img src="{{ MEDIA_URL }}images/editor_logo.png" width="39" height="25"/>
                     </a>
                     <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
-                    <span>Rev: <span id="idlastrevnumber">{{rev.rev}}</span></span>
                     <div class="page_tabs small">
                         {% if scraper.id %}
                             {% include 'codewiki/includes/tabs.html' %}
@@ -125,6 +124,7 @@
                 <span id="watcherstatus"></span>
             
                 <div class="right">
+                    <span class="last_saved">Rev: <span id="idlastrevnumber">{{rev.rev}}</span></span>
                     <ul class="code_about">
                         <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
               	        <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
