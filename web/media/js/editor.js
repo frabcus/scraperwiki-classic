@@ -1098,7 +1098,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function updateLastSavedRev(rev)
     {   
-        $("#idlastrevnumber").text("Rev: " + String(rev)); 
+	if (rev == null)
+	    $("#idlastrevnumber").text("Rev: unchanged"); 
+	else
+	    $("#idlastrevnumber").text("Rev: " + String(rev)); 
     }
 
     function reloadScraper()
