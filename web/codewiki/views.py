@@ -651,9 +651,9 @@ def choose_template(request, wiki_type):
         template = 'codewiki/choose_template.html'
     
     if wiki_type == "scraper":
-        context["languages"] = ["python", "ruby", "php"]
+        context["languages"] = models.code.SCRAPER_LANGUAGES
     else:
-        context["languages"] = ["python", "ruby", "php", "html"]
+        context["languages"] = models.code.VIEW_LANGUAGES
     
     return render_to_response(template, context, context_instance=RequestContext(request))
 

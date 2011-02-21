@@ -484,6 +484,9 @@ body.fullscreen #embedinstructions textarea { width:500px; }
 .code_about li.codewiki_type.scraper {background-image:url(../images/icons/scraper.png);}
 .code_about li.codewiki_type.view {background-image:url(../images/icons/view.png);}
 
+/* last saved date / revision */
+.last_saved {color:#808080;margin:0;padding:0.5em 0em 0.5em 0;}
+
 /* infobox */
 .infobox {border:solid 1px #ccc; font-size:0.9em; color:#808080; padding:0.5em;}
 

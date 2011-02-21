@@ -80,7 +80,6 @@
                         <img src="{{ MEDIA_URL }}images/editor_logo.png" width="39" height="25"/>
                     </a>
                     <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
-                    <span>Rev: <span id="idlastrevnumber">{{rev.rev}}</span></span>
                     <div class="page_tabs small">
                         {% if scraper.id %}
                             {% include 'codewiki/includes/tabs.html' %}
@@ -125,16 +124,14 @@
                 <span id="watcherstatus"></span>
             
                 <div class="right">
-                    <ul class="code_about">
+                    <span class="last_saved"><span id="idlastrevnumber">{% if rev.rev %} Rev: {{rev.rev}} {% endif %}</span></span>
+                    {% comment %} 
+		    <!-- no need for this bit, as says language / type at top right anyway -->
+		    <ul class="code_about">
                         <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
               	        <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
-                        {# the php/html mixed parser appears good enough to handle all of this without a mode switch! #}
-                        {% if 0 %}   
-                          {% ifequal scraper.language 'PHP' %}
-                            <li><tiny><a href="#" id="togglelanguage" style="background:orange">toggle HTML</a></tiny></li>
-                          {% endifequal %}
-                        {% endif %}
                     </ul>
+		    {% endcomment %}
                     {% if scraper.id %}
                         <a id="aCloseEditor1" href="{% url code_overview scraper.wiki_type scraper.short_name %}">close editor</a>
                     {% else %}
