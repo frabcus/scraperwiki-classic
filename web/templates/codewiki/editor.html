@@ -128,12 +128,6 @@
                     <ul class="code_about">
                         <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
               	        <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
-                        {# the php/html mixed parser appears good enough to handle all of this without a mode switch! #}
-                        {% if 0 %}   
-                          {% ifequal scraper.language 'PHP' %}
-                            <li><tiny><a href="#" id="togglelanguage" style="background:orange">toggle HTML</a></tiny></li>
-                          {% endifequal %}
-                        {% endif %}
                     </ul>
                     {% if scraper.id %}
                         <a id="aCloseEditor1" href="{% url code_overview scraper.wiki_type scraper.short_name %}">close editor</a>
