@@ -14,15 +14,16 @@ metadata = Resource(handler=ScraperMetadataHandler)
 
 urlpatterns = patterns('',
     
-    # use this to monitor the site
-    url(r'^table/$',                                      views.scraper_table,          name='scraper_table'),
-
-    # running a scraper by calling a url
+            # running a scraper by calling a url (from scraperwikiviews.com)
     url(r'^run/(?P<short_name>[\w_\-\.]+)/(?P<revision>\d+/)?$', 
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    
+    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/run/$',   # redirect because it's so common
                    lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('rpcexecute', args=[short_name]))),
     
+            # should access from scraperwikiviews.com
+    url(r'^sqlitequery/$',                                views.sqlitequery,            name='sqlitequery'), 
+            
     # special views functionality
     url(r'^views/(?P<short_name>[\w_\-\.]+)/html/$',      views.htmlview,               name='htmlview'),
     
@@ -34,6 +35,8 @@ urlpatterns = patterns('',
     url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),
     url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$',  
                                                           views.export_sqlite,          name='export_sqlite'),
+    
+            # probably deprecated and out of date        
     url(r'^scrapers/export2/(?P<short_name>[\w_\-\.]+)/$',views.export_gdocs_spreadsheet,name='export_gdocs_spreadsheet'),    
     
     url(r'^scrapers/follow/(?P<short_name>[\w_\-\.]+)/$',   views.follow,               name='scraper_follow'),

@@ -3,6 +3,7 @@ from web.codewiki.models import Scraper
 import datetime
 from piston.utils import rc
 from settings import MAX_API_ITEMS, DEFAULT_API_ITEMS
+from codewiki.managers.datastore import DataStore
 
     
 
@@ -117,3 +118,19 @@ class DataByDate(APIBase):
                 
         return Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=limit, offset=offset, start_date=start_date, end_date=end_date)
 
+
+class Sqlite(APIBase):
+    required_arguments = ['name', 'query']
+    
+    def value(self, request):
+        attachlist = request.GET.get('attach', '').split(";")
+        attachlist.insert(0, request.GET.get('name'))   # just the first entry on the list
+        
+        dataproxy = DataStore("sqlviewquery", "")  # zero length short name means it will open up a :memory: database
+        for aattach in attachlist:
+            if aattach:
+                aa = aattach.split(",")
+                sqlitedata = dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
+        
+        sqlquery = request.GET.get('query')
+        return [ dataproxy.request(("sqlitecommand", "execute", sqlquery, None)) ]

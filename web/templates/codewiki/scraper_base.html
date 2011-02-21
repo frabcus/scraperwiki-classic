@@ -8,9 +8,9 @@
 {% endblock %}
 {% block content %}
     <div class="page_title">
-	    <h1 id="hCodeTitle">
-            {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% if not scraper.published %} (not public){% endif %}
-        </h1>
+       <h1>
+            {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %} / <span id="hCodeTitle">{{ scraper.title }}</span>{% if not scraper.published %} (not public){% endif %}
+       </h1>
 	    <ul class="code_about">
 	       <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
 	       <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
@@ -24,7 +24,7 @@
                 <li class="csv"><a href="{% url export_csv scraper.short_name %}" rel="nofollow">Download this dataset (CSV)</a></li>
                 <li class="api"><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>
                 {% if sqlitedata %}
-                    <li class="sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download Sqlite3 database</a></li>
+                    <li class="sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download SQLite3 database</a></li>
                 {% else %}
                     {#<li class="gdocs"><a href="{% url export_gdocs_spreadsheet scraper.short_name %}" target="_new" rel="nofollow">Open in Google Docs</a></li>#}
                 {% endif %}
