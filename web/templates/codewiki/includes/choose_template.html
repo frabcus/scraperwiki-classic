@@ -1,13 +1,13 @@
 {% load screen_shot %}
 <h1>Choose a template</h1>
 <ul class="views small">
-    {% for language in languages %}
+    {% for language, display_language in languages %}
     <li>
-        <a href="{% url editor wiki_type language|lower %}{% if sourcescraper %}?sourcescraper={{sourcescraper}}{% endif %}" class="screenshot">
+        <a href="{% url editor wiki_type language %}{% if sourcescraper %}?sourcescraper={{sourcescraper}}{% endif %}" class="screenshot">
         <br/>                
-          <img src="{{MEDIA_URL}}/images/icons/{{language|lower}}.png" alt="{{language}}"/>
+          <img src="{{MEDIA_URL}}/images/icons/{{language}}.png" alt="{{display_language}}"/>
          <br/>
-         Blank {{language}} {{wiki_type}}
+         Blank {{display_language}} {{wiki_type}}
         </a>                
     </li>
     {% endfor %}
