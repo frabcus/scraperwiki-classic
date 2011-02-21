@@ -17,6 +17,7 @@ import  time
 import  threading
 import  string 
 import  urllib   # should this be urllib2? -- JGT
+import  urllib2
 import  ConfigParser
 import  hashlib
 import  OpenSSL
@@ -233,9 +234,21 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if   mode == 'H' : port = 80
         elif mode == 'S' : port = 443
         else             : port = loc[1]
-        ident     = urllib.urlopen ('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
+        
+        ex = None
+        for attempt in range(3):
+            try:
+                ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).readlines()
+                if ident.strip() != "":
+                    break # Ident OK so break out of the for loop and avoid else block
+            except Exception, e:
+                ex = e # Save the exception incase we run out of attempts and go into else block
+        else:
+            # We've run out of attempts so reraise the last exception
+            if ex:
+                raise ex
 
-        for line in string.split (ident, '\n') :
+        for line in string.split (ident, '\n'):
             if line == '' :
                 continue
             key, value = string.split (line, '=')
