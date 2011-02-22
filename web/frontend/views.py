@@ -4,7 +4,7 @@ from django.shortcuts import render_to_response
 from django.contrib import auth
 from django.shortcuts import get_object_or_404
 import settings
-from frontend.forms import SigninForm, UserProfileForm, SearchForm
+from frontend.forms import SigninForm, UserProfileForm, SearchForm, ResendActivationEmailForm
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
@@ -12,6 +12,8 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
+from django.contrib.sites.models import Site
+from django.utils.safestring import mark_safe
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, LOGARITHMIC
 from codewiki.models import Code, Scraper, View, HELP_LANGUAGES, LANGUAGES_DICT
@@ -118,7 +120,7 @@ def login(request):
 
                 else:
                     # Account exists, but not activated                    
-                    error_messages.append("This account has not been activated (ScraperWiki will have allowed you to use the site before activation for your first time). Please check your email (including the spam folder) and click on the link to confirm your account. If you have lost the email or the link has expired please send an email to feedback@scraperwiki.com asking for your account to be activated.")
+                    error_messages.append(mark_safe("This account has not been activated (ScraperWiki will have allowed you to use the site before activation for your first time). Please check your email (including the spam folder) and click on the link to confirm your account. If you have lost the email or the link has expired please <a href='%s'>request a new one</a>." % reverse('resend_activation_email')))
 
             else:
                 # Account not found                  
@@ -381,3 +383,19 @@ def tag(request, tag):
         'solicitations_percent_complete': solicitations_percent_complete,
         'scrapers_fixed_percentage': scrapers_fixed_percentage,
     }, context_instance = RequestContext(request))
+
+def resend_activation_email(request):
+    form = ResendActivationEmailForm(request.POST or None)
+
+    template = 'frontend/resend_activation_email.html'
+    if form.is_valid():
+        template = 'frontend/resend_activation_complete.html'
+        try:
+            user = User.objects.get(email=form.cleaned_data['email_address'])
+            if not user.is_active:
+                site = Site.objects.get_current()
+                user.registrationprofile_set.get().send_activation_email(site)
+        except Exception, ex:
+            print ex
+
+    return render_to_response(template, {'form': form}, context_instance = RequestContext(request))
