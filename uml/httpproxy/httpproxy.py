@@ -509,33 +509,35 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                         soc.send (content)
                     fetched  = [ None, self.getResponse(soc), 0 ]
                     if db :
-                        if self.fetchedDiffers (fetched, cached) :
-                            cursor = db.cursor()
-                            cursor.execute \
-                                (   '''
-                                    insert  into    httpcache
-                                            (       tag,
-                                                    url,
-                                                    page,
-                                                    hits,
-                                                    scraperid,
-                                                    runid
-                                            )
-                                    values  ( %s, %s, %s, %s, %s, %s )
-                                    ''',
-                                    [   ctag, self.path, fetched[1], 1, scraperID, runID    ]
-                                )
-                            def iid (cursor) :
-                                try    : return cursor.lastrowid
-                                except : pass
-                                try    : return cursor.insert_id()
-                                except : pass
-                                return None
-                            fetched[0] = iid(cursor)
-                            ddiffers   = cached is not None
-                        else :
-                            fetched[0] = cached[0]
-
+                        try:
+                            if self.fetchedDiffers (fetched, cached) :
+                                cursor = db.cursor()
+                                cursor.execute \
+                                    (   '''
+                                        insert  into    httpcache
+                                                (       tag,
+                                                        url,
+                                                        page,
+                                                        hits,
+                                                        scraperid,
+                                                        runid
+                                                )
+                                        values  ( %s, %s, %s, %s, %s, %s )
+                                        ''',
+                                        [   ctag, self.path, fetched[1], 1, scraperID, runID    ]
+                                    )
+                                def iid (cursor) :
+                                    try    : return cursor.lastrowid
+                                    except : pass
+                                    try    : return cursor.insert_id()
+                                    except : pass
+                                    return None
+                                fetched[0] = iid(cursor)
+                                ddiffers   = cached is not None
+                            else :
+                                fetched[0] = cached[0]
+                        except:
+                            pass
             finally :
                 if soc is not None :
                     soc.close()
