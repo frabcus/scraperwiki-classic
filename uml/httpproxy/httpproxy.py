@@ -238,7 +238,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         ex = None
         for attempt in range(3):
             try:
-                ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).readlines()
+                ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
                 if ident.strip() != "":
                     break # Ident OK so break out of the for loop and avoid else block
             except Exception, e:
