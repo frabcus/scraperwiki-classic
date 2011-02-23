@@ -534,7 +534,7 @@ form#newpdfdoclink { }
 .history_month {margin-bottom:20px; }
 .history_border {background-color:#FF0000; border:solid #acacac;}
 .history_edit {background-color:#fbfbfb; border:1px #000; padding:10px; margin-bottom:5px; border:solid #acacac thin;  }
-.history_ran {background-color:#fbdbfc; padding:10px; margin-bottom:5px; border:solid #acacac thin; }
+.history_ran {background-color:#d0f5a9; padding:10px; margin-bottom:5px; border:solid #acacac thin; }
 .history_ran_fail {background-color:#f9d5d4;  padding:10px; margin-bottom:5px; border:solid #acacac thin;}
 .history_ran_notfinished {background-color:#ccc; padding:10px; margin-bottom:5px; border:solid #acacac thin;}
 
