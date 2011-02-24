@@ -27,10 +27,10 @@ class SW_MetadataClient
   include Singleton
 
   def self.create()
-    if ENV["SCRAPER_GUID"]
-      SW_MetadataClient.instance()
-    else
+    if ENV["SCRAPER_GUID"].empty?
       LocalMetadataClient.instance()
+    else
+      SW_MetadataClient.instance()
     end
   end
 
