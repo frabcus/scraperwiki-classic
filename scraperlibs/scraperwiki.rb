@@ -30,9 +30,16 @@ module ScraperWiki
         ScraperWiki.dumpMessage({'message_type' => 'httpresponseheader', 'headerkey' => headerkey, 'headervalue' => headervalue})
     end
 
-    def ScraperWiki.scrape (url)
+    def ScraperWiki.scrape (url, params = nil)
         uri  = URI.parse(url)
-        data = Net::HTTP.get(uri)
+        if params.nil?
+            data = Net::HTTP.get(uri)
+        else
+            if uri.path = ''
+                uri.path = '/' # must post to a path
+            end
+            data = Net::HTTP.post_form(uri, params)
+        end
         return data
     end
 
