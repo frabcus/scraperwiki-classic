@@ -9,7 +9,15 @@ class SeleniumTest(unittest.TestCase):
 
     _selenium_host = ''
     _selenium_port = 4444
-    _selenium_browser = '*firefox'
+    _selenium_browser = """{\
+                "username": "morty",\
+                "access-key": "9b4cb1ad-7a3d-4461-b7fd-2cc47fdfcf1e",\
+                "os": "Windows 2003",\
+                "browser": "firefox",\
+                "browser-version": "3.6.",\
+                "name": "This is an example test"\
+               }"""
+
     _app_url = ''
 
     def setUp(self):

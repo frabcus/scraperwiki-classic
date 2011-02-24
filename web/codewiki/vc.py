@@ -21,8 +21,7 @@ from django.contrib.auth.models import User
 # (although can't be done for repo.commit as this is in hgext.mq, which I can't find)
 # mercurial.commands module is mostly a wrapper on the functionality of the repo object
 
-# this class only used in codewiki/views.py and api/handlers/scraper.py
-# currently in transition from one repo all scrapers to one repo per scraper via the uml/split-up-mercurial-repository script
+# this class only used in codewiki/models/code.py
 class MercurialInterface:
     def __init__(self, repo_path):
         self.ui = mercurial.ui.ui()

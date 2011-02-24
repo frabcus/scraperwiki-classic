@@ -21,7 +21,6 @@ from managers.datastore import DataStore
 
 from codewiki import models
 from api.emitters import CSVEmitter 
-import vc
 import frontend
 
 import difflib
