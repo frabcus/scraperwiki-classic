@@ -9,7 +9,6 @@ class SW_DataStore
 
     attr_accessor :m_port, :m_host
 
-    #required to override existing initialize
     def initialize
       @m_socket = nil
       @m_host = nil
