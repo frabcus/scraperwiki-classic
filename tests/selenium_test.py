@@ -9,12 +9,13 @@ class SeleniumTest(unittest.TestCase):
 
     _selenium_host = ''
     _selenium_port = 4444
+    _selenium_browser = '*firefox'
     _app_url = ''
 
     def setUp(self):
         self.verificationErrors = []
         self.selenium = selenium(SeleniumTest._selenium_host, SeleniumTest._selenium_port, 
-                        "*firefox", SeleniumTest._app_url)
+                        SeleniumTest._selenium_browser, SeleniumTest._app_url)
         self.selenium.start()
 
     def wait_for_page(self, doing=None):
