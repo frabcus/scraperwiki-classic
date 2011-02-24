@@ -23,7 +23,7 @@ test `id -u` = 0 ||
 	exit	1
 }
 
-dd	if=/dev/zero of=jaunty.img bs=1024 seek=$[ 1024 * 1024 ] count=1
+dd	if=/dev/zero of=jaunty.img bs=1024 seek=$[ 1024 * 2048 ] count=2
 mke2fs	-F jaunty.img
 
 echo	'Loading root filesystem image, please wait  ....'

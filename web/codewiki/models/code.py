@@ -79,6 +79,9 @@ class Code(models.Model):
         if self.published and self.first_published_at == None:
             self.first_published_at = datetime.datetime.today()
 
+        if not self.short_name:
+            self.buildfromfirsttitle()
+
         if not self.guid:
             self.set_guid()
 
@@ -109,9 +112,8 @@ class Code(models.Model):
         return self.vcs.getreversion(rev)
 
     def buildfromfirsttitle(self):
-        assert not self.short_name and not self.guid
+        assert not self.short_name
         self.short_name = util.SlugifyUniquely(self.title, Code, slugfield='short_name', instance=self)
-        self.set_guid()
 
     def set_guid(self):
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
