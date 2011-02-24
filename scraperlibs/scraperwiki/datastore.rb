@@ -1,5 +1,6 @@
 require 'json'
 require 'singleton'
+require 'thread'
 
 class SW_DataStore
     
