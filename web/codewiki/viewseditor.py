@@ -201,11 +201,13 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
 
         startupcode = blankstartupcode[wiki_type][language]
 
-        statuptemplate = request.GET.get('template')
+        statuptemplate = request.GET.get('template') or request.GET.get('fork')
         if statuptemplate:
             try:
                 templatescraper = models.Code.objects.get(published=True, language=language, short_name=statuptemplate)
                 startupcode = templatescraper.saved_code()
+                if 'fork' in request.GET:
+                    scraper.title = templatescraper.title
             except models.Code.DoesNotExist:
                 startupcode = startupcode.replace("Blank", "Missing template for")
             
@@ -221,6 +223,10 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     if scraper.wiki_type == 'view' and request.GET.get('sourcescraper'):
         context['source_scraper'] = request.GET.get('sourcescraper')
 
+    #if a fork scraper has been set, then pass it to the page
+    if request.GET.get('fork'):
+        context['fork'] = request.GET.get('fork')
+
     context['scraper']          = scraper
     context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())
     
@@ -231,7 +237,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     # save a code object (source scraper is to make thin link from the view to the scraper
     # this is called in two places, due to those draft scrapers saved in the session
     # would be better if the saving was deferred and not done right following a sign in
-def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourcescraper = ''):
+def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourcescraper=''):
     code_object.line_count = int(code_text.count("\n"))
     
     # work around the botched code/views/scraper inheretance.  
@@ -283,7 +289,13 @@ def handle_editor_save(request):
             scraper = models.Scraper()
         scraper.language = language
         scraper.title = title
-        scraper.buildfromfirsttitle()
+
+        fork = request.POST.get("fork", None)
+        if fork:
+            try:
+                scraper.forked_from = models.Code.objects.get(wiki_type=scraper.wiki_type, short_name=fork)
+            except models.Code.DoesNotExist:
+                pass
             
     code = request.POST.get('code', "")
     sourcescraper = request.POST.get('sourcescraper', "")
@@ -303,7 +315,7 @@ def handle_editor_save(request):
 
         # Set a message with django_notify telling the user their scraper is safe
         request.notifications.add("You need to sign in or create an account - don't worry, your scraper is safe ")
-        response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
+        response_url = reverse('editor', kwargs={'wiki_type': scraper.wiki_type, 'language': scraper.language.lower()})
         return HttpResponse(json.dumps({'status':'OK', 'draft':'True', 'url':response_url}))
 
 

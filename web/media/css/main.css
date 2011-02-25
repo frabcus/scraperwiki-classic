@@ -143,6 +143,7 @@ ul.title_links li.view          a {background:url(../images/icons/view.png) no-r
 ul.title_links li.scraper       a {background:url(../images/icons/scraper.png) no-repeat;}
 ul.title_links li.rss           a {background:url(../images/icons/csv_download.png) no-repeat;}
 ul.title_links li.sqlite        a {background:url(../images/icons/sqlite_download.png) no-repeat;}
+ul.title_links li.fork          a {background:url(../images/icons/fork.png) no-repeat;}
 
 /* Page tabs */
 div.page_tabs {background:#fafafa; padding-right:0.2em;height:1.65em; }
@@ -483,6 +484,8 @@ body.fullscreen #embedinstructions textarea { width:500px; }
 .code_about li.codewiki_type {background-repeat:no-repeat; padding-left:22px;}
 .code_about li.codewiki_type.scraper {background-image:url(../images/icons/scraper.png);}
 .code_about li.codewiki_type.view {background-image:url(../images/icons/view.png);}
+
+.code_about li.fork {background-repeat:no-repeat; padding-left:22px; background-image:url(../images/icons/fork.png);}
 
 /* last saved date / revision */
 .last_saved {color:#808080;margin:0;padding:0.5em 0em 0.5em 0;}

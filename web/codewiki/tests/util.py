@@ -12,7 +12,6 @@ class ScraperUtilTests(TestCase):
 
         scraper1 = Scraper()
         scraper1.title = long_title
-        scraper1.buildfromfirsttitle()
         scraper1.save()
 
         self.assertEqual(short_name, scraper1.short_name)
@@ -22,7 +21,6 @@ class ScraperUtilTests(TestCase):
 
         scraper2 = Scraper()
         scraper2.title = long_title
-        scraper2.buildfromfirsttitle()
         scraper2.save()
 
         self.assertEqual(short_name, scraper2.short_name)

@@ -23,12 +23,16 @@ from django.contrib.auth.models import User
 
 # this class only used in codewiki/models/code.py
 class MercurialInterface:
-    def __init__(self, repo_path):
+    def __init__(self, repo_path, cloned_from_path=None):
         self.ui = mercurial.ui.ui()
         self.ui.setconfig('ui', 'interactive', 'off')
         self.ui.setconfig('ui', 'verbose', 'off')
         self.repopath = os.path.normpath(os.path.abspath(repo_path))  # (hg possibly over-sensitive to back-slashes)
             
+        if not os.path.exists(self.repopath) and cloned_from_path:
+            self.cloned_from_path = os.path.normpath(os.path.abspath(cloned_from_path))  # (hg possibly over-sensitive to back-slashes)
+            mercurial.hg.clone(self.ui, str(self.cloned_from_path), str(self.repopath))
+
             # danger with member copy of repo as not sure if it updates with commits
             # (definitely doesn't update if commit is done against a second repo object)
         self.repo = mercurial.hg.repository(self.ui, self.repopath, create=not os.path.exists(self.repopath))    

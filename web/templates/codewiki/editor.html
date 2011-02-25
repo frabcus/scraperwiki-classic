@@ -61,6 +61,7 @@
     <input type="hidden" id="short_name"        value="{{ scraper.short_name }}"/>
     <input type="hidden" id="scraper_guid"      value="{{ scraper.guid }}"/>
     <input type="hidden" id="sourcescraper"     value="{{ source_scraper }}"/>            
+    <input type="hidden" id="fork"              value="{{ fork }}"/>            
     <input type="hidden" id="username"          value="{{ request.user.username }}"/>
     <input type="hidden" id="userrealname"      value="{{ request.user.get_profile.name }}"/>
     <input type="hidden" id="isstaff"           value="{% if request.user.is_staff %}yes{% endif %}"/>
