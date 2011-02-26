@@ -175,9 +175,6 @@ TEMPLATE_SETTINGS = [
  'CODEMIRROR_URL',
 ]
 
-#sparklines and graphs
-SPARKLINE_MAX_DAYS = 30
-
 try:
     REVISION = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'revision.txt')).read()[:-1]
 except:

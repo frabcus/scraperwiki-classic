@@ -1024,8 +1024,7 @@
             "run_interval": 0, 
             "published": 1, 
             "first_published_at": "2010-02-19 07:08:53", 
-            "guid": "0", 
-            "scraper_sparkline_csv": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"
+            "guid": "0"
         }
     }, 
     {

@@ -51,7 +51,6 @@ class Scraper (code.Code):
     license      = models.CharField(max_length=100, blank=True, choices=LICENSE_CHOICES, default='Unknown')
     license_link = models.URLField(verify_exists=False, null=True, blank=True)
     record_count = models.IntegerField(default=0)        
-    scraper_sparkline_csv = models.CharField(max_length=255, null=True)
     run_interval = models.IntegerField(default=86400)  # in seconds
 
     objects = managers.scraper.ScraperManager()
@@ -81,13 +80,6 @@ class Scraper (code.Code):
         self.record_count = self.count_records()
         self.has_geo = bool(Scraper.objects.has_geo(self.guid))
         self.has_temporal = bool(Scraper.objects.has_temporal(self.guid))
-
-        #get data for sparklines
-        sparkline_days = settings.SPARKLINE_MAX_DAYS
-        created_difference = datetime.datetime.now() - self.created_at
-
-        if (created_difference.days < settings.SPARKLINE_MAX_DAYS):
-            sparkline_days = created_difference.days
 
     def save(self, *args, **kwargs):
         self.wiki_type = 'scraper'
