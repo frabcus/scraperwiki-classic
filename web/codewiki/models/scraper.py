@@ -75,7 +75,7 @@ class Scraper (code.Code):
         return int(Scraper.objects.item_count(self.guid))
 
 
-            # It would be good to kill this function off and move its functionality into being properties of the database
+    # It would be good to kill this function off and move its functionality into being properties of the database
     def update_meta(self):
         #update line counts etc
         self.record_count = self.count_records()
@@ -88,10 +88,6 @@ class Scraper (code.Code):
 
         if (created_difference.days < settings.SPARKLINE_MAX_DAYS):
             sparkline_days = created_difference.days
-
-        #minimum of 1 day
-        recent_record_count = Scraper.objects.recent_record_count(self.guid, sparkline_days)
-        self.scraper_sparkline_csv = ",".join("%d" % count for count in recent_record_count)
 
     def save(self, *args, **kwargs):
         self.wiki_type = 'scraper'

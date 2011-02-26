@@ -72,10 +72,6 @@ class DataStoreClass :
 
         return self.request (('has_temporal',))
 
-    def recent_record_count (self, days) :
-
-        return self.request (('recent_record_count', days))
-
     def close (self) :
 
         self.m_socket.send ('.\n')
