@@ -53,7 +53,7 @@ SESSION_TIMEOUT = 1209600
 
 QUICKCACHE_DIR      = HOME_DIR + '/quickcache/'   # leave blank to disable caching
 
-FIREBOX_PATH = '/var/www/scraperwiki/UML/Server/scripts'
+FIREBOX_PATH = '/var/www/scraperwiki/uml/firebox/'
 sys.path.append(FIREBOX_PATH)
 
 #paypal

@@ -20,6 +20,7 @@ $(document).ready(function() {
     var codemirror_url  = $('#codemirror_url').val();
     var wiki_type       = $('#id_wiki_type').val(); 
     var rev             = $('#originalrev').val(); 
+    var lastsavedcode   = ''; // used to tell if we should expect a null back from the revision log
 
     // runtime information
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
@@ -65,8 +66,6 @@ $(document).ready(function() {
     var chainpatches = [ ]; 
     var chainpatchnumber = 0; // counts them going out
     var lasttypetime = new Date(); 
-
-    $.ajaxSetup({timeout: 10000});
 
     setupCodeEditor();
     setupMenu();
@@ -139,6 +138,9 @@ $(document).ready(function() {
             savedundo = atsavedundo;    // (+historysize.shiftedoffstack)
         if (changetype == "reload")
             savedundo = historysize.undo;   // (+historysize.shiftedoffstack) 
+
+        if ((changetype == "reload") || (changetype == "initialized"))
+            lastsavedcode = codeeditor.getCode(); 
 
         if (historysize.undo + historysize.redo < savedundo)
             savedundo = -1; 
@@ -687,7 +689,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             return; 
         }
 
-    
         //send the data
         var code = codeeditor.getCode(); 
         var urlquery = (!$('#id_urlquery').length || $('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
@@ -706,8 +707,17 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
         // do a save to the system every time we run (this would better be done via twisted at some point)
         var automode = $('select#automode option:selected').val(); 
-        if (pageIsDirty && ((automode == 'autosave') || (automode == 'autotype')))
-            saveScraper(); 
+        if ((automode == 'autosave') || (automode == 'autotype'))
+        {
+            if (pageIsDirty)
+                saveScraper(); 
+            else if (lastsavedcode && (lastsavedcode != code))
+            {
+                var historysize = codeeditor.historySize(); 
+                writeToChat("Page should have been marked dirty but wasn't: historysize="+historysize.undo+"  savedundo="+savedundo); 
+                saveScraper(); 
+            }
+        }
     } 
 
 
@@ -1086,13 +1096,22 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         sendjson({"command":'giveselrange', "selrange":selrange, "username":username}); 
     }
 
+    function updateLastSavedRev(rev)
+    {   
+	if (rev == null)
+	    $("#idlastrevnumber").text("Rev: unchanged"); 
+	else
+	    $("#idlastrevnumber").text("Rev: " + String(rev)); 
+    }
+
     function reloadScraper()
     {
         $('.editor_controls #btnCommitPopup').val('Loading...').addClass('darkness');
-        var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: codeeditor.getCode() } }); 
+        var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: codeeditor.getCode() }, timeout: 10000 }); 
         var reloaddata = $.evalJSON(reloadajax.responseText); 
         codeeditor.setCode(reloaddata.code); 
         rev = reloaddata.rev; 
+        updateLastSavedRev(rev);
         chainpatchnumber = 0; 
         //codeeditor.focus(); 
         if (reloaddata.selrange)
@@ -1253,18 +1272,21 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             return; 
 
         atsavedundo = codeeditor.historySize().undo;  // update only when success
+        var currentcode = codeeditor.getCode(); 
         var sdata = {
                         title           : $('#id_title').val(),
                         commit_message  : "cccommit",   // could get some use out of this if we wanted to
                         sourcescraper   : $('#sourcescraper').val(),
+                        fork            : $('#fork').val(),
                         wiki_type       : wiki_type,
                         guid            : guid,
                         language        : scraperlanguage,
-                        code            : codeeditor.getCode(),
+                        code            : currentcode,
                         earliesteditor  : earliesteditor.toUTCString(), // goes into the comment of the commit to help batch sessions
                     }
 
-        $.ajax({ url:$('input#saveurl').val(), type:'POST', contentType:"application/json", dataType:"html", data:sdata, success:function(response) 
+        // on success
+        $.ajax({ url:$('input#saveurl').val(), type:'POST', contentType:"application/json", dataType:"html", data:sdata, timeout: 10000, success:function(response) 
         {
             res = $.evalJSON(response);
             if (res.status == 'Failed')
@@ -1285,10 +1307,13 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             if (res.draft != 'True') 
             {
                 window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
+                updateLastSavedRev(res.rev);
                 if (res.rev == null)
                 {
                     writeToChat("No difference (null revision number)"); 
                     $('.editor_controls #btnCommitPopup').val('No change'); 
+                    if (lastsavedcode && (lastsavedcode != currentcode))
+                        alert("Warning, the code repository thinks the code hasn't changed when the editor thinks it has, please try again"); 
                 }
                 else 
                 {
@@ -1297,13 +1322,14 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                     if (bConnected)
                         sendjson({"command":'saved', "rev":res.rev}); 
                 }
+                lastsavedcode = currentcode; 
             }
             ChangeInEditor("saved"); 
         },
         error: function(jqXHR, textStatus, errorThrown)
         {
             writeToChat("Response error: " + textStatus + "  :" + jqXHR.responseText); 
-            alert('Sorry, something went wrong with the save, please try copying your code and then reloading the page');
+            alert('Sorry, something went wrong with the save ['+textStatus+'], please try copying your code and then reloading the page');
             window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
         }});
 
@@ -1357,8 +1383,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blockedurlquoted) 
     {
-        if (stackdump) {
-            for (var i = 0; i < stackdump.length; i++) {
+        if (stackdump) 
+        {
+            for (var i = 0; i < stackdump.length; i++) 
+            {
                 var stackentry = stackdump[i]; 
                 sMessage = (stackentry.file !== undefined ? (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file) : ""); 
                 if (stackentry.furtherlinetext !== undefined) {
@@ -1372,11 +1400,14 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             }
         }
 
-        if (blockedurl) {
+        if (blockedurl) 
+        {
             sMessage = "The link " + blockedurl.substring(0,50) + " has been blocked. "; 
             sMessage += "Click <a href=\"/whitelist/?url=" + blockedurlquoted + "\" target=\"_blank\">here</a> for details."; 
             writeToConsole(sMessage, 'exceptionnoesc'); 
-        } else {
+        } 
+        else 
+        {
             writeToConsole(exceptiondescription, 'exceptiondump'); 
         }
     }
@@ -1515,7 +1546,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         {
             modaloptions['onShow'] = function() 
             { 
-                $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, success: function(sdata) 
+                $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, timeout: 10000, success: function(sdata) 
                 {
                     cachejson = parsehighlightcode(sdata, lmimetype); 
                     if (cachejson["content"].length < 15000)  // don't cache huge things
@@ -1603,8 +1634,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         row.push('<tr><td><b>'+cgiescape(command)+'</b></td>'); 
         if (val1)
             row.push('<td>'+cgiescape(val1)+'</td>'); 
-        for (var i = 0; i < lval2.length; i++)
-            row.push('<td>'+cgiescape(lval2[i])+'</td>'); 
+        if (lval2)
+        {
+            for (var i = 0; i < lval2.length; i++)
+                row.push('<td>'+cgiescape(lval2[i])+'</td>'); 
+        }
         row.push('</tr>'); 
 
         $('#output_data table.output_content').append($(row.join("")));  

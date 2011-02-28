@@ -35,6 +35,13 @@ class UserProfileForm(forms.ModelForm):
     bio = forms.CharField(label="A bit about you", widget=forms.Textarea(), required=False)
     email = forms.EmailField(label="Email Address")
     
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).count > 0:
+            raise forms.ValidationError("This email address is already used by another account.")
+
+        return email
+
     class Meta:
         model = UserProfile
         fields = ('bio', 'name')
@@ -89,3 +96,6 @@ class CreateAccountForm(RegistrationForm):
        if User.objects.filter(email__iexact=self.cleaned_data['email']):
            raise forms.ValidationError(_("This email address is already in use. Please supply a different email address."))
        return self.cleaned_data['email']
+
+class ResendActivationEmailForm(forms.Form):
+    email_address = forms.EmailField()

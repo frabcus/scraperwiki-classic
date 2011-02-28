@@ -3,7 +3,7 @@
 <li class="code_object_line">
     <h3>
         <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
-        <a href="{% url profiles_profile_detail code.owner.username %}">
+        <a href="{% if code.owner.username %}{% url profiles_profile_detail code.owner.username %}{% endif %}">
          {% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}
         </a> /
         <a href="{% url code_overview code.wiki_type code.short_name %}">

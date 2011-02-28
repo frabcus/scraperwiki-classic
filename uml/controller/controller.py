@@ -734,6 +734,7 @@ class ScraperController (BaseController) :
                                 p.unregister (fd)
                                 del fdmap[fd]
                                 busy -= 1
+                                continue
                             #
                             #  If data received and data does not end in a newline the add to
                             #  any prior data from the connection and loop.

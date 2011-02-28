@@ -125,18 +125,7 @@ class CodeManager(models.Manager):
         if not rc :
             raise Exception(arg)
         return arg
-
             
-            # used for the sparkline, so can go in a bit
-    def recent_record_count(self, scraper_id, days):
-        proxy   = self.dataproxy(scraper_id)
-        rc, arg = proxy.recent_record_count(days)
-        if not rc :
-            raise Exception(arg)
-        return arg
-    
-    
-    
     def datastore_keys(self, scraper_id):
 
         proxy   = self.dataproxy(scraper_id)

@@ -4,7 +4,6 @@ from frontend.models import UserToUserRole
 from api.handlers.api_base import APIBase
 from tagging.models import Tag
 from piston.utils import rc
-from codewiki import vc
 from codewiki.managers.datastore import DataStore
 
 

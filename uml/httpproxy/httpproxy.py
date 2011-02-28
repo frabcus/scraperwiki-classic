@@ -17,6 +17,7 @@ import  time
 import  threading
 import  string 
 import  urllib   # should this be urllib2? -- JGT
+import  urllib2
 import  ConfigParser
 import  hashlib
 import  OpenSSL
@@ -233,9 +234,21 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if   mode == 'H' : port = 80
         elif mode == 'S' : port = 443
         else             : port = loc[1]
-        ident     = urllib.urlopen ('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
+        
+        ex = None
+        for attempt in range(3):
+            try:
+                ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
+                if ident.strip() != "":
+                    break # Ident OK so break out of the for loop and avoid else block
+            except Exception, e:
+                ex = e # Save the exception incase we run out of attempts and go into else block
+        else:
+            # We've run out of attempts so reraise the last exception
+            if ex:
+                raise ex
 
-        for line in string.split (ident, '\n') :
+        for line in string.split (ident, '\n'):
             if line == '' :
                 continue
             key, value = string.split (line, '=')
@@ -496,33 +509,35 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                         soc.send (content)
                     fetched  = [ None, self.getResponse(soc), 0 ]
                     if db :
-                        if self.fetchedDiffers (fetched, cached) :
-                            cursor = db.cursor()
-                            cursor.execute \
-                                (   '''
-                                    insert  into    httpcache
-                                            (       tag,
-                                                    url,
-                                                    page,
-                                                    hits,
-                                                    scraperid,
-                                                    runid
-                                            )
-                                    values  ( %s, %s, %s, %s, %s, %s )
-                                    ''',
-                                    [   ctag, self.path, fetched[1], 1, scraperID, runID    ]
-                                )
-                            def iid (cursor) :
-                                try    : return cursor.lastrowid
-                                except : pass
-                                try    : return cursor.insert_id()
-                                except : pass
-                                return None
-                            fetched[0] = iid(cursor)
-                            ddiffers   = cached is not None
-                        else :
-                            fetched[0] = cached[0]
-
+                        try:
+                            if self.fetchedDiffers (fetched, cached) :
+                                cursor = db.cursor()
+                                cursor.execute \
+                                    (   '''
+                                        insert  into    httpcache
+                                                (       tag,
+                                                        url,
+                                                        page,
+                                                        hits,
+                                                        scraperid,
+                                                        runid
+                                                )
+                                        values  ( %s, %s, %s, %s, %s, %s )
+                                        ''',
+                                        [   ctag, self.path, fetched[1], 1, scraperID, runID    ]
+                                    )
+                                def iid (cursor) :
+                                    try    : return cursor.lastrowid
+                                    except : pass
+                                    try    : return cursor.insert_id()
+                                    except : pass
+                                    return None
+                                fetched[0] = iid(cursor)
+                                ddiffers   = cached is not None
+                            else :
+                                fetched[0] = cached[0]
+                        except:
+                            pass
             finally :
                 if soc is not None :
                     soc.close()

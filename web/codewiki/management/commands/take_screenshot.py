@@ -26,14 +26,14 @@ class Command(BaseCommand):
         super(Command, self).__init__(*args, **kwargs)
         self.screenshooter = ScreenShooter()
 
-    def add_screenshots(self, view, options):
+    def add_screenshots(self, view, sizes, options):
         if options['verbose']:
             print "Adding screenshot of %s" % view.short_name
 
-        for size in settings.SCREENSHOT_SIZES.keys():
+        for size_name, size_values in sizes.items():
             self.screenshooter.add_shot(url = view.get_screenshot_url(options['domain']), 
-                                        filename = view.get_screenshot_filepath(size),
-                                        size = settings.SCREENSHOT_SIZES[size])
+                                        filename = view.get_screenshot_filepath(size_name),
+                                        size = size_values)
 
     def handle(self, *args, **options):
         if not options['domain']:
@@ -47,6 +47,9 @@ class Command(BaseCommand):
         else:
             views = []
 
+        for view in views:
+            self.add_screenshots(view, settings.VIEW_SCREENSHOT_SIZES, options)
+
         if options['short_name']:
             scrapers = Scraper.unfiltered.filter(short_name=options['short_name'], published=True)
         elif options['run_scrapers']:
@@ -54,12 +57,8 @@ class Command(BaseCommand):
         else:
             scrapers = []
 
-        for obj in chain(views, scrapers):
-            try:
-                self.add_screenshots(obj, options)
-            except Exception, ex:
-                print "Error taking screenshot of %s" % obj.short_name
-                print ex
+        for scraper in scrapers:
+            self.add_screenshots(scraper, settings.SCRAPER_SCREENSHOT_SIZES, options)
 
         if options['verbose']:
             print "------ Starting Screenshooting ------"

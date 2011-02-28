@@ -201,11 +201,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         rc, arg = db.has_temporal  (scraperID)
         self.connection.send (json.dumps ((rc, arg)) + '\n')
 
-    def recent_record_count (self, db, scraperID, runID, days) :
-
-        rc, arg = db.recent_record_count  (scraperID, days)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
     def process (self, db, scraperID, runID, scraperName, line) :
 
         request = json.loads(line) 
@@ -245,11 +240,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.has_temporal  (db, scraperID, runID)
             return
 
-        if request[0] == 'recent_record_count' :
-            self.recent_record_count  (db, scraperID, runID, request[1])
-            return
-
-            # new experimental QD sqlite interface
+        # new experimental QD sqlite interface
         if request[0] == 'sqlitecommand':
             if runID is not None :
                 statusInfo[runID]['action'] = 'sqlitecommand'
@@ -284,13 +275,17 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    : params = urlparse.parse_qs(query)
         except : params = cgi     .parse_qs(query)
 
+                # if the scraperid is set then we can assume it's from the frontend, is not authenticated and will have no write permissions
+                # if it is not set, then it is fetched through the ident call and is then authenticated enough for writing purposes in its relevant file
         if 'scraperid' in params and params['scraperid'][0] not in [ '', None ] :
             if self.connection.getpeername()[0] != config.get ('dataproxy', 'secure') :
                 self.connection.send (json.dumps ((False, "ScraperID only accepted from secure hosts")) + '\n')
                 return
             scraperID, runID, scraperName = params['scraperid'][0], 'fromfrontend.%s.%s' % (params['scraperid'][0], time.time()), params.get('short_name', [""])[0]
+        
         else :
             scraperID, runID, scraperName = self.ident (params['uml'][0], params['port'][0])
+
 
         if path == '' or path is None :
             path = '/'

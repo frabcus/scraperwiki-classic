@@ -126,7 +126,7 @@ INSTALLED_APPS = [
 
 TEST_RUNNER = 'scraperwiki_tests.run_tests' 
 
-ACCOUNT_ACTIVATION_DAYS = 14
+ACCOUNT_ACTIVATION_DAYS = 3650 # If you haven't activated in 10 years then tough luck!
 
 # tell Django that the frontent user_profile model is to be attached to the
 # user model in the admin side.
@@ -175,9 +175,6 @@ TEMPLATE_SETTINGS = [
  'CODEMIRROR_URL',
 ]
 
-#sparklines and graphs
-SPARKLINE_MAX_DAYS = 30
-
 try:
     REVISION = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'revision.txt')).read()[:-1]
 except:
@@ -190,7 +187,8 @@ BLOG_FEED = 'http://blog.scraperwiki.com/feed/'
 DATA_TABLE_ROWS = 10
 RSS_ITEMS = 50
 
-SCREENSHOT_SIZES = {'small': (110, 73), 'medium': (220, 145), 'large': (800, 600)}
+VIEW_SCREENSHOT_SIZES = {'small': (110, 73), 'medium': (220, 145), 'large': (800, 600)}
+SCRAPER_SCREENSHOT_SIZES = {'small': (110, 73)}
 
 CODEMIRROR_VERSION = "0.92"
 CODEMIRROR_URL = "CodeMirror-%s/" % CODEMIRROR_VERSION

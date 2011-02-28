@@ -533,35 +533,9 @@ class Database :
         cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s and date is not null", (scraperID,))
         return [ True, int(cursor.fetchone()[0]) > 9 ]
 
-    def recent_record_count (self, scraperID, days) :
-
-        sql = '''
-              select date(`date_scraped`) as date, count(`date_scraped`) as count from `items`
-                     where `scraper_id` = %s and `date_scraped` between date_sub(curdate(), interval %s day) and date_add(curdate(), interval 1 day)
-                     group by date(`date_scraped`)
-              '''
-        cursor = self.execute (sql, (scraperID, days))
-        date_counts = cursor.fetchall()
-
-        #make a store, 
-        return_dates = []
-        all_dates    = [datetime.datetime.now() + datetime.timedelta(i)  for i in range(-days, 1)]
-        for all_date in  all_dates:
-            #try and find an entry for this date in the query results
-            count = 0
-            for date_count in date_counts :
-                if str(date_count[0]) == all_date.strftime("%Y-%m-%d") :
-                    count = date_count[1]
-
-            #add the count to the return list
-            return_dates.append(count)
-        
-        return [ True, return_dates ]
-                
-    
-        # general experimental single file sqlite access
-        # the values of these fields are safe because from the UML they are subject to an ident callback, 
-        # and from the frontend they are subject to a connection from a particular IP number
+    # general experimental single file sqlite access
+    # the values of these fields are safe because from the UML they are subject to an ident callback, 
+    # and from the frontend they are subject to a connection from a particular IP number
     def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
         #print "XXXXX", (command, runID, val1, val2)
         
@@ -600,9 +574,26 @@ class Database :
             scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
             if not os.path.isfile(scrapersqlitefile):
                 return "No sqlite database"
+            
+            result = { "filesize": os.path.getsize(scrapersqlitefile) }
             fin = open(scrapersqlitefile, "rb")
-            result = {'content':base64.encodestring(fin.read()), 'encoding':"base64"}
+            if val1:
+                fin.seek(val1)
+                result["seek"] = val1
+            else:
+                result["seek"] = 0
+            
+            if val2:
+                content = fin.read(val2)
+            else:
+                content = fin.read()
+            result["length"] = len(content)
+            result["content"] = base64.encodestring(fin.read())
+            result['encoding'] = "base64"
+            fin.close()
+            
             return result
+            
             
             # make a new directory and connection if not seen anywhere (unless it's draft)
         if not self.m_sqlitedbconn:
@@ -634,7 +625,7 @@ class Database :
                 return {"keys":keys, "data":data} 
             
             except sqlite3.Error, e:
-                return "sqlite3.Error: "+str(e)
+                return {"error":"sqlite3.Error: "+str(e)}
                 
         if command == "datasummary":
             self.authorizer_func = authorizer_readonly
@@ -649,7 +640,7 @@ class Database :
                     tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                     
             except sqlite3.Error, e:
-                return "sqlite3.Error: "+str(e)
+                return {"error":"sqlite3.Error: "+str(e)}
             
             result = {"tables":tables}
             if short_name:
@@ -665,14 +656,14 @@ class Database :
                 attachscrapersqlitefile = os.path.join(self.m_resourcedir, val1, "defaultdb.sqlite")
                 self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, val2 or val1))
             except sqlite3.Error, e:
-                return "sqlite3.Error: "+str(e)
-            return "ok"
+                return {"error":"sqlite3.Error: "+str(e)}
+            return {"status":"attach succeeded"}
 
         if command == "commit":
             signal.alarm (10)
             self.m_sqlitedbconn.commit()
             signal.alarm (0)
-            return "ok"   # doesn't reach here if the signal fails
+            return {"status":"commit succeeded"}  # doesn't reach here if the signal fails
 
 
     def updatesqdatakeys(self, scraperID, runID, short_name, swdatatblname):
@@ -713,7 +704,7 @@ class Database :
         
         data["date_scraped"] = datetime.datetime.now().isoformat()
         res = self.sqlitecommand(scraperID, runID, short_name, "execute", self.sqdatatemplate[swdatatblname], [ data.get(k)  for k in self.swdatakeys[swdatatblname] ])
-        if type(res) == str:
-            return [ False, res ]
-        return  [ True, 'Data record inserted' ]
+        if "error" in res:
+            return res
+        return  {"status":'Data record inserted'}
 
