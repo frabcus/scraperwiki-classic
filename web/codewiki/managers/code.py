@@ -105,29 +105,9 @@ class CodeManager(models.Manager):
         allitems = self.data_dictlist(scraper_id, "", "", limit=limit, offset=offset, start_date=start_date, end_date=start_date, latlng=latlng)  
         return convert_dictlist_to_datalist(allitems, column_order, private_columns)
 
-    def item_count(self, scraper_id):
-        proxy   = self.dataproxy(scraper_id)
-        rc, arg = proxy.item_count()
-        if not rc :
-            raise Exception(arg)
-        return arg
 
-    def has_geo(self, scraper_id):
-        proxy   = self.dataproxy(scraper_id)
-        rc, arg = proxy.has_geo()
-        if not rc :
-            raise Exception(arg)
-        return arg
-
-    def has_temporal(self, scraper_id):
-        proxy   = self.dataproxy(scraper_id)
-        rc, arg = proxy.has_temporal()
-        if not rc :
-            raise Exception(arg)
-        return arg
             
     def datastore_keys(self, scraper_id):
-
         proxy   = self.dataproxy(scraper_id)
         rc, arg = proxy.datastore_keys()
         if not rc :

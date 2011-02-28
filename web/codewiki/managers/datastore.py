@@ -53,24 +53,11 @@ class DataStoreClass :
         return self.request (('data_dictlist', tablename, limit, offset, start_date, end_date, latlng))
 
     def datastore_keys (self) :
-
         return self.request (('datastore_keys',))
 
     def data_search (self, key_values, limit, offset) :
-
         return self.request (('data_search', key_values, limit, offset))
 
-    def item_count (self) :
-
-        return self.request (('item_count',))
-
-    def has_geo (self) :
-
-        return self.request (('has_geo',))
-
-    def has_temporal (self) :
-
-        return self.request (('has_temporal',))
 
     def close (self) :
 
