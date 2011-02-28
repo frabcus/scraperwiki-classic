@@ -10,8 +10,12 @@
             {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
         </a>
         <ul class="code_about">
-           <li class="codewiki_type {{code.wiki_type|lower}}">{{code.wiki_type|lower}}</li>
-           <li class="language {{code.language|lower}}">{{code.language|lower}}</li>
+           {% ifequal code.wiki_type 'view' %}
+             <li class="codewiki_type {{code.wiki_type|lower}}"><a href="{% url rpcexecute code.short_name %}">{{code.wiki_type|lower}}</a></li>
+           {% else %}
+             <li class="codewiki_type {{code.wiki_type|lower}}">{{code.wiki_type|lower}}</li>
+           {% endifequal %}
+           <li class="language {{code.language|lower}}"><a href="{% url editor_edit code.wiki_type code.short_name %}">{{code.language|lower}}</a></li>
 
            {% if code.scraper %}
              {% if code.scraper.has_geo %}
