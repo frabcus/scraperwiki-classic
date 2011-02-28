@@ -19,6 +19,8 @@ from registration.signals import user_registered
 import tagging
 from frontend import models as frontendmodels
 
+from codewiki.managers.datastore import DataStore
+
 import codewiki.util
 import codewiki.vc
 import code
@@ -69,17 +71,30 @@ class Scraper (code.Code):
             if not found:
                 raise ValidationError('Invalid run interval')
 
-        
-    def count_records(self):
-        return int(Scraper.objects.item_count(self.guid))
 
-
-    # It would be good to kill this function off and move its functionality into being properties of the database
+            # It would be good to kill this function off and move its functionality into being properties of the database
+            # for now it represents some kind of caching of the size of the datastore
     def update_meta(self):
-        #update line counts etc
-        self.record_count = self.count_records()
-        self.has_geo = bool(Scraper.objects.has_geo(self.guid))
-        self.has_temporal = bool(Scraper.objects.has_temporal(self.guid))
+        dataproxy = DataStore(self.guid, self.short_name)
+        
+        # old style datasets to be eventually deleted
+        rc, arg = dataproxy.request(('item_count',))
+        if rc:
+            self.record_count = int(arg)
+        else:
+            self.record_count = 0
+        rc, arg = dataproxy.request(('has_geo',))
+        if rc:
+            self.has_geo = bool(arg)
+        rc, arg = dataproxy.request(('has_temporal',))
+        if rc:
+            self.has_temporal = bool(arg)
+            
+            
+        datasummary = dataproxy.request(("sqlitecommand", "datasummary", 0, None))
+        for tabledata in datasummary.get("tables", {}).values():
+            self.record_count += tabledata["count"]
+
 
     def save(self, *args, **kwargs):
         self.wiki_type = 'scraper'
