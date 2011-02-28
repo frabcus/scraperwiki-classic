@@ -70,9 +70,16 @@ def scraperwikitag(scraper, html, panepresent):
             paneversion = "version-2"
         if panepresent != None:
             panepresent["scraperwikipane"].append(mswpane)
-    elif panepresent == None:
-        startend = (0, 0) # (0,0)
+    
+    elif panepresent == None:  # case where no div#scraperwikipane is found and it's all there (we're not streaming the html out using php)
+        # have to insert the pane -- favour doing it after the body tag if it exists
+        mbody = re.search("(?i)<body.*?>", html)
+        if mbody:
+            startend = (mbody.end(0), mbody.end(0))
+        else:
+            startend = (0, 0) # (0,0)
         paneversion = "version-2"
+    
     else:
         if len(panepresent["firstfivelines"]) < 5 and re.search("\S", html):
             panepresent["firstfivelines"].append(html)
@@ -83,7 +90,7 @@ def scraperwikitag(scraper, html, panepresent):
     urlscraperedit = reverse('editor_edit', args=[scraper.wiki_type, scraper.short_name])
     
     swdivstyle = "border:thin #aaf solid; display:block;width:225px; position:fixed; top:0px; right:0px; background:#eef; "
-    swlinkstyle = "display:block;float:right; width:175px; height:20px; background:url(/media/images/powered.png) no-repeat;"
+    swlinkstyle = "float:right; width:175px; height:20px; background:url(/media/images/powered.png) no-repeat;"
     lkbuttonstyle = "font-family:helvetica, arial, sans-serif; font-size:0.8em; position:relative; top:1px; background-color:#f1f1ff; border:solid 1px #bbb; padding:0.0em 0.2em!important; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;"
     
     if paneversion == "version-1":
@@ -93,9 +100,9 @@ def scraperwikitag(scraper, html, panepresent):
         swpane.append('<a href="%s" title="Edit source code for this view" style="%s">Edit</a>' % (urlscraperedit, lkbuttonstyle))
         swpane.append('<a href="/" id="scraperwikipane" style="%s"><span style="display:none">Powered by ScraperWiki</span></a>' % swlinkstyle)
         swpane.append('</div>')
-
+    
     else:
-        swdivstyle = "border:thin #aaf solid; display:block;width:180px; position:fixed; top:0px; right:0px; background:#eef; "
+        swdivstyle = "border:thin #aaf solid; width:180px; position:fixed; top:0px; right:0px; background:#eef; "
         swpane = [ '<div id="scraperwikipane" style="%s">' % swdivstyle ]
         swpane.append('<a href="%s" id="scraperwikipane" style="%s"><span style="display:none">Powered by ScraperWiki</span></a>' % (urlscraperoverview, swlinkstyle))
         swpane.append('</div>')
