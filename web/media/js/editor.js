@@ -1383,8 +1383,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blockedurlquoted) 
     {
-        if (stackdump) {
-            for (var i = 0; i < stackdump.length; i++) {
+        if (stackdump) 
+        {
+            for (var i = 0; i < stackdump.length; i++) 
+            {
                 var stackentry = stackdump[i]; 
                 sMessage = (stackentry.file !== undefined ? (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file) : ""); 
                 if (stackentry.furtherlinetext !== undefined) {
@@ -1398,11 +1400,14 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             }
         }
 
-        if (blockedurl) {
+        if (blockedurl) 
+        {
             sMessage = "The link " + blockedurl.substring(0,50) + " has been blocked. "; 
             sMessage += "Click <a href=\"/whitelist/?url=" + blockedurlquoted + "\" target=\"_blank\">here</a> for details."; 
             writeToConsole(sMessage, 'exceptionnoesc'); 
-        } else {
+        } 
+        else 
+        {
             writeToConsole(exceptiondescription, 'exceptiondump'); 
         }
     }
