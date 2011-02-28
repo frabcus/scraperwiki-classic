@@ -287,7 +287,7 @@ def sqlitecommand(command, val1=None, val2=None, verbose=1):
     return result
     
 
-def save_sqlite(unique_keys, data, table_name="swdata", commit="True", verbose=2):
+def save_sqlite(unique_keys, data, table_name="swdata", commit=True, verbose=2):
     ds = DataStore(None)
     result = ds.save_sqlite(unique_keys, data, table_name)
     if "error" in result:
