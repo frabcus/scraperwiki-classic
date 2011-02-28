@@ -143,27 +143,9 @@ class DataStoreClass :
         return self.request (('save', uunique_keys, js_data, date, latlng))
 
     
-    def save_sqlite(self, unique_keys, scraper_data, date=None, latlng=None, swdatatblname="swdata"):
+    def save_sqlite(self, unique_keys, scraper_data, swdatatblname="swdata"):
         if type(unique_keys) not in [ types.ListType, types.TupleType ]:
             return [ False, 'unique_keys must a list or tuple' ]
-             
-        if date is not None :
-            if type(date) not in [ datetime.datetime, datetime.date ] :
-                return [ False, 'date should be a python.datetime (not %s)' % type(date) ]
-
-        if latlng is not None :
-            if type(latlng) not in [ types.ListType, types.TupleType ] or len(latlng) != 2:
-                return [ False, 'latlng must be a (float,float) list or tuple' ]
-            if type(latlng[0]) not in [ types.IntType, types.LongType, types.FloatType ]:
-                return [ False, 'latlng must be a (float,float) list or tuple' ]
-            if type(latlng[1]) not in [ types.IntType, types.LongType, types.FloatType ]:
-                return [ False, 'latlng must be a (float,float) list or tuple' ]
-
-        if date is not None :
-            scraper_data["date"] = date.isoformat()
-        if latlng is not None :
-            scraper_data["latlng_lat"] = float(latlng[0])
-            scraper_data["latlng_lng"] = float(latlng[1])
 
         for key in unique_keys:
             if key not in scraper_data:
@@ -176,9 +158,9 @@ class DataStoreClass :
             if type(key) not in [unicode, str]:
                 return [ False, 'key must be string type' ]
             if not re.match("[a-zA-Z0-9_\- ]+$", key):
-                return [ False, 'key must not be simple text'+key ]
+                return [ False, 'key must be simple text: '+key ]
             
-            if type(value) in [datetime, date]:
+            if type(value) in [datetime.datetime, datetime.date]:
                 value = value.isoformat()
             elif type(value) not in [int, bool, float, unicode, str]:
                 value = unicode(value)
@@ -234,52 +216,68 @@ def ifsencode_trunc(v, t):
 
 
 # functions moved from the out of data code into here to manage their development
-def save(unique_keys, data, date = None, latlng = None, silent = False) :
+def save(unique_keys, data, date = None, latlng = None, silent = False, verbose=2) :
     ds = DataStore(None)
     
-    if True or ds.uses_old_datastore():
-        rc, arg = ds.save(unique_keys, data, date, latlng)
-    else:
-        rc, arg = ds.save_sqlite(unique_keys, data, date, latlng)
+    if silent:   # should deprecate soon
+        verbose = 0
     
-    if not rc :
-        raise Exception (arg) 
+    # enable soon (new version wrapper)
+    if False and not ds.uses_old_datastore():
+        
+        rc = True
+        if date is not None:
+            if type(date) not in [ datetime.datetime, datetime.date ] :
+                rc, arg = False, 'date should be a python.datetime (not %s)' % type(date)
 
-    # output for console
-    if not silent :
+        if latlng is not None :
+            if type(latlng) not in [ types.ListType, types.TupleType ] or len(latlng) != 2:
+                rc, arg = False, 'latlng must be a (float,float) list or tuple'
+            elif type(latlng[0]) not in [ types.IntType, types.LongType, types.FloatType ]:
+                rc, arg = False, 'latlng must be a (float,float) list or tuple'
+            elif type(latlng[1]) not in [ types.IntType, types.LongType, types.FloatType ]:
+                rc, arg = False, 'latlng must be a (float,float) list or tuple'
+
+        if date is not None :
+            scraper_data["date"] = date.isoformat()
+        if latlng is not None :
+            scraper_data["latlng_lat"] = float(latlng[0])
+            scraper_data["latlng_lng"] = float(latlng[1])
+        
+        if not rc:
+            rc, arg = ds.save_sqlite(unique_keys, data, verbose=verbose)
+        if not rc:
+            raise Exception(arg) 
+        return arg
+    
+    
+    # old version
+    rc, arg = ds.save(unique_keys, data, date, latlng)
+    if not rc:
+        raise Exception (arg) 
+    
+    if verbose:
         pdata = {}
         for key, value in data.items():
             pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
-
-        scraperwiki.console.logScrapedData (pdata)
+        scraperwiki.console.logScrapedData(pdata)
     return arg
-
-
 
 
 
 def sqlitecommand(command, val1=None, val2=None, verbose=1):
     ds = DataStore(None)
     result = ds.request(('sqlitecommand', command, val1, val2))
-    
-    if command == "attach":
-        if result != "ok":
-            raise Exception(result)
-    if command == "execute":
-        if result == "":
-            raise Exception("possible signal timeout")
-        if type(result) in [str, unicode]:
-            raise Exception(result)
-    if command == "commit":
-        if result != "ok":
-            raise Exception(result)
-            
+    if "error" in result:
+        raise Exception(result["error"])
+    if "status" not in result and "keys" not in result:
+        raise Exception("possible signal timeout: "+str(result))
     
     # list type for second field in message dump
     if verbose:
         if not val2:
             lval2 = [ ]
-        elif type(val2) in [tuple,list]:
+        elif type(val2) in [tuple, list]:
             lval2 = [ ifsencode_trunc(v, 50)  for v in val2 ]
         elif command == "attach":
             lval2 = [ val2 ]
@@ -289,11 +287,11 @@ def sqlitecommand(command, val1=None, val2=None, verbose=1):
     return result
     
 
-def save_sqlite(unique_keys, data, date=None, latlng=None, table_name="swdata", commit="True", verbose=2):
+def save_sqlite(unique_keys, data, table_name="swdata", commit="True", verbose=2):
     ds = DataStore(None)
-    rc, arg = ds.save_sqlite(unique_keys, data, date, latlng, table_name)   # new columns verbose is verbose=1 (not implemented)
-    if not rc :
-        raise Exception (arg) 
+    result = ds.save_sqlite(unique_keys, data, table_name)
+    if "error" in result:
+        raise Exception(result["error"]) 
 
     if commit:
         sqlitecommand("commit", None, None, 0)
@@ -306,5 +304,5 @@ def save_sqlite(unique_keys, data, date=None, latlng=None, table_name="swdata", 
             pdata["commit"] = "NOT_COMMITTED"
         scraperwiki.console.logScrapedData(pdata)
     
-    return arg
+    return result.get("status")
 

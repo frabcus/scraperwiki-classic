@@ -1338,6 +1338,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function cgiescape(text) 
     {
+        if (typeof text == 'number')
+            return String(text); 
         if (typeof text != 'string')
             return "&lt;NONSTRING "+(typeof text)+"&gt;"; // should convert on server
         return (text ? text.replace(/&/g, '&amp;').replace(/</g, '&lt;') : "");
@@ -1383,8 +1385,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blockedurlquoted) 
     {
-        if (stackdump) {
-            for (var i = 0; i < stackdump.length; i++) {
+        if (stackdump) 
+        {
+            for (var i = 0; i < stackdump.length; i++) 
+            {
                 var stackentry = stackdump[i]; 
                 sMessage = (stackentry.file !== undefined ? (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file) : ""); 
                 if (stackentry.furtherlinetext !== undefined) {
@@ -1398,11 +1402,14 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             }
         }
 
-        if (blockedurl) {
+        if (blockedurl) 
+        {
             sMessage = "The link " + blockedurl.substring(0,50) + " has been blocked. "; 
             sMessage += "Click <a href=\"/whitelist/?url=" + blockedurlquoted + "\" target=\"_blank\">here</a> for details."; 
             writeToConsole(sMessage, 'exceptionnoesc'); 
-        } else {
+        } 
+        else 
+        {
             writeToConsole(exceptiondescription, 'exceptiondump'); 
         }
     }
@@ -1629,8 +1636,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         row.push('<tr><td><b>'+cgiescape(command)+'</b></td>'); 
         if (val1)
             row.push('<td>'+cgiescape(val1)+'</td>'); 
-        for (var i = 0; i < lval2.length; i++)
-            row.push('<td>'+cgiescape(lval2[i])+'</td>'); 
+        if (lval2)
+        {
+            for (var i = 0; i < lval2.length; i++)
+                row.push('<td>'+cgiescape(lval2[i])+'</td>'); 
+        }
         row.push('</tr>'); 
 
         $('#output_data table.output_content').append($(row.join("")));  

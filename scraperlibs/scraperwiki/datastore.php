@@ -61,7 +61,7 @@ class SW_DataStoreClass
       }
    }
 
-   function request ($req)
+   function request($req)
    {
       $this->connect () ;
       $reqmsg  = json_encode ($req) . "\n" ;
@@ -81,30 +81,10 @@ class SW_DataStoreClass
       return json_decode ($text) ;
    }
 
-#function fetch (self, unique_keys_dict) :
-#
-#        if type(unique_keys_dict) not in [ types.DictType ] or len(unique_keys_dict) == 0 :
-#            return [ False, 'unique_keys must a non-empty dictionary' ]
-#
-#        uunique_keys_dict = mangleflattendict(unique_keys_dict)
-#        return $this->request (('fetch', uunique_keys_dict))
-#
-#function retrieve (self, unique_keys_dict) :
-#
-#        if type(unique_keys_dict) not in [ types.DictType ] or len(unique_keys_dict) == 0 :
-#            return [ False, 'unique_keys must a non-empty dictionary' ]
-#
-#        uunique_keys_dict = mangleflattendict(unique_keys_dict)
-#        return $this->request (('retrieve', uunique_keys_dict))
-#    
    function save ($unique_keys, $scraper_data, $date = null, $latlng = null)
    {
       if (!is_null($unique_keys) && !is_array($unique_keys))
          return array (false, 'unique_keys must be null, or an array') ;
-#
-#     if date   is not None :
-#        if type(date) not in [ datetime.datetime, datetime.date ] :
-#            return [ False, 'date should be a python.datetime (not %s)' % type(date) ]
 
       if (!is_null($latlng))
       {
@@ -114,22 +94,15 @@ class SW_DataStoreClass
             return array (false, 'latlng must be a (float,float) array') ;
       }
 
-#     if date   is not None :
-#         date   = str(date)
-
       if (!is_null($latlng))
          $latlng = sprintf ('%010.6f,%010.6f', $latlng[0], $latlng[1]) ;
 
-      # flatten everything into strings here rather than in the dataproxy/datalib
-      #
       $js_data      = $this->mangleflattendict($scraper_data) ;
-
-      # unique_keys need to be mangled too so that they match
-      #
       $uunique_keys = $this->mangleflattenkeys($unique_keys ) ;
 
       return $this->request (array('save', $uunique_keys, $js_data, $date, $latlng)) ;
    }
+
 
    function postcodeToLatLng ($postcode)
    {

@@ -142,13 +142,6 @@
             
                 <div class="right">
                     <span class="last_saved"><span id="idlastrevnumber">{% if rev.rev %} Rev: {{rev.rev}} {% endif %}</span></span>
-                    {% comment %} 
-		    <!-- no need for this bit, as says language / type at top right anyway -->
-		    <ul class="code_about">
-                        <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
-              	        <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
-                    </ul>
-		    {% endcomment %}
                     {% if scraper.id %}
                         <a id="aCloseEditor1" href="{% url code_overview scraper.wiki_type scraper.short_name %}">close editor</a>
                     {% else %}

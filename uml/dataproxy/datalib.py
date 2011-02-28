@@ -568,14 +568,17 @@ class Database :
         else:
             self.authorizer_func = authorizer_writemain
             
-                # this needs batching (eg in 1Mb chunks)
         if command == "downloadsqlitefile":
             scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
             scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+            lscrapersqlitefile = os.path.join(short_name, "defaultdb.sqlite")
             if not os.path.isfile(scrapersqlitefile):
-                return "No sqlite database"
+                return {"status":"No sqlite database"}
             
-            result = { "filesize": os.path.getsize(scrapersqlitefile) }
+            result = { "filename":lscrapersqlitefile, "filesize": os.path.getsize(scrapersqlitefile) }
+            if val2 == 0:
+                return result
+            
             fin = open(scrapersqlitefile, "rb")
             if val1:
                 fin.seek(val1)
@@ -588,7 +591,7 @@ class Database :
             else:
                 content = fin.read()
             result["length"] = len(content)
-            result["content"] = base64.encodestring(fin.read())
+            result["content"] = base64.encodestring(content)
             result['encoding'] = "base64"
             fin.close()
             
@@ -601,7 +604,7 @@ class Database :
                 scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
                 if not os.path.isdir(scraperresourcedir):
                     if command == "datasummary":
-                        return "No sqlite database"   # don't make one if we're just requesting a summary
+                        return {"status":"No sqlite database"}   # don't make one if we're just requesting a summary
                     os.mkdir(scraperresourcedir)
                 scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
@@ -625,7 +628,7 @@ class Database :
                 return {"keys":keys, "data":data} 
             
             except sqlite3.Error, e:
-                return "sqlite3.Error: "+str(e)
+                return {"error":"sqlite3.Error: "+str(e)}
                 
         if command == "datasummary":
             self.authorizer_func = authorizer_readonly
@@ -633,14 +636,15 @@ class Database :
             try:
                 for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
                     tables[name] = {"sql":sql}
-                    self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, ((val1 == None and 10 or val1),))
-                    if val1 != 0:
-                        tables[name]["rows"] = list(self.m_sqlitedbcursor)
-                    tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
+                    if val1 != "count":
+                        self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, ((val1 == None and 10 or val1),))
+                        if val1 != 0:
+                            tables[name]["rows"] = list(self.m_sqlitedbcursor)
+                        tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
                     tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                     
             except sqlite3.Error, e:
-                return "sqlite3.Error: "+str(e)
+                return {"error":"sqlite3.Error: "+str(e)}
             
             result = {"tables":tables}
             if short_name:
@@ -656,14 +660,14 @@ class Database :
                 attachscrapersqlitefile = os.path.join(self.m_resourcedir, val1, "defaultdb.sqlite")
                 self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, val2 or val1))
             except sqlite3.Error, e:
-                return "sqlite3.Error: "+str(e)
-            return "ok"
+                return {"error":"sqlite3.Error: "+str(e)}
+            return {"status":"attach succeeded"}
 
         if command == "commit":
             signal.alarm (10)
             self.m_sqlitedbconn.commit()
             signal.alarm (0)
-            return "ok"   # doesn't reach here if the signal fails
+            return {"status":"commit succeeded"}  # doesn't reach here if the signal fails
 
 
     def updatesqdatakeys(self, scraperID, runID, short_name, swdatatblname):
@@ -704,7 +708,7 @@ class Database :
         
         data["date_scraped"] = datetime.datetime.now().isoformat()
         res = self.sqlitecommand(scraperID, runID, short_name, "execute", self.sqdatatemplate[swdatatblname], [ data.get(k)  for k in self.swdatakeys[swdatatblname] ])
-        if type(res) == str:
-            return [ False, res ]
-        return  [ True, 'Data record inserted' ]
+        if "error" in res:
+            return res
+        return  {"status":'Data record inserted'}
 

@@ -14,6 +14,7 @@ import vc
 import difflib
 import re
 import urllib
+import os
 
 try:                 import json
 except ImportError:  import simplejson as json
@@ -340,11 +341,73 @@ def handle_session_draft(request):
     return HttpResponseRedirect(response_url)
 
 
+
+def getselectedword(line, character, language):
+    try: 
+        ip = int(character)
+    except ValueError:
+        return None
+    ie = ip
+    while ip >= 1 and re.match("[\w\.#]", line[ip-1]):  # search left across dots
+        ip -= 1
+    while ie < len(line) and re.match("\w", line[ie]): # search right across characters
+        ie += 1
+    word = line[ip:ie]
+
+    # search for quoted string
+    while ip >= 1 and line[ip-1] not in ('"', "'"):
+        ip -= 1
+    while ie < len(line) and line[ie] not in ('"', "'"):
+        ie += 1
+    if ip >= 1 and ie < len(line) and line[ip-1] in ('"', "'") and line[ip-1] == line[ie]:
+        word = line[ip:ie] 
+
+    return word    
+
+
+###############
+# language quickhelps 
+# to be improved -- 
+# possibly by calling to a scraper 
+# that tests
+###############
+def quickhelpphp(word):
+    return HttpResponseRedirect("http://www.php.net/search.php?%s" % urllib.urlencode({"pattern":word, "show":"quickref"}))
+
+
+def quickhelppython(word):
+    txt = os.popen('echo "help(\\"%s\\")" | python' % word).read()
+    if re.match("no Python documentation found", txt):
+        return None
+    return HttpResponse(txt, mimetype="text/plain")
+
+def quickhelpruby(word):
+    txt = os.popen('ri "%s"' % word).read()
+    if not txt or re.match("Nothing known about", txt):
+        return None
+    return HttpResponse(txt, mimetype="text/plain")
+    
+
 def quickhelp(request):
     language = request.GET.get('language', '').lower()
     wiki_type = request.GET.get('wiki_type', '')
     line = request.GET.get('line', "")
     character = request.GET.get('character', "")
+    
+    # try to go after the quickhelps
+    word = getselectedword(line, character, language)
+    result = None
+    if word and not re.match("(?i)scraperwiki", word):
+        if language == "php":
+            result = quickhelpphp(word)
+        elif language == "python":
+            result = quickhelppython(word)
+        elif language == "ruby":
+            result = quickhelpruby(word)
+            
+    if result:
+        return result
+
     context = { "wiki_type":wiki_type, "language":language }
     context['quick_help_template'] = 'documentation/%s_quick_help_%s.html' % (wiki_type, language)
     context['cheatsheetquery'] = urllib.urlencode({'line':line, 'character':character, 'language':language})
@@ -352,5 +415,6 @@ def quickhelp(request):
         url = "http://%s%s?%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=['general_quickhelp']), context['cheatsheetquery'])
         return HttpResponseRedirect(url)
     return render_to_response('documentation/quick_help.html', context, context_instance=RequestContext(request))
+
 
 

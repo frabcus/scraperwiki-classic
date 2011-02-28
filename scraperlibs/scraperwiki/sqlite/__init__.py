@@ -9,7 +9,7 @@ def execute(val1, val2=None, verbose=1):
     return sqlitecommand("execute", val1, val2, verbose)
 
 def commit(verbose=1):
-    return sqlitecommand("commit", verbose)
+    return sqlitecommand("commit", None, None, verbose)
 
 
 

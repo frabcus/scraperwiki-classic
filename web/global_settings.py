@@ -126,7 +126,7 @@ INSTALLED_APPS = [
 
 TEST_RUNNER = 'scraperwiki_tests.run_tests' 
 
-ACCOUNT_ACTIVATION_DAYS = 14
+ACCOUNT_ACTIVATION_DAYS = 3650 # If you haven't activated in 10 years then tough luck!
 
 # tell Django that the frontent user_profile model is to be attached to the
 # user model in the admin side.

@@ -503,30 +503,31 @@ def export_csv(request, short_name):
     return response
 
             
-            ## NOT DONE YET
-def stream_sqlite(scraper, memblock=1000000, max_memsize=100000000):
-    for offset in range(0, max_rows, step):
-        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=step, offset=offset)
-        
-        yield generate_csv(dictlist, offset)[0]
-        if len(dictlist) != step:
-            break   #we've reached the end of the data
+def stream_sqlite(dataproxy, filesize, memblock=100000):
+    for offset in range(0, filesize, memblock):
+        sqlitedata = dataproxy.request(("sqlitecommand", "downloadsqlitefile", offset, memblock))
+        content = sqlitedata.get("content")
+        if sqlitedata.get("encoding") == "base64":
+            content = base64.decodestring(content)
+        yield content
+        assert len(content) == sqlitedata.get("length"), len(content)
+        if sqlitedata.get("length") < memblock:
+            break
 
-
+@condition(etag_func=None)
 def export_sqlite(request, short_name):
     scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
     if not scraper:
         return code_error_response(models.Scraper, short_name=short_name, request=request)
     
     dataproxy = DataStore(scraper.guid, scraper.short_name)
-    sqlitedata = dataproxy.request(("sqlitecommand", "downloadsqlitefile", None, None))
-    if type(sqlitedata) in [str, unicode]:
-        return HttpResponse(sqlitedata)
-    content = sqlitedata.get("content")
-    if sqlitedata.get("encoding") == "base64":
-        content = base64.decodestring(content)
-    response = HttpResponse(content, mimetype='application/octet-stream')
+    initsqlitedata = dataproxy.request(("sqlitecommand", "downloadsqlitefile", 0, 0))
+    if "filesize" not in initsqlitedata:
+        return HttpResponse(str(initsqlitedata), mimetype="text/plain")
+    
+    response = HttpResponse(stream_sqlite(dataproxy, initsqlitedata["filesize"]), mimetype='application/octet-stream')
     response['Content-Disposition'] = 'attachment; filename=%s.sqlite' % (short_name)
+    response["Content-Length"] = initsqlitedata["filesize"]
     return response
 
 

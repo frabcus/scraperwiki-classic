@@ -61,13 +61,11 @@
                         information according to this date using the <a href="{% url api:scraper_getdatabydate %}">getDataByDate</a>
                         function in the external API. You can also store dates
                         in the data field, but you should put the most important one in this field.
-                        The date can be formatted as an ISO date in a string (<code>'2009-11-02'</code>), 
-                        can include a time (<code>'2015-01-19 03:14:07'</code>) or can be
-                        a date/time object.
+                        The date should be a Ruby date/time object.
                         </dd>
                     <dt><code>latlng</code> (optional)</dt>
                         <dd>Optionally, a location. This is a pair containing
-                        latitude and longitude coordinates, e.g. <code>(-2.983333, 53.4)</code>. The coordinates should
+                        latitude and longitude coordinates, e.g. <code>[-2.983333, 53.4]</code>. The coordinates should
                         be in the WGS84 projection. You can later retrieve
                         information according to this location using the <a href="{% url api:scraper_getdatabylocation %}">getDataByLocation</a>.
                         Scrapers for which latitude and longitude coordinates have been added will have a map showing the points displayed
@@ -79,7 +77,12 @@
 			    </table>
 				<h4>Example</h4>
 				<div class="example"><code>
-
+			    record = {}<br/>
+			    record['data'] = 'Fluffles'<br/>
+			    record['breed'] = 'Alsatian'<br/>
+				record['date'] = DateTime.now<br/>
+			    record['latlng']  = [51.5010076598646,-0.141587596528854]<br/>
+			    ScraperWiki.save(["data"], record)
 				</code></div>
             </div>
 
@@ -120,7 +123,8 @@
 			    <h4>Method</h4>
 			    <table class="api_detail example_table">
 			    <tr><th width="30%">Method</th><th width="20%">Returned value</th><th>Description</th></tr>
-			<tr><td><code>mdc = SW_MetadataClient<br/>mdc.save(key, value)</code></td><td>String</td>
+			
+			<tr><td><code>ScraperWiki.save_metadata(key, value)</code></td><td>String</td>
 			    <td>
 			 <p>Stores an item of metadata that can later be retrieved using the <code>scraperwiki.metadata.get</code> function.</p>
 			    <dl>
@@ -132,6 +136,19 @@
 	              <dt><code>value</code></dt>
 	              <dd>The value to be stored.</dd>
 	            </dl></td></tr>
+				<tr><td><code>ScraperWiki.get_metadata(key, [default=])</code></td><td>String</td>
+				    <td>
+				 <p>Retrieves an item of metadata that has previously been stored using the <code>ScraperWiki.save_metadata</code> function.</p>
+				    <dl>
+		              <dt><code>key</code></dt>
+		              <dd>
+		                This is a unique identifier for the data being stored. Multiple save requests
+		                with the same key will overwrite any existing value associated with the key.
+		              </dd>
+		              <dt><code>default</code> (optional)</dt>
+		              <dd>The value to be returned if no value is found to be associated with this key. Defaults to <code>nil</code>.</dd>
+		            </dl></td></tr>
+	
 			    </table>
 
             <h3>Special Keys</h3>
@@ -150,8 +167,7 @@
             </table>
 			<h4>Example</h4>
 			<div class="example"><code>
-			mdc = SW_MetadataClient.new<br/>
-			mdc.save('data_columns', ['Id','Id_Event', 'Link', 'Title', 'Category'])
+			ScraperWiki.save_metadata('data_columns', ['data','breed', 'date', 'latlng'])
 			</code></div>
         </div>
 </div>
@@ -172,6 +188,7 @@
 </ul>
 <h5>Metadata</h4>
 <ul>
-  <li><a href="#managing">SW_MetadataClient.save</a></li>
+  <li><a href="#managing">ScraperWiki.get_metadata</li>
+  <li><a href="#managing">ScraperWiki.save_metadata</li>
 </ul> 
 </div>
