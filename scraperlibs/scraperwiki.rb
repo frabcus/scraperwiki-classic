@@ -71,7 +71,6 @@ module ScraperWiki
     end
 
 
-
     def ScraperWiki.save(unique_keys, data, date = nil, latlng = nil)
         res = SW_DataStore.create().save(unique_keys, data, date, latlng)
         if ! res[0]
@@ -91,6 +90,64 @@ module ScraperWiki
         ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => pdata})
     end
 
+    def ScraperWiki.sqlitecommand(command, val1=nil, val2=nil, verbose=2)
+        ds = SW_DataStore.create()
+        res = ds.request(['sqlitecommand', command, val1, val2])
+        if res["error"]
+            raise res["error"]
+        end
+        if verbose:
+            ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>command, 'val1'=>res, 'val2'=>res})
+        end
+    end
+
+    def ScraperWiki.save_sqlite(unique_keys, data, table_name="swdata", commit=true, verbose=2)
+        for key in unique_keys
+            if !data.include?(key)
+                raise 'unique_keys must be a subset of data'
+            end
+        end
+
+        jdata = { }
+        data.each_pair do |key, value|
+            if not key:
+                raise 'key must not be blank'
+            end
+            if key.class != String
+                raise 'key must be string type'
+            end
+
+            if !/[a-zA-Z0-9_\- ]+$/.match(key)
+                raise 'key must be simple text'+key
+            end
+            
+            if ![Fixnum, Float, String, TrueClass, FalseClass, NilClass].include?(value)
+                value = value.to_s
+            end
+            jdata[key] = value
+        end
+
+        ds = SW_DataStore.create()
+        res = ds.request(['save_sqlite', unique_keys, jdata, table_name])
+        if res["error"]
+            raise res["error"]
+        end
+        if commit
+            res = ds.request(['sqlitecommand', 'commit', nil, nil]);
+        end
+
+        pdata = { }
+        jdata.each_pair do |key, value|
+            key = key.to_s
+            if value == nil
+                value  = ''
+            else
+                value = value.to_s
+            end
+            pdata[key] = value
+        end
+        ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => pdata})
+    end
 
     def ScraperWiki.getKeys(name)
         return SW_APIWrapper.getKeys(name)

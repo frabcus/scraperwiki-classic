@@ -1634,8 +1634,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         row.push('<tr><td><b>'+cgiescape(command)+'</b></td>'); 
         if (val1)
             row.push('<td>'+cgiescape(val1)+'</td>'); 
-        for (var i = 0; i < lval2.length; i++)
-            row.push('<td>'+cgiescape(lval2[i])+'</td>'); 
+        if (lval2)
+        {
+            for (var i = 0; i < lval2.length; i++)
+                row.push('<td>'+cgiescape(lval2[i])+'</td>'); 
+        }
         row.push('</tr>'); 
 
         $('#output_data table.output_content').append($(row.join("")));  

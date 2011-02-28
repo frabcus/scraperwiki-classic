@@ -651,7 +651,7 @@ class Database :
                 return {"keys":keys, "data":data} 
             
             except sqlite3.Error, e:
-                return "sqlite3.Error: "+str(e)
+                return {"error":"sqlite3.Error: "+str(e)}
                 
         if command == "datasummary":
             self.authorizer_func = authorizer_readonly
@@ -666,7 +666,7 @@ class Database :
                     tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                     
             except sqlite3.Error, e:
-                return "sqlite3.Error: "+str(e)
+                return {"error":"sqlite3.Error: "+str(e)}
             
             result = {"tables":tables}
             if short_name:
@@ -682,14 +682,14 @@ class Database :
                 attachscrapersqlitefile = os.path.join(self.m_resourcedir, val1, "defaultdb.sqlite")
                 self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, val2 or val1))
             except sqlite3.Error, e:
-                return "sqlite3.Error: "+str(e)
-            return "ok"
+                return {"error":"sqlite3.Error: "+str(e)}
+            return {"status":"attach succeeded"}
 
         if command == "commit":
             signal.alarm (10)
             self.m_sqlitedbconn.commit()
             signal.alarm (0)
-            return "ok"   # doesn't reach here if the signal fails
+            return {"status":"commit succeeded"}  # doesn't reach here if the signal fails
 
 
     def updatesqdatakeys(self, scraperID, runID, short_name, swdatatblname):
@@ -730,7 +730,7 @@ class Database :
         
         data["date_scraped"] = datetime.datetime.now().isoformat()
         res = self.sqlitecommand(scraperID, runID, short_name, "execute", self.sqdatatemplate[swdatatblname], [ data.get(k)  for k in self.swdatakeys[swdatatblname] ])
-        if type(res) == str:
-            return [ False, res ]
-        return  [ True, 'Data record inserted' ]
+        if "error" in res:
+            return res
+        return  {"status":'Data record inserted'}
 
