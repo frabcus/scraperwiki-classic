@@ -268,9 +268,12 @@ class ScraperRunner(threading.Thread):
         emailers = self.scraper.emailers()
         if emailers.count() > 0:
             subject, message = getemailtext(event)
-            if message:  # no email if blank
-                for user in emailers:
-                    send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[user.email], fail_silently=True)
+            if self.scraper.status == 'ok':
+                if message:  # no email if blank
+                    for user in emailers:
+                        send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[user.email], fail_silently=True)
+            else:
+                mail_admins(subject="SICK EMAILER: %s" % subject, message=message)
 
 
 # this is invoked by the crontab with the function
