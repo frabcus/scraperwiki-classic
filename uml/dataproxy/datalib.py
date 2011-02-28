@@ -571,10 +571,14 @@ class Database :
         if command == "downloadsqlitefile":
             scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
             scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+            lscrapersqlitefile = os.path.join(short_name, "defaultdb.sqlite")
             if not os.path.isfile(scrapersqlitefile):
                 return {"status":"No sqlite database"}
             
-            result = { "filesize": os.path.getsize(scrapersqlitefile) }
+            result = { "filename":lscrapersqlitefile, "filesize": os.path.getsize(scrapersqlitefile) }
+            if val2 == 0:
+                return result
+            
             fin = open(scrapersqlitefile, "rb")
             if val1:
                 fin.seek(val1)
@@ -587,7 +591,7 @@ class Database :
             else:
                 content = fin.read()
             result["length"] = len(content)
-            result["content"] = base64.encodestring(fin.read())
+            result["content"] = base64.encodestring(content)
             result['encoding'] = "base64"
             fin.close()
             
