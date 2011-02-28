@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS `sequences` (
   `id` bigint NOT NULL
   ) ENGINE=InnoDB;
 
+INSERT INTO `sequences` VALUES (0);
+
 
 DROP TABLE IF EXISTS `pages`;
 CREATE TABLE IF NOT EXISTS `pages` (
