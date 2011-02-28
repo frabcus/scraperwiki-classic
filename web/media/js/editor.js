@@ -1338,6 +1338,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function cgiescape(text) 
     {
+        if (typeof text == 'number')
+            return String(text); 
         if (typeof text != 'string')
             return "&lt;NONSTRING "+(typeof text)+"&gt;"; // should convert on server
         return (text ? text.replace(/&/g, '&amp;').replace(/</g, '&lt;') : "");
