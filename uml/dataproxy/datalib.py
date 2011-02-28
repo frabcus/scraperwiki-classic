@@ -533,35 +533,9 @@ class Database :
         cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s and date is not null", (scraperID,))
         return [ True, int(cursor.fetchone()[0]) > 9 ]
 
-    def recent_record_count (self, scraperID, days) :
-
-        sql = '''
-              select date(`date_scraped`) as date, count(`date_scraped`) as count from `items`
-                     where `scraper_id` = %s and `date_scraped` between date_sub(curdate(), interval %s day) and date_add(curdate(), interval 1 day)
-                     group by date(`date_scraped`)
-              '''
-        cursor = self.execute (sql, (scraperID, days))
-        date_counts = cursor.fetchall()
-
-        #make a store, 
-        return_dates = []
-        all_dates    = [datetime.datetime.now() + datetime.timedelta(i)  for i in range(-days, 1)]
-        for all_date in  all_dates:
-            #try and find an entry for this date in the query results
-            count = 0
-            for date_count in date_counts :
-                if str(date_count[0]) == all_date.strftime("%Y-%m-%d") :
-                    count = date_count[1]
-
-            #add the count to the return list
-            return_dates.append(count)
-        
-        return [ True, return_dates ]
-                
-    
-        # general experimental single file sqlite access
-        # the values of these fields are safe because from the UML they are subject to an ident callback, 
-        # and from the frontend they are subject to a connection from a particular IP number
+    # general experimental single file sqlite access
+    # the values of these fields are safe because from the UML they are subject to an ident callback, 
+    # and from the frontend they are subject to a connection from a particular IP number
     def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
         #print "XXXXX", (command, runID, val1, val2)
         

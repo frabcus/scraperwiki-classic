@@ -51,7 +51,6 @@ class Scraper (code.Code):
     license      = models.CharField(max_length=100, blank=True, choices=LICENSE_CHOICES, default='Unknown')
     license_link = models.URLField(verify_exists=False, null=True, blank=True)
     record_count = models.IntegerField(default=0)        
-    scraper_sparkline_csv = models.CharField(max_length=255, null=True)
     run_interval = models.IntegerField(default=86400)  # in seconds
 
     objects = managers.scraper.ScraperManager()
@@ -75,23 +74,12 @@ class Scraper (code.Code):
         return int(Scraper.objects.item_count(self.guid))
 
 
-            # It would be good to kill this function off and move its functionality into being properties of the database
+    # It would be good to kill this function off and move its functionality into being properties of the database
     def update_meta(self):
         #update line counts etc
         self.record_count = self.count_records()
         self.has_geo = bool(Scraper.objects.has_geo(self.guid))
         self.has_temporal = bool(Scraper.objects.has_temporal(self.guid))
-
-        #get data for sparklines
-        sparkline_days = settings.SPARKLINE_MAX_DAYS
-        created_difference = datetime.datetime.now() - self.created_at
-
-        if (created_difference.days < settings.SPARKLINE_MAX_DAYS):
-            sparkline_days = created_difference.days
-
-        #minimum of 1 day
-        recent_record_count = Scraper.objects.recent_record_count(self.guid, sparkline_days)
-        self.scraper_sparkline_csv = ",".join("%d" % count for count in recent_record_count)
 
     def save(self, *args, **kwargs):
         self.wiki_type = 'scraper'
