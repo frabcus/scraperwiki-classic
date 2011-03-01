@@ -90,10 +90,12 @@ class Scraper (code.Code):
         if rc:
             self.has_temporal = bool(arg)
             
-            
-        datasummary = dataproxy.request(("sqlitecommand", "datasummary", 0, None))
-        for tabledata in datasummary.get("tables", {}).values():
-            self.record_count += tabledata["count"]
+        try:
+            datasummary = dataproxy.request(("sqlitecommand", "datasummary", 0, None))
+            for tabledata in datasummary.get("tables", {}).values():
+                self.record_count += tabledata["count"]
+        except:
+            pass
 
 
     def save(self, *args, **kwargs):
