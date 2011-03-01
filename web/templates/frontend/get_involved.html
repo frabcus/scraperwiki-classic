@@ -98,8 +98,6 @@
          {% ifequal view_no_description_count 0 %}
              <p>No need! They've all been done.</p>
          {% else %}
-             <p>{{view_no_description_count}} out of {{view_count}} views have no description. Help make ScraperWiki better by <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_description">adding a description to some random views</a>.</p>
-             
              <p>
                  <strong>{{view_no_description_count}} out of {{view_count}}</strong> views are currently missing a description. Help out by adding one that describes what the view shows and what data it uses.
              </p>
