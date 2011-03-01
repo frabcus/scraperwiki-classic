@@ -128,14 +128,6 @@ def scraper_overview(request, short_name):
         sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
         if sqlitedata and type(sqlitedata) not in [str, unicode]:
             context['sqlitedata'] = sqlitedata["tables"]
-        
-            # throw away uniqu_hash rows
-            for table in context['sqlitedata'].values():
-                if "unique_hash" in table["keys"]:
-                    iuh = table["keys"].index("unique_hash")
-                    del table["keys"][iuh]
-                    for row in table["rows"]:
-                        del row[iuh]
     except:
         pass
     

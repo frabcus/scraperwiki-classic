@@ -10,6 +10,7 @@ import  sqlite3
 import  signal
 import  base64
 import  shutil
+import  re
 
 class Database :
 
@@ -75,9 +76,7 @@ class Database :
         self.m_sqlitedbcursor = None
         self.authorizer_func = None  
         
-        self.swdatakeys = {}   # default table is always swdata, but allows us to set other table names in future
-        self.swdatatypes = {}
-        self.sqdatatemplate = {}
+        self.sqlitesaveinfo = { }  # tablename -> info
 
         if type(config) == types.StringType :
             conf = ConfigParser.ConfigParser()
@@ -544,7 +543,7 @@ class Database :
             if action_code in readonlyops:
                 return sqlite3.SQLITE_OK
             if action_code == sqlite3.SQLITE_PRAGMA:
-                if tname == "table_info":
+                if tname in ["table_info", "index_list", "index_info"]:
                     return sqlite3.SQLITE_OK
             return sqlite3.SQLITE_DENY
         
@@ -670,25 +669,78 @@ class Database :
             return {"status":"commit succeeded"}  # doesn't reach here if the signal fails
 
 
-    def updatesqdatakeys(self, scraperID, runID, short_name, swdatatblname):
-        tblinfo = self.sqlitecommand(scraperID, runID, short_name, "execute", "PRAGMA table_info(%s)" % swdatatblname, None)["data"]
-        self.swdatakeys[swdatatblname] = [ a[1]  for a in tblinfo ]
-        self.swdatatypes[swdatatblname] = [ a[2]  for a in tblinfo ]
-        self.sqdatatemplate[swdatatblname] = "insert or replace into %s values (%s)" % (swdatatblname, ",".join(["?"]*len(self.swdatakeys[swdatatblname])))
-
 
     def save_sqlite(self, scraperID, runID, short_name, unique_keys, data, swdatatblname):
-            
-        # establish the sw data table
-        if not self.m_sqlitedbconn or swdatatblname not in self.swdatakeys:
-            self.sqlitecommand(scraperID, runID, short_name, "execute", "create table if not exists %s (`date_scraped` text, `unique_hash` text unique)" % swdatatblname, None)
+        res = { }
+        if not self.m_sqlitedbconn or swdatatblname not in self.sqlitesaveinfo:
+            ssinfo = SqliteSaveInfo(self, scraperID, runID, short_name, swdatatblname)
+            self.sqlitesaveinfo[swdatatblname] = ssinfo
+            if not ssinfo.rebuildinfo():
+                ssinfo.buildinitialtable()
+                ssinfo.rebuildinfo()
+                res["tablecreated"] = swdatatblname
+        else:
+            ssinfo = self.sqlitesaveinfo[swdatatblname]
         
-        if swdatatblname not in self.swdatakeys:
-            self.updatesqdatakeys(scraperID, runID, short_name, swdatatblname)
+        if "date_scraped" not in data:
+            data["date_scraped"] = datetime.datetime.now().isoformat()
+        # would be good to have but f***ing ugly!
+        #if "runID" not in data:  
+        #    data["runID"] = runID
+            
+        newcols = ssinfo.newcolumns(data)
+        if newcols:
+            for k, vt in newcols:
+                ssinfo.addnewcolumn(k, vt)
+            ssinfo.rebuildinfo()
+            res["newcolumn %s" % k] = vt
+
+        if unique_keys:
+            idxname, idxkeys = ssinfo.findclosestindex(unique_keys)
+            if not idxname or idxkeys != set(unique_keys):
+                lres = ssinfo.makenewindex(idxname, unique_keys)
+                if "error" in lres:  return lres
+                res.update(lres)
+            
+            
+        lres = ssinfo.insertdata(data)
+        if "error" in lres:  return lres
+        
+        res["status"] = 'Data record inserted'
+        return res
+
+
+class SqliteSaveInfo:
+    def __init__(self, database, scraperID, runID, short_name, swdatatblname):
+        self.database = database
+        self.scraperID = scraperID
+        self.runID = runID
+        self.short_name = short_name
+        self.swdatatblname = swdatatblname
+
+    def sqliteexecute(self, val1, val2=None):
+        res = self.database.sqlitecommand(self.scraperID, self.runID, self.short_name, "execute", val1, val2)
+        #print "execute", val1, val2, res
+        return res
     
-        # add new columns if required
+    def rebuildinfo(self):
+        tblinfo = self.sqliteexecute("PRAGMA table_info(%s)" % self.swdatatblname)
+        if not tblinfo["data"]:
+            return False
+            
+        self.swdatakeys = [ a[1]  for a in tblinfo["data"] ]
+        self.swdatatypes = [ a[2]  for a in tblinfo["data"] ]
+        self.sqdatatemplate = "insert or replace into `%s` values (%s)" % (self.swdatatblname, ",".join(["?"]*len(self.swdatakeys)))
+
+        return True
+            
+    def buildinitialtable(self):
+        self.sqliteexecute("create table `%s` (`date_scraped` text)" % self.swdatatblname)
+    
+    def newcolumns(self, data):
+        newcols = [ ]
         for k in data:
-            if k not in self.swdatakeys[swdatatblname]:
+            if k not in self.swdatakeys:
                 v = data[k]
                 if v != None:
                     vt = "text"
@@ -696,19 +748,51 @@ class Database :
                         vt = "integer"
                     elif type(v) == float:
                         vt = "real"
-                    self.sqlitecommand(scraperID, runID, short_name, "execute", "alter table %s add column `%s` %s" % (swdatatblname, k, vt), None)
-                    self.updatesqdatakeys(scraperID, runID, short_name, swdatatblname)  # get again rather than amend
-    
-        # compute the hash key
-        ulist = [ ]
-        for k in set(unique_keys):
-            try: ulist.append(str(data[k]))
-            except UnicodeEncodeError: ulist.append(data[k].encode("utf-8"))
-        data["unique_hash"] = hashlib.md5('\0342\0211\0210\0342\0211\0210\0342\0211\0210'.join(ulist)).hexdigest()
+                            # need in future to detect base64 conversion for blobs (as will make downloaded databases more useful to use eg containing images)
+                    newcols.append((k, vt))
+        return newcols
+
+    def addnewcolumn(self, k, vt):
+        self.sqliteexecute("alter table `%s` add column `%s` %s" % (self.swdatatblname, k, vt))
+
+    def findclosestindex(self, unique_keys):
+        idxlist = self.sqliteexecute("PRAGMA index_list(`%s`)" % self.swdatatblname)  # [seq,name,unique]
+        uniqueindexes = [ ]
+        for idxel in idxlist["data"]:
+            if idxel[2]:
+                idxname = idxel[1]
+                idxinfo = self.sqliteexecute("PRAGMA index_info(`%s`)" % idxname) # [seqno,cid,name]
+                idxset = set([ a[2]  for a in idxinfo["data"] ])
+                idxoverlap = len(idxset.intersection(unique_keys))
+                uniqueindexes.append((idxoverlap, idxname, idxset))
         
-        data["date_scraped"] = datetime.datetime.now().isoformat()
-        res = self.sqlitecommand(scraperID, runID, short_name, "execute", self.sqdatatemplate[swdatatblname], [ data.get(k)  for k in self.swdatakeys[swdatatblname] ])
-        if "error" in res:
-            return res
-        return  {"status":'Data record inserted'}
+        if not uniqueindexes:
+            return None, None
+        uniqueindexes.sort()
+        return uniqueindexes[-1][1], uniqueindexes[-1][2]
+
+    # increment to next index number every time there is a change, and add the new index before dropping the old one.
+    def makenewindex(self, idxname, unique_keys):
+        istart = 0
+        if idxname:
+            mnum = re.search("(\d+)$", idxname)
+            if mnum:
+                istart = int(mnum.group(1))
+        for i in range(10000):
+            newidxname = "%s_index%d" % (self.swdatatblname, istart+i)
+            if not self.sqliteexecute("select name from sqlite_master where name=?", (newidxname,))["data"]:
+                break
+            
+        res = { "newindex": newidxname }
+        lres = self.sqliteexecute("create unique index `%s` on `%s` (%s)" % (newidxname, self.swdatatblname, ",".join(unique_keys)))
+        if "error" in lres:  return lres
+        if idxname:
+            lres = self.sqliteexecute("drop index `%s`" % idxname)
+            if "error" in lres:  return lres
+            res["droppedindex"] = idxname
+        return res
+            
+    def insertdata(self, data):
+        values = [ data.get(k)  for k in self.swdatakeys ]
+        return self.sqliteexecute(self.sqdatatemplate, values)
 

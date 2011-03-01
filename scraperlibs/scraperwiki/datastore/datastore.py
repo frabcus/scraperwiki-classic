@@ -145,23 +145,25 @@ class DataStoreClass :
     
     def save_sqlite(self, unique_keys, scraper_data, swdatatblname="swdata"):
         if type(unique_keys) not in [ types.ListType, types.TupleType ]:
-            return [ False, 'unique_keys must a list or tuple' ]
+            return { "error":'unique_keys must a list or tuple' }
 
         for key in unique_keys:
             if key not in scraper_data:
-                return [ False, 'unique_keys must be a subset of data' ]
+                return { "error":'unique_keys must be a subset of data' }
 
         jdata = { }
         for key, value in scraper_data.items():
             if not key:
-                return [ False, 'key must not be blank' ]
+                return { "error": 'key must not be blank' }
             if type(key) not in [unicode, str]:
-                return [ False, 'key must be string type' ]
+                return { "error":'key must be string type' }
             if not re.match("[a-zA-Z0-9_\- ]+$", key):
-                return [ False, 'key must be simple text: '+key ]
+                return { "error":'key must be simple text: '+key }
             
             if type(value) in [datetime.datetime, datetime.date]:
                 value = value.isoformat()
+            elif value == None:
+                pass
             elif type(value) not in [int, bool, float, unicode, str]:
                 value = unicode(value)
 
@@ -304,5 +306,5 @@ def save_sqlite(unique_keys, data, table_name="swdata", commit=True, verbose=2):
             pdata["commit"] = "NOT_COMMITTED"
         scraperwiki.console.logScrapedData(pdata)
     
-    return result.get("status")
+    return result
 
