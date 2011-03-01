@@ -38,7 +38,7 @@ class MercurialInterface:
         self.repo = mercurial.hg.repository(self.ui, self.repopath, create=not os.path.exists(self.repopath))    
     
     
-    def savecode(self, scraper, code):
+    def savecode(self, code):
         assert os.path.exists(self.repopath)
         scraperpath = os.path.join(self.repopath, "code")   # 'code' is the default name for the only file in each repo (for now)
         fout = codecs.open(scraperpath, mode='w', encoding='utf-8')
@@ -47,7 +47,7 @@ class MercurialInterface:
 
     
     # need to dig into the commit command to find the rev
-    def commit(self, scraper, message, user): 
+    def commit(self, message, user): 
         assert os.path.exists(os.path.join(self.repopath, "code"))
         if "code" not in self.repo.dirstate:
             self.repo.add(["code"])   
@@ -93,7 +93,7 @@ class MercurialInterface:
         return result
         
 	            
-    def getcommitlog(self, scraper):
+    def getcommitlog(self):
         result = [ ]
         for rev in self.repo:
             ctx = self.repo[rev]
@@ -102,7 +102,7 @@ class MercurialInterface:
         return result
         
     
-    def getfilestatus(self, scraper):
+    def getfilestatus(self):
         status = { }
         scraperpath = os.path.join(self.repopath, "code")
         
@@ -116,14 +116,14 @@ class MercurialInterface:
         return status
         
 
-    def getstatus(self, scraper, rev=None):
+    def getstatus(self, rev=None):
         status = { }
         scraperfile = "code"
         scraperpath = os.path.join(self.repopath, "code")
         
         # adjacent commit informations
         if rev != None:
-            commitlog = self.getcommitlog(scraper)
+            commitlog = self.getcommitlog()
             if commitlog:
                 irev = len(commitlog)
                 if rev < 0:
@@ -151,7 +151,7 @@ class MercurialInterface:
             fin = codecs.open(scraperpath, mode='rU', encoding='utf-8')
             status["code"] = fin.read()
             fin.close()
-            status.update(self.getfilestatus(scraper)) # keys: filemodifieddate, isadded, ismodified
+            status.update(self.getfilestatus()) # keys: filemodifieddate, isadded, ismodified
         
         status['scraperfile'] = scraperfile
         return status

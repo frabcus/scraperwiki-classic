@@ -173,6 +173,7 @@ TEMPLATE_SETTINGS = [
  'REVISION',
  'VIEW_DOMAIN',
  'CODEMIRROR_URL',
+ 'ENABLE_MARKETPLACE',
 ]
 
 try:
@@ -201,4 +202,4 @@ DISPATCHERURL = "http://localhost:9000"
     # should be in localsettings instead
 UMLURLS = ["http://89.16.177.195:9101", "http://89.16.177.195:9102", "http://89.16.177.195:9103", "http://89.16.177.195:9104"]
 
-
+ENABLE_MARKETPLACE = False

@@ -5,10 +5,12 @@
 {% block content %}
     <div class="page_title tag_header">
         <h1>Tag: <a href="{% url single_tag tag.name %}" class="single_tag">{{tag.name}}</a></h1>
+        {% if settings.ENABLE_MARKETPLACE %}
         <p>
             Do you know of a dataset relating to <em>{{tag.name}}</em> that should have a scraper created for it? <a href="{% url market_solicitation %}?tags={{tag.name}}">If so, please request it</a>
             and it will be added to the open requests section of this page.
         </p>
+        {% endif %}
         <table class="tag_stats">
             <tr>
                 <td>
@@ -19,6 +21,7 @@
                         % Fixed scrapers
                     </p>
                 </td>
+                {% if settings.ENABLE_MARKETPLACE %}
                 <td>
                     <span>
                         {% dial solicitations_percent_complete 200 100 %}                            
@@ -27,6 +30,7 @@
                         % Completed requests
                     </p>
                 </td>
+                {% endif %}
             </tr>
         </table>
     </div>
@@ -42,6 +46,7 @@
         <p>There are no scrapers for this tag yet</p>
     {% endif %}
 </div>
+{% if settings.ENABLE_MARKETPLACE %}
 <div class="content right col">
     <h2>Open requests</h2>
     {% if solicitations_open %}
@@ -69,4 +74,5 @@
         </ul>
     {% endif %}
 </div>
+{% endif %}
 {% endblock %}

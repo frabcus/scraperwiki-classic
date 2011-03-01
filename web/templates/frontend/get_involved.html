@@ -14,6 +14,7 @@
 
     <h2>Technical tasks</h2>
 
+    {% if settings.ENABLE_MARKETPLACE %}
     <div class="task_complete">
         <a href="{% url market_list %}">
             {% dial solicitation_percent 200 100 %}
@@ -32,6 +33,7 @@
             </form>
         {% endifequal %}
     </div>
+    {% endif %}
 
     <div class="task_complete">
         <a href="{% url scraper_list_wiki_type 'scraper' %}?filter=sick">
@@ -58,6 +60,8 @@
     </div>
 
     <h2>Non-technical tasks</h2>
+
+    {% if settings.ENABLE_MARKETPLACE %}
     <div class="task_complete">
         <a href="{% url market_solicitation %}">
             <img class="photo" src="{{MEDIA_URL}}/images/requests.jpg"/>
@@ -71,6 +75,7 @@
             <input type="submit" value="Suggest a dataset"/>
         </form>
     </div>
+    {% endif %}
     
     <div class="task_complete">
         <a href="{% url scraper_list_wiki_type 'scraper' %}?filter=no_description">
@@ -98,8 +103,6 @@
          {% ifequal view_no_description_count 0 %}
              <p>No need! They've all been done.</p>
          {% else %}
-             <p>{{view_no_description_count}} out of {{view_count}} views have no description. Help make ScraperWiki better by <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_description">adding a description to some random views</a>.</p>
-             
              <p>
                  <strong>{{view_no_description_count}} out of {{view_count}}</strong> views are currently missing a description. Help out by adding one that describes what the view shows and what data it uses.
              </p>
@@ -132,14 +135,14 @@
 
     <div class="task_complete">
         <a href="{% url scraper_list_wiki_type 'view' %}?filter=no_tags">
-            {% dial view_description_percent 200 100 %}
+            {% dial view_tags_percent 200 100 %}
         </a>
         <h3>Add some tags to a view <small>({{view_tags_percent}}% complete)</small></h3>
         {% ifequal view_no_tags_count 0 %}
             <p>No need! They've all been done.</p>
         {% else %}
         <p>
-            <strong>{{view_no_tags_count}} out of {{view_count}}</strong> scrapers are currently not tagged. Help out by adding some tags that describe the view.
+            <strong>{{view_no_tags_count}} out of {{view_count}}</strong> views are currently not tagged. Help out by adding some tags that describe the view.
             This will help make the view easier to find for other people.
         </p>
         <form action="{% url scraper_list_wiki_type 'view' %}?filter=no_tags" method="get">
