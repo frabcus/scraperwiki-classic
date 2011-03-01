@@ -28,6 +28,7 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
 	html = scraperwiki.scrape('http://www.google.co.uk', { 'key' : value })	# POST request.
 	</code></div>
 </div>
+
         <div class="section">
             <h3><span id="saving"></span>scraperwiki.datastore.save</h3>
             <p>Save your data to the ScraperWiki datastore. You can then download it, 
@@ -90,6 +91,117 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
 			    scraperwiki.datastore.save(['name'], data, crufts_date, latlng=(-2.983333, 53.4))
 				</code></div>
             </div>
+
+	        <div class="section">
+	            <h3><span id="sql"></span>The SQLite datastore</h3>
+	            <p>In addition to the standard datastore, ScraperWiki also offers access
+	                to a fully-fledged SQLite database that persists between runs.</p>
+	            <p>You can save data to the SQLite database in exactly the same way as the 
+	            ScraperWiki datastore using 
+	            <code>scraperwiki.sqlite.save</code> but you can also carry out more advanced SQL commands
+	            directly (using <code>scraperwiki.sqlite.execute</code> and 
+	            <code>scraperwiki.sqlite.select</code>).</p>
+	            <p>When you save to the SQLite database, it becomes the default datastore for the scraper. 
+	            You can retrieve data later from within other scrapers, or via the API.</p>
+				    <h4>Method</h4>
+				    <table class="api_detail example_table">
+				    <tr><th width="30%">Method</th><th width="20%">Returned value</th><th>Description</th></tr>
+					<tr><td><code>scraperwiki.sqlite.save<br/>
+					    &nbsp;(unique_keys, data,<br/>
+					    &nbsp;[date=],<br/>
+					    &nbsp;[latlng=]) </code></td>
+					<td>None</td>
+				    <td>
+				    <p>Stores a new record in the SQLite database, or replaces an existing
+	                record which has the same unique keys. The data parameter is a
+	                dictionary containing all the attributes of your record and their
+	                values.
+	                </p>
+	                <dl>
+	                    <dt><code>unique_keys</code></dt>
+	                        <dd>Array. Specify the attributes in
+	                        your record which are together unique, e.g. <code>['dog_id']</code> or
+	                        <code>['cattery', 'cat_number']</code>. Any existing data with
+	                        the same values for those attributes as your new data
+	                        will be overwritten. Must contain at least one element.
+	                        </dd>
+	                    <dt><code>data</code></dt>
+	                        <dd>Dictionary. The data in your record. Values are converted to strings, e.g.
+	                        in the example given, 
+	                        the integer <code>9812301</code> will be stored as a string. A null value
+	                        (e.g. <code>None</code> in Python) is stored as an empty string.
+	                        As a special case, if you use a key called <code>'date'</code> or <code>'latlng'</code>,
+	                        then it will be treated as if it were one of the optional arguments described below.
+	                        </dd>
+	                    <dt><code>date</code> (optional)</dt>
+	                        <dd>Special date/time field. You can later retrieve
+	                        information according to this date using the <a href="{% url api:scraper_getdatabydate %}">getDataByDate</a>
+	                        function in the external API. You can also store dates
+	                        in the data field, but you should put the most important date in this field.
+	                        The date should be a date/time object (e.g. <code>datetime.datetime.now() - datetime.timedelta(weeks=2)</code>).
+	                        </dd>
+	                    <dt><code>latlng</code> (optional)</dt>
+	                        <dd>Optionally, a location. This is a pair containing
+	                        latitude and longitude coordinates, e.g. <code>(-2.983333, 53.4)</code>. The coordinates should
+	                        be in the WGS84 projection. You can later retrieve
+	                        information according to this location using the <a href="{% url api:scraper_getdatabylocation %}">getDataByLocation</a>.
+	                        Scrapers for which latitude and longitude coordinates have been added will have a map showing the points displayed
+	                        on the its page on the site.
+	                        </dd>
+	                </dl>
+				    </td>
+				    </tr>
+					<tr><td><code>scraperwiki.sqlite.execute<br/>
+					    &nbsp;(command)</code></td>
+					<td>None</td>
+				    <td>
+				    <p>Executes an SQLite command.
+	                </p>
+	                <dl>
+	                    <dt><code>command</code></dt>
+	                        <dd>String. An SQLite command. See the 
+                          <a href="http://www.sqlite.org/docs.html">SQLite documentation</a> for 
+                          command syntax.
+	                        </dd>
+	                </dl>
+				    </td>
+				    </tr>
+					<tr><td><code>scraperwiki.sqlite.select<br/>
+					    &nbsp;(command)</code></td>
+					<td>List</td>
+				    <td>
+				    <p>Selects from the SQLite database.
+	                </p>
+	                <dl>
+	                    <dt><code>command</code></dt>
+	                        <dd>String. An SQLite select expression.  See the 
+                          <a href="http://www.sqlite.org/docs.html">SQLite documentation</a> for 
+                          command syntax.
+	                        </dd>
+	                </dl>
+				    </td>
+				    </tr>
+					<tr><td><code>scraperwiki.sqlite.commit<br/>
+					    &nbsp;()</code></td>
+					<td>None</td>
+				    <td>
+				    <p>Commits your SQLite changes. Required to make your changes persist between runs.
+	                </p>
+				    </td>
+				    </tr>				
+				    </table>
+					<h4>Example</h4>
+					<div class="example"><code>
+					scraperwiki.sqlite.save(['name'], data, crufts_date, latlng=(-2.983333, 53.4))<br/>
+					person_fields = ["booking_id INTEGER PRIMARY KEY","name TEXT"]<br/>
+					scraperwiki.sqlite.execute("create table if not exists person (%s)" \<br/>
+					&nbsp;&nbsp;% ",".join(person_fields))<br/>
+					scraperwiki.sqlite.execute("INSERT into 'person' values(?,?);",(100, 'Dave'))<br/>
+					scraperwiki.sqlite.commit()<br/>
+					results = scraperwiki.sqlite.select("booking_id from person where name='Dave'")
+					</code></div>
+	            </div>
+
 
         <div class="section">
 	    <h2><span id="geocoding"></span>Geocoding data</h2>
@@ -217,6 +329,13 @@ Just add <code>import scraperwiki</code> at the top of your scraper.</p>
 <h5>Datastore</h5>
 <ul>
   <li><a href="#saving">scraperwiki.datastore.save</a></li>
+</ul>
+<h5>SQL datastore</h5>
+<ul>
+  <li><a href="#sql">scraperwiki.sqlite.save</a></li>
+  <li><a href="#sql">scraperwiki.sqlite.execute</a></li>
+  <li><a href="#sql">scraperwiki.sqlite.select</a></li>
+  <li><a href="#sql">scraperwiki.sqlite.commit</a></li>
 </ul>
 <h5>Geo</h5>
 <ul>
