@@ -8,7 +8,7 @@
         <h1 class="welcome">Welcome to ScraperWiki</h1>
         {% if user.code_set.all|length %}  
             <p>
-              You have a stake in <a href="{% url dashboard %}">{{user|num_scrapers}} scrapers and {{user|num_views}} views</a>.
+              You have a stake in <a href="{% url dashboard %}">{{user|num_scrapers}} scraper{{user|num_scrapers|pluralize}}{% if user|num_views %} and {{user|num_views}} view{{user|num_views|pluralize}}{% endif %}</a>.
             </p>
         {% else %}
         <div class="definition">
