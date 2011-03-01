@@ -13,6 +13,8 @@ cmp -s uml.cfg uml.cfg.local || {
 	exit	1
 	}
 
+# XXX I think we have to have a copy of uml.cfg here (not a symlink) as it runs
+# inside the UML, and is mounted somehow. Please clarify :)
 [ -f controller/uml.cfg ] || {
 	echo	"runlocal: controller/uml.cfg not found"
 	exit	1
