@@ -1,6 +1,5 @@
 {% extends "codewiki/scraper_base.html" %}
 {% load humanize %}
-{% load sparkline %}
 {% load schedule %}
 {% block tab %}
 {% load markup %}
@@ -189,8 +188,6 @@
         (no future run scheduled).
       {% endifnotequal %}
     </p>
-
-    <p>{% sparkline scraper.scraper_sparkline_csv 'medium' %}</p>
 
     {% if user_owns_it and not scraper.published %}
       <div id="publishScraper">

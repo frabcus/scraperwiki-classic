@@ -3,6 +3,7 @@ SHELL=/bin/bash
 
 # m h  dom mon dow   command
 0 5 * * * mysqldump -u backup --single-transaction --quick scraperwiki_live | gzip > /root/backup/mysql-backup.sql.gz
-0 5 * * * tar zcfP /root/backup/scraperwiki.tar.gz /var/www/scraperwiki --exclude "/var/www/scraperwiki/croppercache"
+0 5 * * * tar zcfP /root/backup/scraperwiki.tar.gz /var/www/scraperwiki --exclude "/var/www/scraperwiki/croppercache" --exclude "/var/www/scraperwiki/splitscrapers/"
 0 5 * * * tar zcfP /root/backup/etc.tar.gz /etc
+0 5 * * * dir=$(mktemp -d) && for s in $(ls /var/www/scraperwiki/splitscrapers/); do hg clone /var/www/scraperwiki/splitscrapers/$s $dir/$s; done && tar zcfP /root/backup/mercurial.tar.gz $dir && rm -rf $dir
 0 7 * * * rsync -qazr /root/backup scraperwiki-web.backup.bytemark.co.uk::scraperwiki-web/

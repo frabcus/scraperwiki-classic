@@ -17,7 +17,6 @@ class TestRunScrapers(unittest.TestCase):
                              published=False, 
                              last_run=None,
                              run_interval=86400)
-        unpublished.buildfromfirsttitle()
         unpublished.save()
         self.assertEqual(0, self.scrapers.count())
 
@@ -28,7 +27,6 @@ class TestRunScrapers(unittest.TestCase):
                             published=True, 
                             last_run=None,
                             run_interval=86400)
-        never_run.buildfromfirsttitle()
         never_run.save()
         self.assertEqual(1, self.scrapers.count())
 
@@ -39,7 +37,6 @@ class TestRunScrapers(unittest.TestCase):
                               published=True, 
                               last_run=datetime.datetime.now(), 
                               run_interval=86400)
-        not_overdue.buildfromfirsttitle()
         not_overdue.save()
         self.assertEqual(0, self.scrapers.count())
 
@@ -49,6 +46,5 @@ class TestRunScrapers(unittest.TestCase):
         overdue = Scraper(published=True, 
                           last_run=datetime.datetime.now() - datetime.timedelta(7), 
                           run_interval=86400)
-        overdue.buildfromfirsttitle()
         overdue.save()
         self.assertEqual(1, self.scrapers.count())

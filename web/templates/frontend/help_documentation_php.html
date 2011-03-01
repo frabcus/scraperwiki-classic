@@ -66,9 +66,7 @@
                         information according to this date using the <a href="{% url api:scraper_getdatabydate %}">getDataByDate</a>
                         function in the external API. You can also store dates
                         in the data field, but you should put the most important one in this field.
-                        The date can be formatted as an ISO date in a string (<code>'2009-11-02'</code>), 
-                        can include a time (<code>'2015-01-19 03:14:07'</code>) or can be
-                        a date/time object.
+                        The date should be formatted as a PHP date/time object.
                         </dd>
                     <dt><code>latlng</code> (optional)</dt>
                         <dd>Optionally, a location. This is a pair containing
@@ -85,7 +83,8 @@
 				<h4>Example</h4>
 				<div class="example"><code>
 				$arr = array('name' => 'Fluffles', 'breed' => 'Alsatian');<br/>
-				scraperwiki::save(array('name'), $arr);
+				$date = time();<br/>
+				scraperwiki::save(array('name'), $arr, $date, $latlng);
 				</code></div>
             </div>
 
@@ -171,18 +170,11 @@
                   Store a list of column names here to specify the order in which columns are displayed in the ScraperWiki data table.
                 </td>
               </tr>
-              <tr>
-                <td>private_columns</td>
-                <td>
-                  Store a list of column names here to hide these columns in the ScraperWiki data table from users who do not own the scraper. 
-                </td>
-              </tr>
             </table>
 			<h4>Example</h4>
 			<div class="example"><code>
 			$arr = array("name", "breed");<br/>
-			scraperwiki::save_metadata('data_columns',$arr);<br/>
-			scraperwiki::save_metadata('private_columns','breed');
+			scraperwiki::save_metadata('data_columns',$arr);
 			</code></div>
         </div>
 

@@ -65,6 +65,7 @@ class Code(models.Model):
     language           = models.CharField(max_length=32, choices=LANGUAGES,  default='Python')
     wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
     relations          = models.ManyToManyField("self", blank=True)  # manage.py refuses to generate the tabel for this, so you haev to do it manually.
+    forked_from        = models.ForeignKey('self', null=True, blank=True)
     
     # managers
     objects = CodeManager()
@@ -80,7 +81,7 @@ class Code(models.Model):
             self.first_published_at = datetime.datetime.today()
 
         if not self.short_name:
-            self.buildfromfirsttitle()
+            self._buildfromfirsttitle()
 
         if not self.guid:
             self.set_guid()
@@ -92,10 +93,13 @@ class Code(models.Model):
 
     @property
     def vcs(self):
-        return vc.MercurialInterface(self.get_repo_path())
+        if self.forked_from:
+            return vc.MercurialInterface(self.get_repo_path(), self.forked_from.get_repo_path())
+        else:
+            return vc.MercurialInterface(self.get_repo_path())
 
     def commit_code(self, code_text, commit_message, user):
-        self.vcs.savecode(self, code_text)  # creates directory 
+        self.vcs.savecode(self, code_text)
         rev = self.vcs.commit(self, message=commit_message, user=user)
         return rev
 
@@ -111,7 +115,7 @@ class Code(models.Model):
     def get_reversion(self, rev):
         return self.vcs.getreversion(rev)
 
-    def buildfromfirsttitle(self):
+    def _buildfromfirsttitle(self):
         assert not self.short_name
         self.short_name = util.SlugifyUniquely(self.title, Code, slugfield='short_name', instance=self)
 

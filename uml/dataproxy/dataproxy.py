@@ -201,11 +201,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         rc, arg = db.has_temporal  (scraperID)
         self.connection.send (json.dumps ((rc, arg)) + '\n')
 
-    def recent_record_count (self, db, scraperID, runID, days) :
-
-        rc, arg = db.recent_record_count  (scraperID, days)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
     def process (self, db, scraperID, runID, scraperName, line) :
 
         request = json.loads(line) 
@@ -245,11 +240,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.has_temporal  (db, scraperID, runID)
             return
 
-        if request[0] == 'recent_record_count' :
-            self.recent_record_count  (db, scraperID, runID, request[1])
-            return
-
-            # new experimental QD sqlite interface
+        # new experimental QD sqlite interface
         if request[0] == 'sqlitecommand':
             if runID is not None :
                 statusInfo[runID]['action'] = 'sqlitecommand'

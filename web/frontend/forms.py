@@ -35,6 +35,13 @@ class UserProfileForm(forms.ModelForm):
     bio = forms.CharField(label="A bit about you", widget=forms.Textarea(), required=False)
     email = forms.EmailField(label="Email Address")
     
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).count > 0:
+            raise forms.ValidationError("This email address is already used by another account.")
+
+        return email
+
     class Meta:
         model = UserProfile
         fields = ('bio', 'name')

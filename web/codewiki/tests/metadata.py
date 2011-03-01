@@ -11,7 +11,6 @@ except:
 class MetadataTest(TestCase):
     def setUp(self):
         self.scraper = Scraper(title="Test")
-        self.scraper.buildfromfirsttitle()
         self.scraper.save()
 
         self.metadata = ScraperMetadata()

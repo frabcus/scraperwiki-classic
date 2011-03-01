@@ -36,7 +36,7 @@
 
       {% ifequal itemfirst.type 'commit' %}
       <div class="history_edit">
-          {% show_gravatar itemfirst.user 'small' %}
+          {% if itemfirst.user %}{% show_gravatar itemfirst.user 'small' %}{% endif %}
           <span class="history_editor_info">
             Edited by 
             <a href="{% if itemfirst.user.username %}{% url profiles_profile_detail itemfirst.user.username %}{% endif %}" class="historyuser">

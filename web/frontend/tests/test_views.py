@@ -61,23 +61,18 @@ class FrontEndViewsTests(TestCase):
 
     def test_tutorials(self):    
         scraper = Scraper(title='Python1', language='python', istutorial=True)
-        scraper.buildfromfirsttitle()
         scraper.save()
 
         scraper = Scraper(title='Python2', language='python', istutorial=True)
-        scraper.buildfromfirsttitle()
         scraper.save()
 
         scraper = Scraper(title='Python3', language='python', istutorial=True)
-        scraper.buildfromfirsttitle()
         scraper.save()
 
         scraper = Scraper(title='PHP1', language='php', istutorial=True)
-        scraper.buildfromfirsttitle()
         scraper.save()
 
         scraper = Scraper(title='PHP2', language='php', istutorial=True)
-        scraper.buildfromfirsttitle()
         scraper.save()
 
         response = self.client.get(reverse('help_tutorials'))

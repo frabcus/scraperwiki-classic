@@ -1,5 +1,6 @@
 require 'json'
 require 'singleton'
+require 'thread'
 
 class SW_DataStore
     
@@ -9,7 +10,6 @@ class SW_DataStore
 
     attr_accessor :m_port, :m_host
 
-    #required to override existing initialize
     def initialize
       @m_socket = nil
       @m_host = nil
@@ -77,7 +77,10 @@ class SW_DataStore
             end
           end
         }
-        return JSON.parse(text)
+        if text
+            return JSON.parse(text)
+        end
+        return text
     end
 
     def save(unique_keys, scraper_data, date = nil, latlng = nil)

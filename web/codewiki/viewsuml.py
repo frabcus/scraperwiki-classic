@@ -7,7 +7,6 @@ from django.core.urlresolvers import reverse
 
 from codewiki.models import Scraper, Code, ScraperRunEvent
 
-import vc
 import frontend
 
 import re

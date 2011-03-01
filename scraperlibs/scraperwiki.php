@@ -51,6 +51,27 @@ class scraperwiki
       scraperwiki::sw_dumpMessage (array('message_type' => 'data', 'content' => $data)) ;
    }
 
+   static function sqlitecommand($command, $val1 = null, $val2 = null)
+   {
+      $ds = SW_DataStoreClass::create();
+      $result = $ds->request(array('sqlitecommand', $command, $val1, $val2));
+      if (property_exists($result, 'error'))
+         throw new Exception ($result->error) ;
+      scraperwiki::sw_dumpMessage (array('message_type'=>'sqlitecall', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
+      return $result; 
+   }
+
+   static function save_sqlite($unique_keys, $data, $table_name="swdata", $commit=true, $verbose=2)
+   {
+      $ds = SW_DataStoreClass::create () ;
+      $result = $ds->request(array('save_sqlite', $unique_keys, $data, $table_name)); 
+      if (property_exists($result, 'error'))
+         throw new Exception ($result->error) ;
+      if ($commit)
+         $result = $ds->request(array('commit', null, null));
+      scraperwiki::sw_dumpMessage (array('message_type'=>'data', 'content'=>$data)) ;
+   }
+
    static function gb_postcode_to_latlng ($postcode)
    {
       if (is_null($postcode))
