@@ -396,7 +396,10 @@ def scraper_history(request, wiki_type, short_name):
                 runduration = runevent.run_ended - runevent.run_started
                 item["runduration"] = runduration
                 item["durationseconds"] = "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
-            item["groupkey"] = "runevent|||"+ str(runevent.exception_message.encode('utf-8'))
+            if runevent.exception_message:
+                item["groupkey"] = "runevent|||" + str(runevent.exception_message.encode('utf-8'))
+            else:
+                item["groupkey"] = "runevent|||"
             itemlog.append(item)
         
         itemlog.sort(key=lambda x: x["datetime"], reverse=True)
