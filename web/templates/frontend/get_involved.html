@@ -14,6 +14,7 @@
 
     <h2>Technical tasks</h2>
 
+    {% if settings.ENABLE_MARKETPLACE %}
     <div class="task_complete">
         <a href="{% url market_list %}">
             {% dial solicitation_percent 200 100 %}
@@ -32,6 +33,7 @@
             </form>
         {% endifequal %}
     </div>
+    {% endif %}
 
     <div class="task_complete">
         <a href="{% url scraper_list_wiki_type 'scraper' %}?filter=sick">
@@ -58,6 +60,8 @@
     </div>
 
     <h2>Non-technical tasks</h2>
+
+    {% if settings.ENABLE_MARKETPLACE %}
     <div class="task_complete">
         <a href="{% url market_solicitation %}">
             <img class="photo" src="{{MEDIA_URL}}/images/requests.jpg"/>
@@ -71,6 +75,7 @@
             <input type="submit" value="Suggest a dataset"/>
         </form>
     </div>
+    {% endif %}
     
     <div class="task_complete">
         <a href="{% url scraper_list_wiki_type 'scraper' %}?filter=no_description">
