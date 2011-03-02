@@ -128,18 +128,8 @@ class DataStoreClass :
         if latlng is not None :
             latlng = '%010.6f,%010.6f' % tuple(latlng)
 
-        #  Data must be JSON-encodable. Brute force attack, try each data value
-        #  in turn and stringify any that bork.
-        
-        #  Flatten everything into strings here rather than in the dataproxy/datalib.
-        #  See comment against "mangleflattendict"
-        #
         js_data = mangleflattendict (scraper_data)
-
-        #  Unique_keys need to be mangled too so that they match
-        #
         uunique_keys = mangleflattenkeys (unique_keys)
-        
         return self.request (('save', uunique_keys, js_data, date, latlng))
 
     
@@ -150,6 +140,8 @@ class DataStoreClass :
         for key in unique_keys:
             if key not in scraper_data:
                 return { "error":'unique_keys must be a subset of data' }
+            if scraper_data[key] == None:
+                return { "error":'unique_key value should not be None' }
 
         jdata = { }
         for key, value in scraper_data.items():

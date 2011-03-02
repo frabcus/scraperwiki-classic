@@ -23,6 +23,11 @@
 
         {% if data.rows %}
             <div>
+                {% if user.is_staff %}
+                <form class="staff" action="{% url scraper_converttosqlitedatastore scraper.short_name %}" method="post">
+                    <input type="submit" name="converttosqlitedatastore" value="converttosqlitedatastore"/>
+                </form>
+                {% endif %}
                 <table class="data">
                     <thead>
                         <tr>
