@@ -700,7 +700,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             "language"  : scraperlanguage, 
             "scrapername":short_name,
             "code"      : code,
-            "urlquery"  : urlquery
+            "urlquery"  : urlquery,
+            "automode"  : $('select#automode option:selected').val()
         }
         $('.editor_controls #run').val('Sending');
         sendjson(data); 

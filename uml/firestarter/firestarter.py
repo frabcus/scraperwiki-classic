@@ -111,6 +111,7 @@ class FireStarter :
         self.m_parameters  = {}
         self.m_environment = {}
         self.m_user        = None
+        self.m_draft       = False
         self.m_group       = None
         self.m_limits      = {}
         self.m_allowed     = []
@@ -125,6 +126,8 @@ class FireStarter :
         self.m_cache       = 0
         self.m_language    = None
 
+        # this runID is incredibly ugly, unnecessarily long, and will be prepended with "draft" for draft modes
+        # also gets "fromfrontend" prepended when the running of a script from the webpage
         s = hashlib.sha1()
         s.update(str(os.urandom(16)))
         s.update(str(os.getpid (  )))
@@ -252,6 +255,17 @@ class FireStarter :
 
         self.m_user = user
 
+    def setDraft (self, draft) :
+
+        """
+        Set user that command or script will execute as
+
+        @type   user    : String
+        @param  user    : User name
+        """
+
+        self.m_draft = draft
+    
     def setGroup (self, group) :
 
         """
@@ -473,8 +487,13 @@ class FireStarter :
             setter ('x-urlquery',   self.m_urlquery )
         if self.m_testName   is not None :
             setter ('x-testname',   self.m_testName )
+        
         if self.m_runID      is not None :
-            setter ('x-runid',      self.m_runID    )
+            lrunID = self.m_runID
+            if self.m_draft:
+                lrunID = "draft|||%s" % lrunID
+            setter ('x-runid',      lrunID          )
+        
         if self.m_cache      is not None :
             setter ('x-cache',      self.m_cache    )
         if self.m_language   is not None :

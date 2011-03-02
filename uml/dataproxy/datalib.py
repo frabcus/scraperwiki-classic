@@ -570,10 +570,6 @@ class Database :
         return [ True, "converted %d items" % len(item_idlist) ]
 
 
-# then get the distance to things
-# then do the bubble mapping
-
-
 
     # general experimental single file sqlite access
     # the values of these fields are safe because from the UML they are subject to an ident callback, 
@@ -604,12 +600,15 @@ class Database :
         def authorizer_all(action_code, tname, cname, sql_location, trigger):
             return self.authorizer_func(action_code, tname, cname, sql_location, trigger)
 
-# make the function to map the system to a point by closest
-#                self.m_db.create_function ('acos', 1, lambda value : math.acos(float(value)))
-#            qquery .append(", ((acos(sin(%s * pi() / 180) * sin(abs(substr(`items`.`latlng`, 1, 20)) * pi() / 180) + cos(%s * pi() / 180) * cos(abs(substr(`items`.`latlng`, 1, 20)) * pi() / 180) * cos((%s - abs(substr(`items`.`latlng`, 21, 41))) * pi() / 180)) * 180 / pi()) * 60 * 1.1515 * 1.609344) as distance")
 
         if runID[:12] == "fromfrontend":
             self.authorizer_func = authorizer_readonly
+        
+                # ideally this would be a type that prevented write types onto the database
+                # may need to copy to a temporary file or find a way to convert to a :memory: object
+        elif runID[:8] == "draft|||" and short_name:
+            self.authorizer_func = authorizer_readonly
+        
         else:
             self.authorizer_func = authorizer_writemain
             

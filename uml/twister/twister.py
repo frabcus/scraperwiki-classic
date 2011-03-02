@@ -307,23 +307,31 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             pass
 
     def runcode(self, parsed_data):
-        
         code = parsed_data.get('code', '')
         code = code.encode('utf8')
         
-        # these could all be fetched from self
+        # these could all be fetched (or verified) from self
+        # may want to have a verification of the login information by a callback to django to make sure the 
+        # username that is declared really is authorized to write to the scraper declared
+        
         guid = parsed_data.get('guid', '')
         scraperlanguage = parsed_data.get('language', 'python')
         scrapername = parsed_data.get('scrapername', '')
         scraperlanguage = parsed_data.get('language', '')
         urlquery = parsed_data.get('urlquery', '')
-
+        automode = parsed_data.get('automode', '')
+        username = parsed_data.get('username', '')
+        
+        
         assert guid == self.guid
         args = ['./firestarter/runner.py']
         args.append('--guid=%s' % guid)
         args.append('--language=%s' % scraperlanguage)
         args.append('--name=%s' % scrapername)
         args.append('--urlquery=%s' % urlquery)
+        if not username or automode == "draft":
+            args.append('--draft')
+
         args = [i.encode('utf8') for i in args]
         print "./firestarter/runner.py: %s" % args
 
