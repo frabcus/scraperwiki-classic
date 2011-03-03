@@ -90,7 +90,7 @@ def scraperwikitag(scraper, html, panepresent):
     urlscraperedit = reverse('editor_edit', args=[scraper.wiki_type, scraper.short_name])
     
     swdivstyle = "border:thin #aaf solid; display:block;width:225px; position:fixed; top:0px; right:0px; background:#eef; "
-    swlinkstyle = "float:right; width:175px; height:20px; background:url(/media/images/powered.png) no-repeat;"
+    swlinkstyle = "float:right; width:175px; height:20px; background:url(http://www.scraperwiki.com/media/images/powered.png) no-repeat;"
     lkbuttonstyle = "font-family:helvetica, arial, sans-serif; font-size:0.8em; position:relative; top:1px; background-color:#f1f1ff; border:solid 1px #bbb; padding:0.0em 0.2em!important; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;"
     
     if paneversion == "version-1":
