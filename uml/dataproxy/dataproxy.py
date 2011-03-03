@@ -20,6 +20,7 @@ import string
 import hashlib
 import datalib
 import ConfigParser
+import datetime
 
 try   : import json
 except: import simplejson as json
@@ -415,7 +416,7 @@ if __name__ == '__main__' :
         if os.fork() == 0 :
             os .setsid()
             sys.stdin  = open ('/dev/null')
-            sys.stdout = open (varDir + '/log/dataproxy', 'w', 0)
+            sys.stdout = open (varDir + '/log/dataproxy', 'a', 0)
             sys.stderr = sys.stdout
             if os.fork() == 0 :
                 ppid = os.getppid()
@@ -449,7 +450,7 @@ if __name__ == '__main__' :
             if child == 0 :
                 break
 
-            sys.stdout.write("Forked subprocess: %d\n" % child)
+            sys.stdout.write("%s: Forked subprocess: %d\n" % (datetime.datetime.now().ctime(), child))
             sys.stdout.flush()
     
             os.wait()
