@@ -18,14 +18,6 @@ module ScraperWiki
         $logfd.flush()
     end
 
-    def ScraperWiki.save(unique_keys, data, date = nil, latlng = nil)
-        res = SW_DataStore.create().save(unique_keys, data, date, latlng)
-        if ! res[0]
-            raise res[1]
-        end
-        ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => data})
-    end
-
     def ScraperWiki.httpresponseheader(headerkey, headervalue)
         ScraperWiki.dumpMessage({'message_type' => 'httpresponseheader', 'headerkey' => headerkey, 'headervalue' => headervalue})
     end
@@ -79,11 +71,11 @@ module ScraperWiki
 
         pdata = { }
         data.each_pair do |key, value|
-            key = key.to_s
+            key = key.to_s[0,50]
             if value == nil
                 value  = ''
             else
-                value = value.to_s
+                value = value.to_s[0,50]
             end
             pdata[key] = value
         end
