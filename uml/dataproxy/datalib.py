@@ -835,7 +835,10 @@ class SqliteSaveInfo:
         if "error" in lres:  return lres
         if idxname:
             lres = self.sqliteexecute("drop index `%s`" % idxname)
-            if "error" in lres:  return lres
+            if "error" in lres:  
+                if lres["error"] != 'sqlite3.Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped':
+                    return lres
+                print lres # to detect if it's happening repeatedly
             res["droppedindex"] = idxname
         return res
             
