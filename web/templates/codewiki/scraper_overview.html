@@ -103,21 +103,6 @@
         <div class="content_footer">
             <p>
                 {% if scraper.record_count %}This dataset has a total of {{ scraper.record_count }} records.{% endif %}
-                The scraper 
-                {% if lastscraperrunevent %}
-                  {% ifequal lastscraperrunevent.pid -1 %}
-                     last ran {{lastscraperrunevent.run_started|timesince}} ago 
-                     for <a href="{% if lastscraperrunevent.run_id %}{% url run_event lastscraperrunevent.run_id %}{% else %}{% url run_event lastscraperrunevent.id %}{% endif %}">{{lastscraperrunevent.getduration}} seconds</a>.
-                  {% else %}
-                     {% if lastscraperrunevent.run_id %}
-                        <a href="{% url run_event lastscraperrunevent.run_id %}">is currently running</a>.
-                    {% else %}
-                        <i><a href="{% url run_event lastscraperrunevent.id %}">is running without an id</a></i>.
-                     {% endif %}
-                  {% endifequal %}
-                {% else %}
-                   has not been run yet.
-                {% endif %}
             </p>
         </div>
     </div>
@@ -174,7 +159,24 @@
 <div class="content col right">
     <h3>Schedule {% if user.is_authenticated %}<a href="#" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
     <p>
-      This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
+        This scraper 
+        {% if lastscraperrunevent %}
+          {% ifequal lastscraperrunevent.pid -1 %}
+             last ran {{lastscraperrunevent.run_started|timesince}} ago 
+             for <a href="{% if lastscraperrunevent.run_id %}{% url run_event lastscraperrunevent.run_id %}{% else %}{% url run_event lastscraperrunevent.id %}{% endif %}">{{lastscraperrunevent.getduration}} seconds</a>.
+          {% else %}
+             {% if lastscraperrunevent.run_id %}
+                <a href="{% url run_event lastscraperrunevent.run_id %}">is currently running</a>.
+            {% else %}
+                <i><a href="{% url run_event lastscraperrunevent.id %}">is running without an id</a></i>.
+             {% endif %}
+          {% endifequal %}
+        {% else %}
+           has not been run yet.
+        {% endif %}
+    </p>
+    <p>
+      It is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
       {% ifnotequal scraper.next_run.year 9999 %}
         {% ifequal scraper.next_run|timeuntil '0 minutes' %}
           (next run ASAP).
