@@ -130,11 +130,11 @@ module ScraperWiki
 
         pdata = { }
         jdata.each_pair do |key, value|
-            key = key.to_s
+            key = key.to_s[0,50]
             if value == nil
                 value  = ''
             else
-                value = value.to_s
+                value = value.to_s[0,50]
             end
             pdata[key] = value
         end
