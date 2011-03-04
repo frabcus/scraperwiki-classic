@@ -705,7 +705,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         }
         $('.editor_controls #run').val('Sending');
         sendjson(data); 
-        autosavefuncion(code); 
+        autosavefunction(code); 
     }
 
     function autosavefunction(code)
