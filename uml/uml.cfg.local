@@ -62,6 +62,16 @@ user	= scraperlog
 passwd	= scr4p3rl0g
 db	= scraperwiki_log
 
+; Francis's machine
+[cat]
+host	= 127.0.0.1
+tap	= 127.0.0.1
+eth	= 127.0.0.1
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 25
+
 [ubuntu]
 host	= 127.0.0.1
 tap	= 127.0.0.1
