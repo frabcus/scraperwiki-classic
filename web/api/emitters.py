@@ -40,26 +40,37 @@ class CSVEmitter(Emitter):
     @staticmethod
     def to_csv(dictlist, headings=True):
         
+        fout = StringIO.StringIO()
+        writer = csv.writer(fout, dialect='excel')
+        
         # identify and deal with the case of getKeys which is a list of strings
         if dictlist and type(dictlist[0]) != dict:
-            fout = StringIO.StringIO()
-            writer = csv.writer(fout, dialect='excel')
             writer.writerow([k.encode('utf-8') for k in dictlist])
             return fout.getvalue()
         
+        # identify the sqlite keys and data case
+        if "error" in dictlist[0]:
+            return str(dictlist[0]["error"])
+        if "keys" in dictlist[0] and "data" in dictlist[0]:
+            if headings:
+                writer.writerow([k.encode('utf-8') for k in dictlist[0]["keys"]])
+            for row in dictlist[0]["data"]:
+                writer.writerow([ stringnot(v)  for v in row ])
+            result = fout.getvalue()
+            fout.close()
+            return result
+        
         keyset = set()
         for row in dictlist:
-            if "latlng" in row:   # split the latlng
+            if "latlng" in row and len("latlng") == 2:   # split the latlng
                 try:
-                    row["lat"], row["lng"] = row.pop("latlng") 
+                    row["latlng_lat"], row["latlng_lng"] = row.pop("latlng") 
                 except:
                     pass
             row.pop("date_scraped", None) 
             keyset.update(row.keys())
         allkeys = sorted(keyset)
         
-        fout = StringIO.StringIO()
-        writer = csv.writer(fout, dialect='excel')
         if headings:
             writer.writerow([k.encode('utf-8') for k in allkeys])
         for rowdict in dictlist:
