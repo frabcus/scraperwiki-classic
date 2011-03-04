@@ -353,8 +353,8 @@ class Database :
                 tablename = "swdata"
         if tablename:
             result = self.sqlitecommand(scraperID, "fromfrontend", short_name, "execute", "select * from `%s` limit ? offset ?" % tablename, (limit, offset))
-            if isinstance(result, str):
-                return [False, result]
+            if "error" in result:
+                return [ False, result["error"] ]
             return [True, [ dict(zip(result["keys"], d))  for d in result["data"] ] ]
                 
             
@@ -601,6 +601,9 @@ class Database :
             return self.authorizer_func(action_code, tname, cname, sql_location, trigger)
 
 
+        if not runID:
+            return {"error":"runID is blank"}
+            
         if runID[:12] == "fromfrontend":
             self.authorizer_func = authorizer_readonly
         
