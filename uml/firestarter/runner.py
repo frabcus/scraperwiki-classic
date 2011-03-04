@@ -38,6 +38,7 @@ def execute (code, options) :
     
     fs.setCache         (3600 * 12)
     fs.setCPULimit      (cpulimit, cpulimit+1)
+    fs.setDraft         (options.draft    )
 
     fs.loadConfiguration()
 
@@ -119,6 +120,15 @@ if __name__ == "__main__":
             help    = "URL query argumentspassed in for a view",  
             default = '',
             metavar = "URLQUERY"
+        )
+    
+    parser.add_option \
+        (   "-d",
+            "--draft",
+            dest    = "draft",
+            action  = "store_true",
+            help    = "Run the scraper in draft mode not altering the database",  
+            default = False,
         )
     
     (options, args) = parser.parse_args()

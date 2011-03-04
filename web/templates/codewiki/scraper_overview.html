@@ -23,6 +23,11 @@
 
         {% if data.rows %}
             <div>
+                {% if user.is_staff %}
+                <form class="staff" action="{% url scraper_converttosqlitedatastore scraper.short_name %}" method="post">
+                    <input type="submit" name="converttosqlitedatastore" value="converttosqlitedatastore"/>
+                </form>
+                {% endif %}
                 <table class="data">
                     <thead>
                         <tr>
@@ -65,7 +70,7 @@
               </thead>
               <tbody>
                  {% for row in sqltabledata.rows %}
-                    <tr class="row">{% for value in row %}<td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>{% endfor %}</tr>
+                    <tr class="row">{% for value in row %}<td>{% if value %}{{ value|truncatewords_html:30|urlizetrunc:30 }}{% endif %}</td>{% endfor %}</tr>
                  {% endfor %}
               </tbody>
             </table>
@@ -98,21 +103,6 @@
         <div class="content_footer">
             <p>
                 {% if scraper.record_count %}This dataset has a total of {{ scraper.record_count }} records.{% endif %}
-                The scraper 
-                {% if lastscraperrunevent %}
-                  {% ifequal lastscraperrunevent.pid -1 %}
-                     last ran {{lastscraperrunevent.run_started|timesince}} ago 
-                     for <a href="{% if lastscraperrunevent.run_id %}{% url run_event lastscraperrunevent.run_id %}{% else %}{% url run_event lastscraperrunevent.id %}{% endif %}">{{lastscraperrunevent.getduration}} seconds</a>.
-                  {% else %}
-                     {% if lastscraperrunevent.run_id %}
-                        <a href="{% url run_event lastscraperrunevent.run_id %}">is currently running</a>.
-                    {% else %}
-                        <i><a href="{% url run_event lastscraperrunevent.id %}">is running without an id</a></i>.
-                     {% endif %}
-                  {% endifequal %}
-                {% else %}
-                   has not been run yet.
-                {% endif %}
             </p>
         </div>
     </div>
@@ -164,30 +154,50 @@
     This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.license}}</span>
     <p>  </p>
     
-    <h3>API explorer</h3>
-    Access the data for other online services
-    <ul>
-        <li><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">scraperwiki.datastore.getData</a></li>
-        <li><a href="{% url api:scraper_getinfo %}?name={{scraper.short_name}}">scraperwiki.scraper.getInfo</a></li>
-    </ul>
-
 </div>
 
 <div class="content col right">
     <h3>Schedule {% if user.is_authenticated %}<a href="#" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
     <p>
-      This scraper is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
+        This scraper 
+        {% if lastscraperrunevent %}
+          {% ifequal lastscraperrunevent.pid -1 %}
+             last ran {{lastscraperrunevent.run_started|timesince}} ago 
+             for <a href="{% if lastscraperrunevent.run_id %}{% url run_event lastscraperrunevent.run_id %}{% else %}{% url run_event lastscraperrunevent.id %}{% endif %}">{{lastscraperrunevent.getduration}} seconds</a>.
+          {% else %}
+             {% if lastscraperrunevent.run_id %}
+                <a href="{% url run_event lastscraperrunevent.run_id %}">is currently running</a>.
+            {% else %}
+                <i><a href="{% url run_event lastscraperrunevent.id %}">is running without an id</a></i>.
+             {% endif %}
+          {% endifequal %}
+        {% else %}
+           has not been run yet.
+        {% endif %}
+    </p>
+    <p>
+      It is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
       {% ifnotequal scraper.next_run.year 9999 %}
         {% ifequal scraper.next_run|timeuntil '0 minutes' %}
           (next run ASAP).
         {% else %}
           (next in {{scraper.next_run|timeuntil}}).
         {% endifequal %} 
-        {% if user.is_staff %}<span class="staff">Next run datetime: {{scraper.next_run}}</span>{% endif %}
       {% else %}
         (no future run scheduled).
       {% endifnotequal %}
+      {% if user.is_staff %}<span class="staff">Next run datetime: {{scraper.next_run}}</span>{% endif %}
     </p>
+
+    {% if user_owns_it %}    
+        {% ifnotequal scraper.next_run|timeuntil '0 minutes' %}
+            <form action="{% url scraper_schedule_scraper scraper.short_name %}" method="post">
+                <input type="hidden" name="schedule_scraper" value="1" />
+                <input type="submit" id="btnScheduleScraper" class="" value="Schedule next run ASAP" />
+            </form>
+            <br/>
+        {% endifnotequal %}
+    {% endif %}
 
     {% if user_owns_it and not scraper.published %}
       <div id="publishScraper">
@@ -211,11 +221,6 @@
             <input type="hidden" name="delete_scraper" value="1" />
             <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
             <p>Deletes this scraper and all its data. There is no undo.</p>
-        </form>
-        <form action="{% url scraper_schedule_scraper scraper.short_name %}" method="post">
-            <input type="hidden" name="schedule_scraper" value="1" />
-            <input type="submit" id="btnScheduleScraper" class="" value="Schedule this scraper" />
-            <p>Set scheduler so next run is ASAP</p>
         </form>
     {% else %}
         <p class="infobox">Only the creator of a scraper can delete or reset it.</p>

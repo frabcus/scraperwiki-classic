@@ -21,7 +21,7 @@ def show_tables(dbname=""):
     name = "sqlite_master"
     if dbname:
         name = "%s.%s" % (dbname, name)
-    result = sqlitecommand("execute", "select tbl_name, sql from %s where type='table'" % name)
+    result = sqlitecommand("execute", "select tbl_name, sql from `%s` where type='table'" % name)
     return dict(result["data"])
 
 def table_info(name):

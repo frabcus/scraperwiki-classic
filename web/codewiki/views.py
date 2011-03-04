@@ -128,14 +128,6 @@ def scraper_overview(request, short_name):
         sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
         if sqlitedata and type(sqlitedata) not in [str, unicode]:
             context['sqlitedata'] = sqlitedata["tables"]
-        
-            # throw away uniqu_hash rows
-            for table in context['sqlitedata'].values():
-                if "unique_hash" in table["keys"]:
-                    iuh = table["keys"].index("unique_hash")
-                    del table["keys"][iuh]
-                    for row in table["rows"]:
-                        del row[iuh]
     except:
         pass
     
@@ -235,6 +227,23 @@ def scraper_delete_data(request, short_name):
         scraper.save()
 
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
+
+
+# conversion code
+def scraper_converttosqlitedatastore(request, short_name):
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request=request)
+
+    if scraper.owner() != request.user:
+        raise Http404
+    if request.POST.get('converttosqlitedatastore', None) == 'converttosqlitedatastore':
+        dataproxy = DataStore(scraper.guid, scraper.short_name)
+        dataproxy.request(("converttosqlitedatastore",))
+        scraper.update_meta()
+
+    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
+
 
 # implemented by setting last_run to None
 def scraper_schedule_scraper(request, short_name):

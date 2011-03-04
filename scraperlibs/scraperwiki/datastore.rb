@@ -77,7 +77,7 @@ class SW_DataStore
             end
           end
         }
-        if text
+        if !text.empty?
             return JSON.parse(text)
         end
         return text

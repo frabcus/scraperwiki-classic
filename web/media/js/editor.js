@@ -700,11 +700,16 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             "language"  : scraperlanguage, 
             "scrapername":short_name,
             "code"      : code,
-            "urlquery"  : urlquery
+            "urlquery"  : urlquery,
+            "automode"  : $('select#automode option:selected').val()
         }
         $('.editor_controls #run').val('Sending');
         sendjson(data); 
+        autosavefunction(code); 
+    }
 
+    function autosavefunction(code)
+    {
         // do a save to the system every time we run (this would better be done via twisted at some point)
         var automode = $('select#automode option:selected').val(); 
         if ((automode == 'autosave') || (automode == 'autotype'))
@@ -1098,10 +1103,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function updateLastSavedRev(rev)
     {   
-	if (rev == null)
-	    $("#idlastrevnumber").text("Rev: unchanged"); 
-	else
-	    $("#idlastrevnumber").text("Rev: " + String(rev)); 
+        if (rev == null)
+            $("#idlastrevnumber").text("Rev: unchanged"); 
+        else
+            $("#idlastrevnumber").text("Rev: " + String(rev)); 
     }
 
     function reloadScraper()
@@ -1236,9 +1241,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 // throw the value straight in or run the code which brings it back in via writeRunOutput()
                 if (scraperlanguage == "html")
                 {
-                    activepreviewiframe.document.write(codeeditor.getCode()); 
+                    var code = codeeditor.getCode(); 
+                    activepreviewiframe.document.write(code); 
                     activepreviewiframe.document.close(); 
                     activepreviewiframe = undefined; 
+                    autosavefunction(code); 
                 }
                 else
                     sendCode(); // trigger the running once we're ready for the output

@@ -166,7 +166,11 @@
 		           <dd>
 		             <ul>
 		                 <li><a href="{% url scraper_list %}">Browse data &amp; scrapers</a></li>
+                         {% if settings.ENABLE_MARKETPLACE %}
 		                 <li><a href="{% url market_list %}">Request a dataset</a></li>
+                         {% else %}
+		                 <li><a href="{% url contact_form %}">Request a dataset</a></li>
+                         {% endif %}
                          <li><a href="#" class="editor_scraper">Create a scraper</a></li>
                          {% if user.is_staff %}
                            <li><a href="#" class="editor_view">Create a view</a></li>		                 

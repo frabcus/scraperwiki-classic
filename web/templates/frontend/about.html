@@ -80,8 +80,11 @@
 		collaborative. Anyone can write a screen scraper using the online
 		editor, and the code and data are shared with the world. Because it's a wiki, other programmers can
 		contribute to and improve the code. And, if you're not a programmer
-		yourself, you can <a href="{% url market_solicitation %}">request a scraper</a> or ask the
-		ScraperWiki team to <a href="{% url contact_form %}">write one for you</a>.</p>
+		yourself, you can 
+        {% if settings.ENABLE_MARKETPLACE %}
+        <a href="{% url market_solicitation %}">request a scraper</a> or 
+        {% endif %}
+        ask the ScraperWiki team to <a href="{% url contact_form %}">write one for you</a>.</p>
 		
 <h2>People</h2>
 
