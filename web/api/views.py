@@ -25,7 +25,6 @@ from forms import applyForm
 
 @login_required
 def keys(request):
-
     user = request.user
     users_keys = api_key.objects.filter(user=user)
 
@@ -42,7 +41,6 @@ def keys(request):
 
     return render_to_response('api/keys.html', {'keys' : users_keys,'form' : form}, context_instance=RequestContext(request))
 
-
 def example_scrapers(user, count):
     if user.is_authenticated():
         scrapers = user.code_set.filter(usercoderole__role='owner', deleted=False, published=True).order_by('-first_published_at')[:count]
@@ -50,7 +48,6 @@ def example_scrapers(user, count):
         scrapers = Code.objects.filter(deleted=False, featured=True).order_by('-first_published_at')[:count]
     
     return scrapers
-
 
 def explore_scraper_search_1_0(request):
     user = request.user

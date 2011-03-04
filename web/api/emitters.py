@@ -2,7 +2,8 @@ import datetime
 import time
 import csv
 from django.utils.encoding import smart_str
-
+from django.core.serializers.json import DateTimeAwareJSONEncoder
+from django.utils import simplejson
 from piston.emitters import Emitter
 import phpserialize
 import gviz_api
@@ -134,3 +135,20 @@ class GVizEmitter(Emitter):
         data_table.LoadData(dictlist)
 
         return unicode(data_table.ToJSonResponse())
+
+class JSONDICTEmitter(Emitter):
+    """
+    copied from base code
+    """
+    def render(self, request):
+        cb = request.GET.get('callback')
+        dictlist = self.construct()
+        if "keys" in dictlist[0] and "data" in dictlist[0]:
+            dictlist[0] = [ dict(zip(dictlist[0]["keys"], values))  for values in dictlist[0]["data"] ]
+        seria = simplejson.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
+
+        # Callback
+        if cb:
+            return '%s(%s)' % (cb, seria)
+
+        return seria
