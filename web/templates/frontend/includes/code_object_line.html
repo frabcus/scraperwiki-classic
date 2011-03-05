@@ -2,6 +2,7 @@
 {% load screen_shot %}
 <li class="code_object_line">
     <h3>
+        <!-- scraper id: {{ code.id }} -->
         <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
         <a href="{% if code.owner.username %}{% url profiles_profile_detail code.owner.username %}{% endif %}">
          {% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}
