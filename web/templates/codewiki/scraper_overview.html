@@ -12,14 +12,12 @@
 
 <div class="content full">
     <div class="data_viewer">
-        {% if not sqlitedata or not data.rows %}
-            <ul class="code_about">
-              <li><a id="aHideTable" class="edit">[hide table]</a></li>
-              <li><a id="aShowTable" class="edit">[show table]</a></li>
-              <li><a id="aShowMore" class="edit">[show more]</a></li>
-              <li><a id="aShowLess" class="edit">[show less]</a></li>
-            </ul>
-        {% endif %}
+        <ul class="code_about">
+          <li><a id="aHideTable" class="edit">[hide table]</a></li>
+          <li><a id="aShowTable" class="edit">[show table]</a></li>
+          <li><a id="aShowMore" class="edit">[show more]</a></li>
+          <li><a id="aShowLess" class="edit">[show less]</a></li>
+        </ul>
 
         {% if data.rows %}
             <div>
