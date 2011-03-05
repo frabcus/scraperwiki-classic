@@ -314,8 +314,8 @@ dl.faq dd {padding-left:0; margin-left:0; padding-bottom:1.3em;}
 
 /* Gravatar image */
 .gravatar.small {vertical-align:baseline;}
-.gravatar.medium { margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}
-.gravatar.large { margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}
+.gravatar.medium { vertical-align:middle; margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}
+.gravatar.large { vertical-align:middle; margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}
 
 /* bounty */
 span.bounty {padding:0.2em 0.4em; background:#faca44; font-weight:bold; font-size:0.7em; color:#fff;}
