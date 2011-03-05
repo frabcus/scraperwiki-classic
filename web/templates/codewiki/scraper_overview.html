@@ -176,6 +176,7 @@
         {% endif %}
     </p>
     <p>
+      <span title="Exact time of next run: {{scraper.next_run}}">
       It is scheduled to run <span id="spnRunInterval">{{scraper.run_interval|schedule}}</span>
       {% ifnotequal scraper.next_run.year 9999 %}
         {% ifequal scraper.next_run|timeuntil '0 minutes' %}
@@ -186,7 +187,7 @@
       {% else %}
         (no future run scheduled).
       {% endifnotequal %}
-      {% if user.is_staff %}<span class="staff">Next run datetime: {{scraper.next_run}}</span>{% endif %}
+      </span>
     </p>
 
     {% if user_owns_it %}    
