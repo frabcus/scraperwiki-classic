@@ -30,11 +30,14 @@
     </h3>
     <small>
         Created
-        {{code.created_at|timesince}} ago | 
-        {% if code.scraper.record_count %}
-          ({{ code.scraper.record_count }} records)
-        {% else %}
-          (no records)
+        {{code.created_at|timesince}} ago
+        {% if code.scraper %}
+                 | 
+            {% if code.scraper.record_count %}
+              ({{ code.scraper.record_count }} records)
+            {% else %}
+              (no records)
+            {% endif %}
         {% endif %}
     </small>
     
