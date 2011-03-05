@@ -8,20 +8,6 @@
 {% endblock %}
 {% block content %}
     <div class="page_title">
-        <h1>
-            {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %} / <span id="hCodeTitle">{{ scraper.title }}</span>{% if not scraper.published %} (not public){% endif %}
-        </h1>
-        <ul class="code_about">
-           <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
-           <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
-           {% if scraper.has_temporal %}
-               <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
-           {% endif %}
-           {% if scraper.forked_from and user.is_staff %}
-               <li class="fork staff">This {{scraper.wiki_type}} is a fork of <a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{scraper.forked_from.short_name}}</a></li>
-           {% endif %}
-            <li>{% if user.is_authenticated %}<a href="#" id="aEditTitle" class="edit">[edit title]</a>{% else %}<a href="{% url login %}?next={% url code_overview scraper.wiki_type scraper.short_name %}" class="edit">[sign in to edit title]</a>{% endif %}</li>
-        </ul>
         <ul class="title_links">
             {% ifequal scraper.wiki_type 'scraper'%}
                 <li class="api"><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>
@@ -38,7 +24,21 @@
             {% if user.is_staff %}
                 <li class="fork staff"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
             {% endif %}
-            </ul>
+        </ul>
+        <h1>
+            {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %} / <span id="hCodeTitle">{{ scraper.title }}</span>{% if not scraper.published %} (not public){% endif %}
+        </h1>
+        <ul class="code_about">
+           <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
+           <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
+           {% if scraper.has_temporal %}
+               <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
+           {% endif %}
+           {% if scraper.forked_from and user.is_staff %}
+               <li class="fork staff">This {{scraper.wiki_type}} is a fork of <a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{scraper.forked_from.short_name}}</a></li>
+           {% endif %}
+            <li>{% if user.is_authenticated %}<a href="#" id="aEditTitle" class="edit">[edit title]</a>{% else %}<a href="{% url login %}?next={% url code_overview scraper.wiki_type scraper.short_name %}" class="edit">[sign in to edit title]</a>{% endif %}</li>
+        </ul>
     </div>
     <div class="content full">
         {% ifequal scraper.status 'sick' %}
