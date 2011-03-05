@@ -149,7 +149,7 @@ ul.title_links li.fork          a {background:url(../images/icons/fork.png) no-r
 div.page_tabs {background:#fafafa; padding-right:0.2em;height:1.65em; }
 div.page_tabs.small {font-size:0.8em;}
 div.page_tabs ul {padding:0; margin:0;}
-div.page_tabs ul li {float:right; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
+div.page_tabs ul li {float:right; list-style-type:none; padding:0.3em 0.8em 0.25em 0.8em; margin:0 0.3em 0 0.3em;
         border-top:solid 1px #9f9f9f;border-left:solid 1px #9f9f9f;border-right:solid 1px #9f9f9f;}
 div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
         background:#fff;}
