@@ -12,12 +12,6 @@
 
 <div class="content full">
     <div class="data_viewer">
-        <ul class="code_about">
-          <li><a id="aHideTable" class="edit">[hide table]</a></li>
-          <li><a id="aShowTable" class="edit">[show table]</a></li>
-          <li><a id="aShowMore" class="edit">[show more]</a></li>
-          <li><a id="aShowLess" class="edit">[show less]</a></li>
-        </ul>
 
         {% if data.rows %}
             <div>
@@ -251,52 +245,6 @@
     {% if user.is_authenticated %}
         setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
         setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
-    {% endif %}
-
-
-    $("a#aShowTable").hide(); 
-    $("a#aShowLess").hide(); 
-
-    $("a#aHideTable").click(function() 
-    {
-        $("a#aHideTable").hide(); 
-        $("a#aShowTable").show(); 
-        $('table.data tbody tr').hide(); 
-        $("a#aShowMore").css('color', '#aaa'); 
-        $("a#aShowLess").css('color', '#aaa'); 
-    }); 
-    $("a#aShowTable").click(function() 
-    {
-        $("a#aShowTable").hide(); 
-        $("a#aHideTable").show(); 
-        $('table.data tbody tr.row').show(); 
-        if ($("a#aShowLess").css('display') == 'inline')
-            $('table.data tbody tr.morerow').show(); 
-        $("a#aShowMore").css('color', 'rgb(38, 128, 198)'); 
-        $("a#aShowLess").css('color', 'rgb(38, 128, 198)'); 
-    }); 
-
-    {% if data.morerows %}
-      $("a#aShowMore").click(function() 
-      {
-          if ($("a#aHideTable").css('display') == 'inline')
-          {
-            $("a#aShowMore").hide(); 
-            $("a#aShowLess").show(); 
-            $('table.data tr.morerow').show(); 
-          }
-      }); 
-      $("a#aShowLess").click(function() 
-      {
-          if ($("a#aHideTable").css('display') == 'inline')
-          {
-            $("a#aShowMore").show(); 
-            $("a#aShowLess").hide(); 
-            $('table.data tr.morerow').hide(); 
-          }
-      }); 
-    {% else %}
-      $("a#aShowMore").hide(); 
     {% endif %}
 
 {% endblock %}
