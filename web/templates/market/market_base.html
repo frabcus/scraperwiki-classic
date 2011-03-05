@@ -10,10 +10,6 @@
 
 {% block content %}
 <div class="page_title">
-    <h1>{{solicitation.title}}{% if solicitation.has_bounty %}<span class="bounty">&pound;{{solicitation.price}} bounty</span>{% endif %}</h1>
-    <p>
-        Scraper requested by {% show_gravatar solicitation.user_created 'small' %} <a href="{% url profiles_profile_detail solicitation.user_created.username %}">{{solicitation.user_created.get_profile.name}}</a>
-    </p>
     <ul class="title_links">
         {% ifequal solicitation.status.status 'open' %}
             <li>
@@ -23,6 +19,10 @@
             </li>
         {% endifequal %}
     </ul>
+    <h1>{{solicitation.title}}{% if solicitation.has_bounty %}<span class="bounty">&pound;{{solicitation.price}} bounty</span>{% endif %}</h1>
+    <p>
+        Scraper requested by {% show_gravatar solicitation.user_created 'small' %} <a href="{% url profiles_profile_detail solicitation.user_created.username %}">{{solicitation.user_created.get_profile.name}}</a>
+    </p>
 </div>
 {% ifequal solicitation.status.status 'open' %}
 {% else %}
