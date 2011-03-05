@@ -7,7 +7,7 @@
 {% block content %}
     <div class="page_title">
         <ul class="title_links">
-            <li class="rss"><a href="/feeds/all_code_objects/">RSS feed of all scrapers</a></li>
+            <li class="rss"><a href="/feeds/all_code_objects/">RSS feed of all scrapers / views</a></li>
             {% ifnotequal wiki_type 'view' %}
               <li class="view"><a href="{% url scraper_list %}views">Browse views</a></li>
             {% endifnotequal %}
