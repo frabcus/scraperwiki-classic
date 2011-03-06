@@ -106,6 +106,13 @@ a.more_link {font-weight:bold; font-style:italic;}
 pre.scraperoutput {background-color: aliceblue; padding: 0.5em;}
 pre.scrapercode {background-color: lemonchiffon; padding: 0.5em;}
 
+/* Data tabs */
+div.data_tabs {}
+div.data_tabs ul {padding:0; margin:0; width: 100%}
+div.data_tabs ul li {float:left; list-style-type:none; padding:0.3em 0.8em 0.25em 0.8em; margin:0 0.3em 0 0.3em;
+        border-top:solid 1px #9f9f9f;border-left:solid 1px #9f9f9f;border-right:solid 1px #9f9f9f;}
+div.data_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px; background:#f8f8f8;}
+
 /* Tables */
 table {width:100%; border-collapse:collapse;}
 table.data {margin-top:1em; margin-bottom:1em;}

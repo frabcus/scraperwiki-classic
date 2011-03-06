@@ -49,15 +49,28 @@
                     </tbody>
                 </table>
             </div>
+            <div class="content_footer">
+                <p>
+                    {% if scraper.record_count %}This dataset has a total of {{ scraper.record_count }} records.{% endif %}
+                </p>
+            </div>
         {% endif %}
 
         {% if sqlitedata %}
+    	   <div class="data_tabs">
+            <ul>
+            {% for sqltablename, sqltabledata in sqlitedata.items %}
+                <!-- {{sqltabledata.sql}} --> 
+                <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
+                    {{sqltablename}}
+                    ({{sqltabledata.count}}  rows)
+                </li>
+            {% endfor %}
+            </ul>
           {% for sqltablename, sqltabledata in sqlitedata.items %}
+            <div id="data_content_{{forloop.counter}}" class="data_content">
             <table class="data">
               <thead>
-                 <tr><th colspan="{{sqltabledata.keys|length}}">
-                    Sample from sqlite table <b><a title="{{sqltabledata.sql}}">{{sqltablename}}</a></b> which has {{sqltabledata.count}} rows
-                 </th></tr>
                  <tr>{% for heading in sqltabledata.keys %}<th width="120">{{ heading }}</th>{% endfor %}</tr>
               </thead>
               <tbody>
@@ -66,7 +79,14 @@
                  {% endfor %}
               </tbody>
             </table>
+            </div>
           {% endfor %}
+          </div>
+          <div class="content_footer">
+                <p>
+                    {% if scraper.record_count %}This dataset has a total of {{ scraper.record_count }} records in {{ sqlitedata.count }} tables.{% endif %}
+                </p>
+          </div>
         {% endif %}
 
         {% if not data.rows %}{% if not sqlitedata %}
@@ -91,12 +111,6 @@
                     This scraper is being worked on <br/>and there is no data to display yet
             </div>
         {% endif %}{% endif %}
-
-        <div class="content_footer">
-            <p>
-                {% if scraper.record_count %}This dataset has a total of {{ scraper.record_count }} records.{% endif %}
-            </p>
-        </div>
     </div>
 </div>
 
@@ -247,4 +261,30 @@
         setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
     {% endif %}
 
+    // when you click on a tab to show a different table of a SQLite store
+    function data_tab_clicked(event) {
+        // do nothing if already selected
+        if ($(this).hasClass('selected')) {
+            return;
+        }
+        
+        // make tab selected
+        $('.data_tab').removeClass('selected'); // all
+        $(this).addClass('selected');
+
+        // show and hide
+        $('.data_content').hide(); // all
+        var tab_content_name = $(this).attr('id').replace('data_tab', 'data_content');
+        $('#' + tab_content_name).show();
+    }
+    
+    // detect clicks on data tabs
+    $('.data_tab').click(data_tab_clicked);
+
+    // show initial data tab
+    $('.data_content').hide(); // all
+    $('#data_content_1').show();
+    $('li#data_tab_1').addClass('selected');
+
 {% endblock %}
+
