@@ -141,12 +141,15 @@ class Database :
         Create a cursor and execute a query, returning the cursor as the result.
         """
 
-        cursor = self.m_db.cursor()
-        query  = self.fixPlaceHolder(query)
-        if values is None :
-               cursor.execute (query)
-        else : cursor.execute (query, values)
-        return cursor
+        try:
+            cursor = self.m_db.cursor()
+            query  = self.fixPlaceHolder(query)
+            cursor.execute(query, values)
+            return cursor
+        except:
+            print "Error executing query:"
+            print query
+            print values
 
     def uniqueHash (self, unique, data) :
 
