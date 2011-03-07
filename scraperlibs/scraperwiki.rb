@@ -65,9 +65,6 @@ module ScraperWiki
 
     def ScraperWiki.save(unique_keys, data, date = nil, latlng = nil)
         res = SW_DataStore.create().save(unique_keys, data, date, latlng)
-        if ! res[0]
-            raise res[1]
-        end
 
         pdata = { }
         data.each_pair do |key, value|
