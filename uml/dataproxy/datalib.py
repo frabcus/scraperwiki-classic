@@ -148,7 +148,7 @@ class Database :
             cursor.execute(query, values)
             return cursor
         except Exception, ex:
-            print "Error executing query:"
+            print "Error executing query:", ex
             print query
             print values
             raise ex
