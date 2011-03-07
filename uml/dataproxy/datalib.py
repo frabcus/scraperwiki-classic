@@ -831,7 +831,7 @@ class SqliteSaveInfo:
                 break
             
         res = { "newindex": newidxname }
-        lres = self.sqliteexecute("create unique index `%s` on `%s` (%s)" % (newidxname, self.swdatatblname, ",".join(unique_keys)))
+        lres = self.sqliteexecute("create unique index `%s` on `%s` (%s)" % (newidxname, self.swdatatblname, ",".join(["`%s`"%k  for k in unique_keys])))
         if "error" in lres:  return lres
         if idxname:
             lres = self.sqliteexecute("drop index `%s`" % idxname)
