@@ -1,16 +1,17 @@
-import  ConfigParser
-import  hashlib
-import  types
-import  os
-import  string
-import  time
-import  types
-import  datetime
-import  sqlite3
-import  signal
-import  base64
-import  shutil
-import  re
+import ConfigParser
+import hashlib
+import types
+import os
+import string
+import time
+import types
+import datetime
+import sqlite3
+import signal
+import base64
+import shutil
+import re
+import sys
 
 class Database :
 
@@ -146,10 +147,11 @@ class Database :
             query  = self.fixPlaceHolder(query)
             cursor.execute(query, values)
             return cursor
-        except:
+        except Exception, ex:
             print "Error executing query:"
             print query
             print values
+            raise ex
 
     def uniqueHash (self, unique, data) :
 
@@ -241,110 +243,122 @@ class Database :
         #  items.
         #
         if len(idlist) >  1 :
-
-            self.execute ('delete from `kv`    where `item_id` in (%s)' % string.join(idlist, ','))
-            self.execute ('delete from `items` where `item_id` in (%s)' % string.join(idlist, ','))
+            try:
+                self.execute ('delete from `kv`    where `item_id` in (%s)' % string.join(idlist, ','))
+                self.execute ('delete from `items` where `item_id` in (%s)' % string.join(idlist, ','))
+            except:
+                self.m_db.rollback()
+            else:
+                self.m_db.commit()
+                
 
         #  If exactly one record matched then see if the other values have changed;
         #  if not then do nothing with the data and return "already exists", else
         #  update the values and return "updated". In either casse, update the lat/lng
         #  and date in the items record.
         #
-        if len(idlist) == 1 :
+        elif len(idlist) == 1:
+            try:
+                self.execute \
+                    (   'update `items` set `date` = %s, `latlng` = %s, `date_scraped` = %s where `item_id` = %s',
+                        (   date, latlng, time.strftime('%Y-%m-%d %H:%M:%S'), idlist[0] )
+                    )
 
-            import sys
-            self.execute \
-                (   'update `items` set `date` = %s, `latlng` = %s, `date_scraped` = %s where `item_id` = %s',
-                    (   date, latlng, time.strftime('%Y-%m-%d %H:%M:%S'), idlist[0] )
-                )
+                extant_data = {}
+                cursor = self.execute ('select `key`, `value` from `kv` where `item_id` = %s', ( idlist[0], ))
+                for key, value in cursor.fetchall() :
+                    extant_data[key] = value
+                if extant_data == insert_data :
+                    return [ True, 'Data record already exists' ]
 
-            extant_data = {}
-            cursor = self.execute ('select `key`, `value` from `kv` where `item_id` = %s', ( idlist[0], ))
-            for key, value in cursor.fetchall() :
-                extant_data[key] = value
-            if extant_data == insert_data :
-                return [ True, 'Data record already exists' ]
+                for key, value in insert_data.items() :
+                    cursor = self.execute ('select 1 from `kv` where `item_id` = %s and `key` = %s', (idlist[0], key))
 
-            for key, value in insert_data.items() :
-                cursor = self.execute ('select 1 from `kv` where `item_id` = %s and `key` = %s', (idlist[0], key))
-
-                if cursor.rowcount == 0:
-                    self.execute \
-                        (    '''
-                             insert  into    `kv`
-                                     (       `item_id`,
-                                             `key`,
-                                             `value`
-                                     )
-                             values  (        %s, %s, %s
-                                     )
-                             ''',
-                             (       idlist[0],
-                                     key,
-                                     value
-                             )
-                        )
-                else :
-                    self.execute \
-                        (   '''
-                            update  `kv`
-                            set     `value`     = %s
-                            where   `item_id`   = %s
-                            and     `key`       = %s
-                            ''',
-                            [   value, idlist[0], key   ]
-                        )
-
-            self.m_db.commit()
-            return  [ True, 'Data record updated' ]
+                    if cursor.rowcount == 0:
+                        self.execute \
+                            (    '''
+                                 insert  into    `kv`
+                                         (       `item_id`,
+                                                 `key`,
+                                                 `value`
+                                         )
+                                 values  (        %s, %s, %s
+                                         )
+                                 ''',
+                                 (       idlist[0],
+                                         key,
+                                         value
+                                 )
+                            )
+                    else :
+                        self.execute \
+                            (   '''
+                                update  `kv`
+                                set     `value`     = %s
+                                where   `item_id`   = %s
+                                and     `key`       = %s
+                                ''',
+                                [   value, idlist[0], key   ]
+                            )
+            except:
+                self.m_db.rollback()
+                return  [ False, 'Data record update failed' ]
+            else:
+                self.m_db.commit()
+                return  [ True, 'Data record updated' ]
 
         #  New data to be inserted. Get a new item identifier and then insert
         #  the items record and the key-valuye pairs.
         #
-        itemid = self.nextItemID ()
+        else:
+            try:
+                itemid = self.nextItemID ()
 
-        self.execute \
-            (       '''
-                    insert  into    `items`
-                            (       `item_id`,
-                                    `unique_hash`,
-                                    `scraper_id`,
-                                    `date`,
-                                    `latlng`,
-                                    `date_scraped`
+                self.execute \
+                    (       '''
+                            insert  into    `items`
+                                    (       `item_id`,
+                                            `unique_hash`,
+                                            `scraper_id`,
+                                            `date`,
+                                            `latlng`,
+                                            `date_scraped`
+                                            )
+                            values  (        %s, %s, %s, %s, %s, %s
                                     )
-                    values  (        %s, %s, %s, %s, %s, %s
+                            ''',
+                            (       itemid,
+                                    uhash,
+                                    scraperID,
+                                    date,
+                                    latlng,
+                                    time.strftime('%Y-%m-%d %H:%M:%S')
                             )
-                    ''',
-                    (       itemid,
-                            uhash,
-                            scraperID,
-                            date,
-                            latlng,
-                            time.strftime('%Y-%m-%d %H:%M:%S')
                     )
-            )
 
-        for key, value in insert_data.items() :
-            self.execute \
-                (       '''
-                        insert  into    `kv`
-                                (       `item_id`,
-                                        `key`,
-                                        `value`
+                for key, value in insert_data.items() :
+                    self.execute \
+                        (       '''
+                                insert  into    `kv`
+                                        (       `item_id`,
+                                                `key`,
+                                                `value`
+                                        )
+                                values  (        %s, %s, %s
+                                        )
+                                ''',
+                                (       itemid,
+                                        key,
+                                        value
                                 )
-                        values  (        %s, %s, %s
-                                )
-                        ''',
-                        (       itemid,
-                                key,
-                                value
                         )
-                )
-    
-        self.m_db.commit()
-    
-        return  [ True, 'Data record inserted' ]
+        
+            except:
+                self.m_db.rollback()
+                return  [ False, 'Data record insert failed' ]
+            else:
+                self.m_db.commit()
+                return  [ True, 'Data record inserted' ]
 
 
     def data_dictlist (self, scraperID, short_name, tablename, limit, offset, start_date, end_date, latlng) :
@@ -365,9 +379,6 @@ class Database :
         qparams = []
 
         if latlng is not None :
-            #qquery .append(", substr(`items`.`latlng`,  1, 20)")
-            #qquery .append(", substr(`items`.`latlng`, 21, 41)")
-            #qquery .append(", abs(substr(`items`.`latlng`, 1, 20) - %s) + abs(substr(`items`.`latlng`, 21, 41) - %s) as diamdist")
             qquery .append(", ((acos(sin(%s * pi() / 180) * sin(abs(substr(`items`.`latlng`, 1, 20)) * pi() / 180) + cos(%s * pi() / 180) * cos(abs(substr(`items`.`latlng`, 1, 20)) * pi() / 180) * cos((%s - abs(substr(`items`.`latlng`, 21, 41))) * pi() / 180)) * 180 / pi()) * 60 * 1.1515 * 1.609344) as distance")
             qparams.append(latlng[0])
             qparams.append(latlng[0])
