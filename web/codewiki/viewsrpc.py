@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from tagging.models import Tag, TaggedItem
 from django.db import IntegrityError
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 
 from django.conf import settings
 
@@ -86,19 +87,20 @@ def scraperwikitag(scraper, html, panepresent):
         return html
     
     
-    urlscraperoverview = reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
-    urlscraperedit = reverse('editor_edit', args=[scraper.wiki_type, scraper.short_name])
+    urlbase = "http://www." + Site.objects.get_current().domain;
+    urlscraperoverview = urlbase + reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
+    urlscraperedit = urlbase + reverse('editor_edit', args=[scraper.wiki_type, scraper.short_name])
     
     swdivstyle = "border:thin #aaf solid; display:block;width:225px; position:fixed; top:0px; right:0px; background:#eef; "
     swlinkstyle = "float:right; width:175px; height:20px; background:url(http://www.scraperwiki.com/media/images/powered.png) no-repeat;"
     lkbuttonstyle = "font-family:helvetica, arial, sans-serif; font-size:0.8em; position:relative; top:1px; background-color:#f1f1ff; border:solid 1px #bbb; padding:0.0em 0.2em!important; border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;"
-    
+
     if paneversion == "version-1":
         swpane = [ '<div id="scraperwikipane" style="%s">' % swdivstyle ]
         swpane.append('<b><a href="%s" title="Go to overview page">%s</a></b>' % (urlscraperoverview, scraper.title))
         swpane.append('<br/>')
         swpane.append('<a href="%s" title="Edit source code for this view" style="%s">Edit</a>' % (urlscraperedit, lkbuttonstyle))
-        swpane.append('<a href="/" id="scraperwikipane" style="%s"><span style="display:none">Powered by ScraperWiki</span></a>' % swlinkstyle)
+        swpane.append('<a href="%s" id="scraperwikipane" style="%s"><span style="display:none">Powered by ScraperWiki</span></a>' % (urlbase, swlinkstyle))
         swpane.append('</div>')
     
     else:
