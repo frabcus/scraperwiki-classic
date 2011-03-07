@@ -60,7 +60,6 @@
     	   <div class="data_tabs">
             <ul>
             {% for sqltablename, sqltabledata in sqlitedata.items %}
-                <!-- {{sqltabledata.sql}} --> 
                 <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
                     {{sqltablename}}
                     ({{sqltabledata.count}}  rows)
@@ -85,8 +84,10 @@
           </div>
           <div class="content_footer">
                 <p>
-                    {% if scraper.record_count %}This dataset has a total of {{ scraper.record_count }} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }}.{% endif %}
+                    This dataset has a total of {{ scraper.record_count }} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }}. <a id="sqlite_view_schema" href="javascript:return false;">show schema</a>
                 </p>
+                <div id="sqlite_schema">{% for sqltablename, sqltabledata in sqlitedata.items %}{{sqltabledata.sql}};
+{% endfor %}</div>
           </div>
         {% endif %}
 
@@ -286,6 +287,11 @@
     $('.data_content').hide(); // all
     $('#data_content_1').show();
     $('li#data_tab_1').addClass('selected');
+
+    $('#sqlite_schema').hide();
+    $('#sqlite_view_schema').click( function() {
+        $('#sqlite_schema').toggle();
+    });
 
 {% endblock %}
 

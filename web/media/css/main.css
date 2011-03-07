@@ -133,6 +133,7 @@ table.data th.morerow { display:none; }
 table.data td, table.data th {border-top:solid 1px #ebdade;padding:0.3em 0.5em; line-height:1em;
                               border-left:solid 1px #cbcace; border-right:solid 1px #cbcace;}*/
 
+#sqlite_schema { font-family: monospace; white-space: pre }
 
 table.scrapersediting { width:auto;}
 table.scrapersediting td { border: 1px solid black;}
