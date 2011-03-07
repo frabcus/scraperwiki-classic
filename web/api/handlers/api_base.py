@@ -4,14 +4,16 @@ from piston.handler import BaseHandler
 from piston.utils import rc
 from piston.emitters import Emitter
 from api.models import api_key
-from api.emitters import CSVEmitter, PHPEmitter, GVizEmitter
+from api.emitters import CSVEmitter, PHPEmitter, GVizEmitter, JSONDICTEmitter
 import datetime
 import sys
 import re
 
+Emitter.register('jsondict', JSONDICTEmitter, 'application/json; charset=utf-8')
 Emitter.register('csv', CSVEmitter, 'text/csv; charset=utf-8')
 Emitter.register('php', PHPEmitter, 'text/plain; charset=utf-8')
 Emitter.register('gviz', GVizEmitter, 'text/plain; charset=utf-8')
+
 
 class InvalidScraperException(Exception): pass
 

@@ -106,9 +106,20 @@ a.more_link {font-weight:bold; font-style:italic;}
 pre.scraperoutput {background-color: aliceblue; padding: 0.5em;}
 pre.scrapercode {background-color: lemonchiffon; padding: 0.5em;}
 
+/* Data tabs */
+div.data_tabs { padding:0; margin: 0; display: block; }
+div.data_tabs ul {padding:0; margin:0; width: 100%; clear: right; }
+div.data_tabs ul li {float:left; list-style-type:none; padding:0.4em 0.8em 0.25em 0.8em; margin:0 0.2em -0.3em 0.2em;
+        border-top:solid 1px #9f9f9f;border-left:solid 1px #9f9f9f;border-right:solid 1px #9f9f9f; cursor:pointer; 
+        color: #808080; height: 1.5em; 
+        }
+div.data_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px; background:#f8f8f8;
+        /* color: #000000; */ }
+div.data_content { margin-top: 0; padding-top: 0; } 
+
 /* Tables */
 table {width:100%; border-collapse:collapse;}
-table.data {margin-top:1em; margin-bottom:1em;}
+table.data {margin-top:0em; margin-bottom:1em;}
 table.data th {font-weight:normal;background:#f8f8f8; color:#808080;padding:0.3em 0.5em;
 border-top:solid 1px #ccc; border-bottom:solid 1px #ccc;padding:0.4em 0.6em;}
 
@@ -122,6 +133,7 @@ table.data th.morerow { display:none; }
 table.data td, table.data th {border-top:solid 1px #ebdade;padding:0.3em 0.5em; line-height:1em;
                               border-left:solid 1px #cbcace; border-right:solid 1px #cbcace;}*/
 
+#sqlite_schema { font-family: monospace; white-space: pre }
 
 table.scrapersediting { width:auto;}
 table.scrapersediting td { border: 1px solid black;}
@@ -133,7 +145,7 @@ table.scrapersediting td { border: 1px solid black;}
 div.page_title {border-bottom:dotted 1px #ccc; padding:1em 0 0.5em 0; position:relative;}
 .page_controls {position:absolute; top:0.6em; right:0; text-align:right;}
 div.page_title_narrow { width:600px;}
-ul.title_links {position:absolute; top:0; right:0;}
+ul.title_links {float:right; margin-top: 0}
 ul.title_links li a {padding-left:20px;}
 ul.title_links li.csv           a {background:url(../images/icons/csv_download.png) no-repeat;}
 ul.title_links li.api           a {background:url(../images/icons/api.png) no-repeat;}
@@ -149,7 +161,7 @@ ul.title_links li.fork          a {background:url(../images/icons/fork.png) no-r
 div.page_tabs {background:#fafafa; padding-right:0.2em;height:1.65em; }
 div.page_tabs.small {font-size:0.8em;}
 div.page_tabs ul {padding:0; margin:0;}
-div.page_tabs ul li {float:right; list-style-type:none; padding:0.3em 0.8em; margin:0 0.3em;
+div.page_tabs ul li {float:right; list-style-type:none; padding:0.3em 0.8em 0.25em 0.8em; margin:0 0.3em 0 0.3em;
         border-top:solid 1px #9f9f9f;border-left:solid 1px #9f9f9f;border-right:solid 1px #9f9f9f;}
 div.page_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px;
         background:#fff;}
@@ -249,6 +261,7 @@ table.tag_stats td {position:relative; text-align:center;}
 table.tag_stats td span {overflow:hidden;display:block;width:160px;}
 table.tag_stats td span img {position:relative; left:-20px;}
 
+span#spnLicenseChoice form {display:inline;}
 
 /* Scroll */
 div.scroll {overflow-y:scroll; border:solid 1px #ccc; padding:0.5em;}
@@ -314,8 +327,8 @@ dl.faq dd {padding-left:0; margin-left:0; padding-bottom:1.3em;}
 
 /* Gravatar image */
 .gravatar.small {vertical-align:baseline;}
-.gravatar.medium { margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}
-.gravatar.large { margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}
+.gravatar.medium { vertical-align:middle; margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}
+.gravatar.large { vertical-align:middle; margin-right: 10px; margin-bottom: 10px; margin-left: 0px;}
 
 /* bounty */
 span.bounty {padding:0.2em 0.4em; background:#faca44; font-weight:bold; font-size:0.7em; color:#fff;}
@@ -442,6 +455,7 @@ ul.commitlist li.neweditingsession span { background-color:black; color:white; f
 /* Search results */
 .page_title input {font-size:1em;}
 .tag_list {border-bottom:dotted 1px #ccc;padding-bottom:2em; margin-bottom:2em;}
+#hCodeTitle form {display: inline;}
 
 
 /* Full screen */
