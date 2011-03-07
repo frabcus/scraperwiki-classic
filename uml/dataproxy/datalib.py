@@ -141,12 +141,15 @@ class Database :
         Create a cursor and execute a query, returning the cursor as the result.
         """
 
-        cursor = self.m_db.cursor()
-        query  = self.fixPlaceHolder(query)
-        if values is None :
-               cursor.execute (query)
-        else : cursor.execute (query, values)
-        return cursor
+        try:
+            cursor = self.m_db.cursor()
+            query  = self.fixPlaceHolder(query)
+            cursor.execute(query, values)
+            return cursor
+        except:
+            print "Error executing query:"
+            print query
+            print values
 
     def uniqueHash (self, unique, data) :
 
@@ -831,11 +834,14 @@ class SqliteSaveInfo:
                 break
             
         res = { "newindex": newidxname }
-        lres = self.sqliteexecute("create unique index `%s` on `%s` (%s)" % (newidxname, self.swdatatblname, ",".join(unique_keys)))
+        lres = self.sqliteexecute("create unique index `%s` on `%s` (%s)" % (newidxname, self.swdatatblname, ",".join(["`%s`"%k  for k in unique_keys])))
         if "error" in lres:  return lres
         if idxname:
             lres = self.sqliteexecute("drop index `%s`" % idxname)
-            if "error" in lres:  return lres
+            if "error" in lres:  
+                if lres["error"] != 'sqlite3.Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped':
+                    return lres
+                print lres # to detect if it's happening repeatedly
             res["droppedindex"] = idxname
         return res
             

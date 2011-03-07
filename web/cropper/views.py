@@ -21,6 +21,10 @@ File size:      1100938 bytes
 Optimized:      no
 PDF version:    1.3"""
 
+
+dkpercent = 83  # percentage darkness used by the cropper
+
+
 def pdfinfo(pdffile):
     cmd = 'pdfinfo "%s"' % pdffile
     result = { }
@@ -177,7 +181,6 @@ def cropimg(request, format, srcdoc, page, cropping):
     # then plots white rectangle over it, which when ImageChops.darker() is applied 
     # between the two favours the lighter original in instead of the white rectangles
     if highlightrects:
-        dkpercent = 70
         dpfp = ImageEnhance.Brightness(pfp).enhance(dkpercent / 100.0)
         ddpfp = ImageDraw.Draw(dpfp)
         for rect in highlightrects:

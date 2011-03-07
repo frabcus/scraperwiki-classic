@@ -77,10 +77,7 @@ class SW_DataStore
             end
           end
         }
-        if !text.empty?
-            return JSON.parse(text)
-        end
-        return text
+        return JSON.parse(text)
     end
 
     def save(unique_keys, scraper_data, date = nil, latlng = nil)
