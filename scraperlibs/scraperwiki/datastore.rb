@@ -52,6 +52,7 @@ class SW_DataStore
             proto, port, name, ip = @m_socket.addr()
             getmsg = "GET /?uml=%s&port=%s HTTP/1.1\n\n" % [Socket.gethostname(), port]
             @m_socket.send(getmsg, 0)
+            @m_socket.flush()
             buffer = @m_socket.recv(1024)
             result = JSON.parse(buffer)
             if ! result[0]
@@ -66,6 +67,7 @@ class SW_DataStore
           ensure_connected
           reqmsg  = JSON.generate(req)
           @m_socket.send(reqmsg + "\n", 0)
+          @m_socket.flush()
           while true
             buffer = @m_socket.recv(1024)
             if buffer.length == 0
