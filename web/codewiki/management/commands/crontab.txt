@@ -1,15 +1,19 @@
+MAILTO=cron@scraperwiki.com
 SHELL=/bin/bash
 
 # m h  dom mon dow   command
+0 0 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web &&  time xvfb-run --auto-servernum --server-args="-screen 0, 1440x900x24" python manage.py take_screenshot --verbose --domain=scraperwikiviews.com --run_scrapers
+0 12 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web &&  time xvfb-run --auto-servernum --server-args="-screen 0, 1440x900x24" python manage.py take_screenshot --verbose --domain=scraperwikiviews.com --run_views
 
-*/15 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py run_scrapers -m 20
+*/5 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py run_scrapers -m 30
 
 # Collate email alerts every 5 minutes
 # Note: this only queues them, see below for sending
 */5 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py email_alerts
 
 # Update various bits of meta information for each scraper every hour
-0 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py update_scraper_meta
+8 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py update_scraper_meta
 
 # Send emails with django mailer every minute
 #* * * * * cd /var/www/alpha.scraperwiki.com/ && source bin/activate && cd web && python manage.py email_alerts
+
