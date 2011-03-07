@@ -261,6 +261,7 @@ table.tag_stats td {position:relative; text-align:center;}
 table.tag_stats td span {overflow:hidden;display:block;width:160px;}
 table.tag_stats td span img {position:relative; left:-20px;}
 
+span#spnLicenseChoice form {display:inline;}
 
 /* Scroll */
 div.scroll {overflow-y:scroll; border:solid 1px #ccc; padding:0.5em;}
