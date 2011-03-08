@@ -49,6 +49,22 @@ def mangleflattendict(data):
     return rdata
         
 
+        # a \n delimits the end of the record.  you cannot read beyond it or it will hang
+def receiveoneline(socket):
+    sbuffer = [ ]
+    while True:
+        srec = socket.recv(1024)
+        if not srec:
+            scraperwiki.console.dumpMessage({'message_type': 'chat', 'message':"socket from dataproxy has unfortunately closed"})
+            break
+        ssrec = srec.split("\n")  # multiple strings if a "\n" exists
+        sbuffer.append(ssrec.pop(0))
+        if ssrec:
+            break
+    line = "".join(sbuffer)
+    return line
+
+
 def mangleflattenkeys(keys):
     rkeys = [ ]
     for key in keys:
@@ -59,49 +75,39 @@ def mangleflattenkeys(keys):
 
 class DataStoreClass :
 
-    def __init__ (self, config) :
+    def __init__(self, config) :
+        self.m_socket = None
+        self.m_config = config
 
-        self.m_socket    = None
-        self.m_config    = config
-
-    def connect (self, scraperID = '') :
-
+    def connect(self, scraperID = '') :
         """
         Connect to the data proxy. The data proxy will need to make an Ident call
         back to get the scraperID. Since the data proxy may be on another machine
         and the peer address it sees will have been subject to NAT or masquerading,
         send the UML name and the socket port number in the request.
         """
-
-        if not self.m_socket :
-            if type(self.m_config) == types.StringType :
-                conf = ConfigParser.ConfigParser()
-                conf.readfp (open(self.m_config))
-            else :
-                conf = self.m_config
-            host = conf.get    ('dataproxy', 'host')
-            port = conf.getint ('dataproxy', 'port')
-            self.m_socket    = socket.socket()
-            self.m_socket.connect ((host, port))
-            self.m_socket.send ('GET /?uml=%s&port=%d&scraperid=%s HTTP/1.1\n\n' % (socket.gethostname(), self.m_socket.getsockname()[1], scraperID))
-            rc, arg = json.loads (self.m_socket.recv (1024))
-            if not rc : raise Exception (arg)
+        assert not self.m_socket
+        if type(self.m_config) == types.StringType :
+            conf = ConfigParser.ConfigParser()
+            conf.readfp (open(self.m_config))
+        else :
+            conf = self.m_config
+        host = conf.get    ('dataproxy', 'host')
+        port = conf.getint ('dataproxy', 'port')
+        self.m_socket    = socket.socket()
+        self.m_socket.connect ((host, port))
+        self.m_socket.send ('GET /?uml=%s&port=%d&scraperid=%s HTTP/1.1\n\n' % (socket.gethostname(), self.m_socket.getsockname()[1], scraperID))
+        
+        line = receiveoneline(self.m_socket)  # comes back with True, "Ok"
+        rc, arg = json.loads(line)
+        assert rc, arg
 
     def request (self, req) :
-
-        self.connect ()
-        self.m_socket.send (json.dumps (req) + '\n')
-
-        text = ''
-        while True :
-            data = self.m_socket.recv (1024)
-            if len(data) == 0 :
-                break
-            text += data
-            if text[-1] == '\n' :
-                break
-
-        return json.loads (text)
+        if not self.m_socket:
+            self.connect()
+        self.m_socket.sendall(json.dumps(req)+'\n')
+        line = receiveoneline(self.m_socket)
+        return json.loads(line)
 
     def uses_old_datastore(self):
         return self.request(('item_count',))[1] != 0

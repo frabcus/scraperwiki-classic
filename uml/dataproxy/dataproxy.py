@@ -266,7 +266,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-
+        
         #  Path /Status returns status information.
         #
         if path == '/Status'  :
@@ -298,12 +298,12 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         try    :
             db = datalib.Database()
-            db.connect (config, scraperID)
+            db.connect(config, scraperID)
         except Exception, e :
             self.connection.send (json.dumps ((False, '%s' % e)) + '\n')
             return
 
-        self.connection.send (json.dumps ((True, 'OK')) + '\n')
+        self.connection.send(json.dumps ((True, 'OK')) + '\n')
 
         if runID is not None :
             statusLock.acquire ()
@@ -313,6 +313,8 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         startat = time.strftime ('%Y-%m-%d %H:%M:%S')
 
+
+                # enter the loop that now continues through until the connection is closed
                 # unclear where self.connection is generated.  documentation on object is poor:  http://docs.python.org/release/2.5.2/lib/socket-objects.html
                 # would be nice to obtain its error conditions, timeouts, and an explicit message that it is actually been closed
         sbuffer = [ ]
