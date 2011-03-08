@@ -315,8 +315,10 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
                 # enter the loop that now continues through until the connection is closed
-                # unclear where self.connection is generated.  documentation on object is poor:  http://docs.python.org/release/2.5.2/lib/socket-objects.html
+                # unclear where self.connection is generated.  I believe it is a socket object
+                # documentation on object is poor:  http://docs.python.org/release/2.5.2/lib/socket-objects.html
                 # would be nice to obtain its error conditions, timeouts, and an explicit message that it is actually been closed
+                # perhaps should be using sendall instead of send() everywhere
         sbuffer = [ ]
         try:
             while True:

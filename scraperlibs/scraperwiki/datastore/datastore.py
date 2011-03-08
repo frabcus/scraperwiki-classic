@@ -96,7 +96,7 @@ class DataStoreClass :
         port = conf.getint ('dataproxy', 'port')
         self.m_socket    = socket.socket()
         self.m_socket.connect ((host, port))
-        self.m_socket.send ('GET /?uml=%s&port=%d&scraperid=%s HTTP/1.1\n\n' % (socket.gethostname(), self.m_socket.getsockname()[1], scraperID))
+        self.m_socket.sendall('GET /?uml=%s&port=%d&scraperid=%s HTTP/1.1\n\n' % (socket.gethostname(), self.m_socket.getsockname()[1], scraperID))
         
         line = receiveoneline(self.m_socket)  # comes back with True, "Ok"
         rc, arg = json.loads(line)
@@ -176,7 +176,7 @@ class DataStoreClass :
 
     def close (self) :
 
-        self.m_socket.send ('.\n')
+        self.m_socket.sendall('.\n')  # what's this for?
         self.m_socket.close()
         self.m_socket = None
 
