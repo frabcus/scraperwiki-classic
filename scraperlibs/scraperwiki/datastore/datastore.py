@@ -275,13 +275,16 @@ def sqlitecommand(command, val1=None, val2=None, verbose=1):
     
     # list type for second field in message dump
     if verbose:
-        if not val2:
+        if val2 == None:
             lval2 = [ ]
         elif type(val2) in [tuple, list]:
             lval2 = [ ifsencode_trunc(v, 50)  for v in val2 ]
         elif command == "attach":
             lval2 = [ val2 ]
-
+        elif type(val2) == dict:
+            lval2 = [ ifsencode_trunc(v, 50)  for v in val2.values() ]
+        else:
+            lval2 = [ str(val2) ]
         scraperwiki.console.logSqliteCall(command, val1, lval2)
     
     return result
