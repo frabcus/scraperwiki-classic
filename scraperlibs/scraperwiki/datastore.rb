@@ -65,9 +65,14 @@ class SW_DataStore
         text = ''
         @@lock.synchronize {
           ensure_connected
-          reqmsg  = JSON.generate(req)
-          @m_socket.send(reqmsg + "\n", 0)
+          reqmsg  = JSON.generate(req) + "\n"
+
+          bytes_sent = 0
+          while bytes_sent < reqmsg.length
+            bytes_sent += @m_socket.send(reqmsg.slice(bytes_sent, reqmsg.length), 0)
+          end
           @m_socket.flush()
+
           while true
             buffer = @m_socket.recv(1024)
             if buffer.length == 0

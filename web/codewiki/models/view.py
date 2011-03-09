@@ -32,8 +32,14 @@ class View (code.Code):
         self.wiki_type = 'view'        
 
     def save(self, *args, **kwargs):
-        self.wiki_type = 'view'
+        first_save = not self.id 
+
         super(View, self).save(*args, **kwargs)
+
+        if first_save:
+            for scraper in self.forked_from.relations.all():
+                if scraper not in self.relations.all():
+                    self.relations.add(scraper)
 
     def get_screenshot_url(self, domain):
         return 'http://%s%s' % (domain, reverse('rpcexecute', args=[self.short_name]))

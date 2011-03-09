@@ -201,8 +201,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         rc, arg = db.converttosqlitedatastore(scraperID, runID, scraperName)
         self.connection.send(json.dumps ((rc, arg)) + '\n')
     
-    def process (self, db, scraperID, runID, scraperName, line) :
-        request = json.loads(line) 
+    def process (self, db, scraperID, runID, scraperName, request) :
         if request [0] == 'save'  :
             self.save     (db, scraperID, runID, request[1], request[2], request[3], request[4])
             return
@@ -267,7 +266,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-
+        
         #  Path /Status returns status information.
         #
         if path == '/Status'  :
@@ -299,12 +298,12 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         try    :
             db = datalib.Database()
-            db.connect (config, scraperID)
+            db.connect(config, scraperID)
         except Exception, e :
             self.connection.send (json.dumps ((False, '%s' % e)) + '\n')
             return
 
-        self.connection.send (json.dumps ((True, 'OK')) + '\n')
+        self.connection.send(json.dumps ((True, 'OK')) + '\n')
 
         if runID is not None :
             statusLock.acquire ()
@@ -314,16 +313,27 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         startat = time.strftime ('%Y-%m-%d %H:%M:%S')
 
-        try :
-            buffer  = ''
-            while True :
-                buffer = buffer + self.connection.recv (255)
-                if buffer == '' :
+
+                # enter the loop that now continues through until the connection is closed
+                # unclear where self.connection is generated.  I believe it is a socket object
+                # documentation on object is poor:  http://docs.python.org/release/2.5.2/lib/socket-objects.html
+                # would be nice to obtain its error conditions, timeouts, and an explicit message that it is actually been closed
+                # perhaps should be using sendall instead of send() everywhere
+        sbuffer = [ ]
+        try:
+            while True:
+                srec = self.connection.recv(255)
+                ssrec = srec.split("\n")  # multiple strings if a "\n" exists
+                sbuffer.append(ssrec.pop(0))
+                while ssrec:
+                    line = "".join(sbuffer)
+                    if line:
+                        request = json.loads(line) 
+                        self.process(db, scraperID, runID, scraperName, request)
+                    sbuffer = [ ssrec.pop(0) ]  # next one in
+                if not srec:
                     break
-                lines  = string.split (buffer, '\n')
-                for line in lines[:-1] :
-                    self.process (db, scraperID, runID, scraperName, line)
-                buffer = lines[-1]
+                
         finally :
             self.connection.close()
 

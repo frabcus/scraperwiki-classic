@@ -5,6 +5,21 @@ import  urllib
 try   : import json
 except: import simplejson as json
 
+        # a \n delimits the end of the record.  you cannot read beyond it or it will hang
+def receiveoneline(socket):
+    sbuffer = [ ]
+    while True:
+        srec = socket.recv(1024)
+        if not srec:
+            scraperwiki.console.dumpMessage({'message_type': 'chat', 'message':"socket from dataproxy has unfortunately closed"})
+            break
+        ssrec = srec.split("\n")  # multiple strings if a "\n" exists
+        sbuffer.append(ssrec.pop(0))
+        if ssrec:
+            break
+    line = "".join(sbuffer)
+    return line
+
 
 class DataStoreClass :
 
@@ -19,30 +34,25 @@ class DataStoreClass :
         """
         Connect to the data proxy.
         """
-
+        assert not self.m_socket
         self.m_socket    = socket.socket()
         self.m_socket.connect ((self.m_host, self.m_port))
         data = [ ("uml", socket.gethostname()), ("port", self.m_socket.getsockname()[1]), ("scraperid", scraperID), ("short_name", short_name) ]
         self.m_socket.send ('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
-        rc, arg = json.loads (self.m_socket.recv (1024))
-        if not rc : raise Exception (arg)
+        
+        line = receiveoneline(self.m_socket)  # comes back with True, "Ok"
+        rc, arg = json.loads(line)
+        assert rc, arg
+        
 
     def request(self, req) :
-        self.m_socket.send (json.dumps (req) + '\n')
-
-        text = ''
-        while True :
-            data = self.m_socket.recv (1024)
-            if len(data) == 0 :
-                break
-            text += data
-            if text[-1] == '\n' :
-                break
+        self.m_socket.sendall(json.dumps(req) + '\n')
+        line = receiveoneline(self.m_socket)
         try:
-            return json.loads (text)
+            return json.loads(line)
         except ValueError, e:
             raise Exception("%s:%s" % (e.message, text))
-        
+
 
     def data_dictlist (self, tablename = "", limit = 1000, offset = 0, start_date = None, end_date = None, latlng = None) :
         
