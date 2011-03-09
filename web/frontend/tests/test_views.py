@@ -60,26 +60,31 @@ class FrontEndViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_tutorials(self):    
-        scraper = Scraper(title='Python1', language='python', istutorial=True)
+        scraper = Scraper(title=u'Python1', language='python', istutorial=True)
         scraper.save()
 
-        scraper = Scraper(title='Python2', language='python', istutorial=True)
+        scraper = Scraper(title=u'Python2', language='python', istutorial=True)
         scraper.save()
 
-        scraper = Scraper(title='Python3', language='python', istutorial=True)
+        scraper = Scraper(title=u'Python3', language='python', istutorial=True)
         scraper.save()
 
-        scraper = Scraper(title='PHP1', language='php', istutorial=True)
+        scraper = Scraper(title=u'PHP1', language='php', istutorial=True)
         scraper.save()
 
-        scraper = Scraper(title='PHP2', language='php', istutorial=True)
+        scraper = Scraper(title=u'PHP2', language='php', istutorial=True)
         scraper.save()
 
-        response = self.client.get(reverse('help_tutorials'))
+        response = self.client.get(reverse('help', args=['tutorials', 'python']))
         self.assertEqual(response.status_code, 200)
 
         tutorials =  response.context['tutorials']
         self.assertTrue('python' in tutorials)
         self.assertEqual(3, len(tutorials['python']))
+
+        response = self.client.get(reverse('help', args=['tutorials', 'php']))
+        self.assertEqual(response.status_code, 200)
+
+        tutorials =  response.context['tutorials']
         self.assertTrue('php' in tutorials)
         self.assertEqual(2, len(tutorials['php']))

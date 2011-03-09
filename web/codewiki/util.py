@@ -41,10 +41,10 @@ def SlugifyUniquely(value, model, slugfield="slug", instance=None):
     while True:
         if suffix:
             prefix = base[:max_length - (len(str(suffix)) + 1)]
-            if prefix[-1] == '-': # remove trailing - so we don't get -- in the slug
+            if prefix[-1] == '_': # remove trailing _
                 prefix = prefix[:-1]
 
-            potential = "-".join([prefix, str(suffix)])
+            potential = "_".join([prefix, str(suffix)])
 
         matches = model.unfiltered.filter(**{slugfield: potential})
         if matches.count() == 0 or (instance and matches[0].pk == instance.pk):
