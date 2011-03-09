@@ -2,7 +2,6 @@
 At the moment, this only tests some scraper.views
 """
 
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -38,7 +37,7 @@ class ScraperViewsTests(TestCase):
             m.getfilestatus( 'test_scraper' )
         except:
             s = Scraper.objects.get(short_name=name)
-            m.savecode(s, '#Test scraper for testing purposes only')
+            s.commit_code('#Test scraper for testing purposes only', 'test commit', s.owner())
             return False
         return True
     
