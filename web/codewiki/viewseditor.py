@@ -295,9 +295,6 @@ def handle_editor_save(request):
         if fork:
             try:
                 scraper.forked_from = models.Code.objects.get(wiki_type=scraper.wiki_type, short_name=fork)
-                if wiki_type == 'view':
-                    for s in scraper.forked_from.relations.all():
-                        scraper.relations.add(s)
             except models.Code.DoesNotExist:
                 pass
             
