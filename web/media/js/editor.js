@@ -351,9 +351,9 @@ $(document).ready(function() {
             overlayCss: { cursor:"auto" }, 
             onShow: function() 
             {
-                var wrapheight = $('.simplemodal-wrap').height(); 
                 $('.simplemodal-wrap').css("overflow", "hidden"); 
-                $('.simplemodal-wrap iframe').width( $('.simplemodal-wrap').width()-2); 
+                $('.simplemodal-wrap iframe').width($('.simplemodal-wrap').width()-2); 
+                $('.simplemodal-wrap iframe').height($('.simplemodal-wrap').height()-2); 
             }
         }); 
     }
@@ -1068,7 +1068,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         uml = ''; 
 
         // suppress any more activity to the preview frame
-        if (activepreviewiframe != undefined) {
+        if (activepreviewiframe != undefined) 
+        {
             activepreviewiframe.document.close(); 
             activepreviewiframe = undefined; 
         }
