@@ -21,9 +21,7 @@
                 <li class="full_screen"><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">View as full page</a></li>
                 <li class="embed"><a href="{% url code_overview scraper.wiki_type scraper.short_name %}#embed">Add to your site</a></li>
             {% endifequal %}
-            {% if user.is_staff %}
-                <li class="fork staff"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
-            {% endif %}
+                <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
         </ul>
         <h1>
             {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %} / <span id="hCodeTitle">{{ scraper.title }}</span>{% if not scraper.published %} (not public){% endif %}
@@ -34,8 +32,8 @@
            {% if scraper.has_temporal %}
                <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
            {% endif %}
-           {% if scraper.forked_from and user.is_staff %}
-               <li class="fork staff">Fork of <a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{scraper.forked_from.short_name}}</a></li>
+           {% if scraper.forked_from %}
+               <li class="fork">Fork of <a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{scraper.forked_from.short_name}}</a></li>
            {% endif %}
             <li>{% if user.is_authenticated %}<a href="#" id="aEditTitle" class="edit">[edit title]</a>{% else %}<a href="{% url login %}?next={% url code_overview scraper.wiki_type scraper.short_name %}" class="edit">[sign in to edit title]</a>{% endif %}</li>
         </ul>
