@@ -362,49 +362,19 @@ def getselectedword(line, character, language):
     if ip >= 1 and ie < len(line) and line[ip-1] in ('"', "'") and line[ip-1] == line[ie]:
         word = line[ip:ie] 
 
+    if re.match("\W*$", word):
+        word = ""
     return word
 
 
-###############
-# language quickhelps 
-# to be improved -- 
-# possibly by calling to a scraper 
-# that tests
-###############
-def quickhelpphp(word):
-    return HttpResponseRedirect("http://www.php.net/search.php?%s" % urllib.urlencode({"pattern":word, "show":"quickref"}))
-
-
-def quickhelppython(word):
-    txt = os.popen('echo "help(\\"%s\\")" | python' % word).read()
-    if re.match("no Python documentation found", txt):
-        return None
-    return HttpResponse(txt, mimetype="text/plain")
-
-def quickhelpruby(word):
-    txt = os.popen('ri "%s"' % word).read()
-    if not txt or re.match("Nothing known about", txt):
-        return None
-    return HttpResponse(txt, mimetype="text/plain")
-    
 
 def quickhelp(request):
     query = dict([(k, request.GET.get(k, ""))  for k in ["language", "short_name", "username", "wiki_type", "line", "character"]])
     query["word"] = getselectedword(query["line"], query["character"], query["language"])
+    if re.match("http://", query["word"]):
+        query["escapedurl"] = urllib.quote(query["word"])
+    print query
     
-    #result = None
-    #if word and not re.match("(?i)scraperwiki", word):
-    #    if language == "php":
-    #        result = quickhelpphp(word)
-    #    elif language == "python":
-    #        result = quickhelppython(word)
-    #    elif language == "ruby":
-    #        result = quickhelpruby(word)
-    #if result:
-    #    return result
-        #url = "http://%s%s?%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=['general_quickhelp']), cheatsheetquery)
-        #return HttpResponseRedirect(url)
-
     context = query.copy()
     context['quick_help_template'] = 'documentation/%s_quick_help_%s.html' % (query["wiki_type"], query["language"])
     context['query_string'] = urllib.urlencode(query)

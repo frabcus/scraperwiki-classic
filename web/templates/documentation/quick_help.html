@@ -9,23 +9,51 @@
 
 <body>
   <div id="divQuickHelp">
-    {% ifequal wiki_type 'scraper' %}
-      <p><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute quickcheck_datastore %}?{{query_string}}">preview datastore</a></p>
-    {% endifequal %}
-
-<li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'google_map_cheat_sheet-3' %}">Quick help making google map mashups</a></li>
-      Why not try our patented <a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'general_quickhelp' %}?{{cheatsheetquery}}">cheat sheet technology</a>.</p>
-    </p>
   <h3>
     <img src="{{MEDIA_URL}}images/icons/{{ language|lower }}.png"/>
     {% ifequal language 'php'%}PHP{% endifequal %}
     {% ifequal language 'ruby'%}Ruby{% endifequal %}
     {% ifequal language 'python'%}Python{% endifequal %}
     {% ifequal language 'html'%}HTML{% endifequal %}
-    {{wiki_type}}
+        {{wiki_type}}
     - quick help (<a href="{% url help %}" target="_blank"><img src="{{ MEDIA_URL }}images/link_go.png" alt="New window" /> more help</a>)
   </h3>
   <br/>
+    <ul class="quickhelpoptions">
+      {% if escapedurl %}
+        <li><a href="http://scraperwikiviews.com/{% url rpcexecute 'lxml-cheat-sheet' %}?url={{escapedurl}}">lxml cheat sheet for '{{word}}'</a></li>
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'mechanize_cheat_sheet' %}?url={{escapedurl}}"><b>(pending)</b> mechanize cheat sheet for '{{word}}'</a></li>
+      {% endif %}
+      {% ifequal wiki_type 'scraper' %}
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'quickcheck_datastore' %}?{{query_string}}">Preview datastore</a></li>
+      {% endifequal %}
+
+      {% if word %}
+        {% ifequal language 'php' %}
+          <li><a href="http://www.php.net/search.php?show=quickref&amp;pattern={{word}}">Search PHP.net for "{{word}}"</a></li>
+        {% endifequal %}
+        {% ifequal language 'python' %}
+          <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'python_help_command' %}?{{query_string}}">Python help for "{{word}}"</a></li>
+        {% endifequal %}
+        {% ifequal language 'ruby' %}
+          <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'python_help_command' %}?{{query_string}}">Ruby help for "{{word}}"</a></li>
+        {% endifequal %}
+      {% endif %}
+
+      {% ifequal language 'python' %}
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'excel_cheat_sheet' %}">excel parsing cheat sheet</a></li>
+      {% endifequal %}
+
+      {% ifequal language 'html' %}
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'sqlite_html_cheat_sheet' %}">Interactive sqlite cheat sheet</a></li>
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'jquery_cheat_sheet' %}">Quick help with JQuery</a></li>
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'raphaeljs_cheat_sheet' %}">Quick help with interactive RaphaelJS graphics</a></li>
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'ajax_cheat_sheet' %}">Quick help with AJAX</a></li>
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'google_map_cheat_sheet-3' %}">Quick help making google map mashups</a></li>
+      {% endifequal %}
+
+    <hr/>
+
     {% include quick_help_template %}
   </div>
 </body>
