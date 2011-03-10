@@ -704,6 +704,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             "automode"  : $('select#automode option:selected').val()
         }
         $('.editor_controls #run').val('Sending');
+        $('.editor_controls #run').unbind('click.run'); // prevent a second call to it
         sendjson(data); 
         autosavefunction(code); 
     }
