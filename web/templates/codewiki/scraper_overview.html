@@ -49,20 +49,30 @@
                 </table>
             </div>
             <div class="content_footer">
-                <p>
-                    {% if scraper.record_count %}This dataset has a total of {{ scraper.record_count }} records.{% endif %}
-                </p>
+              <p>
+                 {% if scraper.record_count %}
+                    This dataset has a total of {{scraper.record_count}} records.{% endif %}
+                 {% if sqlitedata %}
+                   <a class="sqlite_view_schema" href="javascript:return false;">show schema{{sqlitedata.items|pluralize}}</a>
+                   <a class="sqlite_view_schema" href="javascript:return false;">hide schema{{sqlitedata.items|pluralize}}</a>
+                 {% endif %}
+              </p>
             </div>
         {% endif %}
 
         {% if sqlitedata %}
-    	   <ul class="data_tabs">
+           <ul id="sqlite_schema">
             {% for sqltablename, sqltabledata in sqlitedata.items %}
-                <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
-                    {{sqltablename}}
-                    ({{sqltabledata.count}}  rows)
-                </li>
+              <li>{{sqltabledata.sql}}</li>
             {% endfor %}
+           </ul>
+    	   <ul class="data_tabs">
+             {% for sqltablename, sqltabledata in sqlitedata.items %}
+                <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
+                    {{sqltablename}} ({{sqltabledata.count}}  rows)
+                </li>
+             {% endfor %}
+              <li id="popupinteractivesqlite">Interactive</li>
             </ul>
           {% for sqltablename, sqltabledata in sqlitedata.items %}
             <div id="data_content_{{forloop.counter}}" class="data_content">
@@ -79,12 +89,9 @@
             </div>
           {% endfor %}
           </div>
+
           <div class="content_footer">
-                <p>
-                    This dataset has a total of {{ scraper.record_count }} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }}. <a id="sqlite_view_schema" href="javascript:return false;">show schema</a>
-                </p>
-                <div id="sqlite_schema">{% for sqltablename, sqltabledata in sqlitedata.items %}{{sqltabledata.sql}};
-{% endfor %}</div>
+             <p>This dataset has a total of {{ scraper.record_count }} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }}</p>
           </div>
         {% endif %}
 
@@ -252,43 +259,60 @@
 <br class="clear"/>
 {% endblock %}
 
-{% block run_script %}
+{% block run_script_outer %}
     {{block.super}}
 
-    {% if user.is_authenticated %}
-        setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
-        setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
-    {% endif %}
+<script>
+{% if user.is_authenticated %}
+    setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
+    setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
+{% endif %}
 
-    // when you click on a tab to show a different table of a SQLite store
-    function data_tab_clicked(event) {
-        // do nothing if already selected
-        if ($(this).hasClass('selected')) {
-            return;
-        }
-        
-        // make tab selected
-        $('.data_tab').removeClass('selected'); // all
-        $(this).addClass('selected');
-
-        // show and hide
-        $('.data_content').hide(); // all
-        var tab_content_name = $(this).attr('id').replace('data_tab', 'data_content');
-        $('#' + tab_content_name).show();
-    }
+// detect clicks on data tabs
+$('.data_tab').click(function data_tab_clicked() 
+{
+    // do nothing if already selected
+    if ($(this).hasClass('selected')) 
+        return;
     
-    // detect clicks on data tabs
-    $('.data_tab').click(data_tab_clicked);
+    // make tab selected
+    $('.data_tab').removeClass('selected'); // all
+    $(this).addClass('selected');
 
-    // show initial data tab
+    // show and hide
     $('.data_content').hide(); // all
-    $('#data_content_1').show();
-    $('li#data_tab_1').addClass('selected');
+    var tab_content_name = $(this).attr('id').replace('data_tab', 'data_content');
+    $('#' + tab_content_name).show();
+}); 
+$('#data_tab_1').click();
 
-    $('#sqlite_schema').hide();
-    $('#sqlite_view_schema').click( function() {
-        $('#sqlite_schema').toggle();
-    });
 
+$('.sqlite_view_schema:last').hide(); 
+$('#sqlite_schema').hide(); 
+$('.sqlite_view_schema').click( function() 
+{
+    $('#sqlite_schema').toggle(); 
+    $('.sqlite_view_schema').toggle(); 
+});
+
+
+$("#popupinteractivesqlite").click(function() 
+{
+    var url = "http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'quickcheck_datastore' %}?src="+decodeURIComponent('{{scraper.short_name}}'); 
+    $.modal('<iframe width="100%" height="100%" src='+url+'></iframe>', 
+    {
+        overlayClose: true,
+        containerCss: { borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
+        overlayCss: { cursor:"auto" }, 
+        onShow: function() 
+        {
+            $('.simplemodal-wrap').css("overflow", "hidden"); 
+            $('.simplemodal-wrap iframe').width($('.simplemodal-wrap').width()-2); 
+            $('.simplemodal-wrap iframe').height($('.simplemodal-wrap').height()-2); 
+        }
+    }); 
+}); 
+
+</script>
 {% endblock %}
 
