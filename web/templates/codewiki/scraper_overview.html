@@ -56,8 +56,7 @@
         {% endif %}
 
         {% if sqlitedata %}
-    	   <div class="data_tabs">
-            <ul>
+    	   <ul class="data_tabs">
             {% for sqltablename, sqltabledata in sqlitedata.items %}
                 <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
                     {{sqltablename}}
@@ -65,7 +64,6 @@
                 </li>
             {% endfor %}
             </ul>
-          </div>
           {% for sqltablename, sqltabledata in sqlitedata.items %}
             <div id="data_content_{{forloop.counter}}" class="data_content">
             <table class="data">

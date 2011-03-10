@@ -107,15 +107,15 @@ pre.scraperoutput {background-color: aliceblue; padding: 0.5em;}
 pre.scrapercode {background-color: lemonchiffon; padding: 0.5em;}
 
 /* Data tabs */
-div.data_tabs { padding:0; margin: 0; display: block; }
-div.data_tabs ul {padding:0; margin:0; width: 100%; clear: right; }
-div.data_tabs ul li {float:left; list-style-type:none; padding:0.4em 0.8em 0.25em 0.8em; margin:0 0.2em -0.3em 0.2em;
+ul.data_tabs {padding:0; margin:0; width: 100%; display: block;  }
+ul.data_tabs li { display:inline; list-style-type:none; padding:0.4em 0.8em 0.25em 0.8em; margin:0 0.2em -0.3em 0.2em; clear:right; 
         border-top:solid 1px #9f9f9f;border-left:solid 1px #9f9f9f;border-right:solid 1px #9f9f9f; cursor:pointer; 
         color: #808080; height: 1.5em; 
         }
-div.data_tabs ul li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px; background:#f8f8f8;
+
+ul.data_tabs li.selected {border-bottom:solid 1px #fff; position:relative; top:-1px; background:#f8f8f8;
         /* color: #000000; */ }
-div.data_content { margin-top: 0; padding-top: 0; } 
+div.data_content {  margin-top: 0; padding-top: 0; display: block } 
 
 /* Tables */
 table {width:100%; border-collapse:collapse;}
