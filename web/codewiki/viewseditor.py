@@ -362,7 +362,7 @@ def getselectedword(line, character, language):
     if ip >= 1 and ie < len(line) and line[ip-1] in ('"', "'") and line[ip-1] == line[ie]:
         word = line[ip:ie] 
 
-    return word    
+    return word
 
 
 ###############
@@ -389,31 +389,25 @@ def quickhelpruby(word):
     
 
 def quickhelp(request):
-    language = request.GET.get('language', '').lower()
-    wiki_type = request.GET.get('wiki_type', '')
-    line = request.GET.get('line', "")
-    character = request.GET.get('character', "")
+    query = dict([(k, request.GET.get(k, ""))  for k in ["language", "short_name", "username", "wiki_type", "line", "character"]])
+    query["word"] = getselectedword(query["line"], query["character"], query["language"])
     
-    # try to go after the quickhelps
-    word = getselectedword(line, character, language)
-    result = None
-    if word and not re.match("(?i)scraperwiki", word):
-        if language == "php":
-            result = quickhelpphp(word)
-        elif language == "python":
-            result = quickhelppython(word)
-        elif language == "ruby":
-            result = quickhelpruby(word)
-            
-    if result:
-        return result
+    #result = None
+    #if word and not re.match("(?i)scraperwiki", word):
+    #    if language == "php":
+    #        result = quickhelpphp(word)
+    #    elif language == "python":
+    #        result = quickhelppython(word)
+    #    elif language == "ruby":
+    #        result = quickhelpruby(word)
+    #if result:
+    #    return result
+        #url = "http://%s%s?%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=['general_quickhelp']), cheatsheetquery)
+        #return HttpResponseRedirect(url)
 
-    context = { "wiki_type":wiki_type, "language":language }
-    context['quick_help_template'] = 'documentation/%s_quick_help_%s.html' % (wiki_type, language)
-    context['cheatsheetquery'] = urllib.urlencode({'line':line, 'character':character, 'language':language})
-    if re.search("Quick help", line):
-        url = "http://%s%s?%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=['general_quickhelp']), context['cheatsheetquery'])
-        return HttpResponseRedirect(url)
+    context = query.copy()
+    context['quick_help_template'] = 'documentation/%s_quick_help_%s.html' % (query["wiki_type"], query["language"])
+    context['query_string'] = urllib.urlencode(query)
     return render_to_response('documentation/quick_help.html', context, context_instance=RequestContext(request))
 
 

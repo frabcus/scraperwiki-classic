@@ -9,11 +9,13 @@
 
 <body>
   <div id="divQuickHelp">
-  {% if user.is_staff %}
-    <p class="staff"> 
+    {% ifequal wiki_type 'scraper' %}
+      <p><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute quickcheck_datastore %}?{{query_string}}">preview datastore</a></p>
+    {% endifequal %}
+
+<li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'google_map_cheat_sheet-3' %}">Quick help making google map mashups</a></li>
       Why not try our patented <a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'general_quickhelp' %}?{{cheatsheetquery}}">cheat sheet technology</a>.</p>
     </p>
-  {% endif %}
   <h3>
     <img src="{{MEDIA_URL}}images/icons/{{ language|lower }}.png"/>
     {% ifequal language 'php'%}PHP{% endifequal %}
@@ -24,8 +26,7 @@
     - quick help (<a href="{% url help %}" target="_blank"><img src="{{ MEDIA_URL }}images/link_go.png" alt="New window" /> more help</a>)
   </h3>
   <br/>
-  {% include quick_help_template %}
-eeee{{quick_help_template}}
+    {% include quick_help_template %}
   </div>
 </body>
 

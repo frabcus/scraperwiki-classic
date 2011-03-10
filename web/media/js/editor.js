@@ -340,7 +340,7 @@ $(document).ready(function() {
         // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
         var cursorpos = codeeditor.cursorPosition(true); 
         var cursorendpos = codeeditor.cursorPosition(false); 
-        var quickhelpparams = { language:scraperlanguage, wiki_type:wiki_type, line:codeeditor.lineContent(cursorpos.line), character:cursorpos.character }; 
+        var quickhelpparams = { language:scraperlanguage, short_name:short_name, wiki_type:wiki_type, username:username, line:codeeditor.lineContent(cursorpos.line), character:cursorpos.character }; 
         if (cursorpos.line == cursorendpos.line)
             quickhelpparams["endcharacter"] = cursorendpos.character; 
 
