@@ -161,6 +161,9 @@ class UML :
 
         return self.m_free < self.m_count
 
+    def dead(self):
+        return self.m_dead
+
     def acquire (self, status) :
 
         """
@@ -598,10 +601,10 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         UMLLock.acquire()
 
-        #  If the UML is not active then it can be removed now and a
-        #  report to this effect returned.
+        #  If the UML is not active or it is dead then it can be removed now 
+        #  and a report to this effect returned.
         #
-        if not uml.active() :
+        if not uml.active() or uml.dead():
             UMLList = [ u for u in UMLList if u is not uml ]
             for i in range(len(UMLList)) :
                 UMLList[i].setNextUML(UMLList[(i+1) % len(UMLList)])
@@ -610,17 +613,16 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.sendOK ()
             self.connection.send  ('UML %s removed' % name)
             self.connection.send  ('\n')
-            return
-
+        else:
         #  If active then mark as closing and report such. No scrapers
         #  will be allocated to the UML and it will be removed when it
         #  is next inactive.
         #
-        uml.close()
-        UMLLock.release()
-        self.sendOK ()
-        self.connection.send  ('UML %s closing' % name)
-        self.connection.send  ('\n')
+            uml.close()
+            UMLLock.release()
+            self.sendOK ()
+            self.connection.send  ('UML %s closing' % name)
+            self.connection.send  ('\n')
 
     def killScraper (self, runID) :
 
