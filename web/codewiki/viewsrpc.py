@@ -87,10 +87,18 @@ def scraperwikitag(scraper, html, panepresent):
         return html
     
     
-    urlbase = "http://www." + Site.objects.get_current().domain;
+    #urlbase = "http://www." + Site.objects.get_current().domain;
+    #urlscraperoverview = urlbase + reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
+    #urlscraperedit = urlbase + reverse('editor_edit', args=[scraper.wiki_type, scraper.short_name])
+    #urlpoweredlogo = urlbase + "/media/images/powered.png";
+        # ^ all very well, but results in http://www.example.com/ locally.  haven't time to care
+        
+        # maybe should be tossed into settings so we can use it in the templates
+    
+    urlbase = "http://scraperwiki.com"
     urlscraperoverview = urlbase + reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
     urlscraperedit = urlbase + reverse('editor_edit', args=[scraper.wiki_type, scraper.short_name])
-    urlpoweredlogo = urlbase + "/media/images/powered.png";
+    urlpoweredlogo = settings.MEDIA_URL + "images/powered.png";
     
     swdivstyle = "border:thin #aaf solid; display:block; position:fixed; top:0px; right:0px; background:#eef; margin: 0em; padding: 6pt; font-size: 10pt; "
     swlinkstyle = "width:167px; height:17px; margin:0; padding: 0; border-style: none; "

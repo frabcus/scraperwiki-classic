@@ -340,7 +340,7 @@ $(document).ready(function() {
         // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
         var cursorpos = codeeditor.cursorPosition(true); 
         var cursorendpos = codeeditor.cursorPosition(false); 
-        var quickhelpparams = { language:scraperlanguage, wiki_type:wiki_type, line:codeeditor.lineContent(cursorpos.line), character:cursorpos.character }; 
+        var quickhelpparams = { language:scraperlanguage, short_name:short_name, wiki_type:wiki_type, username:username, line:codeeditor.lineContent(cursorpos.line), character:cursorpos.character }; 
         if (cursorpos.line == cursorendpos.line)
             quickhelpparams["endcharacter"] = cursorendpos.character; 
 
@@ -351,9 +351,9 @@ $(document).ready(function() {
             overlayCss: { cursor:"auto" }, 
             onShow: function() 
             {
-                var wrapheight = $('.simplemodal-wrap').height(); 
                 $('.simplemodal-wrap').css("overflow", "hidden"); 
-                $('.simplemodal-wrap iframe').width( $('.simplemodal-wrap').width()-2); 
+                $('.simplemodal-wrap iframe').width($('.simplemodal-wrap').width()-2); 
+                $('.simplemodal-wrap iframe').height($('.simplemodal-wrap').height()-2); 
             }
         }); 
     }
@@ -1068,7 +1068,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         uml = ''; 
 
         // suppress any more activity to the preview frame
-        if (activepreviewiframe != undefined) {
+        if (activepreviewiframe != undefined) 
+        {
             activepreviewiframe.document.close(); 
             activepreviewiframe = undefined; 
         }

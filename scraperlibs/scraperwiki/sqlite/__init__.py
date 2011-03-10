@@ -6,6 +6,8 @@ def attach(name, asname=None, verbose=1):
     return sqlitecommand("attach", name, asname, verbose)
     
 def execute(val1, val2=None, verbose=1):
+    if val2 is not None and "?" in val1 and type(val2) not in [list, tuple]:
+        val2 = [val2]
     return sqlitecommand("execute", val1, val2, verbose)
 
 def commit(verbose=1):
@@ -14,6 +16,8 @@ def commit(verbose=1):
 
 
 def select(val1, val2=None, verbose=1):
+    if val2 is not None and "?" in val1 and type(val2) not in [list, tuple]:
+        val2 = [val2]
     result = sqlitecommand("execute", "select %s" % val1, val2, verbose)
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
 

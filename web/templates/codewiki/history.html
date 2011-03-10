@@ -90,7 +90,7 @@
 
         {% else %}{% if itemfirst.runevent.run_ended %}
         <div class="history_ran">
-          Run suceeded:
+          Run succeeded:
           - ran {{itemloggroup.list|length}} times, most recently for {{itemfirst.durationseconds}} seconds
           ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
           <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
