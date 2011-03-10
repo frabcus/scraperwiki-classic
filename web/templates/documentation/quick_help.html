@@ -21,11 +21,16 @@
   <br/>
     <ul class="quickhelpoptions">
       {% if escapedurl %}
-        <li><a href="http://scraperwikiviews.com/{% url rpcexecute 'lxml-cheat-sheet' %}?url={{escapedurl}}">lxml cheat sheet for '{{word}}'</a></li>
-        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'mechanize_cheat_sheet' %}?url={{escapedurl}}"><b>(pending)</b> mechanize cheat sheet for '{{word}}'</a></li>
+        <li><a href="http://scraperwikiviews.com/{% url rpcexecute 'lxml-cheat-sheet' %}?url={{escapedurl}}">Interactive lxml cheat sheet for '{{word}}'</a></li>
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'mechanize_cheat_sheet' %}?url={{escapedurl}}">Interactive mechanize cheat sheet for '{{word}}'</a> (pending)</li>
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'pdf-to-html-preview-1' %}?url={{escapedurl}}">Interactive pdf cheat sheet for '{{word}}'</a> (use this only if the link is actually to a PDF file)</li>
       {% endif %}
       {% ifequal wiki_type 'scraper' %}
-        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'quickcheck_datastore' %}?{{query_string}}">Preview datastore</a></li>
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'quickcheck_datastore' %}?{{query_string}}">Interactive preview datastore</a></li>
+
+        {% ifnotequal language 'python' %}
+          <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'python_sqlite_cheat_sheet' %}"><b>Sqlite saving cheat sheet (python docsumentation)</b></a></li>
+        {% endifnotequal %}
       {% endifequal %}
 
       {% if word %}
@@ -42,6 +47,9 @@
 
       {% ifequal language 'python' %}
         <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'excel_cheat_sheet' %}">excel parsing cheat sheet</a></li>
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'python_sqlite_cheat_sheet' %}"><b>Sqlite saving cheat sheet</b></a></li>
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'python_lxml_cheat_sheet' %}">Python lxml cheat sheet</a> for parsing HTML</li>
+        <li><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'python_lxml_cheat_sheet' %}">Python mechanize cheat sheet</a> (pending)</li>
       {% endifequal %}
 
       {% ifequal language 'html' %}
