@@ -36,7 +36,7 @@ class View (code.Code):
 
         super(View, self).save(*args, **kwargs)
 
-        if first_save:
+        if first_save and self.forked_from:
             for scraper in self.forked_from.relations.all():
                 if scraper not in self.relations.all():
                     self.relations.add(scraper)
