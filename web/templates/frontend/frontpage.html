@@ -11,17 +11,17 @@
               You have a stake in <a href="{% url dashboard %}">{{user|num_scrapers}} scraper{{user|num_scrapers|pluralize}}{% if user|num_views %} and {{user|num_views}} view{{user|num_views|pluralize}}{% endif %}</a>.
             </p>
         {% else %}
-        <div class="definition">
-            <p>
-               <a href="http://en.wikipedia.org/wiki/Web_scraping" title="Wikipedia definition"><strong>Scraper</strong></a>: 
-               a computer program that transforms information from webpages into a data
-            </p>
-            <p>
-               <a href="{% url about %}" title="About ScraperWiki"><strong>ScraperWiki</strong></a>: 
-               a website where anyone can write and repair public web scrapers and discover uses for the data
-            </p>
-        </div>
-        {% endif %}
+            <div class="definition">
+                <p>
+                   <a href="http://en.wikipedia.org/wiki/Web_scraping" title="Wikipedia definition"><strong>Scraper</strong></a>: 
+                   a computer program that transforms information from webpages into a data
+                </p>
+                <p>
+                   <a href="{% url about %}" title="About ScraperWiki"><strong>ScraperWiki</strong></a>: 
+                   a website where anyone can write and repair public web scrapers and discover uses for the data
+                </p>
+            </div>
+            {% endif %}
     </div>
 
     <div class="content half left">
