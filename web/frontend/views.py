@@ -53,26 +53,24 @@ def frontpage(request, public_profile_field=None):
 @login_required
 def dashboard(request):
     user = request.user
-    owned_scrapers = user.code_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
-    owned_count = len(owned_scrapers) 
+    owned_code_objects = user.code_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
+    owned_count = len(owned_code_objects) 
     # needs to be expanded to include scrapers you have edit rights on.
-    contribution_scrapers = user.code_set.filter(usercoderole__role='editor', deleted=False)
-    contribution_count = len(contribution_scrapers)
-    following_scrapers = user.code_set.filter(usercoderole__role='follow', deleted=False)
-    following_count = len(following_scrapers)
+    contribution_code_objects = user.code_set.filter(usercoderole__role='editor', deleted=False)
+    contribution_count = len(contribution_code_objects)
+    # following_code_objects = user.code_set.filter(usercoderole__role='follow', deleted=False)
+    # following_count = len(following_code_objects)
 
-    return render_to_response('frontend/dashboard.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count,'language':'python' }, context_instance = RequestContext(request))
+    return render_to_response('frontend/dashboard.html', {'owned_code_objects': owned_code_objects, 'owned_count' : owned_count, 'contribution_code_objects' : contribution_code_objects, 'contribution_count': contribution_count, 'following_code_objects' : following_code_objects, 'following_count' : following_count,'language':'python' }, context_instance = RequestContext(request))
 
 def profile_detail(request, username):
     
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
-    owned_scrapers = profiled_user.code_set.filter(usercoderole__role='owner', wiki_type="scraper", published=True)
-    owned_views = profiled_user.code_set.filter(usercoderole__role='owner', wiki_type="view", published=True)
-    contributed_views = profiled_user.code_set.filter(usercoderole__role='editor', published=True)
+    owned_code_objects = profiled_user.code_set.filter(usercoderole__role='owner', published=True).order_by('-created_at')
     solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
 
-    return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations, 'owned_scrapers': owned_scrapers, 'owned_views': owned_views } )
+    return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations, 'owned_code_objects': owned_code_objects } )
 
 
 def edit_profile(request):

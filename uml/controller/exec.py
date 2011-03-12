@@ -157,6 +157,11 @@ scraperwiki.datastore.DataStore (config)
 #  exception.
 #
 # (technical question: what happens if the user script traps this exception and ignores it? --JGT)
+# (answer: it will be brutally killed when the hard CPU time limit is reached.
+# See "man setrlimit", "If the process continues to consume CPU time, it will
+# be sent  SIGXCPU once per second until the hard limit is reached, at which
+# time it is sent SIGKILL". This is one second later, as the runner does
+# "fs.setCPULimit      (cpulimit, cpulimit+1)". --FAI)
 def sigXCPU (signum, frame) :
     raise Exception ("CPUTimeExceeded")
 
