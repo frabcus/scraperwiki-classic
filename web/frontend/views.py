@@ -67,12 +67,10 @@ def profile_detail(request, username):
     
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
-    owned_scrapers = profiled_user.code_set.filter(usercoderole__role='owner', wiki_type="scraper", published=True).order_by('-created_at')
-    owned_views = profiled_user.code_set.filter(usercoderole__role='owner', wiki_type="view", published=True).order_by('-created_at')
-    contributed_views = profiled_user.code_set.filter(usercoderole__role='editor', published=True).order_by('-created_at')
+    owned_code_objects = profiled_user.code_set.filter(usercoderole__role='owner', published=True).order_by('-created_at')
     solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
 
-    return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations, 'owned_scrapers': owned_scrapers, 'owned_views': owned_views } )
+    return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations, 'owned_code_objects': owned_code_objects } )
 
 
 def edit_profile(request):

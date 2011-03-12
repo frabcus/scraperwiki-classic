@@ -38,22 +38,13 @@
 	</div>
 
     <div class="content">
-    {% if owned_scrapers %}
-      <h2>Scrapers</h2>    	
+    {% if owned_code_objects %}
+      <h2>Scrapers and views</h2>    	
       <ul class="scraper_list">
-        {% for code in owned_scrapers %}
+        {% for code in owned_code_objects %}
           {% include 'frontend/includes/code_object_line.html' %}
         {% endfor %}
       </ul>
-    {% endif %}
-
-    {% if owned_views %}
-    <h2>Views</h2>
-      <ul class="scraper_list">
-        {% for code in owned_views %}
-          {% include 'frontend/includes/code_object_line.html' %}
-        {% endfor %}
-      </ul> 	            	
     {% endif %}
 
     {% if solicitations %}
