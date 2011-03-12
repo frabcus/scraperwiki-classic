@@ -10,9 +10,9 @@
 
 <div class="content">
     <h2>Scrapers and Views you own</h2>
-    {% if owned_scrapers %}
+    {% if owned_code_objects %}
       <ul class="scraper_list">
-      {% for code in owned_scrapers %}
+      {% for code in owned_code_objects %}
         {% include 'frontend/includes/code_object_line.html' %}
       {% endfor %}
       </ul>

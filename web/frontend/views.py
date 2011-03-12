@@ -53,15 +53,15 @@ def frontpage(request, public_profile_field=None):
 @login_required
 def dashboard(request):
     user = request.user
-    owned_scrapers = user.code_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
-    owned_count = len(owned_scrapers) 
+    owned_code_objects = user.code_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
+    owned_count = len(owned_code_objects) 
     # needs to be expanded to include scrapers you have edit rights on.
     contribution_scrapers = user.code_set.filter(usercoderole__role='editor', deleted=False)
     contribution_count = len(contribution_scrapers)
     following_scrapers = user.code_set.filter(usercoderole__role='follow', deleted=False)
     following_count = len(following_scrapers)
 
-    return render_to_response('frontend/dashboard.html', {'owned_scrapers': owned_scrapers, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count,'language':'python' }, context_instance = RequestContext(request))
+    return render_to_response('frontend/dashboard.html', {'owned_code_objects': owned_code_objects, 'owned_count' : owned_count, 'contribution_scrapers' : contribution_scrapers, 'contribution_count': contribution_count, 'following_scrapers' : following_scrapers, 'following_count' : following_count,'language':'python' }, context_instance = RequestContext(request))
 
 def profile_detail(request, username):
     
