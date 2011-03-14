@@ -190,8 +190,6 @@ def DataStore (config) :
         ds = DataStoreClass(config)
     return ds
 
-
-
 def strunc(v, t):
     if not t or len(v) < t:
         return v
@@ -215,53 +213,44 @@ def ifsencode_trunc(v, t):
     return strencode_trunc(v, t)
 
 
-# functions moved from the out of data code into here to manage their development
-def save(unique_keys, data, date = None, latlng = None, silent = False, verbose=2) :
+                # would like to deprecate date, latlng, silent
+def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="swdata", commit=True, verbose=2) :
     ds = DataStore(None)
     
-    if silent:   # should deprecate soon
-        verbose = 0
-    
-    # enable soon (new version wrapper)
-    if False and not ds.uses_old_datastore():
-        
-        rc = True
-        if date is not None:
-            if type(date) not in [ datetime.datetime, datetime.date ] :
-                rc, arg = False, 'date should be a python.datetime (not %s)' % type(date)
-
-        if latlng is not None :
-            if type(latlng) not in [ types.ListType, types.TupleType ] or len(latlng) != 2:
-                rc, arg = False, 'latlng must be a (float,float) list or tuple'
-            elif type(latlng[0]) not in [ types.IntType, types.LongType, types.FloatType ]:
-                rc, arg = False, 'latlng must be a (float,float) list or tuple'
-            elif type(latlng[1]) not in [ types.IntType, types.LongType, types.FloatType ]:
-                rc, arg = False, 'latlng must be a (float,float) list or tuple'
-
-        if date is not None :
-            scraper_data["date"] = date.isoformat()
-        if latlng is not None :
-            scraper_data["latlng_lat"] = float(latlng[0])
-            scraper_data["latlng_lng"] = float(latlng[1])
-        
+    # keep using old database if anything is in it
+    if ds.uses_old_datastore():
+        rc, arg = ds.save(unique_keys, data, date, latlng)
         if not rc:
-            rc, arg = ds.save_sqlite(unique_keys, data, verbose=verbose)
-        if not rc:
-            raise Exception(arg) 
+            raise Exception (arg) 
+        
+        if verbose:
+            pdata = {}
+            for key, value in data.items():
+                pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
+            scraperwiki.console.logScrapedData(pdata)
         return arg
+
+    # collapse parameters and call main function
+    if date is not None:
+        if type(date) not in [ datetime.datetime, datetime.date ] :
+            raise Exception('date should be a python.datetime (not %s)' % type(date))
+
+    if latlng is not None :
+        if type(latlng) not in [ types.ListType, types.TupleType ] or len(latlng) != 2:
+            raise Exception('latlng must be a (float,float) list or tuple')
+        elif type(latlng[0]) not in [ types.IntType, types.LongType, types.FloatType ]:
+            raise Exception('latlng must be a (float,float) list or tuple')
+        elif type(latlng[1]) not in [ types.IntType, types.LongType, types.FloatType ]:
+            raise Exception('latlng must be a (float,float) list or tuple')
+
+    ldata = data.copy()
+    if date is not None :
+        ldata["date"] = date.isoformat()
+    if latlng is not None :
+        ldata["latlng_lat"] = float(latlng[0])
+        ldata["latlng_lng"] = float(latlng[1])
     
-    
-    # old version
-    rc, arg = ds.save(unique_keys, data, date, latlng)
-    if not rc:
-        raise Exception (arg) 
-    
-    if verbose:
-        pdata = {}
-        for key, value in data.items():
-            pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
-        scraperwiki.console.logScrapedData(pdata)
-    return arg
+    return save_sqlite(unique_keys=unique_keys, data=ldata, table_name=table_name, commit=commit, verbose=verbose)
 
 
 
