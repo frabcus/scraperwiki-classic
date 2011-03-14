@@ -785,11 +785,6 @@ class ScraperController (BaseController) :
                 cltime2    = time.time()
                 swl.log (self.m_scraperID, self.m_runID, 'C.END',   arg1 = ostimes2[2] - ostimes1[2], arg2 = ostimes2[3] - ostimes1[3])
     
-                msg = '%d seconds elapsed, used %d CPU seconds' %  \
-                                        (   int(cltime2 - cltime1),
-                                            int(ostimes2[2] - ostimes1[2])
-                                        )
-                
                 # this creates the status output that is passed out to runner.py.  
                 # The actual completion signal comes when the runner.py process ends
                 self.wfile.write \
