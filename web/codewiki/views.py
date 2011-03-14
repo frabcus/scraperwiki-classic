@@ -217,7 +217,7 @@ def scraper_delete_data(request, short_name):
     if not scraper:
         return code_error_response(models.Scraper, short_name=short_name, request=request)
 
-    if scraper.owner() != request.user:
+    if scraper.owner() != request.user and not request.user.is_staff:
         raise Http404
     if request.POST.get('delete_data', None) == '1':
         dataproxy = DataStore(scraper.guid, scraper.short_name)
@@ -301,7 +301,7 @@ def scraper_delete_scraper(request, wiki_type, short_name):
         if not code_object:
             return code_error_response(models.View, short_name=short_name, request=request)
 
-    if code_object.owner() != request.user:
+    if code_object.owner() != request.user and not request.user.is_staff:
         raise Http404
 
     if request.POST.get('delete_scraper', None) == '1':

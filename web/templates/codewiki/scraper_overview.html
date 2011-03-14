@@ -229,7 +229,10 @@
     {% endif %}
     
     <h3>Delete &amp; reset</h3>
-    {% if user_owns_it %}    
+    {% if user_owns_it or user.is_staff %}    
+        {% if user.is_staff and not user_owns_it %}
+            <div class="staff">
+        {% endif %}
         <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
             <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
             <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
@@ -240,6 +243,9 @@
             <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
             <p>Deletes this scraper and all its data. There is no undo.</p>
         </form>
+        {% if user.is_staff and not user_owns_it %}
+            </div>
+        {% endif %}
     {% else %}
         <p class="infobox">Only the creator of a scraper can delete or reset it.</p>
     {% endif %}
