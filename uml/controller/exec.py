@@ -127,12 +127,14 @@ config.set         ('dataproxy', 'port', string.split(datastore, ':')[1])
 # uncomment the following line and the ProxyHandler lines if you want proxying to work 
 # in a local version
 
+        # This is not used in the real deployed version as it uses another lower level method within the UMLs
+        # ... although it does not appear to have been built for ftp (so you might not get ftp for PHP version)
 ##os.environ['http_proxy' ] = httpProxy
 ##os.environ['https_proxy'] = httpsProxy
 os.environ['ftp_proxy'  ] = ftpProxy
 scraperwiki.utils.urllibSetup   ()
 
-#  This is for urllib2.urlopen() (and hance scraperwiki.scrape()) where
+#  This is for urllib2.urlopen() (and hence scraperwiki.scrape()) where
 #  we can set explicit handlers.
 #
 scraperwiki.utils.urllib2Setup \

@@ -549,7 +549,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         tap      = config.get (socket.gethostname(), 'tap')
-        httpport = config.get ('webproxy',  'port')
+        # webport = config.get ('webproxy',  'port')   # no longer used and useless
+            # httpport, httpsport passed in and only used in debug versions as there is a new lower level method that 
+            # intercepts the ports from within the UML configurations
+        httpport = config.get ('httpproxy',  'port')
+        httpsport = config.get ('httpsproxy',  'port')
         ftpport  = config.get ('ftpproxy',  'port')
         dshost   = config.get ('dataproxy', 'host')
         dsport   = config.get ('dataproxy', 'port')
@@ -557,7 +561,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         args    = \
                 [   'exec.%s' % lsfx,
                     '--http=http://%s:%s'       % (tap,  httpport),
-                    '--https=http://%s:%s'      % (tap,  httpport),
+                    '--https=http://%s:%s'      % (tap,  httpsport),
                     '--ftp=ftp://%s:%s'         % (tap,  ftpport ),
                     '--ds=%s:%s'                % (dshost, dsport),
                     '--path=%s'                 % string.join(self.m_paths, ':'),

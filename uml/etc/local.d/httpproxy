@@ -34,6 +34,6 @@ case "$1" in
   	do_start
 	;;
   *)
-	echo "Usage: orbited {start|stop|restart}" >&2
+	echo "Usage: httpproxy {start|stop|restart}" >&2
 	;;
 esac

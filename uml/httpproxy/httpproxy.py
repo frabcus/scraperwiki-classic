@@ -118,7 +118,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         for block in self.m_blocked :
             if re.match(block, path) :
                 allowed = False
-
+        
         return allowed
 
     def _connect_to (self, scheme, netloc) :
@@ -246,7 +246,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         else:
             # We've run out of attempts so reraise the last exception
             if ex:
-                raise ex
+                raise Exception("httpproxy Ident call-back failed "+str(ex))
 
         for line in string.split (ident, '\n'):
             if line == '' :
@@ -710,7 +710,7 @@ if __name__ == '__main__' :
     subproc = False
     daemon  = False
     confnam = 'uml.cfg'
-
+    
     for arg in sys.argv[1:] :
 
         if arg in ('-h', '--help')  :
