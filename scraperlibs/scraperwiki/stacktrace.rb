@@ -22,6 +22,10 @@ def getExceptionTraceback(e, code)
         codelines = code.split("\n")
         if (nlinenumber >= 1) && (nlinenumber <= codelines.size)
             stackentry["linetext"] = codelines[nlinenumber-1]
+        elsif (nlinenumber == codelines.size + 1)
+            stackentry["linetext"] = "<end of file>"
+        else
+            stackentry["linetext"] = "ScraperWiki internal error, line number out of range in getExceptionTraceback"
         end
         stackdump.push(stackentry)
     end
