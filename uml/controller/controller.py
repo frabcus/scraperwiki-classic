@@ -621,7 +621,7 @@ class ScraperController (BaseController) :
     def fnExecute (self, path) :
 
         """
-        Execute python code passed as a file attached as the \em script
+        Execute python/ruby/php code passed as a file attached as the \em script
         parameter directly. This should be used for control functions
         so no resource limits are applied, and the code is run as the
         current user.
