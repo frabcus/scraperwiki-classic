@@ -543,7 +543,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
     def execScript (self, lsfx, code, pwfd, lwfd) :
 
         """
-        Execute a python script, passed as the text of the script. If the
+        Execute a python/ruby/php script, passed as the text of the script. If the
         script throws an exception then generate a traceback, preceeded
         by a delimiter.
         """
@@ -625,7 +625,7 @@ class ScraperController (BaseController) :
     def fnExecute (self, path) :
 
         """
-        Execute python code passed as a file attached as the \em script
+        Execute python/ruby/php code passed as a file attached as the \em script
         parameter directly. This should be used for control functions
         so no resource limits are applied, and the code is run as the
         current user.
@@ -789,11 +789,6 @@ class ScraperController (BaseController) :
                 cltime2    = time.time()
                 swl.log (self.m_scraperID, self.m_runID, 'C.END',   arg1 = ostimes2[2] - ostimes1[2], arg2 = ostimes2[3] - ostimes1[3])
     
-                msg = '%d seconds elapsed, used %d CPU seconds' %  \
-                                        (   int(cltime2 - cltime1),
-                                            int(ostimes2[2] - ostimes1[2])
-                                        )
-                
                 # this creates the status output that is passed out to runner.py.  
                 # The actual completion signal comes when the runner.py process ends
                 self.wfile.write \

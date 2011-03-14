@@ -4,8 +4,19 @@ def getExceptionTraceback(e, code)
     lbacktrace.pop
 
     exceptiondescription = e.to_s
-    (filename, linenumber) = exceptiondescription.split(":")
+    (filename, linenumber, message) = exceptiondescription.split(/[:\n]/) # there is more after 3rd, thrown away
     if (filename == "(eval)")
+        if (message.strip == "compile error")
+            # Special case for compile errors, where there are *two* errors in the exception description.
+            # So in the case where we have more lines than the first one, and first is a compile error,
+            # we can ditch the compile error - there is e.g. a syntax error in the rest of the description.
+            lines = exceptiondescription.split("\n")
+            if lines.size > 1
+                # Remove the first line, with the compile error in it
+                exceptiondescription = lines[1,lines.size()].join("\n")
+            end
+        end 
+
         lbacktrace.push(exceptiondescription)
     end
 
