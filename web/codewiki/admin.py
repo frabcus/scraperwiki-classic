@@ -26,11 +26,11 @@ class ScraperAdmin(CodeAdmin):
     inlines = (UserCodeRoleInlines,)
     list_display = ('title', 'short_name', 'last_run', 'status', 'published', 'deleted')
     list_filter = ('status', 'last_run', 'published', 'deleted')
-    search_fields = ('title',)
+    search_fields = ('title', 'short_name')
 
 class ViewAdmin(CodeAdmin):
     list_filter = ('status', 'mime_type', 'published',)
-    search_fields = ('title',)
+    search_fields = ('title', 'short_name')
 
 
 admin.site.register(Scraper, ScraperAdmin)
