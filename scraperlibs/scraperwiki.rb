@@ -22,10 +22,23 @@ module ScraperWiki
         ScraperWiki.dumpMessage({'message_type' => 'httpresponseheader', 'headerkey' => headerkey, 'headervalue' => headervalue})
     end
 
+    def ScraperWiki._scrape_uri_with_redirect(uri, limit = 10)
+      # You should choose better exception.
+      raise ArgumentError, 'HTTP redirect too deep' if limit == 0
+
+      response = Net::HTTP.get_response(uri)
+      case response
+      when Net::HTTPSuccess     then response
+      when Net::HTTPRedirection then _scrape_uri_with_redirect(uri.merge(response['location']), limit - 1)
+      else
+        response.error!
+      end
+    end
+
     def ScraperWiki.scrape (url, params = nil)
         uri  = URI.parse(url)
         if params.nil?
-            data = Net::HTTP.get(uri)
+            data = ScraperWiki._scrape_uri_with_redirect(uri).body
         else
             if uri.path = ''
                 uri.path = '/' # must post to a path
