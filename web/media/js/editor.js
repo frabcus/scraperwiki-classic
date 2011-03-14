@@ -621,9 +621,16 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
           } else if (data.message_type == "executionstatus") {
               if (data.content == "startingrun")
                 startingrun(data.runID, data.uml, data.chatname);
-              else if (data.content == "runcompleted")
-                writeToConsole("Finished: " + data.elapsed_seconds + " seconds elapsed, " + data.CPU_seconds + " CPU seconds used"); 
-              else if (data.content == "killsignal")
+              else if (data.content == "runcompleted") {
+                var completeMsg = "Finished: " + data.elapsed_seconds + " seconds elapsed, " + data.CPU_seconds + " CPU seconds used"; 
+                if (data.exit_status)
+                    completeMsg = completeMsg + ", exit status " + data.exit_status;
+                if (data.term_sig_text)
+                    completeMsg = completeMsg + ", terminated by " + data.term_sig_text;
+                else if (data.term_sig)
+                    completeMsg = completeMsg + ", terminated by signal " + data.term_sig;
+                writeToConsole(completeMsg);
+              } else if (data.content == "killsignal")
                 writeToConsole(data.message); 
               else if (data.content == "runfinished")
                 endingrun(data.content); 

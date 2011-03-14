@@ -162,10 +162,10 @@ scraperwiki.datastore.DataStore (config)
 # be sent  SIGXCPU once per second until the hard limit is reached, at which
 # time it is sent SIGKILL". This is one second later, as the runner does
 # "fs.setCPULimit      (cpulimit, cpulimit+1)". --FAI)
-def sigXCPU (signum, frame) :
-    raise Exception ("CPUTimeExceeded")
+#def sigXCPU (signum, frame) :
+#    raise Exception ("CPUTimeExceeded")
 
-signal.signal (signal.SIGXCPU, sigXCPU)
+#signal.signal (signal.SIGXCPU, sigXCPU)
 
 code = open(script).read()
 try :
