@@ -1400,6 +1400,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             {
                 var stackentry = stackdump[i]; 
                 sMessage = (stackentry.file !== undefined ? (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file) : ""); 
+                if (sMessage === undefined) {
+                    alert("sMessage is undefined in writeExceptionDump, internal error")
+                }
                 if (stackentry.furtherlinetext !== undefined) {
                     sMessage += " -- " + stackentry.furtherlinetext;
                 }
