@@ -543,7 +543,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
     def execScript (self, lsfx, code, pwfd, lwfd) :
 
         """
-        Execute a python script, passed as the text of the script. If the
+        Execute a python/ruby/php script, passed as the text of the script. If the
         script throws an exception then generate a traceback, preceeded
         by a delimiter.
         """
