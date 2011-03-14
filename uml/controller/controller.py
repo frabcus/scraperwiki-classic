@@ -800,6 +800,7 @@ class ScraperController (BaseController) :
                     msg['exit_status'] = os.WEXITSTATUS(waited_status)
                 if os.WIFSIGNALED(waited_status):
                     msg['term_sig'] = os.WTERMSIG(waited_status)
+                    # generate text version (e.g. SIGSEGV rather than 11)
                     sigmap = dict((k, v) for v, k in signal.__dict__.iteritems() if v.startswith('SIG'))
                     if msg['term_sig'] in sigmap:
                         msg['term_sig_text'] = sigmap[msg['term_sig']]
