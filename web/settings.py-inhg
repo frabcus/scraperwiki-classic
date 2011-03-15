@@ -62,24 +62,26 @@ EMAIL_FROM = 'noreply@localhost'
 MARKET_BOUNTY_CHARGE = 6.3
 TEAM_EMAIL = 'all@scraperwiki.com'
 
-API_DOMAIN = 'localhost'
 
 ORBETED_PORT = 8001
 ORBETED_DOMAIN = 'localhost'
 
 # TEST_RUNNER = 'django-test-coverage.runner.run_tests'
 
+
+API_DOMAIN = 'localhost'
 MEDIA_URL = '/media/'
+MAIN_URL  = 'http://scraperwiki.com'  # aka Site.objects.get_current().domain (though as we have put 3 other domains here, why not this one too unless making things gratuitously awkward)
+VIEW_DOMAIN = 'localhost:8000'
+
 
 USE_DUMMY_VIEWS = False # use a dummy when running views in iframes
 
-#Google docs settings
-GDOCS_UPLOAD_USER = ''
+     #Google docs settings  (deprecatedGDOCS_UPLOAD_USER = ''
 GDOCS_UPLOAD_PASSWORD = ''
 GDOCS_UPLOAD_FOLDER_URI = '' #you will probably want to set the permissions on this folder to be public
 GDOCS_UPLOAD_MAX = 1048576 #1MB upload max set by google
 
 SCREENSHOT_DIR = '/tmp/'
-VIEW_DOMAIN = 'localhost:8000'
 
 UMLURLS = [ ]  # no umls for local installs

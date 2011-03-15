@@ -126,7 +126,19 @@
 </div>
 
 <div class="content full">
-    <h2>About this scraper {% if user.is_authenticated %}<a href="#" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}</h2>
+    <h2>About this scraper 
+        {% if user.is_authenticated %}<a href="#" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}
+        {% if user.is_staff %}
+          <span class="staff">
+          {% if ckanresource %}
+            <a href="{{ckanresource.ckan_url}}">Go to CKAN page</a>
+          {% endif %}
+          {% if ckansubmit %}
+            <a href="{{ckansubmit}}">Submit to CKAN</a>
+          {% endif %}
+          </span>
+        {% endif %}
+    </h2>
     <div class="text_wiki">
         <div id="divAboutScraper">{{ scraper.description|textile }}</div>
     </div>
