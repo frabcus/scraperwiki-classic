@@ -543,13 +543,17 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
     def execScript (self, lsfx, code, pwfd, lwfd) :
 
         """
-        Execute a python script, passed as the text of the script. If the
+        Execute a python/ruby/php script, passed as the text of the script. If the
         script throws an exception then generate a traceback, preceeded
         by a delimiter.
         """
 
         tap      = config.get (socket.gethostname(), 'tap')
-        httpport = config.get ('webproxy',  'port')
+        # webport = config.get ('webproxy',  'port')   # no longer used and useless
+            # httpport, httpsport passed in and only used in debug versions as there is a new lower level method that 
+            # intercepts the ports from within the UML configurations
+        httpport = config.get ('httpproxy',  'port')
+        httpsport = config.get ('httpsproxy',  'port')
         ftpport  = config.get ('ftpproxy',  'port')
         dshost   = config.get ('dataproxy', 'host')
         dsport   = config.get ('dataproxy', 'port')
@@ -557,7 +561,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         args    = \
                 [   'exec.%s' % lsfx,
                     '--http=http://%s:%s'       % (tap,  httpport),
-                    '--https=http://%s:%s'      % (tap,  httpport),
+                    '--https=http://%s:%s'      % (tap,  httpsport),
                     '--ftp=ftp://%s:%s'         % (tap,  ftpport ),
                     '--ds=%s:%s'                % (dshost, dsport),
                     '--path=%s'                 % string.join(self.m_paths, ':'),
@@ -621,7 +625,7 @@ class ScraperController (BaseController) :
     def fnExecute (self, path) :
 
         """
-        Execute python code passed as a file attached as the \em script
+        Execute python/ruby/php code passed as a file attached as the \em script
         parameter directly. This should be used for control functions
         so no resource limits are applied, and the code is run as the
         current user.
@@ -780,27 +784,27 @@ class ScraperController (BaseController) :
                 #  is summed over all children.
                 #
                 ostimes1   = os.times ()
-                os.waitpid(pid, 0)
+                (waited_pid, waited_status) = os.waitpid(pid, 0)
                 ostimes2   = os.times ()
                 cltime2    = time.time()
                 swl.log (self.m_scraperID, self.m_runID, 'C.END',   arg1 = ostimes2[2] - ostimes1[2], arg2 = ostimes2[3] - ostimes1[3])
     
-                msg = '%d seconds elapsed, used %d CPU seconds' %  \
-                                        (   int(cltime2 - cltime1),
-                                            int(ostimes2[2] - ostimes1[2])
-                                        )
-                
                 # this creates the status output that is passed out to runner.py.  
                 # The actual completion signal comes when the runner.py process ends
-                self.wfile.write \
-                    (   json.dumps \
-                        (   {   'message_type'    : 'executionstatus',
+                msg =       {   'message_type'    : 'executionstatus',
                                 'content'         : 'runcompleted', 
                                 'elapsed_seconds' : int(cltime2 - cltime1), 
                                 'CPU_seconds'     : int(ostimes2[2] - ostimes1[2])
                             }
-                        )   + '\n'
-                    )
+                if os.WIFEXITED(waited_status):
+                    msg['exit_status'] = os.WEXITSTATUS(waited_status)
+                if os.WIFSIGNALED(waited_status):
+                    msg['term_sig'] = os.WTERMSIG(waited_status)
+                    # generate text version (e.g. SIGSEGV rather than 11)
+                    sigmap = dict((k, v) for v, k in signal.__dict__.iteritems() if v.startswith('SIG'))
+                    if msg['term_sig'] in sigmap:
+                        msg['term_sig_text'] = sigmap[msg['term_sig']]
+                self.wfile.write(json.dumps(msg) + '\n')
 
             except Exception, e :
 

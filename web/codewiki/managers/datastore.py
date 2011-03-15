@@ -11,14 +11,17 @@ def receiveoneline(socket):
     while True:
         srec = socket.recv(1024)
         if not srec:
-            scraperwiki.console.dumpMessage({'message_type': 'chat', 'message':"socket from dataproxy has unfortunately closed"})
-            break
+            return {'error': "socket from dataproxy has unfortunately closed"}
         ssrec = srec.split("\n")  # multiple strings if a "\n" exists
         sbuffer.append(ssrec.pop(0))
         if ssrec:
             break
+    
     line = "".join(sbuffer)
-    return line
+    try:
+        return json.loads(line)
+    except ValueError, e:
+        raise Exception("%s:%s" % (e.message, text))
 
 
 class DataStoreClass :
@@ -40,18 +43,13 @@ class DataStoreClass :
         data = [ ("uml", socket.gethostname()), ("port", self.m_socket.getsockname()[1]), ("scraperid", scraperID), ("short_name", short_name) ]
         self.m_socket.send ('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         
-        line = receiveoneline(self.m_socket)  # comes back with True, "Ok"
-        rc, arg = json.loads(line)
+        rc, arg = receiveoneline(self.m_socket)  # comes back with True, "Ok"
         assert rc, arg
         
 
     def request(self, req) :
         self.m_socket.sendall(json.dumps(req) + '\n')
-        line = receiveoneline(self.m_socket)
-        try:
-            return json.loads(line)
-        except ValueError, e:
-            raise Exception("%s:%s" % (e.message, text))
+        return receiveoneline(self.m_socket)
 
 
     def data_dictlist (self, tablename = "", limit = 1000, offset = 0, start_date = None, end_date = None, latlng = None) :

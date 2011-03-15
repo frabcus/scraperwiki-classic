@@ -114,8 +114,6 @@ ul.data_tabs li { display:inline; list-style-type:none; padding:0.4em 0.8em 0.25
         }
 ul.data_tabs li.selected {border-bottom:solid 1px #fff; position:relative; background:#f8f8f8; }
 div.data_content {  margin-top: 0; padding-top: 0; display: block } 
-#popupinteractivesqlite { color: blue; }
-
 
 /* Tables */
 table {width:100%; border-collapse:collapse;}

@@ -369,7 +369,7 @@ class Database :
             if not cursor.fetchall():
                 tablename = "swdata"
         if tablename:
-            result = self.sqlitecommand(scraperID, "fromfrontend", short_name, "execute", "select * from `%s` limit ? offset ?" % tablename, (limit, offset))
+            result = self.sqlitecommand(scraperID, "fromfrontend", short_name, "execute", "select * from main.`%s` limit ? offset ?" % tablename, (limit, offset))
             if "error" in result:
                 return [ False, result["error"] ]
             return [True, [ dict(zip(result["keys"], d))  for d in result["data"] ] ]
@@ -785,18 +785,21 @@ class SqliteSaveInfo:
         return res
     
     def rebuildinfo(self):
-        tblinfo = self.sqliteexecute("PRAGMA table_info(%s)" % self.swdatatblname)
-        if not tblinfo["data"]:
+        if not self.sqliteexecute("select * from main.sqlite_master where name=?", (self.swdatatblname,))["data"]:
             return False
+
+        tblinfo = self.sqliteexecute("PRAGMA main.table_info(`%s`)" % self.swdatatblname)
+            # there's a bug:  PRAGMA main.table_info(swdata) returns the schema for otherdatabase.swdata 
+            # following an attach otherdatabase where otherdatabase has a swdata and main does not
             
         self.swdatakeys = [ a[1]  for a in tblinfo["data"] ]
         self.swdatatypes = [ a[2]  for a in tblinfo["data"] ]
-        self.sqdatatemplate = "insert or replace into `%s` values (%s)" % (self.swdatatblname, ",".join(["?"]*len(self.swdatakeys)))
+        self.sqdatatemplate = "insert or replace into main.`%s` values (%s)" % (self.swdatatblname, ",".join(["?"]*len(self.swdatakeys)))
 
         return True
             
     def buildinitialtable(self):
-        self.sqliteexecute("create table `%s` (`date_scraped` text)" % self.swdatatblname)
+        self.sqliteexecute("create table main.`%s` (`date_scraped` text)" % self.swdatatblname)
     
     def newcolumns(self, data):
         newcols = [ ]
@@ -814,15 +817,15 @@ class SqliteSaveInfo:
         return newcols
 
     def addnewcolumn(self, k, vt):
-        self.sqliteexecute("alter table `%s` add column `%s` %s" % (self.swdatatblname, k, vt))
+        self.sqliteexecute("alter table main.`%s` add column `%s` %s" % (self.swdatatblname, k, vt))
 
     def findclosestindex(self, unique_keys):
-        idxlist = self.sqliteexecute("PRAGMA index_list(`%s`)" % self.swdatatblname)  # [seq,name,unique]
+        idxlist = self.sqliteexecute("PRAGMA main.index_list(`%s`)" % self.swdatatblname)  # [seq,name,unique]
         uniqueindexes = [ ]
         for idxel in idxlist["data"]:
             if idxel[2]:
                 idxname = idxel[1]
-                idxinfo = self.sqliteexecute("PRAGMA index_info(`%s`)" % idxname) # [seqno,cid,name]
+                idxinfo = self.sqliteexecute("PRAGMA main.index_info(`%s`)" % idxname) # [seqno,cid,name]
                 idxset = set([ a[2]  for a in idxinfo["data"] ])
                 idxoverlap = len(idxset.intersection(unique_keys))
                 uniqueindexes.append((idxoverlap, idxname, idxset))
@@ -841,14 +844,14 @@ class SqliteSaveInfo:
                 istart = int(mnum.group(1))
         for i in range(10000):
             newidxname = "%s_index%d" % (self.swdatatblname, istart+i)
-            if not self.sqliteexecute("select name from sqlite_master where name=?", (newidxname,))["data"]:
+            if not self.sqliteexecute("select name from main.sqlite_master where name=?", (newidxname,))["data"]:
                 break
             
         res = { "newindex": newidxname }
         lres = self.sqliteexecute("create unique index `%s` on `%s` (%s)" % (newidxname, self.swdatatblname, ",".join(["`%s`"%k  for k in unique_keys])))
         if "error" in lres:  return lres
         if idxname:
-            lres = self.sqliteexecute("drop index `%s`" % idxname)
+            lres = self.sqliteexecute("drop index main.`%s`" % idxname)
             if "error" in lres:  
                 if lres["error"] != 'sqlite3.Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped':
                     return lres

@@ -58,6 +58,15 @@
         {% endif %}
 
         {% if sqlitedata %}
+             {% if user.is_staff %}
+              <div class="staff" style="float: right">
+              <a href="#" id="popupinteractivesqlite">Interactive</a> | 
+              <span>
+                <a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a>
+                <a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a>
+              </span>
+              </div>
+             {% endif %}
            <ul id="sqlite_schema">
             {% for sqltablename, sqltabledata in sqlitedata.items %}
               <li>{{sqltabledata.sql}}</li>
@@ -69,11 +78,6 @@
                     {{sqltablename}} ({{sqltabledata.count}}  rows)
                 </li>
              {% endfor %}
-              <li id="popupinteractivesqlite">Interactive</li>
-              <li style="display: none; margin: 0; padding: 0">
-                <a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a>
-                <a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a>
-              </li>
             </ul>
           {% for sqltablename, sqltabledata in sqlitedata.items %}
             <div id="data_content_{{forloop.counter}}" class="data_content">
@@ -225,7 +229,10 @@
     {% endif %}
     
     <h3>Delete &amp; reset</h3>
-    {% if user_owns_it %}    
+    {% if user_owns_it or user.is_staff %}    
+        {% if user.is_staff and not user_owns_it %}
+            <div class="staff">
+        {% endif %}
         <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
             <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
             <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
@@ -236,6 +243,9 @@
             <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
             <p>Deletes this scraper and all its data. There is no undo.</p>
         </form>
+        {% if user.is_staff and not user_owns_it %}
+            </div>
+        {% endif %}
     {% else %}
         <p class="infobox">Only the creator of a scraper can delete or reset it.</p>
     {% endif %}

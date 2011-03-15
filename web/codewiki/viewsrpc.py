@@ -120,6 +120,12 @@ def scraperwikitag(scraper, html, panepresent):
 
 def rpcexecute(request, short_name, revision=None):
     scraper = get_object_or_404(models.Code.objects, short_name=short_name)
+    
+    if revision:
+        try: 
+            revision = int(revision)
+        except ValueError: 
+            revision = None
     code = scraper.saved_code(revision)
     
     # quick case where we have PHP with no PHP code in it (it's all pure HTML)

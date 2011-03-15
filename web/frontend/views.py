@@ -61,7 +61,7 @@ def dashboard(request):
     # following_code_objects = user.code_set.filter(usercoderole__role='follow', deleted=False)
     # following_count = len(following_code_objects)
 
-    return render_to_response('frontend/dashboard.html', {'owned_code_objects': owned_code_objects, 'owned_count' : owned_count, 'contribution_code_objects' : contribution_code_objects, 'contribution_count': contribution_count, 'following_code_objects' : following_code_objects, 'following_count' : following_count,'language':'python' }, context_instance = RequestContext(request))
+    return render_to_response('frontend/dashboard.html', {'owned_code_objects': owned_code_objects, 'owned_count' : owned_count, 'contribution_code_objects' : contribution_code_objects, 'contribution_count': contribution_count, 'language':'python' }, context_instance = RequestContext(request))
 
 def profile_detail(request, username):
     

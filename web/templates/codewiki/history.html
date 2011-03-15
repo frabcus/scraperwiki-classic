@@ -69,6 +69,7 @@
           </div>
 
           <div class="codepreviewer"> 
+            <h3 class="loading">Loading</h3>
             <h4 class="cprev">Difference between, revision <span class="shrev"></span> and previous revision <span class="shprevrev"></span></h4>
             <div class="history_code_border">
               <div class="otherlinenumbers"></div> 
@@ -267,9 +268,13 @@ function previewchanges_show(block)
     var cidprevrev = (prevrev ? "?rev="+prevrev : ""); 
     var ciddiff = (prevrev ? "?otherrev="+prevrev+"&rev="+rev : ""); 
 
+    var codepreviewerdiv = block.find(".codepreviewer");
+    codepreviewerdiv.find(".history_code_border").hide();
+    codepreviewerdiv.find(".loading").show();
+    codepreviewerdiv.show();
+
     cachefetch(cidrev, function() { cachefetch(cidprevrev, function() { cachefetch(ciddiff, function()
     {
-        var codepreviewerdiv = block.find(".codepreviewer");
         codepreviewerdiv.find(".cprev span.shrev").text(rev);  // could allow for sub-inspection of series
         codepreviewerdiv.find(".cprev span.shprevrev").text(prevrev); 
 
@@ -282,11 +287,13 @@ function previewchanges_show(block)
         else
             highlightCode(fetchedcache[cidrev], Parser, codepreviewerdiv); 
 
-        codepreviewerdiv.show(); 
         if (fequallines > 5) 
             previewchanges_hideequal(block); 
         else
             previewchanges_showequal(block); 
+
+        codepreviewerdiv.find(".loading").hide();
+        codepreviewerdiv.find(".history_code_border").show();
 
         codepreviewerdiv.find(".outputlines .fequal").click(function() { previewchanges_hideequal(block, $(this)); }); 
         codepreviewerdiv.find(".outputlines .equal").click(function() { previewchanges_showbothcode(block); }); 
