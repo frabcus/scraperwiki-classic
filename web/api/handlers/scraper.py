@@ -1,4 +1,4 @@
-from web.codewiki.models import Scraper, ScraperRunEvent
+from web.codewiki.models import Code, ScraperRunEvent
 from django.contrib.auth.models import User
 from frontend.models import UserToUserRole
 from api.handlers.api_base import APIBase
@@ -155,7 +155,7 @@ class Search(APIBase):
     def value(self, request):
         query = request.GET.get('query', None) 
         result = [ ]  # list of dicts
-        for scraper in Scraper.objects.search(query):
+        for scraper in Code.objects.search(query):
             result.append({'short_name':scraper.short_name, 'title':scraper.title, 'description':scraper.description, 'created':scraper.created_at})
         return result
 
