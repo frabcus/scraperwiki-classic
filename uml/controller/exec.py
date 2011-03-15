@@ -165,7 +165,7 @@ scraperwiki.datastore.DataStore (config)
 # time it is sent SIGKILL". This is one second later, as the runner does
 # "fs.setCPULimit      (cpulimit, cpulimit+1)". --FAI)
 def sigXCPU (signum, frame) :
-    raise Exception ("CPUTimeExceeded")
+    raise Exception ("ScraperWiki CPU time exceeded")
 signal.signal (signal.SIGXCPU, sigXCPU)
 
 
