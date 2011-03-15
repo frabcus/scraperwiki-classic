@@ -250,6 +250,9 @@ def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="sw
         ldata["latlng_lat"] = float(latlng[0])
         ldata["latlng_lng"] = float(latlng[1])
     
+    if "date_scraped" not in ldata:
+        ldata["date_scraped"] = datetime.datetime.now().isoformat()
+    
     return save_sqlite(unique_keys=unique_keys, data=ldata, table_name=table_name, commit=commit, verbose=verbose)
 
 
