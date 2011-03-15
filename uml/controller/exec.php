@@ -123,7 +123,7 @@ function errorHandler($errno, $errstr, $errfile, $errline)
     scraperwiki::sw_dumpMessage($etb); 
     return true; 
 }
-set_error_handler("errorHandler", E_ALL);  // this is for errors, not exceptions (eg 1/0)
+set_error_handler("errorHandler", E_ALL & ~E_NOTICE);  // this is for errors, not exceptions (eg 1/0)
 
 /*
     Can't get this to work
