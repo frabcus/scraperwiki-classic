@@ -732,7 +732,6 @@ class Database :
 
 
 
-# long lists able to go to the save_sqlite
 
     def save_sqlite(self, scraperID, runID, short_name, unique_keys, data, swdatatblname):
         res = { }
@@ -747,25 +746,34 @@ class Database :
             ssinfo = self.sqlitesaveinfo[swdatatblname]
         
             
-        newcols = ssinfo.newcolumns(data)
-        if newcols:
-            for k, vt in newcols:
-                ssinfo.addnewcolumn(k, vt)
-            ssinfo.rebuildinfo()
-            res["newcolumn %s" % k] = vt
-
-        if unique_keys:
-            idxname, idxkeys = ssinfo.findclosestindex(unique_keys)
-            if not idxname or idxkeys != set(unique_keys):
-                lres = ssinfo.makenewindex(idxname, unique_keys)
-                if "error" in lres:  return lres
-                res.update(lres)
-            
-            
-        lres = ssinfo.insertdata(data)
-        if "error" in lres:  return lres
+        if type(data) == dict:
+            data = [data]
         
-        res["status"] = 'Data record inserted'
+        nrecords = 0
+        for ldata in data:
+            newcols = ssinfo.newcolumns(ldata)
+            if newcols:
+                for k, vt in newcols:
+                    ssinfo.addnewcolumn(k, vt)
+                ssinfo.rebuildinfo()
+                res["newcolumn %s" % k] = vt
+
+            if nrecords == 0 and unique_keys:
+                idxname, idxkeys = ssinfo.findclosestindex(unique_keys)
+                if not idxname or idxkeys != set(unique_keys):
+                    lres = ssinfo.makenewindex(idxname, unique_keys)
+                    if "error" in lres:  
+                        return lres
+                    res.update(lres)
+            
+            lres = ssinfo.insertdata(ldata)
+            if "error" in lres:  
+                return lres
+            nrecords += 1
+        
+        res["nrecords"] = nrecords
+        res["status"] = 'Data record(s) inserted'
+        print res, "kkk"
         return res
 
 

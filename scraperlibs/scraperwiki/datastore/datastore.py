@@ -139,39 +139,49 @@ class DataStoreClass :
         return self.request (('save', uunique_keys, js_data, date, latlng))
 
     
-    def save_sqlite(self, unique_keys, scraper_data, swdatatblname="swdata"):
-        if type(unique_keys) not in [ types.ListType, types.TupleType ]:
+    def save_sqlite(self, unique_keys, data, swdatatblname="swdata"):
+        if unique_keys != None and type(unique_keys) not in [ types.ListType, types.TupleType ]:
             return { "error":'unique_keys must a list or tuple' }
 
-        for key in unique_keys:
-            if key not in scraper_data:
-                return { "error":'unique_keys must be a subset of data' }
-            if scraper_data[key] == None:
-                return { "error":'unique_key value should not be None' }
+        def convdata(unique_keys, scraper_data):
+            if unique_keys:
+                for key in unique_keys:
+                    if key not in scraper_data:
+                        return { "error":'unique_keys must be a subset of data' }
+                    if scraper_data[key] == None:
+                        return { "error":'unique_key value should not be None' }
+            jdata = { }
+            for key, value in scraper_data.items():
+                if not key:
+                    return { "error": 'key must not be blank' }
+                if type(key) not in [unicode, str]:
+                    return { "error":'key must be string type' }
+                if not re.match("[a-zA-Z0-9_\- ]+$", key):
+                    return { "error":'key must be simple text: '+key }
+                
+                if type(value) in [datetime.datetime, datetime.date]:
+                    value = value.isoformat()
+                elif value == None:
+                    pass
+                elif type(value) not in [int, bool, float, unicode, str]:
+                    value = unicode(value)
+                jdata[key] = value
+            return jdata
+                
 
-        jdata = { }
-        for key, value in scraper_data.items():
-            if not key:
-                return { "error": 'key must not be blank' }
-            if type(key) not in [unicode, str]:
-                return { "error":'key must be string type' }
-            if not re.match("[a-zA-Z0-9_\- ]+$", key):
-                return { "error":'key must be simple text: '+key }
-            
-            if type(value) in [datetime.datetime, datetime.date]:
-                value = value.isoformat()
-            elif value == None:
-                pass
-            elif type(value) not in [int, bool, float, unicode, str]:
-                value = unicode(value)
-
-            jdata[key] = value
-        
-        return self.request(('save_sqlite', unique_keys, jdata, swdatatblname))
+        if type(data) == dict:
+            rjdata = convdata(unique_keys, data)
+        else:
+            rjdata = [ ]
+            for ldata in data:
+                ljdata = convdata(unique_keys, ldata)
+                if ljdata.get("error"):
+                    return ljdata
+                rjdata.append(ljdata)
+        return self.request(('save_sqlite', unique_keys, rjdata, swdatatblname))
     
     
     def postcodeToLatLng (self, postcode) :
-
         return self.request (('postcodetolatlng', postcode))
 
     def close (self) :
@@ -293,8 +303,14 @@ def save_sqlite(unique_keys, data, table_name="swdata", commit=True, verbose=2):
 
     if verbose >= 2:
         pdata = {}
-        for key, value in data.items():
-            pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
+        if type(data) == dict:
+            for key, value in data.items():
+                pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
+        elif data:
+            for key, value in data[0].items():
+                pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
+            pdata["number_records"] = "Number Records: %d" % len(data)
+            
         if not commit:
             pdata["commit"] = "NOT_COMMITTED"
         scraperwiki.console.logScrapedData(pdata)
