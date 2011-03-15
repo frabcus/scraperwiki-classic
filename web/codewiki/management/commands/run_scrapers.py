@@ -88,7 +88,6 @@ def runmessageloop(runner, event, approxlenoutputlimit):
     exceptionmessage = [ ]
     completiondata = None
     outputmessage = [ ]
-    tailmessage = [ ]
     domainscrapes = { }  # domain: [domain, pages, bytes] 
     
     temptailmessage = "\n\n[further output lines suppressed]\n"
@@ -103,14 +102,21 @@ def runmessageloop(runner, event, approxlenoutputlimit):
         
         message_type = data.get('message_type')
         content = data.get("content")
-        
+
         if message_type == 'executionstatus':
             if content == "startingrun":
                 event.run_id = data.get("runID")
-                event.output = "%s\nEXECUTIONSTATUS: uml=%s runid=%s\n" % (event.output, data.get("uml"), data.get("runID"))
+                event.output = "%sEXECUTIONSTATUS: uml=%s runid=%s\n" % (event.output, data.get("uml"), data.get("runID"))
             elif content == "runcompleted":
                 completiondata = data
-                tailmessage.append("\nEXECUTIONSTATUS: seconds_elapsed=%s CPU_seconds_used=%s\n" % (data.get("elapsed_seconds"), data.get("CPU_seconds"))) 
+                completionmessage = str(data.get("elapsed_seconds")) + " seconds elapsed, " 
+                completionmessage += str(data.get("CPU_seconds")) + " CPU seconds used";
+                if "exit_status" in data and data.get("exit_status") != 0:
+                    completionmessage += ", exit status " + str(data.get("exit_status"));
+                if "term_sig_text" in data:
+                    completionmessage += ", terminated by " + data.get("term_sig_text");
+                elif "term_sig" in data:
+                    completionmessage += ", terminated by signal " + str(data.get("term_sig"));
             event.save()
             
         elif message_type == "sources":
@@ -178,14 +184,17 @@ def runmessageloop(runner, event, approxlenoutputlimit):
             outputtail.append(outputmessage.pop())
         outputtail.reverse()
             
+        omittedmessage = ""
         if outputmessage:
-            tailmessage.insert(0, "\n    [%d lines, %d characters omitted]\n\n" % (len(outputmessage), sum(map(len, outputmessage))))
-        event.output = "%s%s%s" % (event.output[:-len(temptailmessage)], "\n".join(tailmessage), "".join(outputtail))
+            omittedmessage = "\n    [%d lines, %d characters omitted]\n\n" % (len(outputmessage), sum(map(len, outputmessage)))
+        event.output = "%s%s%s" % (event.output[:-len(temptailmessage)], omittedmessage, "".join(outputtail))
         
 
     if exceptionmessage:
         event.output = "%s\n\n*** Exception ***\n\n%s\n" % (event.output, "\n\n".join(exceptionmessage))
-    if not completiondata:
+    if completiondata:
+        event.output = "%s\nEXECUTIONSTATUS: %s\n" % (event.output, completionmessage)
+    else:
         event.output = "%s\nEXECUTIONSTATUS: [Run was interrupted (possibly by a timeout)]\n" % (event.output)
     
     for domainscrape in domainscrapes.values():
