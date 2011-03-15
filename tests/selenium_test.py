@@ -18,6 +18,7 @@ class SeleniumTest(unittest.TestCase):
         self.selenium = selenium(SeleniumTest._selenium_host, SeleniumTest._selenium_port, 
                         SeleniumTest._selenium_browser, SeleniumTest._app_url)
         self.selenium.start()
+        self.selenium.window_maximize()
 
     def wait_for_page(self, doing=None):
         hit_limit = True

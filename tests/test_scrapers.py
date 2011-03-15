@@ -79,7 +79,7 @@ class TestScrapers(SeleniumTest):
             print s.get_body_text()
             self.fail('An error occurred deleting data')
             
-        self.failUnless(s.is_text_present( 'This dataset has a total of 0 records' ), 
+        self.failIf(s.is_text_present( 'This dataset has a total of' ), 
                         msg='The data does not appear to have been deleted')
 
 
