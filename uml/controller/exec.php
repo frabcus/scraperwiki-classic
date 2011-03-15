@@ -111,13 +111,6 @@ SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1]) ;
 if (!is_null ($cache))
    scraperwiki::sw_allowCache ($cache) ;
 
-#
-#def sigXCPU (signum, frame) :
-#    raise Exception ("CPUTimeExceeded")
-#
-#signal.signal (signal.SIGXCPU, sigXCPU)
-#
-
 // the following might be the only way to intercept syntax errors
 //$errors = array(); 
 //parsekit_compile_file($script, $errors); 
@@ -131,6 +124,13 @@ function errorHandler($errno, $errstr, $errfile, $errline)
     return true; 
 }
 set_error_handler("errorHandler", E_ALL);  // this is for errors, not exceptions (eg 1/0)
+
+/*
+    Can't get this to work
+function sigXCPU($signum) {
+    throw new Exception("ScraperWiki CPU time exceeded");
+}
+pcntl_signal(SIGXCPU, "sigXCPU"); */
 
 try
 {
