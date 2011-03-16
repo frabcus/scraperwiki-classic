@@ -94,7 +94,7 @@ class CodeManager(models.Manager):
             return arg
         
         # quick helper result for api when it searches on the default table (which is selected deep in the dataproxy after it has checked out the original mysql key-value datastore thing)
-        if arg == "sqlite3.Error: no such table: swdata":
+        if arg == "sqlite3.Error: no such table: main.swdata":
             sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", 0, None))
             if sqlitedata and type(sqlitedata) not in [str, unicode]:
                 return [{"error":arg}, {'datasummary':sqlitedata}]
