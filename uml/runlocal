@@ -25,27 +25,6 @@ cmp -s uml.cfg uml.cfg.local || {
 	exit	1
 	}
 
-cmp -s controller/uml.cfg uml.cfg.local || {
-	echo	"runlocal: controller/uml.cfg different to uml.cfg.local"
-	exit	1
-	}
-
-[ -f twister/orbited.cfg ] || {
-	echo	"runlocal: twister/orbited.cfg not found"
-	exit	1
-}
-
-[ -f controller/swlogger.py ] || {
-	echo	"runlocal: controller/swlogger.py not found"
-	exit	1
-}
-
-[ -h controller/swlogger.py ] && {
-	echo	"runlocal: controller/swlogger.py must not be a symbolic link"
-	exit	1
-}
-
-
 rm	-rf	./var/log
 rm	-rf	./var/run
 mkdir 	-p 	./var/log

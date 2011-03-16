@@ -56,12 +56,6 @@ secure	= 127.0.0.1
 [metadata]
 host    = localhost:8000
 
-[swlogger]
-host	= 127.0.0.1
-user	= scraperlog
-passwd	= scr4p3rl0g
-db	= scraperwiki_log
-
 ; Francis's machine
 [cat]
 host	= 127.0.0.1
