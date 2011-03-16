@@ -398,7 +398,6 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         self.m_toRemove = []
-        self.m_swlog    = None
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
@@ -412,16 +411,6 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             try    : os.remove (name)
             except : pass
 
-    def swlog (self, scraperid, runid, event, arg1 = None, arg2 = None) :
-
-        try    :
-            if self.m_swlog is None :
-                import swlogger
-                self.m_swlog = swlogger.SWLogger(config)
-                self.m_swlog.connect ()
-            self.m_swlog.log (scraperid, runid, event, arg1 = None, arg2 = None)
-        except :
-            pass
 
     def _connect_to (self, server, port, soc) :
 
@@ -689,17 +678,14 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         try    : runID      = self.headers['x-runid'     ]
         except : runID      = ''
 
-        self.swlog (scraperID, runID, 'D.START', arg1 = self.path)
 
         if scm != 'http' or fragment or netloc :
             self.send_error (400, "bad url %s" % self.path)
-            self.swlog(scraperID, runID, 'D.ERROR', arg1 = 'Bad URL', arg2 = self.path)
             return
 
         uml, id = allocateUML (enqueue, scraperID = scraperID, runID = runID, testName = testName)
         if uml is None :
             self.send_error (400, "No server free to run your scraper, please try again in a few minutes")
-            self.swlog(scraperID, runID, 'D.ERROR', arg1 = 'No UML', arg2 = '%s' % (self.path))
             return
 
         self.connection.send \
@@ -729,14 +715,12 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 for name, value in self.headers.items() :
                     soc.send ("%s: %s\r\n" % (name, value))
                 soc.send ("\r\n")
-                self.swlog(scraperID, runID, 'D.REQUEST')
                 self._read_write (soc)
 
         finally :
             soc            .close()
             self.connection.close()
 
-        self.swlog(scraperID, runID, 'D.END')
         releaseUML       (uml, id)
 
     def _read_write (self, soc, idle = 0x7ffffff) :
