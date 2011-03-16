@@ -35,16 +35,6 @@ cmp -s controller/uml.cfg uml.cfg.local || {
 	exit	1
 }
 
-[ -f firestarter/swlogger.py ] || {
-	echo	"runlocal: firestarter/swlogger.py not found"
-	exit	1
-}
-
-[ -f httpproxy/swlogger.py ] || {
-	echo	"runlocal: httpproxy/swlogger.py not found"
-	exit	1
-}
-
 [ -f controller/swlogger.py ] || {
 	echo	"runlocal: controller/swlogger.py not found"
 	exit	1

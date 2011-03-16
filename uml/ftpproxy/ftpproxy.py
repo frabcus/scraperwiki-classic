@@ -41,7 +41,6 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
 
     def __init__ (self, request, client_address, server) :
 
-        self.m_swlog   = None
         self.m_allowed = []
         self.m_blocked = []
 
@@ -53,14 +52,6 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
 
         SocketServer.BaseRequestHandler.__init__ (self, request, client_address, server)
 
-    def swlog (self) :
-
-        if self.m_swlog is None :
-            import swlogger
-            self.m_swlog = swlogger.SWLogger(config)
-            self.m_swlog.connect ()
-
-        return self.m_swlog
 
     def hostAllowed (self, path, scraperID, runID) :
 
@@ -193,7 +184,6 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
 
                     if not self.hostAllowed (url, scraperID, runID) :
                         self.request.send (blockmsg % self.m_cwd[2])
-                        self.swlog().log (scraperID, runID, 'T.ERROR', arg1 = 'Denied', arg2 = url)
                         continue
 
                     bytes           = 0
@@ -222,10 +212,8 @@ class FTPProxyHandler (SocketServer.BaseRequestHandler) :
                     self.m_pasv.close()
                     self.m_pasv = None
 
-                    self.swlog().log (scraperID, runID, 'T.DONE', arg1 = url, arg2 = failedmessage)
                     continue
 
-                self.swlog().log (scraperID, runID, 'T.COMMAND', arg1 = args[0])
                 self.request.send ("500 Unknown command %s.\n" % args[0])
                 print "UNKNOWN", args
 
