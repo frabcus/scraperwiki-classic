@@ -141,23 +141,23 @@ class DataStoreClass :
     
     def save_sqlite(self, unique_keys, data, swdatatblname="swdata"):
         if unique_keys != None and type(unique_keys) not in [ types.ListType, types.TupleType ]:
-            return { "error":'unique_keys must a list or tuple' }
+            return { "error":'unique_keys must a list or tuple', "unique_keys_type":str(type(unique_keys)) }
 
         def convdata(unique_keys, scraper_data):
             if unique_keys:
                 for key in unique_keys:
                     if key not in scraper_data:
-                        return { "error":'unique_keys must be a subset of data' }
+                        return { "error":'unique_keys must be a subset of data', "bad_key":key }
                     if scraper_data[key] == None:
-                        return { "error":'unique_key value should not be None' }
+                        return { "error":'unique_key value should not be None', "bad_key":key }
             jdata = { }
             for key, value in scraper_data.items():
                 if not key:
-                    return { "error": 'key must not be blank' }
+                    return { "error": 'key must not be blank', "bad_key":key }
                 if type(key) not in [unicode, str]:
-                    return { "error":'key must be string type' }
+                    return { "error":'key must be string type', "bad_key":key }
                 if not re.match("[a-zA-Z0-9_\- ]+$", key):
-                    return { "error":'key must be simple text: '+key }
+                    return { "error":'key must be simple text', "bad_key":key }
                 
                 if type(value) in [datetime.datetime, datetime.date]:
                     value = value.isoformat()
@@ -171,6 +171,8 @@ class DataStoreClass :
 
         if type(data) == dict:
             rjdata = convdata(unique_keys, data)
+            if rjdata.get("error"):
+                return rjdata
         else:
             rjdata = [ ]
             for ldata in data:
@@ -231,7 +233,7 @@ def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="sw
     if ds.uses_old_datastore():
         rc, arg = ds.save(unique_keys, data, date, latlng)
         if not rc:
-            raise Exception (arg) 
+            raise databaseexception({"error":arg}) 
         
         if verbose:
             pdata = {}
@@ -243,7 +245,7 @@ def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="sw
     # collapse parameters and call main function
     if date is not None:
         if type(date) not in [ datetime.datetime, datetime.date ] :
-            raise Exception('date should be a python.datetime (not %s)' % type(date))
+            raise databaseexception({"error":'date should be a python.datetime (not %s)' % type(date)})
 
     if latlng is not None :
         if type(latlng) not in [ types.ListType, types.TupleType ] or len(latlng) != 2:
@@ -271,7 +273,7 @@ def sqlitecommand(command, val1=None, val2=None, verbose=1):
     ds = DataStore(None)
     result = ds.request(('sqlitecommand', command, val1, val2))
     if "error" in result:
-        raise Exception(result["error"])
+        raise databaseexception(result)
     if "status" not in result and "keys" not in result:
         raise Exception("possible signal timeout: "+str(result))
     
@@ -292,11 +294,20 @@ def sqlitecommand(command, val1=None, val2=None, verbose=1):
     return result
     
 
+        # in the future we can raise exception types 
+def databaseexception(errmap):
+    mess = errmap["error"]
+    for k, v in errmap.items():
+        if k != "error":
+            mess = "%s; %s:%s" % (mess, k, v)
+    return Exception(mess)
+        
+
 def save_sqlite(unique_keys, data, table_name="swdata", commit=True, verbose=2):
     ds = DataStore(None)
     result = ds.save_sqlite(unique_keys, data, table_name)
     if "error" in result:
-        raise Exception(result["error"]) 
+        raise databaseexception(result)
 
     if commit:
         sqlitecommand("commit", None, None, 0)

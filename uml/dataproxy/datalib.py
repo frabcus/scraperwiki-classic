@@ -753,10 +753,10 @@ class Database :
         for ldata in data:
             newcols = ssinfo.newcolumns(ldata)
             if newcols:
-                for k, vt in newcols:
-                    ssinfo.addnewcolumn(k, vt)
+                for i, kv in enumerate(newcols):
+                    ssinfo.addnewcolumn(kv[0], kv[1])
+                    res["newcolumn %d" % i] = "%s %s" % kv
                 ssinfo.rebuildinfo()
-                res["newcolumn %s" % k] = vt
 
             if nrecords == 0 and unique_keys:
                 idxname, idxkeys = ssinfo.findclosestindex(unique_keys)
@@ -773,7 +773,6 @@ class Database :
         
         res["nrecords"] = nrecords
         res["status"] = 'Data record(s) inserted'
-        print res, "kkk"
         return res
 
 
@@ -870,7 +869,7 @@ class SqliteSaveInfo:
             if "error" in lres:  
                 if lres["error"] != 'sqlite3.Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped':
                     return lres
-                print lres # to detect if it's happening repeatedly
+                print "Dropping index", lres # to detect if it's happening repeatedly
             res["droppedindex"] = idxname
         return res
             
