@@ -57,19 +57,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         the base class constructor.
         """
 
-        self.m_swlog   = None
         self.m_allowed = []
         self.m_blocked = []
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
-
-    def swlog (self) :
-
-        if self.m_swlog is None :
-            import swlogger
-            self.m_swlog = swlogger.SWLogger(config)
-            self.m_swlog.connect ()
-
-        return self.m_swlog
 
     def log_message (self, format, *args) :
 
@@ -281,11 +271,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         (scheme, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
         scraperID, runID, cache = self.ident ()
 
-        self.swlog().log (scraperID, runID, 'P.CONNECT', arg1 = self.path)
 
         if not self.hostAllowed (self.path, scraperID, runID) :
             self.send_error (403, self.blockmessage(self.path))
-            self.swlog().log (scraperID, runID, 'P.ERROR', arg1 = 'Denied',  arg2 = self.path)
             return
 
         try:
@@ -302,7 +290,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 soc.close()
             self.connection.close()
 
-        self.swlog().log (scraperID, runID, 'P.DONE', arg1 = self.path)
 
     def notify (self, host, **query) :
 
@@ -365,17 +352,14 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return            
 
         scraperID, runID, cacheFor = self.ident ()
-        self.swlog().log (scraperID, runID, 'P.GET', arg1 = self.path)
 
         if path == '' or path is None :
             path = '/'
 
         if scheme not in [ 'http', 'https' ] or fragment or not netloc :
             self.send_error (400, "Malformed URL %s" % self.path)
-            self.swlog().log (scraperID, runID, 'P.ERROR', arg1 = 'Bad URL', arg2 = self.path)
             return
         if not self.hostAllowed (self.path, scraperID, runID) :
-            self.swlog().log (scraperID, runID, 'P.ERROR', arg1 = 'Denied',  arg2 = self.path)
             self.send_error (403, self.blockmessage(self.path))
             return
 
@@ -594,7 +578,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             except : pass
             statusLock.release ()
 
-        self.swlog().log (scraperID, runID, 'P.DONE', arg1 = self.path, arg2 = cacheid)
 
     def getResponse (self, soc, idle = 0x7ffffff) :
 

@@ -45,11 +45,6 @@ cmp -s uml.cfg controller/uml.cfg ||
 	ln $cfg controller/uml.cfg
 }
 
-cmp -s swlogger/swlogger.py controller/swlogger.py ||
-{
-	rm -f controller/swlogger.py
-	ln swlogger/swlogger.py controller/swlogger.py
-}
 
 rm	-f ${unm}/*.cow
 

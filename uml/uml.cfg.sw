@@ -50,12 +50,6 @@ max_api_distance = 10
 [metadata]
 host    = scraperwiki.com
 
-[swlogger]
-host	= 89.16.177.176
-user	= scraperlog
-passwd	= scr4p3rl0g
-db	= swlog_live
-
 [uml001]
 host	= 89.16.177.195
 tap	= 192.168.254.101

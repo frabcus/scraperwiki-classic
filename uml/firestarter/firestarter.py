@@ -134,18 +134,6 @@ class FireStarter :
         s.update(str(time.time (  )))
         self.m_runID       = '%.6f_%s' % (time.time(), s.hexdigest())
 
-        try:
-            import swlogger
-            self.m_swlog = swlogger.SWLogger(config)
-            self.m_swlog.connect ()
-            self.m_swlog.log     (self.m_scraperID, self.m_runID, 'F.START')
-        except:
-            self.m_swlog = None
-
-    def __del__ (self) :
-
-        if self.m_swlog:
-            self.m_swlog.log     (self.m_scraperID, self.m_runID, 'F.END')
 
     def error (self) :
 
@@ -529,9 +517,6 @@ class FireStarter :
 
         import urllib
         import urllib2
-
-        if self.m_swlog:
-            self.m_swlog.log     (self.m_scraperID, self.m_runID, 'F.CALL')
 
         data = urllib.urlencode  (self.m_parameters)
         req  = urllib2.Request   ('http://%s/%s' % (self.m_dispatcher, self.m_path), data)

@@ -52,12 +52,6 @@ max_api_distance = 10
 [metadata]
 host    = 192.168.1.66
 
-[swlogger]
-host	= 192.168.1.66
-user	= scraperlog
-passwd	= scr4p3rl0g
-db	= scraperwiki_log
-
 [ubuntu]
 host	= 192.168.1.66
 tap	= 192.168.1.66

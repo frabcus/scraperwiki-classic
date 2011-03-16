@@ -671,10 +671,6 @@ class ScraperController (BaseController) :
 
             try :
 
-                import swlogger
-                swl = swlogger.SWLogger(config)
-                swl.connect ()
-                swl.log     (self.m_scraperID, self.m_runID, 'C.START')
 
                 #  Close the write sides of the pipes, these are only needed in the
                 #  child processes.
@@ -778,7 +774,6 @@ class ScraperController (BaseController) :
                                         if msg['message_type'] == 'exception' :
                                             try    : arg1 = msg['content']
                                             except : arg1 = '(no content)'
-                                            swl.log (self.m_scraperID, self.m_runID, 'C.ERROR', arg1 = arg1, arg2 = None)
 
                 #  Capture the child user and system times as best we can, since this
                 #  is summed over all children.
@@ -787,7 +782,6 @@ class ScraperController (BaseController) :
                 (waited_pid, waited_status) = os.waitpid(pid, 0)
                 ostimes2   = os.times ()
                 cltime2    = time.time()
-                swl.log (self.m_scraperID, self.m_runID, 'C.END',   arg1 = ostimes2[2] - ostimes1[2], arg2 = ostimes2[3] - ostimes1[3])
     
                 # this creates the status output that is passed out to runner.py.  
                 # The actual completion signal comes when the runner.py process ends

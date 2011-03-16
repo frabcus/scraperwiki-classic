@@ -2,12 +2,6 @@
 
 import  sys
 import  os
-
-# moved to the top because syntax errors in the scraperlibs otherwise are difficult to detect
-#
-sys.stdout = os.fdopen(1, 'w', 0)
-sys.stderr = os.fdopen(2, 'w', 0)
-
 import  socket
 import  signal
 import  string
