@@ -35,11 +35,6 @@ cmp -s controller/uml.cfg uml.cfg.local || {
 	exit	1
 }
 
-[ -f dispatcher/swlogger.py ] || {
-	echo	"runlocal: dispatcher/swlogger.py not found"
-	exit	1
-}
-
 [ -f firestarter/swlogger.py ] || {
 	echo	"runlocal: firestarter/swlogger.py not found"
 	exit	1
