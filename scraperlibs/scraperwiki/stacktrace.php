@@ -39,6 +39,23 @@ function exceptionHandler($exception, $script)
 
 function errorParser($errno, $errstr, $errfile, $errline, $script)
 {
+    $codes = Array(
+        1 => "E_ERROR",
+        2 => "E_WARNING",
+        4 => "E_PARSE",
+        8 => "E_NOTICE",
+        16 => "E_CORE_ERROR",
+        32 => "E_CORE_WARNING",
+        64 => "E_COMPILE_ERROR",
+        128 => "E_COMPILE_WARNING",
+        256 => "E_USER_ERROR",
+        512 => "E_USER_WARNING",
+        1024 => "E_USER_NOTICE",
+        2048 => "E_STRICT",
+        4096 => "E_RECOVERABLE_ERROR",
+        8192 => "E_DEPRECATED",
+        16384 => "E_USER_DEPRECATED",
+    );
         // this function could use debug_backtrace() to obtain the whole stack for this error
     $stackdump = array(); 
     $scriptlines = explode("\n", file_get_contents($script)); 
@@ -47,7 +64,7 @@ function errorParser($errno, $errstr, $errfile, $errline, $script)
     $errorentry["file"] = ($errfile == $script ? "<string>" : $errfile); 
     if (($linenumber >= 0) && ($linenumber < count($scriptlines)))
         $errorentry["linetext"] = $scriptlines[$linenumber]; 
-    $errcode = ($errno == E_USER_ERROR ? "E_USER_ERROR" : ($errno == E_USER_WARNING ? "E_USER_WARNING" : "E_USER_NOTICE")); 
+    $errcode = $codes[$errno]; 
 
     $stackdump[] = $errorentry; 
     return array('message_type' => 'exception', 'exceptiondescription' => $errcode."  ".$errstr, "stackdump" => $stackdump); 
