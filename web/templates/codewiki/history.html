@@ -69,7 +69,7 @@
           </div>
 
           <div class="codepreviewer"> 
-            <h3 class="loading">Loading</h3>
+            <h3 class="loading">Loading...</h3>
             <h4 class="cprev">Difference between, revision <span class="shrev"></span> and previous revision <span class="shprevrev"></span></h4>
             <div class="history_code_border">
               <div class="otherlinenumbers"></div> 
@@ -80,8 +80,8 @@
 
       </div>
       {% else %} 
-      <div class="history_run_event">
 
+      <div class="history_run_event">
         {% if itemfirst.runevent.exception_message %}
         <div class="history_ran_fail">
           Run failed:
@@ -117,6 +117,7 @@
           </div>
 
           <div class="runpreviewer">
+            <h3 class="loading">Loading...</h3>
             <pre class="runpreview"></pre>
           </div>
         </div>
@@ -315,11 +316,15 @@ function previewrunevent_show(block)
     block.find(".hiderunevent").show(); 
 
     var runid = block.find("span.runidlist span.runidelem:first span.runid").text();  
+    block.find(".history_code_border").hide();
+
+    block.find(".loading").show();
+    block.find(".runpreviewer").show(); 
     cachefetch(runid, function() 
     { 
         var runevent = $.evalJSON(fetchedcache[runid]); 
-        block.find(".runpreview").text(runevent.output); 
-        block.find(".runpreviewer").show(); 
+        block.find(".loading").hide();
+        block.find(".runpreview").text(runevent.output).show(); 
     }); 
 }
 
