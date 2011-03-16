@@ -50,9 +50,8 @@
 
           <div class="history_view_changes">
             {% ifnotequal itemfirst.prevrev null %}
-              Rev: {{itemfirst.rev}}
               <a class="hidechanges">Hide changes</a>
-              <a class="showchanges">Show changes</a>
+              <a class="showchanges" title="Rev: {{itemfirst.rev}}">Show changes</a>
             {% else %}
               <a class="hidechanges">Hide first version</a>
               <a class="showchanges">Show first version</a>
