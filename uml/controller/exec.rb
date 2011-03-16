@@ -1,10 +1,5 @@
 #!/usr/bin/ruby
 
-# moved to the top because syntax errors in the scraperlibs otherwise are difficult to detect
-#
-$stdout = IO.new(1)
-$stderr = IO.new(2)
-
 require 'json'
 
 class ConsoleStream
