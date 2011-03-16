@@ -50,6 +50,7 @@
 
           <div class="history_view_changes">
             {% ifnotequal itemfirst.prevrev null %}
+              Rev: {{itemfirst.rev}}
               <a class="hidechanges">Hide changes</a>
               <a class="showchanges">Show changes</a>
             {% else %}
