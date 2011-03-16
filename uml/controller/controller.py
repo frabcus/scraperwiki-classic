@@ -661,7 +661,6 @@ class ScraperController (BaseController) :
         pid   = os.fork()
 
         if pid > 0 :
-
             cltime1 = time.time()
             lock.acquire()
             info    = { 'wfile' : self.wfile, 'idents' : idents, 'options' : {} }
@@ -731,6 +730,23 @@ class ScraperController (BaseController) :
                                 try    : line = os.read (mapped[0], 8192)
                                 except : pass
                             if line in [ '', None ] :
+                                # 
+                                # In case of echoing console output (for PHP, or for
+                                # Ruby/Python before the ConsoleStream is set up in
+                                # exec.py/rb), send anything left over that didn't end in a \n
+                                # 
+                                if fd == psock[0].fileno() :
+                                    if mapped[1] != '':
+                                        # XXX this repeats the code below, there's probably a
+                                        # better way of structuring it
+                                        msg  = { 'message_type' : 'console', 'content' : mapped[1] + "\n"}
+                                        mapped[1] = ''
+                                        text = json.dumps(msg) + '\n'
+                                        self.wfile.write (text)
+                                        self.wfile.flush ()
+                                #
+                                # Record done with that pipe
+                                #
                                 p.unregister (fd)
                                 del fdmap[fd]
                                 busy -= 1
@@ -912,6 +928,7 @@ def execute (port) :
     httpd = ControllerHTTPServer(('', port), ScraperController)
     sa    = httpd.socket.getsockname()
     sys.stdout.write ("Serving HTTP on %s port %s\n" % ( sa[0], sa[1] ))
+
     sys.stdout.flush ()
 
     httpd.serve_forever()
