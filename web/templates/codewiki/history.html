@@ -33,6 +33,7 @@
     {% regroup itemlogmonth.list by groupkey as itemloggroup_list %}
     {% for itemloggroup in itemloggroup_list %}
       {% with itemloggroup.list|first as itemfirst %}   {# could alternatively refer to itemloggroup.list.0 #}
+      {% with itemloggroup.list|last as itemlast %}   
 
       {% ifequal itemfirst.type 'commit' %}
       <div class="history_edit">
@@ -51,10 +52,10 @@
           <div class="history_view_changes">
             {% ifnotequal itemfirst.prevrev null %}
               <a class="hidechanges">Hide changes</a>
-              <a class="showchanges" title="Rev: {{itemfirst.rev}}">Show changes</a>
+              <a class="showchanges" title="Revs {{itemlast.rev}}:{{itemfirst.rev}}">Show changes</a>
             {% else %}
               <a class="hidechanges">Hide first version</a>
-              <a class="showchanges">Show first version</a>
+              <a class="showchanges" title="Rev 0">Show first version</a>
             {% endifnotequal %}
 
             <span class="revlist hide">
@@ -125,6 +126,7 @@
       </div>
       {% endifequal %}
 
+      {% endwith %}
       {% endwith %}
     {% endfor %} {# group #}
     </div> {# history_month #}
