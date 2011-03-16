@@ -124,12 +124,6 @@ class TestOf_FireStarter (unittest.TestCase) :
         pass
 
     def tearDown (self) :
-
-#       import SWLogger
-#       swl = SWLogger.SWLogger()
-#       swl.setHost (mysqlInfo[0])
-#       swl.connect ()
-#       swl.clean   ('l_runid')
         pass
 
     def test_NoDispatcher (self) :
@@ -580,12 +574,7 @@ class TestOf_FireStarter (unittest.TestCase) :
         self.assertTrue    (re.search ('OK\\n', res, re.DOTALL))
 
     def test_loggerLocal (self) :
-
-        import SWLogger
-        swl = SWLogger.SWLogger()
-        swl.setHost (mysqlInfo[0])
-        swl.connect ()
-        swl.log	    ('l_scraperid', 'l_runid', 'l_event', 'l_arg1')
+        pass
 
     def test_Traceback_text (self) :
 
