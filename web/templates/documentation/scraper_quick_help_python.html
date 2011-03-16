@@ -12,10 +12,10 @@
     <dl class="functiondocs">
         <dd>
             <code>
-            import BeautifulSoup<br/>
-            soup = BeautifulSoup.BeautifulSoup(html)<br/>
-            for td in soup.findAll('td'):<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;print td.string<br/>
+            import lxml.html<br/>
+            root = lxml.html.fromstring(html)<br/>
+            for td in root.cssselect('td'):<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;print lxml.html.tostring(td)<br/>
             </code>
         </dd>
     </dl>
@@ -24,8 +24,8 @@
       <dd>
           <code>
               postcode = scraperwiki.geo.extract_gb_postcode("10 Downing Street, London SW1A 2AA")<br/>
-              lat_lng = scraperwiki.geo.gb_postcode_to_latlng(postcode)<br/>
-              print lat_lng
+              latlng = scraperwiki.geo.gb_postcode_to_latlng(postcode)<br/>
+              print latlng
           </code>
       </dd>
     </dl>
@@ -33,11 +33,12 @@
     <dl class="functiondocs">
         <dd>
             <code>
-            for td in soup.findAll('td'):<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;data = {'table_cell': td.string} # save data in dictionary<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;# Choose unique keyname, add optional date/latlng fields<br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;scraperwiki.datastore.save(unique_keys=['table_cell'], data, <br/>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; date="2009-03-02", latlng=lat_lng)
+            for td in root.cssselect('td'):<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;data = {'table_cell': td.text} # save data in dictionary<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;data["date"] = "2009-03-02"<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;data["latlng_lat"], data["latlng_lng"] = latlng<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;# Choose unique keyname<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;scraperwiki.datastore.save(unique_keys=['table_cell'], data=data)
             </code>
         </dd>
     </dl>
