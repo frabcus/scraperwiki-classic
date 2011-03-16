@@ -33,6 +33,7 @@
     {% regroup itemlogmonth.list by groupkey as itemloggroup_list %}
     {% for itemloggroup in itemloggroup_list %}
       {% with itemloggroup.list|first as itemfirst %}   {# could alternatively refer to itemloggroup.list.0 #}
+      {% with itemloggroup.list|last as itemlast %}   
 
       {% ifequal itemfirst.type 'commit' %}
       <div class="history_edit">
@@ -51,10 +52,10 @@
           <div class="history_view_changes">
             {% ifnotequal itemfirst.prevrev null %}
               <a class="hidechanges">Hide changes</a>
-              <a class="showchanges">Show changes</a>
+              <a class="showchanges" title="Revs {{itemlast.rev}}:{{itemfirst.rev}}">Show changes</a>
             {% else %}
               <a class="hidechanges">Hide first version</a>
-              <a class="showchanges">Show first version</a>
+              <a class="showchanges" title="Rev 0">Show first version</a>
             {% endifnotequal %}
 
             <span class="revlist hide">
@@ -69,7 +70,7 @@
           </div>
 
           <div class="codepreviewer"> 
-            <h3 class="loading">Loading</h3>
+            <h3 class="loading">Loading...</h3>
             <h4 class="cprev">Difference between, revision <span class="shrev"></span> and previous revision <span class="shprevrev"></span></h4>
             <div class="history_code_border">
               <div class="otherlinenumbers"></div> 
@@ -80,8 +81,8 @@
 
       </div>
       {% else %} 
-      <div class="history_run_event">
 
+      <div class="history_run_event">
         {% if itemfirst.runevent.exception_message %}
         <div class="history_ran_fail">
           Run failed:
@@ -117,6 +118,7 @@
           </div>
 
           <div class="runpreviewer">
+            <h3 class="loading">Loading...</h3>
             <pre class="runpreview"></pre>
           </div>
         </div>
@@ -124,6 +126,7 @@
       </div>
       {% endifequal %}
 
+      {% endwith %}
       {% endwith %}
     {% endfor %} {# group #}
     </div> {# history_month #}
@@ -315,11 +318,15 @@ function previewrunevent_show(block)
     block.find(".hiderunevent").show(); 
 
     var runid = block.find("span.runidlist span.runidelem:first span.runid").text();  
+    block.find(".history_code_border").hide();
+
+    block.find(".loading").show();
+    block.find(".runpreviewer").show(); 
     cachefetch(runid, function() 
     { 
         var runevent = $.evalJSON(fetchedcache[runid]); 
-        block.find(".runpreview").text(runevent.output); 
-        block.find(".runpreviewer").show(); 
+        block.find(".loading").hide();
+        block.find(".runpreview").text(runevent.output).show(); 
     }); 
 }
 

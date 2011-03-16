@@ -87,15 +87,7 @@ def scraperwikitag(scraper, html, panepresent):
         return html
     
     
-    #urlbase = "http://www." + Site.objects.get_current().domain;
-    #urlscraperoverview = urlbase + reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
-    #urlscraperedit = urlbase + reverse('editor_edit', args=[scraper.wiki_type, scraper.short_name])
-    #urlpoweredlogo = urlbase + "/media/images/powered.png";
-        # ^ all very well, but results in http://www.example.com/ locally.  haven't time to care
-        
-        # maybe should be tossed into settings so we can use it in the templates
-    
-    urlbase = "http://scraperwiki.com"
+    urlbase = settings.MAIN_URL
     urlscraperoverview = urlbase + reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
     urlscraperedit = urlbase + reverse('editor_edit', args=[scraper.wiki_type, scraper.short_name])
     urlpoweredlogo = settings.MEDIA_URL + "images/powered.png";
@@ -112,7 +104,7 @@ def scraperwikitag(scraper, html, panepresent):
     
     else:
         swpane = [ '<div id="scraperwikipane" style="%s;">' % swdivstyle ]
-        swpane.append('<a href="%s" id="scraperwikipane" style="%s"><img style="border-style: none" src="%s" alt="Powered by ScraperWiki"></a>' % (urlbase, swlinkstyle, urlpoweredlogo))
+        swpane.append('<a href="%s" id="scraperwikipane" style="%s"><img style="border-style: none" src="%s" alt="Powered by ScraperWiki"></a>' % (urlscraperoverview, swlinkstyle, urlpoweredlogo))
         swpane.append('</div>')
 
     return "%s%s%s" % (html[:startend[0]], "".join(swpane), html[startend[1]:])

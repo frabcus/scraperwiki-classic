@@ -731,43 +731,49 @@ class Database :
             return {"status":"commit succeeded"}  # doesn't reach here if the signal fails
 
 
+
+
     def save_sqlite(self, scraperID, runID, short_name, unique_keys, data, swdatatblname):
         res = { }
         if not self.m_sqlitedbconn or swdatatblname not in self.sqlitesaveinfo:
             ssinfo = SqliteSaveInfo(self, scraperID, runID, short_name, swdatatblname)
             self.sqlitesaveinfo[swdatatblname] = ssinfo
             if not ssinfo.rebuildinfo():
-                ssinfo.buildinitialtable()
+                ssinfo.buildinitialtable(data)
                 ssinfo.rebuildinfo()
                 res["tablecreated"] = swdatatblname
         else:
             ssinfo = self.sqlitesaveinfo[swdatatblname]
         
-        if "date_scraped" not in data:
-            data["date_scraped"] = datetime.datetime.now().isoformat()
-        # would be good to have but f***ing ugly!
-        #if "runID" not in data:  
-        #    data["runID"] = runID
             
-        newcols = ssinfo.newcolumns(data)
-        if newcols:
-            for k, vt in newcols:
-                ssinfo.addnewcolumn(k, vt)
-            ssinfo.rebuildinfo()
-            res["newcolumn %s" % k] = vt
-
-        if unique_keys:
-            idxname, idxkeys = ssinfo.findclosestindex(unique_keys)
-            if not idxname or idxkeys != set(unique_keys):
-                lres = ssinfo.makenewindex(idxname, unique_keys)
-                if "error" in lres:  return lres
-                res.update(lres)
-            
-            
-        lres = ssinfo.insertdata(data)
-        if "error" in lres:  return lres
+        if type(data) == dict:
+            data = [data]
         
-        res["status"] = 'Data record inserted'
+        nrecords = 0
+        for ldata in data:
+            newcols = ssinfo.newcolumns(ldata)
+            if newcols:
+                for k, vt in newcols:
+                    ssinfo.addnewcolumn(k, vt)
+                ssinfo.rebuildinfo()
+                res["newcolumn %s" % k] = vt
+
+            if nrecords == 0 and unique_keys:
+                idxname, idxkeys = ssinfo.findclosestindex(unique_keys)
+                if not idxname or idxkeys != set(unique_keys):
+                    lres = ssinfo.makenewindex(idxname, unique_keys)
+                    if "error" in lres:  
+                        return lres
+                    res.update(lres)
+            
+            lres = ssinfo.insertdata(ldata)
+            if "error" in lres:  
+                return lres
+            nrecords += 1
+        
+        res["nrecords"] = nrecords
+        res["status"] = 'Data record(s) inserted'
+        print res, "kkk"
         return res
 
 
@@ -778,6 +784,9 @@ class SqliteSaveInfo:
         self.runID = runID
         self.short_name = short_name
         self.swdatatblname = swdatatblname
+        self.swdatakeys = [ ]
+        self.swdatatypes = [  ]
+        self.sqdatatemplate = ""
 
     def sqliteexecute(self, val1, val2=None):
         res = self.database.sqlitecommand(self.scraperID, self.runID, self.short_name, "execute", val1, val2)
@@ -798,8 +807,14 @@ class SqliteSaveInfo:
 
         return True
             
-    def buildinitialtable(self):
-        self.sqliteexecute("create table main.`%s` (`date_scraped` text)" % self.swdatatblname)
+    def buildinitialtable(self, data):
+        assert not self.swdatakeys
+        coldef = self.newcolumns(data)
+        assert coldef
+        # coldef = coldef[:1]  # just put one column in; the rest could be altered -- to prove it's good
+        scoldef = ", ".join(["`%s` %s" % col  for col in coldef])
+                # used to just add date_scraped in, but without it can't create an empty table
+        self.sqliteexecute("create table main.`%s` (%s)" % (self.swdatatblname, scoldef))
     
     def newcolumns(self, data):
         newcols = [ ]

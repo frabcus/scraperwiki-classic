@@ -165,14 +165,11 @@ SW_DataStore.create(host, port)
 
 require 'scraperwiki/stacktrace'
 
-#
-##  Set up a CPU time limit handler which simply throws a python
-##  exception.
-##
-#def sigXCPU (signum, frame) :
-#    raise Exception ("CPUTimeExceeded")
-#
-#signal.signal (signal.SIGXCPU, sigXCPU)
+#  Set up a CPU time limit handler which simply throws a Ruby
+#  exception.
+Signal.trap("XCPU") do
+    raise Exception, "ScraperWiki CPU time exceeded"
+end
 
 code = File.new(script, 'r').read()
 begin

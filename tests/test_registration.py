@@ -27,7 +27,7 @@ class TestRegistration(SeleniumTest):
         self.wait_for_page()
 
         username = str( uuid.uuid4() ).replace('-', '_')
-        email    = 'test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
+        email    = 'se_test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
         password = str( uuid.uuid4() ).replace('-', '_')
         
         d = deepcopy( self.default_values )
@@ -73,11 +73,11 @@ class TestRegistration(SeleniumTest):
         self.wait_for_page()
 
         username = str( uuid.uuid4() ).replace('-', '_')
-        email    = 'test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
+        email    = 'se_test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
         password = str( uuid.uuid4() ).replace('-', '_')
         
         d = deepcopy( self.default_values )
-        d["id_username"] = "test_%s" % (username,)        
+        d["id_username"] = "se_test_%s" % (username,)        
         d["id_email"]   = email
         d["password1"]  = password
         d["password2"]  = password        
@@ -130,7 +130,7 @@ class TestRegistration(SeleniumTest):
         expected = 'This email address is already in use. Please supply a different email address. '
         s = self.selenium
 
-        email = 'test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
+        email = 'se_test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
         for x in xrange(0,2):
             s.open("/")            
             s.click("link=Sign in or create an account")
@@ -138,7 +138,7 @@ class TestRegistration(SeleniumTest):
             
             username = str( uuid.uuid4() ).replace('-', '_')
 
-            self.default_values["id_username"] = "test_%s" % (username,)        
+            self.default_values["id_username"] = "se_test_%s" % (username,)        
             self.default_values["id_email"]   = email
             self.type_dictionary( self.default_values )
             

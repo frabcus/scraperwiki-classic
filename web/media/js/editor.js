@@ -1078,7 +1078,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         // suppress any more activity to the preview frame
         if (activepreviewiframe != undefined) 
         {
-            activepreviewiframe.document.close(); 
+            if (activepreviewiframe.document)
+                activepreviewiframe.document.close(); 
             activepreviewiframe = undefined; 
         }
     }
