@@ -175,5 +175,6 @@ except Exception, e :
     scraperwiki.console.dumpMessage(etb)
 
 
+# force ConsoleStream to output last line, even if no \n
 sys.stdout.flush()
 sys.stderr.flush()

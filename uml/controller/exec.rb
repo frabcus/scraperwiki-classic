@@ -177,3 +177,7 @@ rescue Exception => e
     $logfd.write(JSON.generate(est) + "\n")
 end
 
+
+# force ConsoleStream to output last line, even if no \n
+$stdout.flush
+$stderr.flush
