@@ -1,5 +1,5 @@
 from scraperwiki.datastore import save_sqlite as save
-from scraperwiki.datastore import sqlitecommand
+from scraperwiki.datastore import sqlitecommand, SqliteError, NoSuchTableSqliteError
 
 
 def attach(name, asname=None, verbose=1):
@@ -12,8 +12,6 @@ def execute(val1, val2=None, verbose=1):
 
 def commit(verbose=1):
     return sqlitecommand("commit", None, None, verbose)
-
-
 
 def select(val1, val2=None, verbose=1):
     if val2 is not None and "?" in val1 and type(val2) not in [list, tuple]:
@@ -36,3 +34,21 @@ def table_info(name):
         result = sqlitecommand("execute", "PRAGMA table_info(`%s`)" % name)
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
 
+
+def save_var(name, value, commit=True, verbose=2):
+    data = {"name":name, "value_blob":value, "type":type(value).__name__}
+    save(unique_keys=["name"], data=data, table_name="swvariables", commit=commit, verbose=verbose)
+
+def get_var(name, default=None, verbose=2):
+    try:
+        result = sqlitecommand("execute", "select value_blob, type from swvariables where name=?", (name,), verbose)
+    except NoSuchTableSqliteError, e:
+        return default
+    data = result.get("data")
+    if not data:
+        return default
+    return data[0][0]
+
+    
+
+    

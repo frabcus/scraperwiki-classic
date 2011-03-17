@@ -4,7 +4,6 @@ import types
 import os
 import string
 import time
-import types
 import datetime
 import sqlite3
 import signal
@@ -589,7 +588,7 @@ class Database :
     # the values of these fields are safe because from the UML they are subject to an ident callback, 
     # and from the frontend they are subject to a connection from a particular IP number
     def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
-        #print "XXXXX", (command, runID, val1, val2)
+        #print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
         
         def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
             readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library.  codes: http://www.sqlite.org/c3ref/c_alter_table.html
@@ -725,9 +724,9 @@ class Database :
             return {"status":"attach succeeded"}
 
         if command == "commit":
-            signal.alarm (10)
+            signal.alarm(10)
             self.m_sqlitedbconn.commit()
-            signal.alarm (0)
+            signal.alarm(0)
             return {"status":"commit succeeded"}  # doesn't reach here if the signal fails
 
 
@@ -772,7 +771,7 @@ class Database :
             nrecords += 1
         
         res["nrecords"] = nrecords
-        res["status"] = 'Data record(s) inserted'
+        res["status"] = 'Data record(s) inserted or replaced'
         return res
 
 
@@ -803,7 +802,6 @@ class SqliteSaveInfo:
         self.swdatakeys = [ a[1]  for a in tblinfo["data"] ]
         self.swdatatypes = [ a[2]  for a in tblinfo["data"] ]
         self.sqdatatemplate = "insert or replace into main.`%s` values (%s)" % (self.swdatatblname, ",".join(["?"]*len(self.swdatakeys)))
-
         return True
             
     def buildinitialtable(self, data):
@@ -821,12 +819,14 @@ class SqliteSaveInfo:
             if k not in self.swdatakeys:
                 v = data[k]
                 if v != None:
-                    vt = "text"
-                    if type(v) == int:
+                    if k[-5:] == "_blob":
+                        vt = "blob"  # coerced into affinity none
+                    elif type(v) == int:
                         vt = "integer"
                     elif type(v) == float:
                         vt = "real"
-                            # need in future to detect base64 conversion for blobs (as will make downloaded databases more useful to use eg containing images)
+                    else:
+                        vt = "text"
                     newcols.append((k, vt))
         return newcols
 
