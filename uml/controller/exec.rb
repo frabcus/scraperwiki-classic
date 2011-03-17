@@ -24,6 +24,7 @@ class ConsoleStream
       if @text != ''
           message = { 'message_type' => 'console', 'content' => @text }
           @fd.write(JSON.generate(message) + "\n")
+          @fd.flush
           @text = ''
       end
     end
