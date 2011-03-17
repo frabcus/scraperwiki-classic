@@ -1,7 +1,7 @@
 
 def getExceptionTraceback(e, code)
     lbacktrace = e.backtrace.reverse
-    #File.open("/tmp/fairuby", 'a') {|f| f.write(JSON.generate(lbacktrace)) }
+    File.open("/tmp/fairuby", 'a') {|f| f.write(JSON.generate(lbacktrace)) }
     lbacktrace.pop
 
     exceptiondescription = e.to_s
@@ -39,6 +39,7 @@ def getExceptionTraceback(e, code)
         else
             stackentry["linetext"] = "ScraperWiki internal error, line number out of range in getExceptionTraceback"
         end
+        stackentry["furtherlinetext"] = funcname
         stackdump.push(stackentry)
     end
 
