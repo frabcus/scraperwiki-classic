@@ -92,11 +92,19 @@ module ScraperWiki
         ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => pdata})
     end
 
+    class SqliteException < RuntimeError
+    end
+    class NoSuchTableSqliteException < SqliteException
+    end
+
     def ScraperWiki.sqlitecommand(command, val1=nil, val2=nil, verbose=2)
         ds = SW_DataStore.create()
         res = ds.request(['sqlitecommand', command, val1, val2])
         if res["error"]
-            raise res["error"]
+            if /sqlite3.Error: no such table:/.match(res["error"])
+                raise NoSuchTableSqliteException.new(res["error"])
+            end
+            raise SqliteException.new(res["error"])
         end
         if verbose:
             ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>command, 'val1'=>res, 'val2'=>res})
@@ -106,21 +114,21 @@ module ScraperWiki
     def ScraperWiki.save_sqlite(unique_keys, data, table_name="swdata", commit=true, verbose=2)
         for key in unique_keys
             if !data.include?(key)
-                raise 'unique_keys must be a subset of data'
+                raise SqliteException.new('unique_keys must be a subset of data')
             end
         end
 
         jdata = { }
         data.each_pair do |key, value|
             if not key:
-                raise 'key must not be blank'
+                raise SqliteException.new('key must not be blank')
             end
             if key.class != String
-                raise 'key must be string type'
+                raise SqliteException.new('key must be string type')
             end
 
             if !/[a-zA-Z0-9_\- ]+$/.match(key)
-                raise 'key must be simple text'+key
+                raise SqliteException.new('key must be simple text'+key)
             end
             
             if ![Fixnum, Float, String, TrueClass, FalseClass, NilClass].include?(value)
@@ -132,7 +140,7 @@ module ScraperWiki
         ds = SW_DataStore.create()
         res = ds.request(['save_sqlite', unique_keys, jdata, table_name])
         if res["error"]
-            raise res["error"]
+            raise SqliteException.new(res["error"])
         end
         if commit
             res = ds.request(['sqlitecommand', 'commit', nil, nil]);
@@ -150,6 +158,28 @@ module ScraperWiki
         end
         ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => pdata})
     end
+
+            # also needs to handle the types better (could save json and datetime objects handily
+    def ScraperWiki.save_var(name, value, commit=true, verbose=2)
+        data = { "name" => name, "value_blob" => value, "type" => value.Class }
+        save(unique_keys=["name"], data=data, table_name="swvariables", commit=commit, verbose=verbose)
+    end
+
+    def ScraperWiki.get_var(name, default=nil, verbose=2)
+        begin
+            result = ScraperWiki.sqlitecommand("execute", "select value_blob, type from swvariables where name=?", [name,], verbose)
+        rescue NoSuchTableSqliteException => e   
+            return default
+        end
+
+        if !result["data"]
+            return default
+        end
+        return result["data"][0][0]
+    end
+
+
+
 
     def ScraperWiki.getKeys(name)
         return SW_APIWrapper.getKeys(name)
