@@ -109,6 +109,7 @@ module ScraperWiki
         if verbose:
             ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>command, 'val1'=>res, 'val2'=>res})
         end
+        return res
     end
 
     def ScraperWiki.save_sqlite(unique_keys, data, table_name="swdata", commit=true, verbose=2)
@@ -131,7 +132,7 @@ module ScraperWiki
                 raise SqliteException.new('key must be simple text'+key)
             end
             
-            if ![Fixnum, Float, String, TrueClass, FalseClass, NilClass].include?(value)
+            if ![Fixnum, Float, String, TrueClass, FalseClass, NilClass].include?(value.class)
                 value = value.to_s
             end
             jdata[key] = value
@@ -161,8 +162,8 @@ module ScraperWiki
 
             # also needs to handle the types better (could save json and datetime objects handily
     def ScraperWiki.save_var(name, value, commit=true, verbose=2)
-        data = { "name" => name, "value_blob" => value, "type" => value.Class }
-        save(unique_keys=["name"], data=data, table_name="swvariables", commit=commit, verbose=verbose)
+        data = { "name" => name, "value_blob" => value, "type" => value.class }
+        ScraperWiki.save_sqlite(unique_keys=["name"], data=data, table_name="swvariables", commit=commit, verbose=verbose)
     end
 
     def ScraperWiki.get_var(name, default=nil, verbose=2)
