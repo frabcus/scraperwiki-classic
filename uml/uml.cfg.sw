@@ -19,18 +19,12 @@ db	= swcache_live
 [httpproxy]
 host	= 89.16.177.195
 port	= 9005
-dbhost	= 89.16.177.176
-user	= cache
-passwd	= 4dlk4eaaA44A1gTx
-db	= swcache_live
+cache   = 127.0.0.1:11211
 
 [httpsproxy]
 host	= 89.16.177.195
 port	= 9006
-dbhost	= 89.16.177.176
-user	= cache
-passwd	= 4dlk4eaaA44A1gTx
-db	= swcache_live
+cache   = 127.0.0.1:11211
 
 [ftpproxy]
 host	= 89.16.177.195
