@@ -1,7 +1,7 @@
 
 def getExceptionTraceback(e, code)
     lbacktrace = e.backtrace.reverse
-    File.open("/tmp/fairuby", 'a') {|f| f.write(JSON.generate(lbacktrace)) }
+    #File.open("/tmp/fairuby", 'a') {|f| f.write(JSON.generate(lbacktrace)) }
     lbacktrace.pop
 
     exceptiondescription = e.to_s
