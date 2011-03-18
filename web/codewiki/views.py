@@ -151,81 +151,75 @@ def code_overview(request, wiki_type, short_name):
 
 
 def view_admin(request, short_name):
-    view = get_code_object_or_none(models.View, short_name=short_name)
-    if not view:
-        return code_error_response(models.View, short_name=short_name, request=request)
-
-    #you can only get here if you are signed in
-    if not request.user.is_authenticated():
+    scraper = models.Code.unfiltered.get(short_name=short_name)
+    if not scraper.actionauthorized(request.user, "changeadmin"):
+        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "changeadmin"), context_instance=RequestContext(request)))
+    if not (request.method == 'POST' and request.is_ajax()):
         raise Http404
+    
+    view = scraper.view
 
-    if request.method == 'POST' and request.is_ajax():
-        response = HttpResponse()
-        response_text = ''
-        element_id = request.POST.get('id', None)
-        if element_id == 'divAboutScraper':
-            view.description = request.POST.get('value', None)
-            response_text = textile.textile(view.description)
-
-        if element_id == 'hCodeTitle':
-            view.title = request.POST.get('value', None)
-            response_text = view.title
-
-        if element_id == 'divEditTags':
-            view.settags(request.POST.get('value', ''))  # splitting is in the library
-            response_text = ", ".join([tag.name for tag in view.gettags()])
-
-        #save view
-        view.save()
-        response.write(response_text)
-        return response
-    else:
+    if not (request.method == 'POST' and request.is_ajax()):
         raise Http404
+        
+    response = HttpResponse()
+    response_text = ''
+    element_id = request.POST.get('id', None)
+    if element_id == 'divAboutScraper':
+        view.description = request.POST.get('value', None)
+        response_text = textile.textile(view.description)
+
+    if element_id == 'hCodeTitle':
+        view.title = request.POST.get('value', None)
+        response_text = view.title
+
+    if element_id == 'divEditTags':
+        view.settags(request.POST.get('value', ''))  # splitting is in the library
+        response_text = ", ".join([tag.name for tag in view.gettags()])
+
+    view.save()
+    response.write(response_text)
+    return response
     
     
 def scraper_admin(request, short_name):
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
-
-    #you can only get here if you are signed in
-    if not request.user.is_authenticated():
+    scraper = models.Code.unfiltered.get(short_name=short_name)
+    if not scraper.actionauthorized(request.user, "changeadmin"):
+        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "changeadmin"), context_instance=RequestContext(request)))
+    if not (request.method == 'POST' and request.is_ajax()):
         raise Http404
+        
+    scraper = scraper.scraper
+    
+    response = HttpResponse()
+    response_text = ''
+    element_id = request.POST.get('id', None)
+    if element_id == 'divAboutScraper':
+        scraper.description = request.POST.get('value', None)
+        response_text = textile.textile(scraper.description)
+        
+    if element_id == 'hCodeTitle':
+        scraper.title = request.POST.get('value', None)
+        response_text = scraper.title
 
-    if request.method == 'POST' and request.is_ajax():
-        response = HttpResponse()
-        response_text = ''
-        element_id = request.POST.get('id', None)
-        if element_id == 'divAboutScraper':
-            scraper.description = request.POST.get('value', None)
-            response_text = textile.textile(scraper.description)
-            
-        if element_id == 'hCodeTitle':
-            scraper.title = request.POST.get('value', None)
-            response_text = scraper.title
+    if element_id == 'divEditTags':
+        scraper.settags(request.POST.get('value', ''))
+        response_text = ", ".join([tag.name for tag in scraper.gettags()])
 
-        if element_id == 'divEditTags':
-            scraper.settags(request.POST.get('value', ''))
-            response_text = ", ".join([tag.name for tag in scraper.gettags()])
+    if element_id == 'spnRunInterval':
+        scraper.run_interval = int(request.POST.get('value', None))
+        response_text = models.SCHEDULE_OPTIONS_DICT[scraper.run_interval]
 
-        if element_id == 'spnRunInterval':
-            scraper.run_interval = int(request.POST.get('value', None))
-            response_text = models.SCHEDULE_OPTIONS_DICT[scraper.run_interval]
+    if element_id == 'spnLicenseChoice':
+        scraper.license = request.POST.get('value', None)
+        response_text = scraper.license
 
-        if element_id == 'spnLicenseChoice':
-            scraper.license = request.POST.get('value', None)
-            response_text = scraper.license
+    if element_id == 'publishScraperButton':
+        scraper.published = True
 
-        if element_id == 'publishScraperButton':
-            scraper.published = True
-            response_text = ''
-
-        #save scraper
-        scraper.save()
-        response.write(response_text)
-        return response
-    else:
-        raise Http404
+    scraper.save()
+    response.write(response_text)
+    return response
 
 
 def scraper_delete_data(request, short_name):
