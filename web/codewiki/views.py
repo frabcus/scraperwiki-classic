@@ -486,48 +486,6 @@ def sqlitequery(request):
 
 
 
-def export_gdocs_spreadsheet(request, short_name):
-    #TODO: this funciton needs to change to cache things on disc and read the size from tehre rather than in memory
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
-
-    #get the csv, it's size and choose a title for the file
-    title = scraper.title + " - from ScraperWiki.com"
-    csv_url = 'http://%s%s' % (Site.objects.get_current().domain,  reverse('export_csv', kwargs={'short_name': scraper.short_name}))
-
-    row_limit = 5000
-
-    truncated_message = 'THIS IS A SUBSET OF THE DATA ONLY. GOOGLE DOCS LIMITS FILES TO 1MB. DOWNLOAD THE FULL DATASET AS CSV HERE: %s\n' % str(csv_url)
-    subset_message = 'THIS IS A SUBSET OF THE DATA ONLY. A MAXIMUM OF %s RECORDS CAN BE UPLOADED FROM SCRAPERWIKI. DOWNLOAD THE FULL DATASET AS CSV HERE: %s\n' % (str(row_limit), csv_url)
-    
-    max_length = settings.GDOCS_UPLOAD_MAX - max(len(truncated_message), len(subset_message))
-    csv_data, truncated = generate_csv(models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=row_limit), 0, max_length)
-
-    if truncated:
-        title = title + ' [SUBSET ONLY]'
-        csv_data = truncated_message.encode('utf-8') + csv_data
-    elif scraper.record_count > row_limit:
-        csv_data = subset_message.encode('utf-8') + csv_data
-
-    #create client and authenticate
-    client = gdata.docs.service.DocsService()
-    client.ClientLogin(settings.GDOCS_UPLOAD_USER, settings.GDOCS_UPLOAD_PASSWORD)
-
-    #create a document reference
-    ms = gdata.MediaSource(file_handle=StringIO(csv_data), content_type=gdata.docs.service.SUPPORTED_FILETYPES['CSV'], content_length=len(csv_data))
-
-    #try to upload it
-    #try:
-    entry = client.Upload(ms, title, folder_or_uri=settings.GDOCS_UPLOAD_FOLDER_URI)
-    
-    #redirect
-    print "redirecting"
-    return HttpResponseRedirect(entry.GetAlternateLink().href)
-        
-    #except gdata.service.RequestError:
-    #    print "failed to upload for some other reason"
-
 
 
 def follow(request, short_name):

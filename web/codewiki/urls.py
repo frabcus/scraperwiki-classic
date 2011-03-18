@@ -26,10 +26,6 @@ urlpatterns = patterns('',
     # special views functionality
     url(r'^views/(?P<short_name>[\w_\-\.]+)/html/$',      views.htmlview,               name='htmlview'),
     
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/run/$',   # redirect because it's so common
-                   lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('rpcexecute', args=[short_name]))),
-    url(r'^views/(?P<short_name>[\w_\-\.]+)/full/$',  
-                   lambda request, short_name: HttpResponseRedirect("http://%s%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=[short_name])))),
 
     url(r'^views/(?P<short_name>[\w_\-\.]+)/admin/$',     views.view_admin,             name='view_admin'),    
     
@@ -40,8 +36,6 @@ urlpatterns = patterns('',
     url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$',  
                                                           views.export_sqlite,          name='export_sqlite'),
     
-            # probably deprecated and out of date        
-    url(r'^scrapers/export2/(?P<short_name>[\w_\-\.]+)/$',views.export_gdocs_spreadsheet,name='export_gdocs_spreadsheet'),    
     
     url(r'^scrapers/follow/(?P<short_name>[\w_\-\.]+)/$',   views.follow,               name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-\.]+)/$', views.unfollow,             name='scraper_unfollow'),
@@ -95,5 +89,12 @@ urlpatterns = patterns('',
     url(r'^handle_editor_save/$',                         viewseditor.handle_editor_save,   name="handle_editor_save"),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/edit/$',   viewseditor.edit, name="editor_edit"),    
     url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',            viewseditor.edit, name="editor"),
+
+
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/(?:run|full)/$',   # redirect because it's so common
+                   lambda request, wiki_type, short_name: HttpResponseRedirect("http://%s%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=[short_name])))),
+    url(r'^scrapers/export2/(?P<short_name>[\w_\-\.]+)/$', 
+                   lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=["scraper", short_name]))),
+
 )
 
