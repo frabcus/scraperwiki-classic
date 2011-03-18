@@ -734,19 +734,20 @@ class Database :
 
     def save_sqlite(self, scraperID, runID, short_name, unique_keys, data, swdatatblname):
         res = { }
+        
+        if type(data) == dict:
+            data = [data]
+        
         if not self.m_sqlitedbconn or swdatatblname not in self.sqlitesaveinfo:
             ssinfo = SqliteSaveInfo(self, scraperID, runID, short_name, swdatatblname)
             self.sqlitesaveinfo[swdatatblname] = ssinfo
-            if not ssinfo.rebuildinfo():
-                ssinfo.buildinitialtable(data)
+            if not ssinfo.rebuildinfo() and data:
+                ssinfo.buildinitialtable(data[0])
                 ssinfo.rebuildinfo()
                 res["tablecreated"] = swdatatblname
         else:
             ssinfo = self.sqlitesaveinfo[swdatatblname]
         
-            
-        if type(data) == dict:
-            data = [data]
         
         nrecords = 0
         for ldata in data:
