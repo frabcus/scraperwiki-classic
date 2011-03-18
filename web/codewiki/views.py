@@ -78,13 +78,14 @@ def getscraperor404(request, short_name, action):
     if action == "changeadmin":
         if not (request.method == 'POST' and request.is_ajax()):
             raise Http404
-    if action == "deletedata":
-        if request.POST.get('delete_data', None) != '1':
-            raise Http404
     if action == "converttosqlitedatastore":
         if request.POST.get('converttosqlitedatastore', None) != 'converttosqlitedatastore':
             raise Http404
-
+    
+    if action in ["delete_data", "schedule_scraper", "run_scraper", "screenshoot_scraper", "delete_scraper"]:
+        if request.POST.get(action, None) != '1':
+            raise Http404
+        
     return scraper
 
 
@@ -292,7 +293,7 @@ def scraper_admin(request, short_name):
 
 
 def scraper_delete_data(request, short_name):
-    scraper = getscraperor404(request, short_name, "deletedata")
+    scraper = getscraperor404(request, short_name, "delete_data")
     dataproxy = DataStore(scraper.guid, scraper.short_name)
     dataproxy.request(("clear_datastore",))
     if scraper.wiki_type == "scraper":
@@ -309,78 +310,33 @@ def scraper_converttosqlitedatastore(request, short_name):
         scraper.scraper.update_meta()
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
-
-# implemented by setting last_run to None
 def scraper_schedule_scraper(request, short_name):
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
-
-    if scraper.owner() != request.user and not request.user.is_staff:
-        raise Http404
-    if request.POST.get('schedule_scraper', None) == '1':
-        scraper.last_run = None
-        scraper.save()
+    scraper = getscraperor404(request, short_name, "schedulescraper")
+    if scraper.wiki_type == "scraper":
+        scraper.scraper.last_run = None
+        scraper.scraper.save()
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
-
 
 def scraper_run_scraper(request, short_name):
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
-
-    if not request.user.is_staff:
-        raise Http404
-
-    if request.POST.get('run_scraper', None) == '1':
+    scraper = getscraperor404(request, short_name, "run_scraper")
+    if scraper.wiki_type == "scraper":
+        scraper.scraper.last_run = None
+        scraper.scraper.save()
         call_command('run_scrapers', short_name=short_name)
-    
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
-
 def scraper_screenshoot_scraper(request, wiki_type, short_name):
-    if wiki_type == 'scraper':
-        code_object = get_code_object_or_none(models.Scraper, short_name=short_name)
-        if not code_object:
-            return code_error_response(models.Scraper, short_name=short_name, request=request)
-    else:
-        code_object = get_code_object_or_none(models.View, short_name=short_name)
-        if not code_object:
-            return code_error_response(models.View, short_name=short_name, request=request)
-
-    if not request.user.is_staff:
-        raise Http404
-
-    if request.POST.get('screenshoot_scraper', None) == '1':
-        call_command('take_screenshot', short_name=short_name, domain=settings.VIEW_DOMAIN, verbose=False)
-    
+    scraper = getscraperor404(request, short_name, "screenshoot_scraper")
+    call_command('take_screenshot', short_name=short_name, domain=settings.VIEW_DOMAIN, verbose=False)
     return HttpResponseRedirect(reverse('code_overview', args=[code_object.wiki_type, short_name]))
-
 
 def scraper_delete_scraper(request, wiki_type, short_name):
-    if wiki_type == 'scraper':
-        code_object = get_code_object_or_none(models.Scraper, short_name=short_name)
-        if not code_object:
-            return code_error_response(models.Scraper, short_name=short_name, request=request)
-    else:
-        code_object = get_code_object_or_none(models.View, short_name=short_name)
-        if not code_object:
-            return code_error_response(models.View, short_name=short_name, request=request)
+    scraper = getscraperor404(request, short_name, "delete_scraper")
+    scraper.deleted = True
+    scraper.save()
+    request.notifications.add("Your %s has been deleted" % wiki_type)
+    return HttpResponseRedirect('/')
 
-    if code_object.owner() != request.user and not request.user.is_staff:
-        raise Http404
-
-    if request.POST.get('delete_scraper', None) == '1':
-        code_object.deleted = True
-        code_object.save()
-        request.notifications.add("Your %s has been deleted" % wiki_type)
-        return HttpResponseRedirect('/')
-
-    return HttpResponseRedirect(reverse('code_overview', args=[code_object.wiki_type, short_name]))
-
-
-    
-    
        # this view should be deprecated
 def view_fullscreen (request, short_name):
     urlquerystring = request.META["QUERY_STRING"]
