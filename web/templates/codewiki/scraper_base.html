@@ -13,15 +13,13 @@
                 <li class="api"><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>
                 {% if sqlitedata %}
                     <li class="sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download SQLite3 database</a></li>
-                {% else %}
-                    <li class="csv"><a href="{% url export_csv scraper.short_name %}" rel="nofollow">Download this dataset (CSV)</a></li>
                 {% endif %}
             {% endifequal %}
             {% ifequal scraper.wiki_type 'view'%}
                 <li class="full_screen"><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">View as full page</a></li>
                 <li class="embed"><a href="{% url code_overview scraper.wiki_type scraper.short_name %}#embed">Add to your site</a></li>
             {% endifequal %}
-                <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
+            <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
         </ul>
         <h1>
             {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %} / <span id="hCodeTitle">{{ scraper.title }}</span>{% if not scraper.published %} (not public){% endif %}

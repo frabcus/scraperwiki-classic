@@ -2,56 +2,25 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import render_to_response
-from django.shortcuts import get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.core.management import call_command
-from tagging.models import Tag, TaggedItem
-from tagging.utils import get_tag
-from django.db import IntegrityError
 from django.contrib.auth.models import User
 from django.views.decorators.http import condition
 import textile
-import random
 from django.conf import settings
-from django.utils.encoding import smart_str
-import urllib
 
 from managers.datastore import DataStore
-
 from codewiki import models
-from api.emitters import CSVEmitter 
 import frontend
 
-import difflib
+import urllib
 import re
-import csv
-import math
 import urllib2
 import base64
-
-from cStringIO import StringIO
-import csv, types
 import datetime
-import gdata.docs.service
-
 try:                import json
 except ImportError: import simplejson as json
 
-def get_code_object_or_none(klass, short_name):
-    try:
-        return klass.objects.get(short_name=short_name)
-    except Exception, e:
-        print e, type(e)
-        return None
-
-def code_error_response(klass, short_name, request):
-    if klass.unfiltered.filter(short_name=short_name, deleted=True).count() == 1:
-        body = 'Sorry, this %s has been deleted by the owner' % klass.__name__
-        string = render_to_string('404.html', {'heading': 'Deleted', 'body': body}, context_instance=RequestContext(request))
-        return HttpResponseNotFound(string)
-    else:
-        raise Http404
 
 
 def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
@@ -96,9 +65,6 @@ def comments(request, wiki_type, short_name):
     context["scraper_tags"] = scraper.gettags()
     context["user_owns_it"] = (scraper.owner() == request.user)
     context["user_follows_it"] = (request.user in scraper.followers())
-    context["scraper_contributors"] = scraper.contributors()
-    context["scraper_owner"] = scraper.owner()    
-    context["scraper_followers"] = scraper.followers()    
     
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
@@ -167,11 +133,7 @@ def code_overview(request, wiki_type, short_name):
 
     context["schedule_options"] = models.SCHEDULE_OPTIONS
     context["license_choices"] = models.LICENSE_CHOICES
-    
     context["user_follows_it"] = (request.user in scraper.followers())
-    context["scraper_contributors"] = scraper.contributors()
-    context["scraper_requesters"] = scraper.requesters()    
-    
     context["related_views"] = models.View.objects.filter(relations=scraper)
     
     lscraperrunevents = scraper.scraper.scraperrunevent_set.all().order_by("-run_started")[:1] 
@@ -200,6 +162,7 @@ def code_overview(request, wiki_type, short_name):
         context['datasinglerow'] = zip(data['headings'], data['rows'][0])
     context['data'] = data
     
+    # this is the only one to call.  would like to know the exception that's expected
     try:
         dataproxy = DataStore(scraper.guid, scraper.short_name)
         sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
