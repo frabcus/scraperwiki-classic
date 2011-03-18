@@ -69,27 +69,24 @@ def code_overview(request, wiki_type, short_name):
         return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "overview"), context_instance=RequestContext(request)))
         
     context = {'selected_tab':'overview', 'scraper':scraper }
-    
     context["scraper_tags"] = scraper.gettags()
     context["user_owns_it"] = (scraper.owner() == request.user)
     
     if wiki_type == 'view':
         context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
-        
         if scraper.language == 'html':
             code = scraper.saved_code()
             if re.match('<div\s+class="inline">', code):
                 context["htmlcode"] = code
-        
         return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
 
+    # else section
     assert wiki_type == 'scraper'
-    user = request.user
 
     context["schedule_options"] = models.SCHEDULE_OPTIONS
     context["license_choices"] = models.LICENSE_CHOICES
     
-    context["user_follows_it"] = (user in scraper.followers())
+    context["user_follows_it"] = (request.user in scraper.followers())
     context["scraper_contributors"] = scraper.contributors()
     context["scraper_requesters"] = scraper.requesters()    
     
@@ -153,9 +150,9 @@ def code_overview(request, wiki_type, short_name):
 def view_admin(request, short_name):
     scraper = models.Code.unfiltered.get(short_name=short_name)
     if not scraper.actionauthorized(request.user, "changeadmin"):
-        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "changeadmin"), context_instance=RequestContext(request)))
+        return Http404
     if not (request.method == 'POST' and request.is_ajax()):
-        raise Http404
+        return Http404
     
     view = scraper.view
 
@@ -185,9 +182,9 @@ def view_admin(request, short_name):
 def scraper_admin(request, short_name):
     scraper = models.Code.unfiltered.get(short_name=short_name)
     if not scraper.actionauthorized(request.user, "changeadmin"):
-        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "changeadmin"), context_instance=RequestContext(request)))
+        return Http404
     if not (request.method == 'POST' and request.is_ajax()):
-        raise Http404
+        return Http404
         
     scraper = scraper.scraper
     
@@ -282,6 +279,7 @@ def scraper_run_scraper(request, short_name):
     
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
+
 def scraper_screenshoot_scraper(request, wiki_type, short_name):
     if wiki_type == 'scraper':
         code_object = get_code_object_or_none(models.Scraper, short_name=short_name)
@@ -327,7 +325,6 @@ def scraper_delete_scraper(request, wiki_type, short_name):
     
        # this view should be deprecated
 def view_fullscreen (request, short_name):
-    user = request.user
     urlquerystring = request.META["QUERY_STRING"]
 
     scraper = get_code_object_or_none(models.View, short_name=short_name)
@@ -337,42 +334,43 @@ def view_fullscreen (request, short_name):
     return render_to_response('codewiki/view_fullscreen.html', {'scraper': scraper, 'urlquerystring':urlquerystring}, context_instance=RequestContext(request))
 
 def comments(request, wiki_type, short_name):
-    user = request.user
-    scraper = get_code_object_or_none(models.Code, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Code, short_name=short_name, request=request)
-
-    # Only logged in users should be able to see unpublished scrapers
-    if not scraper.published and not user.is_authenticated():
-        return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
-
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
-
-    scraper_owner = scraper.owner()
-    scraper_contributors = scraper.contributors()
-    scraper_followers = scraper.followers()
-
-    scraper_tags = scraper.gettags()
-
-    context = { 'scraper_tags': scraper_tags, 'scraper_owner': scraper_owner, 'scraper_contributors': scraper_contributors,
-                   'scraper_followers': scraper_followers, 'selected_tab': 'comments', 'scraper': scraper,
-                   'user_owns_it': user_owns_it, 'user_follows_it': user_follows_it }
+    try:
+        scraper = models.Code.unfiltered.get(short_name=short_name)
+    except models.Code.DoesNotExist:
+        message =  "Sorry, this %s does not exist" % wiki_type
+        return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
+    
+    if wiki_type != scraper.wiki_type:
+        return HttpResponseRedirect(reverse('scraper_comments', args=[scraper.wiki_type, short_name]))
+        
+    if not scraper.actionauthorized(request.user, "comments"):
+        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "comments"), context_instance=RequestContext(request)))
+    
+    context = {'selected_tab':'comments', 'scraper':scraper }
+    context["scraper_tags"] = scraper.gettags()
+    context["user_owns_it"] = (scraper.owner() == request.user)
+    context["user_follows_it"] = (request.user in scraper.followers())
+    context["scraper_contributors"] = scraper.contributors()
+    context["scraper_owner"] = scraper.owner()    
+    context["scraper_followers"] = scraper.followers()    
+    
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
 
 def scraper_history(request, wiki_type, short_name):
-    user = request.user
+    try:
+        scraper = models.Code.unfiltered.get(short_name=short_name)
+    except models.Code.DoesNotExist:
+        message =  "Sorry, this %s does not exist" % wiki_type
+        return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
     
-    scraper = get_code_object_or_none(models.Code, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Code, short_name=short_name, request=request)
-
-    # Only logged in users should be able to see unpublished scrapers
-    if not scraper.published and not user.is_authenticated():
-        return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
-
-    dictionary = { 'selected_tab': 'history', 'scraper': scraper, "user":user }
+    if wiki_type != scraper.wiki_type:
+        return HttpResponseRedirect(reverse('scraper_history', args=[scraper.wiki_type, short_name]))
+        
+    if not scraper.actionauthorized(request.user, "history"):
+        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "history"), context_instance=RequestContext(request)))
+    
+    context = { 'selected_tab': 'history', 'scraper': scraper, "user":request.user }
     
     itemlog = [ ]
     for commitentry in scraper.get_commit_log():
@@ -403,10 +401,10 @@ def scraper_history(request, wiki_type, short_name):
         
         itemlog.sort(key=lambda x: x["datetime"], reverse=True)
     
-    dictionary["itemlog"] = itemlog
-    dictionary["filestatus"] = scraper.get_file_status()
+    context["itemlog"] = itemlog
+    context["filestatus"] = scraper.get_file_status()
     
-    return render_to_response('codewiki/history.html', dictionary, context_instance=RequestContext(request))
+    return render_to_response('codewiki/history.html', context, context_instance=RequestContext(request))
 
 
 
@@ -606,11 +604,10 @@ def follow(request, short_name):
     if not scraper:
         return code_error_response(models.Scraper, short_name=short_name, request=request)
 
-    user = request.user
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
+    user_owns_it = (scraper.owner() == request.user)
+    user_follows_it = (request.user in scraper.followers())
     # add the user to follower list
-    scraper.add_user_role(user, 'follow')
+    scraper.add_user_role(request.user, 'follow')
     # Redirect after POST
     return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
 
@@ -622,11 +619,10 @@ def unfollow(request, short_name):
         return code_error_response(models.Scraper, short_name=short_name, request=request)
     print scraper
 
-    user = request.user
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
+    user_owns_it = (scraper.owner() == request.user)
+    user_follows_it = (request.user in scraper.followers())
     # remove the user from follower list
-    scraper.unfollow(user)
+    scraper.unfollow(request.user)
     # Redirect after POST
     return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
 

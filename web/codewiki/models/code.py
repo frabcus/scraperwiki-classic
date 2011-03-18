@@ -247,6 +247,7 @@ class Code(models.Model):
 
 
             # all authorization to go through here
+            # actions are overview, changeadmin, comments, history
     def actionauthorized(self, user, action):
         if self.deleted:
             return False
