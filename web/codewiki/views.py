@@ -70,6 +70,24 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
     return scraper
 
 
+def getscraperor404(request, short_name, action):
+    scraper = models.Code.unfiltered.get(short_name=short_name)
+    if not scraper.actionauthorized(request.user, action):
+        raise Http404
+        
+    if action == "changeadmin":
+        if not (request.method == 'POST' and request.is_ajax()):
+            raise Http404
+    if action == "deletedata":
+        if request.POST.get('delete_data', None) != '1':
+            raise Http404
+    if action == "converttosqlitedatastore":
+        if request.POST.get('converttosqlitedatastore', None) != 'converttosqlitedatastore':
+            raise Http404
+
+    return scraper
+
+
 def comments(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, "scraper_comments", "comments")
     if isinstance(scraper, HttpResponse):  return scraper
@@ -211,18 +229,13 @@ def code_overview(request, wiki_type, short_name):
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
+# all remaining functions are ajax or temporary pages linked only 
+# through the site, so throwing 404s is adequate
+
 def view_admin(request, short_name):
-    scraper = models.Code.unfiltered.get(short_name=short_name)
-    if not scraper.actionauthorized(request.user, "changeadmin"):
-        return Http404
-    if not (request.method == 'POST' and request.is_ajax()):
-        return Http404
-    
+    scraper = getscraperor404(request, short_name, "changeadmin")
     view = scraper.view
 
-    if not (request.method == 'POST' and request.is_ajax()):
-        raise Http404
-        
     response = HttpResponse()
     response_text = ''
     element_id = request.POST.get('id', None)
@@ -244,12 +257,7 @@ def view_admin(request, short_name):
     
     
 def scraper_admin(request, short_name):
-    scraper = models.Code.unfiltered.get(short_name=short_name)
-    if not scraper.actionauthorized(request.user, "changeadmin"):
-        return Http404
-    if not (request.method == 'POST' and request.is_ajax()):
-        return Http404
-        
+    scraper = getscraperor404(request, short_name, "changeadmin")
     scraper = scraper.scraper
     
     response = HttpResponse()
@@ -283,39 +291,22 @@ def scraper_admin(request, short_name):
     return response
 
 
-
-
-
 def scraper_delete_data(request, short_name):
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
-
-    if scraper.owner() != request.user and not request.user.is_staff:
-        raise Http404
-    if request.POST.get('delete_data', None) == '1':
-        dataproxy = DataStore(scraper.guid, scraper.short_name)
-        dataproxy.request(("clear_datastore",))
-        scraper.scrapermetadata_set.all().delete()
-        scraper.update_meta()
-        scraper.save()
-
+    scraper = getscraperor404(request, short_name, "deletedata")
+    dataproxy = DataStore(scraper.guid, scraper.short_name)
+    dataproxy.request(("clear_datastore",))
+    if scraper.wiki_type == "scraper":
+        scraper.scraper.scrapermetadata_set.all().delete()
+        scraper.scraper.update_meta()
+    scraper.save()
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
-
-# conversion code
 def scraper_converttosqlitedatastore(request, short_name):
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
-
-    if scraper.owner() != request.user and not request.user.is_staff:
-        raise Http404
-    if request.POST.get('converttosqlitedatastore', None) == 'converttosqlitedatastore':
-        dataproxy = DataStore(scraper.guid, scraper.short_name)
-        dataproxy.request(("converttosqlitedatastore",))
-        scraper.update_meta()
-
+    scraper = getscraperor404(request, short_name, "converttosqlite")
+    dataproxy = DataStore(scraper.guid, scraper.short_name)
+    dataproxy.request(("converttosqlitedatastore",))
+    if scraper.wiki_type == "scraper":
+        scraper.scraper.update_meta()
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 

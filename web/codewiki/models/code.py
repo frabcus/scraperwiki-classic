@@ -255,6 +255,9 @@ class Code(models.Model):
             return False
         if not self.published and not user.is_authenticated():
             return False
+        if action in ["deletedata", "converttosqlitedatastore"]:
+            if self.owner() != user and not user.is_staff:
+                return False
         return True
 
     def authorizationfailedmessage(self, user, action):
