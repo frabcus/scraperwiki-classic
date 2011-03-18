@@ -337,17 +337,6 @@ def scraper_delete_scraper(request, wiki_type, short_name):
     request.notifications.add("Your %s has been deleted" % wiki_type)
     return HttpResponseRedirect('/')
 
-       # this view should be deprecated
-def view_fullscreen (request, short_name):
-    urlquerystring = request.META["QUERY_STRING"]
-
-    scraper = get_code_object_or_none(models.View, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.View, short_name=short_name, request=request)
-
-    return render_to_response('codewiki/view_fullscreen.html', {'scraper': scraper, 'urlquerystring':urlquerystring}, context_instance=RequestContext(request))
-
-
 
 
 # this ought to be done javascript from the page to fill in the ajax input box
