@@ -23,7 +23,6 @@ try:                import json
 except ImportError: import simplejson as json
 
 
-
 def MakeRunner(request, scraper, code):
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
     failed = False

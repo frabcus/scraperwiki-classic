@@ -38,6 +38,7 @@ class CodeManager(models.Manager):
 
     #use_for_related_fields = True
 
+         # this is what the unfiltered objects is about
     def get_query_set(self):
         return super(CodeManager, self).get_query_set().filter(deleted=False)
 

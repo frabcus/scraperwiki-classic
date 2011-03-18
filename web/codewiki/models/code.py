@@ -244,6 +244,21 @@ class Code(models.Model):
         app_label = 'codewiki'
 
 
+            # all authorization to go through here
+    def actionauthorized(self, user, action):
+        if self.deleted:
+            return False
+        if not self.published and not user.is_authenticated():
+            return False
+        return True
+
+    def authorizationfailedmessage(self, user, action):
+        if self.deleted:
+            return {'heading': 'Deleted', 'body': "Sorry this %s has been deleted" % self.wiki_type}
+        if not self.published and not user.is_authenticated():
+            return {'heading': 'Access denied', 'body': "not published and you are not logged in"}
+        return {'heading': "unknown", "body":"unknown"}
+
 
 class UserCodeRole(models.Model):
     """

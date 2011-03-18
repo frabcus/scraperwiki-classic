@@ -42,7 +42,8 @@ except ImportError: import simplejson as json
 def get_code_object_or_none(klass, short_name):
     try:
         return klass.objects.get(short_name=short_name)
-    except:
+    except Exception, e:
+        print e, type(e)
         return None
 
 def code_error_response(klass, short_name, request):
@@ -54,56 +55,51 @@ def code_error_response(klass, short_name, request):
         raise Http404
 
 
-        # should redirect when wrong type
 def code_overview(request, wiki_type, short_name):
-    if wiki_type == 'scraper':
-        return scraper_overview(request, short_name)
-    else:
-        return view_overview(request, short_name)
+    try:
+        scraper = models.Code.unfiltered.get(short_name=short_name)
+    except models.Code.DoesNotExist:
+        message =  "Sorry, this %s does not exist" % wiki_type
+        return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
+    
+    if wiki_type != scraper.wiki_type:
+        return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
+        
+    if not scraper.actionauthorized(request.user, "overview"):
+        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "overview"), context_instance=RequestContext(request)))
+        
+    context = {'selected_tab':'overview', 'scraper':scraper }
+    context ["scraper_tags"] = Tag.objects.get_for_object(scraper)
+    context ["user_owns_it"] = (scraper.owner() == request.user)
+    
+    if wiki_type == 'view':
+        context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
+        
+        if scraper.language == 'html':
+            code = scraper.saved_code()
+            if re.match('<div\s+class="inline">', code):
+                context["htmlcode"] = code
+        
+        return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
 
-def scraper_overview(request, short_name):
-    """
-    Shows info on the scraper plus example data.
-    """
+    assert wiki_type == 'scraper'
     user = request.user
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
 
-    # Only logged in users should be able to see unpublished scrapers
-    if not scraper.published and not user.is_authenticated():
-        return render_to_response('codewiki/access_denied_unpublished.html', context_instance=RequestContext(request))
+    context["schedule_options"] = models.SCHEDULE_OPTIONS
+    context["license_choices"] = models.LICENSE_CHOICES
     
-    #get views that use this scraper
-    related_views = models.View.objects.filter(relations=scraper)
+    context["user_follows_it"] = (user in scraper.followers())
+    context["scraper_contributors"] = scraper.contributors()
+    context["scraper_requesters"] = scraper.requesters()    
     
-    #get meta data
-    user_owns_it = (scraper.owner() == user)
-    user_follows_it = (user in scraper.followers())
-    scraper_contributors = scraper.contributors()
-    scraper_requesters = scraper.requesters()    
-    scraper_tags = Tag.objects.get_for_object(scraper)
+    context["related_views"] = models.View.objects.filter(relations=scraper)
     
-    lscraperrunevents = scraper.scraperrunevent_set.all().order_by("-run_started")[:1] 
-    lastscraperrunevent = lscraperrunevents and lscraperrunevents[0] or None
+    lscraperrunevents = scraper.scraper.scraperrunevent_set.all().order_by("-run_started")[:1] 
+    context["lastscraperrunevent"] = lscraperrunevents and lscraperrunevents[0] or None
 
-    context = {
-        'scraper_tags': scraper_tags,
-        'selected_tab': 'overview',
-        'scraper': scraper,
-        'lastscraperrunevent':lastscraperrunevent,
-        'user_owns_it': user_owns_it,
-        'user_follows_it': user_follows_it,
-        'scraper_contributors': scraper_contributors,
-        'scraper_requesters': scraper_requesters,
-        'related_views': related_views,
-        'schedule_options': models.SCHEDULE_OPTIONS,
-        'license_choices': models.LICENSE_CHOICES,
-        }
-    
             # to be deprecated when old style datastore is abolished
     column_order = scraper.get_metadata('data_columns')
-    if not user_owns_it:
+    if not context["user_owns_it"]:
         private_columns = scraper.get_metadata('private_columns')
     else:
         private_columns = None
@@ -115,6 +111,7 @@ def scraper_overview(request, short_name):
     except:
         data = {'rows': []}
 
+    
     if len(data['rows']) > 12:
         data['morerows'] = data['rows'][9:]
         data['rows'] = data['rows'][:9]
@@ -331,26 +328,6 @@ def scraper_delete_scraper(request, wiki_type, short_name):
     return HttpResponseRedirect(reverse('code_overview', args=[code_object.wiki_type, short_name]))
 
 
-def view_overview (request, short_name):
-    user = request.user
-    scraper = get_code_object_or_none(models.View, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.View, short_name=short_name, request=request)
-
-    scraper_tags = Tag.objects.get_for_object(scraper)
-    user_owns_it = (scraper.owner() == user)
-    
-    #get scrapers used in this view
-    related_scrapers = scraper.relations.filter(wiki_type='scraper')
-        
-    context = {'selected_tab': 'overview', 'scraper': scraper, 'scraper_tags': scraper_tags, 'related_scrapers': related_scrapers, 'user_owns_it': user_owns_it}
-    
-    if scraper.language == 'html':
-        code = scraper.saved_code()
-        if re.match('<div\s+class="inline">', code):
-            context["htmlcode"] = code
-    
-    return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
     
     
        # this view should be deprecated

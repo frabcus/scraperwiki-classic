@@ -31,6 +31,7 @@ def get_code_object_or_notfoundresponse(short_name, request):
     codeobject = lcodeobject[0]
     if codeobject.deleted:
         return HttpResponseNotFound(render_to_string('404.html', {'heading': 'Deleted', 'body': "Sorry, this scraper has been deleted by its owner"}, context_instance=RequestContext(request)))
+    
     if not codeobject.published and not request.user.is_authenticated():
         return HttpResponseNotFound(render_to_string('404.html', {'heading': 'Access denied', 'body': "Sorry, this scraper is not public"}, context_instance=RequestContext(request)))
     return codeobject
@@ -39,7 +40,7 @@ def get_code_object_or_notfoundresponse(short_name, request):
 
 def raw(request, short_name):
     scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponseNotFound):
+    if isinstance(scraper, HttpResponse):
         return scraper
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
@@ -49,7 +50,7 @@ def raw(request, short_name):
 
 def diffseq(request, short_name):
     scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponseNotFound):
+    if isinstance(scraper, HttpResponse):
         return scraper
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
@@ -88,7 +89,7 @@ def run_event_json(request, run_id):
 # preview of the code diffed
 def code(request, wiki_type, short_name):
     scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponseNotFound):
+    if isinstance(scraper, HttpResponse):
         return scraper
 
     try: rev = int(request.GET.get('rev', '-1'))
@@ -126,7 +127,7 @@ def code(request, wiki_type, short_name):
 
 def reload(request, short_name):
     scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponseNotFound):
+    if isinstance(scraper, HttpResponse):
         return HttpResponse(json.dumps({'status' : 'Failed', 'message':"scraper not available to reload"}))
 
     oldcodeineditor = request.POST.get('oldcode')
@@ -140,7 +141,7 @@ def reload(request, short_name):
     # try to get rid of this
 def edittutorial(request, short_name):
     code = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(code, HttpResponseNotFound):
+    if isinstance(code, HttpResponse):
         return code
 
     qtemplate = "?template="+code.short_name
@@ -185,7 +186,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     # Load an existing scraper preference
     elif short_name != "__new__":
         scraper = get_code_object_or_notfoundresponse(short_name, request)
-        if isinstance(scraper, HttpResponseNotFound):
+        if isinstance(scraper, HttpResponse):
             return scraper
         status = scraper.get_vcs_status(-1)
         assert 'currcommit' not in status 
