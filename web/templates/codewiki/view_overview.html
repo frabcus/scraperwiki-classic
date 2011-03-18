@@ -64,13 +64,16 @@
                  <p class="infobox">Only the creator of a view can delete it.</p>
              {% endif %}
              {% if user.is_staff %}
-                 <p class="staff"><b>Go to scraper on <a href="/admin/codewiki/view/{{scraper.pk}}/">admin page</a></b></p>
+                 <div class="staff">
+                    <p><b>Admin only</b></p>
+                    <p><a href="/admin/codewiki/view/{{scraper.pk}}/">View's Django admin page</a></b></p>
 
-                 <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post" class="staff">
-                     <input type="hidden" name="screenshoot_scraper" value="1" />
-                     <input type="submit" id="btnScreenshootScraper" class="danger" value="Screenshoot this view?" />
-                     <p>Take a screenshot of this view. (Staff only)</p>
-                 </form>
+                     <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post">
+                         <input type="hidden" name="screenshoot_scraper" value="1" />
+                         <input type="submit" id="btnScreenshootScraper" class="danger" value="Screenshoot this view?" />
+                         <p>Take a screenshot of this view.</p>
+                     </form>
+                  </div>
              {% endif %}
         </div>
     <br class="clear"/>    
