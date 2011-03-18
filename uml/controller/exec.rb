@@ -24,6 +24,7 @@ class ConsoleStream
       if @text != ''
           message = { 'message_type' => 'console', 'content' => @text }
           @fd.write(JSON.generate(message) + "\n")
+          @fd.flush
           @text = ''
       end
     end
@@ -177,3 +178,7 @@ rescue Exception => e
     $logfd.write(JSON.generate(est) + "\n")
 end
 
+
+# force ConsoleStream to output last line, even if no \n
+$stdout.flush
+$stderr.flush

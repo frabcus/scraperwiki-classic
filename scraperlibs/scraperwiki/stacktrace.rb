@@ -39,6 +39,7 @@ def getExceptionTraceback(e, code)
         else
             stackentry["linetext"] = "ScraperWiki internal error, line number out of range in getExceptionTraceback"
         end
+        stackentry["furtherlinetext"] = funcname
         stackdump.push(stackentry)
     end
 

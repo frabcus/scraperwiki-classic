@@ -57,9 +57,9 @@ def GetUMLstatuses():
             result[umlname] = { "error":e.reason }
     
     # fake data
-    if not settings.UMLURLS:
-        result["uml001"] = { "runids":["zzzz.xxx_1", "zzzz.xxx_2"] }
-        result["uml002"] = { "error":"bugger bogner" }
+    #if not settings.UMLURLS:
+    #    result["uml001"] = { "runids":["zzzz.xxx_1", "zzzz.xxx_2"] }
+    #    result["uml002"] = { "error":"bugger bogner" }
 
     return result
 

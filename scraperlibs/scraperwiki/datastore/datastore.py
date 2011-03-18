@@ -294,13 +294,18 @@ def sqlitecommand(command, val1=None, val2=None, verbose=1):
     return result
     
 
-        # in the future we can raise exception types 
+class SqliteError(Exception):  pass
+class NoSuchTableSqliteError(SqliteError):  pass
+
 def databaseexception(errmap):
     mess = errmap["error"]
     for k, v in errmap.items():
         if k != "error":
             mess = "%s; %s:%s" % (mess, k, v)
-    return Exception(mess)
+    
+    if re.match('sqlite3.Error: no such table:', mess):
+        return NoSuchTableSqliteError(mess)
+    return SqliteError(mess)
         
 
 def save_sqlite(unique_keys, data, table_name="swdata", commit=True, verbose=2):
