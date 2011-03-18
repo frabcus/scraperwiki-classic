@@ -1,4 +1,3 @@
-from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
@@ -338,98 +337,16 @@ def scraper_delete_scraper(request, wiki_type, short_name):
     return HttpResponseRedirect('/')
 
 
-
-# this ought to be done javascript from the page to fill in the ajax input box
+# these ought to be done javascript from the page to fill in the ajax input box
 def tags(request, wiki_type, short_name):
-    scraper = models.Code.unfiltered.get(short_name=short_name)
+    scraper = getscraperor404(request, short_name, "gettags")
     return HttpResponse(", ".join([tag.name  for tag in scraper.gettags()]))
 
-
 def raw_about_markup(request, wiki_type, short_name):
-    code_object = get_code_object_or_none(models.Code, short_name=short_name)
-    if not code_object:
-        return code_error_response(models.Code, short_name=short_name, request=request)
-
-    response = HttpResponse(mimetype='text/x-web-textile')
-    response.write(code_object.description)
-    return response
+    scraper = getscraperor404(request, short_name, "getdescription")
+    return HttpResponse(scraper.description, mimetype='text/x-web-textile')
 
 
-        
-# see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
-# also inlining the crappy CSVEmitter.to_csv pointless functionality
-# this is all painfully inefficient due to the unstructuredness of the datastore 
-# and the fact that if you leave the output hanging too long the gateway times out
-import time
-
-# see http://stackoverflow.com/questions/1189111/unicode-to-utf8-for-csv-files-python-via-xlrd
-# for issues about how the csv model can't handle unicode
-def stringnot(v):
-    if v == None:
-        return ""
-    if type(v) in [unicode, str]:
-        return v.encode("utf-8")
-    return v
-
-def generate_csv(dictlist, offset, max_length=None):
-    keyset = set()
-    for row in dictlist:
-        if "latlng" in row:   # split the latlng
-            try:
-                row["lat"], row["lng"] = row.pop("latlng") 
-            except:
-                row["lat"], row["lng"] = ("", "")
-        row.pop("date_scraped", None) 
-        keyset.update(row.keys())
-
-    fout = StringIO()
-    writer = csv.writer(fout, dialect='excel')
-    truncated = False
-
-    if offset == 0:
-        writer.writerow([k.encode("utf-8") for k in keyset])
-    for rowdict in dictlist:
-        if max_length:
-            # Save the length of the file in case adding
-            # the next line takes it over the limit
-            last_good_length = fout.tell()
-            
-        writer.writerow([stringnot(rowdict.get(key)) for key in keyset])
-
-        if max_length and fout.tell() > max_length:
-            fout.seek(last_good_length)
-            truncated = True
-            break
-
-    result = fout.getvalue(True)
-    fout.close()
-    return result, truncated
-
-
-def stream_csv(scraper, step=5000, max_rows=1000000):
-    for offset in range(0, max_rows, step):
-        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=step, offset=offset)
-        
-        yield generate_csv(dictlist, offset)[0]
-        if len(dictlist) != step:
-            break   #we've reached the end of the data
-
-
-# see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
-@condition(etag_func=None)
-def export_csv(request, short_name):
-    """
-    This could have been done by having linked directly to the api/csvout, but
-    difficult to make the urlreverse for something in a different app code here
-    itentical to scraperwiki/web/api/emitters.py CSVEmitter render()
-    """
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
-
-    response = HttpResponse(stream_csv(scraper), mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (short_name)
-    return response
 
             
 def stream_sqlite(dataproxy, filesize, memblock=100000):
@@ -443,11 +360,10 @@ def stream_sqlite(dataproxy, filesize, memblock=100000):
         if sqlitedata.get("length") < memblock:
             break
 
+# see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
 @condition(etag_func=None)
 def export_sqlite(request, short_name):
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
+    scraper = getscraperor404(request, short_name, "exportsqlite")
     
     dataproxy = DataStore(scraper.guid, scraper.short_name)
     initsqlitedata = dataproxy.request(("sqlitecommand", "downloadsqlitefile", 0, 0))
@@ -460,61 +376,15 @@ def export_sqlite(request, short_name):
     return response
 
 
-def sqlitequery(request):
-    dataproxy = DataStore("sqlviewquery", "")  # zero length short name means it will open up a :memory: database
-    for aattach in request.GET.get('attach', '').split(";"):
-        if aattach:
-            aa = aattach.split(",")
-            sqlitedata = dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
-    
-    sqlquery = request.GET.get('query')
-    if not sqlquery:
-        return HttpResponse("Example:  ?attach=scraper_name,src&query=select+*+from+src.swdata+limit+10")
-    
-    sqlitedata = dataproxy.request(("sqlitecommand", "execute", sqlquery, None))
-    #return HttpResponse(json.dumps(sqlitedata), mimetype="application/json")
-    return HttpResponse(json.dumps(sqlitedata), mimetype="text/plain")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def follow(request, short_name):
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
-
-    user_owns_it = (scraper.owner() == request.user)
-    user_follows_it = (request.user in scraper.followers())
-    # add the user to follower list
+    scraper = getscraperor404(request, short_name, "setfollow")
     scraper.add_user_role(request.user, 'follow')
-    # Redirect after POST
     return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
-
 
 def unfollow(request, short_name):
-    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
-    print scraper
-    if not scraper:
-        return code_error_response(models.Scraper, short_name=short_name, request=request)
-    print scraper
-
-    user_owns_it = (scraper.owner() == request.user)
-    user_follows_it = (request.user in scraper.followers())
-    # remove the user from follower list
+    scraper = getscraperor404(request, short_name, "setfollow")
     scraper.unfollow(request.user)
-    # Redirect after POST
     return HttpResponseRedirect('/scrapers/show/%s/' % scraper.short_name)
-
 
 
 def choose_template(request, wiki_type):
@@ -539,10 +409,7 @@ def choose_template(request, wiki_type):
 def delete_draft(request):
     if request.session.get('ScraperDraft', False):
         del request.session['ScraperDraft']
-
-    # Remove any pending notifications, i.e. the "don't worry, your scraper is safe" one
-    request.notifications.used = True
-
+    request.notifications.used = True   # Remove any pending notifications, i.e. the "don't worry, your scraper is safe" one
     return HttpResponseRedirect(reverse('frontpage'))
 
 
