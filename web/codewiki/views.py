@@ -55,7 +55,7 @@ def code_error_response(klass, short_name, request):
         raise Http404
 
 
-def code_overview(request, wiki_type, short_name):
+def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
     try:
         scraper = models.Code.unfiltered.get(short_name=short_name)
     except models.Code.DoesNotExist:
@@ -63,10 +63,74 @@ def code_overview(request, wiki_type, short_name):
         return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
     
     if wiki_type != scraper.wiki_type:
-        return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
+        return HttpResponseRedirect(reverse(rdirect, args=[scraper.wiki_type, short_name]))
         
-    if not scraper.actionauthorized(request.user, "overview"):
-        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "overview"), context_instance=RequestContext(request)))
+    if not scraper.actionauthorized(request.user, action):
+        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, action), context_instance=RequestContext(request)))
+    return scraper
+
+
+def comments(request, wiki_type, short_name):
+    scraper = getscraperorresponse(request, wiki_type, short_name, "scraper_comments", "comments")
+    if isinstance(scraper, HttpResponse):  return scraper
+    
+    context = {'selected_tab':'comments', 'scraper':scraper }
+    context["scraper_tags"] = scraper.gettags()
+    context["user_owns_it"] = (scraper.owner() == request.user)
+    context["user_follows_it"] = (request.user in scraper.followers())
+    context["scraper_contributors"] = scraper.contributors()
+    context["scraper_owner"] = scraper.owner()    
+    context["scraper_followers"] = scraper.followers()    
+    
+    return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
+
+
+def scraper_history(request, wiki_type, short_name):
+    scraper = getscraperorresponse(request, wiki_type, short_name, "scraper_history", "history")
+    if isinstance(scraper, HttpResponse):  return scraper
+    
+    context = { 'selected_tab': 'history', 'scraper': scraper, "user":request.user }
+    
+    itemlog = [ ]
+    for commitentry in scraper.get_commit_log():
+        item = { "type":"commit", "rev":commitentry['rev'], "datetime":commitentry["date"] }
+        if "user" in commitentry:
+            item["user"] = commitentry["user"]
+        item['earliesteditor'] = commitentry['description'].split('|||')
+        if itemlog:
+            item["prevrev"] = itemlog[-1]["rev"]
+        item["groupkey"] = "commit|||"+ str(item['earliesteditor'])
+        itemlog.append(item)
+    itemlog.reverse()
+    
+    # now obtain the run-events and sort together
+    if scraper.wiki_type == 'scraper':
+        runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started')
+        for runevent in runevents:
+            item = { "type":"runevent", "runevent":runevent, "datetime":runevent.run_started }
+            if runevent.run_ended:
+                runduration = runevent.run_ended - runevent.run_started
+                item["runduration"] = runduration
+                item["durationseconds"] = "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
+            if runevent.exception_message:
+                item["groupkey"] = "runevent|||" + str(runevent.exception_message.encode('utf-8'))
+            else:
+                item["groupkey"] = "runevent|||"
+            itemlog.append(item)
+        
+        itemlog.sort(key=lambda x: x["datetime"], reverse=True)
+    
+    context["itemlog"] = itemlog
+    context["filestatus"] = scraper.get_file_status()
+    
+    return render_to_response('codewiki/history.html', context, context_instance=RequestContext(request))
+
+
+
+
+def code_overview(request, wiki_type, short_name):
+    scraper = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
+    if isinstance(scraper, HttpResponse):  return scraper
         
     context = {'selected_tab':'overview', 'scraper':scraper }
     context["scraper_tags"] = scraper.gettags()
@@ -219,6 +283,9 @@ def scraper_admin(request, short_name):
     return response
 
 
+
+
+
 def scraper_delete_data(request, short_name):
     scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
     if not scraper:
@@ -333,78 +400,6 @@ def view_fullscreen (request, short_name):
 
     return render_to_response('codewiki/view_fullscreen.html', {'scraper': scraper, 'urlquerystring':urlquerystring}, context_instance=RequestContext(request))
 
-def comments(request, wiki_type, short_name):
-    try:
-        scraper = models.Code.unfiltered.get(short_name=short_name)
-    except models.Code.DoesNotExist:
-        message =  "Sorry, this %s does not exist" % wiki_type
-        return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
-    
-    if wiki_type != scraper.wiki_type:
-        return HttpResponseRedirect(reverse('scraper_comments', args=[scraper.wiki_type, short_name]))
-        
-    if not scraper.actionauthorized(request.user, "comments"):
-        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "comments"), context_instance=RequestContext(request)))
-    
-    context = {'selected_tab':'comments', 'scraper':scraper }
-    context["scraper_tags"] = scraper.gettags()
-    context["user_owns_it"] = (scraper.owner() == request.user)
-    context["user_follows_it"] = (request.user in scraper.followers())
-    context["scraper_contributors"] = scraper.contributors()
-    context["scraper_owner"] = scraper.owner()    
-    context["scraper_followers"] = scraper.followers()    
-    
-    return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
-
-
-def scraper_history(request, wiki_type, short_name):
-    try:
-        scraper = models.Code.unfiltered.get(short_name=short_name)
-    except models.Code.DoesNotExist:
-        message =  "Sorry, this %s does not exist" % wiki_type
-        return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
-    
-    if wiki_type != scraper.wiki_type:
-        return HttpResponseRedirect(reverse('scraper_history', args=[scraper.wiki_type, short_name]))
-        
-    if not scraper.actionauthorized(request.user, "history"):
-        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "history"), context_instance=RequestContext(request)))
-    
-    context = { 'selected_tab': 'history', 'scraper': scraper, "user":request.user }
-    
-    itemlog = [ ]
-    for commitentry in scraper.get_commit_log():
-        item = { "type":"commit", "rev":commitentry['rev'], "datetime":commitentry["date"] }
-        if "user" in commitentry:
-            item["user"] = commitentry["user"]
-        item['earliesteditor'] = commitentry['description'].split('|||')
-        if itemlog:
-            item["prevrev"] = itemlog[-1]["rev"]
-        item["groupkey"] = "commit|||"+ str(item['earliesteditor'])
-        itemlog.append(item)
-    itemlog.reverse()
-    
-    # now obtain the run-events and sort together
-    if scraper.wiki_type == 'scraper':
-        runevents = scraper.scraper.scraperrunevent_set.all().order_by('run_started')
-        for runevent in runevents:
-            item = { "type":"runevent", "runevent":runevent, "datetime":runevent.run_started }
-            if runevent.run_ended:
-                runduration = runevent.run_ended - runevent.run_started
-                item["runduration"] = runduration
-                item["durationseconds"] = "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
-            if runevent.exception_message:
-                item["groupkey"] = "runevent|||" + str(runevent.exception_message.encode('utf-8'))
-            else:
-                item["groupkey"] = "runevent|||"
-            itemlog.append(item)
-        
-        itemlog.sort(key=lambda x: x["datetime"], reverse=True)
-    
-    context["itemlog"] = itemlog
-    context["filestatus"] = scraper.get_file_status()
-    
-    return render_to_response('codewiki/history.html', context, context_instance=RequestContext(request))
 
 
 
