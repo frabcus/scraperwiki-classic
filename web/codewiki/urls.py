@@ -23,8 +23,6 @@ urlpatterns = patterns('',
             # should access from scraperwikiviews.com
     url(r'^sqlitequery/$',                                views.sqlitequery,            name='sqlitequery'), 
             
-    # special views functionality
-    url(r'^views/(?P<short_name>[\w_\-\.]+)/html/$',      views.htmlview,               name='htmlview'),
     
 
     url(r'^views/(?P<short_name>[\w_\-\.]+)/admin/$',     views.view_admin,             name='view_admin'),    

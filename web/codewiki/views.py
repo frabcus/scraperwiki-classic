@@ -517,14 +517,6 @@ def unfollow(request, short_name):
 
 
 
-def htmlview(request, short_name):
-    view = get_code_object_or_none(models.View, short_name=short_name)
-    if not view:
-        return code_error_response(models.View, short_name=short_name, request=request)
-
-    return HttpResponse(view.saved_code())
-
-
 def choose_template(request, wiki_type):
     context = { "wiki_type":wiki_type }
     context["templates"] = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).order_by('language')
