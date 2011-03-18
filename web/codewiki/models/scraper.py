@@ -16,7 +16,6 @@ from codewiki import managers
 from django.db.models.signals import post_save
 from registration.signals import user_registered
 
-import tagging
 from frontend import models as frontendmodels
 
 from codewiki.managers.datastore import DataStore
@@ -139,12 +138,6 @@ class Scraper (code.Code):
         app_label = 'codewiki'
 
         
-#register tagging for scrapers
-try:
-    tagging.register(Scraper)
-except tagging.AlreadyRegistered:
-    pass
-    
 
 
 class ScraperMetadata(models.Model):

@@ -1,7 +1,6 @@
 # encoding: utf-8
 import datetime
 import time
-import tagging
 import code
 import scraper
 import os
@@ -20,7 +19,7 @@ try:
 except:
     import simplejson as json
 
-class View (code.Code):
+class View(code.Code):
 
     mime_type = models.CharField(max_length=255, blank=True, null=True)
     objects = ViewManager()    
@@ -51,8 +50,3 @@ class View (code.Code):
         app_label = 'codewiki'
 
 
-#register tagging
-try:
-    tagging.register(View)
-except tagging.AlreadyRegistered:
-    pass

@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from codewiki.managers.code import CodeManager
-
+import tagging
 import hashlib
 
 from codewiki import vc
@@ -39,6 +39,8 @@ WIKI_TYPES = (
     ('scraper', 'Scraper'),
     ('view', 'View'),    
 )
+
+
 
 class Code(models.Model):
 
@@ -258,6 +260,22 @@ class Code(models.Model):
         if not self.published and not user.is_authenticated():
             return {'heading': 'Access denied', 'body': "not published and you are not logged in"}
         return {'heading': "unknown", "body":"unknown"}
+
+    
+    # tags have been unhelpfully attached to the scraper and view classes rather than the base code class
+    # we can minimize the damage caused by this decision (in terms of forcing the scraper/view code to be 
+    # unnecessarily separate by filtering as much of this application as possible through this interface
+    def gettags(self):
+        if self.wiki_type == "scraper":
+            return tagging.models.Tag.objects.get_for_object(self.scraper)
+        return tagging.models.Tag.objects.get_for_object(self.view)
+
+    def settags(self, tag_names):
+        if self.wiki_type == "scraper":
+            tagging.models.Tag.objects.update_tags(self.scraper, tag_names)
+        else:
+            tagging.models.Tag.objects.update_tags(self.view, tag_names)
+
 
 
 class UserCodeRole(models.Model):

@@ -69,8 +69,9 @@ def code_overview(request, wiki_type, short_name):
         return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "overview"), context_instance=RequestContext(request)))
         
     context = {'selected_tab':'overview', 'scraper':scraper }
-    context ["scraper_tags"] = Tag.objects.get_for_object(scraper)
-    context ["user_owns_it"] = (scraper.owner() == request.user)
+    
+    context["scraper_tags"] = scraper.gettags()
+    context["user_owns_it"] = (scraper.owner() == request.user)
     
     if wiki_type == 'view':
         context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
@@ -171,8 +172,8 @@ def view_admin(request, short_name):
             response_text = view.title
 
         if element_id == 'divEditTags':
-            view.tags = request.POST.get('value', '')
-            response_text = ", ".join([tag.name for tag in view.tags])
+            view.settags(request.POST.get('value', ''))  # splitting is in the library
+            response_text = ", ".join([tag.name for tag in view.gettags()])
 
         #save view
         view.save()
@@ -204,8 +205,8 @@ def scraper_admin(request, short_name):
             response_text = scraper.title
 
         if element_id == 'divEditTags':
-            scraper.tags = request.POST.get('value', '')
-            response_text = ", ".join([tag.name for tag in scraper.tags])
+            scraper.settags(request.POST.get('value', ''))
+            response_text = ", ".join([tag.name for tag in scraper.gettags()])
 
         if element_id == 'spnRunInterval':
             scraper.run_interval = int(request.POST.get('value', None))
@@ -358,7 +359,7 @@ def comments(request, wiki_type, short_name):
     scraper_contributors = scraper.contributors()
     scraper_followers = scraper.followers()
 
-    scraper_tags = Tag.objects.get_for_object(scraper)
+    scraper_tags = scraper.gettags()
 
     context = { 'scraper_tags': scraper_tags, 'scraper_owner': scraper_owner, 'scraper_contributors': scraper_contributors,
                    'scraper_followers': scraper_followers, 'selected_tab': 'comments', 'scraper': scraper,
@@ -415,12 +416,10 @@ def scraper_history(request, wiki_type, short_name):
 
 
 
+# this ought to be done javascript from the page to fill in the ajax input box
 def tags(request, wiki_type, short_name):
-    if wiki_type == 'scraper':
-        code_object = get_code_object_or_none(models.Scraper, short_name)
-    else:
-        code_object = get_code_object_or_none(models.View, short_name)
-    return HttpResponse(", ".join([tag.name for tag in code_object.tags]))
+    scraper = models.Code.unfiltered.get(short_name=short_name)
+    return HttpResponse(", ".join([tag.name  for tag in scraper.gettags()]))
 
 
 def raw_about_markup(request, wiki_type, short_name):
