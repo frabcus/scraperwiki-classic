@@ -61,9 +61,6 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$',                 views.choose_template,  name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        
     
-        # redirects to new scraper?template=
-    url(r'^editor/template/(?P<short_name>[\-\w\.]+)$',   viewseditor.edittutorial, name="tutorial"),  
-
     url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
     
     # call-backs from ajax for reloading and diff

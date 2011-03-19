@@ -247,7 +247,7 @@ class Code(models.Model):
 
 
             # all authorization to go through here
-            # actions are overview, changeadmin, comments, history, exportsqlite, setfollow, rpcexecute
+            # actions are overview, changeadmin, comments, history, exportsqlite, setfollow, rpcexecute, readcode
     def actionauthorized(self, user, action):
         if self.deleted:
             return False

@@ -43,6 +43,7 @@ def getscraperor404(request, short_name, action):
     if not scraper.actionauthorized(request.user, action):
         raise Http404
         
+    # extra post conditions to make spoofing these calls a bit of a hassle
     if action == "changeadmin":
         if not (request.method == 'POST' and request.is_ajax()):
             raise Http404

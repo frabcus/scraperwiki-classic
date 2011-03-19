@@ -37,11 +37,11 @@ def get_code_object_or_notfoundresponse(short_name, request):
     return codeobject
 
 
-
-def raw(request, short_name):
-    scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponse):
-        return scraper
+        
+def raw(request, short_name):  # this is used by swimport
+    scraper = models.Code.unfiltered.get(short_name=short_name)
+    if not scraper.actionauthorized(request.user, "readcode"):
+        raise Http404
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
     code = scraper.get_vcs_status(rev)["code"]
@@ -49,9 +49,9 @@ def raw(request, short_name):
 
 
 def diffseq(request, short_name):
-    scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponse):
-        return scraper
+    scraper = models.Code.unfiltered.get(short_name=short_name)
+    if not scraper.actionauthorized(request.user, "readcode"):
+        raise Http404
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
     try: otherrev = int(request.GET.get('otherrev', '-1'))
@@ -126,9 +126,9 @@ def code(request, wiki_type, short_name):
 
 
 def reload(request, short_name):
-    scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponse):
-        return HttpResponse(json.dumps({'status' : 'Failed', 'message':"scraper not available to reload"}))
+    scraper = models.Code.unfiltered.get(short_name=short_name)
+    if not scraper.actionauthorized(request.user, "readcode"):
+        raise Http404
 
     oldcodeineditor = request.POST.get('oldcode')
     status = scraper.get_vcs_status(-1)
@@ -136,16 +136,6 @@ def reload(request, short_name):
     if oldcodeineditor:
         result["selrange"] = vc.DiffLineSequenceChanges(oldcodeineditor, status["code"])
     return HttpResponse(json.dumps(result))
-
-
-    # try to get rid of this
-def edittutorial(request, short_name):
-    code = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(code, HttpResponse):
-        return code
-
-    qtemplate = "?template="+code.short_name
-    return HttpResponseRedirect(reverse('editor', args=[code.wiki_type, code.language]) + qtemplate)
 
 
 
@@ -206,10 +196,13 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         statuptemplate = request.GET.get('template') or request.GET.get('fork')
         if statuptemplate:
             try:
-                templatescraper = models.Code.objects.get(published=True, language=language, short_name=statuptemplate)
-                startupcode = templatescraper.saved_code()
-                if 'fork' in request.GET:
-                    scraper.title = templatescraper.title
+                templatescraper = models.Code.unfiltered.get(short_name=statuptemplate)
+                if not templatescraper.actionauthorized(request.user, "readcode"):
+                    startupcode = startupcode.replace("Blank", "Not authorized to read this code")
+                else:
+                    startupcode = templatescraper.saved_code()
+                    if 'fork' in request.GET:
+                        scraper.title = templatescraper.title
             except models.Code.DoesNotExist:
                 startupcode = startupcode.replace("Blank", "Missing template for")
             
