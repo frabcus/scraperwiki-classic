@@ -175,12 +175,20 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     
     # Load an existing scraper preference
     elif short_name != "__new__":
-        scraper = get_code_object_or_notfoundresponse(short_name, request)
-        if isinstance(scraper, HttpResponse):
-            return scraper
+        try:
+            scraper = models.Code.unfiltered.get(short_name=short_name)
+        except models.Code.DoesNotExist:
+            message =  "Sorry, this %s does not exist" % wiki_type
+            return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
+        if wiki_type != scraper.wiki_type:
+            return HttpResponseRedirect(reverse("editor_edit", args=[scraper.wiki_type, short_name]))
+        if not scraper.actionauthorized(request.user, "readcodeineditor"):
+            return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "readcodeineditor"), context_instance=RequestContext(request)))
+        
+        
         status = scraper.get_vcs_status(-1)
         assert 'currcommit' not in status 
-        #assert not status['ismodified']  # there are some very old scrapers which haven't been properly committed
+        # assert not status['ismodified']  # should hold, but disabling it for now
         context['code'] = status["code"]
         context['rev'] = status['prevcommit']
 
