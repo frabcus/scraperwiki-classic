@@ -1,20 +1,14 @@
 from django.template import RequestContext
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
+from django.template.loader import render_to_string
 from django.shortcuts import render_to_response
-from django.shortcuts import get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from tagging.models import Tag, TaggedItem
-from django.db import IntegrityError
-from django.contrib.auth.models import User
-from django.contrib.sites.models import Site
 
 from django.conf import settings
 
 from codewiki import models
 import frontend
 import urllib
-
 import subprocess
 import re
 import base64
@@ -110,7 +104,12 @@ def scraperwikitag(scraper, html, panepresent):
 
 
 def rpcexecute(request, short_name, revision=None):
-    scraper = get_object_or_404(models.Code.objects, short_name=short_name)
+    try:
+        scraper = models.Code.unfiltered.get(short_name=short_name)
+    except models.Code.DoesNotExist:
+        return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':"Sorry, this view does not exist"}, context_instance=RequestContext(request)))
+    if not scraper.actionauthorized(request.user, "rpcexecute"):
+        return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "rpcexecute"), context_instance=RequestContext(request)))
     
     if revision:
         try: 

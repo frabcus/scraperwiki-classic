@@ -247,7 +247,7 @@ class Code(models.Model):
 
 
             # all authorization to go through here
-            # actions are overview, changeadmin, comments, history, exportsqlite, setfollow
+            # actions are overview, changeadmin, comments, history, exportsqlite, setfollow, rpcexecute
     def actionauthorized(self, user, action):
         if self.deleted:
             return False
@@ -261,6 +261,8 @@ class Code(models.Model):
         if action in ["run_scraper", "screenshoot_scraper"]:
             if not user.is_staff:
                 return False
+        if action == "rpcexecute" and self.wiki_type != "view":
+            return False
         return True
 
     def authorizationfailedmessage(self, user, action):
@@ -269,7 +271,9 @@ class Code(models.Model):
         if not user.is_authenticated() and action == "changeadmin":
             return {'heading': 'Not logged in', 'body': "only logged in users can change the settings"}
         if not self.published and not user.is_authenticated():
-            return {'heading': 'Access denied', 'body': "not published and you are not logged in"}
+            return {'heading': 'Access denied', 'body': "not published and you are not logged in so can't do %s" % action}
+        if action == "rpcexecute" and self.wiki_type != "view":
+            return {'heading': 'This is a scraper', 'body': "not supposed to run a scraper as a view"}
         return {'heading': "unknown", "body":"unknown"}
 
     
