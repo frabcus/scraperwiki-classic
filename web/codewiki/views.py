@@ -39,7 +39,10 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
 
 
 def getscraperor404(request, short_name, action):
-    scraper = models.Code.unfiltered.get(short_name=short_name)
+    try:
+        scraper = models.Code.unfiltered.get(short_name=short_name)
+    except models.Code.DoesNotExist:
+        raise Http404
     if not scraper.actionauthorized(request.user, action):
         raise Http404
         

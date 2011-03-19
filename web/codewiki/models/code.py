@@ -248,15 +248,15 @@ class Code(models.Model):
 
             # all authorization to go through here
             # actions are overview, changeadmin, comments, history, exportsqlite, setfollow, 
-            # rpcexecute, readcode, readcodeineditor
+            # rpcexecute, readcode, readcodeineditor, savecode
     def actionauthorized(self, user, action):
         if self.deleted:
             return False
-        if not user.is_authenticated() and action == "changeadmin":
+        if not user.is_authenticated() and action in ["changeadmin", "savecode"]:
             return False
         if not self.published and not user.is_authenticated():
             return False
-        if action in ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper"]:
+        if action in ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning"]:
             if self.owner() != user and not user.is_staff:
                 return False
         if action in ["run_scraper", "screenshoot_scraper"]:
