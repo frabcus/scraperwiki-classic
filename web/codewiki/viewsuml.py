@@ -20,19 +20,24 @@ from codewiki.management.commands.run_scrapers import GetDispatcherStatus, GetUM
 from viewsrpc import testactiveumls  # not to use
 
 
+        # should deprecate and go to the top of the history page
 def run_event(request, run_id):
     user = request.user
-    if re.match('\d+$', run_id):
-        # old style (allows access to objects that have not got a run_id due to an error
-        event = get_object_or_404(ScraperRunEvent, id=run_id)  
-    else:
-        event = get_object_or_404(ScraperRunEvent, run_id=run_id)
-    
+    try:
+        if re.match('\d+$', run_id):
+            event = ScraperRunEvent.objects.get(id=run_id)
+        else:
+            event = ScraperRunEvent.objects.get(run_id=run_id)
+    except ScraperRunEvent.DoesNotExist:
+        raise Http404
+        
     context = { 'event':event }
     statusscrapers = GetDispatcherStatus()
     for status in statusscrapers:
         if status['runID'] == event.run_id:
             context['status'] = status
+    if not event.scraper.actionauthorized(request.user, "readcode"):
+        raise Http404
     
     context['scraper'] = event.scraper
     context['selected_tab'] = '' and message.get('message_sub_type') != 'consolestatus'

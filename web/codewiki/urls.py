@@ -54,8 +54,9 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',  views.scraper_history,  name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/comments/$', views.comments,         name='scraper_comments'),
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/code/$',     viewseditor.code,       name='scraper_code'),    
-    url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.\?]+)/$',                      viewsuml.run_event,     name='run_event'),  # the ? is due to the temporary holding value in older objects and should be cleared  out
+    
+    
+    url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.\?]+)/$',                      viewsuml.run_event,     name='run_event'),  # the \? is due to the temporary holding value in older objects and should be cleared  out
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/tags/$',     views.tags,             name='scraper_tags'),    
         
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$',                 views.choose_template,  name='choose_template'),    
@@ -75,7 +76,7 @@ urlpatterns = patterns('',
     # editor 
     url(r'^handle_session_draft/$',                       viewseditor.handle_session_draft, name="handle_session_draft"),
     url(r'^handle_editor_save/$',                         viewseditor.handle_editor_save,   name="handle_editor_save"),    
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/edit/$',   viewseditor.edit, name="editor_edit"),    
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/edit/$',   viewseditor.edit, name="editor_edit"),
     url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',            viewseditor.edit, name="editor"),
 
 

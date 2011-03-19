@@ -132,7 +132,8 @@ class Scraper (code.Code):
             except:
                 pass
 
-        return 'http://%s%s' % (domain, reverse('scraper_code', args=[self.wiki_type, self.short_name]))
+            # send to the editor rather than to no longer existing code page
+        return 'http://%s%s' % (domain, reverse('editor_edit', args=[self.wiki_type, self.short_name]))
 
     class Meta:
         app_label = 'codewiki'

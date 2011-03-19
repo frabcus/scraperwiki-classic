@@ -64,15 +64,21 @@ def diffseq(request, short_name):
     result = sqm.get_opcodes()  # [ ("replace|delete|insert|equal", i1, i2, j1, j2) ]
     return HttpResponse(json.dumps(result))
 
+
 def run_event_json(request, run_id):
-    user = request.user
-    if re.match('\d+$', run_id):
-        event = get_object_or_404(models.ScraperRunEvent, id=run_id)  
-    else:
-        event = get_object_or_404(models.ScraperRunEvent, run_id=run_id)
+    try:
+        if re.match('\d+$', run_id):
+            event = models.ScraperRunEvent.objects.get(id=run_id)
+        else:
+            event = models.ScraperRunEvent.objects.get(run_id=run_id)
+    except models.ScraperRunEvent.DoesNotExist:
+        raise Http404
+    
+    if not event.scraper.actionauthorized(request.user, "readcode"):
+        raise Http404
     
     result = { 'records_produced':event.records_produced, 'pages_scraped':event.pages_scraped, "output":event.output, 
-             'first_url_scraped':event.first_url_scraped, 'exception_message':event.exception_message }
+               'first_url_scraped':event.first_url_scraped, 'exception_message':event.exception_message }
     if event.run_started:
         result['run_started'] = event.run_started.isoformat()
     if event.run_ended:
@@ -84,44 +90,6 @@ def run_event_json(request, run_id):
             result['dispatcherstatus'] = status
     
     return HttpResponse(json.dumps(result))
-
-
-# preview of the code diffed
-def code(request, wiki_type, short_name):
-    scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponse):
-        return scraper
-
-    try: rev = int(request.GET.get('rev', '-1'))
-    except ValueError: rev = -1
-
-    status = scraper.get_vcs_status(rev)
-
-    context = { 'selected_tab': 'history', 'scraper': scraper }
-
-    # overcome lack of subtract in template
-    if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
-        status["modifiedcommitdifference"] = status["filemodifieddate"] - status["prevcommit"]["date"]
-
-    context["status"] = status
-    context["code"] = status.get('code')
-    context['error_messages'] = [ ]
-    
-    try: otherrev = int(request.GET.get('otherrev', '-1'))
-    except ValueError: otherrev = None
-    
-    if otherrev != -1:
-        try:
-            reversion = scraper.get_reversion(otherrev)
-            context["othercode"] = reversion["text"].get(status['scraperfile'])
-        except IndexError:
-            context['error_messages'].append('Bad otherrev index')
-
-    if context.get("othercode"):
-        sqm = difflib.SequenceMatcher(None, context["code"].splitlines(), context["othercode"].splitlines())
-        context['matcheropcodes'] = json.dumps(sqm.get_opcodes())
-    
-    return render_to_response('codewiki/code.html', context, context_instance=RequestContext(request))
 
 
 
@@ -230,7 +198,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     if request.GET.get('fork'):
         context['fork'] = request.GET.get('fork')
 
-    context['scraper']          = scraper
+    context['scraper'] = scraper
     context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())
     
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
