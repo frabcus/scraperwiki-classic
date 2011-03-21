@@ -62,7 +62,7 @@
 				{% else %}
 					<li><a href="{% url login %}?next=/">Sign in or create an account</a></li>
 				{% endif %}
-				<li class="helplink"><a href="{% url help %}">Help</a></li>
+				<li class="helplink"><a href="{% url help 'faq' language|default:"python" %}">Help</a></li>
  			</ul>
 			<p>{{site_message}}</p>
 	    </div>
@@ -86,8 +86,8 @@
             {% else %}
                 <li><a href="{% url contact_form %}">Request a dataset</a></li>
             {% endif %}
-            <li><a href="{% url help 'tutorials' 'python' %}" title="Help">Tutorials</a></li>
-            <li><a href="{% url help 'documentation' 'python' %}" title="Technical docs">Documentation</a></li>
+            <li><a href="{% url help 'tutorials' language|default:"python" %}" title="Help">Tutorials</a></li>
+            <li><a href="{% url help 'documentation' language|default:"python" %}" title="Technical docs">Documentation</a></li>
             {% if user.is_staff %}
               <li class="staff"><a href="{% url running_scrapers %}" title="Interact with current UML status">UML status</a></li>
             {% endif %}
@@ -100,7 +100,7 @@
 
           <ul class="sub_menu">
              <li><a href="{% url about %}" title="About ScraperWiki">About ScraperWiki</a></li>
-             <li><a href="{% url help %}" title="Frequently Asked Questions">FAQ</a></li>
+             <li><a href="{% url help 'faq' language|default:"python" %}" title="Frequently Asked Questions">FAQ</a></li>
              <li><a href="http://blog.scraperwiki.com" title="ScraperWiki Data Blog">Read our blog</a></li>
              <li><a href="{% url contact_form %}" title="Feedback form">Feedback</a></li>
              <li><a href="http://groups.google.com/group/scraperwiki" title="Google groups">Email list</a></li>
@@ -194,17 +194,10 @@
 		           <dd>
 		             <ul>
 			                 <li><a href="{% url contact_form %}">Contact us</a></li>
-			{% if language %}
-			                 <li><a href="{% url help 'faq' language %}">FAQ</a></li>	
-			{% else %}
-			                 <li><a href="{% url help 'faq' 'python' %}">FAQ</a></li>				
-			{% endif %}
+			                 <li><a href="{% url help 'faq' language|default:"python" %}">FAQ</a></li>	
+			                 <li><a href="{% url help 'tutorials' language|default:"python" %}">Tutorials</a></li>	
 			                 <li><a href="{% url whitelist_user %}">Whitelist</a></li>	
-			{% if language %}			
-			                 <li><a href="{% url help 'documentation' language %}">Code documentation</a></li>			                 
-			{% else %}
-			                 <li><a href="{% url help 'documentation' 'python' %}">Code documentation</a></li>			                 			
-			{% endif %}			
+			                 <li><a href="{% url help 'documentation' language|default:"python" %}">Code documentation</a></li>	
 			                 <li><a href="http://groups.google.com/group/scraperwiki">Developers' discussion group</a></li>			                   			                 
 			             </ul>
 		           </dd>
