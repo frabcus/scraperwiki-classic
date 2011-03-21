@@ -1,4 +1,5 @@
 import urllib
+import urllib2
 
 from django.template import RequestContext, loader, Context
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
@@ -143,7 +144,7 @@ def explorer_user_run(request):
     url = "%s?%s" % (uri, querystring)
     
     # Grab the API response
-    result = urllib.urlopen(url).read()
+    result = urllib2.urlopen(url).read()
     
     return render_to_response('api/explorer_user_run.html', 
                               {'result' : result}, 
