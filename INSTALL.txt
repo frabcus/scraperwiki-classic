@@ -1,3 +1,33 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Use these instructions now:
+
+https://bitbucket.org/ScraperWiki/scraperwiki/wiki/InstallationUbuntu10.10
+
+They're not quite complete, but more reliable than the ones below. You
+can update the wiki instructions from below.
+
+TODO: Migrate all instructions from below to that wiki page.
+
+
+
+
+
+
+-----------------------------------------------------------------------------
+
 INSTALLING WITH BUILDOUT
 
 [[Windows-specific installation notes in double square brackets throughout]]
@@ -57,12 +87,12 @@ DONNY NOTE: I did this first on Lucid Lynx Ubuntu to allow mysql-python to insta
 
 To run the buildout, first bootstrap it:
 
-> $ python bootstrap.py
+> $ bootstrap.py
 [[ Francis notes: I had to use python2.5 explicitly for this ]]
 
 Then run buildout [[except on Windows, see notes below]]:
 
-> $ ./bin/buildout 
+> $ buildout 
 
 [[ In Windows, this would be, : > "./bin/buildout.exe" - but in fact we need to
 skip it altogether, so just do "pip install xxx" for each 'install' command in
@@ -87,8 +117,11 @@ Note, sometimes this causes a "SandboxViolation" error, however it's normally
 done what it needs to do before this, so ignore the error and run buildout
 again.
 
-To clear a buildout and start again, remove these directories:
-> $ rm -fr bin/ include/ lib/ develop-eggs/ eggs/ build/
+
+
+To clear virtualenv and buildout and start again, remove these directories:
+> $ rm -fr bin/ include/ lib/ develop-eggs/ eggs/ build/ pip-log.txt parts/
+Then go to 1) above.
 
 
 3) settings.py
