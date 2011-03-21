@@ -59,6 +59,9 @@ h1.welcome {background:url(../images/languages.png) no-repeat top right;padding:
     border:dotted 1px #ccc; margin:1em 0;}
 
 /* Sldieshow */
+#divIntroSlideShow {position:absolute; top:18px; right:2%; width:495px} 
+#divIntroSlideShow .slide_show {border:solid 10px #287aa6;}
+
 .slide_show {background:#fff;}
 .slide_nav {float:right; padding-top:2em;position:relative; right:5px;}
 .slide_nav {font-size:0.6em;}
@@ -297,9 +300,6 @@ ul.scraper_list .screenshot img {float:left; margin:0 5px 5px 0;}
     color:#fff; padding-top:10px;}
 #divWelcomeText h2 {font-size:1.8em; font-weight:bold; clear:none;line-height:1.2em;
     padding:1em 0; border-top:solid 1px #fff; color:#fff;}
-
-#divIntroSlideShow {position:absolute; top:18px; right:2%; width:495px} 
-#divIntroSlideShow .slide_show {border:solid 10px #287aa6;}
 
 #hNewDatasets {padding-top:1em;}
 #divNewScrapers {margin-bottom:1em;}
