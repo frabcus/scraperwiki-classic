@@ -86,6 +86,8 @@ Note, sometimes this causes a "SandboxViolation" error, however it's normally
 done what it needs to do before this, so ignore the error and run buildout
 again.
 
+To clear a buildout and start again, remove the bin/ include/ lib/ directories.
+
 
 3) settings.py
 *******************
