@@ -178,9 +178,7 @@
 		                 <li><a href="{% url contact_form %}">Request a dataset</a></li>
                          {% endif %}
                          <li><a href="#" class="editor_scraper">Create a scraper</a></li>
-                         {% if user.is_staff %}
-                           <li><a href="#" class="editor_view">Create a view</a></li>		                 
-                         {% endif %}
+                         <li><a href="#" class="editor_view">Create a view</a></li>		                 
 		                 <li><a href="{% url api:index %}">API</a></li>
 		             </ul>
 		           </dd>
