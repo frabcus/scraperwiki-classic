@@ -13,6 +13,9 @@
                 <li class="api"><a href="{% url api:scraper_getdata %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>
                 {% if sqlitedata %}
                     <li class="sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download SQLite3 database</a></li>
+                {% else %}
+                    <!-- XXX old CSV export, replace with a new SQLite one -->
+                    <li class="csv"><a href="{% url export_csv scraper.short_name %}" rel="nofollow">Download this dataset (CSV)</a></li>
                 {% endif %}
             {% endifequal %}
             {% ifequal scraper.wiki_type 'view'%}

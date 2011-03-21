@@ -8,8 +8,8 @@ ln -s /home/mike/ScraperWiki/scraperwiki /var/www/scraperwiki
 
 Edit settings.py in your web subdirectory to have:
 
-ORBETED_PORT = 8001
-ORBETED_DOMAIN = 'localhost'
+ORBITED_PORT = 8001
+ORBITED_DOMAIN = 'localhost'
 
 Create a mysql database called "scraperwiki_log" and grant access to user
 "scraperlog" with password "scr4p3rl0g"; best bet is to grant access from 

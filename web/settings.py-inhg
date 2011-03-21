@@ -63,8 +63,8 @@ MARKET_BOUNTY_CHARGE = 6.3
 TEAM_EMAIL = 'all@scraperwiki.com'
 
 
-ORBETED_PORT = 8001
-ORBETED_DOMAIN = 'localhost'
+ORBITED_PORT = 8001
+ORBITED_DOMAIN = 'localhost'
 
 # TEST_RUNNER = 'django-test-coverage.runner.run_tests'
 
