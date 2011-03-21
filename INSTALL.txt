@@ -58,10 +58,11 @@ DONNY NOTE: I did this first on Lucid Lynx Ubuntu to allow mysql-python to insta
 To run the buildout, first bootstrap it:
 
 > $ python bootstrap.py
+[[ Francis notes: I had to use python2.5 explicitly for this ]]
 
 Then run buildout [[except on Windows, see notes below]]:
 
-> $ buildout 
+> $ ./bin/buildout 
 
 [[ In Windows, this would be, : > "./bin/buildout.exe" - but in fact we need to
 skip it altogether, so just do "pip install xxx" for each 'install' command in
@@ -86,7 +87,8 @@ Note, sometimes this causes a "SandboxViolation" error, however it's normally
 done what it needs to do before this, so ignore the error and run buildout
 again.
 
-To clear a buildout and start again, remove the bin/ include/ lib/ directories.
+To clear a buildout and start again, remove these directories:
+> $ rm -fr bin/ include/ lib/ develop-eggs/ eggs/ build/
 
 
 3) settings.py
