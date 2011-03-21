@@ -192,21 +192,15 @@ class TestScrapers(SeleniumTest):
         s.click("link=Sign in or create an account")
         self.wait_for_page()
 
-        username = str( uuid.uuid4() ).replace('-', '_')
-        email    = 'test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
+        username = "se_test_%s" % str( uuid.uuid4() ).replace('-', '_')
         password = str( uuid.uuid4() ).replace('-', '_')
 
-        d = {
-            "id_name" : "test user",
-            "id_username": "test",
-            "id_email": "test@scraperwiki.com",                
-            "id_password1": "password",                
-            "id_password2": "password",                               
-        }
-        d["id_username"] = "test_%s" % (username,)        
-        d["id_email"]   = email
-        d["password1"]  = password
-        d["password2"]  = password        
+        d = {}
+        d["id_name"] = "test user"
+        d["id_username"] = username
+        d["id_email"] = "%s@scraperwiki.com" % username
+        d["id_password1"]  = password
+        d["id_password2"]  = password
         
         self.type_dictionary( d )
         s.click( 'id_tos' )
@@ -217,7 +211,7 @@ class TestScrapers(SeleniumTest):
         
         
     def _create_type(self, link_name, type):
-        name = 'se_test_%s' % ( str( uuid.uuid4() ), )
+        name = 'se_test_%s' % str( uuid.uuid4() ).replace('-', '_')
         
         s = self.selenium
         s.open("/logout")
@@ -245,7 +239,7 @@ class TestScrapers(SeleniumTest):
     def _create_view(self, link_name, type, shortname):
         """ Must be on the scraper homepage """
         s = self.selenium
-        name = 'se_test_%s' % (str( uuid.uuid4() ),)
+        name = 'se_test_%s' % str( uuid.uuid4() ).replace('-', '_')
         print name
         
         s.open('/scrapers/%s' % shortname)
