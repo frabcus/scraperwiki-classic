@@ -419,5 +419,103 @@ def proxycached(request):
     
     return HttpResponse(json.dumps(result), mimetype="application/json")
 
+#################################################################################
+# BEGIN OLD CSV BACK FOR A BIT
 
+from api.emitters import CSVEmitter 
+import csv
+from cStringIO import StringIO
+
+def get_code_object_or_none(klass, short_name):
+    try:
+        return klass.objects.get(short_name=short_name)
+    except Exception, e:
+        print e, type(e)
+        return None
+
+def code_error_response(klass, short_name, request):
+    if klass.unfiltered.filter(short_name=short_name, deleted=True).count() == 1:
+        body = 'Sorry, this %s has been deleted by the owner' % klass.__name__
+        string = render_to_string('404.html', {'heading': 'Deleted', 'body': body}, context_instance=RequestContext(request))
+        return HttpResponseNotFound(string)
+    else:
+        raise Http404
+
+# see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
+# also inlining the crappy CSVEmitter.to_csv pointless functionality
+# this is all painfully inefficient due to the unstructuredness of the datastore 
+# and the fact that if you leave the output hanging too long the gateway times out
+import time
+
+# see http://stackoverflow.com/questions/1189111/unicode-to-utf8-for-csv-files-python-via-xlrd
+# for issues about how the csv model can't handle unicode
+def stringnot(v):
+    if v == None:
+        return ""
+    if type(v) in [unicode, str]:
+        return v.encode("utf-8")
+    return v
+
+def generate_csv(dictlist, offset, max_length=None):
+    keyset = set()
+    for row in dictlist:
+        if "latlng" in row:   # split the latlng
+            try:
+                row["lat"], row["lng"] = row.pop("latlng") 
+            except:
+                row["lat"], row["lng"] = ("", "")
+        row.pop("date_scraped", None) 
+        keyset.update(row.keys())
+
+    fout = StringIO()
+    writer = csv.writer(fout, dialect='excel')
+    truncated = False
+
+    if offset == 0:
+        writer.writerow([k.encode("utf-8") for k in keyset])
+    for rowdict in dictlist:
+        if max_length:
+            # Save the length of the file in case adding
+            # the next line takes it over the limit
+            last_good_length = fout.tell()
+            
+        writer.writerow([stringnot(rowdict.get(key)) for key in keyset])
+
+        if max_length and fout.tell() > max_length:
+            fout.seek(last_good_length)
+            truncated = True
+            break
+
+    result = fout.getvalue(True)
+    fout.close()
+    return result, truncated
+
+
+def stream_csv(scraper, step=5000, max_rows=1000000):
+    for offset in range(0, max_rows, step):
+        dictlist = models.Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=step, offset=offset)
+        
+        yield generate_csv(dictlist, offset)[0]
+        if len(dictlist) != step:
+            break   #we've reached the end of the data
+
+
+# see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
+@condition(etag_func=None)
+def export_csv(request, short_name):
+    """
+    This could have been done by having linked directly to the api/csvout, but
+    difficult to make the urlreverse for something in a different app code here
+    itentical to scraperwiki/web/api/emitters.py CSVEmitter render()
+    """
+    scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
+    if not scraper:
+        return code_error_response(models.Scraper, short_name=short_name, request=request)
+
+    response = HttpResponse(stream_csv(scraper), mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (short_name)
+    return response
+
+# END OLD CSV BACK FOR A BIT
+#################################################################################
 

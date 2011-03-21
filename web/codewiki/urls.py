@@ -24,9 +24,8 @@ urlpatterns = patterns('',
     url(r'^scrapers/delete-data/(?P<short_name>[\w_\-\.]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
     url(r'^scrapers/converttosqlitedatastore/(?P<short_name>[\w_\-\.]+)/$', views.scraper_converttosqlitedatastore, name='scraper_converttosqlitedatastore'),
             
+    url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),
     url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$',  views.export_sqlite,          name='export_sqlite'),
-    #url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),
-    
     
     url(r'^scrapers/follow/(?P<short_name>[\w_\-\.]+)/$',   views.follow,               name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-\.]+)/$', views.unfollow,             name='scraper_unfollow'),
@@ -84,8 +83,8 @@ urlpatterns = patterns('',
                    lambda request, wiki_type, short_name: HttpResponseRedirect("http://%s%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=[short_name])))),
     url(r'^(?P<wiki_type>scraper)s/export2/(?P<short_name>[\w_\-\.]+)/$', 
                    lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name]))),
-    url(r'^(?P<wiki_type>scraper)s/export/(?P<short_name>[\w_\-\.]+)/$', 
-                   lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name]))),
+    #url(r'^(?P<wiki_type>scraper)s/export/(?P<short_name>[\w_\-\.]+)/$', 
+    #               lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name]))),
 
 )
 
