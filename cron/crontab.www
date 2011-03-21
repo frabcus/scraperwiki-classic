@@ -7,5 +7,7 @@ SHELL=/bin/bash
 
 */5 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py run_scrapers -m 30
 
+0 0 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py clear_selenium_byproducts
+
 # Update various bits of meta information for each scraper every hour
 8 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py update_scraper_meta
