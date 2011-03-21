@@ -2,7 +2,6 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import render_to_response
-from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -10,37 +9,28 @@ from django.conf import settings
 from codewiki import models
 
 import vc
-
 import difflib
 import re
 import urllib
 import os
+from codewiki.management.commands.run_scrapers import GetDispatcherStatus
 
 try:                 import json
 except ImportError:  import simplejson as json
 
-from codewiki.management.commands.run_scrapers import GetDispatcherStatus
 
+def getscraperor404(request, short_name, action):
+    try:
+        scraper = models.Code.unfiltered.get(short_name=short_name)
+    except models.Code.DoesNotExist:
+        raise Http404
+    if not scraper.actionauthorized(request.user, action):
+        raise Http404
+    return scraper
 
-# kick this function out to the model module so it can be used elsewhere
-def get_code_object_or_notfoundresponse(short_name, request):
-    lcodeobject = models.Code.unfiltered.filter(short_name=short_name)
-    assert len(lcodeobject) <= 1
-    if len(lcodeobject) == 0:
-        return HttpResponseNotFound(render_to_string('404.html', {'heading': 'Not found', 'body': "Sorry, this scraper does not exist"}, context_instance=RequestContext(request)))
-    codeobject = lcodeobject[0]
-    if codeobject.deleted:
-        return HttpResponseNotFound(render_to_string('404.html', {'heading': 'Deleted', 'body': "Sorry, this scraper has been deleted by its owner"}, context_instance=RequestContext(request)))
-    if not codeobject.published and not request.user.is_authenticated():
-        return HttpResponseNotFound(render_to_string('404.html', {'heading': 'Access denied', 'body': "Sorry, this scraper is not public"}, context_instance=RequestContext(request)))
-    return codeobject
-
-
-
-def raw(request, short_name):
-    scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponseNotFound):
-        return scraper
+        
+def raw(request, short_name):  # this is used by swimport
+    scraper = getscraperor404(request, short_name, "readcode")
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
     code = scraper.get_vcs_status(rev)["code"]
@@ -48,9 +38,7 @@ def raw(request, short_name):
 
 
 def diffseq(request, short_name):
-    scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponseNotFound):
-        return scraper
+    scraper = getscraperor404(request, short_name, "readcode")
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
     try: otherrev = int(request.GET.get('otherrev', '-1'))
@@ -63,15 +51,20 @@ def diffseq(request, short_name):
     result = sqm.get_opcodes()  # [ ("replace|delete|insert|equal", i1, i2, j1, j2) ]
     return HttpResponse(json.dumps(result))
 
+
 def run_event_json(request, run_id):
-    user = request.user
-    if re.match('\d+$', run_id):
-        event = get_object_or_404(models.ScraperRunEvent, id=run_id)  
-    else:
-        event = get_object_or_404(models.ScraperRunEvent, run_id=run_id)
+    try:
+        if re.match('\d+$', run_id):
+            event = models.ScraperRunEvent.objects.get(id=run_id)
+        else:
+            event = models.ScraperRunEvent.objects.get(run_id=run_id)
+    except models.ScraperRunEvent.DoesNotExist:
+        raise Http404
+    if not event.scraper.actionauthorized(request.user, "readcode"):
+        raise Http404
     
     result = { 'records_produced':event.records_produced, 'pages_scraped':event.pages_scraped, "output":event.output, 
-             'first_url_scraped':event.first_url_scraped, 'exception_message':event.exception_message }
+               'first_url_scraped':event.first_url_scraped, 'exception_message':event.exception_message }
     if event.run_started:
         result['run_started'] = event.run_started.isoformat()
     if event.run_ended:
@@ -85,66 +78,15 @@ def run_event_json(request, run_id):
     return HttpResponse(json.dumps(result))
 
 
-# preview of the code diffed
-def code(request, wiki_type, short_name):
-    scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponseNotFound):
-        return scraper
-
-    try: rev = int(request.GET.get('rev', '-1'))
-    except ValueError: rev = -1
-
-    status = scraper.get_vcs_status(rev)
-
-    context = { 'selected_tab': 'history', 'scraper': scraper }
-
-    # overcome lack of subtract in template
-    if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
-        status["modifiedcommitdifference"] = status["filemodifieddate"] - status["prevcommit"]["date"]
-
-    context["status"] = status
-    context["code"] = status.get('code')
-    context['error_messages'] = [ ]
-    
-    try: otherrev = int(request.GET.get('otherrev', '-1'))
-    except ValueError: otherrev = None
-    
-    if otherrev != -1:
-        try:
-            reversion = scraper.get_reversion(otherrev)
-            context["othercode"] = reversion["text"].get(status['scraperfile'])
-        except IndexError:
-            context['error_messages'].append('Bad otherrev index')
-
-    if context.get("othercode"):
-        sqm = difflib.SequenceMatcher(None, context["code"].splitlines(), context["othercode"].splitlines())
-        context['matcheropcodes'] = json.dumps(sqm.get_opcodes())
-    
-    return render_to_response('codewiki/code.html', context, context_instance=RequestContext(request))
-
-
 
 def reload(request, short_name):
-    scraper = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(scraper, HttpResponseNotFound):
-        return HttpResponse(json.dumps({'status' : 'Failed', 'message':"scraper not available to reload"}))
-
+    scraper = getscraperor404(request, short_name, "readcode")
     oldcodeineditor = request.POST.get('oldcode')
     status = scraper.get_vcs_status(-1)
     result = { "code": status["code"], "rev":status.get('prevcommit',{}).get('rev') }
     if oldcodeineditor:
         result["selrange"] = vc.DiffLineSequenceChanges(oldcodeineditor, status["code"])
     return HttpResponse(json.dumps(result))
-
-
-    # try to get rid of this
-def edittutorial(request, short_name):
-    code = get_code_object_or_notfoundresponse(short_name, request)
-    if isinstance(code, HttpResponseNotFound):
-        return code
-
-    qtemplate = "?template="+code.short_name
-    return HttpResponseRedirect(reverse('editor', args=[code.wiki_type, code.language]) + qtemplate)
 
 
 
@@ -184,12 +126,20 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     
     # Load an existing scraper preference
     elif short_name != "__new__":
-        scraper = get_code_object_or_notfoundresponse(short_name, request)
-        if isinstance(scraper, HttpResponseNotFound):
-            return scraper
+        try:
+            scraper = models.Code.unfiltered.get(short_name=short_name)
+        except models.Code.DoesNotExist:
+            message =  "Sorry, this %s does not exist" % wiki_type
+            return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
+        if wiki_type != scraper.wiki_type:
+            return HttpResponseRedirect(reverse("editor_edit", args=[scraper.wiki_type, short_name]))
+        if not scraper.actionauthorized(request.user, "readcodeineditor"):
+            return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "readcodeineditor"), context_instance=RequestContext(request)))
+        
+        
         status = scraper.get_vcs_status(-1)
         assert 'currcommit' not in status 
-        #assert not status['ismodified']  # there are some very old scrapers which haven't been properly committed
+        # assert not status['ismodified']  # should hold, but disabling it for now
         context['code'] = status["code"]
         context['rev'] = status['prevcommit']
 
@@ -205,10 +155,13 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         statuptemplate = request.GET.get('template') or request.GET.get('fork')
         if statuptemplate:
             try:
-                templatescraper = models.Code.objects.get(published=True, language=language, short_name=statuptemplate)
-                startupcode = templatescraper.saved_code()
-                if 'fork' in request.GET:
-                    scraper.title = templatescraper.title
+                templatescraper = models.Code.unfiltered.get(short_name=statuptemplate)
+                if not templatescraper.actionauthorized(request.user, "readcode"):
+                    startupcode = startupcode.replace("Blank", "Not authorized to read this code")
+                else:
+                    startupcode = templatescraper.saved_code()
+                    if 'fork' in request.GET:
+                        scraper.title = templatescraper.title
             except models.Code.DoesNotExist:
                 startupcode = startupcode.replace("Blank", "Missing template for")
             
@@ -228,7 +181,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     if request.GET.get('fork'):
         context['fork'] = request.GET.get('fork')
 
-    context['scraper']          = scraper
+    context['scraper'] = scraper
     context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())
     
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
@@ -239,6 +192,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     # this is called in two places, due to those draft scrapers saved in the session
     # would be better if the saving was deferred and not done right following a sign in
 def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourcescraper=''):
+    assert code_object.actionauthorized(user, "savecode")
     code_object.line_count = int(code_text.count("\n"))
     
     # work around the botched code/views/scraper inheretance.  
@@ -278,7 +232,11 @@ def handle_editor_save(request):
         return HttpResponse(json.dumps({'status' : 'Failed', 'message':"title is blank or untitled"}))
     
     if guid:
-        scraper = models.Code.objects.get(guid=guid)
+        try:
+            scraper = models.Code.unfiltered.get(guid=guid)   # should this use short_name?
+        except models.Code.DoesNotExist:
+            return HttpResponse(json.dumps({'status' : 'Failed', 'message':"Name or guid invalid"}))
+        
         assert scraper.language.lower() == language
         assert scraper.wiki_type == request.POST.get('wiki_type', '')
         scraper.title = title   # the save is done on save_code
@@ -294,7 +252,7 @@ def handle_editor_save(request):
         fork = request.POST.get("fork", None)
         if fork:
             try:
-                scraper.forked_from = models.Code.objects.get(wiki_type=scraper.wiki_type, short_name=fork)
+                scraper.forked_from = models.Code.objects.get(short_name=fork)
             except models.Code.DoesNotExist:
                 pass
             
@@ -305,6 +263,8 @@ def handle_editor_save(request):
     # User is signed in, we can save the scraper
     if request.user.is_authenticated():
         earliesteditor = request.POST.get('earliesteditor', "")
+        if not scraper.actionauthorized(request.user, "savecode"):
+            return HttpResponse(json.dumps({'status':'Failed', 'message':"Not allowed to save this scraper"}))
         rev = save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
         response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
         return HttpResponse(json.dumps({'redirect':'true', 'url':response_url, 'rev':rev }))
@@ -335,13 +295,17 @@ def handle_session_draft(request):
     sourcescraper = session_scraper_draft.get('sourcescraper')
     commitmessage = session_scraper_draft.get('commit_message', "") # needed?
     earliesteditor = session_scraper_draft.get('earliesteditor', "") #needed?
-    save_code(draft_scraper, request.user, draft_code, earliesteditor, commitmessage, sourcescraper)
+        
+        # we reload into editor but only save for an authorized user
+    if draft_scraper.actionauthorized(request.user, "savecode"):
+        save_code(draft_scraper, request.user, draft_code, earliesteditor, commitmessage, sourcescraper)
 
     response_url = reverse('editor_edit', kwargs={'wiki_type': draft_scraper.wiki_type, 'short_name' : draft_scraper.short_name})
     return HttpResponseRedirect(response_url)
 
 
 
+        # this definitely should be ported into javascript so it can respond to selections
 def getselectedword(line, character, language):
     try: 
         ip = int(character)

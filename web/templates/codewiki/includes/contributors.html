@@ -9,8 +9,8 @@
     <li style="color:red">[Error: this scraper has no creator]</li>
     {% endif %}
 
-    {% if scraper_requesters %}  
-      {% for requester in scraper_requesters %}  
+    {% if scraper.requesters %}  
+      {% for requester in scraper.requesters %}  
         <li>
         	{% load gravatar %} {% show_gravatar requester 'medium' %} 
             <a href="{% url profiles_profile_detail requester.username %}">{{requester.get_profile.name}}</a>
@@ -18,8 +18,8 @@
         </li>
       {% endfor %}
     {% endif %}
-    {% if scraper_contributors %}  
-      {% for contributor in scraper_contributors %}  
+    {% if scraper.contributors %}  
+      {% for contributor in scraper.contributors %}  
         <li>
         	{% load gravatar %} {% show_gravatar contributor 'medium' %} 
             <a href="{% url profiles_profile_detail contributor.username %}">{{contributor.get_profile.name}}</a>

@@ -133,4 +133,5 @@ class Sqlite(APIBase):
                 sqlitedata = dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
         
         sqlquery = request.GET.get('query')
-        return [ dataproxy.request(("sqlitecommand", "execute", sqlquery, None)) ]
+        ret = [ dataproxy.request(("sqlitecommand", "execute", sqlquery, None)) ]
+        return ret

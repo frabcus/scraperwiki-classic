@@ -74,15 +74,14 @@ def profile_detail(request, username):
 
 
 def edit_profile(request):
-                form = UserProfileForm()
-                return profile_views.edit_profile(request, form_class=form)
+    form = UserProfileForm()
+    return profile_views.edit_profile(request, form_class=form)
 
 def process_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('frontpage'))
 
 def login(request):
-
     error_messages = []
 
     #grab the redirect URL if set

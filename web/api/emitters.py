@@ -51,7 +51,7 @@ class CSVEmitter(Emitter):
             return fout.getvalue()
         
         # identify the sqlite keys and data case
-        if dictlist and len(dictlist) == 1 and len(dictlist[0].keys() <= 2) and "error" in dictlist[0]:
+        if dictlist and len(dictlist) == 1 and len(dictlist[0].keys()) <= 2 and "error" in dictlist[0]:
             return str(dictlist[0]["error"])
         if dictlist and len(dictlist) == 1 and "keys" in dictlist[0] and "data" in dictlist[0]:
             if headings:

@@ -4,24 +4,32 @@
 
 {% block title %}Welcome{% endblock %}
 {% block content  %}
-    <div class="page_title">
-        <h1 class="welcome">Welcome to ScraperWiki</h1>
-        {% if user.code_set.all|length %}  
+    {% if user.code_set.all|length %}  
+        <div class="page_title">
             <p>
               You have a stake in <a href="{% url dashboard %}">{{user|num_scrapers}} scraper{{user|num_scrapers|pluralize}}{% if user|num_views %} and {{user|num_views}} view{{user|num_views|pluralize}}{% endif %}</a>.
             </p>
-        {% else %}
-            <div class="definition">
-                <p>
-                   <a href="http://en.wikipedia.org/wiki/Web_scraping" title="Wikipedia definition"><strong>Scraper</strong></a>: 
-                   a computer program that transforms information from webpages into a data
-                </p>
-                <p>
-                   <a href="{% url about %}" title="About ScraperWiki"><strong>ScraperWiki</strong></a>: 
-                   a website where anyone can write and repair public web scrapers and discover uses for the data
-                </p>
+        </div>
+    {% endif %}
+
+    <div class="content full">
+        <div id="divWelcome">
+            <div id="divIntroSlideShow">
+                <div class="slide_show">
+                    <img src="{{ MEDIA_URL }}images/intro_slides/intro1.png" />
+                    <img src="{{ MEDIA_URL }}images/intro_slides/intro2.png" />
+                    <img src="{{ MEDIA_URL }}images/intro_slides/intro3.png" />
+                    <img src="{{ MEDIA_URL }}images/intro_slides/intro4.png" />  
+                    <img src="{{ MEDIA_URL }}images/intro_slides/intro5.png" />                                                
+                </div>
+                <div class="slide_nav"></div>
             </div>
-            {% endif %}
+            <div id="divWelcomeText">
+                <img id="imgLogoLarge" src="{{MEDIA_URL}}/images/logo_large.png"/>
+                <h1>ScraperWiki is all the tools you need for Screen Scraping, Data Mining &amp; visualisation.</h1>            
+                <h2>Make bad data good, collaborate &amp; discover new datasets.</h2>
+            </div>
+        </div>
     </div>
 
     <div class="content half left">
@@ -63,3 +71,4 @@
         {% blog_latest %}
     </div>
 {% endblock %}
+{% block run_script %}setupIntroSlideshow();{% endblock %}

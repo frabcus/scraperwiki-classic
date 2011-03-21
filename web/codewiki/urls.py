@@ -8,38 +8,25 @@ from piston.resource import Resource
 from handlers import ScraperMetadataHandler
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 
 metadata = Resource(handler=ScraperMetadataHandler)
 
 urlpatterns = patterns('',
     
-            # running a scraper by calling a url (from scraperwikiviews.com)
+    # running a scraper by calling a url (from scraperwikiviews.com)
     url(r'^run/(?P<short_name>[\w_\-\.]+)/(?:(?P<revision>\d+)/)?$', 
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    
-    
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/run/$',   # redirect because it's so common
-                   lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('rpcexecute', args=[short_name]))),
-    
-            # should access from scraperwikiviews.com
-    url(r'^sqlitequery/$',                                views.sqlitequery,            name='sqlitequery'), 
-            
-    # special views functionality
-    url(r'^views/(?P<short_name>[\w_\-\.]+)/html/$',      views.htmlview,               name='htmlview'),
-    
-            # this should be deprecated and redirected to http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}
-    url(r'^views/(?P<short_name>[\w_\-\.]+)/full/$',      views.view_fullscreen,        name='view_fullscreen'),   
+
     url(r'^views/(?P<short_name>[\w_\-\.]+)/admin/$',     views.view_admin,             name='view_admin'),    
     
     url(r'^scrapers/delete-data/(?P<short_name>[\w_\-\.]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
     url(r'^scrapers/converttosqlitedatastore/(?P<short_name>[\w_\-\.]+)/$', views.scraper_converttosqlitedatastore, name='scraper_converttosqlitedatastore'),
             
-    url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),
-    url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$',  
-                                                          views.export_sqlite,          name='export_sqlite'),
+    url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$',  views.export_sqlite,          name='export_sqlite'),
+    #url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),
     
-            # probably deprecated and out of date        
-    url(r'^scrapers/export2/(?P<short_name>[\w_\-\.]+)/$',views.export_gdocs_spreadsheet,name='export_gdocs_spreadsheet'),    
     
     url(r'^scrapers/follow/(?P<short_name>[\w_\-\.]+)/$',   views.follow,               name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-\.]+)/$', views.unfollow,             name='scraper_unfollow'),
@@ -67,16 +54,14 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',  views.scraper_history,  name='scraper_history'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/comments/$', views.comments,         name='scraper_comments'),
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/code/$',     viewseditor.code,       name='scraper_code'),    
-    url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.\?]+)/$',                      viewsuml.run_event,     name='run_event'),  # the ? is due to the temporary holding value in older objects and should be cleared  out
+    
+    
+    url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.\?]+)/$',                      viewsuml.run_event,     name='run_event'),  # the \? is due to the temporary holding value in older objects and should be cleared  out
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/tags/$',     views.tags,             name='scraper_tags'),    
         
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$',                 views.choose_template,  name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        
     
-        # redirects to new scraper?template=
-    url(r'^editor/template/(?P<short_name>[\-\w\.]+)$',   viewseditor.edittutorial, name="tutorial"),  
-
     url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
     
     # call-backs from ajax for reloading and diff
@@ -91,7 +76,16 @@ urlpatterns = patterns('',
     # editor 
     url(r'^handle_session_draft/$',                       viewseditor.handle_session_draft, name="handle_session_draft"),
     url(r'^handle_editor_save/$',                         viewseditor.handle_editor_save,   name="handle_editor_save"),    
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/edit/$',   viewseditor.edit, name="editor_edit"),    
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/edit/$',   viewseditor.edit, name="editor_edit"),
     url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',            viewseditor.edit, name="editor"),
+
+
+    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/(?:run|full)/$',   # redirect because it's so common
+                   lambda request, wiki_type, short_name: HttpResponseRedirect("http://%s%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=[short_name])))),
+    url(r'^(?P<wiki_type>scraper)s/export2/(?P<short_name>[\w_\-\.]+)/$', 
+                   lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name]))),
+    url(r'^(?P<wiki_type>scraper)s/export/(?P<short_name>[\w_\-\.]+)/$', 
+                   lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name]))),
+
 )
 

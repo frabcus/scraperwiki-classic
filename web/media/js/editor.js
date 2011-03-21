@@ -1308,7 +1308,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             res = $.evalJSON(response);
             if (res.status == 'Failed')
             {
-                alert("Save failed error message.  Shouldn't happen"); 
+                alert("Save failed error message: "+res.message); 
                 return; 
             }
 

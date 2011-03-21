@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from codewiki.managers.code import CodeManager
-
+import tagging
 import hashlib
 
 from codewiki import vc
@@ -39,6 +39,8 @@ WIKI_TYPES = (
     ('scraper', 'Scraper'),
     ('view', 'View'),    
 )
+
+
 
 class Code(models.Model):
 
@@ -242,6 +244,53 @@ class Code(models.Model):
 
     class Meta:
         app_label = 'codewiki'
+
+
+            # all authorization to go through here
+            # actions are overview, changeadmin, comments, history, exportsqlite, setfollow, 
+            # rpcexecute, readcode, readcodeineditor, savecode
+    def actionauthorized(self, user, action):
+        if self.deleted:
+            return False
+        if not user.is_authenticated() and action in ["changeadmin", "savecode"]:
+            return False
+        if not self.published and not user.is_authenticated():
+            return False
+        if action in ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning"]:
+            if self.owner() != user and not user.is_staff:
+                return False
+        if action in ["run_scraper", "screenshoot_scraper"]:
+            if not user.is_staff:
+                return False
+        if action == "rpcexecute" and self.wiki_type != "view":
+            return False
+        return True
+
+    def authorizationfailedmessage(self, user, action):
+        if self.deleted:
+            return {'heading': 'Deleted', 'body': "Sorry this %s has been deleted" % self.wiki_type}
+        if not user.is_authenticated() and action == "changeadmin":
+            return {'heading': 'Not logged in', 'body': "only logged in users can change the settings"}
+        if not self.published and not user.is_authenticated():
+            return {'heading': 'Access denied', 'body': "not published and you are not logged in so can't do %s" % action}
+        if action == "rpcexecute" and self.wiki_type != "view":
+            return {'heading': 'This is a scraper', 'body': "not supposed to run a scraper as a view"}
+        return {'heading': "unknown", "body":"unknown"}
+
+    
+    # tags have been unhelpfully attached to the scraper and view classes rather than the base code class
+    # we can minimize the damage caused by this decision (in terms of forcing the scraper/view code to be 
+    # unnecessarily separate by filtering as much of this application as possible through this interface
+    def gettags(self):
+        if self.wiki_type == "scraper":
+            return tagging.models.Tag.objects.get_for_object(self.scraper)
+        return tagging.models.Tag.objects.get_for_object(self.view)
+
+    def settags(self, tag_names):
+        if self.wiki_type == "scraper":
+            tagging.models.Tag.objects.update_tags(self.scraper, tag_names)
+        else:
+            tagging.models.Tag.objects.update_tags(self.view, tag_names)
 
 
 

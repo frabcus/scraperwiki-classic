@@ -20,30 +20,33 @@ from codewiki.management.commands.run_scrapers import GetDispatcherStatus, GetUM
 from viewsrpc import testactiveumls  # not to use
 
 
+        # should deprecate and go to the top of the history page
 def run_event(request, run_id):
-    user = request.user
-    if re.match('\d+$', run_id):
-        # old style (allows access to objects that have not got a run_id due to an error
-        event = get_object_or_404(ScraperRunEvent, id=run_id)  
-    else:
-        event = get_object_or_404(ScraperRunEvent, run_id=run_id)
-    
+    try:
+        if re.match('\d+$', run_id):
+            event = ScraperRunEvent.objects.get(id=run_id)
+        else:
+            event = ScraperRunEvent.objects.get(run_id=run_id)
+    except ScraperRunEvent.DoesNotExist:
+        raise Http404
+        
     context = { 'event':event }
     statusscrapers = GetDispatcherStatus()
     for status in statusscrapers:
         if status['runID'] == event.run_id:
             context['status'] = status
+    if not event.scraper.actionauthorized(request.user, "readcode"):
+        raise Http404
     
     context['scraper'] = event.scraper
     context['selected_tab'] = '' and message.get('message_sub_type') != 'consolestatus'
-    context['user_owns_it'] = (event.scraper.owner() == user)
+    context['user_owns_it'] = (event.scraper.owner() == request.user)
     
     return render_to_response('codewiki/run_event.html', context, context_instance=RequestContext(request))
 
 
 
 def running_scrapers(request):
-    user = request.user
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:10]  
     
     statusscrapers = GetDispatcherStatus()
@@ -54,10 +57,10 @@ def running_scrapers(request):
                 status['scraper'] = scrapers[0]
         
         scraperrunevents = ScraperRunEvent.objects.filter(run_id=status['runID'])
-        status['killable'] = user.is_staff
+        status['killable'] = request.user.is_staff
         if scraperrunevents:
             status['scraperrunevent'] = scraperrunevents[0]
-            if status['scraper'].owner() == user:
+            if status['scraper'].owner() == request.user:
                 status['killable'] = True
 
     context = { 'statusscrapers': statusscrapers, 'events':recentevents }
@@ -67,20 +70,17 @@ def running_scrapers(request):
 
 
 def scraper_killrunning(request, run_id, event_id):
-    user = request.user
-    event = event_id and get_object_or_404(ScraperRunEvent, id=event_id) or None
-    
-    # staff or scraper owner only
-    if not (request.user.is_staff or (event and event.scraper.owner() == request.user)):
+    try:
+        event = ScraperRunEvent.objects.get(id=event_id)
+    except ScraperRunEvent.DoesNotExist:
         raise Http404
-    
-    if request.POST.get('killrun', None) == '1':
-        killed = kill_running_runid(run_id)
-        print "Kill function result on", killed
-    
+    if not event.scraper.actionauthorized(request.user, "killrunning"):
+        raise Http404
+    if request.POST.get('killrun', None) != '1':
+        raise Http404
+        
+    killed = kill_running_runid(run_id)   # ought we be using the run event and seeing if we can kill it more smartly
+    print "Kill function result on", killed
     time.sleep(1)
-    
-    if event:
-        return HttpResponseRedirect(reverse('run_event', args=[event.run_id]))
-    return HttpResponseRedirect(reverse('running_scrapers'))
+    return HttpResponseRedirect(reverse('run_event', args=[event.run_id]))
 
