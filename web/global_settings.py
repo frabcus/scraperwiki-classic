@@ -203,3 +203,7 @@ DISPATCHERURL = "http://localhost:9000"
 UMLURLS = ["http://89.16.177.195:9101", "http://89.16.177.195:9102", "http://89.16.177.195:9103", "http://89.16.177.195:9104"]
 
 ENABLE_MARKETPLACE = False
+
+# tell south to do migrations when doing tests
+SOUTH_TESTS_MIGRATE = True
+
