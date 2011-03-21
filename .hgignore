@@ -26,8 +26,15 @@ syntax: regexp
 ^web/editor/code_runner.py$
 ^web/python$
 ^web/pip-log.txt$
-^uml$
 ^web/media/src/scraperwiki.tar.gz
 ^share/doc/urlgrabber-3.1.0/
 ^downloads$
 ^francis-laptop.wsgi$
+^resourcedir/
+^uml/var/
+^uml/controller/uml.cfg$
+^uml/firestarter/runner_config.py$
+^uml/twister/orbited.cfg$
+^uml/uml.cfg$
+^uml/uml.cfg.francis$
+^uml/controller/swlogger.py$
