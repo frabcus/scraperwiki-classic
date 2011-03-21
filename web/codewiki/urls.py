@@ -15,7 +15,7 @@ metadata = Resource(handler=ScraperMetadataHandler)
 
 urlpatterns = patterns('',
     
-            # running a scraper by calling a url (from scraperwikiviews.com)
+    # running a scraper by calling a url (from scraperwikiviews.com)
     url(r'^run/(?P<short_name>[\w_\-\.]+)/(?:(?P<revision>\d+)/)?$', 
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    
 
@@ -24,8 +24,8 @@ urlpatterns = patterns('',
     url(r'^scrapers/delete-data/(?P<short_name>[\w_\-\.]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
     url(r'^scrapers/converttosqlitedatastore/(?P<short_name>[\w_\-\.]+)/$', views.scraper_converttosqlitedatastore, name='scraper_converttosqlitedatastore'),
             
-    url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$',  
-                                                          views.export_sqlite,          name='export_sqlite'),
+    url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$',  views.export_sqlite,          name='export_sqlite'),
+    #url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),
     
     
     url(r'^scrapers/follow/(?P<short_name>[\w_\-\.]+)/$',   views.follow,               name='scraper_follow'),
