@@ -50,10 +50,6 @@ class ScraperViewsTests(TestCase):
                             kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
         self.assertEqual(response.status_code, 200)
         
-        
-    def test_scraper_stringnot(self):
-        self.assertEqual(codewiki.views.stringnot('test'), 'test')
-    
     
     def test_scraper_comments(self):
         if not self._repo_exists( 'test_scraper'):
