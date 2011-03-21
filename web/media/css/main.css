@@ -28,7 +28,9 @@ ul.user_menu li {list-style-type:none; display:inline;padding:0.3em 0.3em;}
 
 /* Main menu */
 #divMenu ul li {padding:0.3em 0.3em; list-style-type:none; font-weight:bold;}
-#divSidebarSearch #q {width:103px;}
+#divSidebarSearch {}
+#divSidebarSearch #q {width: 100px;}
+#divSidebarSearch #go {}
 #divMenu .main_menu, #divMenu .sub_menu, #divMenu form {border-bottom:solid 1px #ccc; padding-bottom:1em;}
 #divMenu .sub_menu { font-size:0.8em;}
 #divMenu .sub_menu h4 {padding:1.2em 0 0 0.3em; color:#333;}
