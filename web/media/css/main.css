@@ -59,11 +59,11 @@ h1.welcome {background:url(../images/languages.png) no-repeat top right;padding:
     border:dotted 1px #ccc; margin:1em 0;}
 
 /* Sldieshow */
-#divIntroSlideShow {position:absolute; top:18px; right:2%; width:495px} 
+#divIntroSlideShow {position:absolute; top:18px; right:2%; width:495px; height: 346px; } 
 #divIntroSlideShow .slide_show {border:solid 10px #287aa6;}
 
 .slide_show {background:#fff;}
-.slide_nav {float:right; padding-top:2em;position:relative; right:5px;}
+.slide_nav {z-index:10; float:right; padding-top:2em; position:absolute; right:10px; bottom:-50px; }
 .slide_nav {font-size:0.6em;}
 .slide_nav a {text-decoration: none; margin: 0 5px; padding: 3px 5px; border:solid 1px #fff; color:#fff;}
 .slide_nav a:hover {text-decoration:none; background:#2680c6; color:#fff;}
