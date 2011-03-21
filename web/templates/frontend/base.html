@@ -87,7 +87,7 @@
                 <li><a href="{% url contact_form %}">Request a dataset</a></li>
             {% endif %}
             <li><a href="{% url help 'tutorials' 'python' %}" title="Help">Tutorials</a></li>
-            <li><a href="{% url help %}" title="Help">FAQ</a></li>
+            <li><a href="{% url help 'documentation' 'python' %}" title="Help">Documentation</a></li>
             {% if user.is_staff %}
               <li class="staff"><a href="{% url running_scrapers %}" title="Interact with current UML status">UML status</a></li>
             {% endif %}
