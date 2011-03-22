@@ -161,7 +161,7 @@ def migrate():
 
 def restart_webserver():
     "Restart the web server"
-    sudo('apache2ctl restart')
+    sudo('apache2ctl graceful')
 
 def create_tarball():
     virtualenv("mkdir -p ./web/media/src/; hg archive -t tgz ./web/media/src/scraperwiki.tar.gz")
