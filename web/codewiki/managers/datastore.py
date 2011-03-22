@@ -2,35 +2,21 @@ import  settings
 import  socket
 import  urllib
 
-try   : import json
-except: import simplejson as json
-
-        # a \n delimits the end of the record.  you cannot read beyond it or it will hang
-def receiveoneline(socket):
-    sbuffer = [ ]
-    while True:
-        srec = socket.recv(1024)
-        if not srec:
-            return {'error': "socket from dataproxy has unfortunately closed"}
-        ssrec = srec.split("\n")  # multiple strings if a "\n" exists
-        sbuffer.append(ssrec.pop(0))
-        if ssrec:
-            break
-    
-    line = "".join(sbuffer)
-    try:
-        return json.loads(line)
-    except ValueError, e:
-        raise Exception("%s:%s" % (e.message, text))
+try:
+    import json
+except: 
+    import simplejson as json
 
 
-class DataStoreClass :
+class DataStore(object):
 
-    def __init__ (self) :
+    def __init__ (self, scraperID, short_name) :
 
         self.m_socket   = None
         self.m_host     = settings.DATAPROXY_HOST
         self.m_port     = settings.DATAPROXY_PORT
+
+        self.connect (scraperID, short_name)
 
     def connect (self, scraperID, short_name) :
 
@@ -43,13 +29,13 @@ class DataStoreClass :
         data = [ ("uml", socket.gethostname()), ("port", self.m_socket.getsockname()[1]), ("scraperid", scraperID), ("short_name", short_name) ]
         self.m_socket.send ('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         
-        rc, arg = receiveoneline(self.m_socket)  # comes back with True, "Ok"
+        rc, arg = self.receiveoneline(self.m_socket)  # comes back with True, "Ok"
         assert rc, arg
         
 
     def request(self, req) :
         self.m_socket.sendall(json.dumps(req) + '\n')
-        return receiveoneline(self.m_socket)
+        return self.receiveoneline(self.m_socket)
 
 
     def data_dictlist (self, tablename = "", limit = 1000, offset = 0, start_date = None, end_date = None, latlng = None) :
@@ -73,8 +59,20 @@ class DataStoreClass :
         self.m_socket.close()
         self.m_socket = None
 
-
-def DataStore (scraperID, short_name) :
-    ds = DataStoreClass()
-    ds.connect (scraperID, short_name)
-    return ds
+    # a \n delimits the end of the record.  you cannot read beyond it or it will hang
+    def receiveoneline(self):
+        sbuffer = [ ]
+        while True:
+            srec = self.m_socket.recv(1024)
+            if not srec:
+                return {'error': "socket from dataproxy has unfortunately closed"}
+            ssrec = srec.split("\n")  # multiple strings if a "\n" exists
+            sbuffer.append(ssrec.pop(0))
+            if ssrec:
+                break # Discard anything after the newline
+        
+        line = "".join(sbuffer)
+        try:
+            return json.loads(line)
+        except ValueError, e:
+            raise Exception("%s:%s" % (e.message, text))
