@@ -319,8 +319,9 @@ $(document).ready(function() {
     {
         $(document).bind('keydown', sKeyCombination, function(){return false;});
         $(codeeditor.win.document).unbind('keydown', sKeyCombination);
+
         $(codeeditor.win.document).bind('keydown', sKeyCombination,
-            function(oEvent){
+            function(evt){
                 oFunction();
                 return false; 
             }
@@ -329,6 +330,10 @@ $(document).ready(function() {
 
     function setupKeygrabs()
     {
+//		var mac =  ? true: false;
+		if ( navigator.userAgent.toLowerCase().indexOf("mac")!=-1 ) {
+			addHotkey('meta+s', saveScraper); 
+		}
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+p', popupPreview); 
