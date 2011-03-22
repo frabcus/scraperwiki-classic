@@ -187,7 +187,9 @@ def code_overview(request, wiki_type, short_name):
             pass
             
         if context.get('sqlitedata') and "ckanresource" not in context:
-            ckanparams = {"name":scraper.short_name, "title":scraper.title, "url":settings.MAIN_URL+reverse('code_overview', args=[scraper.wiki_type, short_name])}
+            ckanparams = {"name": scraper.short_name,
+                          "title": scraper.title.encode('utf-8'),
+                          "url": settings.MAIN_URL+reverse('code_overview', args=[scraper.wiki_type, short_name])}
             ckanparams["resources_url"] = settings.MAIN_URL+reverse('export_sqlite', args=[scraper.short_name])
             ckanparams["resources_format"] = "Sqlite"
             ckanparams["resources_description"] = "Scraped data"
