@@ -72,11 +72,13 @@ class ScraperManager(CodeManager):
         if not last_run:
             last_run = datetime.datetime.now()
 
-        # should this also set the language?
-        scraper = self.create(title="%s's Email Alert Scraper" % (user.get_profile().name or user.username),
+        title = "%s's Email Alert Scraper" % (user.get_profile().name or user.username)
+        scraper = self.create(title=title,
                               short_name="%s.emailer" % user.username,
                               published=True,
-                              last_run=last_run)
+                              last_run=last_run,
+                              language='python',
+                              description=title)
         scraper.commit_code("""
 # PLEASE READ THIS BEFORE EDITING
 #
