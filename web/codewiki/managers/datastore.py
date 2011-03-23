@@ -29,13 +29,13 @@ class DataStore(object):
         data = [ ("uml", socket.gethostname()), ("port", self.m_socket.getsockname()[1]), ("scraperid", scraperID), ("short_name", short_name) ]
         self.m_socket.send ('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         
-        rc, arg = self.receiveoneline(self.m_socket)  # comes back with True, "Ok"
+        rc, arg = self.receiveoneline()  # comes back with True, "Ok"
         assert rc, arg
         
 
     def request(self, req) :
         self.m_socket.sendall(json.dumps(req) + '\n')
-        return self.receiveoneline(self.m_socket)
+        return self.receiveoneline()
 
 
     def data_dictlist (self, tablename = "", limit = 1000, offset = 0, start_date = None, end_date = None, latlng = None) :

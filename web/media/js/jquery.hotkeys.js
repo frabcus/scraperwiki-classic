@@ -182,6 +182,7 @@ Note:
                 // prevent f5 overlapping with 't' (or f4 with 's', etc.)
                 character = !special && String.fromCharCode(code).toLowerCase(),
                 shift = event.shiftKey,
+meta = event.metaKey,
                 ctrl = event.ctrlKey,            
                 // patch for jquery 1.2.5 && 1.2.6 see more at:  
                 // http://groups.google.com/group/jquery-en/browse_thread/thread/83e10b3bb1f1c32b
@@ -199,7 +200,7 @@ Note:
             if (mapPoint){ 
                 var trigger;
                 // event type is associated with the hkId
-                if(!shift && !ctrl && !alt) { // No Modifiers
+                if(!shift && !ctrl && !alt && ! meta) { // No Modifiers
                     trigger = mapPoint[special] ||  (character && mapPoint[character]);
                 }
                 else{
@@ -207,6 +208,7 @@ Note:
                     var modif = '';
                     if(alt) modif +='alt+';
                     if(ctrl) modif+= 'ctrl+';
+					else if ( meta ) modif += 'meta+';
                     if(shift) modif += 'shift+';
                     // modifiers + special keys or modifiers + character or modifiers + shift character or just shift character
                     trigger = mapPoint[modif+special];

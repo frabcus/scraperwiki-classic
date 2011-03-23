@@ -40,9 +40,7 @@
         </ul>
     </div>
     <div class="content full">
-        {% ifequal scraper.status 'sick' %}
-          {% if lastscraperrunevent.id %}
-          {% ifequal lastscraperrunevent.pid -1 %}
+        {% if scraper.is_sick_and_not_running %}
             <p class="sick">
                 <strong>Maintenance required!</strong> This {{scraper.wiki_type}} might be broken 
                 (it generated an exception on its <a href="{% if lastscraperrunevent.run_id %}{% url run_event lastscraperrunevent.run_id %}{% else %}{% url run_event lastscraperrunevent.id %}{% endif %}">last run</a>).
@@ -52,9 +50,7 @@
                     Do you know {{scraper.language}}? Could you help <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">fix this {{scraper.wiki_type}}</a>?
                 {% endifequal %}
             </p>
-          {% endifequal %}
-          {% endif %}
-        {% endifequal %}
+        {% endif %}
         <div class="page_tab_body">
                     
             {% block tab %}

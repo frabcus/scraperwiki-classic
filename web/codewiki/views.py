@@ -140,10 +140,9 @@ def code_overview(request, wiki_type, short_name):
     context["user_follows_it"] = (request.user in scraper.followers())
     context["related_views"] = models.View.objects.filter(relations=scraper)
     
-    lscraperrunevents = scraper.scraper.scraperrunevent_set.all().order_by("-run_started")[:1] 
-    context["lastscraperrunevent"] = lscraperrunevents and lscraperrunevents[0] or None
+    context["lastscraperrunevent"] = scraper.last_runevent()
 
-            # to be deprecated when old style datastore is abolished
+    # XXX to be deprecated when old style datastore is abolished
     column_order = scraper.get_metadata('data_columns')
     if not context["user_owns_it"]:
         private_columns = scraper.get_metadata('private_columns')

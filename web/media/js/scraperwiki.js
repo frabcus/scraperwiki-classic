@@ -22,7 +22,7 @@ function setupSearchBoxHint(){
     });
     $('#divSidebarSearch input:text').blur(function() {
         if(!$('#divSidebarSearch input:submit').attr('disabled') && ($(this).val() == '')) {
-            $(this).val('Search ScraperWiki');
+            $(this).val('Search');
             $(this).addClass('hint');
             $('#divSidebarSearch input:submit').attr('disabled', 'disabled'); 
         }
