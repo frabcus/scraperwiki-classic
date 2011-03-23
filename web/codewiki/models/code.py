@@ -121,6 +121,16 @@ class Code(models.Model):
         assert not self.short_name
         self.short_name = util.SlugifyUniquely(self.title, Code, slugfield='short_name', instance=self)
 
+    def last_runevent(self):
+        lscraperrunevents = self.scraper.scraperrunevent_set.all().order_by("-run_started")[:1]
+        return lscraperrunevents and lscraperrunevents[0] or None
+
+    def is_sick_and_not_running(self):
+        lastscraperrunevent = self.last_runevent()
+        if self.status == 'sick' and lastscraperrunevent.id and lastscraperrunevent.pid == -1:
+            return True
+        return False
+
     def set_guid(self):
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
