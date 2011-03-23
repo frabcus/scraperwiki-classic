@@ -36,7 +36,7 @@ anything more complex, you can use other Python download modules directly, such 
         <div class="section">
             <h3><span id="saving"></span>scraperwiki.datastore.save</h3>
             <p>Save your data to the ScraperWiki datastore. You can then download it, 
-               or retrieve it later using the API.</p>
+            or retrieve it later using the API. </p>
 			    <h4>Method</h4>
 			    <table class="api_detail example_table">
 			    <tr><th width="30%">Method</th><th width="20%">Returned value</th><th>Description</th></tr>
@@ -64,6 +64,7 @@ anything more complex, you can use other Python download modules directly, such 
                         in the example given, 
                         the integer <code>9812301</code> will be stored as a string. A null value
                         (e.g. <code>None</code> in Python) is stored as an empty string.
+                        For string values, pass in either a Unicode string or a byte string encoded in UTF-8.
                         As a special case, if you use a key called <code>'date'</code> or <code>'latlng'</code>,
                         then it will be treated as if it were one of the optional arguments described below.
                         </dd>
@@ -134,6 +135,7 @@ anything more complex, you can use other Python download modules directly, such 
 	                        in the example given, 
 	                        the integer <code>9812301</code> will be stored as a string. A null value
 	                        (e.g. <code>None</code> in Python) is stored as an empty string.
+                            For string values, pass in either a Unicode string or a byte string encoded in UTF-8.
 	                        As a special case, if you use a key called <code>'date'</code> or <code>'latlng'</code>,
 	                        then it will be treated as if it were one of the optional arguments described below.
 	                        </dd>
