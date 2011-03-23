@@ -501,6 +501,9 @@ body.fullscreen #embedinstructions textarea { width:500px; }
 
 .code_about li.fork {background-repeat:no-repeat; padding-left:22px; background-image:url(../images/icons/fork.png);}
 
+ul.scraper_list ul.code_about li.about_sick { background:#f3cacb url(../images/icons/eye.png) no-repeat 4px 0.4em; font-variant: normal; color: #000000; 
+    font-size:0.8em; border-top:dotted 1px #d5a2a2; border-bottom:dotted 1px #d5a2a2; padding:0.3em 10px 0.3em 30px; margin:0;
+ 
 /* last saved date / revision */
 .last_saved {color:#808080;margin:0;padding:0.5em 0em 0.5em 0;}
 

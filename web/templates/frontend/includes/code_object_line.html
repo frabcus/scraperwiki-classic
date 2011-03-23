@@ -25,7 +25,13 @@
              {% if code.scraper.has_temporal %}
                <li><img src="{{ MEDIA_URL }}/images/icons/date.png"/></li>
              {% endif %}
+             {% if code.is_sick_and_not_running %}
+                <a href="{% url code_overview code.wiki_type code.short_name %}">
+                <li class="about_sick"> <strong> Maintenance required! </strong></li>
+                </a>
+             {% endif %}
            {% endif %}
+
         </ul>
     </h3>
     <small>
