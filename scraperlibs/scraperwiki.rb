@@ -112,24 +112,32 @@ module ScraperWiki
         return res
     end
 
-    def ScraperWiki.save_sqlite(unique_keys, data, table_name="swdata", commit=true, verbose=2)
-        for key in unique_keys
-            if !data.include?(key)
-                raise SqliteException.new('unique_keys must be a subset of data')
+            # this ought to be a local function
+    def ScraperWiki.convdata(unique_keys, scraper_data)
+        puts unique_keys
+        puts scraper_data
+        if unique_keys:
+            for key in unique_keys
+                if !scraper_data.include?(key)
+                    return { "error" => 'unique_keys must be a subset of data', "bad_key" => key }
+                end
+                if scraper_data[key] == nil:
+                    return { "error" => 'unique_key value should not be None', "bad_key" => key }
+                end
             end
         end
 
         jdata = { }
-        data.each_pair do |key, value|
-            if not key:
-                raise SqliteException.new('key must not be blank')
+        scraper_data.each_pair do |key, value|
+            if not key
+                return { "error" => 'key must not be blank', "bad_key" => key }
             end
             if key.class != String
-                raise SqliteException.new('key must be string type')
+                return { "error" => 'key must be string type', "bad_key" => key }
             end
 
             if !/[a-zA-Z0-9_\- ]+$/.match(key)
-                raise SqliteException.new('key must be simple text'+key)
+                return { "error"=>'key must be simple text', "bad_key"=> key }
             end
             
             if ![Fixnum, Float, String, TrueClass, FalseClass, NilClass].include?(value.class)
@@ -137,33 +145,66 @@ module ScraperWiki
             end
             jdata[key] = value
         end
+        return jdata
+    end
+
+
+    def ScraperWiki.save_sqlite(unique_keys, data, table_name="swdata", verbose=2)
+        if !data
+            ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => "EMPTY SAVE IGNORED"})
+            return
+        end
+
+        if data.class == Hash:
+            rjdata = convdata(unique_keys, data)
+            if rjdata.include?("error")
+                raise SqliteException.new(rjdata["error"])
+            end
+        else
+            rjdata = [ ]
+            for ldata in data
+                ljdata = convdata(unique_keys, ldata)
+                if ljdata.include?("error")
+                    raise SqliteException.new(ljdata["error"])
+                end
+                rjdata.push(ljdata)
+            end
+        end
 
         ds = SW_DataStore.create()
-        res = ds.request(['save_sqlite', unique_keys, jdata, table_name])
+        res = ds.request(['save_sqlite', unique_keys, rjdata, table_name])
         if res["error"]
             raise SqliteException.new(res["error"])
         end
-        if commit
-            res = ds.request(['sqlitecommand', 'commit', nil, nil]);
-        end
 
-        pdata = { }
-        jdata.each_pair do |key, value|
-            key = key.to_s[0,50]
-            if value == nil
-                value  = ''
+        if verbose >= 2
+            pdata = { }
+            if rjdata.class == Hash
+                sdata = rjdata
             else
-                value = value.to_s[0,50]
+                sdata = rjdata[0]
             end
-            pdata[key] = value
+            sdata.each_pair do |key, value|
+                key = key.to_s[0,50]
+                if value == nil
+                    value  = ''
+                else
+                    value = value.to_s[0,50]
+                end
+                pdata[key] = value
+            end
+            if rjdata.class == Array and rjdata.size > 1
+                pdata["number_records"] = "Number Records: "+String(rjdata.size)
+            end
+            ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => pdata})
         end
-        ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => pdata})
+        return res
     end
 
             # also needs to handle the types better (could save json and datetime objects handily
-    def ScraperWiki.save_var(name, value, commit=true, verbose=2)
+    def ScraperWiki.save_var(name, value, verbose=2)
         data = { "name" => name, "value_blob" => value, "type" => value.class }
-        ScraperWiki.save_sqlite(unique_keys=["name"], data=data, table_name="swvariables", commit=commit, verbose=verbose)
+        ScraperWiki.save_sqlite(unique_keys=["name"], data=data, table_name="swvariables", verbose=verbose)
     end
 
     def ScraperWiki.get_var(name, default=nil, verbose=2)
@@ -178,8 +219,6 @@ module ScraperWiki
         end
         return result["data"][0][0]
     end
-
-
 
 
     def ScraperWiki.getKeys(name)

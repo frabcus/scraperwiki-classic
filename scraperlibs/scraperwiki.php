@@ -22,7 +22,24 @@ class scraperwiki
 
    static function sw_logScrapedURL ($url, $length)
    {
-       scraperwiki::sw_dumpMessage
+       scraperwiki::sw_dumpMessageseexception(errmap):
+    mess = errmap["error"]
+    for k, v in errmap.items():
+        if k != "error":
+            mess = "%s; %s:%s" % (mess, k, v)
+    
+    if re.match('sqlite3.Error: no such table:', mess):
+        return NoSuchTableSqliteError(mess)
+    return SqliteError(mess)
+        
+
+def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
+    ds = DataStore(None)
+    result = ds.save_sqlite(unique_keys, data, table_name)
+    if "error" in result:
+        raise databaseexception(result)
+
+
          (  array
             (  'message_type' => 'sources',
                'url'          => $url,
@@ -61,14 +78,12 @@ class scraperwiki
       return $result; 
    }
 
-   static function save_sqlite($unique_keys, $data, $table_name="swdata", $commit=true, $verbose=2)
+   static function save_sqlite($unique_keys, $data, $table_name="swdata", $verbose=2)
    {
       $ds = SW_DataStoreClass::create () ;
       $result = $ds->request(array('save_sqlite', $unique_keys, $data, $table_name)); 
       if (property_exists($result, 'error'))
          throw new Exception ($result->error) ;
-      if ($commit)
-         $result = $ds->request(array('commit', null, null));
       scraperwiki::sw_dumpMessage (array('message_type'=>'data', 'content'=>$data)) ;
    }
 

@@ -225,8 +225,8 @@ def ifsencode_trunc(v, t):
     return strencode_trunc(v, t)
 
 
-                # would like to deprecate date, latlng, silent
-def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="swdata", commit=True, verbose=2) :
+          # would like to deprecate date, latlng, silent
+def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="swdata", verbose=2) :
     ds = DataStore(None)
     
     # keep using old database if anything is in it
@@ -265,7 +265,7 @@ def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="sw
     if "date_scraped" not in ldata:
         ldata["date_scraped"] = datetime.datetime.now().isoformat()
     
-    return save_sqlite(unique_keys=unique_keys, data=ldata, table_name=table_name, commit=commit, verbose=verbose)
+    return save_sqlite(unique_keys=unique_keys, data=ldata, table_name=table_name, verbose=verbose)
 
 
 
@@ -308,14 +308,11 @@ def databaseexception(errmap):
     return SqliteError(mess)
         
 
-def save_sqlite(unique_keys, data, table_name="swdata", commit=True, verbose=2):
+def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
     ds = DataStore(None)
     result = ds.save_sqlite(unique_keys, data, table_name)
     if "error" in result:
         raise databaseexception(result)
-
-    if commit:
-        sqlitecommand("commit", None, None, 0)
 
     if verbose >= 2:
         pdata = {}
@@ -327,8 +324,6 @@ def save_sqlite(unique_keys, data, table_name="swdata", commit=True, verbose=2):
                 pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
             pdata["number_records"] = "Number Records: %d" % len(data)
             
-        if not commit:
-            pdata["commit"] = "NOT_COMMITTED"
         scraperwiki.console.logScrapedData(pdata)
     
     return result
