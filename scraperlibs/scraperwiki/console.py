@@ -42,6 +42,8 @@ class ConsoleStream:
         self.m_text = ''
         self.m_fd = fd
 
+    # Do our best to turn anything into unicode, for display on console
+    # (for datastore, we give errors if it isn't already UTF-8)
     def saveunicode(self, text):
         try:
             return unicode(text)
