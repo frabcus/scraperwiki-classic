@@ -115,7 +115,7 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       curl_setopt ($curl, CURLOPT_RETURNTRANSFER, true) ;
       $res  = curl_exec ($curl) ;
       curl_close ($curl) ;
-      return   utf8_encode($res)  ;
+      return   $res;
    }
 
    static function cache ($enable = true)
