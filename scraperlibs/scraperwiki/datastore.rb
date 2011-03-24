@@ -84,21 +84,7 @@ class SW_DataStore
             end
           end
         }
-        res = JSON.parse(text)
-        raise res[1] if not res[0]
-    end
-
-    def save(unique_keys, scraper_data, date = nil, latlng = nil)
-        if unique_keys != nil && !unique_keys.kind_of?(Array)
-            return [false, 'unique_keys must be nil or an array']
-        end
-        js_data      = mangleflattendict(scraper_data)
-        uunique_keys = mangleflattenkeys(unique_keys )
-        return request(['save', uunique_keys, js_data, date, latlng])
-    end
-
-    def postcodeToLatLng(postcode)
-        return request(['postcodetolatlng', postcode])
+        return JSON.parse(text)
     end
 
     def SW_DataStore.create(host = nil, port = nil)
@@ -116,5 +102,4 @@ class SW_DataStore
         end
         instance
     end
-
 end
