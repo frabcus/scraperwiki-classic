@@ -82,7 +82,7 @@
       </div>
       {% else %} 
 
-      <div class="history_run_event" id="run_{{itemfirst.runevent.run_id}}">
+      <div class="history_run_event" id="run_{{itemfirst.runevent.run_id_for_css}}">
         {% if itemfirst.runevent.exception_message %}
         <div class="history_ran_fail">
           Run failed:
@@ -350,7 +350,6 @@ $(document).ready(function()
 
     $(".history_edit").each(function(i, el) { previewchanges_hide($(el)) });
 
-
     $(".history_edit .showchanges").click(function() { previewchanges_show($(this).parents(".history_edit")); }); 
     $(".history_edit .hidechanges").click(function() { previewchanges_hide($(this).parents(".history_edit")); }); 
 
@@ -359,6 +358,15 @@ $(document).ready(function()
 
     $(".history_run_event .showrunevent").click(function() { previewrunevent_show($(this).parents(".history_run_event")); }); 
     $(".history_run_event .hiderunevent").click(function() { previewrunevent_hide($(this).parents(".history_run_event")); }); 
+
+    // if they put # and the run_id in the URL, open up that one
+    if (window.location.hash) {
+        var hash_run_event = $(window.location.hash);
+        if (hash_run_event.length != 0) {
+            previewrunevent_show(hash_run_event);
+        }
+    }
+
 }); 
 
 </script>
