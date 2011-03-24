@@ -770,7 +770,7 @@ class Database :
             if "error" in lres:  
                 return lres
             nrecords += 1
-        
+        self.m_sqlitedbconn.commit()
         res["nrecords"] = nrecords
         res["status"] = 'Data record(s) inserted or replaced'
         return res

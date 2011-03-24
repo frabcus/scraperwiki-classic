@@ -37,9 +37,9 @@ def table_info(name):
 
 
             # also needs to handle the types better (could save json and datetime objects handily
-def save_var(name, value, commit=True, verbose=2):
+def save_var(name, value, verbose=2):
     data = {"name":name, "value_blob":value, "type":type(value).__name__}
-    save(unique_keys=["name"], data=data, table_name="swvariables", commit=commit, verbose=verbose)
+    save(unique_keys=["name"], data=data, table_name="swvariables", verbose=verbose)
 
 def get_var(name, default=None, verbose=2):
     try:
