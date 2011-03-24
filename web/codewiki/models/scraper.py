@@ -198,10 +198,6 @@ class ScraperRunEvent(models.Model):
     def getduration(self):
         return (self.run_ended or datetime.datetime.now()) - self.run_started
 
-    # can't have dots in ids in HTML/CSS
-    def run_id_for_css(self):
-        return str(self.run_id).replace(".", "_")
-
     @models.permalink
     def get_absolute_url(self):
         return ('run_event', [self.run_id])

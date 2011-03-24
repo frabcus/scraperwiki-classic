@@ -20,7 +20,8 @@ from codewiki.management.commands.run_scrapers import GetDispatcherStatus, GetUM
 from viewsrpc import testactiveumls  # not to use
 
 
-        # should deprecate and go to the top of the history page
+# Redirects to history page now, with # link to right place.
+# XXX deprecate so you can't run through all the ids and get scraper URL names
 def run_event(request, run_id):
     try:
         if re.match('\d+$', run_id):
@@ -30,19 +31,8 @@ def run_event(request, run_id):
     except ScraperRunEvent.DoesNotExist:
         raise Http404
         
-    context = { 'event':event }
-    statusscrapers = GetDispatcherStatus()
-    for status in statusscrapers:
-        if status['runID'] == event.run_id:
-            context['status'] = status
-    if not event.scraper.actionauthorized(request.user, "readcode"):
-        raise Http404
-    
-    context['scraper'] = event.scraper
-    context['selected_tab'] = '' and message.get('message_sub_type') != 'consolestatus'
-    context['user_owns_it'] = (event.scraper.owner() == request.user)
-    
-    return render_to_response('codewiki/run_event.html', context, context_instance=RequestContext(request))
+    scraper = event.scraper
+    return HttpResponseRedirect(reverse('scraper_history', args=[scraper.wiki_type, scraper.short_name]) + "#run_" + str(event.id))
 
 
 
