@@ -75,17 +75,21 @@ module ScraperWiki
         return SW_MetadataClient.create().save(metadata_name, value)
     end
 
+    def ScraperWiki._unicode_truncate(string, size)
+        # Stops 2 byte unicode characters from being chopped in half which kills JSON serializer
+        string.scan(/./u)[0,size].join
+    end
 
     def ScraperWiki.save(unique_keys, data, date = nil, latlng = nil)
         res = SW_DataStore.create().save(unique_keys, data, date, latlng)
 
         pdata = { }
         data.each_pair do |key, value|
-            key = key.to_s[0,50]
+            key = ScraperWiki._unicode_truncate(key.to_s, 50)
             if value == nil
                 value  = ''
             else
-                value = value.to_s[0,50]
+                value = ScraperWiki._unicode_truncate(value.to_s, 50)
             end
             pdata[key] = value
         end
@@ -94,6 +98,7 @@ module ScraperWiki
 
     class SqliteException < RuntimeError
     end
+
     class NoSuchTableSqliteException < SqliteException
     end
 
@@ -185,11 +190,11 @@ module ScraperWiki
                 sdata = rjdata[0]
             end
             sdata.each_pair do |key, value|
-                key = key.to_s[0,50]
+                key = ScraperWiki._unicode_truncate(key.to_s, 50)
                 if value == nil
                     value  = ''
                 else
-                    value = value.to_s[0,50]
+                    value = ScraperWiki._unicode_truncate(value.to_s, 50)
                 end
                 pdata[key] = value
             end
