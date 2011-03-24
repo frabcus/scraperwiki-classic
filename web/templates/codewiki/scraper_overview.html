@@ -263,19 +263,24 @@
     {% endif %}
 
     {% if user.is_staff %}
-    <p class="staff"><b>Go to scraper on <a href="/admin/codewiki/scraper/{{scraper.pk}}/">admin page</a></b></p>
+    <div class="staff">
+        <p><b>Admin only</b></p>
+ 
+        <p><a href="/admin/codewiki/scraper/{{scraper.pk}}/">Scraper's Django admin page</a></b></p>
+ 
+        <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
+            <input type="hidden" name="run_scraper" value="1" />
+            <input type="submit" id="btnRunScraper" class="" value="Run now (if scheduled)" />
+            <p>If this scraper's schedule is overdue, runs it immediately.</p>
+        </form>
 
-    <form action="{% url scraper_run_scraper scraper.short_name %}" method="post" class="staff">
-        <input type="hidden" name="run_scraper" value="1" />
-        <input type="submit" id="btnRunScraper" class="" value="Run now (as if scheduled)" />
-        <p>If this scraper's schedule is overdue, runs it immediately. (Staff only)</p>
-    </form>
+        <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post">
+            <input type="hidden" name="screenshoot_scraper" value="1" />
+            <input type="submit" id="btnScreenshootScraper" class="" value="Screenshoot this scraper" />
+            <p>Take a screenshot of this scraper.</p>
+        </form>
+    </div>
 
-    <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post" class="staff">
-        <input type="hidden" name="screenshoot_scraper" value="1" />
-        <input type="submit" id="btnScreenshootScraper" class="" value="Screenshoot this scraper" />
-        <p>Take a screenshot of this scraper. (Staff only)</p>
-    </form>
     {% endif %}
 
 </div>
