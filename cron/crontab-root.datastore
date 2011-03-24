@@ -5,5 +5,5 @@ SHELL=/bin/bash
 0 3 * * * mysqldump -u backup --single-transaction --quick datastore_live | gzip > /root/backup/mysql-backup.sql.gz
 0 3 * * * tar zcfP /root/backup/scraperwiki.tar.gz /var/www/scraperwiki --exclude "/var/www/scraperwiki/resourcedir"
 0 3 * * * tar zcfP /root/backup/etc.tar.gz /etc
-0 3 * * * dir=$(mktemp -d) && for s in $(ls /var/www/scraperwiki/resourcedir); do sqlite3 $s/defaultdb.sqlite .dump | gzip > $dir/$s.sql.gz; done && tar zcfP /root/backup/sqlite.tar.gz $dir && rm -rf $dir
+0 3 * * * dir=$(mktemp -d) && for s in $(ls /var/www/scraperwiki/resourcedir); do sqlite3 /var/www/scraperwiki/resourcedir/$s/defaultdb.sqlite .dump | gzip > $dir/$s.sql.gz; done && tar zcfP /root/backup/sqlite.tar.gz $dir && rm -rf $dir
 0 5 * * * rsync -qazr /root/backup datastore.backup.bytemark.co.uk::datastore/
