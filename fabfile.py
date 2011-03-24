@@ -20,7 +20,7 @@ def dev():
 
 def www():
     "The main www server (horsell)"
-    env.hosts = ['89.16.177.212:7822']
+    env.hosts = ['horsell.scraperwiki.com:7822']
     env.path = '/var/www/scraperwiki'
     env.branch = 'stable'
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
@@ -32,7 +32,7 @@ def www():
 
 def umls():
     "The UML server (rush)"
-    env.hosts = ['89.16.177.195:7822']
+    env.hosts = ['rush.scraperwiki.com:7822']
     env.path = '/var/www/scraperwiki'
     env.branch = 'stable'
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
@@ -44,7 +44,7 @@ def umls():
 
 def datastore():
     "The datastore server (burbage)"
-    env.hosts = ['89.16.177.176:7822']
+    env.hosts = ['burbage.scraperwiki.com:7822']
     env.path = '/var/www/scraperwiki'
     env.branch = 'stable'
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
