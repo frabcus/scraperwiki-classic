@@ -27,7 +27,7 @@
         <p>
             Each API function has its own URI. You need to pass the format you would like the data returned in and other function-specific arguments via the query string to tell the API exactly what you are requesting:
             <code class="api_call">
-     http://api.scraperwiki.com/api/1.0/datastore/getdata?name=<em>[scraper short name]</em>&amp;format<em>=[json | jsondict | xml | php | csv]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
+     http://api.scraperwiki.com/api/1.0/datastore/getdata?name=<em>[scraper short name]</em>&amp;format<em>=[csv | json | jsondict]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
             </code>
         </p>
     </div>
@@ -44,28 +44,30 @@
             </thead>
             <tbody>
                 <tr>
+                    <td><a href="http://en.wikipedia.org/wiki/Comma-separated_values">Comma separated values (CSV)</a></td>
+                    <td>csv</td>
+                    <td>Comma separated values where the first line lists the titles of the columns and the 
+                        subsequent lines have the same number of comma separated entries</td>
+                </tr>
+                <tr>
                     <td><a href="http://www.json.org/">JSON</a></td>
                     <td>json</td>
                     <td>
-                        A text-based representation of a Javascript object. It can be converted back into an object using the <code><a href="http://www.devguru.com/Technologies/ecmascript/quickref/eval.html">eval()</a></code> function in Javascript, and many other languages have code libraries available
+                        A text-based representation of a Javascript object. It can be converted back into an object using the 
+                        <code><a href="http://www.devguru.com/Technologies/ecmascript/quickref/eval.html">eval()</a></code> 
+                        function in Javascript, and many other languages have code libraries available.<br/>
+                        The representation for a table is<br/>
+                        <code>{ keys:["key1", "key2"], values:[["val11", "val12], ["val11", "val12"]] }</code>
                     </td>
                 </tr>
                 <tr>
-                    <td><a href="http://www.w3.org/XML/">XML</a></td>
-                    <td>xml</td>
-                    <td><a href="http://en.wikipedia.org/w/index.php?title=XML#Example">Extensible Markup Language</a></td>                        
-                </tr>
-                <tr>
-                    <td><a href="http://php.net/manual/en/function.serialize.php">Serialised PHP objects</a></td>
-                    <td>php</td>
+                    <td><a href="http://www.json.org/">JSONDICT</a></td>
+                    <td>jsondict</td>
                     <td>
-                        Serialized PHP, that can be turned back into php objects using PHP's <code><a href="http://php.net/manual/en/function.unserialize.php">unserialize()</a></code> function, or using <code><a href="http://hurring.com/scott/code/python/serialize/">PHPUnserialize</a></code> in Python
+                        A different form of data layout in json where the keys are listed per record
+                        and the records are dicts<br/>
+                        <code>[ {"key1":"val11", "key2":"val12"}, {"key1":"val21", "key2":"val22"} ]</code>
                     </td>
-                </tr>
-                <tr>
-                    <td><a href="http://en.wikipedia.org/wiki/Comma-separated_values">Comma separated values (CSV)</a></td>
-                    <td>csv</td>
-                    <td>Comma, separated, values</td>
                 </tr>
             </tbody>
         </table>
@@ -159,7 +161,6 @@
     <h5>Legacy functions pending migration</h5>
     <ul>
         <li><a href="{% url api:datastore_getkeys %}">scraperwiki.datastore.getKeys</a></li>
-        <li><a href="{% url api:scraper_getdata %}">scraperwiki.datastore.getData</a></li>
         <li><a href="{% url api:scraper_getdatabydate %}">scraperwiki.datastore.getDataByDate</a></li>
         <li><a href="{% url api:scraper_getdatabylocation %}">scraperwiki.datastore.getDataByLocation</a></li>
         <li><a href="{% url api:datastore_search %}">scraperwiki.datastore.search</a></li>

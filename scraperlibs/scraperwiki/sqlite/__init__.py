@@ -26,6 +26,7 @@ def show_tables(dbname=""):
     result = sqlitecommand("execute", "select tbl_name, sql from `%s` where type='table'" % name)
     return dict(result["data"])
 
+
 def table_info(name):
     sname = name.split(".")
     if len(sname) == 2:

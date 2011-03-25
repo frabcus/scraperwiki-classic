@@ -18,6 +18,7 @@ import re
 import urllib2
 import base64
 import datetime
+
 try:                import json
 except ImportError: import simplejson as json
 
@@ -420,6 +421,9 @@ def proxycached(request):
     
     return HttpResponse(json.dumps(result), mimetype="application/json")
 
+
+
+
 #################################################################################
 # BEGIN OLD CSV BACK FOR A BIT
 
@@ -507,7 +511,7 @@ def export_csv(request, short_name):
     """
     This could have been done by having linked directly to the api/csvout, but
     difficult to make the urlreverse for something in a different app code here
-    itentical to scraperwiki/web/api/emitters.py CSVEmitter render()
+    identical to scraperwiki/web/api/emitters.py CSVEmitter render()
     """
     scraper = get_code_object_or_none(models.Scraper, short_name=short_name)
     if not scraper:

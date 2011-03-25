@@ -63,6 +63,8 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_notify.middleware.NotificationsMiddleware',
+    'piston.middleware.ConditionalMiddlewareCompatProxy',
+    'piston.middleware.CommonMiddlewareCompatProxy',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -123,6 +125,7 @@ INSTALLED_APPS = [
     'captcha',
 ] + SCRAPERWIKI_APPS
 
+PISTON_STREAM_OUTPUT = True
 
 TEST_RUNNER = 'scraperwiki_tests.run_tests' 
 
