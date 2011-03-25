@@ -243,8 +243,7 @@ def scraper_admin(request, short_name):
 
     if element_id == 'spnRunInterval':
         scraper.run_interval = int(request.POST.get('value', None))
-        #response_text = models.SCHEDULE_OPTIONS_DICT[scraper.run_interval]
-
+        scraper.save() # XXX need to save so template render gets new values, bad that it saves below also!
         response_text = render_to_string('codewiki/includes/run_interval.html', {'scraper': scraper}, context_instance=RequestContext(request))
 
     if element_id == 'spnLicenseChoice':
