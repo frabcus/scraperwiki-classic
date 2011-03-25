@@ -180,7 +180,7 @@
     {% include 'codewiki/includes/contributors.html' %}
 
     <h3>License {% if user.is_authenticated %}<a href="#" id="aEditLicense" class="edit">[edit license]</a>{% endif %}</h3>
-    This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.license}}</span>
+    This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.scraper.license}}</span>
     <p>  </p>
     
 </div>
