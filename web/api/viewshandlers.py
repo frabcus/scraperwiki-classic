@@ -54,7 +54,7 @@ def stream_csv(dataproxy):
         try:
             ret = simplejson.loads(line)
         except ValueError, e:
-            yield ("%s:%s" % (e.message, text))
+            yield str(e)
             break
         if "error" in ret:
             yield str(ret)
@@ -65,19 +65,20 @@ def stream_csv(dataproxy):
             writer.writerow([ k.encode('utf-8') for k in ret["keys"] ])
         for row in ret["data"]:
             writer.writerow([ stringnot(v)  for v in row ])
-        #print fout.getvalue()
+        
         yield fout.getvalue()
         n += 1
         if "moredata" not in ret:
             break  
-
-
 
 def data_handler(request):
     scraper = getscraperorresponse(request)
     if isinstance(scraper, HttpResponse):  return scraper
     dataproxy = DataStore(scraper.guid, "")  
     rc, arg = dataproxy.request(('item_count',))
+    
+        # redirect to the sqlite interface
+        # (could pull out the column order and put in place of the *)
     if arg == 0:
         tablename = request.GET.get('tablename', "swdata")
         squery = ["select * from `%s`" % tablename]
@@ -111,24 +112,20 @@ def data_handler(request):
         callback = request.GET.get("callback")
         if callback:
             result = "%s(%s)" % (callback, result)
-        return HttpResponse(result, mimetype='text/plain')
+        response = HttpResponse(result, mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
+        return response
+        
     assert format == "csv"
     fout = StringIO()
     writer = csv.writer(fout, dialect='excel')
     writer.writerow([ k.encode('utf-8') for k in arg["keys"] ])
     for row in arg["data"]:
         writer.writerow([ stringnot(v)  for v in row ])
-    return HttpResponse(fout.getvalue(), mimetype='text/plain')
+    response = HttpResponse(fout.getvalue(), mimetype='text/plain')
+    response['Content-Disposition'] = 'attachment; filename=%s.json' % (scraper.short_name)
+    return response
     
-#    response = HttpResponse(result, mimetype='text/plain')
-#    response['Content-Disposition'] = 'attachment; filename=%s.json' % (short_name)
-
-        
-    if len(arg) == 0:
-        return HttpResponse("")
-    
-    return HttpResponse(str(arg))
-
 
 @condition(etag_func=None)
 def sqlite_handler(request):
@@ -145,14 +142,18 @@ def sqlite_handler(request):
             sqlitedata = dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
     
     sqlquery = request.GET.get('query')
-    req = ("sqlitecommand", "execute", sqlquery, None)
+    format = request.GET.get("format")
+    
+    reqt = None
+    if format == "csv":
+        reqt = ("streamchunking", 10)
+    req = ("sqlitecommand", "execute", sqlquery, reqt)
     dataproxy.m_socket.sendall(simplejson.dumps(req) + '\n')
     
-    format = request.GET.get("format")
     if format == "csv":
         st = stream_csv(dataproxy)
-        response = HttpResponse(st, mimetype='text/plain')
-#        response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
+        response = HttpResponse(st, mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
             # unless you put in a content length, the middleware will measure the length of your data
             # (unhelpfully consuming everything in your generator) before then returning a zero length result 
         response["Content-Length"] = -1
@@ -171,6 +172,6 @@ def sqlite_handler(request):
     if callback:
         result = "%s(%s)" % (callback, result)
     response = HttpResponse(result, mimetype='text/plain')
-#    response['Content-Disposition'] = 'attachment; filename=%s.json' % (short_name)
+    response['Content-Disposition'] = 'attachment; filename=%s.json' % (scraper.short_name)
     return response
 

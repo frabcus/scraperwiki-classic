@@ -12,6 +12,9 @@ import shutil
 import re
 import sys
 
+try   : import json
+except: import simplejson as json
+
 class Database :
 
     def createSchema (self) :
@@ -63,6 +66,9 @@ class Database :
                     )
                     '''
             )
+
+    def __init__(self, ldataproxy):
+        self.dataproxy = ldataproxy
 
     def connect (self, config, scraperID) :
 
@@ -675,17 +681,27 @@ class Database :
         
         if command == "execute":
             try:
+                bstreamchunking = val2 and val2[0] == "streamchunking" and not re.search("\?", val1)
                     # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
                 signal.alarm (10)  # should use set_progress_handler !!!!
-                if val2:
+                if val2 and not bstreamchunking:
                     self.m_sqlitedbcursor.execute(val1, val2)  # handle "(?,?,?)", (val, val, val)
                 else:
                     self.m_sqlitedbcursor.execute(val1)
                 signal.alarm (0)
                 
                 keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
-                data = list(self.m_sqlitedbcursor)
-                return {"keys":keys, "data":data} 
+                if not bstreamchunking:
+                    return {"keys":keys, "data":self.m_sqlitedbcursor.fetchall()} 
+                
+                while True:
+                    data = self.m_sqlitedbcursor.fetchmany(val2[1])
+                    arg = {"keys":keys, "data":data} 
+                    if len(data) < val2[1]:
+                        return arg
+                    arg["moredata"] = True
+                    self.dataproxy.connection.send(json.dumps(arg) + '\n')  # push it out
+
             
             except sqlite3.Error, e:
                 return {"error":"sqlite3.Error: "+str(e)}

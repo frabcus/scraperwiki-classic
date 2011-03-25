@@ -297,7 +297,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
 
         try    :
-            db = datalib.Database()
+            db = datalib.Database(self)
             db.connect(config, scraperID)
         except Exception, e :
             self.connection.send (json.dumps ((False, '%s' % e)) + '\n')

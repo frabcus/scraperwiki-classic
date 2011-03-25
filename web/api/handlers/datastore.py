@@ -90,6 +90,7 @@ class DataByLocation(APIBase):
     required_arguments = ['name', 'lat', 'lng']
 
     def value(self, request):
+        return { "error":"Sorry, this function has been deprecated." }
         scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
         if lsm:
             return [lsm]
@@ -109,6 +110,7 @@ class DataByDate(APIBase):
     required_arguments = ['name', 'start_date', 'end_date']
 
     def value(self, request):
+        return { "error":"Sorry, this function has been deprecated." }
         scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
         if lsm:
             return [lsm]

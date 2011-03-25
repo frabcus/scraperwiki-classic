@@ -17,6 +17,7 @@ class DataStore(object):
         self.m_port     = settings.DATAPROXY_PORT
 
         self.connect (scraperID, short_name)
+        self.sbuffer = [ ] 
 
     def connect (self, scraperID, short_name) :
 
@@ -55,21 +56,26 @@ class DataStore(object):
     
     # a \n delimits the end of the record.  you cannot read beyond it or it will hang; unless there is a moredata parameter
     def receiveonelinenj(self):
-        sbuffer = [ ]
+        while len(self.sbuffer) >= 2:
+            res = self.sbuffer.pop(0)
+            if res:
+                return res
         while True:
             srec = self.m_socket.recv(1024)
             if not srec:
                 return {'error': "socket from dataproxy has unfortunately closed"}
             ssrec = srec.split("\n")  # multiple strings if a "\n" exists
-            sbuffer.append(ssrec.pop(0))
+            self.sbuffer.append(ssrec.pop(0))
             if ssrec:
                 break # Discard anything after the newline
         
-        line = "".join(sbuffer)
+        line = "".join(self.sbuffer)
+        self.sbuffer = ssrec
         return line
         
         
     def receiveoneline(self):
+        self.sbuffer = [ ] # reset the buffer just for sake of that's what's worked in the past
         try:
             ret = json.loads(self.receiveonelinenj())
         except ValueError, e:
