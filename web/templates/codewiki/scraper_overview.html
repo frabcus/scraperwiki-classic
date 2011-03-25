@@ -189,13 +189,13 @@
     <h3>Schedule {% if user.is_authenticated %}<a href="#" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
     <p>
         This scraper 
-        {% if lastscraperrunevent %}
-          {% ifequal lastscraperrunevent.pid -1 %}
-             <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ lastscraperrunevent.id }}">last ran</a>
-              {{lastscraperrunevent.run_started|timesince}} ago for 
-              {{lastscraperrunevent.getdurationseconds}} second{{lastscraperrunevent.getdurationseconds|pluralize}}.
+        {% if scraper.last_runevent %}
+          {% ifequal scraper.last_runevent.pid -1 %}
+             <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">last ran</a>
+              {{scraper.last_runevent.run_started|timesince}} ago for 
+              {{scraper.last_runevent.getdurationseconds}} second{{lastscraperrunevent.getdurationseconds|pluralize}}.
           {% else %}
-            is <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ lastscraperrunevent.id }}">currently running</a>.
+            is <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">currently running</a>.
           {% endifequal %}
         {% else %}
            has not been run yet.

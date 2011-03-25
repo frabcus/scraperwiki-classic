@@ -58,7 +58,7 @@ module ScraperWiki
             return nil
         end
         ds  = SW_DataStore.create()
-        res = ds.postcodeToLatLng(postcode)
+        res = ds.request(['postcodetolatlng', postcode])
         if ! res[0]
             ScraperWiki::dumpMessage({'message_type' => 'console', 'content' => 'Warning: %s: %s' % [res[1], postcode]})
             return nil
@@ -75,17 +75,30 @@ module ScraperWiki
         return SW_MetadataClient.create().save(metadata_name, value)
     end
 
+    def ScraperWiki._unicode_truncate(string, size)
+        # Stops 2 byte unicode characters from being chopped in half which kills JSON serializer
+        string.scan(/./u)[0,size].join
+    end
 
     def ScraperWiki.save(unique_keys, data, date = nil, latlng = nil)
-        res = SW_DataStore.create().save(unique_keys, data, date, latlng)
+        if unique_keys != nil && !unique_keys.kind_of?(Array)
+            raise 'unique_keys must be nil or an array'
+        end
+
+        ds = SW_DataStore.create()
+        js_data = ds.mangleflattendict(scraper_data)
+        uunique_keys = ds.mangleflattenkeys(unique_keys)
+        res = ds.request(['save', uunique_keys, js_data, date, latlng])
+
+        raise res[1] if not res[0]
 
         pdata = { }
         data.each_pair do |key, value|
-            key = key.to_s[0,50]
+            key = ScraperWiki._unicode_truncate(key.to_s, 50)
             if value == nil
                 value  = ''
             else
-                value = value.to_s[0,50]
+                value = ScraperWiki._unicode_truncate(value.to_s, 50)
             end
             pdata[key] = value
         end
@@ -94,6 +107,7 @@ module ScraperWiki
 
     class SqliteException < RuntimeError
     end
+
     class NoSuchTableSqliteException < SqliteException
     end
 
@@ -185,11 +199,11 @@ module ScraperWiki
                 sdata = rjdata[0]
             end
             sdata.each_pair do |key, value|
-                key = key.to_s[0,50]
+                key = ScraperWiki._unicode_truncate(key.to_s, 50)
                 if value == nil
                     value  = ''
                 else
-                    value = value.to_s[0,50]
+                    value = ScraperWiki._unicode_truncate(value.to_s, 50)
                 end
                 pdata[key] = value
             end

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import  string
 import  socket
 import  urllib
@@ -41,7 +43,7 @@ def mangleflattendict(data):
         elif type(value) == types.UnicodeType:
             rvalue = value
         elif type(value) == types.StringType:
-            rvalue = value   # if we knew this was utf8 or latin-1 we'd be able to decode it into unicode!
+            rvalue = value.decode('utf-8')
         else:
             rvalue = unicode(value)
             
@@ -163,6 +165,11 @@ class DataStoreClass :
                     value = value.isoformat()
                 elif value == None:
                     pass
+                elif type(value) == str:
+                    try:
+                        value = value.decode("utf-8")
+                    except:
+                        return {"error": "Binary strings must be utf-8 encoded"}
                 elif type(value) not in [int, bool, float, unicode, str]:
                     value = unicode(value)
                 jdata[key] = value
@@ -208,15 +215,27 @@ def strunc(v, t):
     return "%s..." % v[:t]
 
 def strencode_trunc(v, t):
-    try:
-        return strunc(str(v), t)
-    except:  
-        pass
+    """
+    Convert object to unicode string before truncating to 't' characters
+
+    Returns result as UTF8 encoded byte string
+
+    >>> strencode_trunc('Hello World', 5) == 'Hello...'
+    True
+    >>> strencode_trunc(1234567890, 5) == '12345...'
+    True
+    >>> strencode_trunc('abcd\xc3\x8cf', 5) == 'abcdÌ...'
+    True
+    """
+    if type(v) == types.StringType:
+        v = v.decode('utf-8')
+    else:
+        v = unicode(v)
+
     try:
         return strunc(v, t).encode('utf-8')
     except:
-        pass
-    return "---"
+        return "---"
 
 
 def ifsencode_trunc(v, t):
