@@ -83,19 +83,19 @@ def data_handler(request):
         tablename = request.GET.get('tablename', "swdata")
         squery = ["select * from `%s`" % tablename]
         if "limit" in request.GET:
-            squery.append('limit %d' % int(request.GET.get('limit')))
+            squery.append('limit %d' % request.GET.get('limit'))
         if "offset" in request.GET:
-            squery.append('offset %d' % int(request.GET.get('offset')))
-        qsdata = { "name":request.GET.get("name"), "query":" ".join(squery) }
+            squery.append('offset %d' % request.GET.get('offset'))
+        qsdata = { "name": request.GET.get("name").encode('utf-8'), "query": " ".join(squery).encode('utf-8') }
         if "format" in request.GET:
-            qsdata["format"] = request.GET.get("format")
+            qsdata["format"] = request.GET.get("format").encode('utf-8')
         if "callback" in request.GET:
-            qsdata["callback"] = request.GET.get("callback")
+            qsdata["callback"] = request.GET.get("callback").encode('utf-8')
         return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
 
     # do the old data handler case
-    limit = int(request.GET.get('limit', 100))
-    offset = int(request.GET.get('offset', 0))
+    limit = request.GET.get('limit', 100)
+    offset = request.GET.get('offset', 0)
     rc, arg = dataproxy.data_dictlist(limit=limit, offset=offset)
     if not rc:
         return HttpResponse("Error: "+arg)
