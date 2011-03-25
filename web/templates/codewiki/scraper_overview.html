@@ -191,11 +191,11 @@
         This scraper 
         {% if lastscraperrunevent %}
           {% ifequal lastscraperrunevent.pid -1 %}
-              <a href="{% url run_event lastscraperrunevent.id %}">last ran</a>
+             <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ lastscraperrunevent.id }}">last ran</a>
               {{lastscraperrunevent.run_started|timesince}} ago for 
               {{lastscraperrunevent.getdurationseconds}} second{{lastscraperrunevent.getdurationseconds|pluralize}}.
           {% else %}
-            is <a href="{% url run_event lastscraperrunevent.id %}">currently running</a>.
+            is <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ lastscraperrunevent.id }}">currently running</a>.
           {% endifequal %}
         {% else %}
            has not been run yet.
