@@ -191,8 +191,9 @@
         This scraper 
         {% if lastscraperrunevent %}
           {% ifequal lastscraperrunevent.pid -1 %}
-             last ran {{lastscraperrunevent.run_started|timesince}} ago 
-             for <a href="{% if lastscraperrunevent.run_id %}{% url run_event lastscraperrunevent.run_id %}{% else %}{% url run_event lastscraperrunevent.id %}{% endif %}">{{lastscraperrunevent.getduration}} seconds</a>.
+              <a href="{% url run_event lastscraperrunevent.id %}">last ran</a>
+              {{lastscraperrunevent.run_started|timesince}} ago for 
+              {{lastscraperrunevent.getdurationseconds}} second{{lastscraperrunevent.getdurationseconds|pluralize}}.
           {% else %}
             {% if lastscraperrunevent.run_id %}
                 <a href="{% url run_event lastscraperrunevent.run_id %}">is currently running</a>.
