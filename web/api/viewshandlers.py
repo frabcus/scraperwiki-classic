@@ -112,8 +112,8 @@ def data_handler(request):
         callback = request.GET.get("callback")
         if callback:
             result = "%s(%s)" % (callback, result)
-        response = HttpResponse(result, mimetype='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
+        response = HttpResponse(result, mimetype='application/json')
+        response['Content-Disposition'] = 'attachment; filename=%s.json' % (scraper.short_name)
         return response
         
     assert format == "csv"
@@ -122,8 +122,8 @@ def data_handler(request):
     writer.writerow([ k.encode('utf-8') for k in arg["keys"] ])
     for row in arg["data"]:
         writer.writerow([ stringnot(v)  for v in row ])
-    response = HttpResponse(fout.getvalue(), mimetype='text/plain')
-    response['Content-Disposition'] = 'attachment; filename=%s.json' % (scraper.short_name)
+    response = HttpResponse(fout.getvalue(), mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
     return response
     
 
