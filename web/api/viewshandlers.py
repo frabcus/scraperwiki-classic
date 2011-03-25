@@ -171,7 +171,7 @@ def sqlite_handler(request):
     callback = request.GET.get("callback")
     if callback:
         result = "%s(%s)" % (callback, result)
-    response = HttpResponse(result, mimetype='text/plain')
+    response = HttpResponse(result, mimetype='application/json; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename=%s.json' % (scraper.short_name)
     return response
 
