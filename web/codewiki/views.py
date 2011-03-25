@@ -99,10 +99,11 @@ def scraper_history(request, wiki_type, short_name):
             if runevent.run_ended:
                 item["runduration"] = runevent.getduration()
                 item["durationseconds"] = runevent.getdurationseconds()
+            item["groupkey"] = "runevent"
             if runevent.exception_message:
-                item["groupkey"] = "runevent|||" + str(runevent.exception_message.encode('utf-8'))
-            else:
-                item["groupkey"] = "runevent|||"
+                item["groupkey"] += "|||" + str(runevent.exception_message.encode('utf-8'))
+            if runevent.pid != -1:
+                item["groupkey"] += "|||" + str(runevent.pid)
             itemlog.append(item)
         
         itemlog.sort(key=lambda x: x["datetime"], reverse=True)
