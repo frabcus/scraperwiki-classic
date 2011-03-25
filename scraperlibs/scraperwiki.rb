@@ -71,7 +71,6 @@ module ScraperWiki
     end
 
     def ScraperWiki.save_metadata(metadata_name, value)
-        ScraperWiki::dumpMessage({'message_type' => 'console', 'content' => 'Saving %s: %s' % [metadata_name, value]})
         return SW_MetadataClient.create().save(metadata_name, value)
     end
 
@@ -128,8 +127,6 @@ module ScraperWiki
 
             # this ought to be a local function
     def ScraperWiki.convdata(unique_keys, scraper_data)
-        puts unique_keys
-        puts scraper_data
         if unique_keys:
             for key in unique_keys
                 if !scraper_data.include?(key)
