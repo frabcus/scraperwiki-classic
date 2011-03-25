@@ -189,16 +189,13 @@
     <h3>Schedule {% if user.is_authenticated %}<a href="#" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
     <p>
         This scraper 
-        {% if lastscraperrunevent %}
-          {% ifequal lastscraperrunevent.pid -1 %}
-             last ran {{lastscraperrunevent.run_started|timesince}} ago 
-             for <a href="{% if lastscraperrunevent.run_id %}{% url run_event lastscraperrunevent.run_id %}{% else %}{% url run_event lastscraperrunevent.id %}{% endif %}">{{lastscraperrunevent.getduration}} seconds</a>.
+        {% if scraper.last_runevent %}
+          {% ifequal scraper.last_runevent.pid -1 %}
+             <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">last ran</a>
+              {{scraper.last_runevent.run_started|timesince}} ago for 
+              {{scraper.last_runevent.getdurationseconds}} second{{scraper.last_runevent.getdurationseconds|pluralize}}.
           {% else %}
-            {% if lastscraperrunevent.run_id %}
-                <a href="{% url run_event lastscraperrunevent.run_id %}">is currently running</a>.
-            {% else %}
-                <i><a href="{% url run_event lastscraperrunevent.id %}">is running without an id</a></i>.
-             {% endif %}
+            is <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">currently running</a>.
           {% endifequal %}
         {% else %}
            has not been run yet.
@@ -263,19 +260,24 @@
     {% endif %}
 
     {% if user.is_staff %}
-    <p class="staff"><b>Go to scraper on <a href="/admin/codewiki/scraper/{{scraper.pk}}/">admin page</a></b></p>
+    <div class="staff">
+        <p><b>Admin only</b></p>
+ 
+        <p><a href="/admin/codewiki/scraper/{{scraper.pk}}/">Scraper's Django admin page</a></b></p>
+ 
+        <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
+            <input type="hidden" name="run_scraper" value="1" />
+            <input type="submit" id="btnRunScraper" class="" value="Run now (if scheduled)" />
+            <p>If this scraper's schedule is overdue, runs it immediately.</p>
+        </form>
 
-    <form action="{% url scraper_run_scraper scraper.short_name %}" method="post" class="staff">
-        <input type="hidden" name="run_scraper" value="1" />
-        <input type="submit" id="btnRunScraper" class="" value="Run now (as if scheduled)" />
-        <p>If this scraper's schedule is overdue, runs it immediately. (Staff only)</p>
-    </form>
+        <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post">
+            <input type="hidden" name="screenshoot_scraper" value="1" />
+            <input type="submit" id="btnScreenshootScraper" class="" value="Screenshoot this scraper" />
+            <p>Take a screenshot of this scraper.</p>
+        </form>
+    </div>
 
-    <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post" class="staff">
-        <input type="hidden" name="screenshoot_scraper" value="1" />
-        <input type="submit" id="btnScreenshootScraper" class="" value="Screenshoot this scraper" />
-        <p>Take a screenshot of this scraper. (Staff only)</p>
-    </form>
     {% endif %}
 
 </div>

@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 require 'json'
+require 'iconv'
 
 class ConsoleStream
 
@@ -9,8 +10,23 @@ class ConsoleStream
         @text = ''
     end
 
+    # Do our best to turn anything into unicode, for display on console
+    # (for datastore, we give errors if it isn't already UTF-8)
+    def saveunicode(text)
+       begin
+            text = Iconv.conv('utf-8', 'utf-8', text)
+        rescue Iconv::IllegalSequence
+            begin
+                text = Iconv.conv('utf-8', 'iso-8859-1', text)
+            rescue Iconv::IllegalSequence
+                text = Iconv.conv('utf-8//IGNORE', 'utf-8', text)
+            end
+        end
+        return text
+    end
+
     def write(text)
-        @text = @text + text
+        @text = @text + saveunicode(text)
         if @text.length > 0 && @text[-1] == "\n"[0]
             flush
         end

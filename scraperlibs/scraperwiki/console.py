@@ -42,6 +42,10 @@ class ConsoleStream:
         self.m_text = ''
         self.m_fd = fd
 
+    # Do our best to turn anything into unicode, for display on console
+    # (for datastore, we give errors if it isn't already UTF-8)
+    # XXX this is copied in controller for PHP, not sure how to share as
+    # one is in sandbox one outside.
     def saveunicode(self, text):
         try:
             return unicode(text)

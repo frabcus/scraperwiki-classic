@@ -433,7 +433,7 @@ $(document).ready(function() {
 
     <td>
     {% if status.scraperrunevent %}
-      <a href="{% url run_event status.scraperrunevent.id %}">{{status.runtime|floatformat}} seconds</a>
+      <a href="{% url scraper_history status.scraperrunevent.scraper.wiki_type status.scraperrunevent.scraper.short_name %}#run_{{ status.scraperrunevent.id }}">{{status.runtime|floatformat}} seconds</a>
     {% else %}
       {{status.runtime|floatformat}} seconds
     {% endif %}
@@ -471,7 +471,8 @@ $(document).ready(function() {
     <td><a href="{% url code_overview run_event.scraper.wiki_type run_event.scraper.short_name %}">{{run_event.scraper.title}}</a></td> 
     <td>{{run_event.run_started|timesince}} ago (<small>{{run_event.run_started}}</small>)</td> 
     <td>{{run_event.getduration}} seconds</td> 
-    <td><a href="{% url run_event run_event.id %}">{{run_event.outputsummary}}</a></td>
+    <td><a href="{% url scraper_history run_event.scraper.wiki_type run_event.scraper.short_name %}#run_{{ run_event.id }}">{{run_event.outputsummary}}</a></td>
+    
   </tr>
 {% endfor %}
 </table>

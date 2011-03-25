@@ -98,13 +98,13 @@ def scraper_history(request, wiki_type, short_name):
         for runevent in runevents:
             item = { "type":"runevent", "runevent":runevent, "datetime":runevent.run_started }
             if runevent.run_ended:
-                runduration = runevent.run_ended - runevent.run_started
-                item["runduration"] = runduration
-                item["durationseconds"] = "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
+                item["runduration"] = runevent.getduration()
+                item["durationseconds"] = runevent.getdurationseconds()
+            item["groupkey"] = "runevent"
             if runevent.exception_message:
-                item["groupkey"] = "runevent|||" + str(runevent.exception_message.encode('utf-8'))
-            else:
-                item["groupkey"] = "runevent|||"
+                item["groupkey"] += "|||" + str(runevent.exception_message.encode('utf-8'))
+            if runevent.pid != -1:
+                item["groupkey"] += "|||" + str(runevent.pid)
             itemlog.append(item)
         
         itemlog.sort(key=lambda x: x["datetime"], reverse=True)
@@ -141,8 +141,6 @@ def code_overview(request, wiki_type, short_name):
     context["user_follows_it"] = (request.user in scraper.followers())
     context["related_views"] = models.View.objects.filter(relations=scraper)
     
-    context["lastscraperrunevent"] = scraper.last_runevent()
-
     # XXX to be deprecated when old style datastore is abolished
     column_order = scraper.get_metadata('data_columns')
     if not context["user_owns_it"]:

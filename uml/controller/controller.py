@@ -622,6 +622,28 @@ class ScraperController (BaseController) :
         )
         p.wait ()
 
+    # XXX this is copied from Python scraperlibs, not sure how to share sas
+    # one is in sandbox one outside.
+    # Do our best to turn anything into unicode, for display on console
+    # (for datastore, we give errors if it isn't already UTF-8)
+    def saveunicode(self, text):
+        try:
+            return unicode(text)
+        except UnicodeDecodeError:
+            pass
+        
+        try:
+            return unicode(text, encoding='utf8')
+        except UnicodeDecodeError:
+            pass
+    
+        try:
+            return unicode(text, encoding='latin1')
+        except UnicodeDecodeError:
+            pass
+        
+        return unicode(text, errors='replace')
+ 
     def fnExecute (self, path) :
 
         """
@@ -739,7 +761,7 @@ class ScraperController (BaseController) :
                                     if mapped[1] != '':
                                         # XXX this repeats the code below, there's probably a
                                         # better way of structuring it
-                                        msg  = { 'message_type' : 'console', 'content' : mapped[1] + "\n"}
+                                        msg  = { 'message_type' : 'console', 'content' : self.saveunicode(mapped[1]) + "\n"}
                                         mapped[1] = ''
                                         text = json.dumps(msg) + '\n'
                                         self.wfile.write (text)
@@ -771,7 +793,7 @@ class ScraperController (BaseController) :
                             #  message; data from logging connection should be already formatted.
                             #
                             if fd == psock[0].fileno() :
-                                msg  = { 'message_type' : 'console', 'content' : text }
+                                msg  = { 'message_type' : 'console', 'content' : self.saveunicode(text) }
                                 text = json.dumps(msg) + '\n'
                             #
                             #  Send data back towards the client.

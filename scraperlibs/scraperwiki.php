@@ -22,23 +22,24 @@ class scraperwiki
 
    static function sw_logScrapedURL ($url, $length)
    {
-       scraperwiki::sw_dumpMessageseexception(errmap):
-    mess = errmap["error"]
-    for k, v in errmap.items():
-        if k != "error":
+       scraperwiki::sw_dumpMessage
+           /* seexception(errmap):
+        mess = errmap["error"]
+        for k, v in errmap.items():
+        if k != "error" {
             mess = "%s; %s:%s" % (mess, k, v)
-    
-    if re.match('sqlite3.Error: no such table:', mess):
+
+        if re.match('sqlite3.Error: no such table:', mess):
         return NoSuchTableSqliteError(mess)
     return SqliteError(mess)
-        
+
 
 def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
     ds = DataStore(None)
     result = ds.save_sqlite(unique_keys, data, table_name)
     if "error" in result:
         raise databaseexception(result)
-
+            */
 
          (  array
             (  'message_type' => 'sources',
@@ -115,7 +116,7 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       curl_setopt ($curl, CURLOPT_RETURNTRANSFER, true) ;
       $res  = curl_exec ($curl) ;
       curl_close ($curl) ;
-      return   utf8_encode($res)  ;
+      return   $res;
    }
 
    static function cache ($enable = true)

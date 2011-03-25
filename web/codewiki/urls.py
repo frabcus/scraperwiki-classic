@@ -55,7 +55,7 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/comments/$', views.comments,         name='scraper_comments'),
     
     
-    url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.\?]+)/$',                      viewsuml.run_event,     name='run_event'),  # the \? is due to the temporary holding value in older objects and should be cleared  out
+    url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.]+)/$',                      viewsuml.run_event,     name='run_event'),  
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/tags/$',     views.tags,             name='scraper_tags'),    
         
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$',                 views.choose_template,  name='choose_template'),    
