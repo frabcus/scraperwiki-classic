@@ -83,26 +83,25 @@
       {% else %} 
 
       <div class="history_run_event" id="run_{{itemfirst.runevent.id}}">
-        {% if itemfirst.runevent.exception_message %}
-        <div class="history_ran_fail">
-          Run failed:
-          <span class="historyexception">{{itemfirst.runevent.exception_message}}</span> - ran for {{itemfirst.durationseconds}} seconds
+        {% ifnotequal itemfirst.runevent.pid -1 %}
+            <div class="history_ran_notfinished">
+              <span class="history_bold">Currently running</span>: -
+              started {{itemfirst.runevent.run_started|timesince}} ago 
+              (so far {{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
+              <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
+        {% else %}{% if itemfirst.runevent.exception_message %}
+            <div class="history_ran_fail">
+              Run failed:
+              <span class="historyexception">{{itemfirst.runevent.exception_message}}</span> - ran for {{itemfirst.durationseconds}} seconds
               ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
-          <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
-
-        {% else %}{% if itemfirst.runevent.run_ended %}
-        <div class="history_ran">
-          Run succeeded:
-          - ran {{itemloggroup.list|length}} times, most recently for {{itemfirst.durationseconds}} seconds
-          ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
-          <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
-
+              <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
         {% else %}
-        <div class="history_ran_notfinished">
-          <span class="history_bold">Still running</span> 
-          {{itemfirst.runevent.run_started|timesince}} ago (<small>{{itemfirst.runevent.run_started}}</small>)
-
-        {% endif %}{% endif %}
+            <div class="history_ran">
+              Run succeeded:
+              - ran {{itemloggroup.list|length}} times, most recently for {{itemfirst.durationseconds}} seconds
+              ({{itemfirst.runevent.pages_scraped}} scraped pages, {{itemfirst.runevent.records_produced}} records)
+              <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
+        {% endif %}{% endifnotequal %}
           <div class="history_view_changes">
             <a class="hiderunevent">Hide Details</a>
             <a class="showrunevent">Show Details</a>
