@@ -456,6 +456,7 @@ ul.commitlist li.neweditingsession span { background-color:black; color:white; f
 .page_title input {font-size:1em;}
 .tag_list {border-bottom:dotted 1px #ccc;padding-bottom:2em; margin-bottom:2em;}
 #hCodeTitle form {display: inline;}
+#spnRunInterval form {display: inline;}
 
 
 /* Full screen */
