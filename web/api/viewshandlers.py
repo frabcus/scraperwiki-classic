@@ -83,9 +83,9 @@ def data_handler(request):
         tablename = request.GET.get('tablename', "swdata")
         squery = ["select * from `%s`" % tablename]
         if "limit" in request.GET:
-            squery.append('limit %d' % request.GET.get('limit'))
+            squery.append('limit %s' % request.GET.get('limit'))
         if "offset" in request.GET:
-            squery.append('offset %d' % request.GET.get('offset'))
+            squery.append('offset %s' % request.GET.get('offset'))
         qsdata = { "name": request.GET.get("name").encode('utf-8'), "query": " ".join(squery).encode('utf-8') }
         if "format" in request.GET:
             qsdata["format"] = request.GET.get("format").encode('utf-8')
