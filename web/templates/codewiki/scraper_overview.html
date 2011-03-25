@@ -87,7 +87,7 @@
               </thead>
               <tbody>
                  {% for row in sqltabledata.rows %}
-                    <tr class="row">{% for value in row %}<td>{% if value %}{{ value|truncatewords_html:30|urlizetrunc:30 }}{% endif %}</td>{% endfor %}</tr>
+                    <tr class="row">{% for value in row %}<td>{% ifnotequal value None %}{{ value|truncatewords_html:30|urlizetrunc:30 }}{% endifnotequal %}</td>{% endfor %}</tr>
                  {% endfor %}
               </tbody>
             </table>
