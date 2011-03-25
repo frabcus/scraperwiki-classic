@@ -193,7 +193,7 @@
           {% ifequal scraper.last_runevent.pid -1 %}
              <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">last ran</a>
               {{scraper.last_runevent.run_started|timesince}} ago for 
-              {{scraper.last_runevent.getdurationseconds}} second{{lastscraperrunevent.getdurationseconds|pluralize}}.
+              {{scraper.last_runevent.getdurationseconds}} second{{scraper.last_runevent.getdurationseconds|pluralize}}.
           {% else %}
             is <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">currently running</a>.
           {% endifequal %}
