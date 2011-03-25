@@ -24,10 +24,7 @@ from viewsrpc import testactiveumls  # not to use
 # XXX deprecate so you can't run through all the ids and get scraper URL names
 def run_event(request, run_id):
     try:
-        if re.match('\d+$', run_id):
-            event = ScraperRunEvent.objects.get(id=run_id)
-        else:
-            event = ScraperRunEvent.objects.get(run_id=run_id)
+        event = ScraperRunEvent.objects.get(run_id=run_id)
     except ScraperRunEvent.DoesNotExist:
         raise Http404
         

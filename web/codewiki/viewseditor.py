@@ -54,10 +54,7 @@ def diffseq(request, short_name):
 
 def run_event_json(request, run_id):
     try:
-        if re.match('\d+$', run_id):
-            event = models.ScraperRunEvent.objects.get(id=run_id)
-        else:
-            event = models.ScraperRunEvent.objects.get(run_id=run_id)
+        event = models.ScraperRunEvent.objects.get(run_id=run_id)
     except models.ScraperRunEvent.DoesNotExist:
         raise Http404
     if not event.scraper.actionauthorized(request.user, "readcode"):
