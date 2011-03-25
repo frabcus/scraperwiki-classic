@@ -21,7 +21,8 @@ from viewsrpc import testactiveumls  # not to use
 
 
 # Redirects to history page now, with # link to right place.
-# XXX deprecate so you can't run through all the ids and get scraper URL names
+# NB: It only accepts the run_id hashes (NOT the Django id) so people can't
+# run through every value and get the URL names of each scraper.
 def run_event(request, run_id):
     try:
         event = ScraperRunEvent.objects.get(run_id=run_id)

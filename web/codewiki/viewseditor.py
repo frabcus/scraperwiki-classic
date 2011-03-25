@@ -52,6 +52,8 @@ def diffseq(request, short_name):
     return HttpResponse(json.dumps(result))
 
 
+# NB: It only accepts the run_id hashes (NOT the Django id) so people can't
+# run through every value and get the URL names of each scraper.
 def run_event_json(request, run_id):
     try:
         event = models.ScraperRunEvent.objects.get(run_id=run_id)
