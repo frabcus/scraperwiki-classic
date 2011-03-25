@@ -94,8 +94,16 @@ def data_handler(request):
         return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
 
     # do the old data handler case
-    limit = request.GET.get('limit', 100)
-    offset = request.GET.get('offset', 0)
+    try:
+        limit = int(request.GET.get('limit'))
+    except:
+        limit = 100
+
+    try:
+        offset = int(request.GET.get('offset'))
+    except:
+        offset = 0
+
     rc, arg = dataproxy.data_dictlist(limit=limit, offset=offset)
     if not rc:
         return HttpResponse("Error: "+arg)
