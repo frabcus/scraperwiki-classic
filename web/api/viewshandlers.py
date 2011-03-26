@@ -39,6 +39,7 @@ def getscraperorresponse(request):
     return scraper
 
 
+# see http://stackoverflow.com/questions/1189111/unicode-to-utf8-for-csv-files-python-via-xlrd
 def stringnot(v):
     if v == None:
         return ""
@@ -71,12 +72,14 @@ def stream_csv(dataproxy):
         if "moredata" not in ret:
             break  
 
+
 def data_handler(request):
     scraper = getscraperorresponse(request)
     if isinstance(scraper, HttpResponse):  return scraper
     dataproxy = DataStore(scraper.guid, "")  
     rc, arg = dataproxy.request(('item_count',))
     
+        # no items in old datastore
         # redirect to the sqlite interface
         # (could pull out the column order and put in place of the *)
     if arg == 0:
@@ -94,16 +97,8 @@ def data_handler(request):
         return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
 
     # do the old data handler case
-    try:
-        limit = int(request.GET.get('limit'))
-    except:
-        limit = 100
-
-    try:
-        offset = int(request.GET.get('offset'))
-    except:
-        offset = 0
-
+    limit = int(request.GET.get('limit', 100))
+    offset = int(request.GET.get('offset', 0))
     rc, arg = dataproxy.data_dictlist(limit=limit, offset=offset)
     if not rc:
         return HttpResponse("Error: "+arg)
@@ -135,6 +130,10 @@ def data_handler(request):
     return response
     
 
+# see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
+# have had to set the Content-Length to -1 to prevent middleware from consuming the generator to measure it
+# Should consider giving transfer-coding: chunked, 
+# http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6
 @condition(etag_func=None)
 def sqlite_handler(request):
     scraper = getscraperorresponse(request)
