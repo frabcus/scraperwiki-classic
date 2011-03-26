@@ -165,7 +165,7 @@ def sqlite_handler(request):
         response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
             # unless you put in a content length, the middleware will measure the length of your data
             # (unhelpfully consuming everything in your generator) before then returning a zero length result 
-        response["Content-Length"] = -1
+        response["Content-Length"] = 1000000000
         return response
     
     # json is not chunked.  The output is of finite fixed bite sizes because it is generally used by browsers which aren't going to survive a huge download
