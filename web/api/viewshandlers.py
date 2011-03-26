@@ -130,6 +130,10 @@ def data_handler(request):
     return response
     
 
+# ***Streamchunking could all be working, but for not being able to set the Content-Length
+# inexact values give errors in apache, so it would be handy if it could have a setting where 
+# it organized some chunking instead
+
 # see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
 # setting the Content-Length to -1 to prevent middleware from consuming the generator to measure it
 # causes an error in the apache server.  same for a too long content length
@@ -159,13 +163,14 @@ def sqlite_handler(request):
     
     reqt = None
     if format == "csv":
-        reqt = ("streamchunking", 10)
+        reqt = ("streamchunking", 1000)
     req = ("sqlitecommand", "execute", sqlquery, reqt)
     dataproxy.m_socket.sendall(simplejson.dumps(req) + '\n')
     
     if format == "csv":
         st = stream_csv(dataproxy)
         response = HttpResponse(mimetype='text/csv')  # used to take st
+        #response = HttpResponse(st, mimetype='text/csv')  # when streamchunking was tried
         response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
         for s in st:
             response.write(s)
