@@ -397,7 +397,7 @@ def proxycached(request):
 def export_csv(request, short_name):
     tablename = request.GET.get('tablename', "swdata")
     query = "select * from `%s`" % tablename
-    qsdata = { "name":short_name.encode('utf-8'), "query": " ".join(squery).encode('utf-8'), "format":csv }
+    qsdata = { "name":short_name.encode('utf-8'), "query":query.encode('utf-8'), "format":csv }
     return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
 
 
