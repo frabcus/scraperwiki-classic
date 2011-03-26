@@ -17,7 +17,8 @@ from django.contrib.auth.decorators import login_required
 from models import api_key
 from forms import applyForm
 
-import simplejson as json
+try:    import json
+except: import simplejson as json
 
 # The API explorer requires two connections to the server, which is not supported by manage.py runserver
 # To run locally, you need to ensure that settings.py contains API_DOMAIN = 'localhost:8010'
