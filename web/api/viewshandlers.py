@@ -131,9 +131,15 @@ def data_handler(request):
     
 
 # see http://stackoverflow.com/questions/2922874/how-to-stream-an-httpresponse-with-django
-# have had to set the Content-Length to -1 to prevent middleware from consuming the generator to measure it
+# setting the Content-Length to -1 to prevent middleware from consuming the generator to measure it
+# causes an error in the apache server.  same for a too long content length
 # Should consider giving transfer-coding: chunked, 
 # http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6
+
+# streaming is only happening from the dataproxy into here.  Streaming from here out through django is 
+# nearly impossible as we don't know the length of the output file if we incrementally build the csv output
+# the generator code has therefore been undone
+# all for want of setting response["Content-Length"] to the correct value
 @condition(etag_func=None)
 def sqlite_handler(request):
     scraper = getscraperorresponse(request)
@@ -159,10 +165,12 @@ def sqlite_handler(request):
     
     if format == "csv":
         st = stream_csv(dataproxy)
-        response = HttpResponse(st, mimetype='text/csv')
+        response = HttpResponse(mimetype='text/csv')  # used to take st
         response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
-            # unless you put in a content length, the middleware will measure the length of your data
-            # (unhelpfully consuming everything in your generator) before then returning a zero length result 
+        for s in st:
+            response.write(s)
+        # unless you put in a content length, the middleware will measure the length of your data
+        # (unhelpfully consuming everything in your generator) before then returning a zero length result 
         #response["Content-Length"] = 1000000000
         return response
     
