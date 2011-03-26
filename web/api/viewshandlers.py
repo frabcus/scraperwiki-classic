@@ -52,6 +52,8 @@ def stream_csv(dataproxy):
     n = 0
     while True:
         line = dataproxy.receiveonelinenj()
+        yield line
+        break
         try:
             ret = simplejson.loads(line)
         except ValueError, e:
@@ -148,7 +150,7 @@ def sqlite_handler(request):
             aa = aattach.split(",")
             sqlitedata = dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
     
-    sqlquery = request.GET.get('query')
+    sqlquery = request.GET.get('query', "")
     format = request.GET.get("format")
     
     reqt = None
@@ -166,6 +168,7 @@ def sqlite_handler(request):
         response["Content-Length"] = -1
         return response
     
+    # json is not chunked.  The output is of finite fixed bite sizes because it is generally used by browsers which aren't going to survive a huge download
     result = dataproxy.receiveonelinenj()
     if format == "jsondict":
         try:
