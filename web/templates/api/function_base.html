@@ -1,7 +1,11 @@
 {% extends "frontend/base.html" %}
 
 {% block javascript %}
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/apisetupexplore.js?{{settings.REVISION}}"></script>		
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/apisetupexplore.js?{{settings.REVISION}}"></script>	
+    <script>
+      var otherapis = {% if otherapis %}{{otherapis|safe}}{% else %}[]{% endif %};
+      var getinfourl = "http://{{api_domain}}/api/1.0/scraper/getinfo"; 
+    </script>	
 {% endblock %}
 
 {% block content %}
@@ -9,7 +13,7 @@
     <div class="page_title">
         <h1>{% block heading %}{% endblock %}</h1>
         <p>{% block subheading %}{% endblock %}   <small><a href="{% url api:index %}">(return to api overview)</a></small></p>
-        <p><a id="aApiLink" class="api_link" href="http://{{api_domain}}{{api_uri}}">http://{{api_domain}}{{api_uri}}<span></span></a></p>        
+        <p><b><a id="aApiLink" class="api_link" href="http://{{api_domain}}{{api_uri}}">http://{{api_domain}}{{api_uri}}<span></span></a></b></p>
     </div>
 
     <div class="content col left">
@@ -71,7 +75,12 @@
         </ul>
         {% endif %}
 
-        <a id="aScraperLink"></a>
+        <div id="scraperdetails">
+          <h4>More about <a id="aScraperLink"></a></h4>
+          <ul id="otherapis"></ul>
+          <input type="button" id="scraperlisttables" value="List tables"/>
+          <ul id="listtables"></ul>
+        </div>
 
     </div>
     

@@ -263,7 +263,7 @@
     <div class="staff">
         <p><b>Admin only</b></p>
  
-        <p><a href="/admin/codewiki/scraper/{{scraper.pk}}/">Scraper's Django admin page</a></b></p>
+        <p><a href="/admin/codewiki/scraper/{{scraper.pk}}/">Scraper's Django admin page</a></p>
  
         <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
             <input type="hidden" name="run_scraper" value="1" />

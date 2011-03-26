@@ -10,7 +10,7 @@
         <dd>A valid API key.{% if user.is_authenticated and keys %} <input type="text" name="key" id="key" />{% endif %}</dd>
     {% endcomment %}
     <dt><code>format</code> (required)</dt>
-    <dd>The format you would like the response in. <input type="text" name="format" id="format" size="4"/></dd>
+    <dd>The format you would like the response in. <input type="text" name="format" id="format" size="4" value="jsondict"/></dd>
     <dt><code>name</code> (required)</dt>
     <dd>The short name for a scraper. <input type="text" name="name" id="name" value="{{short_name}}"/></dd>
     <dt><code>attach</code> (optional)</dt>
