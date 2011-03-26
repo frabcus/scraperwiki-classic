@@ -87,7 +87,7 @@
               </thead>
               <tbody>
                  {% for row in sqltabledata.rows %}
-                    <tr class="row">{% for value in row %}<td>{% if value %}{{ value|truncatewords_html:30|urlizetrunc:30 }}{% endif %}</td>{% endfor %}</tr>
+                    <tr class="row">{% for value in row %}<td>{% ifnotequal value None %}{{ value|truncatewords_html:30|urlizetrunc:30 }}{% endifnotequal %}</td>{% endfor %}</tr>
                  {% endfor %}
               </tbody>
             </table>
@@ -180,7 +180,7 @@
     {% include 'codewiki/includes/contributors.html' %}
 
     <h3>License {% if user.is_authenticated %}<a href="#" id="aEditLicense" class="edit">[edit license]</a>{% endif %}</h3>
-    This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.license}}</span>
+    This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.scraper.license}}</span>
     <p>  </p>
     
 </div>
@@ -191,14 +191,11 @@
         This scraper 
         {% if scraper.last_runevent %}
           {% ifequal scraper.last_runevent.pid -1 %}
-             last ran {{scraper.last_runevent.run_started|timesince}} ago 
-             for <a href="{% if scraper.last_runevent.run_id %}{% url run_event scraper.last_runevent.run_id %}{% else %}{% url run_event scraper.last_runevent.id %}{% endif %}">{{scraper.last_runevent.getduration}} seconds</a>.
+             <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">last ran</a>
+              {{scraper.last_runevent.run_started|timesince}} ago for 
+              {{scraper.last_runevent.getdurationseconds}} second{{scraper.last_runevent.getdurationseconds|pluralize}}.
           {% else %}
-            {% if scraper.last_runevent.run_id %}
-                <a href="{% url run_event scraper.last_runevent.run_id %}">is currently running</a>.
-            {% else %}
-                <i><a href="{% url run_event scraper.last_runevent.id %}">is running without an id</a></i>.
-             {% endif %}
+            is <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">currently running</a>.
           {% endifequal %}
         {% else %}
            has not been run yet.

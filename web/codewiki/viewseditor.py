@@ -52,12 +52,11 @@ def diffseq(request, short_name):
     return HttpResponse(json.dumps(result))
 
 
+# NB: It only accepts the run_id hashes (NOT the Django id) so people can't
+# run through every value and get the URL names of each scraper.
 def run_event_json(request, run_id):
     try:
-        if re.match('\d+$', run_id):
-            event = models.ScraperRunEvent.objects.get(id=run_id)
-        else:
-            event = models.ScraperRunEvent.objects.get(run_id=run_id)
+        event = models.ScraperRunEvent.objects.get(run_id=run_id)
     except models.ScraperRunEvent.DoesNotExist:
         raise Http404
     if not event.scraper.actionauthorized(request.user, "readcode"):
@@ -333,7 +332,7 @@ def getselectedword(line, character, language):
 
 
 def quickhelp(request):
-    query = dict([(k, request.GET.get(k, ""))  for k in ["language", "short_name", "username", "wiki_type", "line", "character"]])
+    query = dict([(k, request.GET.get(k, "").encode('utf-8'))  for k in ["language", "short_name", "username", "wiki_type", "line", "character"]])
     query["word"] = getselectedword(query["line"], query["character"], query["language"])
     if re.match("http://", query["word"]):
         query["escapedurl"] = urllib.quote(query["word"])

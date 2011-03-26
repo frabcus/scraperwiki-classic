@@ -197,6 +197,9 @@ class ScraperRunEvent(models.Model):
 
     def getduration(self):
         return (self.run_ended or datetime.datetime.now()) - self.run_started
+    def getdurationseconds(self):
+        runduration = self.getduration()
+        return "%.0f" % (runduration.days*24*60*60 + runduration.seconds)
 
     @models.permalink
     def get_absolute_url(self):

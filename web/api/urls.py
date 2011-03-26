@@ -6,6 +6,8 @@ from handlers import scraper
 from handlers import datastore
 
 from api import views
+from api import viewshandlers
+
 
 scrapersearch_handler   = Resource(scraper.Search)
 scraperinfo_handler     = Resource(scraper.GetInfo)
@@ -17,7 +19,7 @@ keys_handler            = Resource(datastore.Keys)
 datastore_search_handler= Resource(datastore.Search)
 getdatabydate_handler   = Resource(datastore.DataByDate)
 getdatabylocation_handler = Resource(datastore.DataByLocation)
-sqlite_handler          = Resource(datastore.Sqlite)
+#sqlite_handler          = Resource(datastore.Sqlite)
 
 geo_postcode_to_latlng_handler = Resource(geo.PostcodeToLatLng)
 
@@ -55,13 +57,16 @@ urlpatterns = patterns('',
     url(r'^1\.0/scraper/getinfo$',      scraperinfo_handler,        name="method_getinfo"),
     url(r'^1\.0/scraper/getruninfo$',   scraperruninfo_handler,     name="method_getruninfo"),
     url(r'^1\.0/scraper/getuserinfo$',  scraperuserinfo_handler,    name="method_getuserinfo"),
-    url(r'^1\.0/scraper/getuserinfo$',  scraperuserinfo_handler,    name="method_getuserinfo"),
+    
     url(r'^1\.0/datastore/search$',     datastore_search_handler,   name="method_datastore_search"),
-    url(r'^1\.0/datastore/getdata$',    data_handler,               name="method_getdata"),
     url(r'^1\.0/datastore/getkeys$',    keys_handler,               name="method_getkeys"),
     url(r'^1\.0/datastore/getdatabydate$', getdatabydate_handler,   name="method_getdatabydate"),
     url(r'^1\.0/datastore/getdatabylocation$', getdatabylocation_handler, name="method_getdatabylocation"),
-    url(r'^1\.0/datastore/sqlite',      sqlite_handler,             name="method_sqlite"),
+    
+    #url(r'^1\.0/datastore/sqlite',      sqlite_handler,             name="method_sqlite"),
+    url(r'^1\.0/datastore/sqlite',      viewshandlers.sqlite_handler,name="method_sqlite"),
+    url(r'^1\.0/datastore/getdata$',    viewshandlers.data_handler,  name="method_getdata"),
+    url(r'^1\.0/datastore/getolddata$', data_handler,                name="method_getolddata"),
 
     url(r'^1\.0/geo/postcodetolatlng/$',geo_postcode_to_latlng_handler, name="method_geo_postcode_to_latlng"),
 )

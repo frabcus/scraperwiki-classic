@@ -87,19 +87,6 @@ class SW_DataStore
         return JSON.parse(text)
     end
 
-    def save(unique_keys, scraper_data, date = nil, latlng = nil)
-        if unique_keys != nil && !unique_keys.kind_of?(Array)
-            return [false, 'unique_keys must be nil or an array']
-        end
-        js_data      = mangleflattendict(scraper_data)
-        uunique_keys = mangleflattenkeys(unique_keys )
-        return request(['save', uunique_keys, js_data, date, latlng])
-    end
-
-    def postcodeToLatLng(postcode)
-        return request(['postcodetolatlng', postcode])
-    end
-
     def SW_DataStore.create(host = nil, port = nil)
         instance = SW_DataStore.instance
         # so, it might be intended that the host and port are
@@ -115,5 +102,4 @@ class SW_DataStore
         end
         instance
     end
-
 end

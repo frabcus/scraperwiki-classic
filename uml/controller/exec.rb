@@ -183,6 +183,8 @@ Signal.trap("XCPU") do
     raise Exception, "ScraperWiki CPU time exceeded"
 end
 
+ARGV.clear # Clear command line args so that we can use Test::Unit
+
 code = File.new(script, 'r').read()
 begin
     require 'rubygems'   # for nokigiri to work

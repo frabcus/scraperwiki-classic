@@ -58,7 +58,7 @@ module ScraperWiki
             return nil
         end
         ds  = SW_DataStore.create()
-        res = ds.postcodeToLatLng(postcode)
+        res = ds.request(['postcodetolatlng', postcode])
         if ! res[0]
             ScraperWiki::dumpMessage({'message_type' => 'console', 'content' => 'Warning: %s: %s' % [res[1], postcode]})
             return nil
@@ -71,7 +71,6 @@ module ScraperWiki
     end
 
     def ScraperWiki.save_metadata(metadata_name, value)
-        ScraperWiki::dumpMessage({'message_type' => 'console', 'content' => 'Saving %s: %s' % [metadata_name, value]})
         return SW_MetadataClient.create().save(metadata_name, value)
     end
 
@@ -81,7 +80,16 @@ module ScraperWiki
     end
 
     def ScraperWiki.save(unique_keys, data, date = nil, latlng = nil)
-        res = SW_DataStore.create().save(unique_keys, data, date, latlng)
+        if unique_keys != nil && !unique_keys.kind_of?(Array)
+            raise 'unique_keys must be nil or an array'
+        end
+
+        ds = SW_DataStore.create()
+        js_data = ds.mangleflattendict(scraper_data)
+        uunique_keys = ds.mangleflattenkeys(unique_keys)
+        res = ds.request(['save', uunique_keys, js_data, date, latlng])
+
+        raise res[1] if not res[0]
 
         pdata = { }
         data.each_pair do |key, value|
@@ -119,8 +127,6 @@ module ScraperWiki
 
             # this ought to be a local function
     def ScraperWiki.convdata(unique_keys, scraper_data)
-        puts unique_keys
-        puts scraper_data
         if unique_keys:
             for key in unique_keys
                 if !scraper_data.include?(key)

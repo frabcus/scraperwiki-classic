@@ -20,29 +20,20 @@ from codewiki.management.commands.run_scrapers import GetDispatcherStatus, GetUM
 from viewsrpc import testactiveumls  # not to use
 
 
-        # should deprecate and go to the top of the history page
+# Redirects to history page now, with # link to right place.
+# NB: It only accepts the run_id hashes (NOT the Django id) so people can't
+# run through every value and get the URL names of each scraper. It is
+# for use in hyperlinks from the UML status page where only the run id is known.
+# Hyperlinks within scraper pages should use the Django id of the run and link
+# to the # link in the history page.
 def run_event(request, run_id):
     try:
-        if re.match('\d+$', run_id):
-            event = ScraperRunEvent.objects.get(id=run_id)
-        else:
-            event = ScraperRunEvent.objects.get(run_id=run_id)
+        event = ScraperRunEvent.objects.get(run_id=run_id)
     except ScraperRunEvent.DoesNotExist:
         raise Http404
         
-    context = { 'event':event }
-    statusscrapers = GetDispatcherStatus()
-    for status in statusscrapers:
-        if status['runID'] == event.run_id:
-            context['status'] = status
-    if not event.scraper.actionauthorized(request.user, "readcode"):
-        raise Http404
-    
-    context['scraper'] = event.scraper
-    context['selected_tab'] = '' and message.get('message_sub_type') != 'consolestatus'
-    context['user_owns_it'] = (event.scraper.owner() == request.user)
-    
-    return render_to_response('codewiki/run_event.html', context, context_instance=RequestContext(request))
+    scraper = event.scraper
+    return HttpResponseRedirect(reverse('scraper_history', args=[scraper.wiki_type, scraper.short_name]) + "#run_" + str(event.id))
 
 
 

@@ -43,7 +43,8 @@
         {% if scraper.is_sick_and_not_running %}
             <p class="sick">
                 <strong>Maintenance required!</strong> This {{scraper.wiki_type}} might be broken 
-                (it generated an exception on its <a href="{% if scraper.last_runevent.run_id %}{% url run_event scraper.last_runevent.run_id %}{% else %}{% url run_event scraper.last_runevent.id %}{% endif %}">last run</a>).
+                (it generated an exception on its 
+                     <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">last ran</a>).
                 {% ifequal scraper.owner.get_profile user %}
                     <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit this {{scraper.wiki_type}}</a>.
                 {% else %}

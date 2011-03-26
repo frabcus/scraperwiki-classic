@@ -32,25 +32,28 @@ def requestvalues(request):
 
 
 
+
+# keys for a table (to be deprecated) -- get table with limit 1 instead
 class Keys(APIBase):
     required_arguments = ['name']
 
     def value(self, request):
-        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
-        if lsm:
-            return [lsm]
-        
-        if not scraper.published:
-            return [{"status":"unpublished"}]
-        return Scraper.objects.datastore_keys(scraper_id=scraper.guid)
+        return { "error":"Sorry, this function has been deprecated." }
+        scraper = self.getscraperorrccode(request, request.GET.get('name'), "apiread")
+        dataproxy = DataStore(scraper.guid, "")
+        rc, arg = dataproxy.request(('datastore_keys',))
+        if not rc :
+            raise ScraperAPIError(arg)
+        return arg
+
+
 
 class Search(APIBase):
     required_arguments = ['name', 'filter']
 
     def value(self, request):
-        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
-        if lsm:
-            return [lsm]
+        return { "error":"Sorry, this function has been deprecated." }
+        scraper = self.getscraperorrccode(request, request.GET.get('name'), "apiread")
         
         key_values = []
         kv_string = request.GET.get('filter', None)
@@ -59,14 +62,17 @@ class Search(APIBase):
             item_split = item.split(',', 1)
             if len(item_split) == 2:
                 key_values.append((item_split[0], item_split[1]))
-
         if len(key_values) == 0:
-            return rc.BAD_REQUEST
+            raise ScraperAPIError("No keys set")
         
         limit, offset, tablename = requestvalues(request)
+        dataproxy = DataStore(scraper.guid, "")
+        dataproxy.request(('data_search', key_values, limit, offset))
+        if not rc :
+            raise ScraperAPIError(arg)
+        return arg
         
-        return Scraper.objects.data_search(scraper_id=scraper.guid, key_values=key_values, limit=limit, offset=offset)
-    
+
 
 class Data(APIBase):
     required_arguments = ['name']
@@ -84,6 +90,7 @@ class DataByLocation(APIBase):
     required_arguments = ['name', 'lat', 'lng']
 
     def value(self, request):
+        return { "error":"Sorry, this function has been deprecated." }
         scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
         if lsm:
             return [lsm]
@@ -103,6 +110,7 @@ class DataByDate(APIBase):
     required_arguments = ['name', 'start_date', 'end_date']
 
     def value(self, request):
+        return { "error":"Sorry, this function has been deprecated." }
         scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
         if lsm:
             return [lsm]
@@ -118,20 +126,3 @@ class DataByDate(APIBase):
                 
         return Scraper.objects.data_dictlist(scraper_id=scraper.guid, short_name=scraper.short_name, tablename="", limit=limit, offset=offset, start_date=start_date, end_date=end_date)
 
-
-class Sqlite(APIBase):
-    required_arguments = ['name', 'query']
-    
-    def value(self, request):
-        attachlist = request.GET.get('attach', '').split(";")
-        attachlist.insert(0, request.GET.get('name'))   # just the first entry on the list
-        
-        dataproxy = DataStore("sqlviewquery", "")  # zero length short name means it will open up a :memory: database
-        for aattach in attachlist:
-            if aattach:
-                aa = aattach.split(",")
-                sqlitedata = dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
-        
-        sqlquery = request.GET.get('query')
-        ret = [ dataproxy.request(("sqlitecommand", "execute", sqlquery, None)) ]
-        return ret
