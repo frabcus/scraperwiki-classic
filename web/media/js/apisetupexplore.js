@@ -1,4 +1,6 @@
-function rewriteApiUrl (){
+var prev_aName = ''; 
+function rewriteApiUrl()
+{
     sArgs = '?';
     var aControls = $('.api_arguments dl input')
     for (var i=0; i < aControls.length; i++) {
@@ -13,15 +15,24 @@ function rewriteApiUrl (){
     $('#aApiLink').attr('href', $('#uri').val() + sArgs);
 
     var aName = $('.api_arguments dl input#name').val(); 
+    if (aName == prev_aName)
+        return; 
 
+    prev_aName = aName; 
     if (aName)
     {
-        $('#aScraperLink').show(); 
         $('#aScraperLink').text(aName); 
         $('#aScraperLink').attr('href', "/scrapers/"+aName); 
+        $('#otherapis').text(""); 
+        var aName = $('.api_arguments dl input#name').val();
+
+        for (var i = 0; i < otherapis.length; i++)
+            $('#otherapis').append('<li><a href="'+otherapis[i]+'?name='+aName+'">'+otherapis[i]+'?name='+aName+'</a></li>'); 
+        $('#listtables').empty(); 
+        $('#scraperdetails').show(); 
     }
     else
-        $('#aScraperLink').hide(); 
+        $('#scraperdetails').hide(); 
 }
 
 
@@ -36,7 +47,7 @@ function APISetupExploreFunction(){
                 function (){
                     $('#format').val(sText);
                     $('#format').focus();
-                    rewriteApiUrl();                    
+                    rewriteApiUrl();
                 }
             );
             $(this).html(aLink);
@@ -89,6 +100,31 @@ function APISetupExploreFunction(){
 
     //linkup the texboxes to rewrite the API url
     $('.api_arguments dl input').each(function() {$(this).keyup(rewriteApiUrl)}); 
+
+    $('#scraperlisttables').click(function()
+    {
+        var aName = $('.api_arguments dl input#name').val();
+        $('#listtables').html("<li>Loading...</li>"); 
+        $.ajax({url:getinfourl, dataType:"jsonp", data:{name:aName, quietfields:"code|runevents|userroles"}, error: function(jq, status) { alert(status); }, success:function(v) 
+        { 
+            $('#listtables').empty(); 
+            if (v && v[0].datasummary && v[0].datasummary.tables)
+            {
+                for (var tablename in v[0].datasummary.tables)
+                {
+                    var table = v[0].datasummary.tables[tablename]; 
+                    $('#listtables').append('<li><b>'+tablename+'</b> ['+table.count+'] '+table.sql+'</li>'); 
+                }
+                $('#listtables li').click(function() 
+                {
+                    $('#tablename').val($(this).find("b").text()); 
+                    $('#query').val("select * from "+$(this).find("b").text()+" limit 10"); 
+                }); 
+            }
+            else
+                $('#listtables').html("<li>No tables</li>"); 
+        }}); 
+    }); 
 
     rewriteApiUrl(); // initialize
 }
