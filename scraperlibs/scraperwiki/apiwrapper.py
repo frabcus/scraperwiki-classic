@@ -5,58 +5,59 @@ import urllib
 try: import json
 except: import simplejson as json
 
+import scraperwiki
+
 apiurl = "http://api.scraperwiki.com/api/1.0/"
 #apiurl = "http://localhost:8010/api/1.0/"   # for local operation
 apilimit = 500
 
-
+attacheddata = [ ]
 def getKeys(name):
-    query = {"name":name}
-    url = "%sdatastore/getkeys?%s" % (apiurl, urllib.urlencode(query))
-    ljson = urllib.urlopen(url).read()
-    return json.loads(ljson)
+    if name not in attacheddata:
+        print "instead of getKeys('%s') please do\n    scraperwiki.sqlite.attach('%s') \n    print scraperwiki.sqlite.execute('select * from `%s`.swdata limit 0')['keys']" % (name, name, name)
+        scraperwiki.sqlite.attach(name)
+        attacheddata.append(name)
+    result = scraperwiki.sqlite.execute("select * from `%s`.swdata limit 0" % name)
+    if "error" in result:
+        raise scraperwiki.sqlite.SqliteError(result["error"])
+    return result["keys"]
+    
 
-def generateData(urlbase, limit, offset):
+def getData(name, limit=-1, offset=0):
+    if name not in attacheddata:
+        print "instead of getData('%s') please do\n    scraperwiki.sqlite.attach('%s') \n    print scraperwiki.sqlite.select('* from `%s`.swdata')" % (name, name, name)
+        scraperwiki.sqlite.attach(name)
+        attacheddata.append(name)
+    
     count = 0
     loffset = 0
     while True:
+        squery = [ "* from `%s`.swdata" % name ]
         if limit == -1:
             llimit = apilimit
         else:
             llimit = min(apilimit, limit-count)
-            
-        url = "%s&limit=%s&offset=%d" % (urlbase, llimit, offset+loffset)
-        ljson = urllib.urlopen(url).read()
-        lresult = json.loads(ljson)
+        squery.append("limit %d" % llimit)
+        squery.append("offset %s" % (offset+loffset))
+        lresult = scraperwiki.sqlite.select(" ".join(squery))
         for row in lresult:
             yield row
-
         count += len(lresult)
-           
         if len(lresult) < llimit:  # run out of records
             break
-            
         if limit != -1 and count >= limit:    # exceeded the limit
             break
-
         loffset += llimit
 
-def getData(name, limit=-1, offset=0):
-    urlbase = "%sdatastore/getdata?name=%s" % (apiurl, name)
-    return generateData(urlbase, limit, offset)
 
 def getDataByDate(name, start_date, end_date, limit=-1, offset=0):
-    urlbase = "%sdatastore/getdatabydate?name=%s&start_date=%s&end_date=%s" % (apiurl, name, start_date, end_date)
-    return generateData(urlbase, limit, offset)
+    raise scraperwiki.sqlite.SqliteError("getDataByDate has been deprecated")
 
 def getDataByLocation(name, lat, lng, limit=-1, offset=0):
-    urlbase = "%sdatastore/getdatabylocation?name=%s&lat=%f&lng=%f" % (apiurl, name, lat, lng)
-    return generateData(urlbase, limit, offset)
+    raise scraperwiki.sqlite.SqliteError("getDataByLocation has been deprecated")
     
 def search(name, filterdict, limit=-1, offset=0):
-    filter = "|".join(map(lambda x: "%s,%s" % (urllib.quote(x[0]), urllib.quote(x[1])), filterdict.items()))
-    urlbase = "%sdatastore/search?name=%s&filter=%s" % (apiurl, name, filter)
-    return generateData(urlbase, limit, offset)
+    raise scraperwiki.sqlite.SqliteError("apiwrapper.search has been deprecated")
 
 
 
