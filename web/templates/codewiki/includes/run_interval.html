@@ -1,0 +1,12 @@
+{% load schedule %}
+  {{scraper.scraper.run_interval|schedule}}
+  {% ifnotequal scraper.scraper.next_run.year 9999 %}
+    {% ifequal scraper.scraper.next_run|timeuntil '0 minutes' %}
+      (next run ASAP).
+    {% else %}
+      (next in {{scraper.scraper.next_run|timeuntil}}).
+    {% endifequal %} 
+  {% else %}
+    (no future run scheduled).
+  {% endifnotequal %}
+
