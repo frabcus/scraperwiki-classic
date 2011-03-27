@@ -96,17 +96,21 @@
                     <a id="aCloseEditor" href="{% url frontpage %}" title="Home">
                         <img src="{{ MEDIA_URL }}images/editor_logo.png" width="39" height="25"/>
                     </a>
-                    <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
-                    <div class="page_tabs small">
-                        {% if scraper.id %}
-                            {% include 'codewiki/includes/tabs.html' %}
-                        {% else %}
-                            {% include 'codewiki/includes/cancel_button.html' %}
-                        {% endif %}
-                    </div>
-                    <span id="border_hide"></span>
+                    {% if scraper.owner %}
+                        {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %}
+                    {% else %}
+                        {% if request.user.get_profile.name %}{{ request.user.get_profile.name }}{% else %}{{request.user.username}}{% endif %}
+                    {% endif %}
+                    / <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
                 </div>
-
+                <div class="page_tabs small">
+                    {% if scraper.id %}
+                        {% include 'codewiki/includes/tabs.html' %}
+                    {% else %}
+                        {% include 'codewiki/includes/cancel_button.html' %}
+                    {% endif %}
+                </div>
+                <span id="border_hide"></span>
             </div>
 
             {# Code editor #}
