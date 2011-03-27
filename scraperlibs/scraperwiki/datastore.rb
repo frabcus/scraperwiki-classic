@@ -2,6 +2,10 @@ require 'json'
 require 'singleton'
 require 'thread'
 
+# the python version of this makes use of a global static copy of the class 
+# so the connection is made only once to the dataproxy
+# I think the Singleton module implements this magically
+
 class SW_DataStore
     
     @@lock = Mutex.new

@@ -332,7 +332,7 @@ def getselectedword(line, character, language):
 
 
 def quickhelp(request):
-    query = dict([(k, request.GET.get(k, ""))  for k in ["language", "short_name", "username", "wiki_type", "line", "character"]])
+    query = dict([(k, request.GET.get(k, "").encode('utf-8'))  for k in ["language", "short_name", "username", "wiki_type", "line", "character"]])
     query["word"] = getselectedword(query["line"], query["character"], query["language"])
     if re.match("http://", query["word"]):
         query["escapedurl"] = urllib.quote(query["word"])

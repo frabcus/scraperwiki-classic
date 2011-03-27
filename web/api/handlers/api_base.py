@@ -15,7 +15,9 @@ Emitter.register('php', PHPEmitter, 'text/plain; charset=utf-8')
 Emitter.register('gviz', GVizEmitter, 'text/plain; charset=utf-8')
 
 
-class InvalidScraperException(Exception): pass
+class ScraperAPINotFound(Exception): pass
+class ScraperAPIForbidden(Exception): pass
+class ScraperAPIError(Exception): pass
 
 class APIBase(BaseHandler):
     allowed_methods = ('GET',)
@@ -69,15 +71,37 @@ class APIBase(BaseHandler):
             return error_response
         
         try:
+            # this is the function everything funnels through
             result = self.value(request)
-        except InvalidScraperException:
+            
+                    # piston appears not to handle these responses properly
+        except ScraperAPINotFound, e:
             error_response = rc.NOT_FOUND
             error_response.write(": Scraper not found")
             return error_response
-
+        except ScraperAPIForbidden, e:
+            error_response = rc.FORBIDDEN
+            error_response.write(": You do not have access to this scraper")
+            return error_response
+        except ScraperAPIError, e:
+            error_response = rc.BAD_REQUEST
+            error_response.write(": Error "+e.message)
+            return error_response
         return result
 
 
+
+    def getscraperorrccode(self, request, short_name, action):
+        try:
+            scraper = Code.unfiltered.get(short_name=short_name)
+        except Code.DoesNotExist:
+            raise ScraperAPINotFound()
+        if not scraper.actionauthorized(request.user, action):
+            raise ScraperAPIForbidden()
+        return scraper
+
+    
+    # to deprecate
     def get_scraper_lsm(self, name):
         try:
             code = Code.unfiltered.get(short_name=name)   # unfiltered is objects, but working around the "convenient" filter that has been injected into the manager

@@ -81,12 +81,6 @@ class CodeManager(models.Manager):
         dataproxy = DataStore(scraper_id, "")  
         return dataproxy
 
-    def data_search(self, scraper_id, key_values, limit=1000, offset=0):   
-        proxy   = self.dataproxy(scraper_id)
-        rc, arg = proxy.data_search(key_values, limit, offset)
-        if not rc :
-            raise Exception(arg)
-        return arg
 
     def data_dictlist(self, scraper_id, short_name, tablename="", limit=1000, offset=0, start_date=None, end_date=None, latlng=None):
         dataproxy = DataStore(scraper_id, short_name)  
@@ -107,13 +101,6 @@ class CodeManager(models.Manager):
         return convert_dictlist_to_datalist(allitems, column_order, private_columns)
 
 
-            
-    def datastore_keys(self, scraper_id):
-        proxy   = self.dataproxy(scraper_id)
-        rc, arg = proxy.datastore_keys()
-        if not rc :
-            raise Exception(arg)
-        return arg
 
     def search(self, query):
         scrapers = self.get_query_set().filter(title__icontains=query, published=True)

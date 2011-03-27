@@ -48,10 +48,11 @@ class GetInfo(APIBase):
             info['license']     = scraper.scraper.license
             info['records']     = scraper.scraper.record_count  # old style datastore
             
-            dataproxy = DataStore(scraper.guid, scraper.short_name)
-            sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", 0, None))
-            if sqlitedata and type(sqlitedata) not in [str, unicode]:
-                info['datasummary'] = sqlitedata
+            if 'datasummary' not in quietfields:
+                dataproxy = DataStore(scraper.guid, scraper.short_name)
+                sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", 0, None))
+                if sqlitedata and type(sqlitedata) not in [str, unicode]:
+                    info['datasummary'] = sqlitedata
         
         if 'userroles' not in quietfields:
             info['userroles']   = { }
@@ -89,7 +90,7 @@ class GetInfo(APIBase):
             history.reverse()
             info['history'] = history
         
-        if scraper.wiki_type == 'scraper':
+        if scraper.wiki_type == 'scraper' and 'runevents' not in quietfields:
             if history_start_date:
                 runevents = scraper.scraper.scraperrunevent_set.filter(run_ended__gte=history_start_date).order_by('-run_started')
             else:

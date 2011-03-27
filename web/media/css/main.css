@@ -379,8 +379,9 @@ div.explorer_response h2 small {font-size:0.5em;}
 div.explorer_response iframe {width:100%; margin: 1em 0; background:#000; border:none; height:400px;}
 
 ul.api_suggest a { cursor: pointer }
-a.api_link span { color:#ccc;font-size:0.8em;}
+a.api_link span { color:#955;font-size:0.8em;}
 a.api_link:hover span {color:#2680c6;}
+#listtables li:hover { cursor: pointer; background:#fee }; 
 
 /* Programmer API */
 .programmer_api {}

@@ -14,11 +14,13 @@
     <div class="data_viewer">
         {% if data.rows %}
             <div>
-                {% if user.is_staff %}
+                {% if user_owns_it or user.is_staff %}    
                 <form class="staff" action="{% url scraper_converttosqlitedatastore scraper.short_name %}" method="post">
                     <input type="submit" name="converttosqlitedatastore" value="converttosqlitedatastore"/>
                 </form>
                 {% endif %}
+
+
                 <table class="data">
                     <thead>
                         <tr>
@@ -87,7 +89,7 @@
               </thead>
               <tbody>
                  {% for row in sqltabledata.rows %}
-                    <tr class="row">{% for value in row %}<td>{% if value %}{{ value|truncatewords_html:30|urlizetrunc:30 }}{% endif %}</td>{% endfor %}</tr>
+                    <tr class="row">{% for value in row %}<td>{% ifnotequal value None %}{{ value|truncatewords_html:30|urlizetrunc:30 }}{% endifnotequal %}</td>{% endfor %}</tr>
                  {% endfor %}
               </tbody>
             </table>
@@ -180,7 +182,7 @@
     {% include 'codewiki/includes/contributors.html' %}
 
     <h3>License {% if user.is_authenticated %}<a href="#" id="aEditLicense" class="edit">[edit license]</a>{% endif %}</h3>
-    This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.license}}</span>
+    This dataset is licensed as: <span id="spnLicenseChoice">{{scraper.scraper.license}}</span>
     <p>  </p>
     
 </div>
@@ -193,7 +195,7 @@
           {% ifequal scraper.last_runevent.pid -1 %}
              <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">last ran</a>
               {{scraper.last_runevent.run_started|timesince}} ago for 
-              {{scraper.last_runevent.getdurationseconds}} second{{lastscraperrunevent.getdurationseconds|pluralize}}.
+              {{scraper.last_runevent.getdurationseconds}} second{{scraper.last_runevent.getdurationseconds|pluralize}}.
           {% else %}
             is <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">currently running</a>.
           {% endifequal %}
@@ -257,7 +259,7 @@
     <div class="staff">
         <p><b>Admin only</b></p>
  
-        <p><a href="/admin/codewiki/scraper/{{scraper.pk}}/">Scraper's Django admin page</a></b></p>
+        <p><a href="/admin/codewiki/scraper/{{scraper.pk}}/">Scraper's Django admin page</a></p>
  
         <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
             <input type="hidden" name="run_scraper" value="1" />
