@@ -14,7 +14,7 @@ apilimit = 500
 attacheddata = [ ]
 def getKeys(name):
     if name not in attacheddata:
-        print "instead of getKeys('%s') please do\n    scraperwiki.sqlite.attach('%s') \n    print scraperwiki.sqlite.execute('select * from `%s`.swdata limit 0')['keys']" % (name, name, name)
+        print "*** instead of getKeys('%s') please do\n    scraperwiki.sqlite.attach('%s') \n    print scraperwiki.sqlite.execute('select * from `%s`.swdata limit 0')['keys']" % (name, name, name)
         scraperwiki.sqlite.attach(name)
         attacheddata.append(name)
     result = scraperwiki.sqlite.execute("select * from `%s`.swdata limit 0" % name)
@@ -25,7 +25,7 @@ def getKeys(name):
 
 def getData(name, limit=-1, offset=0):
     if name not in attacheddata:
-        print "instead of getData('%s') please do\n    scraperwiki.sqlite.attach('%s') \n    print scraperwiki.sqlite.select('* from `%s`.swdata')" % (name, name, name)
+        print "*** instead of getData('%s') please do\n    scraperwiki.sqlite.attach('%s') \n    print scraperwiki.sqlite.select('* from `%s`.swdata')" % (name, name, name)
         scraperwiki.sqlite.attach(name)
         attacheddata.append(name)
     

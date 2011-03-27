@@ -8,6 +8,7 @@ try   : import json
 except: import simplejson as json
 
 import scraperwiki.console
+import scraperwiki.sqlite
 
 class MetadataClient(object):
     def __init__(self):
@@ -88,11 +89,21 @@ def get_client():
     return client
     
     
-def get(metadata_name, default=None):
-    return get_client().get(metadata_name, default)
 
-def get_run_id(metadata_name, default=None):
-    return get_client().get(metadata_name, default)
+metacallholder = None
+def get(metadata_name, default=None):
+    global metacallholder
+    if not metacallholder:
+        print "*** instead of metadata.get('%s') please use\n    scraperwiki.sqlite.get_var('%s')" % (metadata_name, metadata_name)
+        metacallholder = "9sd8sd9fs9d8f9s8df9s8f"
+    result = scraperwiki.sqlite.get_var(metadata_name, metacallholder)
+    if result == metacallholder:
+        result = get_client().get(metadata_name, default) 
+    return result
 
 def save(metadata_name, value):
-    return get_client().save(metadata_name, value)
+    global metacallholder
+    if not metacallholder:
+        print "*** instead of metadata.save('%s') please use\n    scraperwiki.sqlite.save_var('%s')" % (metadata_name, metadata_name)
+        metacallholder = "9sd8sd9fs9d8f9s8df9s8f"
+    return scraperwiki.sqlite.save_var(metadata_name, value)
