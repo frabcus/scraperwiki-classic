@@ -119,7 +119,9 @@ def data_handler(request):
         response['Content-Disposition'] = 'attachment; filename=%s.json' % (scraper.short_name)
         return response
         
-    assert format == "csv"
+    if format != "csv":
+        return HttpResponse("Error: the format '%s' is not supported" % arg)
+        
     fout = StringIO()
     writer = csv.writer(fout, dialect='excel')
     writer.writerow([ k.encode('utf-8') for k in arg["keys"] ])
@@ -166,6 +168,9 @@ def sqlite_handler(request):
         reqt = ("streamchunking", 1000)
     req = ("sqlitecommand", "execute", sqlquery, reqt)
     dataproxy.m_socket.sendall(simplejson.dumps(req) + '\n')
+    
+    if format not in ["csv", "jsondict", "json"]:
+        return HttpResponse("Error: the format '%s' is not supported" % format)
     
     if format == "csv":
         st = stream_csv(dataproxy)
