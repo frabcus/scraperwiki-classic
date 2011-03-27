@@ -266,6 +266,32 @@ module ScraperWiki
     end
 
 
+    def ScraperWiki.show_tables(dbname=nil)
+        name = "sqlite_master"
+        if dbname != nil
+            name = dbname+"."+name 
+        end
+        result = ScraperWiki.sqlitecommand("execute", val1="select tbl_name, sql from `"+name+"` where type='table'")
+        #return result["data"]
+        return (Hash[*result["data"].flatten])   # pre-1.8.7
+    end
+
+
+    def ScraperWiki.table_info(name)
+        sname = name.split(".")
+        if sname.length == 2
+            result = sqlitecommand("execute", "PRAGMA %s.table_info(`%s`)" % sname)
+        else
+            result = sqlitecommand("execute", "PRAGMA table_info(`%s`)" % name)
+        end
+        res = [ ]
+        for d in result["data"]
+            res.push(Hash[*result["keys"].zip(d).flatten])   # pre-1.8.7
+        end
+        return res
+    end
+
+
     def ScraperWiki.getKeys(name)
         return SW_APIWrapper.getKeys(name)
     end
@@ -292,10 +318,10 @@ module ScraperWiki
     end
     
     def ScraperWiki.sqliteexecute(val1, val2=nil, verbose=1)
-        if val2 != nil && val1.scan(/\?/) and val2.class != Array
+        if val2 != nil && val1.scan(/\?/).length != 0 && val2.class != Array
             val2 = [val2]
         end
-        return ScraperWiki.sqlitecommand("execute", val1, val2, verbose)
+        a = ScraperWiki.sqlitecommand("execute", val1, val2, verbose)
     end
 
     def ScraperWiki.commit(verbose=1)
@@ -303,7 +329,7 @@ module ScraperWiki
     end
 
     def ScraperWiki.select(val1, val2=nil, verbose=1)
-        if val2 != nil && val1.scan(/\?/) and val2.class != Array
+        if val2 != nil && val1.scan(/\?/).length != 0 && val2.class != Array
             val2 = [val2]
         end
         result = ScraperWiki.sqlitecommand("execute", "select "+val1, val2, verbose)

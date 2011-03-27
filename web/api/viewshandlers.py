@@ -161,7 +161,7 @@ def sqlite_handler(request):
             sqlitedata = dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
     
     sqlquery = request.GET.get('query', "")
-    format = request.GET.get("format")
+    format = request.GET.get("format", "json")
     
     reqt = None
     if format == "csv":

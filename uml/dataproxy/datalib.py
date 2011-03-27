@@ -681,7 +681,7 @@ class Database :
         
         if command == "execute":
             try:
-                bstreamchunking = val2 and val2[0] == "streamchunking" and not re.search("\?", val1)
+                bstreamchunking = val2 and not re.search("\?", val1) and type(val2) in [list, tuple] and val2[0] == "streamchunking"
                     # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
                 signal.alarm (10)  # should use set_progress_handler !!!!
                 if val2 and not bstreamchunking:
