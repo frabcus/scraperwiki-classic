@@ -6,75 +6,53 @@ class SW_APIWrapperClass
 {
     static function getKeys($name)
     {
-        global $apiurl; 
-        $url = "{$apiurl}getkeys?&name={$name}"; 
+        $result = scraperwiki::execute("select * from `$name`.swdata limit 0")
+        return result["keys"]; 
+    }
+
+    static function getInfo($name)
+    {
+        $url = "http://api.scraperwiki.com/api/1.0/scraper/getinfo?".encode(query); 
         $handle = fopen($url, "r"); 
         $ljson = stream_get_contents($handle); 
         fclose($handle);
         return json_decode($ljson); 
     }
 
-    static function generateData($urlbase, $limit, $offset)
+    static function getData($name, $limit= -1, $offset= 0)
     {
-        global $apilimit; 
         $count = 0;
         $loffset = 0;
         $result = array(); 
         while (true)
         {
             $llimit = ($limit == -1 ? $apilimit : min($apilimit, $limit-$count)); 
-                
-            $url = "{$urlbase}&limit={$llimit}&offset=".($offset+$loffset); 
-            $handle = fopen($url, "r"); 
-            $ljson = stream_get_contents($handle); 
-            fclose($handle);
-            $lresult = json_decode($ljson); 
+            $query = "* from `$name`.swdata limit $llimit offset ".($offset+$loffset); 
+            $lresult = scraperwiki::select("select * from `$name`.swdata limit 0"); 
             $count += count($lresult); 
             $result = array_merge($result, $lresult); 
-            if (count($lresult) < $llimit)  // run out of records
+            if (count($lresult) < $llimit)
                 break; 
-                
-            if (($limit != -1) and ($count >= $limit))    // exceeded the limit
+            if (($limit != -1) and ($count >= $limit))
                 break; 
-    
             $loffset += $llimit; 
         }
         return $result; 
     }
-    
-    static function getData($name, $limit= -1, $offset= 0)
-    {
-        global $apiurl; 
-        $urlbase = "{$apiurl}getdata?name={$name}"; 
-        return SW_APIWrapperClass::generateData($urlbase, $limit, $offset); 
-    }
 
     static function getDataByDate($name, $start_date, $end_date, $limit= -1, $offset= 0)
     {
-        global $apiurl; 
-        $urlbase = "{$apiurl}getdatabydate?name={$name}&start_date={$start_date}&end_date={$end_date}"; 
-        return SW_APIWrapperClass::generateData($urlbase, $limit, $offset); 
+        throw new Exception("getDataByDate has been deprecated"); 
     }
     
     static function getDataByLocation($name, $lat, $lng, $limit= -1, $offset= 0)
     {
-        global $apiurl; 
-        $urlbase = "{$apiurl}getdatabylocation?name={$name}&lat={$lat}&lng={$lng}"; 
-        return SW_APIWrapperClass::generateData($urlbase, $limit, $offset); 
+        throw new Exception("getDataByLocation has been deprecated"); 
     }
         
     static function search($name, $filterdict, $limit= -1, $offset= 0)
     {
-        global $apiurl; 
-        $filter = ""; 
-        foreach ($filterdict as $key => $value)
-        {
-            if ($filter)
-                $filter .= "|";
-            $filter .= urlencode($key).",".urlencode($value); 
-        }
-        $urlbase = "{$apiurl}search?name={$name}&filter={$filter}"; 
-        return SW_APIWrapperClass::generateData($urlbase, $limit, $offset); 
+        throw new Exception("apiwrapper.search has been deprecated"); 
     }
     
     
@@ -86,13 +64,7 @@ class SW_APIWrapperClass
         $name1 = "uk-offshore-oil-wells"; 
         $name2 = "uk-lottery-grants"; 
         print_r(getKeys($name1)); 
-    
         print_r(getData($name1, 110)); 
-        print_r(getDataByDate($name2, $start_date="2009-01-01", $end_date="2009-01-12")); 
-        
-        print_r(getDataByLocation($name1, $lat=59.033358, $lng=1.0486569, $limit=60)); 
-        $filterdict = array('Distributing_Body' => 'UK Sport', "Region" => "London"); 
-        print_r(search($name2, $filterdict, $offset=5, $limit=17)); 
     }
 }
 

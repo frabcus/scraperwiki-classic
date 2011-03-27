@@ -58,15 +58,27 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
          )  )  ;
    }
 
-   static function save ($unique_keys, $data, $date = null, $latlng = null)
+   static function save($unique_keys, $data, $date = null, $latlng = null)
    {
-      $ds      = SW_DataStoreClass::create () ;
-   
-      $result  = $ds->save ($unique_keys, $data, $date, $latlng) ;
-      if (! $result[0])
-         throw new Exception ($result[1]) ;
+      $ds = SW_DataStoreClass::create() ;
+      if ($ds->request(array('item_count'))[1] != 0)
+      {
+        $result = $ds->save($unique_keys, $data, $date, $latlng);
+        if (! $result[0])
+            throw new Exception ($result[1]) ;
+    
+        scraperwiki::sw_dumpMessage (array('message_type' => 'data', 'content' => $data)) ;
+      }
 
-      scraperwiki::sw_dumpMessage (array('message_type' => 'data', 'content' => $data)) ;
+      $ldata = $data.copy();   // what's the function?
+      if (!is_null($date))
+         $ldata["date"] = $date; 
+      if (!is_null($latlng))
+      {
+         $ldata["latlng_lat"] = $latlng[0]; 
+         $ldata["latlng_lng"] = $latlng[1]; 
+      }
+      return scraperwiki::save_sqlite(unique_keys=unique_keys, data=ldata)
    }
 
    static function sqlitecommand($command, $val1 = null, $val2 = null)
@@ -87,6 +99,43 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
          throw new Exception ($result->error) ;
       scraperwiki::sw_dumpMessage (array('message_type'=>'data', 'content'=>$data)) ;
    }
+
+// zip two arrays in PHP?
+   static function select($val1, $val2=null)
+   {
+      result = sqlitecommand("execute", "select %s" % $val1, $val2); 
+      return array(); //[ dict(zip(result["keys"], d))  for d in result["data"] ]; 
+   }
+
+   static function attach($name, $asname=null)
+   {
+      sqlitecommand("attach", $name, $asname); 
+   }
+
+// how do you find the type in php?
+   static function save_var($name, $value)
+   {
+      $data = array("name"=>$name, "value_blob"=>$value, "type"=>type($value)); 
+      save_sqlite(array("name"), $data, "swvariables"); 
+   }
+
+// length of array in PHP?
+   static function get_var($name, $default=None)
+   {
+      $ds = SW_DataStoreClass::create () ;
+      $result = $ds->request(array('save_sqlite', $unique_keys, $data, $table_name)); 
+      if (property_exists($result, 'error'))
+      {
+         if ($result["error"].startsWith('sqlite3.Error: no such table:'))
+            return $default;
+         throw new Exception($result->error) ;
+      }
+      $data = $result["data"]; 
+      if (count($data) == 0)
+         return $default; 
+      return data[0][0]
+   }
+
 
    static function gb_postcode_to_latlng ($postcode)
    {
@@ -129,6 +178,7 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
          )  )  ;
    }
 
+// to go to get_var and set_var
    static function get_metadata($metadata_name, $default = null)
    {
       return SW_MetadataClient::create()->get($metadata_name);
@@ -140,6 +190,10 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       return SW_MetadataClient::create()->save($metadata_name, $value);
    }
 
+
+    static function getInfo($name) {
+        return SW_APIWrapperClass::getInfo($name); 
+    }
 
     static function getKeys($name) {
         return SW_APIWrapperClass::getKeys($name); 
