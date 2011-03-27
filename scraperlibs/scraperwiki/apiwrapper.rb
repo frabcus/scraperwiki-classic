@@ -6,18 +6,33 @@ require 'cgi'
 
 $apiurl = "http://api.scraperwiki.com/api/1.0/datastore/"
 
+$attacheddata = [ ]
+
 module SW_APIWrapper
     def SW_APIWrapper.get_url(url)
         Net::HTTP.get(URI.parse(url))
     end
     
     def SW_APIWrapper.getKeys(name)
-        url = "%sgetkeys?&name=%s" % [$apiurl, name]
-        ljson = get_url(url)
-        return JSON.parse(ljson)
+        if !$attacheddata.include?(name)
+            puts "*** instead of getKeys('"+name+"') please use\n    ScraperWiki.attach('"+name+"') \n    print ScraperWiki.sqliteexecute('select * from `"+name+"`.swdata limit 0')['keys']"
+            ScraperWiki.attach(name)
+            $attacheddata.push(name)
+        end
+        result = ScraperWiki.sqliteexecute("select * from `"+name+"`.swdata limit 0")
+        if result.include?("error")
+            raise SqliteException.new(result["error"])
+        end
+        return result["keys"]
     end
 
-    def SW_APIWrapper.generateData(urlbase, limit, offset)
+    def SW_APIWrapper.getData(name, limit=-1, offset=0)
+        if !$attacheddata.include?(name)
+            puts "*** instead of getData('"+name+"') please use\n    ScraperWiki.attach('"+name+"') \n    print ScraperWiki.select('* from `"+name+"`.swdata')"
+            ScraperWiki.attach(name)
+            $attacheddata.push(name)
+        end
+
         apilimit = 500
         g = Generator.new do |g|
             count = 0
@@ -27,52 +42,34 @@ module SW_APIWrapper
                 else
                     step = apilimit < (limit - count) ? apilimit : limit - count
                 end
+                query = "* from `#{name}`.swdata limit #{step} offset #{offset+count}"
 
-                url = "#{urlbase}&limit=#{step}&offset=#{offset+count}"
-                records = JSON.parse(ScraperWiki.scrape(url))
+                records = ScraperWiki.select(query)
                 for r in records
                     g.yield r
                 end
 
                 count += records.length
-
                 if records.length < step
-                    # run out of records
                     break
                 end
-
                 if limit != -1 and count >= limit
-                    # exceeded the limit
                     break
                 end
             end
         end
     end
 
-    def SW_APIWrapper.getData(name, limit=-1, offset=0)
-        urlbase = "#{$apiurl}getdata?name=#{name}"
-        SW_APIWrapper.generateData(urlbase, limit, offset)
-    end
     
     def SW_APIWrapper.getDataByDate(name, start_date, end_date, limit=-1, offset=0)
-        urlbase = "#{$apiurl}getdatabydate?name=#{name}&start_date=#{start_date}&end_date=#{end_date}"
-        SW_APIWrapper.generateData(urlbase, limit, offset)
+        raise SqliteException.new("getDataByDate has been deprecated")
     end
     
     def SW_APIWrapper.getDataByLocation(name, lat, lng, limit=-1, offset=0)
-        urlbase = "#{$apiurl}getdatabydate?name=#{name}&lat=#{lat}&lng=#{lng}"
-        SW_APIWrapper.generateData(urlbase, limit, offset)
+        raise SqliteException.new("getDataByLocation has been deprecated")
     end
         
     def SW_APIWrapper.search(name, filtermap, limit=-1, offset=0)
-        res = []
-        filtermap.each do |k, v|
-            key = CGI.escape k
-            value = CGI.escape v
-            res.push "%s,%s" % [key, value]
-        end
-        filter = res.join("|")
-        urlbase = "#{$apiurl}search?name=#{name}&filter=#{filter}"
-        return SW_APIWrapper.generateData(urlbase, limit, offset)
+        raise SqliteException.new("SW_APIWrapper.search has been deprecated")
     end
 end
