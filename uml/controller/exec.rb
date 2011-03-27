@@ -13,7 +13,7 @@ class ConsoleStream
     # Do our best to turn anything into unicode, for display on console
     # (for datastore, we give errors if it isn't already UTF-8)
     def saveunicode(text)
-       begin
+        begin
             text = Iconv.conv('utf-8', 'utf-8', text)
         rescue Iconv::IllegalSequence
             begin

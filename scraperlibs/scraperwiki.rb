@@ -5,9 +5,16 @@ require 'scraperwiki/datastore'
 require 'scraperwiki/metadata'
 require 'scraperwiki/apiwrapper'
 
+class SqliteException < RuntimeError
+end
+
+class NoSuchTableSqliteException < SqliteException
+end
+
 module ScraperWiki
 
     $cacheFor = 0
+    $metacallholder = nil
 
     def ScraperWiki.allowCache(cacheFor)
         $cacheFor = cacheFor
@@ -66,27 +73,37 @@ module ScraperWiki
         return res[1]
     end
 
-    def ScraperWiki.get_metadata(metadata_name, default = nil)
-        return SW_MetadataClient.create().get(metadata_name, default)
-    end
-
-    def ScraperWiki.save_metadata(metadata_name, value)
-        return SW_MetadataClient.create().save(metadata_name, value)
-    end
 
     def ScraperWiki._unicode_truncate(string, size)
         # Stops 2 byte unicode characters from being chopped in half which kills JSON serializer
         string.scan(/./u)[0,size].join
     end
 
-    def ScraperWiki.save(unique_keys, data, date = nil, latlng = nil)
+    def ScraperWiki.save(unique_keys, data, date=nil, latlng=nil, table_name="swdata")
         if unique_keys != nil && !unique_keys.kind_of?(Array)
             raise 'unique_keys must be nil or an array'
         end
 
         ds = SW_DataStore.create()
-        js_data = ds.mangleflattendict(scraper_data)
+
+            # redirect to sqlite version if nothing in old style datastore
+        if ds.request(['item_count'])[1] == 0
+            ldata = data.dup
+            if date != nil
+                ldata["date"] = date
+            end
+            if latlng != nil
+                ldata["latlng_lat"] = latlng[0]
+                ldata["latlng_lng"] = latlng[1]
+            end
+            return ScraperWiki.save_sqlite(unique_keys, ldata, table_name="swdata", verbose=2)
+        end
+
+        js_data = ds.mangleflattendict(data)
         uunique_keys = ds.mangleflattenkeys(unique_keys)
+        if latlng != nil
+            latlng = '%010.6f,%010.6f' % latlng
+        end
         res = ds.request(['save', uunique_keys, js_data, date, latlng])
 
         raise res[1] if not res[0]
@@ -102,14 +119,11 @@ module ScraperWiki
             pdata[key] = value
         end
         ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => pdata})
+        return
     end
 
-    class SqliteException < RuntimeError
-    end
 
-    class NoSuchTableSqliteException < SqliteException
-    end
-
+        # this ought to be a local function (the other sqlite functions go through it)
     def ScraperWiki.sqlitecommand(command, val1=nil, val2=nil, verbose=2)
         ds = SW_DataStore.create()
         res = ds.request(['sqlitecommand', command, val1, val2])
@@ -220,15 +234,35 @@ module ScraperWiki
 
     def ScraperWiki.get_var(name, default=nil, verbose=2)
         begin
-            result = ScraperWiki.sqlitecommand("execute", "select value_blob, type from swvariables where name=?", [name,], verbose)
+            result = ScraperWiki.sqliteexecute("select value_blob, type from swvariables where name=?", name, verbose)
         rescue NoSuchTableSqliteException => e   
             return default
         end
-
-        if !result["data"]
+        if result["data"].length == 0
             return default
         end
         return result["data"][0][0]
+    end
+
+    def ScraperWiki.get_metadata(metadata_name, default = nil)
+        if $metacallholder == nil
+            puts "*** instead of get_metadata('"+metadata_name+"') please use\n    get_var('"+metadata_name+"')"
+            $metacallholder = "9sd8sd9fs9d8f9s8df9s8f"
+        end
+        result = ScraperWiki.get_var(metadata_name, $metacallholder)
+        if result == $metacallholder
+            result = SW_MetadataClient.create().get(metadata_name, default) 
+        end
+        return result
+    end
+
+    def ScraperWiki.save_metadata(metadata_name, value)
+        #return SW_MetadataClient.create().save(metadata_name, value)
+        if $metacallholder == nil
+            puts "*** instead of metadata.save('"+metadata_name+"') please use\n    scraperwiki.sqlite.save_var('"+metadata_name+"')"
+            $metacallholder = "9sd8sd9fs9d8f9s8df9s8f"
+        end
+        return ScraperWiki.save_var(metadata_name, value)
     end
 
 
@@ -241,7 +275,7 @@ module ScraperWiki
     end
     
     def ScraperWiki.getDataByDate(name, start_date, end_date, limit=-1, offset=0)
-        SW_APIWrapper.getDataByDate(name, start_date, end_date, limit, offset)
+        raise SqliteException.new("getDataByDate has been deprecated")
     end
     
     def ScraperWiki.getDataByLocation(name, lat, lng, limit=-1, offset=0)
@@ -250,6 +284,35 @@ module ScraperWiki
         
     def ScraperWiki.search(name, filterdict, limit=-1, offset=0)
         SW_APIWrapper.search(name, filterdict, limit, offset)
+    end
+
+
+    def ScraperWiki.attach(name, asname=nil, verbose=1)
+        return ScraperWiki.sqlitecommand("attach", name, asname, verbose)
+    end
+    
+    def ScraperWiki.sqliteexecute(val1, val2=nil, verbose=1)
+        if val2 != nil && val1.scan(/\?/) and val2.class != Array
+            val2 = [val2]
+        end
+        return ScraperWiki.sqlitecommand("execute", val1, val2, verbose)
+    end
+
+    def ScraperWiki.commit(verbose=1)
+        return ScraperWiki.sqlitecommand("commit", nil, nil, verbose)
+    end
+
+    def ScraperWiki.select(val1, val2=nil, verbose=1)
+        if val2 != nil && val1.scan(/\?/) and val2.class != Array
+            val2 = [val2]
+        end
+        result = ScraperWiki.sqlitecommand("execute", "select "+val1, val2, verbose)
+        res = [ ]
+        for d in result["data"]
+            #res.push(Hash[result["keys"].zip(d)])           # post-1.8.7
+            res.push(Hash[*result["keys"].zip(d).flatten])   # pre-1.8.7
+        end
+        return res
     end
 
 end
