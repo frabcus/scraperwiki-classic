@@ -97,29 +97,36 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       $result = $ds->request(array('save_sqlite', $unique_keys, $data, $table_name)); 
       if (property_exists($result, 'error'))
          throw new Exception ($result->error) ;
-      scraperwiki::sw_dumpMessage (array('message_type'=>'data', 'content'=>$data)) ;
+      scraperwiki::sw_dumpMessage(array('message_type'=>'data', 'content'=>$data)) ;
    }
 
-// zip two arrays in PHP?
    static function select($val1, $val2=null)
    {
-      result = sqlitecommand("execute", "select %s" % $val1, $val2); 
-      return array(); //[ dict(zip(result["keys"], d))  for d in result["data"] ]; 
+      $result = scraperwiki::sqlitecommand("execute", "select %s" % $val1, $val2); 
+      //http://rosettacode.org/wiki/Hash_from_two_arrays
+      $res = array(); 
+      foreach ($result["data"] as $i => $row)
+         array_push($res, array_combine(result["keys"], $row)); 
+      return $res; 
    }
 
    static function attach($name, $asname=null)
    {
-      sqlitecommand("attach", $name, $asname); 
+      scraperwiki::sqlitecommand("attach", $name, $asname); 
    }
 
-// how do you find the type in php?
    static function save_var($name, $value)
    {
-      $data = array("name"=>$name, "value_blob"=>$value, "type"=>type($value)); 
+      if (is_int($value))
+         $jvalue = $value; 
+      else if (is_double($value))
+         $jvalue = $value; 
+      else
+         $jvalue = json_encode($value); 
+      $data = array("name"=>$name, "value_blob"=>$jvalue, "type"=>gettype($value)); 
       save_sqlite(array("name"), $data, "swvariables"); 
    }
 
-// length of array in PHP?
    static function get_var($name, $default=None)
    {
       $ds = SW_DataStoreClass::create () ;
