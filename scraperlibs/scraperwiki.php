@@ -187,16 +187,18 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
          )  )  ;
    }
 
-// to go to get_var and set_var
+
+   // the meta functions weren't being used to any extent in PHP anyway
    static function get_metadata($metadata_name, $default = null)
    {
-      return SW_MetadataClient::create()->get($metadata_name);
+      return scraperwiki::get_var($metadata_name, $default); 
+      //return SW_MetadataClient::create()->get($metadata_name);
    }
 
    static function save_metadata($metadata_name, $value)
    {
-      print "Saving " . $metadata_name . ": " . $value . "\n";
-      return SW_MetadataClient::create()->save($metadata_name, $value);
+      return scraperwiki::save_var($metadata_name, $value); 
+      //return SW_MetadataClient::create()->save($metadata_name, $value);
    }
 
 

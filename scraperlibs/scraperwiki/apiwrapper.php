@@ -7,13 +7,12 @@ class SW_APIWrapperClass
     static function getKeys($name)
     {
         global $attacheddata; 
-        if (!in_array($name))
+        if (!in_array($name, $attacheddata))
         {
             print "*** instead of getKeys('$name') please do\n    scraperwiki.sqlite.attach('$name') \n    print scraperwiki.sqlite.execute('select * from `$name`.swdata limit 0')->keys"; 
             scraperwiki::attach($name);
-            array_push($attacheddata, name); 
+            array_push($attacheddata, $name); 
         }
-        scraperwiki::attach($name);
         $result = scraperwiki::sqlitecommand("execute", "select * from `$name`.swdata limit 0"); 
         return $result->keys; 
     }
@@ -30,11 +29,11 @@ class SW_APIWrapperClass
     static function getData($name, $limit= -1, $offset= 0)
     {
         global $attacheddata; 
-        if (!in_array($name))
+        if (!in_array($name, $attacheddata))
         {
             print "*** instead of getData('$name') please do\n    scraperwiki.sqlite.attach('$name') \n    print scraperwiki.sqlite.select('* from `$name`.swdata')"; 
             scraperwiki::attach($name);
-            array_push($attacheddata, name); 
+            array_push($attacheddata, $name); 
         }
         $apilimit = 100; 
         $count = 0;
@@ -46,7 +45,8 @@ class SW_APIWrapperClass
             $query = "* from `$name`.swdata limit $llimit offset ".($offset+$loffset); 
             $lresult = scraperwiki::select($query); 
             $count += count($lresult); 
-            $result = array_merge($result, $lresult); 
+            foreach ($lresult as $k=>$v)
+                array_push($result, (object)$v); 
             if (count($lresult) < $llimit)
                 break; 
             if (($limit != -1) and ($count >= $limit))
