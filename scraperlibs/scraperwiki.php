@@ -95,7 +95,7 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
 
    static function unicode_truncate($val, $n)
    {
-      if ($val == nil)
+      if ($val == null)
          $val = ""; 
       return substr($val, 0, $n); //need to do more?
    }
@@ -115,7 +115,7 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
             $sdata = $data;
          $pdata = array(); 
          foreach ($sdata as $key=>$value)
-            $pdata[unicode_truncate($key)] = unicode_truncate($value); 
+            $pdata[scraperwiki::unicode_truncate($key, 50)] = scraperwiki::unicode_truncate($value, 50); 
          if (array_key_exists(0, $data) && (count($data) >= 2))
             $pdata["number_records"] = "Number Records: ".count($data); 
          scraperwiki::sw_dumpMessage(array('message_type'=>'data', 'content'=>$pdata));
@@ -135,19 +135,23 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
 
    static function attach($name, $asname=null)
    {
-      scraperwiki::sqlitecommand("attach", $name, $asname); 
+      return scraperwiki::sqlitecommand("attach", $name, $asname); 
    }
-   static function sqliteexecute($val1, $val2=nil, $verbose=1)
+   static function sqlitecommit()
    {
-      scraperwiki::sqlitecommand("execute", $val1, $val2, $verbose); 
+      return scraperwiki::sqlitecommand("commit"); 
+   }
+   static function sqliteexecute($val1, $val2=null, $verbose=1)
+   {
+      return scraperwiki::sqlitecommand("execute", $val1, $val2, $verbose); 
    }
 
    static function show_tables($dbname=null)
    {
       $name = "sqlite_master"; 
-      if (dbname != null)
-          $name = $dbname+"."+$name; 
-      $result = scraperwiki::sqlitecommand("execute", "select tbl_name, sql from `$name` where type='table'"); 
+      if ($dbname != null)
+          $name = "`$dbname`.sqlite_master"; 
+      $result = scraperwiki::sqlitecommand("execute", "select tbl_name, sql from $name where type='table'"); 
       $res = array(); 
       foreach ($result->data as $i=>$row)
          $res[$row[0]] = $row[1]; 
@@ -158,9 +162,9 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
    {
       $sname = explode(".", $name); 
       if (count($sname) == 2)
-          $result = sqlitecommand("execute", "PRAGMA ".$sname[0].".table_info(`".$sname[1]."`)"); 
+          $result = scraperwiki::sqlitecommand("execute", "PRAGMA ".$sname[0].".table_info(`".$sname[1]."`)"); 
       else
-          $result = sqlitecommand("execute", "PRAGMA table_info(`".$name."`)"); 
+          $result = scraperwiki::sqlitecommand("execute", "PRAGMA table_info(`".$name."`)"); 
       $res = array(); 
       foreach ($result->data as $i => $row)
          array_push($res, array_combine($result->keys, $row)); 

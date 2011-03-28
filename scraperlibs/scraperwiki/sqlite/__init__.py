@@ -22,8 +22,8 @@ def select(val1, val2=None, verbose=1):
 def show_tables(dbname=""):
     name = "sqlite_master"
     if dbname:
-        name = "%s.%s" % (dbname, name)
-    result = sqlitecommand("execute", "select tbl_name, sql from `%s` where type='table'" % name)
+        name = "`%s`.%s" % (dbname, name)
+    result = sqlitecommand("execute", "select tbl_name, sql from %s where type='table'" % name)
     return dict(result["data"])
 
 
