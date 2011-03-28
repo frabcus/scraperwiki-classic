@@ -61,7 +61,8 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
    static function save($unique_keys, $data, $date = null, $latlng = null)
    {
       $ds = SW_DataStoreClass::create() ;
-      if ($ds->request(array('item_count'))[1] != 0)
+      $olddatastoreitemcount = $ds->request(array('item_count')); 
+      if ($olddatastoreitemcount[1] != 0)
       {
         $result = $ds->save($unique_keys, $data, $date, $latlng);
         if (! $result[0])
@@ -78,7 +79,7 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
          $ldata["latlng_lat"] = $latlng[0]; 
          $ldata["latlng_lng"] = $latlng[1]; 
       }
-      return scraperwiki::save_sqlite(unique_keys=unique_keys, data=ldata)
+      return scraperwiki::save_sqlite($unique_keys, $ldata); 
    }
 
    static function sqlitecommand($command, $val1 = null, $val2 = null)
@@ -93,11 +94,12 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
 
    static function save_sqlite($unique_keys, $data, $table_name="swdata", $verbose=2)
    {
-      $ds = SW_DataStoreClass::create () ;
+      $ds = SW_DataStoreClass::create();
       $result = $ds->request(array('save_sqlite', $unique_keys, $data, $table_name)); 
       if (property_exists($result, 'error'))
          throw new Exception ($result->error) ;
-      scraperwiki::sw_dumpMessage(array('message_type'=>'data', 'content'=>$data)) ;
+      scraperwiki::sw_dumpMessage(array('message_type'=>'data', 'content'=>$data));
+      return $result; 
    }
 
    static function select($val1, $val2=null)
@@ -106,7 +108,7 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       //http://rosettacode.org/wiki/Hash_from_two_arrays
       $res = array(); 
       foreach ($result["data"] as $i => $row)
-         array_push($res, array_combine(result["keys"], $row)); 
+         array_push($res, array_combine($result["keys"], $row)); 
       return $res; 
    }
 
@@ -140,7 +142,7 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       $data = $result["data"]; 
       if (count($data) == 0)
          return $default; 
-      return data[0][0]
+      return $data[0][0]; 
    }
 
 

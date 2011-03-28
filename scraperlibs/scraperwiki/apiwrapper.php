@@ -6,8 +6,8 @@ class SW_APIWrapperClass
 {
     static function getKeys($name)
     {
-        $result = scraperwiki::execute("select * from `$name`.swdata limit 0")
-        return result["keys"]; 
+        $result = scraperwiki::sqlitecommand("execute", "select * from `$name`.swdata limit 0"); 
+        return $result["keys"]; 
     }
 
     static function getInfo($name)
