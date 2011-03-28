@@ -7,12 +7,13 @@ div.draft_warning {background:#ffce5d; text-align:center; font-size:0.8em; paddi
 
 /* Header */
 .editor_header {background:#fafafa; position:relative;border-bottom:solid #9f9f9f 1px;}
-.editor_header div.title input {font-weight:bold; font-size:1em; padding:0 0 0 0; color:#000;
-        border:solid 2px transparent; background:none; width:30%;margin-left:2px;position:relative;top:-5px;}
-.editor_header div.title img {margin:5px 0 0 10px;}        
+.editor_header div.title {font-weight:bold; font-size:1em; padding:0 0 0 0; color:#000;
+        margin-left:10px; margin-bottom: 0.25em; margin-top: 0.25em; }
+.editor_header div.title img {vertical-align: middle; margin-right: 5px; margin-top: -0.25em;}   
+.editor_header div.title input { border:solid 2px transparent; background:none; width: 50%; font-weight: bold; margin-top 0.15em; font-size: 1em; color: #000; font-family: Helvetica, arial, sans-serif }
 .editor_header div.title input:focus {background:#fff; border:inset 2px;outline:none; color:#000;}
 .editor_header div.title input:hover {background:#ffffd3;color:#000;}
-.editor_header div.page_tabs {position:absolute; bottom:0px; right:0;}
+.editor_header div.page_tabs {position:absolute; bottom:0.15em; right:0; float: right}
 .editor_header div.page_tabs li {border-color:#9f9f9f;}
 .editor_header div.page_tabs ul {border-bottom-color:#9f9f9f;}
 .editor_header #border_hide {background:#fafafa;position:absolute; display:block; width:2.85em; height:3px;
