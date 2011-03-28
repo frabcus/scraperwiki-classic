@@ -47,7 +47,7 @@ def frontpage(request, public_profile_field=None):
     for tag in tags_sorted:
         tags.append(tag[0])
     
-    data = {'featured_views': featured_views, 'featured_scrapers': featured_scrapers, 'tags': tags, 'language': 'python'}
+    data = {'featured_views': featured_views, 'featured_scrapers': featured_scrapers, 'tags': tags, 'language': 'python', 'body_class':'frontpage'}
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
 
 @login_required

@@ -39,7 +39,7 @@
     {% endif %}
 </head>
 
-	<body>
+	<body class="{{ body_class }}">
 	    <div class="banner">
 	        <ul class="user_menu">
 				{% if user.is_authenticated %}
@@ -67,7 +67,7 @@
 			<p>{{site_message}}</p>
 	    </div>
 
-    {# Header #}
+    {% block header %}
     <div id="divHeader">
        <div id="divLogo">
           <p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
@@ -109,6 +109,7 @@
           </ul>
         </div>
      </div>
+	{% endblock %}
 
 	    {% block above_page %}{% endblock %}		    
 
