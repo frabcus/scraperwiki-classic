@@ -135,7 +135,7 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       $result = $ds->request(array('sqlitecommand', "execute", "select value_blob, type from swvariables where name=?", array($name)));
       if (property_exists($result, 'error'))
       {
-         if ($result->error.startsWith('sqlite3.Error: no such table:'))
+         if (substr($result->error, 0, 29) == 'sqlite3.Error: no such table:')
             return $default;
          throw new Exception($result->error) ;
       }
