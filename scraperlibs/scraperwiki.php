@@ -93,13 +93,33 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       return $result; 
    }
 
+   static function unicode_truncate($val, $n)
+   {
+      if ($val == nil)
+         $val = ""; 
+      return substr($val, 0, $n); //need to do more?
+   }
+
    static function save_sqlite($unique_keys, $data, $table_name="swdata", $verbose=2)
    {
       $ds = SW_DataStoreClass::create();
       $result = $ds->request(array('save_sqlite', $unique_keys, $data, $table_name)); 
       if (property_exists($result, 'error'))
-         throw new Exception ($result->error) ;
-      scraperwiki::sw_dumpMessage(array('message_type'=>'data', 'content'=>$data));
+         throw new Exception ($result->error);
+
+      if ($verbose == 2)
+      {
+         if (array_key_exists(0, $data))
+            $sdata = $data[0]; 
+         else
+            $sdata = $data;
+         $pdata = array(); 
+         foreach ($sdata as $key=>$value)
+            $pdata[unicode_truncate($key)] = unicode_truncate($value); 
+         if (array_key_exists(0, $data) && (count($data) >= 2))
+            $pdata["number_records"] = "Number Records: ".count($data); 
+         scraperwiki::sw_dumpMessage(array('message_type'=>'data', 'content'=>$pdata));
+      }
       return $result; 
    }
 
