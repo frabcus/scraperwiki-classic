@@ -1,11 +1,19 @@
 <?php
 // code ported from http://scraperwiki.com/views/php-api-access/
 $apiurl = "http://api.scraperwiki.com/api/1.0/datastore/"; 
+$attacheddata = array(); 
 class SW_APIWrapperClass
 {
     static function getKeys($name)
     {
-        scraperwiki::attach("nlud"));
+        global $attacheddata; 
+        if (!in_array($name))
+        {
+            print "*** instead of getKeys('$name') please do\n    scraperwiki.sqlite.attach('$name') \n    print scraperwiki.sqlite.execute('select * from `$name`.swdata limit 0')->keys"; 
+            scraperwiki::attach($name);
+            array_push(attacheddata, name); 
+        }
+        scraperwiki::attach($name);
         $result = scraperwiki::sqlitecommand("execute", "select * from `$name`.swdata limit 0"); 
         return $result->keys; 
     }
@@ -21,8 +29,14 @@ class SW_APIWrapperClass
 
     static function getData($name, $limit= -1, $offset= 0)
     {
+        global $attacheddata; 
+        if (!in_array($name))
+        {
+            print "*** instead of getData('$name') please do\n    scraperwiki.sqlite.attach('$name') \n    print scraperwiki.sqlite.select('* from `$name`.swdata')"; 
+            scraperwiki::attach($name);
+            array_push(attacheddata, name); 
+        }
         $apilimit = 100; 
-        scraperwiki::attach("nlud"));
         $count = 0;
         $loffset = 0;
         $result = array(); 
