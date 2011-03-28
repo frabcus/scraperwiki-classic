@@ -11,7 +11,7 @@ class SW_APIWrapperClass
         {
             print "*** instead of getKeys('$name') please do\n    scraperwiki.sqlite.attach('$name') \n    print scraperwiki.sqlite.execute('select * from `$name`.swdata limit 0')->keys"; 
             scraperwiki::attach($name);
-            array_push(attacheddata, name); 
+            array_push($attacheddata, name); 
         }
         scraperwiki::attach($name);
         $result = scraperwiki::sqlitecommand("execute", "select * from `$name`.swdata limit 0"); 
@@ -34,7 +34,7 @@ class SW_APIWrapperClass
         {
             print "*** instead of getData('$name') please do\n    scraperwiki.sqlite.attach('$name') \n    print scraperwiki.sqlite.select('* from `$name`.swdata')"; 
             scraperwiki::attach($name);
-            array_push(attacheddata, name); 
+            array_push($attacheddata, name); 
         }
         $apilimit = 100; 
         $count = 0;
