@@ -82,14 +82,22 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       return scraperwiki::save_sqlite($unique_keys, $ldata); 
    }
 
-   static function sqlitecommand($command, $val1 = null, $val2 = null)
+   static function sqlitecommand($command, $val1=null, $val2=null, $verbose=1)
    {
       $ds = SW_DataStoreClass::create();
       $result = $ds->request(array('sqlitecommand', $command, $val1, $val2));
       if (property_exists($result, 'error'))
-         throw new Exception ($result->error) ;
-      scraperwiki::sw_dumpMessage (array('message_type'=>'sqlitecall', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
+         throw new Exception ($result->error);
+      if ($verbose != 0)
+         scraperwiki::sw_dumpMessage (array('message_type'=>'sqlitecall', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
       return $result; 
+   }
+
+   static function unicode_truncate($val, $n)
+   {
+      if ($val == null)
+         $val = ""; 
+      return substr($val, 0, $n); //need to do more?
    }
 
    static function save_sqlite($unique_keys, $data, $table_name="swdata", $verbose=2)
@@ -97,8 +105,21 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       $ds = SW_DataStoreClass::create();
       $result = $ds->request(array('save_sqlite', $unique_keys, $data, $table_name)); 
       if (property_exists($result, 'error'))
-         throw new Exception ($result->error) ;
-      scraperwiki::sw_dumpMessage(array('message_type'=>'data', 'content'=>$data));
+         throw new Exception ($result->error);
+
+      if ($verbose == 2)
+      {
+         if (array_key_exists(0, $data))
+            $sdata = $data[0]; 
+         else
+            $sdata = $data;
+         $pdata = array(); 
+         foreach ($sdata as $key=>$value)
+            $pdata[scraperwiki::unicode_truncate($key, 50)] = scraperwiki::unicode_truncate($value, 50); 
+         if (array_key_exists(0, $data) && (count($data) >= 2))
+            $pdata["number_records"] = "Number Records: ".count($data); 
+         scraperwiki::sw_dumpMessage(array('message_type'=>'data', 'content'=>$pdata));
+      }
       return $result; 
    }
 
@@ -114,7 +135,40 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
 
    static function attach($name, $asname=null)
    {
-      scraperwiki::sqlitecommand("attach", $name, $asname); 
+      return scraperwiki::sqlitecommand("attach", $name, $asname); 
+   }
+   static function sqlitecommit()
+   {
+      return scraperwiki::sqlitecommand("commit"); 
+   }
+   static function sqliteexecute($val1, $val2=null, $verbose=1)
+   {
+      return scraperwiki::sqlitecommand("execute", $val1, $val2, $verbose); 
+   }
+
+   static function show_tables($dbname=null)
+   {
+      $name = "sqlite_master"; 
+      if ($dbname != null)
+          $name = "`$dbname`.sqlite_master"; 
+      $result = scraperwiki::sqlitecommand("execute", "select tbl_name, sql from $name where type='table'"); 
+      $res = array(); 
+      foreach ($result->data as $i=>$row)
+         $res[$row[0]] = $row[1]; 
+      return $res; 
+   }
+
+   static function table_info($name)
+   {
+      $sname = explode(".", $name); 
+      if (count($sname) == 2)
+          $result = scraperwiki::sqlitecommand("execute", "PRAGMA ".$sname[0].".table_info(`".$sname[1]."`)"); 
+      else
+          $result = scraperwiki::sqlitecommand("execute", "PRAGMA table_info(`".$name."`)"); 
+      $res = array(); 
+      foreach ($result->data as $i => $row)
+         array_push($res, array_combine($result->keys, $row)); 
+      return $res; 
    }
 
    static function save_var($name, $value)
@@ -135,7 +189,7 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       $result = $ds->request(array('sqlitecommand', "execute", "select value_blob, type from swvariables where name=?", array($name)));
       if (property_exists($result, 'error'))
       {
-         if ($result->error.startsWith('sqlite3.Error: no such table:'))
+         if (substr($result->error, 0, 29) == 'sqlite3.Error: no such table:')
             return $default;
          throw new Exception($result->error) ;
       }
@@ -187,16 +241,18 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
          )  )  ;
    }
 
-// to go to get_var and set_var
+
+   // the meta functions weren't being used to any extent in PHP anyway
    static function get_metadata($metadata_name, $default = null)
    {
-      return SW_MetadataClient::create()->get($metadata_name);
+      return scraperwiki::get_var($metadata_name, $default); 
+      //return SW_MetadataClient::create()->get($metadata_name);
    }
 
    static function save_metadata($metadata_name, $value)
    {
-      print "Saving " . $metadata_name . ": " . $value . "\n";
-      return SW_MetadataClient::create()->save($metadata_name, $value);
+      return scraperwiki::save_var($metadata_name, $value); 
+      //return SW_MetadataClient::create()->save($metadata_name, $value);
    }
 
 
