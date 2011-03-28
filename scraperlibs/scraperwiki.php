@@ -82,13 +82,14 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       return scraperwiki::save_sqlite($unique_keys, $ldata); 
    }
 
-   static function sqlitecommand($command, $val1 = null, $val2 = null)
+   static function sqlitecommand($command, $val1=null, $val2=null, $verbose=1)
    {
       $ds = SW_DataStoreClass::create();
       $result = $ds->request(array('sqlitecommand', $command, $val1, $val2));
       if (property_exists($result, 'error'))
-         throw new Exception ($result->error) ;
-      scraperwiki::sw_dumpMessage (array('message_type'=>'sqlitecall', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
+         throw new Exception ($result->error);
+      if ($verbose != 0)
+         scraperwiki::sw_dumpMessage (array('message_type'=>'sqlitecall', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
       return $result; 
    }
 
@@ -115,6 +116,35 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
    static function attach($name, $asname=null)
    {
       scraperwiki::sqlitecommand("attach", $name, $asname); 
+   }
+   static function sqliteexecute($val1, $val2=nil, $verbose=1)
+   {
+      scraperwiki::sqlitecommand("execute", $val1, $val2, $verbose); 
+   }
+
+   static function show_tables($dbname=null)
+   {
+      $name = "sqlite_master"; 
+      if (dbname != null)
+          $name = $dbname+"."+$name; 
+      $result = scraperwiki::sqlitecommand("execute", "select tbl_name, sql from `$name` where type='table'"); 
+      $res = array(); 
+      foreach ($result->data as $i=>$row)
+         $res[$row[0]] = $row[1]; 
+      return $res; 
+   }
+
+   static function table_info($name)
+   {
+      $sname = explode(".", $name); 
+      if (count($sname) == 2)
+          $result = sqlitecommand("execute", "PRAGMA ".$sname[0].".table_info(`".$sname[1]."`)"); 
+      else
+          $result = sqlitecommand("execute", "PRAGMA table_info(`".$name."`)"); 
+      $res = array(); 
+      foreach ($result->data as $i => $row)
+         array_push($res, array_combine($result->keys, $row)); 
+      return $res; 
    }
 
    static function save_var($name, $value)

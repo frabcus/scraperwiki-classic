@@ -321,7 +321,7 @@ module ScraperWiki
         if val2 != nil && val1.scan(/\?/).length != 0 && val2.class != Array
             val2 = [val2]
         end
-        a = ScraperWiki.sqlitecommand("execute", val1, val2, verbose)
+        return ScraperWiki.sqlitecommand("execute", val1, val2, verbose)
     end
 
     def ScraperWiki.commit(verbose=1)
