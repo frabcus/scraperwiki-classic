@@ -3,9 +3,9 @@
 {% load sw_user_filters %}
 
 {% block title %}Welcome{% endblock %}
-{% block header %}
+{% comment %}{% block header %}
 
-{% endblock %}
+{% endblock %} {% endcomment %}
 {% block content  %}
     {% if user.code_set.all|length %}  
         <div class="page_title">
