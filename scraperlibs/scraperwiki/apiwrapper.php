@@ -1,18 +1,18 @@
 <?php
 // code ported from http://scraperwiki.com/views/php-api-access/
 $apiurl = "http://api.scraperwiki.com/api/1.0/datastore/"; 
-$apilimit = 500; 
 class SW_APIWrapperClass
 {
     static function getKeys($name)
     {
+        scraperwiki::attach("nlud"));
         $result = scraperwiki::sqlitecommand("execute", "select * from `$name`.swdata limit 0"); 
-        return $result["keys"]; 
+        return $result->keys; 
     }
 
     static function getInfo($name)
     {
-        $url = "http://api.scraperwiki.com/api/1.0/scraper/getinfo?".encode(query); 
+        $url = "http://api.scraperwiki.com/api/1.0/scraper/getinfo?name=".urlencode($name); 
         $handle = fopen($url, "r"); 
         $ljson = stream_get_contents($handle); 
         fclose($handle);
@@ -21,6 +21,8 @@ class SW_APIWrapperClass
 
     static function getData($name, $limit= -1, $offset= 0)
     {
+        $apilimit = 100; 
+        scraperwiki::attach("nlud"));
         $count = 0;
         $loffset = 0;
         $result = array(); 
@@ -28,7 +30,7 @@ class SW_APIWrapperClass
         {
             $llimit = ($limit == -1 ? $apilimit : min($apilimit, $limit-$count)); 
             $query = "* from `$name`.swdata limit $llimit offset ".($offset+$loffset); 
-            $lresult = scraperwiki::select("select * from `$name`.swdata limit 0"); 
+            $lresult = scraperwiki::select($query); 
             $count += count($lresult); 
             $result = array_merge($result, $lresult); 
             if (count($lresult) < $llimit)
@@ -58,9 +60,6 @@ class SW_APIWrapperClass
     
     static function Test()
     {
-        global $apilimit; 
-        $apilimit = 50; // make tests easier to stress
-        
         $name1 = "uk-offshore-oil-wells"; 
         $name2 = "uk-lottery-grants"; 
         print_r(getKeys($name1)); 

@@ -104,11 +104,11 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
 
    static function select($val1, $val2=null)
    {
-      $result = scraperwiki::sqlitecommand("execute", "select %s" % $val1, $val2); 
+      $result = scraperwiki::sqlitecommand("execute", "select ".$val1, $val2); 
       //http://rosettacode.org/wiki/Hash_from_two_arrays
       $res = array(); 
-      foreach ($result["data"] as $i => $row)
-         array_push($res, array_combine($result["keys"], $row)); 
+      foreach ($result->data as $i => $row)
+         array_push($res, array_combine($result->keys, $row)); 
       return $res; 
    }
 
@@ -126,20 +126,20 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
       else
          $jvalue = json_encode($value); 
       $data = array("name"=>$name, "value_blob"=>$jvalue, "type"=>gettype($value)); 
-      save_sqlite(array("name"), $data, "swvariables"); 
+      scraperwiki::save_sqlite(array("name"), $data, "swvariables"); 
    }
 
    static function get_var($name, $default=None)
    {
       $ds = SW_DataStoreClass::create () ;
-      $result = $ds->request(array('save_sqlite', $unique_keys, $data, $table_name)); 
+      $result = $ds->request(array('sqlitecommand', "execute", "select value_blob, type from swvariables where name=?", array($name)));
       if (property_exists($result, 'error'))
       {
-         if ($result["error"].startsWith('sqlite3.Error: no such table:'))
+         if ($result->error.startsWith('sqlite3.Error: no such table:'))
             return $default;
          throw new Exception($result->error) ;
       }
-      $data = $result["data"]; 
+      $data = $result->data; 
       if (count($data) == 0)
          return $default; 
       return $data[0][0]; 
