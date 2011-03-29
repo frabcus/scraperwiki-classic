@@ -166,7 +166,7 @@ def sqlite_handler(request):
     sqlquery = request.GET.get('query', "")
     format = request.GET.get("format", "json")
     if format == "json":
-        format = "jsonlist"
+        format = "jsondict"
     
     reqt = None
     if format == "csv":

@@ -552,6 +552,7 @@ class Database :
 
     
     def converttosqlitedatastore(self, scraperID, runID, short_name):
+        self.m_sqlitedbconn = None
         #if runID[:12] != "fromfrontend":
         #    return [ False, "can only be used from frontend" ]
         runID = "converttosqlitedatastore_enabled%s" % runID[12:]
