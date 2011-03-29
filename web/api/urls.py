@@ -64,7 +64,7 @@ urlpatterns = patterns('',
     url(r'^1\.0/datastore/getdatabylocation$', getdatabylocation_handler, name="method_getdatabylocation"),
     
     #url(r'^1\.0/datastore/sqlite',      sqlite_handler,             name="method_sqlite"),
-    url(r'^1\.0/datastore/sqlite',      viewshandlers.sqlite_handler,name="method_sqlite"),
+    url(r'^1\.0/datastore/sqlite$',      viewshandlers.sqlite_handler,name="method_sqlite"),
     url(r'^1\.0/datastore/getdata$',    viewshandlers.data_handler,  name="method_getdata"),
     url(r'^1\.0/datastore/getolddata$', data_handler,                name="method_getolddata"),
 

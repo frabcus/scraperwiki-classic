@@ -165,6 +165,8 @@ class DataStoreClass :
                     value = value.isoformat()
                 elif value == None:
                     pass
+                elif isinstance(value, SqliteError):
+                    return {"error": str(value)}
                 elif type(value) == str:
                     try:
                         value = value.decode("utf-8")
