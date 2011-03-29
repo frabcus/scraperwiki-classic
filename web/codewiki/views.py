@@ -23,6 +23,16 @@ try:                import json
 except ImportError: import simplejson as json
 
 
+def listolddatastore(request):
+    scrapers = models.Code.objects.filter(wiki_type="scraper")
+    res = [ ]
+    for scraper in scrapers:
+        dataproxy = DataStore(scraper.guid, scraper.short_name)
+        rc, arg = dataproxy.request(('item_count',))
+        if arg != 0:
+            res.append('<a href="%s">%s</a>' % (reverse('code_overview', args=[scraper.wiki_type, scraper.short_name]), scraper.short_name))
+    return HttpResponse("<ul><li>%s</li></ul>" % ("</li><li>".join(res)))
+
 
 def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
     try:

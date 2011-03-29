@@ -542,6 +542,10 @@ class Database :
         cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s and latlng is not null and latlng != ''", (scraperID,))
         return [ True, int(cursor.fetchone()[0]) > 0 ]
 
+    def listolddatastore(self, scraperID):
+        cursor = self.execute ("select scraper_id group by scraper_id")
+        return [ True, cursor.fetchall() ]
+    
     def has_temporal (self, scraperID) :
         cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s and date is not null", (scraperID,))
         return [ True, int(cursor.fetchone()[0]) > 9 ]
