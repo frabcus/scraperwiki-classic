@@ -10,10 +10,8 @@
     <div class="page_title">
         <ul class="title_links">
             {% ifequal scraper.wiki_type 'scraper'%}
-                <li class="api"><a href="{% url api:scraper_sqlite %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>
-                {% if sqlitedata %}
-                    <li class="sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download SQLite3 database</a></li>
-                {% endif %}
+               <li class="api"><a href="{% url api:scraper_sqlite %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>
+               <li class="sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download SQLite3 database</a></li>
             {% endifequal %}
             {% ifequal scraper.wiki_type 'view'%}
                 <li class="full_screen"><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">View as full page</a></li>
