@@ -60,16 +60,18 @@
         {% endif %}
 
         {% if sqlitedata %}
-             {% if user.is_staff %}
-              <div class="staff" style="float: right">
+            <div class="staff" style="float: right">
+            <a href="#" id="downloadcsvtable">Download csv</a> | 
+            {% if user.is_staff %}
               <a href="#" id="popupinteractivesqlite">Interactive</a> | 
               <span>
                 <a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a>
                 <a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a>
               </span>
-              </div>
-             {% endif %}
-           <ul id="sqlite_schema">
+            {% endif %}
+          </div>
+
+          <ul id="sqlite_schema">
             {% for sqltablename, sqltabledata in sqlitedata.items %}
               <li>{{sqltabledata.sql}}</li>
             {% endfor %}
@@ -288,6 +290,9 @@
     setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
     setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
 {% endif %}
+
+
+$("#downloadcsvtable").hide(); 
 
 // detect clicks on data tabs
 $('.data_tab').click(function data_tab_clicked() 
