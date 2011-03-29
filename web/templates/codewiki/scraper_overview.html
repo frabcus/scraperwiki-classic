@@ -312,7 +312,7 @@ $('.data_tab').click(function data_tab_clicked()
     $('#' + tab_content_name).show();
 
     $("#downloadcsvtable").show(); 
-    $("#downloadcsvtable").attr("href", "/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+"+encodeURI(tablename)); 
+    $("#downloadcsvtable").attr("href", "/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+`"+encodeURI(tablename)+"`"); 
     //$("#downloadcsvtable").text("/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+"+tablename); 
 }); 
 $('#data_tab_1').click();
