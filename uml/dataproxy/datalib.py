@@ -552,8 +552,8 @@ class Database :
 
     
     def converttosqlitedatastore(self, scraperID, runID, short_name):
-        if runID[:12] != "fromfrontend":
-            return [ False, "can only be used from frontend" ]
+        #if runID[:12] != "fromfrontend":
+        #    return [ False, "can only be used from frontend" ]
         runID = "converttosqlitedatastore_enabled%s" % runID[12:]
 
         qquery = "select `items`.`item_id` as `item_id` from `items` where `items`.`scraper_id` = %s"

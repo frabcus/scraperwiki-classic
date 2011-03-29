@@ -231,7 +231,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
 
         if request[0] == 'converttosqlitedatastore' :
-            self.converttosqlitedatastore  (db, scraperID, runID, scraperName)
+            self.converttosqlitedatastore(db, request[1], runID, request[2])
             return
 
         if request[0] == 'item_count' :
