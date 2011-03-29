@@ -103,14 +103,17 @@ def data_handler(request):
     if not rc:
         return HttpResponse("Error: "+arg)
     
-    format = request.GET.get("format", "json")
+    format = request.GET.get("format", "json").lower()
+    if format == "json":
+        format = "jsondict"
+    
     if format != "jsondict" and len(arg) != 0:
         keys = set()
         for row in arg:   keys.update(row)
         keys = sorted(list(keys))
         rows = [ [row.get(key, "")  for key in keys]  for row in arg ]
         arg = { "keys":keys, "data":rows }
-    if format == "json" or format == "jsondict":
+    if format == "jsonlist" or format == "jsondict":
         result = simplejson.dumps(arg, cls=DateTimeAwareJSONEncoder, indent=4)
         callback = request.GET.get("callback")
         if callback:
@@ -162,6 +165,8 @@ def sqlite_handler(request):
     
     sqlquery = request.GET.get('query', "")
     format = request.GET.get("format", "json")
+    if format == "json":
+        format = "jsonlist"
     
     reqt = None
     if format == "csv":
@@ -169,7 +174,7 @@ def sqlite_handler(request):
     req = ("sqlitecommand", "execute", sqlquery, reqt)
     dataproxy.m_socket.sendall(simplejson.dumps(req) + '\n')
     
-    if format not in ["csv", "jsondict", "json"]:
+    if format not in ["csv", "jsondict", "jsonlist"]:
         return HttpResponse("Error: the format '%s' is not supported" % format)
     
     if format == "csv":
