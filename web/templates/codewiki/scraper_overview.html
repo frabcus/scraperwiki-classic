@@ -60,10 +60,10 @@
         {% endif %}
 
         {% if sqlitedata %}
-            <div class="staff" style="float: right">
-            <a href="#" id="downloadcsvtable">Download csv</a> | 
+          <div class="staff" style="float: right">
+            <a href="#" id="downloadcsvtable" rel="nofollow" target="_blank">Download csv</a>
             {% if user.is_staff %}
-              <a href="#" id="popupinteractivesqlite">Interactive</a> | 
+              | <a href="#" id="popupinteractivesqlite">Interactive</a> | 
               <span>
                 <a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a>
                 <a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a>
@@ -79,7 +79,7 @@
     	   <ul class="data_tabs">
              {% for sqltablename, sqltabledata in sqlitedata.items %}
                 <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
-                    {{sqltablename}} ({{sqltabledata.count}}  rows)
+                    <span class="tablename">{{sqltablename}}</span> ({{sqltabledata.count}}  rows)
                 </li>
              {% endfor %}
             </ul>
@@ -292,8 +292,8 @@
 {% endif %}
 
 
-$("#downloadcsvtable").hide(); 
 
+$("#downloadcsvtable").hide(); 
 // detect clicks on data tabs
 $('.data_tab').click(function data_tab_clicked() 
 {
@@ -308,7 +308,12 @@ $('.data_tab').click(function data_tab_clicked()
     // show and hide
     $('.data_content').hide(); // all
     var tab_content_name = $(this).attr('id').replace('data_tab', 'data_content');
+    var tablename = $(this).find("span.tablename").text(); 
     $('#' + tab_content_name).show();
+
+    $("#downloadcsvtable").show(); 
+    $("#downloadcsvtable").attr("href", "/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+"+tablename); 
+    //$("#downloadcsvtable").text("/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+"+tablename); 
 }); 
 $('#data_tab_1').click();
 
