@@ -7,7 +7,7 @@
                 <a id="libraries" href="{% url help 'libraries' language|default:"python" %}">Libraries</a> 
             </li>
             <li{% ifequal mode "api" %} class="selected"{% endifequal %}> 
-                <a href="{% url api:index %}">API</a>
+                <a href="{% url api:index_1_0 %}">API</a>
             </li>
             <li{% ifequal mode "documentation" %} class="selected"{% endifequal %}> 
                 <a id="reference" href="{% url help 'documentation' language|default:"python" %}">Documentation</a> 
