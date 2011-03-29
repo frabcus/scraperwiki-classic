@@ -24,13 +24,19 @@ except ImportError: import simplejson as json
 
 
 def listolddatastore(request):
-    scrapers = models.Code.objects.filter(wiki_type="scraper")
+    dataproxy = DataStore("", "")
+    rc, arg = dataproxy.request(('listolddatastore',))
+    #scrapers = models.Code.objects.filter(wiki_type="scraper")
+    scrapers = [ ]
+    for lguid in arg:
+        if lguid[0]:
+            lscraper = models.Code.objects.filter(guid=lguid[0])
+            if lscraper:
+                scrapers.append(lscraper[0])
+    
     res = [ ]
     for scraper in scrapers:
-        dataproxy = DataStore(scraper.guid, scraper.short_name)
-        rc, arg = dataproxy.request(('item_count',))
-        if arg != 0:
-            res.append('<a href="%s">%s</a>' % (reverse('code_overview', args=[scraper.wiki_type, scraper.short_name]), scraper.short_name))
+        res.append('<a href="%s">%s</a>' % (reverse('code_overview', args=[scraper.wiki_type, scraper.short_name]), scraper.short_name))
     return HttpResponse("<ul><li>%s</li></ul>" % ("</li><li>".join(res)))
 
 
