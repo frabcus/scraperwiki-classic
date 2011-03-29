@@ -543,7 +543,7 @@ class Database :
         return [ True, int(cursor.fetchone()[0]) > 0 ]
 
     def listolddatastore(self, scraperID):
-        cursor = self.execute ("select scraper_id from items group by scraper_id")
+        cursor = self.execute ("select scraper_id, count(*) as c from items group by scraper_id order by c desc")
         return [ True, cursor.fetchall() ]
     
     def has_temporal (self, scraperID) :
