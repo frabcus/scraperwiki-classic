@@ -61,7 +61,7 @@
 
         {% if sqlitedata %}
           <div style="float: right">
-            <a href="#" id="downloadcsvtable" rel="nofollow" target="_blank">Download csv</a>
+            <a href="#" class="csv" id="downloadcsvtable" rel="nofollow">Download csv</a>
             {% if user.is_staff %}
               | <a href="#" id="popupinteractivesqlite">Interactive</a> | 
               <span>
@@ -312,7 +312,7 @@ $('.data_tab').click(function data_tab_clicked()
     $('#' + tab_content_name).show();
 
     $("#downloadcsvtable").show(); 
-    $("#downloadcsvtable").attr("href", "/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+"+tablename); 
+    $("#downloadcsvtable").attr("href", "/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+"+encodeURI(tablename)); 
     //$("#downloadcsvtable").text("/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+"+tablename); 
 }); 
 $('#data_tab_1').click();
