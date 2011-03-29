@@ -27,7 +27,7 @@
         <p>
             Each API function has its own URI. You need to pass the format you would like the data returned in and other function-specific arguments via the query string to tell the API exactly what you are requesting:
             <code class="api_call">
-     http://api.scraperwiki.com/api/1.0/datastore/getdata?name=<em>[scraper short name]</em>&amp;format<em>=[csv | json | jsondict]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
+     http://api.scraperwiki.com/api/1.0/datastore/getdata?name=<em>[scraper short name]</em>&amp;format<em>=[csv | jsonlist | jsondict]</em>&amp;limit=<em>100</em>&amp;offset=<em>0</em>
             </code>
         </p>
     </div>
@@ -50,8 +50,8 @@
                         subsequent lines have the same number of comma separated entries</td>
                 </tr>
                 <tr>
-                    <td><a href="http://www.json.org/">JSON</a></td>
-                    <td>json</td>
+                    <td><a href="http://www.json.org/">JSONLIST</a></td>
+                    <td>jsonlist</td>
                     <td>
                         A text-based representation of a Javascript object. It can be converted back into an object using the 
                         <code><a href="http://www.devguru.com/Technologies/ecmascript/quickref/eval.html">eval()</a></code> 
