@@ -13,11 +13,12 @@ anything more complex, you can use other Ruby download modules directly, such as
     <h4>Method</h4>
     <table class="api_detail example_table">
     <tr><th width="30%">Method</th><th width="20%">Returned value</th><th>Description</th></tr>
-<tr><td><code>ScraperWiki.scrape<br/>&nbsp;(url, [params=], )</code></td><td>String</td>
+    <tr><td><code>ScraperWiki.scrape<br/>&nbsp;(url, [params=], )</code></td><td>String</td>
     <td><dl>
-    <dt><code>url</code></dt>
-        <dd>String. The address of the web page, e.g. <code>http://www.google.co.uk</code>
-        </dd>
+        <dt><code>url</code></dt>
+        <dd>String. The address of the web page, e.g. <code>http://www.google.co.uk</code></dd>
+        <dt><code>params</code> (optional)</dt>
+        <dd>Hash. If present, sends a POST request, with the parameters specified in the hash.</dd>
     </dl></td>
     </tr>
     </table>
