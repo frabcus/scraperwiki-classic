@@ -1,0 +1,43 @@
+{% extends "frontend/base_new.html" %}
+{% load gravatar %}
+{% load sw_user_filters %}
+
+{% block title %}Welcome{% endblock %}
+{% block header %}
+			<div id="frontpage_intro">
+			<a class="create" href="{% url choose_template 'scraper' %}">Create a scraper</a>
+			<a class="tour" href="/tour/">Take the tour</a>
+				<p>A community of programmers sifting <br/>information to give you the edge.</p>
+			</div>
+			<div id="frontpage_slider">
+		
+			</div>
+{% endblock %}
+{% block content  %}
+
+        	<h2>Featured scrapers</h2>        
+			<ul class="scraper_list">
+    		{% for code in featured_scrapers %}
+    			{% include 'frontend/includes/code_object_line.html' %}
+    		{% endfor %}
+			</ul>
+			<p><a href="{% url scraper_list_wiki_type 'scraper' %}" title="Browse all scrapers" class="more_link">Browse all scrapers</a></p>
+			
+			<h2>Featured views</h2>
+			<ul class="scraper_list">
+			{% for code in featured_views %}
+				{% include 'frontend/includes/code_object_line.html' %}
+			{% endfor %}
+			</ul>
+			<p><a href="{% url scraper_list_wiki_type 'view' %}" title="Browse all scrapers" class="more_link">Browse all views</a></p>
+			
+			<h2>Popular tags</h2>
+			<ul class="tags">
+            {% for tag in tags %}
+				<li><a href="{% url single_tag tag.name %}">{{tag.name}}</a></li>
+            {% endfor %}
+			</ul>
+			<p><a href="{% url all_tags %}" class="more_link">Browse all tags</a></p>
+			
+{% endblock %}
+{% block run_script %}setupIntroSlideshow();{% endblock %}
