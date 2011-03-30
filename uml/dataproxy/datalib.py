@@ -589,6 +589,7 @@ class Database :
         lres = self.sqlitecommand(scraperID, runID, short_name, "commit", None, None)
         if "error" in lres:  return [ False, lres["error"] ]
         self.execute("delete kv, items from kv join items on kv.item_id = items.item_id where scraper_id = %s", (scraperID,))
+        self.execute("delete items items on where scraper_id = %s", (scraperID,))
         self.m_db.commit()
         
         return [ True, "converted %d items" % len(item_idlist) ]
