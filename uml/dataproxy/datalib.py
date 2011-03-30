@@ -603,6 +603,7 @@ class Database :
         #print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
         
         def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
+            #print "authorizer_readonly", (action_code, tname, cname, sql_location, trigger)
             readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library.  codes: http://www.sqlite.org/c3ref/c_alter_table.html
             if action_code in readonlyops:
                 return sqlite3.SQLITE_OK
@@ -612,17 +613,20 @@ class Database :
             return sqlite3.SQLITE_DENY
         
         def authorizer_attaching(action_code, tname, cname, sql_location, trigger):
+            #print "authorizer_attaching", (action_code, tname, cname, sql_location, trigger)
             if action_code == sqlite3.SQLITE_ATTACH:
                 return sqlite3.SQLITE_OK
             return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
         
         def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
+            #print "authorizer_writemain", (action_code, tname, cname, sql_location, trigger)
             if sql_location == None or sql_location == 'main':  
                 return sqlite3.SQLITE_OK
             return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
             
                     # apparently not able to reset authorizer function after it has been set once, so have to redirect this way
         def authorizer_all(action_code, tname, cname, sql_location, trigger):
+            #print "authorizer_all", (action_code, tname, cname, sql_location, trigger)
             return self.authorizer_func(action_code, tname, cname, sql_location, trigger)
 
 
@@ -737,6 +741,8 @@ class Database :
             return result
         
         if command == "attach":
+            if self.authorizer_func == authorizer_writemain:
+                self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
             self.authorizer_func = authorizer_attaching
             try:
                 attachscrapersqlitefile = os.path.join(self.m_resourcedir, val1, "defaultdb.sqlite")
