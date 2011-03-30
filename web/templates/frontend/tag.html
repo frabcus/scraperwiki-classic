@@ -2,9 +2,13 @@
 {% load dial %}
 
 {% block title %}Scrapers and requests tagged '{{tag.name}}'{% endblock %}
+
+{% block header %}
+	<h2>Tag: <a href="{% url single_tag tag.name %}" class="single_tag">{{tag.name}}</a></h2>
+{% endblock %}
+
 {% block content %}
     <div class="page_title tag_header">
-        <h1>Tag: <a href="{% url single_tag tag.name %}" class="single_tag">{{tag.name}}</a></h1>
         {% if settings.ENABLE_MARKETPLACE %}
         <p>
             Do you know of a dataset relating to <em>{{tag.name}}</em> that should have a scraper created for it? <a href="{% url market_solicitation %}?tags={{tag.name}}">If so, please request it</a>

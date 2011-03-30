@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-	<title>{% block title %}{% endblock %} | ScraperWiki | DEV</title>
+	<title>{% block title %}{% endblock %} | ScraperWiki</title>
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.3.2.js"></script>
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
 	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>		
@@ -76,7 +76,7 @@
 	{% block alert_outer %}
 	<div id="alert_outer">
 		<div id="alert_inner">
-			{% block alert %}<h2>Here&rsquo;s an alert!</h2>{% endblock %}
+			{% block alert %}<h2>Here&rsquo;s an alert! <a href="foo">Linky linky.</a></h2>{% endblock %}
 		</div>
 	</div>
 	{% endblock %}

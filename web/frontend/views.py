@@ -60,7 +60,7 @@ def dashboard(request):
     # following_code_objects = user.code_set.filter(usercoderole__role='follow', deleted=False)
     # following_count = len(following_code_objects)
 
-    return render_to_response('frontend/dashboard.html', {'owned_code_objects': owned_code_objects, 'owned_count' : owned_count, 'contribution_code_objects' : contribution_code_objects, 'contribution_count': contribution_count, 'language':'python' }, context_instance = RequestContext(request))
+    return render_to_response('frontend/dashboard.html', {'owned_code_objects': owned_code_objects, 'owned_count' : owned_count, 'contribution_code_objects' : contribution_code_objects, 'contribution_count': contribution_count, 'language':'python', 'body_class':'dashboard' }, context_instance = RequestContext(request))
 
 def profile_detail(request, username):
     
@@ -147,7 +147,7 @@ def login(request):
         registration_form = CreateAccountForm()
         message = None
 
-    return render_to_response('registration/extended_login.html', {'registration_form': registration_form, 'login_form': login_form, 'error_messages': error_messages, 'redirect': redirect}, context_instance = RequestContext(request))
+    return render_to_response('registration/extended_login.html', {'registration_form': registration_form, 'login_form': login_form, 'error_messages': error_messages, 'redirect': redirect, 'body_class':'login'}, context_instance = RequestContext(request))
 
 def help(request, mode=None, language=None):
     tutorials = {}
@@ -169,7 +169,7 @@ def help(request, mode=None, language=None):
         include_tag = "frontend/help_%s_%s.html" % (mode, language)
     return render_to_response('frontend/help.html', { 'mode' : mode, 'language' : language, 'display_language' : display_language, \
              'include_tag' : include_tag, 'tutorials': tutorials, 'viewtutorials': viewtutorials, \
-             'other_languages' : other_languages }, 
+             'other_languages' : other_languages, 'body_class':'help' }, 
              context_instance = RequestContext(request))
 
 def browse_wiki_type(request, wiki_type = None, page_number = 1):
@@ -220,7 +220,7 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
 
     form = SearchForm()
 
-    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, 'special_filter': special_filter, 'language': 'python'}
+    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, 'special_filter': special_filter, 'language': 'python', 'body_class':'browse ' + wiki_type}
     return render_to_response('frontend/browse.html', dictionary, context_instance=RequestContext(request))
 
 
@@ -253,12 +253,12 @@ def search(request, q=""):
         else:
             form = SearchForm()
             return render_to_response('frontend/search_results.html', {
-                'form': form,},
+                'form': form, 'body_class':'search'},
                 context_instance=RequestContext(request))
     else:
         form = SearchForm()
         return render_to_response('frontend/search_results.html', {
-            'form': form,
+            'form': form, 'body_class':'search'
         }, context_instance = RequestContext(request))
 
 def get_involved(request):
@@ -309,7 +309,8 @@ def get_involved(request):
             'solicitation_percent': solicitation_percent,
             'scraper_sick_count': scraper_sick_count,
             'scraper_sick_percent': scraper_sick_percent,
-            'language': 'python',
+            'language': 'python', 
+			'body_class':'get_involved'
         }
 
         return render_to_response('frontend/get_involved.html', data, context_instance=RequestContext(request))
@@ -340,7 +341,7 @@ def tags(request):
 
     tags = _get_merged_tags()
 
-    return render_to_response('frontend/tags.html', {'tags':tags,}, context_instance=RequestContext(request))
+    return render_to_response('frontend/tags.html', {'tags':tags, 'body_class':'tags'}, context_instance=RequestContext(request))
     
 def tag(request, tag):
     tag = get_tag(tag)
@@ -378,6 +379,7 @@ def tag(request, tag):
         'solicitations_pending':solicitations_pending,
         'solicitations_percent_complete': solicitations_percent_complete,
         'scrapers_fixed_percentage': scrapers_fixed_percentage,
+		'body_class':'tag'
     }, context_instance = RequestContext(request))
 
 def resend_activation_email(request):

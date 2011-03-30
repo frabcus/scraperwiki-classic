@@ -1,15 +1,13 @@
 {% extends "frontend/base.html" %}
 
 {% block title %}About{% endblock %}
-{% block content %}
-    <div class="page_title">
-        <h1>All about ScraperWiki</h1>
-        <p>
-            All about the technology and people behind ScraperWiki. 
-          For technical questions, please see <a href="{% url help %}">the help pages</a>.
-        </p>
-    </div>
 
+{% block header %}
+	<h2>All about ScraperWiki</h2>
+	<p>All about the technology and people behind ScraperWiki. For technical questions, please see <a href="{% url help %}">the help pages</a>.</p>
+{% endblock %}
+
+{% block content %}
 <div class="content full">
     <!-- Features -->
     <div class="feature">
