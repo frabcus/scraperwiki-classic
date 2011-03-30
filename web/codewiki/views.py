@@ -32,12 +32,12 @@ def listolddatastore(request):
         if lguid[0]:
             lscraper = models.Code.objects.filter(guid=lguid[0])
             if lscraper:
-                scrapers.append((lscraper[0], lguid[1]))
+                scrapers.append((lscraper[0], lguid[0], lguid[1]))
     
     res = [ ]
     for scraper in scrapers:
-        res.append('%d <a href="%s">%s</a>' % (scraper[1], reverse('code_overview', args=[scraper[0].wiki_type, scraper[0].short_name]), scraper[0].short_name))
-    return HttpResponse("%d <ul><li>%s</li></ul>" % (len(arg), "</li><li>".join(res)))
+        res.append('%d <a href="%s">%s</a>' % (scraper[2], reverse('code_overview', args=[scraper[0].wiki_type, scraper[0].short_name]), scraper[0].short_name))
+    return HttpResponse("%d <p>%s</p>\n<ul><li>%s</li></ul>" % (len(arg), str([(s[1], s[0].short_name)  for s in scrapers]), "</li><li>".join(res)))
 
 
 def getscraperorresponse(request, wiki_type, short_name, rdirect, action):

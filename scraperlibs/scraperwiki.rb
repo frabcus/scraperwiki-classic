@@ -86,40 +86,15 @@ module ScraperWiki
 
         ds = SW_DataStore.create()
 
-            # redirect to sqlite version if nothing in old style datastore
-        if ds.request(['item_count'])[1] == 0
-            ldata = data.dup
-            if date != nil
-                ldata["date"] = date
-            end
-            if latlng != nil
-                ldata["latlng_lat"] = latlng[0]
-                ldata["latlng_lng"] = latlng[1]
-            end
-            return ScraperWiki.save_sqlite(unique_keys, ldata, table_name="swdata", verbose=2)
+        ldata = data.dup
+        if date != nil
+            ldata["date"] = date
         end
-
-        js_data = ds.mangleflattendict(data)
-        uunique_keys = ds.mangleflattenkeys(unique_keys)
         if latlng != nil
-            latlng = '%010.6f,%010.6f' % latlng
+            ldata["latlng_lat"] = latlng[0]
+            ldata["latlng_lng"] = latlng[1]
         end
-        res = ds.request(['save', uunique_keys, js_data, date, latlng])
-
-        raise res[1] if not res[0]
-
-        pdata = { }
-        data.each_pair do |key, value|
-            key = ScraperWiki._unicode_truncate(key.to_s, 50)
-            if value == nil
-                value  = ''
-            else
-                value = ScraperWiki._unicode_truncate(value.to_s, 50)
-            end
-            pdata[key] = value
-        end
-        ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => pdata})
-        return
+        return ScraperWiki.save_sqlite(unique_keys, ldata, table_name="swdata", verbose=2)
     end
 
 
