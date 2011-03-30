@@ -111,9 +111,6 @@ class DataStoreClass :
         line = receiveoneline(self.m_socket)
         return json.loads(line)
 
-    def uses_old_datastore(self):
-        return self.request(('item_count',))[1] != 0
-    
     def save (self, unique_keys, scraper_data, date = None, latlng = None) :
         
         if type(unique_keys) not in [ types.NoneType, types.ListType, types.TupleType ] :
@@ -250,19 +247,6 @@ def ifsencode_trunc(v, t):
 def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="swdata", verbose=2) :
     ds = DataStore(None)
     
-    # keep using old database if anything is in it
-    if ds.uses_old_datastore():
-        rc, arg = ds.save(unique_keys, data, date, latlng)
-        if not rc:
-            raise databaseexception({"error":arg}) 
-        
-        if verbose:
-            pdata = {}
-            for key, value in data.items():
-                pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
-            scraperwiki.console.logScrapedData(pdata)
-        return arg
-
     # collapse parameters and call main function
     if date is not None:
         if type(date) not in [ datetime.datetime, datetime.date ] :

@@ -61,17 +61,7 @@ def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
    static function save($unique_keys, $data, $date = null, $latlng = null)
    {
       $ds = SW_DataStoreClass::create() ;
-      $olddatastoreitemcount = $ds->request(array('item_count')); 
-      if ($olddatastoreitemcount[1] != 0)
-      {
-        $result = $ds->save($unique_keys, $data, $date, $latlng);
-        if (! $result[0])
-            throw new Exception ($result[1]) ;
-    
-        scraperwiki::sw_dumpMessage (array('message_type' => 'data', 'content' => $data)) ;
-      }
-
-      $ldata = $data.copy();   // what's the function?
+      $ldata = $data;   
       if (!is_null($date))
          $ldata["date"] = $date; 
       if (!is_null($latlng))
