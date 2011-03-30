@@ -32,6 +32,24 @@ import itertools
 
 from utilities import location
 
+# TEMPORARY DEV VERSION OF FRONTPAGE
+def dev(request, public_profile_field=None):
+    user = request.user
+
+    #featured
+    featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').order_by('-first_published_at')[:2]    
+    featured_views = Code.objects.filter(featured=True, wiki_type='view').order_by('-first_published_at')[:2]        
+    
+    #popular tags
+    #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
+    tags_sorted = sorted([(tag, int(tag.count)) for tag in Tag.objects.usage_for_model(Scraper, counts=True)], key=lambda k:k[1], reverse=True)[:10]
+    tags = []
+    for tag in tags_sorted:
+        tags.append(tag[0])
+    
+    data = {'featured_views': featured_views, 'featured_scrapers': featured_scrapers, 'tags': tags, 'language': 'python', 'body_class':'frontpage'}
+    return render_to_response('frontend/frontpage_new.html', data, context_instance=RequestContext(request))
+
 
 def frontpage(request, public_profile_field=None):
     user = request.user

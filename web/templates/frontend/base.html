@@ -39,7 +39,7 @@
     {% endif %}
 </head>
 
-	<body class="{{ body_class }}">
+	<body {% if body_class %}class="{{ body_class }}"{% endif %}>
 	    <div class="banner">
 	        <ul class="user_menu">
 				{% if user.is_authenticated %}

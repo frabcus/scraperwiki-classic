@@ -10,7 +10,7 @@
     {% if user.code_set.all|length %}  
         <div class="page_title">
             <p>
-              You have a stake in <a href="{% url dashboard %}">{{user|num_scrapers}} scraper{{user|num_scrapers|pluralize}}{% if user|num_views %} and {{user|num_views}} view{{user|num_views|pluralize}}{% endif %}</a>.
+              You have a stake in <a href="{% url dashboard %}">{{user|num_scrapers}} scraper{{user|num_scrapers|pluralize}}{% if user|num_views %} and {{user|num_views}} view{{user|num_views|pluralize}}{% endif %}</a>. 
             </p>
         </div>
     {% endif %}

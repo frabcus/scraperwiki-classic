@@ -31,6 +31,27 @@ function setupSearchBoxHint(){
 }
 $(document).ready(function(){ setupSearchBoxHint(); }); 
 
+function setupNavSearchBoxHint(){
+    $('#navSearch input:text').focus(function() {
+        if ($('#navSearch input:submit').attr('disabled')) {
+            $(this).val('');
+            $(this).removeClass('hint');
+            $('#navSearch input:submit').removeAttr('disabled'); 
+        }
+		$('#navSearch').addClass('focus');
+    });
+    $('#navSearch input:text').blur(function() {
+        if(!$('#navSearch input:submit').attr('disabled') && ($(this).val() == '')) {
+            $(this).val('Search datasets');
+            $(this).addClass('hint');
+            $('#navSearch input:submit').attr('disabled', 'disabled'); 
+        }
+		$('#navSearch').removeClass('focus');
+    });
+    $('#navSearch input:text').blur();
+}
+$(document).ready(function(){ setupNavSearchBoxHint(); });
+
 function setupScroller(){
     
     //left right buttons
