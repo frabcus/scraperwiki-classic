@@ -61,14 +61,15 @@
 
         {% if sqlitedata %}
           <div style="float: right">
-            <a href="#" class="csv" id="downloadcsvtable" rel="nofollow">Download csv</a>
             {% if user.is_staff %}
-              | <a href="#" id="popupinteractivesqlite">Interactive</a> | 
-              <span>
+              <a href="#" id="popupinteractivesqlite" class="staff">Interactive</a> | 
+              <span class="staff">
                 <a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a>
                 <a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a>
               </span>
+              |
             {% endif %}
+            <a href="#" class="csv" id="downloadcsvtable" rel="nofollow">Download csv</a>
           </div>
 
           <ul id="sqlite_schema">
