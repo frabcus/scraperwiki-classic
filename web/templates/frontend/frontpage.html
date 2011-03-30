@@ -3,75 +3,41 @@
 {% load sw_user_filters %}
 
 {% block title %}Welcome{% endblock %}
-{% comment %}{% block header %}
-
-{% endblock %} {% endcomment %}
+{% block header %}
+			<div id="frontpage_intro">
+			<a class="create" href="{% url choose_template 'scraper' %}">Create a scraper</a>
+			<a class="tour" href="/tour/">Take the tour</a>
+				<p>A community of programmers sifting <br/>information to give you the edge.</p>
+			</div>
+			<div id="frontpage_slider">
+		
+			</div>
+{% endblock %}
 {% block content  %}
-    {% if user.code_set.all|length %}  
-        <div class="page_title">
-            <p>
-              You have a stake in <a href="{% url dashboard %}">{{user|num_scrapers}} scraper{{user|num_scrapers|pluralize}}{% if user|num_views %} and {{user|num_views}} view{{user|num_views|pluralize}}{% endif %}</a>. 
-            </p>
-        </div>
-    {% endif %}
 
-    <div class="content full">
-        <div id="divWelcome">
-            <div id="divIntroSlideShow">
-                <div class="slide_show">
-                    <img src="{{ MEDIA_URL }}images/intro_slides/intro1.png" />
-                    <img src="{{ MEDIA_URL }}images/intro_slides/intro2.png" />
-                    <img src="{{ MEDIA_URL }}images/intro_slides/intro3.png" />
-                    <img src="{{ MEDIA_URL }}images/intro_slides/intro4.png" />  
-                    <img src="{{ MEDIA_URL }}images/intro_slides/intro5.png" />                                                
-                </div>
-                <div class="slide_nav"></div>
-            </div>
-            <div id="divWelcomeText">
-                <img id="imgLogoLarge" src="{{MEDIA_URL}}/images/logo_large.png"/>
-                <h1>ScraperWiki is all the tools you need for Screen Scraping, Data Mining &amp; visualisation.</h1>            
-                <h2>Make bad data good, collaborate &amp; discover new datasets.</h2>
-            </div>
-        </div>
-    </div>
-
-    <div class="content half left">
-        <h2>Featured scrapers</h2>        
-        <ul class="scraper_list">
+        	<h2>Featured scrapers</h2>        
+			<ul class="scraper_list">
     		{% for code in featured_scrapers %}
-    		  {% include 'frontend/includes/code_object_line.html' %}
+    			{% include 'frontend/includes/code_object_line.html' %}
     		{% endfor %}
-    	</ul>
-        <p>
-            <a href="{% url scraper_list_wiki_type 'scraper' %}" title="Browse all scrapers" class="more_link">Browse all scrapers</a>
-        </p>
-    </div>
-
-    <div class="content half right">
-        <h2>Featured views</h2>
-        <ul class="scraper_list">
-    		{% for code in featured_views %}
-    		  {% include 'frontend/includes/code_object_line.html' %}
-    		{% endfor %}
-    	</ul>
-    	<p>
-            <a href="{% url scraper_list_wiki_type 'view' %}" title="Browse all scrapers" class="more_link">Browse all views</a>
-        </p>
-    </div>
-
-    <br class="clear"/>
-    <div class="content full divider">
-        <h3>Popular tags</h3>
-        <ul class="tags">
+			</ul>
+			<p><a href="{% url scraper_list_wiki_type 'scraper' %}" title="Browse all scrapers" class="more_link">Browse all scrapers</a></p>
+			
+			<h2>Featured views</h2>
+			<ul class="scraper_list">
+			{% for code in featured_views %}
+				{% include 'frontend/includes/code_object_line.html' %}
+			{% endfor %}
+			</ul>
+			<p><a href="{% url scraper_list_wiki_type 'view' %}" title="Browse all scrapers" class="more_link">Browse all views</a></p>
+			
+			<h2>Popular tags</h2>
+			<ul class="tags">
             {% for tag in tags %}
-                <li><a href="{% url single_tag tag.name %}">{{tag.name}}</a></li>
+				<li><a href="{% url single_tag tag.name %}">{{tag.name}}</a></li>
             {% endfor %}
-        </ul>
-        <p><a href="{% url all_tags %}" class="more_link">Browse all tags</a></p>
-    </div>
-    <div class="content full divider">
-        {% load blog_latest %}
-        {% blog_latest %}
-    </div>
+			</ul>
+			<p><a href="{% url all_tags %}" class="more_link">Browse all tags</a></p>
+			
 {% endblock %}
 {% block run_script %}setupIntroSlideshow();{% endblock %}
