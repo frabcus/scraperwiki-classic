@@ -36,8 +36,8 @@ def frontpage(request, public_profile_field=None):
     user = request.user
 
     #featured
-    featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').order_by('-first_published_at')[:2]    
-    featured_views = Code.objects.filter(featured=True, wiki_type='view').order_by('-first_published_at')[:2]        
+    #featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').order_by('-first_published_at')[:2]    
+    #featured_views = Code.objects.filter(featured=True, wiki_type='view').order_by('-first_published_at')[:2]        
     featured_both = Code.objects.filter(featured=True).order_by('-first_published_at')[:4]
 	
     #popular tags
@@ -47,8 +47,8 @@ def frontpage(request, public_profile_field=None):
     for tag in tags_sorted:
         tags.append(tag[0])
     
-    data = {'featured_views': featured_views, 
-            'featured_scrapers': featured_scrapers,
+    data = {#'featured_views': featured_views, 
+            #'featured_scrapers': featured_scrapers,
 			'featured_both': featured_both,
             'tags': tags, 
             'language': 'python',

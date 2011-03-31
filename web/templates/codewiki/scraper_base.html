@@ -3,6 +3,11 @@
 {% block title %}{{ scraper.title }}{% endblock %}
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/code_object_comments/{{ scraper.short_name }}" />{% endblock %}
 
+{% block header %}
+	<h2><a href="{% url profiles_profile_detail scraper.owner.username %}">{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}</a> / {{ scraper.title }}</h2>
+	<p>{{scraper.wiki_type|lower}} &bull; {{scraper.language|lower}}{% if not scraper.published %} &bull; (not public){% endif %}</p>
+{% endblock %}
+
 {% block tabs %}
     {% include 'codewiki/includes/tabs.html' %}
 {% endblock %}
@@ -24,9 +29,6 @@
             {% endifequal %}
             <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
         </ul>
-        <h1>
-            {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %} / <span id="hCodeTitle">{{ scraper.title }}</span>{% if not scraper.published %} (not public){% endif %}
-        </h1>
         <ul class="code_about">
            <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
            <li class="language {{scraper.language|lower}}">{{scraper.language|lower}}</li>
