@@ -78,7 +78,9 @@ def profile_detail(request, username):
     owned_code_objects = profiled_user.code_set.filter(usercoderole__role='owner', published=True).order_by('-created_at')
     solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
 
-    return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations, 'owned_code_objects': owned_code_objects } )
+    return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations,
+                                                                                   'owned_code_objects': owned_code_objects,
+                                                                                   'body_class': 'profile' } )
 
 
 def edit_profile(request):
@@ -247,7 +249,8 @@ def search(request, q=""):
                 'tags': tags,
                 'num_results': num_results,
                 'form': form,
-                'query': q,},
+                'query': q,
+                'body_class': 'search'},
             context_instance=RequestContext(request))
 
     # If the form has been submitted, or we have a search term in the URL
@@ -262,7 +265,7 @@ def search(request, q=""):
         else:
             form = SearchForm()
             return render_to_response('frontend/search_results.html', {
-                'form': form, 'body_class':'search'},
+                'form': form, 'body_class': 'search'},
                 context_instance=RequestContext(request))
     else:
         form = SearchForm()
