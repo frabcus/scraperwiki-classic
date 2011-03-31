@@ -341,6 +341,99 @@ body.frontpage #header_inner {
 	background-position: -225px -120px;
 }
 
+#frontpage_slider {
+	position: relative;
+}
+
+#frontpage_slider #intro_developer,
+#frontpage_slider #intro_requester,
+#frontpage_slider #more_developer_div,
+#frontpage_slider #more_requester_div {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+#frontpage_slider #intro_developer {
+	text-align: right;
+	width: 345px;
+	top: 80px;
+}
+
+#frontpage_slider #intro_requester {
+	width: 345px;
+	left: 620px;
+	top: 80px;
+}
+
+#frontpage_slider #more_developer_div,
+#frontpage_slider #more_requester_div {
+	display: none;
+}
+
+#frontpage_slider img {
+	position: absolute;
+	top: 33px;
+	left: 370px;
+	z-index: 100;
+}
+
+#frontpage_slider #cartoon_businesswoman {
+	left: 470px;
+}
+
+#frontpage_slider h3 {
+	font-size: 30px;
+	margin-bottom: 20px;
+}
+
+#frontpage_slider p {
+	margin-left: 0;
+	font-size: 20px;
+	line-height: 24px;
+	font-weight: normal;
+}
+
+#frontpage_slider #more_developer,
+#frontpage_slider #more_requester {
+	display: block;
+	margin-top: 30px;
+}
+
+#frontpage_slider #more_developer_div,
+#frontpage_slider #more_requester_div {
+	width: 780px;
+	margin: 60px 0 20px 10px;
+}
+
+#frontpage_slider #more_requester_div {
+	margin-left: 170px;
+}
+
+#frontpage_slider #more_developer_div h3, 
+#frontpage_slider #more_requester_div h3 {
+	text-align: center;
+}
+
+#frontpage_slider #back_developer,
+#frontpage_slider #back_requester {
+	display: block;
+	position: absolute;
+	right: -100px;
+	top: 220px;
+	z-index: 200;
+	background: #3399cc;
+	padding: 5px 10px;
+	border: 1px solid #66bbdd;
+}
+
+#frontpage_slider #back_requester {
+	right: auto;
+	left: -100px;
+}
+
+
+
 
 
 

@@ -1,5 +1,3 @@
-
-
 function setupButtonConfirmation(sId, sMessage){
     $('#' + sId).click(
         function(){
@@ -29,7 +27,7 @@ function setupSearchBoxHint(){
     });
     $('#divSidebarSearch input:text').blur();
 }
-$(document).ready(function(){ setupSearchBoxHint(); }); 
+$(function(){  }); 
 
 function setupNavSearchBoxHint(){
     $('#navSearch input:text').focus(function() {
@@ -50,7 +48,45 @@ function setupNavSearchBoxHint(){
     });
     $('#navSearch input:text').blur();
 }
-$(document).ready(function(){ setupNavSearchBoxHint(); });
+
+
+
+$(function(){ 
+	
+	setupSearchBoxHint();
+	setupNavSearchBoxHint();
+	
+	$('#more_developer').bind('click', function(){
+		$('#intro_developer, #intro_requester, #cartoon_businesswoman').fadeOut(500);
+		$('#more_developer_div').fadeIn(500);
+		$('#cartoon_developer').animate({left: 800}, 1000, 'easeOutCubic');
+		return false;
+	});
+
+	$('#more_requester').bind('click', function(){
+		$('#intro_developer, #intro_requester, #cartoon_developer').fadeOut(500);
+		$('#more_requester_div').fadeIn(500);
+		$('#cartoon_businesswoman').animate({left: 30}, 1000, 'easeOutCubic');
+		return false;
+	});
+	
+	$('#back_developer').bind('click', function(){
+		$('#intro_developer, #intro_requester, #cartoon_businesswoman').fadeIn(500);
+		$('#more_developer_div').fadeOut(500);
+		$('#cartoon_developer').animate({left: 370}, 1000, 'easeOutCubic');
+		return false;
+	});	
+	$('#back_requester').bind('click', function(){
+		$('#intro_developer, #intro_requester, #cartoon_developer').fadeIn(500);
+		$('#more_requester_div').fadeOut(500);
+		$('#cartoon_businesswoman').animate({left: 470}, 1000, 'easeOutCubic');
+		return false;
+	});
+	
+});
+
+
+
 
 function setupScroller(){
     

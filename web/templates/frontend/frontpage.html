@@ -10,7 +10,26 @@
 				<p>A community of programmers sifting <br/>information to give you the edge.</p>
 			</div>
 			<div id="frontpage_slider">
-		
+				<div id="intro_developer">
+					<h3>Data Developer?</h3>
+					<p>Some persuasive copy goes here.<br/>Lots of acronyms to get the geeks <br/>salivating and make us look hard.</p>
+					<a id="more_developer" href="#more_developer_div">Find out more</a>
+				</div>
+				<div id="intro_requester">
+					<h3>Data Requester?</h3>
+					<p>Some persuasive copy goes here. <br/>Lots of marketing buzzwords to get <br/>the business people on board.</p>
+					<a id="more_requester" href="#more_requester_div">Find out more</a>
+				</div>
+				<img id="cartoon_developer" src="{{ MEDIA_URL }}images/cartoon_developer.gif" width="130" height="315" alt="Cartoon of a happy developer or programmer" />
+				<img id="cartoon_businesswoman" src="{{ MEDIA_URL }}images/cartoon_businesswoman.gif" width="130" height="315" alt="Cartoon of a businesswoman" />
+				<div id="more_developer_div">
+					<h3>Why developers love ScraperWiki</h3>
+					<a id="back_developer" href="#intro_developer">Back</a>
+				</div>
+				<div id="more_requester_div">
+					<h3>Why you&rsquo;ll love ScraperWiki</h3>
+					<a id="back_requester" href="#intro_requester">Back</a>
+				</div>
 			</div>
 {% endblock %}
 {% block content  %}
