@@ -70,13 +70,13 @@ $(function(){
 		return false;
 	});
 	
-	$('#back_developer').bind('click', function(){
+	$('#more_developer_div .back').bind('click', function(){
 		$('#intro_developer, #intro_requester, #cartoon_businesswoman').fadeIn(500);
 		$('#more_developer_div').fadeOut(500);
 		$('#cartoon_developer').animate({left: 370}, 1000, 'easeOutCubic');
 		return false;
 	});	
-	$('#back_requester').bind('click', function(){
+	$('#more_requester_div .back').bind('click', function(){
 		$('#intro_developer, #intro_requester, #cartoon_developer').fadeIn(500);
 		$('#more_requester_div').fadeOut(500);
 		$('#cartoon_businesswoman').animate({left: 470}, 1000, 'easeOutCubic');
