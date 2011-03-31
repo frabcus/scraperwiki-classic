@@ -21,9 +21,13 @@ File size:      1100938 bytes
 Optimized:      no
 PDF version:    1.3"""
 
+# Until recently was able to return file objects to HttpResponse, but this stopped 
+# working, so now need to read in the stream into a string object before returning.  
+# Baffling.  May be related to how the CSV streaming ceased working where the 
+# middle-ware began consuming the stream to measure the content-length and then there was 
+# nothing left to send out.
 
 dkpercent = 83  # percentage darkness used by the cropper
-
 
 def pdfinfo(pdffile):
     cmd = 'pdfinfo "%s"' % pdffile
@@ -137,7 +141,7 @@ def cropimg(request, format, srcdoc, page, cropping):
 
     pdfurl, pdffile, imgstem, qtail = GetSrcDoc(request, srcdoc)
     if not pdfurl:
-        return HttpResponse(open(os.path.join(settings.MEDIA_DIR, 'images', '404.png'), "rb"), mimetype='image/png')
+        return HttpResponse(open(os.path.join(settings.MEDIA_DIR, 'images', '404.png'), "rb").read(), mimetype='image/png')
 
 
     imgfile = "%s_%04d.png" % (imgstem, page)
@@ -156,9 +160,8 @@ def cropimg(request, format, srcdoc, page, cropping):
                 os.system(cmd)
             print "\n\njpg/png sizes", os.path.getsize(jpgimgfile), os.path.getsize(imgfile)
             if os.path.getsize(jpgimgfile) < os.path.getsize(imgfile) / pngfilesizejpgfactor:
-                return HttpResponse(open(jpgimgfile, "rb"), mimetype='image/jpeg')
-        return HttpResponse(open(imgfile, "rb"), mimetype='image/png')
-
+                return HttpResponse(open(jpgimgfile, "rb").read(), mimetype='image/jpeg')
+        return HttpResponse(open(imgfile, "rb").read(), mimetype='image/png')
 
 
     # here on is executed only if there is a cropping to be applied
@@ -218,5 +221,5 @@ def cropimg(request, format, srcdoc, page, cropping):
             assert e.args[0] == 'encoder jpeg not available'
 
     imgout.reset()
-    return HttpResponse(imgout, mimetype=imgmimetype)
+    return HttpResponse(imgout.read(), mimetype=imgmimetype)
 

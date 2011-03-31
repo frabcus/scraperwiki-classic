@@ -4,16 +4,19 @@
 {% block tabs %}
         <ul>
             <li{% ifequal mode "libraries" %} class="selected"{% endifequal %}> 
-                <a id="libraries" href="{% url help 'libraries' language %}">Libraries</a> 
+                <a id="libraries" href="{% url help 'libraries' language|default:"python" %}">Libraries</a> 
+            </li>
+            <li{% ifequal mode "api" %} class="selected"{% endifequal %}> 
+                <a href="{% url api:index_1_0 %}">API</a>
             </li>
             <li{% ifequal mode "documentation" %} class="selected"{% endifequal %}> 
-                <a id="reference" href="{% url help 'documentation' language %}">Documentation</a> 
+                <a id="reference" href="{% url help 'documentation' language|default:"python" %}">Documentation</a> 
             </li>
             <li{% ifequal mode "faq" %} class="selected"{% endifequal %}> 
-                <a id="faq" href="{% url help 'faq' language %}">FAQ</a> 
+                <a id="faq" href="{% url help 'faq' language|default:"python" %}">FAQ</a> 
             </li>
             <li{% ifequal mode "tutorials" %} class="selected"{% endifequal %}> 
-                <a id="tutorials" href="{% url help 'tutorials' language %}">Tutorials</a> 
+                <a id="tutorials" href="{% url help 'tutorials' language|default:"python" %}">Tutorials</a> 
             </li>
         </ul> 
 {% endblock %}

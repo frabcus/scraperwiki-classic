@@ -161,6 +161,8 @@ ul.title_links li.rss           a {background:url(../images/icons/csv_download.p
 ul.title_links li.sqlite        a {background:url(../images/icons/sqlite_download.png) no-repeat;}
 ul.title_links li.fork          a {background:url(../images/icons/fork.png) no-repeat;}
 
+a#downloadcsvtable {background:url(../images/icons/csv_download.png) no-repeat; padding-left: 20px;}
+
 /* Page tabs */
 div.page_tabs {background:#fafafa; padding-right:0.2em;height:1.65em; }
 div.page_tabs.small {font-size:0.8em;}
