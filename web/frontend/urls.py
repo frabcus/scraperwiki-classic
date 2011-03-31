@@ -16,11 +16,16 @@ urlpatterns = patterns('',
     #url(r'^profiles/', include('profiles.urls')), 
 
     url(r'^login/$',frontend_views.login, name='login'),
-    url(r'^login/confirm/$', 'django.views.generic.simple.direct_to_template', {'template': 'registration/confirm_account.html'}, name='confirm_account'),
-    url(r'^terms_and_conditions/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/terms_and_conditions.html'}, name='terms'),
-    url(r'^privacy/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/privacy.html'}, name='privacy'),
-    url(r'^about/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/about.html'}, name='about'),
-    url(r'^example_data/$', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/example_data.html'}, name='api'),
+    url(r'^login/confirm/$', direct_to_template, {'template': 'registration/confirm_account.html',
+                                                  'extra_context': {'body_class': 'confirm_account'}}, name='confirm_account'),
+    url(r'^terms_and_conditions/$', direct_to_template, {'template': 'frontend/terms_and_conditions.html',
+                                                         'extra_context': {'body_class': 'terms'}}, name='terms'),
+    url(r'^privacy/$', direct_to_template, {'template': 'frontend/privacy.html',
+                                            'extra_context': {'body_class': 'privacy'}}, name='privacy'),
+    url(r'^about/$', direct_to_template, {'template': 'frontend/about.html',
+                                          'extra_context': {'body_class': 'about'}}, name='about'),
+    url(r'^example_data/$', direct_to_template, {'template': 'frontend/example_data.html',
+                                                 'extra_context': {'body_class': 'example_data'}}, name='api'),
     url(r'^help/$',frontend_views.help, name='help'),
 
     url(r'^help/(?P<mode>faq|tutorials|documentation|code_documentation|libraries)/$',frontend_views.help, name='help_default'),
@@ -28,18 +33,19 @@ urlpatterns = patterns('',
     url(r'^get_involved/$',frontend_views.get_involved, name='get_involved'),
     
     #hello world
-    url(r'^hello_world.html', 'django.views.generic.simple.direct_to_template', {'template': 'frontend/hello_world.html'}, name='help_hello_world'),
+    url(r'^hello_world.html', direct_to_template, {'template': 'frontend/hello_world.html'}, name='help_hello_world'),
 
     # contact form
-    url(r'^contact/$',                    contact_form, {'form_class':frontend_forms.scraperContactForm},name='contact_form'),
-    url(r'^contact/sent/$',               direct_to_template,{ 'template': 'contact_form/contact_form_sent.html' },name='contact_form_sent'),
+    url(r'^contact/$', contact_form, {'form_class':frontend_forms.scraperContactForm},name='contact_form'),
+    url(r'^contact/sent/$', direct_to_template, {'template': 'contact_form/contact_form_sent.html',
+                                                 'extra_context': {'body_class': 'contact_form_sent'}}, name='contact_form_sent'),
     
     # user's scrapers
     url(r'^dashboard/$',                  frontend_views.dashboard, name='dashboard'),
     url(r'^stats/$',                  frontend_views.stats, name='stats'),    
     
     # Example pages to scrape :)
-    url(r'^examples/basic_table\.html$',  direct_to_template,{ 'template': 'examples/basic_table.html' },name='example_basic_table'),
+    url(r'^examples/basic_table\.html$', direct_to_template, {'template': 'examples/basic_table.html'}, name='example_basic_table'),
     
     #searching and browsing
     url(r'^search/$', frontend_views.search, name='search'),
