@@ -4,10 +4,14 @@
 {% block css %}{% endblock %}
 {% block title %}Profile Details: {{ profile.name }}{% endblock %}
 
+{% block header %}
+	<h2>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}&rsquo;s profile</h2>
+	<p>{{user.username}} &bull; {{user.email}}</p>
+{% endblock %}
+
 {% block content %}
 
     <div class="page_title">
-		<h1>{{ profile.name }}'s profile</h1>
 		{% show_gravatar profile.user 'large' %} 
 		<p>{{ profile.bio }}</p>
 	</div>

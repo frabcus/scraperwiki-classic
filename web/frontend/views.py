@@ -38,7 +38,8 @@ def frontpage(request, public_profile_field=None):
     #featured
     featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').order_by('-first_published_at')[:2]    
     featured_views = Code.objects.filter(featured=True, wiki_type='view').order_by('-first_published_at')[:2]        
-    
+	featured_both = Code.objects.filter(featured=True).order_by('-first_published_at')[:4]
+	
     #popular tags
     #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
     tags_sorted = sorted([(tag, int(tag.count)) for tag in Tag.objects.usage_for_model(Scraper, counts=True)], key=lambda k:k[1], reverse=True)[:10]
@@ -48,6 +49,7 @@ def frontpage(request, public_profile_field=None):
     
     data = {'featured_views': featured_views, 
             'featured_scrapers': featured_scrapers,
+			'featured_both': featured_both,
             'tags': tags, 
             'language': 'python',
             'body_class':'frontpage',

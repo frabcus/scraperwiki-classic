@@ -56,30 +56,62 @@ $(function(){
 	setupSearchBoxHint();
 	setupNavSearchBoxHint();
 	
-	$('#more_developer').bind('click', function(){
+	function developer_show(){
 		$('#intro_developer, #intro_requester, #cartoon_businesswoman').fadeOut(500);
 		$('#more_developer_div').fadeIn(500);
-		$('#cartoon_developer').animate({left: 800}, 1000, 'easeOutCubic');
-		return false;
-	});
-
-	$('#more_requester').bind('click', function(){
+		$('#cartoon_developer').css('z-index', 200).animate({left: 800}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 100); }).addClass('active');
+	}
+	
+	function developer_hide(){
+		$('#intro_developer, #intro_requester, #cartoon_businesswoman').fadeIn(500);
+		$('#more_developer_div').fadeOut(500);
+		$('#cartoon_developer').css('z-index', 200).animate({left: 370}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 100); }).removeClass('active');
+	}
+	
+	function requester_show(){
 		$('#intro_developer, #intro_requester, #cartoon_developer').fadeOut(500);
 		$('#more_requester_div').fadeIn(500);
-		$('#cartoon_businesswoman').animate({left: 30}, 1000, 'easeOutCubic');
+		$('#cartoon_businesswoman').css('z-index', 200).animate({left: 30}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 100); }).addClass('active');
+	}
+	
+	function requester_hide(){
+		$('#intro_developer, #intro_requester, #cartoon_developer').fadeIn(500);
+		$('#more_requester_div').fadeOut(500);
+		$('#cartoon_businesswoman').css('z-index', 200).animate({left: 470}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 100); }).removeClass('active');
+	}
+	
+	$('#cartoon_developer').css('cursor', 'pointer').toggle(function(){
+		developer_show();
+		return false;
+	}, function(){
+		developer_hide();
 		return false;
 	});
 	
-	$('#more_developer_div .back').bind('click', function(){
-		$('#intro_developer, #intro_requester, #cartoon_businesswoman').fadeIn(500);
-		$('#more_developer_div').fadeOut(500);
-		$('#cartoon_developer').animate({left: 370}, 1000, 'easeOutCubic');
+	$('#cartoon_businesswoman').css('cursor', 'pointer').toggle(function(){
+		requester_show();
+		return false;
+	}, function(){
+		requester_hide();
+		return false;
+	});
+	
+	$('#more_developer, #intro_developer').css('cursor', 'pointer').bind('click', function(){
+		developer_show();
+		return false;
+	});
+
+	$('#more_requester, #intro_requester').css('cursor', 'pointer').bind('click', function(){
+		requester_show();
+		return false;
+	});
+	
+	$('#more_developer_div .back').live('click', function(){
+		developer_hide();
 		return false;
 	});	
-	$('#more_requester_div .back').bind('click', function(){
-		$('#intro_developer, #intro_requester, #cartoon_developer').fadeIn(500);
-		$('#more_requester_div').fadeOut(500);
-		$('#cartoon_businesswoman').animate({left: 470}, 1000, 'easeOutCubic');
+	$('#more_requester_div .back').live('click', function(){
+		requester_hide();
 		return false;
 	});
 	

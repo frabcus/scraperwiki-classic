@@ -475,7 +475,21 @@ body.frontpage #header_inner {
 	padding: 20px 0;
 }
 
+body.frontpage #page_inner h2 {
+	text-align: center;
+	font-size: 16px;
+	text-transform: uppercase;
+	color: #666;
+	font-weight: normal;
+	background: #fff url(../images/frontpage_subheading_line.gif) no-repeat center center;
+}
 
+body.frontpage #page_inner h2 a {
+	background-color: #fff;
+	padding: 0 10px;
+	color: #666;
+	text-decoration: none;
+}
 
 
 
