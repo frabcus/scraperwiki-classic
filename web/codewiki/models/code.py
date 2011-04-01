@@ -55,7 +55,7 @@ class Code(models.Model):
     description        = models.TextField(blank=True)
     created_at         = models.DateTimeField(auto_now_add=True)
     deleted            = models.BooleanField()
-    status             = models.CharField(max_length=10, blank=True, default='ok')
+    status             = models.CharField(max_length=10, blank=True, default='ok')   # sick, ok
     users              = models.ManyToManyField(User, through='UserCodeRole')
     guid               = models.CharField(max_length=1000)
     published          = models.BooleanField(default=True)
