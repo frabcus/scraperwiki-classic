@@ -1,6 +1,49 @@
 {% load markup %}
 {% load screen_shot %}
+
 <li class="code_object_line">
+
+    <table class="code_about" cellspacing="0" cellpadding="0">
+        {% ifequal code.wiki_type 'view' %}
+        <tr class="codewiki_type {{code.wiki_type|lower}}">
+            <td class="label">Type</td>
+            <td class="link"><a href="{% url rpcexecute code.short_name %}">{{code.wiki_type|lower}}</a></td>
+        </tr>
+        {% else %}
+        <tr class="codewiki_type {{code.wiki_type|lower}}">
+            <td class="label">Type</td>
+            <td class="link">{{code.wiki_type|lower}}</td>
+        </tr>
+        {% endifequal %}
+        <tr class="language {{code.language|lower}}">
+            <td class="label">Language</td>
+            <td class="link"><a href="{% url editor_edit code.wiki_type code.short_name %}">{{code.language|lower}}</a></td>
+        </tr>
+        {% if code.is_sick_and_not_running %}
+        <tr class="notes">
+            <td class="label">Notes</td>
+            <td class="link about_sick"><a href="{% url code_overview code.wiki_type code.short_name %}">Maintenance<br/>required</a>
+         {% endif %}
+        </tr>
+    </table>
+    
+    <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
+    
+    <h3><a href="{% url code_overview code.wiki_type code.short_name %}">
+        {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
+    </a></h3>
+    
+    <p class="context">Created by <a class="owner" href="{% if code.owner.username %}{% url profiles_profile_detail code.owner.username %}{% endif %}">{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}</a>  {{code.created_at|timesince}} ago</p>
+    
+    <p class="description">{{ code.description|textile|striptags|truncatewords:75 }}</p>
+    
+</li>
+
+
+
+
+
+{% comment %}<li class="code_object_line">
     <h3>
         <!-- scraper id: {{ code.id }} -->
         <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
@@ -56,5 +99,6 @@
         </p>
     
 </li>
+        {% endcomment %}
 
 

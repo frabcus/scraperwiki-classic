@@ -293,6 +293,39 @@ body.frontpage #nav_inner li.frontpage {
 	background: transparent url(../images/header_icon_cog.gif) no-repeat 16px center;
 }
 
+.about #header_inner {
+	background-image: url(../images/header_icon_info.gif);
+}
+
+.contact #header_inner {
+	background-image: url(../images/header_icon_contact.gif);
+}
+
+.dashboard #header_inner {
+	background-image: url(../images/header_icon_dashboard.gif);
+}
+
+.get_involved #header_inner {
+	background-image: url(../images/header_icon_users.gif);
+	background-position: 5px center;
+}
+
+.help #header_inner {
+	background-image: url(../images/header_icon_help.gif);
+}
+
+.profile #header_inner {
+	background-image: url(../images/header_icon_user.gif);
+}
+
+.search #header_inner {
+	background-image: url(../images/header_icon_search.gif);
+}
+
+.view #header_inner {
+	background-image: url(../images/header_icon_view.gif);
+}
+
 #header_inner h2 {
 	font-size: 30px;
 	line-height: 36px;
@@ -330,7 +363,43 @@ body.frontpage #header_inner {
 	background: none;
 }
 
+body.search #header_inner form input {
+	position: relative;
+	top: -6px;
+	opacity: 0;
+	-webkit-transition: opacity 0.3s linear;
+	-moz-transition: opacity 0.3s linear;
+	-o-transition: opacity 0.3s linear;
+}
 
+body.search #header_inner:hover form input {
+	opacity: 1;
+}
+
+body.search #header_inner form #id_q {
+	line-height: 30px;
+	font-size: 24px;
+	padding: 0 6px;
+	height: 30px;
+	margin: 0 0 0 3px;
+	outline: none;
+	background-color: transparent;
+	border: 1px solid #9DCEE7;
+	color: #fff;
+	position: relative;
+	top: -2px;
+	width: 10em;
+	opacity: 1;
+	-webkit-transition: border-color 0.3s linear;
+	-moz-transition: border-color 0.3s linear;
+	-o-transition: border-color 0.3s linear;
+}
+
+body.search #header_inner form #id_q:focus,
+body.search #header_inner form #id_q:hover,
+body.search #header_inner:hover form #id_q {
+	border-color: #fff;
+}
 
 
 /* FRONTPAGE HEADER */
@@ -510,6 +579,10 @@ body.frontpage #header_inner {
 	background-color: #f9f9f9;
 }
 
+body.frontpage #page_outer {
+	background-color: #fff;
+}
+
 #page_inner {
 	padding: 20px 0;
 }
@@ -617,7 +690,8 @@ body.frontpage #page_inner .activity h2 a {
 }
 
 body.frontpage #page_inner .tags ul {
-	padding: 0;
+	padding: 0 0 0 50px;
+	width: 420px;
 	margin: 10px 0;
 }
 
@@ -629,16 +703,40 @@ body.frontpage #page_inner .tags li {
 body.frontpage #page_inner .tags li a {
 	display: block;
 	margin: 0 0 5px 5px;
-	color: #666;
+	covlor: #666;
 	text-decoration: none;
-	padding: 3px 6px;
+	padding: 3px 8px;
 	font-size: 18px;
-	line-height: 18px;
+	line-height: 22px;
 	font-weight: bold;
 }
 
 body.frontpage #page_inner .tags li a:hover {
 	opacity: 1;
+}
+
+body.profile .profilebio {
+	padding: 10px 20px;
+}
+
+body.profile .profilebio p {
+	margin: 0;
+}
+
+body.profile .profilesettings {
+	background-color: #f6f6f6;
+	padding: 10px 20px 0 20px;
+}
+
+body.profile .profilesettings ul {
+	padding: 0;
+	margin: 0;
+}
+
+body.profile h2.scrapersandviews {
+	margin-top: 20px;
+	border-top: 1px solid #ccc;
+	padding-top: 15px;
 }
 
 
@@ -1365,7 +1463,6 @@ ul.title_links li.embed          a {
 /* Page tabs */
 
 div.page_tabs {
-	background: #fafafa;
 	padding-right: 0.2em;
 	height: 1.65em;
 }
@@ -1832,9 +1929,80 @@ div.highlight {
 /* scraper lists */
 
 ul.scraper_list {
+	margin: 0;
+	padding: 0;
+}
+
+ul.scraper_list li {
+	list-style-type: none;
+	padding: 20px 0;
+	border-bottom: 1px solid #9f9f9f;
+	min-height: 80px;
+}
+
+ul.scraper_list a.screenshot {
+	float: left;
+	margin-right: 20px;
+}
+
+ul.scraper_list h3 {
+	font-size: 20px;
+	margin: 0;
+	padding: 0 0 5px 0;
+}
+
+ul.scraper_list .context {
+	color: #666;
+	margin: 0 0 5px 0;
+	font-size: 14px;
+}
+
+ul.scraper_list .context a {
+	font-weight: bold;
+}
+
+ul.scraper_list .description {
+	margin: 0;
+	font-size: 13px;
+	color: #666;
+}
+
+ul.scraper_list table {
+	float: right;
+	width: auto;
+}
+
+ul.scraper_list table td {
+	padding: 5px;
+	text-transform: uppercase;
+}
+
+ul.scraper_list table td.label {
+	color: #aaa;
+	font-size: 10px;
+	text-align: right;
+	background-image: none;
+	padding-right: 8px;
+}
+
+ul.scraper_list table td.link {
+	color: #666;
+	font-size: 12px;
+	padding-left: 23px;
+}
+
+div.pagination {
+	margin-top: 20px;
+	color: #666;
+	font-size: 14px;
+	text-align: center;
+}
+
+
+/* ul.scraper_list {
 	margin-top: 0;
 	position: relative;
-	top: -1em;
+	padding: 0;
 }
 
 ul.scraper_list li {
@@ -1895,6 +2063,74 @@ ul.scraper_list ul.code_about li {
 ul.scraper_list .screenshot img {
 	float: left;
 	margin: 0 5px 5px 0;
+} */
+
+/* code_about (languages / wiki type) */
+
+.code_about {
+	color: #808080;
+	font-variant: small-caps;
+	margin: 0;
+	padding: 0.5em 0;
+}
+
+.code_about li {
+	display: inline;
+	padding-right: 0.3em!important;
+}
+
+.code_about .language td.link, strong.language {
+	background-repeat: no-repeat;
+	background-position: left center;
+}
+
+.code_about .language.python td.link, strong.language.python {
+	background-image: url(../images/icons/python.png);
+}
+
+.code_about .language.php td.link,    strong.language.php {
+	background-image: url(../images/icons/php.png);
+}
+
+.code_about .language.ruby td.link,   strong.language.ruby {
+	background-image: url(../images/icons/ruby.png);
+}
+
+.code_about .language.html td.link,   strong.language.html {
+	background-image: url(../images/icons/html.png);
+}
+
+.code_about .language.javascript  td.link,strong.language.javascript {
+	background-image: url(../images/icons/javascript.png);
+}
+
+.code_about .codewiki_type td.link {
+	background-repeat: no-repeat;
+	background-position: left center;
+}
+
+.code_about .codewiki_type.scraper td.link {
+	background-image: url(../images/icons/scraper.png);
+}
+
+.code_about .codewiki_type.view td.link {
+	background-image: url(../images/icons/view.png);
+}
+
+.code_about .fork td.link {
+	background-repeat: no-repeat;
+	padding-left: 22px;
+	background-image: url(../images/icons/fork.png);
+}
+
+ul.scraper_list .code_about .about_sick {
+	background-image: url(../images/icons/eye.png);
+	background-repeat: no-repeat;
+	background-position: left center;
+}
+
+ul.scraper_list .code_about .about_sick a {
+	color: #c33;
 }
 
 /* About page */
@@ -2557,75 +2793,6 @@ body.fullscreen #embedinstructions textarea {
 
 .text_wiki h1, .text_wiki h2 {
 	font-size: 1.2em;
-}
-
-/* code_about (languages / wiki type) */
-
-.code_about {
-	color: #808080;
-	font-variant: small-caps;
-	margin: 0;
-	padding: 0.5em 0;
-}
-
-.code_about li {
-	display: inline;
-	padding-right: 0.3em!important;
-}
-
-.code_about li.language, strong.language {
-	background-repeat: no-repeat;
-	padding-left: 22px
-}
-
-.code_about li.language.python, strong.language.python {
-	background-image: url(../images/icons/python.png);
-}
-
-.code_about li.language.php,    strong.language.php {
-	background-image: url(../images/icons/php.png);
-}
-
-.code_about li.language.ruby,   strong.language.ruby {
-	background-image: url(../images/icons/ruby.png);
-}
-
-.code_about li.language.html,   strong.language.html {
-	background-image: url(../images/icons/html.png);
-}
-
-.code_about li.language.javascript,strong.language.javascript {
-	background-image: url(../images/icons/javascript.png);
-}
-
-.code_about li.codewiki_type {
-	background-repeat: no-repeat;
-	padding-left: 22px;
-}
-
-.code_about li.codewiki_type.scraper {
-	background-image: url(../images/icons/scraper.png);
-}
-
-.code_about li.codewiki_type.view {
-	background-image: url(../images/icons/view.png);
-}
-
-.code_about li.fork {
-	background-repeat: no-repeat;
-	padding-left: 22px;
-	background-image: url(../images/icons/fork.png);
-}
-
-ul.scraper_list ul.code_about li.about_sick {
-	background: #f3cacb url(../images/icons/eye.png) no-repeat 4px 0.4em;
-	font-variant: normal;
-	color: #000000;
-	font-size: 0.8em;
-	border-top: dotted 1px #d5a2a2;
-	border-bottom: dotted 1px #d5a2a2;
-	padding: 0.3em 10px 0.3em 30px;
-	margin: 0;
 }
 
 /* last saved date / revision */

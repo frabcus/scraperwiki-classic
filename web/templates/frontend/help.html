@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block tabs %}
+    <div class="page_tabs">
         <ul>
             <li{% ifequal mode "libraries" %} class="selected"{% endifequal %}> 
                 <a id="libraries" href="{% url help 'libraries' language %}">Libraries</a> 
@@ -20,7 +21,8 @@
             <li{% ifequal mode "tutorials" %} class="selected"{% endifequal %}> 
                 <a id="tutorials" href="{% url help 'tutorials' language %}">Tutorials</a> 
             </li>
-        </ul> 
+        </ul>
+    </div>
 {% endblock %}
 
 {% block content %}

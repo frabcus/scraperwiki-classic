@@ -47,7 +47,7 @@
 			<ul>
 				<li class="frontpage"><a href="{% url frontpage %}">Home</a></li>
 				<li class="about"><a href="{% url about %}">About</a></li>
-				<li class="about"><a href="{% url scraper_list %}">Browse</a></li>
+				<li class="about"><a href="{% url scraper_list %}scrapers">Browse</a></li>
 				<li class="blog"><a href="http://blog.scraperwiki.com">Blog</a></li>
 				{% if user.is_authenticated %}
 				<li class="user loggedin">
@@ -202,7 +202,7 @@
 				<dt>Data</dt>
 				<dd>
 					<ul>
-						<li><a href="{% url scraper_list %}">Browse data &amp; scrapers</a></li>
+						<li><a href="{% url scraper_list %}scrapers">Browse data &amp; scrapers</a></li>
 						{% if settings.ENABLE_MARKETPLACE %}
 						<li><a href="{% url market_list %}">Request a dataset</a></li>
 						{% else %}
