@@ -22,7 +22,7 @@ img {
 }
 
 a {
-	color: #2680c6;
+	color: #28c;
 	text-decoration: none;
 }
 
@@ -588,7 +588,7 @@ body.frontpage #page_outer {
 }
 
 body.frontpage #page_inner h2 {
-	margin-top: 30px;
+	margin: 30px 0;
 	text-align: center;
 	font-size: 16px;
 	text-transform: uppercase;
@@ -604,11 +604,106 @@ body.frontpage #page_inner h2 a {
 	text-decoration: none;
 }
 
+body.frontpage .featured ul {
+	padding: 0;
+	margin-bottom: 40px;
+}
+
+body.frontpage .featured li {
+	float: left;
+	width: 200px;
+	margin: 0 20px;
+}
+
+body.frontpage .featured li.clear {
+	float: none;
+	clear: left;
+}
+
+body.frontpage .featured li a {
+	display: block;
+	color: #666;
+	padding: 9px;
+	-webkit-box-shadow: 0px 2px 5px #ccc;
+	-moz-box-shadow: 0px 2px 5px #ccc;
+	box-shadow: 0px 2px 5px #ccc;
+	border: 1px solid #ccc;
+}
+
+body.frontpage .featured li:nth-child(1) a {
+	-moz-transform: rotate(2deg);
+	-webkit-transform: rotate(2deg);
+	-o-transform: rotate(2deg);
+	-ms-transform: rotate(2deg);
+	transform: rotate(2deg);
+}
+
+body.frontpage .featured li:nth-child(2) a {
+	-moz-transform: rotate(-1deg);
+	-webkit-transform: rotate(-1deg);
+	-o-transform: rotate(-1deg);
+	-ms-transform: rotate(-1deg);
+	transform: rotate(-1deg);
+}
+
+body.frontpage .featured li:nth-child(3) a {
+	-moz-transform: rotate(-2deg);
+	-webkit-transform: rotate(-2deg);
+	-o-transform: rotate(-2deg);
+	-ms-transform: rotate(-2deg);
+	transform: rotate(-2deg);
+}
+
+body.frontpage .featured li:nth-child(4) a {
+	-moz-transform: rotate(1deg);
+	-webkit-transform: rotate(1deg);
+	-o-transform: rotate(1deg);
+	-ms-transform: rotate(1deg);
+	transform: rotate(1deg);
+}
+
+body.frontpage .featured li a:hover {
+	text-decoration: none;
+	background-color: #F7F9FD;
+	-moz-transform: rotate(0deg);
+	-webkit-transform: rotate(0deg);
+	-o-transform: rotate(0deg);
+	-ms-transform: rotate(0deg);
+	transform: rotate(0deg);
+}
+
+body.frontpage .featured li img {
+	width: 180px;
+}
+
+body.frontpage .featured li h4 {
+	font-size: 15px;
+	line-height: 18px;
+	margin: 4px 0;
+}
+
+body.frontpage .featured li span  {
+	display: block;
+}
+
+body.frontpage .featured li .about {
+	text-transform: uppercase;
+	margin-bottom: 3px;
+	font-size: 12px;
+	line-height: 15px;
+}
+
+body.frontpage .featured li .when {
+	font-size: 11px;
+	line-height: 12px;
+}
+
 body.frontpage .involved {
 	position: relative;
 	width: 640px;
 	height: 172px;
 	padding: 28px 0 0 320px;
+	margin-bottom: 20px;
 	background: #fff6df url(../images/get_involved_box.png) no-repeat 0 0;
 }
 
@@ -677,11 +772,13 @@ body.frontpage .activity {
 body.frontpage #page_inner .tags h2 {
 	background-position: left center;
 	text-align: right;
+	margin-bottom: 10px;
 }
 
 body.frontpage #page_inner .activity h2 {
 	background-position: right center;
 	text-align: left;
+	margin-bottom: 10px;
 }
 
 body.frontpage #page_inner .tags h2 a,
@@ -709,10 +806,6 @@ body.frontpage #page_inner .tags li a {
 	font-size: 18px;
 	line-height: 22px;
 	font-weight: bold;
-}
-
-body.frontpage #page_inner .tags li a:hover {
-	opacity: 1;
 }
 
 body.profile .profilebio {
@@ -2632,25 +2725,56 @@ ul.commitlist li.neweditingsession span {
 
 /* Blog latest */
 
+.blog_latest {
+	margin-left: 20px;
+}
+
 .blog_latest .blog_headline .image_wrap {
-	float: left;
+	float: right;
 	overflow: hidden;
-	width: 250px;
-	height: 150px;
-	margin: 0 8px 8px 0;
+	width: 200px;
+	height: 125px;
+	margin: 0 0 10px 20px;
+}
+
+.blog_latest .blog_headline .image_wrap img {
+	width: 200px;
 }
 
 .blog_latest .blog_headline h5 {
 	font-size: 1.2em;
+	color: #666;
 }
 
-.blog_latest .blog_subs ul {
-	font-size: 0.8em;
+.blog_latest p {
+	font-size: 15px;
+	line-height: 19px;
 }
 
 .blog_latest .blog_subs h5 {
 	font-size: 0.9em;
 	padding: 0;
+	margin-bottom: 5px;
+}
+
+.blog_latest .blog_subs {
+	background-color: #F4F8FB;
+	padding: 10px;
+	color: #28c;
+}
+
+.blog_latest .blog_subs ul {
+	font-size: 0.8em;
+	padding-left: 20px;
+	margin: 0;
+}
+
+.blog_latest .blog_subs ul li {
+	list-style: disc;
+}
+
+.blog_latest .blog_subs ul li a {
+	color: #036;
 }
 
 /* Search results */

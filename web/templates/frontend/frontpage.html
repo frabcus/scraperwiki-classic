@@ -62,10 +62,20 @@
 
 			<div class="featured">
         		<h2><a href="{% url scraper_list_wiki_type 'scraper' %}" title="Browse all scrapers">Featured Scrapers & Views</a></h2>
-				<ul class="scraper_list">
+				<ul>
+				{% load markup %}
+                {% load screen_shot %}
 	    		{% for code in featured_both %}
-	    			{% include 'frontend/includes/code_object_line.html' %}
+                    <li>
+                        <a href="{% url code_overview code.wiki_type code.short_name %}">
+                            {% screen_shot code 'medium' %}
+                            <h4>{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %} / {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}</h4>
+                            <span class="about">{{code.wiki_type}}&nbsp;&nbsp;{{code.language}}</span>
+                            <span class="when">Created {{code.created_at|timesince}} ago</span>
+                        </a>
+                    </li>
 	    		{% endfor %}
+	    		    <li class="clear"></li>
 				</ul>
 			</div>
 			
@@ -86,9 +96,54 @@
     			</ul>
 			</div>
 			
+			<script type="text/javascript">
+			    $(function(){
+                    var num = $('ul.tags li').length;
+                    $('ul.tags li').each(function(){
+                        var i = $(this).prevAll().length;
+                        $(this).children('a').css('opacity', (1 - (i * (1/num)) )).hover(function(){ $(this).css('opacity','1'); }, function(){ $(this).css('opacity', (1 - (i * (1/num)))); });
+                    });
+                });
+			</script>
+			
+			{% comment %}
 			<div class="activity">
 			    <h2><a>Recent Activity</a></h2>
 			</div>
+			{% endcomment %}
+			
+			<div class="activity">
+			    <h2><a>From the Blog</a></h2>
+			    {% load blog_latest %}
+                {% blog_latest %}
+		<!--	    <div class="blog_latest"> 
+                    <div class="blog_headline"> 
+
+                            <div class="image_wrap"> 
+                                <img src="http://scraperwiki.files.wordpress.com/2011/03/scraperwiki-digger-scotland.jpg?w=200&amp;h=150"/> 
+                            </div> 
+
+                        <h5><a href="http://blog.scraperwiki.com/2011/03/28/a-bonny-wee-hack-day-at-hhhglas/">A Bonny Wee Hack Day at #hhhglas</a></h5> 
+
+                            <p>For our first venture to Scotland where better to be than BBC Scotland! We had 8 teams of hacks and hackers digging around the Scottish data beat. For this very special occasion the ScraperWiki digger has donned tartan! With this &#8230; <a href="http://blog.scraperwiki.com/2011/03/28/a-bonny-wee-hack-day-at-hhhglas/">Continue reading <span class="meta-nav">&#8594;</span></a><img alt="" border="0" src="http://stats.wordpress.com/b.gif?host=blog.scraperwiki.com&blog=14548467&post=758214491&subd=scraperwiki&ref=&feed=1" width="1" height="1" /></p> 
+
+                    </div>    
+                    <div class="blog_subs"> 
+                        <h5>More from the ScraperWiki data blog ...</h5> 
+                        <ul> 
+
+                                <li> 
+                                    <a href="http://blog.scraperwiki.com/2011/03/25/opencorporates-partners-with-scraperwiki-offers-bounties-for-open-data-scrapers/">OpenCorporates partners with ScraperWiki &amp; offers bounties for open data scrapers</a> 
+                                </li> 
+
+                                <li> 
+                                    <a href="http://blog.scraperwiki.com/2011/03/21/scraperwiki-ing-down-under/">ScraperWiki-ing Down Under</a> 
+                                </li> 
+
+                        </ul> 
+                    </div> 
+                </div>  -->
+            </div>
 			
 			<br class="clear"/>
 			
