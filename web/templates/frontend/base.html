@@ -94,9 +94,91 @@
 	{% block content_outer %}
 	<div id="page_outer">
 		<div id="page_inner">
-{% block content %}
-			<p>Page content goes here</p>
-{% endblock %}
+		
+		{% block menu %}
+		
+		<div id="divMenu">
+              <ul class="main_menu">
+                <li><a href="{% url dashboard %}" title="Manage your scrapers" class="dashboard">Your dashboard</a></li>
+                <li><a href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a></li>
+                {% if user.is_staff %}
+                  <li class="staff"><a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">New view</a></li>
+                {% endif %}
+                <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers">Browse scrapers</a></li>
+                <li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
+                {% if settings.ENABLE_MARKETPLACE %}
+                    <li><a href="{% url market_list %}">Request a dataset</a></li>
+                {% else %}
+                    <li><a href="{% url contact_form %}">Request a dataset</a></li>
+                {% endif %}
+                <li><a href="{% url help 'tutorials' language|default:"python" %}" title="Help">Tutorials</a></li>
+                <li><a href="{% url help 'documentation' language|default:"python" %}" title="Technical docs">Documentation</a></li>
+                {% if user.is_staff %}
+                  <li class="staff"><a href="{% url running_scrapers %}" title="Interact with current UML status">UML status</a></li>
+                {% endif %}
+              </ul>
+
+              <form id="divSidebarSearch" action="/search/" method="post">
+                <input type="text" id="q" name="q"/>
+                <input type="submit" id="go" value="Go" />
+              </form>
+
+              <ul class="sub_menu">
+                 <li><a href="{% url about %}" title="About ScraperWiki">About ScraperWiki</a></li>
+                 <li><a href="{% url help 'faq' language|default:"python" %}" title="Frequently Asked Questions">FAQ</a></li>
+                 <li><a href="http://blog.scraperwiki.com" title="ScraperWiki Data Blog">Read our blog</a></li>
+                 <li><a href="{% url contact_form %}" title="Feedback form">Feedback</a></li>
+                 <li><a href="http://groups.google.com/group/scraperwiki" title="Google groups">Email list</a></li>
+                 <li><a href="http://twitter.com/scraperwiki" title="Follow us on Twitter">Twitter</a></li>
+                 <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook">Facebook</a></li>
+              </ul>
+            </div>
+		
+		{% endblock %}
+		
+		{% block above_page %}{% endblock %}		    
+
+		<div id="divPage">
+		    <div id="divInfo">
+		        {% if info_messages %}
+                     <ul>
+                         {% for info in info_messages %}
+                             <li>{{ info|escape }}</li>
+                         {% endfor %}
+                     </ul>
+                 {% endif %}
+                 {% if notifications %}
+                 <ul>
+                     {% for message in notifications %}
+                 	{% if forloop.first %} {% comment %} Just get the first notification - otherwise login message displays twice, strange bug {% endcomment %}
+                        <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endif %}
+                     {% endfor %}
+                 </ul>
+                 {% endif %}
+                 {% block info %}
+
+       		     {% endblock %}
+    		</div>
+		    <div id="divErrors">
+		        {% if error_messages %}
+                     <ul>
+                         {% for error in error_messages %}
+                             <li>{{ error|escape }}</li>
+                         {% endfor %}
+                     </ul>
+                 {% endif %}
+    		    {% block errors %}
+		            
+    		    {% endblock %}		    
+    		</div>
+    		
+    		{% block tabs %}{% endblock %}
+            
+		    <div id="divContent">
+  		        {% block content %}{% endblock %}
+  		        <br class="clear"/>
+		    </div>
 		</div>
 	</div>
 	{% endblock %}

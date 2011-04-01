@@ -56,7 +56,9 @@
 				</div>
 			</div>
 {% endblock %}
-{% block content  %}
+{% block content_outer  %}
+    <div id="page_outer">
+		<div id="page_inner">
 
 			<div class="featured">
         		<h2><a href="{% url scraper_list_wiki_type 'scraper' %}" title="Browse all scrapers">Featured Scrapers & Views</a></h2>
@@ -89,6 +91,9 @@
 			</div>
 			
 			<br class="clear"/>
+			
+		</div>
+	</div>
 			
 {% endblock %}
 {% block run_script %}setupIntroSlideshow();{% endblock %}

@@ -13,8 +13,30 @@ br.clear {
 	clear: both;
 }
 
+.hide {
+	display: none;
+}
+
 img {
 	border: none;
+}
+
+a {
+	color: #2680c6;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+span.faux_link {
+	color: #ccc;
+}
+
+a.more_link {
+	font-weight: bold;
+	font-style: italic;
 }
 
 #footer_inner ul, #footer_inner dd {
@@ -287,6 +309,7 @@ body.frontpage #nav_inner li.frontpage {
 
 #header_inner a {
 	color: #fff;
+	text-decoration: underline;
 }
 
 #header_inner h2 a {
@@ -482,6 +505,10 @@ body.frontpage #header_inner {
 
 
 /* PAGE */
+
+#page_outer {
+	background-color: #f9f9f9;
+}
 
 #page_inner {
 	padding: 20px 0;
@@ -790,10 +817,27 @@ ul.user_menu li {
 	margin: 5px 0 0 0;
 }
 
- Main menu 
+*/
+
+/* Main menu */
+
+#divMenu {
+	float: right;
+	width: 150px;
+	margin-left: 20px;
+}
+
+#divMenu .main_menu {
+	padding: 0;
+}
+
+#divMenu .main_menu, #divMenu .sub_menu, #divMenu form {
+	border-bottom: solid 1px #ccc;
+	padding-bottom: 1em;
+}
 
 #divMenu ul li {
-	padding: 0.3em 0.3em;
+	padding: 0.3em 0;
 	list-style-type: none;
 	font-weight: bold;
 }
@@ -810,13 +854,9 @@ ul.user_menu li {
 	
 }
 
-#divMenu .main_menu, #divMenu .sub_menu, #divMenu form {
-	border-bottom: solid 1px #ccc;
-	padding-bottom: 1em;
-}
-
 #divMenu .sub_menu {
 	font-size: 0.8em;
+	padding-left: 0;
 }
 
 #divMenu .sub_menu h4 {
@@ -829,21 +869,25 @@ ul.user_menu li {
 	margin: 0.5em 0 0 0;
 }
 
- Content and columns 
+
+
+
+
+
+/* Content and columns */
 
 #divContent {
-	padding-bottom: 3em;
-	border-left: solid 1px #9f9f9f;
-	border-top: solid 1px #9f9f9f;
-	border-bottom: solid 1px #9f9f9f;
-	padding: 1em 0.8em 2em 0.8em;
-	margin-bottom: 3em;
+	width: 748px;
+	background-color: #fff;
+	border: 1px solid #9f9f9f;
+	padding: 20px;
+	margin-bottom: 20px;
 	min-height: 600px;
 }
 
-.content {
+/* .content {
 	padding-top: 1.3em;
-}
+} */
 
 .content.left, .content.right {
 	float: left;
@@ -911,6 +955,10 @@ ul.user_menu li {
 	background-color: white;
 	z-index: 1000;
 }
+
+
+
+/*
 
  intro 
 
@@ -1050,7 +1098,10 @@ div.attention {
 	color: #fff;
 }
 
- Errors 
+
+*/
+
+/* Errors */
 
 #divErrors {
 	margin: 0.5em 0.5em 1em 0;
@@ -1084,6 +1135,25 @@ small.error_hint {
 	padding-top: 1em;
 }
 
+/* Code */
+
+pre.scraperoutput {
+	background-color: aliceblue;
+	padding: 0.5em;
+}
+
+pre.scrapercode {
+	background-color: lemonchiffon;
+	padding: 0.5em;
+}
+
+
+
+
+
+
+/*
+
  Info 
 
 #divInfo ul {
@@ -1099,38 +1169,6 @@ small.error_hint {
 	padding: 0.1em 0;
 	margin: 0;
 	text-align: center;
-}
-
- Links 
-
-a {
-	color: #2680c6;
-	text-decoration: none;
-}
-
-a:hover {
-	text-decoration: underline;
-}
-
-span.faux_link {
-	color: #ccc;
-}
-
-a.more_link {
-	font-weight: bold;
-	font-style: italic;
-}
-
- Code 
-
-pre.scraperoutput {
-	background-color: aliceblue;
-	padding: 0.5em;
-}
-
-pre.scrapercode {
-	background-color: lemonchiffon;
-	padding: 0.5em;
 }
 
  Data tabs 
@@ -1168,7 +1206,11 @@ div.data_content {
 	display: block
 }
 
- Tables 
+
+
+*/
+
+/* Tables */
 
 table {
 	width: 100%;
@@ -1235,21 +1277,22 @@ table.scrapersediting td {
 	border: 1px solid black;
 }
 
- Flexigrid override 
+/* Flexigrid override */
 
 .flexigrid table {
 	width: auto;
 }
 
- Page titles 
+/* Page titles */
 
 div.page_title {
 	border-bottom: dotted 1px #ccc;
-	padding: 1em 0 0.5em 0;
+	padding: 0 0 0.5em 0;
 	position: relative;
+	min-height: 20px;
 }
 
-.page_controls {
+/* .page_controls {
 	position: absolute;
 	top: 0.6em;
 	right: 0;
@@ -1258,15 +1301,21 @@ div.page_title {
 
 div.page_title_narrow {
 	width: 600px;
-}
+}	*/
 
 ul.title_links {
 	float: right;
-	margin-top: 0
+	margin-top: 0;
+	font-size: 14px;
+}
+
+ul.title_links li {
+	float: right;
+	margin-left: 20px;
 }
 
 ul.title_links li a {
-	padding-left: 20px;
+	padding-left: 22px;
 }
 
 ul.title_links li.csv           a {
@@ -1305,7 +1354,15 @@ ul.title_links li.fork          a {
 	background: url(../images/icons/fork.png) no-repeat;
 }
 
- Page tabs 
+ul.title_links li.edit_title          a {
+	background: url(../images/icons/edit.png) no-repeat;
+}
+
+ul.title_links li.embed          a {
+	background: url(../images/icons/add_to_website.png) no-repeat;
+}
+
+/* Page tabs */
 
 div.page_tabs {
 	background: #fafafa;
@@ -1359,7 +1416,7 @@ div.tab_tools form {
 	display: inline;
 }
 
- meta data 
+/* meta data */
 
 div.metadata dl {
 	padding: 0;
@@ -1383,13 +1440,7 @@ div.metadata dt, div.metadata dd {
 	margin: 0;
 }
 
- Clear 
-
-br.clear {
-	clear: both;
-}
-
- Scraper pages 
+/* Scraper pages */
 
 .code_viewer {
 	border: solid 1px #ccc;
@@ -1405,12 +1456,12 @@ br.clear {
 	height: 40%;
 	width: 100%;
 	text-align: center;
-	padding-top: 5%;
+	padding-top: 10%;
 	position: absolute;
 	top: 0;
 	left: 0;
 	font-weight: bold;
-	color: #cdcbaa;
+	color: #3399cc;
 	text-transform: uppercase;
 	font-size: 2em;
 	background: url(../images/transparent.png) repeat 0 0;
@@ -1469,9 +1520,14 @@ br.clear {
 .screenshot_large {
 	position: relative;
 	border: solid;
-	width: 800px;
-	height: 600px;
+	width: 750px;
+	hceight: 600px;
 	border: dotted 1px #808080;
+	margin: 20px 0;
+}
+
+.screenshot_large img {
+	width: 748px;
 }
 
 .screenshot_large a {
@@ -1503,19 +1559,13 @@ br.clear {
 	width: 200px!important;
 }
 
- View pages 
+/* View pages */
 
 iframe.view {
 	border: thick red dashed;
 }
 
- Hide 
-
-.hide {
-	display: none;
-}
-
- Forms 
+/* Forms */
 
 ul.form {
 	padding: 0;
@@ -1641,7 +1691,7 @@ ul.inline li {
 	display: inline;
 }
 
- tags 
+/* tags */
 
 ul.tags li {
 	display: inline;
@@ -1721,7 +1771,7 @@ span#spnLicenseChoice form {
 	display: inline;
 }
 
- Scroll 
+/* Scroll */
 
 div.scroll {
 	overflow-y: scroll;
@@ -1729,7 +1779,7 @@ div.scroll {
 	padding: 0.5em;
 }
 
- Terms & conditions 
+/* Terms & conditions */
 
 dl.terms {
 	padding: 0;
@@ -1748,7 +1798,25 @@ dl.terms dd {
 	font-size: 0.8em;
 }
 
- Highlight 
+div.terms {
+	line-height: 1.5em;
+}
+
+div.terms ul dl, div.terms ul ul {
+	padding-left: 2em
+}
+
+div.terms ul dl dt {
+	font-weight: bold;
+}
+
+div.terms ul dl dd {
+	padding-left: 0;
+	margin-left: 0;
+	padding-bottom: 0.5em;
+}
+
+/* Highlight */
 
 span.highlight {
 	background: #ffffaa;
@@ -1761,7 +1829,7 @@ div.highlight {
 	margin-bottom: 0.5em;
 }
 
- scraper lists 
+/* scraper lists */
 
 ul.scraper_list {
 	margin-top: 0;
@@ -1829,7 +1897,7 @@ ul.scraper_list .screenshot img {
 	margin: 0 5px 5px 0;
 }
 
- About page 
+/* About page */
 
 #divWelcome {
 	position: relative;
@@ -1901,34 +1969,14 @@ div.feature img {
 	padding-top: 0;
 }
 
- Terms & conditions 
-
-div.terms {
-	line-height: 1.5em;
-}
-
-div.terms ul dl, div.terms ul ul {
-	padding-left: 2em
-}
-
-div.terms ul dl dt {
-	font-weight: bold;
-}
-
-div.terms ul dl dd {
-	padding-left: 0;
-	margin-left: 0;
-	padding-bottom: 0.5em;
-}
-
- Signup page 
+/* Signup page */
 
 #divSignupTerms div.scroll {
 	height: 160px;
 	font-size: 0.7em;
 }
 
- FAQs 
+/* FAQs */
 
 ul.list_of_contents {
 	border-bottom: dotted 1px #ccc;
@@ -1951,7 +1999,7 @@ dl.faq dd {
 	padding-bottom: 1.3em;
 }
 
- Gravatar image 
+/* Gravatar image */
 
 .gravatar.small {
 	vertical-align: baseline;
@@ -1971,7 +2019,7 @@ dl.faq dd {
 	margin-left: 0px;
 }
 
- bounty 
+/* bounty */
 
 span.bounty {
 	padding: 0.2em 0.4em;
@@ -1985,7 +2033,7 @@ span.bounty a {
 	color: #fff!important;
 }
 
- Filter 
+/* Filter */
 
 ul.filter_list {
 	position: absolute;
@@ -1996,7 +2044,7 @@ ul.filter_list li {
 	float: left;
 }
 
- Report 
+/* Report */
 
 p.report {
 	background: #f8f8a8 url(../images/icons/flag_yellow.png) no-repeat 8px 0.4em;
@@ -2007,7 +2055,7 @@ p.report {
 	margin-top: 1em;
 }
 
- Sick 
+/* Sick */
 
 p.sick {
 	background: #f3cacb url(../images/icons/eye.png) no-repeat 8px 0.4em;
@@ -2018,7 +2066,7 @@ p.sick {
 	margin: 0;
 }
 
- Documentation 
+/* Documentation */
 
 div.example {
 	margin: 5px 0;
@@ -2030,7 +2078,7 @@ table.example_table {
 	margin-top: 5px;
 }
 
- API 
+/* API */
 
 code.api_call {
 	background: white;
@@ -2133,16 +2181,17 @@ a.api_link:hover span {
 	background: #fee
 }
 
-; 
 
 
+/* Programmer API */
 
- Programmer API 
 .programmer_api {
 	
 }
 
- Comments 
+
+
+/* Comments */
 
 form.add_comment {
 	position: relative;
@@ -2182,7 +2231,7 @@ div.user_comment img {
 	margin-right: 10px;
 }
 
- Data map 
+/* Data map */
 
 #divDataMap {
 	width: 100%;
@@ -2203,13 +2252,13 @@ div.user_comment img {
 	width: 100%;
 }
 
- Language Choice Popup 
 
+
+/* Language Choice Popup */
 
 .ui-widget {font-family: Helvetica,arial,sans-serif;}
 .ui-widget-header {background: #FFFFD7; color: #2680C6;}
 .ui-widget input.button {font-size: 0.7em;}
-
 
 a.historyuser {
 	padding-left: 5px;
@@ -2312,14 +2361,14 @@ ul.commitlist li.neweditingsession span {
 	display: none;
 }
 
- Overlay 
+/* Overlay */
 
 #simplemodal-overlay {
 	background-color: #9f9f9f;
 	cursor: wait;
 }
 
- Container 
+/* Container */
 
 #simplemodal-container {
 	height: 320px;
@@ -2345,7 +2394,7 @@ ul.commitlist li.neweditingsession span {
 	padding: 8px;
 }
 
- Blog latest 
+/* Blog latest */
 
 .blog_latest .blog_headline .image_wrap {
 	float: left;
@@ -2368,7 +2417,7 @@ ul.commitlist li.neweditingsession span {
 	padding: 0;
 }
 
- Search results 
+/* Search results */
 
 .page_title input {
 	font-size: 1em;
@@ -2388,7 +2437,7 @@ ul.commitlist li.neweditingsession span {
 	display: inline;
 }
 
- Full screen 
+/* Full screen */
 
 body.fullscreen {
 	padding: none;
@@ -2498,7 +2547,7 @@ body.fullscreen #embedinstructions textarea {
 	width: 500px;
 }
 
- textwiki 
+/* textwiki */
 
 .text_wiki {
 	background: #fafafa;
@@ -2510,7 +2559,7 @@ body.fullscreen #embedinstructions textarea {
 	font-size: 1.2em;
 }
 
- code_about (languages / wiki type) 
+/* code_about (languages / wiki type) */
 
 .code_about {
 	color: #808080;
@@ -2579,7 +2628,7 @@ ul.scraper_list ul.code_about li.about_sick {
 	margin: 0;
 }
 
- last saved date / revision 
+/* last saved date / revision */
 
 .last_saved {
 	color: #808080;
@@ -2587,7 +2636,7 @@ ul.scraper_list ul.code_about li.about_sick {
 	padding: 0.5em 0em 0.5em 0;
 }
 
- infobox 
+/* infobox */
 
 .infobox {
 	border: solid 1px #ccc;
@@ -2596,7 +2645,7 @@ ul.scraper_list ul.code_about li.about_sick {
 	padding: 0.5em;
 }
 
- edit links 
+/* edit links */
 
 a.edit {
 	font-variant: normal!important;
@@ -2616,7 +2665,7 @@ h4 a.edit {
 	font-size: 0.8em;
 }
 
- market 
+/* market */
 
 .completeometer {
 	position: absolute;
@@ -2624,13 +2673,13 @@ h4 a.edit {
 	right: 0;
 }
 
- flag stuff that is seen by staff only 
+/* flag stuff that is seen by staff only */
 
 .staff {
 	background: url(../images/staff.png);
 }
 
- get involved 
+/* get involved */
 
 .task_complete {
 	border-bottom: dotted 1px #ccc;
@@ -2651,7 +2700,7 @@ h4 a.edit {
 	padding-left: 220px;
 }
 
- template picker 
+/* template picker */
 
 #template_popup h1 {
 	font-size: 1.2em;
@@ -2675,7 +2724,7 @@ h4 a.edit {
 	top: 4px;
 }
 
- function docmentation 
+/* function docmentation */
 
 div#divQuickHelp {
 	text-align: left
@@ -2737,7 +2786,7 @@ form#newpdfdoclink {
 	
 }
 
- History page updates 
+/* History page updates */
 
 .history_month {
 	margin-bottom: 20px;
@@ -2853,4 +2902,4 @@ form#newpdfdoclink {
 ul.quickhelpoptions li {
 	margin-left: 3.5em;
 	list-style-type: disc;
-}*/
+}
