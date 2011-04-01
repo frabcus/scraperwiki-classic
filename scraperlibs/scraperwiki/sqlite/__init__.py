@@ -36,7 +36,6 @@ def table_info(name):
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
 
 
-
             # also needs to handle the types better (could save json and datetime objects handily
 def save_var(name, value, verbose=2):
     data = {"name":name, "value_blob":value, "type":type(value).__name__}

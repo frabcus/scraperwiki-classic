@@ -1,192 +1,54 @@
-<div class="content col left">
+<div class="documentationpage">
 <h3>Scraperwiki Python documentation</h3>
 
 <p>In your scrapers, you can use ScraperWiki's in-built functions for retrieving, geocoding and saving data. 
 Just add <code>import scraperwiki</code> at the top of your scraper.</p>
 
 
-<div class="section">
-<h3><span id="scraping"></span>scraperwiki.scrape</h3>
-<p>The most basic function. Downloads a web page, and returns you the HTML as a string.
-<strong>Note:</strong> This is just a convenience function. If you want to do
-anything more complex, you can use other Python download modules directly, such as 
-<a href="http://docs.python.org/library/urllib2.html">urllib2</a>.
-</p>
-    <h4>Method</h4>
-    <table class="api_detail example_table">
-    <tr><th width="30%">Method</th><th width="20%">Returned value</th><th>Description</th></tr>
-<tr><td><code>scraperwiki.scrape<br/>&nbsp;(url, [params=], )</code></td><td>String</td>
-    <td><dl>
-    <dt><code>url</code></dt>
-        <dd>String. The address of the web page, e.g. <code>http://www.google.co.uk</code>
-        </dd>
-    <dt><code>params</code> (optional)</dt>
-<dd>Dictionary. If present, sends a POST request, with the parameters specified in the dictionary. 
-        </dd>
-    </dl></td>
-    </tr>
-    </table>
-	<h4>Example</h4>
-	<div class="example"><code>
-	import scraperwiki<br/>
-	html = scraperwiki.scrape('http://www.google.co.uk') # GET request.<br/>
-	html = scraperwiki.scrape('http://www.google.co.uk', { 'key' : value })	# POST request.
-	</code></div>
+<h3><span id="sql"></span>The SQLite datastore</h3>
+<p>ScraperWiki provides a fully-fledged SQLite database for each scraper which you can save to.  
+You can read the data back that has been committed by other scrapers, or extract it through 
+the API</p>
 
+<dl>
+<dt>scraperwiki.<strong>sqlite.save</strong>(unique_keys, data[, table_name="swdata", verbose=2])</dt>
+    <dd>Saves a data record into the datastore into the table given by table_name.  <br/>
+        data is a dict object, unique_keys is a subset of data.keys() which determins 
+        when a record is over-written.<br/>
+        For large numbers of records data can be a list of dicts.
+    </dd>
 
+<dt>scraperwiki.<strong>sqlite.attach</strong>(name[, asname])</dt>
+    <dd>Attaches to the datastore of another scraper with the given name.<br/>
+        asname is an optional alias for the attached datastore.
+    </dd>
 
-	        <div class="section">
-	            <h3><span id="sql"></span>The SQLite datastore</h3>
-	            <p>ScraperWiki provides a fully-fledged SQLite database to save your data into.
-                You do not need to define the table schemas if you use the <code>scraperwiki.sqlite.save</code> function.</p>
-	            <p>However to retrieve the data you may need to use some basic SQL.  
-                It is possible to attach to the database of another scraper and query its data too.  
-                This can be useful for looking up shared object identifiers.</p>
-				    <h4>Method</h4>
-				    <table class="api_detail example_table">
-				    <tr><th width="30%">Method</th><th width="20%">Returned value</th><th>Description</th></tr>
-					<tr><td><code>scraperwiki.sqlite.save<br/>
-					    &nbsp;(unique_keys, data,<br/>
-					    &nbsp;[table_name="swdata"],<br/>
-					    &nbsp;[verbose=2]) </code></td>
-					<td>None</td>
-				    <td>
-				    <p>Stores a new record in the SQLite database, or replaces an existing
-	                record which has the same unique keys. The data parameter is a
-	                dictionary containing all the attributes of your record and their
-	                values.
-	                </p>
-	                <dl>
-	                    <dt><code>unique_keys</code></dt>
-	                        <dd>List. Specify the attributes in
-	                        your record which are together unique, e.g. <code>['dog_id']</code> or
-	                        <code>['cattery', 'cat_number']</code>. Any existing data with
-	                        the same values for those attributes as your new data
-	                        will be overwritten. Must contain at least one element.
-                            This list defines an index to your table
-	                        </dd>
-	                    <dt><code>data</code></dt>
-	                        <dd>Dictionary or list of dictionaries. The data defining the record (or list of records).
-                            Values other than integers and floats are converted to strings.
-                            The data table is altered to include all the keys you give it, and values you do not set 
-                            are set to Null.
-	                        </dd>
-	                    <dt><code>table_name</code> (optional)</dt>
-	                        <dd>The default table name is "swdata", but you can set different names and create 
-                            multiple tables in the same database.  
-	                        </dd>
-	                    <dt><code>verbose</code> (optional)</dt>
-	                        <dd>Set this to 0 to prevent the data replaying into the data tab when 
-                            you are running it in the editor.
-	                        </dd>
-	                </dl>
-				    </td>
-				    </tr>
-					<tr><td><code>scraperwiki.sqlite.execute<br/>
-					    &nbsp;(val1, [val2=])</code></td>
-					<td>Dict</td>
-				    <td>
-				    <p>Executes an SQLite command.
-	                </p>
-	                <dl>
-	                    <dt><code>val1</code></dt>
-	                        <dd>String. The SQLite command itself. See the 
-                          <a href="http://www.sqlite.org/docs.html">SQLite documentation</a> for 
-                          command syntax.
-                          Returns an object <code>{ keys:[], data:[ [ ], [ ], ... ] }</code>
-	                        </dd>
-	                    <dt><code>val2</code> (optional)</dt>
-	                        <dd>List. Used if your sql command is parametrized, eg
-                            <code>val1="insert into swdata values (?,?,?)"</code>, 
-                            then possible to have <code>val2=["a", 1, "thing"]</code>.
-	                        </dd>
-	                </dl>
-				    </td>
-				    </tr>
-					<tr><td><code>scraperwiki.sqlite.commit<br/>
-					    &nbsp;()</code></td>
-					<td>None</td>
-				    <td>
-				    <p>Commits your SQLite changes. Required if you are using 
-                    <code>scraperwiki.sqlite.execute</code> to enter data rather than 
-                    <code>scraperwiki.sqlite.save</code>, which autocommits for you.
-	                </p>
-				    </td>
-				    </tr>				
-					<tr><td><code>scraperwiki.sqlite.attach<br/>
-					    &nbsp;(name, [asname=])</code></td>
-					<td>None</td>
-				    <td>
-				    <p>Connects to the sqlite database of another scraper
-	                </p>
-	                <dl>
-	                    <dt><code>name</code></dt>
-	                        <dd>String. The name of the other scraper
-	                        </dd>
-	                    <dt><code>asname</code> (optional)</dt>
-	                        <dd>String. Assigns a different name to the scraper you have attached to.
-                            eg <code>attach("welsh_assembly_expenses", "src")</code> means we can 
-                            access the tables in it as <code>src.swdata</code>.
-	                        </dd>
-	                </dl>
-				    </td>
-				    </tr>
-				    </table>
-					<h4>Example</h4>
-					<div class="example"><code>
-					scraperwiki.sqlite.save(['name'], data)<br/>
-					person_fields = ["booking_id INTEGER PRIMARY KEY","name TEXT"]<br/>
-					scraperwiki.sqlite.execute("create table if not exists person (%s)" \<br/>
-					&nbsp;&nbsp;% ",".join(person_fields))<br/>
-					scraperwiki.sqlite.execute("INSERT into 'person' values(?,?)", (100, 'Dave'))<br/>
-					scraperwiki.sqlite.commit()<br/>
-					results = scraperwiki.sqlite.select("booking_id from person where name='Dave'")
-					</code></div>
-	            </div>
+<dt>scraperwiki.<strong>sqlite.select</strong>(val1[, val2], verbose=1)</dt>
+    <dd>Executes a select command on the datastore, eg select("* from swdata limit 10")<br/>
+        Returns a list of dicts that have been selected<br/>
+        val2 is an optional list of parameters if the select command contains ?s
+    </dd>
 
+<dt>scraperwiki.<strong>sqlite.execute</strong>(val1[, val2, verbose=1])</dt>
+    <dd>Executes any arbitrary sqlite command (except attach), eg create, delete, insert or drop<br/>
+        val2 is an optional list of parameters if the select command contains question marks
+    </dd>
 
+<dt>scraperwiki.<strong>sqlite.commit</strong>()</dt>
+    <dd>Commits to the file after a series of execute commands.  (sqlite.save auto-commits).
+    </dd>
 
-	    <h2><span id="variables"></span>Managing scrapers with persistent variables</h2> 
-            <p>
-              Scrapers can store and retrieve single variables into the database to help 
-              them pick up where they left off if interrupted on a very large scrape.
-            </p>
-			    <h4>Method</h4>
-			    <table class="api_detail example_table">
-			    <tr><th width="30%">Method</th><th width="20%">Returned value</th><th>Description</th></tr>
-			<tr><td><code>scraperwiki.sqlite.save_var<br/>&nbsp;(key, value)</code></td><td>String</td>
-			    <td>
-			 <p>Stores an item of metadata that can later be retrieved using the <code>scraperwiki.sqlite.get_var</code> function.
-                Values are put into a table called "swvariables".</p>
-			    <dl>
-	              <dt><code>key</code></dt>
-	              <dd>
-	                This is a unique identifier for the data being stored. Multiple save requests
-	                with the same key will overwrite any existing value associated with the key.
-                    
-	              </dd>
-	              <dt><code>value</code></dt>
-	              <dd>The value to be stored.</dd>
-	            </dl></td></tr>
-	            <tr>
-				<td><code>scraperwiki.sqlite.get_var<br/>&nbsp;(key, [default=])</code></td><td>String</td>
-				 <td>
-				 <p>Retrieves an item of metadata that has previously been stored using the <code>scraperwiki.sqlite.save_var</code> function.</p>
-				<dl>
-	              <dt><code>key</code></dt>
-	              <dd>The unique identifier that was used when storing the data.</dd>
-	              <dt><code>default</code> (optional)</dt>
-	              <dd>The value to be returned if no value is found to be associated with this key. Defaults to <code>None</code>.</dd>
-	            </dl></td>
-			    </tr>
-			    </table>
-				<h4>Example</h4>
-				<div class="example"><code>
-				latest_message = scraperwiki.sqlite.get_var('latest_message', default='No message yet')<br/>
-				latest_message = 'Scraper input'<br/>
-				scraperwiki.sqlite.save_var('latest_message',latest_message)
-                </code></div>
-                </div>
+<dt>scraperwiki.<strong>sqlite.save_var</strong>(key, value)</dt>
+    <dd>Saves an arbitrary single-value into a table called "swvariables". 
+        Used to make scrapers able to continue after an interruption.
+    </dd>
+
+<dt>scraperwiki.<strong>sqlite.get_var</strong>(key[, default])</dt>
+    <dd>Retrieves a single value that was saved by save_var.
+    </dd>
+
+</dl>
+
 
 
 
@@ -374,10 +236,9 @@ anything more complex, you can use other Python download modules directly, such 
 			scraperwiki.metadata.save('data_columns', ['date', 'name', 'breed', 'latlng'])
 			</code></div>
         </div>
-
 </div>
 
-<div class="content col right">
+<div>
 <h4>Core ScraperWiki Python functions</h4>
 <h5>Scraping</h5>
 <ul>
@@ -406,4 +267,5 @@ anything more complex, you can use other Python download modules directly, such 
   <li><a href="#managing">scraperwiki.metadata.get</a></li>
 </ul> 
 </div>
+
 
