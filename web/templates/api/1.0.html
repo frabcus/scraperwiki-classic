@@ -73,7 +73,7 @@
         </table>
     </div>
     
-    <div class="section">
+    <div class="section" style="display:none">
         <h2>Status and error codes</h2>
         <p>
             API calls return the following HTTP status codes. You should check for these to see if your request was OK:
@@ -125,10 +125,7 @@
             </tbody>
         </table>
     </div>
-    <div class="section">
-        <h2>Code libraries</h2>
-        <p><a href="{% url api:libraries %}">Coming soon</a></p>
-    </div>
+
 </div>
 
 <div class="content col right">
@@ -137,15 +134,13 @@
             <a href="{% url api:keys %}">Manage your API keys</a>
         </p>
     {% endcomment %}
-    <h4>API functions</h4>
-
-    <h5>Datastore</h5>
+    <h5>Datastore API functions</h5>
     <ul>
         <li><a href="{% url api:scraper_sqlite %}">scraperwiki.datastore.sqlite</a></li>
         <li><a href="{% url api:scraper_getdata %}">scraperwiki.datastore.getData</a></li>
     </ul>
 
-    <h5>Scrapers</h5>
+    <h5>Scraper API functions</h5>
     <ul>
         <li><a href="{% url api:scraper_search %}">scraperwiki.scraper.search</a></li>
         <li><a href="{% url api:scraper_getinfo %}">scraperwiki.scraper.getInfo</a></li>
@@ -158,6 +153,7 @@
         <li><a href="{% url api:geo_postcodetolatlng %}">scraperwiki.geo.postcodeToLocation</a></li>
     </ul>
 
+    <div style="display:none">
     <h5>Legacy functions pending deprecation</h5>
     <p>(The functionality of these can be replicated -- in a more flexable way -- using the sqlite query)</p>
     <ul>
@@ -166,6 +162,7 @@
         <li><a href="{% url api:scraper_getdatabylocation %}">scraperwiki.datastore.getDataByLocation</a></li>
         <li><a href="{% url api:datastore_search %}">scraperwiki.datastore.search</a></li>
     </ul>
+    </div>
 </div>
 
 {% endblock %}

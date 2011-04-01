@@ -157,6 +157,8 @@ def pdftoxml(pdfdata):
     xmlin.close()
     return xmldata
 
+def GET():
+    return dict(cgi.parse_qsl(os.getenv("QUERY_STRING")))
 
 # code adapted from http://docs.python.org/library/imp.html#examples-imp
 # ideally there is a way to seamlessly overload the __import__ function and get us to call out like this

@@ -17,6 +17,7 @@
     <dd>Additional scraper databases to include. <input type="text" name="attach" id="attach" value=""/></dd>
     <dt><code>query</code> (required)</dt>
     <dd>The SQL query against the database. <input type="text" name="query" id="query" value="select * from swdata limit 10"/></dd>
+    <dd><small>(Don't forget to use backticks ` to quote your keys that have spaces in them.)</small></dd>
     <dt><code>callback</code> (optional)</dt>
     <dd><a href="http://en.wikipedia.org/wiki/JSONP#JSONP">JSONP</a> callback function. <input type="text" name="callback" id="callback"/></dd>
 {% endblock %}

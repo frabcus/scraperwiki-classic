@@ -587,4 +587,5 @@ ul.quickhelpoptions li { margin-left:3.5em; list-style-type:disc; }
 
 dl.tutoriallist dd { padding-bottom:5px; }
 div.documentationpage dt { color:#003; font-size:120%; padding-top:10px;}
-div.documentationpage h3 {padding-top:30px}
+div.documentationpage h3 {padding-top:30px; padding-bottom:0}
+div.documentationpage dd { padding-top:2px; padding-bottom:2px;}
