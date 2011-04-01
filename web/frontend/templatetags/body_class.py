@@ -8,4 +8,5 @@ def body_class(request):
     if request.path == '/':
         return 'class="frontpage"'
     else:
-        return 'class="%s"' % ' '.join(request.path[1:].split('/'))
+        classes = ' '.join(request.path[1:].split('/')).strip()
+        return 'class="%s"' % classes
