@@ -585,5 +585,6 @@ form#newpdfdoclink { }
 
 ul.quickhelpoptions li { margin-left:3.5em; list-style-type:disc; }
 
-dl.tutoriallist dt { padding-top:5px; }
+dl.tutoriallist dd { padding-bottom:5px; }
 div.documentationpage dt { color:#003; font-size:120%; padding-top:10px;}
+div.documentationpage h3 {padding-top:30px}
