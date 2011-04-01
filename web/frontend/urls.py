@@ -11,8 +11,9 @@ from django.views.generic.simple import direct_to_template
 urlpatterns = patterns('',
 
     # profiles
-    url(r'^profiles/edit/$', profile_views.edit_profile, {'form_class': frontend_forms.UserProfileForm},   name='profiles_edit_profile'),
-    url(r'^profiles/(?P<username>\w+)/$', 	   frontend_views.profile_detail,  name='profiles_profile_detail'),
+    url(r'^profiles/edit/$', profile_views.edit_profile, {'form_class': frontend_forms.UserProfileForm, 
+                                                          'extra_context': {'body_class': 'profile'}}, name='profiles_edit_profile'),
+    url(r'^profiles/(?P<username>\w+)/$', frontend_views.profile_detail, name='profiles_profile_detail'),
     #url(r'^profiles/', include('profiles.urls')), 
 
     url(r'^login/$',frontend_views.login, name='login'),
@@ -36,7 +37,7 @@ urlpatterns = patterns('',
     url(r'^hello_world.html', direct_to_template, {'template': 'frontend/hello_world.html'}, name='help_hello_world'),
 
     # contact form
-    url(r'^contact/$', contact_form, {'form_class':frontend_forms.scraperContactForm},name='contact_form'),
+    url(r'^contact/$', contact_form, {'form_class': frontend_forms.scraperContactForm, 'extra_context': {'body_class': 'contact'}}, name='contact_form'),
     url(r'^contact/sent/$', direct_to_template, {'template': 'contact_form/contact_form_sent.html',
                                                  'extra_context': {'body_class': 'contact_form_sent'}}, name='contact_form_sent'),
     
