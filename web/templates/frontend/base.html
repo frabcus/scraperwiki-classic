@@ -36,7 +36,8 @@
 	{% endif %}
 </head>
 
-<body{% if body_class %} class="{{ body_class }}"{% endif %}>
+{% load body_class %}
+<body {%  body_class request %}>
 	
 	{% block nav_outer %}
 	<div id="nav_outer">

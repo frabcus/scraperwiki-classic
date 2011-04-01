@@ -231,7 +231,7 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
 
     form = SearchForm()
 
-    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, 'special_filter': special_filter, 'language': 'python', 'body_class':'browse ' + wiki_type}
+    dictionary = { "scrapers": scrapers, 'wiki_type':wiki_type, "form": form, "featured_scrapers":featured_scrapers, 'special_filter': special_filter, 'language': 'python'}
     return render_to_response('frontend/browse.html', dictionary, context_instance=RequestContext(request))
 
 
