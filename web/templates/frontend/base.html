@@ -188,7 +188,8 @@
 	<div id="footer_outer">
 		<div id="footer_inner">
 			{% block footer %}
-			<p class="stats"><strong>{{total_scrapers}} scrapers</strong> <strong>{{total_views}} views</strong> <strong>{{total_users}} users</strong> <span>and counting&hellip;</span></p>
+            {% load site_stats %}
+			<p class="stats"><strong>{% num_scrapers %} scrapers</strong> <strong>{% num_views %} views</strong> <strong>{% num_users %} users</strong> <span>and counting&hellip;</span></p>
 			<dl>
 				<dt>About</dt>
 				<dd>

@@ -52,10 +52,7 @@ def frontpage(request, public_profile_field=None):
 			'featured_both': featured_both,
             'tags': tags, 
             'language': 'python',
-            'body_class':'frontpage',
-            'total_scrapers': Scraper.objects.count(),
-            'total_views': View.objects.count(),
-            'total_users': User.objects.count()}
+            'body_class':'frontpage'}
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
 
 @login_required
