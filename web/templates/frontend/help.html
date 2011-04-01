@@ -16,7 +16,7 @@
                 <a id="faq" href="{% url help 'faq' language|default:"python" %}">FAQ</a> 
             </li>
             <li{% ifequal mode "tutorials" %} class="selected"{% endifequal %}> 
-                <a id="tutorials" href="{% url help 'tutorials' language|default:"python" %}">Tutorials</a> 
+                <a id="tutorials" href="{% url help 'tutorials' language|default:"python" %}">Examples</a> 
             </li>
         </ul> 
 {% endblock %}
@@ -29,12 +29,16 @@
          {% if not forloop.first %} or {% endif %}
          <strong class="language {{other_language}}"><a href="{% url help mode other_language %}">{{display_other_language}}</a></strong>{% endfor %}.
          </p>
-          <h1>{{mode|capfirst}} - {{display_language}}</h1>
+          {% ifequal mode 'tutorials' %}
+            <h1>{{'examples'|capfirst}} - {{display_language}}</h1>
+          {% else %}
+            <h1>{{mode|capfirst}} - {{display_language}}</h1>
+          {% endifequal %}
         {% else %}
           <h1>Help - {{mode|capfirst}}</h1>
         {% endifnotequal %}
         {% ifequal mode "tutorials" %}
-          <p>Quick examples to set you on your way.  Click on one to try it out.</p>
+          <p>Quick and easy examples just to get you started.  Click on one to try it out.</p>
         {% endifequal %}
     </div>
     <div class="content">

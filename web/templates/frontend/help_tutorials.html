@@ -8,10 +8,10 @@
 
 <div class="content half left">
   {% for key, value in tutorials.items %}
-  <h2 id="{{ key }}_tutorials">{{ key.title }} tutorial scrapers</h2>
+  <h2 id="{{ key }}_tutorials">{{ key.title }} scrapers</h2>
   <dl>
     {% for scraper in value %}
-    <dt>
+    <dt style="margin-top:10px">
       <a href="{% url editor scraper.wiki_type scraper.language|lower %}?template={{scraper.short_name}}" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
       {% if user.is_staff %}
         <a class="staff" href="{% url editor_edit scraper.wiki_type scraper.short_name %}">edit</a>
@@ -25,7 +25,7 @@
 
 <div class="content half right">
   {% for key, value in viewtutorials.items %}
-  <h2 id="{{ key }}_tutorials">{{ key.title }} tutorial views</h2>
+  <h2 id="{{ key }}_tutorials">{{ key.title }} views</h2>
   <dl>
     {% for scraper in value %}
     <dt>
