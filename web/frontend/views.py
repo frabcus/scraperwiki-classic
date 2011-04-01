@@ -157,21 +157,28 @@ def help(request, mode=None, language=None):
         language = "python"
     display_language = LANGUAGES_DICT[language]
     other_languages = [ (l, d) for (l, d) in HELP_LANGUAGES if l != language]
+    
     if mode=="code_documentation": # Support legacy URL. 
         mode="documentation"
+    
+    context = { 'mode' : mode, 'language' : language, 'display_language' : display_language, 
+             'tutorials': tutorials, 'viewtutorials': viewtutorials, 
+             'other_languages' : other_languages }
+    
     if not mode or mode=="faq":
         mode = "faq"
-        include_tag = "frontend/help_faq.html"
+        context["include_tag"] = "frontend/help_faq.html"
     elif mode=="tutorials":
-        tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
+        if language == "python":
+            tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('title')
+        else:
+            tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
         viewtutorials[language] = View.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
-        include_tag = "frontend/help_tutorials.html"
+        context["include_tag"] = "frontend/help_tutorials.html"
     else: 
-        include_tag = "frontend/help_%s_%s.html" % (mode, language)
-    return render_to_response('frontend/help.html', { 'mode' : mode, 'language' : language, 'display_language' : display_language, \
-             'include_tag' : include_tag, 'tutorials': tutorials, 'viewtutorials': viewtutorials, \
-             'other_languages' : other_languages }, 
-             context_instance = RequestContext(request))
+        context["include_tag"] = "frontend/help_%s_%s.html" % (mode, language)
+    
+    return render_to_response('frontend/help.html', context, context_instance = RequestContext(request))
 
 def browse_wiki_type(request, wiki_type = None, page_number = 1):
     special_filter = request.GET.get('filter', None)
