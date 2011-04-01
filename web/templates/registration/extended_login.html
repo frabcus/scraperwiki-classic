@@ -4,6 +4,11 @@
 
 {% block title %}Sign in or create an account{% endblock %}
 
+{% block header %}
+	<h2>Sign in or create an account</h2>
+	<p>If you are an existing user please sign in, if not create a new account</a>.</p>
+{% endblock %}
+
 {% block errors %}
     {% if login_form.errors %}
         <ul>
@@ -19,13 +24,10 @@
 
 {% endblock %}
 
-{% block header %}
-	<h2>Sign in or create an account</h2>
-	<p>If you are an existing user please sign in, if not create a new account</a>.</p>
-{% endblock %}
+
 
 {% block content %}
-    <div class="content half left">
+<div class="content half left">
     	<form method="post" action=".">
     	    <fieldset>
     	        <input type="hidden" name="redirect" value="{{redirect}}"/>

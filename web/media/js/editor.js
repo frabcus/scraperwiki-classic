@@ -352,7 +352,7 @@ $(document).ready(function() {
         $.modal('<iframe width="100%" height="100%" src='+$('input#quickhelpurl').val()+'?'+$.param(quickhelpparams)+'></iframe>', 
         {
             overlayClose: true,
-            containerCss: { borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
+            containerCss: { borderColor:"#ccc", height:"80%", padding:0, width:"90%" }, 
             overlayCss: { cursor:"auto" }, 
             onShow: function() 
             {

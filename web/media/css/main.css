@@ -322,7 +322,7 @@ body.frontpage #nav_inner li.frontpage {
 	background-image: url(../images/header_icon_search.gif);
 }
 
-.view #header_inner {
+.views #header_inner {
 	background-image: url(../images/header_icon_view.gif);
 }
 
@@ -584,7 +584,7 @@ body.frontpage #page_outer {
 }
 
 #page_inner {
-	padding: 20px 0;
+	padding: 20px 0 40px 0;
 }
 
 body.frontpage #page_inner h2 {
@@ -1147,6 +1147,17 @@ ul.user_menu li {
 	z-index: 1000;
 }
 
+body.api .right, #help_content .right {
+	font-size: 14px;
+	background-color: #F4F8FB;
+	padding: 10px;
+}
+
+body.api .right ul, #help_content .right ul {
+	padding-left: 0;
+	margin-top: 5px;
+}
+
 
 
 /*
@@ -1667,25 +1678,42 @@ div.metadata dt, div.metadata dd {
 	padding-top: 1em;
 }
 
-.views li {
-	float: left;
+body.choose_template #divContent h1 {
+	text-align: center;
+	font-size: 24px;
+	color: #333;
+	margin: 50px 0 20px 0;
 }
 
-.views li a {
-	display: block;
-	width: 220px;
+ul.views {
+	padding: 0;
 	text-align: center;
 }
 
-.views.small li a {
+#simplemodal-container .views {
+	width: 500px;
+}
+
+ul.views li {
+	display: inline-block;
+}
+
+ul.views li a {
+	display: block;
+	width: 220px;
+	text-align: center;
+	padding: 10px;
+}
+
+ul.views.small li a {
 	width: 110px;
 }
 
-.views.small li a.screenshot {
+ul.views.small li a.screenshot {
 	height: 73px;
 }
 
-.views li a.screenshot {
+ul.views li a.screenshot {
 	display: block;
 	background: #fafafa;
 	border: solid 1px #9f9f9f;
@@ -1693,9 +1721,18 @@ div.metadata dt, div.metadata dd {
 	height: 145px;
 	text-align: center;
 	margin-bottom: 10px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	background-color: #f9f9f9;
 }
 
-.views li.new {
+ul.views li a.screenshot:hover {
+	text-decoration: none;
+	background-color: #F4F8FB;
+	border: 1px solid #48c;
+}
+
+ul.views li.new {
 	border: dashed 1px #ccc;
 	width: 220px;
 	height: 145px;
@@ -1703,7 +1740,7 @@ div.metadata dt, div.metadata dd {
 	padding: 0;
 }
 
-.views li.new a {
+ul.views li.new a {
 	margin-top: 26%;
 }
 
@@ -2197,6 +2234,11 @@ ul.scraper_list .screenshot img {
 	background-image: url(../images/icons/javascript.png);
 }
 
+strong.language {
+	padding-left: 20px;
+	margin-left: 3px;
+}
+
 .code_about .codewiki_type td.link {
 	background-repeat: no-repeat;
 	background-position: left center;
@@ -2585,6 +2627,11 @@ div.user_comment img {
 
 /* Language Choice Popup */
 
+
+
+
+
+
 .ui-widget {font-family: Helvetica,arial,sans-serif;}
 .ui-widget-header {background: #FFFFD7; color: #2680C6;}
 .ui-widget input.button {font-size: 0.7em;}
@@ -2703,7 +2750,7 @@ ul.commitlist li.neweditingsession span {
 	height: 320px;
 	width: 500px;
 	background-color: #fff;
-	border: 1px solid #9f9f9f;
+	border: 1px solid #ccc;
 	padding: 12px;
 }
 
@@ -2714,8 +2761,8 @@ ul.commitlist li.neweditingsession span {
 	display: inline;
 	z-index: 3200;
 	position: absolute;
-	top: -15px;
-	right: -16px;
+	top: -12px;
+	right: -12px;
 	cursor: pointer;
 }
 
