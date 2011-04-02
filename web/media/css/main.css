@@ -479,15 +479,20 @@ body.search #header_inner:hover form #id_q {
 	display: none;
 }
 
-#frontpage_slider img {
+#frontpage_slider #blob_developer,
+#frontpage_slider #blob_requester {
 	position: absolute;
 	top: 15px;
-	left: 330px;
+	left: 310px;
 	z-index: 100;
 }
 
-#frontpage_slider #cartoon_businesswoman {
-	top: 42px;
+#frontpage_slider img:hover {
+	z-index: 201;
+}
+
+#frontpage_slider #blob_requester {
+	top: 60px;
 	left: 460px;
 	z-index: 99;
 }
@@ -538,6 +543,11 @@ body.search #header_inner:hover form #id_q {
 
 #frontpage_slider table {
 	width: 780px;
+	font-size: 18px;
+}
+
+#frontpage_slider .usps td {
+	padding-top: 10px;
 }
 
 #frontpage_slider p.last {

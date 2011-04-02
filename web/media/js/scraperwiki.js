@@ -57,43 +57,45 @@ $(function(){
 	setupNavSearchBoxHint();
 	
 	function developer_show(){
-		$('#intro_developer, #intro_requester, #cartoon_businesswoman').fadeOut(500);
+		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
 		$('#more_developer_div').fadeIn(500);
-		$('#cartoon_developer').css('z-index', 200).animate({left: 800}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 100); }).addClass('active');
+		$('#blob_developer').animate({left: 760}, 1000, 'easeOutCubic').addClass('active');
 	}
 	
 	function developer_hide(){
-		$('#intro_developer, #intro_requester, #cartoon_businesswoman').fadeIn(500);
+		$('#intro_developer, #intro_requester, #blob_requester').fadeIn(500);
 		$('#more_developer_div').fadeOut(500);
-		$('#cartoon_developer').css('z-index', 200).animate({left: 330}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 100); }).removeClass('active');
+		$('#blob_developer').animate({left: 310}, 1000, 'easeOutCubic').removeClass('active');
 	}
 	
 	function requester_show(){
-		$('#intro_developer, #intro_requester, #cartoon_developer').fadeOut(500);
+		$('#intro_developer, #intro_requester, #blob_developer').fadeOut(500);
 		$('#more_requester_div').fadeIn(500);
-		$('#cartoon_businesswoman').css('z-index', 200).animate({left: 10}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 99); }).addClass('active');
+		$('#blob_requester').animate({left: 10}, 1000, 'easeOutCubic').addClass('active');
 	}
 	
 	function requester_hide(){
-		$('#intro_developer, #intro_requester, #cartoon_developer').fadeIn(500);
+		$('#intro_developer, #intro_requester, #blob_developer').fadeIn(500);
 		$('#more_requester_div').fadeOut(500);
-		$('#cartoon_businesswoman').css('z-index', 200).animate({left: 460}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 99); }).removeClass('active');
+		$('#blob_requester').animate({left: 460}, 1000, 'easeOutCubic').removeClass('active');
 	}
 	
-	$('#cartoon_developer').css('cursor', 'pointer').toggle(function(){
-		developer_show();
-		return false;
-	}, function(){
-		developer_hide();
-		return false;
+	$('#blob_developer').css('cursor', 'pointer').bind('click', function(){
+	    if($(this).is('.active')){
+	        developer_hide();
+	    } else {
+	        developer_show();
+	    }
+	    return false;
 	});
 	
-	$('#cartoon_businesswoman').css('cursor', 'pointer').toggle(function(){
-		requester_show();
-		return false;
-	}, function(){
-		requester_hide();
-		return false;
+	$('#blob_requester').css('cursor', 'pointer').bind('click', function(){
+	    if($(this).is('.active')){
+	        requester_hide();
+	    } else {
+	        requester_show();
+	    }
+	    return false;
 	});
 	
 	$('#more_developer, #intro_developer').css('cursor', 'pointer').bind('click', function(){
