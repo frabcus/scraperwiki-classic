@@ -65,19 +65,19 @@ $(function(){
 	function developer_hide(){
 		$('#intro_developer, #intro_requester, #cartoon_businesswoman').fadeIn(500);
 		$('#more_developer_div').fadeOut(500);
-		$('#cartoon_developer').css('z-index', 200).animate({left: 370}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 100); }).removeClass('active');
+		$('#cartoon_developer').css('z-index', 200).animate({left: 330}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 100); }).removeClass('active');
 	}
 	
 	function requester_show(){
 		$('#intro_developer, #intro_requester, #cartoon_developer').fadeOut(500);
 		$('#more_requester_div').fadeIn(500);
-		$('#cartoon_businesswoman').css('z-index', 200).animate({left: 30}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 100); }).addClass('active');
+		$('#cartoon_businesswoman').css('z-index', 200).animate({left: 10}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 99); }).addClass('active');
 	}
 	
 	function requester_hide(){
 		$('#intro_developer, #intro_requester, #cartoon_developer').fadeIn(500);
 		$('#more_requester_div').fadeOut(500);
-		$('#cartoon_businesswoman').css('z-index', 200).animate({left: 470}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 100); }).removeClass('active');
+		$('#cartoon_businesswoman').css('z-index', 200).animate({left: 460}, 1000, 'easeOutCubic', function(){ $(this).css('z-index', 99); }).removeClass('active');
 	}
 	
 	$('#cartoon_developer').css('cursor', 'pointer').toggle(function(){
