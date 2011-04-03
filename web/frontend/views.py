@@ -168,6 +168,7 @@ def help(request, mode=None, language=None):
     if not mode or mode=="faq":
         mode = "faq"
         context["include_tag"] = "frontend/help_faq.html"
+        context["mode"] = "faq"
     
     elif mode=="tutorials":
         
