@@ -101,7 +101,7 @@
           </div>
 
           <div class="content_footer">
-             <p>This dataset has a total of {{ scraper.record_count }} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }}</p>
+             <p>This dataset has a total of {{scraper.scraper.record_count}} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }}</p>
           </div>
         {% endif %}
 
