@@ -2,6 +2,8 @@ import datetime
 import time
 import os
 
+# Development note:  Aiming to merge scraper,view,code back into one object
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -258,11 +260,12 @@ class Code(models.Model):
 
             # all authorization to go through here
             # actions are overview, changeadmin, comments, history, exportsqlite, setfollow, 
-            # rpcexecute, readcode, readcodeineditor, savecode
+            # rpcexecute, readcode, readcodeineditor, savecode, 
+            # settags
     def actionauthorized(self, user, action):
         if self.deleted:
             return False
-        if not user.is_authenticated() and action in ["changeadmin", "savecode"]:
+        if not user.is_authenticated() and action in ["changeadmin", "savecode", "settags"]:
             return False
         if not self.published and not user.is_authenticated():
             return False

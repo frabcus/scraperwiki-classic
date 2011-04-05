@@ -2,6 +2,8 @@
 import datetime
 import time
 
+# Development note:  Aiming to merge scraper,view,code back into one object
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin

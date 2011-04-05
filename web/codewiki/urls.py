@@ -20,7 +20,10 @@ urlpatterns = patterns('',
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    
 
     url(r'^views/(?P<short_name>[\w_\-\.]+)/admin/$',     views.view_admin,             name='view_admin'),    
-    
+    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/$',  views.scraper_admin,          name='scraper_admin'),
+    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/settags$',  views.scraper_admin_settags, name='scraper_admin_settags'),
+
+
     url(r'^scrapers/delete-data/(?P<short_name>[\w_\-\.]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
     url(r'^scrapers/converttosqlitedatastore/(?P<short_name>[\w_\-\.]+)/$', views.scraper_converttosqlitedatastore, name='scraper_converttosqlitedatastore'),
             
@@ -45,8 +48,6 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/screenshoot-scraper/(?P<short_name>[\w_\-\.]+)/$', 
                                                           views.scraper_screenshoot_scraper,    name='scraper_screenshoot_scraper'),
         
-        #not deprecated as used in by ajax to implement publishScraperButton
-    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/$',  views.scraper_admin,          name='scraper_admin'),
         
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',  views.scraper_history,  name='scraper_history'),
@@ -54,7 +55,6 @@ urlpatterns = patterns('',
     
     
     url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.]+)/$',                      viewsuml.run_event,     name='run_event'),  
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/tags/$',     views.tags,             name='scraper_tags'),    
         
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$',                 views.choose_template,  name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        
