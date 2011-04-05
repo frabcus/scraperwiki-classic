@@ -78,7 +78,8 @@ class ScraperManager(CodeManager):
                               published=True,
                               last_run=last_run,
                               language='python',
-                              description=title)
+                              description=title,
+                              privacy_status='visible')
         scraper.commit_code("""
 # PLEASE READ THIS BEFORE EDITING
 #

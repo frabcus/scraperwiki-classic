@@ -42,7 +42,12 @@ WIKI_TYPES = (
     ('view', 'View'),    
 )
 
-
+PRIVACY_STATUSES = (
+    ('public', 'public'),
+    ('visible', 'visible'),
+    ('private', 'private'),
+    ('deleted', 'deleted'),
+)
 
 class Code(models.Model):
 
@@ -70,6 +75,7 @@ class Code(models.Model):
     wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
     relations          = models.ManyToManyField("self", blank=True)  # manage.py refuses to generate the tabel for this, so you haev to do it manually.
     forked_from        = models.ForeignKey('self', null=True, blank=True)
+    privacy_status     = models.CharField(max_length=32, choices=PRIVACY_STATUSES, default='public')
     
     # managers
     objects = CodeManager()
