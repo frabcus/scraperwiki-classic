@@ -119,8 +119,8 @@ function setupCKANLink(){
     });
 }
 
-function setupScraperEditInPlace(wiki_type, short_name){
-    
+function setupScraperEditInPlace(wiki_type, short_name)
+{
     //about
     $('#divAboutScraper').editable('admin/', {
              indicator : 'Saving...',
@@ -222,7 +222,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
               submit    : 'Save',
               onblur: 'ignore',
               data   : $('#hidLicenseChoices').val(),
-              type   : 'select',
+              type   : 'text',
               event: 'dblclick',
               placeholder: '',
               submitdata : {short_name: short_name}
@@ -230,7 +230,8 @@ function setupScraperEditInPlace(wiki_type, short_name){
 
       $('#aEditLicense').click (
            function(){
-                sCurrent = $('#spnLicenseChoice').html().trim();               
+                sCurrent = $('#spnLicenseChoice').html().trim();
+alert(sCurrent); 
                 $('#spnLicenseChoice').dblclick();
                 $('#spnLicenseChoice select').val(sCurrent);
                 return false;

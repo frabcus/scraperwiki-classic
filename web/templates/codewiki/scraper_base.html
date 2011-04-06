@@ -22,7 +22,13 @@
             <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
         </ul>
         <h1>
-            {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %} / <span id="hCodeTitle">{{ scraper.title }}</span>{% if not scraper.published %} (not public){% endif %}
+          {% if scraper.owner.get_profile.name %}
+            {{ scraper.owner.get_profile.name }}
+          {% else %}
+            {{scraper.owner.username}}
+          {% endif %}
+          / <span id="hCodeTitle">{{ scraper.title }}</span>
+         [{{scraper.privacy_status}}]
         </h1>
         <ul class="code_about">
            <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>

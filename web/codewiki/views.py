@@ -220,6 +220,8 @@ def scraper_admin_settags(request, short_name):
     scraper.settags(request.POST.get('value', ''))  # splitting is in the library
     return render_to_response('codewiki/includes/tagslist.html', { "scraper_tags":scraper.gettags() })
 
+
+
 def view_admin(request, short_name):
     scraper = getscraperor404(request, short_name, "changeadmin")
     view = scraper.view
