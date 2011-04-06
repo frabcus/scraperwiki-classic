@@ -270,9 +270,6 @@ def scraper_admin(request, short_name):
         scraper.license = request.POST.get('value', None)
         response_text = scraper.license
 
-    if element_id == 'publishScraperButton':
-        scraper.published = True
-
     scraper.save()
     response.write(response_text)
     return response
@@ -287,6 +284,7 @@ def scraper_delete_data(request, short_name):
         scraper.scraper.scrapermetadata_set.all().delete()
         scraper.scraper.update_meta()
     scraper.save()
+    request.notifications.add("Your data has been deleted")
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 def scraper_converttosqlitedatastore(request, short_name):
