@@ -10,21 +10,10 @@ class TestRunScrapers(unittest.TestCase):
         command = Command()
         self.scrapers = command.get_overdue_scrapers()
 
-    def testUnpublished(self):
-        # Unpublished scrapers should not appear in the list
-        # of scrapers to be run
-        unpublished = Scraper(title=u'Unpublished',
-                             published=False, 
-                             last_run=None,
-                             run_interval=86400)
-        unpublished.save()
-        self.assertEqual(0, self.scrapers.count())
-
     def testNeverRun(self):
         # Published scrapers that have never been run should
         # appear in the list of scrapers to be run
         never_run = Scraper(title=u'Never Run',
-                            published=True, 
                             last_run=None,
                             run_interval=86400)
         never_run.save()
@@ -34,7 +23,6 @@ class TestRunScrapers(unittest.TestCase):
         # Scrapers that haven't been run for less than the run interval
         # should not appear in the list of scrapers to be run
         not_overdue = Scraper(title=u'Not Overdue',
-                              published=True, 
                               last_run=datetime.datetime.now(), 
                               run_interval=86400)
         not_overdue.save()
@@ -43,8 +31,7 @@ class TestRunScrapers(unittest.TestCase):
     def testOverdue(self):
         # Scrapers that haven't been run for longer than the run interval
         # should appear in the list of scrapers to be run
-        overdue = Scraper(published=True, 
-                          last_run=datetime.datetime.now() - datetime.timedelta(7), 
+        overdue = Scraper(last_run=datetime.datetime.now() - datetime.timedelta(7), 
                           run_interval=86400)
         overdue.save()
         self.assertEqual(1, self.scrapers.count())

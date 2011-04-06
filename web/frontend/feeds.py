@@ -82,7 +82,7 @@ class LatestCodeObjects(Feed):
         return obj.get_absolute_url()
         
     def items(self):
-        return Code.objects.filter(published=True).order_by('-created_at')[:settings.RSS_ITEMS]
+        return Code.objects.filter(privacy_status="public").order_by('-created_at')[:settings.RSS_ITEMS]
         
         
 class LatestCodeObjectsBySearchTerm(Feed):
@@ -110,6 +110,6 @@ class LatestCodeObjectsBySearchTerm(Feed):
         return "Items created with '%s' somewhere in title or tags" % obj
 
     def items(self, obj):
-        code_objects = Code.objects.search(obj) 
+        code_objects = Code.objects.scraper_search_query(None, obj) 
         return code_objects[:settings.RSS_ITEMS]
         

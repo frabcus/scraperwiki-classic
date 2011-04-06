@@ -297,7 +297,7 @@ class Command(BaseCommand):
         make_option('--max-concurrent', '-m', dest='max_concurrent',
                         help='Maximum number of scrapers to schedule'),
     )
-    help = 'Run a scraper, or all scrapers.  By default all scrapers that are published are run.'
+    help = 'Run a scraper, or all scrapers.  By default all scrapers are run.'
 
     def run_scraper(self, scraper, options):
         t = ScraperRunner(scraper, options.get('verbose'))
@@ -305,7 +305,7 @@ class Command(BaseCommand):
 
     def get_overdue_scrapers(self):
         #get all scrapers where interval > 0 and require running
-        scrapers = Scraper.objects.filter(published=True).filter(run_interval__gt=0)
+        scrapers = Scraper.unfiltered.exclude(privacy_status="deleted").filter(run_interval__gt=0)
         scrapers = scrapers.extra(where=["(DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW() or last_run is null)"])
         return scrapers
     

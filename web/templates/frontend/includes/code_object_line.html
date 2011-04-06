@@ -10,6 +10,9 @@
         <a href="{% url code_overview code.wiki_type code.short_name %}">
             {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
         </a>
+        {% ifnotequal code.privacy_status 'public' %}
+          [{{code.privacy_status}}]
+        {% endifnotequal %}
         <ul class="code_about">
            {% ifequal code.wiki_type 'view' %}
              <li class="codewiki_type {{code.wiki_type|lower}}"><a href="{% url rpcexecute code.short_name %}">{{code.wiki_type|lower}}</a></li>
