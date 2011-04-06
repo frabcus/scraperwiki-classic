@@ -41,13 +41,17 @@ def listolddatastore(request):
 
 
 def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
+    if action in ["delete_scraper", "delete_data"]:
+        if not (request.method == 'POST' and request.POST.get(action, None) == '1'):
+            raise Http404
+    
     try:
         scraper = models.Code.unfiltered.get(short_name=short_name)
     except models.Code.DoesNotExist:
         message =  "Sorry, this %s does not exist" % wiki_type
         return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
     
-    if wiki_type != scraper.wiki_type:
+    if rdirect and wiki_type != scraper.wiki_type:
         return HttpResponseRedirect(reverse(rdirect, args=[scraper.wiki_type, short_name]))
         
     if not scraper.actionauthorized(request.user, action):
@@ -71,7 +75,7 @@ def getscraperor404(request, short_name, action):
         if request.POST.get('converttosqlitedatastore', None) != 'converttosqlitedatastore':
             raise Http404
     
-    if action in ["delete_data", "schedule_scraper", "run_scraper", "screenshoot_scraper", "delete_scraper"]:
+    if action in ["schedule_scraper", "run_scraper", "screenshoot_scraper", ]:
         if request.POST.get(action, None) != '1':
             raise Http404
         
@@ -275,7 +279,8 @@ def scraper_admin(request, short_name):
 
 
 def scraper_delete_data(request, short_name):
-    scraper = getscraperor404(request, short_name, "delete_data")
+    scraper = getscraperorresponse(request, "scraper", short_name, None, "delete_data")
+    if isinstance(scraper, HttpResponse):  return scraper
     dataproxy = DataStore(scraper.guid, scraper.short_name)
     dataproxy.request(("clear_datastore",))
     if scraper.wiki_type == "scraper":
@@ -312,9 +317,11 @@ def scraper_screenshoot_scraper(request, wiki_type, short_name):
     call_command('take_screenshot', short_name=short_name, domain=settings.VIEW_DOMAIN, verbose=False)
     return HttpResponseRedirect(reverse('code_overview', args=[code_object.wiki_type, short_name]))
 
+
 def scraper_delete_scraper(request, wiki_type, short_name):
-    scraper = getscraperor404(request, short_name, "delete_scraper")
-    scraper.deleted = True
+    scraper = getscraperorresponse(request, wiki_type, short_name, None, "delete_scraper")
+    if isinstance(scraper, HttpResponse):  return scraper
+    scraper.privacy_status = "deleted"
     scraper.save()
     request.notifications.add("Your %s has been deleted" % wiki_type)
     return HttpResponseRedirect('/')
