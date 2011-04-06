@@ -68,7 +68,7 @@ def getscraperor404(request, short_name, action):
         raise Http404
         
     # extra post conditions to make spoofing these calls a bit of a hassle
-    if action in ["changeadmin", "settags"]:
+    if action in ["changeadmin", "settags", "set_privacy_status"]:
         if not (request.method == 'POST' and request.is_ajax()):
             raise Http404
     if action == "converttosqlitedatastore":
@@ -144,6 +144,8 @@ def code_overview(request, wiki_type, short_name):
     context = {'selected_tab':'overview', 'scraper':scraper }
     context["scraper_tags"] = scraper.gettags()
     context["user_owns_it"] = (scraper.owner() == request.user)
+    context["user_edits_it"] = (request.user in scraper.contributors())
+    context["PRIVACY_STATUSES"] = models.PRIVACY_STATUSES[:-1]  # miss out the deleted mode
     
     if wiki_type == 'view':
         context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
@@ -153,7 +155,9 @@ def code_overview(request, wiki_type, short_name):
                 context["htmlcode"] = code
         return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
 
+    #
     # else section
+    #
     assert wiki_type == 'scraper'
 
     context["schedule_options"] = models.SCHEDULE_OPTIONS
@@ -224,6 +228,11 @@ def scraper_admin_settags(request, short_name):
     scraper.settags(request.POST.get('value', ''))  # splitting is in the library
     return render_to_response('codewiki/includes/tagslist.html', { "scraper_tags":scraper.gettags() })
 
+def scraper_admin_privacystatus(request, short_name):
+    scraper = getscraperor404(request, short_name, "set_privacy_status")
+    scraper.privacy_status = request.POST.get('value', '')
+    scraper.save()
+    return HttpResponse(scraper.privacy_status)
 
 
 def view_admin(request, short_name):

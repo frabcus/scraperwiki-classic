@@ -29,7 +29,10 @@ function setupSearchBoxHint(){
     });
     $('#divSidebarSearch input:text').blur();
 }
-$(document).ready(function(){ setupSearchBoxHint(); }); 
+$(document).ready(function()
+{
+    setupSearchBoxHint(); 
+}); 
 
 function setupScroller(){
     
@@ -119,6 +122,18 @@ function setupCKANLink(){
     });
 }
 
+function optiontojson(seloptsid, currsel)
+{
+    var result = { };
+    $(seloptsid+" option").each(function(i, el) 
+    {
+        result[$(el).attr("value")] = $(el).text() 
+        if ($(el).text() == currsel)
+            result["selected"] = $(el).attr("value"); 
+    }); 
+    return $.toJSON(result); 
+}
+
 function setupScraperEditInPlace(wiki_type, short_name)
 {
     //about
@@ -191,6 +206,15 @@ function setupScraperEditInPlace(wiki_type, short_name)
     $('#divEditTagsControls').hide();
     $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
 
+    // privacy status
+    $('#spnPrivacyStatusChoice').editable($("#adminprivacystatusurl").val(), 
+    {
+        indicator : 'Saving...', tooltip:'Click to edit...', cancel:'Cancel', submit:'Save',
+        onblur: 'ignore', event:'dblclick', placeholder:'', type: 'select', 
+        data: optiontojson('#optionsPrivacyStatusChoices', $('#spnPrivacyStatusChoice').text()) 
+    }); 
+    $('#aPrivacyStatusChoice').click(function()  {  $('#spnPrivacyStatusChoice').dblclick(); });
+
      //scheduler
      $('#spnRunInterval').editable('admin/', {
               indicator : 'Saving...',
@@ -205,14 +229,14 @@ function setupScraperEditInPlace(wiki_type, short_name)
               submitdata : {short_name: short_name}
           });
 
-      $('#aEditSchedule').click (
+      $('#aEditSchedule').click(
            function(){
                 sCurrent = $('#spnRunInterval').html().trim();               
                 $('#spnRunInterval').dblclick();
                 $('#spnRunInterval select').val(sCurrent);
                 return false;
            }
-       );          
+       );
 
      //license
      $('#spnLicenseChoice').editable('admin/', {
@@ -222,7 +246,7 @@ function setupScraperEditInPlace(wiki_type, short_name)
               submit    : 'Save',
               onblur: 'ignore',
               data   : $('#hidLicenseChoices').val(),
-              type   : 'text',
+              type   : 'select',
               event: 'dblclick',
               placeholder: '',
               submitdata : {short_name: short_name}
@@ -231,7 +255,6 @@ function setupScraperEditInPlace(wiki_type, short_name)
       $('#aEditLicense').click (
            function(){
                 sCurrent = $('#spnLicenseChoice').html().trim();
-alert(sCurrent); 
                 $('#spnLicenseChoice').dblclick();
                 $('#spnLicenseChoice select').val(sCurrent);
                 return false;

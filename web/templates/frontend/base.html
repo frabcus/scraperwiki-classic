@@ -8,6 +8,7 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jeditable.js"></script>		
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/flexigrid.js"></script>			
     <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>		
     <script type="text/javascript" src="{{ MEDIA_URL }}js/language-choice.js?{{settings.REVISION}}"></script>		
@@ -209,7 +210,8 @@
 <script type="text/javascript" defer="defer">
   {% block run_script %}{% endblock %}
 </script>
-  {% block run_script_outer %}{% endblock %} {# allows us to use script tag and get syntax highlighting in the editor #}
+  {# allows us to use script tag and get syntax highlighting in the editor #}
+  {% block run_script_outer %}{% endblock %} 
 
 	</body>
 </html>

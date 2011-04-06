@@ -24,11 +24,27 @@
   <p class="infobox">Only the creator of a {{scraper.wiki_type}} can delete it.</p>
 {% endif %}
 
+<h3>Privacy settings
+  {% if user_owns_it %}
+    <a id="aPrivacyStatusChoice" class="edit">[edit status]</a>
+  {% endif %}
+</h3>
+
+{# this select gets taken apart and rebuilt by jeditable #}
+<select class="hide" id="optionsPrivacyStatusChoices">
+  {% for value, name in PRIVACY_STATUSES %} 
+    <option value="{{value}}">{{name}}</option>
+  {% endfor %}
+</select>
+This {{scraper.wiki_type}} is: <b><span id="spnPrivacyStatusChoice">{{scraper.privacy_status}}</span></b>
+<p> </p>
+
+
 {% if user.is_staff %}
 <div class="staff">
-  <p><b>Admin only</b></p>
+  <h3>Admin only</h3>
   {% ifequal scraper.wiki_type 'view' %}
-    <p><a href="/admin/codewiki/view/{{scraper.pk}}/">View's Django admin page</a></b></p>
+    <p><a href="/admin/codewiki/view/{{scraper.pk}}/"><b>View's Django admin page</b></a></p>
   {% else %}
     <p><a href="/admin/codewiki/scraper/{{scraper.pk}}/">Scraper's Django admin page</a></p>
   {% endifequal %}
