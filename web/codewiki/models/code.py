@@ -43,10 +43,10 @@ WIKI_TYPES = (
 )
 
 PRIVACY_STATUSES = (
-    ('public', 'public'),
-    ('visible', 'visible'),
-    ('private', 'private'),
-    ('deleted', 'deleted'),
+    ('public', 'Public'),
+    ('visible', 'Visible'),
+    ('private', 'Private'),
+    ('deleted', 'Deleted'),
 )
 
 STAFF_ACTIONS = ["run_scraper", "screenshoot_scraper"]

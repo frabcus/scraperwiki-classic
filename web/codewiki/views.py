@@ -146,6 +146,7 @@ def code_overview(request, wiki_type, short_name):
     context["user_owns_it"] = (scraper.owner() == request.user)
     context["user_edits_it"] = (request.user in scraper.contributors())
     context["PRIVACY_STATUSES"] = models.PRIVACY_STATUSES[:-1]  # miss out the deleted mode
+    context["privacy_status_name"] = dict(models.PRIVACY_STATUSES).get(scraper.privacy_status)
     
     if wiki_type == 'view':
         context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
@@ -232,7 +233,7 @@ def scraper_admin_privacystatus(request, short_name):
     scraper = getscraperor404(request, short_name, "set_privacy_status")
     scraper.privacy_status = request.POST.get('value', '')
     scraper.save()
-    return HttpResponse(scraper.privacy_status)
+    return HttpResponse(dict(models.PRIVACY_STATUSES)[scraper.privacy_status])
 
 
 def view_admin(request, short_name):
