@@ -27,5 +27,5 @@ class CodeManager(models.Manager):
         else:
             scrapers_all = scrapers_all.exclude(privacy_status="private")
         scrapers_all = scrapers_all.order_by('-created_at')
-        return scrapers_all
+        return scrapers_all.distinct()
 

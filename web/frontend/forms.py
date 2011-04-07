@@ -14,12 +14,23 @@ from codewiki.models import SCHEDULE_OPTIONS, Scraper
 class SearchForm(forms.Form):
     q = forms.CharField(label='Find datasets', max_length=50)
     
+    
+def get_emailer_for_user(self, user):
+    try:
+        queryset = self.get_query_set()
+        queryset = queryset.filter(Q(usercoderole__role='owner') & Q(usercoderole__user=user))
+        queryset = queryset.filter(Q(usercoderole__role='email') & Q(usercoderole__user=user))
+        return queryset.latest('id')
+    except:
+        return None
+
+    
 class UserProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
 
         self.user = self.instance.user
-        self.emailer = Scraper.objects.get_emailer_for_user(self.user)
+        self.emailer = get_emailer_for_user(self.user)
 
         if self.emailer:
             self.fields['alert_frequency'].initial = self.emailer.run_interval

@@ -59,7 +59,7 @@
         {% if code.scraper %}
                  | 
             {% if code.scraper.record_count %}
-              ({{ code.scraper.record_count }} records)
+              ({{code.scraper.record_count}} record{{code.scraper.record_count|pluralize}})
             {% else %}
               (no records)
             {% endif %}
