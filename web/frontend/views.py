@@ -60,7 +60,6 @@ def dashboard(request, page_number=1):
     owned_or_edited_code_objects = Code.objects.scraper_search_query(request.user, None).filter(usercoderole__user=user)
     #scrapers_all.filter((Q(usercoderole__user=user) & Q(usercoderole__role='owner')) | (Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
     
-    #paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
     paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
 
     try:    page = int(page_number)

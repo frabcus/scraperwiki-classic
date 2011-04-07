@@ -12,52 +12,6 @@
 
 <div class="content full">
     <div class="data_viewer">
-        {% if data.rows %}
-            <div>
-                {% if user_owns_it or user.is_staff %}    
-                <form class="staff" action="{% url scraper_converttosqlitedatastore scraper.short_name %}" method="post">
-                    <input type="submit" name="converttosqlitedatastore" value="converttosqlitedatastore"/>
-                </form>
-                {% endif %}
-
-
-                <table class="data">
-                    <thead>
-                        <tr>
-                            {% for heading in data.headings %}
-                                <th width="120">{{ heading }}</th>
-                            {% endfor %}
-                        </tr>
-                        <tr>
-                            <th cols="{{data.headings|length}}" class="morerow">...</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in data.rows %}
-                            <tr class="row">
-                                {% for value in row %}
-                                    <td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                        {% for row in data.morerows %}
-                            <tr class="morerow">
-                                {% for value in row %}
-                                    <td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="content_footer">
-              <p>
-                 {% if scraper.record_count %}
-                    This dataset has a total of {{scraper.record_count}} records.
-                 {% endif %}
-              </p>
-            </div>
-        {% endif %}
 
         {% if sqlitedata %}
           <div style="float: right">
@@ -105,7 +59,7 @@
           </div>
         {% endif %}
 
-        {% if not data.rows %}{% if not sqlitedata %}
+        {% if not sqlitedata %}
             <div>
                 <table class="data">
                     <tbody>
@@ -126,7 +80,7 @@
             <div class="info_unpublished">
                     This scraper is being worked on <br/>and there is no data to display yet
             </div>
-        {% endif %}{% endif %}
+        {% endif %}
     </div>
 </div>
 

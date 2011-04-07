@@ -166,29 +166,6 @@ def code_overview(request, wiki_type, short_name):
     context["user_follows_it"] = (request.user in scraper.followers())
     context["related_views"] = models.View.objects.filter(relations=scraper)
     
-    # XXX to be deprecated when old style datastore is abolished
-    column_order = scraper.get_metadata('data_columns')
-    if not context["user_owns_it"]:
-        private_columns = scraper.get_metadata('private_columns')
-    else:
-        private_columns = None
-    try:
-        data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
-                                                   limit=50, 
-                                                   column_order=column_order,
-                                                   private_columns=private_columns)
-    except:
-        data = {'rows': []}
-
-    
-    if len(data['rows']) > 12:
-        data['morerows'] = data['rows'][9:]
-        data['rows'] = data['rows'][:9]
-    
-    if data['rows']:
-        context['datasinglerow'] = zip(data['headings'], data['rows'][0])
-    context['data'] = data
-    
     # this is the only one to call.  would like to know the exception that's expected
     try:
         dataproxy = DataStore(scraper.guid, scraper.short_name)
