@@ -8,7 +8,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
-from codewiki.managers.code import CodeManager
+from django.db.models import Q
 import tagging
 import hashlib
 
@@ -54,6 +54,23 @@ CREATOR_ACTIONS = ["delete_data", "converttosqlitedatastore", "schedule_scraper"
 EDITOR_ACTIONS = ["changeadmin", "savecode", "settags" ]
 VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo" ]
 
+
+def scraper_search_query(objects, user, query):
+    if query:
+        scrapers = objects.filter(title__icontains=query)
+        scrapers_description = objects.filter(description__icontains=query)
+        scrapers_all = scrapers | scrapers_description
+    else:
+        scrapers_all = objects
+    scrapers_all = scrapers_all.exclude(privacy_status="deleted")
+    if user and not user.is_anonymous():
+        scrapers_all = scrapers_all.exclude(Q(privacy_status="private") & ~(Q(usercoderole__user=user) & Q(usercoderole__role='owner')) & ~(Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
+    else:
+        scrapers_all = scrapers_all.exclude(privacy_status="private")
+    scrapers_all = scrapers_all.order_by('-created_at')
+    return scrapers_all.distinct()
+
+
 class Code(models.Model):
 
     # model fields
@@ -66,12 +83,12 @@ class Code(models.Model):
     source             = models.CharField(max_length=100, blank=True)
     description        = models.TextField(blank=True)
     created_at         = models.DateTimeField(auto_now_add=True)
-    deleted            = models.BooleanField()
-    status             = models.CharField(max_length=10, blank=True, default='ok')   # sick, ok
+    deleted            = models.BooleanField()     # deprecated
+    status             = models.CharField(max_length=10, blank=True, default='ok')   # "sick", "ok"
     users              = models.ManyToManyField(User, through='UserCodeRole')
     guid               = models.CharField(max_length=1000)
-    published          = models.BooleanField(default=True)
-    first_published_at = models.DateTimeField(null=True, blank=True)
+    published          = models.BooleanField(default=True)  # deprecated
+    first_published_at = models.DateTimeField(null=True, blank=True)   # could be replaced with created_at
     line_count         = models.IntegerField(default=0)    
     featured           = models.BooleanField(default=False)
     istutorial         = models.BooleanField(default=False)
@@ -82,8 +99,6 @@ class Code(models.Model):
     forked_from        = models.ForeignKey('self', null=True, blank=True)
     privacy_status     = models.CharField(max_length=32, choices=PRIVACY_STATUSES, default='public')
     
-    # managers
-    objects = CodeManager()
 
     def __init__(self, *args, **kwargs):
         super(Code, self).__init__(*args, **kwargs)
@@ -146,6 +161,8 @@ class Code(models.Model):
     def set_guid(self):
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
+        
+        # it would be handy to get rid of this function
     def owner(self):
         if self.pk:
             owner = self.users.filter(usercoderole__role='owner')
@@ -327,18 +344,9 @@ class Code(models.Model):
 
 
 class UserCodeRole(models.Model):
-    """
-    This embodies the roles associated between particular users and scrapers/views.
-    This should be used to store all user/code relationships, ownership,
-    editorship, whatever.
-    """
     user    = models.ForeignKey(User)
     code    = models.ForeignKey(Code)
-    role    = models.CharField(max_length=100)
-    
-    # the following will be used in case of email relationship to keep track of last email (text of run object) that has been sent out
-    # however it has been decided simply to drop the ScraperRunEvents onto a queue to be emailed, so we don't need this placeholder
-    #lastrunobject = models.ForeignKey(ScraperRunEvent, null=True)
+    role    = models.CharField(max_length=100)   # ['owner', 'editor', 'follow', 'requester', 'email']
 
     def __unicode__(self):
         return "Scraper_id: %s -> User: %s (%s)" % (self.code, self.user, self.role)
@@ -349,8 +357,7 @@ class UserCodeRole(models.Model):
 
 
 
-
-# this is defunct.  should go
+# DELETE THIS
 class UserCodeEditing(models.Model):
     """
     Updated by Twisted to state which scrapers/views are being editing at this moment
@@ -370,7 +377,7 @@ class UserCodeEditing(models.Model):
         app_label = 'codewiki'
         
 
-# This should be deleted
+# DELETE THIS
 class CodeCommitEvent(models.Model):
     revision = models.IntegerField()
 

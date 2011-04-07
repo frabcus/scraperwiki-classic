@@ -1,6 +1,6 @@
 from django.contrib.syndication.feeds import Feed, FeedDoesNotExist
 from django.core.exceptions import ObjectDoesNotExist
-from codewiki.models import Code, Scraper, View
+from codewiki.models import Code, Scraper, View, scraper_search_query
 from tagging.utils import get_tag
 from tagging.models import Tag, TaggedItem
 from django.contrib.comments.models import Comment
@@ -110,6 +110,6 @@ class LatestCodeObjectsBySearchTerm(Feed):
         return "Items created with '%s' somewhere in title or tags" % obj
 
     def items(self, obj):
-        code_objects = Code.objects.scraper_search_query(None, obj) 
+        code_objects = scraper_search_query(Code.objects, None, obj) 
         return code_objects[:settings.RSS_ITEMS]
         

@@ -16,7 +16,7 @@ from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, LOGARITHMIC
-from codewiki.models import Code, Scraper, View, HELP_LANGUAGES, LANGUAGES_DICT
+from codewiki.models import Code, Scraper, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from tagging.models import Tag, TaggedItem
 from market.models import Solicitation, SolicitationStatus
 from django.db.models import Q
@@ -57,7 +57,7 @@ def frontpage(request, public_profile_field=None):
 @login_required
 def dashboard(request, page_number=1):
     user = request.user
-    owned_or_edited_code_objects = Code.objects.scraper_search_query(request.user, None).filter(usercoderole__user=user)
+    owned_or_edited_code_objects = scraper_search_query(Code.objects, request.user, None).filter(usercoderole__user=user)
     #scrapers_all.filter((Q(usercoderole__user=user) & Q(usercoderole__role='owner')) | (Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
     
     paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
@@ -204,7 +204,7 @@ def browse_wiki_type(request, wiki_type=None, page_number=1):
     return browse(request, page_number, wiki_type, special_filter)
 
 def browse(request, page_number=1, wiki_type=None, special_filter=None):
-    all_code_objects = Code.objects.scraper_search_query(request.user, None)
+    all_code_objects = scraper_search_query(Code.objects, request.user, None)
     if wiki_type:
         all_code_objects = all_code_objects.filter(wiki_type=wiki_type) 
 
