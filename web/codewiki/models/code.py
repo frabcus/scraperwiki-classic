@@ -153,21 +153,6 @@ class Code(models.Model):
                 return owner[0]
         return None
 
-    def contributors(self):
-        if self.pk:
-            contributors = self.users.filter(usercoderole__role='editor')
-        return contributors
-    
-    def followers(self):
-        if self.pk:
-            followers = self.users.filter(usercoderole__role='follow')
-        return followers
-
-    def emailers(self):
-        if self.pk:
-            emailers = self.users.filter(usercoderole__role='email')
-        return emailers
-        
     def requesters(self):
         if self.pk:
             requesters = self.users.filter(usercoderole__role='requester')
@@ -211,12 +196,15 @@ class Code(models.Model):
                                     role='follow').delete()
         return True
 
-    def followers(self):
-        return self.users.filter(usercoderole__role='follow')
+    def userrolemap(self):
+        result = { "editor":[], "owner":[] }
+        for usercoderole in self.usercoderole_set.all():
+            if usercoderole.role not in result:
+                result[usercoderole.role] = [ ]
+            result[usercoderole.role].append(usercoderole.user)
+        return result
+    
 
-    # currently, the only editor we have is the owner of the scraper.
-    def editors(self):
-        return (self.owner(),)
 
     def saved_code(self, revision = None):
         return self.get_vcs_status(revision)["code"]
@@ -236,9 +224,6 @@ class Code(models.Model):
     def get_absolute_url(self):
         return ('code_overview', [self.wiki_type, self.short_name])
 
-    def is_good(self):
-        # don't know how goodness is going to be defined yet.
-        return True
 
     # update scraper meta data (lines of code etc)    
     def update_meta(self):

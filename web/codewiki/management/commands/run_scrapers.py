@@ -274,7 +274,7 @@ class ScraperRunner(threading.Thread):
         self.scraper.save()
 
         # Send email if this is an email scraper
-        emailers = self.scraper.emailers()
+        emailers = self.scraper.users.filter(usercoderole__role='email')
         if emailers.count() > 0:
             subject, message = getemailtext(event)
             if self.scraper.status == 'ok':
