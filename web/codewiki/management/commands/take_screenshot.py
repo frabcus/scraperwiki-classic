@@ -51,9 +51,9 @@ class Command(BaseCommand):
             self.add_screenshots(view, settings.VIEW_SCREENSHOT_SIZES, options)
 
         if options['short_name']:
-            scrapers = Scraper.unfiltered.filter(short_name=options['short_name'], published=True)
+            scrapers = Scraper.unfiltered.filter(short_name=options['short_name']).exclude(privacy_status="deleted")
         elif options['run_scrapers']:
-            scrapers = Scraper.unfiltered.filter(published=True).order_by("-id")
+            scrapers = Scraper.unfiltered.exclude(privacy_status="deleted").order_by("-id")
         else:
             scrapers = []
 
