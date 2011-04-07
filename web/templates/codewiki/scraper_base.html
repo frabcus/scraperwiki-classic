@@ -29,7 +29,9 @@
             {{scraper.owner.username}}
           {% endif %}
           / <span id="hCodeTitle">{{ scraper.title }}</span>
-         [{{scraper.privacy_status}}]
+          {% ifnotequal scraper.privacy_status 'public' %}
+            [{{scraper.privacy_status}}]
+          {% endifnotequal %}
         </h1>
         <ul class="code_about">
            <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>

@@ -15,40 +15,6 @@ from datastore import  DataStore
 class ScraperManager(CodeManager):
     #use_for_related_fields = True
 
-    def get_query_set(self):
-        return super(ScraperManager, self).get_query_set().filter(deleted=False)
-            
-    def owns(self):
-        return self.get_query_set().filter(usercoderole__role='owner')
-        
-    def watching(self):
-        return self.get_query_set().filter(usercoderole__role='follow')
-
-    # returns a list of the users own scrapers that are currently good.
-    def owned_good(self):
-        good_ones = []
-        for scraper in self.owns():
-            if scraper.is_good():
-                good_ones.append(scraper)
-                
-        return good_ones;
-
-    def owned_count(self):
-        return len(self.owns())
-        
-    def owned_good_count(self):
-        return len(self.owned_good())   
-        
-    def watching_count(self):
-        return len(self.watching())
-
-    def not_watching_any(self):
-        return self.watching_count() == 0
-
-    def dont_own_any(self):
-        return self.owned_count() == 0
-
-
     #for example lists
     def example_scrapers(self, user, count):
         scrapers = []

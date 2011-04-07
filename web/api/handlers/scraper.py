@@ -167,7 +167,7 @@ class GetUserInfo(APIBase):
         for user in users:  # list of users is normally 1
             info = { "username":user.username, "profilename":user.get_profile().name, "datejoined":user.date_joined }
             info['coderoles'] = { }
-            for ucrole in user.usercoderole_set.filter(code__deleted=False, code__published=True):
+            for ucrole in user.usercoderole_set.exclude(code__privacy_status="deleted").exclude(code__privacy_status="private"):
                 if ucrole.role not in info['coderoles']:
                     info['coderoles'][ucrole.role] = [ ]
                 info['coderoles'][ucrole.role].append(ucrole.code.short_name)

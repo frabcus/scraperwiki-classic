@@ -4,6 +4,8 @@ Django management command to collate all the alerts for each user, and pass
 them on to django-mailer.
 """
 
+#### Is this whole file deprecated?
+
 from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
@@ -97,8 +99,7 @@ class Command(BaseCommand):
 
         alert_objects = {
             'models':
-                self.user.user.scraper_set.filter(
-                    usercoderole__role__in=roles, deleted=False),
+                self.user.user.scraper_set.filter(usercoderole__role__in=roles).exclude(privacy_status="deleted"),
             'alert_type': alert_wanted.name}
         
         if alert_wanted.name == "scraper_comment":
