@@ -37,8 +37,8 @@ def frontpage(request, public_profile_field=None):
     user = request.user
 
     #featured
-    featured_scrapers = Code.unfiltered.filter(featured=True, wiki_type='scraper').exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:2]    
-    featured_views = Code.unfiltered.filter(featured=True, wiki_type='view').exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:2]        
+    featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:2]    
+    featured_views = Code.objects.filter(featured=True, wiki_type='view').exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:2]        
     
     #popular tags
     #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
@@ -224,7 +224,7 @@ def browse(request, page_number=1, wiki_type = None, special_filter=None):
         page = 1
 
     if page == 1:
-        featured_scrapers = Code.unfiltered.filter(privacy_status="public", featured=True).order_by('-created_at')
+        featured_scrapers = Code.objects.filter(privacy_status="public", featured=True).order_by('-created_at')
     else:
         featured_scrapers = None
 

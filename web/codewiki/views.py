@@ -46,7 +46,7 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
             raise Http404
     
     try:
-        scraper = models.Code.unfiltered.get(short_name=short_name)
+        scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
         message =  "Sorry, this %s does not exist" % wiki_type
         return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
@@ -61,7 +61,7 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
 
 def getscraperor404(request, short_name, action):
     try:
-        scraper = models.Code.unfiltered.get(short_name=short_name)
+        scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
         raise Http404
     if not scraper.actionauthorized(request.user, action):

@@ -84,7 +84,6 @@ class Code(models.Model):
     
     # managers
     objects = CodeManager()
-    unfiltered = models.Manager()
 
     def __init__(self, *args, **kwargs):
         super(Code, self).__init__(*args, **kwargs)
