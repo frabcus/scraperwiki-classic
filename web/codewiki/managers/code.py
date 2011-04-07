@@ -39,45 +39,6 @@ class CodeManager(models.Manager):
 
     #use_for_related_fields = True
 
-        	
-    def owns(self):
-        return self.get_query_set().filter(usercoderole__role='owner')
-		
-    def watching(self):
-        return self.get_query_set().filter(usercoderole__role='follow')
-
-    # returns a list of the users own scrapers that are currently good.
-    def owned_good(self):
-        good_ones = []
-        for scraper in self.owns():
-            if scraper.is_good():
-                good_ones.append(scraper)
-                
-        return good_ones;
-
-    def owned_count(self):
-        return len(self.owns())
-        
-    def owned_good_count(self):
-        return len(self.owned_good())	
-        
-    def watching_count(self):
-        return len(self.watching())
-
-    def not_watching_any(self):
-        return self.watching_count() == 0
-
-    def dont_own_any(self):
-        return self.owned_count() == 0
-
-            # can't be used to access the new sqlite which requires short_names
-            # questions the value of these functions all needing to take scraper_id when they could be members of Code
-            # or simplified and in-lined
-            
-    def dataproxy(self, scraper_id):
-        dataproxy = DataStore(scraper_id, "")  
-        return dataproxy
-
 
     def data_dictlist(self, scraper_id, short_name, tablename="", limit=1000, offset=0, start_date=None, end_date=None, latlng=None):
         dataproxy = DataStore(scraper_id, short_name)  
