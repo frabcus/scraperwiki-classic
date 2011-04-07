@@ -29,9 +29,7 @@ class GetInfo(APIBase):
         return result
 
     def value(self, request):
-        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
-        if lsm:
-            return [lsm]
+        scraper = self.getscraperorrccode(request, request.GET.get('name'), "apiscraperinfo")
         history_start_date = self.convert_date(request.GET.get('history_start_date', None))
         quietfields        = request.GET.get('quietfields', "").split("|")
             
@@ -107,11 +105,8 @@ class GetRunInfo(APIBase):
     required_arguments = ['name']
     
     def value(self, request):
-        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
-        if lsm:
-            return [lsm]
+        scraper = self.getscraperorrccode(request, request.GET.get('name'), "apiscraperruninfo")
         runid = request.GET.get('runid', '-1')
-        
         runevent = None
         if runid[0] == '-':   # allow for negative indexes to get to recent runs
             try:
@@ -164,6 +159,7 @@ class Search(APIBase):
 class GetUserInfo(APIBase):
     required_arguments = ['username']
 
+            # could be authorized with "apiuserinfo", but no scraper associated to authorize this
     def value(self, request):
         username = request.GET.get('username', "") 
         users = User.objects.filter(username=username)

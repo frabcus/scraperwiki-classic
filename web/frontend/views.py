@@ -221,7 +221,7 @@ def browse(request, page_number=1, wiki_type = None, special_filter=None):
         page = 1
 
     if page == 1:
-        featured_scrapers = Code.objects.filter(published=True, featured=True).order_by('-created_at')
+        featured_scrapers = Code.unfiltered.filter(privacy_status="public", featured=True).order_by('-created_at')
     else:
         featured_scrapers = None
 

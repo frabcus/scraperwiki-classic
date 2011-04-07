@@ -34,8 +34,8 @@ def getscraperorresponse(request):
         message =  "Sorry, this datastore does not exist"
         return HttpResponse(str({'heading':'Not found', 'body':message}))
     
-    if not scraper.actionauthorized(request.user, "apiread"):
-        return HttpResponse(str(scraper.authorizationfailedmessage(request.user, "apiread")))
+    if not scraper.actionauthorized(request.user, "apidataread"):
+        return HttpResponse(str(scraper.authorizationfailedmessage(request.user, "apidataread")))
     return scraper
 
 
