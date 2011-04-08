@@ -213,5 +213,36 @@
   {# allows us to use script tag and get syntax highlighting in the editor #}
   {% block run_script_outer %}{% endblock %} 
 
+
+{% if sqldebug %}
+<div id="debug">
+  <p>
+    {{ sqldebug.queries.count }} Quer{{ sqldebug.queries|pluralize:"y,ies" }}, {{ sqldebug.time }} seconds
+    {% ifnotequal sql_queries|length 0 %}
+    (<span style="cursor: pointer;" onclick="var s=document.getElementById('debugQueryTable').style;s.display=s.display=='none'?'':'none';this.innerHTML=this.innerHTML=='Show'?'Hide':'Show';">Show</span>)
+    {% endifnotequal %}
+  </p>
+  <table id="debugQueryTable" style="display: none;">
+    <col width="1"></col>
+    <col></col>
+    <col width="1"></col>
+    <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">SQL</th>
+      <th scope="col">Time</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for query in sqldebug.queries %}<tr class="{% cycle odd,even %}">
+      <td>{{ forloop.counter }}</td>
+      <td>{{ query|safe }}</td>
+      <td>{{ query.time }}</td>
+    </tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
 	</body>
 </html>
