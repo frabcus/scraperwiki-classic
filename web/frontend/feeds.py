@@ -110,6 +110,6 @@ class LatestCodeObjectsBySearchTerm(Feed):
         return "Items created with '%s' somewhere in title or tags" % obj
 
     def items(self, obj):
-        code_objects = scraper_search_query(Code.objects, None, obj) 
+        code_objects = scraper_search_query(None, obj) 
         return code_objects[:settings.RSS_ITEMS]
         
