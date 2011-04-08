@@ -151,7 +151,7 @@ class Search(APIBase):
     def value(self, request):
         query = request.GET.get('query', None) 
         result = [ ]  # list of dicts
-        for scraper in scraper_search_query(Code.objects, None, query):
+        for scraper in scraper_search_query(None, query):
             result.append({'short_name':scraper.short_name, 'title':scraper.title, 'description':scraper.description, 'created':scraper.created_at})
         return result
 

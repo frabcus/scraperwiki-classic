@@ -55,13 +55,13 @@ EDITOR_ACTIONS = ["changeadmin", "savecode", "settags" ]
 VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo" ]
 
 
-def scraper_search_query(objects, user, query):
+def scraper_search_query(user, query):
     if query:
-        scrapers = objects.filter(title__icontains=query)
-        scrapers_description = objects.filter(description__icontains=query)
+        scrapers = Code.objects.filter(title__icontains=query)
+        scrapers_description = Code.objects.filter(description__icontains=query)
         scrapers_all = scrapers | scrapers_description
     else:
-        scrapers_all = objects
+        scrapers_all = Code.objects
     scrapers_all = scrapers_all.exclude(privacy_status="deleted")
     if user and not user.is_anonymous():
         scrapers_all = scrapers_all.exclude(Q(privacy_status="private") & ~(Q(usercoderole__user=user) & Q(usercoderole__role='owner')) & ~(Q(usercoderole__user=user) & Q(usercoderole__role='editor')))

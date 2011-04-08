@@ -57,7 +57,7 @@ def frontpage(request, public_profile_field=None):
 @login_required
 def dashboard(request, page_number=1):
     user = request.user
-    owned_or_edited_code_objects = scraper_search_query(Code.objects, request.user, None).filter(usercoderole__user=user)
+    owned_or_edited_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=user)
     #scrapers_all.filter((Q(usercoderole__user=user) & Q(usercoderole__role='owner')) | (Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
     
     paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
@@ -80,7 +80,7 @@ def dashboard(request, page_number=1):
 def profile_detail(request, username):
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
-    owned_code_objects = profiled_user.code_set.filter(usercoderole__role='owner', privacy_status="public").order_by('-created_at')
+    owned_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=profiled_user)
     solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
     return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations, 'owned_code_objects': owned_code_objects } )
 
@@ -204,7 +204,7 @@ def browse_wiki_type(request, wiki_type=None, page_number=1):
     return browse(request, page_number, wiki_type, special_filter)
 
 def browse(request, page_number=1, wiki_type=None, special_filter=None):
-    all_code_objects = scraper_search_query(Code.objects, request.user, None)
+    all_code_objects = scraper_search_query(request.user, None)
     if wiki_type:
         all_code_objects = all_code_objects.filter(wiki_type=wiki_type) 
 
@@ -255,7 +255,8 @@ def search(request, q=""):
         q = q.strip()
 
         tags = Tag.objects.filter(name__icontains=q)
-        scrapers = scraper_search_query(Code.objects, request.user, q)
+        scrapers = scraper_search_query(request.user, q)
+        scrapers = scrapers.exclude(usercoderole__role='email')  # so we can search for "email" without getting all the emailers -- would be a type search if we needed it
         num_results = tags.count() + scrapers.count()
         return render_to_response('frontend/search_results.html',
             {
