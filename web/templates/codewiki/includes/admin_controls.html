@@ -24,6 +24,8 @@
   <p class="infobox">Only the creator of a {{scraper.wiki_type}} can delete it.</p>
 {% endif %}
 
+{% if user.is_staff %}
+<div class="staff">
 <h3>Privacy settings
   {% if user_owns_it %}
     <a id="aPrivacyStatusChoice" class="edit">[edit status]</a>
@@ -38,7 +40,8 @@
 </select>
 This {{scraper.wiki_type}} is: <b><span id="spnPrivacyStatusChoice">{{privacy_status_name}}</span></b>
 <p> </p>
-
+</div>
+{% endif %}
 
 {% if user.is_staff %}
 <div class="staff">

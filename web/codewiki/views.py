@@ -89,7 +89,6 @@ def comments(request, wiki_type, short_name):
     context = {'selected_tab':'comments', 'scraper':scraper }
     context["scraper_tags"] = scraper.gettags()
     context["user_owns_it"] = (scraper.owner() == request.user)
-    context["user_follows_it"] = (request.user in scraper.followers())
     
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
@@ -140,14 +139,19 @@ def scraper_history(request, wiki_type, short_name):
 def code_overview(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if isinstance(scraper, HttpResponse):  return scraper
-        
+    
     context = {'selected_tab':'overview', 'scraper':scraper }
     context["scraper_tags"] = scraper.gettags()
-    context["user_owns_it"] = (scraper.owner() == request.user)
-    context["user_edits_it"] = (request.user in scraper.contributors())
+    context["userrolemap"] = scraper.userrolemap()
+    
+    # if {% if a in b %} worked we wouldn't need these two
+    context["user_owns_it"] = (request.user in context["userrolemap"]["owner"])
+    context["user_edits_it"] = (request.user in context["userrolemap"]["owner"]) or (request.user in context["userrolemap"]["editor"])
+    
     context["PRIVACY_STATUSES"] = models.PRIVACY_STATUSES[:-1]  # miss out the deleted mode
     context["privacy_status_name"] = dict(models.PRIVACY_STATUSES).get(scraper.privacy_status)
     
+    # view tpe
     if wiki_type == 'view':
         context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
         if scraper.language == 'html':
@@ -163,31 +167,7 @@ def code_overview(request, wiki_type, short_name):
 
     context["schedule_options"] = models.SCHEDULE_OPTIONS
     context["license_choices"] = models.LICENSE_CHOICES
-    context["user_follows_it"] = (request.user in scraper.followers())
     context["related_views"] = models.View.objects.filter(relations=scraper)
-    
-    # XXX to be deprecated when old style datastore is abolished
-    column_order = scraper.get_metadata('data_columns')
-    if not context["user_owns_it"]:
-        private_columns = scraper.get_metadata('private_columns')
-    else:
-        private_columns = None
-    try:
-        data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
-                                                   limit=50, 
-                                                   column_order=column_order,
-                                                   private_columns=private_columns)
-    except:
-        data = {'rows': []}
-
-    
-    if len(data['rows']) > 12:
-        data['morerows'] = data['rows'][9:]
-        data['rows'] = data['rows'][:9]
-    
-    if data['rows']:
-        context['datasinglerow'] = zip(data['headings'], data['rows'][0])
-    context['data'] = data
     
     # this is the only one to call.  would like to know the exception that's expected
     try:

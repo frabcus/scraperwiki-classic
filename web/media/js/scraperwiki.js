@@ -215,6 +215,12 @@ function setupScraperEditInPlace(wiki_type, short_name)
     }); 
     $('#aPrivacyStatusChoice').click(function()  {  $('#spnPrivacyStatusChoice').dblclick(); });
 
+    $('.demotebutton').click(function() 
+    {
+        alert("Now callback to demote user: '"+$(this).parents("li").find("span.hide").text()+"' to follower status"); 
+    }); 
+    $('#addneweditor').click(function() { alert("nothing here yet - will use editable technology"); } ); 
+
      //scheduler
      $('#spnRunInterval').editable('admin/', {
               indicator : 'Saving...',
