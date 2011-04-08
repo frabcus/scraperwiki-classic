@@ -255,7 +255,7 @@ def search(request, q=""):
         q = q.strip()
 
         tags = Tag.objects.filter(name__icontains=q)
-        scrapers = Code.objects.scraper_search_query(request.user, q)
+        scrapers = scraper_search_query(Code.objects, request.user, q)
         num_results = tags.count() + scrapers.count()
         return render_to_response('frontend/search_results.html',
             {

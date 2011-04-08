@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 from captcha.fields import CaptchaField
-from codewiki.models import SCHEDULE_OPTIONS, Scraper
+from codewiki.models import SCHEDULE_OPTIONS, Scraper, Code
 
 
 #from django.forms.extras.widgets import Textarea
@@ -15,9 +15,9 @@ class SearchForm(forms.Form):
     q = forms.CharField(label='Find datasets', max_length=50)
     
     
-def get_emailer_for_user(self, user):
+def get_emailer_for_user(user):
     try:
-        queryset = self.get_query_set()
+        queryset = Code.objects
         queryset = queryset.filter(Q(usercoderole__role='owner') & Q(usercoderole__user=user))
         queryset = queryset.filter(Q(usercoderole__role='email') & Q(usercoderole__user=user))
         return queryset.latest('id')
