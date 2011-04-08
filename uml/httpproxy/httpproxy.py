@@ -331,9 +331,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #          can subsume isSW
         #
         (scheme, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-        isSW = netloc.endswith('scraperwiki.com')
-        if netloc[:9] == '127.0.0.1':
-            isSW = True
+        isSW = netloc.startswith('127.0.0.1') or netloc.endswith('scraperwiki.com')
 
         #  Path /Status returns status information.
         #

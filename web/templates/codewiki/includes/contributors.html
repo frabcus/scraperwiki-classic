@@ -1,12 +1,14 @@
 <ul>
-    {% if scraper.owner %}
+    {% for owner in userrolemap.owner %}
     <li>
-        <a href="{% url profiles_profile_detail scraper.owner.username %}">
-        {% load gravatar %} {% show_gravatar scraper.owner 'medium' %} 
-        {{scraper.owner.get_profile.name}}</a> (creator)
+        <a href="{% url profiles_profile_detail owner.username %}">
+        {% load gravatar %} {% show_gravatar owner 'medium' %} 
+        {{owner.get_profile.name}}</a> (creator)
     </li>
-    {% else %}
-    <li style="color:red">[Error: this scraper has no creator]</li>
+    {% endfor %}
+
+    {% if userrolemap.owner %}{% else %}
+      <li style="color:red">[Error: this scraper has no creator]</li>
     {% endif %}
 
     {% if scraper.requesters %}  
@@ -18,13 +20,24 @@
         </li>
       {% endfor %}
     {% endif %}
-    {% if scraper.contributors %}  
-      {% for contributor in scraper.contributors %}  
-        <li>
-        	{% load gravatar %} {% show_gravatar contributor 'medium' %} 
-            <a href="{% url profiles_profile_detail contributor.username %}">{{contributor.get_profile.name}}</a>
-            (editor)
-        </li>
-      {% endfor %}
+    {% for contributor in userrolemap.editor %}  
+      <li>
+        {% load gravatar %} {% show_gravatar contributor 'medium' %} 
+          <a href="{% url profiles_profile_detail contributor.username %}">{{contributor.get_profile.name}}</a>
+          (editor)
+
+          {% if user_owns_it %}
+            {% ifnotequal scraper.privacy_status 'public' %}
+              <span class="hide">{{contributor.username}}</span>
+              <input type="button" value="demote" class="demotebutton"/>
+            {% endifnotequal %}
+          {% endif %}
+      </li>
+    {% endfor %}
+
+    {% if user_owns_it %}
+      {% ifnotequal scraper.privacy_status 'public' %}
+        <li><a id="addneweditor">[Add new editor]</a></li>
+      {% endifnotequal %}
     {% endif %}
 </ul>

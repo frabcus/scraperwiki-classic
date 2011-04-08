@@ -29,7 +29,10 @@ function setupSearchBoxHint(){
     });
     $('#divSidebarSearch input:text').blur();
 }
-$(document).ready(function(){ setupSearchBoxHint(); }); 
+$(document).ready(function()
+{
+    setupSearchBoxHint(); 
+}); 
 
 function setupScroller(){
     
@@ -119,8 +122,20 @@ function setupCKANLink(){
     });
 }
 
-function setupScraperEditInPlace(wiki_type, short_name){
-    
+function optiontojson(seloptsid, currsel)
+{
+    var result = { };
+    $(seloptsid+" option").each(function(i, el) 
+    {
+        result[$(el).attr("value")] = $(el).text() 
+        if ($(el).text() == currsel)
+            result["selected"] = $(el).attr("value"); 
+    }); 
+    return $.toJSON(result); 
+}
+
+function setupScraperEditInPlace(wiki_type, short_name)
+{
     //about
     $('#divAboutScraper').editable('admin/', {
              indicator : 'Saving...',
@@ -163,42 +178,48 @@ function setupScraperEditInPlace(wiki_type, short_name){
         }
     );
 
-    //tags
-    oDummy = $('<div id="divEditTags"></div>');
-    $('#divScraperTags').append(oDummy);
-    $('#divEditTags').editable('admin/', {
-             indicator : 'Saving...',
-             tooltip   : 'Click to edit...',
-             cancel    : 'Cancel',
-             submit    : 'Save tags',
-             onblur: 'ignore',
-             event: 'dblclick',
-             placeholder: '',
-             loadurl: 'tags/',
-             submitdata : {short_name: short_name},
-             onreset: function(){ $('#labelEditTags').hide();},
-             callback: function (data){
-                 //add the new tags onto the list
-                 aItems = data.split(',');
-                 $('#divScraperTags ul').html('');
-                 for (var i=0; i < aItems.length; i++) {
-                    url = '/tags/' + escape(aItems[i].replace(/^\s*/, "").replace(/\s*$/, ""))
-                    $('#divScraperTags ul').append($('<li><a href="' + url +'">' + aItems[i].trim() + '</a></li>'))
-                 };
-                 //clear out the textbox for next time
-                 $('#divEditTags').html('');
-                 $('#labelEditTags').hide();
-            }
-         });
-    $('#aEditTags').click (
-         function(){
-              $('#divEditTags').dblclick();
-              $('#labelEditTags').show();
-              return false;
-         }
-     );
+    // this is complex because editable div is not what you see (it's a comma separated field)
+    $('#divEditTags').editable($("#adminsettagurl").val(), 
+    {
+        indicator : 'Saving...', tooltip:'Click to edit...', cancel:'Cancel', submit:'Save tags',
+        onblur: 'ignore', event:'dblclick', placeholder:'',
+        onedit: function() 
+        {
+            var tags = [ ]; 
+            $("#divScraperTags ul.tags li a").each(function(i, el) { tags.push($(el).text()); }); 
+            $(this).text(tags.join(", ")); 
+        },
+        onreset: function() { $('#divEditTagsControls').hide(); },
+        callback: function(lis) 
+        {
+            $('#divScraperTags ul.tags').html(lis); 
+            $('#divEditTagsControls').hide(); 
+            $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
+        }
+    }); 
+    $('#aEditTags').click(function()
+    {
+        $('#divEditTags').dblclick();
+        $('#divEditTagsControls').show();
+        return false;
+    });
+    $('#divEditTagsControls').hide();
+    $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
 
-     $('#labelEditTags').hide();
+    // privacy status
+    $('#spnPrivacyStatusChoice').editable($("#adminprivacystatusurl").val(), 
+    {
+        indicator : 'Saving...', tooltip:'Click to edit...', cancel:'Cancel', submit:'Save',
+        onblur: 'ignore', event:'dblclick', placeholder:'', type: 'select', 
+        data: optiontojson('#optionsPrivacyStatusChoices', $('#spnPrivacyStatusChoice').text()) 
+    }); 
+    $('#aPrivacyStatusChoice').click(function()  {  $('#spnPrivacyStatusChoice').dblclick(); });
+
+    $('.demotebutton').click(function() 
+    {
+        alert("Now callback to demote user: '"+$(this).parents("li").find("span.hide").text()+"' to follower status"); 
+    }); 
+    $('#addneweditor').click(function() { alert("nothing here yet - will use editable technology"); } ); 
 
      //scheduler
      $('#spnRunInterval').editable('admin/', {
@@ -214,14 +235,14 @@ function setupScraperEditInPlace(wiki_type, short_name){
               submitdata : {short_name: short_name}
           });
 
-      $('#aEditSchedule').click (
+      $('#aEditSchedule').click(
            function(){
                 sCurrent = $('#spnRunInterval').html().trim();               
                 $('#spnRunInterval').dblclick();
                 $('#spnRunInterval select').val(sCurrent);
                 return false;
            }
-       );          
+       );
 
      //license
      $('#spnLicenseChoice').editable('admin/', {
@@ -239,7 +260,7 @@ function setupScraperEditInPlace(wiki_type, short_name){
 
       $('#aEditLicense').click (
            function(){
-                sCurrent = $('#spnLicenseChoice').html().trim();               
+                sCurrent = $('#spnLicenseChoice').html().trim();
                 $('#spnLicenseChoice').dblclick();
                 $('#spnLicenseChoice select').val(sCurrent);
                 return false;

@@ -41,13 +41,17 @@ def listolddatastore(request):
 
 
 def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
+    if action in ["delete_scraper", "delete_data"]:
+        if not (request.method == 'POST' and request.POST.get(action, None) == '1'):
+            raise Http404
+    
     try:
-        scraper = models.Code.unfiltered.get(short_name=short_name)
+        scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
         message =  "Sorry, this %s does not exist" % wiki_type
         return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
     
-    if wiki_type != scraper.wiki_type:
+    if rdirect and wiki_type != scraper.wiki_type:
         return HttpResponseRedirect(reverse(rdirect, args=[scraper.wiki_type, short_name]))
         
     if not scraper.actionauthorized(request.user, action):
@@ -57,21 +61,21 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
 
 def getscraperor404(request, short_name, action):
     try:
-        scraper = models.Code.unfiltered.get(short_name=short_name)
+        scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
         raise Http404
     if not scraper.actionauthorized(request.user, action):
         raise Http404
         
     # extra post conditions to make spoofing these calls a bit of a hassle
-    if action == "changeadmin":
+    if action in ["changeadmin", "settags", "set_privacy_status"]:
         if not (request.method == 'POST' and request.is_ajax()):
             raise Http404
     if action == "converttosqlitedatastore":
         if request.POST.get('converttosqlitedatastore', None) != 'converttosqlitedatastore':
             raise Http404
     
-    if action in ["delete_data", "schedule_scraper", "run_scraper", "screenshoot_scraper", "delete_scraper"]:
+    if action in ["schedule_scraper", "run_scraper", "screenshoot_scraper", ]:
         if request.POST.get(action, None) != '1':
             raise Http404
         
@@ -85,7 +89,6 @@ def comments(request, wiki_type, short_name):
     context = {'selected_tab':'comments', 'scraper':scraper }
     context["scraper_tags"] = scraper.gettags()
     context["user_owns_it"] = (scraper.owner() == request.user)
-    context["user_follows_it"] = (request.user in scraper.followers())
     
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
 
@@ -136,11 +139,19 @@ def scraper_history(request, wiki_type, short_name):
 def code_overview(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, "code_overview", "overview")
     if isinstance(scraper, HttpResponse):  return scraper
-        
+    
     context = {'selected_tab':'overview', 'scraper':scraper }
     context["scraper_tags"] = scraper.gettags()
-    context["user_owns_it"] = (scraper.owner() == request.user)
+    context["userrolemap"] = scraper.userrolemap()
     
+    # if {% if a in b %} worked we wouldn't need these two
+    context["user_owns_it"] = (request.user in context["userrolemap"]["owner"])
+    context["user_edits_it"] = (request.user in context["userrolemap"]["owner"]) or (request.user in context["userrolemap"]["editor"])
+    
+    context["PRIVACY_STATUSES"] = models.PRIVACY_STATUSES[:-1]  # miss out the deleted mode
+    context["privacy_status_name"] = dict(models.PRIVACY_STATUSES).get(scraper.privacy_status)
+    
+    # view tpe
     if wiki_type == 'view':
         context["related_scrapers"] = scraper.relations.filter(wiki_type='scraper')
         if scraper.language == 'html':
@@ -149,36 +160,14 @@ def code_overview(request, wiki_type, short_name):
                 context["htmlcode"] = code
         return render_to_response('codewiki/view_overview.html', context, context_instance=RequestContext(request))
 
+    #
     # else section
+    #
     assert wiki_type == 'scraper'
 
     context["schedule_options"] = models.SCHEDULE_OPTIONS
     context["license_choices"] = models.LICENSE_CHOICES
-    context["user_follows_it"] = (request.user in scraper.followers())
     context["related_views"] = models.View.objects.filter(relations=scraper)
-    
-    # XXX to be deprecated when old style datastore is abolished
-    column_order = scraper.get_metadata('data_columns')
-    if not context["user_owns_it"]:
-        private_columns = scraper.get_metadata('private_columns')
-    else:
-        private_columns = None
-    try:
-        data = models.Scraper.objects.data_summary(scraper_id=scraper.guid,
-                                                   limit=50, 
-                                                   column_order=column_order,
-                                                   private_columns=private_columns)
-    except:
-        data = {'rows': []}
-
-    
-    if len(data['rows']) > 12:
-        data['morerows'] = data['rows'][9:]
-        data['rows'] = data['rows'][:9]
-    
-    if data['rows']:
-        context['datasinglerow'] = zip(data['headings'], data['rows'][0])
-    context['data'] = data
     
     # this is the only one to call.  would like to know the exception that's expected
     try:
@@ -215,6 +204,18 @@ def code_overview(request, wiki_type, short_name):
 # all remaining functions are ajax or temporary pages linked only 
 # through the site, so throwing 404s is adequate
 
+def scraper_admin_settags(request, short_name):
+    scraper = getscraperor404(request, short_name, "settags")
+    scraper.settags(request.POST.get('value', ''))  # splitting is in the library
+    return render_to_response('codewiki/includes/tagslist.html', { "scraper_tags":scraper.gettags() })
+
+def scraper_admin_privacystatus(request, short_name):
+    scraper = getscraperor404(request, short_name, "set_privacy_status")
+    scraper.privacy_status = request.POST.get('value', '')
+    scraper.save()
+    return HttpResponse(dict(models.PRIVACY_STATUSES)[scraper.privacy_status])
+
+
 def view_admin(request, short_name):
     scraper = getscraperor404(request, short_name, "changeadmin")
     view = scraper.view
@@ -229,10 +230,6 @@ def view_admin(request, short_name):
     if element_id == 'hCodeTitle':
         view.title = request.POST.get('value', None)
         response_text = view.title
-
-    if element_id == 'divEditTags':
-        view.settags(request.POST.get('value', ''))  # splitting is in the library
-        response_text = ", ".join([tag.name for tag in view.gettags()])
 
     view.save()
     response.write(response_text)
@@ -254,10 +251,6 @@ def scraper_admin(request, short_name):
         scraper.title = request.POST.get('value', None)
         response_text = scraper.title
 
-    if element_id == 'divEditTags':
-        scraper.settags(request.POST.get('value', ''))
-        response_text = ", ".join([tag.name for tag in scraper.gettags()])
-
     if element_id == 'spnRunInterval':
         scraper.run_interval = int(request.POST.get('value', None))
         scraper.save() # XXX need to save so template render gets new values, bad that it saves below also!
@@ -267,22 +260,21 @@ def scraper_admin(request, short_name):
         scraper.license = request.POST.get('value', None)
         response_text = scraper.license
 
-    if element_id == 'publishScraperButton':
-        scraper.published = True
-
     scraper.save()
     response.write(response_text)
     return response
 
 
 def scraper_delete_data(request, short_name):
-    scraper = getscraperor404(request, short_name, "delete_data")
+    scraper = getscraperorresponse(request, "scraper", short_name, None, "delete_data")
+    if isinstance(scraper, HttpResponse):  return scraper
     dataproxy = DataStore(scraper.guid, scraper.short_name)
     dataproxy.request(("clear_datastore",))
     if scraper.wiki_type == "scraper":
         scraper.scraper.scrapermetadata_set.all().delete()
         scraper.scraper.update_meta()
     scraper.save()
+    request.notifications.add("Your data has been deleted")
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 def scraper_converttosqlitedatastore(request, short_name):
@@ -313,26 +305,21 @@ def scraper_screenshoot_scraper(request, wiki_type, short_name):
     call_command('take_screenshot', short_name=short_name, domain=settings.VIEW_DOMAIN, verbose=False)
     return HttpResponseRedirect(reverse('code_overview', args=[code_object.wiki_type, short_name]))
 
+
 def scraper_delete_scraper(request, wiki_type, short_name):
-    scraper = getscraperor404(request, short_name, "delete_scraper")
-    scraper.deleted = True
+    scraper = getscraperorresponse(request, wiki_type, short_name, None, "delete_scraper")
+    if isinstance(scraper, HttpResponse):  return scraper
+    scraper.privacy_status = "deleted"
     scraper.save()
     request.notifications.add("Your %s has been deleted" % wiki_type)
     return HttpResponseRedirect('/')
 
 
-# these ought to be done javascript from the page to fill in the ajax input box
-def tags(request, wiki_type, short_name):
-    scraper = getscraperor404(request, short_name, "gettags")
-    return HttpResponse(", ".join([tag.name  for tag in scraper.gettags()]))
+
 
 def raw_about_markup(request, wiki_type, short_name):
     scraper = getscraperor404(request, short_name, "getdescription")
     return HttpResponse(scraper.description, mimetype='text/x-web-textile')
-
-
-
-
 
 def follow(request, short_name):
     scraper = getscraperor404(request, short_name, "setfollow")

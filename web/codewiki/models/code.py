@@ -2,11 +2,13 @@ import datetime
 import time
 import os
 
+# Development note:  Aiming to merge scraper,view,code back into one object
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
-from codewiki.managers.code import CodeManager
+from django.db.models import Q
 import tagging
 import hashlib
 
@@ -40,6 +42,33 @@ WIKI_TYPES = (
     ('view', 'View'),    
 )
 
+PRIVACY_STATUSES = (
+    ('public', 'Public'),
+    ('visible', 'Visible'),
+    ('private', 'Private'),
+    ('deleted', 'Deleted'),
+)
+
+STAFF_ACTIONS = ["run_scraper", "screenshoot_scraper"]
+CREATOR_ACTIONS = ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status" ]
+EDITOR_ACTIONS = ["changeadmin", "savecode", "settags" ]
+VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo" ]
+
+
+def scraper_search_query(objects, user, query):
+    if query:
+        scrapers = objects.filter(title__icontains=query)
+        scrapers_description = objects.filter(description__icontains=query)
+        scrapers_all = scrapers | scrapers_description
+    else:
+        scrapers_all = objects
+    scrapers_all = scrapers_all.exclude(privacy_status="deleted")
+    if user and not user.is_anonymous():
+        scrapers_all = scrapers_all.exclude(Q(privacy_status="private") & ~(Q(usercoderole__user=user) & Q(usercoderole__role='owner')) & ~(Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
+    else:
+        scrapers_all = scrapers_all.exclude(privacy_status="private")
+    scrapers_all = scrapers_all.order_by('-created_at')
+    return scrapers_all.distinct()
 
 
 class Code(models.Model):
@@ -54,12 +83,12 @@ class Code(models.Model):
     source             = models.CharField(max_length=100, blank=True)
     description        = models.TextField(blank=True)
     created_at         = models.DateTimeField(auto_now_add=True)
-    deleted            = models.BooleanField()
-    status             = models.CharField(max_length=10, blank=True, default='ok')   # sick, ok
+    deleted            = models.BooleanField()     # deprecated
+    status             = models.CharField(max_length=10, blank=True, default='ok')   # "sick", "ok"
     users              = models.ManyToManyField(User, through='UserCodeRole')
     guid               = models.CharField(max_length=1000)
-    published          = models.BooleanField(default=True)
-    first_published_at = models.DateTimeField(null=True, blank=True)
+    published          = models.BooleanField(default=True)  # deprecated
+    first_published_at = models.DateTimeField(null=True, blank=True)   # could be replaced with created_at
     line_count         = models.IntegerField(default=0)    
     featured           = models.BooleanField(default=False)
     istutorial         = models.BooleanField(default=False)
@@ -68,10 +97,8 @@ class Code(models.Model):
     wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
     relations          = models.ManyToManyField("self", blank=True)  # manage.py refuses to generate the tabel for this, so you haev to do it manually.
     forked_from        = models.ForeignKey('self', null=True, blank=True)
+    privacy_status     = models.CharField(max_length=32, choices=PRIVACY_STATUSES, default='public')
     
-    # managers
-    objects = CodeManager()
-    unfiltered = models.Manager()
 
     def __init__(self, *args, **kwargs):
         super(Code, self).__init__(*args, **kwargs)
@@ -134,6 +161,8 @@ class Code(models.Model):
     def set_guid(self):
         self.guid = hashlib.md5("%s" % ("**@@@".join([self.short_name, str(time.mktime(self.created_at.timetuple()))]))).hexdigest()
      
+        
+        # it would be handy to get rid of this function
     def owner(self):
         if self.pk:
             owner = self.users.filter(usercoderole__role='owner')
@@ -141,21 +170,6 @@ class Code(models.Model):
                 return owner[0]
         return None
 
-    def contributors(self):
-        if self.pk:
-            contributors = self.users.filter(usercoderole__role='editor')
-        return contributors
-    
-    def followers(self):
-        if self.pk:
-            followers = self.users.filter(usercoderole__role='follow')
-        return followers
-
-    def emailers(self):
-        if self.pk:
-            emailers = self.users.filter(usercoderole__role='email')
-        return emailers
-        
     def requesters(self):
         if self.pk:
             requesters = self.users.filter(usercoderole__role='requester')
@@ -199,12 +213,15 @@ class Code(models.Model):
                                     role='follow').delete()
         return True
 
-    def followers(self):
-        return self.users.filter(usercoderole__role='follow')
+    def userrolemap(self):
+        result = { "editor":[], "owner":[] }
+        for usercoderole in self.usercoderole_set.all():
+            if usercoderole.role not in result:
+                result[usercoderole.role] = [ ]
+            result[usercoderole.role].append(usercoderole.user)
+        return result
+    
 
-    # currently, the only editor we have is the owner of the scraper.
-    def editors(self):
-        return (self.owner(),)
 
     def saved_code(self, revision = None):
         return self.get_vcs_status(revision)["code"]
@@ -224,9 +241,6 @@ class Code(models.Model):
     def get_absolute_url(self):
         return ('code_overview', [self.wiki_type, self.short_name])
 
-    def is_good(self):
-        # don't know how goodness is going to be defined yet.
-        return True
 
     # update scraper meta data (lines of code etc)    
     def update_meta(self):
@@ -256,35 +270,60 @@ class Code(models.Model):
         app_label = 'codewiki'
 
 
-            # all authorization to go through here
-            # actions are overview, changeadmin, comments, history, exportsqlite, setfollow, 
-            # rpcexecute, readcode, readcodeineditor, savecode
+        # all authorization to go through here
     def actionauthorized(self, user, action):
-        if self.deleted:
+        if user and not user.is_anonymous():
+            roles = [ usercoderole.role  for usercoderole in UserCodeRole.objects.filter(code=self, user=user) ]
+        else:
+            roles = [ ]
+        #print "AUTH", (action, user, roles, self.privacy_status)
+        
+        # roles are: "owner", "editor", "follow", "requester", "email"
+        # privacy_status: "public", "visible", "private", "deleted"
+        if self.privacy_status == "deleted":
             return False
-        if not user.is_authenticated() and action in ["changeadmin", "savecode"]:
-            return False
-        if not self.published and not user.is_authenticated():
-            return False
-        if action in ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning"]:
-            if self.owner() != user and not user.is_staff:
-                return False
-        if action in ["run_scraper", "screenshoot_scraper"]:
-            if not user.is_staff:
-                return False
         if action == "rpcexecute" and self.wiki_type != "view":
             return False
+        
+        if action in STAFF_ACTIONS:
+            return user.is_staff
+        #if user.is_staff:
+        #    return True
+        
+        if action in CREATOR_ACTIONS:
+            return "owner" in roles
+        
+        if action in EDITOR_ACTIONS:
+            if self.privacy_status == "public":
+                return user.is_authenticated()
+            return "editor" in roles or "owner" in roles
+        
+        if action in VISIBLE_ACTIONS:
+            if self.privacy_status == "private":
+                return "editor" in roles or "owner" in roles
+            return True
+                
+        assert False, ("unknown action", action)
         return True
 
+
     def authorizationfailedmessage(self, user, action):
-        if self.deleted:
+        if self.privacy_status == "deleted":
             return {'heading': 'Deleted', 'body': "Sorry this %s has been deleted" % self.wiki_type}
-        if not user.is_authenticated() and action == "changeadmin":
-            return {'heading': 'Not logged in', 'body': "only logged in users can change the settings"}
-        if not self.published and not user.is_authenticated():
-            return {'heading': 'Access denied', 'body': "not published and you are not logged in so can't do %s" % action}
         if action == "rpcexecute" and self.wiki_type != "view":
-            return {'heading': 'This is a scraper', 'body': "not supposed to run a scraper as a view"}
+            return {'heading': 'This is a scraper', 'body': "Not supposed to run a scraper as a view"}
+        if action in STAFF_ACTIONS:
+            return {'heading': 'Not authorized', 'body': "Only staff can do action %s" % action}
+        if action in CREATOR_ACTIONS:
+            return {'heading': 'Not authorized', 'body': "Only owner can do action %s" % action}
+        if action in EDITOR_ACTIONS:
+            if self.privacy_status != "public":
+                return {'heading': 'Not authorized', 'body': "this %s can only be edited by its owner and designated editors" % self.wiki_type}
+            if not user.is_authenticated():
+                return {'heading': 'Not authorized', 'body': "Only logged in users can edit things"}
+        if action in VISIBLE_ACTIONS:
+            if self.privacy_status == "private":
+                return {'heading': 'Not authorized', 'body': "Sorry, this %s is private" % self.wiki_type}
         return {'heading': "unknown", "body":"unknown"}
 
     
@@ -305,18 +344,9 @@ class Code(models.Model):
 
 
 class UserCodeRole(models.Model):
-    """
-    This embodies the roles associated between particular users and scrapers/views.
-    This should be used to store all user/code relationships, ownership,
-    editorship, whatever.
-    """
     user    = models.ForeignKey(User)
     code    = models.ForeignKey(Code)
-    role    = models.CharField(max_length=100)
-    
-    # the following will be used in case of email relationship to keep track of last email (text of run object) that has been sent out
-    # however it has been decided simply to drop the ScraperRunEvents onto a queue to be emailed, so we don't need this placeholder
-    #lastrunobject = models.ForeignKey(ScraperRunEvent, null=True)
+    role    = models.CharField(max_length=100)   # ['owner', 'editor', 'follow', 'requester', 'email']
 
     def __unicode__(self):
         return "Scraper_id: %s -> User: %s (%s)" % (self.code, self.user, self.role)
@@ -327,8 +357,7 @@ class UserCodeRole(models.Model):
 
 
 
-
-# this is defunct.  should go
+# DELETE THIS
 class UserCodeEditing(models.Model):
     """
     Updated by Twisted to state which scrapers/views are being editing at this moment
@@ -348,7 +377,7 @@ class UserCodeEditing(models.Model):
         app_label = 'codewiki'
         
 
-# This should be deleted
+# DELETE THIS
 class CodeCommitEvent(models.Model):
     revision = models.IntegerField()
 

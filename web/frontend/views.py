@@ -16,13 +16,17 @@ from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, LOGARITHMIC
-from codewiki.models import Code, Scraper, View, HELP_LANGUAGES, LANGUAGES_DICT
+from codewiki.models import Code, Scraper, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from tagging.models import Tag, TaggedItem
 from market.models import Solicitation, SolicitationStatus
+from django.db.models import Q
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
 from registration.backends import get_backend
-from profiles import views as profile_views
+
+# find this in lib/python/site-packages/profiles
+from profiles import views as profile_views   
+
 import django.contrib.auth.views
 import os
 import re
@@ -37,8 +41,8 @@ def frontpage(request, public_profile_field=None):
     user = request.user
 
     #featured
-    featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').order_by('-first_published_at')[:2]    
-    featured_views = Code.objects.filter(featured=True, wiki_type='view').order_by('-first_published_at')[:2]        
+    featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:2]    
+    featured_views = Code.objects.filter(featured=True, wiki_type='view').exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:2]        
     
     #popular tags
     #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
@@ -51,25 +55,33 @@ def frontpage(request, public_profile_field=None):
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
 
 @login_required
-def dashboard(request):
+def dashboard(request, page_number=1):
     user = request.user
-    owned_code_objects = user.code_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
-    owned_count = len(owned_code_objects) 
-    # needs to be expanded to include scrapers you have edit rights on.
-    contribution_code_objects = user.code_set.filter(usercoderole__role='editor', deleted=False)
-    contribution_count = len(contribution_code_objects)
-    # following_code_objects = user.code_set.filter(usercoderole__role='follow', deleted=False)
-    # following_count = len(following_code_objects)
-
-    return render_to_response('frontend/dashboard.html', {'owned_code_objects': owned_code_objects, 'owned_count' : owned_count, 'contribution_code_objects' : contribution_code_objects, 'contribution_count': contribution_count, 'language':'python' }, context_instance = RequestContext(request))
-
-def profile_detail(request, username):
+    owned_or_edited_code_objects = scraper_search_query(Code.objects, request.user, None).filter(usercoderole__user=user)
+    #scrapers_all.filter((Q(usercoderole__user=user) & Q(usercoderole__role='owner')) | (Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
     
+    paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
+
+    try:    page = int(page_number)
+    except (ValueError, TypeError):   page = 1
+
+    # If page request (9999) is out of range, deliver last page of results.
+    try:     
+        owned_or_edited_code_objects_pagenated = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        owned_or_edited_code_objects_pagenated = paginator.page(paginator.num_pages)
+    
+    context = {'owned_or_edited_code_objects_pagenated': owned_or_edited_code_objects_pagenated, 
+               'language':'python' }
+    return render_to_response('frontend/dashboard.html', context, context_instance = RequestContext(request))
+
+
+    # may want to pagenate this if the plugin profile app doesn't get in the way
+def profile_detail(request, username):
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
-    owned_code_objects = profiled_user.code_set.filter(usercoderole__role='owner', published=True).order_by('-created_at')
+    owned_code_objects = profiled_user.code_set.filter(usercoderole__role='owner', privacy_status="public").order_by('-created_at')
     solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
-
     return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations, 'owned_code_objects': owned_code_objects } )
 
 
@@ -174,12 +186,12 @@ def help(request, mode=None, language=None):
         
                 # new ordering by the number at start of title, which we then strip out for display
         if language == "python":
-            tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('title')
+            tutorials[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('title')
             for scraper in tutorials[language]:
                 scraper.title = re.sub("^[\d ]+", "", scraper.title)
         else:
-            tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
-        viewtutorials[language] = View.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
+            tutorials[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
+        viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
         context["include_tag"] = "frontend/help_tutorials.html"
     
     else: 
@@ -187,15 +199,14 @@ def help(request, mode=None, language=None):
     
     return render_to_response('frontend/help.html', context, context_instance = RequestContext(request))
 
-def browse_wiki_type(request, wiki_type = None, page_number = 1):
+def browse_wiki_type(request, wiki_type=None, page_number=1):
     special_filter = request.GET.get('filter', None)
     return browse(request, page_number, wiki_type, special_filter)
 
-def browse(request, page_number = 1, wiki_type = None, special_filter=None):
-    if wiki_type == None:
-        all_code_objects = Code.objects.filter(published=True).order_by('-created_at')
-    else:
-        all_code_objects = Code.objects.filter(wiki_type=wiki_type, published=True).order_by('-created_at') 
+def browse(request, page_number=1, wiki_type=None, special_filter=None):
+    all_code_objects = scraper_search_query(Code.objects, request.user, None)
+    if wiki_type:
+        all_code_objects = all_code_objects.filter(wiki_type=wiki_type) 
 
     #extra filters (broken scraper lists etc)
     if special_filter == 'sick':
@@ -208,7 +219,6 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
             all_code_objects = TaggedItem.objects.get_no_tags(Scraper.objects.all().order_by('-created_at') )
         else:
             all_code_objects = TaggedItem.objects.get_no_tags(View.objects.all().order_by('-created_at') )
-
 
     # filter out scrapers that have no records
     if not special_filter:
@@ -223,7 +233,7 @@ def browse(request, page_number = 1, wiki_type = None, special_filter=None):
         page = 1
 
     if page == 1:
-        featured_scrapers = Code.objects.filter(published=True, featured=True).order_by('-created_at')
+        featured_scrapers = Code.objects.filter(privacy_status="public", featured=True).order_by('-created_at')
     else:
         featured_scrapers = None
 
@@ -245,7 +255,7 @@ def search(request, q=""):
         q = q.strip()
 
         tags = Tag.objects.filter(name__icontains=q)
-        scrapers = Code.objects.search(q)
+        scrapers = Code.objects.scraper_search_query(request.user, q)
         num_results = tags.count() + scrapers.count()
         return render_to_response('frontend/search_results.html',
             {

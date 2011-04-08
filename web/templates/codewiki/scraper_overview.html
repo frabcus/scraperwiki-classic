@@ -12,52 +12,6 @@
 
 <div class="content full">
     <div class="data_viewer">
-        {% if data.rows %}
-            <div>
-                {% if user_owns_it or user.is_staff %}    
-                <form class="staff" action="{% url scraper_converttosqlitedatastore scraper.short_name %}" method="post">
-                    <input type="submit" name="converttosqlitedatastore" value="converttosqlitedatastore"/>
-                </form>
-                {% endif %}
-
-
-                <table class="data">
-                    <thead>
-                        <tr>
-                            {% for heading in data.headings %}
-                                <th width="120">{{ heading }}</th>
-                            {% endfor %}
-                        </tr>
-                        <tr>
-                            <th cols="{{data.headings|length}}" class="morerow">...</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in data.rows %}
-                            <tr class="row">
-                                {% for value in row %}
-                                    <td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                        {% for row in data.morerows %}
-                            <tr class="morerow">
-                                {% for value in row %}
-                                    <td>{{ value|truncatewords_html:30|urlizetrunc:30 }}</td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="content_footer">
-              <p>
-                 {% if scraper.record_count %}
-                    This dataset has a total of {{scraper.record_count}} records.
-                 {% endif %}
-              </p>
-            </div>
-        {% endif %}
 
         {% if sqlitedata %}
           <div style="float: right">
@@ -105,7 +59,7 @@
           </div>
         {% endif %}
 
-        {% if not data.rows %}{% if not sqlitedata %}
+        {% if not sqlitedata %}
             <div>
                 <table class="data">
                     <tbody>
@@ -126,7 +80,7 @@
             <div class="info_unpublished">
                     This scraper is being worked on <br/>and there is no data to display yet
             </div>
-        {% endif %}{% endif %}
+        {% endif %}
     </div>
 </div>
 
@@ -149,20 +103,7 @@
     </div>
 </div>
 
-<div id="divScraperTags" class="content full">
-    <h2>Tags {% if user.is_authenticated %}<a href="#" id="aEditTags" class="edit">[edit tags]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to add a tag]</a>{% endif %}</h2>
-    <label id="labelEditTags" for="divEditTags">Comma separated list of tags:</label><div id="divEditTags"></div>
-    <ul class="tags">
-        {% for tag in scraper_tags %}
-            <li><a href="{% url single_tag tag %}">{{ tag }}</a></li>
-        {% endfor %}
-    </ul>
-    {% if not scraper_tags %}
-        <p>
-            Adding tags helps makes sense of all the datasets on ScraperWiki.
-        </p>
-    {% endif %}
-</div>
+{% include 'codewiki/includes/tags.html' %}
 
 <div class="content full">
     <h2>Views using this data from this scraper</h2>    
@@ -225,59 +166,7 @@
         {% endifnotequal %}
     {% endif %}
 
-    {% if user_owns_it and not scraper.published %}
-      <div id="publishScraper">
-        <h3>Publish</h3>
-        <p>By default all scrapers are now published. This scraper was created before that policy. This button allows you to publish this scraper.</p>
-        <form>
-          <input type="submit" class="small button" id="publishScraperButton" value="Publish"/>
-        </form>
-        <br/>
-      </div>
-    {% endif %}
-    
-    <h3>Delete &amp; reset</h3>
-    {% if user_owns_it or user.is_staff %}    
-        {% if user.is_staff and not user_owns_it %}
-            <div class="staff">
-        {% endif %}
-        <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
-            <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
-            <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
-            <p>Removes all data for this scraper. There is no undo.</p>
-        </form>
-        <form action="{% url scraper_delete_scraper 'scraper' scraper.short_name %}" method="post">
-            <input type="hidden" name="delete_scraper" value="1" />
-            <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
-            <p>Deletes this scraper and all its data. There is no undo.</p>
-        </form>
-        {% if user.is_staff and not user_owns_it %}
-            </div>
-        {% endif %}
-    {% else %}
-        <p class="infobox">Only the creator of a scraper can delete or reset it.</p>
-    {% endif %}
-
-    {% if user.is_staff %}
-    <div class="staff">
-        <p><b>Admin only</b></p>
- 
-        <p><a href="/admin/codewiki/scraper/{{scraper.pk}}/">Scraper's Django admin page</a></p>
- 
-        <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
-            <input type="hidden" name="run_scraper" value="1" />
-            <input type="submit" id="btnRunScraper" class="" value="Run now (if scheduled)" />
-            <p>If this scraper's schedule is overdue, runs it immediately.</p>
-        </form>
-
-        <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post">
-            <input type="hidden" name="screenshoot_scraper" value="1" />
-            <input type="submit" id="btnScreenshootScraper" class="" value="Screenshoot this scraper" />
-            <p>Take a screenshot of this scraper.</p>
-        </form>
-    </div>
-
-    {% endif %}
+    {% include 'codewiki/includes/admin_controls.html' %}
 
 </div>
 <br class="clear"/>

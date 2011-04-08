@@ -19,17 +19,14 @@ class CodeAdmin(admin.ModelAdmin):
     inlines = (UserCodeRoleInlines,)    
     readonly_fields = ('wiki_type','guid')
 
-    def queryset(self, request):
-        return self.model.unfiltered.get_query_set()
-
 class ScraperAdmin(CodeAdmin):
     inlines = (UserCodeRoleInlines,)
-    list_display = ('title', 'short_name', 'last_run', 'status', 'published', 'deleted')
-    list_filter = ('status', 'last_run', 'published', 'deleted')
+    list_display = ('title', 'short_name', 'last_run', 'status', 'privacy_status')
+    list_filter = ('status', 'last_run', 'privacy_status')
     search_fields = ('title', 'short_name')
 
 class ViewAdmin(CodeAdmin):
-    list_filter = ('status', 'mime_type', 'published',)
+    list_filter = ('status', 'mime_type', 'privacy_status',)
     search_fields = ('title', 'short_name')
 
 

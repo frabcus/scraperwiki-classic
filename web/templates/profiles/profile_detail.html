@@ -7,9 +7,13 @@
 {% block content %}
 
     <div class="page_title">
-		<h1>{{ profile.name }}'s profile</h1>
+		<h1>{% if profile.name %}{{profile.name}}{% else %}{{profile.user.username}}{% endif %}'s profile</h1>
 		{% show_gravatar profile.user 'large' %} 
-		<p>{{ profile.bio }}</p>
+		{% if profile.bio %}
+          <p>{{ profile.bio }}</p>
+        {% else %}
+          <p>No bio</p>
+        {% endif %}
 	</div>
 	
 	<div class="content"> 

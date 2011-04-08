@@ -41,9 +41,9 @@ class Command(BaseCommand):
             return
 
         if options['short_name']:
-            views = View.unfiltered.filter(short_name=options['short_name'], published=True)
+            views = View.objects.filter(short_name=options['short_name']).exclude(privacy_status="deleted")
         elif options['run_views']:
-            views = View.unfiltered.filter(published=True).order_by("-id")
+            views = View.objects.exclude(privacy_status="deleted").order_by("-id")
         else:
             views = []
 
@@ -51,9 +51,9 @@ class Command(BaseCommand):
             self.add_screenshots(view, settings.VIEW_SCREENSHOT_SIZES, options)
 
         if options['short_name']:
-            scrapers = Scraper.unfiltered.filter(short_name=options['short_name'], published=True)
+            scrapers = Scraper.objects.filter(short_name=options['short_name']).exclude(privacy_status="deleted")
         elif options['run_scrapers']:
-            scrapers = Scraper.unfiltered.filter(published=True).order_by("-id")
+            scrapers = Scraper.objects.exclude(privacy_status="deleted").order_by("-id")
         else:
             scrapers = []
 

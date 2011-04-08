@@ -1,4 +1,4 @@
-from web.codewiki.models import Code, ScraperRunEvent
+from web.codewiki.models import Code, ScraperRunEvent, scraper_search_query
 from django.contrib.auth.models import User
 from frontend.models import UserToUserRole
 from api.handlers.api_base import APIBase
@@ -29,9 +29,7 @@ class GetInfo(APIBase):
         return result
 
     def value(self, request):
-        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
-        if lsm:
-            return [lsm]
+        scraper = self.getscraperorrccode(request, request.GET.get('name'), "apiscraperinfo")
         history_start_date = self.convert_date(request.GET.get('history_start_date', None))
         quietfields        = request.GET.get('quietfields', "").split("|")
             
@@ -107,11 +105,8 @@ class GetRunInfo(APIBase):
     required_arguments = ['name']
     
     def value(self, request):
-        scraper, lsm = self.get_scraper_lsm(request.GET.get('name'))
-        if lsm:
-            return [lsm]
+        scraper = self.getscraperorrccode(request, request.GET.get('name'), "apiscraperruninfo")
         runid = request.GET.get('runid', '-1')
-        
         runevent = None
         if runid[0] == '-':   # allow for negative indexes to get to recent runs
             try:
@@ -156,7 +151,7 @@ class Search(APIBase):
     def value(self, request):
         query = request.GET.get('query', None) 
         result = [ ]  # list of dicts
-        for scraper in Code.objects.search(query):
+        for scraper in scraper_search_query(Code.objects, None, query):
             result.append({'short_name':scraper.short_name, 'title':scraper.title, 'description':scraper.description, 'created':scraper.created_at})
         return result
 
@@ -164,6 +159,7 @@ class Search(APIBase):
 class GetUserInfo(APIBase):
     required_arguments = ['username']
 
+            # could be authorized with "apiuserinfo", but no scraper associated to authorize this
     def value(self, request):
         username = request.GET.get('username', "") 
         users = User.objects.filter(username=username)
@@ -171,7 +167,7 @@ class GetUserInfo(APIBase):
         for user in users:  # list of users is normally 1
             info = { "username":user.username, "profilename":user.get_profile().name, "datejoined":user.date_joined }
             info['coderoles'] = { }
-            for ucrole in user.usercoderole_set.filter(code__deleted=False, code__published=True):
+            for ucrole in user.usercoderole_set.exclude(code__privacy_status="deleted").exclude(code__privacy_status="private"):
                 if ucrole.role not in info['coderoles']:
                     info['coderoles'][ucrole.role] = [ ]
                 info['coderoles'][ucrole.role].append(ucrole.code.short_name)

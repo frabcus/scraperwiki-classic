@@ -4,12 +4,31 @@
     <h3>
         <!-- scraper id: {{ code.id }} -->
         <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
-        <a href="{% if code.owner.username %}{% url profiles_profile_detail code.owner.username %}{% endif %}">
-         {% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}
-        </a> /
-        <a href="{% url code_overview code.wiki_type code.short_name %}">
+
+        {% if code.owner.username %}
+          {% ifequal code.owner request.user %}
+            <a href="{% url code_overview code.wiki_type code.short_name %}" class="your-own">
+              {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
+            </a>
+          {% else %}
+            <a href="{% url profiles_profile_detail code.owner.username %}">
+              {% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}
+            </a>
+            /
+            <a href="{% url code_overview code.wiki_type code.short_name %}">
+              {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
+            </a>
+          {% endifequal %}
+        {% else %}
+          <a href="{% url code_overview code.wiki_type code.short_name %}">
             {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
-        </a>
+          </a>
+        {% endif %}
+
+        {% ifnotequal code.privacy_status 'public' %}
+          [{{code.privacy_status}}]
+        {% endifnotequal %}
+
         <ul class="code_about">
            {% ifequal code.wiki_type 'view' %}
              <li class="codewiki_type {{code.wiki_type|lower}}"><a href="{% url rpcexecute code.short_name %}">{{code.wiki_type|lower}}</a></li>
@@ -40,7 +59,7 @@
         {% if code.scraper %}
                  | 
             {% if code.scraper.record_count %}
-              ({{ code.scraper.record_count }} records)
+              ({{code.scraper.record_count}} record{{code.scraper.record_count|pluralize}})
             {% else %}
               (no records)
             {% endif %}

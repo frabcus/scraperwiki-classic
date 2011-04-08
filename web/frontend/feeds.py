@@ -1,6 +1,6 @@
 from django.contrib.syndication.feeds import Feed, FeedDoesNotExist
 from django.core.exceptions import ObjectDoesNotExist
-from codewiki.models import Code, Scraper, View
+from codewiki.models import Code, Scraper, View, scraper_search_query
 from tagging.utils import get_tag
 from tagging.models import Tag, TaggedItem
 from django.contrib.comments.models import Comment
@@ -82,7 +82,7 @@ class LatestCodeObjects(Feed):
         return obj.get_absolute_url()
         
     def items(self):
-        return Code.objects.filter(published=True).order_by('-created_at')[:settings.RSS_ITEMS]
+        return Code.objects.filter(privacy_status="public").order_by('-created_at')[:settings.RSS_ITEMS]
         
         
 class LatestCodeObjectsBySearchTerm(Feed):
@@ -110,6 +110,6 @@ class LatestCodeObjectsBySearchTerm(Feed):
         return "Items created with '%s' somewhere in title or tags" % obj
 
     def items(self, obj):
-        code_objects = Code.objects.search(obj) 
+        code_objects = scraper_search_query(Code.objects, None, obj) 
         return code_objects[:settings.RSS_ITEMS]
         

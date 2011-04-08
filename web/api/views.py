@@ -48,13 +48,14 @@ def keys(request):
 
 def example_scrapers(user, count):
     if user.is_authenticated():
-        scrapers = user.code_set.filter(usercoderole__role='owner', deleted=False, published=True).order_by('-first_published_at')[:count]
+        scrapers = user.code_set.filter(usercoderole__role='owner').exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:count]
     else:
-        scrapers = Code.objects.filter(deleted=False, featured=True).order_by('-first_published_at')[:count]
+        scrapers = Code.objects.filter(featured=True).exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:count]
     
     return scrapers
 
 def explore_index(request):
+    return HttpResponseRedirect(reverse('api:index_1_0'))
     return render_to_response('api/index.html', {'mode': 'api'}, context_instance=RequestContext(request))
 
 def explore_index_1_0(request):

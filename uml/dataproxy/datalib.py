@@ -106,7 +106,7 @@ class Database :
                                 )
                 self.m_place = '%s'
             except Exception, e :
-                raise Exception("Unable to connect to datastore: %s" % e)
+                raise Exception("Unable to connect to old ScraperWiki MySQL key/value datastore: %s" % e)
 
         if self.m_dbtype == 'sqlite3' :
             try :
@@ -123,7 +123,7 @@ class Database :
                 self.m_place   = '?'
                 self.createSchema ()
             except Exception, e :
-                raise Exception("Unable to connect to datastore: %s" % e)
+                raise Exception("Unable to connect to ScraperWiki SQLite datastore: %s" % e)
 
         if self.m_db is None :
             raise Exception("Unrecognised datastore type '%s'" % dbtype)

@@ -20,15 +20,18 @@ urlpatterns = patterns('',
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    
 
     url(r'^views/(?P<short_name>[\w_\-\.]+)/admin/$',     views.view_admin,             name='view_admin'),    
+    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/$',  views.scraper_admin,          name='scraper_admin'),
     
+    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/settags$', 
+                                                          views.scraper_admin_settags,  name='scraper_admin_settags'),
+    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/privacystatus$', 
+                                                          views.scraper_admin_privacystatus,name='scraper_admin_privacystatus'),
+
     url(r'^scrapers/delete-data/(?P<short_name>[\w_\-\.]+)/$', views.scraper_delete_data, name='scraper_delete_data'),
-    url(r'^scrapers/converttosqlitedatastore/(?P<short_name>[\w_\-\.]+)/$', views.scraper_converttosqlitedatastore, name='scraper_converttosqlitedatastore'),
-            
     
     url(r'^scrapers/follow/(?P<short_name>[\w_\-\.]+)/$',   views.follow,               name='scraper_follow'),
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-\.]+)/$', views.unfollow,             name='scraper_unfollow'),
     
-    url(r'^scrapers/metadata_api/(?P<scraper_guid>[\w_\-\.]+)/(?P<metadata_name>.+)/$', metadata, name='metadata_api'),
 
     # events and monitoring (pehaps should have both wiki_types possible)
     url(r'^scrapers/running_scrapers/$',                  viewsuml.running_scrapers,    name='running_scrapers'),
@@ -45,8 +48,6 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/screenshoot-scraper/(?P<short_name>[\w_\-\.]+)/$', 
                                                           views.scraper_screenshoot_scraper,    name='scraper_screenshoot_scraper'),
         
-        #not deprecated as used in by ajax to implement publishScraperButton
-    url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/$',  views.scraper_admin,          name='scraper_admin'),
         
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/$',          views.code_overview,    name='code_overview'),
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/history/$',  views.scraper_history,  name='scraper_history'),
@@ -54,14 +55,13 @@ urlpatterns = patterns('',
     
     
     url(r'^scrapers/run_event/(?P<run_id>[\w_\-\.]+)/$',                      viewsuml.run_event,     name='run_event'),  
-    url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/tags/$',     views.tags,             name='scraper_tags'),    
         
     url(r'^(?P<wiki_type>scraper|view)s/new/choose_template/$',                 views.choose_template,  name='choose_template'),    
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/raw_about_markup/$', views.raw_about_markup, name='raw_about_markup'),        
     
     url(r'^editor/draft/delete/$',                        views.delete_draft, name="delete_draft"),
     
-    # call-backs from ajax for reloading and diff
+    # editor call-backs from ajax for reloading and diff
     url(r'^editor/raw/(?P<short_name>[\-\w\.]+)$',        viewseditor.raw,    name="raw"),      # raw code not wrapped in javascript
     url(r'^editor/diffseq/(?P<short_name>[\-\w\.]+)$',    viewseditor.diffseq,name="diffseq"),
     url(r'^scrapers/run_event_json/(?P<run_id>[\w_\-\.\?]+)/$', viewseditor.run_event_json, name='run_event_json'),  
@@ -77,12 +77,16 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/new/(?P<language>[\w]+)$',            viewseditor.edit, name="editor"),
 
 
-    url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),   # this gets redirected
     url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$', views.export_sqlite,   name='export_sqlite'),
 
-    # to clean out
+    #
+    # to clean out soon
+    #
+    url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),   # this gets redirected
+    url(r'^scrapers/metadata_api/(?P<scraper_guid>[\w_\-\.]+)/(?P<metadata_name>.+)/$', metadata, name='metadata_api'),
+    url(r'^scrapers/converttosqlitedatastore/(?P<short_name>[\w_\-\.]+)/$', views.scraper_converttosqlitedatastore, name='scraper_converttosqlitedatastore'),
     url(r'^quicklistolddatastore', views.listolddatastore), 
-        
+
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/(?:run|full)/$',   # redirect because it's so common
                    lambda request, wiki_type, short_name: HttpResponseRedirect("http://%s%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=[short_name])))),
     url(r'^(?P<wiki_type>scraper)s/export2/(?P<short_name>[\w_\-\.]+)/$', 

@@ -2,6 +2,8 @@
 import datetime
 import time
 
+# Development note:  Aiming to merge scraper,view,code back into one object
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import admin
@@ -11,7 +13,6 @@ from django.contrib.sites.models import Site
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-import codewiki.managers.scraper
 from codewiki import managers
 from django.db.models.signals import post_save
 from registration.signals import user_registered
@@ -33,7 +34,9 @@ except:
 
 from django.core.mail import send_mail
 
-SCHEDULE_OPTIONS = ((-1, 'never'), (3600*24, 'once a day'), (3600*24*2, 'every two days'), (3600*24*3, 'every three days'),                                                                 (3600*24*7, 'once a week'), (3600*24*14, 'every two weeks'), (3600*24*31, 'once a month'), (3600*24*63, 'every two months'), (3600*24*182, 'every six months'),)
+SCHEDULE_OPTIONS = ((-1, 'never'), (3600*24, 'once a day'), (3600*24*2, 'every two days'), (3600*24*3, 'every three days'), 
+                    (3600*24*7, 'once a week'), (3600*24*14, 'every two weeks'), (3600*24*31, 'once a month'), 
+                    (3600*24*63, 'every two months'), (3600*24*182, 'every six months'),)
 SCHEDULE_OPTIONS_DICT = dict(SCHEDULE_OPTIONS)
 
 LICENSE_CHOICES = (
@@ -53,9 +56,6 @@ class Scraper (code.Code):
     license_link = models.URLField(verify_exists=False, null=True, blank=True)
     record_count = models.IntegerField(default=0)        
     run_interval = models.IntegerField(default=86400)  # in seconds
-
-    objects = managers.scraper.ScraperManager()
-    unfiltered  = models.Manager() # django admin gets confused if this lives in the parent class, so duplicated in child classes
 
     def __init__(self, *args, **kwargs):
         super(Scraper, self).__init__(*args, **kwargs)

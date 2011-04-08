@@ -12,7 +12,7 @@ urlpatterns = patterns('',
 
     # profiles
     url(r'^profiles/edit/$', profile_views.edit_profile, {'form_class': frontend_forms.UserProfileForm},   name='profiles_edit_profile'),
-    url(r'^profiles/(?P<username>\w+)/$', 	   frontend_views.profile_detail,  name='profiles_profile_detail'),
+    url(r'^profiles/(?P<username>\w+)/$', frontend_views.profile_detail,  name='profiles_profile_detail'),
     #url(r'^profiles/', include('profiles.urls')), 
 
     url(r'^login/$',frontend_views.login, name='login'),
@@ -34,7 +34,7 @@ urlpatterns = patterns('',
     url(r'^contact/sent/$',               direct_to_template,{ 'template': 'contact_form/contact_form_sent.html' },name='contact_form_sent'),
     
     # user's scrapers
-    url(r'^dashboard/$',                  frontend_views.dashboard, name='dashboard'),
+    url(r'^dashboard/(?P<page_number>\d+)?$', frontend_views.dashboard, name='dashboard'),
     url(r'^stats/$',                  frontend_views.stats, name='stats'),    
     
     # Example pages to scrape :)

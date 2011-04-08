@@ -29,13 +29,13 @@ import base64
 
 def getscraperorresponse(request):
     try:
-        scraper = Code.unfiltered.get(short_name=request.GET.get('name'))
+        scraper = Code.objects.get(short_name=request.GET.get('name'))
     except Code.DoesNotExist:
         message =  "Sorry, this datastore does not exist"
         return HttpResponse(str({'heading':'Not found', 'body':message}))
     
-    if not scraper.actionauthorized(request.user, "apiread"):
-        return HttpResponse(str(scraper.authorizationfailedmessage(request.user, "apiread")))
+    if not scraper.actionauthorized(request.user, "apidataread"):
+        return HttpResponse(str(scraper.authorizationfailedmessage(request.user, "apidataread")))
     return scraper
 
 

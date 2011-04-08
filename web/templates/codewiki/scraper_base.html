@@ -7,6 +7,9 @@
     {% include 'codewiki/includes/tabs.html' %}
 {% endblock %}
 {% block content %}
+    <input type="hidden" id="adminsettagurl" value="{% url scraper_admin_settags scraper.short_name %}"/>
+    <input type="hidden" id="adminprivacystatusurl" value="{% url scraper_admin_privacystatus scraper.short_name %}"/>
+
     <div class="page_title">
         <ul class="title_links">
             {% ifequal scraper.wiki_type 'scraper'%}
@@ -20,7 +23,15 @@
             <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
         </ul>
         <h1>
-            {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %} / <span id="hCodeTitle">{{ scraper.title }}</span>{% if not scraper.published %} (not public){% endif %}
+          {% if scraper.owner.get_profile.name %}
+            {{ scraper.owner.get_profile.name }}
+          {% else %}
+            {{scraper.owner.username}}
+          {% endif %}
+          / <span id="hCodeTitle">{{ scraper.title }}</span>
+          {% ifnotequal scraper.privacy_status 'public' %}
+            [{{scraper.privacy_status}}]
+          {% endifnotequal %}
         </h1>
         <ul class="code_about">
            <li class="codewiki_type {{scraper.wiki_type|lower}}">{{scraper.wiki_type|lower}}</li>
@@ -57,10 +68,10 @@
     </div>
 {% endblock %}
 
-{% block run_script %}
-     scraper_short_name = '{{scraper.short_name}}';
-
+{% block run_script_outer %}
+<script>
     {% if user.is_authenticated %}
-        setupScraperEditInPlace('scraper', '{{scraper.short_name}}');
+        setupScraperEditInPlace('{{scraper.wiki_type}}', '{{scraper.short_name}}');
     {% endif %}
+</script>
 {% endblock %}
