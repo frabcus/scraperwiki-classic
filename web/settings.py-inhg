@@ -85,3 +85,9 @@ GDOCS_UPLOAD_MAX = 1048576 #1MB upload max set by google
 SCREENSHOT_DIR = '/tmp/'
 
 UMLURLS = [ ]  # no umls for local installs
+
+if DEBUG:
+    TEMPLATE_CONTEXT_PROCESSORS += (
+        'frontend.context_processors.sqldebug',
+    )
+    SQL_DEBUG = False
