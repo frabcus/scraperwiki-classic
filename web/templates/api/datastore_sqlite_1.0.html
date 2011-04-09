@@ -10,14 +10,16 @@
         <dd>A valid API key.{% if user.is_authenticated and keys %} <input type="text" name="key" id="key" />{% endif %}</dd>
     {% endcomment %}
     <dt><code>format</code> (required)</dt>
-    <dd>The format you would like the response in. <input type="text" name="format" id="format" size="4" value="jsondict"/></dd>
+    <dd>The format you would like the response in. <input type="text" name="format" id="format" size="6" value="jsondict"/></dd>
     <dt><code>name</code> (required)</dt>
-    <dd>The short name for a scraper. <input type="text" name="name" id="name" value="{{short_name}}"/></dd>
+    <dd>The short name for a scraper. <input type="text" name="name" id="name" value="{{short_name}}" size="30"/></dd>
     <dt><code>attach</code> (optional)</dt>
-    <dd>Additional scraper databases to include. <input type="text" name="attach" id="attach" value=""/></dd>
+    <dd>Additional scraper databases to include. <input type="text" name="attach" id="attach" value="" size="30"/></dd>
     <dt><code>query</code> (required)</dt>
-    <dd>The SQL query against the database. <input type="text" name="query" id="query" value="select * from swdata limit 10"/></dd>
-    <dd><small>(Don't forget to use backticks ` to quote your keys that have spaces in them.)</small></dd>
+    <dd>SQL query against the database. 
+        <textarea name="query" id="query" rows="3", cols="35">select * from swdata limit 10</textarea>
+        <div class="extra_help">(Don't forget to use backticks ` to quote your keys that have spaces in them.)</div>
+    </dd>
     <dt><code>callback</code> (optional)</dt>
     <dd><a href="http://en.wikipedia.org/wiki/JSONP#JSONP">JSONP</a> callback function. <input type="text" name="callback" id="callback"/></dd>
 {% endblock %}
