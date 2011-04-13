@@ -50,7 +50,7 @@ PRIVACY_STATUSES = (
 )
 
 STAFF_ACTIONS = ["run_scraper", "screenshoot_scraper"]
-CREATOR_ACTIONS = ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status" ]
+CREATOR_ACTIONS = ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper" ]
 EDITOR_ACTIONS = ["changeadmin", "savecode", "settags" ]
 VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo" ]
 
