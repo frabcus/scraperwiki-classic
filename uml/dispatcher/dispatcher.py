@@ -688,15 +688,9 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.send_error (400, "No server free to run your scraper, please try again in a few minutes")
             return
 
-        self.connection.send \
-            (   json.dumps \
-                (   {   'message_type'  : 'executionstatus',
-                        'content'       : 'startingrun',
-                        'runID'         : runID,
-                        'uml'           : uml.name()
-                    }
-                )   + '\n'
-            )
+        self.sendOK()
+        json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': uml.name()}) + '\n'
+        self.connection.send(json_msg)
 
         soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         uml.setSocket (id, soc)
