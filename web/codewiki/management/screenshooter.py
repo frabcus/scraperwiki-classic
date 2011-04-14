@@ -25,7 +25,11 @@ class ScreenShooter(object):
                                       scaleToHeight=height,
                                       width=1440,
                                       height=900,
-                                      wait=5)
+                                      wait=5,
+                                      timeout=60,
+                                      ignoreAlerts=True,
+                                      ignoreConfirms=True,
+                                      ignoreConsoleMessages=True)
             renderer.qWebSettings[QWebSettings.JavascriptEnabled] = True
             self.renderers[(width, height)] = renderer
             return renderer
@@ -34,8 +38,11 @@ class ScreenShooter(object):
         for shot in self.shots:
             if self.verbose:
                 print "Taking screenshot %s" % shot['filename']
-            image = self._get_renderer(shot['size'][0], shot['size'][1]).render(shot['url'])
-            image.save(shot['filename'], 'png')
+            try:
+                image = self._get_renderer(shot['size'][0], shot['size'][1]).render(shot['url'])
+                image.save(shot['filename'], 'png')
+            except RuntimeError:
+                print "Timeout screenshooting %s" % shot['url']
         sys.exit(0)
 
     def add_shot(self, url, filename, size):
