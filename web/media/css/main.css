@@ -375,7 +375,9 @@ form.api_arguments dt code {font-weight:bold; font-size:1.1em;}
 form.api_arguments dd {padding-bottom:0.4em;position:relative;}
 form.api_arguments input { position:absolute; top:-50%; right:0; text-align:right;}
 form.api_arguments input.button {position:static;}
+form.api_arguments textarea { float: right; top:-50%; right:0; text-align:left; }
 form.api_arguments div {text-align:right;}
+form.api_arguments div.extra_help {font-size: 80%; clear: both; }
 
 div.explorer_response h2 small {font-size:0.5em;}
 div.explorer_response iframe {width:100%; margin: 1em 0; background:#000; border:none; height:400px;}
