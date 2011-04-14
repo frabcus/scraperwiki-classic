@@ -2,7 +2,7 @@ var prev_aName = '';
 function rewriteApiUrl()
 {
     sArgs = '?';
-    var aControls = $('.api_arguments dl input')
+    var aControls = $('.api_arguments dl input,textarea')
     for (var i=0; i < aControls.length; i++) {
         if($(aControls[i]).val() != ''){
 	        if (i > 0) {
@@ -99,7 +99,7 @@ function APISetupExploreFunction(){
     );
 
     //linkup the texboxes to rewrite the API url
-    $('.api_arguments dl input').each(function() {$(this).keyup(rewriteApiUrl)}); 
+    $('.api_arguments dl input,textarea').each(function() {$(this).keyup(rewriteApiUrl)}); 
 
     $('#scraperlisttables').click(function()
     {
