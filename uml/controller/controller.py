@@ -76,7 +76,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.m_cgi_fp       = None
         self.m_cgi_headers  = None
         self.m_cgi_env      = None
-        self.m_fs           = None
         self.m_stdout       = sys.stdout
         self.m_stderr       = sys.stderr
         self.m_scraperID    = None
@@ -129,7 +128,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         if 'content-type'   in self.headers : self.m_cgi_env['CONTENT_TYPE'  ] = self.headers['content-type'  ]
         if 'content-length' in self.headers : self.m_cgi_env['CONTENT_LENGTH'] = self.headers['content-length']
 
-    def getFieldStorage (self) :
+    def getRequestMessage(self) :
 
         """
         Get a CGI field storage object. This is created once on demand from
@@ -138,14 +137,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         @return         : cgi.FieldStorage instance
         """
 
-        if self.m_fs is None :
-            self.m_fs = cgi.FieldStorage \
-                        (       fp      = self.m_cgi_fp,
-                                headers = self.m_cgi_headers,
-                                environ = self.m_cgi_env,
-                                keep_blank_values = True
-                        )
-        return self.m_fs
+        return json.loads(self.m_cgi_fp.read(int(self.m_cgi_headers['content-length'])))
 
     def setUser (self) :
 
@@ -598,8 +590,8 @@ class ScraperController (BaseController) :
 
     def fnCommand (self, path) :
 
-        fs      = self.getFieldStorage ()
-        command = fs['command'].value
+        request = self.getRequestMessage()
+        command = request['command']
 
         #  Apply resource limits, and set group and user.
         #
@@ -676,7 +668,7 @@ class ScraperController (BaseController) :
                 idents.append ('block=%s' % value)
                 continue
 
-        fs = self.getFieldStorage ()
+        request = self.getRequestMessage()
 
         psock = socket.socketpair()
         lpipe = os.pipe()
@@ -879,7 +871,7 @@ class ScraperController (BaseController) :
         os.close(lpipe[0])
 
         open ('/tmp/ident.%d'   % os.getpid(), 'w').write(string.join(idents, '\n'))
-        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(fs['script'].value)
+        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(request['script'].encode('utf-8'))
 
         # notes: execScript takes the code as an argument, but doesn't do anything with it.  
         #  it recreates the above file name from the pid and calls the language script with it
@@ -901,32 +893,23 @@ class ScraperController (BaseController) :
         except : language = 'python'
 
         if language == 'python' :
-            self.execScript  ('py',  fs['script'].value, psock[1].fileno(), lpipe[1])
+            self.execScript  ('py',  request['script'], psock[1].fileno(), lpipe[1])
             return
 
         if language == 'php'    :
-            self.execScript  ('php', fs['script'].value, psock[1].fileno(), lpipe[1])
+            self.execScript  ('php', request['script'], psock[1].fileno(), lpipe[1])
             return
 
         if language == 'ruby'   :
-            self.execScript  ('rb',  fs['script'].value, psock[1].fileno(), lpipe[1])
+            self.execScript  ('rb',  request['script'], psock[1].fileno(), lpipe[1])
             return
 
-        self.wfile.write \
-                    (   json.dumps \
-                        (   {   'message_type'  : 'console',
-                                'content'       : 'Language %s not recognised' % language,
-                            }
-                        )   + '\n'
-                    )
-        self.wfile.flush ()
+        self.wfile.write(json.dumps({'message_type': 'console', 'content': 'Language %s not recognised' % language, }) + '\n')
+        self.wfile.flush()
         os.exit()
 
 
-class ControllerHTTPServer \
-        (   SocketServer.ThreadingMixIn,
-            BaseHTTPServer.HTTPServer
-        ) :
+class ControllerHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
 
     """
     Wrapper class providing a forking server. Note that we runn forking
