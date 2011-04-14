@@ -32,13 +32,6 @@ HOME_DIR            = os.path.dirname(SCRAPERWIKI_DIR) # the parent directory of
 
 SPLITSCRAPERS_DIR   = HOME_DIR + '/splitscrapers/'
 
-DATASTORE_DATABASE_ENGINE     = ''       # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATASTORE_DATABASE_HOST     = ''      
-DATASTORE_DATABASE_NAME       = '' # Or path to database file if using sqlite3.
-DATASTORE_DATABASE_USER       = ''   # Not used with sqlite3.
-DATASTORE_DATABASE_PASSWORD   = ''         # Not used with sqlite3.
-DATASTORE_DATABASE_PORT   = ''
-
 DATAPROXY_HOST  = 'localhost'	# Host running data proxy - see uml.cfg
 DATAPROXY_PORT  = 9003	# Dataproxy port - see uml.cfg
 
@@ -62,25 +55,17 @@ EMAIL_FROM = 'noreply@localhost'
 MARKET_BOUNTY_CHARGE = 6.3
 TEAM_EMAIL = 'all@scraperwiki.com'
 
-
 ORBITED_PORT = 8001
 ORBITED_DOMAIN = 'localhost'
 
 # TEST_RUNNER = 'django-test-coverage.runner.run_tests'
-
 
 API_DOMAIN = 'localhost'
 MEDIA_URL = '/media/'
 MAIN_URL  = 'http://scraperwiki.com'  # aka Site.objects.get_current().domain (though as we have put 3 other domains here, why not this one too unless making things gratuitously awkward)
 VIEW_DOMAIN = 'localhost:8000'
 
-
 USE_DUMMY_VIEWS = False # use a dummy when running views in iframes
-
-     #Google docs settings  (deprecatedGDOCS_UPLOAD_USER = ''
-GDOCS_UPLOAD_PASSWORD = ''
-GDOCS_UPLOAD_FOLDER_URI = '' #you will probably want to set the permissions on this folder to be public
-GDOCS_UPLOAD_MAX = 1048576 #1MB upload max set by google
 
 SCREENSHOT_DIR = '/tmp/'
 
