@@ -118,7 +118,7 @@ def claim (request, solicitation_id):
         code = form.cleaned_data['scraper']
         
         #inheritance confution, get a scraper object rather than it's parent copde object
-        scraper = Scraper.objects.get(short_name__exact=code.short_name)
+        scraper = Scraper.objects.exclude(privacy_status="deleted").get(short_name__exact=code.short_name)
         
         #mark as claimed
         solicitation.claim(scraper=scraper, user=user)

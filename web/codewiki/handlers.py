@@ -27,7 +27,7 @@ class ScraperMetadataHandler(BaseHandler):
     @check_scraperid_header
     def read(self, request, scraper_guid, metadata_name):
         try:
-            scraper = Scraper.objects.get(guid=scraper_guid)
+            scraper = Scraper.objects.exclude(privacy_status="deleted").get(guid=scraper_guid)
             if metadata_name in ['title', 'short_name']:
                 metadata = ScraperMetadata()
                 metadata.name = metadata_name
@@ -46,7 +46,7 @@ class ScraperMetadataHandler(BaseHandler):
             return rc.BAD_REQUEST
 
         try:
-            scraper = Scraper.objects.get(guid=scraper_guid) 
+            scraper = Scraper.objects.exclude(privacy_status="deleted").get(guid=scraper_guid) 
         except:
             return rc.NOT_HERE
 
@@ -68,7 +68,7 @@ class ScraperMetadataHandler(BaseHandler):
             return rc.BAD_REQUEST
 
         try:
-            scraper = Scraper.objects.get(guid=scraper_guid)
+            scraper = Scraper.objects.exclude(privacy_status="deleted").get(guid=scraper_guid)
             metadata = scraper.scrapermetadata_set.get(name=metadata_name)
         except:
             return rc.NOT_HERE

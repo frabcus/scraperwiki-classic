@@ -311,7 +311,7 @@ class Command(BaseCommand):
     
     def handle(self, **options):
         if options['short_name']:
-            scrapers = Scraper.objects.get(short_name=options['short_name'])
+            scrapers = Scraper.objects.exclude(privacy_status="deleted").get(short_name=options['short_name'])
             self.run_scraper(scrapers, options)
             return
         

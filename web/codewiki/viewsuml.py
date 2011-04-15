@@ -43,7 +43,7 @@ def running_scrapers(request):
     statusscrapers = GetDispatcherStatus()
     for status in statusscrapers:
         if status['scraperID']:
-            scrapers = Code.objects.filter(guid=status['scraperID'])
+            scrapers = Code.objects.filter(guid=status['scraperID']).exclude(privacy_status="deleted")
             if scrapers:
                 status['scraper'] = scrapers[0]
         

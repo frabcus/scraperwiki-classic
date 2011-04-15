@@ -17,7 +17,7 @@ class SearchForm(forms.Form):
     
 def get_emailer_for_user(user):
     try:
-        queryset = Code.objects
+        queryset = Code.objects.exclude(privacy_status="deleted")
         queryset = queryset.filter(Q(usercoderole__role='owner') & Q(usercoderole__user=user))
         queryset = queryset.filter(Q(usercoderole__role='email') & Q(usercoderole__user=user))
         return queryset.latest('id')

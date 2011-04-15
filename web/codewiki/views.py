@@ -30,7 +30,7 @@ def listolddatastore(request):
     scrapers = [ ]
     for lguid in arg[:1000]:
         if lguid[0]:
-            lscraper = models.Code.objects.filter(guid=lguid[0])
+            lscraper = models.Code.objects.filter(guid=lguid[0]).exclude(privacy_status="deleted")
             if lscraper:
                 scrapers.append((lscraper[0], lguid[0], lguid[1]))
     
@@ -46,7 +46,7 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
             raise Http404
     
     try:
-        scraper = models.Code.objects.get(short_name=short_name)
+        scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=short_name)
     except models.Code.DoesNotExist:
         message =  "Sorry, this %s does not exist" % wiki_type
         return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
@@ -61,7 +61,7 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
 
 def getscraperor404(request, short_name, action):
     try:
-        scraper = models.Code.objects.get(short_name=short_name)
+        scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=short_name)
     except models.Code.DoesNotExist:
         raise Http404
     if not scraper.actionauthorized(request.user, action):
@@ -167,7 +167,7 @@ def code_overview(request, wiki_type, short_name):
 
     context["schedule_options"] = models.SCHEDULE_OPTIONS
     context["license_choices"] = models.LICENSE_CHOICES
-    context["related_views"] = models.View.objects.filter(relations=scraper)
+    context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
     
     # this is the only one to call.  would like to know the exception that's expected
     try:
@@ -334,7 +334,7 @@ def unfollow(request, short_name):
 
 def choose_template(request, wiki_type):
     context = { "wiki_type":wiki_type }
-    context["templates"] = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).order_by('language')
+    context["templates"] = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).exclude(privacy_status="deleted").order_by('language')
     context["sourcescraper"] = request.GET.get('sourcescraper', '')
     
     if request.GET.get('ajax'):
