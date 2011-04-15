@@ -421,9 +421,9 @@ class FireStarter :
         except:
             return self
 
-        if command:
+        if command is not None:
             data = json.dumps({'command': command})
-        elif script:
+        elif script is not None:
             data = json.dumps({'script': script})
         else:
             raise Exception("Either command or script parameters must be provided")
