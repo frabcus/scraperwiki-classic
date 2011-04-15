@@ -228,7 +228,7 @@ function setupScraperEditInPlace(wiki_type, short_name)
               cancel    : 'Cancel',
               submit    : 'Save',
               onblur: 'ignore',
-              data   : $('#hidScheduleOptions').val(),
+              data   : $('#hidScheduleOptions').val().replace('PLACEHOLDER', $('#spnRunIntervalInner').attr('rawInterval')),
               type   : 'select',
               event: 'dblclick',
               placeholder: '',
@@ -237,7 +237,7 @@ function setupScraperEditInPlace(wiki_type, short_name)
 
       $('#aEditSchedule').click(
            function(){
-                sCurrent = $('#spnRunInterval').html().trim();               
+                sCurrent = $('#spnRunIntervalInner').html().trim();               
                 $('#spnRunInterval').dblclick();
                 $('#spnRunInterval select').val(sCurrent);
                 return false;

@@ -6,7 +6,7 @@
 {% load screen_shot %}
 
 <fieldset>
-    <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} }" />
+    <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} 'selected': 'PLACEHOLDER' }" />
     <input type="hidden" id="hidLicenseChoices" value="{ {% for name, text in license_choices %}'{{name}}':'{{text}}', {% endfor %} }" />
 </fieldset>
 
