@@ -317,7 +317,7 @@ def getselectedword(line, character, language):
     try: 
         ip = int(character)
     except ValueError:
-        return None
+        return ""
     ie = ip
     while ip >= 1 and re.match("[\w\.#]", line[ip-1]):  # search left across dots
         ip -= 1
@@ -344,7 +344,7 @@ def quickhelp(request):
     query["word"] = getselectedword(query["line"], query["character"], query["language"])
     if re.match("http://", query["word"]):
         query["escapedurl"] = urllib.quote(query["word"])
-    print query
+    #print query
     
     context = query.copy()
     context['quick_help_template'] = 'documentation/%s_quick_help_%s.html' % (query["wiki_type"], query["language"])

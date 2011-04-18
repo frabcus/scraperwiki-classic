@@ -3,11 +3,11 @@
     <li>
         <a href="{% url profiles_profile_detail owner.username %}">
         {% load gravatar %} {% show_gravatar owner 'medium' %} 
-        {{owner.get_profile.name}}</a> (creator)
+        {{owner.get_profile.name}}</a> (owner)
     </li>
     {% endfor %}
 
-    {% if userrolemap.owner %}{% else %}
+    {% if not userrolemap.owner %}
       <li style="color:red">[Error: this scraper has no creator]</li>
     {% endif %}
 
@@ -41,3 +41,15 @@
       {% endifnotequal %}
     {% endif %}
 </ul>
+
+<p>This {{scraper.wiki_type}} <span id="spnPrivacyStatusChoice">{{privacy_status_name}}</span>.
+  <select class="hide" id="optionsPrivacyStatusChoices">  {# this select gets taken apart and rebuilt by jeditable #}
+  {% for value, name in PRIVACY_STATUSES %} 
+    <option value="{{value}}">{{name}}</option>
+  {% endfor %}
+  </select>
+  {% if user_owns_it %}
+    <a id="aPrivacyStatusChoice" class="edit">[edit status]</a>
+  {% endif %}
+</p>
+
