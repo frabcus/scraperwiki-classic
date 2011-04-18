@@ -6,7 +6,7 @@
       <a href="#" id="aEditTags" class="edit">[edit tags]</a>
     {% else %}
       <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to add a tag]</a>
-    {% endif %}</h2>
+    {% endif %}
   {% else %}
     {# version1.2 problem if user in scraper.userrolemap.editor #}
     {% if user_edits_it %}

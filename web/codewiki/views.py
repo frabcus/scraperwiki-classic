@@ -90,13 +90,8 @@ def getscraperor404(request, short_name, action):
 def comments(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, "scraper_comments", "comments")
     if isinstance(scraper, HttpResponse):  return scraper
-    
     context = {'selected_tab':'comments', 'scraper':scraper }
-    context["scraper_tags"] = scraper.gettags()
-    context["user_owns_it"] = (scraper.owner() == request.user)
-    
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
-
 
 def scraper_history(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, "scraper_history", "history")
@@ -221,18 +216,23 @@ def scraper_admin_privacystatus(request, short_name):
     return HttpResponse(dict(PRIVACY_STATUSES_UI)[scraper.privacy_status])
 
 def scraper_admin_controleditors(request, short_name):
-    print short_name
     scraper = getscraperor404(request, short_name, "set_controleditors")
-    lroleuser = User.objects.filter(username=request.POST.get('roleuser', ''))
+    username = request.GET.get('roleuser', '')
+    lroleuser = User.objects.filter(username=username)
     if not lroleuser:
-        return HttpResponse("User not found")
-    print lroleuser
+        return HttpResponse("Failed: username '%s' not found" % username)
     roleuser = lroleuser[0]
-    newrole = request.POST.get('newrole', '')
-    print newrole, "llL", newrole in ['editor']
-    assert newrole in ['editor']
-    scraper.set_user_role(roleuser, newrole)
-    return HttpResponse("hi there")
+    newrole = request.GET.get('newrole', '')
+    if newrole not in ['editor', 'follow']:
+        return HttpResponse("Failed: role '%s' unrecognized" % newrole)
+    if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
+        return HttpResponse("Failed: user is already '%s'" % newrole)
+    newuserrole = scraper.set_user_role(roleuser, newrole)
+    context = { "role":newuserrole.role, "contributor":newuserrole.user }
+    context["user_owns_it"] = (request.user in scraper.userrolemap()["owner"])
+    if newuserrole:
+        return render_to_response('codewiki/includes/contributor.html', context, context_instance=RequestContext(request))
+    return HttpResponse("Failed: unknown")
 
 
 def view_admin(request, short_name):

@@ -234,6 +234,7 @@ class Code(models.Model):
                                     role='follow').delete()
         return True
 
+    # uses lists of users rather than userroles so that you can test containment easily
     def userrolemap(self):
         result = { "editor":[], "owner":[] }
         for usercoderole in self.usercoderole_set.all():

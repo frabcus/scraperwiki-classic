@@ -208,21 +208,18 @@ function setupScraperEditInPlace(wiki_type, short_name)
     $('#divEditTagsControls').hide();
     $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
 
-    // privacy status
+
+    // changing privacy status
     $('#spnPrivacyStatusChoice').editable($("#adminprivacystatusurl").val(), 
     {
         indicator : 'Saving...', tooltip:'Click to edit...', cancel:'Cancel', submit:'Save',
         onblur: 'ignore', event:'dblclick', placeholder:'', type: 'select', 
-        data: optiontojson('#optionsPrivacyStatusChoices', $('#spnPrivacyStatusChoice').text()) 
+        data: optiontojson('#optionsPrivacyStatusChoices', $('#spnPrivacyStatusChoice').text()), 
+        callback: function() { document.location.reload(true); }
     }); 
     $('#aPrivacyStatusChoice').click(function()  {  $('#spnPrivacyStatusChoice').dblclick(); });
 
-    $('.demotebutton').click(function() 
-    {
-        alert("Now callback to demote user: '"+$(this).parents("li").find("span.hide").text()+"' to follower status"); 
-    }); 
-
-
+    // changing editor status
     $('#addneweditor a').click(function()
     {
         $('#addneweditor a').hide()
@@ -235,14 +232,43 @@ function setupScraperEditInPlace(wiki_type, short_name)
     }); 
     $('#addneweditor input.addbutton').click(function()
     {
+        var thisli = $(this).parents("li:first"); 
         var sdata = { roleuser:$('#addneweditor input:text').val(), newrole:'editor' }; 
-        $.ajax({url:$("#admincontroleditors").val(), type: 'POST', data:sdata, success:function(result)
+        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
         {
-            alert(result); 
+            $('#addneweditor input:text').val(''); 
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                document.location.reload(true)
         }}); 
         $('#addneweditor span').hide(); 
         $('#addneweditor a').show(); 
     }); 
+
+    $('.demotebutton').click(function() 
+    {
+        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'follow' }; 
+        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
+        {
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                document.location.reload(true)
+        }}); 
+    }); 
+    $('.promotebutton').click(function() 
+    {
+        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'editor' }; 
+        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
+        {
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                document.location.reload(true)
+        }}); 
+    }); 
+
 
 
      //scheduler
