@@ -303,7 +303,7 @@ def get_involved(request):
         scraper_no_tags_count = TaggedItem.objects.get_no_tags(Scraper.objects.exclude(privacy_status="deleted")).count()
         scraper_tags_percent = 100 - int(scraper_no_tags_count / float(scraper_count) * 100)
     
-        view_no_tags_count = TaggedItem.objects.get_no_tags(View.objects.exclude(privacy_status="deleted").count()
+        view_no_tags_count = TaggedItem.objects.get_no_tags(View.objects.exclude(privacy_status="deleted")).count()
         view_tags_percent = 100 - int(view_no_tags_count / float(view_count) * 100)
 
         #scraper requests
