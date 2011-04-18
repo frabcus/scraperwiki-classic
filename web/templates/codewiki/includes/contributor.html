@@ -4,7 +4,7 @@
     {{contributor.get_profile.name}}</a> 
     ({% ifequal role 'follow' %}follower{% else %}{{role}}{% endifequal %})
     {% if user_owns_it %}
-      {% ifnotequal privacy_status 'public' %}
+      {% ifnotequal scraper.privacy_status 'public' %}
         {% ifequal role 'editor' %}
           <span class="hide">{{contributor.username}}</span>
           <input type="button" value="demote" class="demotebutton"/>
