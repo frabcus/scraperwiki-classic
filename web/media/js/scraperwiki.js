@@ -134,6 +134,8 @@ function optiontojson(seloptsid, currsel)
     return $.toJSON(result); 
 }
 
+
+// all used only by the code_overview page
 function setupScraperEditInPlace(wiki_type, short_name)
 {
     //about
@@ -219,7 +221,29 @@ function setupScraperEditInPlace(wiki_type, short_name)
     {
         alert("Now callback to demote user: '"+$(this).parents("li").find("span.hide").text()+"' to follower status"); 
     }); 
-    $('#addneweditor').click(function() { alert("nothing here yet - will use editable technology"); } ); 
+
+
+    $('#addneweditor a').click(function()
+    {
+        $('#addneweditor a').hide()
+        $('#addneweditor span').show(); 
+    }); 
+    $('#addneweditor input.cancelbutton').click(function()
+    {
+        $('#addneweditor span').hide(); 
+        $('#addneweditor a').show()
+    }); 
+    $('#addneweditor input.addbutton').click(function()
+    {
+        var sdata = { roleuser:$('#addneweditor input:text').val(), newrole:'editor' }; 
+        $.ajax({url:$("#admincontroleditors").val(), type: 'POST', data:sdata, success:function(result)
+        {
+            alert(result); 
+        }}); 
+        $('#addneweditor span').hide(); 
+        $('#addneweditor a').show(); 
+    }); 
+
 
      //scheduler
      $('#spnRunInterval').editable('admin/', {

@@ -37,7 +37,15 @@
 
     {% if user_owns_it %}
       {% ifnotequal scraper.privacy_status 'public' %}
-        <li><a id="addneweditor">[Add new editor]</a></li>
+        <li id="addneweditor">
+          <span class="hide">
+            Type in the username of another editor:
+            <input type="text">
+            <input type="button" value="Add" class="addbutton">
+            <input type="button" value="Cancel" class="cancelbutton">
+          </span>
+          <a>[Add new editor]</a>
+        </li>
       {% endifnotequal %}
     {% endif %}
 </ul>

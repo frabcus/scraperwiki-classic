@@ -220,6 +220,20 @@ def scraper_admin_privacystatus(request, short_name):
     scraper.save()
     return HttpResponse(dict(PRIVACY_STATUSES_UI)[scraper.privacy_status])
 
+def scraper_admin_controleditors(request, short_name):
+    print short_name
+    scraper = getscraperor404(request, short_name, "set_controleditors")
+    lroleuser = User.objects.filter(username=request.POST.get('roleuser', ''))
+    if not lroleuser:
+        return HttpResponse("User not found")
+    print lroleuser
+    roleuser = lroleuser[0]
+    newrole = request.POST.get('newrole', '')
+    print newrole, "llL", newrole in ['editor']
+    assert newrole in ['editor']
+    scraper.set_user_role(roleuser, newrole)
+    return HttpResponse("hi there")
+
 
 def view_admin(request, short_name):
     scraper = getscraperor404(request, short_name, "changeadmin")
