@@ -15,8 +15,6 @@ from django.contrib.sites.models import Site
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from codewiki.managers.view import ViewManager
-
 try:
     import json
 except:
