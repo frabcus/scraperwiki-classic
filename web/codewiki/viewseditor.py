@@ -243,6 +243,11 @@ def handle_editor_save(request):
         assert scraper.wiki_type == request.POST.get('wiki_type', '')
         scraper.title = title   # the save is done on save_code
         
+        # over-write the "maintenance required" flag as soon as the user does anything with it
+        # (there's been quite a mis-design here, but can live with it)
+        if scraper.status == "sick":
+            scraper.status = "ok"
+        
     else:
         if request.POST.get('wiki_type') == 'view':
             scraper = models.View()
