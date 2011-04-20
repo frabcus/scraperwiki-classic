@@ -212,59 +212,7 @@
         {% endifnotequal %}
     {% endif %}
 
-    {% if user_owns_it and not scraper.published %}
-      <div id="publishScraper">
-        <h3>Publish</h3>
-        <p>By default all scrapers are now published. This scraper was created before that policy. This button allows you to publish this scraper.</p>
-        <form>
-          <input type="submit" class="small button" id="publishScraperButton" value="Publish"/>
-        </form>
-        <br/>
-      </div>
-    {% endif %}
-    
-    <h3>Delete &amp; reset</h3>
-    {% if user_owns_it or user.is_staff %}    
-        {% if user.is_staff and not user_owns_it %}
-            <div class="staff">
-        {% endif %}
-        <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
-            <input type="hidden" id="hidDeleteData" name="delete_data" value="1" />
-            <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
-            <p>Removes all data for this scraper. There is no undo.</p>
-        </form>
-        <form action="{% url scraper_delete_scraper 'scraper' scraper.short_name %}" method="post">
-            <input type="hidden" name="delete_scraper" value="1" />
-            <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this scraper?" />
-            <p>Deletes this scraper and all its data. There is no undo.</p>
-        </form>
-        {% if user.is_staff and not user_owns_it %}
-            </div>
-        {% endif %}
-    {% else %}
-        <p class="infobox">Only the creator of a scraper can delete or reset it.</p>
-    {% endif %}
-
-    {% if user.is_staff %}
-    <div class="staff">
-        <p><b>Admin only</b></p>
- 
-        <p><a href="/admin/codewiki/scraper/{{scraper.pk}}/">Scraper's Django admin page</a></p>
- 
-        <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
-            <input type="hidden" name="run_scraper" value="1" />
-            <input type="submit" id="btnRunScraper" class="" value="Run now (if scheduled)" />
-            <p>If this scraper's schedule is overdue, runs it immediately.</p>
-        </form>
-
-        <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post">
-            <input type="hidden" name="screenshoot_scraper" value="1" />
-            <input type="submit" id="btnScreenshootScraper" class="" value="Screenshoot this scraper" />
-            <p>Take a screenshot of this scraper.</p>
-        </form>
-    </div>
-
-    {% endif %}
+    {% include 'codewiki/includes/admin_controls.html' %}
 
 </div>
 <br class="clear"/>

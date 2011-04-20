@@ -19,6 +19,7 @@
 {% endblock %}
 {% block content %}
     <input type="hidden" id="adminsettagurl" value="{% url scraper_admin_settags scraper.short_name %}"/>
+    <input type="hidden" id="adminprivacystatusurl" value="{% url scraper_admin_privacystatus scraper.short_name %}"/>
 
     <div class="page_title">
         <ul class="title_links">
@@ -59,10 +60,10 @@
     </div>
 {% endblock %}
 
-{% block run_script %}
-     scraper_short_name = '{{scraper.short_name}}';
-
+{% block run_script_outer %}
+<script>
     {% if user.is_authenticated %}
-        setupScraperEditInPlace('scraper', '{{scraper.short_name}}');
+        setupScraperEditInPlace('{{scraper.wiki_type}}', '{{scraper.short_name}}');
     {% endif %}
+</script>
 {% endblock %}

@@ -50,7 +50,7 @@ PRIVACY_STATUSES = (
 )
 
 STAFF_ACTIONS = ["run_scraper", "screenshoot_scraper"]
-CREATOR_ACTIONS = ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning"]
+CREATOR_ACTIONS = ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status" ]
 EDITOR_ACTIONS = ["changeadmin", "savecode", "settags" ]
 VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow" ]
 
@@ -312,16 +312,16 @@ class Code(models.Model):
         if self.privacy_status == "deleted":
             return {'heading': 'Deleted', 'body': "Sorry this %s has been deleted" % self.wiki_type}
         if action == "rpcexecute" and self.wiki_type != "view":
-            return {'heading': 'This is a scraper', 'body': "not supposed to run a scraper as a view"}
+            return {'heading': 'This is a scraper', 'body': "Not supposed to run a scraper as a view"}
         if action in STAFF_ACTIONS:
-            return {'heading': 'Not authorized', 'body': "this is a staff action"}
+            return {'heading': 'Not authorized', 'body': "Only staff can do action %s" % action}
         if action in CREATOR_ACTIONS:
-            return {'heading': 'Not authorized', 'body': "this is an owner action only"}
+            return {'heading': 'Not authorized', 'body': "Only owner can do action %s" % action}
         if action in EDITOR_ACTIONS:
             if self.privacy_status != "public":
                 return {'heading': 'Not authorized', 'body': "this %s can only be edited by its owner and designated editors" % self.wiki_type}
             if not user.is_authenticated():
-                return {'heading': 'Not authorized', 'body': "only logged in users can edit things"}
+                return {'heading': 'Not authorized', 'body': "Only logged in users can edit things"}
         if action in VISIBLE_ACTIONS:
             if self.privacy_status == "private":
                 return {'heading': 'Not authorized', 'body': "Sorry, this %s is private" % self.wiki_type}
