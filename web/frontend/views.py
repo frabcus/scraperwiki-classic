@@ -39,7 +39,7 @@ def frontpage(request, public_profile_field=None):
     #featured
     #featured_scrapers = Code.objects.filter(featured=True, wiki_type='scraper').order_by('-first_published_at')[:2]    
     #featured_views = Code.objects.filter(featured=True, wiki_type='view').order_by('-first_published_at')[:2]        
-    featured_both = Code.objects.filter(featured=True).order_by('-first_published_at')[:4]
+    featured_both = Code.objects.filter(featured=True, privacy_status="public").order_by('-first_published_at')[:4]
 	
     #popular tags
     #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
@@ -76,7 +76,7 @@ def profile_detail(request, username):
     
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
-    owned_code_objects = profiled_user.code_set.filter(usercoderole__role='owner', published=True).order_by('-created_at')
+    owned_code_objects = profiled_user.code_set.filter(usercoderole__role='owner', privacy_status="public").order_by('-created_at')
     solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
 
     return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations,
@@ -187,12 +187,12 @@ def help(request, mode=None, language=None):
         
                 # new ordering by the number at start of title, which we then strip out for display
         if language == "python":
-            tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('title')
+            tutorials[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('title')
             for scraper in tutorials[language]:
                 scraper.title = re.sub("^[\d ]+", "", scraper.title)
         else:
-            tutorials[language] = Scraper.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
-        viewtutorials[language] = View.objects.filter(published=True, istutorial=True, language=language).order_by('first_published_at')
+            tutorials[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
+        viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
         context["include_tag"] = "frontend/help_tutorials.html"
     
     else: 
@@ -204,11 +204,10 @@ def browse_wiki_type(request, wiki_type = None, page_number = 1):
     special_filter = request.GET.get('filter', None)
     return browse(request, page_number, wiki_type, special_filter)
 
-def browse(request, page_number = 1, wiki_type = None, special_filter=None):
-    if wiki_type == None:
-        all_code_objects = Code.objects.filter(published=True).order_by('-created_at')
-    else:
-        all_code_objects = Code.objects.filter(wiki_type=wiki_type, published=True).order_by('-created_at') 
+def browse(request, page_number=1, wiki_type = None, special_filter=None):
+    all_code_objects = Code.objects.scraper_search_query(request.user, None)
+    if wiki_type:
+        all_code_objects = all_code_objects.filter(wiki_type=wiki_type) 
 
     #extra filters (broken scraper lists etc)
     if special_filter == 'sick':
@@ -258,7 +257,7 @@ def search(request, q=""):
         q = q.strip()
 
         tags = Tag.objects.filter(name__icontains=q)
-        scrapers = Code.objects.search(q)
+        scrapers = Code.objects.scraper_search_query(request.user, q)
         num_results = tags.count() + scrapers.count()
         return render_to_response('frontend/search_results.html',
             {

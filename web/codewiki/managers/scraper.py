@@ -53,9 +53,9 @@ class ScraperManager(CodeManager):
     def example_scrapers(self, user, count):
         scrapers = []
         if user.is_authenticated():
-            scrapers = user.code_set.filter(usercoderole__role='owner', wiki_type='scraper', deleted=False, published=True)[:count]
+            scrapers = user.code_set.filter(usercoderole__role='owner', wiki_type='scraper', privacy_status="public")[:count]
         else:
-            scrapers = self.filter(deleted=False, featured=True).order_by('first_published_at')[:count]
+            scrapers = self.filter(privacy_status="public", featured=True).order_by('first_published_at')[:count]
         
         return scrapers
 
@@ -75,7 +75,6 @@ class ScraperManager(CodeManager):
         title = "%s's Email Alert Scraper" % (user.get_profile().name or user.username)
         scraper = self.create(title=title,
                               short_name="%s.emailer" % user.username,
-                              published=True,
                               last_run=last_run,
                               language='python',
                               description=title,
