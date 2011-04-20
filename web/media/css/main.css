@@ -1580,6 +1580,8 @@ ul.title_links li.embed          a {
 	background: url(../images/icons/add_to_website.png) no-repeat;
 }
 
+a#downloadcsvtable {background:url(../images/icons/csv_download.png) no-repeat; padding-left: 20px;}
+
 /* Page tabs */
 
 div.page_tabs {

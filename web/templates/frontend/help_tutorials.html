@@ -1,4 +1,4 @@
-<div class="section">
+<div class="section" style="display:none">
 	<h3>Screen scraping tutorials</h3>
 	<p>Want to try out ScraperWiki, or learn to screen scrape from scratch?</p>
     <p>Choose from a wide selection of screen scraping tutorials and examples, from introductory to very specialized.
@@ -13,6 +13,9 @@
     {% for scraper in value %}
     <dt>
       <a href="{% url editor scraper.wiki_type scraper.language|lower %}?template={{scraper.short_name}}" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
+      {% if user.is_staff %}
+        <a class="staff" href="{% url editor_edit scraper.wiki_type scraper.short_name %}">edit</a>
+      {% endif %}
     </dt>
     <dd>{{scraper.description}}</dd>
     {% endfor %}
@@ -27,6 +30,9 @@
     {% for scraper in value %}
     <dt>
       <a href="{% url editor scraper.wiki_type scraper.language|lower %}?template={{scraper.short_name}}" class="scraper-tutorial-link"><b>{{scraper.title}}</b></a>
+      {% if user.is_staff %}
+        <a class="staff" href="{% url editor_edit scraper.wiki_type scraper.short_name %}">edit</a>
+      {% endif %}
     </dt>
     <dd>{{scraper.description}}</dd>
     {% endfor %}
