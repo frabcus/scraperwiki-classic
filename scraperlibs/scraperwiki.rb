@@ -86,40 +86,15 @@ module ScraperWiki
 
         ds = SW_DataStore.create()
 
-            # redirect to sqlite version if nothing in old style datastore
-        if ds.request(['item_count'])[1] == 0
-            ldata = data.dup
-            if date != nil
-                ldata["date"] = date
-            end
-            if latlng != nil
-                ldata["latlng_lat"] = latlng[0]
-                ldata["latlng_lng"] = latlng[1]
-            end
-            return ScraperWiki.save_sqlite(unique_keys, ldata, table_name="swdata", verbose=2)
+        ldata = data.dup
+        if date != nil
+            ldata["date"] = date
         end
-
-        js_data = ds.mangleflattendict(data)
-        uunique_keys = ds.mangleflattenkeys(unique_keys)
         if latlng != nil
-            latlng = '%010.6f,%010.6f' % latlng
+            ldata["latlng_lat"] = latlng[0]
+            ldata["latlng_lng"] = latlng[1]
         end
-        res = ds.request(['save', uunique_keys, js_data, date, latlng])
-
-        raise res[1] if not res[0]
-
-        pdata = { }
-        data.each_pair do |key, value|
-            key = ScraperWiki._unicode_truncate(key.to_s, 50)
-            if value == nil
-                value  = ''
-            else
-                value = ScraperWiki._unicode_truncate(value.to_s, 50)
-            end
-            pdata[key] = value
-        end
-        ScraperWiki.dumpMessage({'message_type' => 'data', 'content' => pdata})
-        return
+        return ScraperWiki.save_sqlite(unique_keys, ldata, table_name="swdata", verbose=2)
     end
 
 
@@ -269,9 +244,9 @@ module ScraperWiki
     def ScraperWiki.show_tables(dbname=nil)
         name = "sqlite_master"
         if dbname != nil
-            name = dbname+"."+name 
+            name = "`"+dbname+"`.sqlite_master" 
         end
-        result = ScraperWiki.sqlitecommand("execute", val1="select tbl_name, sql from `"+name+"` where type='table'")
+        result = ScraperWiki.sqlitecommand("execute", val1="select tbl_name, sql from "+name+" where type='table'")
         #return result["data"]
         return (Hash[*result["data"].flatten])   # pre-1.8.7
     end
@@ -321,7 +296,7 @@ module ScraperWiki
         if val2 != nil && val1.scan(/\?/).length != 0 && val2.class != Array
             val2 = [val2]
         end
-        a = ScraperWiki.sqlitecommand("execute", val1, val2, verbose)
+        return ScraperWiki.sqlitecommand("execute", val1, val2, verbose)
     end
 
     def ScraperWiki.commit(verbose=1)

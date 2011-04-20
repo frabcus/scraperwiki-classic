@@ -202,7 +202,10 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourc
     rev = code_object.commit_code(code_text, commit_message, user)
 
     if code_object.wiki_type == "scraper":
-        code_object.scraper.update_meta()  # would be ideal to in-line this (and render it's functionality defunct as the data is about the database, not the scraper)
+        try:
+            code_object.scraper.update_meta()  # would be ideal to in-line this (and render it's functionality defunct as the data is about the database, not the scraper)
+        except:
+            pass
         code_object.scraper.save()
     else:
         #make link to source scraper

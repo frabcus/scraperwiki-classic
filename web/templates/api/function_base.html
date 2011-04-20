@@ -1,4 +1,4 @@
-{% extends "frontend/base.html" %}
+{% extends "frontend/help.html" %}
 
 {% block javascript %}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/apisetupexplore.js?{{settings.REVISION}}"></script>	
@@ -57,7 +57,7 @@
         <h4>Response formats</h4>
         <ul id="ulFormats" class="api_suggest">
             <li><code>csv</code></li>
-            <li><code>json</code></li>
+            <li><code>jsonlist</code></li>
             <li><code>jsondict</code></li>
         </ul>
 

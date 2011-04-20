@@ -542,14 +542,19 @@ class Database :
         cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s and latlng is not null and latlng != ''", (scraperID,))
         return [ True, int(cursor.fetchone()[0]) > 0 ]
 
+    def listolddatastore(self, scraperID):
+        cursor = self.execute ("select scraper_id, count(*) as c from items group by scraper_id order by c desc")
+        return [ True, cursor.fetchall() ]
+    
     def has_temporal (self, scraperID) :
         cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s and date is not null", (scraperID,))
         return [ True, int(cursor.fetchone()[0]) > 9 ]
 
     
     def converttosqlitedatastore(self, scraperID, runID, short_name):
-        if runID[:12] != "fromfrontend":
-            return [ False, "can only be used from frontend" ]
+        self.m_sqlitedbconn = None
+        #if runID[:12] != "fromfrontend":
+        #    return [ False, "can only be used from frontend" ]
         runID = "converttosqlitedatastore_enabled%s" % runID[12:]
 
         qquery = "select `items`.`item_id` as `item_id` from `items` where `items`.`scraper_id` = %s"
@@ -584,6 +589,7 @@ class Database :
         lres = self.sqlitecommand(scraperID, runID, short_name, "commit", None, None)
         if "error" in lres:  return [ False, lres["error"] ]
         self.execute("delete kv, items from kv join items on kv.item_id = items.item_id where scraper_id = %s", (scraperID,))
+        self.execute("delete items items on where scraper_id = %s", (scraperID,))
         self.m_db.commit()
         
         return [ True, "converted %d items" % len(item_idlist) ]

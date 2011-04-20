@@ -22,7 +22,7 @@ sys.path.append('web')
 
 DEBUG = False
 
-TIME_ZONE = 'London/England'
+TIME_ZONE = 'Europe/London'
 LANGUAGE_CODE = 'en-uk'
 
 SITE_ID = 1
