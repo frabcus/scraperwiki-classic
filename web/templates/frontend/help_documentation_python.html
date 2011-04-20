@@ -9,32 +9,32 @@ ScraperWiki provides the following built in library which you can access by incl
 
 
 <h3><span id="sql"></span>The SQLite datastore</h3>
-<p>ScraperWiki provides a fully-fledged SQLite database for each scraper which you can save to.  
+<p>ScraperWiki provides a fully-fledged <a href="http://www.sqlite.org/lang.html">SQLite</a> database for each scraper which you can save to.  
 You can read the data back that has been committed by other scrapers, or extract it through 
 the API</p>
 
 <dl>
-<dt>scraperwiki.<strong>sqlite.save</strong>(unique_keys, data[, table_name="swdata", verbose=2])</dt>
+<dt>scraperwiki.<strong>sqlite.save</strong>(unique_keys, data[, table_name="swdata", verbose=2])</dd>
     <dd>Saves a data record into the datastore into the table given by table_name.  <br/>
-        data is a dict object, unique_keys is a subset of data.keys() which determins 
-        when a record is over-written.<br/>
-        For large numbers of records data can be a list of dicts.
+    <dd>data is a dict object, unique_keys is a subset of data.keys() which determins 
+        when a record is over-written.</dd>
+    <dd>For large numbers of records data can be a list of dicts.
     </dd>
 
 <dt>scraperwiki.<strong>sqlite.attach</strong>(name[, asname])</dt>
-    <dd>Attaches to the datastore of another scraper with the given name.<br/>
-        asname is an optional alias for the attached datastore.
+    <dd>Attaches to the datastore of another scraper with the given name.</dd>
+    <dd>asname is an optional alias for the attached datastore.
     </dd>
 
 <dt>scraperwiki.<strong>sqlite.select</strong>(val1[, val2], verbose=1)</dt>
-    <dd>Executes a select command on the datastore, eg select("* from swdata limit 10")<br/>
-        Returns a list of dicts that have been selected<br/>
-        val2 is an optional list of parameters if the select command contains ?s
+    <dd>Executes a select command on the datastore, eg select("* from swdata limit 10")</dd>
+    <dd>Returns a list of dicts that have been selected</dd>
+    <dd>val2 is an optional list of parameters if the select command contains ?s
     </dd>
 
 <dt>scraperwiki.<strong>sqlite.execute</strong>(val1[, val2, verbose=1])</dt>
-    <dd>Executes any arbitrary sqlite command (except attach), eg create, delete, insert or drop<br/>
-        val2 is an optional list of parameters if the select command contains question marks
+    <dd>Executes any arbitrary sqlite command (except attach), eg create, delete, insert or drop</dd>
+    <dd>val2 is an optional list of parameters if the select command contains question marks
     </dd>
 
 <dt>scraperwiki.<strong>sqlite.commit</strong>()</dt>
@@ -92,7 +92,16 @@ the API</p>
     </dd>
 
 <dt>scraperwiki.<strong>utils.GET</strong>()</dt>
-    <dd>The query_string map when using a Scraperwiki "view" <em>(not yet deployed)</em>.
+    <dd>The query_string map when using a Scraperwiki "view".
+    </dd>
+
+<dt>modulename = scraperwiki.<strong>utils.swimport</strong>(name)</dt>
+    <dd>Imports the code from another scraper as the module "modulename".
+    </dd>
+
+<dt>scraperwiki.<strong>apiwrapper.getInfo</strong>(name)</dt>
+    <dd>Get status and historical information about another scraper using an the API call</dd>
+    <dd>(Used for generating email alerts about scraper history.)
     </dd>
 
 </dl>

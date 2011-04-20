@@ -3323,4 +3323,10 @@ div.documentationpage dt {
 
 div.documentationpage h3 {
     padding-top:30px;
+    padding-bottom:0;
+}
+
+div.documentationpage dd {
+    padding-top:2px;
+    padding-bottom:2px;
 }
