@@ -64,7 +64,7 @@ def getscraperor404(request, short_name, action):
         raise Http404
         
     # extra post conditions to make spoofing these calls a bit of a hassle
-    if action == "changeadmin":
+    if action in ["changeadmin", "settags"]:
         if not (request.method == 'POST' and request.is_ajax()):
             raise Http404
     if action == "converttosqlitedatastore":
@@ -215,6 +215,13 @@ def code_overview(request, wiki_type, short_name):
 # all remaining functions are ajax or temporary pages linked only 
 # through the site, so throwing 404s is adequate
 
+def scraper_admin_settags(request, short_name):
+    scraper = getscraperor404(request, short_name, "settags")
+    scraper.settags(request.POST.get('value', ''))  # splitting is in the library
+    return render_to_response('codewiki/includes/tagslist.html', { "scraper_tags":scraper.gettags() })
+
+
+
 def view_admin(request, short_name):
     scraper = getscraperor404(request, short_name, "changeadmin")
     view = scraper.view
@@ -229,10 +236,6 @@ def view_admin(request, short_name):
     if element_id == 'hCodeTitle':
         view.title = request.POST.get('value', None)
         response_text = view.title
-
-    if element_id == 'divEditTags':
-        view.settags(request.POST.get('value', ''))  # splitting is in the library
-        response_text = ", ".join([tag.name for tag in view.gettags()])
 
     view.save()
     response.write(response_text)
@@ -253,10 +256,6 @@ def scraper_admin(request, short_name):
     if element_id == 'hCodeTitle':
         scraper.title = request.POST.get('value', None)
         response_text = scraper.title
-
-    if element_id == 'divEditTags':
-        scraper.settags(request.POST.get('value', ''))
-        response_text = ", ".join([tag.name for tag in scraper.gettags()])
 
     if element_id == 'spnRunInterval':
         scraper.run_interval = int(request.POST.get('value', None))
@@ -321,18 +320,11 @@ def scraper_delete_scraper(request, wiki_type, short_name):
     return HttpResponseRedirect('/')
 
 
-# these ought to be done javascript from the page to fill in the ajax input box
-def tags(request, wiki_type, short_name):
-    scraper = getscraperor404(request, short_name, "gettags")
-    return HttpResponse(", ".join([tag.name  for tag in scraper.gettags()]))
+
 
 def raw_about_markup(request, wiki_type, short_name):
     scraper = getscraperor404(request, short_name, "getdescription")
     return HttpResponse(scraper.description, mimetype='text/x-web-textile')
-
-
-
-
 
 def follow(request, short_name):
     scraper = getscraperor404(request, short_name, "setfollow")

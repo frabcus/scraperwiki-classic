@@ -101,7 +101,7 @@
           </div>
 
           <div class="content_footer">
-             <p>This dataset has a total of {{ scraper.record_count }} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }}</p>
+             <p>This dataset has a total of {{scraper.scraper.record_count}} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }}</p>
           </div>
         {% endif %}
 
@@ -149,20 +149,7 @@
     </div>
 </div>
 
-<div id="divScraperTags" class="content full">
-    <h2>Tags {% if user.is_authenticated %}<a href="#" id="aEditTags" class="edit">[edit tags]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to add a tag]</a>{% endif %}</h2>
-    <label id="labelEditTags" for="divEditTags">Comma separated list of tags:</label><div id="divEditTags"></div>
-    <ul class="tags">
-        {% for tag in scraper_tags %}
-            <li><a href="{% url single_tag tag %}">{{ tag }}</a></li>
-        {% endfor %}
-    </ul>
-    {% if not scraper_tags %}
-        <p>
-            Adding tags helps makes sense of all the datasets on ScraperWiki.
-        </p>
-    {% endif %}
-</div>
+{% include 'codewiki/includes/tags.html' %}
 
 <div class="content full">
     <h2>Views using this data from this scraper</h2>    

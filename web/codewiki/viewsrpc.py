@@ -85,7 +85,7 @@ def scraperwikitag(scraper, html, panepresent):
     urlscraperedit = urlbase + reverse('editor_edit', args=[scraper.wiki_type, scraper.short_name])
     urlpoweredlogo = settings.MEDIA_URL + "images/powered.png";
     
-    swdivstyle = "border:thin #aaf solid; display:block; position:fixed; top:0px; right:0px; background:#eef; margin: 0em; padding: 6pt; font-size: 10pt; "
+    swdivstyle = "border:thin #aaf solid; display:block; position:fixed; top:0px; right:0px; background:#eef; margin: 0em; padding: 6pt; font-size: 10pt; z-index: 8675309; "
     swlinkstyle = "width:167px; height:17px; margin:0; padding: 0; border-style: none; "
 
     if paneversion == "version-1":

@@ -2,6 +2,8 @@ import datetime
 import time
 import os
 
+# Development note:  Aiming to merge scraper,view,code back into one object
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
@@ -40,7 +42,17 @@ WIKI_TYPES = (
     ('view', 'View'),    
 )
 
+PRIVACY_STATUSES = (
+    ('public', 'public'),
+    ('visible', 'visible'),
+    ('private', 'private'),
+    ('deleted', 'deleted'),
+)
 
+STAFF_ACTIONS = ["run_scraper", "screenshoot_scraper"]
+CREATOR_ACTIONS = ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning"]
+EDITOR_ACTIONS = ["changeadmin", "savecode", "settags" ]
+VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow" ]
 
 class Code(models.Model):
 
@@ -68,6 +80,7 @@ class Code(models.Model):
     wiki_type          = models.CharField(max_length=32, choices=WIKI_TYPES, default='scraper')    
     relations          = models.ManyToManyField("self", blank=True)  # manage.py refuses to generate the tabel for this, so you haev to do it manually.
     forked_from        = models.ForeignKey('self', null=True, blank=True)
+    privacy_status     = models.CharField(max_length=32, choices=PRIVACY_STATUSES, default='public')
     
     # managers
     objects = CodeManager()
@@ -256,35 +269,62 @@ class Code(models.Model):
         app_label = 'codewiki'
 
 
-            # all authorization to go through here
-            # actions are overview, changeadmin, comments, history, exportsqlite, setfollow, 
-            # rpcexecute, readcode, readcodeineditor, savecode
+        # all authorization to go through here
     def actionauthorized(self, user, action):
+        if user and not user.is_anonymous():
+            roles = [ usercoderole.role  for usercoderole in UserCodeRole.objects.filter(code=self, user=user) ]
+        else:
+            roles = [ ]
+        #print "AUTH", (action, user, roles, self.privacy_status)
+        
+        # roles are: "owner", "editor", "follow", "requester", "email"
+        # privacy_status: "public", "visible", "private", "deleted"
+        if self.privacy_status == "deleted":
+            return False
         if self.deleted:
             return False
-        if not user.is_authenticated() and action in ["changeadmin", "savecode"]:
-            return False
-        if not self.published and not user.is_authenticated():
-            return False
-        if action in ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning"]:
-            if self.owner() != user and not user.is_staff:
-                return False
-        if action in ["run_scraper", "screenshoot_scraper"]:
-            if not user.is_staff:
-                return False
         if action == "rpcexecute" and self.wiki_type != "view":
             return False
+        
+        if action in STAFF_ACTIONS:
+            return user.is_staff
+        #if user.is_staff:
+        #    return True
+        
+        if action in CREATOR_ACTIONS:
+            return "owner" in roles
+        
+        if action in EDITOR_ACTIONS:
+            if self.privacy_status == "public":
+                return user.is_authenticated()
+            return "editor" in roles or "owner" in roles
+        
+        if action in VISIBLE_ACTIONS:
+            if self.privacy_status == "private":
+                return "editor" in roles or "owner" in roles
+            return True
+                
+        assert False, ("unknown action", action)
         return True
 
+
     def authorizationfailedmessage(self, user, action):
-        if self.deleted:
+        if self.privacy_status == "deleted":
             return {'heading': 'Deleted', 'body': "Sorry this %s has been deleted" % self.wiki_type}
-        if not user.is_authenticated() and action == "changeadmin":
-            return {'heading': 'Not logged in', 'body': "only logged in users can change the settings"}
-        if not self.published and not user.is_authenticated():
-            return {'heading': 'Access denied', 'body': "not published and you are not logged in so can't do %s" % action}
         if action == "rpcexecute" and self.wiki_type != "view":
             return {'heading': 'This is a scraper', 'body': "not supposed to run a scraper as a view"}
+        if action in STAFF_ACTIONS:
+            return {'heading': 'Not authorized', 'body': "this is a staff action"}
+        if action in CREATOR_ACTIONS:
+            return {'heading': 'Not authorized', 'body': "this is an owner action only"}
+        if action in EDITOR_ACTIONS:
+            if self.privacy_status != "public":
+                return {'heading': 'Not authorized', 'body': "this %s can only be edited by its owner and designated editors" % self.wiki_type}
+            if not user.is_authenticated():
+                return {'heading': 'Not authorized', 'body': "only logged in users can edit things"}
+        if action in VISIBLE_ACTIONS:
+            if self.privacy_status == "private":
+                return {'heading': 'Not authorized', 'body': "Sorry, this %s is private" % self.wiki_type}
         return {'heading': "unknown", "body":"unknown"}
 
     

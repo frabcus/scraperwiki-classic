@@ -1236,7 +1236,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
         previewscreen = ['<h3>View preview'];
         if (viewurl)
-             previewscreen.push(' <small><a href="'+viewurl+'" target="_blank">'+viewurl+'</a>'+previewmessage+'</small>'); 
+             previewscreen.push(' (<a href="'+viewurl+'" target="_blank">open in new window</a>'+previewmessage+')'); 
         previewscreen.push('</h3>'); 
         isrc = ""; // isrc = viewurl; (would allow direct inclusion from saved version)
                    // force the preview iframe to fill most of what it should.  needs more work

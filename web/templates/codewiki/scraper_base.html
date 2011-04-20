@@ -7,9 +7,7 @@
 	<h2><a href="{% url profiles_profile_detail scraper.owner.username %}">{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}</a> / {% if user.is_authenticated %}<span id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</span>{% else %}{{ scraper.title }}{% endif %}</h2>
 	<p>{{scraper.wiki_type|lower}} 
 	    &bull; {{scraper.language|lower}}
-	{% if not scraper.published %} 
-	    &bull; (not public)
-	{% endif %}
+	    &bull; [{{scraper.privacy_status}}]
 	{% if scraper.forked_from %}
         &bull; Fork of <a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{scraper.forked_from.short_name}}</a>
     {% endif %}
@@ -20,6 +18,8 @@
     {% include 'codewiki/includes/tabs.html' %}
 {% endblock %}
 {% block content %}
+    <input type="hidden" id="adminsettagurl" value="{% url scraper_admin_settags scraper.short_name %}"/>
+
     <div class="page_title">
         <ul class="title_links">
             {% ifequal scraper.wiki_type 'scraper'%}
