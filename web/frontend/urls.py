@@ -27,6 +27,7 @@ urlpatterns = patterns('',
     url(r'^help/(?P<mode>faq|tutorials|documentation|code_documentation|libraries)/$',frontend_views.help, name='help_default'),
     url(r'^help/(?P<mode>faq|tutorials|documentation|code_documentation|libraries)/(?P<language>python|php|ruby)/$',frontend_views.help, name='help'),
     url(r'^get_involved/$',frontend_views.get_involved, name='get_involved'),
+    url(r'^request_data/$',frontend_views.request_data, name='request_data'),
     
     #hello world
     url(r'^hello_world.html', direct_to_template, {'template': 'frontend/hello_world.html'}, name='help_hello_world'),

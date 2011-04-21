@@ -1,6 +1,6 @@
 from django.conf import settings
 from django import forms
-from frontend.models import UserProfile, AlertTypes
+from frontend.models import UserProfile, AlertTypes, DataEnquiry
 from contact_form.forms import ContactForm
 from registration.forms import RegistrationForm
 from django.utils.translation import ugettext_lazy as _
@@ -111,3 +111,11 @@ class CreateAccountForm(RegistrationForm):
 
 class ResendActivationEmailForm(forms.Form):
     email_address = forms.EmailField()
+
+class DataEnquiryForm(forms.ModelForm):
+    urls = forms.CharField()
+    columns = forms.CharField()
+    broadcast = forms.BooleanField(label="I'm happy for this request to be posted on Twitter/Facebook")
+
+    class Meta:
+        model = DataEnquiry

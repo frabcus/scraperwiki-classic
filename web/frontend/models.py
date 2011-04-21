@@ -229,3 +229,17 @@ class Message(models.Model):
             return "%s [Active]" % self.text
         else:
             return "%s [Inactive]" % self.text
+
+class DataEnquiry(models.Model):
+    urls = models.TextField()
+    columns = models.TextField()
+    due_date = models.DateField()
+    name = models.CharField(max_length=128)
+    email = models.EmailField()
+    telephone = models.CharField(max_length=32)
+    description = models.TextField()
+    company_name = models.CharField(max_length=128)
+    broadcast = models.BooleanField()
+
+    def __unicode__(self):
+        return u"%s - %s" % (self.name, self.email)

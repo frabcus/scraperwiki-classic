@@ -4,7 +4,7 @@ from django.shortcuts import render_to_response
 from django.contrib import auth
 from django.shortcuts import get_object_or_404
 import settings
-from frontend.forms import SigninForm, UserProfileForm, SearchForm, ResendActivationEmailForm
+from frontend.forms import SigninForm, UserProfileForm, SearchForm, ResendActivationEmailForm, DataEnquiryForm
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
@@ -41,7 +41,7 @@ def frontpage(request, public_profile_field=None):
     user = request.user
 
     #featured
-    featured_both = Code.objects.filter(featured=True).exclude(privacy_status="deleted", privacy_status="private").order_by('-first_published_at')[:4]
+    featured_both = Code.objects.filter(featured=True).exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:4]
 	
     #popular tags
     #this is a horrible hack, need to patch http://github.com/memespring/django-tagging to do it properly
@@ -426,3 +426,7 @@ def resend_activation_email(request):
             print ex
 
     return render_to_response(template, {'form': form}, context_instance = RequestContext(request))
+
+def request_data(request):
+    form = DataEnquiryForm()
+    return render_to_response('frontend/request_data.html', {'form': form}, context_instance = RequestContext(request))

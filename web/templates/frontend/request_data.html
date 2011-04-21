@@ -1,0 +1,25 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Request Data{% endblock %}
+
+{% block header %}
+    <h2>Request Data</h2>
+    <p>For Journalists / Researchers &amp; Data Analyists who know cut and paste won't work.</p>
+{% endblock %}
+
+{% block content %}
+<ol>
+  <li>I need some data that I want to keep private (?)</li>
+  <li>I need data and I also want a visualisation (?)</li>
+  <li>I need a data application for my website (?)</li>
+  <li>I want to merge (ETL) contect from systems that cannot talk to each other - help! (?)</li>
+  <li>I need some data that I want to make it public &amp; open (?)</li>
+</ol>
+
+<form action="." method="post">
+<ul>
+{{form.as_ul}}
+</ul>
+<input type="submit"/>
+</form>
+{% endblock %}
