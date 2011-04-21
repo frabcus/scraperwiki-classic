@@ -21,6 +21,7 @@
       {% endfor %}
     {% endwith %}
 
+{% if user.is_staff %} <div class="staff"> <!-- staff only, dark launch-->
     {% if user_owns_it %}
       {% ifnotequal scraper.privacy_status 'public' %}
         <li id="addneweditor">
@@ -34,6 +35,8 @@
         </li>
       {% endifnotequal %}
     {% endif %}
+</div> {% endif %} <!-- end staff only, dark launch -->
+
 </ul>
 
 <!-- 
@@ -53,14 +56,16 @@
 -->
 
 
-<p class="{% ifnotequal scraper.privacy_status 'public' %}report{% endifnotequal %}">This {{scraper.wiki_type}} <span id="spnPrivacyStatusChoice">{{privacy_status_name}}</span>.
+<p class="{% ifnotequal scraper.privacy_status 'public' %}xxxreport{% endifnotequal %}">This {{scraper.wiki_type}} <span id="spnPrivacyStatusChoice">{{privacy_status_name}}</span>.
   <select class="hide" id="optionsPrivacyStatusChoices">  {# this select gets taken apart and rebuilt by jeditable #}
   {% for value, name in PRIVACY_STATUSES %} 
     <option value="{{value}}">{{name}}</option>
   {% endfor %}
   </select>
+{% if user.is_staff %} <div class="staff"> <!-- staff only, dark launch-->
   {% if user_owns_it %}
     <a id="aPrivacyStatusChoice" class="edit">[edit status]</a>
   {% endif %}
+</div> {% endif %} <!-- end staff only, dark launch -->
 </p>
 
