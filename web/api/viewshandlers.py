@@ -29,7 +29,7 @@ import base64
 
 def getscraperorresponse(request):
     try:
-        scraper = Code.objects.get(short_name=request.GET.get('name'))
+        scraper = Code.objects.exclude(privacy_status="deleted").get(short_name=request.GET.get('name'))
     except Code.DoesNotExist:
         message =  "Sorry, this datastore does not exist"
         return HttpResponse(str({'heading':'Not found', 'body':message}))

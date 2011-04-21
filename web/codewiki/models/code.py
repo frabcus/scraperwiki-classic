@@ -50,7 +50,7 @@ PRIVACY_STATUSES = (
 )
 
 STAFF_ACTIONS = ["run_scraper", "screenshoot_scraper"]
-CREATOR_ACTIONS = ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper" ]
+CREATOR_ACTIONS = ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ]
 EDITOR_ACTIONS = ["changeadmin", "savecode", "settags" ]
 VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription" ]
 
@@ -203,6 +203,27 @@ class Code(models.Model):
                                                            code=self, 
                                                            role=role)
 
+    # should eventually replace add_user_role
+    # knows what roles are redundant to each other
+    def set_user_role(self, user, role, remove=False):
+        assert role in ['owner', 'editor', 'follow']  # for now
+        userroles = UserCodeRole.objects.filter(code=self, user=user)
+        euserrole = None
+        for userrole in userroles:
+            if userrole.role == role:
+                if remove:
+                    userrole.delete()
+                else:
+                    euserrole = userrole
+            elif userrole.role in ['owner', 'editor', 'follow'] and role in ['owner', 'editor', 'follow']:
+                userrole.delete()
+        
+        if not euserrole and not remove:
+            euserrole = UserCodeRole(code=self, user=user, role=role)
+            euserrole.save()
+        return euserrole
+        
+    
     def unfollow(self, user):
         """
         Deliberately not making this generic, as you can't stop being an owner
@@ -213,6 +234,7 @@ class Code(models.Model):
                                     role='follow').delete()
         return True
 
+    # uses lists of users rather than userroles so that you can test containment easily
     def userrolemap(self):
         result = { "editor":[], "owner":[] }
         for usercoderole in self.usercoderole_set.all():

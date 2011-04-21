@@ -35,7 +35,7 @@ def listolddatastore(request):
     scrapers = [ ]
     for lguid in arg[:1000]:
         if lguid[0]:
-            lscraper = models.Code.objects.filter(guid=lguid[0])
+            lscraper = models.Code.objects.filter(guid=lguid[0]).exclude(privacy_status="deleted")
             if lscraper:
                 scrapers.append((lscraper[0], lguid[0], lguid[1]))
     
@@ -51,7 +51,7 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
             raise Http404
     
     try:
-        scraper = models.Code.objects.get(short_name=short_name)
+        scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=short_name)
     except models.Code.DoesNotExist:
         message =  "Sorry, this %s does not exist" % wiki_type
         return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
@@ -66,7 +66,7 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
 
 def getscraperor404(request, short_name, action):
     try:
-        scraper = models.Code.objects.get(short_name=short_name)
+        scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=short_name)
     except models.Code.DoesNotExist:
         raise Http404
     if not scraper.actionauthorized(request.user, action):
@@ -90,13 +90,8 @@ def getscraperor404(request, short_name, action):
 def comments(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, "scraper_comments", "comments")
     if isinstance(scraper, HttpResponse):  return scraper
-    
     context = {'selected_tab':'comments', 'scraper':scraper }
-    context["scraper_tags"] = scraper.gettags()
-    context["user_owns_it"] = (scraper.owner() == request.user)
-    
     return render_to_response('codewiki/comments.html', context, context_instance=RequestContext(request))
-
 
 def scraper_history(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, "scraper_history", "history")
@@ -172,7 +167,7 @@ def code_overview(request, wiki_type, short_name):
 
     context["schedule_options"] = models.SCHEDULE_OPTIONS
     context["license_choices"] = models.LICENSE_CHOICES
-    context["related_views"] = models.View.objects.filter(relations=scraper)
+    context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
     
     # this is the only one to call.  would like to know the exception that's expected
     try:
@@ -219,6 +214,25 @@ def scraper_admin_privacystatus(request, short_name):
     scraper.privacy_status = request.POST.get('value', '')
     scraper.save()
     return HttpResponse(dict(PRIVACY_STATUSES_UI)[scraper.privacy_status])
+
+def scraper_admin_controleditors(request, short_name):
+    scraper = getscraperor404(request, short_name, "set_controleditors")
+    username = request.GET.get('roleuser', '')
+    lroleuser = User.objects.filter(username=username)
+    if not lroleuser:
+        return HttpResponse("Failed: username '%s' not found" % username)
+    roleuser = lroleuser[0]
+    newrole = request.GET.get('newrole', '')
+    if newrole not in ['editor', 'follow']:
+        return HttpResponse("Failed: role '%s' unrecognized" % newrole)
+    if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
+        return HttpResponse("Failed: user is already '%s'" % newrole)
+    newuserrole = scraper.set_user_role(roleuser, newrole)
+    context = { "role":newuserrole.role, "contributor":newuserrole.user }
+    context["user_owns_it"] = (request.user in scraper.userrolemap()["owner"])
+    if newuserrole:
+        return render_to_response('codewiki/includes/contributor.html', context, context_instance=RequestContext(request))
+    return HttpResponse("Failed: unknown")
 
 
 def view_admin(request, short_name):
@@ -339,7 +353,7 @@ def unfollow(request, short_name):
 
 def choose_template(request, wiki_type):
     context = { "wiki_type":wiki_type }
-    context["templates"] = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).order_by('language')
+    context["templates"] = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).exclude(privacy_status="deleted").order_by('language')
     context["sourcescraper"] = request.GET.get('sourcescraper', '')
     
     if request.GET.get('ajax'):

@@ -19,7 +19,7 @@ class CommentsForCode(Feed):
         if len(bits) != 1:
             raise ObjectDoesNotExist
         short_name = bits[0]
-        code_object = Code.objects.get(short_name__exact=short_name)
+        code_object = Code.objects.exclude(privacy_status="deleted").get(short_name__exact=short_name)
         if code_object:
             return code_object
         else:

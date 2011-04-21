@@ -105,7 +105,7 @@ def scraperwikitag(scraper, html, panepresent):
 
 def rpcexecute(request, short_name, revision=None):
     try:
-        scraper = models.Code.objects.get(short_name=short_name)
+        scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=short_name)
     except models.Code.DoesNotExist:
         return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':"Sorry, this view does not exist"}, context_instance=RequestContext(request)))
     if not scraper.actionauthorized(request.user, "rpcexecute"):

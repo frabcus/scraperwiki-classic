@@ -1,0 +1,19 @@
+<li>
+    <a href="{% url profiles_profile_detail contributor.username %}">
+    {% load gravatar %} {% show_gravatar contributor 'medium' %} 
+    {{contributor.get_profile.name}}</a> 
+    ({% ifequal role 'follow' %}follower{% else %}{{role}}{% endifequal %})
+    {% if user_owns_it %}
+      {% ifnotequal scraper.privacy_status 'public' %}
+        {% ifequal role 'editor' %}
+          <span class="hide">{{contributor.username}}</span>
+          <input type="button" value="demote" class="demotebutton"/>
+        {% endifequal %}
+        {% ifequal role 'follow' %}
+          <span class="hide">{{contributor.username}}</span>
+          <input type="button" value="promote" class="promotebutton"/>
+        {% endifequal %}
+      {% endifnotequal %}
+    {% endif %}
+</li>
+

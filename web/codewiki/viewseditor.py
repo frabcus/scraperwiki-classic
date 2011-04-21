@@ -21,7 +21,7 @@ except ImportError:  import simplejson as json
 
 def getscraperor404(request, short_name, action):
     try:
-        scraper = models.Code.objects.get(short_name=short_name)
+        scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=short_name)
     except models.Code.DoesNotExist:
         raise Http404
     if not scraper.actionauthorized(request.user, action):
@@ -126,7 +126,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     # Load an existing scraper preference
     elif short_name != "__new__":
         try:
-            scraper = models.Code.objects.get(short_name=short_name)
+            scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=short_name)
         except models.Code.DoesNotExist:
             message =  "Sorry, this %s does not exist" % wiki_type
             return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
@@ -154,7 +154,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         statuptemplate = request.GET.get('template') or request.GET.get('fork')
         if statuptemplate:
             try:
-                templatescraper = models.Code.objects.get(short_name=statuptemplate)
+                templatescraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=statuptemplate)
                 if not templatescraper.actionauthorized(request.user, "readcode"):
                     startupcode = startupcode.replace("Blank", "Not authorized to read this code")
                 else:
@@ -210,7 +210,7 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourc
     else:
         #make link to source scraper
         if sourcescraper:
-            lsourcescraper = models.Code.objects.filter(short_name=sourcescraper)
+            lsourcescraper = models.Code.objects.exclude(privacy_status="deleted").filter(short_name=sourcescraper)
             if lsourcescraper:
                 code_object.relations.add(lsourcescraper[0])
 
@@ -235,7 +235,7 @@ def handle_editor_save(request):
     
     if guid:
         try:
-            scraper = models.Code.objects.get(guid=guid)   # should this use short_name?
+            scraper = models.Code.objects.exclude(privacy_status="deleted").get(guid=guid)   # should this use short_name?
         except models.Code.DoesNotExist:
             return HttpResponse(json.dumps({'status' : 'Failed', 'message':"Name or guid invalid"}))
         
@@ -259,7 +259,7 @@ def handle_editor_save(request):
         fork = request.POST.get("fork", None)
         if fork:
             try:
-                scraper.forked_from = models.Code.objects.get(short_name=fork)
+                scraper.forked_from = models.Code.objects.exclude(privacy_status="deleted").get(short_name=fork)
             except models.Code.DoesNotExist:
                 pass
             
