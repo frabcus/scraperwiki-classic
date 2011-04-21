@@ -95,7 +95,7 @@ class APIBase(BaseHandler):
 
     def getscraperorrccode(self, request, short_name, action):
         try:
-            scraper = Code.unfiltered.get(short_name=short_name)
+            scraper = Code.objects.get(short_name=short_name)
         except Code.DoesNotExist:
             raise ScraperAPINotFound()
         if not scraper.actionauthorized(request.user, action):

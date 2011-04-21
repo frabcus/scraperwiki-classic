@@ -50,7 +50,7 @@ def example_scrapers(user, count):
     if user.is_authenticated():
         scrapers = user.code_set.filter(usercoderole__role='owner').exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:count]
     else:
-        scrapers = Code.unfiltered.filter(featured=True).exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:count]
+        scrapers = Code.objects.filter(featured=True).exclude(privacy_status="deleted").exclude(privacy_status="private").order_by('-first_published_at')[:count]
     
     return scrapers
 

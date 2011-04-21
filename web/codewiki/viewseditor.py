@@ -21,7 +21,7 @@ except ImportError:  import simplejson as json
 
 def getscraperor404(request, short_name, action):
     try:
-        scraper = models.Code.unfiltered.get(short_name=short_name)
+        scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
         raise Http404
     if not scraper.actionauthorized(request.user, action):
@@ -126,7 +126,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     # Load an existing scraper preference
     elif short_name != "__new__":
         try:
-            scraper = models.Code.unfiltered.get(short_name=short_name)
+            scraper = models.Code.objects.get(short_name=short_name)
         except models.Code.DoesNotExist:
             message =  "Sorry, this %s does not exist" % wiki_type
             return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
@@ -154,7 +154,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         statuptemplate = request.GET.get('template') or request.GET.get('fork')
         if statuptemplate:
             try:
-                templatescraper = models.Code.unfiltered.get(short_name=statuptemplate)
+                templatescraper = models.Code.objects.get(short_name=statuptemplate)
                 if not templatescraper.actionauthorized(request.user, "readcode"):
                     startupcode = startupcode.replace("Blank", "Not authorized to read this code")
                 else:
@@ -235,7 +235,7 @@ def handle_editor_save(request):
     
     if guid:
         try:
-            scraper = models.Code.unfiltered.get(guid=guid)   # should this use short_name?
+            scraper = models.Code.objects.get(guid=guid)   # should this use short_name?
         except models.Code.DoesNotExist:
             return HttpResponse(json.dumps({'status' : 'Failed', 'message':"Name or guid invalid"}))
         

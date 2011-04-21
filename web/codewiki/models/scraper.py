@@ -59,7 +59,6 @@ class Scraper (code.Code):
     run_interval = models.IntegerField(default=86400)  # in seconds
 
     objects = managers.scraper.ScraperManager()
-    unfiltered  = models.Manager() # django admin gets confused if this lives in the parent class, so duplicated in child classes
 
     def __init__(self, *args, **kwargs):
         super(Scraper, self).__init__(*args, **kwargs)
