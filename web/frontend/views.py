@@ -16,7 +16,7 @@ from django.contrib.sites.models import Site
 from django.utils.safestring import mark_safe
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, LOGARITHMIC
-from codewiki.models import Code, Scraper, View, HELP_LANGUAGES, LANGUAGES_DICT
+from codewiki.models import Code, Scraper, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from tagging.models import Tag, TaggedItem
 from market.models import Solicitation, SolicitationStatus
 from django.db.models import Q
@@ -60,10 +60,9 @@ def frontpage(request, public_profile_field=None):
 @login_required
 def dashboard(request, page_number=1):
     user = request.user
-    owned_or_edited_code_objects = Code.objects.scraper_search_query(request.user, None).filter(usercoderole__user=user)
+    owned_or_edited_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=user)
     #scrapers_all.filter((Q(usercoderole__user=user) & Q(usercoderole__role='owner')) | (Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
     
-    #paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
     paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
 
     try:    page = int(page_number)
@@ -84,7 +83,7 @@ def dashboard(request, page_number=1):
 def profile_detail(request, username):
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
-    owned_code_objects = profiled_user.code_set.filter(usercoderole__role='owner', privacy_status="public").order_by('-created_at')
+    owned_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=profiled_user)
     solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
     return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations,
                                                                                    'owned_code_objects': owned_code_objects})
@@ -212,7 +211,7 @@ def browse_wiki_type(request, wiki_type=None, page_number=1):
     return browse(request, page_number, wiki_type, special_filter)
 
 def browse(request, page_number=1, wiki_type=None, special_filter=None):
-    all_code_objects = Code.objects.scraper_search_query(request.user, None)
+    all_code_objects = scraper_search_query(request.user, None)
     if wiki_type:
         all_code_objects = all_code_objects.filter(wiki_type=wiki_type) 
 
@@ -264,7 +263,8 @@ def search(request, q=""):
         q = q.strip()
 
         tags = Tag.objects.filter(name__icontains=q)
-        scrapers = Code.objects.scraper_search_query(request.user, q)
+        scrapers = scraper_search_query(request.user, q)
+        scrapers = scrapers.exclude(usercoderole__role='email')  # so we can search for "email" without getting all the emailers -- would be a type search if we needed it
         num_results = tags.count() + scrapers.count()
         return render_to_response('frontend/search_results.html',
             {

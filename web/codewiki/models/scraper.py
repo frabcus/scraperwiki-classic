@@ -13,7 +13,6 @@ from django.contrib.sites.models import Site
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-import codewiki.managers.scraper
 from codewiki import managers
 from django.db.models.signals import post_save
 from registration.signals import user_registered
@@ -57,8 +56,6 @@ class Scraper (code.Code):
     license_link = models.URLField(verify_exists=False, null=True, blank=True)
     record_count = models.IntegerField(default=0)        
     run_interval = models.IntegerField(default=86400)  # in seconds
-
-    objects = managers.scraper.ScraperManager()
 
     def __init__(self, *args, **kwargs):
         super(Scraper, self).__init__(*args, **kwargs)

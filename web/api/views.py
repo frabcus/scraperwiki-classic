@@ -55,6 +55,7 @@ def example_scrapers(user, count):
     return scrapers
 
 def explore_index(request):
+    return HttpResponseRedirect(reverse('api:index_1_0'))
     return render_to_response('api/index.html', {'mode': 'api'}, context_instance=RequestContext(request))
 
 def explore_index_1_0(request):

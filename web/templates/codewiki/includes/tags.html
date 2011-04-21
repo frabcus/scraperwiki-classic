@@ -8,10 +8,9 @@
       <a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to add a tag]</a>
     {% endif %}</h2>
   {% else %}
-    {% if user.is_authenticated %}
-      {% if user_owns_it or user_edits_it %}
-        <a href="#" id="aEditTags" class="edit">[edit tags]</a>
-      {% endif %}
+    {# version1.2 problem if user in scraper.userrolemap.editor #}
+    {% if user_edits_it %}
+      <a href="#" id="aEditTags" class="edit">[edit tags]</a>
     {% endif %}
   {% endifequal %}
   </h2>
