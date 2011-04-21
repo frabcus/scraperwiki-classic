@@ -3330,3 +3330,9 @@ div.documentationpage dd {
     padding-top:2px;
     padding-bottom:2px;
 }
+
+a.your-own {
+    padding-left:20px;
+    background:url(../images/icons/control_play.png) no-repeat;
+    background-position: left 60%;
+}

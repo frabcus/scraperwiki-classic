@@ -4,30 +4,47 @@
 
 {% block header %}
 	<h2>Your dashboard</h2>
-	<p>Manage your scrapers and views.</p>
+	<p>Manage your scrapers and views. Go to <a href="{% url profiles_profile_detail user.username %}">your profile page</a>.</p>
 {% endblock %}
 
 {% block content %}
 
+  {% ifnotequal owned_or_edited_code_objects_pagenated.paginator.num_pages 1 %}
+    <span class="current">
+      Page {{ owned_or_edited_code_objects_pagenated.number }} of {{owned_or_edited_code_objects_pagenated.paginator.num_pages}}
+    </span>
+  {% endifnotequal %}
+
 <div class="content">
-    <h2>Scrapers and Views you own</h2>
-    {% if owned_code_objects %}
+    <h2>Scrapers and Views you own or have edited</h2>
+    {% if owned_or_edited_code_objects_pagenated.object_list %}
       <ul class="scraper_list">
-      {% for code in owned_code_objects %}
+      {% for code in owned_or_edited_code_objects_pagenated.object_list %}
         {% include 'frontend/includes/code_object_line.html' %}
       {% endfor %}
-      </ul>
-    {% else %}
-      <p>You do not own any scrapers or views</p>
+    </ul>
+  {% else %}
+    <p>You have not contributed to any scrapers or views.</p>
+  {% endif %}
+
+  <div class="pagination">
+  <span class="step_links">
+    {% if owned_or_edited_code_objects_pagenated.has_previous %}
+      <a href="{% url dashboard owned_or_edited_code_objects_pagenated.previous_page_number %}">previous</a>
     {% endif %}
-    {% if contribution_code_objects %}
-      <h2>Scrapers and Views you have contributed to</h2>
-      <ul class="scraper_list">
-      {% for code in contribution_code_objects %}
-        {% include 'frontend/includes/code_object_line.html' %}
-      {% endfor %}
-      </ul>
+
+    {% ifnotequal owned_or_edited_code_objects_pagenated.paginator.num_pages 1 %}
+      <span class="current">
+        Page {{ owned_or_edited_code_objects_pagenated.number }} of {{owned_or_edited_code_objects_pagenated.paginator.num_pages}}
+      </span>
+    {% endifnotequal %}
+
+    {% if owned_or_edited_code_objects_pagenated.has_next %}
+       <a href="{% url dashboard owned_or_edited_code_objects_pagenated.next_page_number %}">next</a>
     {% endif %}
+  </span>
+  </div>
 </div>
+
 
 {% endblock %}

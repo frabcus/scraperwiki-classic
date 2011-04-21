@@ -27,18 +27,6 @@
             </tr>
         </table>
              
-
-{% comment %} [APS: remove following/watching features for now]
-			{% if user.is_authenticated %}
-			  <form method="post" action="">
-			  {% if following %}
-			   You are following {{ profile.user.username}} <input type="submit" value="Unfollow" />
-     	      {% else%}
-			   <input type="submit" value="Follow {{ profile.user.username}}" />
-     	      {% endif %} 
-               </form>
-     	    {% endif %} 
-{% endcomment %}
 	</div>
 
     <div class="content">

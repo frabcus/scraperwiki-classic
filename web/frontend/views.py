@@ -19,10 +19,14 @@ from tagging.utils import get_tag, calculate_cloud, LOGARITHMIC
 from codewiki.models import Code, Scraper, View, HELP_LANGUAGES, LANGUAGES_DICT
 from tagging.models import Tag, TaggedItem
 from market.models import Solicitation, SolicitationStatus
+from django.db.models import Q
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
 from registration.backends import get_backend
-from profiles import views as profile_views
+
+# find this in lib/python/site-packages/profiles
+from profiles import views as profile_views   
+
 import django.contrib.auth.views
 import os
 import re
@@ -54,32 +58,34 @@ def frontpage(request, public_profile_field=None):
     return render_to_response('frontend/frontpage.html', data, context_instance=RequestContext(request))
 
 @login_required
-def dashboard(request):
+def dashboard(request, page_number=1):
     user = request.user
+    owned_or_edited_code_objects = Code.objects.scraper_search_query(request.user, None).filter(usercoderole__user=user)
+    #scrapers_all.filter((Q(usercoderole__user=user) & Q(usercoderole__role='owner')) | (Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
     
-    # merge these two conditions    
+    #paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
+    paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
+
+    try:    page = int(page_number)
+    except (ValueError, TypeError):   page = 1
+
+    # If page request (9999) is out of range, deliver last page of results.
+    try:     
+        owned_or_edited_code_objects_pagenated = paginator.page(page)
+    except (EmptyPage, InvalidPage):
+        owned_or_edited_code_objects_pagenated = paginator.page(paginator.num_pages)
     
-    owned_code_objects = user.code_set.filter(usercoderole__role='owner').exclude(privacy_status="deleted").order_by('-created_at')
-    owned_count = len(owned_code_objects) 
-    # needs to be expanded to include scrapers you have edit rights on.
-    contribution_code_objects = user.code_set.filter(usercoderole__role='editor').exclude(privacy_status="deleted")
-    contribution_count = len(contribution_code_objects)
-    # following_code_objects = user.code_set.filter(usercoderole__role='follow', deleted=False)
-    # following_count = len(following_code_objects)
+    context = {'owned_or_edited_code_objects_pagenated': owned_or_edited_code_objects_pagenated, 
+               'language':'python' }
+    return render_to_response('frontend/dashboard.html', context, context_instance = RequestContext(request))
 
-    return render_to_response('frontend/dashboard.html', {'owned_code_objects': owned_code_objects, 
-                                                          'owned_count' : owned_count, 
-                                                          'contribution_code_objects' : contribution_code_objects, 
-                                                          'contribution_count': contribution_count, 
-                                                          'language':'python'}, context_instance = RequestContext(request))
 
+    # may want to pagenate this if the plugin profile app doesn't get in the way
 def profile_detail(request, username):
-    
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
     owned_code_objects = profiled_user.code_set.filter(usercoderole__role='owner', privacy_status="public").order_by('-created_at')
     solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
-
     return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations,
                                                                                    'owned_code_objects': owned_code_objects})
 
@@ -201,11 +207,11 @@ def help(request, mode=None, language=None):
     
     return render_to_response('frontend/help.html', context, context_instance = RequestContext(request))
 
-def browse_wiki_type(request, wiki_type = None, page_number = 1):
+def browse_wiki_type(request, wiki_type=None, page_number=1):
     special_filter = request.GET.get('filter', None)
     return browse(request, page_number, wiki_type, special_filter)
 
-def browse(request, page_number=1, wiki_type = None, special_filter=None):
+def browse(request, page_number=1, wiki_type=None, special_filter=None):
     all_code_objects = Code.objects.scraper_search_query(request.user, None)
     if wiki_type:
         all_code_objects = all_code_objects.filter(wiki_type=wiki_type) 
