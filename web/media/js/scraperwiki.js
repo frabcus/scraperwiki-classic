@@ -224,6 +224,8 @@ function optiontojson(seloptsid, currsel)
     return $.toJSON(result); 
 }
 
+
+// all used only by the code_overview page
 function setupScraperEditInPlace(wiki_type, short_name)
 {
     //about
@@ -296,20 +298,68 @@ function setupScraperEditInPlace(wiki_type, short_name)
     $('#divEditTagsControls').hide();
     $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
 
-    // privacy status
+
+    // changing privacy status
     $('#spnPrivacyStatusChoice').editable($("#adminprivacystatusurl").val(), 
     {
         indicator : 'Saving...', tooltip:'Click to edit...', cancel:'Cancel', submit:'Save',
         onblur: 'ignore', event:'dblclick', placeholder:'', type: 'select', 
-        data: optiontojson('#optionsPrivacyStatusChoices', $('#spnPrivacyStatusChoice').text()) 
+        data: optiontojson('#optionsPrivacyStatusChoices', $('#spnPrivacyStatusChoice').text()), 
+        callback: function() { document.location.reload(true); }
     }); 
     $('#aPrivacyStatusChoice').click(function()  {  $('#spnPrivacyStatusChoice').dblclick(); });
 
+    // changing editor status
+    $('#addneweditor a').click(function()
+    {
+        $('#addneweditor a').hide()
+        $('#addneweditor span').show(); 
+    }); 
+    $('#addneweditor input.cancelbutton').click(function()
+    {
+        $('#addneweditor span').hide(); 
+        $('#addneweditor a').show()
+    }); 
+    $('#addneweditor input.addbutton').click(function()
+    {
+        var thisli = $(this).parents("li:first"); 
+        var sdata = { roleuser:$('#addneweditor input:text').val(), newrole:'editor' }; 
+        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
+        {
+            $('#addneweditor input:text').val(''); 
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                document.location.reload(true)
+        }}); 
+        $('#addneweditor span').hide(); 
+        $('#addneweditor a').show(); 
+    }); 
+
     $('.demotebutton').click(function() 
     {
-        alert("Now callback to demote user: '"+$(this).parents("li").find("span.hide").text()+"' to follower status"); 
+        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'follow' }; 
+        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
+        {
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                document.location.reload(true)
+        }}); 
     }); 
-    $('#addneweditor').click(function() { alert("nothing here yet - will use editable technology"); } ); 
+    $('.promotebutton').click(function() 
+    {
+        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'editor' }; 
+        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
+        {
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                document.location.reload(true)
+        }}); 
+    }); 
+
+
 
      //scheduler
      $('#spnRunInterval').editable('admin/', {
@@ -318,7 +368,7 @@ function setupScraperEditInPlace(wiki_type, short_name)
               cancel    : 'Cancel',
               submit    : 'Save',
               onblur: 'ignore',
-              data   : $('#hidScheduleOptions').val(),
+              data   : $('#hidScheduleOptions').val().replace('PLACEHOLDER', $('#spnRunIntervalInner').attr('rawInterval')),
               type   : 'select',
               event: 'dblclick',
               placeholder: '',
@@ -327,7 +377,7 @@ function setupScraperEditInPlace(wiki_type, short_name)
 
       $('#aEditSchedule').click(
            function(){
-                sCurrent = $('#spnRunInterval').html().trim();               
+                sCurrent = $('#spnRunIntervalInner').html().trim();               
                 $('#spnRunInterval').dblclick();
                 $('#spnRunInterval select').val(sCurrent);
                 return false;

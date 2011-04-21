@@ -26,10 +26,10 @@ class Command(BaseCommand):
     def handle(self, **options):
         
         if options['short_name']:
-            scraper = Scraper.objects.get(short_name=options['short_name'], published=True)
+            scraper = Scraper.objects.exclude(privacy_status="deleted").get(short_name=options['short_name'])
             self.update_meta(scraper)
         else:
-            scrapers = Scraper.objects.filter(published=True)
+            scrapers = Scraper.objects.exclude(privacy_status="deleted")
             for scraper in scrapers:
                 self.update_meta(scraper)
             

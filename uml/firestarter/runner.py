@@ -44,20 +44,9 @@ def execute (code, options) :
 
     code = string.replace (code, '\r', '')
     
-    #  Would prefer this block wrapping was done in the controller to make eval easy to use.
-    #
-    res = fs.execute (code, True)
-    if res is None :
-        sys.stdout.write (json.dumps({ 'message_type' : 'fail', 'content' : fs.error() }) + '\r\n')
-        sys.stdout.flush ()
-        return
-
-    line = res.readline()
-    while line != '' and line is not None :
-        sys.stdout.write (line.strip() + "\r\n")
-        sys.stdout.flush ()
-        line = res.readline()
-
+    for message in fs.execute(code):
+        sys.stdout.write(message + '\r\n')
+        sys.stdout.flush()
 
 #  You can test this script by typing:
 #       echo "print 1" | python runner.py

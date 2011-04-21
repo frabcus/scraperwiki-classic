@@ -28,12 +28,12 @@ def index(request):
                 month_data = {}
                 month_data['month'] = calendar.month_abbr[month]
                 next_month = one_month_in_the_future(month, year) 
-                month_data['total_scrapers'] = Scraper.objects.filter(first_published_at__lte=next_month).count()
-                month_data['this_months_scrapers'] = Scraper.objects.filter(first_published_at__year=year, first_published_at__month=month).count()
-                month_data['total_views'] = View.objects.filter(first_published_at__lte=next_month).count()
-                month_data['this_months_views'] = View.objects.filter(first_published_at__year=year, first_published_at__month=month).count()
-                month_data['total_users'] = User.objects.filter(date_joined__lte=next_month).count()
-                month_data['this_months_users'] = User.objects.filter(date_joined__year=year, date_joined__month=month).count()
+                month_data['total_scrapers'] = Scraper.objects.filter(first_published_at__lte=next_month).exclude(privacy_status="deleted").count()
+                month_data['this_months_scrapers'] = Scraper.objects.filter(first_published_at__year=year, first_published_at__month=month).exclude(privacy_status="deleted").count()
+                month_data['total_views'] = View.objects.filter(first_published_at__lte=next_month).exclude(privacy_status="deleted").count()
+                month_data['this_months_views'] = View.objects.filter(first_published_at__year=year, first_published_at__month=month).exclude(privacy_status="deleted").count()
+                month_data['total_users'] = User.objects.filter(date_joined__lte=next_month).exclude(privacy_status="deleted").count()
+                month_data['this_months_users'] = User.objects.filter(date_joined__year=year, date_joined__month=month).exclude(privacy_status="deleted").count()
                 months_list.append(month_data)
 
                 if next_month > datetime.date.today():

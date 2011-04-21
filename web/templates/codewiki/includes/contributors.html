@@ -1,43 +1,64 @@
 <ul>
-    {% for owner in userrolemap.owner %}
-    <li>
-        <a href="{% url profiles_profile_detail owner.username %}">
-        {% load gravatar %} {% show_gravatar owner 'medium' %} 
-        {{owner.get_profile.name}}</a> (creator)
-    </li>
-    {% endfor %}
-
-    {% if userrolemap.owner %}{% else %}
+    {% if not userrolemap.owner %}
       <li style="color:red">[Error: this scraper has no creator]</li>
     {% endif %}
 
-    {% if scraper.requesters %}  
-      {% for requester in scraper.requesters %}  
-        <li>
-        	{% load gravatar %} {% show_gravatar requester 'medium' %} 
-            <a href="{% url profiles_profile_detail requester.username %}">{{requester.get_profile.name}}</a>
-            (requested this scraper)
-        </li>
+    {% with 'owner' as role %}
+      {% for contributor in userrolemap.owner %}
+        {% include 'codewiki/includes/contributor.html' %}
       {% endfor %}
-    {% endif %}
-    {% for contributor in userrolemap.editor %}  
-      <li>
-        {% load gravatar %} {% show_gravatar contributor 'medium' %} 
-          <a href="{% url profiles_profile_detail contributor.username %}">{{contributor.get_profile.name}}</a>
-          (editor)
+    {% endwith %}
 
-          {% if user_owns_it %}
-            {% ifnotequal scraper.privacy_status 'public' %}
-              <span class="hide">{{contributor.username}}</span>
-              <input type="button" value="demote" class="demotebutton"/>
-            {% endifnotequal %}
-          {% endif %}
-      </li>
-    {% endfor %}
+    {% with 'requester' as role %}
+      {% for contributor in userrolemap.requesters %}
+        {% include 'codewiki/includes/contributor.html' %}
+      {% endfor %}
+    {% endwith %}
+
+    {% with 'editor' as role %}
+      {% for contributor in userrolemap.editor %}  
+        {% include 'codewiki/includes/contributor.html' %}
+      {% endfor %}
+    {% endwith %}
 
     {% if user_owns_it %}
       {% ifnotequal scraper.privacy_status 'public' %}
-        <li><a id="addneweditor">[Add new editor]</a></li>
+        <li id="addneweditor">
+          <span class="hide">
+            Type in the username of another editor:
+            <input type="text">
+            <input type="button" value="Add" class="addbutton">
+            <input type="button" value="Cancel" class="cancelbutton">
+          </span>
+          <a>[Add new editor]</a>
+        </li>
       {% endifnotequal %}
     {% endif %}
 </ul>
+
+{% if userrolemap.follow %}
+  <h3>Followers</h3>
+  {% ifnotequal scraper.privacy_status 'public' %}
+    <p id="followernoaccessmessage">(Do not have edit access to this {{scraper.wiki_type}}.)</p>
+  {% endifnotequal %}
+  <ul>
+  {% with 'follow' as role %}
+    {% for contributor in userrolemap.follow %}  
+      {% include 'codewiki/includes/contributor.html' %}
+    {% endfor %}
+  {% endwith %}
+  </ul>
+{% endif %}
+
+
+<p class="{% ifnotequal scraper.privacy_status 'public' %}report{% endifnotequal %}">This {{scraper.wiki_type}} <span id="spnPrivacyStatusChoice">{{privacy_status_name}}</span>.
+  <select class="hide" id="optionsPrivacyStatusChoices">  {# this select gets taken apart and rebuilt by jeditable #}
+  {% for value, name in PRIVACY_STATUSES %} 
+    <option value="{{value}}">{{name}}</option>
+  {% endfor %}
+  </select>
+  {% if user_owns_it %}
+    <a id="aPrivacyStatusChoice" class="edit">[edit status]</a>
+  {% endif %}
+</p>
+

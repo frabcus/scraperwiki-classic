@@ -223,9 +223,9 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None):
     elif special_filter == 'no_tags':
         #hack to get scrapers with no tags (tags don't recognise inheritance)
         if wiki_type == 'scraper':
-            all_code_objects = TaggedItem.objects.get_no_tags(Scraper.objects.all().order_by('-created_at') )
+            all_code_objects = TaggedItem.objects.get_no_tags(Scraper.objects.exclude(privacy_status="deleted").order_by('-created_at') )
         else:
-            all_code_objects = TaggedItem.objects.get_no_tags(View.objects.all().order_by('-created_at') )
+            all_code_objects = TaggedItem.objects.get_no_tags(View.objects.exclude(privacy_status="deleted").order_by('-created_at') )
 
 
     # filter out scrapers that have no records
@@ -294,21 +294,21 @@ def search(request, q=""):
 
 def get_involved(request):
 
-        scraper_count = Scraper.objects.count()
-        view_count = View.objects.count()
+        scraper_count = Scraper.objects.exclude(privacy_status="deleted").count()
+        view_count = View.objects.exclude(privacy_status="deleted").count()
         
         #no description
-        scraper_no_description_count = Scraper.objects.filter(description='').count()
+        scraper_no_description_count = Scraper.objects.filter(description='').exclude(privacy_status="deleted").count()
         scraper_description_percent = 100 - int(scraper_no_description_count / float(scraper_count) * 100)
 
-        view_no_description_count = View.objects.filter(description='').count()
+        view_no_description_count = View.objects.filter(description='').exclude(privacy_status="deleted").count()
         view_description_percent = 100 - int(view_no_description_count / float(view_count) * 100)
 
         #no tags
-        scraper_no_tags_count = TaggedItem.objects.get_no_tags(Scraper.objects.filter()).count()
+        scraper_no_tags_count = TaggedItem.objects.get_no_tags(Scraper.objects.exclude(privacy_status="deleted")).count()
         scraper_tags_percent = 100 - int(scraper_no_tags_count / float(scraper_count) * 100)
     
-        view_no_tags_count = TaggedItem.objects.get_no_tags(View.objects.filter()).count()
+        view_no_tags_count = TaggedItem.objects.get_no_tags(View.objects.exclude(privacy_status="deleted")).count()
         view_tags_percent = 100 - int(view_no_tags_count / float(view_count) * 100)
 
         #scraper requests
@@ -321,7 +321,7 @@ def get_involved(request):
             solicitation_percent = 100
         
         #scraper status
-        scraper_sick_count = Scraper.objects.filter(status='sick').count()
+        scraper_sick_count = Scraper.objects.filter(status='sick').exclude(privacy_status="deleted").count()
         scraper_sick_percent = 100 - int(scraper_sick_count / float(scraper_count) * 100)
 
         data = {
@@ -379,8 +379,8 @@ def tag(request, tag):
         raise Http404
 
     #get all scrapers and views with this tag
-    scrapers = TaggedItem.objects.get_by_model(Scraper.objects.all(), tag)
-    views = TaggedItem.objects.get_by_model(View.objects.all(), tag)
+    scrapers = TaggedItem.objects.get_by_model(Scraper.objects.exclude(privacy_status="deleted"), tag)
+    views = TaggedItem.objects.get_by_model(View.objects.exclude(privacy_status="deleted"), tag)
     code_objects = sorted(list(scrapers) + list(views), key=lambda x: x.created_at, reverse=True)
     
     #get all open and pending solicitations with this tag

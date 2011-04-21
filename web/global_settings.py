@@ -119,7 +119,6 @@ INSTALLED_APPS = [
     'paypal.standard.ipn',
     'django_notify',
     'tagging',
-    'mailer',
     'contact_form',
     'piston',      # needs 'django-piston' and 'phpserialize'
     'captcha',

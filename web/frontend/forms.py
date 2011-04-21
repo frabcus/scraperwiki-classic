@@ -6,6 +6,7 @@ from registration.forms import RegistrationForm
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
+from django.db.models import Q
 from captcha.fields import CaptchaField
 from codewiki.models import SCHEDULE_OPTIONS, Scraper, Code
 
@@ -17,7 +18,7 @@ class SearchForm(forms.Form):
     
 def get_emailer_for_user(user):
     try:
-        queryset = Code.objects
+        queryset = Scraper.objects.exclude(privacy_status="deleted")
         queryset = queryset.filter(Q(usercoderole__role='owner') & Q(usercoderole__user=user))
         queryset = queryset.filter(Q(usercoderole__role='email') & Q(usercoderole__user=user))
         return queryset.latest('id')
