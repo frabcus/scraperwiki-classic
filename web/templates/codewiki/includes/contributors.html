@@ -36,6 +36,7 @@
     {% endif %}
 </ul>
 
+<!-- 
 {% if userrolemap.follow %}
   <h3>Followers</h3>
   {% ifnotequal scraper.privacy_status 'public' %}
@@ -49,6 +50,7 @@
   {% endwith %}
   </ul>
 {% endif %}
+-->
 
 
 <p class="{% ifnotequal scraper.privacy_status 'public' %}report{% endifnotequal %}">This {{scraper.wiki_type}} <span id="spnPrivacyStatusChoice">{{privacy_status_name}}</span>.
