@@ -7,7 +7,9 @@
 	<h2><a href="{% url profiles_profile_detail scraper.owner.username %}">{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}</a> / {% if user.is_authenticated %}<span id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</span>{% else %}{{ scraper.title }}{% endif %}</h2>
 	<p>{{scraper.wiki_type|lower}} 
 	    &bull; {{scraper.language|lower}}
+        {% ifnotequal scraper.privacy_status 'public' %}
 	    &bull; [{{scraper.privacy_status}}]
+        {% endifnotequal %}
 	{% if scraper.forked_from %}
         &bull; Fork of <a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{scraper.forked_from.short_name}}</a>
     {% endif %}

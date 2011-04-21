@@ -58,10 +58,13 @@ def frontpage(request, public_profile_field=None):
 @login_required
 def dashboard(request):
     user = request.user
-    owned_code_objects = user.code_set.filter(usercoderole__role='owner', deleted=False).order_by('-created_at')
+    
+    # merge these two conditions    
+    
+    owned_code_objects = user.code_set.filter(usercoderole__role='owner').exclude(privacy_status="deleted").order_by('-created_at')
     owned_count = len(owned_code_objects) 
     # needs to be expanded to include scrapers you have edit rights on.
-    contribution_code_objects = user.code_set.filter(usercoderole__role='editor', deleted=False)
+    contribution_code_objects = user.code_set.filter(usercoderole__role='editor').exclude(privacy_status="deleted")
     contribution_count = len(contribution_code_objects)
     # following_code_objects = user.code_set.filter(usercoderole__role='follow', deleted=False)
     # following_count = len(following_code_objects)
@@ -235,7 +238,7 @@ def browse(request, page_number=1, wiki_type = None, special_filter=None):
         page = 1
 
     if page == 1:
-        featured_scrapers = Code.objects.filter(published=True, featured=True).order_by('-created_at')
+        featured_scrapers = Code.unfiltered.filter(privacy_status="public", featured=True).order_by('-created_at')
     else:
         featured_scrapers = None
 

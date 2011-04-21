@@ -52,7 +52,7 @@ PRIVACY_STATUSES = (
 STAFF_ACTIONS = ["run_scraper", "screenshoot_scraper"]
 CREATOR_ACTIONS = ["delete_data", "converttosqlitedatastore", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status" ]
 EDITOR_ACTIONS = ["changeadmin", "savecode", "settags" ]
-VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow" ]
+VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo" ]
 
 class Code(models.Model):
 
@@ -280,8 +280,6 @@ class Code(models.Model):
         # roles are: "owner", "editor", "follow", "requester", "email"
         # privacy_status: "public", "visible", "private", "deleted"
         if self.privacy_status == "deleted":
-            return False
-        if self.deleted:
             return False
         if action == "rpcexecute" and self.wiki_type != "view":
             return False
