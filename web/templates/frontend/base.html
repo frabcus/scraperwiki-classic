@@ -56,9 +56,10 @@
 				<li class="user loggedin">
 					<a href="{% url profiles_profile_detail user.username %}"><span>Logged in</span></a>
 					<ul>
-						<li class="hi">Hi <a href="{% url profiles_profile_detail user.username %}">{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}</a>!</li>
-						<li class="dashboard"><a href="{% url dashboard %}">Your Dashboard</a></li>
-						<li class="feedback"><a href="{% url contact_form %}">Give Feedback</a></li>
+						<li class="hi">Hi {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}!</li>
+						<li class="dashboard"><a href="{% url dashboard %}">Your dashboard</a></li>
+						<li class="profile"><a href="{% url profiles_profile_detail user.username %}">Your profile</li>
+						<li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>
 						<li class="signout"><a href="{% url logout %}?next_page=/">Sign out</a></li>
 					</ul>
 				</li>
