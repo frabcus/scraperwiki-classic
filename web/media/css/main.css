@@ -1577,15 +1577,12 @@ table.data td, table.data th {border-top:solid 1px #ebdade;padding:0.3em 0.5em; 
 #sqlite_schema {
 	font-family: monospace;
 	overflow: auto;
-	border: thin blue solid;
-	margin: 0;
-	padding: 0
+    background: #f4e3e8;
 }
 
 #sqlite_schema li {
-	margin-left: 1.5em;
-	padding-bottom: 5em;
-	padding: 1.0em;
+	margin-left: 0.5em;
+	padding-bottom: 0.5em;
 	list-style-type: disc;
 }
 
