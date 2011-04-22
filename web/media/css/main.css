@@ -1,6 +1,7 @@
-/* @override http://localhost:8000/media/css/main.css? */
-
-
+/* @override 
+	http://localhost:8000/media/css/main.css?
+	http://redesign.scraperwiki.com/media/css/main.css?
+*/
 
 /* HORS D'OUVRE */
 
@@ -1275,8 +1276,19 @@ ul.user_menu li {
 }
 
 .content_footer {
-	font-size: 0.9em;
-	color: #808080;
+	font-size: 0.8em;
+	color: #777;
+	background-color: #eee;
+	padding: 7px 10px 9px 10px;
+}
+
+.content_footer p {
+	margin-bottom: 0;
+}
+
+.content_footer a {
+	color: #222;
+	cursor: pointer;
 }
 
 .content_footer.right {
@@ -1525,35 +1537,50 @@ pre.scrapercode {
 
 ul.data_tabs {
 	padding: 0;
-	margin: 0;
-	width: 100%;
+	margin: 15px 0 0 0;
 	display: block;
 }
 
 ul.data_tabs li {
-	display: inline;
+	float: left;
 	list-style-type: none;
-	padding: 0.4em 0.8em 0.25em 0.8em;
-	margin: 0 0.2em 0.0em 0.2em;
-	clear: right;
-	border-top: solid 1px #9f9f9f;
-	border-left: solid 1px #9f9f9f;
-	border-right: solid 1px #9f9f9f;
+	padding: 0.4em 0.8em 0em 0.8em;
+	margin: 0 0.4em -1px 0;
+	border-top: solid 1px #ccc;
+	border-left: solid 1px #ccc;
+	border-right: solid 1px #ccc;
 	cursor: pointer;
 	color: #808080;
 	height: 1.5em;
 }
 
 ul.data_tabs li.selected {
-	border-bottom: solid 1px #fff;
 	position: relative;
 	background: #f8f8f8;
+}
+
+ul.data_tabs li.clear {
+	float: none;
+	clear: left;
+	padding: 0;
+	margin: 0;
+	height: 0px;
+	opacity: 0;
+}
+
+div.data_options {
+	float: right;
+	font-size: 14px;
 }
 
 div.data_content {
 	margin-top: 0;
 	padding-top: 0;
-	display: block
+	display: block;
+	overflow-x: scroll;
+	font-size: 12px;
+	max-height: 500px;
+	border: 1px solid #ccc;
 }
 
 
@@ -1608,6 +1635,8 @@ table.data td, table.data th {border-top:solid 1px #ebdade;padding:0.3em 0.5em; 
 	font-family: monospace;
 	overflow: auto;
     background: #f4e3e8;
+    margin: 5px 0;
+    padding: 5px 5px 5px 20px;
 }
 
 #sqlite_schema li {
@@ -1731,7 +1760,7 @@ div.page_tabs ul {
 div.page_tabs ul li {
 	float: right;
 	list-style-type: none;
-	padding: 0.3em 0.8em 0.25em 0.8em;
+	padding: 4px 10px 3px 10px;
 	margin: 0 0.3em 0 0.3em;
 	border-top: solid 1px #9f9f9f;
 	border-left: solid 1px #9f9f9f;
@@ -1791,6 +1820,40 @@ div.metadata dt, div.metadata dd {
 
 /* Scraper pages */
 
+#scraper_about .text_wiki {
+	border: none;
+	padding: 0;
+	background-color: transparent;
+}
+
+#scraper_about .text_wiki p {
+	margin-top: 0;
+}
+
+#scraper_about h2,
+#divScraperTags h2,
+#scraper_views h2,
+#scraper_contributors h3,
+#scraper_schedule h3 {
+	margin-bottom: 8px;
+	padding-bottom: 3px;
+	border-bottom: 1px solid #ccc;
+	margin-top: 50px;
+}
+
+#scraper_about h2 .edit,
+#divScraperTags h2 .edit,
+#scraper_views h2 .edit {
+	float: right;
+	margin-top: 5px;
+	font-weight: normal !important;
+}
+
+#scraper_contributors {
+	width: 55%;
+	padding-right: 5%;
+}
+
 .code_viewer {
 	border: solid 1px #ccc;
 	position: relative;
@@ -1798,6 +1861,7 @@ div.metadata dt, div.metadata dd {
 
 .data_viewer {
 	position: relative;
+	margin-bottom: 20px;
 }
 
 .info_unpublished {
@@ -2617,10 +2681,9 @@ ul.filter_list li {
 p.report {
 	background: #f8f8a8 url(../images/icons/flag_yellow.png) no-repeat 8px 0.4em;
 	font-size: 0.8em;
-	border-top: dotted 1px #ccc;
-	border-bottom: dotted 1px #ccc;
+	border: dotted 1px #ccc;
 	padding: 0.5em 10px 0.5em 30px;
-	margin-top: 1em;
+	margin: 40px 0 0 0;
 }
 
 /* Sick */

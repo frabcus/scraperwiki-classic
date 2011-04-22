@@ -15,15 +15,19 @@
   {% endifequal %}
   </h2>
 
+  {% if scraper_tags %}
   <ul class="tags">
     {% include 'codewiki/includes/tagslist.html' %}
   </ul>
-
-  <p id="addtagmessage">Adding tags helps makes sense of all the datasets on ScraperWiki.</p>
-
+  {% else %}
+    <p id="addtagmessage">Adding tags helps makes sense of all the datasets on ScraperWiki. <a href="#">Would you like to add some?</a></p>
+  {% endif %}
+  
+  <!--
   <div id="divEditTagsControls">
     <label id="labelEditTags" for="divEditTags">Comma separated list of tags:</label>
     <div id="divEditTags"></div>
   </div>
-
+  -->
+  
 </div>
