@@ -935,13 +935,38 @@ body.profiles h2.scrapersandviews {
 
 #request_options {
 	width: 365px;
-	float: left;
+	float: right;
 }
 
 #request_form {
 	width: 365px;
-	float: right;
+	float: left;
 	background-color: #F4F8FB;
+	display: none;
+}
+
+#request_intro {
+	width: 365px;
+	float: left;
+	text-align: center;
+}
+
+#request_intro p {
+	color: #666;
+	padding: 0 30px;
+	line-height: 20px;
+}
+
+#request_intro p.first {
+	margin-top: 50px;
+}
+
+#request_intro span {
+	display: block;
+	width: 100px;
+	height: 1px;
+	background-color: #ccc;
+	margin-left: 132px;
 }
 
 #request_options h3 a {
@@ -951,8 +976,9 @@ body.profiles h2.scrapersandviews {
 	font-size: 16px;
 	line-height: 20px;
 	font-weight: bold;
-	border-bottom: 1px solid #fff;
+	border-bottom: 2px solid #fff;
 	color: #169;
+	position: relative;
 }
 
 #request_options h3 a:hover {
@@ -963,29 +989,33 @@ body.profiles h2.scrapersandviews {
 
 #request_options h3 a.selected {
 	border-bottom: none;
+	background-color: #39c;
+	color: #fff;
+}
+
+#request_options h3 a.selected .arrow {
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -10px;
+	width: 0px;
+	height: 0px;
+	border-color: #fff #39c #fff #fff;
+	border-style: solid;
+	border-width: 20px 10px 20px 0px;
 }
 
 #request_options div {
-	border-left: 1px solid #dfeaf2;
-	border-right: 1px solid #dfeaf2;
+	border: 2px solid #39c;
+	border-top: none;
+	margin-bottom: 2px;
 	padding: 12px 15px 0 15px;
 	display: none;
 	position: relative;
 }
 
-#request_options .arrow {
-	position: absolute;
-	display: block;
-	background: #fff url(../images/request_data_arrow.gif) 0 0 no-repeat;
-	width: 11px;
-	height: 20px;
-	right: -11px;
-	top: 50%;
-	margin-top: -10px;
-}
-
 #request_options #public {
-	border-bottom: 1px solid #dfeaf2;
+	border-bottom: 2px solid #39c;
 }
 
 #request_options div p {
@@ -1690,6 +1720,7 @@ div.page_tabs {
 
 div.page_tabs.small {
 	font-size: 0.8em;
+	width: 50%;
 }
 
 div.page_tabs ul {

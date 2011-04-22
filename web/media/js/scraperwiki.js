@@ -119,34 +119,49 @@ $(function(){
 		return false;
 	});
 	
-	$('#request_options div').append('<span class="arrow"></span>');
-	
 	function requestOption($a){
-		$d = $a.parent().next();
-		id = $d.attr('id');
-		$a.addClass('selected').parent().next().slideDown(250);
-		$('#request_options h3 a.selected').not($a).removeClass('selected');
-		$('#request_options div:visible').not($d).slideUp(250);
-		if(id == 'private'){
-			show = '.urls, .columns, .frequency, .due_date, .name, .email';
-		} else if(id == 'viz'){
-			show = '.urls, .columns, .frequency, .due_date, .visualisation, .name, .email, .telephone';
-		} else if(id == 'app'){
-			show = '.urls, .columns, .frequency, .due_date, .name, .email';
-		} else if(id == 'etl'){
-			show = '.description, .name, .email, .telephone, .company_name';
-		} else {
-			show = '.urls, .columns, .frequency, .due_date, .name, .email, .broadcast';
+		
+		function requestOptionInner($a){
+			$d = $a.parent().next();
+			id = $d.attr('id');
+			$a.addClass('selected').parent().next().slideDown(250);
+			$('#request_options h3 a.selected').not($a).removeClass('selected');
+			$('#request_options div:visible').not($d).slideUp(250);
+			if(id == 'private'){
+				show = '.urls, .columns, .frequency, .due_date, .name, .email';
+			} else if(id == 'viz'){
+				show = '.urls, .columns, .frequency, .due_date, .visualisation, .name, .email, .telephone';
+			} else if(id == 'app'){
+				show = '.urls, .columns, .frequency, .due_date, .name, .email';
+			} else if(id == 'etl'){
+				show = '.description, .name, .email, .telephone, .company_name';
+			} else {
+				show = '.urls, .columns, .frequency, .due_date, .name, .email, .broadcast';
+			}
+			$(show, $('#request_form')).filter(':hidden').slideDown(250);
+			$('#request_form li').not(show).slideUp(250);
 		}
-		$(show, $('#request_form')).filter(':hidden').slideDown(250);
-		$('#request_form li:visible').not(show).slideUp(250);
+		
+		if($('#request_intro').is(':visible')){
+			$('#request_intro:visible').fadeOut(200, function(){
+				$('#request_form:hidden').fadeIn(200, function(){
+					requestOptionInner($a)
+				});
+			});	
+		} else {
+			requestOptionInner($a)
+		}
+		
 	}
 	
-	requestOption($('#request_options h3:first a'));
+//	requestOption($('#request_options h3:first a'));
 		
 	$('#request_options h3 a').bind('click', function(e){
 		e.preventDefault();
 		requestOption($(this));
+	}).each(function(){
+		h = $(this).outerHeight();
+		$('<span>').addClass('arrow').css('border-width', h/2 + 'px 10px ' + h/2 + 'px 0px').attr('title',h).appendTo($(this));
 	});
 	
 	
