@@ -929,6 +929,110 @@ body.profiles h2.scrapersandviews {
 	right: 10px;
 }
 
+
+
+/* REQUEST DATA PAGE */
+
+#request_options {
+	width: 365px;
+	float: left;
+}
+
+#request_form {
+	width: 365px;
+	float: right;
+	background-color: #F4F8FB;
+}
+
+#request_options h3 a {
+	display: block;
+	background-color: #dfeaf2;
+	padding: 10px 15px;
+	font-size: 16px;
+	line-height: 20px;
+	font-weight: bold;
+	border-bottom: 1px solid #fff;
+	color: #169;
+}
+
+#request_options h3 a:hover {
+	color: #28c;
+	background-color: #E8F2F9;
+	text-decoration: none;
+}
+
+#request_options h3 a.selected {
+	border-bottom: none;
+}
+
+#request_options div {
+	border-left: 1px solid #dfeaf2;
+	border-right: 1px solid #dfeaf2;
+	padding: 12px 15px 0 15px;
+	display: none;
+	position: relative;
+}
+
+#request_options .arrow {
+	position: absolute;
+	display: block;
+	background: #fff url(../images/request_data_arrow.gif) 0 0 no-repeat;
+	width: 11px;
+	height: 20px;
+	right: -11px;
+	top: 50%;
+	margin-top: -10px;
+}
+
+#request_options #public {
+	border-bottom: 1px solid #dfeaf2;
+}
+
+#request_options div p {
+	margin: 0;
+	padding-bottom: 15px;
+	line-height: 18px;
+	font-size: 14px;
+	color: #666;
+}
+
+#request_form ul {
+	padding: 0;
+	margin: 15px 15px 5px 15px;
+}
+
+#request_form label {
+	display: block;
+	font-size: 14px;
+	margin-bottom: 5px;
+	color: #28c;
+}
+
+#request_form li input.text {
+	width: 328px;
+	line-height: 20px;
+	margin-bottom: 10px;
+	text-indent: 5px;
+}
+
+#request_form textarea {
+	width: 318px;
+	padding: 7px;
+	height: 60px;
+}
+
+#request_form li.broadcast input {
+	float: left;
+	margin: 7px 10px 5px 50px;
+}
+
+#request_form p.last {
+	text-align: center;
+	padding-top: 15px;
+	margin: 0 15px 20px 15px;
+	border-top: 1px solid #D0E2EF;
+}
+
 /*
 
 #divPage {
@@ -1055,10 +1159,6 @@ ul.user_menu li {
 
 #divSidebarSearch #q {
 	width: 100px;
-}
-
-#divSidebarSearch #go {
-	
 }
 
 #divMenu .sub_menu {

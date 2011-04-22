@@ -113,8 +113,13 @@ class ResendActivationEmailForm(forms.Form):
     email_address = forms.EmailField()
 
 class DataEnquiryForm(forms.ModelForm):
-    urls = forms.CharField()
-    columns = forms.CharField()
+    urls = forms.CharField(label='At which URL(s) can we find the data currently?')
+    columns = forms.CharField(label='What information do you want scraped?')
+    due_date = forms.CharField(label='When do you need it by?')
+    name = forms.CharField(label='Your name:')
+    email = forms.CharField(label='Your email address:')
+    telephone = forms.CharField(label='Your telephone number:')
+    company_name = forms.CharField(label='Your company name:')
     broadcast = forms.BooleanField(label="I'm happy for this request to be posted on Twitter/Facebook")
 
     class Meta:

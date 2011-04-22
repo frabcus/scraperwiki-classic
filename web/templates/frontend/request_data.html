@@ -4,22 +4,86 @@
 
 {% block header %}
     <h2>Request Data</h2>
-    <p>For Journalists / Researchers &amp; Data Analyists who know cut and paste won't work.</p>
+    <p>For Journalists, Researchers &amp; Data Analysts who know cut and paste won&rsquo;t work.</p>
 {% endblock %}
 
 {% block content %}
-<ol>
-  <li>I need some data that I want to keep private (?)</li>
-  <li>I need data and I also want a visualisation (?)</li>
-  <li>I need a data application for my website (?)</li>
-  <li>I want to merge (ETL) contect from systems that cannot talk to each other - help! (?)</li>
-  <li>I need some data that I want to make it public &amp; open (?)</li>
-</ol>
+<div id="request_options">
+	
+	<h3><a href="#private">I need some data that I want to keep private</a></h3>
+	<div id="private">
+		<p>The cost will depend on the size and complexity of the information being gathered. It can range from a couple of hours to a few days in duration. When we know what you want, we will give you a quote. We pay our developer community to gather the data.</p>
+	</div>
+	<h3><a href="#viz">I need data and I also want a visualisation</a></h3>
+	<div id="viz">
+		<p>This is a combination of getting the data, storing it, and creating a visualisation that tells a story. We usually ask you to create a short brief with an idea of what you want to do and also a link to the data that you are proposing to mine. We will help you to do this directly or with a ScraperWiki partner.</p>
+	</div>
+	<h3><a href="#app">I need a data application for my website</a></h3>
+	<div id="app">
+		<p>Data applications are designed to drive continuous traffic to a website and also offer the possibility of generating revenue through a subscription model for services like email alerts. We will help you to do this directly or with a ScraperWiki partner.</p>
+	</div>
+	<h3><a href="#etl">I want to merge (ETL) content from systems that cannot talk to each other &ndash; Help!</a></h3>
+	<div id="etl">
+		<p>Sometimes it can be easier to scrape data from systems than to re-engineer the back-end. In this context ScraperWiki acts as a data hub for the purposes of transforming data into a central datastore. It is a more cost effective &lsquo;ETL&rsquo; &ndash; Extract, Transform and Load and a flexible option for building an API for web or mobile applications. We will help you to do this directly or with a ScraperWiki partner.</p>
+	</div>
+	<h3><a href="#public">I need some data that I want to make it public &amp; open</a></h3>
+	<div id="public">
+		<p>This is a free service, so if you have the technical skills just go and do it! Or if you don&rsquo;t have the technical skills we can broadcast this request to our developer community. If you have budget we can pay a developer to do it for you. The cost can range in price and will depend on the size and complexity of the information. It may take a couple of hours or a few days in duration.</p>
+	</div>
+</div>
 
-<form action="." method="post">
-<ul>
-{{form.as_ul}}
-</ul>
-<input type="submit"/>
+<form action="." method="post" id="request_form">
+	<ul>
+	<!-- {{form.as_ul}} -->
+	<li class="urls">
+		<label for="id_urls">At which URL(s) can we find the data currently?</label>
+		<input class="text" type="text" name="urls" id="id_urls" />
+	</li> 
+	<li class="columns">
+		<label for="id_columns">What data, specifically, do you want scraped?</label>
+		<input class="text" type="text" name="columns" id="id_columns" />
+	</li> 
+	<li class="frequency">
+		<label for="id_frequency">How often does the data need to be scraped?</label>
+		<input class="text" type="text" name="frequency" id="id_frequency" />
+	</li>
+	<li class="due_date">
+		<label for="id_due_date">When do you need it by?</label>
+		<input class="text" type="text" name="due_date" id="id_due_date" />
+	</li> 
+	<li class="visualisation">
+		<label for="id_visualisation">What visualisation do you need?</label>
+		<textarea id="id_visualisation" rows="10" cols="40" name="visualisation"></textarea>
+	</li>
+	<li class="description">
+		<label for="id_description">What are your ETL needs?</label>
+		<textarea id="id_description" rows="10" cols="40" name="description"></textarea>
+	</li>
+	<li class="name">
+		<label for="id_name">Your name:</label>
+		<input class="text" type="text" name="name" id="id_name" />
+	</li> 
+	<li class="email">
+		<label for="id_email">Your email address:</label>
+		<input class="text" type="text" name="email" id="id_email" />
+	</li> 
+	<li class="telephone">
+		<label for="id_telephone">Your telephone number:</label>
+		<input class="text" type="text" name="telephone" id="id_telephone" />
+	</li> 
+	<li class="company_name">
+		<label for="id_company_name">Your company name:</label>
+		<input class="text" type="text" name="company_name" id="id_company_name" />
+	</li> 
+	<li class="broadcast">
+		<input class="checkbox" type="checkbox" name="broadcast" id="id_broadcast" />
+		<label for="id_broadcast">I&#39;m happy for this request to be <br/>posted on Twitter/Facebook:</label>
+	</li>
+	</ul>
+	<p class="last">
+		<input type="submit" value="Submit your request" id="submit" />
+	</p>
 </form>
+
+<br class="clear" />
 {% endblock %}
