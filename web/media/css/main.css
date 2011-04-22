@@ -972,19 +972,19 @@ body.profiles h2.scrapersandviews {
 
 #request_options h3 a {
 	display: block;
-	background-color: #dfeaf2;
+	background-color: #E8F2F9;
 	padding: 10px 15px;
 	font-size: 16px;
 	line-height: 20px;
 	font-weight: bold;
 	border-bottom: 2px solid #fff;
-	color: #169;
+	color: #5E98BC;
 	position: relative;
 }
 
 #request_options h3 a:hover {
 	color: #28c;
-	background-color: #E8F2F9;
+	background-color: #F1F7FB;
 	text-decoration: none;
 }
 

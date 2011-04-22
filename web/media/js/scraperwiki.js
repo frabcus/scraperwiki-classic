@@ -124,9 +124,9 @@ $(function(){
 		function requestOptionInner($a){
 			$d = $a.parent().next();
 			id = $d.attr('id');
-			$a.addClass('selected').parent().next().slideDown(250);
+			$a.addClass('selected').parent().next().css('border-color', '#39c').slideDown(250);
 			$('#request_options h3 a.selected').not($a).removeClass('selected');
-			$('#request_options div:visible').not($d).slideUp(250);
+			$('#request_options div:visible').not($d).css('border-color', '#E8F2F9').slideUp(250);
 			if(id == 'private'){
 				show = '.urls, .columns, .frequency, .due_date, .name, .email';
 			} else if(id == 'viz'){
@@ -153,15 +153,13 @@ $(function(){
 		}
 		
 	}
-	
-//	requestOption($('#request_options h3:first a'));
 		
 	$('#request_options h3 a').bind('click', function(e){
 		e.preventDefault();
 		requestOption($(this));
 	}).each(function(){
-		h = $(this).outerHeight();
-		$('<span>').addClass('arrow').css('border-width', h/2 + 'px 10px ' + h/2 + 'px 0px').attr('title',h).appendTo($(this));
+		h = $(this).outerHeight() - 2;
+		$('<span>').addClass('arrow').css('border-width', Math.round(h/2) + 'px 10px ' + Math.round(h/2) + 'px 0px').attr('title',h).appendTo($(this));
 	});
 	
 	
