@@ -1854,6 +1854,10 @@ div.metadata dt, div.metadata dd {
 	padding-right: 5%;
 }
 
+#scraper_contributors ul {
+	padding: 0;
+}
+
 .code_viewer {
 	border: solid 1px #ccc;
 	position: relative;
@@ -1899,7 +1903,6 @@ body.choose_template #divContent h1 {
 
 ul.views {
 	padding: 0;
-	text-align: center;
 }
 
 #simplemodal-container .views {
