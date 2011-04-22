@@ -64,9 +64,7 @@
 {% endblock %}
 
 {% block run_script %}
-<script>
     {% if user.is_authenticated %}
         setupScraperEditInPlace('{{scraper.wiki_type}}', '{{scraper.short_name}}');
     {% endif %}
-</script>
 {% endblock %}

@@ -178,7 +178,6 @@
 {% block run_script %}
     {{block.super}}
 
-<script>
 {% if user.is_authenticated %}
     setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
     setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
@@ -237,6 +236,5 @@ $("#popupinteractivesqlite").click(function()
     }); 
 }); 
 
-</script>
 {% endblock %}
 
