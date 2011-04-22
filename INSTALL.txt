@@ -11,7 +11,6 @@
 
 
 
-
 Use these instructions now:
 
 https://bitbucket.org/ScraperWiki/scraperwiki/wiki/InstallationUbuntu10.10
