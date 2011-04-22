@@ -17,20 +17,10 @@
           <div style="float: right">
             {% if user.is_staff %}
               <a href="#" id="popupinteractivesqlite" class="staff">Interactive</a> | 
-              <span class="staff">
-                <a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a>
-                <a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a>
-              </span>
-              |
             {% endif %}
             <a href="#" class="csv" id="downloadcsvtable" rel="nofollow">Download spreadsheet (CSV)</a>
           </div>
 
-          <ul id="sqlite_schema">
-            {% for sqltablename, sqltabledata in sqlitedata.items %}
-              <li>{{sqltabledata.sql}}</li>
-            {% endfor %}
-           </ul>
     	   <ul class="data_tabs">
              {% for sqltablename, sqltabledata in sqlitedata.items %}
                 <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
@@ -54,8 +44,20 @@
           {% endfor %}
 
           <div class="content_footer">
-             <p>This dataset has a total of {{scraper.scraper.record_count}} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }}</p>
+             <p>This dataset has a total of {{scraper.scraper.record_count}} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }}.
+              {% if user.is_staff %}
+              <span class="staff">
+                <a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a>
+                <a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a>
+              </span>
+              {% endif %}
+              </p>
           </div>
+          <ul id="sqlite_schema" style="display: none">
+            {% for sqltablename, sqltabledata in sqlitedata.items %}
+              <li>{{sqltabledata.sql}}</li>
+            {% endfor %}
+           </ul>
         {% endif %}
 
         {% if not sqlitedata %}
