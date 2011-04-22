@@ -205,6 +205,51 @@ body.frontpage #nav_inner li.frontpage {
 	color: #411;
 }
 
+#nav_inner li.user ul form {
+	margin-bottom: 8px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #eee;
+}
+
+#nav_inner li.user ul form label {
+	font-size: 12px;
+	line-height: 16px;
+	display: block;
+}
+
+#nav_inner li.user ul form #id_user_or_email,
+#nav_inner li.user ul form #id_password {
+	margin-bottom: 5px;
+	padding: 2px;
+	width: 140px;
+}
+
+#nav_inner li.user ul form #forgotten {
+	float: left;
+	background: none;
+	padding: 3px 3px 3px 0;
+	text-indent: 0;
+	font-size: 12px;
+	color: #dbb;
+	font-style: italic;
+	margin-top: 5px;
+	line-height: 12px;
+}
+
+#nav_inner li.user ul form #forgotten:hover {
+	color: #d33;
+}
+
+#nav_inner li.user ul form #submit {
+	float: right;
+	margin-top: 5px;
+}
+
+#nav_inner li.user span.clear {
+	clear: both;
+	display: block;
+	height: 1px;
+}
 
 
 #nav_inner li.search {
