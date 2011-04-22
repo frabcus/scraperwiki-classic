@@ -110,7 +110,7 @@
                 {% if settings.ENABLE_MARKETPLACE %}
                     <li><a href="{% url market_list %}">Request a dataset</a></li>
                 {% else %}
-                    <li><a href="{% url contact_form %}">Request a dataset</a></li>
+                    <li><a href="{% url request_data %}">Request data</a></li>
                 {% endif %}
                 <li><a href="{% url help 'documentation' language|default:"python" %}" title="Technical docs">Documentation</a></li>
                 <li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
@@ -206,7 +206,7 @@
 						{% if settings.ENABLE_MARKETPLACE %}
 						<li><a href="{% url market_list %}">Request a dataset</a></li>
 						{% else %}
-						<li><a href="{% url contact_form %}">Request a dataset</a></li>
+						<li><a href="{% url request_data %}">Request data</a></li>
 						{% endif %}
 						<li><a href="#" class="editor_scraper">Create a scraper</a></li>
 						<li><a href="#" class="editor_view">Create a view</a></li>		                 
