@@ -26,12 +26,6 @@
     <div class="page_title">
         <ul class="title_links">
             <li class="rss"><a href="/feeds/all_code_objects/">RSS feed of all scrapers / views</a></li>
-            {% ifnotequal wiki_type 'view' %}
-              <li class="view"><a href="{% url scraper_list %}views">Browse views</a></li>
-            {% endifnotequal %}
-            {% ifnotequal wiki_type 'scraper' %}
-              <li class="scraper"><a href="{% url scraper_list %}scrapers">Browse scrapers</a></li>
-            {% endifnotequal %}
         </ul>
     </div>
 
