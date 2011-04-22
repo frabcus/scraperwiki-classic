@@ -2164,6 +2164,88 @@ iframe.view {
 	border: thick red dashed;
 }
 
+
+
+
+/* CONTACT PAGE */
+
+body.contact .content form {
+	margin-left: 65px;
+	width: 312px;
+	margin-top: 20px;
+	position: relative;
+}
+
+body.contact form ul label {
+	font-weight: normal;
+	float: none;
+	width: 300px;
+	color: #666;
+	font-size: 14px;
+	margin-bottom: 4px;
+}
+
+body.contact form ul li {
+	margin-bottom: 10px;
+}
+
+body.contact form ul input {
+	padding: 3px 5px;
+	width: 300px;
+}
+
+body.contact form ul input#id_captcha_1 {
+	width: 100px;
+	margin-left: 10px;
+}
+
+body.contact form ul textarea {
+	width: 308px;
+}
+
+body.contact form p.tip {
+	margin-top: 0;
+	font-size: 12px;
+	color: #ccc;
+	font-style: italic;
+	width: 300px;
+	line-height: 16px;
+}
+
+body.contact form p.tip b {
+	color: #999;
+	font-weight: normal;
+}
+
+body.contact p.last {
+	border-top: 1px solid #ddd;
+	padding-top: 10px;
+	text-align: center;
+	margin-bottom: 40px;
+}
+
+body.contact form img {
+	position: absolute;
+	top: 20px;
+	right: -280px;
+}
+
+body.contact form .googlegroup {
+	background-color: #F8FBFD;
+	padding: 10px;
+	position: absolute;
+	top: 310px;
+	right: -295px;
+	width: 210px;
+	text-align: center;
+	font-size: 14px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	line-height: 19px;
+	color: #666;
+}
+
+
 /* Forms */
 
 ul.form {

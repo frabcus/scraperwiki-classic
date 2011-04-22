@@ -14,16 +14,11 @@
 
 {% block header %}
 	<h2>Contact us</h2>
-	<p>Ask us a question or make a suggestion. You are also free to join the <a href="http://groups.google.com/group/scraperwiki">ScraperWiki Google Group</a>.</p>
+	<p>Ask us a question or make a suggestion.</p>
 {% endblock %}
 
 {% block content %}
-    <div class="page_title">
-        <h1></h1>
-        <p>
-        </p>  
-    </div>
-    <div class="content left col">
+    <div class="content">
         <form action="/contact/" method="POST">
             <ul class="form">
             <li>
@@ -55,6 +50,7 @@
                 {{ form.body.label_tag }}                    
                 {{ form.body }}
                 {% field_errors form.body %}
+                <p class="tip"><b>Reporting a bug?</b> Remember to tell us your browser, operating system, and the scraper or page involved.</p>
             </li>
 
             {% if not request.user.is_authenticated %}
@@ -65,12 +61,10 @@
                 </li>
             {% endif %}               
             </ul>
-            <p class="report">Please give your browser brand and/or name of your scraper if we need to know.</p>
-            <input type="submit" value="Send feedback" />
+            <p class="last"><input type="submit" value="Send feedback" /></p>
+            <img src="{{ MEDIA_URL }}images/postman.gif" width="175" height="260" alt="" />
+            <p class="googlegroup">Discuss bugs, ask questions, <br/>stay up to date. <a href="http://groups.google.com/group/scraperwiki">Join the <br/>ScraperWiki Google Group.</a></p>
         </form>
         <br />
-    </div>
-    <div class="content right col">
-        &nbsp;
     </div>
 {% endblock %}
