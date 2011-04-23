@@ -64,7 +64,23 @@
 					</ul>
 				</li>
 				{% else %}
-				<li class="user login"><a href="{% url login %}?next=/">Log in</a></li>
+				<li class="user login">
+				    <a href="{% url login %}?next=/">Log in</a>
+				    <ul>
+						<li class="login_form">
+						    <form method="post" action="{% url login %}">
+                                <label for="id_user_or_email">Username or email:</label>
+                                <input type="text" id="id_user_or_email" name="user_or_email" />
+                                <label for="id_password">Password:</label>
+                                <input type="password" id="id_password" name="password" />
+                                <a id="forgotten" href="/accounts/password/reset/">Forgotten?</a>
+                                <input type="submit" class="submit" id="submit" name="login" value="Log in" />
+                                <span class="clear"></span>
+                            </form>
+						</li>
+						<li class="signup"><a href="{% url login %}">Create an account</a></li>
+					</ul>
+				</li>
 				{% endif %}
 				<li class="search">
 					<form id="navSearch" action="/search/" method="post">
@@ -181,6 +197,7 @@
   		        <br class="clear"/>
 		    </div>
 		</div>
+		<br class="clear" />
 	</div>
 	{% endblock %}
 
