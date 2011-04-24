@@ -3,7 +3,7 @@
 {% block title %}Help{% endblock %}
 
 {% block header %}
-	<h2>Help - {{mode|capfirst}}</h2>
+	<h2>Help &ndash; {{mode|capfirst}}</h2>
 {% endblock %}
 
 {% block tabs %}
@@ -30,8 +30,19 @@
 
 {% block content %}
     <div class="content">
-
+        
     {% ifnotequal mode "faq" %}
+    <p class="language_chooser">
+        <strong>Choose a language:</strong>
+        <a href="../python/" class="python" title="You are currently viewing Python Help files"><img src="{{ MEDIA_URL }}images/icons/python.png" width="16" height="16" alt="" /> Python</a>
+        <a href="../ruby/" class="ruby" title="Switch to Ruby Help files"><img src="{{ MEDIA_URL }}images/icons/ruby.png" width="16" height="16" alt="" /> Ruby</a>
+        <a href="../php/" class="php" title="Switch to PHP Help files"><img src="{{ MEDIA_URL }}images/icons/php.png" width="16" height="16" alt="" /> PHP</a>
+        <a href="http://groups.google.com/group/scraperwiki" class="stuck">Stuck? Try asking other developers</a>
+        <br class="clear"/>
+    </p>
+    {% endifnotequal %}
+    
+    <!-->
     <p>
         You are reading the help for <strong class="language {{language}}">{{display_language}}</strong> 
          See help also for
@@ -40,7 +51,7 @@
          <strong class="language {{other_language}}"><a href="{% url help mode other_language %}">{{display_other_language}}</a></strong>{% endfor %}.
     </p>
     <p>Still confused? Ask a question on our <a href="http://groups.google.com/group/scraperwiki">developers' list</a>.</p>
-    {% endifnotequal %}
+    -->
 
     <div id="help_content">
     {% include include_tag %}
