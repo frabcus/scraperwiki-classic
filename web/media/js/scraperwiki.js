@@ -132,7 +132,7 @@ $(function(){
 			} else if(id == 'viz'){
 				show = '.urls, .columns, .frequency, .due_date, .visualisation, .name, .email, .telephone';
 			} else if(id == 'app'){
-				show = '.urls, .columns, .frequency, .due_date, .name, .email';
+				show = '.urls, .columns, .frequency, .due_date, .application, .name, .email';
 			} else if(id == 'etl'){
 				show = '.description, .name, .email, .telephone, .company_name';
 			} else {

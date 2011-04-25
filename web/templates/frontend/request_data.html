@@ -70,6 +70,10 @@
 		<label for="id_visualisation">What visualisation do you need?</label>
 		<textarea id="id_visualisation" rows="10" cols="40" name="visualisation"></textarea>
 	</li>
+    <li class="application">
+		<label for="id_application">What application do you want built?</label>
+		<textarea id="id_application" rows="10" cols="40" name="application"></textarea>
+	</li>
 	<li class="description">
 		<label for="id_description">What are your ETL needs?</label>
 		<textarea id="id_description" rows="10" cols="40" name="description"></textarea>
@@ -95,12 +99,12 @@
 		<label for="id_broadcast">I&#39;m happy for this request to be <br/>posted on Twitter/Facebook</label>
 	</li>
 	</ul>
+    <p id="terms_and_conditions">
+        Don't worry, we never pass your details on to third parties, and everything's stored safely in accordance with our <a href="{% url terms %}">terms and conditions</a>.
+    </p>
 	<p class="last">
 		<input type="submit" value="Submit your request" id="submit" />
 	</p>
-    <p id="terms_and_conditions">
-        Don't worry, we never pass your details on to third parties, and everything's stored safely in accordance with our <a href="{% url terms %}">terms and conditions</a>.
-     </p>
 </form>
 
 <div id="request_scrapbook">
