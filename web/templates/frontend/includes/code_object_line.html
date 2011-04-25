@@ -1,5 +1,6 @@
 {% load markup %}
 {% load screen_shot %}
+{% load humanize %}
 
 <li class="code_object_line">
 
@@ -33,7 +34,18 @@
         {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
     </a></h3>
     
-    <p class="context">Created {{code.created_at|timesince}} ago</p>
+    {% if code.scraper %}
+    <p class="context">
+        {% if code.scraper.record_count %}
+            {{code.scraper.record_count|intcomma}} row{{code.scraper.record_count|pluralize}} of data.
+        {% else %}
+            No rows of data yet.
+        {% endif %}
+    </p>
+    {% endif %}
+    <p class="context">
+        Created {{code.created_at|timesince}} ago.
+    </p>
     
     <p class="description">{{ code.description|textile|striptags|truncatewords:75 }}</p>
     
