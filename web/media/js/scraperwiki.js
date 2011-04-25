@@ -164,6 +164,8 @@ $(function(){
 	
 	$('#id_due_date').datepicker({
 		minDate: '+1'
+	}).next().bind('click', function(){
+		$(this).prev().datepicker("show");
 	});
 	
 	

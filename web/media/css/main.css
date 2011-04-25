@@ -1123,11 +1123,18 @@ body.profiles h2.scrapersandviews {
 	color: #28c;
 }
 
-#request_form li input.text {
+#request_form li input.text,
+#request_form li select {
 	width: 328px;
 	line-height: 20px;
 	margin-bottom: 10px;
 	text-indent: 5px;
+}
+
+#request_form li select {
+	width: 250px;
+	margin-top: 5px;
+	text-indent: 0;
 }
 
 #request_form textarea {
@@ -1147,6 +1154,39 @@ body.profiles h2.scrapersandviews {
 	margin: 0 15px 20px 15px;
 	border-top: 1px solid #D0E2EF;
 }
+
+#request_form #id_due_date {
+	width: 200px;
+}
+
+#request_form .due_date a {
+	font-size: 12px;
+	display: inline-block;
+	background-color: #fff;
+	padding: 4px 6px;
+	line-height: 16px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	border: 1px solid #ccc;
+	float: right;
+	cursor: pointer;
+}
+
+#request_form .due_date a:hover {
+	text-decoration: none;
+	background-color: #F4F8FB;
+	border-color: #39d;
+	color: #069;
+}
+
+#request_form .due_date a img {
+	vertical-align: -3px;
+	margin-right: 2px;
+}
+
+
+
+
 
 
 #divPage {

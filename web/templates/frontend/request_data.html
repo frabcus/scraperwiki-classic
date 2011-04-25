@@ -52,11 +52,19 @@
 	</li> 
 	<li class="frequency">
 		<label for="id_frequency">How often does the data need to be scraped?</label>
-		<input class="text" type="text" name="frequency" id="id_frequency" />
+	<!--	<input class="text" type="text" name="frequency" id="id_frequency" /> -->
+	     <select id="id_frequency" name="frequency">
+	        <option>Once only</option>
+	        <option>Monthly</option>
+	        <option>Weekly</option>
+	        <option selected="selected">Daily</option>
+	        <option>Hourly</option>
+	        <option>Real-time</option>
+	    </select>
 	</li>
 	<li class="due_date">
 		<label for="id_due_date">When do you need it by?</label>
-		<input class="text" type="text" name="due_date" id="id_due_date" />
+	    <input class="text" type="text" name="due_date" id="id_due_date" /> <a><img src="{{ MEDIA_URL }}images/icons/calendar.png" width="16" height="16" alt="" /> Show calendar</a>
 	</li> 
 	<li class="visualisation">
 		<label for="id_visualisation">What visualisation do you need?</label>
@@ -116,7 +124,7 @@
         <li>
             <a href="http://twitter.com/#%21/timoreilly/status/27527990573268993">
                 <img src="http://placehold.it/145x100" />
-                <h4>The Tim O&rsquo;Reilly seal of approval</h4>
+                <h4>The Tim O&rsquo;Reilly tweet of approval</h4>
             </a>
         </li>
 	    <li class="clear"></li>
