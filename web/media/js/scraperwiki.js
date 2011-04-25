@@ -334,7 +334,7 @@ function setupScraperEditInPlace(wiki_type, short_name)
             $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
         }
     }); 
-    $('#aEditTags').click(function()
+    $('#aEditTags, #aEditTagsFromEmpty').click(function()
     {
         $('#divEditTags').dblclick();
         $('#divEditTagsControls').show();

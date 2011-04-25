@@ -2014,6 +2014,11 @@ div.metadata dt, div.metadata dd {
 	font-weight: normal !important;
 }
 
+#divScraperTags ul {
+    margin-left: 0;
+    padding: 0;
+}
+
 #scraper_contributors {
 	width: 55%;
 	padding-right: 5%;
