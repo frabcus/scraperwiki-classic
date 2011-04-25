@@ -362,7 +362,8 @@ body.frontpage #nav_inner li.frontpage {
 }
 
 .profiles #header_inner,
-.login #header_inner {
+.login #header_inner,
+.password #header_inner {
 	background-image: url(../images/header_icon_user.gif);
 }
 
@@ -2428,6 +2429,14 @@ body.contact form .googlegroup {
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 }
+
+body.password #divContent {
+	text-align: center;
+	width: 548px;
+	padding: 20px 120px;
+}
+
+
 
 
 /* Forms */
