@@ -74,7 +74,7 @@ class scraperContactForm(ContactForm):
         if not request.user.is_authenticated():
             self.fields['captcha'] = CaptchaField()
         
-    subject_dropdown = forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request a private scraper'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))
+    subject_dropdown = forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request data'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))
     title = forms.CharField(widget=forms.TextInput(), label=u'Subject')
     recipient_list = [settings.FEEDBACK_EMAIL]
 

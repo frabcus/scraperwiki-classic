@@ -25,6 +25,10 @@
                 {{ form.subject_dropdown.label_tag }}
                 {{ form.subject_dropdown }}
                 {% field_errors form.subject_dropdown %}
+                <p id="requesting_data_tip" style="display: none">
+                <strong>You can also use the <a href="{% url request_data %}">full data request form</a>
+                    to request data.</strong>
+                </p>
             </li>
             {% if request.user.is_authenticated %}
                 <input id="id_name" name="name" type="hidden" class="required" value="{{ request.user.username }}" />
@@ -67,4 +71,16 @@
         </form>
         <br />
     </div>
+{% endblock %}
+
+{% block run_script %}
+    $(document).ready(function() 
+    { 
+        $("#id_subject_dropdown").change(function() { 
+            if ($(this).val() == 'request') {
+                $("#requesting_data_tip").show(500);
+            }
+        }); 
+    }
+    );
 {% endblock %}
