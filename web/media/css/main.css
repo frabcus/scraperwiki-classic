@@ -2576,13 +2576,42 @@ p.tag_filter {
 	text-align: center;
 	margin: 0 0 20px 0;
 	font-size: 14px;
+	line-height: 24px;
 	color: #28c;
 }
 
-p.tag_filter .filter {
-	margin: 0 10px;
+p.tag_filter label {
+	padding-left: 50px;
+}
+
+p.tag_filter #filter_text {
+	margin: 0 5px;
 	line-height: 16px;
 	padding: 2px 4px;
+}
+
+p.tag_filter a {
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+	background: transparent url(../images/icons/tick.png) 4px 4px no-repeat;
+	text-indent: -9000px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	background-color: #fff;
+	margin-right: 6px;
+	border: 1px solid #C4D8E6;
+	cursor: pointer;
+	outline: none;
+}
+
+p.tag_filter a:hover {
+	background-color: #F4F8FB;
+	border-color: #B0CADE;
+}
+
+p.tag_filter #reset {
+	background-image: url(../images/icons/cross.png);
 }
 
 ul.tags li {

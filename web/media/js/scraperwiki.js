@@ -168,9 +168,30 @@ $(function(){
 		$(this).prev().datepicker("show");
 	});
 	
-	if($('body').is('.tags')){
-		$('.content').liveFilter({defaultText : "Start typing", delay : 500});	
-	}
+	$('body.tags .content #filter').css('visibility','hidden').bind('click', function(){
+		if($('#filter_text').val() != ''){
+			$('.content li').not(":contains(" + $('#filter_text').val() + ")").hide();
+			$(this).siblings('#reset').css('visibility','visible');
+		}
+	}).siblings('#reset').css('visibility','hidden').bind('click', function(){
+		$('.content li').show();
+		$(this).css('visibility','hidden');
+		$('#filter_text').val('');
+		$('#filter').css('visibility','hidden');
+	}).siblings('#filter_text').bind('keyup', function(e){
+		if(e.which == 13){
+			if($('#filter_text').val() != ''){
+				$('.content li').not(":contains(" + $('#filter_text').val() + ")").hide();
+				$(this).siblings('#reset').css('visibility','visible');
+			}
+		} else if($(this).val() != ''){
+			$('#filter').css('visibility','visible');
+		} else {
+			$('#filter').css('visibility','hidden');
+			$('#reset').css('visibility','hidden');
+			$('.content li').show();
+		}
+	});
 	
 	
 	
