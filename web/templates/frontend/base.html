@@ -153,7 +153,9 @@
 
               {% if user.is_staff %}
               <ul class="sub_menu staff"> 
-                  <li class="staff"><a href="{% url running_scrapers %}" title="Interact with current UML status">UML status</a></li>
+                  <li class="staff"><a href="/admin/">Django admin</a></li>
+                  <li class="staff"><a href="{% url running_scrapers %}" title="Interact with current sandbox status">UML status</a></li>
+                  <li class="staff"><a href="{% url kpi %}" title="Key performance indicators">KPIs</a></li>
               </ul>
               {% endif %}
             </div>
