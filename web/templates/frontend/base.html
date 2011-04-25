@@ -124,8 +124,11 @@
                 <li><a href="{% url dashboard %}" title="Manage your scrapers" class="dashboard">Your dashboard</a></li>
                 {% endif %}
                 <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers">Browse scrapers</a></li>
-                <li><a href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a></li>
-                <li><a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">New view</a></li>
+                <li>
+                    <a href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a> /
+                    <a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">view</a>
+                </li>
+                <!-- <li><a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">New view</a></li> -->
                 <!-- <li><a href="{% url help 'tutorials' language|default:"python" %}" title="Help">Tutorials</a></li> -->
                 <li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
                 {% if settings.ENABLE_MARKETPLACE %}
@@ -142,7 +145,7 @@
 
               <ul class="sub_menu">
                  <li><a href="{% url about %}" title="About ScraperWiki">About ScraperWiki</a></li>
-                 <li><a href="{% url help 'faq' language|default:"python" %}" title="Frequently Asked Questions">Help &amp; FAQ&rsquo;s</a></li>
+                 <li><a href="{% url help 'faq' language|default:"python" %}" title="Frequently Asked Questions">Help &amp; FAQs</a></li>
                  <li><a href="{% url help 'documentation' language|default:"python" %}" title="Technical docs">Docs &amp; Tutorials</a></li>
                  <li><a href="{% url contact_form %}" title="Feedback form">Contact us / Feedback</a></li>
               </ul>
