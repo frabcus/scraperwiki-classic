@@ -10,7 +10,34 @@
     <input type="hidden" id="hidLicenseChoices" value="{ {% for name, text in license_choices %}'{{name}}':'{{text}}', {% endfor %} }" />
 </fieldset>
 
+<div class="page_title">
+    <ul class="title_links">
+        {% ifequal scraper.wiki_type 'scraper'%}
+           <li class="api"><a href="{% url api:scraper_sqlite %}?name={{scraper.short_name}}">Explore with ScraperWiki API</a></li>
+           <li class="sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download SQLite3 database</a></li>
+        {% endifequal %}
+        {% ifequal scraper.wiki_type 'view'%}
+            <li class="full_screen"><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">View as full page</a></li>
+            <li class="embed"><a href="{% url code_overview scraper.wiki_type scraper.short_name %}#embed">Add to your site</a></li>
+        {% endifequal %}
+        <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
+    </ul>
+</div>
+
 <div class="content full">
+    {% if scraper.is_sick_and_not_running %}
+        <p class="sick">
+            <strong>Maintenance required!</strong> This {{scraper.wiki_type}} might be broken 
+            (it generated an exception on its 
+                 <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">last run</a>).
+            {% ifequal scraper.owner.get_profile user %}
+                <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit this {{scraper.wiki_type}}</a>.
+            {% else %}
+                Do you know {{scraper.language}}? Could you help <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">fix this {{scraper.wiki_type}}</a>?
+            {% endifequal %}
+        </p>
+    {% endif %}
+
     <div class="data_viewer">
 
         {% if sqlitedata %}
@@ -175,7 +202,13 @@
     {% include 'codewiki/includes/admin_controls.html' %}
 
 </div>
+
 <br class="clear"/>
+
+<p class="report">
+<strong>Important</strong> If you suspect this scraper breaks our <a href="/terms_and_conditions/">Terms &amp; Conditions</a>, please <a href="/contact/">report it</a>
+</p>
+
 {% endblock %}
 
 {% block run_script %}
