@@ -422,18 +422,21 @@ function setupScraperEditInPlace(wiki_type, short_name)
 
 
      //scheduler
-     $('#spnRunInterval').editable('admin/', {
-              indicator : 'Saving...',
-              tooltip   : 'Click to edit...',
-              cancel    : 'Cancel',
-              submit    : 'Save',
-              onblur: 'ignore',
-              data   : $('#hidScheduleOptions').val().replace('PLACEHOLDER', $('#spnRunIntervalInner').attr('rawInterval')),
-              type   : 'select',
-              event: 'dblclick',
-              placeholder: '',
-              submitdata : {short_name: short_name}
-          });
+     //
+     if ($('#spnRunInterval').length > 0) {
+         $('#spnRunInterval').editable('admin/', {
+                  indicator : 'Saving...',
+                  tooltip   : 'Click to edit...',
+                  cancel    : 'Cancel',
+                  submit    : 'Save',
+                  onblur: 'ignore',
+                  data   : $('#hidScheduleOptions').val().replace('PLACEHOLDER', $('#spnRunIntervalInner').attr('rawInterval')),
+                  type   : 'select',
+                  event: 'dblclick',
+                  placeholder: '',
+                  submitdata : {short_name: short_name}
+              });
+      }
 
       $('#aEditSchedule').click(
            function(){

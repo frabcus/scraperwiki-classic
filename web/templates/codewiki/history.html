@@ -1,9 +1,9 @@
 {% extends "codewiki/scraper_base.html" %}
-
 {% load humanize %}
 {% load month_name %}
-{% load gravatar %}
+
 {% block tab %}
+{% load gravatar %}
 
 {% block javascript %}
   {% with scraper.language|lower as language %}
@@ -134,6 +134,8 @@
 
 
 {% block run_script %}
+  {{ block.super }}
+
 var fetchedcache = { }; // cached code of different versions
 function cachefetch(cid, callback)
 {
