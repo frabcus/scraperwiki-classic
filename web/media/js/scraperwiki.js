@@ -168,6 +168,8 @@ $(function(){
 		$(this).prev().datepicker("show");
 	});
 	
+	$('body.tags .content').liveFilter({defaultText : "Start typing"});
+	
 	
 	
 });

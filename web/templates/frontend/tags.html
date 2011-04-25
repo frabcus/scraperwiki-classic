@@ -1,5 +1,9 @@
 {% extends "frontend/base.html" %}
 
+{% block javascript %}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.liveFilter.js"></script>
+{% endblock %}
+
 {% block title %}Tags{% endblock %}
 
 {% block header %}
@@ -26,6 +30,12 @@
 {% block content %}
 
 <div class="content full">
+    
+    <p class="tag_filter">
+    <label for"filter">Filter tags:</label>
+    <input class="filter" type="text" value="" id="filter" />
+	<input class="reset" type="reset" value="Reset" />
+	</p>
 
     <ul class="cloud tags">
         {% for tag in tags %}

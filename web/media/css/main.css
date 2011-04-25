@@ -2570,6 +2570,23 @@ ul.inline li {
 
 /* tags */
 
+p.tag_filter {
+	background-color:  #F4F8FB;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	padding: 10px;
+	text-align: center;
+	margin: 0 0 20px 0;
+	font-size: 14px;
+	color: #28c;
+}
+
+p.tag_filter .filter {
+	margin: 0 10px;
+	line-height: 16px;
+	padding: 2px 4px;
+}
+
 ul.tags li {
 	display: inline;
 	padding-right: 0.3em;
