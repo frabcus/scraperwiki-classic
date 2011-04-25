@@ -13,8 +13,6 @@
   <script type="text/javascript" src="{{ MEDIA_URL }}js/codeviewer.js?{{settings.REVISION}}"></script>  {# highlightCode(code, Parser), highlightOtherCode(greencode, redcode, matcheropcodes, Parser) #}
 {% endblock %}
 
-<p class="history_bold">Scheduled runs and edits to <span>"{{scraper.title}}"</span>.</p>
-
 <input type="hidden" id="rawcodeurl" value="{% url raw scraper.short_name %}"/>
 <input type="hidden" id="diffsequrl" value="{% url diffseq scraper.short_name %}"/>
 <input type="hidden" id="run_event_json" value="{% url run_event_json 'XXX' %}"/>
