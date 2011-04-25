@@ -18,14 +18,14 @@
             <li{% ifequal mode "documentation" %} class="selected"{% endifequal %}> 
                 <a id="reference" href="{% url help 'documentation' language|default:"python" %}">Documentation</a> 
             </li>
-            <li{% ifequal mode "faq" %} class="selected"{% endifequal %}> 
-                <a id="faq" href="{% url help 'faq' language|default:"python" %}">FAQ</a> 
-            </li>
             <li{% ifequal mode "tutorials" %} class="selected"{% endifequal %}> 
                 <a id="tutorials" href="{% url help 'tutorials' language|default:"python" %}">Tutorials</a> 
             </li>
+            <li{% ifequal mode "faq" %} class="selected"{% endifequal %}> 
+                <a id="faq" href="{% url help 'faq' language|default:"python" %}">FAQ</a> 
+            </li>
             <li{% ifequal mode "intro" %} class="selected"{% endifequal %}> 
-                <a id="intro" href="{% url help 'intro' language|default:"python" %}">Intro</a> 
+                <a id="intro" href="{% url help 'intro' language|default:"python" %}">Introduction</a> 
             </li>
         </ul>
     </div>
