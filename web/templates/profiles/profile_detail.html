@@ -2,7 +2,8 @@
 
 {% load gravatar %}
 {% block css %}{% endblock %}
-{% block title %}Profile Details: {{ profile.name }}{% endblock %}
+{% block title %}Profile Details: {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}
+{% endblock %}
 
 {% block header %}
 	<h2>{% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}&rsquo;s profile</h2>
