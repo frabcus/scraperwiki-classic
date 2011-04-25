@@ -1993,8 +1993,8 @@ a#downloadcsvtable {background:url(../images/icons/csv_download.png) no-repeat; 
 /* Page tabs */
 
 div.page_tabs {
-	padding-right: 0.2em;
-	height: 1.65em;
+	padding-right: 10px;
+	heiXXXght: 1.65em;
 }
 
 div.page_tabs.small {
@@ -2005,9 +2005,33 @@ div.page_tabs.small {
 div.page_tabs ul {
 	padding: 0;
 	margin: 0;
+	list-style: none;
 }
 
 div.page_tabs ul li {
+	float: right;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+div.page_tabs ul li a {
+	display: block;
+	border-top: solid 1px #9f9f9f;
+	border-left: solid 1px #9f9f9f;
+	border-right: solid 1px #9f9f9f;
+	padding: 4px 10px 3px 10px;
+	margin-left: 10px;
+}
+
+div.page_tabs ul li.selected a {
+	background-color: #fff;
+	position: relative;
+	padding: 5px 10px 4px 10px;
+	margin: -1px 0 -1px 10px;
+}
+
+/* div.page_tabs ul li {
 	float: right;
 	list-style-type: none;
 	padding: 4px 10px 3px 10px;
@@ -2029,11 +2053,14 @@ div.page_tabs ul li a {
 	font-weight: bold;
 }
 
+*/
+
 div.page_tabs ul li small {
 	font-size: 0.7em;
 	position: relative;
 	top: -0.2em;
 }
+
 
 div.tab_tools {
 	text-align: right;
