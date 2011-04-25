@@ -184,14 +184,16 @@ def help(request, mode=None, language=None):
              'tutorials': tutorials, 'viewtutorials': viewtutorials, 
              'other_languages' : other_languages }
     
-    if not mode or mode=="faq":
+    if not mode or mode=="intro":
+        mode = "intro"
+        context["include_tag"] = "frontend/help_intro.html"
+        context["mode"] = "intro"
+    elif mode=="faq":
         mode = "faq"
         context["include_tag"] = "frontend/help_faq.html"
         context["mode"] = "faq"
-    
     elif mode=="tutorials":
-        
-                # new ordering by the number at start of title, which we then strip out for display
+        # new ordering by the number at start of title, which we then strip out for display
         if language == "python":
             tutorials[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('title')
             for scraper in tutorials[language]:
