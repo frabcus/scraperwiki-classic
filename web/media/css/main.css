@@ -2706,6 +2706,7 @@ ul.scraper_list li {
 	padding: 20px 0;
 	border-bottom: 1px solid #9f9f9f;
 	min-height: 80px;
+	clear: both;
 }
 
 ul.scraper_list a.screenshot {
