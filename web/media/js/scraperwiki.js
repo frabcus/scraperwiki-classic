@@ -162,6 +162,10 @@ $(function(){
 		$('<span>').addClass('arrow').css('border-width', Math.round(h/2) + 'px 10px ' + Math.round(h/2) + 'px 0px').attr('title',h).appendTo($(this));
 	});
 	
+	$('#id_due_date').datepicker({
+		minDate: '+1'
+	});
+	
 	
 	
 });

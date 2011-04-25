@@ -17,7 +17,7 @@
         {% endifequal %}
         <tr class="language {{code.language|lower}}">
             <td class="label">Language</td>
-            <td class="link"><a href="{% url editor_edit code.wiki_type code.short_name %}">{{code.language|lower}}</a></td>
+            <td class="link"><a href="{% url editor_edit code.wiki_type code.short_name %}" title="Edit this {{code.wiki_type|lower}}">{{code.language|lower}}</a></td>
         </tr>
         {% if code.is_sick_and_not_running %}
         <tr class="notes">
@@ -29,11 +29,11 @@
     
     <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
     
-    <h3><a href="{% url code_overview code.wiki_type code.short_name %}">
+    <h3><a class="owner" href="{% if code.owner.username %}{% url profiles_profile_detail code.owner.username %}{% endif %}">{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}</a> / <a href="{% url code_overview code.wiki_type code.short_name %}">
         {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
     </a></h3>
     
-    <p class="context">Created by <a class="owner" href="{% if code.owner.username %}{% url profiles_profile_detail code.owner.username %}{% endif %}">{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}</a>  {{code.created_at|timesince}} ago</p>
+    <p class="context">Created {{code.created_at|timesince}} ago</p>
     
     <p class="description">{{ code.description|textile|striptags|truncatewords:75 }}</p>
     
