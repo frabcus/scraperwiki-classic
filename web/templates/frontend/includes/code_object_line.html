@@ -34,15 +34,20 @@
         {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
     </a></h3>
     
-    <!--{% if code.scraper %}
     <p class="context">
-        {% if code.scraper.record_count %}
-            {{code.scraper.record_count|intcomma}} row{{code.scraper.record_count|pluralize}} of data.
+        {% if code.line_count %}
+            {{code.line_count|intcomma}} line{{code.line_count|pluralize}} of code.
         {% else %}
             No rows of data yet.
         {% endif %}
+        {% if code.scraper %}
+            {% if code.scraper.record_count %}
+                {{code.scraper.record_count|intcomma}} row{{code.scraper.record_count|pluralize}} of data.
+            {% else %}
+                No rows of data yet.
+            {% endif %}
+        {% endif %} 
     </p>
-    {% endif %} -->
     <p class="context">
         Created {{code.created_at|timesince}} ago.
     </p>
