@@ -1,25 +1,42 @@
 {% extends "frontend/base.html" %}
 {% load dial %}
 
-{% block title %}Scrapers and requests tagged '{{tag.name}}'{% endblock %}
+{% block title %}Scrapers and requests tagged &lsquo;{{tag.name}}&rsquo;{% endblock %}
 
 {% block header %}
-	<h2>Tag: <a href="{% url single_tag tag.name %}" class="single_tag">{{tag.name}}</a></h2>
+	<h2><a href="/tags/">Browse by tag</a> / <a href="{% url single_tag tag.name %}">{{tag.name}}</a></h2>
+	<p>Showing all scrapers and requests tagged with &lsquo;{{tag.name}}&rsquo;</p>
+{% endblock %}
+
+{% block tabs %}
+    <div class="page_tabs">
+        <ul>
+            <li class="selected"> 
+                <a id="tags" href="/tags/" class="selected">Browse by tag</a> 
+            </li>
+            <li> 
+                <a id="views" href="{% url scraper_list %}views">Views</a> 
+            </li>
+            <li> 
+                <a id="scrapers" href="{% url scraper_list %}scrapers">Scrapers</a> 
+            </li>
+        </ul>
+    </div>
 {% endblock %}
 
 {% block content %}
-    <div class="page_title tag_header">
+    <div class="tag_header">
         {% if settings.ENABLE_MARKETPLACE %}
         <p>
             Do you know of a dataset relating to <em>{{tag.name}}</em> that should have a scraper created for it? <a href="{% url market_solicitation %}?tags={{tag.name}}">If so, please request it</a>
             and it will be added to the open requests section of this page.
         </p>
         {% endif %}
-        <table class="tag_stats">
+   <!--     <table class="tag_stats">
             <tr>
                 <td>
                     <span>
-                        {% dial scrapers_fixed_percentage 200 100 %}
+                        {% dial scrapers_fixed_percentage 100 50 %}
                     </span>
                     <p>
                         % Fixed scrapers
@@ -28,7 +45,7 @@
                 {% if settings.ENABLE_MARKETPLACE %}
                 <td>
                     <span>
-                        {% dial solicitations_percent_complete 200 100 %}                            
+                        {% dial solicitations_percent_complete 100 50 %}                            
                     </span>
                     <p>              
                         % Completed requests
@@ -36,10 +53,10 @@
                 </td>
                 {% endif %}
             </tr>
-        </table>
+        </table>    -->
     </div>
 
-<div class="content left col">
+<div class="content full">
     {% if scrapers %}
         <ul class="scraper_list">    
             {% for code in scrapers %}

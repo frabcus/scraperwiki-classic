@@ -12,6 +12,9 @@
 {% block tabs %}
     <div class="page_tabs">
         <ul>
+            <li> 
+                <a id="tags" href="/tags/">Browse by tag</a> 
+            </li>
             <li{% ifequal wiki_type 'view' %} class="selected"{% endifequal %}> 
                 <a id="views" href="{% url scraper_list %}views">Views</a> 
             </li>
@@ -25,7 +28,8 @@
 {% block content %}
     <div class="page_title">
         <ul class="title_links">
-            <li class="rss"><a href="/feeds/all_code_objects/">RSS feed of all scrapers / views</a></li>
+            <li class="rss">
+                <a href="/feeds/all_code_objects/">RSS feed of all scrapers / views</a></li>
         </ul>
     </div>
 

@@ -377,6 +377,10 @@ body.frontpage #nav_inner li.frontpage {
 	background-image: url(../images/header_icon_view.gif);
 }
 
+.tags #header_inner {
+	background-image: url(../images/header_icon_tags.gif);
+}
+
 #header_inner h2 {
 	font-size: 30px;
 	line-height: 36px;
@@ -2550,8 +2554,8 @@ ul.tags.cloud li.c4 {
 }
 
 div.tag_header {
+	display: none;
 	min-height: 120px;
-	padding-right: 350px;
 }
 
 table.tag_stats {
