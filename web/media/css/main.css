@@ -2718,12 +2718,16 @@ ul.scraper_list h3 {
 	margin: 0;
 	padding: 0 0 5px 0;
 	color: #8cf;
+	width: 60%;
+	margin-left: 100px;
 }
 
 ul.scraper_list .context {
 	color: #666;
 	margin: 0 0 5px 0;
 	font-size: 14px;
+	width: 60%;
+	margin-left: 100px;
 }
 
 ul.scraper_list .context a {
@@ -2734,6 +2738,8 @@ ul.scraper_list .description {
 	margin: 0;
 	font-size: 13px;
 	color: #666;
+	width: 60%;
+	margin-left: 100px;
 }
 
 ul.scraper_list table {
