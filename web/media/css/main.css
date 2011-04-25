@@ -963,7 +963,8 @@ body.profiles h2.scrapersandviews {
 }
 
 #footer_inner .stats strong {
-	margin-right: 15px;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
 }
  
 #footer_inner a {
