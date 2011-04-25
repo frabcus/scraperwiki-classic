@@ -65,7 +65,7 @@
 				</li>
 				{% else %}
 				<li class="user login">
-				    <a href="{% url login %}?next=/">Log in</a>
+                    <a href="{% url login %}?next={{ request.get_full_path }}">Log in</a>
 				    <ul>
 						<li class="login_form">
 						    <form method="post" action="{% url login %}">
@@ -74,6 +74,7 @@
                                 <label for="id_password">Password:</label>
                                 <input type="password" id="id_password" name="password" />
                                 <a id="forgotten" href="/accounts/password/reset/">Forgotten?</a>
+                                <input type="hidden" name="redirect" value="{{ request.get_full_path }}"/>
                                 <input type="submit" class="submit" id="submit" name="login" value="Log in" />
                                 <span class="clear"></span>
                             </form>
