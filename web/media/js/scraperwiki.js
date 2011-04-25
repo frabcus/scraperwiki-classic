@@ -168,7 +168,9 @@ $(function(){
 		$(this).prev().datepicker("show");
 	});
 	
-	$('body.tags .content').liveFilter({defaultText : "Start typing"});
+	if($('body').is('.tags')){
+		$('.content').liveFilter({defaultText : "Start typing", delay : 500});	
+	}
 	
 	
 	

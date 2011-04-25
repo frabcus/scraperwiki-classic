@@ -76,35 +76,6 @@ div.page_tabs.small {
 	right: 0px;
 }
 
-
-
-/*
-
-.editor_header div.page_tabs {
-	position: absolute;
-	bottom: 0.15em;
-	right: 0;
-	float: right
-}
-
-.editor_header div.page_tabs li {
-	border-color: #9f9f9f;
-}
-
-.editor_header div.page_tabs ul {
-	border-bottom-color: #9f9f9f;
-}
-
-.editor_header #border_hide {
-	background: #fafafa;
-	position: absolute;
-	display: block;
-	width: 2.85em;
-	height: 3px;
-	bottom: -2px;
-	left: 0;
-}
-
 /* Code */
 
 .editor_code {

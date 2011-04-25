@@ -1995,13 +1995,7 @@ a#downloadcsvtable {background:url(../images/icons/csv_download.png) no-repeat; 
 
 div.page_tabs {
 	padding-right: 10px;
-	heiXXXght: 1.65em;
 }
-
-/* div.page_tabs.small {
-	font-size: 0.8em;
-	width: 50%;
-} */
 
 div.page_tabs ul {
 	padding: 0;
@@ -2031,30 +2025,6 @@ div.page_tabs ul li.selected a {
 	padding: 5px 10px 4px 10px;
 	margin: -1px 0 -1px 10px;
 }
-
-/* div.page_tabs ul li {
-	float: right;
-	list-style-type: none;
-	padding: 4px 10px 3px 10px;
-	margin: 0 0.3em 0 0.3em;
-	border-top: solid 1px #9f9f9f;
-	border-left: solid 1px #9f9f9f;
-	border-right: solid 1px #9f9f9f;
-	margin-bottom: -2px;
-}
-
-div.page_tabs ul li.selected {
-	border-bottom: solid 2px #fff;
-	position: relative;
-	top: -1px;
-	background: #fff;
-}
-
-div.page_tabs ul li a {
-	font-weight: bold;
-}
-
-*/
 
 div.page_tabs ul li small {
 	font-size: 0.7em;
