@@ -123,6 +123,7 @@
                 <li><a href="{% url dashboard %}" title="Manage your scrapers" class="dashboard">Your dashboard</a></li>
                 <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers">Browse scrapers</a></li>
                 <li><a href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a></li>
+                <li><a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">New view</a></li>
                 {% if settings.ENABLE_MARKETPLACE %}
                     <li><a href="{% url market_list %}">Request a dataset</a></li>
                 {% else %}
@@ -131,16 +132,12 @@
                 <li><a href="{% url help 'tutorials' language|default:"python" %}" title="Help">Tutorials</a></li>
                 <li><a href="{% url help 'documentation' language|default:"python" %}" title="Technical docs">Documentation</a></li>
                 <li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
-                {% if user.is_staff %}
-                  <li class="staff"><a href="{% url running_scrapers %}" title="Interact with current UML status">UML status</a></li>
-                  <li class="staff"><a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">New view</a></li>
-                {% endif %}
               </ul>
 
-              <form id="divSidebarSearch" action="/search/" method="post">
+              <!-- <form id="divSidebarSearch" action="/search/" method="post">
                 <input type="text" id="q" name="q"/>
                 <input type="submit" id="go" value="Go" />
-              </form>
+            </form> -->
 
               <ul class="sub_menu">
                  <li><a href="{% url about %}" title="About ScraperWiki">About ScraperWiki</a></li>
@@ -153,6 +150,12 @@
                  <li><a href="http://twitter.com/scraperwiki" title="Follow us on Twitter"><span class="unimportant">Follow us on</span> Twitter</a></li>
                  <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook"><span class="unimportant">Visit us on</span> Facebook</a></li>
               </ul>
+
+              {% if user.is_staff %}
+              <ul class="sub_menu staff"> 
+                  <li class="staff"><a href="{% url running_scrapers %}" title="Interact with current UML status">UML status</a></li>
+              </ul>
+              {% endif %}
             </div>
 		
 		{% endblock %}
