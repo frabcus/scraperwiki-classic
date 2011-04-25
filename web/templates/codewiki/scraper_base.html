@@ -4,7 +4,7 @@
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/code_object_comments/{{ scraper.short_name }}" />{% endblock %}
 
 {% block header %}
-	<h2><a href="{% url profiles_profile_detail scraper.owner.username %}">{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}</a> / {% if user.is_authenticated %}<span id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</span>{% else %}{{ scraper.title }}{% endif %}</h2>
+	<h2><a href="{% url profiles_profile_detail scraper.owner.username %}">{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}</a> / {% if user.is_authenticated %}<span id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</span> <a id="aEditTitle" title="Edit title">Edit title</a>{% else %}{{ scraper.title }}{% endif %}</h2>
 	<p>{{scraper.wiki_type|lower}} 
 	    &bull; {{scraper.language|lower}}
         {% ifnotequal scraper.privacy_status 'public' %}
@@ -35,9 +35,6 @@
                 <li class="embed"><a href="{% url code_overview scraper.wiki_type scraper.short_name %}#embed">Add to your site</a></li>
             {% endifequal %}
             <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
-            {% if user.is_authenticated %}
-        	<li class="edit_title"><a href="#" id="aEditTitle">Edit title</a></li>
-        	{% endif %}
         </ul>
     </div>
     <div class="content full">

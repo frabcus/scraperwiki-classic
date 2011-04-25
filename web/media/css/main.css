@@ -383,6 +383,40 @@ body.frontpage #nav_inner li.frontpage {
 	margin-left: 88px;
 }
 
+#header_inner #aEditTitle {
+	display: inline-block;
+	width: 28px;
+	height: 32px;
+	text-indent: -9000px;
+	background: transparent url(../images/edit_title.png) -2px 2px no-repeat;
+	opacity: 0.4;
+	cursor: pointer;
+}
+
+#header_inner:hover #aEditTitle {
+	opacity: 1;
+}
+
+#header_inner .editable input {
+	background: transparent;
+	outline: none;
+	border: none;
+	border-bottom: 2px solid #fff;
+	margin-right: 10px;
+	font-size: 30px;
+	color: #fff;
+	font-weight: bold;
+	font-family: Helvetica, Arial, sans-serif;
+	margin-top: -2px;
+	padding: 0;
+}
+
+#header_inner .editable button {
+	position: relative;
+	top: -5px;
+	margin-right: 5px;
+}
+
 #header_inner p {
 	margin: 0;
 	font-weight: bold;
@@ -1338,6 +1372,7 @@ ul.user_menu li {
 	padding: 0.3em 0;
 	list-style-type: none;
 	font-weight: bold;
+	color: #89BEE2;
 }
 
 #divMenu ul li a .unimportant {
@@ -3247,12 +3282,23 @@ p.report a:hover {
 /* Sick */
 
 p.sick {
-	background: #f3cacb url(../images/icons/eye.png) no-repeat 8px 0.4em;
-	font-size: 0.8em;
-	border-top: dotted 1px #d5a2a2;
-	border-bottom: dotted 1px #d5a2a2;
-	padding: 0.5em 10px 0.5em 30px;
-	margin: 0;
+	margin:10px 0 0 0;
+	padding: 7px 10px 7px 36px;
+	background: #FFDDDE url(../images/icons/eye.png) no-repeat 11px 7px;
+	font-size: 13px;
+	line-height: 18px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+p.sick a {
+	color: #800;
+	text-decoration: underline;
+}
+
+p.sick a:hover {
+	text-decoration: none;
+	color: #c00;
 }
 
 /* Documentation */

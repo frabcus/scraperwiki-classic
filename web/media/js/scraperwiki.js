@@ -302,14 +302,25 @@ function setupScraperEditInPlace(wiki_type, short_name)
 
     //title
     $('#hCodeTitle').editable('admin/', {
-             indicator : 'Saving...',
-             tooltip   : 'Click to edit...',
-             cancel    : 'Cancel',
-             submit    : 'Save',
-             onblur: 'ignore',
-             event: 'dblclick',
-             placeholder: '',             
-             submitdata : {short_name: short_name}
+			cssclass : 'editable',
+			width : $('#hCodeTitle').width() + 30,
+            indicator : 'Saving...',
+            tooltip   : 'Double click to edit title',
+            cancel    : 'Cancel',
+            submit    : 'Save',
+			before : function(value, settings){
+				$('#aEditTitle').hide();
+			},
+			callback : function(value, settings){
+				$('#aEditTitle').show();
+			},
+			onreset : function(value, settings){
+				$('#aEditTitle').show();
+			},
+            onblur: 'ignore',
+            event: 'dblclick',
+            placeholder: '',             
+            submitdata : {short_name: short_name}
          });
          
     $('#aEditTitle').click(
