@@ -1,6 +1,7 @@
 /* @override 
 	http://localhost:8000/media/css/main.css?
 	http://redesign.scraperwiki.com/media/css/main.css?
+	http://media.redesign2.scraperwiki.com/css/main.css?
 */
 
 /* HORS D'OUVRE */
@@ -1997,10 +1998,10 @@ div.page_tabs {
 	heiXXXght: 1.65em;
 }
 
-div.page_tabs.small {
+/* div.page_tabs.small {
 	font-size: 0.8em;
 	width: 50%;
-}
+} */
 
 div.page_tabs ul {
 	padding: 0;
