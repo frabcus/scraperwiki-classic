@@ -2028,6 +2028,32 @@ div.metadata dt, div.metadata dd {
 	padding: 0;
 }
 
+#add_view_to_site {
+	margin-top: 40px;
+	margin-bottom: -20px;
+	background-color: #F4F8FB;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+#add_view_to_site h3 {
+	padding: 10px 15px;
+	border-bottom: 2px solid #fff;
+	color: #28c;
+}
+
+#add_view_to_site code {
+	padding: 10px 20px;
+	font-size: 12px;
+	display: block;
+	line-height: 18px;
+	color: #555;
+}
+
+
+
+
+
 .code_viewer {
 	border: solid 1px #ccc;
 	position: relative;
@@ -3199,11 +3225,23 @@ ul.filter_list li {
 /* Report */
 
 p.report {
-	background: #f8f8a8 url(../images/icons/flag_yellow.png) no-repeat 8px 0.4em;
-	font-size: 0.8em;
-	border: dotted 1px #ccc;
-	padding: 0.5em 10px 0.5em 30px;
 	margin: 40px 0 0 0;
+	padding: 7px 10px 7px 36px;
+	background: #f8f8a8 url(../images/icons/flag_yellow.png) no-repeat 11px 7px;
+	font-size: 13px;
+	line-height: 18px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+p.report a {
+	color: #800;
+	text-decoration: underline;
+}
+
+p.report a:hover {
+	text-decoration: none;
+	color: #c00;
 }
 
 /* Sick */

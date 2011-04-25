@@ -4,59 +4,62 @@
 {% block tab %}
 {% load screen_shot %}
 
-    <div class="content full">
-    {% if htmlcode %}
-        {{htmlcode|safe}}
-    {% else %}
-        <div class="screenshot_large">
-          <a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">
-              <span>Click to open this view</span>
-          </a>
-          {% screen_shot scraper 'large' %}
-       </div>
-    {% endif %}
-    </div>
+<div class="content full">
+{% if htmlcode %}
+    {{htmlcode|safe}}
+{% else %}
+    <div class="screenshot_large">
+      <a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">
+          <span>Click to open this view</span>
+      </a>
+      {% screen_shot scraper 'large' %}
+   </div>
+{% endif %}
+</div>
 
-    <div class="content full">
-        <h2>About this view {% if user.is_authenticated %}<a href="#" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'view' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}</h2>        
-        <div class="text_wiki">
-            <div id="divAboutScraper">{{ scraper.description|textile }}</div>
-        </div>
+<div class="content full" id="scraper_about">
+    <h2>About this view {% if user.is_authenticated %}<a href="#" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'view' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}</h2>        
+    <div class="text_wiki">
+        <div id="divAboutScraper">{{ scraper.description|textile }}</div>
     </div>
+</div>
 
 {% include 'codewiki/includes/tags.html' %}
 
-    <div class="content col left">
-        <h3>Contributors</h3>
-        {% include 'codewiki/includes/contributors.html' %}
-    </div>
-        <div class="content col right">
-            {% if related_scrapers %}            
-                <h3>Scrapers used in the making of this view</h3>
-                <ul>
-                    {% for related_scraper in related_scrapers %}
-                        <a href="{% url profiles_profile_detail related_scraper.owner.username %}">{% if related_scraper.owner.get_profile.name %}{{ related_scraper.owner.get_profile.name }}{% else %}{{related_scraper.owner.username}}{% endif %}</a> /
-                        <a href="{% url code_overview related_scraper.wiki_type related_scraper.short_name %}">{{related_scraper.title}}</a>
-                    {% endfor %}
-                </ul>
-            {% endif %}
+<div class="content full" id="scraper_views">
+{% if related_scrapers %}            
+    <h3>Scrapers used in the making of this view</h3>
+    <ul>
+        {% for related_scraper in related_scrapers %}
+            <a href="{% url profiles_profile_detail related_scraper.owner.username %}">{% if related_scraper.owner.get_profile.name %}{{ related_scraper.owner.get_profile.name }}{% else %}{{related_scraper.owner.username}}{% endif %}</a> /
+            <a href="{% url code_overview related_scraper.wiki_type related_scraper.short_name %}">{{related_scraper.title}}</a>
+        {% endfor %}
+    </ul>
+{% endif %}
+</div>
 
-            {% include 'codewiki/includes/admin_controls.html' %}
-        </div>
-    <br class="clear"/>    
-    <div class="content full">
-      <a name="embed"></a>
-      <h3>Add this view to your site</h3>
-      <code>
-      {% filter force_escape|linebreaksbr %}
-        <div>
-          <iframe width="100%" height="400px" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}"></iframe>
-          <img src="http://scraperwiki.com/media/images/powered.png" alt="Powered by ScraperWiki.com" />
-        </div>
-      {% endfilter %}
-      </code>
-    </div>
-    <br class="clear"/>  
+<div class="content col left" id="scraper_contributors">
+    <h3>Contributors</h3>
+    {% include 'codewiki/includes/contributors.html' %}
+</div>
+
+<div class="content col right" id="scraper_schedule">
+    {% include 'codewiki/includes/admin_controls.html' %}
+</div>
+
+<br class="clear"/>    
+<div class="content full" id="add_view_to_site">
+    <a name="embed"></a>
+    <h3>Add this view to your site</h3>
+    <code>{% filter force_escape|linebreaksbr %}<div>
+            <iframe width="100%" height="400px" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}"></iframe>
+            <img src="http://scraperwiki.com/media/images/powered.png" alt="Powered by ScraperWiki.com" />
+        </div>{% endfilter %}
+    </code>
+</div>
+
+<br class="clear"/>  
+
 {% endblock %}
 {% block run_script %}
     {{block.super}}
