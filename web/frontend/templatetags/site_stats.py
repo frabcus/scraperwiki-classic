@@ -38,6 +38,6 @@ def num_users():
 @register.simple_tag
 @cache_value('num_data_rows')
 def num_data_rows():
-    return intcomma(Scraper.objects.aggregate(line_count=Sum('line_count'))['line_count'])
+    return intcomma(Scraper.objects.aggregate(record_count=Sum('record_count'))['record_count'])
 
 
