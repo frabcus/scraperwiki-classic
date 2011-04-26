@@ -9,7 +9,7 @@
   <form action="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" method="post">
     <input type="hidden" name="delete_scraper" value="1" />
     <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this {{scraper.wiki_type}}?" />
-    <p>Deletes this view. There is no undo.</p>
+    <p>Deletes this {{ scraper.wiki_type }}. There is no undo.</p>
   </form>
 
   {% ifequal scraper.wiki_type 'scraper' %}
