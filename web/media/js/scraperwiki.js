@@ -1,6 +1,7 @@
 
 
-function setupButtonConfirmation(sId, sMessage){
+function setupButtonConfirmation(sId, sMessage)
+{
     $('#' + sId).click(
         function(){
             var bReturn = false;
@@ -12,7 +13,8 @@ function setupButtonConfirmation(sId, sMessage){
     );
 }
 
-function setupSearchBoxHint(){
+function setupSearchBoxHint()
+{
     $('#divSidebarSearch input:text').focus(function() {
         if ($('#divSidebarSearch input:submit').attr('disabled')) {
             $(this).val('');
@@ -29,7 +31,7 @@ function setupSearchBoxHint(){
     });
     $('#divSidebarSearch input:text').blur();
 }
-$(function(){  }); 
+
 
 function setupNavSearchBoxHint(){
     $('#navSearch input:text').focus(function() {
@@ -52,11 +54,31 @@ function setupNavSearchBoxHint(){
 }
 
 
+function newCodeObject(wiki_type)
+{
+    url = '/' + wiki_type + 's/new/choose_template/?ajax=1';
+    //if (scraper_short_name != '')
+    //    url += '&sourcescraper=' + scraper_short_name; 
+    
+    $.get(url, function(data) 
+    {
+        $.modal('<div id="template_popup">'+data+'</div>', 
+        {
+            overlayClose: true, 
+            autoResize: true, 
+            containerCss:{ borderColor:"#ccc", width:(wiki_type == "scraper" ? 480 : 630)+"px", height:"170px" }, 
+            overlayCss: { cursor:"auto" }
+        });
+    });
+}
 
-$(function(){ 
-	
+$(function()
+{ 
 	setupSearchBoxHint();
 	setupNavSearchBoxHint();
+
+    $('a.editor_view').click(function()  {  newCodeObject('view');  return false; }); 
+    $('a.editor_scraper').click(function()  {  newCodeObject('scraper');  return false; }); 
 	
 	function developer_show(){
 		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
