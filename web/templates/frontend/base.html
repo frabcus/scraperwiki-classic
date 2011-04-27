@@ -57,7 +57,7 @@
 					<ul>
 						<li class="hi">Hi {% if user.get_profile.name %}{{user.get_profile.name}}{% else %}{{user.username}}{% endif %}!</li>
 						<li class="dashboard"><a href="{% url dashboard %}">Your dashboard</a></li>
-						<li class="profile"><a href="{% url profiles_profile_detail user.username %}">Your profile</li>
+						<li class="profile"><a href="{% url profiles_profile_detail user.username %}">Your profile</a></li>
 						<li class="feedback"><a href="{% url contact_form %}">Give feedback</a></li>
 						<li class="signout"><a href="{% url logout %}?next_page=/">Sign out</a></li>
 					</ul>
@@ -123,31 +123,22 @@
 				{% if user.is_authenticated %}
                 <li><a href="{% url dashboard %}" title="Manage your scrapers" class="dashboard">Your dashboard</a></li>
                 {% endif %}
-                <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers">Browse scrapers</a></li>
+                <li><a href="{% url scraper_list %}scrapers" title="Browse all scrapers">Browse</a></li>
                 <li>
                     <a href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a> /
                     <a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">view</a>
                 </li>
                 <li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
                 <li><a href="{% url request_data %}">Request data</a></li>
+                <li><a href="{% url docsroot %}">Documentation</a></li>
               </ul>
 
-              <!-- <form id="divSidebarSearch" action="/search/" method="post">
-                <input type="text" id="q" name="q"/>
-                <input type="submit" id="go" value="Go" />
-            </form> -->
-
-              <ul class="sub_menu">
-                 <li><a href="{% url about %}" title="About ScraperWiki">About ScraperWiki</a></li>
-                 <li><a href="{% url help 'intro' language|default:"python" %}" title="Frequently Asked Questions">Help &amp; FAQs</a></li>
-                 <li><a href="{% url help 'documentation' language|default:"python" %}" title="Technical docs">Docs &amp; Tutorials</a></li>
-                 <li><a href="{% url contact_form %}" title="Feedback form">Contact us / Feedback</a></li>
-              </ul>
               <ul class="sub_menu"> 
                  <li><a href="http://blog.scraperwiki.com" title="ScraperWiki Data Blog"><span class="unimportant">Read our</span> blog</a></li>
                  <li><a href="http://groups.google.com/group/scraperwiki" title="Google groups"><span class="unimportant">Join our</span> email list</a></li>
+                 <li><a href="{% url contact_form %}" title="Feedback form"><span class="unimportant">Send us</span> Feedback</a></li>
                  <li><a href="http://twitter.com/scraperwiki" title="Follow us on Twitter"><span class="unimportant">Follow us on</span> Twitter</a></li>
-                 <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook"><span class="unimportant">Visit us on</span> Facebook</a></li>
+                 <li><a href="https://www.facebook.com/pages/ScraperWiki/195413557138197" title="Like us on Facebook"><span class="unimportant">Find on</span> Facebook</a></li>
               </ul>
 
               {% if user.is_staff %}
