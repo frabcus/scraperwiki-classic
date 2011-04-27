@@ -42,61 +42,57 @@
 <form action="." method="post" id="request_form">
 	<ul>
 	<!-- {{form.as_ul}} -->
-	<li class="urls">
-		<label for="id_urls">At which URL(s) can we find the data currently?</label>
-		<input class="text" type="text" name="urls" id="id_urls" />
+	<li class="urls {% if form.urls.errors %}error{% endif %}">
+        {{form.urls.label_tag}}
+        {{form.urls}}
 	</li> 
 	<li class="columns">
-		<label for="id_columns">What data, specifically, do you want scraped?</label>
-		<input class="text" type="text" name="columns" id="id_columns" />
+        {{form.columns.label_tag}}
+        {{form.columns}}
 	</li> 
 	<li class="frequency">
-		<label for="id_frequency">How often does the data need to be scraped?</label>
-	<!--	<input class="text" type="text" name="frequency" id="id_frequency" /> -->
-	     <select id="id_frequency" name="frequency">
-	        <option>Once only</option>
-	        <option>Monthly</option>
-	        <option>Weekly</option>
-	        <option selected="selected">Daily</option>
-	        <option>Hourly</option>
-	        <option>Real-time</option>
-	    </select>
+        {{form.frequency.label_tag}}
+        {{form.frequency}}
 	</li>
 	<li class="due_date">
-		<label for="id_due_date">When do you need it by?</label>
-	    <input class="text" type="text" name="due_date" id="id_due_date" /> <a><img src="{{ MEDIA_URL }}images/icons/calendar.png" width="16" height="16" alt="" /> Show calendar</a>
+        {{form.due_date.label_tag}}
+        {{form.due_date}}
+        <a><img src="{{ MEDIA_URL }}images/icons/calendar.png" width="16" height="16" alt="" /> Show calendar</a>
 	</li> 
 	<li class="visualisation">
-		<label for="id_visualisation">What visualisation do you need?</label>
-		<textarea id="id_visualisation" rows="10" cols="40" name="visualisation"></textarea>
+        {{form.visualisation.label_tag}}
+        {{form.visualisation}}
 	</li>
     <li class="application">
-		<label for="id_application">What application do you want built?</label>
-		<textarea id="id_application" rows="10" cols="40" name="application"></textarea>
+        {{form.application.label_tag}}
+        {{form.application}}
 	</li>
 	<li class="description">
-		<label for="id_description">What are your ETL needs?</label>
-		<textarea id="id_description" rows="10" cols="40" name="description"></textarea>
+        {{form.name.label_tag}}
+        {{form.name}}
 	</li>
-	<li class="name">
-		<label for="id_name">Your name:</label>
-		<input class="text" type="text" name="name" id="id_name" />
+	<li class="name {% if form.name.errors %}error{% endif %}">
+        {{form.name.label_tag}}
+        {{form.name}}
 	</li> 
-	<li class="email">
-		<label for="id_email">Your email address:</label>
-		<input class="text" type="text" name="email" id="id_email" />
+	<li class="email {% if form.email.errors %}error{% endif %}">
+        {{form.email.label_tag}}
+        {{form.email}}
 	</li> 
 	<li class="telephone">
-		<label for="id_telephone">Your telephone number:</label>
-		<input class="text" type="text" name="telephone" id="id_telephone" />
+        {{form.telephone.label_tag}}
+        {{form.telephone}}
 	</li> 
 	<li class="company_name">
-		<label for="id_company_name">Your company name:</label>
-		<input class="text" type="text" name="company_name" id="id_company_name" />
+        {{form.company_name.label_tag}}
+        {{form.company_name}}
+	</li> 
+	<li class="category">
+      {{form.category}}
 	</li> 
 	<li class="broadcast">
-		<input class="checkbox" type="checkbox" name="broadcast" id="id_broadcast" />
-		<label for="id_broadcast">I&#39;m happy for this request to be <br/>posted on Twitter/Facebook</label>
+        {{form.broadcast.label_tag}}
+        {{form.broadcast}}
 	</li>
 	</ul>
     <p id="terms_and_conditions">

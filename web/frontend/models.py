@@ -232,14 +232,36 @@ class Message(models.Model):
 
 class DataEnquiry(models.Model):
     urls = models.TextField()
-    columns = models.TextField()
-    due_date = models.DateField()
+    columns = models.TextField(null=True, blank=True)
+    due_date = models.DateField(null=True, blank=True)
     name = models.CharField(max_length=128)
     email = models.EmailField()
-    telephone = models.CharField(max_length=32)
-    description = models.TextField()
-    company_name = models.CharField(max_length=128)
+    telephone = models.CharField(max_length=32, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    company_name = models.CharField(max_length=128, null=True, blank=True)
     broadcast = models.BooleanField()
+
+    FREQUENCY_CHOICES = (
+      ('one', 'Once only'),
+      ('monthly', 'Monthly'),
+      ('weekly', 'Weekly'),
+      ('daily', 'Daily'),
+      ('hourly', 'Hourly'),
+      ('realtime', 'Real-time')
+    )
+    frequency = models.CharField(max_length=32, choices=FREQUENCY_CHOICES)
+
+    CATEGORY_CHOICES = (
+        ('private', 'private'),
+        ('viz', 'viz'),
+        ('app', 'app'),
+        ('etl', 'etl'),
+        ('public', 'public')
+    )
+    category = models.CharField(max_length=32, choices=CATEGORY_CHOICES)
+
+    class Meta:
+        verbose_name_plural = "data enquiries"
 
     def __unicode__(self):
         return u"%s - %s" % (self.name, self.email)

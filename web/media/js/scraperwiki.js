@@ -162,6 +162,8 @@ $(function()
 			}
 			$(show, $('#request_form')).filter(':hidden').slideDown(250);
 			$('#request_form li').not(show).slideUp(250);
+
+            $('#id_category').val(id);
 		}
 		
 		if($('#request_intro').is(':visible')){
@@ -183,6 +185,13 @@ $(function()
 		h = $(this).outerHeight() - 2;
 		$('<span>').addClass('arrow').css('border-width', Math.round(h/2) + 'px 10px ' + Math.round(h/2) + 'px 0px').attr('title',h).appendTo($(this));
 	});
+
+    // If the form is being returned with errors then the category will be set
+    // so display the form as required by the selected category
+    var choice = $('#id_category').val();
+    if(choice !== ''){
+        $('#request_options h3 a[href="#' + choice + '"]').click();
+    }
 	
 	$('#id_due_date').datepicker({
 		minDate: '+1'

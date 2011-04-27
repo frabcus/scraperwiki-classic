@@ -113,14 +113,22 @@ class ResendActivationEmailForm(forms.Form):
     email_address = forms.EmailField()
 
 class DataEnquiryForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(DataEnquiryForm, self).__init__(*args, **kwargs)
+        self.fields['frequency'].initial = 'daily'
+
     urls = forms.CharField(label='At which URL(s) can we find the data currently?')
-    columns = forms.CharField(label='What information do you want scraped?')
-    due_date = forms.CharField(label='When do you need it by?')
+    columns = forms.CharField(required=False, label='What information do you want scraped?')
+    due_date = forms.DateField(required=False, label='When do you need it by?')
     name = forms.CharField(label='Your name:')
     email = forms.CharField(label='Your email address:')
-    telephone = forms.CharField(label='Your telephone number:')
-    company_name = forms.CharField(label='Your company name:')
-    broadcast = forms.BooleanField(label="I'm happy for this request to be posted on Twitter/Facebook")
+    telephone = forms.CharField(required=False, label='Your telephone number:')
+    company_name = forms.CharField(required=False, label='Your company name:')
+    broadcast = forms.BooleanField(required=False, label='I&#39;m happy for this request to be <br/>posted on Twitter/Facebook')
+    description = forms.CharField(required=False, widget=forms.Textarea, label='What are your ETL needs?')
+    visualisation = forms.CharField(required=False, widget=forms.Textarea, label='What visualisation do you need?')
+    application = forms.CharField(required=False, widget=forms.Textarea, label='What application do you want built?')
+    frequency = forms.ChoiceField(label='How often does the data need to be scraped?', choices=DataEnquiry.FREQUENCY_CHOICES)
 
     class Meta:
         model = DataEnquiry
