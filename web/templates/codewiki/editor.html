@@ -121,7 +121,10 @@
 
             {# Controls #}
             <div class="editor_controls">
-                <a id="menu_tutorials" class="helplink" href="#" title="Show useful commands">Quick help</a>
+                <a class="helplink" href="{% url documentation %}" target="_blank" title="Show useful commands">Documentation</a>
+                {% if user.is_staff %}
+                  <a id="oldquickhelp" class="staff" title="Show useful commands">Old help</a>
+                {% endif %}
                 {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
                   <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R)"/>
                 {% endifnotequal %}{% endifnotequal %}

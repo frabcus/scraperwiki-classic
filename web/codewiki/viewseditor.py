@@ -312,39 +312,10 @@ def handle_session_draft(request):
 
 
 
-        # this definitely should be ported into javascript so it can respond to selections
-def getselectedword(line, character, language):
-    try: 
-        ip = int(character)
-    except ValueError:
-        return ""
-    ie = ip
-    while ip >= 1 and re.match("[\w\.#]", line[ip-1]):  # search left across dots
-        ip -= 1
-    while ie < len(line) and re.match("\w", line[ie]): # search right across characters
-        ie += 1
-    word = line[ip:ie]
-
-    # search for quoted string
-    while ip >= 1 and line[ip-1] not in ('"', "'"):
-        ip -= 1
-    while ie < len(line) and line[ie] not in ('"', "'"):
-        ie += 1
-    if ip >= 1 and ie < len(line) and line[ip-1] in ('"', "'") and line[ip-1] == line[ie]:
-        word = line[ip:ie] 
-
-    if re.match("\W*$", word):
-        word = ""
-    return word
-
-
-
 def quickhelp(request):
-    query = dict([(k, request.GET.get(k, "").encode('utf-8'))  for k in ["language", "short_name", "username", "wiki_type", "line", "character"]])
-    query["word"] = getselectedword(query["line"], query["character"], query["language"])
+    query = dict([(k, request.GET.get(k, "").encode('utf-8'))  for k in ["language", "short_name", "username", "wiki_type", "line", "character", "word"]])
     if re.match("http://", query["word"]):
         query["escapedurl"] = urllib.quote(query["word"])
-    #print query
     
     context = query.copy()
     context['quick_help_template'] = 'documentation/%s_quick_help_%s.html' % (query["wiki_type"], query["language"])

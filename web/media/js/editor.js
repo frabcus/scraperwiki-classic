@@ -330,14 +330,11 @@ $(document).ready(function() {
 
     function setupKeygrabs()
     {
-//		var mac =  ? true: false;
-		if ( navigator.userAgent.toLowerCase().indexOf("mac")!=-1 ) {
+		if ( navigator.userAgent.toLowerCase().indexOf("mac")!=-1 ) 
 			addHotkey('meta+s', saveScraper); 
-		}
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+p', popupPreview); 
-        addHotkey('ctrl+h', popupHelp); 
     };
 
     function popupHelp()
@@ -345,7 +342,27 @@ $(document).ready(function() {
         // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
         var cursorpos = codeeditor.cursorPosition(true); 
         var cursorendpos = codeeditor.cursorPosition(false); 
-        var quickhelpparams = { language:scraperlanguage, short_name:short_name, wiki_type:wiki_type, username:username, line:codeeditor.lineContent(cursorpos.line), character:cursorpos.character }; 
+        var line = codeeditor.lineContent(cursorpos.line); 
+        var character = cursorpos.character; 
+
+        var ip = character; 
+        var ie = character;
+        while ((ip >= 1) && line.charAt(ip-1).match(/[\w\.#]/g))
+            ip--; 
+        while ((ie < line.length) && line.charAt(ie).match(/\w/g))
+            ie++; 
+        var word = line.substring(ip, ie); 
+
+        while ((ip >= 1) && line.charAt(ip-1).match(/[^'"]/g))
+            ip--; 
+        while ((ie < line.length) && line.charAt(ie).match(/[^'"]/g))
+            ie++; 
+        if ((ip >= 1) && (ie < line.length) && line.charAt(ip-1).match(/['"]/g) && (line.charAt(ip-1) == line.charAt(ie)))
+            word = line.substring(ip, ie); 
+        if (word.match(/^\W*$/g))
+            word = ""; 
+
+        var quickhelpparams = { language:scraperlanguage, short_name:short_name, wiki_type:wiki_type, username:username, line:line, character:character, word:word }; 
         if (cursorpos.line == cursorendpos.line)
             quickhelpparams["endcharacter"] = cursorendpos.character; 
 
@@ -366,7 +383,7 @@ $(document).ready(function() {
     //Setup Menu
     function setupMenu()
     {
-        $('#menu_tutorials').click(popupHelp); 
+        $('#oldquickhelp').click(popupHelp); 
         $('#chat_line').bind('keypress', function(eventObject) 
         {
             var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
