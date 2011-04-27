@@ -1184,7 +1184,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function setupToolbar()
     {
         // actually the save button
-        $('.editor_controls #btnCommitPopup').live('click', function ()
+        $('.editor_controls #btnCommitPopup').live('click', function()
         {
             saveScraper();  
             return false;
@@ -1192,8 +1192,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         
         $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')); 
 
-        //close editor link
-        $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(function ()
+        // close editor link (quickhelp link is target blank so no need for this)
+        $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(function()
         {
             if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
                 return false; 
@@ -1202,7 +1202,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             return true;
         });
 
-        $(window).unload( function () { 
+        $(window).unload(function() 
+        { 
             bSuppressDisconnectionMessages = true; 
             writeToConsole('window unload'); 
             sendjson({"command":'loseconnection'}); 
@@ -1215,19 +1216,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         else
             $('.editor_controls #preview').hide();
 
-        // available only for php cases
-        $('#togglelanguage').bind('click', function () 
-        { 
-            if (!$(this).hasClass('htmltoggled')) {
-                $(this).html('toggle PHP');
-                $(this).addClass('htmltoggled');
-                codeeditor.setParser(parserName["html"], parserConfig["php"]); 
-            } else {
-                $(this).html('toggle HTML');
-                $(this).removeClass('htmltoggled');
-                codeeditor.setParser(parserName["php"], parserConfig["php"]); 
-            }
-        }); 
 
         if (scraperlanguage == 'html')
             $('.editor_controls #run').hide();
