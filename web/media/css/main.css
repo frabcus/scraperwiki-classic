@@ -1128,7 +1128,7 @@ body.profiles h2.scrapersandviews {
 	color: #28c;
 }
 
-#request_form li input.text,
+#request_form li input,
 #request_form li select {
 	width: 328px;
 	line-height: 20px;
@@ -1207,6 +1207,12 @@ body.profiles h2.scrapersandviews {
 #request_form #terms_and_conditions a {
 	text-decoration: underline;
 	color: #999;
+}
+
+#request_form li.error input {
+    background: #ff6666;
+    border-color: #cc0000;
+    color: #fff;
 }
 
 

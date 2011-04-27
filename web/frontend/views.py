@@ -430,5 +430,10 @@ def resend_activation_email(request):
     return render_to_response(template, {'form': form}, context_instance = RequestContext(request))
 
 def request_data(request):
-    form = DataEnquiryForm()
+    form = DataEnquiryForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
+    else:
+        print form.errors
     return render_to_response('frontend/request_data.html', {'form': form}, context_instance = RequestContext(request))
