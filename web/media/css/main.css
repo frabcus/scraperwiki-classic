@@ -4437,8 +4437,12 @@ div.documentationpage dt {
 }
 
 div.documentationpage h3 {
-    padding-top:30px;
+    padding-top:5px;
     padding-bottom:0;
+}
+
+div.documentationpage li {
+    display: inline;
 }
 
 div.documentationpage dd {

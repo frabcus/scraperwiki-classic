@@ -1,125 +1,52 @@
-<div class="documentationpage">
+<h3>Language libraries</h3>
+<ul>
+  <li><a href="{% url docs 'help_documentation_python' %}">Python documentation</a></li>
+| <li><a href="{% url docs 'help_documentation_ruby' %}">Ruby documentation</a></li>
+| <li><a href="{% url docs 'help_documentation_php' %}">PHP documentation</a></li>
+</ul>
 
-<div class="section">
-<p>In addition to all the standard Python libraries for downloading and parsing pages from the web, 
-ScraperWiki provides the following built in library which you can access by including 
-<code>import scraperwiki</code> at the top of your code.</p>
+<h3>Technical features</h3>
 
-<p>The source code implementation of these functions can be found 
-<a href="https://bitbucket.org/ScraperWiki/scraperwiki/src/efd21ea1c875/scraperlibs/">here</a>.</p>
-</div>
+<ul>
+    <li>Online code editor, write debug and run Python, Ruby or PHP in your browser</li>
+    <li><a id="reference" href="{% url help 'documentation' language|default:"python" %}">ScraperWiki code libraries</a> make scraping and parsing simple</li>
+    <li>Nokogiri, lxml, Mechanize &mdash; <a id="libraries" href="{% url help 'libraries' language|default:"python" %}">all the libraries</a> you're used to</li>
+    <li>Store data direct to an SQLite datastore</li>
+    <li><a href="{% url api:index_1_0 %}">API access</a> to data in JSON, CSV</li>
+    <li>Views for writing simple web apps</li>
+    <li>Scheduled to re-run so your data is always up-to-date</li>
+    <li>Email alerts if your scrapers fail, or someone edits them</li>
+    <li>Built in source control, based on Mercurial</li>
+</ul>
 
-<h3><span id="sql"></span>The SQLite datastore</h3>
-<p>ScraperWiki provides a fully-fledged <a href="http://www.sqlite.org/lang.html">SQLite</a> database for each scraper which you can save to.  
-You can read the data back that has been committed by other scrapers, or extract it through 
-the API</p>
+<h3>View stuff</h3>
+<ul>
+  <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
+| <li><a href="{% url docscontrib 'jquery_cheat_sheet' %}">jquery_cheat_sheet</a></li>
+| <li><a href="{% url docscontrib 'ajax_cheat_sheet' %}">ajax_cheat_sheet</a></li>
+| <li><a href="{% url docscontrib 'google_map_cheat_sheet-3' %}">google_map_cheat_sheet-3</a></li>
+| <li><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">python_querystring_cheat_sheet</a></li>
+| <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
+| <li><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Raphaeljs use</a></li>
+</ul>
 
-<dl>
-<dt>scraperwiki.<strong>sqlite.save</strong>(unique_keys, data[, table_name="swdata", verbose=2])</dd>
-    <dd>Saves a data record into the datastore into the table given by table_name.  <br/>
-    <dd>data is a dict object, unique_keys is a subset of data.keys() which determins 
-        when a record is over-written.</dd>
-    <dd>For large numbers of records data can be a list of dicts.
-    </dd>
+<h3>Scraper stuff</h3>
+<ul>
+  <li><a href="{% url docscontrib 'php_sqlite_cheat_sheet' %}">php_sqlite_cheat_sheet</a></li>
+| <li><a href="{% url docscontrib 'ruby_sqlite_cheat_sheet' %}">ruby_sqlite_cheat_sheet</a></li>
+| <li><a href="{% url docscontrib 'python_sqlite_cheat_sheet' %}">python_sqlite_cheat_sheet</a></li>
 
-<dt>scraperwiki.<strong>sqlite.attach</strong>(name[, asname])</dt>
-    <dd>Attaches to the datastore of another scraper with the given name.</dd>
-    <dd>asname is an optional alias for the attached datastore.
-    </dd>
+| <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">csv_cheat_sheet</a></li>
+| <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">python_mechanize_cheat_sheet</a></li>
+| <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">python_lxml_cheat_sheet</a></li>
+| <li><a href="{% url docscontrib 'excel_cheat_sheet' %}">Excel cheat sheet</a></li>
+| <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>
+</ul>
 
-<dt>scraperwiki.<strong>sqlite.select</strong>(val1[, val2], verbose=1)</dt>
-    <dd>Executes a select command on the datastore, eg select("* from swdata limit 10")</dd>
-    <dd>Returns a list of dicts that have been selected</dd>
-    <dd>val2 is an optional list of parameters if the select command contains ?s
-    </dd>
-
-<dt>scraperwiki.<strong>sqlite.execute</strong>(val1[, val2, verbose=1])</dt>
-    <dd>Executes any arbitrary sqlite command (except attach), eg create, delete, insert or drop</dd>
-    <dd>val2 is an optional list of parameters if the select command contains question marks
-    </dd>
-
-<dt>scraperwiki.<strong>sqlite.commit</strong>()</dt>
-    <dd>Commits to the file after a series of execute commands.  (sqlite.save auto-commits).
-    </dd>
-
-<dt>scraperwiki.<strong>sqlite.save_var</strong>(key, value)</dt>
-    <dd>Saves an arbitrary single-value into a table called "swvariables". 
-        Used to make scrapers able to continue after an interruption.
-    </dd>
-
-<dt>scraperwiki.<strong>sqlite.get_var</strong>(key[, default])</dt>
-    <dd>Retrieves a single value that was saved by save_var.
-    </dd>
-
-</dl>
-
-
-
-
-<h3>Geocoding functions</h3>
-<p>Some installed functions to help you transform between different coordinate systems.</p> 
-
-<dl>
-<dt>scraperwiki.<strong>geo.extract_gb_postcode</strong>(string)</dt>
-    <dd>Attempts to extract a UK postcode from a given string.
-    </dd>
-
-<dt>scraperwiki.<strong>geo.gb_postcode_to_latlng</strong>(postcode)</dt>
-    <dd>Returns a WGS84 (lat, lng) pair for the central location of a UK postcode.
-    </dd>
-
-<dt>scraperwiki.<strong>geo.os_easting_northing_to_latlng</strong>(easting, northing)</dt>
-    <dd>Converts a <a href="http://en.wikipedia.org/wiki/British_national_grid_reference_system">OSGB</a> 
-        grid reference to a WGS84 (lat, lng) pair.
-    </dd>
-
-</dl>
-
-
-<h3>Misc data format functions</h3>
-<dl>
-
-<dt>scraperwiki.<strong>pdftoxml</strong>(pdfdata)</dt>
-    <dd>Convert a byte string containing a PDF file into an XML file containing the coordinates 
-        and font of each text string.  <br/>
-        Refer to 
-        <a href="http://scraperwiki.com/scrapers/new/python?template=advanced-scraping-pdfs">the example</a> 
-        for more details.
-    </dd>
-
-<dt>scraperwiki.<strong>utils.httpresponseheader</strong>("Content-Type", "image/PNG")</dt>
-    <dd>Set the content-type header to something other than HTML when using a Scraperwiki "view" 
-        (a simplified CGI script).
-    </dd>
-
-<dt>scraperwiki.<strong>utils.GET</strong>()</dt>
-    <dd>The query_string map when using a Scraperwiki "view".
-    </dd>
-
-<dt>modulename = scraperwiki.<strong>utils.swimport</strong>(name)</dt>
-    <dd>Imports the code from another scraper as the module "modulename".
-    </dd>
-
-<dt>scraperwiki.<strong>apiwrapper.getInfo</strong>(name)</dt>
-    <dd>Get status and historical information about another scraper using an the API call</dd>
-    <dd>(Used for generating email alerts about scraper history.)
-    </dd>
-
-</dl>
-
-<h3>Deprecated functions</h3>
-
-<dl>
-<dt>scraperwiki.<strong>datastore.save</strong>(unique_keys, data[, date, latlng])</dt>
-    <dd>Precursor for the sqlite.save() function</dd>
-
-<dt>scraperwiki.<strong>metadata.save</strong>(key, value)</dt>
-    <dd>Now user sqlite.save_var(key, value)</dd>
-
-<dt>scraperwiki.<strong>metadata.get</strong>(key[, default])</dt>
-    <dd>Now user sqlite.get_var(key)</dd>
-
-</dl>
-
-</div>
+<h3>Scraper tools</h3>
+<ul>
+  <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml-cheat-sheet</a></li>
+| <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li>
+| <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">pdf-to-html-preview-1</a></li>
+</ul>
 
