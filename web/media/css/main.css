@@ -1575,13 +1575,13 @@ ul.user_menu li {
 	z-index: 1000;
 }
 
-body.api .right, #help_content .right {
+body.api .right, #help_content .col.right {
 	font-size: 14px;
 	background-color: #F4F8FB;
 	padding: 10px;
 }
 
-body.api .right ul, #help_content .right ul {
+body.api .right ul, #help_content .col.right ul {
 	padding-left: 0;
 	margin-top: 5px;
 }
@@ -4442,7 +4442,9 @@ div.documentationpage h3 {
 }
 
 div.documentationpage li {
-    display: inline;
+    /*display: inline; */
+	list-style-type: disc;
+    margin-left: 2em;
 }
 
 div.documentationpage dd {

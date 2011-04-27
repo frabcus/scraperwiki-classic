@@ -1,9 +1,4 @@
-<h3>Language libraries</h3>
-<ul>
-  <li><a href="{% url docs 'help_documentation_python' %}">Python documentation</a></li>
-| <li><a href="{% url docs 'help_documentation_ruby' %}">Ruby documentation</a></li>
-| <li><a href="{% url docs 'help_documentation_php' %}">PHP documentation</a></li>
-</ul>
+<!-- This probably goes in the introduction topic guide? Not sure
 
 <h3>Technical features</h3>
 
@@ -18,35 +13,87 @@
     <li>Email alerts if your scrapers fail, or someone edits them</li>
     <li>Built in source control, based on Mercurial</li>
 </ul>
+-->
 
-<h3>View stuff</h3>
+<div class="content col left">
+
+<p>ScraperWiki runs normal Python, Ruby and PHP scripts on our servers,
+scheduled to scrape and refine data. Edit and debug the scripts
+entirely in your browser, no setup required. A built in SQL API gets the data
+out as JSON or CSV files. 
+
+
+<h3>First steps</h3>
 <ul>
-  <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
-| <li><a href="{% url docscontrib 'jquery_cheat_sheet' %}">jquery_cheat_sheet</a></li>
-| <li><a href="{% url docscontrib 'ajax_cheat_sheet' %}">ajax_cheat_sheet</a></li>
-| <li><a href="{% url docscontrib 'google_map_cheat_sheet-3' %}">google_map_cheat_sheet-3</a></li>
-| <li><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">python_querystring_cheat_sheet</a></li>
-| <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
-| <li><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Raphaeljs use</a></li>
+    <li>Introduction topic guide tutorial thing</li>
+    <li>SQL datastore topic guide -
+             <a href="{% url docscontrib 'ruby_sqlite_cheat_sheet' %}">Ruby</a> |
+             <a href="{% url docscontrib 'php_sqlite_cheat_sheet' %}">PHP</a> |
+             <a href="{% url docscontrib 'python_sqlite_cheat_sheet' %}">Python</a>
+    </li>
+    <li>Views topic guide thang</li>
 </ul>
 
-<h3>Scraper stuff</h3>
+<h3>Reference</h3>
 <ul>
-  <li><a href="{% url docscontrib 'php_sqlite_cheat_sheet' %}">php_sqlite_cheat_sheet</a></li>
-| <li><a href="{% url docscontrib 'ruby_sqlite_cheat_sheet' %}">ruby_sqlite_cheat_sheet</a></li>
-| <li><a href="{% url docscontrib 'python_sqlite_cheat_sheet' %}">python_sqlite_cheat_sheet</a></li>
+  <li>
+  ScraperWiki internal API - 
+  <a href="{% url docs 'help_documentation_ruby' %}">Ruby</a>
+| <a href="{% url docs 'help_documentation_python' %}">Python</a>
+| <a href="{% url docs 'help_documentation_php' %}">PHP</a>
+  </li>
+  <li>
+  ScraperWiki external API
+  </li>
+  <li>
+  Libraries
+  </li>
+</ul>
+</div>
 
-| <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">csv_cheat_sheet</a></li>
-| <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">python_mechanize_cheat_sheet</a></li>
-| <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">python_lxml_cheat_sheet</a></li>
-| <li><a href="{% url docscontrib 'excel_cheat_sheet' %}">Excel cheat sheet</a></li>
-| <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>
+<div class="content col right">
+    <h3>Getting help</h3>
+
+    <ul>
+        <li>Stack Overflow</li>
+        <li>Google Group</li>
+        <li>blah</li>
+        etc.
+    </ul>
+</div>
+
+<div class="content half left">
+<h3>Scraping topic guides</h3>
+<ul>
+
+ <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">csv_cheat_sheet</a></li>
+ <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">python_mechanize_cheat_sheet</a></li>
+ <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">python_lxml_cheat_sheet</a></li>
+ <li><a href="{% url docscontrib 'excel_cheat_sheet' %}">Excel cheat sheet</a></li>
+ <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>
 </ul>
 
 <h3>Scraper tools</h3>
 <ul>
   <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml-cheat-sheet</a></li>
-| <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li>
-| <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">pdf-to-html-preview-1</a></li>
+ <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li>
+ <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">pdf-to-html-preview-1</a></li>
 </ul>
+</div>
+
+<div class="content half right">
+
+<h3>Views topic guides</h3>
+<ul>
+  <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
+ <li><a href="{% url docscontrib 'jquery_cheat_sheet' %}">jquery_cheat_sheet</a></li>
+ <li><a href="{% url docscontrib 'ajax_cheat_sheet' %}">ajax_cheat_sheet</a></li>
+ <li><a href="{% url docscontrib 'google_map_cheat_sheet-3' %}">google_map_cheat_sheet-3</a></li>
+ <li><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">python_querystring_cheat_sheet</a></li>
+ <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
+ <li><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Raphaeljs use</a></li>
+</ul>
+
+</div>
+
 
