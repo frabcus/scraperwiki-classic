@@ -1,0 +1,29 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Documentation{% endblock %}
+
+{% block header %}
+  <h2>Documentation{% if title %} &ndash; {{title}}{% endif %}</h2>
+{% endblock %}
+
+{% block content %}
+  <div class="content">
+    {% if scraper %}
+      {% if user.is_staff %}
+        <div class="staff" style="float:right">
+          <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit</a>
+          | <a href="/admin/codewiki/{{scraper.wiki_type}}/{{scraper.pk}}/">Admin</a>
+        </div>
+      {% endif %}
+    {% endif %}
+    <div id="help_content">
+    {% if doccontents %}
+      {{doccontents|safe}}
+    {% else %}{% if docpage %}
+      {% include docpage %}
+    {% else %}
+      {% include 'documentation/includes/docindex.html' %}
+    {% endif %}{% endif %}
+    </div>
+  </div>
+{% endblock %}

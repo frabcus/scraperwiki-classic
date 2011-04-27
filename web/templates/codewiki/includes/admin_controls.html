@@ -27,11 +27,7 @@
 {% if user.is_staff %}
 <div class="staff">
   <h3>Admin only</h3>
-  {% ifequal scraper.wiki_type 'view' %}
-    <p><a href="/admin/codewiki/view/{{scraper.pk}}/"><b>View's Django admin page</b></a></p>
-  {% else %}
-    <p><a href="/admin/codewiki/scraper/{{scraper.pk}}/">Scraper's Django admin page</a></p>
-  {% endifequal %}
+  <p><a href="/admin/codewiki/{{scraper.wiki_type}}/{{scraper.pk}}/">{{scraper.wiki_type|capfirst}}'s Django admin page</a></p>
 
   {% ifequal scraper.wiki_type 'scraper' %}
     <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">

@@ -2,7 +2,7 @@ from django.conf.urls.defaults import *
 from documentation import views
 
 urlpatterns = patterns('',
-   url(r'^$', views.catchall, name="docsroot"),
-#   url(r'^contrib/(?P<path>.+)/$', views.contribs, name="contrib"),
-   url(r'^(?P<path>.+)/$', views.catchall, name="docs"),
+   url(r'^$',                               views.docmain, name="docsroot"),
+   url(r'^contrib/(?P<short_name>[\w_\-\./]+)/$', views.contrib, name="contrib"),
+   url(r'^(?P<path>[\w_\-\.]+)/$',    views.docmain, name="docs"),
 )
