@@ -4451,11 +4451,14 @@ div.documentationpage h3 {
 }
 
 div.documentationpage li {
-    /*display: inline; */
+	list-style-type: disc;
+    margin-left: 0em; 
+}
+
+div.documentationpage .right li {
 	list-style-type: disc;
     margin-left: 2em;
 }
-
 div.documentationpage dd {
     padding-top:2px;
     padding-bottom:2px;
