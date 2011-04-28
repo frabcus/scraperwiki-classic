@@ -4,10 +4,10 @@
 
 {% block header %}
   <h2>Documentation{% if title %} &ndash; {{title}}{% endif %}</h2>
-  <p>Mouse</p>
 {% endblock %}
 
 {% block content %}
+
   <div class="documentationpage">
     {% if scraper %}
       {% if user.is_staff %}
@@ -20,11 +20,24 @@
     <div id="help_content">
     {% if doccontents %}
       {{doccontents|safe}}
-    {% else %}{% if docpage %}
-      {% include docpage %}
     {% else %}
-      {% include 'documentation/includes/docindex.html' %}
-    {% endif %}{% endif %}
+		{% if docpage %}
+			{% include "documentation/language_picker.html" %}
+      		{% include docpage %}
+    	{% else %}
+      		{% include 'documentation/includes/docindex.html' %}
+    	{% endif %}
+	{% endif %}
     </div>
   </div>
+
+  <script type='text/javascript'>
+	$('body').addClass( '{{language}}');
+	
+	function switch_language(to) {
+		window.location.href = window.location.href.replace('{{language}}',to).replace('{{language}}',to);
+		return false;
+	}
+  </script>
+
 {% endblock %}

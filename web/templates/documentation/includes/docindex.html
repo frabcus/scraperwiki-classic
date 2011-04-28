@@ -15,69 +15,83 @@
 </ul>
 -->
 
+<p class="language_chooser">
+        <strong>Choose a language:</strong>
+        <a href="{% url docs 'python' %}" class="python" title="You are currently viewing Python Help files"><img src="{{ MEDIA_URL }}/images/icons/python.png" width="16" height="16" alt="" /> Python</a>
+        <a href="{% url docs 'ruby' %}" class="ruby" title="Switch to Ruby Help files"><img src="{{ MEDIA_URL }}/images/icons/ruby.png" width="16" height="16" alt="" /> Ruby</a>
+        <a href="{% url docs 'php' %}" class="php" title="Switch to PHP Help files"><img src="{{ MEDIA_URL }}/images/icons/php.png" width="16" height="16" alt="" /> PHP</a>
+        <a href="http://groups.google.com/group/scraperwiki" class="stuck">Stuck? Try asking other developers</a>
+        <br class="clear"/>
+</p>
+
+
 <div class="content col left">
 
 <p>ScraperWiki runs normal Python, Ruby and PHP scripts on our servers,
 scheduled to scrape and refine data. Edit and debug the scripts
 entirely in your browser, no setup required. A built in SQL API gets the data
-out as JSON or CSV files. 
-
+out as JSON or CSV files. </p>
 
 <h3>First steps</h3>
 <ul>
-    <li>Introduction topic guide tutorial thing</li>
-    <li>SQL datastore topic guide -
-             <a href="{% url docscontrib 'ruby_sqlite_cheat_sheet' %}">Ruby</a> |
-             <a href="{% url docscontrib 'python_sqlite_cheat_sheet' %}">Python</a> |
-             <a href="{% url docscontrib 'php_sqlite_cheat_sheet' %}">PHP</a> 
-    </li>
-    <li>Views topic guide thang</li>
+    <li>Introductory tutorial</li>
+	
+    <li><a href="/docs/{{language}}_datastore_guide">The Datastore</a></li>
+    <li><a href="/docs/{{language}}_view_guide">Working with ScraperWiki Views</a></li>
 </ul>
 
-<h3>Reference</h3>
-<ul>
-  <li>
-  ScraperWiki internal API - 
-  <a href="{% url docs 'help_documentation_ruby' %}">Ruby</a>
-| <a href="{% url docs 'help_documentation_python' %}">Python</a>
-| <a href="{% url docs 'help_documentation_php' %}">PHP</a>
-  </li>
-  <li>
-  ScraperWiki external API
-  </li>
-  <li>
-  Libraries available
-  </li>
-</ul>
 </div>
 
 <div class="content col right">
     <h3>Getting help</h3>
 
-    <ul>
-        <li>Stack Overflow</li>
-        <li>Google Group</li>
-        <li>blah</li>
-        etc.
-    </ul>
+	<p>
+		To get help with ScraperWiki if you can't find what you want here ..
+		<ul>
+			<li>You can 
+                try searching for questions already asked on 
+		      <a href="http://stackoverflow.com/questions/tagged/scraperwiki">Stack Overflow</a>, or</li>
+		    <li>Email your question to the ScraperWiki <a href="http://groups.google.com/group/scraperwiki">Google Group</a></li>
+		</ul>
+		
+		If you want to request data you can contact us using the <a href="{% url request_data %}">request form</a>
+	</p>		
 </div>
 
 <div class="content half left">
+<h3>Reference</h3>
+<ul>
+  <li>
+	<a href="/docs/{{language}}_help_documentation">ScraperWiki internal API</a>
+  </li>
+  <li>
+	<a href="{% url docsexternal %}">ScraperWiki external API</a>
+  </li>
+  <li>
+  <a href='/docs/{{language}}_libraries">Libraries available</a>
+  </li>
+</ul>
+	
+	
 <h3>Scraping topic guides</h3>
 <ul>
-
- <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">csv_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">python_mechanize_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">python_lxml_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'excel_cheat_sheet' %}">Excel cheat sheet</a></li>
+{% ifequal language 'python' %}
+ <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">Using lxml</a></li>	
+ <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">Using Mechanize with Python</a></li>
+ <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">Working with CSV files</a></li>
+ <li><a href="{% url docscontrib 'excel_cheat_sheet' %}">Reading Excel files</a></li>
+{% endifequal %}
  <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>
 </ul>
 
 <h3>Scraper tools</h3>
 <ul>
-  <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml-cheat-sheet</a></li>
+ <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml document model viewer</a></li>
+{% comment %} Not found
  <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">pdf-to-html-preview-1</a></li>
+{% endcomment %}
+ <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">Preview of PDF-HTML Tool</a></li>
+ <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">Sqlite Tool</a></li>
 </ul>
 </div>
 
@@ -85,13 +99,14 @@ out as JSON or CSV files.
 
 <h3>Views topic guides</h3>
 <ul>
-  <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'jquery_cheat_sheet' %}">jquery_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'ajax_cheat_sheet' %}">ajax_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'google_map_cheat_sheet-3' %}">google_map_cheat_sheet-3</a></li>
+ <li><a href="{% url docs 'jquery_topic_guide' %}">Using JQuery</a></li>
+ <li><a href="{% url docs 'ajax_topic_guide' %}">AJAX Guidance</a></li>
+ <li><a href="{% url docs 'gmap_topic_guide' %}">Google maps</a></li>
+{% comment %} <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>{% endcomment %}
+ <li><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Vector Graphics with Raphaeljs</a></li>
+{% ifequal language 'python' %}
  <li><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">python_querystring_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Raphaeljs use</a></li>
+{% endifequal %}
 </ul>
 
 </div>
