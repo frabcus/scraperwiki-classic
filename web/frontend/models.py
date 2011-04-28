@@ -239,7 +239,8 @@ class DataEnquiry(models.Model):
     urls = models.TextField()
     columns = models.TextField(null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)
-    name = models.CharField(max_length=128)
+    first_name = models.CharField(max_length=64)
+    last_name = models.CharField(max_length=64)
     email = models.EmailField()
     telephone = models.CharField(max_length=32, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -271,11 +272,12 @@ class DataEnquiry(models.Model):
         verbose_name_plural = "data enquiries"
 
     def __unicode__(self):
-        return u"%s <%s>" % (self.name, self.email)
+        return u"%s %s <%s>" % (self.first_name, self.last_name, self.email)
 
     def email_message(self):
         return u"""
-            Name: %s
+            First Name: %s
+            Last Name: %s
             Email: %s
             Telephone: %s
             Company: %s
@@ -286,7 +288,8 @@ class DataEnquiry(models.Model):
             Description: %s
             Visualisation: %s
             Application: %s
-        """ % (self.name,
+        """ % (self.first_name,
+               self.last_name,
                self.email,
                self.telephone,
                self.company_name,
