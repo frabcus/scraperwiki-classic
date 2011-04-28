@@ -45,37 +45,73 @@ max_api_distance = 10
 host    = scraperwiki.com
 
 [uml001]
-host	= 89.16.177.195
+host = 89.16.177.195
 tap	= 192.168.254.101
 eth	= 192.168.254.1
-port	= 9001
+port = 9001
 via	= 9101
 mem	= 1024M
-count	= 25
+count = 25
 
 [uml002]
-host	= 89.16.177.195
+host = 89.16.177.195
 tap	= 192.168.254.102
 eth	= 192.168.254.2
-port	= 9001
+port = 9001
 via	= 9102
 mem	= 1024M
-count	= 25
+count = 25
 
 [uml003]
-host	= 89.16.177.195
+host = 89.16.177.195
 tap	= 192.168.254.103
 eth	= 192.168.254.3
-port	= 9001
+port = 9001
 via	= 9103
 mem	= 1024M
-count	= 25
+count = 25
 
 [uml004]
-host	= 89.16.177.195
+host = 89.16.177.195
 tap	= 192.168.254.104
 eth	= 192.168.254.4
-port	= 9001
+port = 9001
 via	= 9104
 mem	= 1024M
-count	= 25
+count = 25
+
+[uml005]
+host = 89.16.177.176
+tap	= 192.168.254.101
+eth	= 192.168.254.1
+port = 9001
+via	= 9101
+mem	= 1024M
+count = 25
+
+[uml006]
+host = 89.16.177.176
+tap	= 192.168.254.102
+eth	= 192.168.254.2
+port = 9001
+via	= 9102
+mem	= 1024M
+count = 25
+
+[uml007]
+host = 89.16.177.176
+tap	= 192.168.254.103
+eth	= 192.168.254.3
+port = 9001
+via	= 9103
+mem	= 1024M
+count = 25
+
+[uml008]
+host = 89.16.177.176
+tap	= 192.168.254.104
+eth	= 192.168.254.4
+port = 9001
+via	= 9104
+mem	= 1024M
+count = 25
