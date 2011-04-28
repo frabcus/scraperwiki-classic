@@ -17,12 +17,13 @@
 
 <p class="language_chooser">
         <strong>Choose a language:</strong>
-        <a href="?language=python" class="python" title="You are currently viewing Python Help files"><img src="{{ MEDIA_URL }}/images/icons/python.png" width="16" height="16" alt="" /> Python</a>
-        <a href="?language=ruby" class="ruby" title="Switch to Ruby Help files"><img src="{{ MEDIA_URL }}/images/icons/ruby.png" width="16" height="16" alt="" /> Ruby</a>
-        <a href="?language=php" class="php" title="Switch to PHP Help files"><img src="{{ MEDIA_URL }}/images/icons/php.png" width="16" height="16" alt="" /> PHP</a>
+        <a href="{% url docs 'python' %}" class="python" title="You are currently viewing Python Help files"><img src="{{ MEDIA_URL }}/images/icons/python.png" width="16" height="16" alt="" /> Python</a>
+        <a href="{% url docs 'ruby' %}" class="ruby" title="Switch to Ruby Help files"><img src="{{ MEDIA_URL }}/images/icons/ruby.png" width="16" height="16" alt="" /> Ruby</a>
+        <a href="{% url docs 'php' %}" class="php" title="Switch to PHP Help files"><img src="{{ MEDIA_URL }}/images/icons/php.png" width="16" height="16" alt="" /> PHP</a>
         <a href="http://groups.google.com/group/scraperwiki" class="stuck">Stuck? Try asking other developers</a>
         <br class="clear"/>
 </p>
+
 
 <div class="content col left">
 
@@ -35,8 +36,8 @@ out as JSON or CSV files. </p>
 <ul>
     <li>Introductory tutorial</li>
 	
-    <li><a href="{% url docs language|add:'_datastore_guide' %}">The Datastore</a></li>
-    <li><a href="{% url docs language|add:'_view_guide' %}">Working with ScraperWiki Views</a></li>
+    <li><a href="{% url docs language,language|add:'_datastore_guide' %}">The Datastore</a></li>
+    <li><a href="{% url docs language,language|add:'_view_guide' %}">Working with ScraperWiki Views</a></li>
 </ul>
 
 <h3>Reference</h3>
@@ -67,7 +68,6 @@ out as JSON or CSV files. </p>
 <div class="content half left">
 <h3>Scraping topic guides</h3>
 <ul>
-
  <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">csv_cheat_sheet</a></li>
  <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">python_mechanize_cheat_sheet</a></li>
  <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">python_lxml_cheat_sheet</a></li>

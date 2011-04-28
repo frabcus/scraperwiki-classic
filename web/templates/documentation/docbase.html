@@ -22,9 +22,7 @@
       {{doccontents|safe}}
     {% else %}
 		{% if docpage %}
-			{% comment %}
-							{% include "documentation/language_picker.html" %}
-			{% endcomment %}			
+			{% include "documentation/language_picker.html" %}
       		{% include docpage %}
     	{% else %}
       		{% include 'documentation/includes/docindex.html' %}
@@ -35,6 +33,11 @@
 
   <script type='text/javascript'>
 	$('body').addClass( '{{language}}');
+	
+	function switch_language(to) {
+		window.location.href = window.location.href.replace('{{language}}',to).replace('{{language}}',to);
+		return false;
+	}
   </script>
 
 {% endblock %}

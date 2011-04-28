@@ -13,8 +13,10 @@ def titleize(title):
         return ' '.join( [ x.capitalize() for x in title.split('_') ])
     return ''
 
-def docmain(request, path=None):
-    language = request.GET.get('language', None) or request.session.get('language', 'python')
+def docmain(request, language=None, path=None):
+#    language = request.GET.get('language', None) or request.session.get('language', 'python')
+    if language is None:
+        language = request.session.get('language', 'python')
     request.session['language'] = language
     context = {'language':language }
     
