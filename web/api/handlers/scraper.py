@@ -145,15 +145,30 @@ class GetRunInfo(APIBase):
 
 
 class Search(APIBase):
-
     def value(self, request):
         query = request.GET.get('query', None) 
         if not query:
             query = request.GET.get('searchquery', None) 
+        maxrows = 5
+        try:   maxrows = int(request.GET.get('maxrows', ""))
+        except ValueError: pass
         result = [ ]  # list of dicts
         scrapers = scraper_search_query(user=None, query=query)
-        for scraper in scrapers[:5]:
-            result.append({'short_name':scraper.short_name, 'title':scraper.title, 'description':scraper.description, 'created':scraper.created_at, 'privacy_status':scraper.privacy_status})
+        for scraper in scrapers[:maxrows]:
+            res = {'short_name':scraper.short_name }
+            res['title'] = scraper.title
+            owners = scraper.userrolemap()["owner"]
+            if owners:
+                owner = owners[0]
+                ownername = owner.get_profile().name
+                if not ownername:
+                    ownername = owner.username
+                if ownername:
+                    res['title'] = "%s / %s" % (ownername, scraper.title)
+            res['description'] = scraper.description
+            res['created'] = scraper.created_at
+            res['privacy_status'] = scraper.privacy_status
+            result.append(res)
         return result
 
 

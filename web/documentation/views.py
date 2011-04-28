@@ -53,7 +53,7 @@ def api_explorer(request):
     api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
     assert url[:len(api_base)] == api_base
     result = urllib2.urlopen(url).read()
-    return HttpResponse(styout % result)
+    return HttpResponse(styout % re.sub("<", "&lt;", result))
 
 
 

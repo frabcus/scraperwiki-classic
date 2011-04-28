@@ -10,7 +10,7 @@
             getinfo:'.format, .name, .version, .history_start_date, .quietfields, .callback',
             getruninfo:'.format, .name, .runid, .callback',
             getuserinfo:'.format, .username, .callback',
-            search:'.format, .searchquery, .callback'
+            search:'.format, .searchquery, .maxrows, .callback'
         }
     </script>
 {% endblock %}
@@ -48,6 +48,9 @@
 	<div id="search">
 		<p>Search the titles and descriptions of all our scrapers.</p>
 	</div>
+
+    <input type="button" value="List tables" id="scraperlisttables">
+    <ul id="listtables"></ul>
 </div>
 
 <form id="request_form">
@@ -58,7 +61,7 @@
         <label for="id_format">format</label>
         <select type="text" name="format" id="id_format">
             <option value="csv">csv</option>
-            <option value="jsondict">jsondict</option>
+            <option value="jsondict" selected>jsondict</option>
             <option value="jsonlist">jsonlist</option>
         </select>
 	</li> 
@@ -72,7 +75,7 @@
 	</li> 
 	<li class="version">
         <label for="id_version">version<span class="desc"> number (optional)</span></label>
-        <input type="text" name="version" id="id_version">
+        <input type="text" name="version" id="id_version" value="-1">
 	</li> 
 	<li class="runid">
         <label for="id_runid">runid</label>
@@ -87,7 +90,7 @@
         <input type="text" name="quietfields" id="id_quietfields">
 	</li> 
 	<li class="attach">
-        <label for="id_attach">attach<span class="desc"> datastores from other scrapers (optional)</span></label>
+        <label for="id_attach">attach<span class="desc"> datastores from other scrapers delimited by ; (optional)</span></label>
         <input type="text" name="attach" id="id_attach">
 	</li> 
 	<li class="query">
@@ -97,6 +100,10 @@
 	<li class="searchquery">
         <label for="id_searchquery">searchquery</label>
         <input type="text" name="searchquery" id="id_searchquery">
+	</li> 
+	<li class="maxrows">
+        <label for="id_maxrows">maxrows</label>
+        <input type="text" name="maxrows" id="id_maxrows" value="5">
 	</li> 
 	<li class="callback">
         <label for="id_callback">callback<span class="desc"> for JSONP (optional)</span></label>

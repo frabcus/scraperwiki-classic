@@ -96,7 +96,88 @@ $(function()
         }
         $('#id_apiuri').val(surl.join("")); 
     }
-    $('#request_form input, #request_form textarea').each(function() {$(this).keyup(rewriteapiurl)}); 
+    $('#request_form input, #request_form textarea').each(function() 
+    {   
+        $(this).keypress(function(e)
+        {
+            if (e.which == 13)
+                {  $("#btnCallMethod").click();  e.preventDefault();  return false }
+        })
+        $(this).keyup(rewriteapiurl); 
+    }); 
     $('#request_form select').each(function() {$(this).change(rewriteapiurl)}); 
-}); 
+    $('#request_form #id_name').autocomplete(
+    {
+        minLength: 2,
+        open: function() {  $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); }, 
+        close: function() {  $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); rewriteapiurl(); }, 
+        select: function(event, ui) { rewriteapiurl(); },
+        focus: function(event, ui)  { $( "#request_form #id_name" ).val(ui.item.label);  return false; }, 
+        source: function(request, response) 
+        {
+            $.ajax(
+            {
+                url: $('#id_api_base').val()+"scraper/search",
+                dataType: "jsonp",
+                data: { format:"jsondict", maxrows: 12, searchquery: request.term },
+                success: function(data) 
+                {
+                    response($.map(data, function(item) { return  { label: item.short_name, desc: item.title, value: item.short_name }})); 
+                }
+            })
+        }
+    })
+    .data( "autocomplete" )._renderItem = function( ul, item ) 
+    {
+        return $( "<li></li>" )
+        .data( "item.autocomplete", item )
+        .append( "<a><b>" + item.label + "</b><br>" + item.desc + "</a>" )
+        .appendTo(ul);
+    }; 
+    $('#request_form #id_attach').autocomplete(
+    {
+        minLength: 2,
+        open: function() {  $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); }, 
+        close: function() {  $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); rewriteapiurl(); }, 
+        select: function(event, ui) { rewriteapiurl(); },
+        source: function(request, response) 
+        {
+            $.ajax(
+            {
+                url: $('#id_api_base').val()+"scraper/search",
+                dataType: "jsonp",
+                data: { format:"jsondict", maxrows: 12, searchquery: request.term },
+                success: function(data) 
+                {
+                    response($.map(data, function(item) { return  { label: item.short_name, desc: item.title, value: item.short_name }})); 
+                }
+            })
+        }
+    })
+    $('#request_form #id_quietfields').autocomplete({source: [ "", "code", "userroles", "runevents", "datasummary" ]}); 
 
+    $('#scraperlisttables').click(function()
+    {
+        var aName = $('#request_form #id_name').val();
+        $('#listtables').html("<li>Loading...</li>"); 
+        $.ajax({url:$('#id_api_base').val()+"scraper/getinfo", dataType:"jsonp", data:{name:aName, quietfields:"code|runevents|userroles"}, error: function(jq, status) { alert(status); }, success:function(v) 
+        { 
+            $('#listtables').empty(); 
+            if (v && v[0] && v[0].datasummary && v[0].datasummary.tables)
+            {
+                for (var tablename in v[0].datasummary.tables)
+                {
+                    var table = v[0].datasummary.tables[tablename]; 
+                    $('#listtables').append('<li><b>'+tablename+'</b> ['+table.count+'] '+table.sql+'</li>'); 
+                }
+                $('#listtables li').click(function() 
+                {
+                    $('#tablename').val($(this).find("b").text()); 
+                    $('#query').val("select * from "+$(this).find("b").text()+" limit 10"); 
+                }); 
+            }
+            else
+                $('#listtables').html("<li>No tables</li>"); 
+        }}); 
+    }); 
+}); 
