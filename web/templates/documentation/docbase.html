@@ -4,6 +4,24 @@
 
 {% block header %}
   <h2>Documentation{% if title %} &ndash; {{title}}{% endif %}</h2>
+
+<style>
+code {
+  	xmargin-left:10px; 
+	padding: 8px;
+	background:#aaa; 
+	border: solid 3px #333;
+	overflow: auto;
+	color: white; 
+	display:block; 
+	font-family: monospace; 
+	white-space:pre; 
+	font-size:120%;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;	
+	border-radius: 4px;		
+}
+</style>
 {% endblock %}
 
 {% block content %}
