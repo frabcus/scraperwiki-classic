@@ -9,4 +9,5 @@ urlpatterns = patterns('',
    url(r'^(?P<language>(python|ruby|php))/$',views.docmain, name="docs"),      
    url(r'^(?P<language>(python|ruby|php))/(?P<path>[\w_\-\.]+)/$',views.docmain, name="docs"),   
    url(r'^(?P<path>([\w_\-\.]+|/))/$',    views.docmain, name="docs"),   
+
 )
