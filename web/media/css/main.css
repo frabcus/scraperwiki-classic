@@ -4455,7 +4455,7 @@ div.documentationpage li {
     margin-left: 0em; 
 }
 
-div.documentationpage .right li {
+div.documentationpage #getting_help li {
 	list-style-type: disc;
     margin-left: 2em;
 }
