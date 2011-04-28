@@ -3,8 +3,10 @@
 page_titles = {
     "ajax_topic_guide": ("Using Ajax from ScraperWiki", "Para"),
     "docindex" : ("",""),
-    "gmap_topic_guide" : ("",""),
-    "jquery_topic_guide" : ("",""),
+    "gmap_topic_guide" : ("Google Maps",""),
+    "jquery_topic_guide" : ("Using JQuery",""),
+    
+    "faq" : ("Frequently Asked Questions",""),    
     
     "php_datastore_guide" : ("The Datastore","A guide to the datastore for PHP programmers"),
     "php_help_documentation" : ("ScraperWiki internal API",""),
