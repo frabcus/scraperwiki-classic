@@ -40,3 +40,9 @@ def contrib(request, short_name):
     context["title"] = scraper.title
     context["scraper"] = scraper
     return render_to_response('documentation/docbase.html', context, context_instance=RequestContext(request))
+
+def docexternal(request):
+    return render_to_response('documentation/apibase.html', { }, context_instance=RequestContext(request))
+
+
+

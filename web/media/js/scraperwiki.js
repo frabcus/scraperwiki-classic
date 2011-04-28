@@ -146,7 +146,6 @@ $(function()
 
 
 
-
 function setupScroller(){
     
     //left right buttons
