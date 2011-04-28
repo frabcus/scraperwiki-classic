@@ -15,17 +15,16 @@
 </ul>
 -->
 
+<div class="content col left">
+
 <p class="language_chooser">
         <strong>Choose a language:</strong>
         <a href="{% url docs 'python' %}" class="python" title="{% ifequal language 'python' %}You are currently viewing Python Help files{% else %}Switch to Python help{% endifequal %}"><img src="{{ MEDIA_URL }}/images/icons/python.png" width="16" height="16" alt="" /> Python</a>
         <a href="{% url docs 'ruby' %}" class="ruby" title="{% ifequal language 'ruby' %}You are currently viewing Ruby Help files{% else %}Switch to Ruby Help files{% endifequal %}"><img src="{{ MEDIA_URL }}/images/icons/ruby.png" width="16" height="16" alt="" /> Ruby</a>
         <a href="{% url docs 'php' %}" class="php" title="{% ifequal language 'php' %}You are currently viewing PHP Help files{% else %}Switch to PHP Help files{% endifequal %}"><img src="{{ MEDIA_URL }}/images/icons/php.png" width="16" height="16" alt="" /> PHP</a>
-        <a href="http://groups.google.com/group/scraperwiki" class="stuck">Stuck? Try asking other developers</a>
         <br class="clear"/>
 </p>
 
-
-<div class="content col left">
 
 <p>ScraperWiki runs normal Python, Ruby and PHP scripts on our servers,
 scheduled to scrape and refine data. Edit and debug the scripts
