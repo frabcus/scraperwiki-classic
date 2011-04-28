@@ -117,14 +117,14 @@ class DataEnquiryForm(forms.ModelForm):
         super(DataEnquiryForm, self).__init__(*args, **kwargs)
         self.fields['frequency'].initial = 'daily'
 
-    urls = forms.CharField(label='At which URL(s) can we find the data currently?')
+    urls = forms.CharField(required=False, label='At which URL(s) can we find the data currently?')
     columns = forms.CharField(required=False, label='What information do you want scraped?')
     due_date = forms.DateField(required=False, label='When do you need it by?')
     name = forms.CharField(label='Your name:')
     email = forms.CharField(label='Your email address:')
     telephone = forms.CharField(required=False, label='Your telephone number:')
     company_name = forms.CharField(required=False, label='Your company name:')
-    broadcast = forms.BooleanField(required=False, label='I&#39;m happy for this request to be <br/>posted on Twitter/Facebook')
+    broadcast = forms.BooleanField(required=False, label='I\'m happy for this request to be posted on Twitter/Facebook')
     description = forms.CharField(required=False, widget=forms.Textarea, label='What are your ETL needs?')
     visualisation = forms.CharField(required=False, widget=forms.Textarea, label='What visualisation do you need?')
     application = forms.CharField(required=False, widget=forms.Textarea, label='What application do you want built?')
