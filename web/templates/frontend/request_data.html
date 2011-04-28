@@ -55,8 +55,7 @@
 
 <form action="." method="post" id="request_form">
 	<ul>
-	<!-- {{form.as_ul}} -->
-	<li class="urls {% if form.urls.errors %}error{% endif %}">
+	<li class="urls">
         {{form.urls.label_tag}}
         {{form.urls}}
 	</li> 
@@ -105,8 +104,8 @@
       {{form.category}}
 	</li> 
 	<li class="broadcast">
-        {{form.broadcast.label_tag}}
         {{form.broadcast}}
+        {{form.broadcast.label_tag}}
 	</li>
 	</ul>
     <p id="terms_and_conditions">

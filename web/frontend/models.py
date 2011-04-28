@@ -2,9 +2,13 @@ import datetime
 
 from django.db import models
 from django.db.models import Q
+from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from django.dispatch import dispatcher
+from django.core.mail import send_mail
+from django.conf import settings
 
 class AlertTypes(models.Model):
     """
@@ -231,6 +235,7 @@ class Message(models.Model):
             return "%s [Inactive]" % self.text
 
 class DataEnquiry(models.Model):
+    date_of_enquiry = models.DateTimeField(auto_now_add=True)
     urls = models.TextField()
     columns = models.TextField(null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)
@@ -238,6 +243,8 @@ class DataEnquiry(models.Model):
     email = models.EmailField()
     telephone = models.CharField(max_length=32, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    visualisation = models.TextField(null=True, blank=True)
+    application = models.TextField(null=True, blank=True)
     company_name = models.CharField(max_length=128, null=True, blank=True)
     broadcast = models.BooleanField()
 
@@ -264,4 +271,36 @@ class DataEnquiry(models.Model):
         verbose_name_plural = "data enquiries"
 
     def __unicode__(self):
-        return u"%s - %s" % (self.name, self.email)
+        return u"%s <%s>" % (self.name, self.email)
+
+    def email_message(self):
+        return u"""
+            Name: %s
+            Email: %s
+            Telephone: %s
+            Company: %s
+            URLs: %s
+            Columns: %s
+            Due Date: %s
+            Broadcast: %s
+            Description: %s
+            Visualisation: %s
+            Application: %s
+        """ % (self.name,
+               self.email,
+               self.telephone,
+               self.company_name,
+               self.urls,
+               self.columns,
+               self.due_date,
+               self.broadcast,
+               self.description,
+               self.visualisation,
+               self.application)
+
+def data_enquiry_post_save(sender, **kwargs):
+    if kwargs['created']:
+        instance = kwargs['instance']
+        send_mail('Data Request', instance.email_message(), instance.email, [settings.FEEDBACK_EMAIL], fail_silently=False)
+
+post_save.connect(data_enquiry_post_save, sender=DataEnquiry)
