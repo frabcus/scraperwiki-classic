@@ -40,6 +40,25 @@ out as JSON or CSV files. </p>
     <li><a href="{% url docs language,language|add:'_view_guide' %}">Working with ScraperWiki Views</a></li>
 </ul>
 
+</div>
+
+<div class="content col right">
+    <h3>Getting help</h3>
+
+	<p>
+		To get help with ScraperWiki if you can't find what you want here ..
+		<ul>
+			<li>You can 
+		try searching for questions already asked on 
+		<a href='http://stackoverflow.com/questions/tagged/scraperwiki'>Stack Overflow</a>, or</li>
+		<li>Email your question to the ScraperWiki <a href='http://groups.google.com/group/scraperwiki'>Google Group</a></li>
+		</ul>
+		
+		If you want to request data you can contact us using the <a href="{% url request_data %}">request form</a>
+	</p>		
+</div>
+
+<div class="content half left">
 <h3>Reference</h3>
 <ul>
   <li>
@@ -52,39 +71,27 @@ out as JSON or CSV files. </p>
   <a href='{% url docs language,language|add:"_libraries" %}'>Libraries available</a>
   </li>
 </ul>
-</div>
-
-<div class="content col right" style='margin-left:16px;'>
-    <h3>Getting help</h3>
-
-	<p>
-		To get help with ScraperWiki if you can't find what you want here ..
-		<ul>
-			<li>You can 
-		try searching for questions already asked on 
-		<a href='http://stackoverflow.com/questions/tagged/scraperwiki'>Stack Overflow</a>, or</li>
-		<li>Email your question to the ScraperWiki<a href='http://groups.google.com/group/scraperwiki'>Google Group</a></li>
-		</ul>
-		
-		If you want to request data you can contact us using the <a href="{% url request_data %}">request form</a>
-	</p>		
-</div>
-
-<div class="content half left">
+	
+	
 <h3>Scraping topic guides</h3>
 <ul>
+{% ifequal language 'python' %}
  <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">Using lxml</a></li>	
+ <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">Using Mechanize with Python</a></li>
  <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">Working with CSV files</a></li>
  <li><a href="{% url docscontrib 'excel_cheat_sheet' %}">Reading Excel files</a></li>
- <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">Using Mechanize with Python</a></li>
+{% endifequal %}
  <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>
 </ul>
 
 <h3>Scraper tools</h3>
 <ul>
- <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml-cheat-sheet</a></li>
+ <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml document model viewer</a></li>
+{% comment %} Not found
  <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">pdf-to-html-preview-1</a></li>
+{% endcomment %}
+ <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">Preview of PDF-HTML Tool</a></li>
+ <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">Sqlite Tool</a></li>
 </ul>
 </div>
 
@@ -92,13 +99,14 @@ out as JSON or CSV files. </p>
 
 <h3>Views topic guides</h3>
 <ul>
- <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'jquery_cheat_sheet' %}">jquery_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'ajax_cheat_sheet' %}">ajax_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'google_map_cheat_sheet-3' %}">Google maps</a></li>
- <li><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">python_querystring_cheat_sheet</a></li>
- <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>
+ <li><a href="{% url docs 'jquery_topic_guide' %}">Using JQuery</a></li>
+ <li><a href="{% url docs 'ajax_topic_guide' %}">AJAX Guidance</a></li>
+ <li><a href="{% url docs 'gmap_topic_guide' %}">Google maps</a></li>
+{% comment %} <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>{% endcomment %}
  <li><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Vector Graphics with Raphaeljs</a></li>
+{% ifequal language 'python' %}
+ <li><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">python_querystring_cheat_sheet</a></li>
+{% endifequal %}
 </ul>
 
 </div>

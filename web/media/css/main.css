@@ -1579,6 +1579,7 @@ body.api .right, #help_content .col.right {
 	font-size: 14px;
 	background-color: #F4F8FB;
 	padding: 10px;
+	margin-left: 16px;
 }
 
 body.api .right ul, #help_content .col.right ul {
