@@ -94,10 +94,6 @@ out as JSON or CSV files. </p>
      <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">Preview of PDF-HTML Tool</a></li>
      <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">Sqlite Tool</a></li>
     </ul>
-    <h3>View tools</h3>
-    <ul>
-     <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>
-    </ul>
 </div> {% endif %}
 
 </div>
@@ -115,6 +111,13 @@ out as JSON or CSV files. </p>
  <li><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">Reading querystring parameters</a></li>
 {% endifequal %}
 </ul>
+
+{% if user.is_staff %} <div class="staff">
+    <h3>View tools</h3>
+    <ul>
+     <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>
+    </ul>
+</div> {% endif %}
 
 </div>
 
