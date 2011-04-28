@@ -20,11 +20,16 @@
     <div id="help_content">
     {% if doccontents %}
       {{doccontents|safe}}
-    {% else %}{% if docpage %}
-      {% include docpage %}
     {% else %}
-      {% include 'documentation/includes/docindex.html' %}
-    {% endif %}{% endif %}
+		{% if docpage %}
+			{% comment %}
+							{% include "documentation/language_picker.html" %}
+			{% endcomment %}			
+      		{% include docpage %}
+    	{% else %}
+      		{% include 'documentation/includes/docindex.html' %}
+    	{% endif %}
+	{% endif %}
     </div>
   </div>
 
