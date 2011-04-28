@@ -1,6 +1,6 @@
 {% extends "frontend/base.html" %}
 
-{% block title %}Request data{% endblock %}
+{% block title %}Documentation - External interface{% endblock %}
 
 {% block javascript %}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/requestoptions.js?{{settings.REVISION}}"></script>	
@@ -15,14 +15,12 @@
     </script>
 {% endblock %}
 
-
 {% block header %}
-    <h2>Request data</h2>
-    <p>For Journalists, Researchers &amp; Data Analysts who know cut and paste won&rsquo;t work.</p>
+  <h2>Documentation &ndash; External interface</h2>
+  <p>Mouse</p>
 {% endblock %}
 
 {% block content %}
-
 
 <div id="request_intro">
 	<p class="first">ScraperWiki is a place where raw information is transformed into <em>living data</em></p>
@@ -30,7 +28,6 @@
 	<p class="last">Please select the option on the right that best describes your needs&hellip;</p>
 </div>
 <div id="request_options">
-	
 	<h3><a href="#private">I need some data that I want to keep private</a></h3>
 	<div id="private">
 		<p>We get the data and store it for you. The cost will depend on the size and complexity of the information being gathered. It can range from a couple of hours to a few days in duration. When we know what you want, we will give you a quote. We pay our developer community to gather the data.</p>
@@ -56,9 +53,9 @@
 <form action="." method="post" id="request_form">
 	<ul>
 	<!-- {{form.as_ul}} -->
-	<li class="urls {% if form.urls.errors %}error{% endif %}">
-        {{form.urls.label_tag}}
-        {{form.urls}}
+	<li class="urls">
+        <label for="id_urls">Whatnot</label>
+        <input type="text" name="urls" id="id_urls">
 	</li> 
 	<li class="columns">
         {{form.columns.label_tag}}

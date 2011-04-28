@@ -1,3 +1,4 @@
+
 $(function()
 { 
 	function requestOption($a){
@@ -8,19 +9,8 @@ $(function()
 			$a.addClass('selected').parent().next().css('border-color', '#39c').slideDown(250);
 			$('#request_options h3 a.selected').not($a).removeClass('selected');
 			$('#request_options div:visible').not($d).css('border-color', '#E8F2F9').slideUp(250);
-			if(id == 'private'){
-				show = '.urls, .columns, .frequency, .due_date, .name, .email';
-			} else if(id == 'viz'){
-				show = '.urls, .columns, .frequency, .due_date, .visualisation, .name, .email, .telephone';
-			} else if(id == 'app'){
-				show = '.urls, .columns, .frequency, .due_date, .application, .name, .email';
-			} else if(id == 'etl'){
-				show = '.description, .name, .email, .telephone, .company_name';
-			} else {
-				show = '.urls, .columns, .frequency, .due_date, .name, .email, .broadcast';
-			}
-			$(show, $('#request_form')).filter(':hidden').slideDown(250);
-			$('#request_form li').not(show).slideUp(250);
+			$(showinglookup[id], $('#request_form')).filter(':hidden').slideDown(250);
+			$('#request_form li').not(showinglookup[id]).slideUp(250);
 
             $('#id_category').val(id);
 		}
@@ -72,7 +62,7 @@ $(function()
 		if(e.which == 13){
 			if($('#filter_text').val() != ''){
 				$('.content li').hide().filter(":contains(" + $('#filter_text').val() + ")").show();
-				$(this).siblings('BASIC#reset').css('visibility','visible');
+				$(this).siblings('#reset').css('visibility','visible');
 			}
 		} else if($(this).val() != ''){
 			$('#filter').css('visibility','visible');
@@ -82,4 +72,4 @@ $(function()
 			$('.content li').show();
 		}
 	});
-})
+}); 
