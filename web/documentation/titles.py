@@ -27,11 +27,3 @@ page_titles = {
     "view_guide" : ("ScraperWiki View Guide","How to use Views inside ScraperWiki"),    
 }
 
-
-scraper_titles = {
-    "excel_cheat_sheet" : ("Reading Excel files","How to read Excel files with ScraperWiki"),    
-    "python_lxml_cheat_sheet" : ("Using lxml",""),
-    "python_mechanize_cheat_sheet": ("Using Mechanize with Python", ""),
-    "csv_cheat_sheet": ("Working with CSV files", ""),
-    "python_querystring_cheat_sheet": ("Reading querystring parameters",""),
-}

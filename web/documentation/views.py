@@ -34,8 +34,6 @@ def docmain(request, language=None, path=None):
 
     # should also filter, say, on isstartup=True and on privacy_status=visible to limit what can be injected into here
 def contrib(request, short_name):
-    from titles import scraper_titles
-        
     context = { }
     try:
         scraper = codewiki.models.Code.objects.filter().get(short_name=short_name) 
@@ -45,9 +43,7 @@ def contrib(request, short_name):
         raise Http404
     
     context["doccontents"] = scraper.get_vcs_status(-1)["code"]
-    title, para = scraper_titles[scraper.title]
-    context["title"] = title
-    context["para"] = para
+    context["title"] = scraper.title
 
     context["scraper"] = scraper
     return render_to_response('documentation/docbase.html', context, context_instance=RequestContext(request))
