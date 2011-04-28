@@ -4452,6 +4452,20 @@ div.documentationpage dd {
     padding-bottom:2px;
 }
 
+div.documentationpage code {
+	padding: 8px;
+	background:#aaa; 
+	border: solid 3px #333;
+	overflow: auto;
+	color: white; 
+	display:block; 
+	font-family: monospace; 
+	white-space:pre; 
+	font-size:120%;
+	-webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px;		
+}
+
+
 a.your-own {
     padding-left:20px;
     background:url(../images/icons/control_play.png) no-repeat;
