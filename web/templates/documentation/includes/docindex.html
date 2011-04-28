@@ -15,23 +15,28 @@
 </ul>
 -->
 
+<p class="language_chooser">
+        <strong>Choose a language:</strong>
+        <a href="?language=python" class="python" title="You are currently viewing Python Help files"><img src="{{ MEDIA_URL }}/images/icons/python.png" width="16" height="16" alt="" /> Python</a>
+        <a href="?language=ruby" class="ruby" title="Switch to Ruby Help files"><img src="{{ MEDIA_URL }}/images/icons/ruby.png" width="16" height="16" alt="" /> Ruby</a>
+        <a href="?language=php" class="php" title="Switch to PHP Help files"><img src="{{ MEDIA_URL }}/images/icons/php.png" width="16" height="16" alt="" /> PHP</a>
+        <a href="http://groups.google.com/group/scraperwiki" class="stuck">Stuck? Try asking other developers</a>
+        <br class="clear"/>
+</p>
+
 <div class="content col left">
 
 <p>ScraperWiki runs normal Python, Ruby and PHP scripts on our servers,
 scheduled to scrape and refine data. Edit and debug the scripts
 entirely in your browser, no setup required. A built in SQL API gets the data
-out as JSON or CSV files. 
-
+out as JSON or CSV files. </p>
 
 <h3>First steps</h3>
 <ul>
-    <li>Introduction topic guide tutorial thing</li>
-    <li>SQL datastore topic guide -
-             <a href="{% url docscontrib 'ruby_sqlite_cheat_sheet' %}">Ruby</a> |
-             <a href="{% url docscontrib 'python_sqlite_cheat_sheet' %}">Python</a> |
-             <a href="{% url docscontrib 'php_sqlite_cheat_sheet' %}">PHP</a> 
-    </li>
-    <li>Views topic guide thang</li>
+    <li>Introductory tutorial</li>
+	
+    <li><a href="{% url docs language|add:'_datastore_guide' %}">The Datastore</a></li>
+    <li><a href="{% url docs language|add:'_view_guide' %}">Working with ScraperWiki Views</a></li>
 </ul>
 
 <h3>Reference</h3>
@@ -51,7 +56,7 @@ out as JSON or CSV files.
 </ul>
 </div>
 
-<div class="content col right">
+<div class="content col right" style='margin-left:16px;'>
     <h3>Getting help</h3>
 
     <ul>

@@ -4,10 +4,10 @@
 
 {% block header %}
   <h2>Documentation{% if title %} &ndash; {{title}}{% endif %}</h2>
-  <p>Mouse</p>
 {% endblock %}
 
 {% block content %}
+
   <div class="documentationpage">
     {% if scraper %}
       {% if user.is_staff %}
@@ -27,4 +27,9 @@
     {% endif %}{% endif %}
     </div>
   </div>
+
+  <script type='text/javascript'>
+	$('body').addClass( '{{language}}');
+  </script>
+
 {% endblock %}

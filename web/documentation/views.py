@@ -1,16 +1,24 @@
 from django.template import RequestContext, TemplateDoesNotExist
 from django.shortcuts import render_to_response
 from django.http import Http404
+from codewiki.models import Code
 import os
 import re
 import codewiki
 import settings
 
+def titleize(title):
+    """ Turns 'some_slug' into 'Some Slug' """
+    if title:
+        return ' '.join( [ x.capitalize() for x in title.split('_') ])
+    return ''
+
 def docmain(request, path=None):
     language = request.GET.get('language', None) or request.session.get('language', 'python')
     request.session['language'] = language
     context = {'language':language }
-    context["title"] = path
+    
+    context["title"] = titleize(path)
     if path:
         context["docpage"] = 'documentation/includes/%s.html' % re.sub("\.\.", "", path)  # remove attempts to climb into another directory
         if not os.path.exists(os.path.join(settings.SCRAPERWIKI_DIR, "templates", context["docpage"])):
@@ -23,7 +31,7 @@ def contrib(request, short_name):
     context = { }
     try:
         scraper = codewiki.models.Code.objects.filter(language="html").get(short_name=short_name) 
-    except models.Code.DoesNotExist:
+    except Code.DoesNotExist:
         raise Http404
     if not scraper.actionauthorized(request.user, "readcode"):
         raise Http404
