@@ -82,15 +82,18 @@ out as JSON or CSV files. </p>
  <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>
 </ul>
 
-<h3>Scraper tools</h3>
-<ul>
- <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml document model viewer</a></li>
-{% comment %} Not found
- <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li>
-{% endcomment %}
- <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">Preview of PDF-HTML Tool</a></li>
- <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">Sqlite Tool</a></li>
-</ul>
+{% if user.is_staff %} <div class="staff">
+    <h3>Scraper tools</h3>
+    <ul>
+     <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml document model viewer</a></li>
+    {% comment %} Not found
+     <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li>
+    {% endcomment %}
+     <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">Preview of PDF-HTML Tool</a></li>
+     <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">Sqlite Tool</a></li>
+    </ul>
+</div> {% endif %}
+
 </div>
 
 <div class="content half right">
