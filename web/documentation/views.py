@@ -1,10 +1,12 @@
 from django.template import RequestContext, TemplateDoesNotExist
 from django.shortcuts import render_to_response
-from django.http import Http404
+from django.http import Http404, HttpResponse, HttpResponseNotFound
 import os
 import re
 import codewiki
 import settings
+import urllib2
+
 
 def docmain(request, path=None):
     language = request.GET.get('language', None) or request.session.get('language', 'python')
@@ -34,7 +36,19 @@ def contrib(request, short_name):
     return render_to_response('documentation/docbase.html', context, context_instance=RequestContext(request))
 
 def docexternal(request):
-    return render_to_response('documentation/apibase.html', { }, context_instance=RequestContext(request))
+    api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
+    return render_to_response('documentation/apibase.html', {"api_base":api_base}, context_instance=RequestContext(request))
+
+
+def api_explorer(request):
+    styout = '<pre style="background:#000; color:#fff;">%s</pre>'  # can't be done by formatting the iframe
+    if not request.POST:
+        return HttpResponse(styout % "Select a function, add values above, then click 'call method'\nto see live data")
+    url = request.POST.get("apiurl")
+    api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
+    assert url[:len(api_base)] == api_base
+    result = urllib2.urlopen(url).read()
+    return HttpResponse(styout % result)
 
 
 

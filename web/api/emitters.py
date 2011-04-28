@@ -46,7 +46,7 @@ class CSVEmitter(Emitter):
         writer = csv.writer(fout, dialect='excel')
         
         # identify and deal with the case of getKeys which is a list of strings
-        if dictlist and type(dictlist[0]) != dict:
+        if dictlist and (type(dictlist) != list or type(dictlist[0]) != dict):
             writer.writerow([k.encode('utf-8') for k in dictlist])
             return fout.getvalue()
         
@@ -146,7 +146,7 @@ class JSONDICTEmitter(Emitter):
     def render(self, request):
         cb = request.GET.get('callback')
         dictlist = self.construct()
-        if dictlist and len(dictlist) == 1 and "keys" in dictlist[0] and "data" in dictlist[0]:
+        if dictlist and len(dictlist) == 1 and type(dictlist) == list and "keys" in dictlist[0] and "data" in dictlist[0]:
             dictlist[0] = [ dict(zip(dictlist[0]["keys"], values))  for values in dictlist[0]["data"] ]
         seria = simplejson.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
 

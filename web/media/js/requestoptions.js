@@ -5,14 +5,21 @@ $(function()
 		
 		function requestOptionInner($a){
 			$d = $a.parent().next();
-			id = $d.attr('id');
+			var id = $d.attr('id');
 			$a.addClass('selected').parent().next().css('border-color', '#39c').slideDown(250);
 			$('#request_options h3 a.selected').not($a).removeClass('selected');
 			$('#request_options div:visible').not($d).css('border-color', '#E8F2F9').slideUp(250);
 			$(showinglookup[id], $('#request_form')).filter(':hidden').slideDown(250);
 			$('#request_form li').not(showinglookup[id]).slideUp(250);
-
             $('#id_category').val(id);
+            $('#id_category_title').val($a.text());
+
+            // jsondict option only exists for sqlite selection (not available in piston)
+            var jd = $("#id_format option[value='jsonlist']"); 
+            jd.attr("disabled", (id == "sqlite" ? "" : "disabled")); 
+            if ((id != "sqlite") && jd.attr("selected"))
+                $("#id_format option[value='jsondict']").attr("selected", true); 
+            setTimeout(rewriteapiurl, 400); 
 		}
 		
 		if($('#request_intro').is(':visible')){
@@ -72,4 +79,24 @@ $(function()
 			$('.content li').show();
 		}
 	});
+
+    function rewriteapiurl()
+    {
+        var surl = [ $('#id_api_base').val() ]; 
+        surl.push($('#id_category_title').val().replace("scraperwiki.", "").replace(".", "/")); 
+        surl.push("?"); 
+        var ents = $('#request_form li').not(':hidden'); 
+        var entdropdown = ents.find('select'); 
+        surl.push(entdropdown.attr("name"), "=", entdropdown.val()); 
+        for (var i = 0; i < ents.length; i++)
+        {
+            var ent = $(ents[i]).find("input"); 
+            if ((ent.length == 1) && (ent.val().length != 0))
+                surl.push("&", ent.attr("name"), "=", encodeURIComponent(ent.val())); 
+        }
+        $('#id_apiuri').val(surl.join("")); 
+    }
+    $('#request_form input, #request_form textarea').each(function() {$(this).keyup(rewriteapiurl)}); 
+    $('#request_form select').each(function() {$(this).change(rewriteapiurl)}); 
 }); 
+

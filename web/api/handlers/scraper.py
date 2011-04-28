@@ -8,7 +8,6 @@ from codewiki.managers.datastore import DataStore
 
 
 class GetInfo(APIBase):
-    required_arguments = ['name']
     
     def convert_history(self, commitentry):
         result = { 'version':commitentry['rev'], 'date':commitentry['date'] }
@@ -42,6 +41,7 @@ class GetInfo(APIBase):
         info['description'] = scraper.description
         info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
         info['wiki_type']   = scraper.wiki_type
+        info['privacy_status'] = scraper.privacy_status
         if scraper.wiki_type == 'scraper':
             info['license']     = scraper.scraper.license
             info['records']     = scraper.scraper.record_count  # old style datastore
@@ -102,7 +102,6 @@ class GetInfo(APIBase):
 
 
 class GetRunInfo(APIBase):
-    required_arguments = ['name']
     
     def value(self, request):
         scraper = self.getscraperorrccode(request, request.GET.get('name'), "apiscraperruninfo")
@@ -146,19 +145,19 @@ class GetRunInfo(APIBase):
 
 
 class Search(APIBase):
-    required_arguments = ['query']
 
     def value(self, request):
         query = request.GET.get('query', None) 
+        if not query:
+            query = request.GET.get('searchquery', None) 
         result = [ ]  # list of dicts
-        for scraper in scraper_search_query(None, query):
-            result.append({'short_name':scraper.short_name, 'title':scraper.title, 'description':scraper.description, 'created':scraper.created_at})
+        scrapers = scraper_search_query(user=None, query=query)
+        for scraper in scrapers[:5]:
+            result.append({'short_name':scraper.short_name, 'title':scraper.title, 'description':scraper.description, 'created':scraper.created_at, 'privacy_status':scraper.privacy_status})
         return result
 
 
 class GetUserInfo(APIBase):
-    required_arguments = ['username']
-
             # could be authorized with "apiuserinfo", but no scraper associated to authorize this
     def value(self, request):
         username = request.GET.get('username', "") 

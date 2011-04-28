@@ -6,11 +6,11 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/requestoptions.js?{{settings.REVISION}}"></script>	
     <script>
         var showinglookup = { 
-            private:'.urls, .columns, .frequency, .due_date, .name, .email', 
-            viz:'.urls, .columns, .frequency, .due_date, .visualisation, .name, .email, .telephone',
-            app:'.urls, .columns, .frequency, .due_date, .application, .name, .email',
-            etl:'.description, .name, .email, .telephone, .company_name',
-            public:'.urls, .columns, .frequency, .due_date, .name, .email, .broadcast'
+            sqlite:'.format, .name, .attach, .query, .callback', 
+            getinfo:'.format, .name, .version, .history_start_date, .quietfields, .callback',
+            getruninfo:'.format, .name, .runid, .callback',
+            getuserinfo:'.format, .username, .callback',
+            search:'.format, .searchquery, .callback'
         }
     </script>
 {% endblock %}
@@ -23,96 +23,103 @@
 {% block content %}
 
 <div id="request_intro">
-	<p class="first">ScraperWiki is a place where raw information is transformed into <em>living data</em></p>
+	<p class="first">The ScraperWiki external interface allows you to extract data in the form you want for use on the web or in your own applications.  You can also extract information about the state of any scraper.</p>
 	<span></span>
-	<p class="last">Please select the option on the right that best describes your needs&hellip;</p>
+	<p class="last">Please select the function on the right that you want to learn how to use</p>
 </div>
+
 <div id="request_options">
-	<h3><a href="#private">I need some data that I want to keep private</a></h3>
-	<div id="private">
-		<p>We get the data and store it for you. The cost will depend on the size and complexity of the information being gathered. It can range from a couple of hours to a few days in duration. When we know what you want, we will give you a quote. We pay our developer community to gather the data.</p>
+	<h3><a href="#sqlite">scraperwiki.datastore.sqlite</a></h3>
+	<div id="sqlite">
+		<p>Query and extract your data via a general purpose SQL interface.</p>
 	</div>
-	<h3><a href="#viz">I need data and I also want a visualisation</a></h3>
-	<div id="viz">
-		<p>This is a combination of getting the data, storing it, and creating a visualisation that tells a story. We usually ask you to create a short brief with an idea of what you want to do and also a link to the data that you are proposing to mine. We will help you to do this directly or with a ScraperWiki partner.</p>
+	<h3><a href="#getinfo">scraperwiki.scraper.getinfo</a></h3>
+	<div id="getinfo">
+		<p>Extract any data about a scraper, including the code, who has been editing it and any historical versions.</p>
 	</div>
-	<h3><a href="#app">I need a data application for my website</a></h3>
-	<div id="app">
-		<p>Data applications are designed to drive continuous traffic to a website and also offer the possibility of generating revenue through a subscription model for services like email alerts. This is an automated service.</p>
+	<h3><a href="#getruninfo">scraperwiki.scraper.getruninfo</a></h3>
+	<div id="getruninfo">
+		<p>See what the scraper did during each run.</p>
 	</div>
-	<h3><a href="#etl">I want to merge content from systems that cannot talk to each other (ETL) &ndash; Help!</a></h3>
-	<div id="etl">
-		<p>Sometimes it can be easier to scrape data from systems than to re-engineer the back-end. In this context ScraperWiki acts as a data hub for the purposes of transforming data into a central datastore. It is a more cost effective &lsquo;ETL&rsquo; &ndash; Extract, Transform and Load and a flexible option for building an API for web or mobile applications.</p>
+	<h3><a href="#getuserinfo">scraperwiki.scraper.getuserinfo</a></h3>
+	<div id="getuserinfo">
+		<p>Find out information about a user of the system.</p>
 	</div>
-	<h3><a href="#public">I need some data and I want to make it public &amp; open</a></h3>
-	<div id="public">
-		<p>This is a free service, if you have the technical skills just go and do it! If not, we can broadcast this request to our developer community. Alternatively if you have budget we can pay a developer to do it for you. The cost can range in price and will depend on the size and complexity of the information.</p>
+	<h3><a href="#search">scraperwiki.scraper.search</a></h3>
+	<div id="search">
+		<p>Search the titles and descriptions of all our scrapers.</p>
 	</div>
 </div>
 
-<form action="." method="post" id="request_form">
+<form id="request_form">
 	<ul>
-	<!-- {{form.as_ul}} -->
-	<li class="urls">
-        <label for="id_urls">Whatnot</label>
-        <input type="text" name="urls" id="id_urls">
+    <input class="hide" type="text" name="category" id="id_category">
+    <input class="hide" type="text" name="function" id="id_category_title">
+	<li class="format">
+        <label for="id_format">format</label>
+        <select type="text" name="format" id="id_format">
+            <option value="csv">csv</option>
+            <option value="jsondict">jsondict</option>
+            <option value="jsonlist">jsonlist</option>
+        </select>
 	</li> 
-	<li class="columns">
-        {{form.columns.label_tag}}
-        {{form.columns}}
+	<li class="name">
+        <label for="id_name">name<span class="desc"> of the scraper</span></label>
+        <input type="text" name="name" id="id_name">
 	</li> 
-	<li class="frequency">
-        {{form.frequency.label_tag}}
-        {{form.frequency}}
-	</li>
-	<li class="due_date">
-        {{form.due_date.label_tag}}
-        {{form.due_date}}
-        <a><img src="{{ MEDIA_URL }}images/icons/calendar.png" width="16" height="16" alt="" /> Show calendar</a>
+	<li class="username">
+        <label for="id_username">username</label>
+        <input type="text" name="username" id="id_username">
 	</li> 
-	<li class="visualisation">
-        {{form.visualisation.label_tag}}
-        {{form.visualisation}}
-	</li>
-    <li class="application">
-        {{form.application.label_tag}}
-        {{form.application}}
-	</li>
-	<li class="description">
-        {{form.name.label_tag}}
-        {{form.name}}
-	</li>
-	<li class="name {% if form.name.errors %}error{% endif %}">
-        {{form.name.label_tag}}
-        {{form.name}}
+	<li class="version">
+        <label for="id_version">version<span class="desc"> number (optional)</span></label>
+        <input type="text" name="version" id="id_version">
 	</li> 
-	<li class="email {% if form.email.errors %}error{% endif %}">
-        {{form.email.label_tag}}
-        {{form.email}}
+	<li class="runid">
+        <label for="id_runid">runid</label>
+        <input type="text" name="runid" id="id_runid">
 	</li> 
-	<li class="telephone">
-        {{form.telephone.label_tag}}
-        {{form.telephone}}
+	<li class="history_start_date">
+        <label for="id_history_start_date">history_start_date<span class="desc"> (optional)</span></label>
+        <input type="text" name="history_start_date" id="id_history_start_date">
 	</li> 
-	<li class="company_name">
-        {{form.company_name.label_tag}}
-        {{form.company_name}}
+	<li class="quietfields">
+        <label for="id_quietfields">quietfields<span class="desc"> delimited by | (optional)</span></label>
+        <input type="text" name="quietfields" id="id_quietfields">
 	</li> 
-	<li class="category">
-      {{form.category}}
+	<li class="attach">
+        <label for="id_attach">attach<span class="desc"> datastores from other scrapers (optional)</span></label>
+        <input type="text" name="attach" id="id_attach">
 	</li> 
-	<li class="broadcast">
-        {{form.broadcast.label_tag}}
-        {{form.broadcast}}
-	</li>
+	<li class="query">
+        <label for="id_query">query<span class="desc"> in SQL</span></label>
+        <textarea name="query" id="id_query"></textarea>
+	</li> 
+	<li class="searchquery">
+        <label for="id_searchquery">searchquery</label>
+        <input type="text" name="searchquery" id="id_searchquery">
+	</li> 
+	<li class="callback">
+        <label for="id_callback">callback<span class="desc"> for JSONP (optional)</span></label>
+        <input type="text" name="callback" id="id_callback">
+	</li> 
 	</ul>
+
     <p id="terms_and_conditions">
-        Don't worry, we never pass your details on to third parties, and everything's stored safely in accordance with our <a href="{% url terms %}">terms and conditions</a>.
+        We reserve the right to apply a rate limit to large requests at a later date in order to pass on reasonable costs <a href="{% url terms %}">terms and conditions</a>.
     </p>
-	<p class="last">
-		<input type="submit" value="Submit your request" id="submit" />
-	</p>
 </form>
+
+<div class="explorer_response">
+  <h2>Function response</h2>
+  <form action="{% url api_explore %}" method="post" target="iframeResponse">
+    <input type="submit" id="btnCallMethod" class="button" value="Call method ..."/>
+    <input type="text" name="apiurl" id="id_apiuri" size="70">
+  </form>
+  <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
+  <iframe name="iframeResponse" id="api_response" src="{% url api_explore %}"></iframe>
+</div>
+
 
 <div id="request_scrapbook">
 	<h2><a>Not convinced? See what we can do</a></h2>

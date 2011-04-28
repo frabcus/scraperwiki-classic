@@ -140,8 +140,7 @@ $(function()
 	$('#more_requester_div .back').live('click', function(){
 		requester_hide();
 		return false;
-	});
-	
+	});	
 });
 
 
