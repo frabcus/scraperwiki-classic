@@ -90,7 +90,7 @@ $(function()
         surl.push(entdropdown.attr("name"), "=", entdropdown.val()); 
         for (var i = 0; i < ents.length; i++)
         {
-            var ent = $(ents[i]).find("input"); 
+            var ent = $(ents[i]).find("input, textarea"); 
             if ((ent.length == 1) && (ent.val().length != 0))
                 surl.push("&", ent.attr("name"), "=", encodeURIComponent(ent.val())); 
         }

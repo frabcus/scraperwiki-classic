@@ -92,7 +92,7 @@
 	</li> 
 	<li class="query">
         <label for="id_query">query<span class="desc"> in SQL</span></label>
-        <textarea name="query" id="id_query"></textarea>
+        <textarea name="query" id="id_query">select * from swdata limit 10</textarea>
 	</li> 
 	<li class="searchquery">
         <label for="id_searchquery">searchquery</label>
@@ -113,7 +113,7 @@
   <h2>Function response</h2>
   <form action="{% url api_explore %}" method="post" target="iframeResponse">
     <input type="submit" id="btnCallMethod" class="button" value="Call method ..."/>
-    <input type="text" name="apiurl" id="id_apiuri" size="70">
+    <textarea name="apiurl" id="id_apiuri" cols="70" rows="3"></textarea>
   </form>
   <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
   <iframe name="iframeResponse" id="api_response" src="{% url api_explore %}"></iframe>

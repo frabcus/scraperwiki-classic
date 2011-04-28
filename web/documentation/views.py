@@ -45,7 +45,6 @@ def docexternal(request):
     api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
     return render_to_response('documentation/apibase.html', {"api_base":api_base}, context_instance=RequestContext(request))
 
-
 def api_explorer(request):
     styout = '<pre style="background:#000; color:#fff;">%s</pre>'  # can't be done by formatting the iframe
     if not request.POST:
