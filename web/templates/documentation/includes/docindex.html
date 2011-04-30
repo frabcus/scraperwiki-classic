@@ -74,15 +74,17 @@ out as JSON or CSV files. </p>
 </ul>
 	
 	
-<h3>Scraping topic guides</h3>
-<ul>
-{% ifequal language 'python' %}
- <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">Using lxml</a></li>	
- <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">Using Mechanize with Python</a></li>
- <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">Working with CSV files</a></li>
- <li><a href="{% url docscontrib 'excel_cheat_sheet' %}">Reading Excel files</a></li>
-{% endifequal %}
-</ul>
+{% if user.is_staff %} <div class="staff">
+    <h3>Scraping topic guides</h3>
+    <ul>
+    {% ifequal language 'python' %}
+     <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">Using lxml</a></li>	
+     <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">Using Mechanize with Python</a></li>
+     <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">Working with CSV files</a></li>
+     <li><a href="{% url docscontrib 'excel_cheat_sheet' %}">Reading Excel files</a></li>
+    {% endifequal %}
+    </ul>
+</div> {% endif %}
 
 {% if user.is_staff %} <div class="staff">
     <h3>Scraper tools</h3>
@@ -100,17 +102,19 @@ out as JSON or CSV files. </p>
 
 <div class="content half right">
 
-<h3>Views topic guides</h3>
-<ul>
- <li><a href="{% url docs 'jquery_topic_guide' %}">Using JQuery</a></li>
- <li><a href="{% url docs 'ajax_topic_guide' %}">AJAX Guidance</a></li>
- <li><a href="{% url docs 'gmap_topic_guide' %}">Google maps</a></li>
-{% comment %} <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>{% endcomment %}
- <li><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Vector Graphics with Raphaeljs</a></li>
-{% ifequal language 'python' %}
- <li><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">Reading querystring parameters</a></li>
-{% endifequal %}
-</ul>
+{% if user.is_staff %} <div class="staff">
+    <h3>Views topic guides</h3>
+    <ul>
+     <li><a href="{% url docs 'jquery_topic_guide' %}">Using JQuery</a></li>
+     <li><a href="{% url docs 'ajax_topic_guide' %}">AJAX Guidance</a></li>
+     <li><a href="{% url docs 'gmap_topic_guide' %}">Google maps</a></li>
+    {% comment %} <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>{% endcomment %}
+     <li><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Vector Graphics with Raphaeljs</a></li>
+    {% ifequal language 'python' %}
+     <li><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">Reading querystring parameters</a></li>
+    {% endifequal %}
+    </ul>
+</div> {% endif %}
 
 {% if user.is_staff %} <div class="staff">
     <h3>View tools</h3>
