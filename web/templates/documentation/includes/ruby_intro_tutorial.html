@@ -24,7 +24,7 @@ type Ctrl+R.
 </code>
 
 <p>(As we go through this tutorial, you can copy and paste each 
-block of code onto the end of your growing scraper.)</p>
+block of code onto the end of your growing scraper, and run it each time.)</p>
 
 <p>The code runs on ScraperWiki's servers. You can see any output you
 printed in the Console tab at the bottom of the editor.
@@ -36,7 +36,7 @@ printed in the Console tab at the bottom of the editor.
 or Mechanize. There is also a simple built in ScraperWiki function.
 </p>
 
-<code>html = ScraperWiki.scrape("http://www.youtube.com/charts")
+<code>html = ScraperWiki.scrape("http://unstats.un.org/unsd/demographic/products/socind/education.htm")
 puts html
 </code>
 
@@ -50,15 +50,21 @@ everything that has been downloaded.</p>
 </p>
 
 <code>require 'nokogiri'
+
 doc = Nokogiri::HTML(html)
-doc.search('.video-details').each do |v|
-  title = v.search('h3 a').first['title']
-  puts title
+for v in doc.search("table[@align='left'] tr.tcont")
+  cells = v.search('td')
+  data = {
+    'country' =&gt; cells[0].inner_html,
+    'years_in_school' =&gt; cells[4].inner_html.to_i
+  }
+  puts data.to_json
 end
+
 </code>
 <!--     :views => v.at_css('li.last strong').inner_html.gsub(' views', '').gsub(",","").strip.to_i -->
 
-<p>The bits of code like 'h3 a' are CSS selectors, just like 
+<p>The bits of code like 'tr.tcont' are CSS selectors, just like 
 those used to style HTML.
 </p>
 
@@ -67,9 +73,9 @@ those used to style HTML.
 <p>The datastore is a magic SQL store, one where you don't need to make
 a schema up front.</p>
 
-<p>Replace "puts title" in the Nokogiri loop with this save command:</p>
+<p>Replace "puts data.to_json" in the Nokogiri loop with this save command:</p>
 
-<code>ScraperWiki.save(unique_keys=['title'], data={'title' =&gt; title})
+<code>ScraperWiki.save(unique_keys=['country'], data=data)
 </code>
 
 <p>The unique key should be whatever uniquely identifies each piece of data.
@@ -80,24 +86,27 @@ unique keys is replaced.</p>
 
 <h2>5. Getting the data out again</h2>
 
-<p>You can write and run scrapers in draft, but you need to save them so you
-don't lose your work, and so you can access the datastore externally.</p>
-
 <p>If you haven't done so yet, press "save scraper" at the bottom
 right of the editor. You'll need to give your scraper a title, and to make a
 ScraperWiki account if you don't have one already.</p>
 
-<p>Now, click on the Scraper tab at the top right to see your data.
+<p>Now, click on the Scraper tab at the top right to see a preview of your
+data.  The easiest way to get it all out is to "Download spreadsheet (CSV)".
 </p>
 
-<p>The easiest way to get your data out is to "Download spreadsheet (CSV)".
-</p>
+<p>For more complex queries "Explore with ScraperWiki API". Try this
+query in the SQL query box.</p>
 
-<p>For SQL and JSON, choose "Explore with ScraperWiki API".</p>
+<code>select * from swdata order by years_in_school desc limit 10
+</code>
+
+<p>It returns the records for the ten countries where children spend
+the most years at school. Notice that as well as JSON, you can also
+get custom CSV files using an SQL query.</p>
 
 <h2>What next?</h2>
 
-<p>If you're now ready to write your own scraper, then get going. Otherwise...
+<p>If you're now ready to write your own scraper on ScraperWiki, then get going. Otherwise...
 
 {% load doc_links %}
 <ul>
