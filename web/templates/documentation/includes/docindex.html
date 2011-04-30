@@ -1,3 +1,5 @@
+{% load doc_links %}
+
 <!-- This probably goes in the introduction topic guide? Not sure
 
 <h3>Technical features</h3>
@@ -33,11 +35,24 @@ out as JSON or CSV files. </p>
 
 <h3>First steps</h3>
 <ul>
-    <li><a href="/docs/{{language}}/{{language}}_intro_tutorial">Introductory tutorial</a></li>
-    <li><a href="/docs/{{language}}/{{language}}_datastore_guide">The Datastore</a></li>
-    <li><a href="/docs/{{language}}/view_guide">Working with ScraperWiki Views</a></li>
+    <li> {% doc_link_full 'LANG_intro_tutorial' language %} </li>
+    <li> {% doc_link_full 'LANG_datastore_guide' language %} </li>
+    <li> {% doc_link_full 'view_guide' language %} </li>
 </ul>
 
+<h3>Reference</h3>
+<ul>
+  <li>
+	<a href="/docs/{{language}}/{{language}}_help_documentation">ScraperWiki internal API</a>
+  </li>
+  <li>
+	<a href="{% url docsexternal %}">ScraperWiki external API</a>
+  </li>
+  <li>
+  <a href='/docs/{{language}}/{{language}}_libraries'>Libraries available</a>
+  </li>
+</ul>
+	
 </div>
 
 <div class="content col right" id="getting_help">
@@ -60,19 +75,7 @@ out as JSON or CSV files. </p>
 </div>
 
 <div class="content half left">
-<h3>Reference</h3>
-<ul>
-  <li>
-	<a href="/docs/{{language}}/{{language}}_help_documentation">ScraperWiki internal API</a>
-  </li>
-  <li>
-	<a href="{% url docsexternal %}">ScraperWiki external API</a>
-  </li>
-  <li>
-  <a href='/docs/{{language}}/{{language}}_libraries'>Libraries available</a>
-  </li>
-</ul>
-	
+
 	
 {% if user.is_staff %} <div class="staff">
     <h3>Scraping topic guides</h3>

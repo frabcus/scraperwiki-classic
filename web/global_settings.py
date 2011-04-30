@@ -101,6 +101,7 @@ SCRAPERWIKI_APPS = [
     'whitelist',
     'cropper',
     'kpi',
+    'documentation',
     #'devserver',
 ]
 

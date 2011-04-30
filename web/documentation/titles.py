@@ -8,24 +8,24 @@ page_titles = {
     
     "faq" : ("Frequently Asked Questions",""),    
     
-    "php_datastore_guide" : ("The Datastore","A guide to the datastore for PHP programmers"),
+    "php_datastore_guide" : ("Datastore guide","A guide to the datastore for PHP programmers"),
     "php_help_documentation" : ("ScraperWiki internal API",""),
     "php_intro_tutorial" : ("Introductory tutorial",""),
-    "php_libraries" : ("PHP Libraries",""),
-    "php_view_guide" : ("ScraperWiki View Guide","How to use Views inside ScraperWiki"),    
+    "php_libraries" : ("PHP libraries",""),
+    "php_view_guide" : ("ScraperWiki view guide","How to use Views inside ScraperWiki"),    
     
-    "python_datastore_guide" : ("The Datastore","A guide to the datastore for Python programmers"),
+    "python_datastore_guide" : ("Datastore guide","A guide to the datastore for Python programmers"),
     "python_help_documentation" : ("ScraperWiki internal API",""),
     "python_intro_tutorial" : ("Introductory tutorial",""),
     "python_libraries" : ("Python Libraries",""),
     "python_view_guide" : ("ScraperWiki View Guide","How to use Views inside ScraperWiki"),    
     
-    "ruby_datastore_guide" : ("The Datastore","A guide to the datastore for Ruby programmers"),
+    "ruby_datastore_guide" : ("Datastore guide","A guide to the datastore for Ruby programmers"),
     "ruby_help_documentation" : ("ScraperWiki internal API",""),
     "ruby_intro_tutorial" : ("Introductory tutorial",""),
     "ruby_libraries" : ("Ruby Libraries",""),
-    "ruby_view_guide" : ("ScraperWiki View Guide","How to use Views inside ScraperWiki"),    
+    "ruby_view_guide" : ("ScraperWiki view guide","How to use Views inside ScraperWiki"),    
     
-    "view_guide" : ("ScraperWiki View Guide","How to use Views inside ScraperWiki"),    
+    "view_guide" : ("ScraperWiki view guide","How to use Views inside ScraperWiki"),    
 }
 
