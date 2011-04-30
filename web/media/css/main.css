@@ -4443,8 +4443,15 @@ div.documentationpage dt {
     color:#003; font-size:120%; padding-top:10px;
 }
 
+div.documentationpage h2 {
+    margin-top: 1.25em;
+    padding-top:0;
+    padding-bottom:0;
+}
+
 div.documentationpage h3 {
-    padding-top:5px;
+    margin-top: 1.25em;
+    padding-top:0;
     padding-bottom:0;
 }
 
@@ -4464,6 +4471,8 @@ div.documentationpage dd {
 
 div.documentationpage code {
 	padding: 8px;
+    margin-top: 1em;
+    margin-bottom: 1em;
 	background:#aaa; 
 	border: solid 3px #333;
 	overflow: auto;
