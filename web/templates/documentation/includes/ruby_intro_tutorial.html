@@ -1,37 +1,118 @@
-<h2>How to make a new scraper</h2>
+<p>First, which language are you most comfortable with?</p>
 
-Make a new scraper
+<p class="language_chooser">
+        <a href="#" onclick="switch_language('python');return false;" class="python" title="Switch to Python Help files"><img src="{{ MEDIA_URL }}/images/icons/python.png" width="16" height="16" alt="" /> Python</a>
+        <a href="#" onclick="switch_language('ruby');return false;" class="ruby" title="Switch to Ruby Help files"><img src="{{ MEDIA_URL }}/images/icons/ruby.png" width="16" height="16" alt="" /> Ruby</a>
+        <a  href="#" onclick="switch_language('php');return false;" class="php" title="Switch to PHP Help files"><img src="{{ MEDIA_URL }}/images/icons/php.png" width="16" height="16" alt="" /> PHP</a>
+   <br class="clear"/>
+</p>
 
-Choose language most comfortable with
 
-Put in a few lines of code to show it runs
 
-<code>ScraperWiki.save_sqlite(unique_keys=["a"], data={"a"=>1, "bbb"=>"Hi there"})
+
+<h2>1. Make a new scraper</h2>
+
+<p>Pick "new scraper" from the main menu on the right, and choose Ruby.
+You'll get a web based code editor.
+</p>
+
+<p>Put in a few lines of code to show it runs, and click the "Run" button or
+type Ctrl+R.
+</p>
+
+<code>puts "Hello, coding in the cloud!"
 </code>
 
+<p>(As we go through this tutorial, you can copy and paste each 
+block of code onto the end of your growing scraper.)</p>
 
-<h2></h2>
+<p>The code runs on ScraperWiki's servers. You can see any output you
+printed in the Console tab at the bottom of the editor.
+</p>
 
-Put some code in that scrapes some data
+<h2>2. Download HTML from the web</h2>
 
+<p>You can use any normal Ruby library to crawl the web, such as Net::HTTP
+or Mechanize. There is also a simple built in ScraperWiki function.
+</p>
 
-<h2></h2>
+<code>html = ScraperWiki.scrape("http://www.youtube.com/charts")
+puts html
+</code>
 
-Save it to the datastore
+<p>When you print something quite large, click "more" in the console
+to view it all. Alternatively, go to the Sources tab in the editor to see
+everything that has been downloaded.</p>
 
+<h2>3. Parsing the HTML to get your content</h2>
 
-<h2></h2>
+<p>Nokogiri is Ruby's best Japanese saw for cutting up HTML.
+</p>
 
-Click on the scraper tab, see data in there
+<code>require 'nokogiri'
+doc = Nokogiri::HTML(html)
+doc.search('.video-details').each do |v|
+  title = v.search('h3 a').first['title']
+  puts title
+end
+</code>
+<!--     :views => v.at_css('li.last strong').inner_html.gsub(' views', '').gsub(",","").strip.to_i -->
 
+<p>The bits of code like 'h3 a' are CSS selectors, just like 
+those used to style HTML.
+</p>
 
-<h3></h3>
+<h2>4. Saving to the ScraperWiki datastore</h2>
 
-Go to the API explorer, and get data back out
-Maybe a CSV with columns reordered, filtered
+<p>The datastore is a magic SQL store, one where you don't need to make
+a schema up front.</p>
 
+<p>Replace "puts title" in the Nokogiri loop with this save command:</p>
 
-Done
+<code>ScraperWiki.save(unique_keys=['title'], data={'title' =&gt; title})
+</code>
+
+<p>The unique key should be whatever uniquely identifies each piece of data.
+When the scraper runs again, existing data with the same values for the
+unique keys is replaced.</p>
+
+<p>Go to the Data tab in the editor to see the data loading in.</p>
+
+<h2>5. Getting the data out again</h2>
+
+<p>You can write and run scrapers in draft, but you need to save them so you
+don't lose your work, and so you can access the datastore externally.</p>
+
+<p>If you haven't done so yet, press "save scraper" at the bottom
+right of the editor. You'll need to give your scraper a title, and to make a
+ScraperWiki account if you don't have one already.</p>
+
+<p>Now, click on the Scraper tab at the top right to see your data.
+</p>
+
+<p>The easiest way to get your data out is to "Download spreadsheet (CSV)".
+</p>
+
+<p>For SQL and JSON, choose "Explore with ScraperWiki API".</p>
+
+<h2>What next?</h2>
+
+<p>If you're now ready to write your own scraper, then get going. Otherwise...
+
+{% load doc_links %}
+<ul>
+    <li> 
+        {% doc_link_full 'LANG_datastore_guide' language %}, the next tutorial.
+    </li>
+    <li>
+        <a href="{% url get_involved %}" title="Get involved">Get involved!</a>
+        Fix, tag or document our shared public data scrapers.
+    </li>
+    <li>
+        <a href="{% url docs language %}">More documentation</a> on ScraperWiki
+        and common Ruby scraping libraries.
+    </li>
+</ul>
 
 
 
