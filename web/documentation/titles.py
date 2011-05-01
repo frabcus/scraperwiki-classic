@@ -22,8 +22,8 @@ page_titles = {
     
     "php_intro_tutorial" : ("Introductory tutorial","How to use ScraperWiki for people who can already write PHP"),
     "php_datastore_guide" : ("Datastore guide","A guide to the ScraperWiki SQL datastore for PHP programmers"),
-    "php_help_documentation" : ("ScraperWiki internal API","PHP batteries included in ScraperWiki"),
-    "php_libraries" : ("3rd party libraries",""),
+    "php_help_documentation" : ("ScraperWiki internal API",""),
+    "php_libraries" : ("3rd party libraries","PHP batteries included in ScraperWiki"),
     "php_view_guide" : ("ScraperWiki view guide","How to use Views inside ScraperWiki"),    
     
     "view_guide" : ("ScraperWiki view guide","How to use Views inside ScraperWiki"),    
