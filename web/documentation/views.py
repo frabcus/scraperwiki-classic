@@ -27,6 +27,8 @@ def docmain(request, language=None, path=None):
         context["docpage"] = 'documentation/includes/%s.html' % re.sub("\.\.", "", path)  # remove attempts to climb into another directory
         if not os.path.exists(os.path.join(settings.SCRAPERWIKI_DIR, "templates", context["docpage"])):
             raise Http404
+    else:
+        context["para"] = "Tutorials, references and guides for programmers coding on ScraperWiki"
             
     return render_to_response('documentation/docbase.html', context, context_instance=RequestContext(request))
 
