@@ -3,7 +3,7 @@
 {% block title %}Documentation{% endblock %}
 
 {% block header %}
-  <h2>Documentation{% if title %} &ndash; {{title}}{% endif %}</h2>
+<h2>{% if title %}Docs &ndash; {{title}}{% else %}Documentation{% endif %}</h2>
 	{% if para %}<p>{{ para|safe}}</p>{% endif %}
 {% endblock %}
 

@@ -1,22 +1,5 @@
 {% load doc_links %}
 
-<!-- This probably goes in the introduction topic guide? Not sure
-
-<h3>Technical features</h3>
-
-<ul>
-    <li>Online code editor, write debug and run Python, Ruby or PHP in your browser</li>
-    <li><a id="reference" href="{% url help 'documentation' language|default:"python" %}">ScraperWiki code libraries</a> make scraping and parsing simple</li>
-    <li>Nokogiri, lxml, Mechanize &mdash; <a id="libraries" href="{% url help 'libraries' language|default:"python" %}">all the libraries</a> you're used to</li>
-    <li>Store data direct to an SQLite datastore</li>
-    <li><a href="{% url api:index_1_0 %}">API access</a> to data in JSON, CSV</li>
-    <li>Views for writing simple web apps</li>
-    <li>Scheduled to re-run so your data is always up-to-date</li>
-    <li>Email alerts if your scrapers fail, or someone edits them</li>
-    <li>Built in source control, based on Mercurial</li>
-</ul>
--->
-
 <div class="content col left">
 
 <p class="language_chooser">
@@ -42,15 +25,10 @@ out as JSON or CSV files. </p>
 
 <h3>Reference</h3>
 <ul>
-  <li>
-    {% doc_link_full 'LANG_help_documentation' language %}
-  </li>
-  <li>
-	<a href="{% url docsexternal %}">ScraperWiki external API</a>
-  </li>
-  <li>
-    {% doc_link_full 'LANG_libraries' language %}
-  </li>
+  <li> {% doc_link_full 'LANG_help_documentation' language %} </li>
+  <li> <a href="{% url docsexternal %}">ScraperWiki external API</a> </li>
+  <li> {% doc_link_full 'LANG_libraries' language %} </li>
+  <li> {% doc_link_full 'technical_overview' language %} </li>
 </ul>
 	
 </div>

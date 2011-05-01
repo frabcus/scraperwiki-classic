@@ -27,5 +27,6 @@ page_titles = {
     "php_view_guide" : ("ScraperWiki view guide","How to use Views inside ScraperWiki"),    
     
     "view_guide" : ("ScraperWiki view guide","How to use Views inside ScraperWiki"),    
+    "technical_overview" : ("Technical overview","All the component parts of ScraperWiki and how they work together"),    
 }
 
