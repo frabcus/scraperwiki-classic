@@ -52,8 +52,12 @@ def contrib(request, short_name):
 
 
 def docexternal(request):
+    language = request.session.get('language', 'python')
     api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
-    return render_to_response('documentation/apibase.html', {"api_base":api_base}, context_instance=RequestContext(request))
+
+    context = {'language':language, 'api_base':api_base }
+
+    return render_to_response('documentation/apibase.html', context, context_instance=RequestContext(request))
 
 def api_explorer(request):
     styout = '<pre style="background:#000; color:#fff;">%s</pre>'  # can't be done by formatting the iframe
