@@ -1026,6 +1026,8 @@ body.profiles h2.scrapersandviews {
 #request_options {
 	width: 365px;
 	float: right;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #request_form {
@@ -1075,7 +1077,7 @@ body.profiles h2.scrapersandviews {
 }
 
 #request_options h2 {
-	color: #444;
+	color: #555;
     text-align: center;
     margin-bottom: 10px;
 }
