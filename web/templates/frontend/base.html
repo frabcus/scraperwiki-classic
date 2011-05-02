@@ -187,7 +187,8 @@
 				<dt>Data</dt>
 				<dd>
 					<ul>
-						<li><a href="{% url scraper_list %}scrapers">Browse data &amp; scrapers</a></li>
+                        <li><a href="{% url request_data %}">Business</a></li>
+						<li><a href="{% url scraper_list %}scrapers">Browse data</a></li>
 						<li><a href="{% url request_data %}">Request data</a></li>
 						<li><a href="#" class="editor_scraper">Create a new scraper</a> / <a href="#" class="editor_view">view</a></li>		                 
 						<li><a href="{% url get_involved %}" title="Get involved">Get involved!</a></li>
@@ -206,10 +207,9 @@
 					<ul>
 						<li><a href="{% url contact_form %}">Contact us</a></li>
 						<li><a href="{% url docs 'faq' %}">FAQ</a></li>							
-						<li><a href="{% url tutorials %}">Tutorials</a></li>	
-						<li><a href="{% url whitelist_user %}">Whitelist</a></li>	
-						<li><a href="{% url docsroot %}">Documentation</a></li>	
+						<li><a href="{% url docsroot %}">Documentation / tutorials</a></li>	
 						<li><a href="http://groups.google.com/group/scraperwiki">Developers&rsquo; discussion group</a></li>			                   			                 
+						<li><a href="{% url whitelist_user %}">Whitelist</a></li>	
 					</ul>
 				</dd>
 			</dl>
