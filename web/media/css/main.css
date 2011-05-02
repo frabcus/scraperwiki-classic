@@ -3152,6 +3152,24 @@ body.about #divContent h2.inline {
 	line-height: 32px;
 }
 
+body.about #about_images {
+    text-align: center;
+}
+
+body.about .about_image {
+	cursor: pointer;
+}
+
+body.about #about_hover {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 30em;
+	background-color: #F4F8FB;
+    padding: 1em;
+    display:none; 
+}
+
 body.about #scrapbook h2 {
 	margin-bottom: 30px;
 	margin-top: 50px;

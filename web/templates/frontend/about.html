@@ -16,21 +16,21 @@
     <p>But getting at it isn&rsquo;t always easy. There's a table here, a report
     there, a few web pages, PDFs, spreadsheets&hellip; And it can be scattered over
     thousands of different places on the web, making it hard to see the whole
-    picture and the story behind it. It&rsquo;s like trying to build something from Lego when someone has
-    hidden the bricks all over town and you have to find them before
-    you can start building!</p>
+    picture and the story behind it. It&rsquo;s like trying to build something
+    from Lego when someone has hidden the bricks all over town and you have to
+    find them before you can start building!</p>
 </div>
 <div class="column-right">
     <p>To get at data, programmers write bits of code called &lsquo;screen
-    scrapers&rsquo;, which extract the useful bits so they can be reused in other apps, or
-    rummaged through by journalists and researchers. But these bits of code
-    tend to break,  get thrown away or forgotten once they have been
-    used, and so the data is lost again. Which is bad.</p>
-    <p>ScraperWiki is an online tool to make that process simpler and more
-    collaborative. Anyone can write a screen scraper using the online
-    editor, and the code and data are shared with the world. Because it&rsquo;s a wiki, other programmers can
-    contribute to and improve the code. And, if you're not a programmer
-    yourself, you can 
+    scrapers&rsquo;, which extract the useful bits so they can be reused in
+    other apps, or rummaged through by journalists and researchers. But these
+    bits of code tend to break,  get thrown away or forgotten once they have
+    been used, and so the data is lost again. Which is bad.</p> <p>ScraperWiki
+    is an online tool to make that process simpler and more collaborative.
+    Anyone can write a screen scraper using the online editor, and the code and
+    data are shared with the world. Because it&rsquo;s a wiki, other
+    programmers can contribute to and improve the code. And, if you're not a
+    programmer yourself, you can 
     {% if settings.ENABLE_MARKETPLACE %}
     <a href="{% url market_solicitation %}">request a scraper</a> or 
     {% endif %}
@@ -74,20 +74,81 @@
 
 <div id="people">
     <h2><a>Company history and people</a></h2>
-    <p>
 
-
-    <p>Years ago Julian 
-       TheyWorkForYou, PlanningAlerts
+    <p>ScraperWiki was started by Julian Todd and Aidan McGuire. The company
+    has seed funding <a href="http://www.4ip.org.uk/2009/12/4ip-invests-in-scraperwiki/">from 4iP</a>,
+    and the founders.  We're based in Liverpool (engineering) and London (sales), UK.
+    </p>
     
-    The original idea for ScraperWiki was Julian Todd's. Richard Pope ran
-    the project. Tom Mortimer-Jones, Sym Roe, Anna Powell-Smith and Mike
-    Richardson helped to build it (when not 
-    <a href="http://www.youtube.com/watch?v=HNGc8gKFkDs">building igloos</a>).</p> 
+    <div id="about_images">
+        <span class="about_image">
+            <img src="{{ MEDIA_URL }}images/about_francis.png"> 
+            <span style="display: none"> 
+                Francis Irving (CEO, <a href="http://www.twitter.com/frabcus">@frabcus</a>) 
+                previously started <a href="http://www.mysociety.org">mySociety</a> 
+                and founded development tool TortoiseCVS, which with its successors is
+                used by tens of millions of people.
+            </span>
+        </span>
+        <span class="about_image">
+            <img src="{{ MEDIA_URL }}images/about_aine.png"> 
+            <span style="display: none"> 
+                Aine McGuire (VP of Sales, <a href="http://www.twitter.com/ainemcguire">@ainemcguire</a>)
+                previously founded a Microsoft Gold Certified Partner company
+                with a major focus on education and partner skills and has
+                rolled out large programmes across EMEA over 10 years.
+            </span>
+        </span>
+        <span class="about_image">
+            <img src="{{ MEDIA_URL }}images/about_julian.png"> 
+            <span style="display: none"> 
+                Julian Todd (CTO, <a href="http://www.twitter.com/goatchurch">@goatchurch</a>)
+                previously started democracy website TheyWorkForYou.com which
+                is used by millions of people and inspired the creation of the
+                Sunlight Foundation in the USA. 
+            </span>
+        </span>
+        <span class="about_image">
+            <img src="{{ MEDIA_URL }}images/about_aidan.png">
+            <span style="display: none"> 
+                Aidan McGuire (CFO, <a href="http://www.twitter.com/amcguire62">@amcguire62</a>)
+                previously founded a supply chain software business and has a banking background.
+            </span>
+        </span>
+        <span class="about_image">
+            <img src="{{ MEDIA_URL }}images/about_tom.png"> 
+            <span style="display: none"> 
+                Tom Mortimer-Jones (<a href="http://www.twitter.com/morty_uk">@morty_uk</a>)
+            </span>
+        </span>
+        <span class="about_image">
+            <img src="{{ MEDIA_URL }}images/about_nicola.png">
+            <span style="display: none"> 
+                Nicola Hughes (<a href="http://www.twitter.com/DataMinerUK">@DataMinerUK</a>)
+                She owns an axelotl.
+            </span>
+        </span>
+        <span class="about_image">
+            <img src="{{ MEDIA_URL }}images/about_zarino.png"> 
+            <span style="display: none"> 
+                Zarino Zappia (<a href="http://www.twitter.com/zarino">@zarino</a>)
+            </span>
+        </span>
+        <span class="about_image">
+            <img src="{{ MEDIA_URL }}images/about_ross.png"> 
+            <span style="display: none"> 
+                Ross Jones (<a href="http://www.twitter.com/rossjones">@rossjones</a>)
+            </span>
+        </span>
+    </div>
+    <div id="about_hover">
+    </div>
 
-    <p>Aidan McGuire and Aine McGuire managed it all. Thanks to Francis Irving,
-    Tom Steinberg and Jamie Arnold for mentoring, Francis Davey for legal
-    advice, and Zarino Zappia for design consultancy.</p>
+    <p>Thanks also to: Richard Pope, who designed the first version of ScraperWiki.
+    Sym Roe, Anna Powell-Smith and Mike Richardson who helped to build it.
+    Tom Steinberg and Jamie Arnold for mentoring. Francis Davey for
+    legal advice. We also offer <a href="http://www.youtube.com/watch?v=HNGc8gKFkDs">bespoke igloos</a>.
+    </p>
 
 </div>
 
@@ -112,3 +173,19 @@
 
 
 {% endblock %}
+
+{% block run_script %}
+    {{block.super}}
+
+    $('.about_image').mouseover( function()
+    {
+        var h = $(this).find("span").html();
+        if ($('#about_hover').html() != h) {
+            $('#about_hover').html(h);
+            $('#about_hover').show();
+        }
+    });
+
+{% endblock %}
+
+
