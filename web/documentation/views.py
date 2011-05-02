@@ -11,19 +11,18 @@ import urllib2
 
 def docmain(request, language=None, path=None):
     from titles import page_titles
-    
-#    language = request.GET.get('language', None) or request.session.get('language', 'python')
-    if language is None:
-        language = request.session.get('language', 'python')
+
+    language = language or request.session.get('language', 'python')
     request.session['language'] = language
-    context = {'language':language }
+    context = {'language': language }
     
     if path:
         title, para = page_titles[path]
         context["title"] = title
         context["para"] = para
         
-        # Maybe we should render a template instead for now?
+        # Maybe we should be rendering a template from the file so that it isn't fixed 
+        # as static html.
         context["docpage"] = 'documentation/includes/%s.html' % re.sub("\.\.", "", path)  # remove attempts to climb into another directory
         if not os.path.exists(os.path.join(settings.SCRAPERWIKI_DIR, "templates", context["docpage"])):
             raise Http404
