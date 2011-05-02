@@ -1,6 +1,7 @@
 from django.template import RequestContext, TemplateDoesNotExist
 from django.shortcuts import render_to_response
-from django.http import Http404, HttpResponse, HttpResponseNotFound
+from django.core.urlresolvers import reverse
+from django.http import Http404, HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from codewiki.models import Code
 import os
 import re
@@ -31,6 +32,25 @@ def docmain(request, language=None, path=None):
             
     return render_to_response('documentation/docbase.html', context, context_instance=RequestContext(request))
 
+
+def tutorials(request,language=None):
+    from codewiki.models import Scraper, View
+
+    if not language:
+        return HttpResponseRedirect(reverse('tutorials',kwargs={'language': request.session.get('language', 'python')}) )
+
+    tutorial_dict, viewtutorials = {}, {}
+    if language == "python":
+        tutorial_dict[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('title')
+        for scraper in tutorial_dict[language]:
+            scraper.title = re.sub("^[\d ]+", "", scraper.title)
+    else:
+        tutorial_dict[language] = Scraper.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
+        
+    viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
+    context = {'language': language, 'tutorials': tutorial_dict, 'viewtutorials': viewtutorials}
+    
+    return render_to_response('documentation/tutorials.html', context, context_instance = RequestContext(request))
 
 
     # should also filter, say, on isstartup=True and on privacy_status=visible to limit what can be injected into here
