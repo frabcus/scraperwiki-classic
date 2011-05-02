@@ -1065,10 +1065,19 @@ body.profiles h2.scrapersandviews {
 	padding: 10px 15px;
 	font-size: 16px;
 	line-height: 20px;
-	font-weight: bold;
+	font-weight: normal;
 	border-bottom: 2px solid #fff;
 	color: #5E98BC;
 	position: relative;
+}
+#request_options h3 a strong {
+	font-weight: bold;
+}
+
+#request_options h2 {
+	color: #444;
+    text-align: center;
+    margin-bottom: 10px;
 }
 
 #request_options h3 a:hover {
