@@ -3161,10 +3161,9 @@ body.about .about_image {
 }
 
 body.about #about_hover {
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 15%;
     text-align: center;
-    width: 30em;
+    width: 70%;
 	background-color: #F4F8FB;
     padding: 1em;
     display:none; 
