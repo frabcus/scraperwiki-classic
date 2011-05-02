@@ -3272,21 +3272,14 @@ body.about #people p {
 }
 
 #about_specifics .logos {
-	float: left;
-	width: 320px;
 	padding: 15px 20px 5px 20px;
 }
 
-#about_specifics .funding,
 #about_specifics .licence {
 	float: right;
 	width: 340px;
 	padding: 15px 20px 5px 20px;
 	border-left: 2px solid #fff;
-}
-
-#about_specifics .funding {
-	border-bottom: 2px solid #fff;
 }
 
 #about_specifics h3 {
