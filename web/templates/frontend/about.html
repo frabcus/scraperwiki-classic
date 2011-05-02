@@ -9,6 +9,7 @@
 
 {% block content %}
 
+
 <div class="column-left">
     <h2 class="inline">What is ScraperWiki?</h2>
     <p class="first">There&rsquo;s lots of useful data on the internet &ndash; crime
@@ -25,16 +26,17 @@
     scrapers&rsquo;, which extract the useful bits so they can be reused in
     other apps, or rummaged through by journalists and researchers. But these
     bits of code tend to break,  get thrown away or forgotten once they have
-    been used, and so the data is lost again. Which is bad.</p> <p>ScraperWiki
-    is an online tool to make that process simpler and more collaborative.
-    Anyone can write a screen scraper using the online editor, and the code and
-    data are shared with the world. Because it&rsquo;s a wiki, other
-    programmers can contribute to and improve the code. And, if you're not a
-    programmer yourself, you can 
-    {% if settings.ENABLE_MARKETPLACE %}
-    <a href="{% url market_solicitation %}">request a scraper</a> or 
-    {% endif %}
-    ask the ScraperWiki team to <a href="{% url request_data %}">write one for you</a>.</p>
+    been used, and so the data is lost again. Which is bad.</p> 
+
+    <p>ScraperWiki is an online tool to make that process simpler and more
+    collaborative. Anyone can write a screen scraper using the online editor.
+    In the free version, the code and data are shared with the world. 
+    Because it's a wiki, other programmers can contribute to and improve the
+    code.</p>
+
+    <p>If you're not a programmer, or if you want to tackle a large or complex
+    task, you can ask the ScraperWiki team to 
+    <a href="{% url request_data %}">organise it for you</a>.</p>
 </div>
 
 <br class="clear" />
