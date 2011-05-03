@@ -358,7 +358,8 @@ body.frontpage #nav_inner li.frontpage {
 	background-position: 5px center;
 }
 
-.help #header_inner {
+.help #header_inner,
+.docs #header_inner {
 	background-image: url(../images/header_icon_help.gif);
 }
 
@@ -1517,8 +1518,12 @@ ul.user_menu li {
 	padding-top: 1.3em;
 } */
 
-.content.left, .content.right {
+.content.left {
 	float: left;
+}
+
+.content.right {
+	float: right;
 }
 
 .content.half {
@@ -1598,18 +1603,82 @@ ul.user_menu li {
 	z-index: 1000;
 }
 
-body.api .right, #help_content .col.right {
+body.api .right {
 	font-size: 14px;
 	background-color: #F4F8FB;
 	padding: 10px;
 	margin-left: 16px;
 }
 
-body.api .right ul, #help_content .col.right ul {
+body.api .right ul {
 	padding-left: 0;
 	margin-top: 5px;
 }
 
+#help_content #getting_help {
+	background-color: #fcfce3;
+	width: 40%;
+	padding: 15px;
+	font-size: 14px;
+	padding-bottom: 10px;
+	margin-top: 30px;
+}
+
+#help_content #getting_help ul {
+	margin: 0;
+	padding: 0;
+}
+
+#help_content #getting_help ul li {
+	list-style: none;
+	margin: 0;
+	padding: 10px 10px 10px 36px;
+	border-top: 1px solid #cc9;
+	background: transparent url(../images/icons/help.png) no-repeat 8px 50%;
+}
+
+#help_content #getting_help h3 {
+	margin-top: 0;
+	text-align: center;
+}
+
+#help_content #getting_help p {
+	text-align: center;
+	margin-top: 5px;
+}
+
+#help_content #getting_help ul li.stack {
+	background-image: url(../images/icons/stack_overflow.png);
+}
+
+#help_content #getting_help ul li.google {
+	background-image: url(../images/icons/email.png);
+}
+
+#help_content #getting_help ul li.bugs {
+	background-image: url(../images/icons/bug.png);
+}
+
+#help_content #getting_help ul li.request {
+	background-image: url(../images/icons/balloon_ellipsis.png);
+}
+
+#help_content p.intro {
+	margin-top: 30px;
+	line-height: 1.2em;
+	padding-left: 30px;
+}
+
+#help_content .index h3 {
+	border-bottom: 1px solid #ccc;
+	padding-bottom: 5px;
+	margin-left: 30px;
+}
+
+#help_content .index ul {
+	margin-top: 10px;
+	padding-left: 30px;
+}
 
 
 /*
@@ -2334,29 +2403,34 @@ p.language_chooser {
 	background-color:  #F4F8FB;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
-	margin: 0 0 10px 0;
+	margin: 0;
 	font-size: 13px;
 }
 
 p.language_chooser strong,
 p.language_chooser a {
-	float: left;
+	float: right;
 	padding: 7px 12px;
-	border-right: 2px solid #fff;
+	border-left: 2px solid #fff;
 	margin: 0;
 	line-height: 16px;
 }
 
-p.language_chooser a img {
-	vertical-align: 2px;
-	margin-right: 3px;
-	margin-bottom: -6px;
+p.language_chooser strong {
+	border: none;
 }
 
-p.language_chooser a.stuck {
-	float: right;
-	border: none;
-	border-left: 2px solid #fff;
+p.language_chooser a.back {
+	float: left;
+	border-right: 2px solid #fff;
+	border-left: none;
+	-moz-border-radius-topleft: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+}
+
+p.language_chooser a.php {
 	-moz-border-radius-topright: 5px;
 	-moz-border-radius-bottomright: 5px;
 	border-top-right-radius: 5px;
@@ -2366,6 +2440,12 @@ p.language_chooser a.stuck {
 p.language_chooser strong {
 	color: #28c;
 	font-weight: normal;
+}
+
+p.language_chooser a img {
+	vertical-align: 2px;
+	margin-right: 3px;
+	margin-bottom: -6px;
 }
 
 p.language_chooser a:hover {

@@ -1,17 +1,8 @@
 {% load doc_links %}
 
-<div class="content col left">
-
-<p class="language_chooser">
-        <strong>Choose a language:</strong>
-        <a href="{% url docs 'python' %}" class="python" title="{% ifequal language 'python' %}You are currently viewing Python Help files{% else %}Switch to Python help{% endifequal %}"><img src="{{ MEDIA_URL }}/images/icons/python.png" width="16" height="16" alt="" /> Python</a>
-        <a href="{% url docs 'ruby' %}" class="ruby" title="{% ifequal language 'ruby' %}You are currently viewing Ruby Help files{% else %}Switch to Ruby Help files{% endifequal %}"><img src="{{ MEDIA_URL }}/images/icons/ruby.png" width="16" height="16" alt="" /> Ruby</a>
-        <a href="{% url docs 'php' %}" class="php" title="{% ifequal language 'php' %}You are currently viewing PHP Help files{% else %}Switch to PHP Help files{% endifequal %}"><img src="{{ MEDIA_URL }}/images/icons/php.png" width="16" height="16" alt="" /> PHP</a>
-        <br class="clear"/>
-</p>
-
-
-<p>ScraperWiki runs normal Python, Ruby and PHP scripts on our servers,
+<div class="content half left index">
+    
+<p class="intro">ScraperWiki runs normal Python, Ruby and PHP scripts on our servers,
 scheduled to scrape and refine data. 
 <!-- Edit and debug the scripts entirely in your browser, no setup required. A built
 in SQL API gets the data out as JSON or CSV files.  -->
@@ -34,28 +25,21 @@ in SQL API gets the data out as JSON or CSV files.  -->
 	
 </div>
 
-<div class="content col right" id="getting_help">
-    <h3>Getting help</h3>
-
-	<p>
-		To get help with ScraperWiki if you can't find what you want here ..
-		<ul>
-			<li>Try the <a href="/docs/{{language}}/faq">Frequently Asked Questions</a></li>
-			
-			<li>You can 
-                try searching for questions already answered on 
-		      <a href="http://stackoverflow.com/questions/tagged/scraperwiki">Stack Overflow</a></li>
-		    <li>Email your question to the ScraperWiki <a href="http://groups.google.com/group/scraperwiki">Google Group</a></li>
-		    <li>Go to BitBucket and check both the <a href='http://bitbucket.org/ScraperWiki/scraperwiki/issues'>bug list</a> and the source code <a href="http://bitbucket.org/ScraperWiki/scraperwiki/src">source code</a></li>		
-		</ul>
-		
-		If you want to request data you can contact us using the <a href="{% url request_data %}">request form</a>
-	</p>		
+<div class="content half right" id="getting_help">
+    <h3>Need help?</h3>
+	<p>If you can't find what you want here&hellip;</p>
+	<ul>
+		<li class="faq">Try the <a href="/docs/{{language}}/faq">Frequently Asked Questions</a></li>
+		<li class="stack">Try searching for questions already answered on <a href="http://stackoverflow.com/questions/tagged/scraperwiki">Stack Overflow</a></li>
+	    <li class="google">Email your question to the ScraperWiki&nbsp;<a href="http://groups.google.com/group/scraperwiki">Google&nbsp;Group</a></li>
+	    <li class="bugs">Go to BitBucket and check out the <a href='http://bitbucket.org/ScraperWiki/scraperwiki/issues'>bug&nbsp;list</a> and <a href="http://bitbucket.org/ScraperWiki/scraperwiki/src">source&nbsp;code</a></li>
+	    <li class="request">Fill out the <a href="{% url request_data %}">request&nbsp;form</a> and we&rsquo;ll get the data for you.</li>
+	</ul>	
 </div>
 
-<div class="content half left">
+<br class="clear" />
 
-	
+<div class="content half left index">
 {% if user.is_staff %} <div class="staff">
     <h3>Scraping topic guides</h3>
     <ul>
@@ -82,7 +66,7 @@ in SQL API gets the data out as JSON or CSV files.  -->
 
 </div>
 
-<div class="content half right">
+<div class="content half right index">
 
 {% if user.is_staff %} <div class="staff">
     <h3>Views topic guides</h3>
