@@ -319,6 +319,8 @@ class Code(models.Model):
         if action in EDITOR_ACTIONS:
             if self.privacy_status == "public":
                 return user.is_authenticated()
+            if user.is_superuser:
+                return True
             return "editor" in roles or "owner" in roles
         
         if action in VISIBLE_ACTIONS:
