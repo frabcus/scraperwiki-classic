@@ -22,7 +22,16 @@
 
 {% block content %}
 
-{% include "documentation/language_picker.html" %}
+<p class="language_chooser">
+    {% if not docindex %}
+    <a href="{% url docs language %}" class="back" title="Back to documentation homepage">
+        <img src="{{ MEDIA_URL }}/images/icons/back_arrow.png" width="16" height="16" alt="" />
+        List of documentation</a>
+    {% endif %}
+   <br class="clear"/>
+</p>
+   <br class="clear"/>
+
 
 <div id="request_intro">
 	<p class="first">The ScraperWiki external interface allows you to extract data in the form you want for use on the web or in your own applications.  You can also extract information about the state of any scraper.</p>
