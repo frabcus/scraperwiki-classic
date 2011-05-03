@@ -2430,6 +2430,10 @@ p.language_chooser a.back {
 	border-bottom-left-radius: 5px;
 }
 
+p.language_chooser a.back img {
+	opacity: 1;
+}
+
 p.language_chooser a.php {
 	-moz-border-radius-topright: 5px;
 	-moz-border-radius-bottomright: 5px;

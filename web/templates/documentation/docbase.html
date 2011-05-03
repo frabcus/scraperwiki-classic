@@ -10,11 +10,11 @@
 
 
 {% block run_script %}
-    $(".copy-clip").each(function(i) {
+    $(".code_wrapper").each(function(i) {
         clip = new ZeroClipboard.Client();
         clip.setHandCursor( true );
-        $el = $(this);
-        $parent = $el.parent();
+        $el = $(this).append('<a>Copy to clipboard</a>');
+        $parent = $(this);
         clip.glue($el[0], $parent[0]);
         txt = $el.parent().find("code").text();
         clip.setText(txt);
