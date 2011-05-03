@@ -10,7 +10,7 @@
 
 
 {% block run_script %}
-    ZeroClipboard.setMoviePath( '/{{ MEDIA_URL }}js/ZeroClipboard.swf' );
+    ZeroClipboard.setMoviePath( '{{ MEDIA_URL }}js/ZeroClipboard.swf' );
     $(".code_wrapper").each(function(i) {
         clip = new ZeroClipboard.Client();
         clip.setText( '' );
