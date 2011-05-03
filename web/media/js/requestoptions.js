@@ -6,6 +6,7 @@ $(function()
 		function requestOptionInner($a){
 			$d = $a.parent().next();
 			var id = $d.attr('id');
+            window.location.hash = id; 
 			$a.addClass('selected').parent().next().css('border-color', '#39c').slideDown(250);
 			$('#request_options h3 a.selected').not($a).removeClass('selected');
 			$('#request_options div:visible').not($d).css('border-color', '#E8F2F9').slideUp(250);
@@ -41,6 +42,10 @@ $(function()
 		h = $(this).outerHeight() - 2;
 		$('<span>').addClass('arrow').css('border-width', Math.round(h/2) + 'px 10px ' + Math.round(h/2) + 'px 0px').attr('title',h).appendTo($(this));
 	});
+
+    if (window.location.hash)
+        setTimeout(function() { $('#request_options div'+window.location.hash).prev().find("a").click(); }, 200); 
+
 
     // If the form is being returned with errors then the category will be set
     // so display the form as required by the selected category
