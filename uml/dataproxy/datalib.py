@@ -714,6 +714,7 @@ class Database :
 
             
             except sqlite3.Error, e:
+                signal.alarm (0)
                 return {"error":"sqlite3.Error: "+str(e)}
                 
         if command == "datasummary":
