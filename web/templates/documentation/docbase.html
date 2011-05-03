@@ -21,6 +21,7 @@
         clip.addEventListener( 'complete', function(client, text) {
         //  alert("Copied text to clipboard: " + text );
             el.text('Copied').addClass('copied');
+            el.focus(); // so flash doesn't have keyboard focus afterwards
         });
         
         clip.addEventListener( 'onMouseOver', function(client, text) {
