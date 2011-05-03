@@ -4,6 +4,23 @@
     {% if title %}Docs &ndash; {{title}}{% else %}Documentation{% endif %}
 {% endblock %}
 
+{% block javascript %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>
+{% endblock %}
+
+
+{% block run_script %}
+    $(".copy-clip").each(function(i) {
+        clip = new ZeroClipboard.Client();
+        clip.setHandCursor( true );
+        $el = $(this);
+        $parent = $el.parent();
+        clip.glue($el[0], $parent[0]);
+        txt = $el.parent().find("code").text();
+        clip.setText(txt);
+    }
+{% endblock %}
+
 {% block header %}
 <h2>{% if title %}Docs &ndash; {{title}}{% else %}Documentation{% endif %}</h2>
 	{% if para %}<p>{{ para|safe}}</p>{% endif %}
