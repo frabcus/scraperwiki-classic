@@ -10,20 +10,20 @@
     ZeroClipboard.setMoviePath( '{{ MEDIA_URL }}js/ZeroClipboard.swf' );
     $(".copy_to_clipboard").each(function(i) {
         
-        $el = $(this);
-        $parent = $el.parent();
-        $code = $el.siblings('code');
+        var el = $(this);
+        var parent = el.parent();
+        var code = el.siblings('code');
             
         clip = new ZeroClipboard.Client();
-        clip.setText($code.text());
+        clip.setText(code.text());
         clip.setHandCursor( true );
 
         clip.addEventListener( 'complete', function(client, text) {
         //  alert("Copied text to clipboard: " + text );
-            $el.text('Copied');
+            el.text('Copied');
         } );
         
-        clip.glue($el[0], $parent[0]);
+        clip.glue(el[0], parent[0]);
         
     });
 {% endblock %}
