@@ -7,6 +7,11 @@
 {% block javascript %}<script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>{% endblock %}
 
 {% block run_script %}
+    // Add copy button bumf to every <code> element
+    $("code").wrap('<div class="code_wrapper" style="position:relative"/>');
+    $("code").after('<a href="#" class="copy_to_clipboard">Copy</a>');
+
+    // Make the copy button work
     ZeroClipboard.setMoviePath( '{{ MEDIA_URL }}js/ZeroClipboard.swf' );
     $(".copy_to_clipboard").each(function(i) {
         
@@ -19,7 +24,7 @@
         clip.setHandCursor( true );
 
         clip.addEventListener( 'complete', function(client, text) {
-        //  alert("Copied text to clipboard: " + text );
+            //  alert("Copied text to clipboard: " + text );
             el.text('Copied').addClass('copied');
             el.focus(); // so flash doesn't have keyboard focus afterwards
         });
