@@ -15,8 +15,7 @@ in the views section, choose "create a new view" and pick Ruby as your language.
 <code>puts "This is a &lt;em&gt;fragment&lt;/em&gt; of HTML."
 </code>
 
-<p>There is a link to "open in new window", if you prefer to
-view the output in another browser tab.</p>
+<p>If you prefer to view the output in another browser tab there is a link to "open in new window" at the top of the preview (only present after the view has been saved).</p>
 
 
 
@@ -48,8 +47,8 @@ puts data
 puts "&lt;tr&gt;&lt;th&gt;Country&lt;/th&gt;&lt;th&gt;Years in school&lt;/th&gt;"
 for d in data
   puts "&lt;tr&gt;"
-  print "&lt;td&gt;",d["country"],"&lt;/td&gt;"
-  print "&lt;td&gt;",d["years_in_school"].to_s,"&lt;/td&gt;", "\n"
+  puts "&lt;td&gt;", d["country"], "&lt;/td&gt;"
+  puts "&lt;td&gt;", d["years_in_school"].to_s, "&lt;/td&gt;"
   puts "&lt;/tr&gt;"
 end
 puts "&lt;/table&gt;"
