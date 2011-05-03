@@ -45,7 +45,8 @@ $(function()
 
     if (window.location.hash)
         setTimeout(function() { $('#request_options div'+window.location.hash).prev().find("a").click(); }, 200); 
-
+    if ($('#request_form #id_name').val())
+        setTimeout(function() { $('#request_form #id_name').change(); }, 300); 
 
     // If the form is being returned with errors then the category will be set
     // so display the form as required by the selected category
