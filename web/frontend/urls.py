@@ -22,10 +22,12 @@ urlpatterns = patterns('',
     url(r'^about/$', direct_to_template, {'template': 'frontend/about.html'}, name='about'),
     url(r'^tour/$', direct_to_template, {'template': 'frontend/tour.html'}, name='tour'),                                          
     url(r'^example_data/$', direct_to_template, {'template': 'frontend/example_data.html'}, name='api'),
-    url(r'^help/$',frontend_views.help, name='help'),
 
-    url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/$',frontend_views.help, name='help_default'),
-    url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/(?P<language>python|php|ruby)/$',frontend_views.help, name='help'),
+
+    url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/(?P<language>python|php|ruby)/$','django.views.generic.simple.redirect_to', {'url': '/docs/%(language)s'},name='help'),
+    url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/$','django.views.generic.simple.redirect_to', {'url': '/docs/'}, name='help_default'),
+    url(r'^help/$','django.views.generic.simple.redirect_to', {'url': '/docs/'}, name='help_default'),
+    
     url(r'^get_involved/$',frontend_views.get_involved, name='get_involved'),
     url(r'^request_data/$',frontend_views.request_data, name='request_data'),
     

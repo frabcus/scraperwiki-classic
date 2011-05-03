@@ -55,6 +55,10 @@
 	$('body').addClass( '{{language}}');
 	
 	function switch_language(to) {
+		if ( window.location.href.indexOf( '{{language}}' ) == -1  ) {
+			window.location.href = '/docs/' + to;
+			return false;
+		}
 		window.location.href = window.location.href.replace('{{language}}',to).replace('{{language}}',to);
 		return false;
 	}
