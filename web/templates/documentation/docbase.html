@@ -10,15 +10,43 @@
 
 
 {% block run_script %}
+    ZeroClipboard.setMoviePath( '/{{ MEDIA_URL }}js/ZeroClipboard.swf' );
     $(".code_wrapper").each(function(i) {
         clip = new ZeroClipboard.Client();
+        clip.setText( '' );
         clip.setHandCursor( true );
-        $el = $(this).append('<a>Copy to clipboard</a>');
+        
+        clip.addEventListener( 'load', function(client) {
+            alert( "movie is loaded" );
+        } );
+
+        clip.addEventListener( 'complete', function(client, text) {
+            alert("Copied text to clipboard: " + text );
+        } );
+
+        clip.addEventListener( 'mouseOver', function(client) {
+            alert("mouse over"); 
+        } );
+
+        clip.addEventListener( 'mouseOut', function(client) { 
+            alert("mouse out"); 
+        } );
+
+        clip.addEventListener( 'mouseDown', function(client) { 
+            // set text to copy here
+            clip.setText( document.getElementById('clip_text').value );
+
+            alert("mouse down"); 
+        } );
+
+        clip.addEventListener( 'mouseUp', function(client) { 
+            alert("mouse up"); 
+        } );
+        
         $parent = $(this);
+        $el = $('<a>').text('Copy to clipboard').attr('href','#javascript-action-here?').appendTo($parent);
         clip.glue($el[0], $parent[0]);
-        txt = $el.parent().find("code").text();
-        clip.setText(txt);
-    }
+    });
 {% endblock %}
 
 {% block header %}
