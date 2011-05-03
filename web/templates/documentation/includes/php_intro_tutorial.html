@@ -23,7 +23,8 @@ printed in the Console tab at the bottom of the editor.
 <p>We're going to scrape the average number of years children spend
 in school in different countries from a UN site.</p>
 
-<p>You can use any normal PHP library to crawl the web but there is also a simple built in ScraperWiki function which may be easier to use.
+<p>You can use any normal PHP function to crawl the web, such as cURL.
+There is also a simple built in ScraperWiki function which may be easier to use.
 </p>
 
 <code>$html = scraperWiki::scrape("http://unstats.un.org/unsd/demographic/products/socind/education.htm");
@@ -44,7 +45,10 @@ $dom = new simple_html_dom();
 $dom->load($html);
 foreach($dom->find("table[@align='left'] tr.tcont") as $data){
     $tds = $data->find("td");
-    $record = array('country' => $tds[0]->plaintext, 'years_in_school' => intval($tds[4]->plaintext) );
+    $record = array(
+        'country' => $tds[0]->plaintext, 
+        'years_in_school' => intval($tds[4]->plaintext)
+    );
     print_r($record);
 }
 </code>
