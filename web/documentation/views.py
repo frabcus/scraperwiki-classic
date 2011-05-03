@@ -49,7 +49,10 @@ def tutorials(request,language=None):
         
     viewtutorials[language] = View.objects.filter(privacy_status="public", istutorial=True, language=language).order_by('first_published_at')
     context = {'language': language, 'tutorials': tutorial_dict, 'viewtutorials': viewtutorials}
-    
+
+    context["title"] = "Live tutorials"
+    context["para"] = "Screen scraping tutorials entirely within a code editor in your browser"
+
     return render_to_response('documentation/tutorials.html', context, context_instance = RequestContext(request))
 
 
