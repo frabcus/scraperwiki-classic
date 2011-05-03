@@ -11,6 +11,7 @@ type Ctrl+R.
 <div class="code_wrapper" style="position:relative">
 <code>print "Hello, coding in the cloud!"
 </code>
+<a href="#" class="copy_to_clipboard">Copy</a>
 </div>
 
 <p>(As we go through this tutorial, you can copy and paste each 
@@ -32,6 +33,7 @@ in school in different countries from a UN site.</p>
 <code>$html = scraperWiki::scrape("http://unstats.un.org/unsd/demographic/products/socind/education.htm");
 print $html . "\n";
 </code>
+<a href="#" class="copy_to_clipboard">Copy</a>
 </div>
 
 <p>When you print something quite large, click "more" in the console
@@ -43,6 +45,7 @@ everything that has been downloaded.</p>
 <p>To help your parse the HTML we provide a Simple HTML DOM script that you can use as follows.
 </p>
 
+<div class="code_wrapper" style="position:relative">
 <code>require 'scraperwiki/simple_html_dom.php';
 $dom = new simple_html_dom();
 $dom->load($html);
@@ -52,6 +55,8 @@ foreach($dom->find("table[@align='left'] tr.tcont") as $data){
     print_r($record);
 }
 </code>
+<a href="#" class="copy_to_clipboard">Copy</a>
+</div>
 
 <p>The bits of code like 'tr.tcont' are CSS selectors, just like 
 those used to style HTML.
@@ -64,8 +69,11 @@ a schema up front.</p>
 
 <p>Replace "print_r($record);" in the loop with this save command:</p>
 
+<div class="code_wrapper" style="position:relative">
 <code>scraperwiki::save(array('country'), $record);
 </code>
+<a href="#" class="copy_to_clipboard">Copy</a>
+</div>
 
 <p>The unique key should be whatever uniquely identifies each piece of data.
 When the scraper runs again, existing data with the same values for the
@@ -86,8 +94,11 @@ data.  The easiest way to get it all out is to "Download spreadsheet (CSV)".
 <p>For more complex queries "Explore with ScraperWiki API". Try this
 query in the SQL query box.</p>
 
+<div class="code_wrapper" style="position:relative">
 <code>select * from swdata order by years_in_school desc limit 10
 </code>
+<a href="#" class="copy_to_clipboard">Copy</a>
+</div>
 
 <p>It gives you the records for the ten countries where children spend
 the most years at school. </p>
