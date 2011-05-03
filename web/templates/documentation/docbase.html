@@ -18,6 +18,11 @@
         var el = $(this).attr('title','Click to copy this snippet to your clipboard');
         var parent = el.parent();
         var code = el.siblings('code');
+
+        // add eleven spaces to end of first line, so Copy button never obscures text
+        // (this was easiest way to do it without altering the overflow scrolling behaviour)
+        var t = code.text().replace(/\n/, "           \n")
+        code.text(t);
             
         clip = new ZeroClipboard.Client();
         clip.setText(code.text());
