@@ -24,8 +24,8 @@
     {% if doccontents %}
       {{doccontents|safe}}
     {% else %}
+        {% include "documentation/language_picker.html" %}
 		{% if docpage %}
-			{% include "documentation/language_picker.html" %}
       		{% include docpage %}
     	{% else %}
       		{% include 'documentation/includes/docindex.html' %}
