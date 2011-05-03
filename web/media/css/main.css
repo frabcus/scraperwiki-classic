@@ -4628,12 +4628,18 @@ div.documentationpage .copy_to_clipboard {
 	border-radius: 4px;
 }
 
+div.documentationpage .copy_to_clipboard.copied {
+	background-image: url(../images/icons/clipboard_tick.png);
+}
+
 div.documentationpage .copy_to_clipboard.hover,
 div.documentationpage .copy_to_clipboard:hover {
 	background-color: #fff;
 	color: #444;
 	text-decoration: none;
 }
+
+
 
 
 a.your-own {
