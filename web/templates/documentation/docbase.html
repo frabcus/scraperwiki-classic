@@ -1,6 +1,8 @@
 {% extends "frontend/base.html" %}
 
-{% block title %}Documentation{% endblock %}
+{% block title %}
+    {% if title %}Docs &ndash; {{title}}{% else %}Documentation{% endif %}
+{% endblock %}
 
 {% block header %}
 <h2>{% if title %}Docs &ndash; {{title}}{% else %}Documentation{% endif %}</h2>
