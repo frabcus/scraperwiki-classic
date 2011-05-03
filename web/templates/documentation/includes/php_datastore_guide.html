@@ -1,6 +1,7 @@
-<h2>The Datastore</h2>
-<p>Every scraper comes with its own <a href="http://www.sqlite.org/lang.html">Sqlite database</a> 
-which it can store data to.  You can also query data from other scrapers.</p>
+<p>Every scraper comes with its own <a href="http://www.sqlite.org/lang.html">SQLite database</a> 
+which it can store data to. You can also read data from other scrapers.</p>
+
+<h2>Saving data, basic</h2>
 
 <p>Easy save function for basic use.</p>
 <code>scraperwiki::save_sqlite(array("a"),array("a"=>1, "bbb"=>"Hi there"));
@@ -15,6 +16,8 @@ which it can store data to.  You can also query data from other scrapers.</p>
 <code>$message = scraperwiki::save_sqlite(array("a"), array("a"=>2, "bbb"=>"Going home", "cccnew"=>-999.9));
 print_r($message); 
 </code>
+
+<h2>Saving data, advanced</h2>
 
 <p>Each new column is given an <a href="http://www.sqlite.org/datatype3.html#affinity">affinity</a> 
 according to the type of the value it is first given (text, integer, real).  It is okay to save a string 
@@ -33,6 +36,8 @@ and verbose (which doesn't send messages to the data tab if set to 0</p>
 scraperwiki::save_sqlite(array("a"), $data); 
 </code>
 
+<h2>Finding out the schema</h2>
+
 <p>To see the dict of table_names mapping to schemas.</p>
 <code>print_r(scraperwiki::show_tables()); 
 </code>
@@ -43,6 +48,8 @@ foreach ($info as $i=>$column)
     print_r($column->name +" "+ $column->type);
 </code>
 
+<h2>Direct SQL for saving</h2>
+
 <p>You can execute direct SQL commands.  Back-ticks ` are used to quote column names that are have spaces in them.</p>
 <code>scraperwiki::sqliteexecute("create table ttt (xx int, `yy` string)");
 scraperwiki::sqliteexecute("insert into ttt values (?,?)", array(9, 'hello'));
@@ -52,6 +59,8 @@ scraperwiki::sqliteexecute("insert or replace into ttt values (:xx, :yy)", array
 <p>Don't forget after doing your inserts you need to commit the result.  (The save() command always automatically commits.)</p>
 <code>scraperwiki::sqlitecommit();
 </code>
+
+<h2>Direct SQL for selecting</h2>
 
 <p>Selection can be done by execution of a select function.</p>
 <code>print_r(scraperwiki::sqliteexecute("select * from ttt")); 
@@ -68,10 +77,20 @@ corresponding values.</p>
  --> array(array('yy'=> 'hello', 'xx'=> 9), array('yy'=>'again', 'xx'=>10))
 </code>
 
+<h2>Direct SQL for modifying schemas</h2>
+
 <p>You can also clean up by deleting rows or dropping tables</p>
 <code>scraperwiki::sqliteexecute("delete from ttt where xx=9"); 
 scraperwiki::sqliteexecute("drop table if exists ttt"); 
 </code>
+
+<p>There's also a "clear datastore" button on the scraper page, which is useful
+for starting again during development if the schema is in a mess.</p>
+
+<p>If you like, you can completely ignore the ScraperWiki save command,
+and construct all your schemas explicitly.</p>
+
+<h2>Reading data from other scrapers</h2>
 
 <p>To access data from other scrapers we attach to them.</p>
 <code>scraperwiki::attach("new_americ_foundation_drone_strikes"); 
