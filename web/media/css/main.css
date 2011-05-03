@@ -2430,6 +2430,10 @@ p.language_chooser a.back {
 	border-bottom-left-radius: 5px;
 }
 
+p.language_chooser a.back img {
+	opacity: 1;
+}
+
 p.language_chooser a.php {
 	-moz-border-radius-topright: 5px;
 	-moz-border-radius-bottomright: 5px;
@@ -2446,12 +2450,20 @@ p.language_chooser a img {
 	vertical-align: 2px;
 	margin-right: 3px;
 	margin-bottom: -6px;
+	opacity: 0.4;
 }
 
 p.language_chooser a:hover {
 	background-color: #D3E7F5;
 	text-decoration: none;
 	color: #06a;
+}
+
+p.language_chooser a:hover img,
+body.python p.language_chooser a.python img,
+body.ruby p.language_chooser a.ruby img,
+body.php p.language_chooser a.php img {
+	opacity: 1;
 }
 
 body.python p.language_chooser a.python,
