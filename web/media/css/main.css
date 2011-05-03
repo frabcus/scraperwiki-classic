@@ -1220,10 +1220,18 @@ body.profiles h2.scrapersandviews {
 	color: #999;
 }
 
+#request_form #main_error {
+	padding: 10px 20px;
+    margin: 30px 20px;
+	background: #ffaaaa;
+	border: 1px solid #cc0000;
+	color: #000;
+}
+
 #request_form li.error input {
-    background: #ff6666;
+    background: #ffaaaa;
     border-color: #cc0000;
-    color: #fff;
+    color: #000;
 }
 
 #request_form li label span.desc {

@@ -55,6 +55,9 @@
 </div>
 
 <form action="." method="post" id="request_form">
+    {% if form.errors %}
+        <div id="main_error">So we can get back to you, please fill in your name and email.</div>
+    {% endif %}
 	<ul>
 	<li class="urls">
         {{form.urls.label_tag}}
