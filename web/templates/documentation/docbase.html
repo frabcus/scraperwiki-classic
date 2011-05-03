@@ -7,42 +7,41 @@
 {% block javascript %}<script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>{% endblock %}
 
 {% block run_script %}
+    // Add copy button bumf to every <code> element
+    $("code").wrap('<div class="code_wrapper" style="position:relative"/>');
+    $("code").after('<a href="#" class="copy_to_clipboard">Copy</a>');
+
+    // Make the copy button work
     ZeroClipboard.setMoviePath( '{{ MEDIA_URL }}js/ZeroClipboard.swf' );
-    $(".code_wrapper").each(function(i) {
-        clip = new ZeroClipboard.Client();
-        clip.setText( '' );
-        clip.setHandCursor( true );
+    $(".copy_to_clipboard").each(function(i) {
         
-        clip.addEventListener( 'load', function(client) {
-            alert( "movie is loaded" );
-        } );
+        var el = $(this).attr('title','Click to copy this snippet to your clipboard');
+        var parent = el.parent();
+        var code = el.siblings('code');
+
+        // add eleven spaces to end of first line, so Copy button never obscures text
+        // (this was easiest way to do it without altering the overflow scrolling behaviour)
+        var t = code.text().replace(/\n/, "           \n")
+        code.text(t);
+            
+        clip = new ZeroClipboard.Client();
+        clip.setText(code.text());
+        clip.setHandCursor( true );
 
         clip.addEventListener( 'complete', function(client, text) {
-            alert("Copied text to clipboard: " + text );
-        } );
-
-        clip.addEventListener( 'mouseOver', function(client) {
-            alert("mouse over"); 
-        } );
-
-        clip.addEventListener( 'mouseOut', function(client) { 
-            alert("mouse out"); 
-        } );
-
-        clip.addEventListener( 'mouseDown', function(client) { 
-            // set text to copy here
-            clip.setText( document.getElementById('clip_text').value );
-
-            alert("mouse down"); 
-        } );
-
-        clip.addEventListener( 'mouseUp', function(client) { 
-            alert("mouse up"); 
-        } );
+            //  alert("Copied text to clipboard: " + text );
+            el.text('Copied').addClass('copied');
+            el.focus(); // so flash doesn't have keyboard focus afterwards
+        });
         
-        $parent = $(this);
-        $el = $('<a>').text('Copy to clipboard').attr('href','#javascript-action-here?').appendTo($parent);
-        clip.glue($el[0], $parent[0]);
+        clip.addEventListener( 'onMouseOver', function(client, text) {
+            if(el.is('.copied')){
+                el.text('Copy').removeClass('copied');
+            }
+        });
+        
+        clip.glue(el[0], parent[0]);
+        
     });
 {% endblock %}
 

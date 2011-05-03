@@ -4,6 +4,8 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<title>{% block title %}{% endblock %} | ScraperWiki</title>
 
+    {% block meta %}{% endblock %}
+
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.5.2.js"></script>
             {# May want to review contents (which includes everything) and slim down this ui file #}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.12.custom.min.js"></script>

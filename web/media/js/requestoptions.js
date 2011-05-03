@@ -23,9 +23,9 @@ $(function()
             setTimeout(rewriteapiurl, 400); 
 		}
 		
-		if($('#request_intro').is(':visible')){
-			$('#request_intro:visible').fadeOut(200, function(){
-				$('#request_form:hidden').fadeIn(200, function(){
+		if($('#request_form').is(':hidden')){
+			$('#request_options').animate({marginRight: 0}, 400, 'easeOutCubic', function(){
+				$('#request_form').fadeIn(200, function(){
 					requestOptionInner($a)
 				});
 			});	
