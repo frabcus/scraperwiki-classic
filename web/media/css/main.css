@@ -2400,7 +2400,7 @@ iframe.view {
 /* HELP PAGES */
 
 p.language_chooser {
-	background-color:  #F4F8FB;
+	background-color:  #E8F2F9;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	margin: 0;
@@ -4594,15 +4594,17 @@ div.documentationpage code {
 	padding: 8px;
     margin-top: 1em;
     margin-bottom: 1em;
-	background:#aaa; 
-	border: solid 3px #333;
+	background: #C1E0F0 url(../images/graph_paper_light.png) center center;
+	border: solid 2px #7DBEDF;
 	overflow: auto;
-	color: white; 
+	color: #036; 
 	display:block; 
 	font-family: monospace; 
 	white-space:pre; 
 	font-size:120%;
-	-webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px;		
+	-webkit-border-radius: 4px; 
+	-moz-border-radius: 4px; 
+	border-radius: 4px;
 }
 
 div.documentationpage .code_wrapper {
@@ -4611,31 +4613,32 @@ div.documentationpage .code_wrapper {
 
 div.documentationpage .copy_to_clipboard {
 	position: absolute;
-	top: 8px;
-	right: 8px;
+	top: 6px;
+	right: 6px;
 	display: block;
 	height: 24px;
 	line-height: 24px;
 	padding-left: 26px;
 	padding-right: 6px;
-	color: #fff;
+	color: #39c;
 	font-size: 14px;
 	outline: none;
-	background: transparent url(../images/icons/clipboard.png) 5px 4px no-repeat;
-	background-color: #999;
+	background: #DFEFF7 url(../images/icons/clipboard.png) 5px 4px no-repeat;
 	-webkit-border-radius: 4px; 
 	-moz-border-radius: 4px; 
 	border-radius: 4px;
+	border: 1px solid #7DBEDF;
 }
 
 div.documentationpage .copy_to_clipboard.copied {
 	background-image: url(../images/icons/clipboard_tick.png);
+	color: #061;
 }
 
 div.documentationpage .copy_to_clipboard.hover,
 div.documentationpage .copy_to_clipboard:hover {
 	background-color: #fff;
-	color: #444;
+	color: #069;
 	text-decoration: none;
 }
 
