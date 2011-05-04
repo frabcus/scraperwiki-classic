@@ -1027,7 +1027,7 @@ body.profiles h2.scrapersandviews {
 #request_options {
 	width: 365px;
 	float: left;
-    margin-left: 190px;
+    margin-left: 192px;
 }
 
 #request_form {
@@ -4681,6 +4681,12 @@ div.documentationpage .copy_to_clipboard:hover {
 	text-decoration: none;
 }
 
+div.documentationpage .copy_to_clipboard.copied.hover,
+div.documentationpage .copy_to_clipboard.copied:hover {
+	background-color: #EBF3EC;
+	color: #061;
+	border-color: #484;
+}
 
 
 
