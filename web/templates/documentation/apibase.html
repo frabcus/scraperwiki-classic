@@ -3,6 +3,7 @@
 {% block title %}Documentation / External API{% endblock %}
 
 {% block javascript %}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>
 <script type="text/javascript">
 var showinglookup = { 
     sqlite:'.format, .name, .attach, .query, .callback', 
@@ -14,6 +15,42 @@ var showinglookup = {
 
 $(function()
 {
+
+    ZeroClipboard.setMoviePath( '{{ MEDIA_URL }}js/ZeroClipboard.swf' );
+    var el = $('#id_apiuri_copy');
+    var parent = el.parent();
+    var code = $('#id_apiuri');
+
+    // add eleven spaces to end of first line, so Copy button never obscures text
+    // (this was easiest way to do it without altering the overflow scrolling behaviour)
+    var t = code.text().replace(/\n/, "           \n")
+    code.text(t);
+    
+    clip = new ZeroClipboard.Client();
+    clip.setText(code.text());
+    clip.setHandCursor( true );
+    
+    clip.addEventListener( 'onLoad', function(client, text) {
+        console.log('loaded');
+    });
+
+    clip.addEventListener( 'complete', function(client, text) {
+        //  alert("Copied text to clipboard: " + text );
+        el.text('Copied').addClass('copied');
+        el.focus(); // so flash doesn't have keyboard focus afterwards
+    });
+
+    clip.addEventListener( 'onMouseOver', function(client, text) {
+        if(el.is('.copied')){
+            el.text('Copy').removeClass('copied');
+        }
+    });
+
+//    clip.glue(el[0], parent[0]);
+
+    parent.append(clip.getHTML( 150, 20 ));
+    
+    
     $('#functions li:first').addClass('first').siblings(':last').addClass('last');
     $('#functions a').bind('click', function(e){
         var id = $(this).attr('href').substr(1);
