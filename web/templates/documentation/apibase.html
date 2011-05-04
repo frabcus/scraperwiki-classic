@@ -3,41 +3,84 @@
 {% block title %}Documentation / External API{% endblock %}
 
 {% block javascript %}
-    <script type="text/javascript">
-        var showinglookup = { 
-            sqlite:'.format, .name, .attach, .query, .callback', 
-            getinfo:'.format, .name, .version, .history_start_date, .quietfields, .callback',
-            getruninfo:'.format, .name, .runid, .callback',
-            getuserinfo:'.format, .username, .callback',
-            search:'.format, .searchquery, .maxrows, .callback'
-        }
+<script type="text/javascript">
+var showinglookup = { 
+    sqlite:'.format, .name, .attach, .query, .callback', 
+    getinfo:'.format, .name, .version, .history_start_date, .quietfields, .callback',
+    getruninfo:'.format, .name, .runid, .callback',
+    getuserinfo:'.format, .username, .callback',
+    search:'.format, .searchquery, .maxrows, .callback'
+}
 
-        $(function(){
-            $('#functions li:first').addClass('first').siblings(':last').addClass('last');
-            $('#functions a').bind('click', function(e){
-                var id = $(this).attr('href').substr(1);
-                //  the type of button (eg: sqlite, getinfo, search) is now stored in var 'id'.
-                
-                if(id == 'intro'){
-                    $('#intro').show();
-                    $('#options').hide();
-                } else {
-                    $(showinglookup[id], $('#options')).filter(':hidden').show();
-                    $('#options li').not(showinglookup[id]).hide();
-                    $('#intro').hide();
-                    window.location.hash = id; 
-                    $('#options').show();
-                }
-                
-                $(this).parent().addClass('selected').siblings('.selected').removeClass('selected');
-                e.preventDefault();
-            });
-            if($('#functions').height() > $('#detail').height()){
-                $('#detail').css('minHeight', $('#functions').height());
-            }
-        });
-    </script>
+$(function()
+{
+    $('#functions li:first').addClass('first').siblings(':last').addClass('last');
+    $('#functions a').bind('click', function(e){
+        var id = $(this).attr('href').substr(1);
+        //  the type of button (eg: sqlite, getinfo, search) is now stored in var 'id'.
+        
+        if(id == 'intro'){
+            $('#intro').show();
+            $('#options').hide();
+        } else {
+            $(showinglookup[id], $('#options')).filter(':hidden').show();
+            $('#options li').not(showinglookup[id]).hide();
+            $('#intro').hide();
+            window.location.hash = id; 
+            $('#id_category_title').val($(this).find('strong').text());
+            $('#options').show();
+
+            // jsondict option only exists for sqlite selection (not available in piston)
+            var jd = $("#id_format option[value='jsonlist']"); 
+            jd.attr("disabled", (id == "sqlite" ? "" : "disabled")); 
+            if ((id != "sqlite") && jd.attr("selected"))
+                $("#id_format option[value='jsondict']").attr("selected", true); 
+            setTimeout(rewriteapiurl, 400); 
+        }
+        
+        $(this).parent().addClass('selected').siblings('.selected').removeClass('selected');
+        e.preventDefault();
+    });
+    if($('#functions').height() > $('#detail').height()){
+        $('#detail').css('minHeight', $('#functions').height());
+    }
+
+    if (window.location.hash)
+        setTimeout(function() { $('#functions a[href='+window.location.hash+']').click(); }, 200); 
+    if ($('#detail #id_name').val())
+        setTimeout(function() { $('#detail #id_name').change(); }, 300); 
+
+    function rewriteapiurl()
+    {
+        var surl = [ $('#id_api_base').val() ]; 
+        surl.push($('#id_category_title').val().replace("scraperwiki.", "").replace(".", "/")); 
+        surl.push("?"); 
+        var ents = $('#detail li').not(':hidden'); 
+        var entdropdown = ents.find('select'); 
+        surl.push(entdropdown.attr("name"), "=", entdropdown.val()); 
+        for (var i = 0; i < ents.length; i++)
+        {
+            var ent = $(ents[i]).find("input, textarea"); 
+            if ((ent.length == 1) && (ent.val().length != 0))
+                surl.push("&", ent.attr("name"), "=", encodeURIComponent(ent.val())); 
+        }
+        $('#id_apiuri').val(surl.join("")); 
+    }
+
+    $('#detail select').each(function() { $(this).change(rewriteapiurl) }); 
+    $('#detail input, #detail textarea').each(function() 
+    {   
+        $(this).keypress(function(e)
+        {
+            if (e.which == 13)
+                {  $("#btnCallMethod").click();  e.preventDefault();  return false }
+        })
+        $(this).keyup(rewriteapiurl); 
+    }); 
+});
+</script>
 {% endblock %}
+
 
 {% block header %}
    <h2><a href="{% url docs language %}">Documentation</a> / External API</h2>
@@ -134,6 +177,8 @@
         	</li> 
         	</ul>
         </form>
+
+
    <!--     <form action="{% url api_explore %}" method="post" target="iframeResponse">
             <input type="submit" id="btnCallMethod" class="button" value="Call method ..."/>
             <textarea name="apiurl" id="id_apiuri" cols="70" rows="3"></textarea>

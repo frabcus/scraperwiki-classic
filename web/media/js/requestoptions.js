@@ -14,13 +14,6 @@ $(function()
 			$('#request_form li').not(showinglookup[id]).slideUp(250);
             $('#id_category').val(id);
             $('#id_category_title').val($a.text());
-
-            // jsondict option only exists for sqlite selection (not available in piston)
-            var jd = $("#id_format option[value='jsonlist']"); 
-            jd.attr("disabled", (id == "sqlite" ? "" : "disabled")); 
-            if ((id != "sqlite") && jd.attr("selected"))
-                $("#id_format option[value='jsondict']").attr("selected", true); 
-            setTimeout(rewriteapiurl, 400); 
 		}
 		
 		if($('#request_form').is(':hidden')){
