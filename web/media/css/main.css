@@ -4847,7 +4847,7 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 
 
 #api_explorer #result, #api_explorer #response {
-	/* display: none; */
+	display: none;
 }
 
 #api_explorer #result #id_apiuri_wrapper {
@@ -4877,26 +4877,48 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	position: absolute;
 	top: 0;
 	right: 0;
-	width: 44px;
+	width: 70px;
 	height: 50%;
-	text-indent: -9000px;
 	outline: none;
 	border-left: 2px solid #CCB48F;
-	background: #F0EACE url(../images/icons/clipboard.png) center center no-repeat;
+	background-color: #F0EACE;
 	-moz-border-radius-topright: 2px;
 	border-top-right-radius: 2px;
 	cursor: pointer;
+	font-size: 14px;
+	color: #7f4a00;
+}
+
+#api_explorer #result #id_apiuri_copy img,
+#api_explorer #result #id_apiuri_run img {
+	vertical-align: -2px;
+	margin-right: 2px;
+}
+
+#api_explorer #result #id_apiuri_copy span,
+#api_explorer #result #id_apiuri_run span {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	margin-top: -8px;
+	height: 16px;
+	line-height: 16px;
+	width: 70px;
+	text-align: center;
 }
 
 #api_explorer #result #id_apiuri_copy:hover {
-	background: #E4D9A7 url(../images/icons/clipboard.png) center center no-repeat;
+	background-color: #E4D9A7;
+	text-decoration: none;
 }
 
 #api_explorer #result #id_apiuri_run {
 	top: auto;
+	height: 49%;
 	bottom: 0;
 	border-top: 2px solid #CCB48F;
-	background: #DEF0DD url(../images/icons/terminal_run.png) center center no-repeat;
+	background-color: #DEF0DD;
+	color: #005200;
 	-moz-border-radius-topright: 0;
 	border-top-right-radius: 0;
 	-moz-border-radius-bottomright: 2px;
@@ -4904,7 +4926,8 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 }
 
 #api_explorer #result #id_apiuri_run:hover {
-	background: #BCE0BA url(../images/icons/terminal_run.png) center center no-repeat;
+	background-color: #BCE0BA;
+	text-decoration: none;
 }
 
 #api_explorer #response {
