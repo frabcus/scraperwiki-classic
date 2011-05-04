@@ -83,8 +83,9 @@ class scraperContactForm(ContactForm):
         return self.cleaned_data['email']
 
 
-class SigninForm (AuthenticationForm):
+class SigninForm(forms.Form):
     user_or_email = forms.CharField(label=_(u'Username or email'))
+    password = forms.CharField(label=_(u'Password'), widget=forms.PasswordInput())
     remember_me = forms.BooleanField(widget=forms.CheckboxInput(),
                            label=_(u'Remember me'))
 
