@@ -4864,15 +4864,19 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 }
 
 #api_explorer #result #id_apiuri {
-	border: none;
-	outline: none;
-	background: transparent;
+	display: block;
 	width: 330px;
-	max-width: 330px;
-	height: 60px;
+	min-height: 60px;
 	padding: 10px;
 	font-size: 13px;
 	line-height: 17px;
+	color: #000;
+	text-decoration: none;
+	word-wrap: break-word;
+}
+
+#api_explorer #result #id_apiuri:hover {
+	text-decoration: underline;
 }
 
 #api_explorer #result #id_apiuri_copy,
@@ -4911,7 +4915,8 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	text-align: center;
 }
 
-#api_explorer #result #id_apiuri_copy:hover {
+#api_explorer #result #id_apiuri_copy:hover,
+#api_explorer #result #id_apiuri_copy.hover {
 	background-color: #E4D9A7;
 	text-decoration: none;
 }

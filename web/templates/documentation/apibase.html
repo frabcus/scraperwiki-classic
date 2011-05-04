@@ -29,26 +29,30 @@ $(function()
     clip = new ZeroClipboard.Client();
     clip.setText(code.text());
     clip.setHandCursor( true );
-    
-    clip.addEventListener( 'onLoad', function(client, text) {
-        console.log('loaded');
-    });
 
     clip.addEventListener( 'complete', function(client, text) {
-        //  alert("Copied text to clipboard: " + text );
-        el.text('Copied').addClass('copied');
+        var original = el.children('span').html();
+        el.children('span').html('Copied').addClass('copied');
+        var t = setTimeout(function(){ el.children('span').html(original); }, 2000);
         el.focus(); // so flash doesn't have keyboard focus afterwards
     });
 
     clip.addEventListener( 'onMouseOver', function(client, text) {
         if(el.is('.copied')){
-            el.text('Copy').removeClass('copied');
+            el.children('span').text('Copy').removeClass('copied');
         }
+        el.addClass('hover');
+        //  We set the clipboard text on mouseover, since the <a> is empty on pageload.
+        clip.setText(code.text());
     });
 
-//    clip.glue(el[0], parent[0]);
-
-    parent.append(clip.getHTML( 150, 20 ));
+    clip.addEventListener( 'onMouseOut', function(client, text) {
+        el.removeClass('hover');
+    });
+    
+    // We manually append the Flash movie, because ZeroClipboard is too stupid 
+    // to work out the position of a hidden <a> element on page load.
+    $('<div id="zeroclipboard" style="position: absolute; top: 50%; right: 0; margin-top: -20px">' + clip.getHTML( el.width(), '40' ) + '</div>').appendTo(parent);
     
     
     $('#functions li:first').addClass('first').siblings(':last').addClass('last');
@@ -101,7 +105,7 @@ $(function()
             if ((ent.length == 1) && (ent.val().length != 0))
                 surl.push("&", ent.attr("name"), "=", encodeURIComponent(ent.val())); 
         }
-        $('#id_apiuri').val(surl.join("")); 
+        $('#id_apiuri').text(surl.join("")).attr('href', surl.join("")); 
     }
 
     $('#detail select').each(function() { $(this).change(rewriteapiurl) }); 
@@ -295,7 +299,7 @@ $(function()
         <div id="result">
             <h2>Step 2: Use this URI in your application&hellip;</h2>
             <div id="id_apiuri_wrapper">
-                <textarea name="apiurl" id="id_apiuri" cols="70" rows="3"></textarea>
+                <a id="id_apiuri" href="" title="This is a link! Click to visit, or right-click to copy"></a>
                 <a href="#" id="id_apiuri_copy" title="Copy to clipboard"><span><img src="{{ MEDIA_URL }}/images/icons/clipboard.png" width="16" height="16" alt="" /> Copy</span></a>
                 <a href="#" id="id_apiuri_run" title="Show live response to this function"><span><img src="{{ MEDIA_URL }}/images/icons/terminal_run.png" width="16" height="16" alt="" /> Run</span></a>
             </div>
