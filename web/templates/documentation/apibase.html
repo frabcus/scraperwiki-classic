@@ -1,6 +1,6 @@
 {% extends "frontend/base.html" %}
 
-{% block title %}Docs - External API{% endblock %}
+{% block title %}Documentation / External API{% endblock %}
 
 {% block javascript %}
     <script type="text/javascript">
@@ -40,7 +40,7 @@
 {% endblock %}
 
 {% block header %}
-  <h2>Docs &ndash; External API</h2>
+   <h2><a href="{% url docs language %}">Documentation</a> / External API</h2>
   <p>How to get data out of ScraperWiki via a REST API</p>
 {% endblock %}
 
@@ -50,7 +50,7 @@
     {% if not docindex %}
     <a href="{% url docs language %}" class="back" title="Back to documentation homepage">
         <img src="{{ MEDIA_URL }}/images/icons/back_arrow.png" width="16" height="16" alt="" />
-        List of documentation</a>
+        Back to contents</a>
     {% endif %}
    <br class="clear"/>
 </p>

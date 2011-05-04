@@ -1,7 +1,7 @@
 {% extends "frontend/base.html" %}
 
 {% block title %}
-    {% if title %}Docs &ndash; {{title}}{% else %}Documentation{% endif %}
+    {% if title %}Documentation / {{title}}{% else %}Documentation{% endif %}
 {% endblock %}
 
 {% block javascript %}<script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>{% endblock %}
@@ -46,7 +46,7 @@
 {% endblock %}
 
 {% block header %}
-<h2>{% if title %}Docs &ndash; {{title}}{% else %}Documentation{% endif %}</h2>
+<h2>{% if title %}<a href="{% url docs language %}">Documentation</a> / {{title}}{% else %}Documentation{% endif %}</h2>
 	{% if para %}<p>{{ para|safe}}</p>{% endif %}
 	{% endblock %}
 
