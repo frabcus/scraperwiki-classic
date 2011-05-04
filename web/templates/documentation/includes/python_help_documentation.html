@@ -64,6 +64,12 @@ scrapers, or extract it through the API.
     <dd>Commits to the file after a series of execute commands.  (sqlite.save auto-commits after every action).
     </dd>
 
+<dt>scraperwiki.<strong>sqlite.show_tables</strong>([dbname])</dt>
+    <dd>Returns an array of tables and their schemas in either the current or an attached database.</dd>
+
+<dt>scraperwiki.<strong>sqlite.table_info</strong>(name)</dt>
+    <dd>Returns an array of attributes for each element of the table.</dd>
+
 <dt>scraperwiki.<strong>sqlite.save_var</strong>(key, value)</dt>
     <dd>Saves an arbitrary single-value into a table called "swvariables". 
         e.g. Can be used to make scrapers able to continue after an interruption.
@@ -120,11 +126,6 @@ scrapers, or extract it through the API.
 
 <dt>modulename = scraperwiki.<strong>utils.swimport</strong>(name)</dt>
     <dd>Imports the code from another scraper as the module "modulename".
-    </dd>
-
-<dt>scraperwiki.<strong>apiwrapper.getInfo</strong>(name)</dt>
-    <dd>Get status and historical information about another scraper using an the API call</dd>
-    <dd>(Used for generating email alerts about scraper history.)
     </dd>
 
 </dl>
