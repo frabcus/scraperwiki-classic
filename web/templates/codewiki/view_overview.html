@@ -4,6 +4,12 @@
 {% block tab %}
 {% load screen_shot %}
 
+<div class="page_title">
+    <ul class="title_links">
+        <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
+    </ul>
+</div>
+
 <div class="content full">
 {% if htmlcode %}
     {{htmlcode|safe}}
