@@ -143,6 +143,12 @@ $(function()
         }, 500); 
     }); 
 
+    $('#id_apiuri_run').click(function(e) 
+    {
+        var ifrmsrc = $('#id_api_explore').val()+"?apiurl="+encodeURIComponent($('#id_apiuri').val()); 
+        $('iframe#api_response').attr('src', ifrmsrc); 
+        e.preventDefault();
+    }); 
 
 });
 </script>
@@ -165,8 +171,6 @@ $(function()
    <br class="clear"/>
 </p>
    <br class="clear"/>
-   
-   
    
    
    
@@ -247,10 +251,6 @@ $(function()
         </form>
 
 
-   <!--     <form action="{% url api_explore %}" method="post" target="iframeResponse">
-            <input type="submit" id="btnCallMethod" class="button" value="Call method ..."/>
-            <textarea name="apiurl" id="id_apiuri" cols="70" rows="3"></textarea>
-        </form> -->
         <div id="result">
             <h2>Step 2: Use this URI in your application&hellip;</h2>
             <div id="id_apiuri_wrapper">
@@ -261,12 +261,13 @@ $(function()
         </div>
         <div id="response">
             <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
+            <input type="text" id="id_api_explore" value="{% url api_explore %}" class="hide">
             <iframe name="iframeResponse" id="api_response" src="{% url api_explore %}"></iframe>
         </div>
     </div>
     <br class="clear" />
 
-    <ul id="listtables"></ul>
+    <ul id="listtables" style="border: thick #999 solid"></ul>
 
 </div>
 
