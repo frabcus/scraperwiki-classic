@@ -4712,8 +4712,18 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	display: block;
 	padding: 12px 15px;
 	font-size: 14px;
-	width: 230px;
-	color: #555;
+	width: 240px;
+	color: #39c;
+	border-bottom: 1px solid #ececec;
+	border-top: 1px solid #f9f9f9;
+}
+
+#api_explorer #functions .first a {
+	border-top: none;
+}
+
+#api_explorer #functions .last a {
+	border-bottom: none;
 }
 
 #api_explorer #functions a:hover {
@@ -4728,7 +4738,6 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	position: relative;
 	z-index: 10;
 	padding: 11px 16px 11px 14px;
-	color: #333;
 }
 
 #api_explorer #functions small {
@@ -4736,15 +4745,20 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	margin-top: 5px;
 	font-size: 12px;
 	color: #999;
+	text-decoration: none;
 }
 
 #api_explorer #functions a:hover {
-	color: #333;
+	color: #17a;
+}
+
+#api_explorer #functions a:hover strong {
+	text-decoration: underline;
 }
 
 #api_explorer #functions a:hover small,
 #api_explorer #functions .selected a small {
-	color: #777;
+	color: #666;
 }
 
 #api_explorer #intro {
@@ -4773,9 +4787,13 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	border: 1px solid #ccc;
 	background-color: #fff;
 	float: right;
-	width: 446px;
+	width: 436px;
 	padding: 20px;
 	min-height: 470px;
+}
+
+#api_explorer #options {
+	display: none;
 }
 
 #api_explorer #id_apiuri {
@@ -4787,6 +4805,46 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	display: none;
 }
 
+#api_explorer form ul {
+	padding: 0;
+	margin: 0;
+}
+
+#api_explorer form label {
+	display: block;
+	font-size: 14px;
+	margin-bottom: 5px;
+	color: #28c;
+	width: 400px;
+}
+
+#api_explorer form li label a {
+	text-decoration: underline;
+}
+
+#api_explorer form li input,
+#api_explorer form li select {
+	width: 400px;
+	line-height: 20px;
+	margin-bottom: 10px;
+	text-indent: 5px;
+}
+
+#api_explorer form li textarea {
+	width: 390px;
+}
+
+#api_explorer form li select {
+	width: 250px;
+	margin-top: 5px;
+	text-indent: 0;
+}
+
+#api_explorer form textarea {
+	width: 318px;
+	padding: 7px;
+	height: 60px;
+}
 
 
 
