@@ -4950,6 +4950,27 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	background: #C1E0F0 url(../images/graph_paper_light.png) center center;
 }
 
+body.docs.api .ui-autocomplete {
+	-webkit-box-shadow: 0px 3px 5px rgba(0,0,0,0.5); 
+	-moz-box-shadow: 0px 3px 5px rgba(0,0,0,0.5); 
+	box-shadow: 0px 3px 5px rgba(0,0,0,0.5);
+}
+
+body.docs.api .ui-autocomplete strong {
+	font-size: 14px;
+}
+
+body.docs.api .ui-autocomplete span {
+	font-size: 12px;
+	color: #666;
+}
+
+body.docs.api .ui-autocomplete .ui-menu-item a {
+	line-height: 1;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
 
 a.your-own {
     padding-left:20px;
