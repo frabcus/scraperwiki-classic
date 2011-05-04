@@ -78,12 +78,12 @@ def docexternal(request):
     return render_to_response('documentation/apibase.html', context, context_instance=RequestContext(request))
 
 def api_explorer(request):
-    styout = '<pre style="background:#000; color:#fff;">%s</pre>'  # can't be done by formatting the iframe
+    styout = '<pre style="color:#036;">%s</pre>'  # can't be done by formatting the iframe
     url = request.POST.get("apiurl")
     if not url:
         url = request.GET.get("apiurl")
     if not url:
-        return HttpResponse(styout % "Select a function, add values above, then click 'call method'\nto see live data")
+        return HttpResponse(styout % "Select a function, add values above, \nthen click 'Run' to see live data")
     api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
     assert url[:len(api_base)] == api_base
     result = urllib2.urlopen(url).read()

@@ -4820,6 +4820,10 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	width: 400px;
 }
 
+#api_explorer form label .desc {
+	color: #90c6df;
+}
+
 #api_explorer form li label a {
 	text-decoration: underline;
 }
@@ -4863,12 +4867,12 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	border: none;
 	outline: none;
 	background: transparent;
-	width: 355px;
-	max-width: 355px;
+	width: 330px;
+	max-width: 330px;
 	height: 60px;
 	padding: 10px;
-	font-size: 14px;
-	line-height: 18px;
+	font-size: 13px;
+	line-height: 17px;
 }
 
 #api_explorer #result #id_apiuri_copy,
@@ -4936,8 +4940,9 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 
 #api_explorer #response iframe {
 	width: 430px;
+	height: 400px;
 	border: none;
-	background-color: #000;
+	background: #C1E0F0 url(../images/graph_paper_light.png) center center;
 }
 
 

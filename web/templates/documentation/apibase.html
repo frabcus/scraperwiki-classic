@@ -21,14 +21,14 @@ $(function()
         
         if(id == 'intro'){
             $('#intro').show();
-            $('#options').hide();
+            $('#options, #result, #response').hide();
         } else {
             $(showinglookup[id], $('#options')).filter(':hidden').show();
             $('#options li').not(showinglookup[id]).hide();
             $('#intro').hide();
             window.location.hash = id; 
             $('#id_category_title').val($(this).find('strong').text());
-            $('#options').show();
+            $('#options, #result').show();
 
             // jsondict option only exists for sqlite selection (not available in piston)
             var jd = $("#id_format option[value='jsonlist']"); 
@@ -146,7 +146,8 @@ $(function()
     $('#id_apiuri_run').click(function(e) 
     {
         var ifrmsrc = $('#id_api_explore').val()+"?apiurl="+encodeURIComponent($('#id_apiuri').val()); 
-        $('iframe#api_response').attr('src', ifrmsrc); 
+        $('iframe#api_response').attr('src', ifrmsrc);
+        $('#response:hidden').slideDown();
         e.preventDefault();
     }); 
 
@@ -234,6 +235,9 @@ $(function()
         	<li class="query">
                 <label for="id_query">query<span class="desc"> in SQL</span></label>
                 <textarea name="query" id="id_query">select * from swdata limit 10</textarea>
+                <ul id="listtables">
+                    
+                </ul>
         	</li> 
         	<li class="searchquery">
                 <label for="id_searchquery">searchquery</label>
@@ -266,8 +270,6 @@ $(function()
         </div>
     </div>
     <br class="clear" />
-
-    <ul id="listtables" style="border: thick #999 solid"></ul>
 
 </div>
 
