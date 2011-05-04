@@ -101,7 +101,7 @@ class TestScrapers(SeleniumTest):
             print s.get_body_text()
             self.fail('An error occurred deleting data')
         
-        self.failUnless(s.is_text_present( 'Your scraper has been deleted' ), msg='The scraper has not been deleted')
+        self.failUnless(s.is_text_present('Your scraper has been deleted'), msg='The scraper has not been deleted')
 
 
     def _check_delete_view(self, name):
@@ -251,7 +251,7 @@ class TestScrapers(SeleniumTest):
         s.wait_for_page_to_load("30000")      
                 
         s.answer_on_next_prompt( name )        
-        s.click('link=Create a new view')        
+        s.click('//a[@class="editor_view"]')        
         time.sleep(1)        
                 
         s.click( 'link=%s' % link_name )

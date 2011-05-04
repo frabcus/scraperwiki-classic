@@ -126,7 +126,9 @@ class TestRegistration(SeleniumTest):
         s.click('register')
         self.wait_for_page()
         
-        self.failUnless(s.is_text_present("Please review the form and try again."), msg='Expected complaints about no data')
+        self.assertEqual(6, int(s.get_xpath_count("//small[@class='error_hint']")), msg="Wrong number of error messages")
+
+        self.failUnless(s.is_text_present("You must agree to the ScraperWiki terms and conditions"), msg='Expected complaints about no data')
 
 
     def test_dupe_email(self):
