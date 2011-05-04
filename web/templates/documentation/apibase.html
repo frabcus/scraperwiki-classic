@@ -13,6 +13,19 @@
             search:'.format, .searchquery, .maxrows, .callback'
         }
     </script>
+    <script type="text/javascript">
+        $(function(){
+            $('#functions a').bind('click', function(e){
+                var id = $(this).attr('href').substr(1);
+                //  the type of button (eg: sqlite, getinfo, search) is now stored in var 'id'.
+                $(this).parent().addClass('selected').siblings('.selected').removeClass('selected');
+                e.preventDefault();
+            });
+            if($('#functions').height() > $('#detail').height()){
+                $('#detail').css('minHeight', $('#functions').height());
+            }
+        });
+    </script>
 {% endblock %}
 
 {% block header %}
@@ -31,110 +44,101 @@
    <br class="clear"/>
 </p>
    <br class="clear"/>
-
-
-<div id="request_intro">
-	<p class="first">The ScraperWiki external interface allows you to extract data in the form you want for use on the web or in your own applications.  You can also extract information about the state of any scraper.</p>
-	<span></span>
-	<p class="last">Please select the function on the right that you want to learn how to use</p>
-</div>
-
-<div id="request_options">
-	<h3><a href="#sqlite">scraperwiki.datastore.sqlite</a></h3>
-	<div id="sqlite">
-		<p>Query and extract your data via a general purpose SQL interface.</p>
-	</div>
-	<h3><a href="#getinfo">scraperwiki.scraper.getinfo</a></h3>
-	<div id="getinfo">
-		<p>Extract any data about a scraper, including the code, who has been editing it and any historical versions.</p>
-	</div>
-	<h3><a href="#getruninfo">scraperwiki.scraper.getruninfo</a></h3>
-	<div id="getruninfo">
-		<p>See what the scraper did during each run.</p>
-	</div>
-	<h3><a href="#getuserinfo">scraperwiki.scraper.getuserinfo</a></h3>
-	<div id="getuserinfo">
-		<p>Find out information about a user of the system.</p>
-	</div>
-	<h3><a href="#search">scraperwiki.scraper.search</a></h3>
-	<div id="search">
-		<p>Search the titles and descriptions of all our scrapers.</p>
-	</div>
-
-    <ul id="listtables"></ul>
-</div>
-
-<form id="request_form">
-	<ul>
-    <input class="hide" type="text" name="category" id="id_category">
-    <input class="hide" type="text" name="function" id="id_category_title">
-	<li class="format">
-        <label for="id_format">format</label>
-        <select type="text" name="format" id="id_format">
-            <option value="csv">csv</option>
-            <option value="jsondict" selected>jsondict</option>
-            <option value="jsonlist">jsonlist</option>
-        </select>
-	</li> 
-	<li class="name">
-        <label for="id_name">name<span class="desc"> of the scraper</span></label>
-        <input type="text" name="name" id="id_name" value="{{name}}">
-	</li> 
-	<li class="username">
-        <label for="id_username">username</label>
-        <input type="text" name="username" id="id_username">
-	</li> 
-	<li class="version">
-        <label for="id_version">version<span class="desc"> number (-1 for most recent)</span></label>
-        <input type="text" name="version" id="id_version" value="-1">
-	</li> 
-	<li class="runid">
-        <label for="id_runid">runid</label>
-        <input type="text" name="runid" id="id_runid">
-	</li> 
-	<li class="history_start_date">
-        <label for="id_history_start_date">history_start_date<span class="desc"> (optional)</span></label>
-        <input type="text" name="history_start_date" id="id_history_start_date">
-	</li> 
-	<li class="quietfields">
-        <label for="id_quietfields">quietfields<span class="desc"> not included in the output for quicker respnse, delimited by '|' (eg 'code|runevents')</span></label>
-        <input type="text" name="quietfields" id="id_quietfields">
-	</li> 
-	<li class="attach">
-        <label for="id_attach">attach<span class="desc"> datastores from other scrapers, delimited by ';' (refer to <a href="{% url docs 'python' 'python_help_documentation' %}">internal api</a>)</span></label>
-        <input type="text" name="attach" id="id_attach">
-	</li> 
-	<li class="query">
-        <label for="id_query">query<span class="desc"> in SQL</span></label>
-        <textarea name="query" id="id_query">select * from swdata limit 10</textarea>
-	</li> 
-	<li class="searchquery">
-        <label for="id_searchquery">searchquery</label>
-        <input type="text" name="searchquery" id="id_searchquery">
-	</li> 
-	<li class="maxrows">
-        <label for="id_maxrows">maxrows</label>
-        <input type="text" name="maxrows" id="id_maxrows" value="5">
-	</li> 
-	<li class="callback">
-        <label for="id_callback">callback<span class="desc"> for JSONP (optional)</span></label>
-        <input type="text" name="callback" id="id_callback">
-	</li> 
-	</ul>
-
-    <p id="terms_and_conditions">
-        We reserve the right to apply a rate limit to large requests at a later date in order to pass on reasonable costs <a href="{% url terms %}">terms and conditions</a>.
-    </p>
-</form>
-
-<div class="explorer_response">
-  <h2>Function response</h2>
-  <form action="{% url api_explore %}" method="post" target="iframeResponse">
-    <input type="submit" id="btnCallMethod" class="button" value="Call method ..."/>
-    <textarea name="apiurl" id="id_apiuri" cols="70" rows="3"></textarea>
-  </form>
-  <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
-  <iframe name="iframeResponse" id="api_response" src="{% url api_explore %}"></iframe>
+   
+   
+   
+   
+   
+<div id="api_explorer">
+    <ul id="functions">
+        <li class="selected"><a href="#intro"><strong>About the External API</strong><small>Some short description goes here</small></a></li>
+        <li><a href="#sqlite"><strong>scraperwiki.datastore.sqlite</strong><small>Query and extract your data via a general&nbsp;purpose&nbsp;SQL&nbsp;interface</small></a></li>
+        <li><a href="#getinfo"><strong>scraperwiki.scraper.getinfo</strong><small>Extract data about a scraper&rsquo;s code, owner,&nbsp;history&nbsp;etc</small></a></li>
+        <li><a href="#getruninfo"><strong>scraperwiki.scraper.getruninfo</strong><small>See what the scraper did&nbsp;during&nbsp;each&nbsp;run</small></a></li>
+        <li><a href="#getuserinfo"><strong>scraperwiki.scraper.getuserinfo</strong><small>Find out information about a user</small></a></li>
+        <li><a href="#search"><strong>scraperwiki.scraper.search</strong><small>Search the titles and descriptions of&nbsp;all&nbsp;our&nbsp;scrapers</small></a></li>
+    </ul>
+    <div id="detail">
+        <div id="intro">
+            <p class="first">The ScraperWiki external interface allows you to extract data in the form you want for use on the web or in your own applications.  You can also extract information about the state of any scraper.</p>
+        	<span></span>
+        	<p class="last">&laquo; Please select the function that you want to learn how to use.</p>
+        </div>
+        <form id="request_form">
+        	<ul>
+            <input class="hide" type="text" name="category" id="id_category">
+            <input class="hide" type="text" name="function" id="id_category_title">
+        	<li class="format">
+                <label for="id_format">format</label>
+                <select type="text" name="format" id="id_format">
+                    <option value="csv">csv</option>
+                    <option value="jsondict" selected>jsondict</option>
+                    <option value="jsonlist">jsonlist</option>
+                </select>
+        	</li> 
+        	<li class="name">
+                <label for="id_name">name<span class="desc"> of the scraper</span></label>
+                <input type="text" name="name" id="id_name" value="{{name}}">
+        	</li> 
+        	<li class="username">
+                <label for="id_username">username</label>
+                <input type="text" name="username" id="id_username">
+        	</li> 
+        	<li class="version">
+                <label for="id_version">version<span class="desc"> number (-1 for most recent)</span></label>
+                <input type="text" name="version" id="id_version" value="-1">
+        	</li> 
+        	<li class="runid">
+                <label for="id_runid">runid</label>
+                <input type="text" name="runid" id="id_runid">
+        	</li> 
+        	<li class="history_start_date">
+                <label for="id_history_start_date">history_start_date<span class="desc"> (optional)</span></label>
+                <input type="text" name="history_start_date" id="id_history_start_date">
+        	</li> 
+        	<li class="quietfields">
+                <label for="id_quietfields">quietfields<span class="desc"> not included in the output for quicker respnse, delimited by '|' (eg 'code|runevents')</span></label>
+                <input type="text" name="quietfields" id="id_quietfields">
+        	</li> 
+        	<li class="attach">
+                <label for="id_attach">attach<span class="desc"> datastores from other scrapers, delimited by ';' (refer to <a href="{% url docs 'python' 'python_help_documentation' %}">internal api</a>)</span></label>
+                <input type="text" name="attach" id="id_attach">
+        	</li> 
+        	<li class="query">
+                <label for="id_query">query<span class="desc"> in SQL</span></label>
+                <textarea name="query" id="id_query">select * from swdata limit 10</textarea>
+        	</li> 
+        	<li class="searchquery">
+                <label for="id_searchquery">searchquery</label>
+                <input type="text" name="searchquery" id="id_searchquery">
+        	</li> 
+        	<li class="maxrows">
+                <label for="id_maxrows">maxrows</label>
+                <input type="text" name="maxrows" id="id_maxrows" value="5">
+        	</li> 
+        	<li class="callback">
+                <label for="id_callback">callback<span class="desc"> for JSONP (optional)</span></label>
+                <input type="text" name="callback" id="id_callback">
+        	</li> 
+        	</ul>
+        </form>
+   <!--     <form action="{% url api_explore %}" method="post" target="iframeResponse">
+            <input type="submit" id="btnCallMethod" class="button" value="Call method ..."/>
+            <textarea name="apiurl" id="id_apiuri" cols="70" rows="3"></textarea>
+        </form> -->
+        <div id="result">
+            <div id="id_apiuri_wrapper">
+                <textarea name="apiurl" id="id_apiuri" cols="70" rows="3"></textarea>
+                <a href="#" id="id_apiuri_copy" title="Copy to clipboard">Copy</a>
+                <a href="#" id="id_apiuri_run" title="Show live response to this function">Run</a>
+            </div>
+        </div>
+        <div id="response">
+            <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
+            <iframe name="iframeResponse" id="api_response" src="{% url api_explore %}"></iframe>
+        </div>
+    </div>
+    <br class="clear" />
 </div>
 
 

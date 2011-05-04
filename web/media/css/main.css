@@ -4690,6 +4690,106 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 
 
 
+
+#api_explorer {
+	background-color: #f3f3f3;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+}
+
+#api_explorer #functions {
+	float: left;
+	padding: 0;
+	margin: 0;
+}
+
+#api_explorer #functions li {
+	margin: 0;
+	padding: 0;
+}
+
+#api_explorer #functions a {
+	display: block;
+	padding: 12px 15px;
+	font-size: 14px;
+	width: 230px;
+	color: #555;
+}
+
+#api_explorer #functions a:hover {
+	text-decoration: none;
+}
+
+#api_explorer #functions .selected a {
+	background-color: #fff;
+	border: 1px solid #ccc;
+	border-right: none;
+	margin-right: -3px;
+	position: relative;
+	z-index: 10;
+	padding: 11px 16px 11px 14px;
+	color: #333;
+}
+
+#api_explorer #functions small {
+	display: block;
+	margin-top: 5px;
+	font-size: 12px;
+	color: #999;
+}
+
+#api_explorer #functions a:hover {
+	color: #333;
+}
+
+#api_explorer #functions a:hover small,
+#api_explorer #functions .selected a small {
+	color: #777;
+}
+
+#api_explorer #intro {
+	text-align: center;
+}
+
+#api_explorer #intro p {
+	color: #666;
+	padding: 0 80px;
+	line-height: 20px;
+}
+
+#api_explorer #intro p.first {
+	margin-top: 50px;
+	padding: 0 30px;
+}
+
+#api_explorer #intro span {
+	display: inline-block;
+	width: 100px;
+	height: 1px;
+	background-color: #ccc;
+}
+
+#api_explorer #detail {
+	border: 1px solid #ccc;
+	background-color: #fff;
+	float: right;
+	width: 446px;
+	padding: 20px;
+	min-height: 470px;
+}
+
+#api_explorer #id_apiuri {
+	width: 300px;
+	height: 100px;
+}
+
+#api_explorer #result, #api_explorer #response {
+	display: none;
+}
+
+
+
+
 a.your-own {
     padding-left:20px;
     background:url(../images/icons/control_play.png) no-repeat;
