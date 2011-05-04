@@ -4720,11 +4720,11 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 }
 
 #api_explorer #functions .first a {
-	border-top: none;
+	border-top: 1px solid #f3f3f3;
 }
 
 #api_explorer #functions .last a {
-	border-bottom: none;
+	border-bottom: 1px solid #f3f3f3;
 }
 
 #api_explorer #functions a:hover {
@@ -4793,17 +4793,17 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	min-height: 470px;
 }
 
+#api_explorer #detail h2 {
+	color: #555;
+	font-size: 16px;
+	margin-bottom: 15px;
+	padding: 10px;
+	background-color: #f6f6f6;
+}
+
 #api_explorer #options {
 	display: none;
-}
-
-#api_explorer #id_apiuri {
-	width: 300px;
-	height: 100px;
-}
-
-#api_explorer #result, #api_explorer #response {
-	display: none;
+	margin-bottom: 20px;
 }
 
 #api_explorer form ul {
@@ -4825,14 +4825,16 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 
 #api_explorer form li input,
 #api_explorer form li select {
-	width: 400px;
+	width: 425px;
 	line-height: 20px;
 	margin-bottom: 10px;
 	text-indent: 5px;
 }
 
 #api_explorer form li textarea {
-	width: 390px;
+	width: 414px;
+	padding: 7px;
+	height: 60px;
 }
 
 #api_explorer form li select {
@@ -4841,12 +4843,78 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	text-indent: 0;
 }
 
-#api_explorer form textarea {
-	width: 318px;
-	padding: 7px;
-	height: 60px;
+
+
+#api_explorer #result, #api_explorer #response {
+	/* display: none; */
 }
 
+#api_explorer #result #id_apiuri_wrapper {
+	border: 2px solid #CCB48F;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	position: relative;
+	width: 426px;
+	background-color: #fcfce3;
+}
+
+#api_explorer #result #id_apiuri {
+	border: none;
+	outline: none;
+	background: transparent;
+	width: 355px;
+	max-width: 355px;
+	height: 60px;
+	padding: 10px;
+	font-size: 14px;
+	line-height: 18px;
+}
+
+#api_explorer #result #id_apiuri_copy,
+#api_explorer #result #id_apiuri_run {
+	display: block;
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 44px;
+	height: 50%;
+	text-indent: -9000px;
+	outline: none;
+	border-left: 2px solid #CCB48F;
+	background: #F0EACE url(../images/icons/clipboard.png) center center no-repeat;
+	-moz-border-radius-topright: 2px;
+	border-top-right-radius: 2px;
+	cursor: pointer;
+}
+
+#api_explorer #result #id_apiuri_copy:hover {
+	background: #E4D9A7 url(../images/icons/clipboard.png) center center no-repeat;
+}
+
+#api_explorer #result #id_apiuri_run {
+	top: auto;
+	bottom: 0;
+	border-top: 2px solid #CCB48F;
+	background: #DEF0DD url(../images/icons/terminal_run.png) center center no-repeat;
+	-moz-border-radius-topright: 0;
+	border-top-right-radius: 0;
+	-moz-border-radius-bottomright: 2px;
+	border-bottom-right-radius: 2px;
+}
+
+#api_explorer #result #id_apiuri_run:hover {
+	background: #BCE0BA url(../images/icons/terminal_run.png) center center no-repeat;
+}
+
+#api_explorer #response {
+	margin-top: 20px;
+}
+
+#api_explorer #response iframe {
+	width: 430px;
+	border: none;
+	background-color: #000;
+}
 
 
 a.your-own {
