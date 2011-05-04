@@ -50,9 +50,15 @@ $(function()
         el.removeClass('hover');
     });
     
+    function resizeZO(){
+        var h = $('#id_apiuri').height() + 20;
+        $('#zeroclipboard').find('embed').attr('height',h/2);
+        $('#zeroclipboard').find('object').attr('height',h/2);
+    }
+    
     // We manually append the Flash movie, because ZeroClipboard is too stupid 
     // to work out the position of a hidden <a> element on page load.
-    $('<div id="zeroclipboard" style="position: absolute; top: 50%; right: 0; margin-top: -20px">' + clip.getHTML( el.width(), '40' ) + '</div>').appendTo(parent);
+    $('<div id="zeroclipboard" style="position: absolute; top: 0; right: 0;">' + clip.getHTML( el.width(), '40' ) + '</div>').appendTo(parent);
     
     
     $('#functions li:first').addClass('first').siblings(':last').addClass('last');
@@ -105,7 +111,8 @@ $(function()
             if ((ent.length == 1) && (ent.val().length != 0))
                 surl.push("&", ent.attr("name"), "=", encodeURIComponent(ent.val())); 
         }
-        $('#id_apiuri').text(surl.join("")).attr('href', surl.join("")); 
+        $('#id_apiuri').text(surl.join("")).attr('href', surl.join(""));
+        var t = setTimeout(resizeZO(), 500);
     }
 
     $('#detail select').each(function() { $(this).change(rewriteapiurl) }); 
@@ -148,7 +155,7 @@ $(function()
     {
         return $( "<li></li>" )
         .data( "item.autocomplete", item )
-        .append( "<a><b>" + item.label + "</b><br>" + item.desc + "</a>" )
+        .append( '<a><strong>' + item.desc + '</strong><br/><span>' + item.label + '</span></a>' )
         .appendTo(ul);
     };
 
@@ -186,7 +193,7 @@ $(function()
 
     $('#id_apiuri_run').click(function(e) 
     {
-        var ifrmsrc = $('#id_api_explore').val()+"?apiurl="+encodeURIComponent($('#id_apiuri').val()); 
+        var ifrmsrc = $('#id_api_explore').val()+"?apiurl="+encodeURIComponent($('#id_apiuri').text()); 
         $('iframe#api_response').attr('src', ifrmsrc);
         $('#response:hidden').slideDown();
         e.preventDefault();
