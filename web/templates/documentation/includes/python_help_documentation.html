@@ -12,6 +12,18 @@
   <a href="https://bitbucket.org/ScraperWiki/scraperwiki/src/efd21ea1c875/scraperlibs/">here</a>.</p>
 </div>
 
+
+<h3>Scraping</h3>
+<p>You can also use any Python HTTP library.</p>
+
+<dl>
+<dt>scraperwiki.<strong>scrape</strong>(url[, params])</dt>
+    <dd>Returns the downloaded string from the given url.</dd>
+    <dd>params are send as a POST if set.
+    </dd>
+</dl>
+
+
 <h3><span id="sql"></span>Datastore (SQLite)</h3>
 <p>ScraperWiki provides a fully-fledged SQLite database for each scraper which
 you can save to.  You can read the data back that has been committed by other
@@ -63,10 +75,10 @@ scrapers, or extract it through the API.
 </dl>
 
 
-<h3>View functions</h3>
+<h3>Views</h3>
 
 <dt>scraperwiki.<strong>utils.httpresponseheader</strong>("Content-Type", "image/PNG")</dt>
-    <dd>Set the content-type header to something other than HTML when using a Scraperwiki "view" 
+    <dd>Set the content-type header to something other than HTML when using a ScraperWiki "view" 
     <dd>(e.g. "Content-Type", "image/PNG")
     </dd>
 
@@ -75,7 +87,7 @@ scrapers, or extract it through the API.
     </dd>
 
 
-<h3>Geocoding functions</h3>
+<h3>Geocoding</h3>
 <p>Some installed functions to help you transform between different coordinate systems.</p> 
 
 <dl>
@@ -95,7 +107,7 @@ scrapers, or extract it through the API.
 </dl>
 
 
-<h3>Misc data format functions</h3>
+<h3>Miscellaneous</h3>
 <dl>
 
 <dt>scraperwiki.<strong>pdftoxml</strong>(pdfdata)</dt>

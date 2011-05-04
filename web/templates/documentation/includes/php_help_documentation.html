@@ -7,6 +7,15 @@
   <a href="https://bitbucket.org/ScraperWiki/scraperwiki/src/efd21ea1c875/scraperlibs/scraperwiki.php">here</a>.</p>
 </div>
 
+<h3>Scraping</h3>
+<p>You can also use any PHP HTTP library.</p>
+
+<dl>
+<dt>scraperwiki::<strong>scrape</strong>($url)</dt>
+    <dd>Returns the downloaded string 
+</dd>
+</dl>
+
 <h3><span id="sql"></span>Datastore (SQLite)</h3>
 <p>ScraperWiki provides a fully-fledged SQLite database for each scraper which
 you can save to.  You can read the data back that has been committed by other
@@ -65,15 +74,15 @@ scrapers, or extract it through the API.
 </dl>
 
 
-<h3>View functions</h3>
+<h3>Views</h3>
 
 <dt>scraperwiki::<strong>httpresponseheader</strong>($headerkey, $headervalue)</dt>
-    <dd>Set the content-type header to something other than HTML when using a Scraperwiki "view" </dd>
+    <dd>Set the content-type header to something other than HTML when using a ScraperWiki "view" </dd>
     <dd>(e.g. "Content-Type", "image/PNG")
     </dd>
 
 
-<h3>Geocoding functions</h3>
+<h3>Geocoding</h3>
 
 <dl>
 <dt>scraperwiki::<strong>gb_postcode_to_latlng</strong>($postcode)</dt>
@@ -83,12 +92,4 @@ scrapers, or extract it through the API.
 </dl>
 
 
-<h3>Miscellaneous functions</h3>
-<dl>
-
-<dt>scraperwiki::<strong>scrape</strong>($url)</dt>
-    <dd>Returns the downloaded string 
-    </dd>
-
-</dl>
 
