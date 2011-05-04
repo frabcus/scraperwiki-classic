@@ -1026,14 +1026,13 @@ body.profiles h2.scrapersandviews {
 
 #request_options {
 	width: 365px;
-	float: right;
-    margin-left: auto;
-    margin-right: 190px;
+	float: left;
+    margin-left: 190px;
 }
 
 #request_form {
 	width: 363px;
-	float: left;
+	float: right;
 	background-color: #F4F8FB;
 	display: none;
 	margin-top: 40px;
@@ -1115,8 +1114,8 @@ body.profiles h2.scrapersandviews {
 	color: #fff;
 	-moz-border-radius: 0;
 	border-radius: 0;
-	-moz-border-radius-topright: 4px;
-	border-top-right-radius: 4px;
+	-moz-border-radius-topleft: 4px;
+	border-top-left-radius: 4px;
 	margin-bottom: 0;
 	border: 0;
 }
@@ -1125,12 +1124,12 @@ body.profiles h2.scrapersandviews {
 	display: block;
 	position: absolute;
 	top: 0;
-	left: -10px;
+	right: -10px;
 	width: 0px;
 	height: 0px;
-	border-color: #fff #39c #fff #fff;
+	border-color: #fff #fff #fff #39c ;
 	border-style: solid;
-	border-width: 20px 10px 20px 0px;
+	border-width: 20px 0px 20px 10px;
 }
 
 #request_options div {

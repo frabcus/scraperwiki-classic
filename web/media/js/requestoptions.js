@@ -24,7 +24,7 @@ $(function()
 		}
 		
 		if($('#request_form').is(':hidden')){
-			$('#request_options').animate({marginRight: 0}, 400, 'easeOutCubic', function(){
+			$('#request_options').animate({marginLeft: 0}, 400, 'easeOutCubic', function(){
 				$('#request_form').fadeIn(200, function(){
 					requestOptionInner($a)
 				});
@@ -40,7 +40,7 @@ $(function()
 		requestOption($(this));
 	}).each(function(){
 		h = $(this).outerHeight() - 2;
-		$('<span>').addClass('arrow').css('border-width', Math.round(h/2) + 'px 10px ' + Math.round(h/2) + 'px 0px').attr('title',h).appendTo($(this));
+		$('<span>').addClass('arrow').css('border-width', Math.round(h/2) + 'px 0px ' + Math.round(h/2) + 'px 10px').attr('title',h).appendTo($(this));
 	});
 
     if (window.location.hash)
