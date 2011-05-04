@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.safestring import mark_safe
 from django import forms
 from frontend.models import UserProfile, AlertTypes, DataEnquiry
 from contact_form.forms import ContactForm
@@ -87,7 +88,7 @@ class SigninForm(forms.Form):
     user_or_email = forms.CharField(label=_(u'Username or email'))
     password = forms.CharField(label=_(u'Password'), widget=forms.PasswordInput())
     remember_me = forms.BooleanField(widget=forms.CheckboxInput(),
-                           label=_(u'Remember me'))
+                           label=_(u'Remember me'), required=False)
 
     def clean(self):
         cleaned_data = self.cleaned_data

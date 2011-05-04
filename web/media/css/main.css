@@ -1255,7 +1255,8 @@ body.profiles h2.scrapersandviews {
 	color: #999;
 }
 
-#request_form #main_error {
+#request_form #main_error,
+#login_form #main_error {
 	padding: 10px 20px;
     margin: 15px 20px;
 	background: #ffaaaa;
