@@ -6,7 +6,9 @@
 
 <div class="page_title">
     <ul class="title_links">
+        <li class="embed"><a href="#embed">Add to your site</a></li>
         <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
+        <li class="view"><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">View as full page</a></li>
     </ul>
 </div>
 
