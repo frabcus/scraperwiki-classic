@@ -13,6 +13,9 @@ class TestScrapers(SeleniumTest):
     Run
     Check
     """
+    login_text = "Log in"
+    logged_in_text = "Logged in"
+
     def _load_data(self, type='python', obj='scraper'):
         thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_%s.txt' % (type, obj,))
         try:
@@ -34,6 +37,7 @@ class TestScrapers(SeleniumTest):
         s.click('link=Discussion (0)')    
         self.wait_for_page('visiting discussion')
         comment = 'A test comment'
+
         s.type('id_comment', comment)
         s.click('id_submit')
         time.sleep(2)
@@ -189,7 +193,7 @@ class TestScrapers(SeleniumTest):
                             
     def _create_user(self):
         s = self.selenium
-        s.click("link=Sign in or create an account")
+        s.click("link=%s" % self.login_text)
         self.wait_for_page()
 
         username = "se_test_%s" % str( uuid.uuid4() ).replace('-', '_')
@@ -207,7 +211,7 @@ class TestScrapers(SeleniumTest):
         s.click('register')
         self.wait_for_page()
         
-        self.failUnless(s.is_text_present("signed in as"), msg='User is not signed in and should be')
+        self.failUnless(s.is_text_present(self.logged_in_text), msg='User is not signed in and should be')
         
         
     def _create_type(self, link_name, type):
