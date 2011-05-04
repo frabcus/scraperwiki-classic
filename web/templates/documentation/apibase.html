@@ -2,9 +2,8 @@
 
 {% block title %}Docs - External API{% endblock %}
 
-{#
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/requestoptions.js?{{settings.REVISION}}"></script>	
-    <script>
+{% block javascript %}
+    <script type="text/javascript">
         var showinglookup = { 
             sqlite:'.format, .name, .attach, .query, .callback', 
             getinfo:'.format, .name, .version, .history_start_date, .quietfields, .callback',
@@ -12,11 +11,7 @@
             getuserinfo:'.format, .username, .callback',
             search:'.format, .searchquery, .maxrows, .callback'
         }
-    </script>
-#}
 
-{% block javascript %}
-    <script type="text/javascript">
         $(function(){
             $('#functions li:first').addClass('first').siblings(':last').addClass('last');
             $('#functions a').bind('click', function(e){
@@ -27,7 +22,10 @@
                     $('#intro').show();
                     $('#options').hide();
                 } else {
+                    $(showinglookup[id], $('#options')).filter(':hidden').show();
+                    $('#options li').not(showinglookup[id]).hide();
                     $('#intro').hide();
+                    window.location.hash = id; 
                     $('#options').show();
                 }
                 
