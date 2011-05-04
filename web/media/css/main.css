@@ -1192,7 +1192,12 @@ body.profiles h2.scrapersandviews {
 
 #request_form li.broadcast input {
 	float: left;
-	margin: 7px 10px 5px 50px;
+	margin: 10px 12px 5px 50px;
+	width: auto;
+}
+
+#request_form li.broadcast label {
+	padding-right: 50px;
 }
 
 #request_form #id_due_date {
