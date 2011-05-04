@@ -77,6 +77,73 @@ $(function()
         })
         $(this).keyup(rewriteapiurl); 
     }); 
+
+    var autocompletedata = 
+    {
+        minLength: 2,
+        open: function() {  $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); }, 
+        close: function() {  $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); rewriteapiurl(); }, 
+        select: function(event, ui) { rewriteapiurl(); },
+        source: function(request, response) 
+        {
+            $.ajax(
+            {
+                url: $('#id_api_base').val()+"scraper/search",
+                dataType: "jsonp",
+                data: { format:"jsondict", maxrows: 12, searchquery: request.term },
+                success: function(data) 
+                {
+                    response($.map(data, function(item) { return  { label: item.short_name, desc: item.title, value: item.short_name }})); 
+                }
+            })
+        }
+    }; 
+    $('#detail #id_attach').autocomplete(autocompletedata); 
+        // reuse the same settings with one extra function (it's been verified that the settings are copied over internally)
+
+    autocompletedata.focus = function(event, ui)  { $( "#detail #id_name" ).val(ui.item.label);  return false; }; 
+    $('#detail #id_name').autocomplete(autocompletedata)
+    .data( "autocomplete" )._renderItem = function(ul, item) 
+    {
+        return $( "<li></li>" )
+        .data( "item.autocomplete", item )
+        .append( "<a><b>" + item.label + "</b><br>" + item.desc + "</a>" )
+        .appendTo(ul);
+    };
+
+    $('#detail #id_quietfields').autocomplete({source: [ "", "code", "userroles", "runevents", "datasummary" ]}); 
+
+    var scraperlistcall = null; 
+    $('#detail #id_name').bind('keyup change', function()
+    {
+        if (scraperlistcall != null)
+            clearTimeout(scraperlistcall); 
+        $('#listtables').html("<li>Waiting...</li>"); 
+        scraperlistcall = setTimeout(function()
+        {
+            scraperlistcall = null; 
+            var aName = $('#detail #id_name').val();
+            $('#listtables').html("<li>Loading...</li>"); 
+            $.ajax({url:$('#id_api_base').val()+"scraper/getinfo", dataType:"jsonp", data:{name:aName, quietfields:"code|runevents|userroles"}, error: function(jq, status) { alert(status); }, success:function(v) 
+            { 
+                $('#listtables').empty(); 
+                if (v && v[0] && v[0].datasummary && v[0].datasummary.tables)
+                {
+                    for (var tablename in v[0].datasummary.tables)
+                    {
+                        var table = v[0].datasummary.tables[tablename]; 
+                        $('#listtables').append('<li><b>'+tablename+'</b> ['+table.count+'] '+table.sql+'</li>'); 
+                    }
+                }
+                else if (v && v.error)
+                    $('#listtables').html("<li>"+v.error+"</li>"); 
+                else
+                    $('#listtables').html("<li>No tables</li>"); 
+            }}); 
+        }, 500); 
+    }); 
+
+
 });
 </script>
 {% endblock %}
@@ -112,6 +179,7 @@ $(function()
         <li><a href="#getuserinfo"><strong>scraperwiki.scraper.getuserinfo</strong><small>Find out information about a user</small></a></li>
         <li><a href="#search"><strong>scraperwiki.scraper.search</strong><small>Search the titles and descriptions of&nbsp;all&nbsp;our&nbsp;scrapers</small></a></li>
     </ul>
+
     <div id="detail">
         <div id="intro">
             <p class="first">The ScraperWiki external interface allows you to extract data in the form you want for use on the web or in your own applications.  You can also extract information about the state of any scraper.</p>
@@ -197,6 +265,9 @@ $(function()
         </div>
     </div>
     <br class="clear" />
+
+    <ul id="listtables"></ul>
+
 </div>
 
 
