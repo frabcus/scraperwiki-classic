@@ -33,13 +33,13 @@ scraperwiki.sqlite.attach("school_life_expectancy_in_years")
 tables directly from queries.</p>
 
 <code>data = scraperwiki.sqlite.select(
-    "* from school_life_expectancy_in_years.swdata 
-    order by years_in_school desc limit 10"
+    '''* from school_life_expectancy_in_years.swdata 
+    order by years_in_school desc limit 10'''
 )
 print data
 </code>
 
-<p>The data comes back as an array of hashes.</p>
+<p>The data comes back as an array of dictionaries.</p>
 
 <h2>3. Print out the results</h2>
 
