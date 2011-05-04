@@ -33,23 +33,24 @@ urlpatterns = patterns('',
     #explorer
     url(r'^explorer_call$',                             views.explorer_user_run,    name='explorer_call'),
     url(r'^explorer_example/(?P<method>[\w_\-\.\_]+)$', views.explorer_example,     name='explorer_example'),
-
-    # Documentation
-    url(r'^$', views.explore_index, name='index'),
-    url(r'^1\.0$', views.explore_index_1_0, name='index_1_0'),
     url(r'^1\.0/libraries$', views.explore_index_1_0_libraries, name='libraries'),
-    url(r'^1\.0/explore/scraperwiki.scraper.search$',       views.explore_scraper_search_1_0,       name='scraper_search'),
-    url(r'^1\.0/explore/scraperwiki.scraper.getinfo$',      views.explore_scraper_getinfo_1_0,      name='scraper_getinfo'),
-    url(r'^1\.0/explore/scraperwiki.scraper.getruninfo$',   views.explore_scraper_getruninfo_1_0,   name='scraper_getruninfo'),    
-    url(r'^1\.0/explore/scraperwiki.scraper.getuserinfo$',  views.explore_scraper_getuserinfo_1_0,  name='scraper_getuserinfo'),
+
+    url(r'^$', 'django.views.generic.simple.redirect_to', {'url': '/docs/api'},name='index'),
+    url(r'^1\.0$', 'django.views.generic.simple.redirect_to', {'url': '/docs/api'}, name='index_1_0'),
+
+
+    url(r'^1\.0/explore/scraperwiki.scraper.search$',       'django.views.generic.simple.redirect_to', {'url': '/docs/api#search'}, name='scraper_search'),
+    url(r'^1\.0/explore/scraperwiki.scraper.getinfo$',      'django.views.generic.simple.redirect_to', {'url': '/docs/api#getinfo'},name='scraper_getinfo'),
+    url(r'^1\.0/explore/scraperwiki.scraper.getruninfo$',   'django.views.generic.simple.redirect_to', {'url': '/docs/api#getruninfo'},name='scraper_getruninfo'),    
+    url(r'^1\.0/explore/scraperwiki.scraper.getuserinfo$',  'django.views.generic.simple.redirect_to', {'url': '/docs/api#getuserinfo'},name='scraper_getuserinfo'),
+    url(r'^1\.0/explore/scraperwiki.datastore.sqlite$',     'django.views.generic.simple.redirect_to', {'url': '/docs/api#sqlite'}, name='scraper_sqlite'),    
     
-    url(r'^1\.0/explore/scraperwiki.datastore.getkeys$',    views.explore_scraper_getkeys_1_0,      name='datastore_getkeys'),    
-    url(r'^1\.0/explore/scraperwiki.datastore.search$',     views.explore_datastore_search_1_0,     name='datastore_search'),        
-    url(r'^1\.0/explore/scraperwiki.datastore.getdata$',    views.explore_scraper_getdata_1_0,      name='scraper_getdata'),    
-    url(r'^1\.0/explore/scraperwiki.datastore.getdatabydate$', views.explore_scraper_getdatabydate_1_0, name='scraper_getdatabydate'),
-    url(r'^1\.0/explore/scraperwiki.datastore.getdatabylocation$', views.explore_scraper_getdatabylocation_1_0, name='scraper_getdatabylocation'),    
-    url(r'^1\.0/explore/scraperwiki.datastore.sqlite$',     views.explore_scraper_sqlite_1_0,       name='scraper_sqlite'),    
-    url(r'^1\.0/explore/scraperwiki.geo.postcodetolatlng$', views.explore_geo_postcodetolatlng_1_0, name='geo_postcodetolatlng'),    
+#    url(r'^1\.0/explore/scraperwiki.datastore.getkeys$',    views.explore_scraper_getkeys_1_0,      name='datastore_getkeys'),    
+#    url(r'^1\.0/explore/scraperwiki.datastore.search$',     views.explore_datastore_search_1_0,     name='datastore_search'),        
+#    url(r'^1\.0/explore/scraperwiki.datastore.getdata$',    views.explore_scraper_getdata_1_0,      name='scraper_getdata'),    
+#    url(r'^1\.0/explore/scraperwiki.datastore.getdatabydate$', views.explore_scraper_getdatabydate_1_0, name='scraper_getdatabydate'),
+#    url(r'^1\.0/explore/scraperwiki.datastore.getdatabylocation$', views.explore_scraper_getdatabylocation_1_0, name='scraper_getdatabylocation'),    
+#    url(r'^1\.0/explore/scraperwiki.geo.postcodetolatlng$', views.explore_geo_postcodetolatlng_1_0, name='geo_postcodetolatlng'),    
 
 
     # API calls

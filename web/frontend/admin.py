@@ -17,6 +17,9 @@ class AlertsAdmin(admin.ModelAdmin):
 class MessageAdmin(admin.ModelAdmin):
     pass
 
+class DataEnquiryAdmin(admin.ModelAdmin):
+    pass
+
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined', 'last_login')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
@@ -27,6 +30,7 @@ admin.site.register(UserToUserRole)
 admin.site.register(AlertTypes, AlertTypesAdmin)
 admin.site.register(Alerts, AlertsAdmin)
 admin.site.register(Message, MessageAdmin)
+admin.site.register(DataEnquiry, DataEnquiryAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)

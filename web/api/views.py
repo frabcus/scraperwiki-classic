@@ -129,6 +129,7 @@ def explorer_user_run(request):
     
     #build up the URL
     post_data = dict(request.POST)
+    print post_data
     for k,v in post_data.items():
         if not v[0]: 
             del post_data[k]

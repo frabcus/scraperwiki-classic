@@ -1,9 +1,11 @@
 from django.conf import settings
+from django.utils.safestring import mark_safe
 from django import forms
-from frontend.models import UserProfile, AlertTypes
+from frontend.models import UserProfile, AlertTypes, DataEnquiry
 from contact_form.forms import ContactForm
 from registration.forms import RegistrationForm
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Q
@@ -74,7 +76,7 @@ class scraperContactForm(ContactForm):
         if not request.user.is_authenticated():
             self.fields['captcha'] = CaptchaField()
         
-    subject_dropdown = forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request a private scraper'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))
+    subject_dropdown = forms.ChoiceField(label="Subject type", choices=(('suggestion', 'Suggestion about how we can improve something'),('request', 'Request data'),('help', 'Help using ScraperWiki'), ('bug', 'Report a bug'), ('other', 'Other')))
     title = forms.CharField(widget=forms.TextInput(), label=u'Subject')
     recipient_list = [settings.FEEDBACK_EMAIL]
 
@@ -82,10 +84,22 @@ class scraperContactForm(ContactForm):
         return self.cleaned_data['email']
 
 
-class SigninForm (AuthenticationForm):
+class SigninForm(forms.Form):
     user_or_email = forms.CharField(label=_(u'Username or email'))
+    password = forms.CharField(label=_(u'Password'), widget=forms.PasswordInput())
     remember_me = forms.BooleanField(widget=forms.CheckboxInput(),
-                           label=_(u'Remember me'))
+                           label=_(u'Remember me'), required=False)
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+
+        user = authenticate(username=cleaned_data.get('user_or_email', ''), password=cleaned_data.get('password', ''))
+        if user is None:
+            raise forms.ValidationError("Sorry, but we could not find that user, or the password was wrong")
+        elif not user.is_active:
+            raise forms.ValidationError(mark_safe("This account has not been activated (ScraperWiki will have allowed you to use the site before activation for your first time). Please check your email (including the spam folder) and click on the link to confirm your account. If you have lost the email or the link has expired please <a href='%s'>request a new one</a>." % reverse('resend_activation_email')))
+
+        return cleaned_data
 
 
 class CreateAccountForm(RegistrationForm):
@@ -111,3 +125,25 @@ class CreateAccountForm(RegistrationForm):
 
 class ResendActivationEmailForm(forms.Form):
     email_address = forms.EmailField()
+
+class DataEnquiryForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(DataEnquiryForm, self).__init__(*args, **kwargs)
+        self.fields['frequency'].initial = 'daily'
+
+    urls = forms.CharField(required=False, label='At which URL(s) can we find the data currently?')
+    columns = forms.CharField(required=False, label='What information do you want scraped?')
+    due_date = forms.DateField(required=False, label='When do you need it by?')
+    first_name = forms.CharField(label='First name:')
+    last_name = forms.CharField(label='Last name:')
+    email = forms.CharField(label='Your email address:')
+    telephone = forms.CharField(required=False, label='Your telephone number:')
+    company_name = forms.CharField(required=False, label='Your company name:')
+    broadcast = forms.BooleanField(required=False, label='I\'m happy for this request to be posted on Twitter/Facebook')
+    description = forms.CharField(required=False, widget=forms.Textarea, label='What are your ETL needs?')
+    visualisation = forms.CharField(required=False, widget=forms.Textarea, label='What visualisation do you need?')
+    application = forms.CharField(required=False, widget=forms.Textarea, label='What application do you want built?')
+    frequency = forms.ChoiceField(label='How often does the data need to be scraped?', choices=DataEnquiry.FREQUENCY_CHOICES)
+
+    class Meta:
+        model = DataEnquiry

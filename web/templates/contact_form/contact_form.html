@@ -12,21 +12,23 @@
 
 {% endblock %}
 
+{% block header %}
+	<h2>Contact us</h2>
+	<p>Ask us a question or make a suggestion.</p>
+{% endblock %}
+
 {% block content %}
-    <div class="page_title">
-        <h1>Contact us</h1>
-        <p>Ask us a question or make a suggestion.  
-           You are also free to join the 
-           <a href="http://groups.google.com/group/scraperwiki">ScraperWiki Google Group</a>.
-        </p>  
-    </div>
-    <div class="content left col">
+    <div class="content">
         <form action="/contact/" method="POST">
             <ul class="form">
             <li>
                 {{ form.subject_dropdown.label_tag }}
                 {{ form.subject_dropdown }}
                 {% field_errors form.subject_dropdown %}
+                <p id="requesting_data_tip" style="display: none">
+                <strong>You can also use the <a href="{% url request_data %}">full data request form</a>
+                    to request data.</strong>
+                </p>
             </li>
             {% if request.user.is_authenticated %}
                 <input id="id_name" name="name" type="hidden" class="required" value="{{ request.user.username }}" />
@@ -52,6 +54,7 @@
                 {{ form.body.label_tag }}                    
                 {{ form.body }}
                 {% field_errors form.body %}
+                <p class="tip"><b>Reporting a bug?</b> Remember to tell us your browser, operating system, and the scraper or page involved.</p>
             </li>
 
             {% if not request.user.is_authenticated %}
@@ -62,12 +65,26 @@
                 </li>
             {% endif %}               
             </ul>
-            <p class="report">Please give your browser brand and/or name of your scraper if we need to know.</p>
-            <input type="submit" value="Send feedback" />
+            <p class="last"><input type="submit" value="Send message" /></p>
+            <img src="{{ MEDIA_URL }}images/postman.gif" width="175" height="260" alt="" />
+            <p class="postphone">
+                <strong>Post and phone</strong>
+                <br><br>Scraperwiki, ic2<br>Liverpool Science Park<br>146 Brownlow Hill<br>Liverpool L3 5RF
+                <br><br>Tel: +44 208 1330541
+            </p>
         </form>
         <br />
     </div>
-    <div class="content right col">
-        &nbsp;
-    </div>
+{% endblock %}
+
+{% block run_script %}
+    $(document).ready(function() 
+    { 
+        $("#id_subject_dropdown").change(function() { 
+            if ($(this).val() == 'request') {
+                $("#requesting_data_tip").show(500);
+            }
+        }); 
+    }
+    );
 {% endblock %}

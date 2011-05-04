@@ -12,6 +12,7 @@ import urllib
 import subprocess
 import re
 import base64
+import cgi
 
 try:                import json
 except ImportError: import simplejson as json
@@ -22,33 +23,29 @@ def MakeRunner(request, scraper, code):
     failed = False
 
     urlquerystring = request.META["QUERY_STRING"]
-    # derive the function and arguments from the urlargs
-    # (soon to be deprecated)
-    rargs = { }
-    for key in request.GET.keys():
-        rargs[str(key)] = request.GET.get(key)
-    func = rargs.pop("function", None)
-    for key in rargs.keys():
-        try: 
-            rargs[key] = json.loads(rargs[key])
-        except:
-            pass
     
-    args = [runner_path]
-    args.append('--guid=%s' % scraper.guid)
-    args.append('--language=%s' % scraper.language.lower())
-    args.append('--name=%s' % scraper.short_name)
+    # append post values to the query string (so we can consume them experimentally)
+    # we could also be passing in the sets of scraper environment variables in this way too
+    # though maybe we need a generalized version of the --urlquery= that sets an environment variables explicitly
+    # the bottleneck appears to be the runner.py command line instantiation
+    # (POST is a django.http.QueryDict which destroys information about the order of the incoming parameters) 
+    if list(request.POST):
+        qsl = cgi.parse_qsl(urlquerystring)
+        qsl.extend(request.POST.items())
+        urlquerystring = urllib.urlencode(qsl)
+        print "sending in new querystring:", urlquerystring
+    
+    
+    args = [ runner_path.encode('utf8') ]
+    args.append('--guid=%s' % scraper.guid.encode('utf8'))
+    args.append('--language=%s' % scraper.language.lower().encode('utf8'))
+    args.append('--name=%s' % scraper.short_name.encode('utf8'))
     args.append('--cpulimit=80')
-    args.append('--urlquery=%s' % urlquerystring)
-    args = [i.encode('utf8') for i in args]
+    args.append('--urlquery=%s' % urlquerystring.encode('utf8'))
     
     runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     runner.stdin.write(code.encode('utf8'))
     
-    # append in the single line at the bottom that gets the rpc executed with the right function and arguments
-    #if func:
-    #    runner.stdin.write("\n\n%s(**%s)\n" % (func, repr(rargs)))
-
     runner.stdin.close()
     return runner
 

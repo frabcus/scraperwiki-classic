@@ -10,34 +10,52 @@
     <input type="hidden" id="hidLicenseChoices" value="{ {% for name, text in license_choices %}'{{name}}':'{{text}}', {% endfor %} }" />
 </fieldset>
 
+<div class="page_title">
+    <ul class="title_links">
+        {% ifequal scraper.wiki_type 'scraper'%}
+           <li class="api"><a href="{% url docsexternal %}?name={{scraper.short_name}}#sqlite">Explore with ScraperWiki API</a></li>
+           <li class="sqlite"><a href="{% url export_sqlite scraper.short_name %}" rel="nofollow">Download SQLite3 database</a></li>
+        {% endifequal %}
+        {% ifequal scraper.wiki_type 'view'%}
+            <li class="full_screen"><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">View as full page</a></li>
+            <li class="embed"><a href="{% url code_overview scraper.wiki_type scraper.short_name %}#embed">Add to your site</a></li>
+        {% endifequal %}
+        <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
+    </ul>
+</div>
+
 <div class="content full">
+    {% if scraper.is_sick_and_not_running %}
+        <p class="sick">
+            <strong>Maintenance required!</strong> This {{scraper.wiki_type}} might be broken 
+            (it generated an exception on its 
+                 <a href="{% url scraper_history scraper.wiki_type scraper.short_name %}#run_{{ scraper.last_runevent.id }}">last run</a>).
+            {% ifequal scraper.owner.get_profile user %}
+                <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit this {{scraper.wiki_type}}</a>.
+            {% else %}
+                Do you know {{scraper.language}}? Could you help <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">fix this {{scraper.wiki_type}}</a>?
+            {% endifequal %}
+        </p>
+    {% endif %}
+
     <div class="data_viewer">
 
         {% if sqlitedata %}
-          <div style="float: right">
+          <div class="data_options">
             {% if user.is_staff %}
               <a href="#" id="popupinteractivesqlite" class="staff">Interactive</a> | 
-              <span class="staff">
-                <a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a>
-                <a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a>
-              </span>
-              |
             {% endif %}
             <a href="#" class="csv" id="downloadcsvtable" rel="nofollow">Download spreadsheet (CSV)</a>
           </div>
 
-          <ul id="sqlite_schema">
-            {% for sqltablename, sqltabledata in sqlitedata.items %}
-              <li>{{sqltabledata.sql}}</li>
-            {% endfor %}
-           </ul>
     	   <ul class="data_tabs">
              {% for sqltablename, sqltabledata in sqlitedata.items %}
                 <li id="data_tab_{{forloop.counter}}" class="data_tab"> 
                     <span class="tablename">{{sqltablename}}</span> ({{sqltabledata.count}}  rows)
                 </li>
              {% endfor %}
-            </ul>
+				<li class="clear"></li>
+           </ul>
           {% for sqltablename, sqltabledata in sqlitedata.items %}
             <div id="data_content_{{forloop.counter}}" class="data_content">
             <table class="data">
@@ -54,25 +72,34 @@
           {% endfor %}
 
           <div class="content_footer">
-             <p>This dataset has a total of {{scraper.scraper.record_count}} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }}</p>
+             <p>This dataset has a total of {{scraper.scraper.record_count}} records in {{ sqlitedata|length }} table{{ sqlitedata|length|pluralize }} (<span><a class="sqlite_view_schema" >show schema{{sqlitedata.items|pluralize}}</a><a class="sqlite_view_schema" >hide schema{{sqlitedata.items|pluralize}}</a></span>).
+              </p>
           </div>
+          <ul id="sqlite_schema" style="display: none">
+            {% for sqltablename, sqltabledata in sqlitedata.items %}
+              <li>{{sqltabledata.sql}}</li>
+            {% endfor %}
+           </ul>
         {% endif %}
 
         {% if not sqlitedata %}
-            <div>
-                <table class="data">
+           <ul class="data_tabs"> 
+                <li class="clear"></li> 
+           </ul> 
+            <div id="data_content_1" class="data_content">
+                <table class="data" cellspacing="0" cellpadding="0" style="border-collapse: collapse">
                     <tbody>
-                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-                    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr class="row"><td width="120">&nbsp;</td><td width="120">&nbsp;</td><td width="120">&nbsp;</td><td width="120">&nbsp;</td><td width="120">&nbsp;</td></tr>
+                        <tr class="row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr class="row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr class="row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr class="row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr class="row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr class="row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr class="row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr class="row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr class="row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr class="row"><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -83,7 +110,7 @@
     </div>
 </div>
 
-<div class="content full">
+<div class="content full" id="scraper_about">
     <h2>About this scraper 
         {% if user.is_authenticated %}<a href="#" id="aEditAboutScraper" class="edit">[edit description]</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}" class="edit">[sign in to edit description]</a>{% endif %}
         {% if user.is_staff %}
@@ -98,29 +125,35 @@
         {% endif %}
     </h2>
     <div class="text_wiki">
-        <div id="divAboutScraper">{{ scraper.description|textile }}</div>
+        <div id="divAboutScraper">
+        {% if ckansubmit %}
+            {{ scraper.description|textile }}
+        {% else %}
+            <p>This scraper has no description. {% if user.is_authenticated %}<a href="#" id="aEditAboutScraper">Would you like to add one?</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">Sign in to add one.</a>{% endif %}</p>
+        {% endif %}</div>
     </div>
 </div>
 
 {% include 'codewiki/includes/tags.html' %}
 
-<div class="content full">
-    <h2>Views using this data from this scraper</h2>    
-    <ul class="views">
+<div class="content full" id="scraper_views">
+    <h2>Views using this data from this scraper <a href="{% url choose_template 'view' %}" class="edit editor_view">[create a new view]</a></h2>    
         {% if related_views %}
+        <ul class="views">
             {% for related_view in related_views %}
                 <li>
                     <a href="{% url code_overview related_view.wiki_type related_view.short_name %}" class="screenshot">{% screen_shot related_view %}</a>
                     <a href="{% url code_overview related_view.wiki_type related_view.short_name %}">{{related_view.title}}</a>
                 </li>
             {% endfor %}
-        {% endif %}        
-        <li class="new"><a href="{% url choose_template 'view' %}" class="editor_view">Create a new view</a></li>
-    </ul>
+        </ul>
+        {% else %}
+        <p>No views currently use data from this scraper. <a href="{% url choose_template 'view' %}" class="editor_view">Would you like to create one?</a>
+        {% endif %}
     <br class="clear"/>
 </div>
 
-<div class="content col left">
+<div class="content col left" id="scraper_contributors">
     <h3>Contributors</h3>
     {% include 'codewiki/includes/contributors.html' %}
 
@@ -131,7 +164,7 @@
 
 
 
-<div class="content col right">
+<div class="content col right" id="scraper_schedule">
     <h3>Schedule {% if user.is_authenticated %}<a href="#" id="aEditSchedule" class="edit">[edit schedule]</a>{% endif %}</h3>
     <p>
         This scraper 
@@ -169,13 +202,18 @@
     {% include 'codewiki/includes/admin_controls.html' %}
 
 </div>
+
 <br class="clear"/>
+
+<p class="report">
+<strong>Important</strong> If you suspect this scraper breaks our <a href="/terms_and_conditions/">Terms &amp; Conditions</a>, please <a href="/contact/">report it</a>
+</p>
+
 {% endblock %}
 
-{% block run_script_outer %}
+{% block run_script %}
     {{block.super}}
 
-<script>
 {% if user.is_authenticated %}
     setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
     setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
@@ -212,7 +250,7 @@ $('.sqlite_view_schema:last').hide();
 $('#sqlite_schema').hide(); 
 $('.sqlite_view_schema').click( function() 
 {
-    $('#sqlite_schema').toggle(); 
+    $('#sqlite_schema').toggle(500); 
     $('.sqlite_view_schema').toggle(); 
 });
 
@@ -234,6 +272,5 @@ $("#popupinteractivesqlite").click(function()
     }); 
 }); 
 
-</script>
 {% endblock %}
 

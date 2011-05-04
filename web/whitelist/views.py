@@ -33,7 +33,7 @@ def whitelist_user(request):
     
     data = {'whitelist':whitelist, 'blacklist':blacklist, 
             'blacklistunlisted':blacklistunlisted, 'blacklistunlistedrejected':blacklistunlistedrejected, 
-            'url':url, 'urlinwhitelist':urlinwhitelist, 'urlinblacklist':urlinblacklist }
+            'url':url, 'urlinwhitelist':urlinwhitelist, 'urlinblacklist':urlinblacklist}
     return render_to_response('whitelist/index.html', data, context_instance=RequestContext(request))
 
 def whitelist_config(request):

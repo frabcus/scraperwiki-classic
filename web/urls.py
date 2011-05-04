@@ -56,6 +56,9 @@ urlpatterns = patterns('',
     # API
     (r'^api/', include('api.urls', namespace='foo', app_name='api')),
 
+    # Documentation
+    (r'^docs/', include('documentation.urls')),
+
     # Robots.txt
     (r'^robots.txt$', direct_to_template, {'template': 'robots.txt', 'mimetype': 'text/plain'}),
 

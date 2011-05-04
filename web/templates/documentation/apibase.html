@@ -1,0 +1,319 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Documentation / External API{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>
+<script type="text/javascript">
+var showinglookup = { 
+    sqlite:'.format, .name, .attach, .query, .callback', 
+    getinfo:'.format, .name, .version, .history_start_date, .quietfields, .callback',
+    getruninfo:'.format, .name, .runid, .callback',
+    getuserinfo:'.format, .username, .callback',
+    search:'.format, .searchquery, .maxrows, .callback'
+}
+
+$(function()
+{
+
+    ZeroClipboard.setMoviePath( '{{ MEDIA_URL }}js/ZeroClipboard.swf' );
+    var el = $('#id_apiuri_copy');
+    var parent = el.parent();
+    var code = $('#id_apiuri');
+
+    // add eleven spaces to end of first line, so Copy button never obscures text
+    // (this was easiest way to do it without altering the overflow scrolling behaviour)
+    var t = code.text().replace(/\n/, "           \n")
+    code.text(t);
+    
+    clip = new ZeroClipboard.Client();
+    clip.setText(code.text());
+    clip.setHandCursor( true );
+
+    clip.addEventListener( 'complete', function(client, text) {
+        var original = el.children('span').html();
+        el.children('span').html('Copied').addClass('copied');
+        var t = setTimeout(function(){ el.children('span').html(original); }, 2000);
+        el.focus(); // so flash doesn't have keyboard focus afterwards
+    });
+
+    clip.addEventListener( 'onMouseOver', function(client, text) {
+        if(el.is('.copied')){
+            el.children('span').text('Copy').removeClass('copied');
+        }
+        el.addClass('hover');
+        //  We set the clipboard text on mouseover, since the <a> is empty on pageload.
+        clip.setText(code.text());
+    });
+
+    clip.addEventListener( 'onMouseOut', function(client, text) {
+        el.removeClass('hover');
+    });
+    
+    // We manually append the Flash movie, because ZeroClipboard is too stupid 
+    // to work out the position of a hidden <a> element on page load.
+    $('<div id="zeroclipboard" style="position: absolute; top: 50%; right: 0; margin-top: -20px">' + clip.getHTML( el.width(), '40' ) + '</div>').appendTo(parent);
+    
+    
+    $('#functions li:first').addClass('first').siblings(':last').addClass('last');
+    $('#functions a').bind('click', function(e){
+        var id = $(this).attr('href').substr(1);
+        //  the type of button (eg: sqlite, getinfo, search) is now stored in var 'id'.
+        
+        if(id == 'intro'){
+            $('#intro').show();
+            $('#options, #result, #response').hide();
+        } else {
+            $(showinglookup[id], $('#options')).filter(':hidden').show();
+            $('#options li').not(showinglookup[id]).hide();
+            $('#intro').hide();
+            window.location.hash = id; 
+            $('#id_category_title').val($(this).find('strong').text());
+            $('#options, #result').show();
+
+            // jsondict option only exists for sqlite selection (not available in piston)
+            var jd = $("#id_format option[value='jsonlist']"); 
+            jd.attr("disabled", (id == "sqlite" ? "" : "disabled")); 
+            if ((id != "sqlite") && jd.attr("selected"))
+                $("#id_format option[value='jsondict']").attr("selected", true); 
+            setTimeout(rewriteapiurl, 400); 
+        }
+        
+        $(this).parent().addClass('selected').siblings('.selected').removeClass('selected');
+        e.preventDefault();
+    });
+    if($('#functions').height() > $('#detail').height()){
+        $('#detail').css('minHeight', $('#functions').height());
+    }
+
+    if (window.location.hash)
+        setTimeout(function() { $('#functions a[href='+window.location.hash+']').click(); }, 200); 
+    if ($('#detail #id_name').val())
+        setTimeout(function() { $('#detail #id_name').change(); }, 300); 
+
+    function rewriteapiurl()
+    {
+        var surl = [ $('#id_api_base').val() ]; 
+        surl.push($('#id_category_title').val().replace("scraperwiki.", "").replace(".", "/")); 
+        surl.push("?"); 
+        var ents = $('#detail li').not(':hidden'); 
+        var entdropdown = ents.find('select'); 
+        surl.push(entdropdown.attr("name"), "=", entdropdown.val()); 
+        for (var i = 0; i < ents.length; i++)
+        {
+            var ent = $(ents[i]).find("input, textarea"); 
+            if ((ent.length == 1) && (ent.val().length != 0))
+                surl.push("&", ent.attr("name"), "=", encodeURIComponent(ent.val())); 
+        }
+        $('#id_apiuri').text(surl.join("")).attr('href', surl.join("")); 
+    }
+
+    $('#detail select').each(function() { $(this).change(rewriteapiurl) }); 
+    $('#detail input, #detail textarea').each(function() 
+    {   
+        $(this).keypress(function(e)
+        {
+            if (e.which == 13)
+                {  $("#btnCallMethod").click();  e.preventDefault();  return false }
+        })
+        $(this).keyup(rewriteapiurl); 
+    }); 
+
+    var autocompletedata = 
+    {
+        minLength: 2,
+        open: function() {  $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); }, 
+        close: function() {  $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); rewriteapiurl(); }, 
+        select: function(event, ui) { rewriteapiurl(); },
+        source: function(request, response) 
+        {
+            $.ajax(
+            {
+                url: $('#id_api_base').val()+"scraper/search",
+                dataType: "jsonp",
+                data: { format:"jsondict", maxrows: 12, searchquery: request.term },
+                success: function(data) 
+                {
+                    response($.map(data, function(item) { return  { label: item.short_name, desc: item.title, value: item.short_name }})); 
+                }
+            })
+        }
+    }; 
+    $('#detail #id_attach').autocomplete(autocompletedata); 
+        // reuse the same settings with one extra function (it's been verified that the settings are copied over internally)
+
+    autocompletedata.focus = function(event, ui)  { $( "#detail #id_name" ).val(ui.item.label);  return false; }; 
+    $('#detail #id_name').autocomplete(autocompletedata)
+    .data( "autocomplete" )._renderItem = function(ul, item) 
+    {
+        return $( "<li></li>" )
+        .data( "item.autocomplete", item )
+        .append( "<a><b>" + item.label + "</b><br>" + item.desc + "</a>" )
+        .appendTo(ul);
+    };
+
+    $('#detail #id_quietfields').autocomplete({source: [ "", "code", "userroles", "runevents", "datasummary" ]}); 
+
+    var scraperlistcall = null; 
+    $('#detail #id_name').bind('keyup change', function()
+    {
+        if (scraperlistcall != null)
+            clearTimeout(scraperlistcall); 
+        $('#listtables').html("<li>Waiting...</li>"); 
+        scraperlistcall = setTimeout(function()
+        {
+            scraperlistcall = null; 
+            var aName = $('#detail #id_name').val();
+            $('#listtables').html("<li>Loading...</li>"); 
+            $.ajax({url:$('#id_api_base').val()+"scraper/getinfo", dataType:"jsonp", data:{name:aName, quietfields:"code|runevents|userroles"}, error: function(jq, status) { alert(status); }, success:function(v) 
+            { 
+                $('#listtables').empty(); 
+                if (v && v[0] && v[0].datasummary && v[0].datasummary.tables)
+                {
+                    for (var tablename in v[0].datasummary.tables)
+                    {
+                        var table = v[0].datasummary.tables[tablename]; 
+                        $('#listtables').append('<li><b>'+tablename+'</b> ['+table.count+'] '+table.sql+'</li>'); 
+                    }
+                }
+                else if (v && v.error)
+                    $('#listtables').html("<li>"+v.error+"</li>"); 
+                else
+                    $('#listtables').html("<li>No tables</li>"); 
+            }}); 
+        }, 500); 
+    }); 
+
+    $('#id_apiuri_run').click(function(e) 
+    {
+        var ifrmsrc = $('#id_api_explore').val()+"?apiurl="+encodeURIComponent($('#id_apiuri').val()); 
+        $('iframe#api_response').attr('src', ifrmsrc);
+        $('#response:hidden').slideDown();
+        e.preventDefault();
+    }); 
+
+});
+</script>
+{% endblock %}
+
+
+{% block header %}
+   <h2><a href="{% url docs language %}">Documentation</a> / External API</h2>
+  <p>How to get data out of ScraperWiki via a REST API</p>
+{% endblock %}
+
+{% block content %}
+
+<p class="language_chooser">
+    {% if not docindex %}
+    <a href="{% url docs language %}" class="back" title="Back to documentation homepage">
+        <img src="{{ MEDIA_URL }}/images/icons/back_arrow.png" width="16" height="16" alt="" />
+        Back to contents</a>
+    {% endif %}
+   <br class="clear"/>
+</p>
+   <br class="clear"/>
+   
+   
+   
+<div id="api_explorer">
+    <ul id="functions">
+        <li class="selected"><a href="#intro"><strong>About the External API</strong><small>Some short description goes here</small></a></li>
+        <li><a href="#sqlite"><strong>scraperwiki.datastore.sqlite</strong><small>Query and extract your data via a general&nbsp;purpose&nbsp;SQL&nbsp;interface</small></a></li>
+        <li><a href="#getinfo"><strong>scraperwiki.scraper.getinfo</strong><small>Extract data about a scraper&rsquo;s code, owner,&nbsp;history&nbsp;etc</small></a></li>
+        <li><a href="#getruninfo"><strong>scraperwiki.scraper.getruninfo</strong><small>See what the scraper did&nbsp;during&nbsp;each&nbsp;run</small></a></li>
+        <li><a href="#getuserinfo"><strong>scraperwiki.scraper.getuserinfo</strong><small>Find out information about a user</small></a></li>
+        <li><a href="#search"><strong>scraperwiki.scraper.search</strong><small>Search the titles and descriptions of&nbsp;all&nbsp;our&nbsp;scrapers</small></a></li>
+    </ul>
+
+    <div id="detail">
+        <div id="intro">
+            <p class="first">The ScraperWiki external interface allows you to extract data in the form you want for use on the web or in your own applications.  You can also extract information about the state of any scraper.</p>
+        	<span></span>
+        	<p class="last">&laquo; Please select the function that you want to learn how to use.</p>
+        </div>
+        <form id="options">
+            <h2>Step 1: Set your options&hellip;</h2>
+        	<ul>
+            <input class="hide" type="text" name="category" id="id_category">
+            <input class="hide" type="text" name="function" id="id_category_title">
+        	<li class="format">
+                <label for="id_format">format</label>
+                <select type="text" name="format" id="id_format">
+                    <option value="csv">csv</option>
+                    <option value="jsondict" selected>jsondict</option>
+                    <option value="jsonlist">jsonlist</option>
+                </select>
+        	</li> 
+        	<li class="name">
+                <label for="id_name">name<span class="desc"> of the scraper</span></label>
+                <input type="text" name="name" id="id_name" value="{{name}}">
+        	</li> 
+        	<li class="username">
+                <label for="id_username">username</label>
+                <input type="text" name="username" id="id_username">
+        	</li> 
+        	<li class="version">
+                <label for="id_version">version<span class="desc"> number (-1 for most recent)</span></label>
+                <input type="text" name="version" id="id_version" value="-1">
+        	</li> 
+        	<li class="runid">
+                <label for="id_runid">runid</label>
+                <input type="text" name="runid" id="id_runid">
+        	</li> 
+        	<li class="history_start_date">
+                <label for="id_history_start_date">history_start_date<span class="desc"> (optional)</span></label>
+                <input type="text" name="history_start_date" id="id_history_start_date">
+        	</li> 
+        	<li class="quietfields">
+                <label for="id_quietfields">quietfields<span class="desc"> not included in the output for quicker respnse, delimited by '|' (eg 'code|runevents')</span></label>
+                <input type="text" name="quietfields" id="id_quietfields">
+        	</li> 
+        	<li class="attach">
+                <label for="id_attach">attach<span class="desc"> datastores from other scrapers, delimited by ';' (refer to <a href="{% url docs 'python' 'python_help_documentation' %}">internal api</a>)</span></label>
+                <input type="text" name="attach" id="id_attach">
+        	</li> 
+        	<li class="query">
+                <label for="id_query">query<span class="desc"> in SQL</span></label>
+                <textarea name="query" id="id_query">select * from swdata limit 10</textarea>
+                <ul id="listtables">
+                    
+                </ul>
+        	</li> 
+        	<li class="searchquery">
+                <label for="id_searchquery">searchquery</label>
+                <input type="text" name="searchquery" id="id_searchquery">
+        	</li> 
+        	<li class="maxrows">
+                <label for="id_maxrows">maxrows</label>
+                <input type="text" name="maxrows" id="id_maxrows" value="5">
+        	</li> 
+        	<li class="callback">
+                <label for="id_callback">callback<span class="desc"> for JSONP (optional)</span></label>
+                <input type="text" name="callback" id="id_callback">
+        	</li> 
+        	</ul>
+        </form>
+
+
+        <div id="result">
+            <h2>Step 2: Use this URI in your application&hellip;</h2>
+            <div id="id_apiuri_wrapper">
+                <a id="id_apiuri" href="" title="This is a link! Click to visit, or right-click to copy"></a>
+                <a href="#" id="id_apiuri_copy" title="Copy to clipboard"><span><img src="{{ MEDIA_URL }}/images/icons/clipboard.png" width="16" height="16" alt="" /> Copy</span></a>
+                <a href="#" id="id_apiuri_run" title="Show live response to this function"><span><img src="{{ MEDIA_URL }}/images/icons/terminal_run.png" width="16" height="16" alt="" /> Run</span></a>
+            </div>
+        </div>
+        <div id="response">
+            <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
+            <input type="text" id="id_api_explore" value="{% url api_explore %}" class="hide">
+            <iframe name="iframeResponse" id="api_response" src="{% url api_explore %}"></iframe>
+        </div>
+    </div>
+    <br class="clear" />
+
+</div>
+
+
+<br class="clear" />
+{% endblock %}

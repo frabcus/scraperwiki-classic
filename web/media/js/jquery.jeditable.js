@@ -12,6 +12,8 @@
  * Based on editable by Dylan Verheul <dylan_at_dyve.net>:
  *    http://www.dyve.net/jquery/?editable
  *
+ * 'before' and 'after' callback options added by Zarino Zappia
+ *
  */
 
 /**
@@ -25,6 +27,7 @@
   * @param Hash    options            additional options 
   * @param String  options[method]    method to use to send edited content (POST or PUT) **
   * @param Function options[callback] Function to run after submitting edited content **
+  * @param Function options[before]   Function to run when editing begins **
   * @param String  options[name]      POST parameter name of edited content
   * @param String  options[id]        POST parameter name of edited div id
   * @param Hash    options[submitdata] Extra parameters to send when submitting edited content.
@@ -90,7 +93,8 @@
                     || $.editable.types['defaults'].element;
         var reset    = $.editable.types[settings.type].reset 
                     || $.editable.types['defaults'].reset;
-        var callback = settings.callback || function() { };
+        var callback = settings.callback || function() { };			
+        var before   = settings.before   || function() { };		
         var onedit   = settings.onedit   || function() { }; 
         var onsubmit = settings.onsubmit || function() { };
         var onreset  = settings.onreset  || function() { };
@@ -123,6 +127,8 @@
             }
             
             $(this).bind(settings.event, function(e) {
+				
+				before.apply(self, [self.innerHTML, settings]);
                 
                 /* abort if disabled for this element */
                 if (true === $(this).data('disabled.editable')) {

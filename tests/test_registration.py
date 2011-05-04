@@ -10,7 +10,11 @@ class TestRegistration(SeleniumTest):
     registration being required by further tests so that they can 
     log on.
     """
+    login_text = "Log in"
     login_fail = "Sorry, but we could not find that user, or the password was wrong"
+    logged_in_text = "Logged in"
+    sign_out_text = "Sign out"
+    profile_text = "Your profile"
     default_values = {
         "id_name" : "test user",
         "id_username": "test",
@@ -18,12 +22,11 @@ class TestRegistration(SeleniumTest):
         "id_password1": "password",                
         "id_password2": "password",                               
     }
-    
 
     def test_manage_profile(self):
         s = self.selenium
         s.open("/")
-        s.click("link=Sign in or create an account")
+        s.click("link=%s" % self.login_text)
         self.wait_for_page()
 
         username = str( uuid.uuid4() ).replace('-', '_')
@@ -42,13 +45,13 @@ class TestRegistration(SeleniumTest):
         s.click('register')
         self.wait_for_page()
         
-        self.failUnless(s.is_text_present("signed in as"), msg='User is not signed in and should be')
+        self.failUnless(s.is_text_present(self.logged_in_text), msg='User is not signed in and should be')
         
         
         bio = 'A short description about this user'
         
         # Click on username to view the profile
-        s.click('link=%s' % d['id_name'])
+        s.click('link=%s' % self.profile_text)
         self.wait_for_page()
         
         # Edit your profile
@@ -69,7 +72,7 @@ class TestRegistration(SeleniumTest):
     def test_create_valid(self):
         s = self.selenium
         s.open("/")
-        s.click("link=Sign in or create an account")
+        s.click("link=%s" % self.login_text)
         self.wait_for_page()
 
         username = str( uuid.uuid4() ).replace('-', '_')
@@ -88,9 +91,9 @@ class TestRegistration(SeleniumTest):
         s.click('register')
         self.wait_for_page()
         
-        self.failUnless(s.is_text_present("signed in as"), msg='User should be logged in but is not')
+        self.failUnless(s.is_text_present(self.logged_in_text), msg='User should be logged in but is not')
         
-        s.click('link=sign out')
+        s.click('link=%s' % self.sign_out_text)
         self.wait_for_page()
         
         SeleniumTest._valid_username = d["id_username"]        
@@ -100,7 +103,7 @@ class TestRegistration(SeleniumTest):
     def test_invalid_email(self):
         s = self.selenium
         s.open("/")
-        s.click("link=Sign in or create an account")
+        s.click("link=%s" % self.login_text)
         self.wait_for_page()
 
         d = deepcopy( self.default_values )
@@ -117,13 +120,15 @@ class TestRegistration(SeleniumTest):
     def test_no_data(self):
         s = self.selenium
         s.open("/")
-        s.click("link=Sign in or create an account")
+        s.click("link=%s" % self.login_text)
         self.wait_for_page()
         
         s.click('register')
         self.wait_for_page()
         
-        self.failUnless(s.is_text_present("Please review the form and try again."), msg='Expected complaints about no data')
+        self.assertEqual(6, int(s.get_xpath_count("//small[@class='error_hint']")), msg="Wrong number of error messages")
+
+        self.failUnless(s.is_text_present("You must agree to the ScraperWiki terms and conditions"), msg='Expected complaints about no data')
 
 
     def test_dupe_email(self):
@@ -133,7 +138,7 @@ class TestRegistration(SeleniumTest):
         email = 'se_test_%s@scraperwiki.com' % str( uuid.uuid4() ).replace('-', '_')
         for x in xrange(0,2):
             s.open("/")            
-            s.click("link=Sign in or create an account")
+            s.click("link=%s" % self.login_text)
             self.wait_for_page()
             
             username = str( uuid.uuid4() ).replace('-', '_')
@@ -147,7 +152,7 @@ class TestRegistration(SeleniumTest):
             self.wait_for_page()
             
             if x == 0:
-                s.click("link=sign out")
+                s.click("link=%s" % self.sign_out_text)
                 self.wait_for_page()
                 
         self.failUnless(s.is_text_present(expected), 'Email was not already in use and was expected to be')
@@ -156,7 +161,7 @@ class TestRegistration(SeleniumTest):
     def test_nonmatching_passwords(self):
         s = self.selenium
         s.open("/")
-        s.click("link=Sign in or create an account")
+        s.click("link=%s" % self.login_text)
         self.wait_for_page()
         
         d = deepcopy( self.default_values )
@@ -173,7 +178,7 @@ class TestRegistration(SeleniumTest):
     def test_missing_terms(self):
         s = self.selenium
         s.open("/")
-        s.click("link=Sign in or create an account")
+        s.click("link=%s" % self.login_text)
         self.wait_for_page()
         
         d = deepcopy( self.default_values )
@@ -189,7 +194,7 @@ class TestRegistration(SeleniumTest):
     def test_login_no_details(self):
         s = self.selenium
         s.open("/")
-        s.click("link=Sign in or create an account")
+        s.click("link=%s" % self.login_text)
         self.wait_for_page()
 
         s.click('login')
@@ -200,7 +205,7 @@ class TestRegistration(SeleniumTest):
     def test_login_only_username(self):
         s = self.selenium
         s.open("/")
-        s.click("link=Sign in or create an account")
+        s.click("link=%s" % self.login_text)
         self.wait_for_page()
 
         s.type( 'id_user_or_email', 'abcdefghijklmnopqrstuvwxyz')
@@ -211,7 +216,7 @@ class TestRegistration(SeleniumTest):
     def test_login_junk_details(self):
         s = self.selenium
         s.open("/")
-        s.click("link=Sign in or create an account")
+        s.click("link=%s" % self.login_text)
         self.wait_for_page()
 
         s.type( 'id_user_or_email', 'abcdefghijklmnopqrstuvwxyz')

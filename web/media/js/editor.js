@@ -330,14 +330,11 @@ $(document).ready(function() {
 
     function setupKeygrabs()
     {
-//		var mac =  ? true: false;
-		if ( navigator.userAgent.toLowerCase().indexOf("mac")!=-1 ) {
+		if ( navigator.userAgent.toLowerCase().indexOf("mac")!=-1 ) 
 			addHotkey('meta+s', saveScraper); 
-		}
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+p', popupPreview); 
-        addHotkey('ctrl+h', popupHelp); 
     };
 
     function popupHelp()
@@ -345,14 +342,34 @@ $(document).ready(function() {
         // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
         var cursorpos = codeeditor.cursorPosition(true); 
         var cursorendpos = codeeditor.cursorPosition(false); 
-        var quickhelpparams = { language:scraperlanguage, short_name:short_name, wiki_type:wiki_type, username:username, line:codeeditor.lineContent(cursorpos.line), character:cursorpos.character }; 
+        var line = codeeditor.lineContent(cursorpos.line); 
+        var character = cursorpos.character; 
+
+        var ip = character; 
+        var ie = character;
+        while ((ip >= 1) && line.charAt(ip-1).match(/[\w\.#]/g))
+            ip--; 
+        while ((ie < line.length) && line.charAt(ie).match(/\w/g))
+            ie++; 
+        var word = line.substring(ip, ie); 
+
+        while ((ip >= 1) && line.charAt(ip-1).match(/[^'"]/g))
+            ip--; 
+        while ((ie < line.length) && line.charAt(ie).match(/[^'"]/g))
+            ie++; 
+        if ((ip >= 1) && (ie < line.length) && line.charAt(ip-1).match(/['"]/g) && (line.charAt(ip-1) == line.charAt(ie)))
+            word = line.substring(ip, ie); 
+        if (word.match(/^\W*$/g))
+            word = ""; 
+
+        var quickhelpparams = { language:scraperlanguage, short_name:short_name, wiki_type:wiki_type, username:username, line:line, character:character, word:word }; 
         if (cursorpos.line == cursorendpos.line)
             quickhelpparams["endcharacter"] = cursorendpos.character; 
 
         $.modal('<iframe width="100%" height="100%" src='+$('input#quickhelpurl').val()+'?'+$.param(quickhelpparams)+'></iframe>', 
         {
             overlayClose: true,
-            containerCss: { borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
+            containerCss: { borderColor:"#ccc", height:"80%", padding:0, width:"90%" }, 
             overlayCss: { cursor:"auto" }, 
             onShow: function() 
             {
@@ -366,7 +383,7 @@ $(document).ready(function() {
     //Setup Menu
     function setupMenu()
     {
-        $('#menu_tutorials').click(popupHelp); 
+        $('#oldquickhelp').click(popupHelp); 
         $('#chat_line').bind('keypress', function(eventObject) 
         {
             var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
@@ -1167,7 +1184,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function setupToolbar()
     {
         // actually the save button
-        $('.editor_controls #btnCommitPopup').live('click', function ()
+        $('.editor_controls #btnCommitPopup').live('click', function()
         {
             saveScraper();  
             return false;
@@ -1175,8 +1192,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         
         $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')); 
 
-        //close editor link
-        $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(function ()
+        // close editor link (quickhelp link is target blank so no need for this)
+        $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(function()
         {
             if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
                 return false; 
@@ -1185,7 +1202,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             return true;
         });
 
-        $(window).unload( function () { 
+        $(window).unload(function() 
+        { 
             bSuppressDisconnectionMessages = true; 
             writeToConsole('window unload'); 
             sendjson({"command":'loseconnection'}); 
@@ -1198,19 +1216,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         else
             $('.editor_controls #preview').hide();
 
-        // available only for php cases
-        $('#togglelanguage').bind('click', function () 
-        { 
-            if (!$(this).hasClass('htmltoggled')) {
-                $(this).html('toggle PHP');
-                $(this).addClass('htmltoggled');
-                codeeditor.setParser(parserName["html"], parserConfig["php"]); 
-            } else {
-                $(this).html('toggle HTML');
-                $(this).removeClass('htmltoggled');
-                codeeditor.setParser(parserName["php"], parserConfig["php"]); 
-            }
-        }); 
 
         if (scraperlanguage == 'html')
             $('.editor_controls #run').hide();
