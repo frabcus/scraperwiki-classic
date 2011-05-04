@@ -15,6 +15,7 @@ class TestScrapers(SeleniumTest):
     """
     login_text = "Log in"
     logged_in_text = "Logged in"
+    new_scraper_link = "Create new scraper"
 
     def _load_data(self, type='python', obj='scraper'):
         thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_%s.txt' % (type, obj,))
@@ -141,7 +142,7 @@ class TestScrapers(SeleniumTest):
     
     def test_python_create(self):
         s = self.selenium        
-        name = self._create_type( 'Blank Python scraper', 'python')
+        name = self._create_type( 'Python scraper', 'python')
         self._wait_for_run()
         
         s.click('aCloseEditor1')
@@ -150,7 +151,7 @@ class TestScrapers(SeleniumTest):
         self._add_comment(name)
             
         self._check_dashboard_count()
-        view_name = self._create_view('Blank Python view', 'python', name )
+        view_name = self._create_view('Python view', 'python', name )
         self._check_clear_data( name )
         self._check_delete_scraper(name )
         self._check_delete_view( view_name )        
@@ -158,7 +159,7 @@ class TestScrapers(SeleniumTest):
                      
     def test_ruby_create(self):  
         s = self.selenium                      
-        name = self._create_type( 'Blank Ruby scraper', 'ruby')
+        name = self._create_type( 'Ruby scraper', 'ruby')
         self._wait_for_run()
                     
         s.click('aCloseEditor1')
@@ -167,7 +168,7 @@ class TestScrapers(SeleniumTest):
         self._add_comment(name)            
             
         self._check_dashboard_count()                
-        view_name = self._create_view('Blank Ruby view', 'ruby', name )        
+        view_name = self._create_view('Ruby view', 'ruby', name )        
         self._check_clear_data( name )
         self._check_delete_scraper(name )
         self._check_delete_view( view_name )
@@ -176,7 +177,7 @@ class TestScrapers(SeleniumTest):
                 
     def test_php_create(self):   
         s = self.selenium                     
-        name = self._create_type( 'Blank PHP scraper', 'php')   
+        name = self._create_type( 'PHP scraper', 'php')   
         self._wait_for_run()
         
         s.click('aCloseEditor1')
@@ -185,7 +186,7 @@ class TestScrapers(SeleniumTest):
         self._add_comment(name)            
             
         self._check_dashboard_count()
-        view_name = self._create_view('Blank PHP view', 'php', name )                
+        view_name = self._create_view('PHP view', 'php', name )                
         self._check_clear_data( name )
         self._check_delete_scraper(name )
         self._check_delete_view( view_name )                     
@@ -227,7 +228,7 @@ class TestScrapers(SeleniumTest):
         self._create_user()
         
         s.answer_on_next_prompt( name )        
-        s.click('link=New scraper')        
+        s.click('link=%s' % self.new_scraper_link)        
         time.sleep(1)        
         s.click( 'link=%s' % link_name )
         self.wait_for_page()

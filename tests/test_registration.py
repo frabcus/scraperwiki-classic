@@ -13,6 +13,8 @@ class TestRegistration(SeleniumTest):
     login_text = "Log in"
     login_fail = "Sorry, but we could not find that user, or the password was wrong"
     logged_in_text = "Logged in"
+    sign_out_text = "Sign out"
+    profile_text = "Your profile"
     default_values = {
         "id_name" : "test user",
         "id_username": "test",
@@ -20,7 +22,6 @@ class TestRegistration(SeleniumTest):
         "id_password1": "password",                
         "id_password2": "password",                               
     }
-    
 
     def test_manage_profile(self):
         s = self.selenium
@@ -50,7 +51,7 @@ class TestRegistration(SeleniumTest):
         bio = 'A short description about this user'
         
         # Click on username to view the profile
-        s.click('link=%s' % d['id_name'])
+        s.click('link=%s' % self.profile_text)
         self.wait_for_page()
         
         # Edit your profile
@@ -92,7 +93,7 @@ class TestRegistration(SeleniumTest):
         
         self.failUnless(s.is_text_present(self.logged_in_text), msg='User should be logged in but is not')
         
-        s.click('link=sign out')
+        s.click('link=%s' % self.sign_out_text)
         self.wait_for_page()
         
         SeleniumTest._valid_username = d["id_username"]        
@@ -149,7 +150,7 @@ class TestRegistration(SeleniumTest):
             self.wait_for_page()
             
             if x == 0:
-                s.click("link=sign out")
+                s.click("link=%s" % self.sign_out_text)
                 self.wait_for_page()
                 
         self.failUnless(s.is_text_present(expected), 'Email was not already in use and was expected to be')
