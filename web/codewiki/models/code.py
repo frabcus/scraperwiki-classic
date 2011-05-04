@@ -154,8 +154,9 @@ class Code(models.Model):
 
     def is_sick_and_not_running(self):
         lastscraperrunevent = self.last_runevent()
-        if self.status == 'sick' and lastscraperrunevent.id and lastscraperrunevent.pid == -1:
-            return True
+        if self.status == 'sick':
+            if (not lastscraperrunevent.id) or (lastscraperrunevent.id and lastscraperrunevent.pid == -1):
+                return True
         return False
 
     def set_guid(self):
@@ -318,6 +319,8 @@ class Code(models.Model):
         if action in EDITOR_ACTIONS:
             if self.privacy_status == "public":
                 return user.is_authenticated()
+            if user.is_superuser:
+                return True
             return "editor" in roles or "owner" in roles
         
         if action in VISIBLE_ACTIONS:

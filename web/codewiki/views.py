@@ -353,7 +353,6 @@ def unfollow(request, short_name):
 
 def choose_template(request, wiki_type):
     context = { "wiki_type":wiki_type }
-    context["templates"] = models.Code.objects.filter(isstartup=True, wiki_type=wiki_type).exclude(privacy_status="deleted").order_by('language')
     context["sourcescraper"] = request.GET.get('sourcescraper', '')
     
     if request.GET.get('ajax'):

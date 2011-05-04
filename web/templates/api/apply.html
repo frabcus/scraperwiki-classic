@@ -1,8 +1,12 @@
 {% extends "frontend/help.html" %}
 
+{% block header %}
+	<h2>ScraperWiki API</h2>
+	<p>API Key</p>
+{% endblock %}
+
 {% block content %}
   <h2>API Key</h2>
-  
   
   {% if keys %}
     <h3>Your Existing Keys</h3>

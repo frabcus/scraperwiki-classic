@@ -1,0 +1,154 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Request data{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/requestoptions.js?{{settings.REVISION}}"></script>	
+    <script>
+        var showinglookup = { 
+            private:'.urls, .columns, .frequency, .due_date, .first_name, .last_name, .email', 
+            viz:'.urls, .columns, .frequency, .due_date, .visualisation, .first_name, .last_name, .email, .telephone',
+            app:'.urls, .columns, .frequency, .due_date, .application, .first_name, .last_name, .email',
+            etl:'.first_name, .last_name, .email, .telephone, .company_name',
+            public:'.urls, .columns, .frequency, .due_date, .first_name, .last_name, .email, .broadcast'
+        }
+    </script>
+{% endblock %}
+
+
+{% block header %}
+    <h2>Request data</h2>
+    <p>For Journalists, Researchers &amp; Data Analysts who know cut and paste won&rsquo;t work</p>
+{% endblock %}
+
+{% block content %}
+
+
+<div id="request_options">
+    <h2>What do you need?</h2>
+	
+    <h3><a href="#private">I need some data that I want to <strong>keep&nbsp;private</strong></a></h3>
+	<div id="private">
+		<p>We get the data and store it for you. The cost will depend on the size and complexity of the information being gathered. It can range from a couple of hours to a few days in duration. When we know what you want, we will give you a quote. We pay our developer community to gather the data.</p>
+	</div>
+    <h3><a href="#viz">I need data and I also want a <strong>visualisation</strong></a></h3>
+	<div id="viz">
+		<p>This is a combination of getting the data, storing it, and creating a visualisation that tells a story. We usually ask you to create a short brief with an idea of what you want to do and also a link to the data that you are proposing to mine. We will help you to do this directly or with a ScraperWiki partner.</p>
+	</div>
+    <h3><a href="#app">I need a <strong>data application</strong> for my website</a></h3>
+	<div id="app">
+		<p>Data applications are designed to drive continuous traffic to a website and also offer the possibility of generating revenue through a subscription model for services like email alerts. This is an automated service.</p>
+	</div>
+    <h3><a href="#etl">I want to merge content from systems that cannot talk to each other (<strong>ETL</strong>) &ndash; Help!</a></h3>
+	<div id="etl">
+		<p>Sometimes it can be easier to scrape data from systems than to re-engineer the back-end. In this context ScraperWiki acts as a data hub for the purposes of transforming data into a central datastore. It is a more cost effective &lsquo;ETL&rsquo; &ndash; Extract, Transform and Load and a flexible option for building an API for web or mobile applications.</p>
+	</div>
+    <h3><a href="#public">I need some data and I want to make it <strong>public&nbsp;&amp;&nbsp;open</strong></a></h3>
+	<div id="public">
+		<p>This is a free service, if you have the technical skills just go and do it! If not, we can broadcast this request to our developer community. Alternatively if you have budget we can pay a developer to do it for you. The cost can range in price and will depend on the size and complexity of the information.</p>
+	</div>
+</div>
+
+<form action="." method="post" id="request_form">
+    {% if form.errors %}
+        <div id="main_error">So we can get back to you, please fill in your name and email.</div>
+    {% endif %}
+	<ul>
+	<li class="urls">
+        {{form.urls.label_tag}}
+        {{form.urls}}
+	</li> 
+	<li class="columns">
+        {{form.columns.label_tag}}
+        {{form.columns}}
+	</li> 
+	<li class="frequency">
+        {{form.frequency.label_tag}}
+        {{form.frequency}}
+	</li>
+	<li class="due_date">
+        {{form.due_date.label_tag}}
+        {{form.due_date}}
+        <a><img src="{{ MEDIA_URL }}images/icons/calendar.png" width="16" height="16" alt="" /> Show calendar</a>
+	</li> 
+	<li class="visualisation">
+        {{form.visualisation.label_tag}}
+        {{form.visualisation}}
+	</li>
+    <li class="application">
+        {{form.application.label_tag}}
+        {{form.application}}
+	</li>
+	<li class="description">
+        {{form.name.label_tag}}
+        {{form.name}}
+	</li>
+	<li class="first_name {% if form.first_name.errors %}error{% endif %}">
+        {{form.first_name.label_tag}}
+        {{form.first_name}}
+	</li> 
+	<li class="last_name {% if form.last_name.errors %}error{% endif %}">
+        {{form.last_name.label_tag}}
+        {{form.last_name}}
+	</li> 
+	<li class="email {% if form.email.errors %}error{% endif %}">
+        {{form.email.label_tag}}
+        {{form.email}}
+	</li> 
+	<li class="telephone">
+        {{form.telephone.label_tag}}
+        {{form.telephone}}
+	</li> 
+	<li class="company_name">
+        {{form.company_name.label_tag}}
+        {{form.company_name}}
+	</li> 
+	<li class="category">
+      {{form.category}}
+	</li> 
+	<li class="broadcast">
+        {{form.broadcast}}
+        {{form.broadcast.label_tag}}
+	</li>
+	</ul>
+    <p id="terms_and_conditions">
+        Don't worry, we never pass your details on to third parties, and everything's stored safely in accordance with our <a href="{% url terms %}">terms and conditions</a>.
+    </p>
+	<p class="last">
+		<input type="submit" value="Submit your request" id="submit" />
+	</p>
+</form>
+
+<div id="request_scrapbook">
+	<h2><a>Not convinced? See what we can do</a></h2>
+	<ul>
+        <li>
+            <a href="http://www.youtube.com/watch?v=3RQ1f6vUMoM&p=12A3B8DEF0A9F401">
+                <img src="{{ MEDIA_URL }}images/scrapbook_bbc.jpg" width="145" height="100" alt="ScraperWiki at the BBC Hack Day" />
+                <h4>Outreach at the BBC</h4>
+            </a>
+        </li>
+        <li>
+            <a href="http://www.channel4.com/news/could-selling-off-britains-assets-cut-the-debt">
+                <img src="{{ MEDIA_URL }}images/scrapbook_channel4.jpg" width="145" height="100" alt="ScraperWiki&rsquo; Government spending chart for Channel4" />
+                <h4>Visualisations for Channel 4</h4>
+            </a>
+        </li>
+        <li>
+            <a href="http://blog.scraperwiki.com/2011/02/25/read-all-about-it-read-all-about-it-%E2%80%9Cscraperwiki-gets-on-the-guardian-front-page-%E2%80%9D/">
+                <img src="{{ MEDIA_URL }}images/scrapbook_guardian.jpg" width="145" height="100" alt="ScraperWiki on the Guardian front page" />
+                <h4>Data discovery in the Guardian</h4>
+            </a>
+        </li>
+        <li>
+            <a href="http://twitter.com/#%21/timoreilly/status/27527990573268993">
+                <img src="{{ MEDIA_URL }}images/scrapbook_twitter.jpg" width="145" height="100" alt="Tim O&rsquo;Reilly <3 ScraperWiki" />
+                <h4>The Tim O&rsquo;Reilly tweet of approval</h4>
+            </a>
+        </li>
+	    <li class="clear"></li>
+	</ul>
+</div>
+
+<br class="clear" />
+{% endblock %}

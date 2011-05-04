@@ -1,0 +1,91 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}
+    {% if title %}Documentation / {{title}}{% else %}Documentation{% endif %}
+{% endblock %}
+
+{% block javascript %}<script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>{% endblock %}
+
+{% block run_script %}
+    // Add copy button bumf to every <code> element
+    $("code").wrap('<div class="code_wrapper" style="position:relative"/>');
+    $("code").after('<a href="#" class="copy_to_clipboard" title="Click to copy this snippet to your clipboard">Copy</a>');
+
+    // Make the copy button work
+    ZeroClipboard.setMoviePath( '{{ MEDIA_URL }}js/ZeroClipboard.swf' );
+    $(".copy_to_clipboard").each(function(i) {
+        
+        var el = $(this);
+        var parent = el.parent();
+        var code = el.siblings('code');
+
+        // add eleven spaces to end of first line, so Copy button never obscures text
+        // (this was easiest way to do it without altering the overflow scrolling behaviour)
+        var t = code.text().replace(/\n/, "           \n")
+        code.text(t);
+            
+        clip = new ZeroClipboard.Client();
+        clip.setText(code.text());
+        clip.setHandCursor( true );
+
+        clip.addEventListener( 'complete', function(client, text) {
+            //  alert("Copied text to clipboard: " + text );
+            el.text('Copied').addClass('copied');
+            el.focus(); // so flash doesn't have keyboard focus afterwards
+        });
+        
+        clip.addEventListener( 'onMouseOver', function(client, text) {
+            if(el.is('.copied')){
+                el.text('Copy').removeClass('copied');
+            }
+        });
+        
+        clip.glue(el[0], parent[0]);
+        
+    });
+{% endblock %}
+
+{% block header %}
+<h2>{% if title %}<a href="{% url docs language %}">Documentation</a> / {{title}}{% else %}Documentation{% endif %}</h2>
+	{% if para %}<p>{{ para|safe}}</p>{% endif %}
+	{% endblock %}
+
+{% block content %}
+
+  <div class="documentationpage">
+    {% if scraper %}
+      {% if user.is_staff %}
+        <div class="staff" style="float:right">
+          <a href="{% url editor_edit scraper.wiki_type scraper.short_name %}">Edit</a>
+          | <a href="/admin/codewiki/{{scraper.wiki_type}}/{{scraper.pk}}/">Admin</a>
+        </div>
+      {% endif %}
+    {% endif %}
+    <div id="help_content">
+    {% if doccontents %}
+      {{doccontents|safe}}
+    {% else %}
+        {% include "documentation/language_picker.html" %}
+		{% if docpage %}
+      		{% include docpage %}
+    	{% else %}
+      		{% include 'documentation/includes/docindex.html' %}
+    	{% endif %}
+	{% endif %}
+    </div>
+  </div>
+
+  <script type='text/javascript'>
+	$('body').addClass( '{{language}}');
+	
+	function switch_language(to) {
+		if ( window.location.href.indexOf( '{{language}}' ) == -1  ) {
+			window.location.href = '/docs/' + to;
+			return false;
+		}
+		window.location.href = window.location.href.replace('{{language}}',to).replace('{{language}}',to);
+		return false;
+	}
+  </script>
+
+{% endblock %}

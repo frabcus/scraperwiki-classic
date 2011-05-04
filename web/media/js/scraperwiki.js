@@ -1,6 +1,7 @@
 
 
-function setupButtonConfirmation(sId, sMessage){
+function setupButtonConfirmation(sId, sMessage)
+{
     $('#' + sId).click(
         function(){
             var bReturn = false;
@@ -12,7 +13,8 @@ function setupButtonConfirmation(sId, sMessage){
     );
 }
 
-function setupSearchBoxHint(){
+function setupSearchBoxHint()
+{
     $('#divSidebarSearch input:text').focus(function() {
         if ($('#divSidebarSearch input:submit').attr('disabled')) {
             $(this).val('');
@@ -29,10 +31,119 @@ function setupSearchBoxHint(){
     });
     $('#divSidebarSearch input:text').blur();
 }
-$(document).ready(function()
+
+
+function setupNavSearchBoxHint(){
+    $('#navSearch input:text').focus(function() {
+        if ($('#navSearch input:submit').attr('disabled')) {
+            $(this).val('');
+            $(this).removeClass('hint');
+            $('#navSearch input:submit').removeAttr('disabled'); 
+        }
+		$('#navSearch').addClass('focus');
+    });
+    $('#navSearch input:text').blur(function() {
+        if(!$('#navSearch input:submit').attr('disabled') && ($(this).val() == '')) {
+            $(this).val('Search datasets');
+            $(this).addClass('hint');
+            $('#navSearch input:submit').attr('disabled', 'disabled'); 
+        }
+		$('#navSearch').removeClass('focus');
+    });
+    $('#navSearch input:text').blur();
+}
+
+
+function newCodeObject(wiki_type)
 {
-    setupSearchBoxHint(); 
-}); 
+    url = '/' + wiki_type + 's/new/choose_template/?ajax=1';
+    //if (scraper_short_name != '')
+    //    url += '&sourcescraper=' + scraper_short_name; 
+    
+    $.get(url, function(data) 
+    {
+        $.modal('<div id="template_popup">'+data+'</div>', 
+        {
+            overlayClose: true, 
+            autoResize: true, 
+            containerCss:{ borderColor:"#ccc", width:(wiki_type == "scraper" ? 480 : 630)+"px", height:"170px" }, 
+            overlayCss: { cursor:"auto" }
+        });
+    });
+}
+
+$(function()
+{ 
+	setupSearchBoxHint();
+	setupNavSearchBoxHint();
+
+    $('a.editor_view').click(function()  {  newCodeObject('view');  return false; }); 
+    $('a.editor_scraper').click(function()  {  newCodeObject('scraper');  return false; }); 
+	
+	function developer_show(){
+		$('#intro_developer, #intro_requester, #blob_requester').fadeOut(500);
+		$('#more_developer_div').fadeIn(500);
+		$('#blob_developer').animate({left: 760}, 1000, 'easeOutCubic').addClass('active');
+	}
+	
+	function developer_hide(){
+		$('#intro_developer, #intro_requester, #blob_requester').fadeIn(500);
+		$('#more_developer_div').fadeOut(500);
+		$('#blob_developer').animate({left: 310}, 1000, 'easeOutCubic').removeClass('active');
+	}
+	
+	function requester_show(){
+		$('#intro_developer, #intro_requester, #blob_developer').fadeOut(500);
+		$('#more_requester_div').fadeIn(500);
+		$('#blob_requester').animate({left: 10}, 1000, 'easeOutCubic').addClass('active');
+	}
+	
+	function requester_hide(){
+		$('#intro_developer, #intro_requester, #blob_developer').fadeIn(500);
+		$('#more_requester_div').fadeOut(500);
+		$('#blob_requester').animate({left: 460}, 1000, 'easeOutCubic').removeClass('active');
+	}
+	
+	$('#blob_developer').css('cursor', 'pointer').bind('click', function(){
+	    if($(this).is('.active')){
+	        developer_hide();
+	    } else {
+	        developer_show();
+	    }
+	    return false;
+	});
+	
+	$('#blob_requester').css('cursor', 'pointer').bind('click', function(){
+	    if($(this).is('.active')){
+	        requester_hide();
+	    } else {
+	        requester_show();
+	    }
+	    return false;
+	});
+	
+	$('#more_developer, #intro_developer').css('cursor', 'pointer').bind('click', function(){
+		developer_show();
+		return false;
+	});
+
+	$('#more_requester, #intro_requester').css('cursor', 'pointer').bind('click', function(){
+		requester_show();
+		return false;
+	});
+
+	
+	$('#more_developer_div .back').live('click', function(){
+		developer_hide();
+		return false;
+	});	
+	$('#more_requester_div .back').live('click', function(){
+		requester_hide();
+		return false;
+	});	
+});
+
+
 
 function setupScroller(){
     
@@ -163,14 +274,25 @@ function setupScraperEditInPlace(wiki_type, short_name)
 
     //title
     $('#hCodeTitle').editable('admin/', {
-             indicator : 'Saving...',
-             tooltip   : 'Click to edit...',
-             cancel    : 'Cancel',
-             submit    : 'Save',
-             onblur: 'ignore',
-             event: 'dblclick',
-             placeholder: '',             
-             submitdata : {short_name: short_name}
+			cssclass : 'editable',
+			width : $('#hCodeTitle').width() + 30,
+            indicator : 'Saving...',
+            tooltip   : 'Double click to edit title',
+            cancel    : 'Cancel',
+            submit    : 'Save',
+			before : function(value, settings){
+				$('#aEditTitle').hide();
+			},
+			callback : function(value, settings){
+				$('#aEditTitle').show();
+			},
+			onreset : function(value, settings){
+				$('#aEditTitle').show();
+			},
+            onblur: 'ignore',
+            event: 'dblclick',
+            placeholder: '',             
+            submitdata : {short_name: short_name}
          });
          
     $('#aEditTitle').click(
@@ -199,7 +321,7 @@ function setupScraperEditInPlace(wiki_type, short_name)
             $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
         }
     }); 
-    $('#aEditTags').click(function()
+    $('#aEditTags, #aEditTagsFromEmpty').click(function()
     {
         $('#divEditTags').dblclick();
         $('#divEditTagsControls').show();
@@ -272,18 +394,21 @@ function setupScraperEditInPlace(wiki_type, short_name)
 
 
      //scheduler
-     $('#spnRunInterval').editable('admin/', {
-              indicator : 'Saving...',
-              tooltip   : 'Click to edit...',
-              cancel    : 'Cancel',
-              submit    : 'Save',
-              onblur: 'ignore',
-              data   : $('#hidScheduleOptions').val().replace('PLACEHOLDER', $('#spnRunIntervalInner').attr('rawInterval')),
-              type   : 'select',
-              event: 'dblclick',
-              placeholder: '',
-              submitdata : {short_name: short_name}
-          });
+     //
+     if ($('#spnRunInterval').length > 0) {
+         $('#spnRunInterval').editable('admin/', {
+                  indicator : 'Saving...',
+                  tooltip   : 'Click to edit...',
+                  cancel    : 'Cancel',
+                  submit    : 'Save',
+                  onblur: 'ignore',
+                  data   : $('#hidScheduleOptions').val().replace('PLACEHOLDER', $('#spnRunIntervalInner').attr('rawInterval')),
+                  type   : 'select',
+                  event: 'dblclick',
+                  placeholder: '',
+                  submitdata : {short_name: short_name}
+              });
+      }
 
       $('#aEditSchedule').click(
            function(){

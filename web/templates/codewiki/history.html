@@ -1,9 +1,9 @@
 {% extends "codewiki/scraper_base.html" %}
-
 {% load humanize %}
 {% load month_name %}
-{% load gravatar %}
+
 {% block tab %}
+{% load gravatar %}
 
 {% block javascript %}
   {% with scraper.language|lower as language %}
@@ -12,8 +12,6 @@
 
   <script type="text/javascript" src="{{ MEDIA_URL }}js/codeviewer.js?{{settings.REVISION}}"></script>  {# highlightCode(code, Parser), highlightOtherCode(greencode, redcode, matcheropcodes, Parser) #}
 {% endblock %}
-
-<p class="history_bold">Scheduled runs and edits to <span>"{{scraper.title}}"</span>.</p>
 
 <input type="hidden" id="rawcodeurl" value="{% url raw scraper.short_name %}"/>
 <input type="hidden" id="diffsequrl" value="{% url diffseq scraper.short_name %}"/>
@@ -135,8 +133,8 @@
 {% endblock %}
 
 
-{% block run_script_outer %}
-<script type="text/javascript" defer="defer">
+{% block run_script %}
+  {{ block.super }}
 
 var fetchedcache = { }; // cached code of different versions
 function cachefetch(cid, callback)
@@ -365,6 +363,4 @@ $(document).ready(function()
     }
 
 }); 
-
-</script>
 {% endblock %}

@@ -2,73 +2,154 @@
 {% load gravatar %}
 {% load sw_user_filters %}
 
-{% block title %}Welcome{% endblock %}
-{% block content  %}
-    {% if user.code_set.all|length %}  
-        <div class="page_title">
-            <p>
-              You have a stake in <a href="{% url dashboard %}">{{user|num_scrapers}} scraper{{user|num_scrapers|pluralize}}{% if user|num_views %} and {{user|num_views}} view{{user|num_views|pluralize}}{% endif %}</a>.
-            </p>
-        </div>
-    {% endif %}
+{% block title %}Refine, reuse and request data{% endblock %}
+{% block meta %}<meta name="description" content="Scrape and link data using Ruby, Python and PHP scripts that run maintenance-free in the cloud. Request data for scoops and better decisions."/>{% endblock %}
 
-    <div class="content full">
-        <div id="divWelcome">
-            <div id="divIntroSlideShow">
-                <div class="slide_show">
-                    <img src="{{ MEDIA_URL }}images/intro_slides/intro1.png" />
-                    <img src="{{ MEDIA_URL }}images/intro_slides/intro2.png" />
-                    <img src="{{ MEDIA_URL }}images/intro_slides/intro3.png" />
-                    <img src="{{ MEDIA_URL }}images/intro_slides/intro4.png" />  
-                    <img src="{{ MEDIA_URL }}images/intro_slides/intro5.png" />                                                
-                </div>
-                <div class="slide_nav"></div>
-            </div>
-            <div id="divWelcomeText">
-                <img id="imgLogoLarge" src="{{MEDIA_URL}}/images/logo_large.png"/>
-                <h1>ScraperWiki is all the tools you need for Screen Scraping, Data Mining &amp; visualisation.</h1>            
-                <h2>Make bad data good, collaborate &amp; discover new datasets.</h2>
-            </div>
-        </div>
-    </div>
-
-    <div class="content half left">
-        <h2>Featured scrapers</h2>        
-        <ul class="scraper_list">
-    		{% for code in featured_scrapers %}
-    		  {% include 'frontend/includes/code_object_line.html' %}
-    		{% endfor %}
-    	</ul>
-        <p>
-            <a href="{% url scraper_list_wiki_type 'scraper' %}" title="Browse all scrapers" class="more_link">Browse all scrapers</a>
-        </p>
-    </div>
-
-    <div class="content half right">
-        <h2>Featured views</h2>
-        <ul class="scraper_list">
-    		{% for code in featured_views %}
-    		  {% include 'frontend/includes/code_object_line.html' %}
-    		{% endfor %}
-    	</ul>
-    	<p>
-            <a href="{% url scraper_list_wiki_type 'view' %}" title="Browse all scrapers" class="more_link">Browse all views</a>
-        </p>
-    </div>
-
-    <br class="clear"/>
-    <div class="content full divider">
-        <h3>Popular tags</h3>
-        <ul class="tags">
-            {% for tag in tags %}
-                <li><a href="{% url single_tag tag.name %}">{{tag.name}}</a></li>
-            {% endfor %}
-        </ul>
-        <p><a href="{% url all_tags %}" class="more_link">Browse all tags</a></p>
-    </div>
-    <div class="content full divider">
-        {% load blog_latest %}
-        {% blog_latest %}
-    </div>
+{% block header %}
+			<div id="frontpage_intro">
+			<a class="create editor_scraper" href="{% url choose_template 'scraper' %}">Create a scraper</a>
+            <!--<a class="tour" href="/tour/">Take the tour</a> -->
+				<p>A community of programmers sifting <br/>information to give you the edge.</p>
+			</div>
+			<div id="frontpage_slider">
+				<div id="intro_developer">
+					<h3>Data Developer?</h3>
+					<p>Refine and reuse data with Ruby,<br/>Python and PHP scripts that run <br/>maintenance-free in the cloud.</p>
+					<a id="more_developer" href="#more_developer_div">&laquo; Find out more</a>
+				</div>
+				<div id="intro_requester">
+					<h3>Data Requester?</h3>
+					<p>Get data for predictability, scoops <br/>and better decisions. Find your <br/>surprises before they surprise you!</p>
+					<a id="more_requester" href="#more_requester_div">Find out more &raquo;</a>
+				</div>
+				<img id="blob_developer" src="{{ MEDIA_URL }}images/blob_developer.png" width="200" height="310" alt="A developer with a hard hat and pick axe" />
+				<img id="blob_requester" src="{{ MEDIA_URL }}images/blob_requester.png" width="190" height="260" alt="A businessperson with a ruby and gold ingot" />
+				<div id="more_developer_div">
+					<h3>Why developers love ScraperWiki</h3>
+					<table cellpadding="0" cellspacing="0">
+						<tr class="icons">
+							<td><img src="{{ MEDIA_URL }}images/icon_languages.gif" width="100" height="64" alt=""/></td>
+							<td><img src="{{ MEDIA_URL }}images/icon_vault.gif" width="100" height="64" alt=""/></td>
+							<td><img src="{{ MEDIA_URL }}images/icon_globe.gif" width="100" height="64" alt=""/></td>
+						</tr>
+						<tr class="usps">
+                            <td>SQL. Cron. JSON.<br/>No boring sysadmin.</td>
+							<td>Somewhere to keep all<br/>your dirty little scripts</td>
+							<td>Real-time coding, with a<br/> community of geeks</td>
+						</tr>
+					</table>
+					<p class="last"><a class="back" href="#intro_developer">&laquo; Go Back</a> or <a class="forward" href="{% url docs 'ruby' %}">Get started!</a></p>
+				</div>
+				<div id="more_requester_div">
+					<h3>Why people who need data love ScraperWiki</h3>
+					<table cellpadding="0" cellspacing="0">
+						<tr class="icons">
+							<td><img src="{{ MEDIA_URL }}images/icon_quickly.gif" width="100" height="64" alt=""/></td>
+							<td><img src="{{ MEDIA_URL }}images/icon_1000s.gif" width="100" height="64" alt=""/></td>
+							<td><img src="{{ MEDIA_URL }}images/icon_visualise.gif" width="100" height="64" alt=""/></td>
+						</tr>
+						<tr class="usps">
+							<td>We make the data available<br/>quickly and easily</td>
+							<td>1000s of developers<br/>at your fingertips!</td>
+							<td>Simply analyse, aggregate<br/>and visualise data.</td>
+						</tr>
+					</table>
+					<p class="last"><a class="back" href="#intro_requester">&laquo; Go Back</a> or <a class="forward" href="{% url request_data %}">Request data!</a></p>
+				</div>
+			</div>
 {% endblock %}
-{% block run_script %}setupIntroSlideshow();{% endblock %}
+{% block content_outer  %}
+    <div id="page_outer">
+		<div id="page_inner">
+
+			<div class="featured">
+        		<h2><a href="{% url scraper_list_wiki_type 'scraper' %}" title="Browse all scrapers">Featured Scrapers & Views</a></h2>
+				<ul>
+				{% load markup %}
+                {% load screen_shot %}
+	    		{% for code in featured_both %}
+                    <li>
+                        <a href="{% url code_overview code.wiki_type code.short_name %}">
+                            {% screen_shot code 'medium' %}
+                            <h4>{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %} / {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}</h4>
+                            <span class="about">{{code.wiki_type}}&nbsp;&nbsp;{{code.language}}</span>
+                            <span class="when">Created {{code.created_at|timesince}} ago</span>
+                        </a>
+                    </li>
+	    		{% endfor %}
+	    		    <li class="clear"></li>
+				</ul>
+			</div>
+			
+			<div class="involved">
+			    <h2>Get involved</h2>
+			    <a id="new_scraper"class="editor_scraper" href="{% url choose_template 'scraper' %}"><strong>Create a new scraper</strong> <span>Start using our collaborative coding environment right now for free.</span></a>
+			    <a id="new_request" href="{% url request_data %}"><strong>Request a new scraper</strong> <span>Not a developer? No problem! Tell us what you want and we&rsquo;ll build it</span></a>
+			    <a id="fix_scraper" href="{% url get_involved %}#technical"><strong>Fix a broken scraper</strong> <span>Fancy a challenge? Try getting a broken scraper back onto its feet.</span></a>
+			    <a id="tag_scraper" href="{% url get_involved %}#nontechnical"><strong>Spring cleaning</strong> <span>Help us organise our scrapers and views by describing and tagging them.</span></a>
+			</div>
+			
+			<div class="tags">
+			    <h2><a href="{% url all_tags %}" title="Browse by tag">Popular tags</a></h2>
+    			<ul class="tags">
+                {% for tag in tags %}
+    				<li><a href="{% url single_tag tag.name %}">{{tag.name}}</a></li>
+                {% endfor %}
+    			</ul>
+			</div>
+			
+			<script type="text/javascript">
+			    $(function(){
+                    var num = $('ul.tags li').length;
+                    $('ul.tags li').each(function(){
+                        var i = $(this).prevAll().length;
+                        $(this).children('a').css('opacity', (1 - (i * (1/num)) )).hover(function(){ $(this).css('opacity','1'); }, function(){ $(this).css('opacity', (1 - (i * (1/num)))); });
+                    });
+                });
+			</script>
+			
+			{% comment %}
+			<div class="activity">
+			    <h2><a>Recent Activity</a></h2>
+			</div>
+			{% endcomment %}
+			
+			<div class="activity">
+			    <h2><a>From the Blog</a></h2>
+			    {% load blog_latest %}
+                {% blog_latest %}
+		<!--	    <div class="blog_latest"> 
+                    <div class="blog_headline"> 
+
+                            <div class="image_wrap"> 
+                                <img src="http://scraperwiki.files.wordpress.com/2011/03/scraperwiki-digger-scotland.jpg?w=200&amp;h=150"/> 
+                            </div> 
+
+                        <h5><a href="http://blog.scraperwiki.com/2011/03/28/a-bonny-wee-hack-day-at-hhhglas/">A Bonny Wee Hack Day at #hhhglas</a></h5> 
+
+                            <p>For our first venture to Scotland where better to be than BBC Scotland! We had 8 teams of hacks and hackers digging around the Scottish data beat. For this very special occasion the ScraperWiki digger has donned tartan! With this &#8230; <a href="http://blog.scraperwiki.com/2011/03/28/a-bonny-wee-hack-day-at-hhhglas/">Continue reading <span class="meta-nav">&#8594;</span></a><img alt="" border="0" src="http://stats.wordpress.com/b.gif?host=blog.scraperwiki.com&blog=14548467&post=758214491&subd=scraperwiki&ref=&feed=1" width="1" height="1" /></p> 
+
+                    </div>    
+                    <div class="blog_subs"> 
+                        <h5>More from the ScraperWiki data blog ...</h5> 
+                        <ul> 
+
+                                <li> 
+                                    <a href="http://blog.scraperwiki.com/2011/03/25/opencorporates-partners-with-scraperwiki-offers-bounties-for-open-data-scrapers/">OpenCorporates partners with ScraperWiki &amp; offers bounties for open data scrapers</a> 
+                                </li> 
+
+                                <li> 
+                                    <a href="http://blog.scraperwiki.com/2011/03/21/scraperwiki-ing-down-under/">ScraperWiki-ing Down Under</a> 
+                                </li> 
+
+                        </ul> 
+                    </div> 
+                </div>  -->
+            </div>
+			
+			<br class="clear"/>
+			
+		</div>
+	</div>
+			
+{% endblock %}

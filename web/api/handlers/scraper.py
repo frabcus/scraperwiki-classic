@@ -8,7 +8,6 @@ from codewiki.managers.datastore import DataStore
 
 
 class GetInfo(APIBase):
-    required_arguments = ['name']
     
     def convert_history(self, commitentry):
         result = { 'version':commitentry['rev'], 'date':commitentry['date'] }
@@ -42,6 +41,7 @@ class GetInfo(APIBase):
         info['description'] = scraper.description
         info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
         info['wiki_type']   = scraper.wiki_type
+        info['privacy_status'] = scraper.privacy_status
         if scraper.wiki_type == 'scraper':
             info['license']     = scraper.scraper.license
             info['records']     = scraper.scraper.record_count  # old style datastore
@@ -102,7 +102,6 @@ class GetInfo(APIBase):
 
 
 class GetRunInfo(APIBase):
-    required_arguments = ['name']
     
     def value(self, request):
         scraper = self.getscraperorrccode(request, request.GET.get('name'), "apiscraperruninfo")
@@ -146,19 +145,34 @@ class GetRunInfo(APIBase):
 
 
 class Search(APIBase):
-    required_arguments = ['query']
-
     def value(self, request):
         query = request.GET.get('query', None) 
+        if not query:
+            query = request.GET.get('searchquery', None) 
+        maxrows = 5
+        try:   maxrows = int(request.GET.get('maxrows', ""))
+        except ValueError: pass
         result = [ ]  # list of dicts
-        for scraper in scraper_search_query(None, query):
-            result.append({'short_name':scraper.short_name, 'title':scraper.title, 'description':scraper.description, 'created':scraper.created_at})
+        scrapers = scraper_search_query(user=None, query=query)
+        for scraper in scrapers[:maxrows]:
+            res = {'short_name':scraper.short_name }
+            res['title'] = scraper.title
+            owners = scraper.userrolemap()["owner"]
+            if owners:
+                owner = owners[0]
+                ownername = owner.get_profile().name
+                if not ownername:
+                    ownername = owner.username
+                if ownername:
+                    res['title'] = "%s / %s" % (ownername, scraper.title)
+            res['description'] = scraper.description
+            res['created'] = scraper.created_at
+            res['privacy_status'] = scraper.privacy_status
+            result.append(res)
         return result
 
 
 class GetUserInfo(APIBase):
-    required_arguments = ['username']
-
             # could be authorized with "apiuserinfo", but no scraper associated to authorize this
     def value(self, request):
         username = request.GET.get('username', "") 

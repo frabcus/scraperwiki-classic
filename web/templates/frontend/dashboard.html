@@ -1,12 +1,13 @@
 {% extends "frontend/base.html" %}
 
 {% block title %}Your scrapers{% endblock %}
-{% block content %}
 
-<div class="page_title">
-    <h1><span class="text">Your dashboard</span></h1>
-    <p>Manage your scrapers and views.  Go to <a href="{% url profiles_profile_detail user.username %}">your profile page</a>.</p>
-</div>
+{% block header %}
+	<h2>Your dashboard</h2>
+	<p>Manage your scrapers and views. Go to <a href="{% url profiles_profile_detail user.username %}">your profile page</a>.</p>
+{% endblock %}
+
+{% block content %}
 
   {% ifnotequal owned_or_edited_code_objects_pagenated.paginator.num_pages 1 %}
     <span class="current">
@@ -14,11 +15,10 @@
     </span>
   {% endifnotequal %}
 
-  <div class="content">
-  <h2>Scrapers and Views you own or have edited</h2>
-
-  {% if owned_or_edited_code_objects_pagenated.object_list %}
-    <ul class="scraper_list">
+<div class="content">
+    <h2>Scrapers and Views you own or have edited</h2>
+    {% if owned_or_edited_code_objects_pagenated.object_list %}
+      <ul class="scraper_list">
       {% for code in owned_or_edited_code_objects_pagenated.object_list %}
         {% include 'frontend/includes/code_object_line.html' %}
       {% endfor %}

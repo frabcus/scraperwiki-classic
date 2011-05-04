@@ -410,8 +410,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 cbits[2] = self.headers['cookie']
             ctag = hashlib.sha1(string.join (cbits, '____')).hexdigest()
 
-        if cache_client and useCache:
-            cached = cache_client.get( ctag )
+        if ctag and cache_client and useCache:
+            cached = cache_client.get(ctag)
         else:
             cached = None
 
@@ -455,8 +455,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
                     fetched = self.getResponse(soc)
 
-                    if cache_client:
-                        if self.fetchedDiffers (fetched, cached) :
+                    if ctag and cache_client:
+                        if self.fetchedDiffers(fetched, cached):
                             cache_client.set(ctag, fetched)
 
             finally :

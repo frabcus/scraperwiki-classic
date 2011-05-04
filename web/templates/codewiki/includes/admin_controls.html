@@ -9,7 +9,7 @@
   <form action="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" method="post">
     <input type="hidden" name="delete_scraper" value="1" />
     <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this {{scraper.wiki_type}}?" />
-    <p>Deletes this view. There is no undo.</p>
+    <p>Deletes this {{ scraper.wiki_type }}. There is no undo.</p>
   </form>
 
   {% ifequal scraper.wiki_type 'scraper' %}
@@ -27,11 +27,7 @@
 {% if user.is_staff %}
 <div class="staff">
   <h3>Admin only</h3>
-  {% ifequal scraper.wiki_type 'view' %}
-    <p><a href="/admin/codewiki/view/{{scraper.pk}}/"><b>View's Django admin page</b></a></p>
-  {% else %}
-    <p><a href="/admin/codewiki/scraper/{{scraper.pk}}/">Scraper's Django admin page</a></p>
-  {% endifequal %}
+  <p><a href="/admin/codewiki/{{scraper.wiki_type}}/{{scraper.pk}}/">{{scraper.wiki_type|capfirst}}'s Django admin page</a></p>
 
   {% ifequal scraper.wiki_type 'scraper' %}
     <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
@@ -41,11 +37,14 @@
     </form>
   {% endifequal %}
 
+  {% comment %} 
   <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post">
     <input type="hidden" name="screenshoot_scraper" value="1" />
     <input type="submit" id="btnScreenshootScraper" class="" value="Screenshoot this scraper" />
     <p>Take a screenshot of this scraper.</p>
   </form>
+  {% endcomment %} 
+
 </div>
 {% endif %}
 

@@ -1,0 +1,94 @@
+{% load doc_links %}
+
+<div class="content half left index">
+    
+<p class="intro">ScraperWiki runs normal Python, Ruby and PHP scripts on our servers,
+scheduled to scrape and refine data. 
+<!-- Edit and debug the scripts entirely in your browser, no setup required. A built
+in SQL API gets the data out as JSON or CSV files.  -->
+</p>
+
+<h3>First steps</h3>
+<ul>
+    <li> {% doc_link_full 'LANG_intro_tutorial' language %} </li>
+    <li> {% doc_link_full 'LANG_view_guide' language %} </li>
+    <li> {% doc_link_full 'LANG_datastore_guide' language %} </li>
+    <li> <a href='{% url tutorials language %}'>Live tutorials</a></li>
+</ul>
+
+<h3>Reference</h3>
+<ul>
+  <li> {% doc_link_full 'LANG_help_documentation' language %} </li>
+  <li> <a href="{% url docsexternal %}">External API</a> </li>
+  <li> {% doc_link_full 'LANG_libraries' language %} </li>
+</ul>
+	
+</div>
+
+<div class="content half right" id="getting_help">
+    <h3>Need help?</h3>
+	<p>If you can't find what you want here&hellip;</p>
+	<ul>
+		<li class="faq">Try the <a href="/docs/{{language}}/faq">Frequently Asked Questions</a></li>
+		<li class="stack">Search for answers or ask new questions on <a href="http://stackoverflow.com/questions/tagged/scraperwiki">Stack Overflow</a></li>
+	    <li class="google">Email your question to the ScraperWiki&nbsp;<a href="http://groups.google.com/group/scraperwiki">Google&nbsp;Group</a></li>
+	    <li class="bugs">Go to BitBucket and check out the <a href='http://bitbucket.org/ScraperWiki/scraperwiki/issues'>bug&nbsp;list</a> and <a href="http://bitbucket.org/ScraperWiki/scraperwiki/src">source&nbsp;code</a></li>
+	    <li class="request">Fill out the <a href="{% url request_data %}">request&nbsp;form</a> and we&rsquo;ll get the data for you</li>
+	</ul>	
+</div>
+
+<br class="clear" />
+
+<div class="content half left index">
+{% if user.is_staff %} <div class="staff">
+    <h3>Scraping topic guides</h3>
+    <ul>
+    {% ifequal language 'python' %}
+     <li><a href="{% url docscontrib 'python_lxml_cheat_sheet' %}">Using lxml</a></li>	
+     <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">Using Mechanize with Python</a></li>
+     <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">Working with CSV files</a></li>
+     <li><a href="{% url docscontrib 'excel_cheat_sheet' %}">Reading Excel files</a></li>
+    {% endifequal %}
+    </ul>
+</div> {% endif %}
+
+{% if user.is_staff %} <div class="staff">
+    <h3>Scraper tools</h3>
+    <ul>
+     <li><a href="{% url docscontrib 'lxml-cheat-sheet' %}">lxml document model viewer</a></li>
+    {% comment %} Not found
+     <li><a href="{% url docscontrib 'mechanize_cheat_sheet' %}">mechanize_cheat_sheet</a></li>
+    {% endcomment %}
+     <li><a href="{% url docscontrib 'pdf-to-html-preview-1' %}">Preview of PDF-HTML Tool</a></li>
+     <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">Sqlite Tool</a></li>
+    </ul>
+</div> {% endif %}
+
+</div>
+
+<div class="content half right index">
+
+{% if user.is_staff %} <div class="staff">
+    <h3>Views topic guides</h3>
+    <ul>
+     <li><a href="{% url docs 'jquery_topic_guide' %}">Using JQuery</a></li>
+     <li><a href="{% url docs 'ajax_topic_guide' %}">AJAX Guidance</a></li>
+     <li><a href="{% url docs 'gmap_topic_guide' %}">Google maps</a></li>
+    {% comment %} <li><a href="{% url docscontrib 'sqlite_html_cheat_sheet' %}">sqlite_html_cheat_sheet</a></li>{% endcomment %}
+     <li><a href="{% url docscontrib 'raphaeljs_cheat_sheet' %}">Vector Graphics with Raphaeljs</a></li>
+    {% ifequal language 'python' %}
+     <li><a href="{% url docscontrib 'python_querystring_cheat_sheet' %}">Reading querystring parameters</a></li>
+    {% endifequal %}
+    </ul>
+</div> {% endif %}
+
+{% if user.is_staff %} <div class="staff">
+    <h3>View tools</h3>
+    <ul>
+     <li><a href="{% url docscontrib 'quickcheck_datastore' %}">Quickcheck datastore</a></li>
+    </ul>
+</div> {% endif %}
+
+</div>
+
+
