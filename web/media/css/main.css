@@ -1256,7 +1256,8 @@ body.profiles h2.scrapersandviews {
 }
 
 #request_form #main_error,
-#login_form #main_error {
+#login_form #main_error,
+#registration_form #main_error {
 	padding: 10px 20px;
     margin: 15px 20px;
 	background: #ffaaaa;
