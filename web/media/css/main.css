@@ -4943,6 +4943,17 @@ div.documentationpage .copy_to_clipboard.copied:hover {
 	margin-top: 20px;
 }
 
+#api_explorer ul #listtables {
+	margin-bottom: 10px;
+}
+
+#listtables li {
+	width: 414px;
+	padding: 5px 8px;
+	font-size: 12px;
+	background-color: #f3f3f3;
+}
+
 #api_explorer #response iframe {
 	width: 430px;
 	height: 400px;
