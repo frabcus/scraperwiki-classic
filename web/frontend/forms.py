@@ -4,6 +4,7 @@ from frontend.models import UserProfile, AlertTypes, DataEnquiry
 from contact_form.forms import ContactForm
 from registration.forms import RegistrationForm
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Q
@@ -86,6 +87,17 @@ class SigninForm (AuthenticationForm):
     user_or_email = forms.CharField(label=_(u'Username or email'))
     remember_me = forms.BooleanField(widget=forms.CheckboxInput(),
                            label=_(u'Remember me'))
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+
+        user = authenticate(username=cleaned_data.get('user_or_email', ''), password=cleaned_data.get('password', ''))
+        if user is None:
+            raise forms.ValidationError("Sorry, but we could not find that user, or the password was wrong")
+        elif not user.is_active:
+            raise forms.ValidationError(mark_safe("This account has not been activated (ScraperWiki will have allowed you to use the site before activation for your first time). Please check your email (including the spam folder) and click on the link to confirm your account. If you have lost the email or the link has expired please <a href='%s'>request a new one</a>." % reverse('resend_activation_email')))
+
+        return cleaned_data
 
 
 class CreateAccountForm(RegistrationForm):

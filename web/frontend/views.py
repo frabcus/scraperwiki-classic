@@ -13,7 +13,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
-from django.utils.safestring import mark_safe
 from tagging.models import Tag, TaggedItem
 from tagging.utils import get_tag, calculate_cloud, LOGARITHMIC
 from codewiki.models import Code, Scraper, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
@@ -102,43 +101,30 @@ def login(request):
 
     #grab the redirect URL if set
     redirect = request.GET.get('next') or request.POST.get('redirect', '')
-    
+
     #Create login and registration forms
     login_form = SigninForm()
     registration_form = CreateAccountForm()
-
+    
     if request.method == 'POST':
-
         #Existing user is logging in
         if request.POST.has_key('login'):
 
             login_form = SigninForm(data=request.POST)
-            user = auth.authenticate(username=request.POST['user_or_email'], password=request.POST['password'])
+            if login_form.is_valid():
+                user = auth.authenticate(username=request.POST['user_or_email'], password=request.POST['password'])
 
-            if user is not None:
-                if user.is_active:
+                #Log in
+                auth.login(request, user)
 
-                    #Log in
-                    auth.login(request, user)
+                #set session timeout
+                if request.POST.has_key('remember_me'):
+                    request.session.set_expiry(settings.SESSION_TIMEOUT)
 
-                    #set session timeout
-                    if request.POST.has_key('remember_me'):
-                        request.session.set_expiry(settings.SESSION_TIMEOUT)
-
-
-                    if redirect:
-                        return HttpResponseRedirect(redirect)
-                    else:
-                        return HttpResponseRedirect(reverse('frontpage'))
-
+                if redirect:
+                    return HttpResponseRedirect(redirect)
                 else:
-                    # Account exists, but not activated                    
-                    error_messages.append(mark_safe("This account has not been activated (ScraperWiki will have allowed you to use the site before activation for your first time). Please check your email (including the spam folder) and click on the link to confirm your account. If you have lost the email or the link has expired please <a href='%s'>request a new one</a>." % reverse('resend_activation_email')))
-
-            else:
-                # Account not found                  
-                error_messages.append("Sorry, but we could not find that user, or the password was wrong")
-
+                    return HttpResponseRedirect(reverse('frontpage'))
 
         #New user is registering
         elif request.POST.has_key('register'):
@@ -158,11 +144,6 @@ def login(request):
                     return HttpResponseRedirect(redirect)
                 else:
                     return HttpResponseRedirect(reverse('frontpage'))
-
-    else:
-        login_form = SigninForm()
-        registration_form = CreateAccountForm()
-        message = None
 
     return render_to_response('registration/extended_login.html', {'registration_form': registration_form,
                                                                    'login_form': login_form, 
