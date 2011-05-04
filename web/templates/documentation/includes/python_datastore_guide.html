@@ -43,7 +43,7 @@ scraperwiki.sqlite.save(["a"], data)
 <code>print scraperwiki.sqlite.show_tables()
 </code>
 
-<p>Info about a particular table (and its elements) can be made 
+<p>Info about a particular table (and its elements) can be queried. </p>
 <code>info = scraperwiki.sqlite.table_info(name="swdata")
 for column in info:
     print column.name, column.type

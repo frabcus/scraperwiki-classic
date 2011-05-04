@@ -42,7 +42,7 @@ scraperwiki::save_sqlite(array("a"), $data);
 <code>print_r(scraperwiki::show_tables()); 
 </code>
 
-<p>Info about a particular table (and its elements) can be made 
+<p>Info about a particular table (and its elements) can be queried. </p>
 <code>$info = scraperwiki::table_info($name="swdata");
 foreach ($info as $i=>$column)
     print_r($column->name +" "+ $column->type);
