@@ -31,8 +31,9 @@ scrapers, or extract it through the API.
     <dd>Saves a data record into the datastore into the table given by $table_name.  <dd>
     <dd>$data is an array with field names as keys, $unique_keys must be an
         array that is a subset of array_keys($data) which determines when a record
-        is over-written.
-    <dd>For large numbers of records data can be a array of arrays.
+        is over-written. 
+    <dd>For large numbers of records $data can be an array of arrays.
+    <dd>verbose alters what is shown in the Data tab of the editor.
     </dd>
 
 <dt>scraperwiki::<strong>attach</strong>($name[, $asname])</dt>

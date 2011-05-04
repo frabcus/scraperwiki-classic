@@ -39,8 +39,9 @@ scrapers, or extract it through the API.
 <dt>scraperwiki.<strong>sqlite.save</strong>(unique_keys, data[, table_name="swdata", verbose=2])</dt>
     <dd>Saves a data record into the datastore into the table given by table_name.  <br/>
     <dd>data is a dict object with field names as keys, unique_keys is a subset
-        of data.keys() which determines when a record is over-written.</dd>
+        of data.keys() which determines when a record is over-written.
     <dd>For large numbers of records data can be a list of dicts.
+    <dd>$verbose alters what is shown in the Data tab of the editor.
     </dd>
 
 <dt>scraperwiki.<strong>sqlite.attach</strong>(name[, asname])</dt>
