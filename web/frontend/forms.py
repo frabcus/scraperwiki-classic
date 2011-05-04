@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.safestring import mark_safe
 from django import forms
 from frontend.models import UserProfile, AlertTypes, DataEnquiry
 from contact_form.forms import ContactForm
