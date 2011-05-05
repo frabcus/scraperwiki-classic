@@ -201,10 +201,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         rc, arg = db.has_temporal  (scraperID)
         self.connection.send (json.dumps ((rc, arg)) + '\n')
 
-    def converttosqlitedatastore(self, db, scraperID, runID, scraperName):
-        rc, arg = db.converttosqlitedatastore(scraperID, runID, scraperName)
-        self.connection.send(json.dumps ((rc, arg)) + '\n')
-    
     def process (self, db, scraperID, runID, scraperName, request) :
         if request [0] == 'save'  :
             self.save     (db, scraperID, runID, request[1], request[2], request[3], request[4])
@@ -228,13 +224,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if request[0] == 'data_search' :
             self.data_search  (db, scraperID, runID, request[1], request[2], request[3])
-            return
-
-        if request[0] == 'converttosqlitedatastore' :
-            if len(request) == 1:
-                self.converttosqlitedatastore(db, scraperID, runID, scraperName)
-            else:
-                self.converttosqlitedatastore(db, request[1], runID, request[2])
             return
 
         if request[0] == 'item_count' :

@@ -76,9 +76,6 @@ def getscraperor404(request, short_name, action):
     if action in ["changeadmin", "settags", "set_privacy_status"]:
         if not (request.method == 'POST' and request.is_ajax()):
             raise Http404
-    if action == "converttosqlitedatastore":
-        if request.POST.get('converttosqlitedatastore', None) != 'converttosqlitedatastore':
-            raise Http404
     
     if action in ["schedule_scraper", "run_scraper", "screenshoot_scraper", ]:
         if request.POST.get(action, None) != '1':
@@ -296,13 +293,6 @@ def scraper_delete_data(request, short_name):
     request.notifications.add("Your data has been deleted")
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
-def scraper_converttosqlitedatastore(request, short_name):
-    scraper = getscraperor404(request, short_name, "converttosqlite")
-    dataproxy = DataStore(scraper.guid, scraper.short_name)
-    dataproxy.request(("converttosqlitedatastore",))
-    if scraper.wiki_type == "scraper":
-        scraper.scraper.update_meta()
-    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 def scraper_schedule_scraper(request, short_name):
     scraper = getscraperor404(request, short_name, "schedulescraper")

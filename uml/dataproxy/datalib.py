@@ -551,52 +551,9 @@ class Database :
         return [ True, int(cursor.fetchone()[0]) > 9 ]
 
     
-    def converttosqlitedatastore(self, scraperID, runID, short_name):
-        self.m_sqlitedbconn = None
-        #if runID[:12] != "fromfrontend":
-        #    return [ False, "can only be used from frontend" ]
-        runID = "converttosqlitedatastore_enabled%s" % runID[12:]
-
-        qquery = "select `items`.`item_id` as `item_id` from `items` where `items`.`scraper_id` = %s"
-        cursor = self.execute (qquery, (scraperID,))
-        item_idlist = cursor.fetchall ()
-        for item_idl in item_idlist :
-            item_id = item_idl[0]
-            rdata = { }
-
-            cursor = self.execute ("select `date`, `latlng`, `date_scraped` from `items` where `item_id` = %s", (item_id,))
-            item   = cursor.fetchone()
-            
-            if item[0] is not None: 
-                rdata["date"] = str(item[0])
-            if item[2] is not None: 
-                rdata["date_scraped"] = str(item[2])
-            if item[1] is not None:
-                latlng = item[1].split(",")
-                if len(latlng) == 2:
-                    try:
-                        rdata["latlng_lat"] = float(latlng[0])
-                        rdata["latlng_lng"] = float(latlng[1])
-                    except ValueError:
-                        pass # If the data in the latlng column doesn't convert ignore it
-
-            cursor = self.execute("select `key`, `value` from `kv` where `item_id` = %s", (item_id,))
-            for key, value in cursor.fetchall() :
-                rdata[key] = value
-            
-            lres = self.save_sqlite(scraperID, runID, short_name, unique_keys=None, data=rdata, swdatatblname="swdata")
-            if "error" in lres:  return [ False, lres["error"] ]
-        lres = self.sqlitecommand(scraperID, runID, short_name, "commit", None, None)
-        if "error" in lres:  return [ False, lres["error"] ]
-        self.execute("delete kv, items from kv join items on kv.item_id = items.item_id where scraper_id = %s", (scraperID,))
-        self.execute("delete items items on where scraper_id = %s", (scraperID,))
-        self.m_db.commit()
-        
-        return [ True, "converted %d items" % len(item_idlist) ]
 
 
-
-    # general experimental single file sqlite access
+    # general single file sqlite access
     # the values of these fields are safe because from the UML they are subject to an ident callback, 
     # and from the frontend they are subject to a connection from a particular IP number
     def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
