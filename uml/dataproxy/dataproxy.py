@@ -154,55 +154,18 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             try    : statusInfo[runID]['action'] = None
             except : pass
 
-
-    def save (self, db, scraperID, runID, unique, data, date, latlng) :
-
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = 'save'
-            except : pass
-
-        rc, arg = db.save (scraperID, unique, data, date, latlng)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = None
-            except : pass
-
-
     def clear_datastore(self, db, scraperID, runID, scraperName):
         rc, arg = db.clear_datastore(scraperID, scraperName)
         self.connection.send(json.dumps ((rc, arg)) + '\n')
 
-    def datastore_keys (self, db, scraperID, runID) :
-        rc, arg = db.datastore_keys (scraperID)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-    def data_search (self, db, scraperID, runID, key_values, limit, offset) :
-        rc, arg = db.data_search  (scraperID, key_values, limit, offset)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-
-
 
     def process (self, db, scraperID, runID, scraperName, request) :
-        if request [0] == 'save'  :
-            self.save     (db, scraperID, runID, request[1], request[2], request[3], request[4])
-            return
-
         if request[0] == 'postcodetolatlng' :
             self.postcodeToLatLng (db, scraperID, runID, request[1])
             return
 
         if request[0] == 'clear_datastore':
             self.clear_datastore(db, scraperID, runID, scraperName)
-            return
-
-        if request[0] == 'datastore_keys' :
-            self.datastore_keys  (db, scraperID, runID)
-            return
-
-        if request[0] == 'data_search' :
-            self.data_search  (db, scraperID, runID, request[1], request[2], request[3])
             return
 
         # new experimental QD sqlite interface
