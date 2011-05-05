@@ -66,6 +66,7 @@ def contrib(request, short_name):
     context["title"] = scraper.title
 
     context["scraper"] = scraper
+    context["language"] = "python"
     return render_to_response('documentation/docbase.html', context, context_instance=RequestContext(request))
 
 
