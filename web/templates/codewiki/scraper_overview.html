@@ -126,7 +126,7 @@
     </h2>
     <div class="text_wiki">
         <div id="divAboutScraper">
-        {% if ckansubmit %}
+        {% if scraper.description %}
             {{ scraper.description|textile }}
         {% else %}
             <p>This scraper has no description. {% if user.is_authenticated %}<a href="#" id="aEditAboutScraper">Would you like to add one?</a>{% else %}<a href="{% url login %}?next={% url code_overview 'scraper' scraper.short_name %}">Sign in to add one.</a>{% endif %}</p>
