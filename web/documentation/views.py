@@ -17,7 +17,7 @@ def docmain(request, language=None, path=None):
     request.session['language'] = language
     context = {'language': language }
     
-    if path:
+    if path in page_titles:
         title, para = page_titles[path]
         context["title"] = title
         context["para"] = para
