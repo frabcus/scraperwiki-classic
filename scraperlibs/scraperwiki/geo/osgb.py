@@ -465,7 +465,7 @@ def osgb_to_eastnorth (osgb_str):
 	rel_easting, rel_northing = zonecoord_to_eastnorth (osgb_coords)
 	east = zone_easting + rel_easting
 	north = zone_northing + rel_northing
-    return east, north
+	return east, north
 
 
 ### TEST & DEBUG ###
