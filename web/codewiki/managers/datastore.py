@@ -39,15 +39,6 @@ class DataStore(object):
         return self.receiveoneline()
 
 
-    def data_dictlist (self, tablename = "", limit = 1000, offset = 0, start_date = None, end_date = None, latlng = None) :
-        
-        if start_date is not None : start_date = str(start_date)
-        if end_date   is not None : end_date   = str(  end_date)
-        if latlng     is not None : latlng     = '%010.6f,%010.6f' % tuple(latlng)
-
-        return self.request (('data_dictlist', tablename, limit, offset, start_date, end_date, latlng))
-
-
     def close(self) :
         self.m_socket.send ('.\n')
         self.m_socket.close()

@@ -169,10 +169,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             except : pass
 
 
-    def data_dictlist (self, db, scraperID, runID, scraperName, tablename, limit, offset, start_date, end_date, latlng) :
-        rc, arg = db.data_dictlist (scraperID, scraperName, tablename, limit, offset, start_date, end_date, latlng)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
     def clear_datastore(self, db, scraperID, runID, scraperName):
         rc, arg = db.clear_datastore(scraperID, scraperName)
         self.connection.send(json.dumps ((rc, arg)) + '\n')
@@ -195,10 +191,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if request[0] == 'postcodetolatlng' :
             self.postcodeToLatLng (db, scraperID, runID, request[1])
-            return
-
-        if request[0] == 'data_dictlist' :
-            self.data_dictlist    (db, scraperID, runID, scraperName, request[1], request[2], request[3], request[4], request[5], request[6])
             return
 
         if request[0] == 'clear_datastore':
