@@ -28,21 +28,6 @@ PRIVACY_STATUSES_UI = [ ('public', 'can be edited by anyone who is logged on'),
                         ('deleted', 'is deleted') 
                       ]
 
-def listolddatastore(request):
-    dataproxy = DataStore("junk", "test")
-    rc, arg = dataproxy.request(('listolddatastore',))
-    #scrapers = models.Code.objects.filter(wiki_type="scraper")
-    scrapers = [ ]
-    for lguid in arg[:1000]:
-        if lguid[0]:
-            lscraper = models.Code.objects.filter(guid=lguid[0]).exclude(privacy_status="deleted")
-            if lscraper:
-                scrapers.append((lscraper[0], lguid[0], lguid[1]))
-    
-    res = [ ]
-    for scraper in scrapers:
-        res.append('%d <a href="%s">%s</a>' % (scraper[2], reverse('code_overview', args=[scraper[0].wiki_type, scraper[0].short_name]), scraper[0].short_name))
-    return HttpResponse("%d <p>%s</p>\n<ul><li>%s</li></ul>" % (len(arg), str([(s[1], s[0].short_name)  for s in scrapers]), "</li><li>".join(res)))
 
 
 def getscraperorresponse(request, wiki_type, short_name, rdirect, action):

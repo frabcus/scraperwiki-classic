@@ -534,24 +534,6 @@ class Database :
 
         return [ True, allitems ]
 
-    def item_count (self, scraperID) :
-        cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s", (scraperID, ))
-        return [ True, int(cursor.fetchone()[0]) ]
-
-    def has_geo (self, scraperID) :
-        cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s and latlng is not null and latlng != ''", (scraperID,))
-        return [ True, int(cursor.fetchone()[0]) > 0 ]
-
-    def listolddatastore(self, scraperID):
-        cursor = self.execute ("select scraper_id, count(*) as c from items group by scraper_id order by c desc")
-        return [ True, cursor.fetchall() ]
-    
-    def has_temporal (self, scraperID) :
-        cursor = self.execute ("select count(`item_id`) from `items` where `scraper_id` = %s and date is not null", (scraperID,))
-        return [ True, int(cursor.fetchone()[0]) > 9 ]
-
-    
-
 
     # general single file sqlite access
     # the values of these fields are safe because from the UML they are subject to an ident callback, 
