@@ -693,7 +693,7 @@ class Database :
             try:
                 bstreamchunking = val2 and not re.search("\?", val1) and type(val2) in [list, tuple] and val2[0] == "streamchunking"
                     # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
-                signal.alarm (10)  # should use set_progress_handler !!!!
+                signal.alarm (30)  # should use set_progress_handler !!!!
                 if val2 and not bstreamchunking:
                     self.m_sqlitedbcursor.execute(val1, val2)  # handle "(?,?,?)", (val, val, val)
                 else:

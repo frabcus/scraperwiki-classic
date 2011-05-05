@@ -517,6 +517,11 @@ body.search #header_inner:hover form #id_q {
 	background: transparent url(../images/frontpage_intro_buttons.png) no-repeat 0 0;
 }
 
+/* Temporary override */
+#frontpage_intro a {
+	background-image: url(../images/frontpage_intro_buttons_alt.png);
+}
+
 #frontpage_intro a.create {
 	width: 255px;
 	background-position: -225px 0;

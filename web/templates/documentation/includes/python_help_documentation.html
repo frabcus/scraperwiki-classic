@@ -98,6 +98,12 @@ scrapers, or extract it through the API.
 <p>Some installed functions to help you transform between different coordinate systems.</p> 
 
 <dl>
+<dt>scraperwiki.<strong>geo.os_easting_northing_to_latlng</strong>(easting, northing[, grid='GB'])</dt>
+    <dd>Converts a <a href="http://en.wikipedia.org/wiki/British_national_grid_reference_system">OSGB</a> 
+        or <a href="http://en.wikipedia.org/wiki/Irish_grid_reference_system">OSIE</a> (grid='IE') 
+        grid reference to a WGS84 (lat, lng) pair.
+    </dd>
+
 <dt>scraperwiki.<strong>geo.extract_gb_postcode</strong>(string)</dt>
     <dd>Attempts to extract a UK postcode from a given string.
     </dd>
@@ -106,10 +112,6 @@ scrapers, or extract it through the API.
     <dd>Returns a WGS84 (lat, lng) pair for the central location of a UK postcode.
     </dd>
 
-<dt>scraperwiki.<strong>geo.os_easting_northing_to_latlng</strong>(easting, northing)</dt>
-    <dd>Converts a <a href="http://en.wikipedia.org/wiki/British_national_grid_reference_system">OSGB</a> 
-        grid reference to a WGS84 (lat, lng) pair.
-    </dd>
 
 </dl>
 

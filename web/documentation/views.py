@@ -17,7 +17,7 @@ def docmain(request, language=None, path=None):
     request.session['language'] = language
     context = {'language': language }
     
-    if path:
+    if path in page_titles:
         title, para = page_titles[path]
         context["title"] = title
         context["para"] = para
@@ -66,6 +66,7 @@ def contrib(request, short_name):
     context["title"] = scraper.title
 
     context["scraper"] = scraper
+    context["language"] = "python"
     return render_to_response('documentation/docbase.html', context, context_instance=RequestContext(request))
 
 
