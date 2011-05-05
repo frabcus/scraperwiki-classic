@@ -14,7 +14,6 @@ scraperinfo_handler     = Resource(scraper.GetInfo)
 scraperruninfo_handler  = Resource(scraper.GetRunInfo)
 scraperuserinfo_handler = Resource(scraper.GetUserInfo)
 
-data_handler            = Resource(datastore.Data)
 keys_handler            = Resource(datastore.Keys)
 datastore_search_handler= Resource(datastore.Search)
 getdatabydate_handler   = Resource(datastore.DataByDate)
@@ -67,7 +66,6 @@ urlpatterns = patterns('',
     #url(r'^1\.0/datastore/sqlite',      sqlite_handler,             name="method_sqlite"),
     url(r'^1\.0/datastore/sqlite$',     viewshandlers.sqlite_handler,name="method_sqlite"),
     url(r'^1\.0/datastore/getdata$',    viewshandlers.data_handler,  name="method_getdata"),
-    url(r'^1\.0/datastore/getolddata$', data_handler,                name="method_getolddata"),
 
     url(r'^1\.0/geo/postcodetolatlng/$',geo_postcode_to_latlng_handler, name="method_geo_postcode_to_latlng"),
 )

@@ -154,103 +154,18 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             try    : statusInfo[runID]['action'] = None
             except : pass
 
-
-    def save (self, db, scraperID, runID, unique, data, date, latlng) :
-
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = 'save'
-            except : pass
-
-        rc, arg = db.save (scraperID, unique, data, date, latlng)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = None
-            except : pass
-
-
-    def data_dictlist (self, db, scraperID, runID, scraperName, tablename, limit, offset, start_date, end_date, latlng) :
-        rc, arg = db.data_dictlist (scraperID, scraperName, tablename, limit, offset, start_date, end_date, latlng)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
     def clear_datastore(self, db, scraperID, runID, scraperName):
         rc, arg = db.clear_datastore(scraperID, scraperName)
         self.connection.send(json.dumps ((rc, arg)) + '\n')
 
-    def datastore_keys (self, db, scraperID, runID) :
-        rc, arg = db.datastore_keys (scraperID)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
 
-    def data_search (self, db, scraperID, runID, key_values, limit, offset) :
-        rc, arg = db.data_search  (scraperID, key_values, limit, offset)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-    def item_count (self, db, scraperID, runID) :
-        rc, arg = db.item_count  (scraperID)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-    def has_geo (self, db, scraperID, runID) :
-        rc, arg = db.has_geo  (scraperID)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-    def listolddatastore(self, db, scraperID, runID) :
-        rc, arg = db.listolddatastore  (scraperID)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-    def has_temporal (self, db, scraperID, runID) :
-        rc, arg = db.has_temporal  (scraperID)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-    def converttosqlitedatastore(self, db, scraperID, runID, scraperName):
-        rc, arg = db.converttosqlitedatastore(scraperID, runID, scraperName)
-        self.connection.send(json.dumps ((rc, arg)) + '\n')
-    
     def process (self, db, scraperID, runID, scraperName, request) :
-        if request [0] == 'save'  :
-            self.save     (db, scraperID, runID, request[1], request[2], request[3], request[4])
-            return
-
         if request[0] == 'postcodetolatlng' :
             self.postcodeToLatLng (db, scraperID, runID, request[1])
             return
 
-        if request[0] == 'data_dictlist' :
-            self.data_dictlist    (db, scraperID, runID, scraperName, request[1], request[2], request[3], request[4], request[5], request[6])
-            return
-
         if request[0] == 'clear_datastore':
             self.clear_datastore(db, scraperID, runID, scraperName)
-            return
-
-        if request[0] == 'datastore_keys' :
-            self.datastore_keys  (db, scraperID, runID)
-            return
-
-        if request[0] == 'data_search' :
-            self.data_search  (db, scraperID, runID, request[1], request[2], request[3])
-            return
-
-        if request[0] == 'converttosqlitedatastore' :
-            if len(request) == 1:
-                self.converttosqlitedatastore(db, scraperID, runID, scraperName)
-            else:
-                self.converttosqlitedatastore(db, request[1], runID, request[2])
-            return
-
-        if request[0] == 'item_count' :
-            self.item_count  (db, scraperID, runID)
-            return
-
-        if request[0] == 'has_geo' :
-            self.has_geo  (db, scraperID, runID)
-            return
-
-        if request[0] == 'listolddatastore' :
-            self.listolddatastore  (db, scraperID, runID)
-            return
-        
-        if request[0] == 'has_temporal' :
-            self.has_temporal  (db, scraperID, runID)
             return
 
         # new experimental QD sqlite interface

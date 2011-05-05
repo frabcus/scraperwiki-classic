@@ -23,24 +23,6 @@ class scraperwiki
    static function sw_logScrapedURL ($url, $length)
    {
        scraperwiki::sw_dumpMessage
-           /* seexception(errmap):
-        mess = errmap["error"]
-        for k, v in errmap.items():
-        if k != "error" {
-            mess = "%s; %s:%s" % (mess, k, v)
-
-        if re.match('sqlite3.Error: no such table:', mess):
-        return NoSuchTableSqliteError(mess)
-    return SqliteError(mess)
-
-
-def save_sqlite(unique_keys, data, table_name="swdata", verbose=2):
-    ds = DataStore(None)
-    result = ds.save_sqlite(unique_keys, data, table_name)
-    if "error" in result:
-        raise databaseexception(result)
-            */
-
          (  array
             (  'message_type' => 'sources',
                'url'          => $url,

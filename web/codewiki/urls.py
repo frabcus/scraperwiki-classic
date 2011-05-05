@@ -86,8 +86,6 @@ urlpatterns = patterns('',
     #
     url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),   # this gets redirected
     url(r'^scrapers/metadata_api/(?P<scraper_guid>[\w_\-\.]+)/(?P<metadata_name>.+)/$', metadata, name='metadata_api'),
-    url(r'^scrapers/converttosqlitedatastore/(?P<short_name>[\w_\-\.]+)/$', views.scraper_converttosqlitedatastore, name='scraper_converttosqlitedatastore'),
-    url(r'^quicklistolddatastore', views.listolddatastore), 
 
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/(?:run|full)/$',   # redirect because it's so common
                    lambda request, wiki_type, short_name: HttpResponseRedirect("http://%s%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=[short_name])))),

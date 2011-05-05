@@ -14,30 +14,6 @@ class SW_DataStoreClass
       $this->m_port      = $port    ;
    }
 
-   function mangleflattendict ($data)
-   {
-      $rdata = array() ;
-      foreach ($data as $key => $value)
-      {
-         $rkey = str_replace (' ', '_', $key) ;
-        
-         if     (is_null($value) ) $rvalue  = ''  ;
-         elseif ($value === true ) $rvalue  = '1' ; 
-         elseif ($value === false) $rvalue  = '0' ;
-         else                      $rvalue  = sprintf ("%s", $value) ;
-            
-         $rdata[$rkey] = $rvalue ;
-      }
-      return $rdata ;
-   }
-
-   function mangleflattenkeys ($keys)
-   {
-      $rkeys = array() ;
-      foreach ($keys as $key)
-         $rkeys[] = str_replace (' ', '_', $key) ;
-      return $rkeys ;
-   }
 
    function connect ()
    {
@@ -83,24 +59,7 @@ class SW_DataStoreClass
 
    function save ($unique_keys, $scraper_data, $date = null, $latlng = null)
    {
-      if (!is_null($unique_keys) && !is_array($unique_keys))
-         return array (false, 'unique_keys must be null, or an array') ;
-
-      if (!is_null($latlng))
-      {
-         if (!is_array($latlng) || count($latlng) != 2)
-            return array (false, 'latlng must be a (float,float) array') ;
-         if (!is_numeric($latlng[0]) || !is_numeric($latlng[1]) )
-            return array (false, 'latlng must be a (float,float) array') ;
-      }
-
-      if (!is_null($latlng))
-         $latlng = sprintf ('%010.6f,%010.6f', $latlng[0], $latlng[1]) ;
-
-      $js_data      = $this->mangleflattendict($scraper_data) ;
-      $uunique_keys = $this->mangleflattenkeys($unique_keys ) ;
-
-      return $this->request (array('save', $uunique_keys, $js_data, $date, $latlng)) ;
+       throw new Exception ("This function is no more and shouldn't be accessible") ;
    }
 
 

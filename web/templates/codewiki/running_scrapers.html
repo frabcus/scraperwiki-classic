@@ -251,7 +251,7 @@ $(document).ready(function() {
                 var running = scraperentry.running; 
                 var scraperusers = scraperentry.scraperusers; 
 
-                idscrapername = "SCR_" + scrapername; 
+                idscrapername = "SCR_" + scrapername.replace(".", "--"); 
                 ele = "#monitoroutput ul#scraperentries li#"+idscrapername; 
                 if (scraperpresent)
                 {
@@ -294,14 +294,14 @@ $(document).ready(function() {
 
         if (jdata.message_type == "savenote")
         {
-            hidcchatname = "#SCR_" + jdata.scrapername + "_CHA_" + getIDfromCChatname(jdata.cchatname); 
+            hidcchatname = "#SCR_" + jdata.scrapername.replace(".", "--") + "_CHA_" + getIDfromCChatname(jdata.cchatname); 
             $(hidcchatname).addClass("bksaving"); 
             window.setTimeout(function() { $(hidcchatname).removeClass("bksaving") }, 2500);
             $(hidcchatname + " .lasttouchdiff .lasttouch").text(String(servernowtime.getTime())); 
         }
         if (jdata.message_type == "typingnote")
         {
-            hidcchatname = "#SCR_" + jdata.scrapername + "_CHA_" + getIDfromCChatname(jdata.cchatname); 
+            hidcchatname = "#SCR_" + jdata.scrapername.replace(".", "--") + "_CHA_" + getIDfromCChatname(jdata.cchatname); 
             $(hidcchatname).addClass("bktyping"); 
             window.setTimeout(function() { $(hidcchatname).removeClass("bktyping") }, 250);
             $(hidcchatname + " .lasttouchdiff .lasttouch").text(String(servernowtime.getTime())); 

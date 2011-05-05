@@ -65,6 +65,7 @@ MIDDLEWARE_CLASSES = [
     'django_notify.middleware.NotificationsMiddleware',
     'piston.middleware.ConditionalMiddlewareCompatProxy',
     'piston.middleware.CommonMiddlewareCompatProxy',
+    'pagination.middleware.PaginationMiddleware',    
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -123,6 +124,7 @@ INSTALLED_APPS = [
     'contact_form',
     'piston',      # needs 'django-piston' and 'phpserialize'
     'captcha',
+    'pagination',    
 ] + SCRAPERWIKI_APPS
 
 PISTON_STREAM_OUTPUT = True
@@ -201,6 +203,8 @@ APPROXLENOUTPUTLIMIT = 3000
 
 HTTPPROXYURL = "http://localhost:9005"
 DISPATCHERURL = "http://localhost:9000"
+
+PAGINATION_DEFAULT_PAGINATION=20
 
     # should be in localsettings instead
 UMLURLS = ["http://89.16.177.195:9101", "http://89.16.177.195:9102", "http://89.16.177.195:9103", "http://89.16.177.195:9104"]

@@ -28,21 +28,6 @@ PRIVACY_STATUSES_UI = [ ('public', 'can be edited by anyone who is logged on'),
                         ('deleted', 'is deleted') 
                       ]
 
-def listolddatastore(request):
-    dataproxy = DataStore("junk", "test")
-    rc, arg = dataproxy.request(('listolddatastore',))
-    #scrapers = models.Code.objects.filter(wiki_type="scraper")
-    scrapers = [ ]
-    for lguid in arg[:1000]:
-        if lguid[0]:
-            lscraper = models.Code.objects.filter(guid=lguid[0]).exclude(privacy_status="deleted")
-            if lscraper:
-                scrapers.append((lscraper[0], lguid[0], lguid[1]))
-    
-    res = [ ]
-    for scraper in scrapers:
-        res.append('%d <a href="%s">%s</a>' % (scraper[2], reverse('code_overview', args=[scraper[0].wiki_type, scraper[0].short_name]), scraper[0].short_name))
-    return HttpResponse("%d <p>%s</p>\n<ul><li>%s</li></ul>" % (len(arg), str([(s[1], s[0].short_name)  for s in scrapers]), "</li><li>".join(res)))
 
 
 def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
@@ -75,9 +60,6 @@ def getscraperor404(request, short_name, action):
     # extra post conditions to make spoofing these calls a bit of a hassle
     if action in ["changeadmin", "settags", "set_privacy_status"]:
         if not (request.method == 'POST' and request.is_ajax()):
-            raise Http404
-    if action == "converttosqlitedatastore":
-        if request.POST.get('converttosqlitedatastore', None) != 'converttosqlitedatastore':
             raise Http404
     
     if action in ["schedule_scraper", "run_scraper", "screenshoot_scraper", ]:
@@ -296,13 +278,6 @@ def scraper_delete_data(request, short_name):
     request.notifications.add("Your data has been deleted")
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
-def scraper_converttosqlitedatastore(request, short_name):
-    scraper = getscraperor404(request, short_name, "converttosqlite")
-    dataproxy = DataStore(scraper.guid, scraper.short_name)
-    dataproxy.request(("converttosqlitedatastore",))
-    if scraper.wiki_type == "scraper":
-        scraper.scraper.update_meta()
-    return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 def scraper_schedule_scraper(request, short_name):
     scraper = getscraperor404(request, short_name, "schedulescraper")

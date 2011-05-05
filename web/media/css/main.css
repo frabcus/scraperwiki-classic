@@ -2060,12 +2060,6 @@ table.scrapersediting td {
 	border: 1px solid black;
 }
 
-/* Flexigrid override */
-
-.flexigrid table {
-	width: auto;
-}
-
 /* Page titles */
 
 div.page_title {

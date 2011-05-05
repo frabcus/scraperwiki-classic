@@ -18,38 +18,6 @@ import  scraperwiki.console
 # handles old version of the key-value store
 # intend to make a new sqlite module and access functions into there
 
-def mangleflattendict(data):
-    rdata = { }
-    for key, value in data.items() :
-        
-        # was previously mangled in dataproxy/datalib.fixKVKey()  kept for compatibility, 
-        # but moved here to allow in future a function save_no_mangling()
-        # or optional filtering that prevents invalid keys getting into scrapers that are intended to have xml output, 
-        # so those that will never have xml output can avoid damage
-        rkey = key.replace(' ', '_')
-        
-        # in future this could be json.dumps or something that is better able to manage the 
-        # confusion between unicode and str types (and mark them all up to unicode)
-        if value == None:
-            rvalue = u""
-        elif value == True:
-            rvalue = u"1"
-        elif value == False:
-            rvalue = u"0"
-        elif isinstance(value, datetime.date):
-            rvalue = value.isoformat()
-        elif isinstance(value, datetime.datetime):
-            rvalue = value.isoformat()
-        elif type(value) == types.UnicodeType:
-            rvalue = value
-        elif type(value) == types.StringType:
-            rvalue = value.decode('utf-8')
-        else:
-            rvalue = unicode(value)
-            
-        rdata[rkey] = rvalue
-    return rdata
-        
 
         # a \n delimits the end of the record.  you cannot read beyond it or it will hang
 def receiveoneline(socket):
@@ -66,13 +34,6 @@ def receiveoneline(socket):
     line = "".join(sbuffer)
     return line
 
-
-def mangleflattenkeys(keys):
-    rkeys = [ ]
-    for key in keys:
-        rkey = key.replace(' ', '_')  
-        rkeys.append(rkey)
-    return rkeys
 
 
 class DataStoreClass :
@@ -112,32 +73,8 @@ class DataStoreClass :
         return json.loads(line)
 
     def save (self, unique_keys, scraper_data, date = None, latlng = None) :
-        
-        if type(unique_keys) not in [ types.NoneType, types.ListType, types.TupleType ] :
-            return [ False, 'unique_keys must be None, or a list or tuple' ]
- 
-        if date is not None :
-            if type(date) not in [ datetime.datetime, datetime.date ] :
-                return [ False, 'date should be a python.datetime (not %s)' % type(date) ]
+        raise Exception("scraperwiki.datastore.save() has been deprecated.  Use scraperwiki.sqlite.save()")
 
-        if latlng is not None :
-            if type(latlng) not in [ types.ListType, types.TupleType ] or len(latlng) != 2 :
-                return [ False, 'latlng must be a (float,float) list or tuple' ]
-            if type(latlng[0]) not in [ types.IntType, types.LongType, types.FloatType ] :
-                return [ False, 'latlng must be a (float,float) list or tuple' ]
-            if type(latlng[1]) not in [ types.IntType, types.LongType, types.FloatType ] :
-                return [ False, 'latlng must be a (float,float) list or tuple' ]
-
-        if date is not None :
-            date = str(date)
-        if latlng is not None :
-            latlng = '%010.6f,%010.6f' % tuple(latlng)
-
-        js_data = mangleflattendict (scraper_data)
-        uunique_keys = mangleflattenkeys (unique_keys)
-        return self.request (('save', uunique_keys, js_data, date, latlng))
-
-    
     def save_sqlite(self, unique_keys, data, swdatatblname="swdata"):
         if unique_keys != None and type(unique_keys) not in [ types.ListType, types.TupleType ]:
             return { "error":'unique_keys must a list or tuple', "unique_keys_type":str(type(unique_keys)) }
@@ -243,35 +180,8 @@ def ifsencode_trunc(v, t):
     return strencode_trunc(v, t)
 
 
-          # would like to deprecate date, latlng, silent
 def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="swdata", verbose=2) :
-    ds = DataStore(None)
-    
-    # collapse parameters and call main function
-    if date is not None:
-        if type(date) not in [ datetime.datetime, datetime.date ] :
-            raise databaseexception({"error":'date should be a python.datetime (not %s)' % type(date)})
-
-    if latlng is not None :
-        if type(latlng) not in [ types.ListType, types.TupleType ] or len(latlng) != 2:
-            raise Exception('latlng must be a (float,float) list or tuple')
-        elif type(latlng[0]) not in [ types.IntType, types.LongType, types.FloatType ]:
-            raise Exception('latlng must be a (float,float) list or tuple')
-        elif type(latlng[1]) not in [ types.IntType, types.LongType, types.FloatType ]:
-            raise Exception('latlng must be a (float,float) list or tuple')
-
-    ldata = data.copy()
-    if date is not None :
-        ldata["date"] = date.isoformat()
-    if latlng is not None :
-        ldata["latlng_lat"] = float(latlng[0])
-        ldata["latlng_lng"] = float(latlng[1])
-    
-    if "date_scraped" not in ldata:
-        ldata["date_scraped"] = datetime.datetime.now().isoformat()
-    
-    return save_sqlite(unique_keys=unique_keys, data=ldata, table_name=table_name, verbose=verbose)
-
+    raise Exception("scraperwiki.datastore.save() has been deprecated.  Use scraperwiki.sqlite.save()")
 
 
 def sqlitecommand(command, val1=None, val2=None, verbose=1):

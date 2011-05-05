@@ -49,8 +49,8 @@ LICENSE_CHOICES = (
 
 class Scraper (code.Code):
 
-    has_geo      = models.BooleanField(default=False)
-    has_temporal = models.BooleanField(default=False)    
+    has_geo      = models.BooleanField(default=False)        # to be deleted
+    has_temporal = models.BooleanField(default=False)        # to be deleted
     last_run     = models.DateTimeField(blank=True, null=True)    
     license      = models.CharField(max_length=100, blank=True, choices=LICENSE_CHOICES, default='Unknown')
     license_link = models.URLField(verify_exists=False, null=True, blank=True)
@@ -75,20 +75,6 @@ class Scraper (code.Code):
             # for now it represents some kind of caching of the size of the datastore
     def update_meta(self):
         dataproxy = DataStore(self.guid, self.short_name)
-        
-        # old style datasets to be eventually deleted
-        rc, arg = dataproxy.request(('item_count',))
-        if rc:
-            self.record_count = int(arg)
-        else:
-            self.record_count = 0
-        rc, arg = dataproxy.request(('has_geo',))
-        if rc:
-            self.has_geo = bool(arg)
-        rc, arg = dataproxy.request(('has_temporal',))
-        if rc:
-            self.has_temporal = bool(arg)
-            
         try:
             datasummary = dataproxy.request(("sqlitecommand", "datasummary", 0, None))
             for tabledata in datasummary.get("tables", {}).values():

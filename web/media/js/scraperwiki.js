@@ -212,9 +212,6 @@ function setupIntroSlideshow(){
 	});
 }
 
-function setupDataViewer(){
-    $('.raw_data').flexigrid({height:250});    
-}
 
 function setupCKANLink(){
     $.ajax({

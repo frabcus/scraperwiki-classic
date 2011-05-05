@@ -20,31 +20,6 @@ class SW_DataStore
       @m_port = nil
     end
 
-    def mangleflattendict(data)
-        rdata = {}
-        data.each_pair do |key, value|
-            rkey = key.gsub(' ', '_')
-            if value == nil
-                rvalue  = ''
-            elsif  value.eql?(true)
-                rvalue  = '1'
-            elsif value.eql?(false)
-                rvalue  = '0'
-            else
-                rvalue  = value.to_s
-            end
-            rdata[rkey] = rvalue
-        end
-        return rdata
-    end
-
-    def mangleflattenkeys(keys)
-        rkeys = []
-        keys.each do |key|
-            rkeys.push(key.gsub(' ', '_'))
-        end
-        return rkeys
-    end
 
     def ensure_connected
         # Connect to the data proxy. The data proxy will need to make an Ident call
