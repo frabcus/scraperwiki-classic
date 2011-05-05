@@ -436,6 +436,38 @@ def lonlat_to_osgb (lon, lat, digits=3):
 	return eastnorth_to_osgb (east, north, digits)
 	
 
+
+# scavenged from the osgb_to_lonlat code
+def osgb_to_eastnorth (osgb_str):
+	"""
+	Convert an Ordinance Survey reference to a longitude and latitude.
+	
+	:Params:
+		osgb_str
+			An Ordnance Survey grid reference in "letter-number" format.
+			Case and spaces are cleaned up by this function, and resolution
+			automatically detected, so that so that 'TM114 525', 'TM114525',
+			and 'TM 11400 52500' are all recognised and identical. 
+	
+	:Returns:
+		The easting and northing of the grid reference, according to
+		
+	"""
+	## Preconditions & preparation:
+	# clean string and split off zone prefix & coords
+	osgb_str = str(osgb_str)   # deals with unicode problems
+	osgb_str = osgb_str.replace (' ', '').upper()
+	osgb_zone = osgb_str[:2]
+	osgb_coords = osgb_str[2:]
+	## Main:
+	# translate into distances from ref & within zone
+	zone_easting, zone_northing = oszone_to_eastnorth (osgb_zone)
+	rel_easting, rel_northing = zonecoord_to_eastnorth (osgb_coords)
+	east = zone_easting + rel_easting
+	north = zone_northing + rel_northing
+    return east, north
+
+
 ### TEST & DEBUG ###
 
 def _doctest ():

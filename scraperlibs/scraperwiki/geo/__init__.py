@@ -1,4 +1,4 @@
-from osgb import eastnorth_to_osgb, osgb_to_lonlat, lonlat_to_eastnorth
+from osgb import eastnorth_to_osgb, osgb_to_lonlat, lonlat_to_eastnorth, osgb_to_eastnorth
 from geo_helper import turn_osgb36_into_wgs84, turn_eastingnorthing_into_osgb36, turn_eastingnorthing_into_osie36, turn_osie36_into_wgs84
 
 import urllib2
@@ -17,27 +17,6 @@ import scraperwiki.console
 
 '''standardized to wgs84 (if possible)'''
 
-def gb_postcode_to_latlng(postcode):
-
-    if not postcode :
-        return None
-    ds = DataStore (None)
-    rc, arg = ds.postcodeToLatLng (postcode)
-    if not rc :
-        scraperwiki.console.logWarning ('%s: %s' % (arg, postcode))
-        return None
-    return arg
-
-def gb_postcode_to_latlng_maxmanders(postcode):
-    '''Convert postcode to latlng maxmander's code. (in future use a scraperwiki-rpc)'''
-    if not postcode:
-        return None
-    purl = "http://maxmanders.co.uk/ukgeocode/postcode/" + urllib2.quote(postcode)
-    res = urllib2.urlopen(purl).read()
-    latlng = map(float, re.findall("(?:<lat>|<lon>)(.*?)</", res))
-    if not latlng:
-        return None
-    return latlng
 
 def os_easting_northing_to_latlng(easting, northing, grid='GB'):
     '''Convert easting, northing to latlng assuming altitude 200m'''
@@ -49,6 +28,8 @@ def os_easting_northing_to_latlng(easting, northing, grid='GB'):
         latlng = turn_osie36_into_wgs84(oscoord[0], oscoord[1], 200)
     return latlng[:2]
 
+
+# to delete
 def extract_gb_postcode(string):
     postcode = False
     matches = re.findall(r'[A-Z][A-Z]?[0-9][A-Z0-9]? ?[0-9][ABDEFGHJLNPQRSTUWXYZ]{2}\b', string, re.IGNORECASE)
@@ -58,4 +39,25 @@ def extract_gb_postcode(string):
 
     return postcode
 
+# to delete
+def gb_postcode_to_latlng(postcode):
+    if not postcode :
+        return None
+    ds = DataStore (None)
+    rc, arg = ds.postcodeToLatLng (postcode)
+    if not rc :
+        scraperwiki.console.logWarning ('%s: %s' % (arg, postcode))
+        return None
+    return arg
 
+# definitely to delete
+def gb_postcode_to_latlng_maxmanders(postcode):
+    '''Convert postcode to latlng maxmander's code. (in future use a scraperwiki-rpc)'''
+    if not postcode:
+        return None
+    purl = "http://maxmanders.co.uk/ukgeocode/postcode/" + urllib2.quote(postcode)
+    res = urllib2.urlopen(purl).read()
+    latlng = map(float, re.findall("(?:<lat>|<lon>)(.*?)</", res))
+    if not latlng:
+        return None
+    return latlng
