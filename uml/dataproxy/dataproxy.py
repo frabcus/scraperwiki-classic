@@ -33,8 +33,6 @@ config     = None
 varDir     = '/var'
 uid        = None
 gid        = None
-statusLock = None
-statusInfo = {}
 
 class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
@@ -72,33 +70,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
         sys.stderr.flush ()
 
-    def sendStatus (self) :
-
-        """
-        Send status information.
-        """
-
-        #  Gather up the status information. Since we need to lock the status
-        #  structure for the duration, do this up front to make it as quick
-        #  as possible.
-        #
-        status = []
-        statusLock.acquire()
-        try    :
-            for key, value in statusInfo.items() :
-                status.append (string.join([ '%s=%s' % (k,v) for k, v in value.items()], ';'))
-        except :
-            pass
-        statusLock.release()
-
-        self.connection.send  ('HTTP/1.0 200 OK\n')
-        self.connection.send  ('Connection: Close\n')
-        self.connection.send  ('Pragma: no-cache\n')
-        self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/text\n')
-        self.connection.send  ('\n')
-        self.connection.send  (string.join(status, '\n'))
-        self.connection.send  ('\n')
 
     def ident (self, uml, port) :
 
@@ -142,17 +113,8 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         return scraperID, runID, scraperName
 
     def postcodeToLatLng (self, db, scraperID, runID, postcode) :
-
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = 'postcodetolatlng'
-            except : pass
-
         rc, arg = db.postcodeToLatLng (scraperID, postcode)
         self.connection.send (json.dumps ((rc, arg)) + '\n')
-
-        if runID is not None :
-            try    : statusInfo[runID]['action'] = None
-            except : pass
 
     def clear_datastore(self, db, scraperID, runID, scraperName):
         rc, arg = db.clear_datastore(scraperID, scraperName)
@@ -170,12 +132,8 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         # new experimental QD sqlite interface
         if request[0] == 'sqlitecommand':
-            if runID is not None :
-                statusInfo[runID]['action'] = 'sqlitecommand'
             result = db.sqlitecommand(scraperID, runID, scraperName, command=request[1], val1=request[2], val2=request[3])
             self.connection.send(json.dumps(result) + '\n')
-            if runID is not None :
-                statusInfo[runID]['action'] = None
             return
 
         if request[0] == 'save_sqlite':
@@ -193,12 +151,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
         
-        #  Path /Status returns status information.
-        #
-        if path == '/Status'  :
-            self.sendStatus ()
-            self.connection.close()
-            return
 
         try    : params = urlparse.parse_qs(query)
         except : params = cgi     .parse_qs(query)
@@ -231,12 +183,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         self.connection.send(json.dumps ((True, 'OK')) + '\n')
 
-        if runID is not None :
-            statusLock.acquire ()
-            try    : statusInfo[runID] = { 'runID' : runID, 'scraperID' : scraperID, 'query' : query, 'action' : None }
-            except : pass
-            statusLock.release ()
-
         startat = time.strftime ('%Y-%m-%d %H:%M:%S')
 
 
@@ -262,12 +208,6 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 
         finally :
             self.connection.close()
-
-        if runID is not None :
-            statusLock.acquire ()
-            try    : del statusInfo[runID]
-            except : pass
-            statusLock.release ()
 
 
     do_HEAD   = do_GET
@@ -391,7 +331,6 @@ if __name__ == '__main__' :
     
             os.wait()
 
-    statusLock = threading.Lock()
 
     config = ConfigParser.ConfigParser()
     config.readfp (open(confnam))
