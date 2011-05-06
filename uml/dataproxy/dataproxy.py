@@ -112,20 +112,13 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         return scraperID, runID, scraperName
 
-    def postcodeToLatLng (self, db, scraperID, runID, postcode) :
-        rc, arg = db.postcodeToLatLng (scraperID, postcode)
-        self.connection.send (json.dumps ((rc, arg)) + '\n')
-
     def clear_datastore(self, db, scraperID, runID, scraperName):
         rc, arg = db.clear_datastore(scraperID, scraperName)
         self.connection.send(json.dumps ((rc, arg)) + '\n')
 
 
     def process (self, db, scraperID, runID, scraperName, request) :
-        if request[0] == 'postcodetolatlng' :
-            self.postcodeToLatLng (db, scraperID, runID, request[1])
-            return
-
+        
         if request[0] == 'clear_datastore':
             self.clear_datastore(db, scraperID, runID, scraperName)
             return

@@ -41,17 +41,6 @@ class Database :
         self.m_resourcedir = conf.get('dataproxy', 'resourcedir')
 
 
-    def postcodeToLatLng (self, scraperID, postcode) :   
-
-        postcode = postcode.upper().replace(' ', '')
-        cursor   = self.execute ('select x(location), y(location) from `postcode_lookup` where `postcode` = %s', [ postcode ])
-        try :
-            result = cursor.fetchone()
-            return [ True,  ( result[0], result[1] ) ]
-        except :
-            return [ False, 'Postcode not found' ]
-
-
     def clear_datastore(self, scraperID, short_name):
         scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
         scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")

@@ -63,11 +63,6 @@ class SW_DataStoreClass
    }
 
 
-   function postcodeToLatLng ($postcode)
-   {
-      return $this->request (array ('postcodetolatlng', $postcode)) ;
-   }
-
    function close ()
    {
       socket_send  ($this->m_socket, ".\n", 2, MSG_EOR) ;

@@ -126,9 +126,6 @@ class DataStoreClass :
         return self.request(('save_sqlite', unique_keys, rjdata, swdatatblname))
     
     
-    def postcodeToLatLng (self, postcode) :
-        return self.request (('postcodetolatlng', postcode))
-
     def close (self) :
 
         self.m_socket.sendall('.\n')  # what's this for?

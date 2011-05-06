@@ -5,7 +5,6 @@ import urllib2
 import re
 import sys
 sys.path.append('..')
-from scraperwiki.datastore import DataStore
 
 try:
   import json
@@ -29,16 +28,7 @@ def os_easting_northing_to_latlng(easting, northing, grid='GB'):
 
 
 # to delete
-def extract_gb_postcode(string):
-    postcode = False
-    matches = re.findall(r'[A-Z][A-Z]?[0-9][A-Z0-9]? ?[0-9][ABDEFGHJLNPQRSTUWXYZ]{2}\b', string, re.IGNORECASE)
-
-    if len(matches) > 0:
-        postcode = matches[0]
-
-    return postcode
-
-def SW_gb_postcode_to_latlng(postcode):
+def gb_postcode_to_latlng(postcode):
     if not postcode:
          return None
     url = "http://scraperwikiviews.com/run/uk_postcode_lookup/?postcode="+urllib2.quote(postcode)
@@ -49,28 +39,12 @@ def SW_gb_postcode_to_latlng(postcode):
     return None
 
 # to delete
-def gb_postcode_to_latlng(postcode):
-    return SW_gb_postcode_to_latlng(postcode)
+def extract_gb_postcode(string):
+    postcode = False
+    matches = re.findall(r'[A-Z][A-Z]?[0-9][A-Z0-9]? ?[0-9][ABDEFGHJLNPQRSTUWXYZ]{2}\b', string, re.IGNORECASE)
 
-    # old method
-    if not postcode:
-        return None
-    ds = DataStore (None)
-    rc, arg = ds.postcodeToLatLng (postcode)
-    if not rc :
-        scraperwiki.console.logWarning ('%s: %s' % (arg, postcode))
-        return None
-    return arg
+    if len(matches) > 0:
+        postcode = matches[0]
 
+    return postcode
 
-# definitely to delete
-def gb_postcode_to_latlng_maxmanders(postcode):
-    '''Convert postcode to latlng maxmander's code. (in future use a scraperwiki-rpc)'''
-    if not postcode:
-        return None
-    purl = "http://maxmanders.co.uk/ukgeocode/postcode/" + urllib2.quote(postcode)
-    res = urllib2.urlopen(purl).read()
-    latlng = map(float, re.findall("(?:<lat>|<lon>)(.*?)</", res))
-    if not latlng:
-        return None
-    return latlng
