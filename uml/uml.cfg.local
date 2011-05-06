@@ -57,7 +57,7 @@ secure	= 127.0.0.1
 host    = localhost:8000
 
 ; Francis's machine
-[cat]
+[bat.local]
 host	= 127.0.0.1
 tap	= 127.0.0.1
 eth	= 127.0.0.1
