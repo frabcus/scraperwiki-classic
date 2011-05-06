@@ -182,7 +182,6 @@ class scraperwiki
        return null; 
 
         // old method
-      scraperwiki::gb_postcode_to_latlng($postcode)
       if (is_null($postcode))
          return null ;
 
