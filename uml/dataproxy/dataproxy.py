@@ -35,11 +35,6 @@ uid        = None
 gid        = None
 
 class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
-
-    """
-    Proxy handler class. Overrides the base handler to implement
-    filtering and proxying.
-    """
     __base         = BaseHTTPServer.BaseHTTPRequestHandler
     __base_handle  = __base.handle
 
@@ -47,38 +42,14 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     rbufsize       = 0
 
     def __init__ (self, *alist, **adict) :
-
-        """
-        Class constructor. All arguments (positional and keyed) are passed down to
-        the base class constructor.
-        """
-
         self.m_db      = None
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
     def log_message (self, format, *args) :
-
-        """
-        Override this method so that we can flush stderr
-
-        @type   format  : String
-        @param  format  : Format string
-        @type   args    : List
-        @param  args    : Arguments to format string
-        """
-
         BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
         sys.stderr.flush ()
 
-
     def ident (self, uml, port) :
-
-        """
-        Request scraper and run identifiers, and host permissions from the UML.
-        This uses local and remote port numbers to identify a TCP/IP connection
-        from the scraper running under the controller.
-        """
-
         scraperID   = None
         runID       = None
         scraperName = None
@@ -95,55 +66,34 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         loc       = self.connection.getsockname()
         ident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()   # (lucky this doesn't clash with the function we are in, eh -- JT)
 
-                # would be a great idea to use cgi.parse_qs(query) technology here -- at both ends -- as it is already used in this module elsewhere!
+                # should be using cgi.parse_qs(query) technology here
         for line in string.split (ident, '\n') :
-            if line == '' :
-                continue
-            key, value = string.split (line, '=')
-            if key == 'runid'       :
-                runID       = value
-                continue
-            if key == 'scraperid'   :
-                scraperID   = value
-                continue
-            if key == 'scrapername' :
-                scraperName = value
-                continue
+            if line:
+                key, value = string.split (line, '=')
+                if key == 'runid':
+                    runID = value
+                elif key == 'scraperid':
+                    scraperID   = value
+                elif key == 'scrapername':
+                    scraperName = value
 
         return scraperID, runID, scraperName
 
-    def clear_datastore(self, db, scraperID, runID, scraperName):
-        rc, arg = db.clear_datastore(scraperID, scraperName)
-        self.connection.send(json.dumps ((rc, arg)) + '\n')
-
-
-    def process (self, db, scraperID, runID, scraperName, request) :
-        
+    def process (self, db, scraperID, runID, scraperName, request):
         if request[0] == 'clear_datastore':
-            self.clear_datastore(db, scraperID, runID, scraperName)
-            return
+            res = db.clear_datastore(scraperID, scraperName)
+        elif request[0] == 'sqlitecommand':
+            res = db.sqlitecommand(scraperID, runID, scraperName, command=request[1], val1=request[2], val2=request[3])
+        elif request[0] == 'save_sqlite':
+            res = db.save_sqlite(scraperID, runID, scraperName, unique_keys=request[1], data=request[2], swdatatblname=request[3])
+        else:
+            res = {"error":'Unknown datastore command: %s' % request[0]}
+        self.connection.send(json.dumps(res)+'\n')
 
-        # new experimental QD sqlite interface
-        if request[0] == 'sqlitecommand':
-            result = db.sqlitecommand(scraperID, runID, scraperName, command=request[1], val1=request[2], val2=request[3])
-            self.connection.send(json.dumps(result) + '\n')
-            return
 
-        if request[0] == 'save_sqlite':
-            result = db.save_sqlite(scraperID, runID, scraperName, unique_keys=request[1], data=request[2], swdatatblname=request[3])
-            self.connection.send(json.dumps(result) + '\n')
-            return
-        
-        self.connection.send (json.dumps ((False, 'Unknown datastore command: %s' % request[0])) + '\n')
-
+        # this morphs into the long running two-way connection
     def do_GET (self) :
-
-        """
-        Handle GET request.
-        """
-
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-        
 
         try    : params = urlparse.parse_qs(query)
         except : params = cgi     .parse_qs(query)
@@ -151,39 +101,28 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 # if the scraperid is set then we can assume it's from the frontend, is not authenticated and will have no write permissions
                 # if it is not set, then it is fetched through the ident call and is then authenticated enough for writing purposes in its relevant file
         if 'scraperid' in params and params['scraperid'][0] not in [ '', None ] :
-            if self.connection.getpeername()[0] != config.get ('dataproxy', 'secure') :
-                self.connection.send (json.dumps ((False, "ScraperID only accepted from secure hosts")) + '\n')
+            if self.connection.getpeername()[0] != config.get('dataproxy', 'secure') :
+                self.connection.send(json.dumps({"error":"ScraperID only accepted from secure hosts"})+'\n')
                 return
             scraperID, runID, scraperName = params['scraperid'][0], 'fromfrontend.%s.%s' % (params['scraperid'][0], time.time()), params.get('short_name', [""])[0]
         
         else :
-            scraperID, runID, scraperName = self.ident (params['uml'][0], params['port'][0])
+            scraperID, runID, scraperName = self.ident(params['uml'][0], params['port'][0])
 
 
         if path == '' or path is None :
             path = '/'
 
         if scm not in [ 'http', 'https' ] or fragment :
-            self.connection.send (json.dumps ((False, "Malformed URL %s" % self.path)) + '\n')
+            self.connection.send(json.dumps({"error":"Malformed URL %s" % self.path})+'\n')
             return
 
-        try    :
-            db = datalib.Database(self)
-            db.connect(config, scraperID)
-        except Exception, e :
-            self.connection.send (json.dumps ((False, '%s' % e)) + '\n')
-            return
+        db = datalib.Database(self, config, scraperID)
+        self.connection.send(json.dumps({"status":"good"})+'\n')
 
-        self.connection.send(json.dumps ((True, 'OK')) + '\n')
-
-        startat = time.strftime ('%Y-%m-%d %H:%M:%S')
-
-
-                # enter the loop that now continues through until the connection is closed
-                # unclear where self.connection is generated.  I believe it is a socket object
-                # documentation on object is poor:  http://docs.python.org/release/2.5.2/lib/socket-objects.html
-                # would be nice to obtain its error conditions, timeouts, and an explicit message that it is actually been closed
-                # perhaps should be using sendall instead of send() everywhere
+                # enter the loop that now waits for single requests (delimited by \n) 
+                # and sends back responses through a socket
+                # all with json objects -- until the connection is terminated
         sbuffer = [ ]
         try:
             while True:

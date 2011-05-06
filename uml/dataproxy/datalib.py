@@ -17,14 +17,8 @@ except: import simplejson as json
 
 class Database :
 
-    def __init__(self, ldataproxy):
+    def __init__(self, ldataproxy, config, scraperID):
         self.dataproxy = ldataproxy
-
-    def connect (self, config, scraperID) :
-
-        """
-        Get a database connection.
-        """
 
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
@@ -47,15 +41,13 @@ class Database :
         if os.path.isfile(scrapersqlitefile):
             deletedscrapersqlitefile = os.path.join(scraperresourcedir, "DELETED-defaultdb.sqlite")
             shutil.move(scrapersqlitefile, deletedscrapersqlitefile)
-            
-        return [ True, None ]
-
+        return {"status":"good"}
 
     # general single file sqlite access
     # the values of these fields are safe because from the UML they are subject to an ident callback, 
     # and from the frontend they are subject to a connection from a particular IP number
     def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
-        #print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
+        print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
         
         def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
             #print "authorizer_readonly", (action_code, tname, cname, sql_location, trigger)
@@ -87,7 +79,7 @@ class Database :
 
         if not runID:
             return {"error":"runID is blank"}
-            
+
         if runID[:12] == "fromfrontend":
             self.authorizer_func = authorizer_readonly
         
@@ -106,7 +98,7 @@ class Database :
             if not os.path.isfile(scrapersqlitefile):
                 return {"status":"No sqlite database"}
             
-            result = { "filename":lscrapersqlitefile, "filesize": os.path.getsize(scrapersqlitefile) }
+            result = { "filename":lscrapersqlitefile, "filesize": os.path.getsize(scrapersqlitefile)}
             if val2 == 0:
                 return result
             
@@ -134,8 +126,8 @@ class Database :
             if short_name:
                 scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
                 if not os.path.isdir(scraperresourcedir):
-                    if command == "datasummary":
-                        return {"status":"No sqlite database"}   # don't make one if we're just requesting a summary
+                    if command == "datasummary": 
+                        return {"status":"No sqlite database"}    # don't make one if we're just requesting a summary
                     os.mkdir(scraperresourcedir)
                 scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
@@ -157,22 +149,24 @@ class Database :
                 
                 keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
                 if not bstreamchunking:
-                    return {"keys":keys, "data":self.m_sqlitedbcursor.fetchall()} 
+                    return {"keys":keys, "data":self.m_sqlitedbcursor.fetchall()}
                 
+                    # this loop has the one internal jsend in it
                 while True:
                     data = self.m_sqlitedbcursor.fetchmany(val2[1])
                     arg = {"keys":keys, "data":data} 
                     if len(data) < val2[1]:
-                        return arg
+                        break
                     arg["moredata"] = True
-                    self.dataproxy.connection.send(json.dumps(arg) + '\n')  # push it out
+                    self.dataproxy.connection.send(json.dumps(arg)+'\n')
+                return arg
 
             
             except sqlite3.Error, e:
                 signal.alarm (0)
                 return {"error":"sqlite3.Error: "+str(e)}
                 
-        if command == "datasummary":
+        elif command == "datasummary":
             self.authorizer_func = authorizer_readonly
             tables = { }
             try:
@@ -196,7 +190,7 @@ class Database :
                     result["filesize"] = os.path.getsize(scrapersqlitefile)
             return result
         
-        if command == "attach":
+        elif command == "attach":
             if self.authorizer_func == authorizer_writemain:
                 self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
             self.authorizer_func = authorizer_attaching
@@ -207,12 +201,11 @@ class Database :
                 return {"error":"sqlite3.Error: "+str(e)}
             return {"status":"attach succeeded"}
 
-        if command == "commit":
+        elif command == "commit":
             signal.alarm(10)
             self.m_sqlitedbconn.commit()
             signal.alarm(0)
             return {"status":"commit succeeded"}  # doesn't reach here if the signal fails
-
 
 
 
@@ -273,7 +266,7 @@ class SqliteSaveInfo:
 
     def sqliteexecute(self, val1, val2=None):
         res = self.database.sqlitecommand(self.scraperID, self.runID, self.short_name, "execute", val1, val2)
-        #print "execute", val1, val2, res
+        #print ["execute", val1, val2, res]
         return res
     
     def rebuildinfo(self):
@@ -288,6 +281,7 @@ class SqliteSaveInfo:
         self.swdatatypes = [ a[2]  for a in tblinfo["data"] ]
         self.sqdatatemplate = "insert or replace into main.`%s` values (%s)" % (self.swdatatblname, ",".join(["?"]*len(self.swdatakeys)))
         return True
+    
             
     def buildinitialtable(self, data):
         assert not self.swdatakeys
