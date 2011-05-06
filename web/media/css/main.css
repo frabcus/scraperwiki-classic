@@ -292,6 +292,7 @@ body.frontpage #nav_inner li.frontpage {
 #nav_search_go {
 	position: absolute;
 	left: -9000px;
+	width: 10px;
 }
 
 
@@ -452,7 +453,7 @@ body.frontpage #header_outer {
 }
 
 body.frontpage #header_inner {
-	padding: 10px 0 0 0;
+	padding: 0;
 	background: none;
 }
 
@@ -498,7 +499,8 @@ body.search #header_inner:hover form #id_q {
 /* FRONTPAGE HEADER */
 
 #frontpage_intro p {
-	margin: 10px 0 0 10px;
+	margin: 0;
+	padding: 20px 0 0 10px;
 	color: #fff;
 	text-shadow: 0px 1px 5px #325a78;
 	filter: dropshadow(color=#325a78, offx=0, offy=1);
@@ -511,7 +513,7 @@ body.search #header_inner:hover form #id_q {
 	float: right;
 	width: 225px;
 	height: 60px;
-	margin: -5px 10px 0 0;
+	margin: 15px 10px 0 0;
 	text-decoration: none;
 	text-indent: -9000px;
 	background: transparent url(../images/frontpage_intro_buttons.png) no-repeat 0 0;

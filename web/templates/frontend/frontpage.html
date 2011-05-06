@@ -67,16 +67,12 @@
 				<ul>
 				{% load markup %}
                 {% load screen_shot %}
-	    		{% for code in featured_both %}
-                    <li>
-                        <a href="{% url code_overview code.wiki_type code.short_name %}">
+	    		{% for code in featured_both %}<li><a href="{% url code_overview code.wiki_type code.short_name %}">
                             {% screen_shot code 'medium' %}
                             <h4>{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %} / {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}</h4>
                             <span class="about">{{code.wiki_type}}&nbsp;&nbsp;{{code.language}}</span>
                             <span class="when">Created {{code.created_at|timesince}} ago</span>
-                        </a>
-                    </li>
-	    		{% endfor %}
+                        </a></li>{% endfor %}
 	    		    <li class="clear"></li>
 				</ul>
 			</div>
