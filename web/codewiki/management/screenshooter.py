@@ -4,8 +4,19 @@ from webkit2png import WebkitRenderer
 from PyQt4.QtGui import QApplication
 from PyQt4.QtCore import QTimer, Qt
 from PyQt4.QtWebKit import QWebSettings
-import sys, signal
+import sys, signal, gc, os
 
+def _memsize():
+    """ this function tries to return a measurement of how much memory
+    this process is consuming, in some arbitrary unit (if it doesn't
+    manage to, it returns 0).
+    """
+    gc.collect()
+    try:
+        x = int(os.popen('ps -p %d -o vsz|tail -1' % os.getpid()).read())
+    except:
+        x = 0
+    return x
 
 class ScreenShooter(object):
     def __init__(self):
@@ -38,6 +49,8 @@ class ScreenShooter(object):
         for shot in self.shots:
             if self.verbose:
                 print "Taking screenshot %s" % shot['filename']
+                print shot['url']
+                print _memsize()
             try:
                 image = self._get_renderer(shot['size'][0], shot['size'][1]).render(shot['url'])
                 image.save(shot['filename'], 'png')
