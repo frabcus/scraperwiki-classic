@@ -174,6 +174,15 @@ class scraperwiki
 
    static function gb_postcode_to_latlng ($postcode)
    {
+       $url = "http://scraperwikiviews.com/run/uk_postcode_lookup/?postcode=".urlencode($postcode); 
+       $sres = scraperwiki::scrape($url); 
+       $jres = json_decode($sres, true); 
+       if ($jres["lat"] && $jres["lng"])
+            return array($jres["lat"], $jres["lng"]); 
+       return null; 
+
+        // old method
+      scraperwiki::gb_postcode_to_latlng($postcode)
       if (is_null($postcode))
          return null ;
 

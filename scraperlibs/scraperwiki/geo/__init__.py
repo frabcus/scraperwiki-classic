@@ -5,7 +5,6 @@ import urllib2
 import re
 import sys
 sys.path.append('..')
-from scraperwiki.datastore import connection
 from scraperwiki.datastore import DataStore
 
 try:
@@ -39,9 +38,22 @@ def extract_gb_postcode(string):
 
     return postcode
 
+def SW_gb_postcode_to_latlng(postcode):
+    if not postcode:
+         return None
+    url = "http://scraperwikiviews.com/run/uk_postcode_lookup/?postcode="+urllib2.quote(postcode)
+    sres = urllib2.urlopen(url).read()
+    jres = json.loads(sres)
+    if "lat" in jres and "lng" in jres:
+        return (jres["lat"], jres["lng"])
+    return None
+
 # to delete
 def gb_postcode_to_latlng(postcode):
-    if not postcode :
+    return SW_gb_postcode_to_latlng(postcode)
+
+    # old method
+    if not postcode:
         return None
     ds = DataStore (None)
     rc, arg = ds.postcodeToLatLng (postcode)
@@ -49,6 +61,7 @@ def gb_postcode_to_latlng(postcode):
         scraperwiki.console.logWarning ('%s: %s' % (arg, postcode))
         return None
     return arg
+
 
 # definitely to delete
 def gb_postcode_to_latlng_maxmanders(postcode):
