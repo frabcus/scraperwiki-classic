@@ -250,7 +250,7 @@ class DataEnquiry(models.Model):
     broadcast = models.BooleanField()
 
     FREQUENCY_CHOICES = (
-      ('one', 'Once only'),
+      ('once', 'Once only'),
       ('monthly', 'Monthly'),
       ('weekly', 'Weekly'),
       ('daily', 'Daily'),
@@ -276,6 +276,7 @@ class DataEnquiry(models.Model):
 
     def email_message(self):
         return u"""
+            Category: %s
             First Name: %s
             Last Name: %s
             Your email address: %s
@@ -289,15 +290,16 @@ class DataEnquiry(models.Model):
             What are your ETL needs?: %s
             What visualisation do you need?: %s
             What application do you want built?: %s
-        """ % (self.first_name,
+        """ % (self.category,
+               self.first_name,
                self.last_name,
                self.email,
                self.telephone,
                self.company_name,
                self.urls,
                self.columns,
-               self.due_date,
-               FREQUENCY_CHOICES[self.frequency],
+               self.due_date or '',
+               self.frequency,
                "Yes" if self.broadcast else "No",
                self.description,
                self.visualisation,
