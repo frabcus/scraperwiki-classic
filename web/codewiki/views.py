@@ -156,7 +156,7 @@ def code_overview(request, wiki_type, short_name):
     try:
         dataproxy = DataStore(scraper.guid, scraper.short_name)
         sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
-        if sqlitedata and type(sqlitedata) not in [str, unicode]:
+        if sqlitedata and type(sqlitedata) not in [str, unicode] and "tables" in sqlitedata:
             context['sqlitedata'] = sqlitedata["tables"]
     except socket.error, e:
         context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
@@ -380,7 +380,7 @@ def proxycached(request):
     try:
         fin = urllib2.urlopen(proxyurl)
         result["mimetype"] = fin.headers.type
-        if fin.headers.maintype == 'text' or fin.headers.type == "application/json":
+        if fin.headers.maintype == 'text' or fin.headers.type == "application/json" or fin.headers.type[-4:] == "+xml":
             result['content'] = convtounicode(fin.read())
         else:
             result['content'] = base64.encodestring(fin.read())

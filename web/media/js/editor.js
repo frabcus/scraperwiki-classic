@@ -1536,9 +1536,15 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             return { "objcontent": $('<pre class="popupoutput">Malformed json: ' + cgiescape(sdata) + "</pre>") }; 
         }
 
+        lmimetype = cachejson["mimetype"];  // the incoming value is incorrect because of failure to use closure and httpproxy.py isn't sending the value out properly (see line 489)
         if ((lmimetype != "text/html") || (cachejson["content"].length > 20000))
         {
-            cachejson["objcontent"] = $('<pre>'+cgiescape(cachejson["content"]) + "</pre>"); 
+            var res = [ ]; 
+            res.push("<h2>mimetype: "+lmimetype+"</h2>"); 
+            if (cachejson["encoding"] == "base64")
+                res.push("<h2>Encoded as: "+cachejson["encoding"]+"</h2>"); 
+            res.push('<pre>', cgiescape(cachejson["content"]), '</pre>'); 
+            cachejson["objcontent"] = $(res.join("")); 
             return cachejson; 
         }
         // could highlight text/javascript and text/css
