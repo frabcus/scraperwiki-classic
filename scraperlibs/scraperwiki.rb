@@ -64,7 +64,20 @@ module ScraperWiki
         Net::HTTP.get(uri)
     end
 
+    def ScraperWiki.SW_gb_postcode_to_latlng(postcode)
+        uri = URI.parse("http://scraperwikiviews.com/run/uk_postcode_lookup/?postcode="+URI.escape(postcode))
+        sres = Net::HTTP.get(uri)
+        jres = JSON.parse(sres)
+        if jres["lat"] and jres["lng"]:
+            return [jres["lat"], jres["lng"]]
+        end
+        return nil
+    end
+
     def ScraperWiki.gb_postcode_to_latlng(postcode)
+        return ScraperWiki.SW_gb_postcode_to_latlng(postcode)
+
+        # old method
         if postcode == nil :
             return nil
         end
