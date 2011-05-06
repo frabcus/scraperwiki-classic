@@ -74,65 +74,19 @@ def stream_csv(dataproxy):
 
 
 def data_handler(request):
-    scraper = getscraperorresponse(request)
-    if isinstance(scraper, HttpResponse):  return scraper
-    dataproxy = DataStore(scraper.guid, "")  
-    rc, arg = dataproxy.request(('item_count',))
-    
-        # no items in old datastore
-        # redirect to the sqlite interface
-        # (could pull out the column order and put in place of the *)
-    if arg == 0:
-        tablename = request.GET.get('tablename', "swdata")
-        squery = ["select * from `%s`" % tablename]
-        if "limit" in request.GET:
-            squery.append('limit %s' % request.GET.get('limit'))
-        if "offset" in request.GET:
-            squery.append('offset %s' % request.GET.get('offset'))
-        qsdata = { "name": request.GET.get("name").encode('utf-8'), "query": " ".join(squery).encode('utf-8') }
-        if "format" in request.GET:
-            qsdata["format"] = request.GET.get("format").encode('utf-8')
-        if "callback" in request.GET:
-            qsdata["callback"] = request.GET.get("callback").encode('utf-8')
-        return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
+    tablename = request.GET.get('tablename', "swdata")
+    squery = ["select * from `%s`" % tablename]
+    if "limit" in request.GET:
+        squery.append('limit %s' % request.GET.get('limit'))
+    if "offset" in request.GET:
+        squery.append('offset %s' % request.GET.get('offset'))
+    qsdata = { "name": request.GET.get("name").encode('utf-8'), "query": " ".join(squery).encode('utf-8') }
+    if "format" in request.GET:
+        qsdata["format"] = request.GET.get("format").encode('utf-8')
+    if "callback" in request.GET:
+        qsdata["callback"] = request.GET.get("callback").encode('utf-8')
+    return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
 
-    # do the old data handler case
-    limit = int(request.GET.get('limit', 100))
-    offset = int(request.GET.get('offset', 0))
-    rc, arg = dataproxy.data_dictlist(limit=limit, offset=offset)
-    if not rc:
-        return HttpResponse("Error: "+arg)
-    
-    format = request.GET.get("format", "json").lower()
-    if format == "json":
-        format = "jsondict"
-    
-    if format != "jsondict" and len(arg) != 0:
-        keys = set()
-        for row in arg:   keys.update(row)
-        keys = sorted(list(keys))
-        rows = [ [row.get(key, "")  for key in keys]  for row in arg ]
-        arg = { "keys":keys, "data":rows }
-    if format == "jsonlist" or format == "jsondict":
-        result = simplejson.dumps(arg, cls=DateTimeAwareJSONEncoder, indent=4)
-        callback = request.GET.get("callback")
-        if callback:
-            result = "%s(%s)" % (callback, result)
-        response = HttpResponse(result, mimetype='application/json')
-        response['Content-Disposition'] = 'attachment; filename=%s.json' % (scraper.short_name)
-        return response
-        
-    if format != "csv":
-        return HttpResponse("Error: the format '%s' is not supported" % arg)
-        
-    fout = StringIO()
-    writer = csv.writer(fout, dialect='excel')
-    writer.writerow([ k.encode('utf-8') for k in arg["keys"] ])
-    for row in arg["data"]:
-        writer.writerow([ stringnot(v)  for v in row ])
-    response = HttpResponse(fout.getvalue(), mimetype='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
-    return response
     
 
 # ***Streamchunking could all be working, but for not being able to set the Content-Length

@@ -18,6 +18,7 @@ import re
 import urllib2
 import base64
 import datetime
+import socket
 
 try:                import json
 except ImportError: import simplejson as json
@@ -157,9 +158,9 @@ def code_overview(request, wiki_type, short_name):
         sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
         if sqlitedata and type(sqlitedata) not in [str, unicode]:
             context['sqlitedata'] = sqlitedata["tables"]
-    except:
-        pass
-    
+    except socket.error, e:
+        context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
+        
     # put in ckan connections
     if request.user.is_staff:
         try:

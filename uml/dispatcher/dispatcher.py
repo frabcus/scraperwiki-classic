@@ -775,7 +775,6 @@ class UMLScanner (threading.Thread) :
 
         while True :
             time.sleep(10)
-            print >>sys.stderr, "MONITOR"
             UMLLock.acquire()
             if UMLPtr is None :
                 UMLLock.release()

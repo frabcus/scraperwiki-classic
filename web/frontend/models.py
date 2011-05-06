@@ -250,7 +250,7 @@ class DataEnquiry(models.Model):
     broadcast = models.BooleanField()
 
     FREQUENCY_CHOICES = (
-      ('one', 'Once only'),
+      ('once', 'Once only'),
       ('monthly', 'Monthly'),
       ('weekly', 'Weekly'),
       ('daily', 'Daily'),
@@ -276,27 +276,31 @@ class DataEnquiry(models.Model):
 
     def email_message(self):
         return u"""
+            Category: %s
             First Name: %s
             Last Name: %s
-            Email: %s
-            Telephone: %s
-            Company: %s
-            URLs: %s
-            Columns: %s
-            Due Date: %s
-            Broadcast: %s
-            Description: %s
-            Visualisation: %s
-            Application: %s
-        """ % (self.first_name,
+            Your email address: %s
+            Your telephone number: %s
+            Your company name: %s
+            At which URL(s) can we find the data currently?: %s
+            What information do you want scraped?: %s
+            When do you need it by?: %s
+            How often does the data need to be scraped?: %s
+            I'm happy for this request to be posted on Twitter/Facebook: %s
+            What are your ETL needs?: %s
+            What visualisation do you need?: %s
+            What application do you want built?: %s
+        """ % (self.category,
+               self.first_name,
                self.last_name,
                self.email,
                self.telephone,
                self.company_name,
                self.urls,
                self.columns,
-               self.due_date,
-               self.broadcast,
+               self.due_date or '',
+               self.frequency,
+               "Yes" if self.broadcast else "No",
                self.description,
                self.visualisation,
                self.application)
