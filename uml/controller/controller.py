@@ -759,7 +759,6 @@ class ScraperController (BaseController) :
                                 #
                                 # Record done with that pipe
                                 #
-                                p.unregister (fd)
                                 del fdmap[fd]
                                 busy -= 1
                                 continue
