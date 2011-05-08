@@ -50,6 +50,7 @@ PRIVACY_STATUSES = (
 )
 
 STAFF_ACTIONS = ["run_scraper", "screenshoot_scraper"]
+STAFF_EXTRA_ACTIONS = ["delete_data"]
 CREATOR_ACTIONS = ["delete_data", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ]
 EDITOR_ACTIONS = ["changeadmin", "savecode", "settags" ]
 VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription" ]
@@ -310,8 +311,8 @@ class Code(models.Model):
         
         if action in STAFF_ACTIONS:
             return user.is_staff
-        #if user.is_staff:
-        #    return True
+        if user.is_staff and action in STAFF_EXTRA_ACTIONS:  
+            return True
         
         if action in CREATOR_ACTIONS:
             return "owner" in roles
