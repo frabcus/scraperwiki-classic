@@ -251,7 +251,7 @@ module ScraperWiki
     def ScraperWiki.save_metadata(metadata_name, value)
         #return SW_MetadataClient.create().save(metadata_name, value)
         if $metacallholder == nil
-            puts "*** instead of metadata.save('"+metadata_name+"') please use\n    scraperwiki.sqlite.save_var('"+metadata_name+"')"
+            puts "*** instead of save_metadata('"+metadata_name+"') please use\n    save_var('"+metadata_name+"')"
             $metacallholder = "9sd8sd9fs9d8f9s8df9s8f"
         end
         return ScraperWiki.save_var(metadata_name, value)
