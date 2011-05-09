@@ -17,7 +17,8 @@ class scraperwiki
    static function sw_dumpMessage ($dict)
    {
       global $logfd ;
-      fwrite ($logfd, json_encode ($dict) . "\n") ;
+      if ($logfd)
+          fwrite ($logfd, json_encode ($dict) . "\n") ;
    }
 
    static function sw_logScrapedURL ($url, $length)
