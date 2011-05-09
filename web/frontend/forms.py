@@ -140,7 +140,7 @@ class DataEnquiryForm(forms.ModelForm):
     email = forms.CharField(label='Your email address:')
     telephone = forms.CharField(required=False, label='Your telephone number:')
     company_name = forms.CharField(required=False, label='Your company name:')
-    broadcast = forms.BooleanField(required=False, label='I\'m happy for this request to be posted on Twitter/Facebook')
+    broadcast = forms.BooleanField(initial=True, required=False, label='I\'m happy for this request to be posted on Twitter/Facebook')
     description = forms.CharField(required=False, widget=forms.Textarea, label='What are your ETL needs?')
     visualisation = forms.CharField(required=False, widget=forms.Textarea, label='What visualisation do you need?')
     application = forms.CharField(required=False, widget=forms.Textarea, label='What application do you want built?')

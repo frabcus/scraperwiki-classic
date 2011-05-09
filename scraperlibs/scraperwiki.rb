@@ -64,7 +64,7 @@ module ScraperWiki
         Net::HTTP.get(uri)
     end
 
-    def ScraperWiki.SW_gb_postcode_to_latlng(postcode)
+    def ScraperWiki.gb_postcode_to_latlng(postcode)
         uri = URI.parse("http://scraperwikiviews.com/run/uk_postcode_lookup/?postcode="+URI.escape(postcode))
         sres = Net::HTTP.get(uri)
         jres = JSON.parse(sres)
@@ -74,21 +74,6 @@ module ScraperWiki
         return nil
     end
 
-    def ScraperWiki.gb_postcode_to_latlng(postcode)
-        return ScraperWiki.SW_gb_postcode_to_latlng(postcode)
-
-        # old method
-        if postcode == nil :
-            return nil
-        end
-        ds  = SW_DataStore.create()
-        res = ds.request(['postcodetolatlng', postcode])
-        if ! res[0]
-            ScraperWiki::dumpMessage({'message_type' => 'console', 'content' => 'Warning: %s: %s' % [res[1], postcode]})
-            return nil
-        end
-        return res[1]
-    end
 
 
     def ScraperWiki._unicode_truncate(string, size)

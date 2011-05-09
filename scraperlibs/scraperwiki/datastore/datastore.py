@@ -62,17 +62,17 @@ class DataStoreClass :
         self.m_socket.sendall('GET /?uml=%s&port=%d&scraperid=%s HTTP/1.1\n\n' % (socket.gethostname(), self.m_socket.getsockname()[1], scraperID))
         
         line = receiveoneline(self.m_socket)  # comes back with True, "Ok"
-        rc, arg = json.loads(line)
-        assert rc, arg
+        res = json.loads(line)
+        assert res.get("status") == "good", res
 
-    def request (self, req) :
+    def request(self, req) :
         if not self.m_socket:
             self.connect()
         self.m_socket.sendall(json.dumps(req)+'\n')
         line = receiveoneline(self.m_socket)
         return json.loads(line)
 
-    def save (self, unique_keys, scraper_data, date = None, latlng = None) :
+    def save(self, unique_keys, scraper_data, date = None, latlng = None) :
         raise Exception("scraperwiki.datastore.save() has been deprecated.  Use scraperwiki.sqlite.save()")
 
     def save_sqlite(self, unique_keys, data, swdatatblname="swdata"):
@@ -125,12 +125,7 @@ class DataStoreClass :
                 rjdata.append(ljdata)
         return self.request(('save_sqlite', unique_keys, rjdata, swdatatblname))
     
-    
-    def postcodeToLatLng (self, postcode) :
-        return self.request (('postcodetolatlng', postcode))
-
     def close (self) :
-
         self.m_socket.sendall('.\n')  # what's this for?
         self.m_socket.close()
         self.m_socket = None
