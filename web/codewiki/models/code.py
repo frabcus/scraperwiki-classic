@@ -50,8 +50,8 @@ PRIVACY_STATUSES = (
 )
 
 STAFF_ACTIONS = ["run_scraper", "screenshoot_scraper"]
-STAFF_EXTRA_ACTIONS = ["delete_data"]
 CREATOR_ACTIONS = ["delete_data", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ]
+STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS # let staff also do anything a creator can
 EDITOR_ACTIONS = ["changeadmin", "savecode", "settags" ]
 VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription" ]
 
