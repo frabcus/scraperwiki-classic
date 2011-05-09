@@ -32,8 +32,8 @@ class SW_DataStoreClass
             socket_send        ($this->m_socket, $getmsg, strlen($getmsg), MSG_EOR) ;
             socket_recv        ($this->m_socket, $buffer, 0xffff, 0) ;
             $result = json_decode ($buffer) ;
-            if (! $result[0])
-               throw new Exception ($result[1]) ;
+            if ($result["status"] != "good")
+               throw new Exception ($result["status"]) ;
       }
    }
 
@@ -62,11 +62,6 @@ class SW_DataStoreClass
        throw new Exception ("This function is no more and shouldn't be accessible") ;
    }
 
-
-   function postcodeToLatLng ($postcode)
-   {
-      return $this->request (array ('postcodetolatlng', $postcode)) ;
-   }
 
    function close ()
    {
