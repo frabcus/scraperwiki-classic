@@ -115,7 +115,7 @@ def sqlite_handler(request):
     for aattach in attachlist:
         if aattach:
             aa = aattach.split(",")
-            dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
+            dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "val1":aa[0], "val2":(len(aa) == 2 and aa[1] or None)})
     
     sqlquery = request.GET.get('query', "")
     format = request.GET.get("format", "json")
@@ -125,7 +125,10 @@ def sqlite_handler(request):
     reqt = None
     if format == "csv":
         reqt = ("streamchunking", 1000)
-    req = ("sqlitecommand", "execute", sqlquery, reqt)
+    
+    # this is inlined from the dataproxy.request() function to allow for receiveoneline to perform multiple readlines in this case
+    # (this is the stream-chunking thing.  the right interface is not yet apparent)
+    req = {"maincommand":"sqlitecommand", "command":"execute", "val1":sqlquery, "val2":reqt}
     dataproxy.m_socket.sendall(simplejson.dumps(req) + '\n')
     
     if format not in ["csv", "jsondict", "jsonlist"]:

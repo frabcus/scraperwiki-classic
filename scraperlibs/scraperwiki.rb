@@ -103,7 +103,7 @@ module ScraperWiki
         # this ought to be a local function (the other sqlite functions go through it)
     def ScraperWiki.sqlitecommand(command, val1=nil, val2=nil, verbose=2)
         ds = SW_DataStore.create()
-        res = ds.request(['sqlitecommand', command, val1, val2])
+        res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>command, 'val1'=>val1, 'val2'=>val2})
         if res["error"]
             if /sqlite3.Error: no such table:/.match(res["error"])
                 raise NoSuchTableSqliteException.new(res["error"])
@@ -174,7 +174,7 @@ module ScraperWiki
         end
 
         ds = SW_DataStore.create()
-        res = ds.request(['save_sqlite', unique_keys, rjdata, table_name])
+        res = ds.request({'maincommand'=>'save_sqlite', 'unique_keys'=>unique_keys, 'data'=>rjdata, 'swdatatblname'=>table_name})
         if res["error"]
             raise SqliteException.new(res["error"])
         end

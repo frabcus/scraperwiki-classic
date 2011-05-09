@@ -57,7 +57,7 @@ class scraperwiki
    static function sqlitecommand($command, $val1=null, $val2=null, $verbose=1)
    {
       $ds = SW_DataStoreClass::create();
-      $result = $ds->request(array('sqlitecommand', $command, $val1, $val2));
+      $result = $ds->request(array('maincommand'=>'sqlitecommand', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
       if (property_exists($result, 'error'))
          throw new Exception ($result->error);
       if ($verbose != 0)
@@ -75,7 +75,7 @@ class scraperwiki
    static function save_sqlite($unique_keys, $data, $table_name="swdata", $verbose=2)
    {
       $ds = SW_DataStoreClass::create();
-      $result = $ds->request(array('save_sqlite', $unique_keys, $data, $table_name)); 
+      $result = $ds->request(array('maincommand'=>'save_sqlite', 'unique_keys'=>$unique_keys, 'data'=>$data, 'swdatatblname'=>$table_name)); 
       if (property_exists($result, 'error'))
          throw new Exception ($result->error);
 
@@ -157,8 +157,8 @@ class scraperwiki
 
    static function get_var($name, $default=None)
    {
-      $ds = SW_DataStoreClass::create () ;
-      $result = $ds->request(array('sqlitecommand', "execute", "select value_blob, type from swvariables where name=?", array($name)));
+      $ds = SW_DataStoreClass::create ();
+      $result = scraperwiki::sqlitecommand("execute", "select value_blob, type from swvariables where name=?", array($name)); 
       if (property_exists($result, 'error'))
       {
          if (substr($result->error, 0, 29) == 'sqlite3.Error: no such table:')
