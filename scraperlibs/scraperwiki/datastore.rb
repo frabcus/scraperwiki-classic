@@ -34,8 +34,8 @@ class SW_DataStore
             @m_socket.flush()
             buffer = @m_socket.recv(1024)
             result = JSON.parse(buffer)
-            if ! result[0]
-                raise result[1]
+            if result["status"] !+ "good"
+                raise result["status"]
             end
         end
     end

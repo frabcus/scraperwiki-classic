@@ -156,11 +156,21 @@ def code_overview(request, wiki_type, short_name):
     try:
         dataproxy = DataStore(scraper.guid, scraper.short_name)
         sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
-        if sqlitedata and type(sqlitedata) not in [str, unicode] and "tables" in sqlitedata:
-            context['sqlitedata'] = sqlitedata["tables"]
+        if not sqlitedata:
+            context['sqliteconnectionerror'] = 'No content in response'
+        elif type(sqlitedata) in [str, unicode]:
+            context['sqliteconnectionerror'] = sqlitedata
+        elif 'tables' not in sqlitedata:
+            if 'status' in sqlitedata:
+                context['sqliteconnectionerror'] = sqlitedata['status']
+            else:
+                context['sqliteconnectionerror'] = 'Response with unexpected format'
+        else:
+            # success, have good data
+            context['sqlitedata'] = sqlitedata['tables']
     except socket.error, e:
         context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
-        
+
     # put in ckan connections
     if request.user.is_staff:
         try:

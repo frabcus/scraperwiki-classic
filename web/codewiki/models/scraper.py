@@ -76,6 +76,7 @@ class Scraper (code.Code):
     def update_meta(self):
         dataproxy = DataStore(self.guid, self.short_name)
         try:
+            self.record_count = 0
             datasummary = dataproxy.request(("sqlitecommand", "datasummary", 0, None))
             for tabledata in datasummary.get("tables", {}).values():
                 self.record_count += tabledata["count"]

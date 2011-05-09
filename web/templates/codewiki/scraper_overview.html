@@ -105,10 +105,14 @@
             </div>
             <div class="info_unpublished">
                 {% if sqliteconnectionerror %}
-                    Dataproxy error: {{sqliteconnectionerror}}
+                    Sorry! The datastore isn't working right now. 
+                    {{sqliteconnectionerror}}.
                 {% else %}
                     This scraper is being worked on <br/>and there is no data to display yet
                 {% endif %}
+            </div>
+            <div class="content_footer">
+                &nbsp;
             </div>
         {% endif %}
     </div>

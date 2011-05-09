@@ -180,26 +180,6 @@ class scraperwiki
        if ($jres["lat"] && $jres["lng"])
             return array($jres["lat"], $jres["lng"]); 
        return null; 
-
-        // old method
-      if (is_null($postcode))
-         return null ;
-
-      $ds      = SW_DataStoreClass::create () ;
-
-      $result  = $ds->postcodeToLatLng ($postcode) ;
-      if (! $result[0])
-      {
-         scraperwiki::sw_dumpMessage
-            (  array
-                  (  'message_type' => 'console',
-                     'content'      => 'Warning: ' + sprintf('%s: %s', $result[1], $postcode)
-                  )
-            )  ;
-        return null  ;
-      }
-
-      return $result[1] ;
    }
 
    static function scrape ($url)

@@ -69,7 +69,7 @@ def stream_csv(dataproxy):
         
         yield fout.getvalue()
         n += 1
-        if "moredata" not in ret:
+        if not ret.get("moredata"):
             break  
 
 
@@ -115,7 +115,7 @@ def sqlite_handler(request):
     for aattach in attachlist:
         if aattach:
             aa = aattach.split(",")
-            sqlitedata = dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
+            dataproxy.request(("sqlitecommand", "attach", aa[0], (len(aa) == 2 and aa[1] or None)))
     
     sqlquery = request.GET.get('query', "")
     format = request.GET.get("format", "json")
