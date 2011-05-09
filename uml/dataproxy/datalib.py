@@ -266,6 +266,8 @@ class SqliteSaveInfo:
 
     def sqliteexecute(self, val1, val2=None):
         res = self.database.sqlitecommand(self.scraperID, self.runID, self.short_name, "execute", val1, val2)
+        if "error" in res:
+            print "rrrrr", res
         #print ["execute", val1, val2, res]
         return res
     
