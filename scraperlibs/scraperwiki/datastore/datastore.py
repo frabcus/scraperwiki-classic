@@ -42,7 +42,7 @@ class DataStoreClass :
         self.m_socket = None
         self.m_config = config
 
-    def connect(self, scraperID = '') :
+    def connect(self, scraperID = ''):
         """
         Connect to the data proxy. The data proxy will need to make an Ident call
         back to get the scraperID. Since the data proxy may be on another machine
@@ -123,7 +123,7 @@ class DataStoreClass :
                 if ljdata.get("error"):
                     return ljdata
                 rjdata.append(ljdata)
-        return self.request(('save_sqlite', unique_keys, rjdata, swdatatblname))
+        return self.request({"maincommand":'save_sqlite', "unique_keys":unique_keys, "data":rjdata, "swdatatblname":swdatatblname})
     
     def close (self) :
         self.m_socket.sendall('.\n')  # what's this for?
@@ -181,7 +181,7 @@ def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="sw
 
 def sqlitecommand(command, val1=None, val2=None, verbose=1):
     ds = DataStore(None)
-    result = ds.request(('sqlitecommand', command, val1, val2))
+    result = ds.request({"maincommand":'sqlitecommand', "command":command, "val1":val1, "val2":val2})
     if "error" in result:
         raise databaseexception(result)
     if "status" not in result and "keys" not in result:

@@ -48,7 +48,7 @@ class GetInfo(APIBase):
             
             if 'datasummary' not in quietfields:
                 dataproxy = DataStore(scraper.guid, scraper.short_name)
-                sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", 0, None))
+                sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "val1":0, "val2":None})
                 if sqlitedata and type(sqlitedata) not in [str, unicode]:
                     info['datasummary'] = sqlitedata
         

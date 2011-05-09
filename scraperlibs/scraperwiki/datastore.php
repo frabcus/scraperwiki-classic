@@ -31,9 +31,9 @@ class SW_DataStoreClass
             $getmsg = sprintf  ("GET /?uml=%s&port=%s HTTP/1.1\n\n", trim(`/bin/hostname`), $port) ;
             socket_send        ($this->m_socket, $getmsg, strlen($getmsg), MSG_EOR) ;
             socket_recv        ($this->m_socket, $buffer, 0xffff, 0) ;
-            $result = json_decode ($buffer) ;
+            $result = json_decode($buffer, true);
             if ($result["status"] != "good")
-               throw new Exception ($result["status"]) ;
+               throw new Exception ($result["status"]);
       }
    }
 
@@ -54,7 +54,7 @@ class SW_DataStoreClass
                break ;
       }
 
-      return json_decode ($text) ;
+      return json_decode($text) ;
    }
 
    function save ($unique_keys, $scraper_data, $date = null, $latlng = null)

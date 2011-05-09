@@ -155,7 +155,7 @@ def code_overview(request, wiki_type, short_name):
     # this is the only one to call.  would like to know the exception that's expected
     try:
         dataproxy = DataStore(scraper.guid, scraper.short_name)
-        sqlitedata = dataproxy.request(("sqlitecommand", "datasummary", None, None))
+        sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "val1":None, "val2":None})
         if not sqlitedata:
             context['sqliteconnectionerror'] = 'No content in response'
         elif type(sqlitedata) in [str, unicode]:
@@ -174,9 +174,9 @@ def code_overview(request, wiki_type, short_name):
     # put in ckan connections
     if request.user.is_staff:
         try:
-            dataproxy.request(("sqlitecommand", "attach", "ckan_datastore", "src"))
+            dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "val1":"ckan_datastore", "val2":"src"})
             ckansqlite = "select src.records.ckan_url, src.records.notes from src.resources left join src.records on src.records.id=src.resources.records_id  where src.resources.scraperwiki=?"
-            lsqlitedata = dataproxy.request(("sqlitecommand", "execute", ckansqlite, (scraper.short_name,)))
+            lsqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"execute", "val1":ckansqlite, "val2":(scraper.short_name,)})
             if lsqlitedata.get("data"):
                 context['ckanresource'] = dict(zip(lsqlitedata["keys"], lsqlitedata["data"][0]))
         except:
@@ -281,7 +281,7 @@ def scraper_delete_data(request, short_name):
     scraper = getscraperorresponse(request, "scraper", short_name, None, "delete_data")
     if isinstance(scraper, HttpResponse):  return scraper
     dataproxy = DataStore(scraper.guid, scraper.short_name)
-    dataproxy.request(("clear_datastore",))
+    dataproxy.request({"maincommand":"clear_datastore"})
     if scraper.wiki_type == "scraper":
         scraper.scraper.scrapermetadata_set.all().delete()
         scraper.scraper.update_meta()
@@ -413,7 +413,7 @@ def export_csv(request, short_name):
     # but as it's done, leave it here
 def stream_sqlite(dataproxy, filesize, memblock=100000):
     for offset in range(0, filesize, memblock):
-        sqlitedata = dataproxy.request(("sqlitecommand", "downloadsqlitefile", offset, memblock))
+        sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"downloadsqlitefile", "val1":offset, "val2":memblock})
         content = sqlitedata.get("content")
         if sqlitedata.get("encoding") == "base64":
             content = base64.decodestring(content)
@@ -428,7 +428,7 @@ def export_sqlite(request, short_name):
     scraper = getscraperor404(request, short_name, "exportsqlite")
     
     dataproxy = DataStore(scraper.guid, scraper.short_name)
-    initsqlitedata = dataproxy.request(("sqlitecommand", "downloadsqlitefile", 0, 0))
+    initsqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"downloadsqlitefile", "val1":0, "val2":0})
     if "filesize" not in initsqlitedata:
         return HttpResponse(str(initsqlitedata), mimetype="text/plain")
     

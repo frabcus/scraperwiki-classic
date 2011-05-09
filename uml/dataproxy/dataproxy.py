@@ -79,15 +79,22 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         return scraperID, runID, scraperName
 
-    def process (self, db, scraperID, runID, scraperName, request):
-        if request[0] == 'clear_datastore':
+    def process(self, db, scraperID, runID, scraperName, request):
+        if type(request) != dict:
+            res = {"error":'request must be dict', "content":str(request)}
+        elif "maincommand" not in request:
+            res = {"error":'request must contain maincommand', "content":str(request)}
+            
+        elif request["maincommand"] == 'clear_datastore':
             res = db.clear_datastore(scraperID, scraperName)
-        elif request[0] == 'sqlitecommand':
-            res = db.sqlitecommand(scraperID, runID, scraperName, command=request[1], val1=request[2], val2=request[3])
-        elif request[0] == 'save_sqlite':
-            res = db.save_sqlite(scraperID, runID, scraperName, unique_keys=request[1], data=request[2], swdatatblname=request[3])
+        elif request["maincommand"] == 'sqlitecommand':
+            res = db.sqlitecommand(scraperID, runID, scraperName, command=request["command"], val1=request["val1"], val2=request["val2"])
+        elif request["maincommand"] == 'save_sqlite':
+            res = db.save_sqlite(scraperID, runID, scraperName, unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
+        
         else:
-            res = {"error":'Unknown datastore command: %s' % request[0]}
+            res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
+        
         self.connection.send(json.dumps(res)+'\n')
 
 

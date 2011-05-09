@@ -29,12 +29,14 @@ class DataStore(object):
         assert res.get("status") == "good", res
         
 
-    def request(self, req) :
+    def request(self, req):
+        assert type(req) == dict, req
+        assert "maincommand" in req
         self.m_socket.sendall(json.dumps(req) + '\n')
         return self.receiveoneline()
 
     def close(self) :
-        self.m_socket.send ('.\n')
+        self.m_socket.send('.\n')
         self.m_socket.close()
         self.m_socket = None
 
