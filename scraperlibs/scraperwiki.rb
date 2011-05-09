@@ -15,6 +15,7 @@ module ScraperWiki
 
     $cacheFor = 0
     $metacallholder = nil
+    $attachlist = [ ]
 
     def ScraperWiki.allowCache(cacheFor)
         $cacheFor = cacheFor
@@ -103,7 +104,7 @@ module ScraperWiki
         # this ought to be a local function (the other sqlite functions go through it)
     def ScraperWiki.sqlitecommand(command, val1=nil, val2=nil, verbose=2)
         ds = SW_DataStore.create()
-        res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>command, 'val1'=>val1, 'val2'=>val2})
+        res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>command, 'val1'=>val1, 'val2'=>val2, 'attachlist'=>$attachlist})
         if res["error"]
             if /sqlite3.Error: no such table:/.match(res["error"])
                 raise NoSuchTableSqliteException.new(res["error"])
@@ -257,9 +258,9 @@ module ScraperWiki
     def ScraperWiki.table_info(name)
         sname = name.split(".")
         if sname.length == 2
-            result = sqlitecommand("execute", "PRAGMA %s.table_info(`%s`)" % sname)
+            result = ScraperWiki.sqlitecommand("execute", "PRAGMA %s.table_info(`%s`)" % sname)
         else
-            result = sqlitecommand("execute", "PRAGMA table_info(`%s`)" % name)
+            result = ScraperWiki.sqlitecommand("execute", "PRAGMA table_info(`%s`)" % name)
         end
         res = [ ]
         for d in result["data"]
@@ -291,6 +292,7 @@ module ScraperWiki
 
 
     def ScraperWiki.attach(name, asname=nil, verbose=1)
+        $attachlist.push({"name"=>name, "asname"=>asname})
         return ScraperWiki.sqlitecommand("attach", name, asname, verbose)
     end
     

@@ -42,7 +42,7 @@ class DataStoreClass :
         self.m_socket = None
         self.m_config = config
 
-    def connect(self, scraperID = '') :
+    def connect(self, scraperID = ''):
         """
         Connect to the data proxy. The data proxy will need to make an Ident call
         back to get the scraperID. Since the data proxy may be on another machine
