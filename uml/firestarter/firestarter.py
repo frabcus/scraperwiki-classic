@@ -52,7 +52,6 @@ class FireStarter :
         self.m_scraperID   = None
         self.m_urlquery   = None
         self.m_error       = None
-        self.m_language    = None
 
         # this runID is incredibly ugly, unnecessarily long, and will be prepended with "draft" for draft modes
         # also gets "fromfrontend" prepended when the running of a script from the webpage
@@ -199,16 +198,6 @@ class FireStarter :
         for resource, limit in limits :
             self.setLimit (resource, *limit)
 
-    def setLanguage (self, language) :
-
-        """
-        Set scripting language
-
-        @type   language: String
-        @param  language: Scripting language
-        """
-
-        self.m_language = language
 
     def addAllowedSites (self, *sites) :
 
@@ -357,9 +346,6 @@ class FireStarter :
                 lrunID = "draft|||%s" % lrunID
             setter ('x-runid',      lrunID          )
         
-        if self.m_language   is not None :
-            setter ('x-language',   self.m_language )
-
         for resource, limit in self.m_limits.items() :
             setter ('x-setrlimit-%d' % resource, '%s,%s' % (limit[0], limit[1]))
 
@@ -376,35 +362,33 @@ class FireStarter :
         for path in range(len(self.m_paths   )) :
             setter ('x-paths-%d'          % path, self.m_paths   [path])
 
-    def _call(self, path, command=None, script=None):
-
-        """
-        Call the dispatcher to execute the command or script. This is an
-        internal method would not normally be called directly.
-        """
-
+    def execute(self, jdata):
         soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             soc.connect((self.m_dispatcher_host, self.m_dispatcher_port))
         except:
             return self
 
-        if command is not None:
-            data = json.dumps({'command': command})
-        elif script is not None:
-            data = json.dumps({'script': script})
-        else:
-            raise Exception("Either command or script parameters must be provided")
+        jdata["runid"] = self.m_runID
+        if self.m_draft:
+            jdata["runid"] = "draft|||%s" % jdata["runid"]
 
-        soc.send('POST %s HTTP/1.1\r\n' % path)
-        soc.send('Content-Length: %s\r\n' % len(data))
+        sdata = json.dumps(jdata)
+        soc.send('POST /Execute HTTP/1.1\r\n')
+        soc.send('Content-Length: %s\r\n' % len(sdata))
         soc.send('Connection: close\r\n')
 
         def add_header(x, y):
             soc.send("%s: %s\r\n" % (x, y))
         self.setHeaders(add_header)
+        
+        # these parameters are lifted out by the dispatcher for its operation until we can get to the bottom of what's going on with _read_write
+        soc.send("x-scraperid: %s\r\n" % jdata["scraperid"])
+        soc.send("x-testname: %s\r\n" % jdata["scrapername"])
+        soc.send("x-runid: %s\r\n" % jdata["runid"])
+        
         soc.send('\r\n')
-        soc.send(data)
+        soc.send(sdata)
 
         self.soc_file = soc.makefile('r')
         status_line = self.soc_file.readline()
@@ -438,30 +422,4 @@ class FireStarter :
         else:
             raise StopIteration
 
-    def command(self, command):
-
-        """
-        Execute a specified command. The command is passed to the
-        I{subprocess.Popen} function.
-
-        @type   command : String
-        @param  command : Command to execute
-        @rtype      : String
-        @return     : Output from command
-        """
-
-        return self._call('/Command', command=command)
-
-    def execute(self, script):
-
-        """
-        Execute a specified script.
-
-        @type   command : String
-        @param  command : Text of script to execute
-        @rtype      : String
-        @return     : Output from script
-        """
-
-        return self._call('/Execute', script=script)
 

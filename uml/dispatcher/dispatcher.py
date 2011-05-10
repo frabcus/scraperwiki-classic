@@ -720,7 +720,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     def _read_write (self, soc, idle = 0x7ffffff) :
 
         """
-        Copy data backl and forth between the client and the server.
+        Copy data back and forth between the client and the server.
 
         @type   soc     : Socket
         @param  soc     : Socket to server

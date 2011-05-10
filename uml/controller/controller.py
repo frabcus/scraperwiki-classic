@@ -61,6 +61,7 @@ poptions, pargs = parser.parse_args()
 #print poptions, sys.argv
 
 
+# one of these per scraper executing the code and relaying it to the scrapercontroller
 class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     """
@@ -86,10 +87,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.m_cgi_env      = None
         self.m_stdout       = sys.stdout
         self.m_stderr       = sys.stderr
-        self.m_scraperID    = None
-        self.m_scraperName  = None
-        self.m_runID        = None
-        self.m_urlquery     = None
         self.m_uid          = None
         self.m_gid          = None
         self.m_paths        = []
@@ -210,44 +207,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 self.send_error (404, 'Group %s not found' % self.headers['x-setgroup'])
                 return False
         return True
-
-    def setScraperID (self) :
-
-        """
-        If the \em x-scraperid header is present then set that as the scraper ID.
-        """
-
-        if 'x-scraperid'  in self.headers :
-            self.m_scraperID = os.environ['SCRAPER_GUID'] = self.headers['x-scraperid']
     
-    def setScraperName (self) :
-
-        """
-        If the \em x-testname header is present then set that as the scraper Name.
-        """
-
-        if 'x-testname'  in self.headers :
-            self.m_scraperName = os.environ['SCRAPER_NAME'] = self.headers['x-testname']
-
-    def setRunID (self) :
-
-        """
-        If the \em x-runid header is present then set that as the run ID.
-        """
-
-        if 'x-runid'      in self.headers :
-            self.m_runID     = os.environ['RUNID']        = self.headers['x-runid']
-
-    def setUrlquery (self) :
-
-        """
-        If the \em x-urlquery header is present then set that as the urlquery
-        """
-
-        if 'x-urlquery'   in self.headers :
-            self.m_urlquery  = self.headers['x-urlquery']
-            os.environ['URLQUERY'] = self.m_urlquery
-            os.environ['QUERY_STRING'] = self.m_urlquery
 
     
     def setRLimit (self) :
@@ -285,29 +245,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 bits = string.split (value, '=')
                 os.environ[bits[0]] = bits[1]
 
-    def traceback (self) :
-
-        """
-        Get the traceback mode, defaults to I{text}
-
-        @rtype      : String
-        @return     : Traceback mode
-        """
-
-        for name, value in self.headers.items() :
-            if name == 'x-traceback' :
-                return value
-        return 'text'
-
     def sendWhoAmI (self, query) :
-
-        """
-        Send controller information, useful for debugging.
-
-        @type   query   : String
-        @param  query   : 
-        """
-
         self.connection.send  ('HTTP/1.0 200 OK\n')
         self.connection.send  ('Connection: Close\n')
         self.connection.send  ('Pragma: no-cache\n')
@@ -317,14 +255,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  ('hostname=%s\n' % socket.gethostname())
 
     def sendStatus (self, query) :
-
-        """
-        Send status information, useful for debugging.
-
-        @type   query   : String
-        @param  query   : 
-        """
-
         status = []
         lock.acquire()
         for key, value in scrapersByRunID.items() :
@@ -340,15 +270,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  (string.join (status, '\n') + '\n')
 
     def sendIdent (self, query) :
-
-        """
-        Send ident information, specifically the scraper and run identifiers for a
-        specified connection to the proxy.
-
-        @type   query   : String
-        @param  query   : (remote:local) ports from the proxy's viewpoint
-        """
-
         self.connection.send  ('HTTP/1.0 200 OK\n')
         self.connection.send  ('Connection: Close\n')
         self.connection.send  ('Pragma: no-cache\n')
@@ -448,46 +369,15 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         self.log_request('Option', '')
 
-    def execute (self, path) :
-
-        """
-        Execute request. The \em path string has the leading / removed
-        and is then split on the / character. The first part is used
-        as the method name with \em fn prefixed. The entire split list
-        is passed to the method call.
-
-        @type   path    : String
-        @param  path    : CGI execution path
-        """
-
-        path = path[1:].split('/')
-        try :
-            method = getattr (self, "fn" + path[0])
-        except :
-            self.send_error (404, 'Action %s not found' % path[0])
-            return
-
-        self.log_request('Execute', path)
-        method (path)
 
     def do_POST (self) :
-
-        """
-        Handle POST request.
-        """
-
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
         self.storeEnvironment (self.rfile, self.headers, 'POST', None)
-        self.execute          (path)
+        assert path == '/Execute'
+        self.execute()
 
     def do_GET (self) :
-
-        """
-        Handle POST request.
-        """
-
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-
         if path == '/WhoAmI' :
             self.sendWhoAmI (query)
             self.connection.close()
@@ -503,7 +393,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
             return
 
-        if path == '/Notify' :
+        if path == '/Notify' :    # used to relay notification of http requests back to the dispatcher
             self.sendNotify (query)
             self.connection.close()
             return
@@ -513,32 +403,12 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
             return
 
-        self.storeEnvironment (None, None, 'GET', query)
-        self.execute          (path)
+        if path == '/Execute':
+            self.storeEnvironment(None, None, 'GET', query)
+            self.execute(path)
+        else:
+            self.send_error(404, 'Action %s not found' % path)
 
-    def getTraceback (self, code) :
-
-        """
-        Get traceback information. Returns exception, traceback, the
-        scraper file in whch the error occured and the line number.
-
-        @return         : (exception, traceback, file, line)
-        """
-
-        if self.traceback() == 'text' :
-            import backtrace
-            return backtrace.backtrace ('text', code, context = 10)
-        if self.traceback() == 'html' :
-            import backtrace
-            return backtrace.backtrace ('html', code, context = 10)
-
-        import traceback
-        tb = [ \
-                string.replace (t, 'File "<string>"', 'Scraper')
-                for t in traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback)
-                if string.find (t, 'Controller.py') < 0
-              ]
-        return str(sys.exc_type), string.join(tb, ''), None, None
 
     def execScript (self, lsfx, code, pwfd, lwfd) :
 
@@ -583,40 +453,18 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         os.close (pwfd)
         os.close (lwfd)
 
+        # the actual execution of the scraper
         os.execvp('exec.%s' % lsfx, args)
 
+
+
+# one of these per scraper receiving the data
 class ScraperController (BaseController) :
 
     """
     Class derived from \em BaseController to implement scraper functionality.
     The methods named \em fnName are the execution methods.
     """
-
-    def fnCommand (self, path) :
-
-        request = self.getRequestMessage()
-        command = request['command']
-
-        #  Apply resource limits, and set group and user.
-        #
-        self.setRLimit      ()
-        self.setGroup       ()
-        self.setUser        ()
-        self.addPaths       ()
-        self.addEnvironment ()
-        self.setScraperID   ()
-        self.setScraperName ()
-        self.setRunID       ()
-        self.setUrlquery    ()
-
-        p = subprocess.Popen \
-        (   command,
-            shell   = True,
-            stdin   = open('/dev/null'),
-            stdout  = self.wfile,
-            stderr  = self.wfile
-        )
-        p.wait ()
 
     # XXX this is copied from Python scraperlibs, not sure how to share sas
     # one is in sandbox one outside.
@@ -640,30 +488,35 @@ class ScraperController (BaseController) :
         
         return unicode(text, errors='replace')
  
-    def fnExecute (self, path) :
-
-        """
-        Execute python/ruby/php code passed as a file attached as the \em script
-        parameter directly. This should be used for control functions
-        so no resource limits are applied, and the code is run as the
-        current user.
-
-        @type   path    : List
-        @param  path    : Split CGI execution path
-        """
-
+    def execute(self):
+        self.log_request('Execute', '/Execute')
+        request = self.getRequestMessage()
+        print request
+        
         if not self.checkUser () : return
         if not self.checkGroup() : return
 
-        self.setScraperID   ()
-        self.setScraperName ()
-        self.setRunID       ()
-        self.setUrlquery    ()
 
         idents = []
-        if self.m_scraperID   is not None : idents.append ('scraperid=%s'   % self.m_scraperID  )
-        if self.m_runID       is not None : idents.append ('runid=%s'       % self.m_runID      )
-        if self.m_scraperName is not None : idents.append ('scrapername=%s' % self.m_scraperName)
+        if request.get("scraperid"):
+            idents.append('scraperid=%s' % request.get("scraperid"))
+            os.environ['SCRAPER_GUID'] = request.get("scraperid")
+
+        self.m_runID = None
+        if request.get("runid"):
+            idents.append ('runid=%s' % request.get("runid"))
+            os.environ['RUNID'] = request.get("runid")
+            self.m_runID = request.get("runid")
+            
+        if request.get("scrapername"):
+            idents.append ('scrapername=%s' % request.get("scrapername"))
+            os.environ['SCRAPER_NAME'] = request.get("scrapername")
+            
+        if request.get("urlquery"):
+            os.environ['URLQUERY'] = request.get("urlquery")
+            os.environ['QUERY_STRING'] = request.get("urlquery")
+        
+        
         for name, value in self.headers.items() :
             if name[:17] == 'x-addallowedsite-' :
                 idents.append ('allow=%s' % value)
@@ -672,7 +525,6 @@ class ScraperController (BaseController) :
                 idents.append ('block=%s' % value)
                 continue
 
-        request = self.getRequestMessage()
 
         psock = socket.socketpair()
         lpipe = os.pipe()
@@ -871,8 +723,10 @@ class ScraperController (BaseController) :
         psock[0].close()
         os.close(lpipe[0])
 
+# received end
+
         open ('/tmp/ident.%d'   % os.getpid(), 'w').write(string.join(idents, '\n'))
-        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(request['script'].encode('utf-8'))
+        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(request['code'].encode('utf-8'))
 
         # notes: execScript takes the code as an argument, but doesn't do anything with it.  
         #  it recreates the above file name from the pid and calls the language script with it
@@ -890,19 +744,19 @@ class ScraperController (BaseController) :
         self.addPaths       ()
         self.addEnvironment ()
 
-        try    : language = self.headers['x-language']
-        except : language = 'python'
+        language = request.get('language', 'python')
 
+        # I think code is passed through to assist with the stackdump, though it is saved into a temporary file anyway
         if language == 'python' :
-            self.execScript  ('py',  request['script'], psock[1].fileno(), lpipe[1])
+            self.execScript  ('py',  request['code'], psock[1].fileno(), lpipe[1])
             return
 
         if language == 'php'    :
-            self.execScript  ('php', request['script'], psock[1].fileno(), lpipe[1])
+            self.execScript  ('php', request['code'], psock[1].fileno(), lpipe[1])
             return
 
         if language == 'ruby'   :
-            self.execScript  ('rb',  request['script'], psock[1].fileno(), lpipe[1])
+            self.execScript  ('rb',  request['code'], psock[1].fileno(), lpipe[1])
             return
 
         self.wfile.write(json.dumps({'message_type': 'console', 'content': 'Language %s not recognised' % language, }) + '\n')
@@ -910,10 +764,11 @@ class ScraperController (BaseController) :
         os.exit()
 
 
+# one of these representing the whole controller
 class ControllerHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
 
     """
-    Wrapper class providing a forking server. Note that we runn forking
+    Wrapper class providing a forking server. Note that we run forking
     and not threaded as we may want to change the user and group id of
     the executed scripts.
     """
@@ -921,31 +776,9 @@ class ControllerHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServe
     pass
 
 
-def execute (port) :
-
-    """
-    Execute controller.
-
-    @type   port    : Integer
-    @param  port    : Port on which to listen
-    """
-    ScraperController.protocol_version = "HTTP/1.0"
-
-    httpd = ControllerHTTPServer(('', port), ScraperController)
-    sa    = httpd.socket.getsockname()
-    sys.stdout.write ("Serving HTTP on %s port %s\n" % ( sa[0], sa[1] ))
-
-    sys.stdout.flush ()
-
-    httpd.serve_forever()
 
 
-def autoFirewall () :
-
-    """
-    Setup firewall when the firewall=auto option is selected.
-    """
-
+def autoFirewall():
     rules    = []
     natrules = []
 
@@ -1008,24 +841,22 @@ def autoFirewall () :
         )
         p.wait ()
 
-def sigTerm (signum, frame) :
 
-    """
-    Handler for SIGTERM. Kills any child process and removes any PID
-    file.
-
-    @type   signum  : Integer
-    @param  signum  : Signal number, should be SIGTERM
-    @type   frame   : Python frame
-    @param  frame   ; Python frame in which signal caught
-    """
-
+def sigTerm(signum, frame):
     try    : os.kill (child, signal.SIGTERM)
     except : pass
     try    : os.remove (poptions.varDir + '/run/controller.pid')
     except : pass
     sys.exit (1)
 
+
+def execute(port) :
+    ScraperController.protocol_version = "HTTP/1.0"
+    httpd = ControllerHTTPServer(('', port), ScraperController)
+    sa = httpd.socket.getsockname()
+    sys.stdout.write("Serving HTTP on %s port %s\n" % ( sa[0], sa[1] ))
+    sys.stdout.flush()
+    httpd.serve_forever()
 
 if __name__ == '__main__' :
     if poptions.addPath:
@@ -1057,6 +888,7 @@ if __name__ == '__main__' :
         pf.write  ('%d\n' % os.getpid())
         pf.close  ()
 
+
     #  If running in subproc mode then the server executes as a child
     #  process. The parent simply loops on the death of the child and
     #  recreates it in the event that it croaks.
@@ -1085,3 +917,5 @@ if __name__ == '__main__' :
         lname = poptions.name
     
     execute (config.getint (lname, 'port'))
+    
+    
