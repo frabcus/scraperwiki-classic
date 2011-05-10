@@ -1,7 +1,9 @@
 import re
 import datetime
-from scraperwiki.datastore import request
-import scraperwiki.console
+import scraperwiki
+
+class SqliteError(Exception):  pass
+class NoSuchTableSqliteError(SqliteError):  pass
 
 
 def strunc(v, t):
@@ -28,8 +30,7 @@ def ifsencode_trunc(v, t):
 
 
 def sqlitecommand(command, val1=None, val2=None, verbose=1):
-    ds = DataStore(None)
-    result = ds.request({"maincommand":'sqlitecommand', "command":command, "val1":val1, "val2":val2})
+    result = scraperwiki.datastore.request({"maincommand":'sqlitecommand', "command":command, "val1":val1, "val2":val2})
     if "error" in result:
         raise databaseexception(result)
     if "status" not in result and "keys" not in result:
@@ -52,8 +53,6 @@ def sqlitecommand(command, val1=None, val2=None, verbose=1):
     return result
     
 
-class SqliteError(Exception):  pass
-class NoSuchTableSqliteError(SqliteError):  pass
 
 def databaseexception(errmap):
     mess = errmap["error"]
@@ -116,7 +115,7 @@ def save(unique_keys, data, table_name="swdata", verbose=2):
             if ljdata.get("error"):
                 return ljdata
             rjdata.append(ljdata)
-    result = request({"maincommand":'save_sqlite', "unique_keys":unique_keys, "data":rjdata, "swdatatblname":table_name})
+    result = scraperwiki.datastore.request({"maincommand":'save_sqlite', "unique_keys":unique_keys, "data":rjdata, "swdatatblname":table_name})
 
     if "error" in result:
         raise databaseexception(result)

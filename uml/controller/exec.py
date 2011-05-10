@@ -7,7 +7,7 @@ import  signal
 import  string
 import  time
 import  urllib2
-
+import optparse
 
 try    : import json
 except : import simplejson as json
@@ -42,82 +42,26 @@ class ConsoleStream:
     def fileno(self):
         return self.m_fd.fileno()
 
+parser = optparse.OptionParser()
+parser.add_option("--script", metavar="name")
+parser.add_option("--path", metavar="path")
+parser.add_option("--http", metavar="proxy")
+parser.add_option("--https", metavar="proxy")
+parser.add_option("--ftp", metavar="proxy")
+parser.add_option("--ds", metavar="server:port")
+parser.add_option("--uid")
+parser.add_option("--gid")
 
-USAGE       = ' [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [--urlquery=str] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
-trace       = None
-script      = None
-path        = None
-scraperID   = None
-runID       = None
-urlquery    = None
-httpProxy   = None
-httpsProxy  = None
-ftpProxy    = None
-ds   = None
-uid         = None
-gid         = None
+options, args = parser.parse_args()
 
-for arg in sys.argv[1:] :
+if options.gid is not None :
+    os.setregid(int(options.gid), int(options.gid))
+if options.uid is not None :
+    os.setreuid(int(options.uid), int(options.uid))
 
-    if arg[: 8] == '--trace='       :
-        trace      = arg[ 8:]
-        continue
-
-    if arg[: 9] == '--script='      :
-        script     = arg[ 9:]
-        continue
-
-    if arg[:12] == '--scraperid='   :
-        scraperID  = arg[12:]
-        continue
-
-    if arg[: 8] == '--runid='       :
-        runID      = arg[ 8:]
-        continue
-
-    if arg[: 11] == '--urlquery='       :
-        urlquery   = arg[ 11:]
-        continue
-    
-    if arg[: 7] == '--path='        :
-        path       = arg[ 7:]
-        continue
-
-    if arg[: 7] == '--http='        :
-        httpProxy  = arg[ 7:]
-        continue
-
-    if arg[: 8] == '--https='       :
-        httpsProxy = arg[ 8:]
-        continue
-
-    if arg[: 6] == '--ftp='         :
-        ftpProxy   = arg[ 6:]
-        continue
-
-    if arg[: 5] == '--ds='          :
-        ds  = arg[ 5:]
-        continue
-
-    if arg[: 6] == '--uid='         :
-        uid        = arg[ 6:]
-        continue
-
-    if arg[: 6] == '--gid='         :
-        gid        = arg[ 6:]
-        continue
-
-    print "usage: " + sys.argv[0] + USAGE
-    sys.exit (1)
-
-if gid is not None :
-    os.setregid (int(gid), int(gid))
-if uid is not None :
-    os.setreuid (int(uid), int(uid))
-
-if path is not None :
-    for p in string.split (path, ':') :
-        sys.path.append (p)
+if options.path is not None :
+    for p in string.split (options.path, ':') :
+        sys.path.append(p)
 
 
 #  Imports cannot be done until sys.path is set
@@ -137,9 +81,9 @@ sys.stderr = ConsoleStream(scraperwiki.logfd)
 
         # This is not used in the real deployed version as it uses another lower level method within the UMLs
         # ... although it does not appear to have been built for ftp (so you might not get ftp for PHP version)
-##os.environ['http_proxy' ] = httpProxy
-##os.environ['https_proxy'] = httpsProxy
-os.environ['ftp_proxy'  ] = ftpProxy
+##os.environ['http_proxy' ] = options.http
+##os.environ['https_proxy'] = options.https
+os.environ['ftp_proxy'  ] = options.ftp
 scraperwiki.utils.urllibSetup   ()
 
 #  This is for urllib2.urlopen() (and hence scraperwiki.scrape()) where
@@ -147,13 +91,13 @@ scraperwiki.utils.urllibSetup   ()
 #
 scraperwiki.utils.urllib2Setup \
     (
-##        urllib2.ProxyHandler ({'http':  httpProxy }),
-##        urllib2.ProxyHandler ({'https': httpsProxy}),
-        urllib2.ProxyHandler ({'ftp':   ftpProxy  })
+##        urllib2.ProxyHandler ({'http':  options.http }),
+##        urllib2.ProxyHandler ({'https': options.https}),
+        urllib2.ProxyHandler ({'ftp':   options.ftp  })
     )
 
 
-host, port = string.split(ds, ':')
+host, port = string.split(options.ds, ':')
 scraperwiki.datastore.create(host, port)
 
 
@@ -172,7 +116,7 @@ def sigXCPU (signum, frame) :
 signal.signal (signal.SIGXCPU, sigXCPU)
 
 
-code = open(script).read()
+code = open(options.script).read()
 try :
     import imp
     mod        = imp.new_module ('scraper')

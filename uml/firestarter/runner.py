@@ -34,9 +34,6 @@ def execute (code, options) :
     fs.setUser          ('nobody' )
     fs.setGroup         ('nogroup')
 
-    fs.setTraceback     ('text')
-    
-    fs.setCache         (3600 * 12)
     fs.setCPULimit      (cpulimit, cpulimit+1)
     fs.setDraft         (options.draft    )
 

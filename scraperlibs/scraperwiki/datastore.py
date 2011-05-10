@@ -12,8 +12,6 @@ import  re
 try   : import json
 except: import simplejson as json
 
-import  scraperwiki.console
-
 
 m_socket = None
 m_host = None

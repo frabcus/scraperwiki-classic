@@ -277,19 +277,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 bits = string.split (value, '=')
                 os.environ[bits[0]] = bits[1]
 
-    def traceback (self) :
-
-        """
-        Get the traceback mode, defaults to I{text}
-
-        @rtype      : String
-        @return     : Traceback mode
-        """
-
-        for name, value in self.headers.items() :
-            if name == 'x-traceback' :
-                return value
-        return 'text'
 
     def sendWhoAmI (self, query) :
 
@@ -508,29 +495,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.storeEnvironment (None, None, 'GET', query)
         self.execute          (path)
 
-    def getTraceback (self, code) :
-
-        """
-        Get traceback information. Returns exception, traceback, the
-        scraper file in whch the error occured and the line number.
-
-        @return         : (exception, traceback, file, line)
-        """
-
-        if self.traceback() == 'text' :
-            import backtrace
-            return backtrace.backtrace ('text', code, context = 10)
-        if self.traceback() == 'html' :
-            import backtrace
-            return backtrace.backtrace ('html', code, context = 10)
-
-        import traceback
-        tb = [ \
-                string.replace (t, 'File "<string>"', 'Scraper')
-                for t in traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback)
-                if string.find (t, 'Controller.py') < 0
-              ]
-        return str(sys.exc_type), string.join(tb, ''), None, None
 
     def execScript (self, lsfx, code, pwfd, lwfd) :
 
@@ -562,9 +526,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if self.m_uid is not None : args.append ('--uid=%d' % self.m_uid)
         if self.m_gid is not None : args.append ('--gid=%d' % self.m_gid)
-
-        try    : args.append ('--trace=%s' % self.headers['x-traceback'])
-        except : args.append ('--trace=text')
 
         os.close (0)
         os.close (1)
@@ -826,7 +787,6 @@ class ScraperController (BaseController) :
                 self.wfile.write(json.dumps(msg) + '\n')
 
             except Exception, e :
-
                 import traceback
                 sys.stderr.write(traceback.format_exc())
                 self.log_request('Copying results failed: %s' % repr(e))

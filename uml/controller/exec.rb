@@ -52,12 +52,9 @@ class ConsoleStream
 end
 
 
-USAGE       = ' [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
-trace       = nil
+USAGE       = ' [--script=name] [--path=path] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
 script      = nil
 path        = nil
-scraperID   = nil
-runID       = nil
 httpProxy   = nil
 httpsProxy  = nil
 ftpProxy    = nil
@@ -67,23 +64,8 @@ gid         = nil
 
 ARGV.each do |a|
 
-    if a.slice(0.. 7) == '--trace='
-        trace      = a.slice(8 ..-1)
-        next
-    end
-
     if a.slice(0.. 8) == '--script='
         script     = a.slice(9 ..-1)
-        next
-    end
-
-    if a.slice(0..11) == '--scraperid='
-        scraperID  = a.slice(12..-1)
-        next
-    end
-
-    if a.slice(0.. 7) == '--runid='
-        runID      = a.slice(8 ..-1)
         next
     end
 
@@ -126,11 +108,8 @@ ARGV.each do |a|
     Process.exit(1)
 end
 
-#print   "trace     =", trace,      "\n"
 #print   "script    =", script,     "\n"
 #print   "path      =", path,       "\n"
-#print   "scraperID =", scraperID,  "\n"
-#print   "runID     =", runID,      "\n"
 #print   "httpProxy =", httpProxy,  "\n"
 #print   "httpsProxy=", httpsProxy, "\n"
 #print   "ftpProxy  =", ftpProxy,   "\n"

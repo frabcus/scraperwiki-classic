@@ -51,9 +51,7 @@ class FireStarter :
         self.m_runID       = None
         self.m_scraperID   = None
         self.m_urlquery   = None
-        self.m_traceback   = None
         self.m_error       = None
-        self.m_cache       = 0
         self.m_language    = None
 
         # this runID is incredibly ugly, unnecessarily long, and will be prepended with "draft" for draft modes
@@ -201,17 +199,6 @@ class FireStarter :
         for resource, limit in limits :
             self.setLimit (resource, *limit)
 
-    def setCache (self, cache) :
-
-        """
-        Set time for which cached pages are valid
-
-        @type   cache   : Integer
-        @param  cache   : Time for which pages are valid, zero means no caching
-        """
-
-        self.m_cache = cache
-
     def setLanguage (self, language) :
 
         """
@@ -331,21 +318,6 @@ class FireStarter :
 
         self.setLimit (resource.RLIMIT_CPU, soft, hard)
 
-    def setTraceback (self, traceback) :
-
-        """
-        Set the traceback mode. Currently should be
-
-          - I{html} for a formatted HTML traceback
-          - I{text} for a text traceback
-          - otherwise a minimal text traceback is generated
-
-        @type   traceback : String
-        @param  traceback : Traceback mode
-        """
-
-        self.m_traceback = traceback
-
     def setTestName (self, testName) :
 
         """
@@ -372,8 +344,6 @@ class FireStarter :
             setter ('x-setuser',    self.m_user     )
         if self.m_group      is not None :
             setter ('x-setgroup',   self.m_group    )
-        if self.m_traceback  is not None :
-            setter ('x-traceback',  self.m_traceback)
         if self.m_scraperID  is not None :
             setter ('x-scraperid',  self.m_scraperID)
         if self.m_urlquery   is not None :
@@ -387,8 +357,6 @@ class FireStarter :
                 lrunID = "draft|||%s" % lrunID
             setter ('x-runid',      lrunID          )
         
-        if self.m_cache      is not None :
-            setter ('x-cache',      self.m_cache    )
         if self.m_language   is not None :
             setter ('x-language',   self.m_language )
 
