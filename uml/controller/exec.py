@@ -51,13 +51,12 @@ parser.add_option("--ftp", metavar="proxy")
 parser.add_option("--ds", metavar="server:port")
 parser.add_option("--uid")
 parser.add_option("--gid")
-
 options, args = parser.parse_args()
 
-if options.gid is not None :
-    os.setregid(int(options.gid), int(options.gid))
 if options.uid is not None :
     os.setreuid(int(options.uid), int(options.uid))
+if options.gid is not None :
+    os.setregid(int(options.gid), int(options.gid))
 
 if options.path is not None :
     for p in string.split (options.path, ':') :

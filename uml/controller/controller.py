@@ -27,31 +27,39 @@ import re
 import cgi
 import ConfigParser
 import threading
-
+import optparse
 try    : import json
 except : import simplejson as json
 
-global  confnam
 global  config
-global  firewall
 global  scrapersByRunID
 global  scrapersByPID
 global  lock
 
 USAGE           = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--firewall=option] [--config=file] [--name=name]"
 child           = None
-varDir          = '/var'
-confnam         = 'uml.cfg'
 config          = None
-name            = None
-firewall        = None
 re_resolv       = re.compile ('nameserver\s+([0-9.]+)')
-setuid          = True
 scrapersByRunID = {}
 scrapersByPID   = {}
 lock            = threading.Lock()
 
 infomap     = {}
+
+global poptions
+parser = optparse.OptionParser()
+parser.add_option("--varDir", metavar="dir", default='/var')
+parser.add_option("--addPath", metavar="path")
+parser.add_option("--firewall", metavar="option")
+parser.add_option("--config", dest="confnam", metavar="file", default='uml.cfg')
+parser.add_option("--name", metavar="name")
+
+parser.add_option("--subproc", action="store_true")
+parser.add_option("--daemon", action="store_true")
+parser.add_option("--nosetuid", dest="setuid", action="store_false", default=True)
+poptions, pargs = parser.parse_args()
+#print poptions, sys.argv
+
 
 class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
@@ -146,7 +154,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         effective user.
         """
 
-        if setuid and 'x-setuser'  in self.headers :
+        if poptions.setuid and 'x-setuser'  in self.headers :
             import pwd
             try    :
                 user  = pwd.getpwnam (self.headers['x-setuser' ])
@@ -162,7 +170,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         effective group.
         """
 
-        if setuid and 'x-setgroup' in self.headers :
+        if poptions.setuid and 'x-setgroup' in self.headers :
             import grp
             try    :
                 group = grp.getgrnam (self.headers['x-setgroup'])
@@ -178,7 +186,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         effective user.
         """
 
-        if setuid and 'x-setuser'  in self.headers :
+        if poptions.setuid and 'x-setuser'  in self.headers :
             import pwd
             try    :
                 self.m_uid = pwd.getpwnam (self.headers['x-setuser' ]).pw_uid
@@ -194,7 +202,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         effective group.
         """
 
-        if setuid and 'x-setgroup' in self.headers :
+        if poptions.setuid and 'x-setgroup' in self.headers :
             import grp
             try    :
                 self.m_gid = grp.getgrnam (self.headers['x-setgroup']).gr_gid
@@ -277,6 +285,19 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 bits = string.split (value, '=')
                 os.environ[bits[0]] = bits[1]
 
+    def traceback (self) :
+
+        """
+        Get the traceback mode, defaults to I{text}
+
+        @rtype      : String
+        @return     : Traceback mode
+        """
+
+        for name, value in self.headers.items() :
+            if name == 'x-traceback' :
+                return value
+        return 'text'
 
     def sendWhoAmI (self, query) :
 
@@ -495,6 +516,29 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.storeEnvironment (None, None, 'GET', query)
         self.execute          (path)
 
+    def getTraceback (self, code) :
+
+        """
+        Get traceback information. Returns exception, traceback, the
+        scraper file in whch the error occured and the line number.
+
+        @return         : (exception, traceback, file, line)
+        """
+
+        if self.traceback() == 'text' :
+            import backtrace
+            return backtrace.backtrace ('text', code, context = 10)
+        if self.traceback() == 'html' :
+            import backtrace
+            return backtrace.backtrace ('html', code, context = 10)
+
+        import traceback
+        tb = [ \
+                string.replace (t, 'File "<string>"', 'Scraper')
+                for t in traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback)
+                if string.find (t, 'Controller.py') < 0
+              ]
+        return str(sys.exc_type), string.join(tb, ''), None, None
 
     def execScript (self, lsfx, code, pwfd, lwfd) :
 
@@ -526,6 +570,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         if self.m_uid is not None : args.append ('--uid=%d' % self.m_uid)
         if self.m_gid is not None : args.append ('--gid=%d' % self.m_gid)
+
 
         os.close (0)
         os.close (1)
@@ -787,6 +832,7 @@ class ScraperController (BaseController) :
                 self.wfile.write(json.dumps(msg) + '\n')
 
             except Exception, e :
+
                 import traceback
                 sys.stderr.write(traceback.format_exc())
                 self.log_request('Copying results failed: %s' % repr(e))
@@ -976,68 +1022,25 @@ def sigTerm (signum, frame) :
 
     try    : os.kill (child, signal.SIGTERM)
     except : pass
-    try    : os.remove (varDir + '/run/controller.pid')
+    try    : os.remove (poptions.varDir + '/run/controller.pid')
     except : pass
     sys.exit (1)
 
 
 if __name__ == '__main__' :
-
-    subproc = False
-    daemon  = False
-
-    for arg in sys.argv[1:] :
-
-        if arg in ('-h', '--help') :
-            print "usage: " + sys.argv[0] + USAGE
-            sys.exit (1)
-
-        if arg[: 9] == '--varDir='  :
-            varDir  = arg[ 9:]
-            continue
-
-        if arg[ :9] == '--config='  :
-            confnam = arg[ 9:]
-            continue
-
-        if arg[ :7] == '--name='  :
-            name    = arg[ 7:]
-            continue
-
-        if arg[:10] == '--addPath=' :
-            sys.path.append (arg[10:])
-            continue
-
-        if arg[:11] == '--firewall=' :
-            firewall = arg[11:]
-            continue
-
-        if arg == '--subproc' :
-            subproc = True
-            continue
-
-        if arg == '--daemon'  :
-            daemon = True
-            continue
-
-        if arg == '--nosetuid':
-            setuid = False
-            continue
-
-
-        print "usage: " + sys.argv[0] + USAGE
-        sys.exit (1)
+    if poptions.addPath:
+        sys.path.append(poptions.addPath)
 
     #  If executing in daemon mode then fork and detatch from the
     #  controlling terminal. Basically this is the fork-setsid-fork
     #  sequence.
     #
-    if daemon :
+    if poptions.daemon:
 
         if os.fork() == 0 :
             os .setsid()
             sys.stdin  = open ('/dev/null')
-            sys.stdout = open (varDir + '/log/controller', 'w', 0)
+            sys.stdout = open (poptions.varDir + '/log/controller', 'w', 0)
             sys.stderr = sys.stdout
             if os.fork() == 0 :
                 ppid = os.getppid()
@@ -1050,7 +1053,7 @@ if __name__ == '__main__' :
             os.wait()
             sys.exit (1)
 
-        pf = open (varDir + '/run/controller.pid', 'w')
+        pf = open (poptions.varDir + '/run/controller.pid', 'w')
         pf.write  ('%d\n' % os.getpid())
         pf.close  ()
 
@@ -1058,12 +1061,9 @@ if __name__ == '__main__' :
     #  process. The parent simply loops on the death of the child and
     #  recreates it in the event that it croaks.
     #
-    if subproc :
-
+    if poptions.subproc:
         signal.signal (signal.SIGTERM, sigTerm)
-
         while True :
-
             child = os.fork()
             if child == 0 :
                 break
@@ -1074,11 +1074,14 @@ if __name__ == '__main__' :
             os.wait()
 
     config = ConfigParser.ConfigParser()
-    config.readfp (open(confnam))
+    config.readfp(open(poptions.confnam))
 
-    if firewall == 'auto' :
-        autoFirewall ()
+    if poptions.firewall == 'auto' :
+        autoFirewall()
 
-    if name is None :
-        name = socket.gethostname()
-    execute (config.getint (name, 'port'))
+    if poptions.name is None :
+        lname = socket.gethostname()
+    else:
+        lname = poptions.name
+    
+    execute (config.getint (lname, 'port'))
