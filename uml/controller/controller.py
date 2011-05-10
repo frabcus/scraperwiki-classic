@@ -563,8 +563,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         if self.m_uid is not None : args.append ('--uid=%d' % self.m_uid)
         if self.m_gid is not None : args.append ('--gid=%d' % self.m_gid)
 
-        try    : args.append ('--cache=%s' % self.headers['x-cache'    ])
-        except : pass
         try    : args.append ('--trace=%s' % self.headers['x-traceback'])
         except : args.append ('--trace=text')
 

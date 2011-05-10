@@ -2,8 +2,6 @@ require 'json'
 require	'uri'
 require	'net/http'
 require 'scraperwiki/datastore'
-require 'scraperwiki/metadata'
-require 'scraperwiki/apiwrapper'
 
 class SqliteException < RuntimeError
 end
@@ -13,13 +11,8 @@ end
 
 module ScraperWiki
 
-    $cacheFor = 0
-    $metacallholder = nil
+    $metadatamessagedone = false
     $attachlist = [ ]
-
-    def ScraperWiki.allowCache(cacheFor)
-        $cacheFor = cacheFor
-    end
 
     def ScraperWiki.dumpMessage(hash)
         $logfd.write(JSON.generate(hash) + "\n")
@@ -58,11 +51,6 @@ module ScraperWiki
         end
         
         return ScraperWiki._follow_redirects(response).body
-    end
-
-    def ScraperWiki.cache (enable = true)
-        uri = URI.parse('http://127.0.0.1:9001/Option?runid=%s&webcache=%s' % [ ENV['RUNID'], enable ? $cacheFor : 0 ])
-        Net::HTTP.get(uri)
     end
 
     def ScraperWiki.gb_postcode_to_latlng(postcode)
@@ -112,7 +100,18 @@ module ScraperWiki
             raise SqliteException.new(res["error"])
         end
         if verbose:
-            ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>command, 'val1'=>res, 'val2'=>res})
+            if val2.kind_of?(Array) 
+                val2.each do |value|
+                    lval2 = [ ]
+                    if value == nil
+                        value  = ''
+                    end
+                    lval2.push(ScraperWiki._unicode_truncate(value.to_s, 50))
+                end
+            else
+                lval2 = val2
+            end
+            ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>command, 'val1'=>val1, 'val2'=>lval2})
         end
         return res
     end
@@ -194,7 +193,7 @@ module ScraperWiki
                 else
                     value = ScraperWiki._unicode_truncate(value.to_s, 50)
                 end
-                pdata[key] = value
+                pdata[key] = String(value)
             end
             if rjdata.class == Array and rjdata.size > 1
                 pdata["number_records"] = "Number Records: "+String(rjdata.size)
@@ -223,22 +222,18 @@ module ScraperWiki
     end
 
     def ScraperWiki.get_metadata(metadata_name, default = nil)
-        if $metacallholder == nil
+        if !$metadatamessagedone == nil
             puts "*** instead of get_metadata('"+metadata_name+"') please use\n    get_var('"+metadata_name+"')"
-            $metacallholder = "9sd8sd9fs9d8f9s8df9s8f"
+            metadatamessagedone = true
         end
-        result = ScraperWiki.get_var(metadata_name, $metacallholder)
-        if result == $metacallholder
-            result = SW_MetadataClient.create().get(metadata_name, default) 
-        end
+        result = ScraperWiki.get_var(metadata_name, default)
         return result
     end
 
     def ScraperWiki.save_metadata(metadata_name, value)
-        #return SW_MetadataClient.create().save(metadata_name, value)
-        if $metacallholder == nil
+        if !$metadatamessagedone
             puts "*** instead of save_metadata('"+metadata_name+"') please use\n    save_var('"+metadata_name+"')"
-            $metacallholder = "9sd8sd9fs9d8f9s8df9s8f"
+            $metadatamessagedone = true
         end
         return ScraperWiki.save_var(metadata_name, value)
     end
@@ -271,11 +266,11 @@ module ScraperWiki
 
 
     def ScraperWiki.getKeys(name)
-        return SW_APIWrapper.getKeys(name)
+        raise SqliteException.new("getKeys has been deprecated")
     end
 
     def ScraperWiki.getData(name, limit=-1, offset=0)
-        SW_APIWrapper.getData(name, limit, offset)
+        raise SqliteException.new("getData has been deprecated")
     end
     
     def ScraperWiki.getDataByDate(name, start_date, end_date, limit=-1, offset=0)
@@ -283,11 +278,11 @@ module ScraperWiki
     end
     
     def ScraperWiki.getDataByLocation(name, lat, lng, limit=-1, offset=0)
-        SW_APIWrapper.getDataByLocation(name, lat, lng, limit, offset)
+        raise SqliteException.new("getDataByLocation has been deprecated")
     end
         
     def ScraperWiki.search(name, filterdict, limit=-1, offset=0)
-        SW_APIWrapper.search(name, filterdict, limit, offset)
+        raise SqliteException.new("SW_APIWrapper.search has been deprecated")
     end
 
 

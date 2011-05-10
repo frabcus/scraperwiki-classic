@@ -7,15 +7,13 @@ import  signal
 import  string
 import  time
 import  urllib2
-import  ConfigParser
 
 
 try    : import json
 except : import simplejson as json
 
 
-USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [--urlquery=str] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
-cache       = None
+USAGE       = ' [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [--urlquery=str] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
 trace       = None
 script      = None
 path        = None
@@ -30,10 +28,6 @@ uid         = None
 gid         = None
 
 for arg in sys.argv[1:] :
-
-    if arg[: 8] == '--cache='       :
-        cache      = int(arg[ 8:])
-        continue
 
     if arg[: 8] == '--trace='       :
         trace      = arg[ 8:]
@@ -108,11 +102,6 @@ scraperwiki.console.logfd   = os.fdopen(3, 'w', 0)
 sys.stdout  = scraperwiki.console.ConsoleStream (scraperwiki.console.logfd)
 sys.stderr  = scraperwiki.console.ConsoleStream (scraperwiki.console.logfd)
 
-config = ConfigParser.ConfigParser()
-config.add_section ('dataproxy')
-config.set         ('dataproxy', 'host', string.split(datastore, ':')[0])
-config.set         ('dataproxy', 'port', string.split(datastore, ':')[1])
-
 
 #  These seem to be needed for urllib.urlopen() to support proxying, though
 #  FTP doesn't actually work.
@@ -138,14 +127,9 @@ scraperwiki.utils.urllib2Setup \
         urllib2.ProxyHandler ({'ftp':   ftpProxy  })
     )
 
-if cache is not None :
-    scraperwiki.utils.allowCache (cache)
 
-#  Pass the configuration to the datastore. At this stage no connection
-#  is made; a connection will be made on demand if the scraper tries
-#  to save anything.
-#
-scraperwiki.datastore.DataStore (config)
+host, port = string.split(datastore, ':')
+scraperwiki.datastore.create(host, port)
 
 
 

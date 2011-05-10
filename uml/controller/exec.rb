@@ -52,8 +52,7 @@ class ConsoleStream
 end
 
 
-USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
-cache       = nil
+USAGE       = ' [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
 trace       = nil
 script      = nil
 path        = nil
@@ -67,11 +66,6 @@ uid         = nil
 gid         = nil
 
 ARGV.each do |a|
-
-    if a.slice(0.. 7) == '--cache='
-        cache      = a.slice(8 ..-1).to_i
-        next
-    end
 
     if a.slice(0.. 7) == '--trace='
         trace      = a.slice(8 ..-1)
@@ -132,7 +126,6 @@ ARGV.each do |a|
     Process.exit(1)
 end
 
-#print   "cache     =", cache,      "\n"
 #print   "trace     =", trace,      "\n"
 #print   "script    =", script,     "\n"
 #print   "path      =", path,       "\n"
@@ -162,10 +155,6 @@ $logfd  = IO.new(3)
 $stdout = ConsoleStream.new($logfd)
 $stderr = ConsoleStream.new($logfd)
 
-
-if cache
-    ScraperWiki.allowCache(cache) ;
-end
 
 ##  Pass the configuration to the datastore. At this stage no connection
 ##  is made; a connection will be made on demand if the scraper tries

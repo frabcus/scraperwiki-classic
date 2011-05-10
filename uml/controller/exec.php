@@ -2,8 +2,7 @@
 <?php
 
 
-$USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]' ;
-$cache       = null ;
+$USAGE       = ' [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]' ;
 $trace       = null ;
 $script      = null ;
 $path        = null ;
@@ -20,11 +19,6 @@ for ($idx = 1 ; $idx < count($argv) ; $idx += 1)
 {
    $arg  = $argv[$idx] ;
 
-   if (substr ($arg, 0,  8) == '--cache='    )
-   {
-      $cache      = substr ($arg,  8) ;
-      continue    ;
-   }
    if (substr ($arg, 0,  8) == '--trace='    )
    {
       $trace      = substr ($arg,  8) ;
@@ -107,9 +101,6 @@ require_once   'scraperwiki/stacktrace.php';
 
 $dsinfo = split (':', $datastore) ;
 SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1]) ;
-
-if (!is_null ($cache))
-   scraperwiki::sw_allowCache ($cache) ;
 
 // the following might be the only way to intercept syntax errors
 //$errors = array(); 
