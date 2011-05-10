@@ -47,7 +47,7 @@ class Database :
     # the values of these fields are safe because from the UML they are subject to an ident callback, 
     # and from the frontend they are subject to a connection from a particular IP number
     def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
-        print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
+        #print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
         
         def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
             #print "authorizer_readonly", (action_code, tname, cname, sql_location, trigger)

@@ -144,106 +144,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         return json.loads(self.m_cgi_fp.read(int(self.m_cgi_headers['content-length'])))
 
-    def setUser (self) :
 
-        """
-        If the \em x-setuser header is present then set that as the real and
-        effective user.
-        """
-
-        if poptions.setuid and 'x-setuser'  in self.headers :
-            import pwd
-            try    :
-                user  = pwd.getpwnam (self.headers['x-setuser' ])
-                os.setreuid (user.pw_uid, user.pw_uid)
-            except :
-                self.send_error (404, 'User %s not found'  % self.headers['x-setuser' ])
-                return
-
-    def setGroup (self) :
-
-        """
-        If the \em x-setgroup header is present then set that as the real and
-        effective group.
-        """
-
-        if poptions.setuid and 'x-setgroup' in self.headers :
-            import grp
-            try    :
-                group = grp.getgrnam (self.headers['x-setgroup'])
-                os.setregid (group.gr_gid, group.gr_gid)
-            except :
-                self.send_error (404, 'Group %s not found' % self.headers['x-setgroup'])
-                return
-
-    def checkUser (self) :
-
-        """
-        If the \em x-setuser header is present then use that for the real and
-        effective user.
-        """
-
-        if poptions.setuid and 'x-setuser'  in self.headers :
-            import pwd
-            try    :
-                self.m_uid = pwd.getpwnam (self.headers['x-setuser' ]).pw_uid
-            except :
-                self.send_error (404, 'User %s not found'  % self.headers['x-setuser' ])
-                return False
-        return True
-
-    def checkGroup (self) :
-
-        """
-        If the \em x-setgroup header is present then use that for the real and
-        effective group.
-        """
-
-        if poptions.setuid and 'x-setgroup' in self.headers :
-            import grp
-            try    :
-                self.m_gid = grp.getgrnam (self.headers['x-setgroup']).gr_gid
-            except :
-                self.send_error (404, 'Group %s not found' % self.headers['x-setgroup'])
-                return False
-        return True
-    
-
-    
-    def setRLimit (self) :
-
-        """
-        Set resource limits. Scans headers for headers starting 'x-setrlimit'.
-        The header should contain three comma-separated numbers, which are
-        respectively the limit code, the soft limit and the hard limit.
-        """
-
-        for name, value in self.headers.items() :
-            if name[:12] == 'x-setrlimit-' :
-                args = string.split (value, ',')
-                resource.setrlimit (int(name[12:]), (int(args[0]), int(args[1])))
-
-    def addPaths (self) :
-
-        """
-        Add directories to the search path.
-        command.
-        """
-
-        for name, value in self.headers.items() :
-            if name[:8] == 'x-paths-' :
-                self.m_paths.append (value)
-
-    def addEnvironment (self) :
-
-        """
-        Add stuff to the environment
-        """
-
-        for name, value in self.headers.items() :
-            if name[:9] == 'x-setenv-' :
-                bits = string.split (value, '=')
-                os.environ[bits[0]] = bits[1]
 
     def sendWhoAmI (self, query) :
         self.connection.send  ('HTTP/1.0 200 OK\n')
@@ -491,11 +392,23 @@ class ScraperController (BaseController) :
     def execute(self):
         self.log_request('Execute', '/Execute')
         request = self.getRequestMessage()
-        print request
-        
-        if not self.checkUser () : return
-        if not self.checkGroup() : return
 
+            # I don't think this is ever used
+        if poptions.setuid:
+            if request.get("user"):
+                import pwd
+                try    :
+                    self.m_uid = pwd.getpwnam(request.get("user")).pw_uid
+                except :
+                    self.send_error (404, 'User %s not found'  % request.get("user"))
+                    return
+            if request.get("group"):
+                import grp
+                try    :
+                    self.m_gid = grp.getgrnam(request.get("group")).gr_gid
+                except :
+                    self.send_error (404, 'Group %s not found' % request.get("group"))
+                    return
 
         idents = []
         if request.get("scraperid"):
@@ -507,24 +420,20 @@ class ScraperController (BaseController) :
             idents.append ('runid=%s' % request.get("runid"))
             os.environ['RUNID'] = request.get("runid")
             self.m_runID = request.get("runid")
-            
+
         if request.get("scrapername"):
             idents.append ('scrapername=%s' % request.get("scrapername"))
             os.environ['SCRAPER_NAME'] = request.get("scrapername")
-            
+
         if request.get("urlquery"):
             os.environ['URLQUERY'] = request.get("urlquery")
             os.environ['QUERY_STRING'] = request.get("urlquery")
-        
-        
-        for name, value in self.headers.items() :
-            if name[:17] == 'x-addallowedsite-' :
-                idents.append ('allow=%s' % value)
-                continue
-            if name[:17] == 'x-addblockedsite-' :
-                idents.append ('block=%s' % value)
-                continue
 
+        print request, idents
+        for value in request['white']:
+            idents.append('allow=%s' % value)
+        for value in request['black']:
+            idents.append('block=%s' % value)
 
         psock = socket.socketpair()
         lpipe = os.pipe()
@@ -740,11 +649,10 @@ class ScraperController (BaseController) :
         #  Apply resource limits, set group and user, paths and
         #  environment.
         #
-        self.setRLimit      ()
-        self.addPaths       ()
-        self.addEnvironment ()
+        self.m_paths = request.get("paths", [ ])
 
         language = request.get('language', 'python')
+        #resource.setrlimit(resource.RLIMIT_CPU, (request['cpulimit'], request['cpulimit']+1))
 
         # I think code is passed through to assist with the stackdump, though it is saved into a temporary file anyway
         if language == 'python' :
