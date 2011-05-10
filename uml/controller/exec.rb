@@ -61,7 +61,7 @@ runID       = nil
 httpProxy   = nil
 httpsProxy  = nil
 ftpProxy    = nil
-datastore   = nil
+ds   = nil
 uid         = nil
 gid         = nil
 
@@ -108,7 +108,7 @@ ARGV.each do |a|
     end
 
     if a.slice(0.. 4) == '--ds='
-        datastore  = a.slice(5 ..-1)
+        ds  = a.slice(5 ..-1)
         next
     end
 
@@ -161,7 +161,7 @@ $stderr = ConsoleStream.new($logfd)
 ##  to save anything.
 ##
 require 'scraperwiki/datastore'
-host, port = datastore.split(':')
+host, port = ds.split(':')
 SW_DataStore.create(host, port)
 
 require 'scraperwiki/stacktrace'

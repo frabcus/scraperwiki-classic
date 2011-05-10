@@ -32,12 +32,12 @@ def log(message=""):
     now = datetime.datetime.now()
     str_now = now.strftime("%Y-%m-%d %H:%M:%S")
     logmessage = "log( %s )\t\t %s() line %d%s : %s" % (str(message), stack[-2][2], stack[-2][1], tail, str_now)
-    scraperwiki.console.logMessage (logmessage)
+    scraperwiki.dumpMessage({'message_type': 'console', 'content': logmessage})
 
 
 def httpresponseheader(headerkey, headervalue):
     ''' eg httpresponseheader('Content-Type', 'text/plain') '''
-    scraperwiki.console.logHTTPResponseHeader (headerkey, headervalue)
+    scraperwiki.dumpMessage({'message_type': 'httpresponseheader', 'headerkey': headerkey, 'headervalue': headervalue})
 
 
 #  The code will install a set of specific handlers to be used when a URL

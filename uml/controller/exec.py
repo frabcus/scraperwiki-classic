@@ -12,6 +12,36 @@ import  urllib2
 try    : import json
 except : import simplejson as json
 
+class ConsoleStream:
+    def __init__(self, fd):
+        self.m_text = ''
+        self.m_fd = fd
+
+    def saveunicode(self, text):
+        try:    return unicode(text)
+        except UnicodeDecodeError:     pass
+        try:    return unicode(text, encoding='utf8')
+        except UnicodeDecodeError:     pass
+        try:    return unicode(text, encoding='latin1')
+        except UnicodeDecodeError:     pass
+        return unicode(text, errors='replace')
+    
+    def write(self, text):
+        self.m_text += self.saveunicode(text)
+        if self.m_text and self.m_text[-1] == '\n' :
+            self.flush()
+
+    def flush(self) :
+        if self.m_text:
+            scraperwiki.dumpMessage({'message_type': 'console', 'content': self.m_text})
+            self.m_text = ''
+
+    def close(self):
+        self.m_fd.close()
+
+    def fileno(self):
+        return self.m_fd.fileno()
+
 
 USAGE       = ' [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [--urlquery=str] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
 trace       = None
@@ -23,7 +53,7 @@ urlquery    = None
 httpProxy   = None
 httpsProxy  = None
 ftpProxy    = None
-datastore   = None
+ds   = None
 uid         = None
 gid         = None
 
@@ -66,7 +96,7 @@ for arg in sys.argv[1:] :
         continue
 
     if arg[: 5] == '--ds='          :
-        datastore  = arg[ 5:]
+        ds  = arg[ 5:]
         continue
 
     if arg[: 6] == '--uid='         :
@@ -91,16 +121,11 @@ if path is not None :
 
 
 #  Imports cannot be done until sys.path is set
-#
-import  scraperwiki.utils
-import  scraperwiki.datastore
-import  scraperwiki.console
-import  scraperwiki.stacktrace
+import  scraperwiki
 
-scraperwiki.console.logfd   = os.fdopen(3, 'w', 0)
-
-sys.stdout  = scraperwiki.console.ConsoleStream (scraperwiki.console.logfd)
-sys.stderr  = scraperwiki.console.ConsoleStream (scraperwiki.console.logfd)
+scraperwiki.logfd = os.fdopen(3, 'w', 0)
+sys.stdout = ConsoleStream(scraperwiki.logfd)
+sys.stderr = ConsoleStream(scraperwiki.logfd)
 
 
 #  These seem to be needed for urllib.urlopen() to support proxying, though
@@ -128,7 +153,7 @@ scraperwiki.utils.urllib2Setup \
     )
 
 
-host, port = string.split(datastore, ':')
+host, port = string.split(ds, ':')
 scraperwiki.datastore.create(host, port)
 
 
@@ -156,7 +181,7 @@ try :
 except Exception, e :
     etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
     assert etb.get('message_type') == 'exception'
-    scraperwiki.console.dumpMessage(etb)
+    scraperwiki.dumpMessage(etb)
 
 
 # force ConsoleStream to output last line, even if no \n

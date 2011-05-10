@@ -27,8 +27,6 @@ def ifsencode_trunc(v, t):
     return strencode_trunc(v, t)
 
 
-
-
 def sqlitecommand(command, val1=None, val2=None, verbose=1):
     ds = DataStore(None)
     result = ds.request({"maincommand":'sqlitecommand', "command":command, "val1":val1, "val2":val2})
@@ -49,7 +47,7 @@ def sqlitecommand(command, val1=None, val2=None, verbose=1):
             lval2 = [ ifsencode_trunc(v, 50)  for v in val2.values() ]
         else:
             lval2 = [ str(val2) ]
-        scraperwiki.console.logSqliteCall(command, val1, lval2)
+        scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command': command, "val1":val1, "lval2":lval2})
     
     return result
     
@@ -132,10 +130,8 @@ def save(unique_keys, data, table_name="swdata", verbose=2):
             for key, value in data[0].items():
                 pdata[strencode_trunc(key, 50)] = strencode_trunc(value, 50)
             pdata["number_records"] = "Number Records: %d" % len(data)
-            
-        scraperwiki.console.logScrapedData(pdata)
+        scraperwiki.dumpMessage({'message_type':'data', 'content': pdata})
     return result
-
 
 
 def attach(name, asname=None, verbose=1):

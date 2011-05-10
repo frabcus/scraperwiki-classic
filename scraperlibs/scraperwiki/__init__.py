@@ -1,10 +1,19 @@
+try    : import json
+except : import simplejson as json
 
-# main scraping function 
+
+logfd = None   # set to os.fdopen(3, 'w', 0) for consuming json objects
+
+def dumpMessage(d):
+    logfd.write(json.dumps(d))
+    logfd.write('\n')
+    logfd.flush()
+
+
 from utils import log, scrape, pdftoxml, swimport
-
-# sub-libraries
 import geo
 import datastore
 import sqlite
 import metadata
+import stacktrace
 

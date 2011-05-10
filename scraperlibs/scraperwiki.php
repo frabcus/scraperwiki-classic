@@ -7,21 +7,11 @@ class scraperwiki
 {
    private static $attachlist = array();
 
-   static function sw_dumpMessage ($dict)
+   static function sw_dumpMessage($dict)
    {
       global $logfd ;
       if ($logfd)
           fwrite ($logfd, json_encode ($dict) . "\n") ;
-   }
-
-   static function sw_logScrapedURL ($url, $length)
-   {
-       scraperwiki::sw_dumpMessage
-         (  array
-            (  'message_type' => 'sources',
-               'url'          => $url,
-               'content'      => sprintf ("%d bytes from %s", $length, $url)
-         )  )  ;
    }
 
    static function httpresponseheader ($headerkey, $headervalue)
@@ -55,7 +45,7 @@ class scraperwiki
       if (property_exists($result, 'error'))
          throw new Exception ($result->error);
       if ($verbose != 0)
-         scraperwiki::sw_dumpMessage (array('message_type'=>'sqlitecall', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
+         scraperwiki::sw_dumpMessage(array('message_type'=>'sqlitecall', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
       return $result; 
    }
 
