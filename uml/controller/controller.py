@@ -287,7 +287,7 @@ class ScraperController (BaseController) :
         return unicode(text, errors='replace')
  
  
-    def processmain(self, psock, lpipe):
+    def processmain(self, psock, lpipe, pid, cltime1):
         #  Close the write sides of the pipes, these are only needed in the
         #  child processes.
         #
@@ -401,9 +401,6 @@ class ScraperController (BaseController) :
                         for l in text.split('\n') :
                             if l != '' :
                                 msg = json.loads(l)
-                                if msg['message_type'] == 'exception' :
-                                    try    : arg1 = msg['content']
-                                    except : arg1 = '(no content)'
 
         #  Capture the child user and system times as best we can, since this
         #  is summed over all children.
@@ -528,7 +525,7 @@ class ScraperController (BaseController) :
             os.environ['URLQUERY'] = request.get("urlquery")
             os.environ['QUERY_STRING'] = request.get("urlquery")
 
-        print request, idents
+        #print request, idents
         for value in request['white']:
             idents.append('allow=%s' % value)
         for value in request['black']:
@@ -547,7 +544,7 @@ class ScraperController (BaseController) :
             lock.release()
 
             try:
-                self.processmain(psock, lpipe)
+                self.processmain(psock, lpipe, pid, cltime1)
 
             except Exception, e:
                 import traceback

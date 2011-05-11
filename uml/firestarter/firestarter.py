@@ -66,10 +66,10 @@ class FireStarter:
             except IOError:
                 if confurl[:26] != 'http://dev.scraperwiki.com':    # known problem
                     print json.dumps({ 'message_type':'console', 'content': "Failed to open: %s" % confurl })
-        for line in conftxt.split('\n') :
-            key, value = line.split('=')
-            assert key in ['white', 'black']
-            jdata[key].append(value)
+        for line in conftxt.split('\n'):
+            kv = line.split('=')
+            if len(kv) == 2 and kv[0] in ['white', 'black']:
+                jdata[kv[0]].append(kv[1])
 
         sdata = json.dumps(jdata)
         soc.send('POST /Execute HTTP/1.1\r\n')
