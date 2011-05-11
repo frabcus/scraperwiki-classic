@@ -15,27 +15,19 @@ import sys
 try   : import json
 except: import simplejson as json
 
-class Database :
+class Database:
 
-    def __init__(self, ldataproxy, config, scraperID):
+    def __init__(self, ldataproxy, resourcedir):
         self.dataproxy = ldataproxy
+        self.m_resourcedir = resourcedir
 
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
         self.authorizer_func = None  
-        
         self.sqlitesaveinfo = { }  # tablename -> info
 
-        if type(config) == types.StringType :
-            conf = ConfigParser.ConfigParser()
-            conf.readfp (open(config))
-        else :
-            conf = config
 
-        self.m_resourcedir = conf.get('dataproxy', 'resourcedir')
-
-
-    def clear_datastore(self, scraperID, short_name):
+    def clear_datastore(self, short_name):
         scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
         scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
         if os.path.isfile(scrapersqlitefile):
@@ -46,8 +38,8 @@ class Database :
     # general single file sqlite access
     # the values of these fields are safe because from the UML they are subject to an ident callback, 
     # and from the frontend they are subject to a connection from a particular IP number
-    def sqlitecommand(self, scraperID, runID, short_name, command, val1, val2):
-        #print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
+    def sqlitecommand(self, runID, short_name, command, val1, val2):
+        print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
         
         def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
             #print "authorizer_readonly", (action_code, tname, cname, sql_location, trigger)
@@ -209,14 +201,14 @@ class Database :
 
 
 
-    def save_sqlite(self, scraperID, runID, short_name, unique_keys, data, swdatatblname):
+    def save_sqlite(self, runID, short_name, unique_keys, data, swdatatblname):
         res = { }
         
         if type(data) == dict:
             data = [data]
         
         if not self.m_sqlitedbconn or swdatatblname not in self.sqlitesaveinfo:
-            ssinfo = SqliteSaveInfo(self, scraperID, runID, short_name, swdatatblname)
+            ssinfo = SqliteSaveInfo(self, runID, short_name, swdatatblname)
             self.sqlitesaveinfo[swdatatblname] = ssinfo
             if not ssinfo.rebuildinfo() and data:
                 ssinfo.buildinitialtable(data[0])
@@ -254,9 +246,8 @@ class Database :
 
 
 class SqliteSaveInfo:
-    def __init__(self, database, scraperID, runID, short_name, swdatatblname):
+    def __init__(self, database, runID, short_name, swdatatblname):
         self.database = database
-        self.scraperID = scraperID
         self.runID = runID
         self.short_name = short_name
         self.swdatatblname = swdatatblname
@@ -265,7 +256,7 @@ class SqliteSaveInfo:
         self.sqdatatemplate = ""
 
     def sqliteexecute(self, val1, val2=None):
-        res = self.database.sqlitecommand(self.scraperID, self.runID, self.short_name, "execute", val1, val2)
+        res = self.database.sqlitecommand(self.runID, self.short_name, "execute", val1, val2)
         if "error" in res:
             print "rrrrr", res
         #print ["execute", val1, val2, res]

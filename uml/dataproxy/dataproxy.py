@@ -47,16 +47,9 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         sys.stderr.flush()
 
     def ident(self, uml, port):
-        scraperID   = None
         runID       = None
-        scraperName = None
+        short_name = None
 
-        #  Determin the caller host address and the port to call on that host from
-        #  the configuration since the request will be from UML running inside that
-        #  host (and note actually from the peer host). Similarly use the port
-        #  supplied in the request since the peer port will have been subject to
-        #  NAT or masquerading.
-        #
         host      = config.get(uml, 'host')
         via       = config.get(uml, 'via' )
         rem       = self.connection.getpeername()
@@ -69,25 +62,23 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 key, value = line.split('=')
                 if key == 'runid':
                     runID = value
-                elif key == 'scraperid':
-                    scraperID   = value
                 elif key == 'scrapername':
-                    scraperName = value
+                    short_name = value
 
-        return scraperID, runID, scraperName
+        return runID, short_name
 
-    def process(self, db, scraperID, runID, scraperName, request):
+    def process(self, db, runID, short_name, request):
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
         elif "maincommand" not in request:
             res = {"error":'request must contain maincommand', "content":str(request)}
             
         elif request["maincommand"] == 'clear_datastore':
-            res = db.clear_datastore(scraperID, scraperName)
+            res = db.clear_datastore(short_name)
         elif request["maincommand"] == 'sqlitecommand':
-            res = db.sqlitecommand(scraperID, runID, scraperName, command=request["command"], val1=request["val1"], val2=request["val2"])
+            res = db.sqlitecommand(runID, short_name, command=request["command"], val1=request["val1"], val2=request["val2"])
         elif request["maincommand"] == 'save_sqlite':
-            res = db.save_sqlite(scraperID, runID, scraperName, unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
+            res = db.save_sqlite(runID, short_name, unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
         
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
@@ -97,31 +88,28 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         # this morphs into the long running two-way connection
     def do_GET (self) :
-        (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-
-        try    : params = urlparse.parse_qs(query)
-        except : params = cgi     .parse_qs(query)
-
-                # if the scraperid is set then we can assume it's from the frontend, is not authenticated and will have no write permissions
-                # if it is not set, then it is fetched through the ident call and is then authenticated enough for writing purposes in its relevant file
-        if 'scraperid' in params and params['scraperid'][0] not in [ '', None ] :
+        (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
+        params = dict(cgi.parse_qsl(query))
+        print params
+        if 'short_name' in params:
             if self.connection.getpeername()[0] != config.get('dataproxy', 'secure') :
-                self.connection.send(json.dumps({"error":"ScraperID only accepted from secure hosts"})+'\n')
+                self.connection.send(json.dumps({"error":"short_name only accepted from secure hosts"})+'\n')
                 return
-            scraperID, runID, scraperName = params['scraperid'][0], 'fromfrontend.%s.%s' % (params['scraperid'][0], time.time()), params.get('short_name', [""])[0]
+            short_name = params.get('short_name', '')
+            runID = 'fromfrontend.%s.%s' % (short_name, time.time()), 
         
         else :
-            scraperID, runID, scraperName = self.ident(params['uml'][0], params['port'][0])
+            runID, short_name = self.ident(params['uml'], params['port'])
 
 
         if path == '' or path is None :
             path = '/'
 
-        if scm not in [ 'http', 'https' ] or fragment :
+        if scm not in ['http', 'https'] or fragment :
             self.connection.send(json.dumps({"error":"Malformed URL %s" % self.path})+'\n')
             return
 
-        db = datalib.Database(self, config, scraperID)
+        db = datalib.Database(self, config.get('dataproxy', 'resourcedir'))
         self.connection.send(json.dumps({"status":"good"})+'\n')
 
                 # enter the loop that now waits for single requests (delimited by \n) 
@@ -137,7 +125,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     line = "".join(sbuffer)
                     if line:
                         request = json.loads(line) 
-                        self.process(db, scraperID, runID, scraperName, request)
+                        self.process(db, runID, short_name, request)
                     sbuffer = [ ssrec.pop(0) ]  # next one in
                 if not srec:
                     break
