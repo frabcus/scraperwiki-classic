@@ -7,111 +7,68 @@ import  signal
 import  string
 import  time
 import  urllib2
-import  ConfigParser
-
+import optparse
 
 try    : import json
 except : import simplejson as json
 
+class ConsoleStream:
+    def __init__(self, fd):
+        self.m_text = ''
+        self.m_fd = fd
 
-USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [--urlquery=str] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
-cache       = None
-trace       = None
-script      = None
-path        = None
-scraperID   = None
-runID       = None
-urlquery    = None
-httpProxy   = None
-httpsProxy  = None
-ftpProxy    = None
-datastore   = None
-uid         = None
-gid         = None
-
-for arg in sys.argv[1:] :
-
-    if arg[: 8] == '--cache='       :
-        cache      = int(arg[ 8:])
-        continue
-
-    if arg[: 8] == '--trace='       :
-        trace      = arg[ 8:]
-        continue
-
-    if arg[: 9] == '--script='      :
-        script     = arg[ 9:]
-        continue
-
-    if arg[:12] == '--scraperid='   :
-        scraperID  = arg[12:]
-        continue
-
-    if arg[: 8] == '--runid='       :
-        runID      = arg[ 8:]
-        continue
-
-    if arg[: 11] == '--urlquery='       :
-        urlquery   = arg[ 11:]
-        continue
+    def saveunicode(self, text):
+        try:    return unicode(text)
+        except UnicodeDecodeError:     pass
+        try:    return unicode(text, encoding='utf8')
+        except UnicodeDecodeError:     pass
+        try:    return unicode(text, encoding='latin1')
+        except UnicodeDecodeError:     pass
+        return unicode(text, errors='replace')
     
-    if arg[: 7] == '--path='        :
-        path       = arg[ 7:]
-        continue
+    def write(self, text):
+        self.m_text += self.saveunicode(text)
+        if self.m_text and self.m_text[-1] == '\n' :
+            self.flush()
 
-    if arg[: 7] == '--http='        :
-        httpProxy  = arg[ 7:]
-        continue
+    def flush(self) :
+        if self.m_text:
+            scraperwiki.dumpMessage({'message_type': 'console', 'content': self.m_text})
+            self.m_text = ''
 
-    if arg[: 8] == '--https='       :
-        httpsProxy = arg[ 8:]
-        continue
+    def close(self):
+        self.m_fd.close()
 
-    if arg[: 6] == '--ftp='         :
-        ftpProxy   = arg[ 6:]
-        continue
+    def fileno(self):
+        return self.m_fd.fileno()
 
-    if arg[: 5] == '--ds='          :
-        datastore  = arg[ 5:]
-        continue
+parser = optparse.OptionParser()
+parser.add_option("--script", metavar="name")
+parser.add_option("--path", metavar="path")
+parser.add_option("--http", metavar="proxy")
+parser.add_option("--https", metavar="proxy")
+parser.add_option("--ftp", metavar="proxy")
+parser.add_option("--ds", metavar="server:port")
+parser.add_option("--uid")
+parser.add_option("--gid")
+options, args = parser.parse_args()
 
-    if arg[: 6] == '--uid='         :
-        uid        = arg[ 6:]
-        continue
+if options.uid is not None :
+    os.setreuid(int(options.uid), int(options.uid))
+if options.gid is not None :
+    os.setregid(int(options.gid), int(options.gid))
 
-    if arg[: 6] == '--gid='         :
-        gid        = arg[ 6:]
-        continue
-
-    print "usage: " + sys.argv[0] + USAGE
-    sys.exit (1)
-
-if gid is not None :
-    os.setregid (int(gid), int(gid))
-if uid is not None :
-    os.setreuid (int(uid), int(uid))
-
-if path is not None :
-    for p in string.split (path, ':') :
-        sys.path.append (p)
+if options.path is not None :
+    for p in string.split (options.path, ':') :
+        sys.path.append(p)
 
 
 #  Imports cannot be done until sys.path is set
-#
-import  scraperwiki.utils
-import  scraperwiki.datastore
-import  scraperwiki.console
-import  scraperwiki.stacktrace
+import  scraperwiki
 
-scraperwiki.console.logfd   = os.fdopen(3, 'w', 0)
-
-sys.stdout  = scraperwiki.console.ConsoleStream (scraperwiki.console.logfd)
-sys.stderr  = scraperwiki.console.ConsoleStream (scraperwiki.console.logfd)
-
-config = ConfigParser.ConfigParser()
-config.add_section ('dataproxy')
-config.set         ('dataproxy', 'host', string.split(datastore, ':')[0])
-config.set         ('dataproxy', 'port', string.split(datastore, ':')[1])
+scraperwiki.logfd = os.fdopen(3, 'w', 0)
+sys.stdout = ConsoleStream(scraperwiki.logfd)
+sys.stderr = ConsoleStream(scraperwiki.logfd)
 
 
 #  These seem to be needed for urllib.urlopen() to support proxying, though
@@ -123,9 +80,9 @@ config.set         ('dataproxy', 'port', string.split(datastore, ':')[1])
 
         # This is not used in the real deployed version as it uses another lower level method within the UMLs
         # ... although it does not appear to have been built for ftp (so you might not get ftp for PHP version)
-##os.environ['http_proxy' ] = httpProxy
-##os.environ['https_proxy'] = httpsProxy
-os.environ['ftp_proxy'  ] = ftpProxy
+##os.environ['http_proxy' ] = options.http
+##os.environ['https_proxy'] = options.https
+os.environ['ftp_proxy'  ] = options.ftp
 scraperwiki.utils.urllibSetup   ()
 
 #  This is for urllib2.urlopen() (and hence scraperwiki.scrape()) where
@@ -133,19 +90,14 @@ scraperwiki.utils.urllibSetup   ()
 #
 scraperwiki.utils.urllib2Setup \
     (
-##        urllib2.ProxyHandler ({'http':  httpProxy }),
-##        urllib2.ProxyHandler ({'https': httpsProxy}),
-        urllib2.ProxyHandler ({'ftp':   ftpProxy  })
+##        urllib2.ProxyHandler ({'http':  options.http }),
+##        urllib2.ProxyHandler ({'https': options.https}),
+        urllib2.ProxyHandler ({'ftp':   options.ftp  })
     )
 
-if cache is not None :
-    scraperwiki.utils.allowCache (cache)
 
-#  Pass the configuration to the datastore. At this stage no connection
-#  is made; a connection will be made on demand if the scraper tries
-#  to save anything.
-#
-scraperwiki.datastore.DataStore (config)
+host, port = string.split(options.ds, ':')
+scraperwiki.datastore.create(host, port)
 
 
 
@@ -163,7 +115,7 @@ def sigXCPU (signum, frame) :
 signal.signal (signal.SIGXCPU, sigXCPU)
 
 
-code = open(script).read()
+code = open(options.script).read()
 try :
     import imp
     mod        = imp.new_module ('scraper')
@@ -172,7 +124,7 @@ try :
 except Exception, e :
     etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
     assert etb.get('message_type') == 'exception'
-    scraperwiki.console.dumpMessage(etb)
+    scraperwiki.dumpMessage(etb)
 
 
 # force ConsoleStream to output last line, even if no \n

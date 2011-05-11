@@ -1,34 +1,17 @@
 <?php
 
 require_once   ('scraperwiki/datastore.php') ;
-require_once   ('scraperwiki/metadata.php' ) ;
 require_once   ('scraperwiki/stacktrace.php' ) ;
-require_once   ('scraperwiki/apiwrapper.php' ) ;
 
 class scraperwiki
 {
-   private static $m_cacheFor = 0 ;
+   private static $attachlist = array();
 
-   static function sw_allowCache ($cacheFor)
-   {
-      self::$m_cacheFor = $cacheFor ;
-   }
-
-   static function sw_dumpMessage ($dict)
+   static function sw_dumpMessage($dict)
    {
       global $logfd ;
       if ($logfd)
           fwrite ($logfd, json_encode ($dict) . "\n") ;
-   }
-
-   static function sw_logScrapedURL ($url, $length)
-   {
-       scraperwiki::sw_dumpMessage
-         (  array
-            (  'message_type' => 'sources',
-               'url'          => $url,
-               'content'      => sprintf ("%d bytes from %s", $length, $url)
-         )  )  ;
    }
 
    static function httpresponseheader ($headerkey, $headervalue)
@@ -62,7 +45,7 @@ class scraperwiki
       if (property_exists($result, 'error'))
          throw new Exception ($result->error);
       if ($verbose != 0)
-         scraperwiki::sw_dumpMessage (array('message_type'=>'sqlitecall', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
+         scraperwiki::sw_dumpMessage(array('message_type'=>'sqlitecall', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
       return $result; 
    }
 
@@ -99,7 +82,8 @@ class scraperwiki
    static function select($val1, $val2=null)
    {
       $result = scraperwiki::sqlitecommand("execute", "select ".$val1, $val2); 
-      //http://rosettacode.org/wiki/Hash_from_two_arrays
+
+          // see http://rosettacode.org/wiki/Hash_from_two_arrays
       $res = array(); 
       foreach ($result->data as $i => $row)
          array_push($res, array_combine($result->keys, $row)); 
@@ -108,6 +92,7 @@ class scraperwiki
 
    static function attach($name, $asname=null)
    {
+      $attachlist.push(array("name"=>$name, "asname"=>$asname)); 
       return scraperwiki::sqlitecommand("attach", $name, $asname); 
    }
    static function sqlitecommit()
@@ -183,7 +168,7 @@ class scraperwiki
        return null; 
    }
 
-   static function scrape ($url)
+   static function scrape($url)
    {
       $curl = curl_init ($url ) ;
       curl_setopt ($curl, CURLOPT_RETURNTRANSFER, true) ;
@@ -192,52 +177,43 @@ class scraperwiki
       return   $res;
    }
 
-   static function cache ($enable = true)
-   {
-      file_get_html
-         (  sprintf
-            (  "http://127.0.0.1:9001/Option?runid=%s&webcache=%s",
-               getenv('RUNID'),
-               $enable ? self::$m_cacheFor : 0
-         )  )  ;
-   }
-
-
    // the meta functions weren't being used to any extent in PHP anyway
    static function get_metadata($metadata_name, $default = null)
    {
       return scraperwiki::get_var($metadata_name, $default); 
-      //return SW_MetadataClient::create()->get($metadata_name);
    }
 
    static function save_metadata($metadata_name, $value)
    {
       return scraperwiki::save_var($metadata_name, $value); 
-      //return SW_MetadataClient::create()->save($metadata_name, $value);
    }
 
 
     static function getInfo($name) {
-        return SW_APIWrapperClass::getInfo($name); 
+        $url = "http://api.scraperwiki.com/api/1.0/scraper/getinfo?name=".urlencode($name); 
+        $handle = fopen($url, "r"); 
+        $ljson = stream_get_contents($handle); 
+        fclose($handle);
+        return json_decode($ljson); 
     }
 
     static function getKeys($name) {
-        return SW_APIWrapperClass::getKeys($name); 
+        throw new Exception("getKeys has been deprecated"); 
     }
     static function getData($name, $limit= -1, $offset= 0) {
-        return SW_APIWrapperClass::getData($name, $limit, $offset); 
+        throw new Exception("getData has been deprecated"); 
     }
 
     static function getDataByDate($name, $start_date, $end_date, $limit= -1, $offset= 0) {
-        return SW_APIWrapperClass::getDataByDate($name, $start_date, $end_date, $limit, $offset); 
+        throw new Exception("getDataByDate has been deprecated"); 
     }
     
     static function getDataByLocation($name, $lat, $lng, $limit= -1, $offset= 0) { 
-        return SW_APIWrapperClass::getDataByLocation($name, $lat, $lng, $limit, $offset); 
+        throw new Exception("getDataByLocation has been deprecated"); 
     }
         
     static function search($name, $filterdict, $limit= -1, $offset= 0) {
-        return SW_APIWrapperClass::search($name, $filterdict, $limit, $offset);
+        throw new Exception("apiwrapper.search has been deprecated"); 
     }
 }
 

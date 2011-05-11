@@ -32,12 +32,12 @@ def log(message=""):
     now = datetime.datetime.now()
     str_now = now.strftime("%Y-%m-%d %H:%M:%S")
     logmessage = "log( %s )\t\t %s() line %d%s : %s" % (str(message), stack[-2][2], stack[-2][1], tail, str_now)
-    scraperwiki.console.logMessage (logmessage)
+    scraperwiki.dumpMessage({'message_type': 'console', 'content': logmessage})
 
 
 def httpresponseheader(headerkey, headervalue):
     ''' eg httpresponseheader('Content-Type', 'text/plain') '''
-    scraperwiki.console.logHTTPResponseHeader (headerkey, headervalue)
+    scraperwiki.dumpMessage({'message_type': 'httpresponseheader', 'headerkey': headerkey, 'headervalue': headervalue})
 
 
 #  The code will install a set of specific handlers to be used when a URL
@@ -46,14 +46,13 @@ def httpresponseheader(headerkey, headervalue):
 urllibopener  = None
 urllib2cj     = None
 urllib2opener = None
-cacheFor      = 0
+
 
 #  The "urllib2Setup" function is called with zero or more handlers. An opener
 #  is constructed using these, plus a cookie processor, and is installed as the
 #  urllib2 opener. The opener also overrides the user-agent header.
 #
 def urllib2Setup (*handlers) :
-
     global urllib2cj
     global urllib2opener
     urllib2cj = cookielib.CookieJar()
@@ -64,35 +63,11 @@ def urllib2Setup (*handlers) :
 #  Similarly for urllib, but no handlers.
 #
 def urllibSetup () :
-
     global urllibopener
     urllibopener = urllib.URLopener()
     urllibopener.addheaders = [('User-agent', 'ScraperWiki')]
     urllib._urlopener = urllibopener
 
-#  "allowCache" is called to allow (or disallow) caching; this will typically be
-#  set True for running from the editor, and False when the scraped is cron'd
-#
-def allowCache (cf) :
-
-    global cacheFor
-    cacheFor = cf
-
-#  API call from the scraper to enable caching, provided that it is allowed as in
-#  the previous method. "urllibSetup" and "urllib2Setup" are called if they have
-#  no already been called.
-#
-def cache (enable = True) :
-
-#   global urllibopener
-#   global urllib2opener
-
-#   if urllibopener  is None : urllibSetup  ()
-#   if urllib2opener is None : urllib2Setup ()
-#   urllibopener .addheaders.append (('x-cache', enable and cacheFor or 0))
-#   urllib2opener.addheaders.append (('x-cache', enable and cacheFor or 0))
-
-    urllib2.urlopen("http://127.0.0.1:9001/Option?runid=%s&webcache=%s" % (os.environ['RUNID'], enable and cacheFor or 0)).read()
 
 #  Scrape a URL optionally with parameters. This is effectively a wrapper around
 #  urllib2.orlopen().
@@ -116,29 +91,6 @@ def scrape (url, params = None) :
     return text
 
 
-# etree has many functions that apply to an etree._Element that are not in the Element, 
-#  eg etree.tostring(element)
-
-
-# the etree element object has following functions:
-#   element.findall(".//span")          finds all span objects below the element
-#   element.findall(".//span[@id]")     finds all span objects that have an id attribute (THIS DOESN'T WORK)
-#   element.tag                         the tag of an element
-#   element.getchildren()               list of children of an element
-#   element.attrib                      dict of attributes and values
-#   element.text                        plain text contents of element (for html contents, use etree.tostring(element)
-def parse_html(text):
-    """Turn some text into a lxml.etree object"""
-    
-    import lxml.etree as etree   # can't do as from lxml.etree import etree
-    import html5lib
-    
-    tree = html5lib.treebuilders.getTreeBuilder("etree", etree)
-    parser = html5lib.HTMLParser(tree=tree)
-    rootelement = parser.parse(text)
-    return rootelement
-
-
 def pdftoxml(pdfdata):
     """converts pdf file to xml file"""
     pdffout = tempfile.NamedTemporaryFile(suffix='.pdf')
@@ -157,8 +109,6 @@ def pdftoxml(pdfdata):
     xmlin.close()
     return xmldata
 
-def GET():
-    return dict(cgi.parse_qsl(os.getenv("QUERY_STRING")))
 
 # code adapted from http://docs.python.org/library/imp.html#examples-imp
 # ideally there is a way to seamlessly overload the __import__ function and get us to call out like this

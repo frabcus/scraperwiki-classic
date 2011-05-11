@@ -2,13 +2,9 @@
 <?php
 
 
-$USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]' ;
-$cache       = null ;
-$trace       = null ;
+$USAGE       = ' [--script=name] [--path=path] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]' ;
 $script      = null ;
 $path        = null ;
-$scraperID   = null ;
-$runID       = null ;
 $httpProxy   = null ;
 $httpsProxy  = null ;
 $ftpProxy    = null ;
@@ -20,29 +16,9 @@ for ($idx = 1 ; $idx < count($argv) ; $idx += 1)
 {
    $arg  = $argv[$idx] ;
 
-   if (substr ($arg, 0,  8) == '--cache='    )
-   {
-      $cache      = substr ($arg,  8) ;
-      continue    ;
-   }
-   if (substr ($arg, 0,  8) == '--trace='    )
-   {
-      $trace      = substr ($arg,  8) ;
-      continue    ;
-   }
    if (substr ($arg, 0,  9) == '--script='   )
    {
       $script     = substr ($arg,  9) ;
-      continue    ;
-   }
-   if (substr ($arg, 0, 12) == '--scraperid=')
-   {
-      $scraperID  = substr ($arg, 12) ;
-      continue    ;
-   }
-   if (substr ($arg, 0,  8) == '--runid='    )
-   {
-      $runID      = substr ($arg,  8) ;
       continue    ;
    }
    if (substr ($arg, 0, 7) == '--path='      )
@@ -107,9 +83,6 @@ require_once   'scraperwiki/stacktrace.php';
 
 $dsinfo = split (':', $datastore) ;
 SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1]) ;
-
-if (!is_null ($cache))
-   scraperwiki::sw_allowCache ($cache) ;
 
 // the following might be the only way to intercept syntax errors
 //$errors = array(); 

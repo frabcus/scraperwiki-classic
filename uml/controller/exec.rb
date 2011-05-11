@@ -52,44 +52,20 @@ class ConsoleStream
 end
 
 
-USAGE       = ' [--cache=N] [--trace=mode] [--script=name] [--path=path] [--scraperid=id] [--runid=id] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
-cache       = nil
-trace       = nil
+USAGE       = ' [--script=name] [--path=path] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
 script      = nil
 path        = nil
-scraperID   = nil
-runID       = nil
 httpProxy   = nil
 httpsProxy  = nil
 ftpProxy    = nil
-datastore   = nil
+ds   = nil
 uid         = nil
 gid         = nil
 
 ARGV.each do |a|
 
-    if a.slice(0.. 7) == '--cache='
-        cache      = a.slice(8 ..-1).to_i
-        next
-    end
-
-    if a.slice(0.. 7) == '--trace='
-        trace      = a.slice(8 ..-1)
-        next
-    end
-
     if a.slice(0.. 8) == '--script='
         script     = a.slice(9 ..-1)
-        next
-    end
-
-    if a.slice(0..11) == '--scraperid='
-        scraperID  = a.slice(12..-1)
-        next
-    end
-
-    if a.slice(0.. 7) == '--runid='
-        runID      = a.slice(8 ..-1)
         next
     end
 
@@ -114,7 +90,7 @@ ARGV.each do |a|
     end
 
     if a.slice(0.. 4) == '--ds='
-        datastore  = a.slice(5 ..-1)
+        ds  = a.slice(5 ..-1)
         next
     end
 
@@ -132,12 +108,8 @@ ARGV.each do |a|
     Process.exit(1)
 end
 
-#print   "cache     =", cache,      "\n"
-#print   "trace     =", trace,      "\n"
 #print   "script    =", script,     "\n"
 #print   "path      =", path,       "\n"
-#print   "scraperID =", scraperID,  "\n"
-#print   "runID     =", runID,      "\n"
 #print   "httpProxy =", httpProxy,  "\n"
 #print   "httpsProxy=", httpsProxy, "\n"
 #print   "ftpProxy  =", ftpProxy,   "\n"
@@ -163,16 +135,12 @@ $stdout = ConsoleStream.new($logfd)
 $stderr = ConsoleStream.new($logfd)
 
 
-if cache
-    ScraperWiki.allowCache(cache) ;
-end
-
 ##  Pass the configuration to the datastore. At this stage no connection
 ##  is made; a connection will be made on demand if the scraper tries
 ##  to save anything.
 ##
 require 'scraperwiki/datastore'
-host, port = datastore.split(':')
+host, port = ds.split(':')
 SW_DataStore.create(host, port)
 
 require 'scraperwiki/stacktrace'

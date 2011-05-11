@@ -645,7 +645,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-
+        
         if path == '/Config' :
             self.sendConfig ()
             self.connection.close()
@@ -671,19 +671,16 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
             return
 
-        try    : scraperID  = self.headers['x-scraperid' ]
-        except : scraperID  = None
-        try    : testName   = self.headers['x-testname'  ]
-        except : testName   = ''
-        try    : runID      = self.headers['x-runid'     ]
-        except : runID      = ''
+        scraperID  = self.headers.get('x-scraperid', None)
+        testName   = self.headers.get('x-testname', '')
+        runID      = self.headers.get('x-runid', '')
 
 
         if scm != 'http' or fragment or netloc :
             self.send_error (400, "bad url %s" % self.path)
             return
 
-        uml, id = allocateUML (enqueue, scraperID = scraperID, runID = runID, testName = testName)
+        uml, id = allocateUML (enqueue, scraperID = scraperID, runID=runID, testName=testName)
         if uml is None :
             self.send_error (400, "No server free to run your scraper, please try again in a few minutes")
             return
@@ -717,10 +714,12 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         releaseUML       (uml, id)
 
+
+# this one is hard to work out.  Should intercept the json object coming through from the runner and obtain values of scraperid, runid, etc
     def _read_write (self, soc, idle = 0x7ffffff) :
 
         """
-        Copy data backl and forth between the client and the server.
+        Copy data back and forth between the client and the server.
 
         @type   soc     : Socket
         @param  soc     : Socket to server

@@ -19,7 +19,6 @@ import time
 import signal
 import socket
 import select
-import string
 import StringIO
 import resource
 import subprocess
@@ -27,32 +26,42 @@ import re
 import cgi
 import ConfigParser
 import threading
+import optparse
 
 try    : import json
 except : import simplejson as json
 
-global  confnam
 global  config
-global  firewall
 global  scrapersByRunID
 global  scrapersByPID
 global  lock
 
 USAGE           = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--firewall=option] [--config=file] [--name=name]"
 child           = None
-varDir          = '/var'
-confnam         = 'uml.cfg'
 config          = None
-name            = None
-firewall        = None
 re_resolv       = re.compile ('nameserver\s+([0-9.]+)')
-setuid          = True
 scrapersByRunID = {}
 scrapersByPID   = {}
 lock            = threading.Lock()
 
 infomap     = {}
 
+global poptions
+parser = optparse.OptionParser()
+parser.add_option("--varDir", metavar="dir", default='/var')
+parser.add_option("--addPath", metavar="path")
+parser.add_option("--firewall", metavar="option")
+parser.add_option("--config", dest="confnam", metavar="file", default='uml.cfg')
+parser.add_option("--name", metavar="name")
+
+parser.add_option("--subproc", action="store_true")
+parser.add_option("--daemon", action="store_true")
+parser.add_option("--nosetuid", dest="setuid", action="store_false", default=True)
+poptions, pargs = parser.parse_args()
+#print poptions, sys.argv
+
+
+# one of these per scraper executing the code and relaying it to the scrapercontroller
 class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     """
@@ -78,10 +87,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.m_cgi_env      = None
         self.m_stdout       = sys.stdout
         self.m_stderr       = sys.stderr
-        self.m_scraperID    = None
-        self.m_scraperName  = None
-        self.m_runID        = None
-        self.m_urlquery     = None
         self.m_uid          = None
         self.m_gid          = None
         self.m_paths        = []
@@ -128,225 +133,31 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         if 'content-type'   in self.headers : self.m_cgi_env['CONTENT_TYPE'  ] = self.headers['content-type'  ]
         if 'content-length' in self.headers : self.m_cgi_env['CONTENT_LENGTH'] = self.headers['content-length']
 
-    def getRequestMessage(self) :
 
-        """
-        Get a CGI field storage object. This is created once on demand from
-        the stored environment.
-
-        @return         : cgi.FieldStorage instance
-        """
-
-        return json.loads(self.m_cgi_fp.read(int(self.m_cgi_headers['content-length'])))
-
-    def setUser (self) :
-
-        """
-        If the \em x-setuser header is present then set that as the real and
-        effective user.
-        """
-
-        if setuid and 'x-setuser'  in self.headers :
-            import pwd
-            try    :
-                user  = pwd.getpwnam (self.headers['x-setuser' ])
-                os.setreuid (user.pw_uid, user.pw_uid)
-            except :
-                self.send_error (404, 'User %s not found'  % self.headers['x-setuser' ])
-                return
-
-    def setGroup (self) :
-
-        """
-        If the \em x-setgroup header is present then set that as the real and
-        effective group.
-        """
-
-        if setuid and 'x-setgroup' in self.headers :
-            import grp
-            try    :
-                group = grp.getgrnam (self.headers['x-setgroup'])
-                os.setregid (group.gr_gid, group.gr_gid)
-            except :
-                self.send_error (404, 'Group %s not found' % self.headers['x-setgroup'])
-                return
-
-    def checkUser (self) :
-
-        """
-        If the \em x-setuser header is present then use that for the real and
-        effective user.
-        """
-
-        if setuid and 'x-setuser'  in self.headers :
-            import pwd
-            try    :
-                self.m_uid = pwd.getpwnam (self.headers['x-setuser' ]).pw_uid
-            except :
-                self.send_error (404, 'User %s not found'  % self.headers['x-setuser' ])
-                return False
-        return True
-
-    def checkGroup (self) :
-
-        """
-        If the \em x-setgroup header is present then use that for the real and
-        effective group.
-        """
-
-        if setuid and 'x-setgroup' in self.headers :
-            import grp
-            try    :
-                self.m_gid = grp.getgrnam (self.headers['x-setgroup']).gr_gid
-            except :
-                self.send_error (404, 'Group %s not found' % self.headers['x-setgroup'])
-                return False
-        return True
-
-    def setScraperID (self) :
-
-        """
-        If the \em x-scraperid header is present then set that as the scraper ID.
-        """
-
-        if 'x-scraperid'  in self.headers :
-            self.m_scraperID = os.environ['SCRAPER_GUID'] = self.headers['x-scraperid']
-    
-    def setScraperName (self) :
-
-        """
-        If the \em x-testname header is present then set that as the scraper Name.
-        """
-
-        if 'x-testname'  in self.headers :
-            self.m_scraperName = os.environ['SCRAPER_NAME'] = self.headers['x-testname']
-
-    def setRunID (self) :
-
-        """
-        If the \em x-runid header is present then set that as the run ID.
-        """
-
-        if 'x-runid'      in self.headers :
-            self.m_runID     = os.environ['RUNID']        = self.headers['x-runid']
-
-    def setUrlquery (self) :
-
-        """
-        If the \em x-urlquery header is present then set that as the urlquery
-        """
-
-        if 'x-urlquery'   in self.headers :
-            self.m_urlquery  = self.headers['x-urlquery']
-            os.environ['URLQUERY'] = self.m_urlquery
-            os.environ['QUERY_STRING'] = self.m_urlquery
-
-    
-    def setRLimit (self) :
-
-        """
-        Set resource limits. Scans headers for headers starting 'x-setrlimit'.
-        The header should contain three comma-separated numbers, which are
-        respectively the limit code, the soft limit and the hard limit.
-        """
-
-        for name, value in self.headers.items() :
-            if name[:12] == 'x-setrlimit-' :
-                args = string.split (value, ',')
-                resource.setrlimit (int(name[12:]), (int(args[0]), int(args[1])))
-
-    def addPaths (self) :
-
-        """
-        Add directories to the search path.
-        command.
-        """
-
-        for name, value in self.headers.items() :
-            if name[:8] == 'x-paths-' :
-                self.m_paths.append (value)
-
-    def addEnvironment (self) :
-
-        """
-        Add stuff to the environment
-        """
-
-        for name, value in self.headers.items() :
-            if name[:9] == 'x-setenv-' :
-                bits = string.split (value, '=')
-                os.environ[bits[0]] = bits[1]
-
-    def traceback (self) :
-
-        """
-        Get the traceback mode, defaults to I{text}
-
-        @rtype      : String
-        @return     : Traceback mode
-        """
-
-        for name, value in self.headers.items() :
-            if name == 'x-traceback' :
-                return value
-        return 'text'
-
-    def sendWhoAmI (self, query) :
-
-        """
-        Send controller information, useful for debugging.
-
-        @type   query   : String
-        @param  query   : 
-        """
-
+    def sendConnectionHeaders(self):
         self.connection.send  ('HTTP/1.0 200 OK\n')
         self.connection.send  ('Connection: Close\n')
         self.connection.send  ('Pragma: no-cache\n')
         self.connection.send  ('Cache-Control: no-cache\n')
         self.connection.send  ('Content-Type: text/text\n')
         self.connection.send  ('\n')
-        self.connection.send  ('hostname=%s\n' % socket.gethostname())
 
-    def sendStatus (self, query) :
+    def sendWhoAmI(self, query):
+        self.sendConnectionHeaders()
+        self.connection.send('hostname=%s\n' % socket.gethostname())
 
-        """
-        Send status information, useful for debugging.
-
-        @type   query   : String
-        @param  query   : 
-        """
-
+    def sendStatus(self, query) :
         status = []
         lock.acquire()
         for key, value in scrapersByRunID.items() :
             status.append ('runID=%s' % (key))
         lock.release()
 
-        self.connection.send  ('HTTP/1.0 200 OK\n')
-        self.connection.send  ('Connection: Close\n')
-        self.connection.send  ('Pragma: no-cache\n')
-        self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/text\n')
-        self.connection.send  ('\n')
-        self.connection.send  (string.join (status, '\n') + '\n')
+        self.sendConnectionHeaders()
+        self.connection.send('\n'.join(status) + '\n')
 
     def sendIdent (self, query) :
-
-        """
-        Send ident information, specifically the scraper and run identifiers for a
-        specified connection to the proxy.
-
-        @type   query   : String
-        @param  query   : (remote:local) ports from the proxy's viewpoint
-        """
-
-        self.connection.send  ('HTTP/1.0 200 OK\n')
-        self.connection.send  ('Connection: Close\n')
-        self.connection.send  ('Pragma: no-cache\n')
-        self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/text\n')
-        self.connection.send  ('\n')
+        self.sendConnectionHeaders()
 
         #  The query contains the proxy's remote port (which is the local port here)
         #  and the proxy's local port (which is the remote port here). Scan all open
@@ -354,7 +165,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         #  process number; this is used to map to the identification information for
         #  the scraper.
         #
-        (lport, rport) = string.split (query, ':')
+        (lport, rport) = query.split(':')
         p    = re.compile ('exec.[a-z]+ *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
         lsof = subprocess.Popen([ 'lsof', '-n', '-P' ], stdout = subprocess.PIPE).communicate()[0]
         for line in lsof.split('\n') :
@@ -363,7 +174,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 self.log_request('Ident', '(%s,%s) is pid %s' % (lport, rport, m.group(1)))
                 try    :
                     info = scrapersByPID[int(m.group(1))]
-                    self.connection.send (string.join(info['idents'], '\n'))
+                    self.connection.send ('\n'.join(info['idents']))
                     self.connection.send ("\n")
                     for key, value in info['options'].items() :
                         self.connection.send ('option=%s:%s\n' % (key, value))
@@ -400,12 +211,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             wfile.write (line)
             wfile.flush ()
 
-        self.connection.send  ('HTTP/1.0 200 OK\n')
-        self.connection.send  ('Connection: Close\n')
-        self.connection.send  ('Pragma: no-cache\n')
-        self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/text\n')
-        self.connection.send  ('\n')
+        self.sendConnectionHeaders()
 
     def sendOption (self, query) :
 
@@ -429,117 +235,215 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 if key != 'runid' :
                     options[key] = value[0]
 
-        self.connection.send  ('HTTP/1.0 200 OK\n')
-        self.connection.send  ('Connection: Close\n')
-        self.connection.send  ('Pragma: no-cache\n')
-        self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/text\n')
-        self.connection.send  ('\n')
+        self.sendConnectionHeaders()
         for key, value in options.items() :
             self.connection.send ("%s=%s\n" % (key, value))
 
         self.log_request('Option', '')
 
-    def execute (self, path) :
-
-        """
-        Execute request. The \em path string has the leading / removed
-        and is then split on the / character. The first part is used
-        as the method name with \em fn prefixed. The entire split list
-        is passed to the method call.
-
-        @type   path    : String
-        @param  path    : CGI execution path
-        """
-
-        path = path[1:].split('/')
-        try :
-            method = getattr (self, "fn" + path[0])
-        except :
-            self.send_error (404, 'Action %s not found' % path[0])
-            return
-
-        self.log_request('Execute', path)
-        method (path)
 
     def do_POST (self) :
-
-        """
-        Handle POST request.
-        """
-
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
         self.storeEnvironment (self.rfile, self.headers, 'POST', None)
-        self.execute          (path)
+        assert path == '/Execute'
+        self.execute()
 
     def do_GET (self) :
-
-        """
-        Handle POST request.
-        """
-
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
 
-        if path == '/WhoAmI' :
-            self.sendWhoAmI (query)
-            self.connection.close()
+        if path == '/Execute':
+            self.storeEnvironment(None, None, 'GET', query)
+            self.execute(path)
+            return
+        
+        elif path == '/WhoAmI':
+            self.sendWhoAmI(query)
+        elif path == '/Ident':
+            self.sendIdent(query)
+        elif path == '/Status':
+            self.sendStatus(query)
+        elif path == '/Notify':    # used to relay notification of http requests back to the dispatcher
+            self.sendNotify(query)
+        elif path == '/Option':
+            self.sendOption(query)
+        else:
+            self.send_error(404, 'Action %s not found' % path)
             return
 
-        if path == '/Ident'  :
-            self.sendIdent  (query)
-            self.connection.close()
-            return
+        self.connection.close()
 
-        if path == '/Status' :
-            self.sendStatus (query)
-            self.connection.close()
-            return
 
-        if path == '/Notify' :
-            self.sendNotify (query)
-            self.connection.close()
-            return
 
-        if path == '/Option' :
-            self.sendOption (query)
-            self.connection.close()
-            return
+# one of these per scraper receiving the data
+class ScraperController (BaseController) :
 
-        self.storeEnvironment (None, None, 'GET', query)
-        self.execute          (path)
+    def saveunicode(self, text):
+        try:     return unicode(text)
+        except UnicodeDecodeError:     pass
+        try:     return unicode(text, encoding='utf8')
+        except UnicodeDecodeError:     pass
+        try:     return unicode(text, encoding='latin1')
+        except UnicodeDecodeError:     pass
+        return unicode(text, errors='replace')
+ 
+ 
+    def processmain(self, psock, lpipe, pid, cltime1):
+        #  Close the write sides of the pipes, these are only needed in the
+        #  child processes.
+        #
+        psock[1].close()
+        os.close(lpipe[1])
 
-    def getTraceback (self, code) :
+        #  Create file-like objects so that we can use readline. These are
+        #  stored mapped from the file descriptors for convenient access
+        #  below.
+        #
+        fdmap = {}
+        fdmap[psock[0].fileno()] = [ psock[0], '' ]
+        fdmap[lpipe[0]         ] = [ lpipe[0], '' ]
 
-        """
-        Get traceback information. Returns exception, traceback, the
-        scraper file in whch the error occured and the line number.
+        #  Create a list of the two pipe read descriptors for input via
+        #  select. We will loop reading and processing data from
+        #  these. Also poll the connection; this will be flagged as
+        #  having input if it is closed at the other end.
+        rlist = [psock[0].fileno(), lpipe[0], self.connection.fileno()]
 
-        @return         : (exception, traceback, file, line)
-        """
+        #  Loop while the file descriptors are still open in the child
+        #  process. Output is passed back, with "print" output jsonified.
+        #  Check for exception messages, in which case log the exception to
+        #  the logging database. If the caller closes the connection,
+        #  kill the child and exit the loop.
+        #
+        busy    = 2
+        while busy > 0 :
+            (rback, wback, eback) = select.select(rlist, [], []) 
+            assert wback == [] # we don't use these, only read
+            assert eback == [] # we don't use these, only read
+            for fd in rback:
+                #
+                #  If the event is on the caller connection then caller must
+                #  have terminated, so exit loop.
+                #
+                if fd == self.connection.fileno() :
+                    busy = 0
+                    os.kill (pid, signal.SIGKILL)
+                    break
+                #
+                #  Otherwise should have been from child ...
+                #
+                if fd in fdmap :
+                    mapped = fdmap[fd]
+                    #
+                    #  Read some text. If none then the child has closed the connection
+                    #  so unregister here and decrement count of open child connections.
+                    #
+                    line = None
+                    if line is None :
+                        try    : line = mapped[0].recv(8192)
+                        except : pass
+                    if line is None :
+                        try    : line = os.read (mapped[0], 8192)
+                        except : pass
+                    if line in [ '', None ] :
+                        # 
+                        # In case of echoing console output (for PHP, or for
+                        # Ruby/Python before the ConsoleStream is set up in
+                        # exec.py/rb), send anything left over that didn't end in a \n
+                        # 
+                        if fd == psock[0].fileno() :
+                            if mapped[1] != '':
+                                # XXX this repeats the code below, there's probably a
+                                # better way of structuring it
+                                msg  = { 'message_type' : 'console', 'content' : self.saveunicode(mapped[1]) + "\n"}
+                                mapped[1] = ''
+                                text = json.dumps(msg) + '\n'
+                                self.wfile.write (text)
+                                self.wfile.flush ()
+                        #
+                        # Record done with that pipe
+                        #
+                        del fdmap[fd]
+                        busy -= 1
+                        continue
+                    #
+                    #  If data received and data does not end in a newline the add to
+                    #  any prior data from the connection and loop.
+                    #
+                    if len(line) > 0 and line[-1] != '\n' :
+                        mapped[1] = mapped[1] + line
+                        continue
+                    #
+                    #  Prepend prior data to the current data and clear the prior
+                    #  data. If still nothing then loop.
+                    #
+                    text = mapped[1] + line
+                    mapped[1] = ''
+                    if text == '' :
+                        continue
+                    #
+                    #  If data is from the print connection then json-format as a console
+                    #  message; data from logging connection should be already formatted.
+                    #
+                    if fd == psock[0].fileno() :
+                        msg  = { 'message_type' : 'console', 'content' : self.saveunicode(text) }
+                        text = json.dumps(msg) + '\n'
+                    #
+                    #  Send data back towards the client.
+                    #
+                    self.wfile.write (text)
+                    self.wfile.flush ()
+                    #
+                    #  If the data came from the logging connection and was an error the
+                    #  log to the database. We might get multiple json'd lines in one
+                    #  so split up.
+                    #
+                    if fd == lpipe[0] :
+                        for l in text.split('\n') :
+                            if l != '' :
+                                msg = json.loads(l)
 
-        if self.traceback() == 'text' :
-            import backtrace
-            return backtrace.backtrace ('text', code, context = 10)
-        if self.traceback() == 'html' :
-            import backtrace
-            return backtrace.backtrace ('html', code, context = 10)
+        #  Capture the child user and system times as best we can, since this
+        #  is summed over all children.
+        #
+        ostimes1   = os.times ()
+        (waited_pid, waited_status) = os.waitpid(pid, 0)
+        ostimes2   = os.times ()
+        cltime2    = time.time()
 
-        import traceback
-        tb = [ \
-                string.replace (t, 'File "<string>"', 'Scraper')
-                for t in traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback)
-                if string.find (t, 'Controller.py') < 0
-              ]
-        return str(sys.exc_type), string.join(tb, ''), None, None
+        # this creates the status output that is passed out to runner.py.  
+        # The actual completion signal comes when the runner.py process ends
+        msg =       {   'message_type'    : 'executionstatus',
+                        'content'         : 'runcompleted', 
+                        'elapsed_seconds' : int(cltime2 - cltime1), 
+                        'CPU_seconds'     : int(ostimes2[2] - ostimes1[2])
+                    }
+        if os.WIFEXITED(waited_status):
+            msg['exit_status'] = os.WEXITSTATUS(waited_status)
+        if os.WIFSIGNALED(waited_status):
+            msg['term_sig'] = os.WTERMSIG(waited_status)
+            # generate text version (e.g. SIGSEGV rather than 11)
+            sigmap = dict((k, v) for v, k in signal.__dict__.iteritems() if v.startswith('SIG'))
+            if msg['term_sig'] in sigmap:
+                msg['term_sig_text'] = sigmap[msg['term_sig']]
+        self.wfile.write(json.dumps(msg) + '\n')
+         
+ 
+    def processchild(self, psock, lpipe, idents, request):
+        psock[0].close()
+        os.close(lpipe[0])
 
-    def execScript (self, lsfx, code, pwfd, lwfd) :
+        open ('/tmp/ident.%d'   % os.getpid(), 'w').write('\n'.join(idents))
+        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(request['code'].encode('utf-8'))
 
-        """
-        Execute a python/ruby/php script, passed as the text of the script. If the
-        script throws an exception then generate a traceback, preceeded
-        by a delimiter.
-        """
+        paths = request.get("paths", [ ])
+        language = request.get('language', 'python')
+        resource.setrlimit(resource.RLIMIT_CPU, (request['cpulimit'], request['cpulimit']+1))
 
+        lsfx = { 'php':'php', 'ruby':'rb', 'python':'py' }[language]
+        
+        pwfd = psock[1].fileno()
+        lwfd = lpipe[1]
+        
         tap      = config.get (socket.gethostname(), 'tap')
         # webport = config.get ('webproxy',  'port')   # no longer used and useless
             # httpport, httpsport passed in and only used in debug versions as there is a new lower level method that 
@@ -556,17 +460,15 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                     '--https=http://%s:%s'      % (tap,  httpsport),
                     '--ftp=ftp://%s:%s'         % (tap,  ftpport ),
                     '--ds=%s:%s'                % (dshost, dsport),
-                    '--path=%s'                 % string.join(self.m_paths, ':'),
+                    '--path=%s' % ':'.join(paths),
                     '--script=/tmp/scraper.%d'  % os.getpid(),
                 ]
 
-        if self.m_uid is not None : args.append ('--uid=%d' % self.m_uid)
-        if self.m_gid is not None : args.append ('--gid=%d' % self.m_gid)
+        if self.m_uid is not None: 
+            args.append('--uid=%d' % self.m_uid)
+        if self.m_gid is not None:
+            args.append('--gid=%d' % self.m_gid)
 
-        try    : args.append ('--cache=%s' % self.headers['x-cache'    ])
-        except : pass
-        try    : args.append ('--trace=%s' % self.headers['x-traceback'])
-        except : args.append ('--trace=text')
 
         os.close (0)
         os.close (1)
@@ -579,96 +481,55 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         os.close (pwfd)
         os.close (lwfd)
 
+        # the actual execution of the scraper
         os.execvp('exec.%s' % lsfx, args)
 
-class ScraperController (BaseController) :
-
-    """
-    Class derived from \em BaseController to implement scraper functionality.
-    The methods named \em fnName are the execution methods.
-    """
-
-    def fnCommand (self, path) :
-
-        request = self.getRequestMessage()
-        command = request['command']
-
-        #  Apply resource limits, and set group and user.
-        #
-        self.setRLimit      ()
-        self.setGroup       ()
-        self.setUser        ()
-        self.addPaths       ()
-        self.addEnvironment ()
-        self.setScraperID   ()
-        self.setScraperName ()
-        self.setRunID       ()
-        self.setUrlquery    ()
-
-        p = subprocess.Popen \
-        (   command,
-            shell   = True,
-            stdin   = open('/dev/null'),
-            stdout  = self.wfile,
-            stderr  = self.wfile
-        )
-        p.wait ()
-
-    # XXX this is copied from Python scraperlibs, not sure how to share sas
-    # one is in sandbox one outside.
-    # Do our best to turn anything into unicode, for display on console
-    # (for datastore, we give errors if it isn't already UTF-8)
-    def saveunicode(self, text):
-        try:
-            return unicode(text)
-        except UnicodeDecodeError:
-            pass
-        
-        try:
-            return unicode(text, encoding='utf8')
-        except UnicodeDecodeError:
-            pass
-    
-        try:
-            return unicode(text, encoding='latin1')
-        except UnicodeDecodeError:
-            pass
-        
-        return unicode(text, errors='replace')
  
-    def fnExecute (self, path) :
+    def execute(self):
+        self.log_request('Execute', '/Execute')
+        request = json.loads(self.m_cgi_fp.read(int(self.m_cgi_headers['content-length'])))
 
-        """
-        Execute python/ruby/php code passed as a file attached as the \em script
-        parameter directly. This should be used for control functions
-        so no resource limits are applied, and the code is run as the
-        current user.
-
-        @type   path    : List
-        @param  path    : Split CGI execution path
-        """
-
-        if not self.checkUser () : return
-        if not self.checkGroup() : return
-
-        self.setScraperID   ()
-        self.setScraperName ()
-        self.setRunID       ()
-        self.setUrlquery    ()
+            # I don't think this is ever used
+        if poptions.setuid:
+            if request.get("user"):
+                import pwd
+                try    :
+                    self.m_uid = pwd.getpwnam(request.get("user")).pw_uid
+                except :
+                    self.send_error (404, 'User %s not found'  % request.get("user"))
+                    return
+            if request.get("group"):
+                import grp
+                try    :
+                    self.m_gid = grp.getgrnam(request.get("group")).gr_gid
+                except :
+                    self.send_error (404, 'Group %s not found' % request.get("group"))
+                    return
 
         idents = []
-        if self.m_scraperID   is not None : idents.append ('scraperid=%s'   % self.m_scraperID  )
-        if self.m_runID       is not None : idents.append ('runid=%s'       % self.m_runID      )
-        if self.m_scraperName is not None : idents.append ('scrapername=%s' % self.m_scraperName)
-        for name, value in self.headers.items() :
-            if name[:17] == 'x-addallowedsite-' :
-                idents.append ('allow=%s' % value)
-                continue
-            if name[:17] == 'x-addblockedsite-' :
-                idents.append ('block=%s' % value)
-                continue
+        if request.get("scraperid"):
+            idents.append('scraperid=%s' % request.get("scraperid"))
+            os.environ['SCRAPER_GUID'] = request.get("scraperid")
 
-        request = self.getRequestMessage()
+        self.m_runID = None
+        if request.get("runid"):
+            idents.append ('runid=%s' % request.get("runid"))
+            os.environ['RUNID'] = request.get("runid")
+            self.m_runID = request.get("runid")
+
+        if request.get("scrapername"):
+            idents.append ('scrapername=%s' % request.get("scrapername"))
+            os.environ['SCRAPER_NAME'] = request.get("scrapername")
+
+        if request.get("urlquery"):
+            os.environ['URLQUERY'] = request.get("urlquery")
+            os.environ['QUERY_STRING'] = request.get("urlquery")
+
+        #print request, idents
+        for value in request['white']:
+            idents.append('allow=%s' % value)
+        for value in request['black']:
+            idents.append('block=%s' % value)
 
         psock = socket.socketpair()
         lpipe = os.pipe()
@@ -677,164 +538,20 @@ class ScraperController (BaseController) :
         if pid > 0 :
             cltime1 = time.time()
             lock.acquire()
-            info    = { 'wfile' : self.wfile, 'idents' : idents, 'options' : {} }
+            info = { 'wfile' : self.wfile, 'idents' : idents, 'options' : {} }
             scrapersByRunID[self.m_runID] = info
-            scrapersByPID  [pid         ] = info
+            scrapersByPID[pid] = info
             lock.release()
 
-            try :
+            try:
+                self.processmain(psock, lpipe, pid, cltime1)
 
-
-                #  Close the write sides of the pipes, these are only needed in the
-                #  child processes.
-                #
-                psock[1].close()
-                os.close(lpipe[1])
-
-                #  Create file-like objects so that we can use readline. These are
-                #  stored mapped from the file descriptors for convenient access
-                #  below.
-                #
-                fdmap = {}
-                fdmap[psock[0].fileno()] = [ psock[0], '' ]
-                fdmap[lpipe[0]         ] = [ lpipe[0], '' ]
-
-                #  Create a list of the two pipe read descriptors for input via
-                #  select. We will loop reading and processing data from
-                #  these. Also poll the connection; this will be flagged as
-                #  having input if it is closed at the other end.
-                rlist = [psock[0].fileno(), lpipe[0], self.connection.fileno()]
-
-                #  Loop while the file descriptors are still open in the child
-                #  process. Output is passed back, with "print" output jsonified.
-                #  Check for exception messages, in which case log the exception to
-                #  the logging database. If the caller closes the connection,
-                #  kill the child and exit the loop.
-                #
-                busy    = 2
-                while busy > 0 :
-                    (rback, wback, eback) = select.select(rlist, [], []) 
-                    assert wback == [] # we don't use these, only read
-                    assert eback == [] # we don't use these, only read
-                    for fd in rback:
-                        #
-                        #  If the event is on the caller connection then caller must
-                        #  have terminated, so exit loop.
-                        #
-                        if fd == self.connection.fileno() :
-                            busy = 0
-                            os.kill (pid, signal.SIGKILL)
-                            break
-                        #
-                        #  Otherwise should have been from child ...
-                        #
-                        if fd in fdmap :
-                            mapped = fdmap[fd]
-                            #
-                            #  Read some text. If none then the child has closed the connection
-                            #  so unregister here and decrement count of open child connections.
-                            #
-                            line = None
-                            if line is None :
-                                try    : line = mapped[0].recv(8192)
-                                except : pass
-                            if line is None :
-                                try    : line = os.read (mapped[0], 8192)
-                                except : pass
-                            if line in [ '', None ] :
-                                # 
-                                # In case of echoing console output (for PHP, or for
-                                # Ruby/Python before the ConsoleStream is set up in
-                                # exec.py/rb), send anything left over that didn't end in a \n
-                                # 
-                                if fd == psock[0].fileno() :
-                                    if mapped[1] != '':
-                                        # XXX this repeats the code below, there's probably a
-                                        # better way of structuring it
-                                        msg  = { 'message_type' : 'console', 'content' : self.saveunicode(mapped[1]) + "\n"}
-                                        mapped[1] = ''
-                                        text = json.dumps(msg) + '\n'
-                                        self.wfile.write (text)
-                                        self.wfile.flush ()
-                                #
-                                # Record done with that pipe
-                                #
-                                del fdmap[fd]
-                                busy -= 1
-                                continue
-                            #
-                            #  If data received and data does not end in a newline the add to
-                            #  any prior data from the connection and loop.
-                            #
-                            if len(line) > 0 and line[-1] != '\n' :
-                                mapped[1] = mapped[1] + line
-                                continue
-                            #
-                            #  Prepend prior data to the current data and clear the prior
-                            #  data. If still nothing then loop.
-                            #
-                            text = mapped[1] + line
-                            mapped[1] = ''
-                            if text == '' :
-                                continue
-                            #
-                            #  If data is from the print connection then json-format as a console
-                            #  message; data from logging connection should be already formatted.
-                            #
-                            if fd == psock[0].fileno() :
-                                msg  = { 'message_type' : 'console', 'content' : self.saveunicode(text) }
-                                text = json.dumps(msg) + '\n'
-                            #
-                            #  Send data back towards the client.
-                            #
-                            self.wfile.write (text)
-                            self.wfile.flush ()
-                            #
-                            #  If the data came from the logging connection and was an error the
-                            #  log to the database. We might get multiple json'd lines in one
-                            #  so split up.
-                            #
-                            if fd == lpipe[0] :
-                                for l in string.split(text, '\n') :
-                                    if l != '' :
-                                        msg = json.loads(l)
-                                        if msg['message_type'] == 'exception' :
-                                            try    : arg1 = msg['content']
-                                            except : arg1 = '(no content)'
-
-                #  Capture the child user and system times as best we can, since this
-                #  is summed over all children.
-                #
-                ostimes1   = os.times ()
-                (waited_pid, waited_status) = os.waitpid(pid, 0)
-                ostimes2   = os.times ()
-                cltime2    = time.time()
-    
-                # this creates the status output that is passed out to runner.py.  
-                # The actual completion signal comes when the runner.py process ends
-                msg =       {   'message_type'    : 'executionstatus',
-                                'content'         : 'runcompleted', 
-                                'elapsed_seconds' : int(cltime2 - cltime1), 
-                                'CPU_seconds'     : int(ostimes2[2] - ostimes1[2])
-                            }
-                if os.WIFEXITED(waited_status):
-                    msg['exit_status'] = os.WEXITSTATUS(waited_status)
-                if os.WIFSIGNALED(waited_status):
-                    msg['term_sig'] = os.WTERMSIG(waited_status)
-                    # generate text version (e.g. SIGSEGV rather than 11)
-                    sigmap = dict((k, v) for v, k in signal.__dict__.iteritems() if v.startswith('SIG'))
-                    if msg['term_sig'] in sigmap:
-                        msg['term_sig_text'] = sigmap[msg['term_sig']]
-                self.wfile.write(json.dumps(msg) + '\n')
-
-            except Exception, e :
-
+            except Exception, e:
                 import traceback
                 sys.stderr.write(traceback.format_exc())
                 self.log_request('Copying results failed: %s' % repr(e))
 
-            finally :
-
+            finally:
                 lock.acquire()
                 del scrapersByRunID[self.m_runID]
                 del scrapersByPID  [pid         ]
@@ -859,89 +576,21 @@ class ScraperController (BaseController) :
 
             return
 
-        if pid < 0 :
-            return
-
-        #  Code from here down runs in the child process
-        #
-        psock[0].close()
-        os.close(lpipe[0])
-
-        open ('/tmp/ident.%d'   % os.getpid(), 'w').write(string.join(idents, '\n'))
-        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(request['script'].encode('utf-8'))
-
-        # notes: execScript takes the code as an argument, but doesn't do anything with it.  
-        #  it recreates the above file name from the pid and calls the language script with it
-        #  attempts to move the php block wrapping "<?php\n%s\n?>\n" % code to here from runner.py
-        #  made difficult by inability to restart the controller.
-        #  If it was done closer to this face then we could contemplate using eval() rather than require()
-        #  to invoke the script
-
-        os.environ['metadata_host' ] = config.get ('metadata', 'host')
-
-        #  Apply resource limits, set group and user, paths and
-        #  environment.
-        #
-        self.setRLimit      ()
-        self.addPaths       ()
-        self.addEnvironment ()
-
-        try    : language = self.headers['x-language']
-        except : language = 'python'
-
-        if language == 'python' :
-            self.execScript  ('py',  request['script'], psock[1].fileno(), lpipe[1])
-            return
-
-        if language == 'php'    :
-            self.execScript  ('php', request['script'], psock[1].fileno(), lpipe[1])
-            return
-
-        if language == 'ruby'   :
-            self.execScript  ('rb',  request['script'], psock[1].fileno(), lpipe[1])
-            return
-
-        self.wfile.write(json.dumps({'message_type': 'console', 'content': 'Language %s not recognised' % language, }) + '\n')
-        self.wfile.flush()
-        os.exit()
+        if pid == 0:
+            self.processchild(psock, lpipe, idents, request)
 
 
+# one of these representing the whole controller
 class ControllerHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
-
     """
-    Wrapper class providing a forking server. Note that we runn forking
+    Wrapper class providing a forking server. Note that we run forking
     and not threaded as we may want to change the user and group id of
     the executed scripts.
     """
-
     pass
 
 
-def execute (port) :
-
-    """
-    Execute controller.
-
-    @type   port    : Integer
-    @param  port    : Port on which to listen
-    """
-    ScraperController.protocol_version = "HTTP/1.0"
-
-    httpd = ControllerHTTPServer(('', port), ScraperController)
-    sa    = httpd.socket.getsockname()
-    sys.stdout.write ("Serving HTTP on %s port %s\n" % ( sa[0], sa[1] ))
-
-    sys.stdout.flush ()
-
-    httpd.serve_forever()
-
-
-def autoFirewall () :
-
-    """
-    Setup firewall when the firewall=auto option is selected.
-    """
-
+def autoFirewall():
     rules    = []
     natrules = []
 
@@ -974,7 +623,7 @@ def autoFirewall () :
 
     rname = '/tmp/iptables.%s' % os.getpid()
     rfile = open (rname, 'w')
-    rfile.write  (string.join (rules, '\n') + '\n')
+    rfile.write  ('\n'.join(rules) + '\n')
     rfile.close  ()
 
     if os.getuid() == 0 :
@@ -990,7 +639,7 @@ def autoFirewall () :
 
     rname = '/tmp/iptables_nat.%s' % os.getpid()
     rfile = open (rname, 'w')
-    rfile.write  (string.join (natrules, '\n') + '\n')
+    rfile.write  ('\n'.join(natrules) + '\n')
     rfile.close  ()
 
     if os.getuid() == 0 :
@@ -1004,82 +653,37 @@ def autoFirewall () :
         )
         p.wait ()
 
-def sigTerm (signum, frame) :
 
-    """
-    Handler for SIGTERM. Kills any child process and removes any PID
-    file.
-
-    @type   signum  : Integer
-    @param  signum  : Signal number, should be SIGTERM
-    @type   frame   : Python frame
-    @param  frame   ; Python frame in which signal caught
-    """
-
+def sigTerm(signum, frame):
     try    : os.kill (child, signal.SIGTERM)
     except : pass
-    try    : os.remove (varDir + '/run/controller.pid')
+    try    : os.remove (poptions.varDir + '/run/controller.pid')
     except : pass
     sys.exit (1)
 
 
+def execute(port) :
+    ScraperController.protocol_version = "HTTP/1.0"
+    httpd = ControllerHTTPServer(('', port), ScraperController)
+    sa = httpd.socket.getsockname()
+    sys.stdout.write("Serving HTTP on %s port %s\n" % ( sa[0], sa[1] ))
+    sys.stdout.flush()
+    httpd.serve_forever()
+
 if __name__ == '__main__' :
-
-    subproc = False
-    daemon  = False
-
-    for arg in sys.argv[1:] :
-
-        if arg in ('-h', '--help') :
-            print "usage: " + sys.argv[0] + USAGE
-            sys.exit (1)
-
-        if arg[: 9] == '--varDir='  :
-            varDir  = arg[ 9:]
-            continue
-
-        if arg[ :9] == '--config='  :
-            confnam = arg[ 9:]
-            continue
-
-        if arg[ :7] == '--name='  :
-            name    = arg[ 7:]
-            continue
-
-        if arg[:10] == '--addPath=' :
-            sys.path.append (arg[10:])
-            continue
-
-        if arg[:11] == '--firewall=' :
-            firewall = arg[11:]
-            continue
-
-        if arg == '--subproc' :
-            subproc = True
-            continue
-
-        if arg == '--daemon'  :
-            daemon = True
-            continue
-
-        if arg == '--nosetuid':
-            setuid = False
-            continue
-
-
-        print "usage: " + sys.argv[0] + USAGE
-        sys.exit (1)
+    if poptions.addPath:
+        sys.path.append(poptions.addPath)
 
     #  If executing in daemon mode then fork and detatch from the
     #  controlling terminal. Basically this is the fork-setsid-fork
     #  sequence.
     #
-    if daemon :
+    if poptions.daemon:
 
         if os.fork() == 0 :
             os .setsid()
             sys.stdin  = open ('/dev/null')
-            sys.stdout = open (varDir + '/log/controller', 'w', 0)
+            sys.stdout = open (poptions.varDir + '/log/controller', 'w', 0)
             sys.stderr = sys.stdout
             if os.fork() == 0 :
                 ppid = os.getppid()
@@ -1092,20 +696,18 @@ if __name__ == '__main__' :
             os.wait()
             sys.exit (1)
 
-        pf = open (varDir + '/run/controller.pid', 'w')
+        pf = open (poptions.varDir + '/run/controller.pid', 'w')
         pf.write  ('%d\n' % os.getpid())
         pf.close  ()
+
 
     #  If running in subproc mode then the server executes as a child
     #  process. The parent simply loops on the death of the child and
     #  recreates it in the event that it croaks.
     #
-    if subproc :
-
+    if poptions.subproc:
         signal.signal (signal.SIGTERM, sigTerm)
-
         while True :
-
             child = os.fork()
             if child == 0 :
                 break
@@ -1116,11 +718,16 @@ if __name__ == '__main__' :
             os.wait()
 
     config = ConfigParser.ConfigParser()
-    config.readfp (open(confnam))
+    config.readfp(open(poptions.confnam))
 
-    if firewall == 'auto' :
-        autoFirewall ()
+    if poptions.firewall == 'auto' :
+        autoFirewall()
 
-    if name is None :
-        name = socket.gethostname()
-    execute (config.getint (name, 'port'))
+    if poptions.name is None :
+        lname = socket.gethostname()
+    else:
+        lname = poptions.name
+    
+    execute (config.getint (lname, 'port'))
+    
+    
