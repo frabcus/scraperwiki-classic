@@ -41,9 +41,6 @@ secure  = 89.16.177.212
 resourcedir = /var/www/scraperwiki/resourcedir
 max_api_distance = 10
 
-[metadata]
-host    = scraperwiki.com
-
 [uml001]
 host = 89.16.177.195
 tap	= 192.168.254.101

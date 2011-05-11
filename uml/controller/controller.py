@@ -19,7 +19,6 @@ import time
 import signal
 import socket
 import select
-import string
 import StringIO
 import resource
 import subprocess
@@ -28,6 +27,7 @@ import cgi
 import ConfigParser
 import threading
 import optparse
+
 try    : import json
 except : import simplejson as json
 
@@ -133,50 +133,31 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         if 'content-type'   in self.headers : self.m_cgi_env['CONTENT_TYPE'  ] = self.headers['content-type'  ]
         if 'content-length' in self.headers : self.m_cgi_env['CONTENT_LENGTH'] = self.headers['content-length']
 
-    def getRequestMessage(self) :
 
-        """
-        Get a CGI field storage object. This is created once on demand from
-        the stored environment.
-
-        @return         : cgi.FieldStorage instance
-        """
-
-        return json.loads(self.m_cgi_fp.read(int(self.m_cgi_headers['content-length'])))
-
-
-
-    def sendWhoAmI (self, query) :
+    def sendConnectionHeaders(self):
         self.connection.send  ('HTTP/1.0 200 OK\n')
         self.connection.send  ('Connection: Close\n')
         self.connection.send  ('Pragma: no-cache\n')
         self.connection.send  ('Cache-Control: no-cache\n')
         self.connection.send  ('Content-Type: text/text\n')
         self.connection.send  ('\n')
-        self.connection.send  ('hostname=%s\n' % socket.gethostname())
 
-    def sendStatus (self, query) :
+    def sendWhoAmI(self, query):
+        self.sendConnectionHeaders()
+        self.connection.send('hostname=%s\n' % socket.gethostname())
+
+    def sendStatus(self, query) :
         status = []
         lock.acquire()
         for key, value in scrapersByRunID.items() :
             status.append ('runID=%s' % (key))
         lock.release()
 
-        self.connection.send  ('HTTP/1.0 200 OK\n')
-        self.connection.send  ('Connection: Close\n')
-        self.connection.send  ('Pragma: no-cache\n')
-        self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/text\n')
-        self.connection.send  ('\n')
-        self.connection.send  (string.join (status, '\n') + '\n')
+        self.sendConnectionHeaders()
+        self.connection.send('\n'.join(status) + '\n')
 
     def sendIdent (self, query) :
-        self.connection.send  ('HTTP/1.0 200 OK\n')
-        self.connection.send  ('Connection: Close\n')
-        self.connection.send  ('Pragma: no-cache\n')
-        self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/text\n')
-        self.connection.send  ('\n')
+        self.sendConnectionHeaders()
 
         #  The query contains the proxy's remote port (which is the local port here)
         #  and the proxy's local port (which is the remote port here). Scan all open
@@ -184,7 +165,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         #  process number; this is used to map to the identification information for
         #  the scraper.
         #
-        (lport, rport) = string.split (query, ':')
+        (lport, rport) = query.split(':')
         p    = re.compile ('exec.[a-z]+ *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
         lsof = subprocess.Popen([ 'lsof', '-n', '-P' ], stdout = subprocess.PIPE).communicate()[0]
         for line in lsof.split('\n') :
@@ -193,7 +174,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 self.log_request('Ident', '(%s,%s) is pid %s' % (lport, rport, m.group(1)))
                 try    :
                     info = scrapersByPID[int(m.group(1))]
-                    self.connection.send (string.join(info['idents'], '\n'))
+                    self.connection.send ('\n'.join(info['idents']))
                     self.connection.send ("\n")
                     for key, value in info['options'].items() :
                         self.connection.send ('option=%s:%s\n' % (key, value))
@@ -230,12 +211,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             wfile.write (line)
             wfile.flush ()
 
-        self.connection.send  ('HTTP/1.0 200 OK\n')
-        self.connection.send  ('Connection: Close\n')
-        self.connection.send  ('Pragma: no-cache\n')
-        self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/text\n')
-        self.connection.send  ('\n')
+        self.sendConnectionHeaders()
 
     def sendOption (self, query) :
 
@@ -259,12 +235,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 if key != 'runid' :
                     options[key] = value[0]
 
-        self.connection.send  ('HTTP/1.0 200 OK\n')
-        self.connection.send  ('Connection: Close\n')
-        self.connection.send  ('Pragma: no-cache\n')
-        self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/text\n')
-        self.connection.send  ('\n')
+        self.sendConnectionHeaders()
         for key, value in options.items() :
             self.connection.send ("%s=%s\n" % (key, value))
 
@@ -279,46 +250,203 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     def do_GET (self) :
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-        if path == '/WhoAmI' :
-            self.sendWhoAmI (query)
-            self.connection.close()
-            return
-
-        if path == '/Ident'  :
-            self.sendIdent  (query)
-            self.connection.close()
-            return
-
-        if path == '/Status' :
-            self.sendStatus (query)
-            self.connection.close()
-            return
-
-        if path == '/Notify' :    # used to relay notification of http requests back to the dispatcher
-            self.sendNotify (query)
-            self.connection.close()
-            return
-
-        if path == '/Option' :
-            self.sendOption (query)
-            self.connection.close()
-            return
 
         if path == '/Execute':
             self.storeEnvironment(None, None, 'GET', query)
             self.execute(path)
+            return
+        
+        elif path == '/WhoAmI':
+            self.sendWhoAmI(query)
+        elif path == '/Ident':
+            self.sendIdent(query)
+        elif path == '/Status':
+            self.sendStatus(query)
+        elif path == '/Notify':    # used to relay notification of http requests back to the dispatcher
+            self.sendNotify(query)
+        elif path == '/Option':
+            self.sendOption(query)
         else:
             self.send_error(404, 'Action %s not found' % path)
+            return
+
+        self.connection.close()
 
 
-    def execScript (self, lsfx, code, pwfd, lwfd) :
 
-        """
-        Execute a python/ruby/php script, passed as the text of the script. If the
-        script throws an exception then generate a traceback, preceeded
-        by a delimiter.
-        """
+# one of these per scraper receiving the data
+class ScraperController (BaseController) :
 
+    def saveunicode(self, text):
+        try:     return unicode(text)
+        except UnicodeDecodeError:     pass
+        try:     return unicode(text, encoding='utf8')
+        except UnicodeDecodeError:     pass
+        try:     return unicode(text, encoding='latin1')
+        except UnicodeDecodeError:     pass
+        return unicode(text, errors='replace')
+ 
+ 
+    def processmain(self, psock, lpipe):
+        #  Close the write sides of the pipes, these are only needed in the
+        #  child processes.
+        #
+        psock[1].close()
+        os.close(lpipe[1])
+
+        #  Create file-like objects so that we can use readline. These are
+        #  stored mapped from the file descriptors for convenient access
+        #  below.
+        #
+        fdmap = {}
+        fdmap[psock[0].fileno()] = [ psock[0], '' ]
+        fdmap[lpipe[0]         ] = [ lpipe[0], '' ]
+
+        #  Create a list of the two pipe read descriptors for input via
+        #  select. We will loop reading and processing data from
+        #  these. Also poll the connection; this will be flagged as
+        #  having input if it is closed at the other end.
+        rlist = [psock[0].fileno(), lpipe[0], self.connection.fileno()]
+
+        #  Loop while the file descriptors are still open in the child
+        #  process. Output is passed back, with "print" output jsonified.
+        #  Check for exception messages, in which case log the exception to
+        #  the logging database. If the caller closes the connection,
+        #  kill the child and exit the loop.
+        #
+        busy    = 2
+        while busy > 0 :
+            (rback, wback, eback) = select.select(rlist, [], []) 
+            assert wback == [] # we don't use these, only read
+            assert eback == [] # we don't use these, only read
+            for fd in rback:
+                #
+                #  If the event is on the caller connection then caller must
+                #  have terminated, so exit loop.
+                #
+                if fd == self.connection.fileno() :
+                    busy = 0
+                    os.kill (pid, signal.SIGKILL)
+                    break
+                #
+                #  Otherwise should have been from child ...
+                #
+                if fd in fdmap :
+                    mapped = fdmap[fd]
+                    #
+                    #  Read some text. If none then the child has closed the connection
+                    #  so unregister here and decrement count of open child connections.
+                    #
+                    line = None
+                    if line is None :
+                        try    : line = mapped[0].recv(8192)
+                        except : pass
+                    if line is None :
+                        try    : line = os.read (mapped[0], 8192)
+                        except : pass
+                    if line in [ '', None ] :
+                        # 
+                        # In case of echoing console output (for PHP, or for
+                        # Ruby/Python before the ConsoleStream is set up in
+                        # exec.py/rb), send anything left over that didn't end in a \n
+                        # 
+                        if fd == psock[0].fileno() :
+                            if mapped[1] != '':
+                                # XXX this repeats the code below, there's probably a
+                                # better way of structuring it
+                                msg  = { 'message_type' : 'console', 'content' : self.saveunicode(mapped[1]) + "\n"}
+                                mapped[1] = ''
+                                text = json.dumps(msg) + '\n'
+                                self.wfile.write (text)
+                                self.wfile.flush ()
+                        #
+                        # Record done with that pipe
+                        #
+                        del fdmap[fd]
+                        busy -= 1
+                        continue
+                    #
+                    #  If data received and data does not end in a newline the add to
+                    #  any prior data from the connection and loop.
+                    #
+                    if len(line) > 0 and line[-1] != '\n' :
+                        mapped[1] = mapped[1] + line
+                        continue
+                    #
+                    #  Prepend prior data to the current data and clear the prior
+                    #  data. If still nothing then loop.
+                    #
+                    text = mapped[1] + line
+                    mapped[1] = ''
+                    if text == '' :
+                        continue
+                    #
+                    #  If data is from the print connection then json-format as a console
+                    #  message; data from logging connection should be already formatted.
+                    #
+                    if fd == psock[0].fileno() :
+                        msg  = { 'message_type' : 'console', 'content' : self.saveunicode(text) }
+                        text = json.dumps(msg) + '\n'
+                    #
+                    #  Send data back towards the client.
+                    #
+                    self.wfile.write (text)
+                    self.wfile.flush ()
+                    #
+                    #  If the data came from the logging connection and was an error the
+                    #  log to the database. We might get multiple json'd lines in one
+                    #  so split up.
+                    #
+                    if fd == lpipe[0] :
+                        for l in text.split('\n') :
+                            if l != '' :
+                                msg = json.loads(l)
+                                if msg['message_type'] == 'exception' :
+                                    try    : arg1 = msg['content']
+                                    except : arg1 = '(no content)'
+
+        #  Capture the child user and system times as best we can, since this
+        #  is summed over all children.
+        #
+        ostimes1   = os.times ()
+        (waited_pid, waited_status) = os.waitpid(pid, 0)
+        ostimes2   = os.times ()
+        cltime2    = time.time()
+
+        # this creates the status output that is passed out to runner.py.  
+        # The actual completion signal comes when the runner.py process ends
+        msg =       {   'message_type'    : 'executionstatus',
+                        'content'         : 'runcompleted', 
+                        'elapsed_seconds' : int(cltime2 - cltime1), 
+                        'CPU_seconds'     : int(ostimes2[2] - ostimes1[2])
+                    }
+        if os.WIFEXITED(waited_status):
+            msg['exit_status'] = os.WEXITSTATUS(waited_status)
+        if os.WIFSIGNALED(waited_status):
+            msg['term_sig'] = os.WTERMSIG(waited_status)
+            # generate text version (e.g. SIGSEGV rather than 11)
+            sigmap = dict((k, v) for v, k in signal.__dict__.iteritems() if v.startswith('SIG'))
+            if msg['term_sig'] in sigmap:
+                msg['term_sig_text'] = sigmap[msg['term_sig']]
+        self.wfile.write(json.dumps(msg) + '\n')
+         
+ 
+    def processchild(self, psock, lpipe, idents, request):
+        psock[0].close()
+        os.close(lpipe[0])
+
+        open ('/tmp/ident.%d'   % os.getpid(), 'w').write('\n'.join(idents))
+        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(request['code'].encode('utf-8'))
+
+        paths = request.get("paths", [ ])
+        language = request.get('language', 'python')
+        resource.setrlimit(resource.RLIMIT_CPU, (request['cpulimit'], request['cpulimit']+1))
+
+        lsfx = { 'php':'php', 'ruby':'rb', 'python':'py' }[language]
+        
+        pwfd = psock[1].fileno()
+        lwfd = lpipe[1]
+        
         tap      = config.get (socket.gethostname(), 'tap')
         # webport = config.get ('webproxy',  'port')   # no longer used and useless
             # httpport, httpsport passed in and only used in debug versions as there is a new lower level method that 
@@ -335,12 +463,14 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                     '--https=http://%s:%s'      % (tap,  httpsport),
                     '--ftp=ftp://%s:%s'         % (tap,  ftpport ),
                     '--ds=%s:%s'                % (dshost, dsport),
-                    '--path=%s'                 % string.join(self.m_paths, ':'),
+                    '--path=%s' % ':'.join(paths),
                     '--script=/tmp/scraper.%d'  % os.getpid(),
                 ]
 
-        if self.m_uid is not None : args.append ('--uid=%d' % self.m_uid)
-        if self.m_gid is not None : args.append ('--gid=%d' % self.m_gid)
+        if self.m_uid is not None: 
+            args.append('--uid=%d' % self.m_uid)
+        if self.m_gid is not None:
+            args.append('--gid=%d' % self.m_gid)
 
 
         os.close (0)
@@ -357,41 +487,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         # the actual execution of the scraper
         os.execvp('exec.%s' % lsfx, args)
 
-
-
-# one of these per scraper receiving the data
-class ScraperController (BaseController) :
-
-    """
-    Class derived from \em BaseController to implement scraper functionality.
-    The methods named \em fnName are the execution methods.
-    """
-
-    # XXX this is copied from Python scraperlibs, not sure how to share sas
-    # one is in sandbox one outside.
-    # Do our best to turn anything into unicode, for display on console
-    # (for datastore, we give errors if it isn't already UTF-8)
-    def saveunicode(self, text):
-        try:
-            return unicode(text)
-        except UnicodeDecodeError:
-            pass
-        
-        try:
-            return unicode(text, encoding='utf8')
-        except UnicodeDecodeError:
-            pass
-    
-        try:
-            return unicode(text, encoding='latin1')
-        except UnicodeDecodeError:
-            pass
-        
-        return unicode(text, errors='replace')
  
     def execute(self):
         self.log_request('Execute', '/Execute')
-        request = self.getRequestMessage()
+        request = json.loads(self.m_cgi_fp.read(int(self.m_cgi_headers['content-length'])))
 
             # I don't think this is ever used
         if poptions.setuid:
@@ -442,164 +541,20 @@ class ScraperController (BaseController) :
         if pid > 0 :
             cltime1 = time.time()
             lock.acquire()
-            info    = { 'wfile' : self.wfile, 'idents' : idents, 'options' : {} }
+            info = { 'wfile' : self.wfile, 'idents' : idents, 'options' : {} }
             scrapersByRunID[self.m_runID] = info
-            scrapersByPID  [pid         ] = info
+            scrapersByPID[pid] = info
             lock.release()
 
-            try :
+            try:
+                self.processmain(psock, lpipe)
 
-
-                #  Close the write sides of the pipes, these are only needed in the
-                #  child processes.
-                #
-                psock[1].close()
-                os.close(lpipe[1])
-
-                #  Create file-like objects so that we can use readline. These are
-                #  stored mapped from the file descriptors for convenient access
-                #  below.
-                #
-                fdmap = {}
-                fdmap[psock[0].fileno()] = [ psock[0], '' ]
-                fdmap[lpipe[0]         ] = [ lpipe[0], '' ]
-
-                #  Create a list of the two pipe read descriptors for input via
-                #  select. We will loop reading and processing data from
-                #  these. Also poll the connection; this will be flagged as
-                #  having input if it is closed at the other end.
-                rlist = [psock[0].fileno(), lpipe[0], self.connection.fileno()]
-
-                #  Loop while the file descriptors are still open in the child
-                #  process. Output is passed back, with "print" output jsonified.
-                #  Check for exception messages, in which case log the exception to
-                #  the logging database. If the caller closes the connection,
-                #  kill the child and exit the loop.
-                #
-                busy    = 2
-                while busy > 0 :
-                    (rback, wback, eback) = select.select(rlist, [], []) 
-                    assert wback == [] # we don't use these, only read
-                    assert eback == [] # we don't use these, only read
-                    for fd in rback:
-                        #
-                        #  If the event is on the caller connection then caller must
-                        #  have terminated, so exit loop.
-                        #
-                        if fd == self.connection.fileno() :
-                            busy = 0
-                            os.kill (pid, signal.SIGKILL)
-                            break
-                        #
-                        #  Otherwise should have been from child ...
-                        #
-                        if fd in fdmap :
-                            mapped = fdmap[fd]
-                            #
-                            #  Read some text. If none then the child has closed the connection
-                            #  so unregister here and decrement count of open child connections.
-                            #
-                            line = None
-                            if line is None :
-                                try    : line = mapped[0].recv(8192)
-                                except : pass
-                            if line is None :
-                                try    : line = os.read (mapped[0], 8192)
-                                except : pass
-                            if line in [ '', None ] :
-                                # 
-                                # In case of echoing console output (for PHP, or for
-                                # Ruby/Python before the ConsoleStream is set up in
-                                # exec.py/rb), send anything left over that didn't end in a \n
-                                # 
-                                if fd == psock[0].fileno() :
-                                    if mapped[1] != '':
-                                        # XXX this repeats the code below, there's probably a
-                                        # better way of structuring it
-                                        msg  = { 'message_type' : 'console', 'content' : self.saveunicode(mapped[1]) + "\n"}
-                                        mapped[1] = ''
-                                        text = json.dumps(msg) + '\n'
-                                        self.wfile.write (text)
-                                        self.wfile.flush ()
-                                #
-                                # Record done with that pipe
-                                #
-                                del fdmap[fd]
-                                busy -= 1
-                                continue
-                            #
-                            #  If data received and data does not end in a newline the add to
-                            #  any prior data from the connection and loop.
-                            #
-                            if len(line) > 0 and line[-1] != '\n' :
-                                mapped[1] = mapped[1] + line
-                                continue
-                            #
-                            #  Prepend prior data to the current data and clear the prior
-                            #  data. If still nothing then loop.
-                            #
-                            text = mapped[1] + line
-                            mapped[1] = ''
-                            if text == '' :
-                                continue
-                            #
-                            #  If data is from the print connection then json-format as a console
-                            #  message; data from logging connection should be already formatted.
-                            #
-                            if fd == psock[0].fileno() :
-                                msg  = { 'message_type' : 'console', 'content' : self.saveunicode(text) }
-                                text = json.dumps(msg) + '\n'
-                            #
-                            #  Send data back towards the client.
-                            #
-                            self.wfile.write (text)
-                            self.wfile.flush ()
-                            #
-                            #  If the data came from the logging connection and was an error the
-                            #  log to the database. We might get multiple json'd lines in one
-                            #  so split up.
-                            #
-                            if fd == lpipe[0] :
-                                for l in string.split(text, '\n') :
-                                    if l != '' :
-                                        msg = json.loads(l)
-                                        if msg['message_type'] == 'exception' :
-                                            try    : arg1 = msg['content']
-                                            except : arg1 = '(no content)'
-
-                #  Capture the child user and system times as best we can, since this
-                #  is summed over all children.
-                #
-                ostimes1   = os.times ()
-                (waited_pid, waited_status) = os.waitpid(pid, 0)
-                ostimes2   = os.times ()
-                cltime2    = time.time()
-    
-                # this creates the status output that is passed out to runner.py.  
-                # The actual completion signal comes when the runner.py process ends
-                msg =       {   'message_type'    : 'executionstatus',
-                                'content'         : 'runcompleted', 
-                                'elapsed_seconds' : int(cltime2 - cltime1), 
-                                'CPU_seconds'     : int(ostimes2[2] - ostimes1[2])
-                            }
-                if os.WIFEXITED(waited_status):
-                    msg['exit_status'] = os.WEXITSTATUS(waited_status)
-                if os.WIFSIGNALED(waited_status):
-                    msg['term_sig'] = os.WTERMSIG(waited_status)
-                    # generate text version (e.g. SIGSEGV rather than 11)
-                    sigmap = dict((k, v) for v, k in signal.__dict__.iteritems() if v.startswith('SIG'))
-                    if msg['term_sig'] in sigmap:
-                        msg['term_sig_text'] = sigmap[msg['term_sig']]
-                self.wfile.write(json.dumps(msg) + '\n')
-
-            except Exception, e :
-
+            except Exception, e:
                 import traceback
                 sys.stderr.write(traceback.format_exc())
                 self.log_request('Copying results failed: %s' % repr(e))
 
-            finally :
-
+            finally:
                 lock.acquire()
                 del scrapersByRunID[self.m_runID]
                 del scrapersByPID  [pid         ]
@@ -624,66 +579,18 @@ class ScraperController (BaseController) :
 
             return
 
-        if pid < 0 :
-            return
-
-        #  Code from here down runs in the child process
-        #
-        psock[0].close()
-        os.close(lpipe[0])
-
-# received end
-
-        open ('/tmp/ident.%d'   % os.getpid(), 'w').write(string.join(idents, '\n'))
-        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(request['code'].encode('utf-8'))
-
-        # notes: execScript takes the code as an argument, but doesn't do anything with it.  
-        #  it recreates the above file name from the pid and calls the language script with it
-        #  attempts to move the php block wrapping "<?php\n%s\n?>\n" % code to here from runner.py
-        #  made difficult by inability to restart the controller.
-        #  If it was done closer to this face then we could contemplate using eval() rather than require()
-        #  to invoke the script
-
-        os.environ['metadata_host' ] = config.get ('metadata', 'host')
-
-        #  Apply resource limits, set group and user, paths and
-        #  environment.
-        #
-        self.m_paths = request.get("paths", [ ])
-
-        language = request.get('language', 'python')
-        #resource.setrlimit(resource.RLIMIT_CPU, (request['cpulimit'], request['cpulimit']+1))
-
-        # I think code is passed through to assist with the stackdump, though it is saved into a temporary file anyway
-        if language == 'python' :
-            self.execScript  ('py',  request['code'], psock[1].fileno(), lpipe[1])
-            return
-
-        if language == 'php'    :
-            self.execScript  ('php', request['code'], psock[1].fileno(), lpipe[1])
-            return
-
-        if language == 'ruby'   :
-            self.execScript  ('rb',  request['code'], psock[1].fileno(), lpipe[1])
-            return
-
-        self.wfile.write(json.dumps({'message_type': 'console', 'content': 'Language %s not recognised' % language, }) + '\n')
-        self.wfile.flush()
-        os.exit()
+        if pid == 0:
+            self.processchild(psock, lpipe, idents, request)
 
 
 # one of these representing the whole controller
 class ControllerHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
-
     """
     Wrapper class providing a forking server. Note that we run forking
     and not threaded as we may want to change the user and group id of
     the executed scripts.
     """
-
     pass
-
-
 
 
 def autoFirewall():
@@ -719,7 +626,7 @@ def autoFirewall():
 
     rname = '/tmp/iptables.%s' % os.getpid()
     rfile = open (rname, 'w')
-    rfile.write  (string.join (rules, '\n') + '\n')
+    rfile.write  ('\n'.join(rules) + '\n')
     rfile.close  ()
 
     if os.getuid() == 0 :
@@ -735,7 +642,7 @@ def autoFirewall():
 
     rname = '/tmp/iptables_nat.%s' % os.getpid()
     rfile = open (rname, 'w')
-    rfile.write  (string.join (natrules, '\n') + '\n')
+    rfile.write  ('\n'.join(natrules) + '\n')
     rfile.close  ()
 
     if os.getuid() == 0 :
