@@ -67,7 +67,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         return runID, short_name
 
-    def process(self, db, runID, short_name, request):
+    def process(self, db, dataauth, runID, short_name, request):
         #print "rrr", request
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
@@ -81,7 +81,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if request["command"] == "downloadsqlitefile":
                 res = db.downloadsqlitefile(short_name, seek=request["seek"], length=request["length"])
             else:
-                res = db.sqlitecommand(runID, short_name, command=request["command"], val1=request["val1"], val2=request["val2"])
+                res = db.sqlitecommand(dataauth, runID, short_name, command=request["command"], val1=request["val1"], val2=request["val2"])
         
         elif request["maincommand"] == 'save_sqlite':
             res = db.save_sqlite(runID, short_name, unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
@@ -103,8 +103,13 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 return
             short_name = params.get('short_name', '')
             runID = 'fromfrontend.%s.%s' % (short_name, time.time()) 
+            dataauth = "fromfrontend"
         else :
             runID, short_name = self.ident(params['uml'], params['port'])
+            if runID[:8] == "draft|||" and short_name:
+                dataauth = "draft"
+            else:
+                dataauth = "writable"
         
         if path == '' or path is None :
             path = '/'
@@ -129,7 +134,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     line = "".join(sbuffer)
                     if line:
                         request = json.loads(line) 
-                        self.process(db, runID, short_name, request)
+                        self.process(db, dataauth, runID, short_name, request)
                     sbuffer = [ ssrec.pop(0) ]  # next one in
                 if not srec:
                     break

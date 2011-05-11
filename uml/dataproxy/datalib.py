@@ -62,6 +62,7 @@ class Database:
         return {"status":"good"}
 
     
+            # To do this properly would need to ensure file doesn't change during this process
     def downloadsqlitefile(self, short_name, seek, length):
         scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
         scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
@@ -84,36 +85,26 @@ class Database:
         return result
     
     
-    # general single file sqlite access
-    # the values of these fields are safe because from the UML they are subject to an ident callback, 
-    # and from the frontend they are subject to a connection from a particular IP number
-    def sqlitecommand(self, runID, short_name, command, val1, val2):
-        print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
+    def establishconnection(self, dataauth, short_name, bcreate):
         
         # apparently not able to reset authorizer function after it has been set once, so have to redirect this way
         def authorizer_all(action_code, tname, cname, sql_location, trigger):
             #print "authorizer_all", (action_code, tname, cname, sql_location, trigger)
             return self.authorizer_func(action_code, tname, cname, sql_location, trigger)
-
-
-        if not runID:
-            return {"error":"runID is blank"}
-
-        if runID[:12] == "fromfrontend":
+        
+        if dataauth == "fromfrontend":
             self.authorizer_func = authorizer_readonly
-        elif runID[:8] == "draft|||" and short_name:
+        elif dataauth == "draft" and short_name:
             self.authorizer_func = authorizer_readonly
         else:
             self.authorizer_func = authorizer_writemain
-            
-
-            # make a new directory and connection if not seen anywhere (unless it's draft)
+        
         if not self.m_sqlitedbconn:
             if short_name:
                 scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
                 if not os.path.isdir(scraperresourcedir):
-                    if command == "datasummary": 
-                        return {"status":"No sqlite database"}    # don't make one if we're just requesting a summary
+                    if not bcreate: 
+                        return False
                     os.mkdir(scraperresourcedir)
                 scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
@@ -121,6 +112,17 @@ class Database:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:")   # draft scrapers make a local version
             self.m_sqlitedbconn.set_authorizer(authorizer_all)
             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
+        return True
+                
+                
+    def sqlitecommand(self, dataauth, runID, short_name, command, val1, val2):
+        print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
+        if not runID:
+            return {"error":"runID is blank"}
+
+        if not establishconnection(self, dataauth, short_name, command == "datasummary"):
+             return {"status":"No sqlite database"}
+
         
         if command == "execute":
             try:

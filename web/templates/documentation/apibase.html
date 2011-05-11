@@ -177,10 +177,19 @@ $(function()
                 $('#listtables').empty(); 
                 if (v && v[0] && v[0].datasummary && v[0].datasummary.tables)
                 {
+                    var maxtablecount = 0;
+                    var maxtablename = null;
                     for (var tablename in v[0].datasummary.tables)
                     {
                         var table = v[0].datasummary.tables[tablename]; 
                         $('#listtables').append('<li><b>'+tablename+'</b> [<em>'+table.count+' rows</em>] '+table.sql+'</li>'); 
+                        if ((table.count > maxtablecount) || (maxtablename == null))
+                        {
+                            maxtablename = tablename; 
+                            maxtablecount = table.count; 
+                        }
+                        if (maxtablename != null)
+                            $('#id_query').val("select * from "+maxtablename+" limit 10").keyup(); // same as change
                     }
                 }
                 else if (v && v.error)
