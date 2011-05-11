@@ -115,15 +115,41 @@ class Database:
         return True
                 
                 
+    def datasummary(self, dataauth, short_name, limit):
+        if not self.establishconnection(dataauth, short_name, False):
+             return {"status":"No sqlite database"}
+        
+        self.authorizer_func = authorizer_readonly
+        tables = { }
+        try:
+            for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
+                tables[name] = {"sql":sql}
+                if limit != -1:
+                    self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, (limit,))
+                    if limit != 0:
+                        tables[name]["rows"] = list(self.m_sqlitedbcursor)
+                    tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
+                tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
+                
+        except sqlite3.Error, e:
+            return {"error":"sqlite3.Error: "+str(e)}
+        
+        result = {"tables":tables}
+        if short_name:
+            scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+            scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+            if os.path.isfile(scrapersqlitefile):
+                result["filesize"] = os.path.getsize(scrapersqlitefile)
+        return result
+    
+    
     def sqlitecommand(self, dataauth, runID, short_name, command, val1, val2):
-        print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
+        #print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
         if not runID:
             return {"error":"runID is blank"}
 
-        if not establishconnection(self, dataauth, short_name, command == "datasummary"):
-             return {"status":"No sqlite database"}
+        self.establishconnection(dataauth, short_name, True)
 
-        
         if command == "execute":
             try:
                 bstreamchunking = val2 and not re.search("\?", val1) and type(val2) in [list, tuple] and val2[0] == "streamchunking"
@@ -156,30 +182,6 @@ class Database:
             except sqlite3.Error, e:
                 signal.alarm (0)
                 return {"error":"sqlite3.Error: "+str(e)}
-                
-        elif command == "datasummary":
-            self.authorizer_func = authorizer_readonly
-            tables = { }
-            try:
-                for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
-                    tables[name] = {"sql":sql}
-                    if val1 != "count":
-                        self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, ((val1 == None and 10 or val1),))
-                        if val1 != 0:
-                            tables[name]["rows"] = list(self.m_sqlitedbcursor)
-                        tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
-                    tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
-                    
-            except sqlite3.Error, e:
-                return {"error":"sqlite3.Error: "+str(e)}
-            
-            result = {"tables":tables}
-            if short_name:
-                scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
-                scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
-                if os.path.isfile(scrapersqlitefile):
-                    result["filesize"] = os.path.getsize(scrapersqlitefile)
-            return result
         
         elif command == "attach":
             if self.authorizer_func == authorizer_writemain:

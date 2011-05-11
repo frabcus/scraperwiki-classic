@@ -77,7 +77,7 @@ class Scraper (code.Code):
         dataproxy = DataStore(self.short_name)
         try:
             self.record_count = 0
-            datasummary = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "val1":0, "val2":None})
+            datasummary = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "limit":-1})
             if "error" not in datasummary:
                 for tabledata in datasummary.get("tables", {}).values():
                     self.record_count += tabledata["count"]

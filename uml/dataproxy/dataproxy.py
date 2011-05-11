@@ -80,6 +80,8 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif request["maincommand"] == 'sqlitecommand':
             if request["command"] == "downloadsqlitefile":
                 res = db.downloadsqlitefile(short_name, seek=request["seek"], length=request["length"])
+            elif request["command"] == "datasummary":
+                res = db.datasummary(dataauth, short_name, request.get("limit", 10))
             else:
                 res = db.sqlitecommand(dataauth, runID, short_name, command=request["command"], val1=request["val1"], val2=request["val2"])
         

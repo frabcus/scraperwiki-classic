@@ -152,10 +152,9 @@ def code_overview(request, wiki_type, short_name):
     context["license_choices"] = models.LICENSE_CHOICES
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
     
-    # this is the only one to call.  would like to know the exception that's expected
     try:
         dataproxy = DataStore(scraper.short_name)
-        sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "val1":None, "val2":None})
+        sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "limit":10})
         if not sqlitedata:
             context['sqliteconnectionerror'] = 'No content in response'
         elif type(sqlitedata) in [str, unicode]:
