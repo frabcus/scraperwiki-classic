@@ -136,20 +136,20 @@ class scraperwiki
       else if (is_double($value))
          $jvalue = $value; 
       else
-         $jvalue = json_encode($value); 
+         $jvalue = $value; //json_encode($value); 
       $data = array("name"=>$name, "value_blob"=>$jvalue, "type"=>gettype($value)); 
       scraperwiki::save_sqlite(array("name"), $data, "swvariables"); 
    }
 
    static function get_var($name, $default=None)
    {
-      $ds = SW_DataStoreClass::create ();
-      $result = scraperwiki::sqlitecommand("execute", "select value_blob, type from swvariables where name=?", array($name)); 
-      if (property_exists($result, 'error'))
+      $ds = SW_DataStoreClass::create();
+      try  { $result = scraperwiki::sqlitecommand("execute", "select value_blob, type from swvariables where name=?", array($name)); }
+      catch (Exception $e)
       {
-         if (substr($result->error, 0, 29) == 'sqlite3.Error: no such table:')
+         if (substr($e->getMessage(), 0, 29) == 'sqlite3.Error: no such table:')
             return $default;
-         throw new Exception($result->error) ;
+         throw $e;
       }
       $data = $result->data; 
       if (count($data) == 0)

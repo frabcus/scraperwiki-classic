@@ -20,8 +20,6 @@ import datetime
 import tempfile
 import imp
 
-import scraperwiki.console
-
 # this will be useful for profiling the code, 
 # it should return an output in json that you can click on to take you to the correct line
 # see formatting in scrape 
