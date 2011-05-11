@@ -17,6 +17,11 @@ def docmain(request, language=None, path=None):
     request.session['language'] = language
     context = {'language': language }
     
+    # not written by anyone yet
+    if language == 'html':
+        return HttpResponseRedirect(reverse('docsroot', kwargs={'language':'python'}) )
+        
+    
     if path in page_titles:
         title, para = page_titles[path]
         context["title"] = title

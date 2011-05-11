@@ -10,6 +10,7 @@ in SQL API gets the data out as JSON or CSV files.  -->
 
 <h3>First steps</h3>
 <ul>
+          {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
     <li> {% doc_link_full 'LANG_intro_tutorial' language %} </li>
     <li> {% doc_link_full 'LANG_view_guide' language %} </li>
     <li> {% doc_link_full 'LANG_datastore_guide' language %} </li>
@@ -18,8 +19,9 @@ in SQL API gets the data out as JSON or CSV files.  -->
 
 <h3>Reference</h3>
 <ul>
-  <li> {% doc_link_full 'LANG_help_documentation' language %} </li>
-  <li> <a href="{% url docsexternal %}">External API</a> </li>
+        {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
+  <li> {% doc_link_full 'LANG_help_documentation' language %} - Library functions for accessing the databases.</li>  
+  <li> <a href="{% url docsexternal %}">External API</a> - Http interfaces for outside services.</li>
   <li> {% doc_link_full 'LANG_libraries' language %} </li>
 </ul>
 	

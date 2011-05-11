@@ -65,7 +65,7 @@
     <input type="hidden" id="username"          value="{{ request.user.username }}"/>
     <input type="hidden" id="userrealname"      value="{{ request.user.get_profile.name }}"/>
     <input type="hidden" id="isstaff"           value="{% if request.user.is_staff %}yes{% endif %}"/>
-    <input type="hidden" id="scraperlanguage"   value="{{ scraper.language|lower }}"/>
+    <input type="hidden" id="scraperlanguage"   value="{{ scraper.language }}"/>
     <input type="hidden" id="originalrev"       value="{{rev}}"/>
     <input type="hidden" id="codemirror_url"    value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
     <input type="hidden" id="id_wiki_type"      value="{{scraper.wiki_type}}"/>
@@ -121,7 +121,7 @@
 
             {# Controls #}
             <div class="editor_controls">
-                <a class="helplink" href="{% url docsroot %}" target="_blank" title="Show useful commands">Documentation</a>
+                <a class="helplink" href="{% url docsroot scraper.language %}" target="_blank" title="Show useful commands">Documentation</a>
                 {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
                   <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R)"/>
                 {% endifnotequal %}{% endifnotequal %}
