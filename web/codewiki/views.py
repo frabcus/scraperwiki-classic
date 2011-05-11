@@ -154,7 +154,7 @@ def code_overview(request, wiki_type, short_name):
     
     # this is the only one to call.  would like to know the exception that's expected
     try:
-        dataproxy = DataStore(scraper.guid, scraper.short_name)
+        dataproxy = DataStore(scraper.short_name)
         sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "val1":None, "val2":None})
         if not sqlitedata:
             context['sqliteconnectionerror'] = 'No content in response'
@@ -280,7 +280,7 @@ def scraper_admin(request, short_name):
 def scraper_delete_data(request, short_name):
     scraper = getscraperorresponse(request, "scraper", short_name, None, "delete_data")
     if isinstance(scraper, HttpResponse):  return scraper
-    dataproxy = DataStore(scraper.guid, scraper.short_name)
+    dataproxy = DataStore(scraper.short_name)
     dataproxy.request({"maincommand":"clear_datastore"})
     if scraper.wiki_type == "scraper":
         scraper.scraper.scrapermetadata_set.all().delete()
@@ -411,9 +411,9 @@ def export_csv(request, short_name):
 
     # could be replaced with the dataproxy chunking technology now available in there,
     # but as it's done, leave it here
-def stream_sqlite(dataproxy, filesize, memblock=100000):
+def stream_sqlite(dataproxy, filesize, memblock):
     for offset in range(0, filesize, memblock):
-        sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"downloadsqlitefile", "val1":offset, "val2":memblock})
+        sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"downloadsqlitefile", "seek":offset, "length":memblock})
         content = sqlitedata.get("content")
         if sqlitedata.get("encoding") == "base64":
             content = base64.decodestring(content)
@@ -426,13 +426,14 @@ def stream_sqlite(dataproxy, filesize, memblock=100000):
 @condition(etag_func=None)
 def export_sqlite(request, short_name):
     scraper = getscraperor404(request, short_name, "exportsqlite")
+    memblock=100000
     
-    dataproxy = DataStore(scraper.guid, scraper.short_name)
-    initsqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"downloadsqlitefile", "val1":0, "val2":0})
+    dataproxy = DataStore(scraper.short_name)
+    initsqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"downloadsqlitefile", "seek":0, "length":0})
     if "filesize" not in initsqlitedata:
         return HttpResponse(str(initsqlitedata), mimetype="text/plain")
     
-    response = HttpResponse(stream_sqlite(dataproxy, initsqlitedata["filesize"]), mimetype='application/octet-stream')
+    response = HttpResponse(stream_sqlite(dataproxy, initsqlitedata["filesize"], memblock), mimetype='application/octet-stream')
     response['Content-Disposition'] = 'attachment; filename=%s.sqlite' % (short_name)
     response["Content-Length"] = initsqlitedata["filesize"]
     return response

@@ -68,6 +68,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return runID, short_name
 
     def process(self, db, runID, short_name, request):
+        #print "rrr", request
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
         elif "maincommand" not in request:
@@ -75,8 +76,13 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             
         elif request["maincommand"] == 'clear_datastore':
             res = db.clear_datastore(short_name)
+        
         elif request["maincommand"] == 'sqlitecommand':
-            res = db.sqlitecommand(runID, short_name, command=request["command"], val1=request["val1"], val2=request["val2"])
+            if request["command"] == "downloadsqlitefile":
+                res = db.downloadsqlitefile(short_name, seek=request["seek"], length=request["length"])
+            else:
+                res = db.sqlitecommand(runID, short_name, command=request["command"], val1=request["val1"], val2=request["val2"])
+        
         elif request["maincommand"] == 'save_sqlite':
             res = db.save_sqlite(runID, short_name, unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
         
@@ -90,18 +96,16 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET (self) :
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
         params = dict(cgi.parse_qsl(query))
-        print params
+
         if 'short_name' in params:
             if self.connection.getpeername()[0] != config.get('dataproxy', 'secure') :
                 self.connection.send(json.dumps({"error":"short_name only accepted from secure hosts"})+'\n')
                 return
             short_name = params.get('short_name', '')
-            runID = 'fromfrontend.%s.%s' % (short_name, time.time()), 
-        
+            runID = 'fromfrontend.%s.%s' % (short_name, time.time()) 
         else :
             runID, short_name = self.ident(params['uml'], params['port'])
-
-
+        
         if path == '' or path is None :
             path = '/'
 

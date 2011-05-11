@@ -107,11 +107,8 @@ def data_handler(request):
 def sqlite_handler(request):
     scraper = getscraperorresponse(request)
     if isinstance(scraper, HttpResponse):  return scraper
-    dataproxy = DataStore("sqlviewquery", "")  # zero length short name means it will open up a :memory: database
-
+    dataproxy = DataStore(request.GET.get('name'))
     attachlist = request.GET.get('attach', '').split(";")
-    attachlist.insert(0, request.GET.get('name'))   # just the first entry on the list
-        
     for aattach in attachlist:
         if aattach:
             aa = aattach.split(",")
@@ -122,13 +119,12 @@ def sqlite_handler(request):
     if format == "json":
         format = "jsondict"
     
-    reqt = None
+    req = {"maincommand":"sqlitecommand", "command":"execute", "val1":sqlquery, "val2":None}
     if format == "csv":
-        reqt = ("streamchunking", 1000)
+        req["val2"] = ("streamchunking", 1000)
     
     # this is inlined from the dataproxy.request() function to allow for receiveoneline to perform multiple readlines in this case
-    # (this is the stream-chunking thing.  the right interface is not yet apparent)
-    req = {"maincommand":"sqlitecommand", "command":"execute", "val1":sqlquery, "val2":reqt}
+        # (this is the stream-chunking thing.  the right interface is not yet apparent)
     dataproxy.m_socket.sendall(simplejson.dumps(req) + '\n')
     
     if format not in ["csv", "jsondict", "jsonlist"]:

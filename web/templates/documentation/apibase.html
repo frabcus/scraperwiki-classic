@@ -180,7 +180,7 @@ $(function()
                     for (var tablename in v[0].datasummary.tables)
                     {
                         var table = v[0].datasummary.tables[tablename]; 
-                        $('#listtables').append('<li><b>'+tablename+'</b> ['+table.count+'] '+table.sql+'</li>'); 
+                        $('#listtables').append('<li><b>'+tablename+'</b> [<em>'+table.count+' rows</em>] '+table.sql+'</li>'); 
                     }
                 }
                 else if (v && v.error)

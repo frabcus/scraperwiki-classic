@@ -8,7 +8,6 @@ from codewiki.managers.datastore import DataStore
 
 
 class GetInfo(APIBase):
-    
     def convert_history(self, commitentry):
         result = { 'version':commitentry['rev'], 'date':commitentry['date'] }
         if 'user' in commitentry:
@@ -47,7 +46,7 @@ class GetInfo(APIBase):
             info['records']     = scraper.scraper.record_count  # old style datastore
             
             if 'datasummary' not in quietfields:
-                dataproxy = DataStore(scraper.guid, scraper.short_name)
+                dataproxy = DataStore(scraper.short_name)
                 sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "val1":0, "val2":None})
                 if sqlitedata and type(sqlitedata) not in [str, unicode]:
                     info['datasummary'] = sqlitedata
@@ -58,7 +57,7 @@ class GetInfo(APIBase):
                 if ucrole.role not in info['userroles']:
                     info['userroles'][ucrole.role] = [ ]
                 info['userroles'][ucrole.role].append(ucrole.user.username)
-            
+        print info            
                 
         try: 
             rev = int(request.GET.get('version', ''))

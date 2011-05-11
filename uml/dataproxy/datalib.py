@@ -15,6 +15,32 @@ import sys
 try   : import json
 except: import simplejson as json
 
+
+def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
+    #print "authorizer_readonly", (action_code, tname, cname, sql_location, trigger)
+    readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library.  codes: http://www.sqlite.org/c3ref/c_alter_table.html
+    if action_code in readonlyops:
+        return sqlite3.SQLITE_OK
+    if action_code == sqlite3.SQLITE_PRAGMA:
+        if tname in ["table_info", "index_list", "index_info"]:
+            return sqlite3.SQLITE_OK
+    return sqlite3.SQLITE_DENY
+
+def authorizer_attaching(action_code, tname, cname, sql_location, trigger):
+    #print "authorizer_attaching", (action_code, tname, cname, sql_location, trigger)
+    if action_code == sqlite3.SQLITE_ATTACH:
+        return sqlite3.SQLITE_OK
+    return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
+
+def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
+    #print "authorizer_writemain", (action_code, tname, cname, sql_location, trigger)
+    if sql_location == None or sql_location == 'main':  
+        return sqlite3.SQLITE_OK
+    return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
+    
+
+
+
 class Database:
 
     def __init__(self, ldataproxy, resourcedir):
@@ -35,35 +61,36 @@ class Database:
             shutil.move(scrapersqlitefile, deletedscrapersqlitefile)
         return {"status":"good"}
 
+    
+    def downloadsqlitefile(self, short_name, seek, length):
+        scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+        scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+        lscrapersqlitefile = os.path.join(short_name, "defaultdb.sqlite")
+        if not os.path.isfile(scrapersqlitefile):
+            return {"status":"No sqlite database"}
+        
+        result = { "filename":lscrapersqlitefile, "filesize": os.path.getsize(scrapersqlitefile)}
+        if length == 0:
+            return result
+        
+        fin = open(scrapersqlitefile, "rb")
+        fin.seek(seek)
+        content = fin.read(length)
+        result["length"] = len(content)
+        result["content"] = base64.encodestring(content)
+        result['encoding'] = "base64"
+        fin.close()
+        
+        return result
+    
+    
     # general single file sqlite access
     # the values of these fields are safe because from the UML they are subject to an ident callback, 
     # and from the frontend they are subject to a connection from a particular IP number
     def sqlitecommand(self, runID, short_name, command, val1, val2):
         print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
         
-        def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
-            #print "authorizer_readonly", (action_code, tname, cname, sql_location, trigger)
-            readonlyops = [ sqlite3.SQLITE_SELECT, sqlite3.SQLITE_READ, sqlite3.SQLITE_DETACH, 31 ]  # 31=SQLITE_FUNCTION missing from library.  codes: http://www.sqlite.org/c3ref/c_alter_table.html
-            if action_code in readonlyops:
-                return sqlite3.SQLITE_OK
-            if action_code == sqlite3.SQLITE_PRAGMA:
-                if tname in ["table_info", "index_list", "index_info"]:
-                    return sqlite3.SQLITE_OK
-            return sqlite3.SQLITE_DENY
-        
-        def authorizer_attaching(action_code, tname, cname, sql_location, trigger):
-            #print "authorizer_attaching", (action_code, tname, cname, sql_location, trigger)
-            if action_code == sqlite3.SQLITE_ATTACH:
-                return sqlite3.SQLITE_OK
-            return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
-        
-        def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
-            #print "authorizer_writemain", (action_code, tname, cname, sql_location, trigger)
-            if sql_location == None or sql_location == 'main':  
-                return sqlite3.SQLITE_OK
-            return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
-            
-                    # apparently not able to reset authorizer function after it has been set once, so have to redirect this way
+        # apparently not able to reset authorizer function after it has been set once, so have to redirect this way
         def authorizer_all(action_code, tname, cname, sql_location, trigger):
             #print "authorizer_all", (action_code, tname, cname, sql_location, trigger)
             return self.authorizer_func(action_code, tname, cname, sql_location, trigger)
@@ -74,45 +101,12 @@ class Database:
 
         if runID[:12] == "fromfrontend":
             self.authorizer_func = authorizer_readonly
-        
-                # ideally this would be a type that prevented write types onto the database
-                # may need to copy to a temporary file or find a way to convert to a :memory: object
         elif runID[:8] == "draft|||" and short_name:
             self.authorizer_func = authorizer_readonly
-        
         else:
             self.authorizer_func = authorizer_writemain
             
-        if command == "downloadsqlitefile":
-            scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
-            scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
-            lscrapersqlitefile = os.path.join(short_name, "defaultdb.sqlite")
-            if not os.path.isfile(scrapersqlitefile):
-                return {"status":"No sqlite database"}
-            
-            result = { "filename":lscrapersqlitefile, "filesize": os.path.getsize(scrapersqlitefile)}
-            if val2 == 0:
-                return result
-            
-            fin = open(scrapersqlitefile, "rb")
-            if val1:
-                fin.seek(val1)
-                result["seek"] = val1
-            else:
-                result["seek"] = 0
-            
-            if val2:
-                content = fin.read(val2)
-            else:
-                content = fin.read()
-            result["length"] = len(content)
-            result["content"] = base64.encodestring(content)
-            result['encoding'] = "base64"
-            fin.close()
-            
-            return result
-            
-            
+
             # make a new directory and connection if not seen anywhere (unless it's draft)
         if not self.m_sqlitedbconn:
             if short_name:
@@ -138,6 +132,9 @@ class Database:
                 else:
                     self.m_sqlitedbcursor.execute(val1)
                 signal.alarm (0)
+                
+#INSERT/UPDATE/DELETE/REPLACE), and commits transactions implicitly before a non-DML, non-query statement (i. e. anything other than SELECT
+
                 
                 keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
                 if not bstreamchunking:

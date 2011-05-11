@@ -74,7 +74,7 @@ class Scraper (code.Code):
             # It would be good to kill this function off and move its functionality into being properties of the database
             # for now it represents some kind of caching of the size of the datastore
     def update_meta(self):
-        dataproxy = DataStore(self.guid, self.short_name)
+        dataproxy = DataStore(self.short_name)
         try:
             self.record_count = 0
             datasummary = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "val1":0, "val2":None})
