@@ -4,7 +4,23 @@
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/code_object_comments/{{ scraper.short_name }}" />{% endblock %}
 
 {% block header %}
-	<h2><a href="{% url profiles_profile_detail scraper.owner.username %}">{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}</a> / {% if user.is_authenticated %}<span id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</span> <a id="aEditTitle" title="Edit title">Edit title</a>{% else %}{{ scraper.title }}{% endif %}</h2>
+	<h2>
+      <a href="{% url profiles_profile_detail scraper.owner.username %}">
+        {% if scraper.owner %}
+          {% if scraper.owner.get_profile.name %}
+            {{scraper.owner.get_profile.name}}
+          {% else %}
+            {{scraper.owner.username}}
+          {% endif %}
+        {% endif %}
+       </a> / 
+       {% if user.is_authenticated %}
+         <span id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</span> 
+         <a id="aEditTitle" title="Edit title">Edit title</a>
+       {% else %}
+         {{ scraper.title }}
+       {% endif %}
+    </h2>
 	<p>{{scraper.wiki_type|lower}} 
 	    &bull; {{scraper.language|lower}}
         {% ifnotequal scraper.privacy_status 'public' %}
