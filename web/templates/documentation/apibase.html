@@ -126,12 +126,12 @@ $(function()
     }
 
     $('#detail select').each(function() { $(this).change(rewriteapiurl) }); 
-    $('#detail input, #detail textarea').each(function() 
+    $('#detail input').each(function() 
     {   
         $(this).keypress(function(e)
         {
             if (e.which == 13)
-                {  $("#btnCallMethod").click();  e.preventDefault();  return false }
+                {  $("#id_apiuri_run").click();  e.preventDefault();  return false }
         })
         $(this).keyup(rewriteapiurl); 
     }); 
