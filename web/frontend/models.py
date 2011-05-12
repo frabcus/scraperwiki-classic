@@ -286,7 +286,6 @@ class DataEnquiry(models.Model):
             What information do you want scraped?: %s
             When do you need it by?: %s
             How often does the data need to be scraped?: %s
-            I'm happy for this request to be posted on Twitter/Facebook: %s
             What are your ETL needs?: %s
             What visualisation do you need?: %s
             What application do you want built?: %s
@@ -300,7 +299,6 @@ class DataEnquiry(models.Model):
                self.columns,
                self.due_date or '',
                self.frequency,
-               "Yes" if self.broadcast else "No",
                self.description,
                self.visualisation,
                self.application)
