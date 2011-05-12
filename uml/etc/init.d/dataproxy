@@ -17,7 +17,8 @@ DESC="DataProxy"
 NAME=dataproxy
 DAEMON=/usr/bin/python
 VARDIR=/var
-LOGFILE=$VARDIR/log/$NAME
+export PYTHONPATH=/var/www/scraperwiki/uml
+LOGFILE=$VARDIR/log/$NAME.log
 PIDFILE=$VARDIR/run/$NAME.pid
 TOADDRS="julian@scraperwiki.com"
 DAEMON_ARGS="/var/www/scraperwiki/uml/dataproxy/dataproxy.py --setuid --pidfile=$PIDFILE --logfile=$LOGFILE --toaddrs=$TOADDRS"

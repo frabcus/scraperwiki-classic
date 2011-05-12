@@ -36,6 +36,10 @@ parser.add_option("--logfile")
 parser.add_option("--toaddrs", default="")
 poptions, pargs = parser.parse_args()
 
+logger = rslogger.getlogger(name="dataproxy", logfile=poptions.logfile, level='debug', toaddrs=poptions.toaddrs.split(","))
+datalib.logger = logger
+stdoutlog = open(poptions.logfile+"-stdout", 'a', 0)
+
 if poptions.setuid:
     gid = grp.getgrnam("nogroup").gr_gid
     os.setregid(gid, gid)
@@ -43,8 +47,6 @@ if poptions.setuid:
     os.setreuid(uid, uid)
 
 
-logger = rslogger.getlogger(name="dataproxy", logfile=poptions.logfile, level='debug', toaddrs=poptions.toaddrs.split(","))
-datalib.logger = logger
 #logger.critical("hi there")
 
 
@@ -176,8 +178,8 @@ if __name__ == '__main__' :
     if os.fork() == 0 :
         os.setsid()
         sys.stdin  = open('/dev/null')
-        sys.stdout = open(poptions.logfile+"-stdout", 'a', 0)
-        sys.stderr = sys.stdout
+        sys.stdout = stdoutlog
+        sys.stderr = stdoutlog
         if os.fork() == 0 :
             ppid = os.getppid()
             while ppid != 1 :
