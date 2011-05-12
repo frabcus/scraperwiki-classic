@@ -21,7 +21,8 @@
       {% endfor %}
     {% endwith %}
 
-{% if user.is_staff %} <div class="staff"> <!-- staff only, dark launch-->
+{% if user.is_staff %} 
+<div class="staff"> <!-- staff only, dark launch-->
     {% if user_owns_it %}
       {% ifnotequal scraper.privacy_status 'public' %}
         <li id="addneweditor">
@@ -35,26 +36,26 @@
         </li>
       {% endifnotequal %}
     {% endif %}
-</div> {% endif %} <!-- end staff only, dark launch -->
+</div> <!-- end staff only, dark launch -->
+{% endif %} 
 
 </ul>
 
-<!-- 
-{% if userrolemap.follow %}
-  <h3>Followers</h3>
-  {% ifnotequal scraper.privacy_status 'public' %}
-    <p id="followernoaccessmessage">(Do not have edit access to this {{scraper.wiki_type}}.)</p>
-  {% endifnotequal %}
-  <ul>
-  {% with 'follow' as role %}
-    {% for contributor in userrolemap.follow %}  
-      {% include 'codewiki/includes/contributor.html' %}
-    {% endfor %}
-  {% endwith %}
-  </ul>
-{% endif %}
--->
-
+{% comment %}
+    {% if userrolemap.follow %}
+    <h3>Followers</h3>
+    {% ifnotequal scraper.privacy_status 'public' %}
+        <p id="followernoaccessmessage">(Do not have edit access to this {{scraper.wiki_type}}.)</p>
+    {% endifnotequal %}
+    <ul>
+    {% with 'follow' as role %}
+        {% for contributor in userrolemap.follow %}  
+        {% include 'codewiki/includes/contributor.html' %}
+        {% endfor %}
+    {% endwith %}
+    </ul>
+    {% endif %}
+{% endcomment %}
 
 <p class="{% ifnotequal scraper.privacy_status 'public' %}xxxreport{% endifnotequal %}">This {{scraper.wiki_type}} <span id="spnPrivacyStatusChoice">{{privacy_status_name}}</span>.
   <select class="hide" id="optionsPrivacyStatusChoices">  {# this select gets taken apart and rebuilt by jeditable #}
@@ -62,10 +63,13 @@
     <option value="{{value}}">{{name}}</option>
   {% endfor %}
   </select>
-{% if user.is_staff %} <div class="staff"> <!-- staff only, dark launch-->
-  {% if user_owns_it %}
-    <a id="aPrivacyStatusChoice" class="edit">[edit status]</a>
-  {% endif %}
-</div> {% endif %} <!-- end staff only, dark launch -->
+
+  {% if user.is_staff %} 
+    <span class="staff"> <!-- staff only, dark launch-->
+    {% if user_owns_it %}
+      <a id="aPrivacyStatusChoice" class="edit">[edit status]</a>
+    {% endif %}
+    </span> <!-- end staff only, dark launch -->
+  {% endif %} 
 </p>
 
