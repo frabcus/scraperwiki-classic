@@ -206,7 +206,7 @@ def scraper_search_handler(request):
     if callback:
         res = "%s(%s)" % (callback, res)
     response = HttpResponse(res, mimetype='application/json; charset=utf-8')
-    response['Content-Disposition'] = 'attachment; filename=%s.json' % (scraper.short_name)
+    response['Content-Disposition'] = 'attachment; filename=search.json'
     return response
 
 
@@ -293,7 +293,7 @@ def runevent_handler(request):
     if callback:
         res = "%s(%s)" % (callback, res)
     response = HttpResponse(res, mimetype='application/json; charset=utf-8')
-    response['Content-Disposition'] = 'attachment; filename=userinfo.json'
+    response['Content-Disposition'] = 'attachment; filename=runevent.json'
     return response
 
 
@@ -404,7 +404,7 @@ def scraperinfo_handler(request):
     if callback:
         res = "%s(%s)" % (callback, res)
     response = HttpResponse(res, mimetype='application/json; charset=utf-8')
-    response['Content-Disposition'] = 'attachment; filename=userinfo.json'
+    response['Content-Disposition'] = 'attachment; filename=scraperinfo.json'
     return response
 
 
