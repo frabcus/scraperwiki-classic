@@ -19,29 +19,28 @@ from django.utils import simplejson
 
 from codewiki.models import Scraper, Code, ScraperRunEvent, scraper_search_query
 from codewiki.managers.datastore import DataStore
-
-from django.contrib.auth.decorators import login_required
-
-from models import api_key
-from forms import applyForm
 from cStringIO import StringIO
-
-import base64
 
 try:     import json
 except:  import simplejson as json
 
 
-def getscraperorresponse(request):
+def getscraperorresponse(request, action):
+    message = None
     try:
         scraper = Code.objects.exclude(privacy_status="deleted").get(short_name=request.GET.get('name'))
     except Code.DoesNotExist:
         message =  "Sorry, this datastore does not exist"
-        return HttpResponse(str({'heading':'Not found', 'body':message}))
     
-    if not scraper.actionauthorized(request.user, "apidataread"):
-        return HttpResponse(str(scraper.authorizationfailedmessage(request.user, "apidataread")))
-    return scraper
+    if not message and scraper.actionauthorized(request.user, "apidataread"):
+        return scraper
+        
+    result = json.dumps({'error':message})
+    callback = request.GET.get("callback")
+    if callback:
+        result = "%s(%s)" % (callback, result)
+    return HttpResponse(result)
+
 
 
 # see http://stackoverflow.com/questions/1189111/unicode-to-utf8-for-csv-files-python-via-xlrd
@@ -110,7 +109,7 @@ def data_handler(request):
 # all for want of setting response["Content-Length"] to the correct value
 @condition(etag_func=None)
 def sqlite_handler(request):
-    scraper = getscraperorresponse(request)
+    scraper = getscraperorresponse(request, "apidataread")
     if isinstance(scraper, HttpResponse):  return scraper
     dataproxy = DataStore(request.GET.get('name'))
     attachlist = request.GET.get('attach', '').split(";")
@@ -250,17 +249,10 @@ def userinfo_handler(request):
 
 
 
-def getscraperorrccode(request, short_name, action):
-    try:
-        scraper = Code.objects.exclude(privacy_status="deleted").get(short_name=short_name)
-    except Code.DoesNotExist:
-        raise ScraperAPINotFound()
-    if not scraper.actionauthorized(request.user, action):
-        raise ScraperAPIForbidden()
-    return scraper
 
 def runevent_handler(request):
-    scraper = getscraperorrccode(request, request.GET.get('name'), "apiscraperruninfo")
+    scraper = getscraperorresponse(request, "apiscraperruninfo")
+    if isinstance(scraper, HttpResponse):  return scraper
     runid = request.GET.get('runid', '-1')
     runevent = None
     if runid[0] == '-':   # allow for negative indexes to get to recent runs
@@ -336,7 +328,8 @@ def convert_date(date_str):
 
 
 def scraperinfo_handler(request):
-    scraper = getscraperorrccode(request, request.GET.get('name'), "apiscraperinfo")
+    scraper = getscraperorresponse(request, "apiscraperinfo")
+    if isinstance(scraper, HttpResponse):  return scraper
     history_start_date = convert_date(request.GET.get('history_start_date', None))
     quietfields        = request.GET.get('quietfields', "").split("|")
         

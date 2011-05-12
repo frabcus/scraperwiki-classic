@@ -122,7 +122,7 @@ INSTALLED_APPS = [
     'django_notify',
     'tagging',
     'contact_form',
-    'piston',      # needs 'django-piston' and 'phpserialize'
+    'piston',      # needs 'django-piston' and 'phpserialize' (this to be deleted)
     'captcha',
     'pagination',    
 ] + SCRAPERWIKI_APPS

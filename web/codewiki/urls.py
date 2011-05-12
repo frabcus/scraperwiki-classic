@@ -1,8 +1,8 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
 
 from codewiki import views, viewsrpc, viewsuml, viewseditor
 
-from django.conf.urls.defaults import *
+
 from piston.resource import Resource
 
 from handlers import ScraperMetadataHandler

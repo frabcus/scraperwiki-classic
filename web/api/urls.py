@@ -1,10 +1,6 @@
-from django.conf.urls.defaults import *
-from django.views.generic.simple import direct_to_template
+from django.conf.urls.defaults import patterns, url
 from piston.resource import Resource
 
-from handlers import scraper
-
-from api import views
 from api import viewshandlers
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
@@ -15,6 +11,7 @@ except: import simplejson as json
 
 # Version 1.0 URLS
 urlpatterns = patterns('',
+    
     # current api
     url(r'^1\.0/datastore/sqlite$',     viewshandlers.sqlite_handler,name="method_sqlite"),
     url(r'^1\.0/datastore/getdata$',    viewshandlers.data_handler,  name="method_getdata"),
@@ -35,13 +32,6 @@ urlpatterns = patterns('',
     # explorer redirects
     url(r'^1\.0/explore/scraperwiki.(?:scraper|datastore).(?P<shash>\w+)$', 
                    lambda request, shash: HttpResponseRedirect("%s#%s" % (reverse('docsexternal'), shash))),
-    
-    #explorer
-    url(r'^explorer_call$',                             views.explorer_user_run,    name='explorer_call'),
-    url(r'^explorer_example/(?P<method>[\w_\-\.\_]+)$', views.explorer_example,     name='explorer_example'),
-
-    url(r'^$', 'django.views.generic.simple.redirect_to', {'url': '/docs/api'},name='index'),
-    url(r'^1\.0$', 'django.views.generic.simple.redirect_to', {'url': '/docs/api'}, name='index_1_0'),
-
-
+    url(r'^(?:1\.0|1\.0/explore/.*|)$', 
+                   lambda request: HttpResponseRedirect(reverse('docsexternal'))),
 )
