@@ -279,7 +279,6 @@ class UML :
 
         try    :
             import urllib2
-            print >>sys.stderr, "http://%s:%s/Status" % (self.m_server, self.m_port)
             res = urllib2.urlopen("http://%s:%s/Status" % (self.m_server, self.m_port), timeout = 2).read()
             self.m_dead = False
             return
