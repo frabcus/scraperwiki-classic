@@ -27,24 +27,6 @@ except: import simplejson as json
 #python manage.py runserver 8010
 # And then you use browse at http://localhost:8000/api/1.0/explore/scraperwiki.scraper.getinfo
 
-@login_required
-def keys(request):
-    user = request.user
-    users_keys = api_key.objects.filter(user=user)
-
-    key = api_key(user=user)
-    form = applyForm()
-    
-    if request.method == 'POST':
-        form = applyForm(data=request.POST, files=request.FILES,instance=key)
-        if form.is_valid():
-            form.save(commit=False)
-            form.save()
-            form = applyForm() #clear the form
-        #return HttpResponseRedirect(request.path_info)
-
-    return render_to_response('api/keys.html', {'mode': 'api', 'keys' : users_keys,'form' : form}, context_instance=RequestContext(request))
-
 
 def example_scrapers(user, count):
     if user.is_authenticated():
@@ -61,8 +43,6 @@ def explore_index(request):
 def explore_index_1_0(request):
     return render_to_response('api/1.0.html', {'mode': 'api'}, context_instance=RequestContext(request))
 
-def explore_index_1_0_libraries(request):
-    return render_to_response('api/libraries.html', {'mode': 'api'}, context_instance=RequestContext(request))
 
 def explore_scraper_search_1_0(request):
     user = request.user
@@ -154,30 +134,3 @@ def explorer_example(request, method):
 
 
 
-# to deprecate
-def explore_scraper_getkeys_1_0(request):
-    scrapers = []
-    user = request.user
-    scrapers = example_scrapers(user, 5)
-
-    return render_to_response('api/datastore_getkeys_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getkeys')}, context_instance=RequestContext(request))
-
-def explore_datastore_search_1_0(request):
-    scrapers = []
-    user = request.user
-    scrapers = example_scrapers(user, 5)
-
-    return render_to_response('api/datastore_search_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_datastore_search')}, context_instance=RequestContext(request))
-
-def explore_scraper_getdatabydate_1_0(request):
-    scrapers = []
-    user = request.user
-    scrapers = example_scrapers(user, 5)
-    return render_to_response('api/scraper_getdatabydate_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdatabydate')}, context_instance=RequestContext(request))    
-
-def explore_scraper_getdatabylocation_1_0(request):
-    scrapers = []
-    user = request.user
-    scrapers = example_scrapers(user, 5)
-        
-    return render_to_response('api/scraper_getdatabylocation_1.0.html', {'scrapers': scrapers, 'has_scrapers': True, 'max_api_items': MAX_API_ITEMS, 'api_domain': API_DOMAIN, 'api_uri': reverse('api:method_getdatabylocation')}, context_instance=RequestContext(request))    
