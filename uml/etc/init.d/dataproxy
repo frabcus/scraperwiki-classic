@@ -22,7 +22,6 @@ LOGFILE=$VARDIR/log/$NAME.log
 PIDFILE=$VARDIR/run/$NAME.pid
 TOADDRS="julian@scraperwiki.com"
 DAEMON_ARGS="/var/www/scraperwiki/uml/dataproxy/dataproxy.py --setuid --pidfile=$PIDFILE --logfile=$LOGFILE --toaddrs=$TOADDRS"
-SCRIPTNAME=/etc/init.d/$NAME
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -137,7 +136,7 @@ case "$1" in
 	esac
 	;;
   *)
-	echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+	echo "Usage: /etc/init.d/$NAME {start|stop|restart|force-reload}" >&2
 	exit 3
 	;;
 esac

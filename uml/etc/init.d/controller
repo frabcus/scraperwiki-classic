@@ -12,15 +12,16 @@
 # Do NOT "set -e"
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
-PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Controller"
 NAME=controller
-CONFIG=/scraperwiki/scripts/uml.cfg
 DAEMON=/scraperwiki/scripts/controller.py
-DAEMON_PATH=/scraperwiki/scripts
-DAEMON_ARGS="--daemon --subproc --addPath=$DAEMON_PATH --config=$CONFIG --firewall=auto"
-PIDFILE=/var/run/$NAME.pid
-SCRIPTNAME=/etc/init.d/$NAME
+VARDIR=/var
+CONFIG=/scraperwiki/scripts/uml.cfg
+export PYTHONPATH=/var/www/scraperwiki/scraperlibs/:/var/www/scraperwiki/uml/
+PIDFILE=$VARDIR/run/$NAME.pid
+LOGFILE=$VARDIR/log/$NAME.log
+TOADDRS="julian@scraperwiki.com"
+DAEMON_ARGS="--setuid --firewall=auto --pidfile=$PIDFILE --logfile=$LOGFILE --config=$CONFIG --toaddrs=$TOADDRS"
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -40,8 +41,6 @@ SCRIPTNAME=/etc/init.d/$NAME
 #
 do_start()
 {
-	PATH=$PATH:$DAEMON_PATH
-
 	# Return
 	#   0 if daemon has been started
 	#   1 if daemon was already running
@@ -137,7 +136,7 @@ case "$1" in
 	esac
 	;;
   *)
-	echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+	echo "Usage: /etc/init.d/$NAME {start|stop|restart|force-reload}" >&2
 	exit 3
 	;;
 esac

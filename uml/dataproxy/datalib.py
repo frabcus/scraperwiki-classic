@@ -147,7 +147,7 @@ class Database:
     
     
     def sqlitecommand(self, dataauth, runID, short_name, command, val1, val2):
-        logger.info(str(("XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn))))
+        logger.debug(str(("XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)))[:100])
         if not runID:
             return {"error":"runID is blank"}
 
@@ -205,14 +205,14 @@ class Database:
 
 
 
-    def save_sqlite(self, runID, short_name, unique_keys, data, swdatatblname):
+    def save_sqlite(self, dataauth, runID, short_name, unique_keys, data, swdatatblname):
         res = { }
         
         if type(data) == dict:
             data = [data]
         
         if not self.m_sqlitedbconn or swdatatblname not in self.sqlitesaveinfo:
-            ssinfo = SqliteSaveInfo(self, runID, short_name, swdatatblname)
+            ssinfo = SqliteSaveInfo(self, dataauth, runID, short_name, swdatatblname)
             self.sqlitesaveinfo[swdatatblname] = ssinfo
             if not ssinfo.rebuildinfo() and data:
                 ssinfo.buildinitialtable(data[0])
@@ -220,7 +220,6 @@ class Database:
                 res["tablecreated"] = swdatatblname
         else:
             ssinfo = self.sqlitesaveinfo[swdatatblname]
-        
         
         nrecords = 0
         for ldata in data:
@@ -250,8 +249,9 @@ class Database:
 
 
 class SqliteSaveInfo:
-    def __init__(self, database, runID, short_name, swdatatblname):
+    def __init__(self, database, dataauth, runID, short_name, swdatatblname):
         self.database = database
+        self.dataauth = dataauth
         self.runID = runID
         self.short_name = short_name
         self.swdatatblname = swdatatblname
@@ -260,7 +260,7 @@ class SqliteSaveInfo:
         self.sqdatatemplate = ""
 
     def sqliteexecute(self, val1, val2=None):
-        res = self.database.sqlitecommand(self.runID, self.short_name, "execute", val1, val2)
+        res = self.database.sqlitecommand(self.dataauth, self.runID, self.short_name, "execute", val1, val2)
         if "error" in res:
             logger.warning(res)
         logger.debug(str(["execute", val1, val2, res]))

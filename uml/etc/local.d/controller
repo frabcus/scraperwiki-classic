@@ -2,18 +2,18 @@
 
 DESC="Controller"
 NAME=controller
-CONFIG=/var/www/scraperwiki/uml/uml.cfg.local
 DAEMON=/var/www/scraperwiki/uml/controller/controller.py
-DAEMON_PATH=/var/www/scraperwiki/scraperlibs/
-CTRL_PATH=/var/www/scraperwiki/uml/controller/
-DAEMON_ARGS="--daemon --subproc --addPath=$DAEMON_PATH --varDir=./var --firewall=none --config=$CONFIG --nosetuid"
-PIDFILE=./var/run/$NAME.pid
+VARDIR=/var/www/scraperwiki/uml/var
+CONFIG=/var/www/scraperwiki/uml/uml.cfg
+export PYTHONPATH=/var/www/scraperwiki/scraperlibs/:/var/www/scraperwiki/uml/
+PIDFILE=$VARDIR/run/$NAME.pid
+LOGFILE=$VARDIR/log/$NAME.log
+DAEMON_ARGS="--pidfile=$PIDFILE --logfile=$LOGFILE --config=$CONFIG"
 
 do_start()
 {
 	mkdir -p ./var/run
 	mkdir -p ./var/log
-	PATH=$PATH:$CTRL_PATH
 	$DAEMON $DAEMON_ARGS
 }
 

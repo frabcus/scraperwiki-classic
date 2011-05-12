@@ -8,6 +8,7 @@ import  datetime
 import  types
 import  socket
 import  re
+import scraperwiki
 
 try   : import json
 except: import simplejson as json
@@ -30,7 +31,7 @@ def receiveoneline(socket):
     while True:
         srec = socket.recv(1024)
         if not srec:
-            scraperwiki.console.dumpMessage({'message_type': 'chat', 'message':"socket from dataproxy has unfortunately closed"})
+            scraperwiki.dumpMessage({'message_type': 'chat', 'message':"socket from dataproxy has unfortunately closed"})
             break
         ssrec = srec.split("\n")  # multiple strings if a "\n" exists
         sbuffer.append(ssrec.pop(0))

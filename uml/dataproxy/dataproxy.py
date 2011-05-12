@@ -36,19 +36,9 @@ parser.add_option("--logfile")
 parser.add_option("--toaddrs", default="")
 poptions, pargs = parser.parse_args()
 
-logger = rslogger.getlogger(name="dataproxy", logfile=poptions.logfile, level='debug', toaddrs=poptions.toaddrs.split(","))
+logger = rslogger.getlogger(name="dataproxy", logfile=poptions.logfile, level='info', toaddrs=poptions.toaddrs.split(","))
 datalib.logger = logger
 stdoutlog = open(poptions.logfile+"-stdout", 'a', 0)
-
-if poptions.setuid:
-    gid = grp.getgrnam("nogroup").gr_gid
-    os.setregid(gid, gid)
-    uid = pwd.getpwnam("nobody").pw_uid
-    os.setreuid(uid, uid)
-
-
-#logger.critical("hi there")
-
 
 class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     __base         = BaseHTTPServer.BaseHTTPRequestHandler
@@ -79,7 +69,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return runID, short_name
 
     def process(self, db, dataauth, runID, short_name, request):
-        logger.info(str(("rrr", request)))
+        logger.debug(str(("rrr", request)))
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
         elif "maincommand" not in request:
@@ -97,11 +87,12 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 res = db.sqlitecommand(dataauth, runID, short_name, command=request["command"], val1=request["val1"], val2=request["val2"])
         
         elif request["maincommand"] == 'save_sqlite':
-            res = db.save_sqlite(runID, short_name, unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
+            res = db.save_sqlite(dataauth, runID, short_name, unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
         
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
         
+        logger.debug(json.dumps(res))
         self.connection.send(json.dumps(res)+'\n')
 
 
