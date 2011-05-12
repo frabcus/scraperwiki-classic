@@ -84,12 +84,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
-    def log_message (self, format, *args) :
-        #Override this method so that we can flush stderr
-        BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, '%5d: %s' % (os.getpid(), format), *args)
-        sys.stderr.flush ()
-
-
 
     def sendConnectionHeaders(self):
         self.connection.send  ('HTTP/1.0 200 OK\n')
@@ -126,15 +120,15 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             if m :
                 
 # this might be what we replace with a proper urllib.urlencode
-                self.log_request('Ident', '(%s,%s) is pid %s' % (lport, rport, m.group(1)))
+                logger.debug('Ident (%s,%s) is pid %s' % (lport, rport, m.group(1)))
                 try    :
                     info = scrapersByPID[int(m.group(1))]
                     self.connection.send ('\n'.join(info['idents']))
                     self.connection.send ("\n")
                 except Exception, e:
-                    self.log_request('Ident', '(%s,%s) send failed: %s' % (lport, rport, repr(e)))
+                    logger.debug('Ident (%s,%s) send failed: %s' % (lport, rport, repr(e)))
                 return
-        self.log_request('Ident', '(%s,%s) not found' % (lport, rport))
+        logger.debug('Ident (%s,%s) not found' % (lport, rport))
 
     def sendNotify (self, query) :
         """
@@ -398,7 +392,7 @@ class ScraperController (BaseController) :
 
  
     def execute(self, request):
-        self.log_request('Execute', '/Execute')
+        logger.debug(('Execute '+str(request))[:100])
 
         idents = []
         if request.get("scraperid"):
@@ -442,8 +436,8 @@ class ScraperController (BaseController) :
 
             except Exception, e:
                 import traceback
+                logger.error('Copying results failed: %s' % repr(e))
                 logger.error(traceback.format_exc())
-                self.log_request('Copying results failed: %s' % repr(e))
 
             finally:
                 lock.acquire()
@@ -596,6 +590,6 @@ if __name__ == '__main__' :
     if poptions.firewall == 'auto' :
         autoFirewall()
     
-    execute (config.getint (socket.gethostname(), 'port'))
+    execute(config.getint (socket.gethostname(), 'port'))
     
     

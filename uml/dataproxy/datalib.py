@@ -46,18 +46,21 @@ def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
 
 class Database:
 
-    def __init__(self, ldataproxy, resourcedir):
-        self.dataproxy = ldataproxy
+    def __init__(self, ldataproxy, resourcedir, short_name, dataauth, runID):
+        self.dataproxy = ldataproxy  # this is just to give access to self.dataproxy.connection.send()
         self.m_resourcedir = resourcedir
-
+        self.short_name = short_name
+        self.dataauth = dataauth
+        self.runID = runID
+        
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
         self.authorizer_func = None  
         self.sqlitesaveinfo = { }  # tablename -> info
 
 
-    def clear_datastore(self, short_name):
-        scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+    def clear_datastore(self):
+        scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
         scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
         if os.path.isfile(scrapersqlitefile):
             deletedscrapersqlitefile = os.path.join(scraperresourcedir, "DELETED-defaultdb.sqlite")
@@ -66,10 +69,10 @@ class Database:
 
     
             # To do this properly would need to ensure file doesn't change during this process
-    def downloadsqlitefile(self, short_name, seek, length):
-        scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+    def downloadsqlitefile(self, seek, length):
+        scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
         scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
-        lscrapersqlitefile = os.path.join(short_name, "defaultdb.sqlite")
+        lscrapersqlitefile = os.path.join(self.short_name, "defaultdb.sqlite")
         if not os.path.isfile(scrapersqlitefile):
             return {"status":"No sqlite database"}
         
@@ -88,23 +91,23 @@ class Database:
         return result
     
     
-    def establishconnection(self, dataauth, short_name, bcreate):
+    def establishconnection(self, bcreate):
         
         # apparently not able to reset authorizer function after it has been set once, so have to redirect this way
         def authorizer_all(action_code, tname, cname, sql_location, trigger):
             #print "authorizer_all", (action_code, tname, cname, sql_location, trigger)
             return self.authorizer_func(action_code, tname, cname, sql_location, trigger)
         
-        if dataauth == "fromfrontend":
+        if self.dataauth == "fromfrontend":
             self.authorizer_func = authorizer_readonly
-        elif dataauth == "draft" and short_name:
+        elif self.dataauth == "draft" and self.short_name:
             self.authorizer_func = authorizer_readonly
         else:
             self.authorizer_func = authorizer_writemain
         
         if not self.m_sqlitedbconn:
-            if short_name:
-                scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+            if self.short_name:
+                scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
                 if not os.path.isdir(scraperresourcedir):
                     if not bcreate: 
                         return False
@@ -118,8 +121,8 @@ class Database:
         return True
                 
                 
-    def datasummary(self, dataauth, short_name, limit):
-        if not self.establishconnection(dataauth, short_name, False):
+    def datasummary(self, limit):
+        if not self.establishconnection(False):
              return {"status":"No sqlite database"}
         
         self.authorizer_func = authorizer_readonly
@@ -138,81 +141,81 @@ class Database:
             return {"error":"sqlite3.Error: "+str(e)}
         
         result = {"tables":tables}
-        if short_name:
-            scraperresourcedir = os.path.join(self.m_resourcedir, short_name)
+        if self.short_name:
+            scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
             scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
             if os.path.isfile(scrapersqlitefile):
                 result["filesize"] = os.path.getsize(scrapersqlitefile)
         return result
     
     
-    def sqlitecommand(self, dataauth, runID, short_name, command, val1, val2):
-        logger.debug(str(("XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)))[:100])
-        if not runID:
+    def sqliteexecute(self, val1, val2):
+        logger.debug(str(("XXXXX", (self.runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)))[:100])
+        if not self.runID:
             return {"error":"runID is blank"}
 
-        self.establishconnection(dataauth, short_name, True)
+        self.establishconnection(True)
 
-        if command == "execute":
-            try:
-                bstreamchunking = val2 and not re.search("\?", val1) and type(val2) in [list, tuple] and val2[0] == "streamchunking"
-                    # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
-                signal.alarm (30)  # should use set_progress_handler !!!!
-                if val2 and not bstreamchunking:
-                    self.m_sqlitedbcursor.execute(val1, val2)  # handle "(?,?,?)", (val, val, val)
-                else:
-                    self.m_sqlitedbcursor.execute(val1)
-                signal.alarm (0)
-                
+        try:
+            bstreamchunking = val2 and not re.search("\?", val1) and type(val2) in [list, tuple] and val2[0] == "streamchunking"
+                # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
+            signal.alarm (30)  # should use set_progress_handler !!!!
+            if val2 and not bstreamchunking:
+                self.m_sqlitedbcursor.execute(val1, val2)  # handle "(?,?,?)", (val, val, val)
+            else:
+                self.m_sqlitedbcursor.execute(val1)
+            signal.alarm (0)
+
 #INSERT/UPDATE/DELETE/REPLACE), and commits transactions implicitly before a non-DML, non-query statement (i. e. anything other than SELECT
 
-                
-                keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
-                if not bstreamchunking:
-                    return {"keys":keys, "data":self.m_sqlitedbcursor.fetchall()}
-                
-                    # this loop has the one internal jsend in it
-                while True:
-                    data = self.m_sqlitedbcursor.fetchmany(val2[1])
-                    arg = {"keys":keys, "data":data} 
-                    if len(data) < val2[1]:
-                        break
-                    arg["moredata"] = True
-                    self.dataproxy.connection.send(json.dumps(arg)+'\n')
-                return arg
 
-            
-            except sqlite3.Error, e:
-                signal.alarm (0)
-                return {"error":"sqlite3.Error: "+str(e)}
+            keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
+            if not bstreamchunking:
+                return {"keys":keys, "data":self.m_sqlitedbcursor.fetchall()}
+
+                # this loop has the one internal jsend in it
+            while True:
+                data = self.m_sqlitedbcursor.fetchmany(val2[1])
+                arg = {"keys":keys, "data":data} 
+                if len(data) < val2[1]:
+                    break
+                arg["moredata"] = True
+                self.dataproxy.connection.send(json.dumps(arg)+'\n')
+            return arg
+
         
-        elif command == "attach":
-            if self.authorizer_func == authorizer_writemain:
-                self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
-            self.authorizer_func = authorizer_attaching
-            try:
-                attachscrapersqlitefile = os.path.join(self.m_resourcedir, val1, "defaultdb.sqlite")
-                self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, val2 or val1))
-            except sqlite3.Error, e:
-                return {"error":"sqlite3.Error: "+str(e)}
-            return {"status":"attach succeeded"}
+        except sqlite3.Error, e:
+            signal.alarm (0)
+            return {"error":"sqlite3.Error: "+str(e)}
+        
+    def sqliteattach(self, name, asname):
+        self.establishconnection(True)
+        if self.authorizer_func == authorizer_writemain:
+            self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
+        self.authorizer_func = authorizer_attaching
+        try:
+            attachscrapersqlitefile = os.path.join(self.m_resourcedir, name, "defaultdb.sqlite")
+            self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, asname or name))
+        except sqlite3.Error, e:
+            return {"error":"sqlite3.Error: "+str(e)}
+        return {"status":"attach succeeded"}
 
-        elif command == "commit":
-            signal.alarm(10)
-            self.m_sqlitedbconn.commit()
-            signal.alarm(0)
-            return {"status":"commit succeeded"}  # doesn't reach here if the signal fails
+    def sqlitecommit(self):
+        self.establishconnection(True)
+        signal.alarm(10)
+        self.m_sqlitedbconn.commit()
+        signal.alarm(0)
+        return {"status":"commit succeeded"}  # doesn't reach here if the signal fails
 
 
-
-    def save_sqlite(self, dataauth, runID, short_name, unique_keys, data, swdatatblname):
+    def save_sqlite(self, unique_keys, data, swdatatblname):
         res = { }
         
         if type(data) == dict:
             data = [data]
         
         if not self.m_sqlitedbconn or swdatatblname not in self.sqlitesaveinfo:
-            ssinfo = SqliteSaveInfo(self, dataauth, runID, short_name, swdatatblname)
+            ssinfo = SqliteSaveInfo(self, swdatatblname)
             self.sqlitesaveinfo[swdatatblname] = ssinfo
             if not ssinfo.rebuildinfo() and data:
                 ssinfo.buildinitialtable(data[0])
@@ -249,18 +252,15 @@ class Database:
 
 
 class SqliteSaveInfo:
-    def __init__(self, database, dataauth, runID, short_name, swdatatblname):
+    def __init__(self, database, swdatatblname):
         self.database = database
-        self.dataauth = dataauth
-        self.runID = runID
-        self.short_name = short_name
         self.swdatatblname = swdatatblname
         self.swdatakeys = [ ]
         self.swdatatypes = [  ]
         self.sqdatatemplate = ""
 
     def sqliteexecute(self, val1, val2=None):
-        res = self.database.sqlitecommand(self.dataauth, self.runID, self.short_name, "execute", val1, val2)
+        res = self.database.sqliteexecute(val1, val2)
         if "error" in res:
             logger.warning(res)
         logger.debug(str(["execute", val1, val2, res]))

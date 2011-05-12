@@ -68,7 +68,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         return runID, short_name
 
-    def process(self, db, dataauth, runID, short_name, request):
+    def process(self, db, request):
         logger.debug(str(("rrr", request)))
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
@@ -76,18 +76,23 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             res = {"error":'request must contain maincommand', "content":str(request)}
             
         elif request["maincommand"] == 'clear_datastore':
-            res = db.clear_datastore(short_name)
+            res = db.clear_datastore()
         
         elif request["maincommand"] == 'sqlitecommand':
             if request["command"] == "downloadsqlitefile":
-                res = db.downloadsqlitefile(short_name, seek=request["seek"], length=request["length"])
+                res = db.downloadsqlitefile(seek=request["seek"], length=request["length"])
             elif request["command"] == "datasummary":
-                res = db.datasummary(dataauth, short_name, request.get("limit", 10))
-            else:
-                res = db.sqlitecommand(dataauth, runID, short_name, command=request["command"], val1=request["val1"], val2=request["val2"])
+                res = db.datasummary(request.get("limit", 10))
+            elif request["command"] == "attach":
+                res = db.sqliteattach(request.get("name"), request.get("asname"))
+            elif request["command"] == "commit":
+                res = db.commit()
+            elif request["command"] == "execute":
+                            # this should contain the attach list with it
+                res = db.sqliteexecute(val1=request["val1"], val2=request["val2"])
         
         elif request["maincommand"] == 'save_sqlite':
-            res = db.save_sqlite(dataauth, runID, short_name, unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
+            res = db.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
         
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
@@ -122,7 +127,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.connection.send(json.dumps({"error":"Malformed URL %s" % self.path})+'\n')
             return
 
-        db = datalib.Database(self, config.get('dataproxy', 'resourcedir'))
+        db = datalib.Database(self, config.get('dataproxy', 'resourcedir'), short_name, dataauth, runID)
         self.connection.send(json.dumps({"status":"good"})+'\n')
 
                 # enter the loop that now waits for single requests (delimited by \n) 
@@ -138,7 +143,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     line = "".join(sbuffer)
                     if line:
                         request = json.loads(line) 
-                        self.process(db, dataauth, runID, short_name, request)
+                        self.process(db, request)
                     sbuffer = [ ssrec.pop(0) ]  # next one in
                 if not srec:
                     break

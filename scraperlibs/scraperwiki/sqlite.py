@@ -134,15 +134,24 @@ def save(unique_keys, data, table_name="swdata", verbose=2):
 
 
 def attach(name, asname=None, verbose=1):
-    return sqlitecommand("attach", name, asname, verbose)
+    result = scraperwiki.datastore.request({"maincommand":'sqlitecommand', "command":"attach", "name":name, "asname":asname})
+    if "error" in result:
+        raise databaseexception(result)
+    if "status" not in result:
+        raise Exception("possible signal timeout: "+str(result))
+        scraperwiki.dumpMessage({'message_type':'data', 'content': pdata})
+    return result
+
+
+def commit(verbose=1):
+    return sqlitecommand("commit", None, None, verbose)
+    
     
 def execute(val1, val2=None, verbose=1):
     if val2 is not None and "?" in val1 and type(val2) not in [list, tuple]:
         val2 = [val2]
     return sqlitecommand("execute", val1, val2, verbose)
 
-def commit(verbose=1):
-    return sqlitecommand("commit", None, None, verbose)
 
 def select(val1, val2=None, verbose=1):
     if val2 is not None and "?" in val1 and type(val2) not in [list, tuple]:
