@@ -108,19 +108,10 @@ ARGV.each do |a|
     Process.exit(1)
 end
 
-#print   "script    =", script,     "\n"
-#print   "path      =", path,       "\n"
-#print   "httpProxy =", httpProxy,  "\n"
-#print   "httpsProxy=", httpsProxy, "\n"
-#print   "ftpProxy  =", ftpProxy,   "\n"
-#print   "datastore =", datastore,  "\n"
-#print   "uid       =", uid,        "\n"
-#print   "gid       =", gid,        "\n"
-
-if gid
+if gid    # nogroup
     Process::Sys.setregid(gid, gid)
 end
-if uid
+if uid    # nobody
     Process::Sys.setreuid(uid, uid)
 end
 

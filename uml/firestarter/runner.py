@@ -82,7 +82,7 @@ class FireStarter:
 
 
 def buildjdata(code, options, config):
-    jdata = { "user":"nobody", "group":"nogroup" }
+    jdata = { }
     jdata["code"] = code.replace('\r', '')
     jdata["cpulimit"] = int(options.cpulimit)
     jdata["draft"] = options.draft

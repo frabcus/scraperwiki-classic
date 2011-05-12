@@ -12,6 +12,9 @@ import shutil
 import re
 import sys
 
+
+logger = None   # set by dataproxy
+
 try   : import json
 except: import simplejson as json
 
@@ -144,7 +147,7 @@ class Database:
     
     
     def sqlitecommand(self, dataauth, runID, short_name, command, val1, val2):
-        #print "XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)
+        logger.info(str(("XXXXX", (command, runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn))))
         if not runID:
             return {"error":"runID is blank"}
 
@@ -259,8 +262,8 @@ class SqliteSaveInfo:
     def sqliteexecute(self, val1, val2=None):
         res = self.database.sqlitecommand(self.runID, self.short_name, "execute", val1, val2)
         if "error" in res:
-            print "rrrrr", res
-        #print ["execute", val1, val2, res]
+            logger.warning(res)
+        logger.debug(str(["execute", val1, val2, res]))
         return res
     
     def rebuildinfo(self):
@@ -342,7 +345,7 @@ class SqliteSaveInfo:
             if "error" in lres:  
                 if lres["error"] != 'sqlite3.Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped':
                     return lres
-                print "Dropping index", lres # to detect if it's happening repeatedly
+                logger.warning(("Dropping index", lres)) # to detect if it's happening repeatedly
             res["droppedindex"] = idxname
         return res
             

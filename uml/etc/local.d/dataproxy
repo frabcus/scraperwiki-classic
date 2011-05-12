@@ -2,10 +2,12 @@
 
 DESC="DataProxy"
 NAME=dataproxy
-CONFIG=/var/www/scraperwiki/uml/uml.cfg.local
 DAEMON=/var/www/scraperwiki/uml/dataproxy/dataproxy.py
-DAEMON_ARGS="--daemon --subproc --varDir=./var --config=$CONFIG"
-PIDFILE=./var/run/$NAME.pid
+VARDIR=/var/www/scraperwiki/uml/var
+export PYTHONPATH=/var/www/scraperwiki/uml
+LOGFILE=$VARDIR/log/$NAME.log
+PIDFILE=$VARDIR/run/$NAME.pid
+DAEMON_ARGS="--pidfile=$PIDFILE --logfile=$LOGFILE"
 
 do_start()
 {

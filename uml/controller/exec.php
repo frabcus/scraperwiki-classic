@@ -63,12 +63,12 @@ for ($idx = 1 ; $idx < count($argv) ; $idx += 1)
 
 $logfd = fopen("/proc/self/fd/3", "w") ;
 
-if (!is_null($gid))
+if (!is_null($gid))    # nogroup
 {
    posix_setgid  ($gid) ;
    posix_setegid ($gid) ;
 }
-if (!is_null($uid))
+if (!is_null($uid))    # nogroup
 {
    posix_setuid  ($uid) ;
    posix_seteuid ($uid) ;

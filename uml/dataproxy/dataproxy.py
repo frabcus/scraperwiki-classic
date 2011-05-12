@@ -13,26 +13,39 @@ import time
 import ConfigParser
 import datetime
 import optparse
+import grp
+import pwd
+import rslogger   # made possible by PYTHONPATH environment variable
+import datalib
 
 try   : import json
 except: import simplejson as json
 
-import datalib
+# note: there is a symlink from /var/www/scraperwiki to the scraperwiki directory
+# which allows us to get away with being crap with the paths
 
-USAGE      = " [--varDir=dir] [--subproc] [--daemon] [--config=file]"
+config = ConfigParser.ConfigParser()
+config.readfp(open('/var/www/scraperwiki/uml/uml.cfg'))
+
 child      = None
 
 parser = optparse.OptionParser()
-parser.add_option("--varDir", metavar="dir", default='/var')
-parser.add_option("--subproc", action="store_true")
-parser.add_option("--daemon", action="store_true")
-parser.add_option("--uid")
-parser.add_option("--gid")
-parser.add_option("--config", dest="confnam", metavar="file", default='uml.cfg')
+parser.add_option("--setuid", action="store_true")
+parser.add_option("--pidfile")
+parser.add_option("--logfile")
+parser.add_option("--toaddrs", default="")
 poptions, pargs = parser.parse_args()
 
-config = ConfigParser.ConfigParser()
-config.readfp(open(poptions.confnam))
+if poptions.setuid:
+    gid = grp.getgrnam("nogroup").gr_gid
+    os.setregid(gid, gid)
+    uid = pwd.getpwnam("nobody").pw_uid
+    os.setreuid(uid, uid)
+
+
+logger = rslogger.getlogger(name="dataproxy", logfile=poptions.logfile, level='debug', toaddrs=poptions.toaddrs.split(","))
+datalib.logger = logger
+#logger.critical("hi there")
 
 
 class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -41,10 +54,6 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     server_version = "DataProxy/ScraperWiki_0.0.1"
     rbufsize       = 0
-
-    def log_message (self, format, *args) :
-        BaseHTTPServer.BaseHTTPRequestHandler.log_message(self, format, *args)
-        sys.stderr.flush()
 
     def ident(self, uml, port):
         runID       = None
@@ -68,7 +77,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return runID, short_name
 
     def process(self, db, dataauth, runID, short_name, request):
-        #print "rrr", request
+        logger.info(str(("rrr", request)))
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
         elif "maincommand" not in request:
@@ -154,65 +163,57 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 class ProxyHTTPServer(SocketServer.ForkingMixIn, BaseHTTPServer.HTTPServer):
     pass
 
-
 def sigTerm(signum, frame) :
-    try    : os.kill(child, signal.SIGTERM)
-    except : pass
-    try    : os.remove(poptions.varDir + '/run/dataproxy.pid')
-    except : pass
-    sys.exit (1)
-
+    #logger.debug("terminating")    # many of these, only one terminated
+    os.kill(child, signal.SIGTERM)
+    os.remove(poptions.pidfile)
+    logger.warning("terminated")
+    sys.exit(1)
 
 if __name__ == '__main__' :
 
-    #  If executing in daemon mode then fork and detatch from the
-    #  controlling terminal. Basically this is the fork-setsid-fork
-    #  sequence.
-    #
-    if poptions.daemon :
+    # daemon mode
+    if os.fork() == 0 :
+        os.setsid()
+        sys.stdin  = open('/dev/null')
+        sys.stdout = open(poptions.logfile+"-stdout", 'a', 0)
+        sys.stderr = sys.stdout
         if os.fork() == 0 :
-            os .setsid()
-            sys.stdin  = open ('/dev/null')
-            sys.stdout = open (poptions.varDir + '/log/dataproxy', 'a', 0)
-            sys.stderr = sys.stdout
-            if os.fork() == 0 :
+            ppid = os.getppid()
+            while ppid != 1 :
+                time.sleep(1)
                 ppid = os.getppid()
-                while ppid != 1 :
-                    time.sleep(1)
-                    ppid = os.getppid()
-            else :
-                os._exit (0)
         else :
-            os.wait()
-            sys.exit (1)
+            os._exit (0)
+    else :
+        os.wait()
+        sys.exit (1)
 
-        pf = open (poptions.varDir + '/run/dataproxy.pid', 'w')
-        pf.write  ('%d\n' % os.getpid())
-        pf.close  ()
+    pf = open(poptions.pidfile, 'w')
+    pf.write('%d\n' % os.getpid())
+    pf.close()
+        
 
-    if poptions.gid is not None:
-        os.setregid(int(poptions.gid), int(poptions.gid))
-    if poptions.uid is not None:
-        os.setreuid(int(poptions.uid), int(poptions.uid))
+    if poptions.setuid:
+        gid = grp.getgrnam("nogroup").gr_gid
+        os.setregid(gid, gid)
+        uid = pwd.getpwnam("nobody").pw_uid
+        os.setreuid(uid, uid)
 
-    #  If running in subproc mode then the server executes as a child
-    #  process. The parent simply loops on the death of the child and
-    #  recreates it in the event that it croaks.
-    if poptions.subproc:
-        signal.signal(signal.SIGTERM, sigTerm)
-        while True:
-            child = os.fork()
-            if child == 0:
-                break
-
-            sys.stdout.write("%s: Forked subprocess: %d\n" % (datetime.datetime.now().ctime(), child))
-            sys.stdout.flush()
-            os.wait()
+    # subproc mode
+    signal.signal(signal.SIGTERM, sigTerm)
+    while True:
+        child = os.fork()
+        if child == 0:
+            break
+        logger.warning("%s: Forked subprocess: %d\n" % (datetime.datetime.now().ctime(), child))
+        os.wait()
 
 
     port = config.getint('dataproxy', 'port')
     ProxyHandler.protocol_version = "HTTP/1.0"
     httpd = ProxyHTTPServer(('', port), ProxyHandler)
     sa = httpd.socket.getsockname()
-    print "Serving HTTP on", sa[0], "port", sa[1], "..."
+    logger.warning(str(("Serving HTTP on", sa[0], "port", sa[1], "...")))
     httpd.serve_forever()
+

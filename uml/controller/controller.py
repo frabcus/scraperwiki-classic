@@ -27,6 +27,8 @@ import cgi
 import ConfigParser
 import threading
 import optparse
+import pwd
+import grp
 
 try    : import json
 except : import simplejson as json
@@ -76,55 +78,20 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
     rbufsize       = 0
 
     def __init__ (self, *alist, **adict) :
-
-        """
-        Class constructor. All arguments (positional and keyed) are passed down to
-        the base class constructor.
-        """
-
         self.m_cgi_fp       = None
         self.m_cgi_headers  = None
         self.m_cgi_env      = None
         self.m_stdout       = sys.stdout
         self.m_stderr       = sys.stderr
-        self.m_uid          = None
-        self.m_gid          = None
-        self.m_paths        = []
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
     def log_message (self, format, *args) :
-
-        """
-        Override this method so that we can flush stderr
-
-        @type   format  : String
-        @param  format  : Format string
-        @type   args    : List
-        @param  args    : Arguments to format string
-        """
-
+        #Override this method so that we can flush stderr
         BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, '%5d: %s' % (os.getpid(), format), *args)
         sys.stderr.flush ()
 
     def storeEnvironment (self, rfile, headers, method, query) :
-
-        """
-        Store envronment information needed to retrieve CGI parameters. The
-        information is stored rather than used immediately as it will also
-        be used when executing a script in CGI mode. The \em rfile and \em headers
-        arguments may be \em None if not needed (for a \em GET request).
-
-        @type   rfile   : Stream
-        @param  rfile   : Incoming stream from client
-        @type   headers : Dictionary
-        @param  headers : HTTP headers dictionary if needed
-        @type   method  : String
-        @param  method  : HTTP request method
-        @type   query   : String
-        @param  query   : HTTP query string
-        """
-
         self.m_cgi_fp       = rfile
         self.m_cgi_headers  = headers
         self.m_cgi_env      = { 'REQUEST_METHOD' : method }
@@ -439,6 +406,7 @@ class ScraperController (BaseController) :
         language = request.get('language', 'python')
         resource.setrlimit(resource.RLIMIT_CPU, (request['cpulimit'], request['cpulimit']+1))
 
+        # language extensions
         lsfx = { 'php':'php', 'ruby':'rb', 'python':'py' }[language]
         
         pwfd = psock[1].fileno()
@@ -464,10 +432,9 @@ class ScraperController (BaseController) :
                     '--script=/tmp/scraper.%d'  % os.getpid(),
                 ]
 
-        if self.m_uid is not None: 
-            args.append('--uid=%d' % self.m_uid)
-        if self.m_gid is not None:
-            args.append('--gid=%d' % self.m_gid)
+        if poptions.setuid:
+            args.append('--uid=%d' % pwd.getpwnam("nobody").pw_uid)
+            args.append('--gid=%d' % grp.getgrnam("nogroup").gr_gid)
 
 
         os.close (0)
@@ -488,23 +455,6 @@ class ScraperController (BaseController) :
     def execute(self):
         self.log_request('Execute', '/Execute')
         request = json.loads(self.m_cgi_fp.read(int(self.m_cgi_headers['content-length'])))
-
-            # I don't think this is ever used
-        if poptions.setuid:
-            if request.get("user"):
-                import pwd
-                try    :
-                    self.m_uid = pwd.getpwnam(request.get("user")).pw_uid
-                except :
-                    self.send_error (404, 'User %s not found'  % request.get("user"))
-                    return
-            if request.get("group"):
-                import grp
-                try    :
-                    self.m_gid = grp.getgrnam(request.get("group")).gr_gid
-                except :
-                    self.send_error (404, 'Group %s not found' % request.get("group"))
-                    return
 
         idents = []
         if request.get("scraperid"):

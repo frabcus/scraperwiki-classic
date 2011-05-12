@@ -49,8 +49,8 @@ parser.add_option("--http", metavar="proxy")
 parser.add_option("--https", metavar="proxy")
 parser.add_option("--ftp", metavar="proxy")
 parser.add_option("--ds", metavar="server:port")
-parser.add_option("--uid")
-parser.add_option("--gid")
+parser.add_option("--gid")    # nogroup
+parser.add_option("--uid")    # nobody
 options, args = parser.parse_args()
 
 if options.gid is not None :
