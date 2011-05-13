@@ -162,7 +162,10 @@ def code_overview(request, wiki_type, short_name):
             context['sqliteconnectionerror'] = sqlitedata
         elif 'tables' not in sqlitedata:
             if 'status' in sqlitedata:
-                context['sqliteconnectionerror'] = sqlitedata['status']
+                if sqlitedata['status'] == 'No sqlite database':
+                    pass # just leave 'sqlitedata' not in context
+                else:
+                    context['sqliteconnectionerror'] = sqlitedata['status']
             else:
                 context['sqliteconnectionerror'] = 'Response with unexpected format'
         else:

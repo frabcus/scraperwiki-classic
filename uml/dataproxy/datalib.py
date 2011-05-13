@@ -123,7 +123,7 @@ class Database:
                 
     def datasummary(self, limit):
         if not self.establishconnection(False):
-             return {"status":"No sqlite database"}
+             return {"status":"No sqlite database"} # don't change this return string, is a structured one
         
         self.authorizer_func = authorizer_readonly
         tables = { }
