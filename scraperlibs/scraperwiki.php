@@ -93,7 +93,7 @@ class scraperwiki
 
    static function attach($name, $asname=null)
    {
-      $attachlist.push(array("name"=>$name, "asname"=>$asname)); 
+      array_push(self::$attachlist, array("name"=>$name, "asname"=>$asname)); 
       $result = $ds->request(array('maincommand'=>'sqlitecommand', 'command'=>'attach', "name"=>$name, "asname"=>$asname));
    }
    static function sqlitecommit()

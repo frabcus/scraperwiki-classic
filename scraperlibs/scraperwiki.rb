@@ -2,12 +2,15 @@ require 'json'
 require	'uri'
 require	'net/http'
 require 'scraperwiki/datastore'
+require 'generator'
 
 class SqliteException < RuntimeError
 end
 
 class NoSuchTableSqliteException < SqliteException
 end
+
+$apiwrapperattacheddata = [ ]
 
 module ScraperWiki
 
@@ -334,4 +337,51 @@ module ScraperWiki
         return res
     end
 
+    # old functions put back in for regression
+    def ScraperWiki.getData(name, limit=-1, offset=0)
+        if !$apiwrapperattacheddata.include?(name)
+            puts "*** instead of getData('"+name+"') please use\n    ScraperWiki.attach('"+name+"') \n    print ScraperWiki.select('* from `"+name+"`.swdata')"
+            ScraperWiki.attach(name)
+            $apiwrapperattacheddata.push(name)
+        end
+
+        apilimit = 500
+        g = Generator.new do |g|
+            count = 0
+            while true
+                if limit == -1
+                    step = apilimit
+                else
+                    step = apilimit < (limit - count) ? apilimit : limit - count
+                end
+                query = "* from `#{name}`.swdata limit #{step} offset #{offset+count}"
+
+                records = ScraperWiki.select(query)
+                for r in records
+                    g.yield r
+                end
+
+                count += records.length
+                if records.length < step
+                    break
+                end
+                if limit != -1 and count >= limit
+                    break
+                end
+            end
+        end
+    end
+
+    def ScraperWiki.getKeys(name)
+        if !$apiwrapperattacheddata.include?(name)
+            puts "*** instead of getKeys('"+name+"') please use\n    ScraperWiki.attach('"+name+"') \n    print ScraperWiki.sqliteexecute('select * from `"+name+"`.swdata limit 0')['keys']"
+            ScraperWiki.attach(name)
+            $apiwrapperattacheddata.push(name)
+        end
+        result = ScraperWiki.sqliteexecute("select * from `"+name+"`.swdata limit 0")
+        if result.include?("error")
+            raise SqliteException.new(result["error"])
+        end
+        return result["keys"]
+    end
 end
