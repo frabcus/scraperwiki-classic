@@ -552,7 +552,7 @@ def execute(port) :
     ScraperController.protocol_version = "HTTP/1.0"
     httpd = ControllerHTTPServer(('', port), ScraperController)
     sa = httpd.socket.getsockname()
-    logger.warning("Serving HTTP on %s port %s\n" % ( sa[0], sa[1] ))
+    logger.info("Serving HTTP on %s port %s" % ( sa[0], sa[1] ))
     httpd.serve_forever()
 
 if __name__ == '__main__' :
@@ -584,7 +584,7 @@ if __name__ == '__main__' :
         child = os.fork()
         if child == 0 :
             break
-        logger.warning("Forked subprocess: %d\n" % child)
+        logger.info("Forked subprocess: %d" % child)
         os.wait()
 
     if poptions.firewall == 'auto' :

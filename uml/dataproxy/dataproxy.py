@@ -204,7 +204,7 @@ if __name__ == '__main__' :
         child = os.fork()
         if child == 0:
             break
-        logger.warning("%s: Forked subprocess: %d\n" % (datetime.datetime.now().ctime(), child))
+        logger.info("%s: Forked subprocess: %d" % (datetime.datetime.now().ctime(), child))
         os.wait()
 
 
@@ -212,6 +212,6 @@ if __name__ == '__main__' :
     ProxyHandler.protocol_version = "HTTP/1.0"
     httpd = ProxyHTTPServer(('', port), ProxyHandler)
     sa = httpd.socket.getsockname()
-    logger.warning(str(("Serving HTTP on", sa[0], "port", sa[1], "...")))
+    logger.info(str(("Serving HTTP on", sa[0], "port", sa[1], "...")))
     httpd.serve_forever()
 
