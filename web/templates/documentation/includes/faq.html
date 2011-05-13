@@ -4,9 +4,8 @@
      <ul>
            <li><a href="#what">What is ScraperWiki?</a></li>
            <li><a href="#who">Who is ScraperWiki for?</a></li>
-           <li><a href="#bits">Who are all the bits of ScraperWiki?</a></li>
      </ul>
-     <h2>Technical questions</h2>
+     <h2>Technical overview questions</h2>
      <ul>
            <li><a href="#languages">What programming languages can I use to write scrapers?</a></li>
            <li><a href="#how">How do I write a screen scraper?</a></li>
@@ -14,6 +13,11 @@
            <li><a href="#editing">Who can edit a scraper?</a></li>
            <li><a href="#data">How can I get data out of ScraperWiki?</a></li>
            <li><a href="#errors">What happens if my scraper breaks?</a></li>
+           <li><a href="#bits">Who are all the bits of ScraperWiki?</a></li>
+     </ul>
+     <h2>Technical detail questions</h2>
+     <ul>
+           <li><a href="#clear_datastore">I made a column or a table I don't need, how do I remove it?</a></li>
      </ul>
      <h2>Licensing questions</h2>
      <ul>
@@ -44,24 +48,6 @@
                <p>ScraperWiki is useful both for programmers who want to write screen scrapers with less fuss, and for journalists, activists and the general public who want to discover and re-use interesting, useful data.
                </p>
            </dd>
-
-           <dt id="bits">What are all the bits of ScraperWiki?</dt>
-            <dd>
-            <p>These are the major parts of ScraperWiki, from a technical point of view.</p>
-            <ul>
-                <li>Edit code with a browser-based code editor, it's called <a href="http://codemirror.net/">CodeMirror</a>.</li>
-                <li>Normal Python, Ruby and PHP scripts run in a sandbox on ScraperWiki's servers.</li>
-                <li>Nokogiri, lxml, Mechanize &mdash; all the {% doc_link_full 'LANG_libraries' language %} you're used to.</li>
-                <li>{% doc_link_full 'LANG_help_documentation' language %} makes scraping and storing data simple.</li>
-                <li>Data is stored direct in a SQLite datastore, schemaless unless you want control ({% doc_link_full 'LANG_datastore_guide' language %}).</li>
-                <li>Access to data in JSON or CSV using SQL in URLs via the <a href="{% url docsexternal %}">ScraperWiki external API</a>.</li>
-                <li>Views for exporting the data in any format, or writing simple web apps. They're CGI scripts.</li>
-                <li>Scheduled to re-run daily so your data is always up-to-date. See scraper overview page.</li>
-                <li>Email alerts if your scrapers fail, or someone edits them.</li>
-                <li>Autocommits to built in source control, based on Mercurial. See the history tab.</li>
-            </ul>
-            </dd>
-
 
            <dt id="languages">What programming languages can I use to write scrapers?</dt>
 
@@ -112,6 +98,41 @@
                </p>
            </dd>
 
+           <dt id="bits">What are all the bits of ScraperWiki?</dt>
+            <dd>
+            <p>These are the major parts of ScraperWiki, from a technical point of view.</p>
+            <ul>
+                <li>Edit code with a browser-based code editor, it's called <a href="http://codemirror.net/">CodeMirror</a>.</li>
+                <li>Normal Python, Ruby and PHP scripts run in a sandbox on ScraperWiki's servers.</li>
+                <li>Nokogiri, lxml, Mechanize &mdash; all the {% doc_link_full 'LANG_libraries' language %} you're used to.</li>
+                <li>{% doc_link_full 'LANG_help_documentation' language %} makes scraping and storing data simple.</li>
+                <li>Data is stored direct in a SQLite datastore, schemaless unless you want control ({% doc_link_full 'LANG_datastore_guide' language %}).</li>
+                <li>Access to data in JSON or CSV using SQL in URLs via the <a href="{% url docsexternal %}">ScraperWiki external API</a>.</li>
+                <li>Views for exporting the data in any format, or writing simple web apps. They're CGI scripts.</li>
+                <li>Scheduled to re-run daily so your data is always up-to-date. See scraper overview page.</li>
+                <li>Email alerts if your scrapers fail, or someone edits them.</li>
+                <li>Autocommits to built in source control, based on Mercurial. See the history tab.</li>
+            </ul>
+            </dd>
+
+
+           <dt id="clear_datastore">I made a column or a table I don't need, how do I remove it?</dt>
+           <dd>
+               <p>The datastore save function automatically makes a schema for you. This means
+               that while you're developing a scraper you sometimes end up with columns or tables that you 
+               don't need later. </p>
+               
+               <p>The easiest fix during development is to clear the datastore,
+               and let your script make it again with exactly the right
+               columns/tables. There is a button on the scraper overview page
+               called "Clear datastore" that does that.
+                </p>
+
+                <p>Alternatively call the "excecute" function  and use
+                "alter table" SQL commands to modify the schema how you like.
+                See the {% doc_link_full 'LANG_datastore_guide' language %}.
+                </p>
+           </dd>
 
            <dt id="licence">Who owns the code I write on ScraperWiki?</dt>
 
