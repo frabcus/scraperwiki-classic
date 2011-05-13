@@ -586,6 +586,7 @@ if __name__ == '__main__' :
             break
         logger.info("Forked subprocess: %d" % child)
         os.wait()
+        logger.warning("Forked subprocess ended: %d" % child)
 
     if poptions.firewall == 'auto' :
         autoFirewall()

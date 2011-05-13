@@ -36,7 +36,7 @@ parser.add_option("--logfile")
 parser.add_option("--toaddrs", default="")
 poptions, pargs = parser.parse_args()
 
-logger = rslogger.getlogger(name="dataproxy", logfile=poptions.logfile, level='info', toaddrs=poptions.toaddrs.split(","))
+logger = rslogger.getlogger(name="dataproxy", logfile=poptions.logfile, level='debug', toaddrs=poptions.toaddrs.split(","))
 datalib.logger = logger
 stdoutlog = open(poptions.logfile+"-stdout", 'a', 0)
 
@@ -75,7 +75,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif "maincommand" not in request:
             res = {"error":'request must contain maincommand', "content":str(request)}
             
-        elif request["maincommand"] == 'clear_datastore':
+        elif request["maincommand"] == 'clear_datastre':
             res = db.clear_datastore()
         
         elif request["maincommand"] == 'sqlitecommand':

@@ -112,18 +112,21 @@ def sqlite_handler(request):
     scraper = getscraperorresponse(request, "apidataread")
     if isinstance(scraper, HttpResponse):  return scraper
     dataproxy = DataStore(request.GET.get('name'))
-    attachlist = request.GET.get('attach', '').split(";")
-    for aattach in attachlist:
+    lattachlist = request.GET.get('attach', '').split(";")
+    attachlist = [ ]
+    for aattach in lattachlist:
         if aattach:
             aa = aattach.split(",")
-            dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "val1":aa[0], "val2":(len(aa) == 2 and aa[1] or None)})
+            attachi = {"name":aa[0], "asname":(len(aa) == 2 and aa[1] or None)}
+            attachlist.append(attachi)
+            dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":attachi["name"], "asname":attachi["asname"]})
     
     sqlquery = request.GET.get('query', "")
     format = request.GET.get("format", "json")
     if format == "json":
         format = "jsondict"
     
-    req = {"maincommand":"sqlitecommand", "command":"execute", "val1":sqlquery, "val2":None}
+    req = {"maincommand":"sqlitecommand", "command":"execute", "val1":sqlquery, "val2":None, "attachlist":attachlist}
     if format == "csv":
         req["val2"] = ("streamchunking", 1000)
     

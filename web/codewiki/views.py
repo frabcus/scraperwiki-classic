@@ -20,6 +20,8 @@ import base64
 import datetime
 import socket
 
+
+
 try:                import json
 except ImportError: import simplejson as json
 
@@ -28,7 +30,6 @@ PRIVACY_STATUSES_UI = [ ('public', 'can be edited by anyone who is logged on'),
                         ('private', 'cannot be seen by anyone except for the designated editors'), 
                         ('deleted', 'is deleted') 
                       ]
-
 
 
 def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
@@ -170,25 +171,28 @@ def code_overview(request, wiki_type, short_name):
     except socket.error, e:
         context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
 
-    # put in ckan connections
+        
     if request.user.is_staff:
         try:
-            dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "val1":"ckan_datastore", "val2":"src"})
+            dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":"ckan_datastore", "asname":"src"})
             ckansqlite = "select src.records.ckan_url, src.records.notes from src.resources left join src.records on src.records.id=src.resources.records_id  where src.resources.scraperwiki=?"
-            lsqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"execute", "val1":ckansqlite, "val2":(scraper.short_name,)})
+            attachlist = [{"name":"ckan_datastore", "asname":"src"}]
+            lsqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"execute", "val1":ckansqlite, "val2":(scraper.short_name,), "attachlist":attachlist})
+        except socket.error, e:
+            lsqlitedata = None
+
+        if lsqlitedata:
             if lsqlitedata.get("data"):
                 context['ckanresource'] = dict(zip(lsqlitedata["keys"], lsqlitedata["data"][0]))
-        except:
-            pass
-            
-        if context.get('sqlitedata') and "ckanresource" not in context:
-            ckanparams = {"name": scraper.short_name,
-                          "title": scraper.title.encode('utf-8'),
-                          "url": settings.MAIN_URL+reverse('code_overview', args=[scraper.wiki_type, short_name])}
-            ckanparams["resources_url"] = settings.MAIN_URL+reverse('export_sqlite', args=[scraper.short_name])
-            ckanparams["resources_format"] = "Sqlite"
-            ckanparams["resources_description"] = "Scraped data"
-            context["ckansubmit"] = "http://ckan.net/package/new?%s" % urllib.urlencode(ckanparams)
+                
+            if context.get('sqlitedata') and "ckanresource" not in context:
+                ckanparams = {"name": scraper.short_name,
+                            "title": scraper.title.encode('utf-8'),
+                            "url": settings.MAIN_URL+reverse('code_overview', args=[scraper.wiki_type, short_name])}
+                ckanparams["resources_url"] = settings.MAIN_URL+reverse('export_sqlite', args=[scraper.short_name])
+                ckanparams["resources_format"] = "Sqlite"
+                ckanparams["resources_description"] = "Scraped data"
+                context["ckansubmit"] = "http://ckan.net/package/new?%s" % urllib.urlencode(ckanparams)
 
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
