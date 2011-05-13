@@ -18,6 +18,7 @@ DAEMON=/scraperwiki/scripts/controller.py
 VARDIR=/var
 CONFIG=/scraperwiki/scripts/uml.cfg
 export PYTHONPATH=/var/www/scraperwiki/scraperlibs/:/var/www/scraperwiki/uml/
+export RUBYLIB=/var/www/scraperwiki/scraperlibs/
 PIDFILE=$VARDIR/run/$NAME.pid
 LOGFILE=$VARDIR/log/$NAME.log
 TOADDRS="julian@scraperwiki.com"

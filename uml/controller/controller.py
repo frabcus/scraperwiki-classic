@@ -361,8 +361,9 @@ class ScraperController (BaseController) :
         dshost   = config.get ('dataproxy', 'host')
         dsport   = config.get ('dataproxy', 'port')
 
+        execscript = os.path.join(os.path.dirname(sys.argv[0]), 'exec.%s' % lsfx)
         args    = \
-                [   'exec.%s' % lsfx,
+                [   execscript,
                     '--http=http://%s:%s'       % (tap,  httpport),
                     '--https=http://%s:%s'      % (tap,  httpsport),
                     '--ftp=ftp://%s:%s'         % (tap,  ftpport ),
@@ -388,7 +389,7 @@ class ScraperController (BaseController) :
         os.close (lwfd)
 
         # the actual execution of the scraper
-        os.execvp('controller/exec.%s' % lsfx, args)
+        os.execvp(execscript, args)
 
  
     def execute(self, request):
@@ -544,7 +545,10 @@ def autoFirewall():
 
 def sigTerm(signum, frame):
     os.kill(child, signal.SIGTERM)
-    os.remove(poptions.pidfile)
+    try:
+        os.remove(poptions.pidfile)
+    except OSError:
+        pass  # no such file
     sys.exit (1)
 
 
