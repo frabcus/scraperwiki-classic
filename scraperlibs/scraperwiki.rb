@@ -89,10 +89,9 @@ module ScraperWiki
     end
 
 
-        # this ought to be a local function (the other sqlite functions go through it)
-    def ScraperWiki.sqlitecommand(command, val1=nil, val2=nil, verbose=2)
+    def ScraperWiki.sqliteexecute(sqlquery, data=nil, verbose=2)
         ds = SW_DataStore.create()
-        res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>command, 'val1'=>val1, 'val2'=>val2, 'attachlist'=>$attachlist})
+        res = ds.request({'maincommand'=>'sqliteexecute', 'sqlquery'=>sqlquery, 'data'=>data, 'attachlist'=>$attachlist})
         if res["error"]
             if /sqlite3.Error: no such table:/.match(res["error"])
                 raise NoSuchTableSqliteException.new(res["error"])
@@ -100,21 +99,23 @@ module ScraperWiki
             raise SqliteException.new(res["error"])
         end
         if verbose:
-            if val2.kind_of?(Array) 
-                val2.each do |value|
-                    lval2 = [ ]
+            if data.kind_of?(Array) 
+                data.each do |value|
+                    ldata = [ ]
                     if value == nil
                         value  = ''
                     end
-                    lval2.push(ScraperWiki._unicode_truncate(value.to_s, 50))
+                    ldata.push(ScraperWiki._unicode_truncate(value.to_s, 50))
                 end
             else
-                lval2 = val2
+                ldata = data
             end
-            ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>command, 'val1'=>val1, 'val2'=>lval2})
+            ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>"execute", 'val1'=>sqlquery, 'val2'=>ldata})
         end
         return res
     end
+
+
 
             # this ought to be a local function
     def ScraperWiki.convdata(unique_keys, scraper_data)
@@ -244,7 +245,7 @@ module ScraperWiki
         if dbname != nil
             name = "`"+dbname+"`.sqlite_master" 
         end
-        result = ScraperWiki.sqlitecommand("execute", val1="select tbl_name, sql from "+name+" where type='table'")
+        result = ScraperWiki.sqliteexecute("select tbl_name, sql from "+name+" where type='table'")
         #return result["data"]
         return (Hash[*result["data"].flatten])   # pre-1.8.7
     end
@@ -253,9 +254,9 @@ module ScraperWiki
     def ScraperWiki.table_info(name)
         sname = name.split(".")
         if sname.length == 2
-            result = ScraperWiki.sqlitecommand("execute", "PRAGMA %s.table_info(`%s`)" % sname)
+            result = ScraperWiki.sqliteexecute("PRAGMA %s.table_info(`%s`)" % sname)
         else
-            result = ScraperWiki.sqlitecommand("execute", "PRAGMA table_info(`%s`)" % name)
+            result = ScraperWiki.sqliteexecute("PRAGMA table_info(`%s`)" % name)
         end
         res = [ ]
         for d in result["data"]
@@ -288,25 +289,43 @@ module ScraperWiki
 
     def ScraperWiki.attach(name, asname=nil, verbose=1)
         $attachlist.push({"name"=>name, "asname"=>asname})
-        return ScraperWiki.sqlitecommand("attach", name, asname, verbose)
+
+        ds = SW_DataStore.create()
+        res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>"attach", 'name'=>name, 'asname'=>asname})
+        if res["error"]
+            if /sqlite3.Error: no such table:/.match(res["error"])
+                raise NoSuchTableSqliteException.new(res["error"])
+            end
+            raise SqliteException.new(res["error"])
+        end
+        if verbose:
+            if data.kind_of?(Array) 
+                data.each do |value|
+                    ldata = [ ]
+                    if value == nil
+                        value  = ''
+                    end
+                    ldata.push(ScraperWiki._unicode_truncate(value.to_s, 50))
+                end
+            else
+                ldata = data
+            end
+            ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>"attach", 'val1'=>sqlquery, 'val2'=>ldata})
+        end
+        return res
     end
     
-    def ScraperWiki.sqliteexecute(val1, val2=nil, verbose=1)
-        if val2 != nil && val1.scan(/\?/).length != 0 && val2.class != Array
-            val2 = [val2]
-        end
-        return ScraperWiki.sqlitecommand("execute", val1, val2, verbose)
-    end
 
     def ScraperWiki.commit(verbose=1)
-        return ScraperWiki.sqlitecommand("commit", nil, nil, verbose)
+        ds = SW_DataStore.create()
+        res = ds.request({'maincommand'=>'sqlitecommand', 'command'=>"commit"})
     end
 
-    def ScraperWiki.select(val1, val2=nil, verbose=1)
-        if val2 != nil && val1.scan(/\?/).length != 0 && val2.class != Array
-            val2 = [val2]
+    def ScraperWiki.select(sqlquery, data=nil, verbose=1)
+        if data != nil && sqlquery.scan(/\?/).length != 0 && data.class != Array
+            data = [data]
         end
-        result = ScraperWiki.sqlitecommand("execute", "select "+val1, val2, verbose)
+        result = ScraperWiki.sqliteexecute("select "+sqlquery, data, verbose)
         res = [ ]
         for d in result["data"]
             #res.push(Hash[result["keys"].zip(d)])           # post-1.8.7
