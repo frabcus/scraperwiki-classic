@@ -150,8 +150,8 @@ class Database:
         return result
     
     
-    def sqliteexecute(self, val1, val2):
-        logger.debug(str(("XXXXX", (self.runID, val1, val2, self.m_sqlitedbcursor, self.m_sqlitedbconn)))[:100])
+    def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
+        logger.debug(str(("XXXXX", (self.runID, sqlquery, data, self.m_sqlitedbcursor, self.m_sqlitedbconn)))[:100])
         if not self.runID:
             logger.warning(str(("sqliteexecute runid is blank ", str(e))))
             return {"error":"runID is blank"}
@@ -159,29 +159,31 @@ class Database:
         self.establishconnection(True)
 
         try:
-            bstreamchunking = val2 and not re.search("\?", val1) and type(val2) in [list, tuple] and val2[0] == "streamchunking"
                 # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
-            signal.alarm (30)  # should use set_progress_handler !!!!
-            if val2 and not bstreamchunking:
-                self.m_sqlitedbcursor.execute(val1, val2)  # handle "(?,?,?)", (val, val, val)
+            signal.alarm(30)  # should use set_progress_handler !!!!
+            if data:
+                self.m_sqlitedbcursor.execute(sqlquery, data)  # handle "(?,?,?)", (val, val, val)
             else:
-                self.m_sqlitedbcursor.execute(val1)
-            signal.alarm (0)
+                self.m_sqlitedbcursor.execute(sqlquery)
+            signal.alarm(0)
 
-#INSERT/UPDATE/DELETE/REPLACE), and commits transactions implicitly before a non-DML, non-query statement (i. e. anything other than SELECT
-
+            #INSERT/UPDATE/DELETE/REPLACE), and commits transactions implicitly before a non-DML, non-query statement (i. e. anything other than SELECT
+            #check that only SELECT has a legitimate return state
 
             keys = self.m_sqlitedbcursor.description and map(lambda x:x[0], self.m_sqlitedbcursor.description) or []
-            if not bstreamchunking:
+
+            # non-chunking return point
+            if not streamchunking:
                 return {"keys":keys, "data":self.m_sqlitedbcursor.fetchall()}
 
                 # this loop has the one internal jsend in it
             while True:
-                data = self.m_sqlitedbcursor.fetchmany(val2[1])
+                data = self.m_sqlitedbcursor.fetchmany(streamchunking)
                 arg = {"keys":keys, "data":data} 
-                if len(data) < val2[1]:
+                if len(data) < streamchunking:
                     break
                 arg["moredata"] = True
+                logger.debug(str(("midchunk", (len(data)))))
                 self.dataproxy.connection.send(json.dumps(arg)+'\n')
             return arg
 
@@ -190,7 +192,8 @@ class Database:
             signal.alarm (0)
             logger.warning(str(("sqlite.error ", str(e))))
             return {"error":"sqlite3.Error: "+str(e)}
-        
+
+
     def sqliteattach(self, name, asname):
         logger.debug(str(("attach", name, "defaultdb.sqlite")))
         self.establishconnection(True)
@@ -264,11 +267,11 @@ class SqliteSaveInfo:
         self.swdatatypes = [  ]
         self.sqdatatemplate = ""
 
-    def sqliteexecute(self, val1, val2=None):
-        res = self.database.sqliteexecute(val1, val2)
+    def sqliteexecute(self, sqlquery, data=None):
+        res = self.database.sqliteexecute(sqlquery, data, None, None)
         if "error" in res:
             logger.warning(res)
-        logger.debug(str(["execute", val1, val2, res]))
+        logger.debug(str(["execute", sqlquery, data, res]))
         return res
     
     def rebuildinfo(self):

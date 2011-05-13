@@ -128,7 +128,7 @@ def sqlite_handler(request):
     
     req = {"maincommand":"sqlitecommand", "command":"execute", "val1":sqlquery, "val2":None, "attachlist":attachlist}
     if format == "csv":
-        req["val2"] = ("streamchunking", 1000)
+        req["streamchunking"] = 1000
     
     # this is inlined from the dataproxy.request() function to allow for receiveoneline to perform multiple readlines in this case
         # (this is the stream-chunking thing.  the right interface is not yet apparent)

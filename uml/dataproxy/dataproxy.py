@@ -89,7 +89,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 res = db.commit()
             elif request["command"] == "execute":
                             # this should contain the attach list with it
-                res = db.sqliteexecute(val1=request["val1"], val2=request["val2"])
+                res = db.sqliteexecute(sqlquery=request["val1"], data=request["val2"], attachlist=request.get("attachlist",[]), streamchunking=request.get("streamchunking"))
         
         elif request["maincommand"] == 'save_sqlite':
             res = db.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
