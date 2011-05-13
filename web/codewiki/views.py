@@ -177,7 +177,7 @@ def code_overview(request, wiki_type, short_name):
             dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":"ckan_datastore", "asname":"src"})
             ckansqlite = "select src.records.ckan_url, src.records.notes from src.resources left join src.records on src.records.id=src.resources.records_id  where src.resources.scraperwiki=?"
             attachlist = [{"name":"ckan_datastore", "asname":"src"}]
-            lsqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"execute", "val1":ckansqlite, "val2":(scraper.short_name,), "attachlist":attachlist})
+            lsqlitedata = dataproxy.request({"maincommand":"sqliteexecute", "sqlquery":ckansqlite, "data":(scraper.short_name,), "attachlist":attachlist})
         except socket.error, e:
             lsqlitedata = None
 

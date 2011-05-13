@@ -126,7 +126,7 @@ def sqlite_handler(request):
     if format == "json":
         format = "jsondict"
     
-    req = {"maincommand":"sqlitecommand", "command":"execute", "val1":sqlquery, "val2":None, "attachlist":attachlist}
+    req = {"maincommand":"sqliteexecute", "sqlquery":sqlquery, "data":None, "attachlist":attachlist}
     if format == "csv":
         req["streamchunking"] = 1000
     

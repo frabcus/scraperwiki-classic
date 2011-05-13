@@ -5,6 +5,7 @@ import scraperwiki
 class SqliteError(Exception):  pass
 class NoSuchTableSqliteError(SqliteError):  pass
 
+attachlist = [ ]
 
 def strunc(v, t):
     if not t or len(v) < t:
@@ -29,8 +30,9 @@ def ifsencode_trunc(v, t):
     return strencode_trunc(v, t)
 
 
-def sqlitecommand(command, val1=None, val2=None, verbose=1):
-    result = scraperwiki.datastore.request({"maincommand":'sqlitecommand', "command":command, "val1":val1, "val2":val2})
+def sqliteexecute(sqlquery, data=None, verbose=1):
+    global attachlist
+    result = scraperwiki.datastore.request({"maincommand":'sqliteexecute', "sqlquery":sqlquery, "data":data, "attachlist":attachlist})
     if "error" in result:
         raise databaseexception(result)
     if "status" not in result and "keys" not in result:
@@ -38,17 +40,15 @@ def sqlitecommand(command, val1=None, val2=None, verbose=1):
     
     # list type for second field in message dump
     if verbose:
-        if val2 == None:
-            lval2 = [ ]
-        elif type(val2) in [tuple, list]:
-            lval2 = [ ifsencode_trunc(v, 50)  for v in val2 ]
-        elif command == "attach":
-            lval2 = [ val2 ]
-        elif type(val2) == dict:
-            lval2 = [ ifsencode_trunc(v, 50)  for v in val2.values() ]
+        if data == None:
+            ldata = [ ]
+        elif type(data) in [tuple, list]:
+            ldata = [ ifsencode_trunc(v, 50)  for v in data ]
+        elif type(data) == dict:
+            ldata = [ ifsencode_trunc(v, 50)  for v in data.values() ]
         else:
-            lval2 = [ str(val2) ]
-        scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command': command, "val1":val1, "lval2":lval2})
+            ldata = [ str(data) ]
+        scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command':'sqliteexecute', "sqlquery":sqlquery, "ldata":ldata})
     
     return result
     
@@ -134,6 +134,8 @@ def save(unique_keys, data, table_name="swdata", verbose=2):
 
 
 def attach(name, asname=None, verbose=1):
+    global attachlist
+    attachlist.append({"name":name, "asname":asname})
     result = scraperwiki.datastore.request({"maincommand":'sqlitecommand', "command":"attach", "name":name, "asname":asname})
     if "error" in result:
         raise databaseexception(result)
@@ -144,35 +146,38 @@ def attach(name, asname=None, verbose=1):
 
 
 def commit(verbose=1):
-    return sqlitecommand("commit", None, None, verbose)
+    result = scraperwiki.datastore.request({"maincommand":'sqlitecommand', "command":"commit"})
+    if "error" in result:
+        raise databaseexception(result)
+    if "status" not in result:
+        raise Exception("possible signal timeout: "+str(result))
+        scraperwiki.dumpMessage({'message_type':'data', 'content': pdata})
+    return result    
     
-    
-def execute(val1, val2=None, verbose=1):
-    if val2 is not None and "?" in val1 and type(val2) not in [list, tuple]:
-        val2 = [val2]
-    return sqlitecommand("execute", val1, val2, verbose)
 
 
-def select(val1, val2=None, verbose=1):
-    if val2 is not None and "?" in val1 and type(val2) not in [list, tuple]:
-        val2 = [val2]
-    result = sqlitecommand("execute", "select %s" % val1, val2, verbose)
+def select(sqlquery, data=None, verbose=1):
+    if data is not None and "?" in sqlquery and type(data) not in [list, tuple]:
+        data = [data]
+    sqlquery = "select %s" % sqlquery   # maybe check if select or another command is there already?
+    result = sqliteexecute(sqlquery, data, verbose=verbose)
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
+
 
 def show_tables(dbname=""):
     name = "sqlite_master"
     if dbname:
         name = "`%s`.%s" % (dbname, name)
-    result = sqlitecommand("execute", "select tbl_name, sql from %s where type='table'" % name)
+    result = sqliteexecute("select tbl_name, sql from %s where type='table'" % name)
     return dict(result["data"])
 
 
 def table_info(name):
     sname = name.split(".")
     if len(sname) == 2:
-        result = sqlitecommand("execute", "PRAGMA %s.table_info(`%s`)" % tuple(sname))
+        result = sqliteexecute("PRAGMA %s.table_info(`%s`)" % tuple(sname))
     else:
-        result = sqlitecommand("execute", "PRAGMA table_info(`%s`)" % name)
+        result = sqliteexecute("PRAGMA table_info(`%s`)" % name)
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
 
 
@@ -183,7 +188,7 @@ def save_var(name, value, verbose=2):
 
 def get_var(name, default=None, verbose=2):
     try:
-        result = sqlitecommand("execute", "select value_blob, type from swvariables where name=?", (name,), verbose)
+        result = sqliteexecute("select value_blob, type from swvariables where name=?", (name,), verbose)
     except NoSuchTableSqliteError, e:
         return default
     data = result.get("data")

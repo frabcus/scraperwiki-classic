@@ -75,7 +75,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif "maincommand" not in request:
             res = {"error":'request must contain maincommand', "content":str(request)}
             
-        elif request["maincommand"] == 'clear_datastre':
+        elif request["maincommand"] == 'clear_datastore':
             res = db.clear_datastore()
         
         elif request["maincommand"] == 'sqlitecommand':
@@ -87,18 +87,20 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 res = db.sqliteattach(request.get("name"), request.get("asname"))
             elif request["command"] == "commit":
                 res = db.commit()
-            elif request["command"] == "execute":
-                            # this should contain the attach list with it
-                res = db.sqliteexecute(sqlquery=request["val1"], data=request["val2"], attachlist=request.get("attachlist",[]), streamchunking=request.get("streamchunking"))
+        
+        elif request["maincommand"] == "sqliteexecute":
+            res = db.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"), streamchunking=request.get("streamchunking"))
         
         elif request["maincommand"] == 'save_sqlite':
             res = db.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
         
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
+            logger.error(json.dumps(res))
         
-        logger.debug(json.dumps(res))
-        self.connection.send(json.dumps(res)+'\n')
+        sres = json.dumps(res)
+        logger.debug(sres[:200])
+        self.connection.send(sres+'\n')
 
 
         # this morphs into the long running two-way connection
@@ -161,14 +163,14 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 class ProxyHTTPServer(SocketServer.ForkingMixIn, BaseHTTPServer.HTTPServer):
     pass
 
-def sigTerm(signum, frame) :
+def sigTerm(signum, frame):
     #logger.debug("terminating")    # many of these, only one terminated
     os.kill(child, signal.SIGTERM)
     os.remove(poptions.pidfile)
     logger.warning("terminated")
     sys.exit(1)
 
-if __name__ == '__main__' :
+if __name__ == '__main__':
 
     # daemon mode
     if os.fork() == 0 :
