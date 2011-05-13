@@ -13,6 +13,7 @@ import scraperwiki
 try   : import json
 except: import simplejson as json
 
+import scraperwiki
 
 m_socket = None
 m_host = None
