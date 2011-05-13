@@ -133,6 +133,9 @@ $(function()
             if (e.which == 13)
                 {  $("#id_apiuri_run").click();  e.preventDefault();  return false }
         })
+    }); 
+    $('#detail input, #detail textarea').each(function() 
+    {   
         $(this).keyup(rewriteapiurl); 
     }); 
 
