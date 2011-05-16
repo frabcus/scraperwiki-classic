@@ -115,7 +115,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         #
         (lport, rport) = query.split(':')
         p    = re.compile ('exec.[a-z]+ *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
-        lsof = subprocess.Popen([ 'lsof', '-n', '-P' ], stdout = subprocess.PIPE).communicate()[0]
+        lsof = subprocess.Popen([ 'lsof', '-n', '-P', '-i' ], stdout = subprocess.PIPE).communicate()[0]
         for line in lsof.split('\n') :
             m = p.match (line)
             if m :
@@ -129,7 +129,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 except Exception, e:
                     logger.debug('Ident (%s,%s) send failed: %s' % (lport, rport, repr(e)))
                 return
-        logger.debug('Ident (%s,%s) not found' % (lport, rport))
+        logger.debug('Ident (%s,%s) not found:\n%s' % (lport, rport, lsof))
 
     def sendNotify (self, query) :
         """
