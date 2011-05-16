@@ -17,8 +17,13 @@ NAME=controller
 DAEMON=/scraperwiki/scripts/controller.py
 VARDIR=/var
 CONFIG=/scraperwiki/scripts/uml.cfg
+
+# set up the directory paths for the different exec.py/rb/php scripts
+# PYTHONPATH also applies to controller.py; PHPPATH is nonstandard and implemented within exec.php
 export PYTHONPATH=/var/www/scraperwiki/scraperlibs/:/var/www/scraperwiki/uml/
 export RUBYLIB=/var/www/scraperwiki/scraperlibs/
+export PHPPATH=/var/www/scraperwiki/scraperlibs/
+
 PIDFILE=$VARDIR/run/$NAME.pid
 LOGFILE=$VARDIR/log/$NAME.log
 TOADDRS="julian@scraperwiki.com"

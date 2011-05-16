@@ -215,7 +215,7 @@ module ScraperWiki
 
     def ScraperWiki.get_var(name, default=nil, verbose=2)
         begin
-            result = ScraperWiki.sqliteexecute("select value_blob, type from swvariables where name=?", name, verbose)
+            result = ScraperWiki.sqliteexecute("select value_blob, type from swvariables where name=?", [name], verbose)
         rescue NoSuchTableSqliteException => e   
             return default
         end

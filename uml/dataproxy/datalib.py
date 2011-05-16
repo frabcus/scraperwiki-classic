@@ -151,7 +151,7 @@ class Database:
     
     
     def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
-        logger.debug(str(("XXXXX", (self.runID, sqlquery, data, self.m_sqlitedbcursor, self.m_sqlitedbconn)))[:100])
+        logger.debug(str(("XXXXX", (self.runID, sqlquery, data, self.m_sqlitedbcursor, self.m_sqlitedbconn)))[:500])
         if not self.runID:
             logger.warning(str(("sqliteexecute runid is blank ", str(e))))
             return {"error":"runID is blank"}
