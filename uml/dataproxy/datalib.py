@@ -189,7 +189,8 @@ class Database:
 
         
         except sqlite3.Error, e:
-            signal.alarm (0)
+            signal.alarm(0)
+            logger.exception("Testing exception output")
             logger.warning(str(("sqlite.error ", str(e))))
             return {"error":"sqlite3.Error: "+str(e)}
 

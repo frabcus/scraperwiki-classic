@@ -29,11 +29,11 @@ import threading
 import optparse
 import pwd
 import grp
-import rslogger
+import logging
+import logging.config
 
 try    : import json
 except : import simplejson as json
-
 
 global  scrapersByRunID
 global  scrapersByPID
@@ -60,7 +60,8 @@ poptions, pargs = parser.parse_args()
 config = ConfigParser.ConfigParser()
 config.readfp(open(poptions.config))
 
-logger = rslogger.getlogger(name="controller", logfile=poptions.logfile, level='debug', toaddrs=poptions.toaddrs.split(","))
+logging.config.fileConfig(poptions.config)
+logger = logging.getLogger('controller')
 stdoutlog = open(poptions.logfile+"-stdout", 'a', 0)
 
 

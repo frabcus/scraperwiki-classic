@@ -30,7 +30,7 @@ def ifsencode_trunc(v, t):
     return strencode_trunc(v, t)
 
 
-def sqliteexecute(sqlquery, data=None, verbose=1):
+def execute(sqlquery, data=None, verbose=1):
     global attachlist
     result = scraperwiki.datastore.request({"maincommand":'sqliteexecute', "sqlquery":sqlquery, "data":data, "attachlist":attachlist})
     if "error" in result:

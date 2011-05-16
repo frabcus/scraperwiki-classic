@@ -18,14 +18,18 @@ import pwd
 import rslogger   # made possible by PYTHONPATH environment variable
 import datalib
 
+import logging
+import logging.config
+
 try   : import json
 except: import simplejson as json
 
 # note: there is a symlink from /var/www/scraperwiki to the scraperwiki directory
 # which allows us to get away with being crap with the paths
 
+configfile = '/var/www/scraperwiki/uml/uml.cfg'
 config = ConfigParser.ConfigParser()
-config.readfp(open('/var/www/scraperwiki/uml/uml.cfg'))
+config.readfp(open(configfile))
 
 child      = None
 
@@ -36,9 +40,13 @@ parser.add_option("--logfile")
 parser.add_option("--toaddrs", default="")
 poptions, pargs = parser.parse_args()
 
-logger = rslogger.getlogger(name="dataproxy", logfile=poptions.logfile, level='debug', toaddrs=poptions.toaddrs.split(","))
+
+logging.config.fileConfig(configfile)
+logger = logging.getLogger('dataproxy')
+#logger = rslogger.getlogger(name="dataproxy", logfile=poptions.logfile, level='debug', toaddrs=poptions.toaddrs.split(","))
 datalib.logger = logger
 stdoutlog = open(poptions.logfile+"-stdout", 'a', 0)
+
 
 class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     __base         = BaseHTTPServer.BaseHTTPRequestHandler

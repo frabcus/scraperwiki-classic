@@ -75,7 +75,7 @@ if (!is_null($uid))    # nogroup
 }
 
 // set the include paths to scraperlibs from an environment variable (what can be done automatically for python and ruby)
-foreach (split (':', getenv('PHPPATH') as $dir)
+foreach (split(':', getenv('PHPPATH')) as $dir)
     ini_set('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
 
 require_once   'scraperwiki/datastore.php' ;
