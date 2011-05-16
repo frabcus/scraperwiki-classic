@@ -1,7 +1,7 @@
 import os, logging, logging.handlers
 import socket
 
-FORMAT = '%(asctime)s %(levelname)s: %(message)s'
+FORMAT = '%(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s'
 LEVELS = {
     'debug'   : logging.DEBUG,    #10
     'info'    : logging.INFO,     #20
