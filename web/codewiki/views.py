@@ -152,7 +152,8 @@ def code_overview(request, wiki_type, short_name):
     context["schedule_options"] = models.SCHEDULE_OPTIONS
     context["license_choices"] = models.LICENSE_CHOICES
     context["related_views"] = models.View.objects.filter(relations=scraper).exclude(privacy_status="deleted")
-    
+   
+    dataproxy = None
     try:
         dataproxy = DataStore(scraper.short_name)
         sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "limit":10})
@@ -175,7 +176,8 @@ def code_overview(request, wiki_type, short_name):
         context['sqliteconnectionerror'] = e.args[1]  # 'Connection refused'
 
         
-    if request.user.is_staff:
+    # unfinished CKAN integration
+    if dataproxy and request.user.is_staff:
         try:
             dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":"ckan_datastore", "asname":"src"})
             ckansqlite = "select src.records.ckan_url, src.records.notes from src.resources left join src.records on src.records.id=src.resources.records_id  where src.resources.scraperwiki=?"
