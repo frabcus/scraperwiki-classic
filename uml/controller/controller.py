@@ -114,7 +114,9 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         #  the scraper.
         #
         (lport, rport) = query.split(':')
-        p    = re.compile ('exec.[a-z]+ *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
+        # On Linux, process names come out as exec.py/exec.rb etc.
+        # On OSX, they come out as python/ruby etc.
+        p    = re.compile ('(?:exec.[a-z]+|python|ruby) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
         lsof = subprocess.Popen([ 'lsof', '-n', '-P', '-i' ], stdout = subprocess.PIPE).communicate()[0]
         for line in lsof.split('\n') :
             m = p.match (line)
