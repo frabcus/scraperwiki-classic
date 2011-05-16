@@ -7,6 +7,8 @@ import urllib2
 import ConfigParser
 import socket
 import time
+import logging
+import logging.config
 
 try:    import simplejson as json
 except: import json
@@ -23,62 +25,63 @@ parser.add_option("--name", default='', metavar="SCRAPER_NAME")
 parser.add_option("--cpulimit", default='80')
 parser.add_option("--urlquery", default='')
 parser.add_option("--draft", action="store_true", default=False)
+options, args = parser.parse_args()
+
+logging.config.fileConfig(configfile)
+logger = logging.getLogger('runner')
+
+config = ConfigParser.ConfigParser()
+config.readfp(open(configfile))
 
 
-class FireStarter:
-    def __init__(self, dhost, dport, jdata):
-        self.m_error = None
-        self.soc_file = None
-        soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        soc.connect((dhost, dport))
+def writereadstream(dhost, dport, jdata):
+    soc_file = None
+    
+    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    soc.connect((dhost, dport))
 
-        sdata = json.dumps(jdata)
+    sdata = json.dumps(jdata)
 
-        soc.send('POST /Execute HTTP/1.1\r\n')
-        soc.send('Content-Length: %s\r\n' % len(sdata))
-        soc.send('Connection: close\r\n')
+    soc.send('POST /Execute HTTP/1.1\r\n')
+    soc.send('Content-Length: %s\r\n' % len(sdata))
+    soc.send('Connection: close\r\n')
 
-        # these parameters are lifted out by the dispatcher for its operation until we can get to the bottom of what's going on with _read_write
-        soc.send("x-scraperid: %s\r\n" % jdata["scraperid"])
-        soc.send("x-testname: %s\r\n" % jdata["scrapername"])
-        soc.send("x-runid: %s\r\n" % jdata["runid"])
-        
-        soc.send('\r\n')
-        soc.send(sdata)
+    # these parameters are lifted out by the dispatcher for its operation until we can get to the bottom of what's going on with _read_write
+    soc.send("x-scraperid: %s\r\n" % jdata["scraperid"])
+    soc.send("x-testname: %s\r\n" % jdata["scrapername"])
+    soc.send("x-runid: %s\r\n" % jdata["runid"])
+    
+    soc.send('\r\n')
+    soc.send(sdata)
 
-        self.soc_file = soc.makefile('r')
-        status_line = self.soc_file.readline()
-        if status_line.split(' ')[1] != '200':
-            self.m_error = status_line.split(' ', 2)[2].strip()
-            self.soc_file.close()
-
+    soc_file = soc.makefile('r')
+    status_line = soc_file.readline().split()
+    nbytes, nrecords = 0, 0
+    if status_line[1] == '200':
+    
         # Ignore the HTTP headers
         while True: 
-            line = self.soc_file.readline()
+            line = soc_file.readline()
             if line.strip() == "":
                 break
-
-
-    def __iter__(self):
-        return self
-
-        # returning content
-    def next(self):
-        if self.m_error:
-            message = json.dumps({'message_type' : 'fail', 'content' : self.m_error})
-            self.m_error = None
-            return message
-        elif self.soc_file and not self.soc_file.closed:
-            line = self.soc_file.readline().strip()
+            
+        while True:
+            line = soc_file.readline().strip()
             if line == '':
-                self.soc_file.close()
-                raise StopIteration
-            else:
-                return line
-        else:
-            raise StopIteration
-
-
+                soc_file.close()
+                break
+            sys.stdout.write(line + '\r\n')
+            sys.stdout.flush()
+            
+            nbytes += len(line)
+            nrecords += 1
+        logger.debug('%s:  %d bytes  %d records' % (jdata["scrapername"], nbytes, nrecords))
+            
+    else:
+        soc_file.close()
+        logger.warning('fail on %s: %s' % (jdata["scrapername"], str(status_line)))
+        sys.stdout.write(json.dumps({'message_type' : 'fail', 'content' : status_line[2].strip()}) + '\r\n')
+        sys.stdout.flush()
 
 
 def buildjdata(code, options, config):
@@ -128,16 +131,10 @@ def buildjdata(code, options, config):
 
 # main loop
 if __name__ == "__main__":
-    options, args = parser.parse_args()
     code = sys.stdin.read()
-    config = ConfigParser.ConfigParser()
-    config.readfp(open(configfile))
     jdata = buildjdata(code, options, config)
+    logger.debug('%s: ' % (jdata["scrapername"]))
 
     dhost = config.get('dispatcher', 'host')
     dport = config.getint('dispatcher', 'port')
-    fs = FireStarter(dhost, dport, jdata)
-    
-    for message in fs:
-        sys.stdout.write(message + '\r\n')
-        sys.stdout.flush()
+    writereadstream(dhost, dport, jdata)

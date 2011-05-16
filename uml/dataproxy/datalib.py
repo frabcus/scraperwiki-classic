@@ -105,6 +105,9 @@ class Database:
         else:
             self.authorizer_func = authorizer_writemain
         
+        def progress_handler():
+            logger.debug("progress on %s" % self.runID)
+        
         if not self.m_sqlitedbconn:
             if self.short_name:
                 scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
@@ -117,6 +120,10 @@ class Database:
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:")   # draft scrapers make a local version
             self.m_sqlitedbconn.set_authorizer(authorizer_all)
+            try:
+                self.m_sqlitedbconn.set_progress_handler(progress_handler, 3)
+            except AttributeError:
+                pass  # must be python version 2.6
             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
         return True
                 
@@ -138,7 +145,7 @@ class Database:
                 tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                 
         except sqlite3.Error, e:
-            logger.warning(str(("datasummary", "sqlite.error ", str(e))))
+            logger.warning("datasummary sqlite.error %s" % str(e))
             return {"error":"sqlite3.Error: "+str(e)}
         
         result = {"tables":tables}
@@ -151,13 +158,9 @@ class Database:
     
     
     def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
-        logger.debug(str(("XXXXX", (self.runID, sqlquery, data, self.m_sqlitedbcursor, self.m_sqlitedbconn)))[:500])
-        if not self.runID:
-            logger.warning(str(("sqliteexecute runid is blank ", str(e))))
-            return {"error":"runID is blank"}
+        logger.debug("XXXX %s %s - %s %s" % (self.runID[:5], self.short_name, sqlquery, str(data)[:50]))
 
         self.establishconnection(True)
-
         try:
                 # this causes the process to entirely die after 10 seconds as the alarm is nowhere handled
             signal.alarm(30)  # should use set_progress_handler !!!!
@@ -183,7 +186,7 @@ class Database:
                 if len(data) < streamchunking:
                     break
                 arg["moredata"] = True
-                logger.debug(str(("midchunk", (len(data)))))
+                logger.debug("midchunk %s %d" % (self.short_name, len(data)))
                 self.dataproxy.connection.send(json.dumps(arg)+'\n')
             return arg
 
@@ -191,12 +194,11 @@ class Database:
         except sqlite3.Error, e:
             signal.alarm(0)
             logger.exception("Testing exception output")
-            logger.warning(str(("sqlite.error ", str(e))))
             return {"error":"sqlite3.Error: "+str(e)}
 
 
     def sqliteattach(self, name, asname):
-        logger.debug(str(("attach", name, "defaultdb.sqlite")))
+        logger.debug("attach to %s  %s as %s" % (self.short_name, name, asname))
         self.establishconnection(True)
         if self.authorizer_func == authorizer_writemain:
             self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
@@ -205,7 +207,7 @@ class Database:
             attachscrapersqlitefile = os.path.join(self.m_resourcedir, name, "defaultdb.sqlite")
             self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, asname or name))
         except sqlite3.Error, e:
-            logger.warning(str(("sqlite.error ", str(e))))
+            logger.exception("attaching")
             return {"error":"sqlite3.Error: "+str(e)}
         return {"status":"attach succeeded"}
 
@@ -271,8 +273,7 @@ class SqliteSaveInfo:
     def sqliteexecute(self, sqlquery, data=None):
         res = self.database.sqliteexecute(sqlquery, data, None, None)
         if "error" in res:
-            logger.warning(res)
-        logger.debug(str(["execute", sqlquery, data, res]))
+            logger.warning("%s  %s" % (self.short_name, str(res)))
         return res
     
     def rebuildinfo(self):
@@ -354,7 +355,7 @@ class SqliteSaveInfo:
             if "error" in lres:  
                 if lres["error"] != 'sqlite3.Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped':
                     return lres
-                logger.warning(str(("Dropping index", lres))) # to detect if it's happening repeatedly
+                logger.info("%s:  %s" % (self.short_name, str(lres)))
             res["droppedindex"] = idxname
         return res
             
