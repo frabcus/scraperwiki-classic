@@ -116,6 +116,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         (lport, rport) = query.split(':')
         # On Linux, process names come out as exec.py/exec.rb etc.
         # On OSX, they come out as python/ruby etc.
+        # XXX todo, get PHP working on OSX
         p    = re.compile ('(?:exec.[a-z]+|[Pp]ython|[Rr]uby) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
         lsof = subprocess.Popen([ 'lsof', '-n', '-P', '-i' ], stdout = subprocess.PIPE).communicate()[0]
         for line in lsof.split('\n') :
