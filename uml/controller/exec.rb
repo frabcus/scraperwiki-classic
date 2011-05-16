@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+require 'rubygems'   # for nokigiri to work on all machines, and for JSON/Iconv on OSX
+
 require 'json'
 require 'iconv'
 
@@ -146,7 +148,6 @@ ARGV.clear # Clear command line args so that we can use Test::Unit
 
 code = File.new(script, 'r').read()
 begin
-    require 'rubygems'   # for nokigiri to work
     eval code
 rescue Exception => e
     est = getExceptionTraceback(e, code)
