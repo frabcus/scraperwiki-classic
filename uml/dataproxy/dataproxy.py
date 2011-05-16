@@ -43,7 +43,6 @@ poptions, pargs = parser.parse_args()
 
 logging.config.fileConfig(configfile)
 logger = logging.getLogger('dataproxy')
-#logger = rslogger.getlogger(name="dataproxy", logfile=poptions.logfile, level='debug', toaddrs=poptions.toaddrs.split(","))
 datalib.logger = logger
 stdoutlog = open(poptions.logfile+"-stdout", 'a', 0)
 
@@ -56,7 +55,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     rbufsize       = 0
 
     def ident(self, uml, port):
-        runID       = None
+        runID      = None
         short_name = None
 
         host      = config.get(uml, 'host')

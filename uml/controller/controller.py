@@ -51,10 +51,8 @@ infomap     = {}
 parser = optparse.OptionParser()
 parser.add_option("--firewall", metavar="option")
 parser.add_option("--pidfile")
-parser.add_option("--logfile")
 parser.add_option("--config")
 parser.add_option("--setuid", action="store_true")
-parser.add_option("--toaddrs", default="")
 poptions, pargs = parser.parse_args()
 
 config = ConfigParser.ConfigParser()
@@ -62,7 +60,9 @@ config.readfp(open(poptions.config))
 
 logging.config.fileConfig(poptions.config)
 logger = logging.getLogger('controller')
-stdoutlog = open(poptions.logfile+"-stdout", 'a', 0)
+
+stdoutlog = open('/var/www/scraperwiki/uml/var/log/controller.log'+"-stdout", 'a', 0)
+#stdoutlog = sys.stdout
 
 
 # one of these per scraper executing the code and relaying it to the scrapercontroller
@@ -122,21 +122,19 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         for line in lsof.split('\n') :
             m = p.match (line)
             if m :
-                
-# this might be what we replace with a proper urllib.urlencode
                 logger.debug('Ident (%s,%s) is pid %s' % (lport, rport, m.group(1)))
                 try    :
                     info = scrapersByPID[int(m.group(1))]
                     self.connection.send ('\n'.join(info['idents']))
                     self.connection.send ("\n")
                 except Exception, e:
-                    logger.debug('Ident (%s,%s) send failed: %s' % (lport, rport, repr(e)))
+                    logger.exception('Ident (%s,%s) send failed')
                 return
-        logger.debug('Ident (%s,%s) not found:\n%s' % (lport, rport, lsof))
+        logger.warning('Ident (%s,%s) not found:\n%s' % (lport, rport, lsof))
 
     def sendNotify (self, query) :
         """
-        Send notification back through the controller.
+        Send notification back through the controller. (usually of a http request)
         """
         params  = cgi.parse_qs(query)
         wfile   = None
@@ -144,6 +142,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             lock.acquire()
             wfile = scrapersByRunID[params['runid'][0]]['wfile']
         except  :
+            logger.exception("test3")
             pass
         finally :
             lock.release()
@@ -250,10 +249,12 @@ class ScraperController (BaseController) :
                     line = None
                     if line is None :
                         try    : line = mapped[0].recv(8192)
-                        except : pass
+                        except: 
+                            logger.exception("test4")
                     if line is None :
                         try    : line = os.read (mapped[0], 8192)
-                        except : pass
+                        except:
+                            logger.exception("test4")
                     if line in [ '', None ] :
                         # 
                         # In case of echoing console output (for PHP, or for
@@ -397,7 +398,7 @@ class ScraperController (BaseController) :
 
  
     def execute(self, request):
-        logger.debug(('Execute '+str(request))[:100])
+        logger.debug('Execute %s' % str(request)[:100])
 
         idents = []
         if request.get("scraperid"):
@@ -440,9 +441,7 @@ class ScraperController (BaseController) :
                 self.processmain(psock, lpipe, pid, cltime1)
 
             except Exception, e:
-                import traceback
-                logger.error('Copying results failed: %s' % repr(e))
-                logger.error(traceback.format_exc())
+                logger.exception('Copying results failed')
 
             finally:
                 lock.acquire()
@@ -454,18 +453,22 @@ class ScraperController (BaseController) :
                 #  running in a thread and not a separate process.
                 #
                 try    : psock[0].close()
-                except : pass
+                except :
+                    logger.exception("test")
+                    pass
                 try    : psock[1].close()
-                except : pass
+                except : 
+                    logger.exception("test2")
+                    pass
                 try    : os.close(lpipe[0])
-                except : pass
+                except OSError: pass
                 try    : os.close(lpipe[1])
-                except : pass
+                except OSError: pass
 
                 try    : os.remove ('/tmp/scraper.%d' % pid)
-                except : pass
+                except OSError: pass
                 try    : os.remove ('/tmp/ident.%d'   % pid)
-                except : pass
+                except OSError: pass
 
             return
 
@@ -599,6 +602,6 @@ if __name__ == '__main__' :
     if poptions.firewall == 'auto' :
         autoFirewall()
     
-    execute(config.getint (socket.gethostname(), 'port'))
+    execute(config.getint(socket.gethostname(), 'port'))
     
     
