@@ -1202,16 +1202,20 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             return true;
         });
 
+        $(window).unload(function()
+        {
+            bSuppressDisconnectionMessages = true; 
+            writeToConsole('window unload'); 
+            sendjson({"command":'loseconnection'}); 
+            //if (conn)  conn.close();  
+        });  
+
+        /*
         $(window).bind('beforeunload', function() 
         { 
             if (pageIsDirty)
                 return "You have unsaved changes, close the editor anyway?";
-
-            //bSuppressDisconnectionMessages = true; 
-            //writeToConsole('window unload'); 
-            //sendjson({"command":'loseconnection'}); 
-            //if (conn)  conn.close();  
-        });  
+        } */
 
 
         if (wiki_type == 'view')
