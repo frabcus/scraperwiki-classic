@@ -61,8 +61,8 @@ config.readfp(open(poptions.config))
 logging.config.fileConfig(poptions.config)
 logger = logging.getLogger('controller')
 
-stdoutlog = open('/var/www/scraperwiki/uml/var/log/controller.log'+"-stdout", 'a', 0)
-#stdoutlog = sys.stdout
+#stdoutlog = open('/var/www/scraperwiki/uml/var/log/controller.log'+"-stdout", 'a', 0)
+stdoutlog = sys.stdout
 
 
 # one of these per scraper executing the code and relaying it to the scrapercontroller
