@@ -1210,11 +1210,17 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             //if (conn)  conn.close();  
         });  
 
+        /*
+        This fires when making a new scraper on some browsers (while doing the
+        redirect), so need to prevent that case. Julian had this problem.
+
         $(window).bind('beforeunload', function() 
         { 
             if (pageIsDirty && !bSuppressDisconnectionMessages)
                 return "You have unsaved changes, close the editor anyway?";
         });
+
+        */
 
 
         if (wiki_type == 'view')
@@ -1361,8 +1367,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         },
         error: function(jqXHR, textStatus, errorThrown)
         {
-            writeToChat("Response error: " + textStatus + "  :" + jqXHR.responseText); 
-            alert('Sorry, something went wrong with the save ['+textStatus+'], please try copying your code and then reloading the page');
+            var errmessage = "Response error: " + textStatus + "  thrown: " + errorThrown + "  text:" + jqXHR.responseText; 
+            writeToChat(errmessage);
+            alert('Sorry, something went wrong with the save, please try copying your code and then reloading the page. Technical details: ' + textStatus);
             window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
         }});
 
