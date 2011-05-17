@@ -162,7 +162,7 @@ def select(sqlquery, data=None, verbose=1):
     if data is not None and "?" in sqlquery and type(data) not in [list, tuple]:
         data = [data]
     sqlquery = "select %s" % sqlquery   # maybe check if select or another command is there already?
-    result = sqliteexecute(sqlquery, data, verbose=verbose)
+    result = execute(sqlquery, data, verbose=verbose)
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
 
 
@@ -170,16 +170,16 @@ def show_tables(dbname=""):
     name = "sqlite_master"
     if dbname:
         name = "`%s`.%s" % (dbname, name)
-    result = sqliteexecute("select tbl_name, sql from %s where type='table'" % name)
+    result = execute("select tbl_name, sql from %s where type='table'" % name)
     return dict(result["data"])
 
 
 def table_info(name):
     sname = name.split(".")
     if len(sname) == 2:
-        result = sqliteexecute("PRAGMA %s.table_info(`%s`)" % tuple(sname))
+        result = execute("PRAGMA %s.table_info(`%s`)" % tuple(sname))
     else:
-        result = sqliteexecute("PRAGMA table_info(`%s`)" % name)
+        result = execute("PRAGMA table_info(`%s`)" % name)
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
 
 
@@ -190,7 +190,7 @@ def save_var(name, value, verbose=2):
 
 def get_var(name, default=None, verbose=2):
     try:
-        result = sqliteexecute("select value_blob, type from swvariables where name=?", (name,), verbose)
+        result = execute("select value_blob, type from swvariables where name=?", (name,), verbose)
     except NoSuchTableSqliteError, e:
         return default
     data = result.get("data")
@@ -198,6 +198,5 @@ def get_var(name, default=None, verbose=2):
         return default
     return data[0][0]
 
-    
 
-    
+
