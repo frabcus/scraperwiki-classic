@@ -1361,8 +1361,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         },
         error: function(jqXHR, textStatus, errorThrown)
         {
-            writeToChat("Response error: " + textStatus + "  :" + jqXHR.responseText); 
-            alert('Sorry, something went wrong with the save ['+textStatus+'], please try copying your code and then reloading the page');
+            var errmessage = "Response error: " + textStatus + "  thrown: " + errorThrown + "  text:" + jqXHR.responseText; 
+            writeToChat(errmessage);
+            alert('Sorry, something went wrong with the save, please try copying your code and then reloading the page. Technical details: ' + textStatus);
             window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
         }});
 
