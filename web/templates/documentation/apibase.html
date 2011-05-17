@@ -112,17 +112,30 @@ $(function()
                 surl.push("&", ent.attr("name"), "=", encodeURIComponent(ent.val())); 
         }
         $('#id_apiuri').text(surl.join("")).attr('href', surl.join(""));
+
+        if ($('#id_name').val().length != 0)
+        {
+            var overviewurl = $('#id_scraperoverview_url').val().replace('XXX', encodeURIComponent($('#id_name').val())); 
+            $("#overviewreturn a").attr("href", overviewurl); 
+            $("#overviewreturn").show(); 
+        }
+        else
+            $("#overviewreturn").hide(); 
+
         var t = setTimeout(resizeZO(), 500);
     }
 
     $('#detail select').each(function() { $(this).change(rewriteapiurl) }); 
-    $('#detail input, #detail textarea').each(function() 
+    $('#detail input').each(function() 
     {   
         $(this).keypress(function(e)
         {
             if (e.which == 13)
-                {  $("#btnCallMethod").click();  e.preventDefault();  return false }
+                {  $("#id_apiuri_run").click();  e.preventDefault();  return false }
         })
+    }); 
+    $('#detail input, #detail textarea').each(function() 
+    {   
         $(this).keyup(rewriteapiurl); 
     }); 
 
@@ -177,10 +190,19 @@ $(function()
                 $('#listtables').empty(); 
                 if (v && v[0] && v[0].datasummary && v[0].datasummary.tables)
                 {
+                    var maxtablecount = 0;
+                    var maxtablename = null;
                     for (var tablename in v[0].datasummary.tables)
                     {
                         var table = v[0].datasummary.tables[tablename]; 
-                        $('#listtables').append('<li><b>'+tablename+'</b> ['+table.count+'] '+table.sql+'</li>'); 
+                        $('#listtables').append('<li><b>'+tablename+'</b> [<em>'+table.count+' rows</em>] '+table.sql+'</li>'); 
+                        if ((table.count > maxtablecount) || (maxtablename == null))
+                        {
+                            maxtablename = tablename; 
+                            maxtablecount = table.count; 
+                        }
+                        if (maxtablename != null)
+                            $('#id_query').val("select * from "+maxtablename+" limit 10").keyup(); // same as change
                     }
                 }
                 else if (v && v.error)
@@ -253,7 +275,7 @@ $(function()
                 </select>
         	</li> 
         	<li class="name">
-                <label for="id_name">name<span class="desc"> of the scraper</span></label>
+                <label for="id_name">name<span class="desc"> of the scraper</span> <span id="overviewreturn">(return to <a href="{% url code_overview 'scraper' 'XXX' %}">overview</a>)</label>
                 <input type="text" name="name" id="id_name" value="{{name}}">
         	</li> 
         	<li class="username">
@@ -312,6 +334,7 @@ $(function()
             </div>
         </div>
         <div id="response">
+            <input type="text" id="id_scraperoverview_url" value="{% url code_overview 'scraper' 'XXX' %}" class="hide">
             <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
             <input type="text" id="id_api_explore" value="{% url api_explore %}" class="hide">
             <iframe name="iframeResponse" id="api_response" src="{% url api_explore %}"></iframe>

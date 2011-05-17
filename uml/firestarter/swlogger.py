@@ -1,1 +1,0 @@
-../swlogger/swlogger.py

@@ -11,7 +11,6 @@ try:
 except:
   import simplejson as json
 
-import scraperwiki.console
 
 '''standardized to wgs84 (if possible)'''
 

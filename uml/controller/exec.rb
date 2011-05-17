@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+require 'rubygems'   # for nokigiri to work on all machines, and for JSON/Iconv on OSX
+
 require 'json'
 require 'iconv'
 
@@ -108,19 +110,10 @@ ARGV.each do |a|
     Process.exit(1)
 end
 
-#print   "script    =", script,     "\n"
-#print   "path      =", path,       "\n"
-#print   "httpProxy =", httpProxy,  "\n"
-#print   "httpsProxy=", httpsProxy, "\n"
-#print   "ftpProxy  =", ftpProxy,   "\n"
-#print   "datastore =", datastore,  "\n"
-#print   "uid       =", uid,        "\n"
-#print   "gid       =", gid,        "\n"
-
-if gid
+if gid    # nogroup
     Process::Sys.setregid(gid, gid)
 end
-if uid
+if uid    # nobody
     Process::Sys.setreuid(uid, uid)
 end
 
@@ -155,7 +148,6 @@ ARGV.clear # Clear command line args so that we can use Test::Unit
 
 code = File.new(script, 'r').read()
 begin
-    require 'rubygems'   # for nokigiri to work
     eval code
 rescue Exception => e
     est = getExceptionTraceback(e, code)

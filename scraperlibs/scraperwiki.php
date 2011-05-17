@@ -38,16 +38,17 @@ class scraperwiki
       return scraperwiki::save_sqlite($unique_keys, $ldata); 
    }
 
-   static function sqlitecommand($command, $val1=null, $val2=null, $verbose=1)
+   static function sqliteexecute($sqlquery=null, $data=null, $verbose=1)
    {
       $ds = SW_DataStoreClass::create();
-      $result = $ds->request(array('maincommand'=>'sqlitecommand', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
+      $result = $ds->request(array('maincommand'=>'sqliteexecute', 'sqlquery'=>$sqlquery, 'data'=>$data));
       if (property_exists($result, 'error'))
          throw new Exception ($result->error);
       if ($verbose != 0)
-         scraperwiki::sw_dumpMessage(array('message_type'=>'sqlitecall', 'command'=>$command, 'val1'=>$val1, 'val2'=>$val2));
+         scraperwiki::sw_dumpMessage(array('message_type'=>'sqlitecall', 'command'=>"execute", 'val1'=>$sqlquery, 'val2'=>$data));
       return $result; 
    }
+
 
    static function unicode_truncate($val, $n)
    {
@@ -79,9 +80,9 @@ class scraperwiki
       return $result; 
    }
 
-   static function select($val1, $val2=null)
+   static function select($sqlquery, $data=null)
    {
-      $result = scraperwiki::sqlitecommand("execute", "select ".$val1, $val2); 
+      $result = scraperwiki::sqliteexecute("select ".$sqlquery, $data); 
 
           // see http://rosettacode.org/wiki/Hash_from_two_arrays
       $res = array(); 
@@ -92,16 +93,16 @@ class scraperwiki
 
    static function attach($name, $asname=null)
    {
-      $attachlist.push(array("name"=>$name, "asname"=>$asname)); 
-      return scraperwiki::sqlitecommand("attach", $name, $asname); 
+      array_push(self::$attachlist, array("name"=>$name, "asname"=>$asname)); 
+      $result = $ds->request(array('maincommand'=>'sqlitecommand', 'command'=>'attach', "name"=>$name, "asname"=>$asname));
    }
    static function sqlitecommit()
    {
-      return scraperwiki::sqlitecommand("commit"); 
-   }
-   static function sqliteexecute($val1, $val2=null, $verbose=1)
-   {
-      return scraperwiki::sqlitecommand("execute", $val1, $val2, $verbose); 
+      $ds = SW_DataStoreClass::create();
+      $result = $ds->request(array('maincommand'=>'sqlitecommand', 'command'=>'commit'));
+      if (property_exists($result, 'error'))
+         throw new Exception ($result->error);
+      return $result; 
    }
 
    static function show_tables($dbname=null)
@@ -109,7 +110,7 @@ class scraperwiki
       $name = "sqlite_master"; 
       if ($dbname != null)
           $name = "`$dbname`.sqlite_master"; 
-      $result = scraperwiki::sqlitecommand("execute", "select tbl_name, sql from $name where type='table'"); 
+      $result = scraperwiki::sqliteexecute("select tbl_name, sql from $name where type='table'"); 
       $res = array(); 
       foreach ($result->data as $i=>$row)
          $res[$row[0]] = $row[1]; 
@@ -120,9 +121,9 @@ class scraperwiki
    {
       $sname = explode(".", $name); 
       if (count($sname) == 2)
-          $result = scraperwiki::sqlitecommand("execute", "PRAGMA ".$sname[0].".table_info(`".$sname[1]."`)"); 
+          $result = scraperwiki::sqliteexecute("PRAGMA ".$sname[0].".table_info(`".$sname[1]."`)"); 
       else
-          $result = scraperwiki::sqlitecommand("execute", "PRAGMA table_info(`".$name."`)"); 
+          $result = scraperwiki::sqliteexecute("PRAGMA table_info(`".$name."`)"); 
       $res = array(); 
       foreach ($result->data as $i => $row)
          array_push($res, array_combine($result->keys, $row)); 
@@ -136,20 +137,20 @@ class scraperwiki
       else if (is_double($value))
          $jvalue = $value; 
       else
-         $jvalue = json_encode($value); 
+         $jvalue = $value; //json_encode($value); 
       $data = array("name"=>$name, "value_blob"=>$jvalue, "type"=>gettype($value)); 
       scraperwiki::save_sqlite(array("name"), $data, "swvariables"); 
    }
 
    static function get_var($name, $default=None)
    {
-      $ds = SW_DataStoreClass::create ();
-      $result = scraperwiki::sqlitecommand("execute", "select value_blob, type from swvariables where name=?", array($name)); 
-      if (property_exists($result, 'error'))
+      $ds = SW_DataStoreClass::create();
+      try  { $result = scraperwiki::sqliteexecute("select value_blob, type from swvariables where name=?", array($name)); }
+      catch (Exception $e)
       {
-         if (substr($result->error, 0, 29) == 'sqlite3.Error: no such table:')
+         if (substr($e->getMessage(), 0, 29) == 'sqlite3.Error: no such table:')
             return $default;
-         throw new Exception($result->error) ;
+         throw $e;
       }
       $data = $result->data; 
       if (count($data) == 0)

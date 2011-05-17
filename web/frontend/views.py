@@ -415,8 +415,6 @@ def request_data(request):
     if form.is_valid():
         form.save()
         return render_to_response('frontend/request_data_thanks.html', context_instance = RequestContext(request))
-    else:
-        print form.errors
     return render_to_response('frontend/request_data.html', {'form': form}, context_instance = RequestContext(request))
 
 

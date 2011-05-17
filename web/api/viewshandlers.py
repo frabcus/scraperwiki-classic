@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from settings import MAX_API_ITEMS, API_DOMAIN
 from django.views.decorators.http import condition
+from tagging.models import Tag
 
 import csv
 from django.utils.encoding import smart_str
@@ -16,27 +17,30 @@ from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.utils import simplejson
 
 
-from codewiki.models import Scraper, Code
+from codewiki.models import Scraper, Code, ScraperRunEvent, scraper_search_query
 from codewiki.managers.datastore import DataStore
-
-from django.contrib.auth.decorators import login_required
-
-from models import api_key
-from forms import applyForm
 from cStringIO import StringIO
 
-import base64
+try:     import json
+except:  import simplejson as json
 
-def getscraperorresponse(request):
+
+def getscraperorresponse(request, action):
+    message = None
     try:
         scraper = Code.objects.exclude(privacy_status="deleted").get(short_name=request.GET.get('name'))
     except Code.DoesNotExist:
         message =  "Sorry, this datastore does not exist"
-        return HttpResponse(str({'heading':'Not found', 'body':message}))
     
-    if not scraper.actionauthorized(request.user, "apidataread"):
-        return HttpResponse(str(scraper.authorizationfailedmessage(request.user, "apidataread")))
-    return scraper
+    if not message and scraper.actionauthorized(request.user, "apidataread"):
+        return scraper
+        
+    result = json.dumps({'error':message})
+    callback = request.GET.get("callback")
+    if callback:
+        result = "%s(%s)" % (callback, result)
+    return HttpResponse(result)
+
 
 
 # see http://stackoverflow.com/questions/1189111/unicode-to-utf8-for-csv-files-python-via-xlrd
@@ -105,30 +109,29 @@ def data_handler(request):
 # all for want of setting response["Content-Length"] to the correct value
 @condition(etag_func=None)
 def sqlite_handler(request):
-    scraper = getscraperorresponse(request)
+    scraper = getscraperorresponse(request, "apidataread")
     if isinstance(scraper, HttpResponse):  return scraper
-    dataproxy = DataStore("sqlviewquery", "")  # zero length short name means it will open up a :memory: database
-
-    attachlist = request.GET.get('attach', '').split(";")
-    attachlist.insert(0, request.GET.get('name'))   # just the first entry on the list
-        
-    for aattach in attachlist:
+    dataproxy = DataStore(request.GET.get('name'))
+    lattachlist = request.GET.get('attach', '').split(";")
+    attachlist = [ ]
+    for aattach in lattachlist:
         if aattach:
             aa = aattach.split(",")
-            dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "val1":aa[0], "val2":(len(aa) == 2 and aa[1] or None)})
+            attachi = {"name":aa[0], "asname":(len(aa) == 2 and aa[1] or None)}
+            attachlist.append(attachi)
+            dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":attachi["name"], "asname":attachi["asname"]})
     
     sqlquery = request.GET.get('query', "")
     format = request.GET.get("format", "json")
     if format == "json":
         format = "jsondict"
     
-    reqt = None
+    req = {"maincommand":"sqliteexecute", "sqlquery":sqlquery, "data":None, "attachlist":attachlist}
     if format == "csv":
-        reqt = ("streamchunking", 1000)
+        req["streamchunking"] = 1000
     
     # this is inlined from the dataproxy.request() function to allow for receiveoneline to perform multiple readlines in this case
-    # (this is the stream-chunking thing.  the right interface is not yet apparent)
-    req = {"maincommand":"sqlitecommand", "command":"execute", "val1":sqlquery, "val2":reqt}
+        # (this is the stream-chunking thing.  the right interface is not yet apparent)
     dataproxy.m_socket.sendall(simplejson.dumps(req) + '\n')
     
     if format not in ["csv", "jsondict", "jsonlist"]:
@@ -162,4 +165,249 @@ def sqlite_handler(request):
     response = HttpResponse(result, mimetype='application/json; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename=%s.json' % (scraper.short_name)
     return response
+
+
+def scraper_search_handler(request):
+    query = request.GET.get('query') 
+    if not query:
+        query = request.GET.get('searchquery') 
+    try:   
+        maxrows = int(request.GET.get('maxrows', ""))
+    except ValueError: 
+        maxrows = 5
+    result = [ ]  # list of dicts
+    scrapers = scraper_search_query(user=None, query=query)
+    for scraper in scrapers[:maxrows]:
+        res = {'short_name':scraper.short_name }
+        res['title'] = scraper.title
+        owners = scraper.userrolemap()["owner"]
+        if owners:
+            owner = owners[0]
+            ownername = owner.get_profile().name
+            if not ownername:
+                ownername = owner.username
+            if ownername:
+                res['title'] = "%s / %s" % (ownername, scraper.title)
+        res['description'] = scraper.description
+        res['created'] = scraper.created_at.isoformat()
+        res['privacy_status'] = scraper.privacy_status
+        result.append(res)
+    
+    if request.GET.get("format") == "csv":
+        fout = StringIO()
+        writer = csv.writer(fout, dialect='excel')
+        headers = [ 'short_name', 'title', 'description', 'created', 'privacy_status' ]
+        writer.writerow(headers)
+        for r in result:
+            writer.writerow([r[header]  for header in headers])
+        response = HttpResponse(fout.getvalue(), mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=search.csv'
+        return response
+    
+    res = json.dumps(result, indent=4)
+    callback = request.GET.get("callback")
+    if callback:
+        res = "%s(%s)" % (callback, res)
+    response = HttpResponse(res, mimetype='application/json; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename=search.json'
+    return response
+
+
+
+
+def userinfo_handler(request):
+    username = request.GET.get('username', "") 
+    users = User.objects.filter(username=username)
+    result = [ ]
+    for user in users:  # list of users is normally 1
+        info = { "username":user.username, "profilename":user.get_profile().name }
+        info["datejoined"] = user.date_joined.isoformat()
+        info['coderoles'] = { }
+        for ucrole in user.usercoderole_set.exclude(code__privacy_status="deleted").exclude(code__privacy_status="private"):
+            if ucrole.role not in info['coderoles']:
+                info['coderoles'][ucrole.role] = [ ]
+            info['coderoles'][ucrole.role].append(ucrole.code.short_name)
+
+        info['fromuserroles'] = { }
+        for fromuserrole in user.from_user.all():
+            if fromuserrole.role not in info['fromuserroles']:
+                info['fromuserroles'][fromuserrole.role] = [ ]
+            info['fromuserroles'][fromuserrole.role].append(fromuserrole.from_user.username)
+        
+        info['touserroles'] = { }
+        for touserrole in user.to_user.all():
+            if touserrole.role not in info['touserroles']:
+                info['touserroles'][touserrole.role] = [ ]
+            info['touserroles'][touserrole.role].append(touserrole.to_user.username)
+        
+        result.append(info)
+    
+    res = json.dumps(result, indent=4)
+    callback = request.GET.get("callback")
+    if callback:
+        res = "%s(%s)" % (callback, res)
+    response = HttpResponse(res, mimetype='application/json; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename=userinfo.json'
+    return response
+
+
+
+
+def runevent_handler(request):
+    scraper = getscraperorresponse(request, "apiscraperruninfo")
+    if isinstance(scraper, HttpResponse):  return scraper
+    runid = request.GET.get('runid', '-1')
+    runevent = None
+    if runid[0] == '-':   # allow for negative indexes to get to recent runs
+        try:
+            i = -int(runid)
+            runevents = scraper.scraper.scraperrunevent_set.all().order_by('-run_started')
+            if i < len(runevents):
+                runevent = runevents[i]
+        except ValueError:
+            pass
+    if not runevent:
+        try:
+            runevent = scraper.scraper.scraperrunevent_set.get(run_id=runid)
+        except ScraperRunEvent.DoesNotExist:
+            return HttpResponse("Error: run object not found")
+
+    info = { "runid":runevent.run_id, "run_started":runevent.run_started, 
+                "records_produced":runevent.records_produced, "pages_scraped":runevent.pages_scraped, 
+            }
+    if runevent.run_ended:
+        info['run_ended'] = runevent.run_ended
+    if runevent.exception_message:
+        info['exception_message'] = runevent.exception_message
+    
+    info['output'] = runevent.output
+    if runevent.first_url_scraped:
+        info['first_url_scraped'] = runevent.first_url_scraped
+    
+    domainsscraped = [ ]
+    for domainscrape in runevent.domainscrape_set.all():
+        domainsscraped.append({'domain':domainscrape.domain, 'bytes':domainscrape.bytes_scraped, 'pages':domainscrape.pages_scraped})
+    if domainsscraped:
+        info['domainsscraped'] = domainsscraped
+        
+    result = [info]      # a list with one element
+    res = json.dumps(result, indent=4)
+    callback = request.GET.get("callback")
+    if callback:
+        res = "%s(%s)" % (callback, res)
+    response = HttpResponse(res, mimetype='application/json; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename=runevent.json'
+    return response
+
+
+
+
+def convert_history(commitentry):
+    result = { 'version':commitentry['rev'], 'date':commitentry['date'].isoformat() }
+    if 'user' in commitentry:
+        result["user"] = commitentry['user'].username
+    lsession = commitentry['description'].split('|||')
+    if len(lsession) == 2:
+        result['session'] = lsession[0]
+    return result
+
+def convert_run_event(runevent):
+    result = { "runid":runevent.run_id, "run_started":runevent.run_started, 
+                "records_produced":runevent.records_produced, "pages_scraped":runevent.pages_scraped, 
+                "still_running":(runevent.pid != -1), "last_update":runevent.run_ended, 
+                }
+    if runevent.exception_message:
+        result['exception_message'] = runevent.exception_message
+    return result
+
+def convert_date(date_str):
+    if not date_str:
+        return None
+    try:
+        #return datetime.datetime.strptime(date_str, '%Y-%m-%d')
+        return datetime.datetime(*map(int, re.findall("\d+", date_str)))  # should handle 2011-01-05 21:30:37
+    except ValueError:
+        return None
+
+
+def scraperinfo_handler(request):
+    scraper = getscraperorresponse(request, "apiscraperinfo")
+    if isinstance(scraper, HttpResponse):  return scraper
+    history_start_date = convert_date(request.GET.get('history_start_date', None))
+    quietfields        = request.GET.get('quietfields', "").split("|")
+        
+    info = { }
+    info['short_name']  = scraper.short_name
+    info['language']    = scraper.language
+    info['created']     = scraper.created_at.isoformat()
+    
+    info['title']       = scraper.title
+    info['description'] = scraper.description
+    info['tags']        = [tag.name for tag in Tag.objects.get_for_object(scraper)]
+    info['wiki_type']   = scraper.wiki_type
+    info['privacy_status'] = scraper.privacy_status
+    if scraper.wiki_type == 'scraper':
+        info['license']     = scraper.scraper.license
+        info['records']     = scraper.scraper.record_count  # old style datastore
+        
+        if 'datasummary' not in quietfields:
+            dataproxy = DataStore(scraper.short_name)
+            sqlitedata = dataproxy.request({"maincommand":"sqlitecommand", "command":"datasummary", "val1":0, "val2":None})
+            if sqlitedata and type(sqlitedata) not in [str, unicode]:
+                info['datasummary'] = sqlitedata
+    
+    if 'userroles' not in quietfields:
+        info['userroles']   = { }
+        for ucrole in scraper.usercoderole_set.all():
+            if ucrole.role not in info['userroles']:
+                info['userroles'][ucrole.role] = [ ]
+            info['userroles'][ucrole.role].append(ucrole.user.username)
+            
+    try: 
+        rev = int(request.GET.get('version', ''))
+    except ValueError: 
+        rev = None
+        
+    status = scraper.get_vcs_status(rev)
+    if 'code' not in quietfields:
+        info['code']        = status["code"]
+    
+    for committag in ["currcommit", "prevcommit", "nextcommit"]:
+        if committag in status:
+            info[committag] = convert_history(status[committag])
+    
+    if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
+        if 'filemodifieddate' in status:
+            info["modifiedcommitdifference"] = str(status["filemodifieddate"] - status["prevcommit"]["date"])
+            info['filemodifieddate'] = status['filemodifieddate'].isoformat()
+
+    if history_start_date:
+        history = [ ]
+        commitentries = scraper.get_commit_log()
+        for commitentry in commitentries:
+            if commitentry['date'] < history_start_date:
+                continue
+            history.append(convert_history(commitentry))
+        history.reverse()
+        info['history'] = history
+    
+    if scraper.wiki_type == 'scraper' and 'runevents' not in quietfields:
+        if history_start_date:
+            runevents = scraper.scraper.scraperrunevent_set.filter(run_ended__gte=history_start_date).order_by('-run_started')
+        else:
+            runevents = scraper.scraper.scraperrunevent_set.all().order_by('-run_started')[:2]
+            
+        info['runevents'] = [ ]
+        for runevent in runevents:
+            info['runevents'].append(convert_run_event(runevent))
+
+    result = [info]      # a list with one element
+    res = json.dumps(result, indent=4)
+    callback = request.GET.get("callback")
+    if callback:
+        res = "%s(%s)" % (callback, res)
+    response = HttpResponse(res, mimetype='application/json; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename=scraperinfo.json'
+    return response
+
 

@@ -1,130 +1,142 @@
 ##!/bin/sh -
 "exec" "python" "-O" "$0" "$@"
 
-__doc__ = """ScraperWiki Data Proxy"""
-
-__version__ = "ScraperWiki_0.0.1"
-
 import BaseHTTPServer
 import SocketServer
 import urllib
 import urlparse
 import cgi
-import select
 import signal
 import os
 import sys
 import time
-import threading
-import string 
-import hashlib
-import datalib
 import ConfigParser
 import datetime
+import optparse
+import grp
+import pwd
+import rslogger   # made possible by PYTHONPATH environment variable
+import datalib
+
+import logging
+import logging.config
 
 try   : import json
 except: import simplejson as json
 
-global config
+# note: there is a symlink from /var/www/scraperwiki to the scraperwiki directory
+# which allows us to get away with being crap with the paths
 
-USAGE      = " [--varDir=dir] [--subproc] [--daemon] [--config=file]"
+configfile = '/var/www/scraperwiki/uml/uml.cfg'
+config = ConfigParser.ConfigParser()
+config.readfp(open(configfile))
+
 child      = None
-config     = None
-varDir     = '/var'
-uid        = None
-gid        = None
 
-class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
+parser = optparse.OptionParser()
+parser.add_option("--setuid", action="store_true")
+parser.add_option("--pidfile")
+parser.add_option("--logfile")
+parser.add_option("--toaddrs", default="")
+poptions, pargs = parser.parse_args()
+
+
+logging.config.fileConfig(configfile)
+logger = logging.getLogger('dataproxy')
+datalib.logger = logger
+stdoutlog = open(poptions.logfile+"-stdout", 'a', 0)
+
+
+class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     __base         = BaseHTTPServer.BaseHTTPRequestHandler
     __base_handle  = __base.handle
 
-    server_version = "DataProxy/" + __version__
+    server_version = "DataProxy/ScraperWiki_0.0.1"
     rbufsize       = 0
 
-    def __init__ (self, *alist, **adict) :
-        self.m_db      = None
-        BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
+    def ident(self, uml, port):
+        runID      = None
+        short_name = None
 
-    def log_message (self, format, *args) :
-        BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
-        sys.stderr.flush ()
-
-    def ident (self, uml, port) :
-        scraperID   = None
-        runID       = None
-        scraperName = None
-
-        #  Determin the caller host address and the port to call on that host from
-        #  the configuration since the request will be from UML running inside that
-        #  host (and note actually from the peer host). Similarly use the port
-        #  supplied in the request since the peer port will have been subject to
-        #  NAT or masquerading.
-        #
-        host      = config.get (uml, 'host')
-        via       = config.get (uml, 'via' )
+        host      = config.get(uml, 'host')
+        via       = config.get(uml, 'via' )
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
-        ident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()   # (lucky this doesn't clash with the function we are in, eh -- JT)
+        lident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()   
 
                 # should be using cgi.parse_qs(query) technology here
-        for line in string.split (ident, '\n') :
+        for line in lident.split('\n'):
             if line:
-                key, value = string.split (line, '=')
+                key, value = line.split('=')
                 if key == 'runid':
                     runID = value
-                elif key == 'scraperid':
-                    scraperID   = value
                 elif key == 'scrapername':
-                    scraperName = value
+                    short_name = value
 
-        return scraperID, runID, scraperName
+        return runID, short_name
 
-    def process(self, db, scraperID, runID, scraperName, request):
+    def process(self, db, request):
+        logger.debug(str(("rrr", request)))
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
         elif "maincommand" not in request:
             res = {"error":'request must contain maincommand', "content":str(request)}
             
         elif request["maincommand"] == 'clear_datastore':
-            res = db.clear_datastore(scraperID, scraperName)
+            res = db.clear_datastore()
+        
         elif request["maincommand"] == 'sqlitecommand':
-            res = db.sqlitecommand(scraperID, runID, scraperName, command=request["command"], val1=request["val1"], val2=request["val2"])
+            if request["command"] == "downloadsqlitefile":
+                res = db.downloadsqlitefile(seek=request["seek"], length=request["length"])
+            elif request["command"] == "datasummary":
+                res = db.datasummary(request.get("limit", 10))
+            elif request["command"] == "attach":
+                res = db.sqliteattach(request.get("name"), request.get("asname"))
+            elif request["command"] == "commit":
+                res = db.commit()
+        
+        elif request["maincommand"] == "sqliteexecute":
+            res = db.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"), streamchunking=request.get("streamchunking"))
+        
         elif request["maincommand"] == 'save_sqlite':
-            res = db.save_sqlite(scraperID, runID, scraperName, unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
+            res = db.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
         
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
+            logger.error(json.dumps(res))
         
-        self.connection.send(json.dumps(res)+'\n')
+        sres = json.dumps(res)
+        logger.debug(sres[:200])
+        self.connection.send(sres+'\n')
 
 
         # this morphs into the long running two-way connection
     def do_GET (self) :
-        (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
+        (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
+        params = dict(cgi.parse_qsl(query))
 
-        try    : params = urlparse.parse_qs(query)
-        except : params = cgi     .parse_qs(query)
-
-                # if the scraperid is set then we can assume it's from the frontend, is not authenticated and will have no write permissions
-                # if it is not set, then it is fetched through the ident call and is then authenticated enough for writing purposes in its relevant file
-        if 'scraperid' in params and params['scraperid'][0] not in [ '', None ] :
+        if 'short_name' in params:
             if self.connection.getpeername()[0] != config.get('dataproxy', 'secure') :
-                self.connection.send(json.dumps({"error":"ScraperID only accepted from secure hosts"})+'\n')
+                self.connection.send(json.dumps({"error":"short_name only accepted from secure hosts"})+'\n')
                 return
-            scraperID, runID, scraperName = params['scraperid'][0], 'fromfrontend.%s.%s' % (params['scraperid'][0], time.time()), params.get('short_name', [""])[0]
-        
+            short_name = params.get('short_name', '')
+            runID = 'fromfrontend.%s.%s' % (short_name, time.time()) 
+            dataauth = "fromfrontend"
         else :
-            scraperID, runID, scraperName = self.ident(params['uml'][0], params['port'][0])
-
-
+            runID, short_name = self.ident(params['uml'], params['port'])
+            if runID[:8] == "draft|||" and short_name:
+                dataauth = "draft"
+            else:
+                dataauth = "writable"
+        
         if path == '' or path is None :
             path = '/'
 
-        if scm not in [ 'http', 'https' ] or fragment :
+        if scm not in ['http', 'https'] or fragment :
             self.connection.send(json.dumps({"error":"Malformed URL %s" % self.path})+'\n')
             return
 
-        db = datalib.Database(self, config, scraperID)
+        db = datalib.Database(self, config.get('dataproxy', 'resourcedir'), short_name, dataauth, runID)
         self.connection.send(json.dumps({"status":"good"})+'\n')
 
                 # enter the loop that now waits for single requests (delimited by \n) 
@@ -140,7 +152,7 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                     line = "".join(sbuffer)
                     if line:
                         request = json.loads(line) 
-                        self.process(db, scraperID, runID, scraperName, request)
+                        self.process(db, request)
                     sbuffer = [ ssrec.pop(0) ]  # next one in
                 if not srec:
                     break
@@ -155,123 +167,60 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     do_DELETE = do_GET
 
 
-class ProxyHTTPServer \
-        (   SocketServer.ForkingMixIn,
-            BaseHTTPServer.HTTPServer
-        ) :
+class ProxyHTTPServer(SocketServer.ForkingMixIn, BaseHTTPServer.HTTPServer):
     pass
 
+def sigTerm(signum, frame):
+    #logger.debug("terminating")    # many of these, only one terminated
+    os.kill(child, signal.SIGTERM)
+    os.remove(poptions.pidfile)
+    logger.warning("terminated")
+    sys.exit(1)
 
-def execute (port) :
+if __name__ == '__main__':
 
-    ProxyHandler.protocol_version = "HTTP/1.0"
-
-    httpd = ProxyHTTPServer(('', port), ProxyHandler)
-    sa    = httpd.socket.getsockname()
-    print "Serving HTTP on", sa[0], "port", sa[1], "..."
-
-    httpd.serve_forever()
-
-
-def sigTerm (signum, frame) :
-
-    try    : os.kill (child, signal.SIGTERM)
-    except : pass
-    try    : os.remove (varDir + '/run/dataproxy.pid')
-    except : pass
-    sys.exit (1)
-
-
-if __name__ == '__main__' :
-
-    subproc = False
-    daemon  = False
-    confnam = 'uml.cfg'
-
-    for arg in sys.argv[1:] :
-
-        if arg in ('-h', '--help') :
-            print "usage: " + sys.argv[0] + USAGE
-            sys.exit (1)
-
-        if arg[: 6] == '--uid=' :
-            uid      = arg[ 6:]
-            continue
-
-        if arg[: 6] == '--gid=' :
-            gid      = arg[ 6:]
-            continue
-
-        if arg[ :9] == '--varDir='  :
-            varDir  = arg[ 9:]
-            continue
-
-        if arg[ :9] == '--config='  :
-            confnam = arg[ 9:]
-            continue
-
-        if arg == '--subproc' :
-            subproc = True
-            continue
-
-        if arg == '--daemon' :
-            daemon = True
-            continue
-
-        print "usage: " + sys.argv[0] + USAGE
+    # daemon mode
+    if os.fork() == 0 :
+        os.setsid()
+        sys.stdin  = open('/dev/null')
+        sys.stdout = stdoutlog
+        sys.stderr = stdoutlog
+        if os.fork() == 0 :
+            ppid = os.getppid()
+            while ppid != 1 :
+                time.sleep(1)
+                ppid = os.getppid()
+        else :
+            os._exit (0)
+    else :
+        os.wait()
         sys.exit (1)
 
+    pf = open(poptions.pidfile, 'w')
+    pf.write('%d\n' % os.getpid())
+    pf.close()
+        
 
-    #  If executing in daemon mode then fork and detatch from the
-    #  controlling terminal. Basically this is the fork-setsid-fork
-    #  sequence.
-    #
-    if daemon :
+    if poptions.setuid:
+        gid = grp.getgrnam("nogroup").gr_gid
+        os.setregid(gid, gid)
+        uid = pwd.getpwnam("nobody").pw_uid
+        os.setreuid(uid, uid)
 
-        if os.fork() == 0 :
-            os .setsid()
-            sys.stdin  = open ('/dev/null')
-            sys.stdout = open (varDir + '/log/dataproxy', 'a', 0)
-            sys.stderr = sys.stdout
-            if os.fork() == 0 :
-                ppid = os.getppid()
-                while ppid != 1 :
-                    time.sleep (1)
-                    ppid = os.getppid()
-            else :
-                os._exit (0)
-        else :
-            os.wait()
-            sys.exit (1)
-
-        pf = open (varDir + '/run/dataproxy.pid', 'w')
-        pf.write  ('%d\n' % os.getpid())
-        pf.close  ()
-
-    if gid is not None : os.setregid (int(gid), int(gid))
-    if uid is not None : os.setreuid (int(uid), int(uid))
-
-    #  If running in subproc mode then the server executes as a child
-    #  process. The parent simply loops on the death of the child and
-    #  recreates it in the event that it croaks.
-    #
-    if subproc :
-
-        signal.signal (signal.SIGTERM, sigTerm)
-
-        while True :
-
-            child = os.fork()
-            if child == 0 :
-                break
-
-            sys.stdout.write("%s: Forked subprocess: %d\n" % (datetime.datetime.now().ctime(), child))
-            sys.stdout.flush()
-    
-            os.wait()
+    # subproc mode
+    signal.signal(signal.SIGTERM, sigTerm)
+    while True:
+        child = os.fork()
+        if child == 0:
+            break
+        logger.info("%s: Forked subprocess: %d" % (datetime.datetime.now().ctime(), child))
+        os.wait()
 
 
-    config = ConfigParser.ConfigParser()
-    config.readfp (open(confnam))
+    port = config.getint('dataproxy', 'port')
+    ProxyHandler.protocol_version = "HTTP/1.0"
+    httpd = ProxyHTTPServer(('', port), ProxyHandler)
+    sa = httpd.socket.getsockname()
+    logger.info(str(("Serving HTTP on", sa[0], "port", sa[1], "...")))
+    httpd.serve_forever()
 
-    execute (config.getint ('dataproxy', 'port'))

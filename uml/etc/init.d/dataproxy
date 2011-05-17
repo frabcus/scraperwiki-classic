@@ -11,18 +11,17 @@
 
 # Do NOT "set -e"
 
-NOBODY=`grep nobody /etc/passwd | cut -d: -f3`
-NOGROUP=`grep nogroup /etc/group | cut -d: -f3`
-
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="DataProxy"
 NAME=dataproxy
-CONFIG=/var/www/scraperwiki/uml/uml.cfg
 DAEMON=/usr/bin/python
-DAEMON_ARGS="/var/www/scraperwiki/uml/dataproxy/dataproxy.py --daemon --subproc --uid=$NOBODY --gid=$NOGROUP --config=$CONFIG"
-PIDFILE=/var/run/$NAME.pid
-SCRIPTNAME=/etc/init.d/$NAME
+VARDIR=/var
+export PYTHONPATH=/var/www/scraperwiki/uml
+LOGFILE=$VARDIR/log/$NAME.log
+PIDFILE=$VARDIR/run/$NAME.pid
+TOADDRS="julian@scraperwiki.com"
+DAEMON_ARGS="/var/www/scraperwiki/uml/dataproxy/dataproxy.py --setuid --pidfile=$PIDFILE --logfile=$LOGFILE --toaddrs=$TOADDRS"
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -137,7 +136,7 @@ case "$1" in
 	esac
 	;;
   *)
-	echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+	echo "Usage: /etc/init.d/$NAME {start|stop|restart|force-reload}" >&2
 	exit 3
 	;;
 esac

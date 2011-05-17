@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url, include
 
 # please use "import <something> as local_name" as this removes issues of name collision.
 import frontend.views as frontend_views

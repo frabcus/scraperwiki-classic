@@ -5,22 +5,18 @@ __version__ = "ScraperWiki_0.0.1"
 import urllib2
 import urllib
 import cookielib
-import re
 
 try:
   import json
 except:
   import simplejson as json
 
-import cgi
 import os
 import sys
 import traceback
 import datetime
 import tempfile
 import imp
-
-import scraperwiki.console
 
 # this will be useful for profiling the code, 
 # it should return an output in json that you can click on to take you to the correct line

@@ -27,18 +27,20 @@ import cgi
 import ConfigParser
 import threading
 import optparse
+import pwd
+import grp
+import logging
+import logging.config
 
 try    : import json
 except : import simplejson as json
 
-global  config
 global  scrapersByRunID
 global  scrapersByPID
 global  lock
 
-USAGE           = " [--varDir=dir] [--addPath=path] [--subproc] [--daemon] [--firewall=option] [--config=file] [--name=name]"
 child           = None
-config          = None
+
 re_resolv       = re.compile ('nameserver\s+([0-9.]+)')
 scrapersByRunID = {}
 scrapersByPID   = {}
@@ -46,19 +48,21 @@ lock            = threading.Lock()
 
 infomap     = {}
 
-global poptions
 parser = optparse.OptionParser()
-parser.add_option("--varDir", metavar="dir", default='/var')
-parser.add_option("--addPath", metavar="path")
 parser.add_option("--firewall", metavar="option")
-parser.add_option("--config", dest="confnam", metavar="file", default='uml.cfg')
-parser.add_option("--name", metavar="name")
-
-parser.add_option("--subproc", action="store_true")
-parser.add_option("--daemon", action="store_true")
-parser.add_option("--nosetuid", dest="setuid", action="store_false", default=True)
+parser.add_option("--pidfile")
+parser.add_option("--config")
+parser.add_option("--setuid", action="store_true")
 poptions, pargs = parser.parse_args()
-#print poptions, sys.argv
+
+config = ConfigParser.ConfigParser()
+config.readfp(open(poptions.config))
+
+logging.config.fileConfig(poptions.config)
+logger = logging.getLogger('controller')
+
+#stdoutlog = open('/var/www/scraperwiki/uml/var/log/controller.log'+"-stdout", 'a', 0)
+stdoutlog = sys.stdout
 
 
 # one of these per scraper executing the code and relaying it to the scrapercontroller
@@ -76,62 +80,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
     rbufsize       = 0
 
     def __init__ (self, *alist, **adict) :
-
-        """
-        Class constructor. All arguments (positional and keyed) are passed down to
-        the base class constructor.
-        """
-
-        self.m_cgi_fp       = None
-        self.m_cgi_headers  = None
-        self.m_cgi_env      = None
         self.m_stdout       = sys.stdout
         self.m_stderr       = sys.stderr
-        self.m_uid          = None
-        self.m_gid          = None
-        self.m_paths        = []
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
-
-    def log_message (self, format, *args) :
-
-        """
-        Override this method so that we can flush stderr
-
-        @type   format  : String
-        @param  format  : Format string
-        @type   args    : List
-        @param  args    : Arguments to format string
-        """
-
-        BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, '%5d: %s' % (os.getpid(), format), *args)
-        sys.stderr.flush ()
-
-    def storeEnvironment (self, rfile, headers, method, query) :
-
-        """
-        Store envronment information needed to retrieve CGI parameters. The
-        information is stored rather than used immediately as it will also
-        be used when executing a script in CGI mode. The \em rfile and \em headers
-        arguments may be \em None if not needed (for a \em GET request).
-
-        @type   rfile   : Stream
-        @param  rfile   : Incoming stream from client
-        @type   headers : Dictionary
-        @param  headers : HTTP headers dictionary if needed
-        @type   method  : String
-        @param  method  : HTTP request method
-        @type   query   : String
-        @param  query   : HTTP query string
-        """
-
-        self.m_cgi_fp       = rfile
-        self.m_cgi_headers  = headers
-        self.m_cgi_env      = { 'REQUEST_METHOD' : method }
-
-        if query                            : self.m_cgi_env['QUERY_STRING'  ] = query
-        if 'content-type'   in self.headers : self.m_cgi_env['CONTENT_TYPE'  ] = self.headers['content-type'  ]
-        if 'content-length' in self.headers : self.m_cgi_env['CONTENT_LENGTH'] = self.headers['content-length']
 
 
     def sendConnectionHeaders(self):
@@ -141,10 +93,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  ('Cache-Control: no-cache\n')
         self.connection.send  ('Content-Type: text/text\n')
         self.connection.send  ('\n')
-
-    def sendWhoAmI(self, query):
-        self.sendConnectionHeaders()
-        self.connection.send('hostname=%s\n' % socket.gethostname())
 
     def sendStatus(self, query) :
         status = []
@@ -166,38 +114,35 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         #  the scraper.
         #
         (lport, rport) = query.split(':')
-        p    = re.compile ('exec.[a-z]+ *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
-        lsof = subprocess.Popen([ 'lsof', '-n', '-P' ], stdout = subprocess.PIPE).communicate()[0]
+        # On Linux, process names come out as exec.py/exec.rb etc.
+        # On OSX, they come out as python/ruby etc.
+        # XXX todo, get PHP working on OSX
+        p    = re.compile ('(?:exec.[a-z]+|[Pp]ython|[Rr]uby) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
+        lsof = subprocess.Popen([ 'lsof', '-n', '-P', '-i' ], stdout = subprocess.PIPE).communicate()[0]
         for line in lsof.split('\n') :
             m = p.match (line)
             if m :
-                self.log_request('Ident', '(%s,%s) is pid %s' % (lport, rport, m.group(1)))
+                logger.debug('Ident (%s,%s) is pid %s' % (lport, rport, m.group(1)))
                 try    :
                     info = scrapersByPID[int(m.group(1))]
                     self.connection.send ('\n'.join(info['idents']))
                     self.connection.send ("\n")
-                    for key, value in info['options'].items() :
-                        self.connection.send ('option=%s:%s\n' % (key, value))
                 except Exception, e:
-                    self.log_request('Ident', '(%s,%s) send failed: %s' % (lport, rport, repr(e)))
+                    logger.exception('Ident (%s,%s) send failed')
                 return
-        self.log_request('Ident', '(%s,%s) not found' % (lport, rport))
+        logger.warning('Ident (%s,%s) not found:\n%s' % (lport, rport, lsof))
 
     def sendNotify (self, query) :
-
         """
-        Send notification back through the controller.
-
-        @type   query   : String
-        @param  query   : URL-encoded message data plus runid
+        Send notification back through the controller. (usually of a http request)
         """
-
         params  = cgi.parse_qs(query)
         wfile   = None
         try     :
             lock.acquire()
             wfile = scrapersByRunID[params['runid'][0]]['wfile']
         except  :
+            logger.exception("test3")
             pass
         finally :
             lock.release()
@@ -213,59 +158,23 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         self.sendConnectionHeaders()
 
-    def sendOption (self, query) :
-
-        """
-        Set option
-
-        @type   query   : String
-        @param  query   : URL-encoded options data plus runid
-        """
-
-        params  = cgi.parse_qs(query)
-        options = None
-        try     :
-            lock.acquire()
-            options = scrapersByRunID[params['runid'][0]]['options']
-        finally :
-            lock.release()
-
-        if options is not None :
-            for key, value in params.items() :
-                if key != 'runid' :
-                    options[key] = value[0]
-
-        self.sendConnectionHeaders()
-        for key, value in options.items() :
-            self.connection.send ("%s=%s\n" % (key, value))
-
-        self.log_request('Option', '')
-
-
+    # this request is put together by runner.py
     def do_POST (self) :
-        (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-        self.storeEnvironment (self.rfile, self.headers, 'POST', None)
+        (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
         assert path == '/Execute'
-        self.execute()
+            # BaseHTTPRequestHandler.rfile is the input stream
+        request = json.loads(self.rfile.read(int(self.headers['content-length'])))
+        self.execute(request)
 
     def do_GET (self) :
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
 
-        if path == '/Execute':
-            self.storeEnvironment(None, None, 'GET', query)
-            self.execute(path)
-            return
-        
-        elif path == '/WhoAmI':
-            self.sendWhoAmI(query)
-        elif path == '/Ident':
+        if path == '/Ident':
             self.sendIdent(query)
         elif path == '/Status':
             self.sendStatus(query)
         elif path == '/Notify':    # used to relay notification of http requests back to the dispatcher
             self.sendNotify(query)
-        elif path == '/Option':
-            self.sendOption(query)
         else:
             self.send_error(404, 'Action %s not found' % path)
             return
@@ -339,11 +248,10 @@ class ScraperController (BaseController) :
                     #
                     line = None
                     if line is None :
-                        try    : line = mapped[0].recv(8192)
-                        except : pass
-                    if line is None :
-                        try    : line = os.read (mapped[0], 8192)
-                        except : pass
+                        if hasattr(mapped[0], "recv"):
+                            line = mapped[0].recv(8192) # socket
+                        else:
+                            line = os.read (mapped[0], 8192) # pipe
                     if line in [ '', None ] :
                         # 
                         # In case of echoing console output (for PHP, or for
@@ -439,6 +347,7 @@ class ScraperController (BaseController) :
         language = request.get('language', 'python')
         resource.setrlimit(resource.RLIMIT_CPU, (request['cpulimit'], request['cpulimit']+1))
 
+        # language extensions
         lsfx = { 'php':'php', 'ruby':'rb', 'python':'py' }[language]
         
         pwfd = psock[1].fileno()
@@ -454,8 +363,9 @@ class ScraperController (BaseController) :
         dshost   = config.get ('dataproxy', 'host')
         dsport   = config.get ('dataproxy', 'port')
 
+        execscript = os.path.join(os.path.dirname(sys.argv[0]), 'exec.%s' % lsfx)
         args    = \
-                [   'exec.%s' % lsfx,
+                [   execscript,
                     '--http=http://%s:%s'       % (tap,  httpport),
                     '--https=http://%s:%s'      % (tap,  httpsport),
                     '--ftp=ftp://%s:%s'         % (tap,  ftpport ),
@@ -464,10 +374,9 @@ class ScraperController (BaseController) :
                     '--script=/tmp/scraper.%d'  % os.getpid(),
                 ]
 
-        if self.m_uid is not None: 
-            args.append('--uid=%d' % self.m_uid)
-        if self.m_gid is not None:
-            args.append('--gid=%d' % self.m_gid)
+        if poptions.setuid:
+            args.append('--uid=%d' % pwd.getpwnam("nobody").pw_uid)
+            args.append('--gid=%d' % grp.getgrnam("nogroup").gr_gid)
 
 
         os.close (0)
@@ -482,29 +391,11 @@ class ScraperController (BaseController) :
         os.close (lwfd)
 
         # the actual execution of the scraper
-        os.execvp('exec.%s' % lsfx, args)
+        os.execvp(execscript, args)
 
  
-    def execute(self):
-        self.log_request('Execute', '/Execute')
-        request = json.loads(self.m_cgi_fp.read(int(self.m_cgi_headers['content-length'])))
-
-            # I don't think this is ever used
-        if poptions.setuid:
-            if request.get("user"):
-                import pwd
-                try    :
-                    self.m_uid = pwd.getpwnam(request.get("user")).pw_uid
-                except :
-                    self.send_error (404, 'User %s not found'  % request.get("user"))
-                    return
-            if request.get("group"):
-                import grp
-                try    :
-                    self.m_gid = grp.getgrnam(request.get("group")).gr_gid
-                except :
-                    self.send_error (404, 'Group %s not found' % request.get("group"))
-                    return
+    def execute(self, request):
+        logger.debug('Execute %s' % str(request)[:100])
 
         idents = []
         if request.get("scraperid"):
@@ -538,7 +429,7 @@ class ScraperController (BaseController) :
         if pid > 0 :
             cltime1 = time.time()
             lock.acquire()
-            info = { 'wfile' : self.wfile, 'idents' : idents, 'options' : {} }
+            info = { 'wfile' : self.wfile, 'idents' : idents }
             scrapersByRunID[self.m_runID] = info
             scrapersByPID[pid] = info
             lock.release()
@@ -547,9 +438,7 @@ class ScraperController (BaseController) :
                 self.processmain(psock, lpipe, pid, cltime1)
 
             except Exception, e:
-                import traceback
-                sys.stderr.write(traceback.format_exc())
-                self.log_request('Copying results failed: %s' % repr(e))
+                logger.exception('Copying results failed')
 
             finally:
                 lock.acquire()
@@ -561,18 +450,22 @@ class ScraperController (BaseController) :
                 #  running in a thread and not a separate process.
                 #
                 try    : psock[0].close()
-                except : pass
+                except :
+                    logger.exception("test")
+                    pass
                 try    : psock[1].close()
-                except : pass
+                except : 
+                    logger.exception("test2")
+                    pass
                 try    : os.close(lpipe[0])
-                except : pass
+                except OSError: pass
                 try    : os.close(lpipe[1])
-                except : pass
+                except OSError: pass
 
                 try    : os.remove ('/tmp/scraper.%d' % pid)
-                except : pass
+                except OSError: pass
                 try    : os.remove ('/tmp/ident.%d'   % pid)
-                except : pass
+                except OSError: pass
 
             return
 
@@ -655,10 +548,11 @@ def autoFirewall():
 
 
 def sigTerm(signum, frame):
-    try    : os.kill (child, signal.SIGTERM)
-    except : pass
-    try    : os.remove (poptions.varDir + '/run/controller.pid')
-    except : pass
+    os.kill(child, signal.SIGTERM)
+    try:
+        os.remove(poptions.pidfile)
+    except OSError:
+        pass  # no such file
     sys.exit (1)
 
 
@@ -666,68 +560,45 @@ def execute(port) :
     ScraperController.protocol_version = "HTTP/1.0"
     httpd = ControllerHTTPServer(('', port), ScraperController)
     sa = httpd.socket.getsockname()
-    sys.stdout.write("Serving HTTP on %s port %s\n" % ( sa[0], sa[1] ))
-    sys.stdout.flush()
+    logger.info("Serving HTTP on %s port %s" % ( sa[0], sa[1] ))
     httpd.serve_forever()
 
 if __name__ == '__main__' :
-    if poptions.addPath:
-        sys.path.append(poptions.addPath)
-
-    #  If executing in daemon mode then fork and detatch from the
-    #  controlling terminal. Basically this is the fork-setsid-fork
-    #  sequence.
-    #
-    if poptions.daemon:
-
+    # daemon
+    if os.fork() == 0 :
+        os .setsid()
+        sys.stdin  = open ('/dev/null')
+        sys.stdout = stdoutlog
+        sys.stderr = stdoutlog
         if os.fork() == 0 :
-            os .setsid()
-            sys.stdin  = open ('/dev/null')
-            sys.stdout = open (poptions.varDir + '/log/controller', 'w', 0)
-            sys.stderr = sys.stdout
-            if os.fork() == 0 :
+            ppid = os.getppid()
+            while ppid != 1 :
+                time.sleep (1)
                 ppid = os.getppid()
-                while ppid != 1 :
-                    time.sleep (1)
-                    ppid = os.getppid()
-            else :
-                os._exit (0)
         else :
-            os.wait()
-            sys.exit (1)
+            os._exit (0)
+    else :
+        os.wait()
+        sys.exit (1)
 
-        pf = open (poptions.varDir + '/run/controller.pid', 'w')
-        pf.write  ('%d\n' % os.getpid())
-        pf.close  ()
+    pf = open(poptions.pidfile, 'w')
+    pf.write('%d\n' % os.getpid())
+    pf.close()
 
 
-    #  If running in subproc mode then the server executes as a child
-    #  process. The parent simply loops on the death of the child and
-    #  recreates it in the event that it croaks.
-    #
-    if poptions.subproc:
-        signal.signal (signal.SIGTERM, sigTerm)
-        while True :
-            child = os.fork()
-            if child == 0 :
-                break
-
-            sys.stdout.write("Forked subprocess: %d\n" % child)
-            sys.stdout.flush()
-    
-            os.wait()
-
-    config = ConfigParser.ConfigParser()
-    config.readfp(open(poptions.confnam))
+    # subproc
+    signal.signal (signal.SIGTERM, sigTerm)
+    while True :
+        child = os.fork()
+        if child == 0 :
+            break
+        logger.info("Forked subprocess: %d" % child)
+        os.wait()
+        logger.warning("Forked subprocess ended: %d" % child)
 
     if poptions.firewall == 'auto' :
         autoFirewall()
-
-    if poptions.name is None :
-        lname = socket.gethostname()
-    else:
-        lname = poptions.name
     
-    execute (config.getint (lname, 'port'))
+    execute(config.getint(socket.gethostname(), 'port'))
     
     

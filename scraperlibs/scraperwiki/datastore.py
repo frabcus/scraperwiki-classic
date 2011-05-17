@@ -8,10 +8,12 @@ import  datetime
 import  types
 import  socket
 import  re
+import scraperwiki
 
 try   : import json
 except: import simplejson as json
 
+import scraperwiki
 
 m_socket = None
 m_host = None
@@ -30,7 +32,7 @@ def receiveoneline(socket):
     while True:
         srec = socket.recv(1024)
         if not srec:
-            scraperwiki.console.dumpMessage({'message_type': 'chat', 'message':"socket from dataproxy has unfortunately closed"})
+            scraperwiki.dumpMessage({'message_type': 'chat', 'message':"socket from dataproxy has unfortunately closed"})
             break
         ssrec = srec.split("\n")  # multiple strings if a "\n" exists
         sbuffer.append(ssrec.pop(0))
@@ -93,8 +95,19 @@ def getUserInfo(username):
     ljson = urllib.urlopen(url).read()
     return json.loads(ljson)
 
+
+# put this nasty one back in
+datastoresave = [ ]
 def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="swdata", verbose=2) :
-    raise Exception("scraperwiki.datastore.save() has been deprecated.  Use scraperwiki.sqlite.save()")
+    if not datastoresave:
+        print "*** instead of scraperwiki.datastore.save() please use scraperwiki.sqlite.save('%s')"
+        datastoresave.append(True)
+    if latlng:
+        raise Exception("scraperwiki.datastore.save(latlng) has definitely been deprecated.  Put the values into the data")
+    if date:
+        data["date"] = date
+    return scraperwiki.sqlite.save(unique_keys=unique_keys, data=data, table_name=table_name, verbose=verbose)
+    
 
 def getKeys(name):
     raise scraperwiki.sqlite.SqliteError("getKeys has been deprecated")

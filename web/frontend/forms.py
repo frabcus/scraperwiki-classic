@@ -146,5 +146,16 @@ class DataEnquiryForm(forms.ModelForm):
     application = forms.CharField(required=False, widget=forms.Textarea, label='What application do you want built?')
     frequency = forms.ChoiceField(label='How often does the data need to be scraped?', choices=DataEnquiry.FREQUENCY_CHOICES)
 
+    def clean(self):
+        cleaned_data = self.cleaned_data
+
+        if not cleaned_data.get('first_name') or not cleaned_data.get('last_name') or not cleaned_data.get('email'):
+            raise forms.ValidationError("So we can get back to you, please fill in your name and email.")
+
+        if cleaned_data['category'] == 'public' and cleaned_data['broadcast'] == False:
+            raise forms.ValidationError("Sorry, we can only help with free public data requests if you're happy for us to post it on social networks.")
+
+        return cleaned_data
+
     class Meta:
         model = DataEnquiry

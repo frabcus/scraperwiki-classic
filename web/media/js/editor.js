@@ -1195,20 +1195,26 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         // close editor link (quickhelp link is target blank so no need for this)
         $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(function()
         {
-            if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
+            if (pageIsDirty && !confirm("You have unsaved changes, leave the editor anyway?"))
                 return false; 
             bSuppressDisconnectionMessages = true; 
             sendjson({"command":'loseconnection'});   //if (conn)  conn.close(); not as effective 
             return true;
         });
 
-        $(window).unload(function() 
-        { 
+        $(window).unload(function()
+        {
             bSuppressDisconnectionMessages = true; 
             writeToConsole('window unload'); 
             sendjson({"command":'loseconnection'}); 
             //if (conn)  conn.close();  
         });  
+
+        $(window).bind('beforeunload', function() 
+        { 
+            if (pageIsDirty && !bSuppressDisconnectionMessages)
+                return "You have unsaved changes, close the editor anyway?";
+        });
 
 
         if (wiki_type == 'view')
@@ -1399,7 +1405,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             }
         }); 
 
-        // bind the double-click (causes problems with the jquery interface as it doesn't notice the mouse exiting the frame
+        // bind the double-click (causes problems with the jquery interface as it doesn't notice the mouse exiting the frame)
         // $(".ui-resizable-s").bind("dblclick", resizeControls);
     }
 

@@ -9,25 +9,16 @@ except:
 
 
 class DataStore(object):
-
-    def __init__ (self, scraperID, short_name) :
-        self.m_socket   = None
-        self.m_host     = settings.DATAPROXY_HOST
-        self.m_port     = settings.DATAPROXY_PORT
-
-        self.connect (scraperID, short_name)
+    def __init__ (self, short_name) :
         self.sbuffer = [ ] 
-
-    def connect (self, scraperID, short_name) :
-        assert not self.m_socket
-        self.m_socket    = socket.socket()
-        self.m_socket.connect ((self.m_host, self.m_port))
-        data = [ ("uml", socket.gethostname()), ("port", self.m_socket.getsockname()[1]), ("scraperid", scraperID), ("short_name", short_name) ]
+        self.m_socket = socket.socket()
+        self.m_socket.connect((settings.DATAPROXY_HOST, settings.DATAPROXY_PORT))
+        data = [ ("uml", socket.gethostname()), ("port", self.m_socket.getsockname()[1]), ("short_name", short_name) ]
         self.m_socket.send ('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         
         res = self.receiveoneline()  # comes back with True, "Ok"
         assert res.get("status") == "good", res
-        
+
 
     def request(self, req):
         assert type(req) == dict, req
@@ -40,7 +31,6 @@ class DataStore(object):
         self.m_socket.close()
         self.m_socket = None
 
-    
     # a \n delimits the end of the record.  you cannot read beyond it or it will hang; unless there is a moredata=True parameter
     def receiveonelinenj(self):
         while len(self.sbuffer) >= 2:
