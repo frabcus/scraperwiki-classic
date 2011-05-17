@@ -1399,7 +1399,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             }
         }); 
 
-        // bind the double-click (causes problems with the jquery interface as it doesn't notice the mouse exiting the frame
+        // bind the double-click (causes problems with the jquery interface as it doesn't notice the mouse exiting the frame)
         // $(".ui-resizable-s").bind("dblclick", resizeControls);
     }
 
