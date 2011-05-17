@@ -248,13 +248,10 @@ class ScraperController (BaseController) :
                     #
                     line = None
                     if line is None :
-                        try    : line = mapped[0].recv(8192)
-                        except: 
-                            logger.exception("controller recv exception A")
-                    if line is None :
-                        try    : line = os.read (mapped[0], 8192)
-                        except:
-                            logger.exception("controller recv exception B")
+                        if hasattr(mapped[0], "recv"):
+                            line = mapped[0].recv(8192) # socket
+                        else:
+                            line = os.read (mapped[0], 8192) # pipe
                     if line in [ '', None ] :
                         # 
                         # In case of echoing console output (for PHP, or for
