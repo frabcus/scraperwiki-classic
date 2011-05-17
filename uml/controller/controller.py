@@ -61,8 +61,8 @@ config.readfp(open(poptions.config))
 logging.config.fileConfig(poptions.config)
 logger = logging.getLogger('controller')
 
-stdoutlog = open('/var/www/scraperwiki/uml/var/log/controller.log'+"-stdout", 'a', 0)
-#stdoutlog = sys.stdout
+#stdoutlog = open('/var/www/scraperwiki/uml/var/log/controller.log'+"-stdout", 'a', 0)
+stdoutlog = sys.stdout
 
 
 # one of these per scraper executing the code and relaying it to the scrapercontroller
@@ -248,13 +248,10 @@ class ScraperController (BaseController) :
                     #
                     line = None
                     if line is None :
-                        try    : line = mapped[0].recv(8192)
-                        except: 
-                            logger.exception("test4")
-                    if line is None :
-                        try    : line = os.read (mapped[0], 8192)
-                        except:
-                            logger.exception("test4")
+                        if hasattr(mapped[0], "recv"):
+                            line = mapped[0].recv(8192) # socket
+                        else:
+                            line = os.read (mapped[0], 8192) # pipe
                     if line in [ '', None ] :
                         # 
                         # In case of echoing console output (for PHP, or for
