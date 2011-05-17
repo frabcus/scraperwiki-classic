@@ -15,7 +15,6 @@ import datetime
 import optparse
 import grp
 import pwd
-import rslogger   # made possible by PYTHONPATH environment variable
 import datalib
 
 import logging
