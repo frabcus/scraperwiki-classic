@@ -1210,11 +1210,17 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             //if (conn)  conn.close();  
         });  
 
+        /*
+        This fires when making a new scraper on some browsers (while doing the
+        redirect), so need to prevent that case. Julian had this problem.
+
         $(window).bind('beforeunload', function() 
         { 
             if (pageIsDirty && !bSuppressDisconnectionMessages)
                 return "You have unsaved changes, close the editor anyway?";
         });
+
+        */
 
 
         if (wiki_type == 'view')
