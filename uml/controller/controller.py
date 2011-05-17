@@ -211,12 +211,6 @@ class ScraperController (BaseController) :
         fdmap[psock[0].fileno()] = [ psock[0], '' ]
         fdmap[lpipe[0]         ] = [ lpipe[0], '' ]
 
-        #  Create a list of the two pipe read descriptors for input via
-        #  select. We will loop reading and processing data from
-        #  these. Also poll the connection; this will be flagged as
-        #  having input if it is closed at the other end.
-        rlist = [psock[0].fileno(), lpipe[0], self.connection.fileno()]
-
         #  Loop while the file descriptors are still open in the child
         #  process. Output is passed back, with "print" output jsonified.
         #  Check for exception messages, in which case log the exception to
@@ -225,9 +219,15 @@ class ScraperController (BaseController) :
         #
         busy    = 2
         while busy > 0 :
+            #  Create a list of the two pipe read descriptors that are still
+            #  open for input via select. We loop reading and processing data
+            #  from these. Also poll the connection; this will be flagged as
+            #  having input if it is closed at the other end.
+            rlist = fdmap.keys() + [self.connection.fileno(),]
             (rback, wback, eback) = select.select(rlist, [], []) 
             assert wback == [] # we don't use these, only read
             assert eback == [] # we don't use these, only read
+
             for fd in rback:
                 #
                 #  If the event is on the caller connection then caller must
