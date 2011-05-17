@@ -1195,7 +1195,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         // close editor link (quickhelp link is target blank so no need for this)
         $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(function()
         {
-            if (pageIsDirty && !confirm("You have unsaved changes, close the editor anyway?"))
+            if (pageIsDirty && !confirm("You have unsaved changes, leave the editor anyway?"))
                 return false; 
             bSuppressDisconnectionMessages = true; 
             sendjson({"command":'loseconnection'});   //if (conn)  conn.close(); not as effective 
@@ -1210,12 +1210,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             //if (conn)  conn.close();  
         });  
 
-        /*
         $(window).bind('beforeunload', function() 
         { 
-            if (pageIsDirty)
+            if (pageIsDirty && !bSuppressDisconnectionMessages)
                 return "You have unsaved changes, close the editor anyway?";
-        } */
+        });
 
 
         if (wiki_type == 'view')
