@@ -5,7 +5,7 @@
 
 {% block header %}
 	<h2>
-      <a href="{% url profiles_profile_detail scraper.owner.username %}">
+      <a href="{% if scraper.owner.username %}{% url profiles_profile_detail scraper.owner.username %}{% endif %}">
         {% if scraper.owner %}
           {% if scraper.owner.get_profile.name %}
             {{scraper.owner.get_profile.name}}

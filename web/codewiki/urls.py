@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls.defaults import *
 
 from codewiki import views, viewsrpc, viewsuml, viewseditor
 
