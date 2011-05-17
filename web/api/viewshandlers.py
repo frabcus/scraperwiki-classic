@@ -272,11 +272,11 @@ def runevent_handler(request):
         except ScraperRunEvent.DoesNotExist:
             return HttpResponse("Error: run object not found")
 
-    info = { "runid":runevent.run_id, "run_started":runevent.run_started, 
+    info = { "runid":runevent.run_id, "run_started":runevent.run_started.isoformat(), 
                 "records_produced":runevent.records_produced, "pages_scraped":runevent.pages_scraped, 
             }
     if runevent.run_ended:
-        info['run_ended'] = runevent.run_ended
+        info['run_ended'] = runevent.run_ended.isoformat()
     if runevent.exception_message:
         info['exception_message'] = runevent.exception_message
     
@@ -301,7 +301,6 @@ def runevent_handler(request):
 
 
 
-
 def convert_history(commitentry):
     result = { 'version':commitentry['rev'], 'date':commitentry['date'].isoformat() }
     if 'user' in commitentry:
@@ -312,10 +311,12 @@ def convert_history(commitentry):
     return result
 
 def convert_run_event(runevent):
-    result = { "runid":runevent.run_id, "run_started":runevent.run_started, 
+    result = { "runid":runevent.run_id, "run_started":runevent.run_started.isoformat(), 
                 "records_produced":runevent.records_produced, "pages_scraped":runevent.pages_scraped, 
-                "still_running":(runevent.pid != -1), "last_update":runevent.run_ended, 
+                "still_running":(runevent.pid != -1),
                 }
+    if runevent.run_ended:
+        result['last_update'] = runevent.run_ended.isoformat()
     if runevent.exception_message:
         result['exception_message'] = runevent.exception_message
     return result
