@@ -250,11 +250,11 @@ class ScraperController (BaseController) :
                     if line is None :
                         try    : line = mapped[0].recv(8192)
                         except: 
-                            logger.exception("test4")
+                            logger.exception("controller recv exception A")
                     if line is None :
                         try    : line = os.read (mapped[0], 8192)
                         except:
-                            logger.exception("test4")
+                            logger.exception("controller recv exception B")
                     if line in [ '', None ] :
                         # 
                         # In case of echoing console output (for PHP, or for
