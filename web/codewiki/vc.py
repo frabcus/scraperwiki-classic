@@ -11,9 +11,13 @@ import codecs
 import mercurial
 import mercurial.ui
 import mercurial.hg
+import mercurial.revlog
+import logging
 
 from django.contrib.auth.models import User
 
+# for now till we establish logging into the django system
+logger = logging
 
 
 # The documentation and help strings for this Mercurial interface is inadequate
@@ -55,7 +59,12 @@ class MercurialInterface:
         if message is None:
             message = "changed"
 
-        node = self.repo.commit(message, user.username)
+        try:
+            node = self.repo.commit(message, user.username)
+        except mercurial.revlog.RevlogError, e:
+            logger.error("RevlogError: %s %s" %  (self.repopath, str(e)))
+            return -9999
+            
         if not node:
             return None
         return self.repo.changelog.rev(node)
@@ -95,10 +104,14 @@ class MercurialInterface:
 	            
     def getcommitlog(self):
         result = [ ]
-        for rev in self.repo:
-            ctx = self.repo[rev]
-            if "code" in ctx.files():   # could get both if changes in description
-                result.append(self.getctxrevisionsummary(ctx))
+        try:
+            for rev in self.repo:
+                ctx = self.repo[rev]
+                if "code" in ctx.files():   # could get both if changes in description
+                    result.append(self.getctxrevisionsummary(ctx))
+        except mercurial.revlog.RevlogError, e:
+            logger.error("RevlogError: %s %s" %  (self.repopath, str(e)))
+            result = [ ]
         return result
         
     
@@ -108,9 +121,13 @@ class MercurialInterface:
         
         lmtime = time.localtime(os.stat(scraperpath).st_mtime)
         status["filemodifieddate"] = datetime.datetime(*lmtime[:7])
-        modified, added, removed, deleted, unknown, ignored, clean = self.repo.status()
+        try:
+            modified, added, removed, deleted, unknown, ignored, clean = self.repo.status()
+            #print "sssss", (modified, added, removed, deleted, unknown, ignored, clean)
+        except mercurial.revlog.RevlogError, e:
+            logger.error("RevlogError: %s %s" %  (self.repopath, str(e)))
+            modified, added = [ ], [ ]
         
-        #print "sssss", (modified, added, removed, deleted, unknown, ignored, clean)
         status["ismodified"] = ("code" in modified)
         status["isadded"] = ("code" in added)  # false if actually committed (ie true means we're in an awkward state)
         return status

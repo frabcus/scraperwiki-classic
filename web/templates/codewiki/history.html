@@ -17,6 +17,12 @@
 <input type="hidden" id="diffsequrl" value="{% url diffseq scraper.short_name %}"/>
 <input type="hidden" id="run_event_json" value="{% url run_event_json 'XXX' %}"/>
 
+{% if not itemlog %}
+<div class="history_ran_fail">
+  The history log for this scraper is missing, possibly corrupted
+</div>
+{% endif %}
+
 {% regroup itemlog by datetime.year as itemlogyear_list%}
 {% for itemlogyear in itemlogyear_list %}
 
