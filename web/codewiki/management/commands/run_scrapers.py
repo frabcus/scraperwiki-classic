@@ -87,7 +87,6 @@ def is_currently_running(scraper):
     return urllib2.urlopen(settings.DISPATCHERURL + '/Status').read().find(scraper.guid) > 0    
 
 
-
 def kill_running_runid(runid):
     """
     Finds the scraper running under the provided run id and kills it.
@@ -96,7 +95,8 @@ def kill_running_runid(runid):
     mresponse = re.match("Scraper (\S+) (killed|not killed|not found)", response)
     print response
     
-    if not mresponse:  return False
+    if not mresponse:  
+        return False
     
     assert mresponse
     assert mresponse.group(1) == runid
@@ -140,6 +140,7 @@ def runmessageloop(runner, event, approxlenoutputlimit):
                     completionmessage += ", terminated by " + data.get("term_sig_text");
                 elif "term_sig" in data:
                     completionmessage += ", terminated by signal " + str(data.get("term_sig"));
+            
             event.save()
             
         elif message_type == "sources":

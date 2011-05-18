@@ -644,7 +644,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
               if (data.content == "startingrun")
                 startingrun(data.runID, data.uml, data.chatname);
               else if (data.content == "runcompleted") {
-                var completeMsg = "Finished: " + data.elapsed_seconds + " seconds elapsed, " + data.CPU_seconds + " CPU seconds used"; 
+                var completeMsg = "Finished: ";
+                if (data.elapsed_seconds != undefined)
+                    completeMsg = completeMsg + " seconds elapsed, " + data.CPU_seconds + " CPU seconds used"; 
                 if (data.exit_status)
                     completeMsg = completeMsg + ", exit status " + data.exit_status;
                 if (data.term_sig_text)

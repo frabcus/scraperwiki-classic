@@ -75,7 +75,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return runID, short_name
 
     def process(self, db, request):
-        logger.debug(str(("rrr", request)))
+        logger.debug(str(("rrr", request))[:100])
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
         elif "maincommand" not in request:

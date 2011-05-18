@@ -95,17 +95,17 @@ count	= 25
 
 
 [loggers]
-keys=root,dataproxy,controller,runner
+keys=root,dataproxy,controller,runner,dispatcher
 
 [handlers]
-keys=consoleHandler,logfileHandlerDataproxyDebug,logfileHandlerDataproxyWarning,logfileHandlerDataproxyEmail,logfileHandlerControllerDebug,logfileHandlerControllerWarning,logfileHandlerRunnerDebug
+keys=consoleHandler,logfileHandlerDataproxyDebug,logfileHandlerDataproxyWarning,logfileHandlerDataproxyEmail,logfileHandlerControllerDebug,logfileHandlerControllerWarning,logfileHandlerRunnerDebug,logfileHandlerDispatcherWarning,logfileHandlerDispatcherDebug
 
 [formatters]
 keys=simpleFormatter
 
 
 [logger_root]
-level=DEBUG
+level=CRITICAL
 handlers=consoleHandler
 
 [logger_dataproxy]
@@ -124,6 +124,12 @@ propagate=0
 level=DEBUG
 handlers=logfileHandlerRunnerDebug
 qualname=runner
+propagate=0
+
+[logger_dispatcher]
+level=DEBUG
+handlers=logfileHandlerDispatcherDebug,logfileHandlerDispatcherWarning
+qualname=dispatcher
 propagate=0
 
 
@@ -165,6 +171,19 @@ class=handlers.SMTPHandler
 level=CRITICAL
 formatter=simpleFormatter
 args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 'ScraperWiki error in dataproxy')
+
+
+[handler_logfileHandlerDispatcherDebug]
+class=handlers.RotatingFileHandler
+level=DEBUG
+formatter=simpleFormatter
+args=('/var/www/scraperwiki/uml/var/log/dispatcher.log', "a", 100000, 5)
+
+[handler_logfileHandlerDispatcherWarning]
+class=handlers.RotatingFileHandler
+level=WARNING
+formatter=simpleFormatter
+args=('/var/www/scraperwiki/uml/var/log/dispatcher.log-warn', "a", 100000, 5)
 
 
 [handler_logfileHandlerRunnerDebug]

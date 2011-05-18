@@ -45,12 +45,6 @@ def writereadstream(dhost, dport, jdata):
     soc.send('POST /Execute HTTP/1.1\r\n')
     soc.send('Content-Length: %s\r\n' % len(sdata))
     soc.send('Connection: close\r\n')
-
-    # these parameters are lifted out by the dispatcher for its operation until we can get to the bottom of what's going on with _read_write
-    soc.send("x-scraperid: %s\r\n" % jdata["scraperid"])
-    soc.send("x-testname: %s\r\n" % jdata["scrapername"])
-    soc.send("x-runid: %s\r\n" % jdata["runid"])
-    
     soc.send('\r\n')
     soc.send(sdata)
 

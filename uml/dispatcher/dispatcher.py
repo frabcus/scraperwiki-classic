@@ -113,9 +113,9 @@ class UML :
 
         self.m_next   = next
 
-    def setConfig (self, config) :
+    def setConfig (self, lconfig) :
 
-        self.m_config = config
+        self.m_config = lconfig
 
     def nextUML (self) :
 
@@ -226,41 +226,14 @@ class UML :
 
         return self.m_closing and not self.active()
 
-    def config (self, config) :
+    def getconfigstatus(self):
+        return "name=%s;server=%s;port=%d;count=%d;free=%d;closing=%s;dead=%s" % (self.m_name, self.m_server, self.m_port, self.m_count, self.m_free, self.m_closing, self.m_dead)
 
-        """
-        Append configuration information for this UML. Each configuration is
-        appended as a line in the form \em key1=value1;key2=value2;...
-
-        @type   config  : List
-        @param  config  : Configuration list
-        """
-
-        config.append \
-                (       "name=%s;server=%s;port=%d;count=%d;free=%d;closing=%s;dead=%s" % \
-                        (       self.m_name,
-                                self.m_server,
-                                self.m_port,
-                                self.m_count,
-                                self.m_free,
-                                self.m_closing,
-                                self.m_dead
-                )       )
-                
-
-    def status (self, status) :
-
-        """
-        Append status information for this UML. Each request is appended
-        as a line in the form \em key1=value1;key2=value2;...
-
-        @type   status  : List
-        @param  status  : Status list
-        """
-
+    def getstatuslist(self):
+        res = [ ]
         for key, value in self.m_scrapers.items() :
-           status.append (string.join([ '%s=%s' % (k,v) for k, v in value.m_status.items()], ';'))
-
+            res.append(';'.join([ '%s=%s' % (k,v) for k, v in value.m_status.items()]))
+        return res
         # The above output is interpreted in web/codewiki/management/commands/run_scrapers.py by
         # splitting on ; and then =. Doing it this way means that m_status can be used to accumulate
         # information without needing the code here to be changed.
@@ -394,91 +367,13 @@ def releaseUML (uml, id) :
 
 class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
-    """
-    Proxy handler class. Overrides the base handler to implement
-    filtering and proxying.
-    """
     __base         = BaseHTTPServer.BaseHTTPRequestHandler
     __base_handle  = __base.handle
 
     server_version = "Dispatcher/" + __version__
     rbufsize       = 0
 
-    def __init__ (self, *alist, **adict) :
-
-        """
-        Class constructor. All arguments (positional and keyed) are passed down to
-        the base class constructor.
-        """
-
-        self.m_toRemove = []
-
-        BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
-
-    def __del__ (self) :
-
-        """
-        Class destructor. Remove any files that are queued to be removed.
-        """
-
-        for name in self.m_toRemove :
-            try    : os.remove (name)
-            except : pass
-
-
-    def _connect_to (self, server, port, soc) :
-
-        """
-        Connect to host. If the connection fails then a 404 error will have been
-        sent back to the client.
-
-        @type   server  : String
-        @param  server  : Server address
-        @type   port    : Integer
-        @param  port    : Port number
-        @return         : True if connected
-        """
-
-        try :
-            soc.connect((server, port))
-        except socket.error, arg:
-            try    : msg = arg[1]
-            except : msg = arg
-            self.send_error (404, msg)
-            return False
-
-        return True
-
-    def log_message (self, format, *args) :
-
-        """
-        Override this method so that we can flush stderr
-
-        @type   format  : String
-        @param  format  : Format string
-        @type   args    : List
-        @param  args    : Arguments to format string
-        """
-
-        BaseHTTPServer.BaseHTTPRequestHandler.log_message (self, format, *args)
-        sys.stderr.flush ()
-
-    def fileToRemove (self, name) :
-
-        """
-        Add a file name to a list of names to remove, and return the name.
-        These files will be removed when the connection closes down.
-
-        @type   name    : String
-        @param  name    : File name
-        @rtype          : String
-        @return         : File name
-        """
-
-        self.m_toRemove.append (name)
-
-    def sendOK (self) :
-
+    def sendConnectionHeaders(self):
         self.connection.send  ('HTTP/1.0 200 OK\n')
         self.connection.send  ('Connection: Close\n')
         self.connection.send  ('Pragma: no-cache\n')
@@ -486,119 +381,77 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  ('Content-Type: text/text\n')
         self.connection.send  ('\n')
 
-    def sendConfig (self) :
-
-        """
-        Send configuration information.
-        """
-
-        #  Gather up the configuration information. Since we need to lock the UML
-        #  structure for the duration, do this up front to make it as quick
-        #  as possible.
-        #
-        config = []
+    def sendConfig(self):
+        sconfig = []
         UMLLock.acquire()
-        try    :
-            for uml in UMLList :
-                uml.config (config)
-        except :
-            pass
+        try:
+            for uml in UMLList:
+                sconfig.append(uml.getconfigstatus())
+        except:
+            logger.exception("sendConfig")
         UMLLock.release()
+        logger.debug("sendConfig: "+str(sconfig)[:20])
 
-        self.sendOK ()
-        self.connection.send  (string.join(config, '\n'))
-        self.connection.send  ('\n')
+        self.sendConnectionHeaders()
+        self.connection.send('\n'.join(sconfig))
+        self.connection.send('\n')
 
-    def sendStatus (self) :
-
-        """
-        Send status information.
-        """
-
-        #  Gather up the status information. Since we need to lock the UML
-        #  structure for the duration, do this up front to make it as quick
-        #  as possible.
-        #
-        status = []
+    def sendStatus(self):
+        sstatus = []
         UMLLock.acquire()
-        try    :
-            for uml in UMLList :
-                uml.status (status)
-        except :
-            pass
+        try:
+            for uml in UMLList:
+                sstatus.extend(uml.getstatuslist())
+        except:
+            logger.exception("sendStatus")
         UMLLock.release()
+        logger.debug("sendStatus: "+str(sstatus)[:20])
+        
+        self.sendConnectionHeaders()
+        self.connection.send('\n'.join(sstatus))
+        self.connection.send('\n')
 
-        self.sendOK ()
-        self.connection.send  (string.join(status, '\n'))
-        self.connection.send  ('\n')
-
-    def addUML (self, name) :
-
-        """
-        Add a new UML
-
-        @type   info    : String
-        @param  info    : Name of UML to add
-        """
-
+    def addUML(self, uname):
+        logger.info("addUML: '%s'" % uname)
+        if not config.has_section(uname):
+            logger.warning("addUML on unknown uml: "+uname)
+            self.sendConnectionHeaders()
+            self.connection.send('UML %s not found' % uname)
+            self.connection.send('\n')
+            return
+        
         global UMLPtr
         global UMLList
 
-        #  Check that the named UML exists, if not then report an
-        #  error.
-        #
-        if not config.has_section (name) :
-            self.sendOK ()
-            self.connection.send  ('UML %s not found' % name)
-            self.connection.send  ('\n')
-            return
-
-        #  Get the UML details and add to the list; the next UML
-        #  pointer is arbitrarily reset to the first UML in the list
-        #
-        host  = config.get    (name, 'host' )
-        via   = config.getint (name, 'via'  )
-        count = config.getint (name, 'count')
+        host  = config.get    (uname, 'host' )
+        via   = config.getint (uname, 'via'  )
+        count = config.getint (uname, 'count')
 
         UMLLock.acquire()
-
-        if name not in [uml.name() for uml in UMLList]:
-            UMLList.append (UML(name, host, via, count))
+        if uname not in [uml.name() for uml in UMLList]:
+            UMLList.append (UML(uname, host, via, count))
             for i in range(len(UMLList)) :
                 UMLList[i].setNextUML(UMLList[(i+1) % len(UMLList)])
-            UMLPtr  = UMLList[0]
-
+            UMLPtr = UMLList[0]
         UMLLock.release()
-
-        #  On successful addition pass back the new configuration
-        #  information.
-        #
+        
         self.sendConfig()
 
-    def removeUML (self, name) :
-
-        """
-        Remove a UML or mark closing if in use
-
-        @type   name    : String
-        @param  name    : Name of UML to remove
-        """
-
+    def removeUML(self, uname):
+        logger.info("removeUML: '%s'" % uname)
         global UMLPtr
         global UMLList
 
-        #  Can UML list for the named UML, report an error it it is
-        #  not found.
-        #
         uml = None
-        for i in range (len(UMLList)) :
-            if UMLList[i].name() == name :
+        for i in range (len(UMLList)):
+            if UMLList[i].name() == uname:
                 uml = UMLList[i]
                 break
 
         if uml is None :
-            self.sendOK ()
-            self.connection.send  ('UML %s not found' % name)
+            logger.warning("removeUML on unknown uml: "+uname)
+            self.sendConnectionHeaders()
+            self.connection.send  ('UML %s not found' % uname)
             self.connection.send  ('\n')
             return
 
@@ -613,161 +466,122 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 UMLList[i].setNextUML(UMLList[(i+1) % len(UMLList)])
             UMLPtr  = len(UMLList) > 0 and UMLList[0] or None
             UMLLock.release()
-            self.sendOK ()
-            self.connection.send  ('UML %s removed' % name)
+            self.sendConnectionHeaders()
+            self.connection.send  ('UML %s removed' % uname)
             self.connection.send  ('\n')
-        else:
+        
         #  If active then mark as closing and report such. No scrapers
         #  will be allocated to the UML and it will be removed when it
         #  is next inactive.
         #
+        else:
             uml.close()
             UMLLock.release()
-            self.sendOK ()
-            self.connection.send  ('UML %s closing' % name)
+            self.sendConnectionHeaders()
+            self.connection.send  ('UML %s closing' % uname)
             self.connection.send  ('\n')
 
-    def killScraper (self, runID) :
-
-        """
-        Kill a scraper
-
-        @type   runID   : String
-        @param  runID   : Run identifier
-        """
-
+    
+    def killScraper(self, runID):
         global UMLPtr
         global UMLList
 
         killed = None
         UMLLock.acquire()
         for uml in UMLList :
-            killed = uml.killScraper (runID)
+            killed = uml.killScraper(runID)
             if killed is not None :
                 break
         UMLLock.release()
-        self.sendOK ()
+        self.sendConnectionHeaders()
         if killed is True  : self.connection.send  ('Scraper %s killed'     % runID)
         if killed is False : self.connection.send  ('Scraper %s not killed' % runID)
         if killed is None  : self.connection.send  ('Scraper %s not found'  % runID)
         self.connection.send  ('\n')
 
+
     def do_GET (self) :
-
-        """
-        Handle GET request.
-        """
-
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-        
         if path == '/Config' :
-            self.sendConfig ()
-            self.connection.close()
-            return
-
-        if path == '/Status' :
-            self.sendStatus ()
-            self.connection.close()
-            return
-
-        if path == '/Add'    :
-            self.addUML     (query)
-            self.connection.close()
-            return
-
-        if path == '/Remove' :
-            self.removeUML  (query)
-            self.connection.close()
-            return
-
-        if path == '/Kill'   :
+            self.sendConfig()
+        elif path == '/Status' :
+            self.sendStatus()
+        elif path == '/Add'    :
+            self.addUML(query)
+        elif path == '/Remove' :
+            self.removeUML(query)
+        elif path == '/Kill'   :
             self.killScraper(query)
-            self.connection.close()
+        else:
+            if scm != 'http' or fragment or netloc:
+                self.send_error(400, "bad url %s" % self.path)
+            else:
+                self.sendConnectionHeaders()
+                self.execute(path, params, query)
+        self.connection.close()
+
+
+    def execute(self, path, params, query):
+        # unpack the json packed up by runner.py
+        sdata = self.rfile.read(int(self.headers['Content-Length']))
+        if len(sdata) != int(self.headers['Content-Length']):
+            logger.error("failed to receive full record from runner")
+
+        try:
+            jdata = json.loads(sdata)
+        except ValueError, e:
+            logger.error("bad json value: %s: %s" % (str(e), sdata[:100]))
             return
 
-        scraperID  = self.headers.get('x-scraperid', None)
-        testName   = self.headers.get('x-testname', '')
-        runID      = self.headers.get('x-runid', '')
+        scraperID = jdata['scraperid']
+        short_name = jdata['scrapername']
+        runID = jdata['runid']
 
-
-        if scm != 'http' or fragment or netloc :
-            self.send_error (400, "bad url %s" % self.path)
+        logger.debug("execute on: %s  %s" % (short_name, runID))
+        
+        uml, id = allocateUML(poptions.enqueue, scraperID = scraperID, runID=runID, testName=short_name)
+        if not uml:
+            logger.error("no uml allocated for: %s  %s" % (short_name, runID))
+            self.connection.send(json.dumps({'message_type': 'executionstatus', 'content': 'runcompleted', 'exit_status':"No UML allocated"}))
             return
 
-        uml, id = allocateUML(poptions.enqueue, scraperID = scraperID, runID=runID, testName=testName)
-        if uml is None :
-            self.send_error (400, "No server free to run your scraper, please try again in a few minutes")
-            return
 
-        self.sendOK()
+        # this is what we send back to runner.py
         json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': uml.name()}) + '\n'
         self.connection.send(json_msg)
 
+        # this is what connects to the controller
         soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        uml.setSocket (id, soc)
+        uml.setSocket(id, soc)
 
-        try :
-            if self._connect_to (uml.server(), uml.port(), soc) :
-                self.log_request(testName)
-                soc.send \
-                    (   "%s %s %s\r\n" %
-                        (   self.command,
-                            urlparse.urlunparse (('', '', path, params, query, '')),
-                            self.request_version
-                    )   )
-                self.headers['Connection'] = 'close'
-                del self.headers['Proxy-Connection']
-                for name, value in self.headers.items() :
-                    soc.send ("%s: %s\r\n" % (name, value))
-                soc.send ("\r\n")
-                self._read_write (soc)
+        try:
+            soc.connect((uml.server(), uml.port()))
+        except socket.error, e:
+            logger.exception("execute")
+            self.connection.send(json.dumps({'message_type': 'executionstatus', 'content': 'runcompleted', 'exit_status':"Failed to connect to controller"}))
+            soc = None
 
-        finally :
-            soc            .close()
-            self.connection.close()
+        if soc:
+            soc.send("%s %s %s\r\n" % (self.command, urlparse.urlunparse(('', '', path, params, query, '')), self.request_version))
+            soc.send('Content-Length: %s\r\n' % self.headers['Content-Length'])
+            soc.send('Connection: close\r\n')
+            soc.send("\r\n")
+            soc.send(sdata)
 
-        releaseUML       (uml, id)
+        while soc:
+            rec = soc.recv(8192)
+            if rec:
+                try:
+                    self.connection.send(rec)
+                except socket.error, e:
+                    soc.close()
+                    soc = None
+                    logger.debug("dispatcher to runner connection error")
+            else:
+                soc = None
 
+        releaseUML(uml, id)
 
-# this one is hard to work out.  Should intercept the json object coming through from the runner and obtain values of scraperid, runid, etc
-    def _read_write (self, soc, idle = 0x7ffffff) :
-
-        """
-        Copy data back and forth between the client and the server.
-
-        @type   soc     : Socket
-        @param  soc     : Socket to server
-        @type   idle    : Integer
-        @param  idel    : Maximum idling time between data
-        """
-
-        iw    = [self.connection, soc]
-        ow    = []
-        count = 0
-        pause = 5
-        busy  = True
-        while busy :
-            count        += pause
-            try    :
-                (ins, _, exs) = select.select(iw, ow, iw, pause)
-            except :
-                break
-            if exs :
-                break
-            if ins :
-                for i in ins :
-                    if i is soc : out = self.connection
-                    else        : out = soc
-                    try    : data = i.recv (8192)
-                    except : return
-                    if data :
-                        out.send(data)
-                        count = 0
-                    else :
-                        busy = False
-                        break
-            if count >= idle :
-                break
 
     do_HEAD   = do_GET
     do_POST   = do_GET
@@ -809,8 +623,6 @@ class DispatcherHTTPServer \
             BaseHTTPServer.HTTPServer
         ) :
     pass
-
-
 
 
 def sigTerm(signum, frame):

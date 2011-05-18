@@ -163,7 +163,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
         assert path == '/Execute'
             # BaseHTTPRequestHandler.rfile is the input stream
-        request = json.loads(self.rfile.read(int(self.headers['content-length'])))
+        request = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
         self.execute(request)
 
     def do_GET (self) :
