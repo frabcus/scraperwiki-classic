@@ -48,7 +48,7 @@ def execute(sqlquery, data=None, verbose=1):
             ldata = [ ifsencode_trunc(v, 50)  for v in data.values() ]
         else:
             ldata = [ str(data) ]
-        scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command':'sqliteexecute', "sqlquery":sqlquery, "ldata":ldata})
+        scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command':'sqliteexecute', "val1":sqlquery, "lval2":ldata})
     
     return result
     
