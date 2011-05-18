@@ -296,6 +296,9 @@ class Command(BaseCommand):
                         help='Print lots'),
         make_option('--max-concurrent', '-m', dest='max_concurrent',
                         help='Maximum number of scrapers to schedule'),
+        make_option('--ignore-emails', dest='ignore_emails', action="store_true",
+                        help='Ignore email scrapers'),
+                        
     )
     help = 'Run a scraper, or all scrapers.  By default all scrapers are run.'
 
@@ -307,9 +310,14 @@ class Command(BaseCommand):
         #get all scrapers where interval > 0 and require running
         scrapers = Scraper.objects.exclude(privacy_status="deleted").filter(run_interval__gt=0)
         scrapers = scrapers.extra(where=["(DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW() or last_run is null)"]).order_by('-last_run')
+        if self.ignore_emails:
+            scrapers = scrapers.exclude(users__usercoderole__role="email")            
+        
         return scrapers
     
     def handle(self, **options):
+        self.ignore_emails = options.get('ignore_emails') or False
+                
         if options['short_name']:
             scrapers = Scraper.objects.exclude(privacy_status="deleted").get(short_name=options['short_name'])
             self.run_scraper(scrapers, options)
