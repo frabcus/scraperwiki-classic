@@ -9,7 +9,7 @@ except: import simplejson as json
 import subprocess
 
 from codewiki.models import Code, Scraper, ScraperRunEvent, DomainScrape
-import frontend
+import frontend 
 import settings
 import datetime
 import time
@@ -25,11 +25,25 @@ import urlparse
 
 # useful function for polling the UML for its current position (don't know where to keep it)
 def GetDispatcherStatus():
+    """
+    Gets the status from the dispatcher
+    """
     result = [ ]
     now = time.time()
+    fin,lines = None, None
     
-    fin = urllib2.urlopen(settings.DISPATCHERURL + '/Status')
-    lines = fin.readlines()
+    try:
+        # Make an attempt to handle the possibility that the dispatcher is down.
+        fin = urllib2.urlopen(settings.DISPATCHERURL + '/Status')
+        lines = fin.readlines()
+    except urllib2.URLError, e:
+        msg = 'The dispatcher at %s appears to be down for run_scrapers script:\n%s' % (settings.DISPATCHERURL,e)
+        mail_admins(subject="[ScraperWiki] Dispatcher down?", message=msg, fail_silently=True)
+        raise
+    else:
+        fin.close()                
+        
+        
     for line in lines:
         if re.match("\s*$", line):
             continue
@@ -43,6 +57,7 @@ def GetDispatcherStatus():
             data[key] = value
         data['runtime'] = now - float(data['time'])
         result.append(data)
+        
     return result
 
 
@@ -65,10 +80,18 @@ def GetUMLstatuses():
 
 
 def is_currently_running(scraper):
+    """
+    Checks whether the dispatcher thinks the specified scraper is still 
+    actually running or not.
+    """
     return urllib2.urlopen(settings.DISPATCHERURL + '/Status').read().find(scraper.guid) > 0    
 
 
+
 def kill_running_runid(runid):
+    """
+    Finds the scraper running under the provided run id and kills it.
+    """
     response = urllib2.urlopen(settings.DISPATCHERURL + '/Kill?'+runid).read()
     mresponse = re.match("Scraper (\S+) (killed|not killed|not found)", response)
     print response
@@ -220,6 +243,7 @@ def getemailtext(event):
 
 # class to manage running one scraper
 class ScraperRunner(threading.Thread):
+    
     def __init__(self, scraper, verbose):
         super(ScraperRunner, self).__init__()
         self.scraper = scraper
@@ -286,7 +310,7 @@ class ScraperRunner(threading.Thread):
 
 
 # this is invoked by the crontab with the function
-#   python manage.py run_scrapers.
+#   python manage.py run_scrapers
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -296,28 +320,57 @@ class Command(BaseCommand):
                         help='Print lots'),
         make_option('--max-concurrent', '-m', dest='max_concurrent',
                         help='Maximum number of scrapers to schedule'),
+        make_option('--ignore-emails', dest='ignore_emails', action="store_true",
+                        help='Ignore email scrapers'),
+                        
     )
     help = 'Run a scraper, or all scrapers.  By default all scrapers are run.'
 
+
     def run_scraper(self, scraper, options):
+        """
+        Creates and runs the thread that will actually initiate the execution 
+        of the  scraper passed to this method
+        """
         t = ScraperRunner(scraper, options.get('verbose'))
         t.start()
 
+
     def get_overdue_scrapers(self):
+        """
+        Obtains a queryset of scrapers that should have already been run, we 
+        will order these with the ones that have run least recently hopefully
+        being near the top of the list.
+        
+        If this command was starting with --ignore-emails then we will exclude 
+        those scrapers that are actually email scrapers in disguise.
+        """
         #get all scrapers where interval > 0 and require running
         scrapers = Scraper.objects.exclude(privacy_status="deleted").filter(run_interval__gt=0)
-        scrapers = scrapers.extra(where=["(DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW() or last_run is null)"])
+        scrapers = scrapers.extra(where=["(DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW() or last_run is null)"]).order_by('-last_run')
+        if self.ignore_emails:
+            scrapers = scrapers.exclude(users__usercoderole__role="email")            
+        
         return scrapers
     
+    
     def handle(self, **options):
+        """
+        Executes the command by fetching the scrapers that are overdue and 
+        sending off messages to the dispatcher to execute them.
+        """
+        self.ignore_emails = options.get('ignore_emails') or False
+                
         if options['short_name']:
+            # If given a shortname then just execute that single scraper
             scrapers = Scraper.objects.exclude(privacy_status="deleted").get(short_name=options['short_name'])
             self.run_scraper(scrapers, options)
             return
         
+        # Get a list of the scrapers that are overdue
         scrapers = self.get_overdue_scrapers()
 
-        # limit to the first n scrapers
+        # limit to the first n scrapers if we were told to limit them.
         if 'max_concurrent' in options:
             try:
                 scrapers = scrapers[:int(options['max_concurrent'])]
@@ -328,11 +381,16 @@ class Command(BaseCommand):
             try:
                 if not is_currently_running(scraper):
                     self.run_scraper(scraper, options)
+                    
+                    # Unsure why this is required? Can we safely remove this?
                     import time
                     time.sleep(5)
                 else:
                     if options.get('verbose', False):
                         print "%s is already running" % scraper.short_name
             except Exception, e:
+                msg = 'There was a problem in run_scrapers:\n%s\n%s' % (scraper.short_name,str(e),)
+                mail_admins(subject="[ScraperWiki] run_scrapers error", message=msg, fail_silently=True)                
+                
                 print "Error running scraper: " + scraper.short_name
                 print e

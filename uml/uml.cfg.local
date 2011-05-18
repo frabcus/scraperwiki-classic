@@ -53,6 +53,16 @@ resourcedir = ../resourcedir
 max_api_distance = 10
 secure	= 127.0.0.1
 
+; Ross' machine
+[ross-work.local]
+host    = 127.0.0.1
+tap = 127.0.0.1
+eth = 127.0.0.1
+port    = 9001
+via = 9001
+mem = 128M
+count   = 25
+
 
 ; Francis's machine
 [bat.local]
