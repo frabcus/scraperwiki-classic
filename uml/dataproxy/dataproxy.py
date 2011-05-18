@@ -92,7 +92,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             elif request["command"] == "attach":
                 res = db.sqliteattach(request.get("name"), request.get("asname"))
             elif request["command"] == "commit":
-                res = db.commit()
+                res = db.sqlitecommit()
         
         elif request["maincommand"] == "sqliteexecute":
             res = db.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"), streamchunking=request.get("streamchunking"))
