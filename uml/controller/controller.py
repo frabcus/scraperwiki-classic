@@ -553,15 +553,9 @@ def sigTerm(signum, frame):
         os.remove(poptions.pidfile)
     except OSError:
         pass  # no such file
-    sys.exit (1)
+    sys.exit(1)
 
 
-def execute(port) :
-    ScraperController.protocol_version = "HTTP/1.0"
-    httpd = ControllerHTTPServer(('', port), ScraperController)
-    sa = httpd.socket.getsockname()
-    logger.info("Serving HTTP on %s port %s" % ( sa[0], sa[1] ))
-    httpd.serve_forever()
 
 if __name__ == '__main__' :
     # daemon
@@ -599,6 +593,10 @@ if __name__ == '__main__' :
     if poptions.firewall == 'auto' :
         autoFirewall()
     
-    execute(config.getint(socket.gethostname(), 'port'))
+    ScraperController.protocol_version = "HTTP/1.0"
+    httpd = ControllerHTTPServer(('', config.getint(socket.gethostname(), 'port')), ScraperController)
+    sa = httpd.socket.getsockname()
+    logger.info("Serving HTTP on %s port %s" % ( sa[0], sa[1] ))
+    httpd.serve_forever()
     
     

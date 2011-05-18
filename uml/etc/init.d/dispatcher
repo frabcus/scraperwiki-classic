@@ -11,18 +11,15 @@
 
 # Do NOT "set -e"
 
-NOBODY=`grep nobody /etc/passwd | cut -d: -f3`
-NOGROUP=`grep nogroup /etc/group | cut -d: -f3`
-
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Dispatcher"
 NAME=dispatcher
 CONFIG=/var/www/scraperwiki/uml/uml.cfg
 DAEMON=/usr/bin/python
-DAEMON_ARGS="/var/www/scraperwiki/uml/dispatcher/dispatcher.py --daemon --subproc --monitor --uid=$NOBODY --gid=$NOGROUP --config=$CONFIG --monitor"
-PWD=/var/www/scraperwiki/uml/dispatcher
 PIDFILE=/var/run/$NAME.pid
+DAEMON_ARGS="/var/www/scraperwiki/uml/dispatcher/dispatcher.py --monitor --setuid --monitor --pidfile=$PIDFILE"
+PWD=/var/www/scraperwiki/uml/dispatcher
 SCRIPTNAME=/etc/init.d/$NAME
 
 

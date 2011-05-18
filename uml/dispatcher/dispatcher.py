@@ -21,21 +21,36 @@ import time
 import string
 import uuid
 import ConfigParser
+import optparse
+import pwd
+import grp
+import logging
+import logging.config
 
 try    : import json
 except : import simplejson as json
 
 global config
 
-USAGE   = " [--varDir=dir] [--enqueue] [--subproc] [--daemon] [--config=file] [--name=name] [--monitor]"
+parser = optparse.OptionParser()
+parser.add_option("--pidfile")
+parser.add_option("--config")
+parser.add_option("--setuid", action="store_true")
+parser.add_option("--monitor", action="store_true")
+parser.add_option("--enqueue", action="store_true")
+poptions, pargs = parser.parse_args()
+
+config = ConfigParser.ConfigParser()
+config.readfp(open(poptions.config))
+
+logging.config.fileConfig(poptions.config)
+logger = logging.getLogger('dispatcher')
+
+#stdoutlog = open('/var/www/scraperwiki/uml/var/log/dispatcher.log'+"-stdout", 'a', 0)
+stdoutlog = sys.stdout
+
 child   = None
 umlAddr = []
-varDir  = '/var'
-config  = None
-name    = 'dispatcher'
-enqueue = False
-uid     = None
-gid     = None
 
 UMLList = []
 UMLLock = None
@@ -679,7 +694,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.send_error (400, "bad url %s" % self.path)
             return
 
-        uml, id = allocateUML (enqueue, scraperID = scraperID, runID=runID, testName=testName)
+        uml, id = allocateUML(poptions.enqueue, scraperID = scraperID, runID=runID, testName=testName)
         if uml is None :
             self.send_error (400, "No server free to run your scraper, please try again in a few minutes")
             return
@@ -796,137 +811,68 @@ class DispatcherHTTPServer \
     pass
 
 
-def execute (port) :
-
-    DispatcherHandler.protocol_version = "HTTP/1.0"
-
-    httpd = DispatcherHTTPServer(('', port), DispatcherHandler)
-    sa    = httpd.socket.getsockname()
-    sys.stdout.write ("Serving HTTP on %s port %s\n" % ( sa[0], sa[1] ))
-    sys.stdout.flush ()
-
-    httpd.serve_forever()
 
 
-def sigTerm (signum, frame) :
-
-    try    : os.kill (child, signal.SIGTERM)
-    except : pass
-    try    : os.remove (varDir + '/run/dispatcher.pid')
-    except : pass
-    sys.exit (1)
+def sigTerm(signum, frame):
+    os.kill (child, signal.SIGTERM)
+    try:
+        os.remove(poptions.pidfile)
+    except OSError:
+        pass
+    sys.exit(1)
 
 
 if __name__ == '__main__' :
-
-    subproc = False
-    daemon  = False
-    monitor = False
-    confnam = 'uml.cfg'
-
-    for arg in sys.argv[1:] :
-
-        if arg in ('-h', '--help') :
-            print "usage: " + sys.argv[0] + USAGE
-            sys.exit (1)
-
-        if arg[: 6] == '--uid=' :
-            uid      = arg[ 6:]
-            continue
-
-        if arg[: 6] == '--gid=' :
-            gid      = arg[ 6:]
-            continue
-
-        if arg[ :9] == '--varDir='  :
-            varDir  = arg[ 9:]
-            continue
-
-        if arg[ :9] == '--config='  :
-            confnam = arg[ 9:]
-            continue
-
-        if arg[ :7] == '--name='  :
-            name    = arg[ 7:]
-            continue
-
-        if arg == '--subproc' :
-            subproc = True
-            continue
-
-        if arg == '--daemon'  :
-            daemon  = True
-            continue
-
-        if arg == '--monitor' :
-            monitor = True
-            continue
-
-        if arg == '--enqueue' :
-            enqueue = True
-            continue
-
-        print "usage: " + sys.argv[0] + USAGE
-        sys.exit (1)
-
-
     #  If executing in daemon mode then fork and detatch from the
     #  controlling terminal. Basically this is the fork-setsid-fork
     #  sequence.
     #
-    if daemon :
-
+    if os.fork() == 0 :
+        os.setsid()
+        sys.stdin = open('/dev/null')
+        sys.stdout = stdoutlog
+        sys.stderr = stdoutlog
         if os.fork() == 0 :
-            os .setsid()
-            sys.stdin  = open ('/dev/null')
-            sys.stdout = open (varDir + '/log/dispatcher', 'w', 0)
-            sys.stderr = sys.stdout
-            if os.fork() == 0 :
+            ppid = os.getppid()
+            while ppid != 1 :
+                time.sleep (1)
                 ppid = os.getppid()
-                while ppid != 1 :
-                    time.sleep (1)
-                    ppid = os.getppid()
-            else :
-                os._exit (0)
         else :
-            os.wait()
-            sys.exit (1)
+            os._exit (0)
+    else :
+        os.wait()
+        sys.exit (1)
 
-        pf = open (varDir + '/run/dispatcher.pid', 'w')
-        pf.write  ('%d\n' % os.getpid())
-        pf.close  ()
+    pf = open(poptions.pidfile, 'w')
+    pf.write  ('%d\n' % os.getpid())
+    pf.close  ()
 
-    if gid is not None : os.setregid (int(gid), int(gid))
-    if uid is not None : os.setreuid (int(uid), int(uid))
+    if poptions.setuid:
+        args.append('--uid=%d' % pwd.getpwnam("nobody").pw_uid)
+        args.append('--gid=%d' % grp.getgrnam("nogroup").gr_gid)
 
     #  If running in subproc mode then the server executes as a child
     #  process. The parent simply loops on the death of the child and
     #  recreates it in the event that it croaks.
     #
-    if subproc :
+    signal.signal (signal.SIGTERM, sigTerm)
+    while True :
 
-        signal.signal (signal.SIGTERM, sigTerm)
+        child = os.fork()
+        if child == 0 :
+            time.sleep (1)
+            break
 
-        while True :
+        sys.stdout.write("Forked subprocess: %d\n" % child)
+        sys.stdout.flush()
 
-            child = os.fork()
-            if child == 0 :
-                time.sleep (1)
-                break
-
-            sys.stdout.write("Forked subprocess: %d\n" % child)
-            sys.stdout.flush()
-    
-            os.wait()
+        os.wait()
 
     #  The dispatcher section of the config file contains the port number
     #  and the list of UMLs that this dispatcher controls; the access details
     #  for the UMLs is taken from the corresponding UML sections.
     #
-    config = ConfigParser.ConfigParser()
-    config.readfp (open(confnam))
-
-    for uml in config.get (name, 'umllist').split(',') :
+    for uml in config.get ('dispatcher', 'umllist').split(',') :
         host  = config.get    (uml, 'host' )
         via   = config.getint (uml, 'via'  )
         count = config.getint (uml, 'count')
@@ -938,9 +884,13 @@ if __name__ == '__main__' :
     UMLPtr  = len(UMLList) > 0 and UMLList[0] or None
     UMLLock = threading.Lock()
 
-    if monitor :
-
+    if poptions.monitor:
         mtr = UMLScanner ()
         mtr.start ()
 
-    execute (config.getint (name, 'port'))
+    DispatcherHandler.protocol_version = "HTTP/1.0"
+    httpd = DispatcherHTTPServer(('', config.getint ('dispatcher', 'port')), DispatcherHandler)
+    sa    = httpd.socket.getsockname()
+    sys.stdout.write ("Serving HTTP on %s port %s\n" % ( sa[0], sa[1] ))
+    sys.stdout.flush ()
+    httpd.serve_forever()
