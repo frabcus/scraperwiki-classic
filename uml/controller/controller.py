@@ -1,12 +1,4 @@
-#!/bin/sh -
-"exec" "python" "$0" "$@"
-
-__doc__ = """ScraperWiki Controller
-
-Hacked by.                                      Mike Richardson
-"""
-
-__version__ = "ScraperWiki_0.0.1"
+#!/usr/bin/env python
 
 import BaseHTTPServer
 import SocketServer
@@ -42,11 +34,9 @@ global  lock
 child           = None
 
 re_resolv       = re.compile ('nameserver\s+([0-9.]+)')
-scrapersByRunID = {}
-scrapersByPID   = {}
+scrapersByRunID = {}   # runid => { 'wfile' : self.wfile, 'idents' : idents }
+scrapersByPID   = {}   # pid => { 'wfile' : self.wfile, 'idents' : idents }
 lock            = threading.Lock()
-
-infomap     = {}
 
 parser = optparse.OptionParser()
 parser.add_option("--firewall", metavar="option")
@@ -76,7 +66,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
     __base         = BaseHTTPServer.BaseHTTPRequestHandler
     __base_handle  = __base.handle
 
-    server_version = "Controller/" + __version__
+    server_version = "Controller/ScraperWiki_0.0.1"
     rbufsize       = 0
 
     def __init__ (self, *alist, **adict) :
@@ -94,17 +84,18 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  ('Content-Type: text/text\n')
         self.connection.send  ('\n')
 
-    def sendStatus(self, query) :
+    def sendStatus(self):
         status = []
         lock.acquire()
         for key, value in scrapersByRunID.items() :
-            status.append ('runID=%s' % (key))
+            status.append('runID=%s' % (key))
         lock.release()
 
         self.sendConnectionHeaders()
         self.connection.send('\n'.join(status) + '\n')
 
-    def sendIdent (self, query) :
+
+    def sendIdent(self, query) :
         self.sendConnectionHeaders()
 
         #  The query contains the proxy's remote port (which is the local port here)
@@ -132,69 +123,56 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 return
         logger.warning('Ident (%s,%s) not found:\n%s' % (lport, rport, lsof))
 
-    def sendNotify (self, query) :
-        """
-        Send notification back through the controller. (usually of a http request)
-        """
-        params  = cgi.parse_qs(query)
-        wfile   = None
-        try     :
-            lock.acquire()
-            wfile = scrapersByRunID[params['runid'][0]]['wfile']
-        except  :
-            logger.exception("test3")
-            pass
-        finally :
-            lock.release()
-
-        if wfile is not None :
-            msg   = {}
+        # Send notification back through the controller to the dispatcher . (usually of a http request)
+    def sendNotify(self, query):
+        params = cgi.parse_qs(query)
+        wfile = scrapersByRunID.get(params['runid'][0])
+        if wfile:
+            msg = {}
             for key, value in params.items() :
                 if key != 'runid' :
                     msg[key] = value[0]
             line  = json.dumps(msg) + '\n'
-            wfile.write (line)
-            wfile.flush ()
+            wfile.write(line)
+            wfile.flush()
 
         self.sendConnectionHeaders()
 
     # this request is put together by runner.py
     def do_POST (self) :
-        (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
+        scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
         assert path == '/Execute'
             # BaseHTTPRequestHandler.rfile is the input stream
         request = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
         self.execute(request)
+        self.connection.close()
+
 
     def do_GET (self) :
-        (scm, netloc, path, params, query, fragment) = urlparse.urlparse (self.path, 'http')
-
+        scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
         if path == '/Ident':
             self.sendIdent(query)
         elif path == '/Status':
-            self.sendStatus(query)
+            self.sendStatus()
         elif path == '/Notify':    # used to relay notification of http requests back to the dispatcher
             self.sendNotify(query)
         else:
             self.send_error(404, 'Action %s not found' % path)
-            return
-
         self.connection.close()
 
 
+def saveunicode(text):
+    try:     return unicode(text)
+    except UnicodeDecodeError:     pass
+    try:     return unicode(text, encoding='utf8')
+    except UnicodeDecodeError:     pass
+    try:     return unicode(text, encoding='latin1')
+    except UnicodeDecodeError:     pass
+    return unicode(text, errors='replace')
+
 
 # one of these per scraper receiving the data
-class ScraperController (BaseController) :
-
-    def saveunicode(self, text):
-        try:     return unicode(text)
-        except UnicodeDecodeError:     pass
-        try:     return unicode(text, encoding='utf8')
-        except UnicodeDecodeError:     pass
-        try:     return unicode(text, encoding='latin1')
-        except UnicodeDecodeError:     pass
-        return unicode(text, errors='replace')
- 
+class ScraperController(BaseController):
  
     def processmain(self, psock, lpipe, pid, cltime1):
         #  Close the write sides of the pipes, these are only needed in the
@@ -262,7 +240,7 @@ class ScraperController (BaseController) :
                             if mapped[1] != '':
                                 # XXX this repeats the code below, there's probably a
                                 # better way of structuring it
-                                msg  = { 'message_type' : 'console', 'content' : self.saveunicode(mapped[1]) + "\n"}
+                                msg  = { 'message_type':'console', 'content':saveunicode(mapped[1]) + "\n"}
                                 mapped[1] = ''
                                 text = json.dumps(msg) + '\n'
                                 self.wfile.write (text)
@@ -293,7 +271,7 @@ class ScraperController (BaseController) :
                     #  message; data from logging connection should be already formatted.
                     #
                     if fd == psock[0].fileno() :
-                        msg  = { 'message_type' : 'console', 'content' : self.saveunicode(text) }
+                        msg  = { 'message_type':'console', 'content':saveunicode(text) }
                         text = json.dumps(msg) + '\n'
                     #
                     #  Send data back towards the client.
@@ -390,13 +368,12 @@ class ScraperController (BaseController) :
         os.close (pwfd)
         os.close (lwfd)
 
-        # the actual execution of the scraper
+        # the actual execution of the scraper (never returns)
         os.execvp(execscript, args)
 
  
     def execute(self, request):
-        logger.debug('Execute %s' % str(request)[:100])
-
+        logger.debug('Execute %s' % request.get("scrapername"))
         idents = []
         if request.get("scraperid"):
             idents.append('scraperid=%s' % request.get("scraperid"))
@@ -427,6 +404,8 @@ class ScraperController (BaseController) :
         pid   = os.fork()
 
         if pid > 0 :
+            logger.debug('pid %s: %s' % (pid, request.get("scrapername")))
+
             cltime1 = time.time()
             lock.acquire()
             info = { 'wfile' : self.wfile, 'idents' : idents }
@@ -467,10 +446,12 @@ class ScraperController (BaseController) :
                 try    : os.remove ('/tmp/ident.%d'   % pid)
                 except OSError: pass
 
+            logger.debug('endpid %s: %s' % (pid, request.get("scrapername")))
             return
 
         if pid == 0:
-            self.processchild(psock, lpipe, idents, request)
+            logger.debug('processexec: %s' % (request.get("scrapername")))
+            self.processchild(psock, lpipe, idents, request)  # calls execvp and never returns
 
 
 # one of these representing the whole controller
@@ -564,16 +545,16 @@ if __name__ == '__main__' :
         sys.stdin  = open ('/dev/null')
         sys.stdout = stdoutlog
         sys.stderr = stdoutlog
-        if os.fork() == 0 :
+        if os.fork() == 0:
             ppid = os.getppid()
-            while ppid != 1 :
-                time.sleep (1)
+            while ppid != 1:
+                time.sleep(1)
                 ppid = os.getppid()
-        else :
-            os._exit (0)
-    else :
+        else:
+            os._exit(0)
+    else:
         os.wait()
-        sys.exit (1)
+        sys.exit(1)
 
     pf = open(poptions.pidfile, 'w')
     pf.write('%d\n' % os.getpid())
@@ -582,7 +563,7 @@ if __name__ == '__main__' :
 
     # subproc
     signal.signal (signal.SIGTERM, sigTerm)
-    while True :
+    while True:
         child = os.fork()
         if child == 0 :
             break
@@ -596,7 +577,7 @@ if __name__ == '__main__' :
     ScraperController.protocol_version = "HTTP/1.0"
     httpd = ControllerHTTPServer(('', config.getint(socket.gethostname(), 'port')), ScraperController)
     sa = httpd.socket.getsockname()
-    logger.info("Serving HTTP on %s port %s" % ( sa[0], sa[1] ))
+    logger.info("Serving HTTP on %s port %s" % (sa[0], sa[1]))
     httpd.serve_forever()
     
     

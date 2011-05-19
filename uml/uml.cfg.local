@@ -1,7 +1,7 @@
 [dispatcher]
 host	= 127.0.0.1
 port	= 9000
-umllist	= uml001
+umllist	= uml001,uml002
 confurl	= allwhite
 path    = ../scraperlibs
 use_queue = False
@@ -92,6 +92,14 @@ via	= 9001
 mem	= 128M
 count	= 25
 
+[uml002]
+host	= 127.0.0.1
+tap	= 192.168.254.101
+eth	= 192.168.254.1
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 2
 
 
 [loggers]

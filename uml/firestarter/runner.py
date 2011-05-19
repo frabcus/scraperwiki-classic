@@ -2,13 +2,13 @@
 import sys
 import os
 import optparse
-import hashlib
 import urllib2
 import ConfigParser
 import socket
 import time
 import logging
 import logging.config
+import uuid
 
 try:    import simplejson as json
 except: import json
@@ -89,11 +89,7 @@ def buildjdata(code, options, config):
     jdata["scrapername"] = options.name
 
     # set the runid
-    s = hashlib.sha1()
-    s.update(str(os.urandom(16)))
-    s.update(str(os.getpid()))
-    s.update(str(time.time()))
-    jdata["runid"] = '%.6f_%s' % (time.time(), s.hexdigest())
+    jdata["runid"] = '%.6f_%s' % (time.time(), uuid.uuid4())
     if jdata.get("draft"):
         jdata["runid"] = "draft|||%s" % jdata["runid"]
 

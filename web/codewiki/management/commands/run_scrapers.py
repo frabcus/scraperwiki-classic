@@ -25,9 +25,6 @@ import urlparse
 
 # useful function for polling the UML for its current position (don't know where to keep it)
 def GetDispatcherStatus():
-    """
-    Gets the status from the dispatcher
-    """
     result = [ ]
     now = time.time()
     fin,lines = None, None
@@ -41,23 +38,16 @@ def GetDispatcherStatus():
         mail_admins(subject="[ScraperWiki] Dispatcher down?", message=msg, fail_silently=True)
         raise
     else:
-        fin.close()                
+        fin.close()
         
         
     for line in lines:
         if re.match("\s*$", line):
             continue
-        # Lines are in the form key1=value1;key2=value2;..... Split on ; and then on = and assemble
-        # results dictionary. This makes the code independent of ordering. At the end, calculate
-        # the run time.
-        #
-        data = {}
-        for pair in line.strip().split(';') :
-            key, value = pair.split ('=')
-            data[key] = value
-        data['runtime'] = now - float(data['time'])
-        result.append(data)
-        
+        mline = re.match('uname=([\w\-_\.]+);scraperID=([\w\._]*?);short_name=([^;]*?);runID=([^;]*?);runtime=([\d\.\-]*)\s*$', line)
+        assert mline, line
+        if mline:
+            result.append( {'uname':mline.group(1), 'scraperID':mline.group(2), 'short_name':mline.group(3), 'runID':mline.group(4), 'runtime':float(mline.group(5)) } )
     return result
 
 
@@ -80,17 +70,10 @@ def GetUMLstatuses():
 
 
 def is_currently_running(scraper):
-    """
-    Checks whether the dispatcher thinks the specified scraper is still 
-    actually running or not.
-    """
     return urllib2.urlopen(settings.DISPATCHERURL + '/Status').read().find(scraper.guid) > 0    
 
 
 def kill_running_runid(runid):
-    """
-    Finds the scraper running under the provided run id and kills it.
-    """
     response = urllib2.urlopen(settings.DISPATCHERURL + '/Kill?'+runid).read()
     mresponse = re.match("Scraper (\S+) (killed|not killed|not found)", response)
     print response
