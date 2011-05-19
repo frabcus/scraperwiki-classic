@@ -142,7 +142,7 @@ class HighRise(object):
         xml_note = self.note_xml_template % note
         req = urllib2.Request(url, xml_note, {"Content-type": "application/xml"})
         resp = urllib2.urlopen(req)
-        if resp.code != 200:
+        if resp.code != 201:
             raise HighRiseException("Error creating note")
         xml = resp.read()
 
@@ -161,7 +161,7 @@ class HighRise(object):
         xml_task = self.task_xml_template % (task, frame, person_id, category, subject)
         req = urllib2.Request(url, xml_task, {"Content-type": "application/xml"})
         resp = urllib2.urlopen(req)
-        if resp.code != 200:
+        if resp.code != 201:
             raise HighRiseException("Error creating task")
         xml = resp.read()
 
@@ -170,7 +170,7 @@ class HighRise(object):
         xml_note = self.tag_xml_template % tag_text
         req = urllib2.Request(url, xml_note, {"Content-type": "application/xml"})
         resp = urllib2.urlopen(req)
-        if resp.code != 200:
+        if resp.code != 201:
             raise HighRiseException("Error tagging person")
         doc = etree.XML(resp.read())
         return Tag(doc)
@@ -180,7 +180,7 @@ class HighRise(object):
         xml_person = self.person_xml_template % (first_name, last_name, email)
         req = urllib2.Request(url, xml_person, {"Content-type": "application/xml"})
         resp = urllib2.urlopen(req)
-        if resp.code != 200:
+        if resp.code != 201:
             raise HighRiseException("Error creating person")
         doc = etree.XML(resp.read())
         return Person(doc)
