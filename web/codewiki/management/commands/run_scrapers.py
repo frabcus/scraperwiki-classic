@@ -312,6 +312,9 @@ class Command(BaseCommand):
     )
     help = 'Run a scraper, or all scrapers.  By default all scrapers are run.'
 
+    def __init__(self):
+        self.ignore_emails = False # tests need a default value, so can call get_overdue_scrapers directly
+        super(Command, self).__init__
 
     def run_scraper(self, scraper, options):
         """
