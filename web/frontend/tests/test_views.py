@@ -47,9 +47,21 @@ class FrontEndViewsTests(TestCase):
         response = self.client.get(reverse('about'))
         self.assertEqual(response.status_code, 200)
 
-    def test_help(self):
-        response = self.client.get(reverse('help'))
+    def test_docs_ruby(self):
+        response = self.client.get(reverse('docs'), {'language': 'ruby'})
         self.assertEqual(response.status_code, 200)
+
+    def test_docs_python(self):
+        response = self.client.get(reverse('docs'), {'language': 'python'})
+        self.assertEqual(response.status_code, 200)
+
+    def test_docs_php(self):
+        response = self.client.get(reverse('docs'), {'language': 'php'})
+        self.assertEqual(response.status_code, 200)
+
+    def test_help(self):
+        response = self.client.get('/help/', follow=True)
+        self.assertEqual(response.redirect_chain, [('http://testserver/docs/', 301)])
 
     def test_contact_form(self):
         response = self.client.get(reverse('contact_form'))
