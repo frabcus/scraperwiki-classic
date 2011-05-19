@@ -48,15 +48,15 @@ class FrontEndViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_docs_ruby(self):
-        response = self.client.get(reverse('docs'), {'language': 'ruby'})
+        response = self.client.get(reverse('docs', kwargs={'language': 'ruby'}))
         self.assertEqual(response.status_code, 200)
 
     def test_docs_python(self):
-        response = self.client.get(reverse('docs'), {'language': 'python'})
+        response = self.client.get(reverse('docs', kwargs={'language': 'python'}))
         self.assertEqual(response.status_code, 200)
 
     def test_docs_php(self):
-        response = self.client.get(reverse('docs'), {'language': 'php'})
+        response = self.client.get(reverse('docs', kwargs={'language': 'php'}))
         self.assertEqual(response.status_code, 200)
 
     def test_help(self):
