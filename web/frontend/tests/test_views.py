@@ -78,14 +78,15 @@ class FrontEndViewsTests(TestCase):
 
         # check the pages render right
         ix = 0
-        for lang in ['python', 'php', 'ruby']:
+        for lang in ['ruby', 'python', 'php']:
             ix = ix + 1
 
             response = self.client.get(reverse('tutorials', kwargs={'language':lang}))
             self.assertEqual(response.status_code, 200)
 
             tutorials = response.context['tutorials']
-            print "***TUT:", tutorials
+            # print "***TUT:", tutorials
             self.assertEqual(tutorials.keys(), [lang])
             self.assertEqual(ix, len(tutorials[lang]))
+
 
