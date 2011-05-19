@@ -35,10 +35,6 @@ class FrontEndViewsTests(TestCase):
                                                        'password': '123'})
         self.assertEqual(response.status_code, 200)
 
-    def test_help(self):
-        response = self.client.get(reverse('help'))
-        self.assertEqual(response.status_code, 200)
-
     def test_terms(self):
         response = self.client.get(reverse('terms'))
         self.assertEqual(response.status_code, 200)
