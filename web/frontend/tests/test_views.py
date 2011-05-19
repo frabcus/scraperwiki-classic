@@ -67,32 +67,25 @@ class FrontEndViewsTests(TestCase):
         response = self.client.get(reverse('contact_form'))
         self.assertEqual(response.status_code, 200)
 
-    def test_tutorials(self):    
-        scraper = Scraper(title=u'Python1', language='python', istutorial=True)
-        scraper.save()
+    def test_live_tutorials(self):    
+        # make some dummy tutorials
+        ix = 0 
+        for lang in ['ruby', 'python', 'php']:
+            ix = ix + 1
+            for i in range(ix):
+                scraper = Scraper(title=unicode(lang + str(i)), language=lang, istutorial=True)
+                scraper.save()
 
-        scraper = Scraper(title=u'Python2', language='python', istutorial=True)
-        scraper.save()
+        # check the pages render right
+        ix = 0
+        for lang in ['python', 'php', 'ruby']:
+            ix = ix + 1
 
-        scraper = Scraper(title=u'Python3', language='python', istutorial=True)
-        scraper.save()
+            response = self.client.get(reverse('tutorials', kwargs={'language':lang}))
+            self.assertEqual(response.status_code, 200)
 
-        scraper = Scraper(title=u'PHP1', language='php', istutorial=True)
-        scraper.save()
+            tutorials = response.context['tutorials']
+            print "***TUT:", tutorials
+            self.assertEqual(tutorials.keys(), [lang])
+            self.assertEqual(ix, len(tutorials[lang]))
 
-        scraper = Scraper(title=u'PHP2', language='php', istutorial=True)
-        scraper.save()
-
-        response = self.client.get(reverse('help', args=['tutorials', 'python']))
-        self.assertEqual(response.status_code, 200)
-
-        tutorials =  response.context['tutorials']
-        self.assertTrue('python' in tutorials)
-        self.assertEqual(3, len(tutorials['python']))
-
-        response = self.client.get(reverse('help', args=['tutorials', 'php']))
-        self.assertEqual(response.status_code, 200)
-
-        tutorials =  response.context['tutorials']
-        self.assertTrue('php' in tutorials)
-        self.assertEqual(2, len(tutorials['php']))
