@@ -23,7 +23,7 @@ class ScraperViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
     
     
-    def _repo_exists( self, name ):
+    def _ensure_repo_exists( self, name ):
         """
         Check whether the repo exists, and create it if it does not. This is only used
         for testing and so should be safe.
@@ -31,20 +31,19 @@ class ScraperViewsTests(TestCase):
         from codewiki.vc import MercurialInterface
         from django.conf import settings
         from codewiki.models.scraper import Scraper
-        
-        m = MercurialInterface( settings.SPLITSCRAPERS_DIR )                    
+
+        s = Scraper.objects.get(short_name=name)
+        m = s.vcs
+
         try:
-            m.getfilestatus( name )
+            m.getfilestatus( 'code' )
         except:
-            s = Scraper.objects.get(short_name=name)
-            s.commit_code('#Test scraper for testing purposes only', 'test commit', s.owner())
-            return False
-        return True
+            s.commit_code('# Scraper for automated testing purposes only', 'This is an automated test commit.', s.owner())
+            print "\nrepository for scraper '%s' created" % name
     
     
     def test_scraper_history(self):
-        if not self._repo_exists( 'test_scraper'):
-            print "\n'test_scraper' doesn't exist - it is being created"
+        self._ensure_repo_exists( 'test_scraper')
             
         response = self.client.get(reverse('scraper_history',
                             kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
@@ -52,8 +51,7 @@ class ScraperViewsTests(TestCase):
         
     
     def test_scraper_comments(self):
-        if not self._repo_exists( 'test_scraper'):
-            print "\n'test_scraper' doesn't exist - it is being created"
+        self._ensure_repo_exists( 'test_scraper')
             
         response = self.client.get(reverse('scraper_comments',
                             kwargs={'wiki_type':'scraper', 'short_name': 'test_scraper'}))
