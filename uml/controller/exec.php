@@ -1,86 +1,43 @@
 #!/usr/bin/php5
 <?php
 
-
-$USAGE       = ' [--script=name] [--path=path] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]' ;
-$script      = null ;
-$path        = null ;
-$httpProxy   = null ;
-$httpsProxy  = null ;
-$ftpProxy    = null ;
-$datastore   = null ;
-$uid         = null ;
-$gid         = null ;
-
-for ($idx = 1 ; $idx < count($argv) ; $idx += 1)
-{
-   $arg  = $argv[$idx] ;
-
-   if (substr ($arg, 0,  9) == '--script='   )
-   {
-      $script     = substr ($arg,  9) ;
-      continue    ;
-   }
-   if (substr ($arg, 0, 7) == '--path='      )
-   {
-      $path       = substr ($arg,  7) ;
-      continue    ;
-   }
-   if (substr ($arg, 0, 7) == '--http='      )
-   {
-      $httpProxy  = substr ($arg,  7) ;
-      continue    ;
-   }
-   if (substr ($arg, 0, 8) == '--https='     )
-   {
-      $httpsProxy = substr ($arg,  8) ;
-      continue    ;
-   }
-   if (substr ($arg, 0, 6) == '--ftp='       )
-   {
-      $ftpProxy   = substr ($arg,  6) ;
-      continue    ;
-   }
-   if (substr ($arg, 0, 5) == '--ds='        )
-   {
-      $datastore  = substr ($arg,  5) ;
-      continue    ;
-   }
-   if (substr ($arg, 0, 6) == '--uid='       )
-   {
-      $uid        = substr ($arg,  6) ;
-      continue    ;
-   }
-   if (substr ($arg, 0, 6) == '--gid='       )
-   {
-      $gid        = substr ($arg,  6) ;
-      continue    ;
-   }
-
-   print "usage: " . $argv[0] . $USAGE . "\n" ;
-   exit  (1) ;
-}
-
-$logfd = fopen("/proc/self/fd/3", "w") ;
-
-if (!is_null($gid))    # nogroup
-{
-   posix_setgid  ($gid) ;
-   posix_setegid ($gid) ;
-}
-if (!is_null($uid))    # nogroup
-{
-   posix_setuid  ($uid) ;
-   posix_seteuid ($uid) ;
-}
-
 // set the include paths to scraperlibs from an environment variable (what can be done automatically for python and ruby)
 foreach (split(':', getenv('PHPPATH')) as $dir)
     ini_set('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
 
-require_once   'scraperwiki/datastore.php' ;
-require_once   'scraperwiki.php'           ;
-require_once   'scraperwiki/stacktrace.php';
+$logfd = fopen("/proc/self/fd/3", "w") ;
+
+require_once 'scraperwiki.php';
+require_once 'scraperwiki/datastore.php';
+require_once 'scraperwiki/stacktrace.php';
+
+ob_implicit_flush(true);
+
+$script = null;
+$datastore = null;
+
+for ($idx = 1; $idx < count($argv); $idx += 1)
+{
+   $arg  = $argv[$idx] ;
+
+   if (substr ($arg, 0,  9) == '--script=')
+      $script = substr ($arg, 9);
+   if (substr ($arg, 0, 5) == '--ds=')
+      $datastore = substr($arg, 5);
+   if (substr($arg, 0, 6) == '--gid=')
+   {
+      $gid = substr($arg,  6);
+      posix_setgid($gid);
+      posix_setegid($gid);
+   }
+   if (substr ($arg, 0, 6) == '--uid=')
+   {
+      $uid = substr($arg, 6);
+      posix_setuid($uid);
+      posix_seteuid($uid);
+   }
+}
+
 
 $dsinfo = split (':', $datastore) ;
 SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1]) ;
@@ -97,6 +54,7 @@ function errorHandler($errno, $errstr, $errfile, $errline)
     scraperwiki::sw_dumpMessage($etb); 
     return true; 
 }
+
 set_error_handler("errorHandler", E_ALL & ~E_NOTICE);  // this is for errors, not exceptions (eg 1/0)
 
 /*

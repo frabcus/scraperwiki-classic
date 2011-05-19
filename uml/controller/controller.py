@@ -27,16 +27,10 @@ import logging.config
 try    : import json
 except : import simplejson as json
 
-global  scrapersByRunID
-global  scrapersByPID
-global  lock
-
 child           = None
 
-re_resolv       = re.compile ('nameserver\s+([0-9.]+)')
-scrapersByRunID = {}   # runid => { 'wfile' : self.wfile, 'idents' : idents }
-scrapersByPID   = {}   # pid => { 'wfile' : self.wfile, 'idents' : idents }
-lock            = threading.Lock()
+runidstocontrollers = {}   # { runid => ScraperController }
+pidstorunids   = {}   # { pid => runid }
 
 parser = optparse.OptionParser()
 parser.add_option("--firewall", metavar="option")
@@ -86,55 +80,54 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     def sendStatus(self):
         status = []
-        lock.acquire()
-        for key, value in scrapersByRunID.items() :
-            status.append('runID=%s' % (key))
-        lock.release()
-
+        runids = runidstocontrollers.keys()  # to protect from multithreading
+        for runid in runids:
+            status.append('runID=%s' % (runid))
         self.sendConnectionHeaders()
-        self.connection.send('\n'.join(status) + '\n')
+        self.connection.sendall('\n'.join(status) + '\n')
 
 
     def sendIdent(self, query) :
         self.sendConnectionHeaders()
 
-        #  The query contains the proxy's remote port (which is the local port here)
-        #  and the proxy's local port (which is the remote port here). Scan all open
-        #  files for a TCP/IP stream with these two ports. If found then extract the
-        #  process number; this is used to map to the identification information for
-        #  the scraper.
-        #
+        # given the port and socket, find the pid holding it open using a grep on lsof
         (lport, rport) = query.split(':')
         # On Linux, process names come out as exec.py/exec.rb etc.
         # On OSX, they come out as python/ruby etc.
         # XXX todo, get PHP working on OSX
+        pid = None
         p    = re.compile ('(?:exec.[a-z]+|[Pp]ython|[Rr]uby) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
         lsof = subprocess.Popen([ 'lsof', '-n', '-P', '-i' ], stdout = subprocess.PIPE).communicate()[0]
         for line in lsof.split('\n') :
-            m = p.match (line)
-            if m :
-                logger.debug('Ident (%s,%s) is pid %s' % (lport, rport, m.group(1)))
-                try    :
-                    info = scrapersByPID[int(m.group(1))]
-                    self.connection.send ('\n'.join(info['idents']))
-                    self.connection.send ("\n")
-                except Exception, e:
-                    logger.exception('Ident (%s,%s) send failed')
-                return
-        logger.warning('Ident (%s,%s) not found:\n%s' % (lport, rport, lsof))
+            m = p.match(line)
+            if m:
+                pid = int(m.group(1))
+                break
+
+        if pid:
+            logger.debug(' Ident (%s,%s) is pid %s' % (lport, rport, pid))
+            runid = pidstorunids.get(pid)
+            controller = runidstocontrollers.get(runid)
+            if controller:
+                self.connection.sendall('\n'.join(controller.idents))
+            else:
+                logger.warning('Ident scraper not longer present for pid %s' % m.group(1))
+            return
+        else:
+            logger.warning(' Ident (%s,%s) not found:\n%s' % (lport, rport, lsof))
 
         # Send notification back through the controller to the dispatcher . (usually of a http request)
     def sendNotify(self, query):
         params = cgi.parse_qs(query)
-        wfile = scrapersByRunID.get(params['runid'][0])
-        if wfile:
+        runid = params['runid'][0]
+        controller = runidstocontrollers.get(runid)
+        if controller:
             msg = {}
             for key, value in params.items() :
                 if key != 'runid' :
                     msg[key] = value[0]
             line  = json.dumps(msg) + '\n'
-            wfile.write(line)
-            wfile.flush()
+            controller.connection.sendall(line)
 
         self.sendConnectionHeaders()
 
@@ -143,7 +136,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
         assert path == '/Execute'
             # BaseHTTPRequestHandler.rfile is the input stream
-        request = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+        request = json.loads(self.connection.recv(int(self.headers['Content-Length'])))
         self.execute(request)
         self.connection.close()
 
@@ -171,222 +164,138 @@ def saveunicode(text):
     return unicode(text, errors='replace')
 
 
+
 # one of these per scraper receiving the data
 class ScraperController(BaseController):
  
-    def processmain(self, psock, lpipe, pid, cltime1):
-        #  Close the write sides of the pipes, these are only needed in the
-        #  child processes.
-        #
-        psock[1].close()
-        os.close(lpipe[1])
+    def processrelayoutput(self, streamprintsin, streamjsonsin, childpid):
+        ostimes1 = os.times()
+        
+        rlist = [ self.connection, streamprintsin, streamjsonsin ] 
+        printsbuffer = [ ]
+        jsonsbuffer = [ ]
+        
+        while len(rlist) > 2 and self.connection in rlist:
+            try:
+                rback, wback, eback = select.select(rlist, [ ], [ ]) 
+            
+                # shouldn't be happening any more, but try to track down which it is when it does
+            except select.error, e:   
+                logger.warning("bad file descriptor childpid: %d"%childpid)
+                logger.warning([streamprintsin.fileno(), streamjsonsin.fileno(), self.connection.fileno()]) 
+                for fd in rlist:
+                    if type(fd) == int:
+                        fdn = fd
+                    else:
+                        fdn = fd.fileno()
+                    try:
+                        os.fstat(fdn)
+                    except:
+                        logger.exception("bad osserror: %d" % fdn)
+                raise
+            
+            # further incoming signals (sometimes empty) from the controller can be assumed to be a termination message
+            if self.connection in rback:
+                line = self.connection.recv(200)
+                logger.debug("got message to remove %s  %d" % (str([line]), childpid))
+                os.kill(childpid, signal.SIGKILL)
+                break
+            
+            jsonoutputlist = [ ]
+            
+            # batch up stdout streaming into console message if a block ends in \n
+            if streamprintsin in rback:
+                srecprints = streamprintsin.recv(8192)   # returns '' if nothing more to come
+                printsbuffer.append(srecprints)
+                if not srecprints or srecprints[-1] == '\n':
+                    line = "".join(printsbuffer)
+                    if line:
+                        jsonoutputlist.append(json.dumps({ 'message_type':'console', 'content':saveunicode(line) }))
+                    del printsbuffer[:]
+                if not srecprints:
+                    streamprintsin.close()
+                    rlist.remove(streamprintsin)
 
-        #  Create file-like objects so that we can use readline. These are
-        #  stored mapped from the file descriptors for convenient access
-        #  below.
-        #
-        fdmap = {}
-        fdmap[psock[0].fileno()] = [ psock[0], '' ]
-        fdmap[lpipe[0]         ] = [ lpipe[0], '' ]
+            # valid json objects coming in from file descriptor 3
+            if streamjsonsin in rback:
+                srecjsons = streamjsonsin.recv(8192)
+                if srecjsons:
+                    ssrecjsons = srecjsons.split("\n")
+                    jsonsbuffer.append(ssrecjsons.pop(0))
+                    while ssrecjsons:
+                        jsonoutputlist.append("".join(jsonsbuffer))
+                        del jsonsbuffer[:]
+                        jsonsbuffer.append(ssrecjsons.pop(0))
+                else:
+                    streamjsonsin.close()
+                    rlist.remove(streamjsonsin)
 
-        #  Loop while the file descriptors are still open in the child
-        #  process. Output is passed back, with "print" output jsonified.
-        #  Check for exception messages, in which case log the exception to
-        #  the logging database. If the caller closes the connection,
-        #  kill the child and exit the loop.
-        #
-        busy    = 2
-        while busy > 0 :
-            #  Create a list of the two pipe read descriptors that are still
-            #  open for input via select. We loop reading and processing data
-            #  from these. Also poll the connection; this will be flagged as
-            #  having input if it is closed at the other end.
-            rlist = fdmap.keys() + [self.connection.fileno(),]
-            (rback, wback, eback) = select.select(rlist, [], []) 
-            assert wback == [] # we don't use these, only read
-            assert eback == [] # we don't use these, only read
+            # output the sequence of valud json objects delimited by \n
+            for jsonoutput in jsonoutputlist:
+                self.connection.sendall(jsonoutput + '\n')
 
-            for fd in rback:
-                #
-                #  If the event is on the caller connection then caller must
-                #  have terminated, so exit loop.
-                #
-                if fd == self.connection.fileno() :
-                    busy = 0
-                    os.kill (pid, signal.SIGKILL)
-                    break
-                #
-                #  Otherwise should have been from child ...
-                #
-                if fd in fdmap :
-                    mapped = fdmap[fd]
-                    #
-                    #  Read some text. If none then the child has closed the connection
-                    #  so unregister here and decrement count of open child connections.
-                    #
-                    line = None
-                    if line is None :
-                        if hasattr(mapped[0], "recv"):
-                            line = mapped[0].recv(8192) # socket
-                        else:
-                            line = os.read (mapped[0], 8192) # pipe
-                    if line in [ '', None ] :
-                        # 
-                        # In case of echoing console output (for PHP, or for
-                        # Ruby/Python before the ConsoleStream is set up in
-                        # exec.py/rb), send anything left over that didn't end in a \n
-                        # 
-                        if fd == psock[0].fileno() :
-                            if mapped[1] != '':
-                                # XXX this repeats the code below, there's probably a
-                                # better way of structuring it
-                                msg  = { 'message_type':'console', 'content':saveunicode(mapped[1]) + "\n"}
-                                mapped[1] = ''
-                                text = json.dumps(msg) + '\n'
-                                self.wfile.write (text)
-                                self.wfile.flush ()
-                        #
-                        # Record done with that pipe
-                        #
-                        del fdmap[fd]
-                        busy -= 1
-                        continue
-                    #
-                    #  If data received and data does not end in a newline the add to
-                    #  any prior data from the connection and loop.
-                    #
-                    if len(line) > 0 and line[-1] != '\n' :
-                        mapped[1] = mapped[1] + line
-                        continue
-                    #
-                    #  Prepend prior data to the current data and clear the prior
-                    #  data. If still nothing then loop.
-                    #
-                    text = mapped[1] + line
-                    mapped[1] = ''
-                    if text == '' :
-                        continue
-                    #
-                    #  If data is from the print connection then json-format as a console
-                    #  message; data from logging connection should be already formatted.
-                    #
-                    if fd == psock[0].fileno() :
-                        msg  = { 'message_type':'console', 'content':saveunicode(text) }
-                        text = json.dumps(msg) + '\n'
-                    #
-                    #  Send data back towards the client.
-                    #
-                    self.wfile.write (text)
-                    self.wfile.flush ()
-                    #
-                    #  If the data came from the logging connection and was an error the
-                    #  log to the database. We might get multiple json'd lines in one
-                    #  so split up.
-                    #
-                    if fd == lpipe[0] :
-                        for l in text.split('\n') :
-                            if l != '' :
-                                msg = json.loads(l)
+        ostimes2 = os.times()
 
-        #  Capture the child user and system times as best we can, since this
-        #  is summed over all children.
-        #
-        ostimes1   = os.times ()
-        (waited_pid, waited_status) = os.waitpid(pid, 0)
-        ostimes2   = os.times ()
-        cltime2    = time.time()
+        # return message if connection still good to add any termination conditions
+        if self.connection not in rlist:
+            return None
+        return { 'message_type':'executionstatus', 'content':'runcompleted', 
+                 'elapsed_seconds' : int(ostimes2[4] - ostimes1[4]), 'CPU_seconds':int(ostimes2[0] - ostimes1[0]) }
 
-        # this creates the status output that is passed out to runner.py.  
-        # The actual completion signal comes when the runner.py process ends
-        msg =       {   'message_type'    : 'executionstatus',
-                        'content'         : 'runcompleted', 
-                        'elapsed_seconds' : int(cltime2 - cltime1), 
-                        'CPU_seconds'     : int(ostimes2[2] - ostimes1[2])
-                    }
-        if os.WIFEXITED(waited_status):
-            msg['exit_status'] = os.WEXITSTATUS(waited_status)
-        if os.WIFSIGNALED(waited_status):
-            msg['term_sig'] = os.WTERMSIG(waited_status)
-            # generate text version (e.g. SIGSEGV rather than 11)
-            sigmap = dict((k, v) for v, k in signal.__dict__.iteritems() if v.startswith('SIG'))
-            if msg['term_sig'] in sigmap:
-                msg['term_sig_text'] = sigmap[msg['term_sig']]
-        self.wfile.write(json.dumps(msg) + '\n')
-         
  
-    def processchild(self, psock, lpipe, idents, request):
-        psock[0].close()
-        os.close(lpipe[0])
+    def processrunscript(self, streamprintsout, streamjsonsout, request, tmpscriptfile):
+        fout = open(tmpscriptfile, 'w')
+        fout.write(request['code'].encode('utf-8'))
+        fout.close()
 
-        open ('/tmp/ident.%d'   % os.getpid(), 'w').write('\n'.join(idents))
-        open ('/tmp/scraper.%d' % os.getpid(), 'w').write(request['code'].encode('utf-8'))
-
-        paths = request.get("paths", [ ])
         language = request.get('language', 'python')
         resource.setrlimit(resource.RLIMIT_CPU, (request['cpulimit'], request['cpulimit']+1))
 
         # language extensions
-        lsfx = { 'php':'php', 'ruby':'rb', 'python':'py' }[language]
+        lexec = { 'php':'exec.php', 'ruby':'exec.rb', 'python':'exec.py' }[language]
         
-        pwfd = psock[1].fileno()
-        lwfd = lpipe[1]
-        
-        tap      = config.get (socket.gethostname(), 'tap')
-        # webport = config.get ('webproxy',  'port')   # no longer used and useless
-            # httpport, httpsport passed in and only used in debug versions as there is a new lower level method that 
-            # intercepts the ports from within the UML configurations
-        httpport = config.get ('httpproxy',  'port')
-        httpsport = config.get ('httpsproxy',  'port')
-        ftpport  = config.get ('ftpproxy',  'port')
-        dshost   = config.get ('dataproxy', 'host')
-        dsport   = config.get ('dataproxy', 'port')
-
-        execscript = os.path.join(os.path.dirname(sys.argv[0]), 'exec.%s' % lsfx)
-        args    = \
-                [   execscript,
-                    '--http=http://%s:%s'       % (tap,  httpport),
-                    '--https=http://%s:%s'      % (tap,  httpsport),
-                    '--ftp=ftp://%s:%s'         % (tap,  ftpport ),
-                    '--ds=%s:%s'                % (dshost, dsport),
-                    '--path=%s' % ':'.join(paths),
-                    '--script=/tmp/scraper.%d'  % os.getpid(),
-                ]
+        execscript = os.path.join(os.path.dirname(sys.argv[0]), lexec)
+        args = [    execscript,
+                    '--ds=%s:%s' % (config.get('dataproxy', 'host'), config.get('dataproxy', 'port')),
+                    '--script=%s' % tmpscriptfile,
+               ]
 
         if poptions.setuid:
-            args.append('--uid=%d' % pwd.getpwnam("nobody").pw_uid)
             args.append('--gid=%d' % grp.getgrnam("nogroup").gr_gid)
+            args.append('--uid=%d' % pwd.getpwnam("nobody").pw_uid)
 
+        # close the filenos for stdin, stdout, stderr, 3, and then over-load them with streamprintsout and streamjsonsout
+        os.close(0)
+        os.close(1)
+        os.close(2)
+        os.close(3)
+        
+        os.dup2(streamprintsout, 1)
+        os.dup2(streamprintsout, 2)
+        os.dup2(streamjsonsout, 3)
+        
+        os.close(streamprintsout)
+        os.close(streamjsonsout)
 
-        os.close (0)
-        os.close (1)
-        os.close (2)
-        os.close (3)
-        os.open  ('/dev/null', os.O_RDONLY)
-        os.dup2  (pwfd, 1)
-        os.dup2  (pwfd, 2)
-        os.dup2  (lwfd, 3)
-        os.close (pwfd)
-        os.close (lwfd)
-
-        # the actual execution of the scraper (never returns)
+            # the actual execution of the scraper (never returns)
         os.execvp(execscript, args)
 
  
     def execute(self, request):
         logger.debug('Execute %s' % request.get("scrapername"))
-        idents = []
+        self.idents = []
         if request.get("scraperid"):
-            idents.append('scraperid=%s' % request.get("scraperid"))
+            self.idents.append('scraperid=%s' % request.get("scraperid"))
             os.environ['SCRAPER_GUID'] = request.get("scraperid")
 
         self.m_runID = None
         if request.get("runid"):
-            idents.append ('runid=%s' % request.get("runid"))
+            self.idents.append ('runid=%s' % request.get("runid"))
             os.environ['RUNID'] = request.get("runid")
             self.m_runID = request.get("runid")
 
         if request.get("scrapername"):
-            idents.append ('scrapername=%s' % request.get("scrapername"))
+            self.idents.append ('scrapername=%s' % request.get("scrapername"))
             os.environ['SCRAPER_NAME'] = request.get("scrapername")
 
         if request.get("urlquery"):
@@ -395,63 +304,64 @@ class ScraperController(BaseController):
 
         #print request, idents
         for value in request['white']:
-            idents.append('allow=%s' % value)
+            self.idents.append('allow=%s' % value)
         for value in request['black']:
-            idents.append('block=%s' % value)
+            self.idents.append('block=%s' % value)
+        self.idents.append('')   # to get an extra \n at the end
 
-        psock = socket.socketpair()
-        lpipe = os.pipe()
-        pid   = os.fork()
+        streamprintsin, streamprintsout = socket.socketpair()
+        streamjsonsin, streamjsonsout = socket.socketpair()
+        
+        childpid   = os.fork()
+        
+        if childpid == 0:
+            logger.debug('processexec: %s' % (request.get("scrapername")))
+            streamprintsin.close()
+            streamjsonsin.close()
+            tmpscriptfile = '/tmp/scraper.%d' % os.getpid() 
+            self.processrunscript(streamprintsout.fileno(), streamjsonsout.fileno(), request, tmpscriptfile)  
+                # eventually calls execvp("php exec.php") and never returns
+        
+        else:
+            logger.debug('childpid %s: %s' % (childpid, request.get("scrapername")))
+            runidstocontrollers[self.m_runID] = self
+            pidstorunids[childpid] = self.m_runID
 
-        if pid > 0 :
-            logger.debug('pid %s: %s' % (pid, request.get("scrapername")))
-
-            cltime1 = time.time()
-            lock.acquire()
-            info = { 'wfile' : self.wfile, 'idents' : idents }
-            scrapersByRunID[self.m_runID] = info
-            scrapersByPID[pid] = info
-            lock.release()
+            streamprintsout.close()
+            streamjsonsout.close()
 
             try:
-                self.processmain(psock, lpipe, pid, cltime1)
-
+                endingmessage = self.processrelayoutput(streamprintsin, streamjsonsin, childpid)
             except Exception, e:
-                logger.exception('Copying results failed')
+                logger.exception('process main exception: %s  %s' % (childpid, request.get("scrapername")))
+                endingmessage = None
 
-            finally:
-                lock.acquire()
-                del scrapersByRunID[self.m_runID]
-                del scrapersByPID  [pid         ]
-                lock.release()
+            waited_pid, waited_status = os.waitpid(childpid, 0)
+            exitmessage = { }
+            if os.WIFEXITED(waited_status):
+                exitmessage['exit_status'] = os.WEXITSTATUS(waited_status)
+            if os.WIFSIGNALED(waited_status):
+                exitmessage['term_sig'] = os.WTERMSIG(waited_status)
+                sigmap = dict((k, v) for v, k in signal.__dict__.iteritems() if v.startswith('SIG'))
+                if exitmessage['term_sig'] in sigmap:
+                    exitmessage['term_sig_text'] = sigmap[exitmessage['term_sig']]
+                    
+            logger.debug("endmessage: %s  exitmessage: %s" % (endingmessage, exitmessage))
+            del runidstocontrollers[self.m_runID]
+            del pidstorunids[childpid]
 
-                #  Make absolutely sure all sockets and pipes are closed, since we are
-                #  running in a thread and not a separate process.
-                #
-                try    : psock[0].close()
-                except :
-                    logger.exception("test")
-                    pass
-                try    : psock[1].close()
-                except : 
-                    logger.exception("test2")
-                    pass
-                try    : os.close(lpipe[0])
-                except OSError: pass
-                try    : os.close(lpipe[1])
-                except OSError: pass
+            if endingmessage:
+                endingmessage.update(exitmessage)
+                self.connection.sendall(json.dumps(endingmessage) + '\n')
 
-                try    : os.remove ('/tmp/scraper.%d' % pid)
-                except OSError: pass
-                try    : os.remove ('/tmp/ident.%d'   % pid)
-                except OSError: pass
+            streamprintsin.close()
+            streamjsonsin.close()
 
-            logger.debug('endpid %s: %s' % (pid, request.get("scrapername")))
-            return
+            try:
+                os.remove('/tmp/scraper.%d' % childpid)
+            except OSError:
+                pass
 
-        if pid == 0:
-            logger.debug('processexec: %s' % (request.get("scrapername")))
-            self.processchild(psock, lpipe, idents, request)  # calls execvp and never returns
 
 
 # one of these representing the whole controller
@@ -465,6 +375,7 @@ class ControllerHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServe
 
 
 def autoFirewall():
+    re_resolv = re.compile('nameserver\s+([0-9.]+)')
     rules    = []
     natrules = []
 
@@ -562,7 +473,7 @@ if __name__ == '__main__' :
 
 
     # subproc
-    signal.signal (signal.SIGTERM, sigTerm)
+    signal.signal(signal.SIGTERM, sigTerm)
     while True:
         child = os.fork()
         if child == 0 :

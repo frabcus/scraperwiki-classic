@@ -24,6 +24,8 @@ export PYTHONPATH=/scraperwiki/live/scraperlibs/
 export RUBYLIB=/scraperwiki/live/scraperlibs/
 export PHPPATH=/scraperwiki/live/scraperlibs/
 
+export PYTHONUNBUFFERED=True
+
 PIDFILE=$VARDIR/run/$NAME.pid
 DAEMON_ARGS="--setuid --firewall=auto --pidfile=$PIDFILE --config=$CONFIG"
 

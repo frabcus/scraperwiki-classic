@@ -48,30 +48,31 @@ def writereadstream(dhost, dport, jdata):
     soc.send('\r\n')
     soc.send(sdata)
 
-    soc_file = soc.makefile('r')
-    status_line = soc_file.readline().split()
-    nbytes, nrecords = 0, 0
-    if status_line[1] == '200':
     
-        # Ignore the HTTP headers
-        while True: 
-            line = soc_file.readline()
-            if line.strip() == "":
-                break
+    sbuffer = [ ]
+    bgap = False
+    nbytes, nrecords = 0, 0
+    while True:
+        srec = soc.recv(8192)
+        ssrec = srec.split("\n")  # multiple strings if a "\n" exists
+        sbuffer.append(ssrec.pop(0))
+        while ssrec:
+            line = "".join(sbuffer)
+            if line.strip():
+                if not bgap:
+                    pass # logger.debug("hhh: "+line)   # discard headers
+                else:
+                    sys.stdout.write(line + '\r\n')
+                    sys.stdout.flush()
+            else:
+                bgap = True
+            sbuffer = [ ssrec.pop(0) ]  # next one in
+        if not srec:
+            break
+    
+    logger.debug('%s:  ending %d bytes  %d records  %s' % (jdata["scrapername"], nbytes, nrecords, jdata["runid"]))
             
-        while True:
-            line = soc_file.readline().strip()
-            if line == '':
-                soc_file.close()
-                break
-            sys.stdout.write(line + '\r\n')
-            sys.stdout.flush()
-            
-            nbytes += len(line)
-            nrecords += 1
-        logger.debug('%s:  %d bytes  %d records' % (jdata["scrapername"], nbytes, nrecords))
-            
-    else:
+    if False:
         soc_file.close()
         logger.warning('fail on %s: %s' % (jdata["scrapername"], str(status_line)))
         sys.stdout.write(json.dumps({'message_type' : 'fail', 'content' : status_line[2].strip()}) + '\r\n')
@@ -123,7 +124,7 @@ def buildjdata(code, options, config):
 if __name__ == "__main__":
     code = sys.stdin.read()
     jdata = buildjdata(code, options, config)
-    logger.debug('%s: ' % (jdata["scrapername"]))
+    logger.debug('%s: starting   %s' % (jdata["scrapername"], jdata["runid"]))
 
     dhost = config.get('dispatcher', 'host')
     dport = config.getint('dispatcher', 'port')

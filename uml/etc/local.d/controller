@@ -12,6 +12,8 @@ export PYTHONPATH=/var/www/scraperwiki/scraperlibs/
 export RUBYLIB=/var/www/scraperwiki/scraperlibs/
 export PHPPATH=/var/www/scraperwiki/scraperlibs/
 
+export PYTHONUNBUFFERED=True
+
 PIDFILE=$VARDIR/run/$NAME.pid
 DAEMON_ARGS="--pidfile=$PIDFILE --config=$CONFIG"
 

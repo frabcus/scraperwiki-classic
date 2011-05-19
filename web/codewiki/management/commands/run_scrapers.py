@@ -74,7 +74,9 @@ def is_currently_running(scraper):
 
 
 def kill_running_runid(runid):
+    print settings.DISPATCHERURL + '/Kill?'+runid
     response = urllib2.urlopen(settings.DISPATCHERURL + '/Kill?'+runid).read()
+    print response
     mresponse = re.match("Scraper (\S+) (killed|not killed|not found)", response)
     print response
     

@@ -61,17 +61,23 @@ def running_scrapers(request):
 
 
 def scraper_killrunning(request, run_id, event_id):
-    try:
-        event = ScraperRunEvent.objects.get(id=event_id)
-    except ScraperRunEvent.DoesNotExist:
-        raise Http404
-    if not event.scraper.actionauthorized(request.user, "killrunning"):
-        raise Http404
-    if request.POST.get('killrun', None) != '1':
-        raise Http404
-        
+    event = None
+    if event_id or not request.user.is_staff:
+        try:
+            event = ScraperRunEvent.objects.get(id=event_id)
+        except ScraperRunEvent.DoesNotExist:
+            raise Http404
+        if not event.scraper.actionauthorized(request.user, "killrunning"):
+            raise Http404
+        if request.POST.get('killrun', None) != '1':
+            raise Http404
+
     killed = kill_running_runid(run_id)   # ought we be using the run event and seeing if we can kill it more smartly
     print "Kill function result on", killed
     time.sleep(1)
-    return HttpResponseRedirect(reverse('run_event', args=[event.run_id]))
+    if event:
+        return HttpResponseRedirect(reverse('run_event', args=[event.run_id]))
+    else:
+        return HttpResponseRedirect(reverse('running_scrapers'))
+        
 
