@@ -65,7 +65,7 @@ count   = 25
 
 
 ; Francis's machine
-[bat.local]
+[bat]
 host	= 127.0.0.1
 tap	= 127.0.0.1
 eth	= 127.0.0.1
