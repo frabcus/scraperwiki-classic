@@ -253,13 +253,6 @@ class Code(models.Model):
     def get_repo_path(self):
         if settings.SPLITSCRAPERS_DIR:
             return os.path.join(settings.SPLITSCRAPERS_DIR, self.short_name)
-        
-        result = None
-        if self.wiki_type == 'view':
-            result = settings.VMODULES_DIR
-        else:
-            result = settings.SMODULES_DIR
-        return result
 
     @models.permalink
     def get_absolute_url(self):
