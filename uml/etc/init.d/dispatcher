@@ -18,7 +18,7 @@ NAME=dispatcher
 CONFIG=/var/www/scraperwiki/uml/uml.cfg
 DAEMON=/usr/bin/python
 PIDFILE=/var/run/$NAME.pid
-DAEMON_ARGS="/var/www/scraperwiki/uml/dispatcher/dispatcher.py --monitor --setuid --monitor --pidfile=$PIDFILE"
+DAEMON_ARGS="/var/www/scraperwiki/uml/dispatcher/dispatcher.py --config=$CONFIG --pidfile=$PIDFILE --setuid --monitor"
 PWD=/var/www/scraperwiki/uml/dispatcher
 SCRIPTNAME=/etc/init.d/$NAME
 

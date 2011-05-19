@@ -378,8 +378,10 @@ if __name__ == '__main__' :
     pf.close()
 
     if poptions.setuid:
-        args.append('--uid=%d' % pwd.getpwnam("nobody").pw_uid)
-        args.append('--gid=%d' % grp.getgrnam("nogroup").gr_gid)
+        gid = grp.getgrnam("nogroup").gr_gid
+        uid = pwd.getpwnam("nobody").pw_uid
+        os.setregid(gid, gid)
+        os.setreuid(uid, uid)
 
     # subproc mode
     signal.signal(signal.SIGTERM, sigTerm)
