@@ -36,10 +36,10 @@ class ScraperViewsTests(TestCase):
         m = s.vcs
 
         try:
-            m.getfilestatus( 'code' )
+            status = m.getfilestatus( )
         except:
             s.commit_code('# Scraper for automated testing purposes only', 'This is an automated test commit.', s.owner())
-            print "\nrepository for scraper '%s' created" % name
+            print "\nrepository for scraper '%s' created in dir '%s'" % (name, s.get_repo_path())
     
     
     def test_scraper_history(self):
