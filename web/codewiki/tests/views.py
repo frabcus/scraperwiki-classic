@@ -32,9 +32,9 @@ class ScraperViewsTests(TestCase):
         from django.conf import settings
         from codewiki.models.scraper import Scraper
         
-        m = MercurialInterface( settings.SMODULES_DIR )                    
+        m = MercurialInterface( settings.SPLITSCRAPERS_DIR )                    
         try:
-            m.getfilestatus( 'test_scraper' )
+            m.getfilestatus( name )
         except:
             s = Scraper.objects.get(short_name=name)
             s.commit_code('#Test scraper for testing purposes only', 'test commit', s.owner())
