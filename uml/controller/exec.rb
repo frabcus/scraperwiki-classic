@@ -74,10 +74,10 @@ OptionParser.new do|opts|
      options[:ds] = ds
    end
    opts.on( '--gid=[GID]') do|gid|
-     Process::Sys.setregid(gid, gid)
+     Process::Sys.setregid(gid.to_i, gid.to_i)
    end
    opts.on( '--uid=[UID]') do|uid|
-     Process::Sys.setreuid(uid, uid)
+     Process::Sys.setreuid(uid.to_i, uid.to_i)
    end
 end.parse(ARGV)
 
