@@ -24,7 +24,9 @@
       {% endfor %}
     </ul>
   {% else %}
-    <p>You have not contributed to any scrapers or views.</p>
+    <p>You have not yet contributed to any scrapers or views.</p>
+    <p><a href="{% url choose_template 'scraper' %}" title="Create a new screen scraper" class="editor_scraper">New scraper</a> / <a href="{% url choose_template 'view' %}" title="Create a new view" class="editor_view">view</a>
+
   {% endif %}
 
   <div class="pagination">
