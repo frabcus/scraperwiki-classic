@@ -28,23 +28,15 @@ try:     import json
 except:  import simplejson as json
 
 
-def getscraperorresponse(request, action):
-    message = None
+def getscraperorresponse(short_name, action, user):
     try:
-        scraper = Code.objects.exclude(privacy_status="deleted").get(short_name=request.GET.get('name'))
+        scraper = Code.objects.get(short_name=short_name)
     except Code.DoesNotExist:
-        message =  "Sorry, this datastore does not exist"
+        return "Sorry, this scraper does not exist"
+    if not scraper.actionauthorized(user, "apidataread"):
+        return scraper.authorizationfailedmessage(user, "apidataread").get("body")
+    return scraper
     
-    if not message and scraper.actionauthorized(request.user, "apidataread"):
-        return scraper
-        
-    result = json.dumps({'error':message})
-    callback = request.GET.get("callback")
-    if callback:
-        result = "%s(%s)" % (callback, result)
-    return HttpResponse(result)
-
-
 
 # see http://stackoverflow.com/questions/1189111/unicode-to-utf8-for-csv-files-python-via-xlrd
 def stringnot(v):
@@ -112,8 +104,14 @@ def data_handler(request):
 # all for want of setting response["Content-Length"] to the correct value
 @condition(etag_func=None)
 def sqlite_handler(request):
-    scraper = getscraperorresponse(request, "apidataread")
-    if isinstance(scraper, HttpResponse):  return scraper
+    short_name = request.GET.get('name')
+    scraper = getscraperorresponse(short_name, "apidataread", request.user)
+    if type(scraper) in [str, unicode]:
+        result = json.dumps({'error':scraper, "short_name":short_name})
+        if request.GET.get("callback"):
+            result = "%s(%s)" % (request.GET.get("callback"), result)
+        return HttpResponse(result)
+    
     dataproxy = DataStore(request.GET.get('name'))
     lattachlist = request.GET.get('attach', '').split(";")
     attachlist = [ ]
@@ -257,27 +255,41 @@ def userinfo_handler(request):
 
 
 def runevent_handler(request):
-    scraper = getscraperorresponse(request, "apiscraperruninfo")
-    if isinstance(scraper, HttpResponse):  return scraper
+    short_name = request.GET.get('name')
+    scraper = getscraperorresponse(short_name, "apiscraperruninfo", request.user)
+    if type(scraper) in [str, unicode]:
+        result = json.dumps({'error':scraper, "short_name":short_name})
+        if request.GET.get("callback"):
+            result = "%s(%s)" % (request.GET.get("callback"), result)
+        return HttpResponse(result)
+    
+    
     runid = request.GET.get('runid', '-1')
     runevent = None
-    if runid[0] == '-':   # allow for negative indexes to get to recent runs
-        try:
-            i = -int(runid)
-            runevents = scraper.scraper.scraperrunevent_set.all().order_by('-run_started')
-            if i < len(runevents):
-                runevent = runevents[i]
-        except ValueError:
-            pass
+    if scraper.wiki_type != "view":
+            # negative index counts back from the most recent run
+        if runid[0] == '-':
+            try:
+                i = -int(runid) - 1
+                runevents = scraper.scraper.scraperrunevent_set.all().order_by('-run_started')
+                if i < len(runevents):
+                    runevent = runevents[i]
+            except ValueError:
+                pass
+        if not runevent:
+            try:
+                runevent = scraper.scraper.scraperrunevent_set.get(run_id=runid)
+            except ScraperRunEvent.DoesNotExist:
+                pass
+        
     if not runevent:
-        try:
-            runevent = scraper.scraper.scraperrunevent_set.get(run_id=runid)
-        except ScraperRunEvent.DoesNotExist:
-            return HttpResponse("Error: run object not found")
+        result = json.dumps({'error':"run_event not found", "short_name":short_name})
+        if request.GET.get("callback"):
+            result = "%s(%s)" % (request.GET.get("callback"), result)
+        return HttpResponse(result)
 
     info = { "runid":runevent.run_id, "run_started":runevent.run_started.isoformat(), 
-                "records_produced":runevent.records_produced, "pages_scraped":runevent.pages_scraped, 
-            }
+             "records_produced":runevent.records_produced, "pages_scraped":runevent.pages_scraped }
     if runevent.run_ended:
         info['run_ended'] = runevent.run_ended.isoformat()
     if runevent.exception_message:
@@ -335,11 +347,34 @@ def convert_date(date_str):
 
 
 def scraperinfo_handler(request):
-    scraper = getscraperorresponse(request, "apiscraperinfo")
-    if isinstance(scraper, HttpResponse):  return scraper
+    result = [ ]
+    
+    quietfields = request.GET.get('quietfields', "").split("|")
     history_start_date = convert_date(request.GET.get('history_start_date', None))
-    quietfields        = request.GET.get('quietfields', "").split("|")
-        
+    
+    
+    try: 
+        rev = int(request.GET.get('version', ''))
+    except ValueError: 
+        rev = None
+
+    for short_name in request.GET.get('name', "").split():
+        scraper = getscraperorresponse(short_name, "apiscraperinfo", request.user)
+        if type(scraper) in [str, unicode]:
+            result.append({'error':scraper, "short_name":short_name})
+        else:
+            result.append(scraperinfo(scraper, history_start_date, quietfields, rev))
+
+    res = json.dumps(result, indent=4)
+    callback = request.GET.get("callback")
+    if callback:
+        res = "%s(%s)" % (callback, res)
+    response = HttpResponse(res, mimetype='application/json; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename=scraperinfo.json'
+    return response
+
+
+def scraperinfo(scraper, history_start_date, quietfields, rev):
     info = { }
     info['short_name']  = scraper.short_name
     info['language']    = scraper.language
@@ -366,11 +401,6 @@ def scraperinfo_handler(request):
             if ucrole.role not in info['userroles']:
                 info['userroles'][ucrole.role] = [ ]
             info['userroles'][ucrole.role].append(ucrole.user.username)
-            
-    try: 
-        rev = int(request.GET.get('version', ''))
-    except ValueError: 
-        rev = None
         
     status = scraper.get_vcs_status(rev)
     if 'code' not in quietfields:
@@ -405,13 +435,7 @@ def scraperinfo_handler(request):
         for runevent in runevents:
             info['runevents'].append(convert_run_event(runevent))
 
-    result = [info]      # a list with one element
-    res = json.dumps(result, indent=4)
-    callback = request.GET.get("callback")
-    if callback:
-        res = "%s(%s)" % (callback, res)
-    response = HttpResponse(res, mimetype='application/json; charset=utf-8')
-    response['Content-Disposition'] = 'attachment; filename=scraperinfo.json'
-    return response
+    return info
+        
 
 
