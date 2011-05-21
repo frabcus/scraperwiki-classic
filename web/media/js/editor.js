@@ -1,9 +1,8 @@
 $(document).ready(function() {
 
     // editor window dimensions
-    var editor_id = 'id_code';
-    var codeeditor = undefined;
-    var codemirroriframe = undefined; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
+    var codeeditor = null;
+    var codemirroriframe = null; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
     var codeeditorbackgroundimage = 'none'; 
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
@@ -67,7 +66,15 @@ $(document).ready(function() {
     var chainpatchnumber = 0; // counts them going out
     var lasttypetime = new Date(); 
 
-    setupCodeEditor();
+    if (window.location.hash != "#plain")
+        setupCodeEditor();
+    else
+    {
+        $('#id_code').keypress(function() { ChangeInEditor("edit"); }); 
+        setupKeygrabs();
+        resizeControls('first');
+    }
+    
     setupMenu();
     setupTabs();
     setupToolbar();
@@ -131,20 +138,26 @@ $(document).ready(function() {
     function ChangeInEditor(changetype) 
     {
         lasttypetime = new Date(); 
-        var historysize = codeeditor.historySize(); // should have (+ historysize.shiftedoffstack)
-        var automode = $('select#automode option:selected').val(); 
-
-        if (changetype == "saved")
-            savedundo = atsavedundo;    // (+historysize.shiftedoffstack)
-        if (changetype == "reload")
-            savedundo = historysize.undo;   // (+historysize.shiftedoffstack) 
-
-        if ((changetype == "reload") || (changetype == "initialized"))
-            lastsavedcode = codeeditor.getCode(); 
-
-        if (historysize.undo + historysize.redo < savedundo)
-            savedundo = -1; 
-        var lpageIsDirty = (historysize.undo != savedundo); 
+        var lpageIsDirty; 
+        if (codeeditor)
+        {
+            var historysize = codeeditor.historySize(); 
+            var automode = $('select#automode option:selected').val(); 
+    
+            if (changetype == "saved")
+                savedundo = atsavedundo
+            if (changetype == "reload")
+                savedundo = historysize.undo + historysize.lostundo; 
+            if ((changetype == "reload") || (changetype == "initialized"))
+                lastsavedcode = codeeditor.getCode(); 
+    
+            var lpageIsDirty = (historysize.undo + historysize.lostundo != savedundo); 
+        }
+        else
+        {
+            lpageIsDirty = (changetype == "edit"); 
+            $('select#automode #id_autotype').attr('disabled', true); 
+        }
 
         if (pageIsDirty != lpageIsDirty)
         {
@@ -158,7 +171,7 @@ $(document).ready(function() {
         // that will be applied when someone else opens a window
             if (pageIsDirty && (automode != 'autotype'))
                 $('select#automode #id_autotype').attr('disabled', true); 
-            else if (!pageIsDirty && !$('select#automode #id_autosave').attr('disabled'))
+            else if (!pageIsDirty && !$('select#automode #id_autosave').attr('disabled') && codeeditor)
                 $('select#automode #id_autotype').attr('disabled', false); 
         }
 
@@ -173,6 +186,8 @@ $(document).ready(function() {
     // and make it appear selected for the broadcast user
         if (automode == 'autotype')
         {
+            //assert codeeditor;
+
             // send any edits up the line (first to the chat page to show we can decode it)
             var historystack = codeeditor.editor.history.history; 
             var redohistorystack = codeeditor.editor.history.redoHistory; 
@@ -266,8 +281,8 @@ $(document).ready(function() {
             lineNumbers: true,
             indentUnit: indentUnits[scraperlanguage],
             readOnly: false, // cannot be changed once started up
-            undoDepth: 200,  // defaults to 50.  wait till we get lostundo value
-            undoDelay: 800, // 2 seconds  (default is 800)
+            undoDepth: 200,  // defaults to 50.  
+            undoDelay: 300,  // (default is 800)
             tabMode: "shift", 
             disableSpellcheck: true,
             autoMatchParens: true,
@@ -280,18 +295,18 @@ $(document).ready(function() {
             //noScriptCaching: true, // essential when hacking the codemirror libraries
 
             // this is called once the codemirror window has finished initializing itself
-            initCallback: function() {
-                    codemirroriframe = codeeditor.frame // $("#id_code").next().children(":first"); (the object is now a HTMLIFrameElement so you have to set the height as an attribute rather than a function)
-                    codemirroriframeheightdiff = codemirroriframe.height - $("#codeeditordiv").height(); 
-                    codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
-                    setupKeygrabs();
-                    resizeControls('first');
-                    setCodeeditorBackgroundImage(codeeditorbackgroundimage); // in case the signal got in first
-                    ChangeInEditor("initialized"); 
-                } 
-          };
-
-          codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
+            initCallback: function() 
+            {
+                codemirroriframe = codeeditor.frame // $("#id_code").next().children(":first"); (the object is now a HTMLIFrameElement so you have to set the height as an attribute rather than a function)
+                codemirroriframeheightdiff = codemirroriframe.height - $("#codeeditordiv").height(); 
+                codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
+                setupKeygrabs();
+                resizeControls('first');
+                setCodeeditorBackgroundImage(codeeditorbackgroundimage); // in case the signal got in first
+                ChangeInEditor("initialized"); 
+            } 
+        };
+        codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
     }
 
 
@@ -309,34 +324,32 @@ $(document).ready(function() {
     function setCodeeditorBackgroundImage(lcodeeditorbackgroundimage)
     {
         codeeditorbackgroundimage = lcodeeditorbackgroundimage; 
-        if (codemirroriframe != undefined) // also signifies the frame has been built
+        if (codemirroriframe) // also signifies the frame has been built
             codeeditor.win.document.body.style.backgroundImage = codeeditorbackgroundimage; 
+        else
+            $('#id_code').css("background-image", lcodeeditorbackgroundimage); 
     }
 
     //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
     //which means we have to do some seemingly random binds/unbinds
     function addHotkey(sKeyCombination, oFunction)
     {
-        $(document).bind('keydown', sKeyCombination, function(){return false;});
-        $(codeeditor.win.document).unbind('keydown', sKeyCombination);
-
-        $(codeeditor.win.document).bind('keydown', sKeyCombination,
-            function(evt){
-                oFunction();
-                return false; 
-            }
-        );
+        $(document).bind('keydown', sKeyCombination, function() { return false; });
+        var cd = (codeeditor ? codeeditor.win.document : document); 
+        $(cd).unbind('keydown', sKeyCombination);
+        $(cd).bind('keydown', sKeyCombination, function(evt) { oFunction(); return false; }); 
     }
 
     function setupKeygrabs()
     {
-		if ( navigator.userAgent.toLowerCase().indexOf("mac")!=-1 ) 
-			addHotkey('meta+s', saveScraper); 
+        if (navigator.userAgent.toLowerCase().indexOf("mac") != -1) 
+            addHotkey('meta+s', saveScraper); 
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+p', popupPreview); 
     };
 
+        // context sensitive detection (not used at the moment)
     function popupHelp()
     {
         // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
@@ -383,7 +396,7 @@ $(document).ready(function() {
     //Setup Menu
     function setupMenu()
     {
-        $('#oldquickhelp').click(popupHelp); 
+        //$('#oldquickhelp').click(popupHelp); 
         $('#chat_line').bind('keypress', function(eventObject) 
         {
             var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
@@ -723,7 +736,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         }
 
         //send the data
-        var code = codeeditor.getCode(); 
+        var code = (codeeditor ? codeeditor.getCode() : $('#id_code').val())
         var urlquery = (!$('#id_urlquery').length || $('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
         data = {
             "command"   : "run",
@@ -750,7 +763,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         {
             if (pageIsDirty)
                 saveScraper(); 
-            else if (lastsavedcode && (lastsavedcode != code))
+            else if (lastsavedcode && (lastsavedcode != code) && codeeditor)
             {
                 var historysize = codeeditor.historySize(); 
                 writeToChat("Page should have been marked dirty but wasn't: historysize="+historysize.undo+"  savedundo="+savedundo); 
@@ -1122,9 +1135,12 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function makeSelection(selrange)
     {
-        var linehandlestart = codeeditor.nthLine(selrange.startline + 1); 
-        var linehandleend = (selrange.endline == selrange.startline ? linehandlestart : codeeditor.nthLine(selrange.endline + 1)); 
-        codeeditor.selectLines(linehandlestart, selrange.startoffset, linehandleend, selrange.endoffset); 
+        if (codeeditor)
+        {
+            var linehandlestart = codeeditor.nthLine(selrange.startline + 1); 
+            var linehandleend = (selrange.endline == selrange.startline ? linehandlestart : codeeditor.nthLine(selrange.endline + 1)); 
+            codeeditor.selectLines(linehandlestart, selrange.startoffset, linehandleend, selrange.endoffset); 
+        }
     }
 
     function transmitSelection()
@@ -1148,9 +1164,13 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function reloadScraper()
     {
         $('.editor_controls #btnCommitPopup').val('Loading...').addClass('darkness');
-        var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: codeeditor.getCode() }, timeout: 10000 }); 
+        var oldcode = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
+        var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: oldcode }, timeout: 10000 }); 
         var reloaddata = $.evalJSON(reloadajax.responseText); 
-        codeeditor.setCode(reloaddata.code); 
+        if (codeeditor)
+            codeeditor.setCode(reloaddata.code); 
+        else
+            $("#id_code").val(reloaddata.code); 
         rev = reloaddata.rev; 
         updateLastSavedRev(rev);
         chainpatchnumber = 0; 
@@ -1277,7 +1297,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 // throw the value straight in or run the code which brings it back in via writeRunOutput()
                 if (scraperlanguage == "html")
                 {
-                    var code = codeeditor.getCode(); 
+                    var code = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
                     activepreviewiframe.document.write(code); 
                     activepreviewiframe.document.close(); 
                     activepreviewiframe = undefined; 
@@ -1314,8 +1334,15 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         if (!bSuccess)
             return; 
 
-        atsavedundo = codeeditor.historySize().undo;  // update only when success
-        var currentcode = codeeditor.getCode(); 
+        if (codeeditor)
+        {
+            var historysize = codeeditor.historySize(); 
+            atsavedundo = historysize.undo + historysize.lostundo; 
+        }
+        else
+            atsavedundo = 1; 
+
+        var currentcode = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
         var sdata = {
                         title           : $('#id_title').val(),
                         commit_message  : "cccommit",   // could get some use out of this if we wanted to
@@ -1763,26 +1790,33 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     
 
     //resize code editor
-   function resizeCodeEditor(){
-      if (codemirroriframe){
-          //resize the iFrame inside the editor wrapping div
-          codemirroriframe.height = (($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px');
-          codemirroriframe.width = (($("#codeeditordiv").width() + codemirroriframewidthdiff) + 'px');
-
-          //resize the output area so the console scrolls correclty
-          iWindowHeight = $(window).height();
-          iEditorHeight = $("#codeeditordiv").height();
-          iControlsHeight = $('.editor_controls').height();
-          iCodeEditorTop = parseInt($("#codeeditordiv").position().top);
-          iOutputEditorTabs = $('#outputeditordiv .tabs').height();
-          iOutputEditorDiv = iWindowHeight - (iEditorHeight + iControlsHeight + iCodeEditorTop) - 30; 
-          $("#outputeditordiv").height(iOutputEditorDiv + 'px');   
-          //$("#outputeditordiv .info").height($("#outputeditordiv").height() - parseInt($("#outputeditordiv .info").position().top) + 'px');
-          $("#outputeditordiv .info").height((iOutputEditorDiv - iOutputEditorTabs) + 'px');
-          //iOutputEditorTabs
-      }
-    }
+   function resizeCodeEditor()
+   {
+       if (codemirroriframe)
+       {
+            //resize the iFrame inside the editor wrapping div
+            codemirroriframe.height = (($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px');
+            codemirroriframe.width = (($("#codeeditordiv").width() + codemirroriframewidthdiff) + 'px');
     
+            //resize the output area so the console scrolls correclty
+            iWindowHeight = $(window).height();
+            iEditorHeight = $("#codeeditordiv").height();
+            iControlsHeight = $('.editor_controls').height();
+            iCodeEditorTop = parseInt($("#codeeditordiv").position().top);
+            iOutputEditorTabs = $('#outputeditordiv .tabs').height();
+            iOutputEditorDiv = iWindowHeight - (iEditorHeight + iControlsHeight + iCodeEditorTop) - 30; 
+            $("#outputeditordiv").height(iOutputEditorDiv + 'px');   
+            //$("#outputeditordiv .info").height($("#outputeditordiv").height() - parseInt($("#outputeditordiv .info").position().top) + 'px');
+            $("#outputeditordiv .info").height((iOutputEditorDiv - iOutputEditorTabs) + 'px');
+            //iOutputEditorTabs
+        }
+        else
+        {
+            $("#id_code").css("height", ($("#codeeditordiv").height()-10) + 'px'); 
+            $("#id_code").css("width", ($("#codeeditordiv").width()-8) + 'px'); 
+        }
+    }
+
 
     //click bar to resize
     function resizeControls(sDirection) {
