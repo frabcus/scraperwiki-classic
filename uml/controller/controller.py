@@ -282,27 +282,15 @@ class ScraperController(BaseController):
 
  
     def execute(self, request):
-            # environment variables, if not reset, appear to leak between scrapers (particularly urlquery).  Don't know how this is possible
         self.idents = []
-        logger.debug(str(request))
         
         scraperguid = request.get("scraperid", "")
-        os.environ['SCRAPER_GUID'] = scraperguid
         self.idents.append('scraperid=%s' % scraperguid)
-
         self.m_runID = request.get("runid", "")
         self.idents.append ('runid=%s' % self.m_runID)
-        os.environ['RUNID'] = self.m_runID
-
         scrapername = request.get("scrapername", "")
         self.idents.append ('scrapername=%s' % scrapername)
-        os.environ['SCRAPER_NAME'] = scrapername
-
         urlquery = request.get("urlquery", "")
-        os.environ['URLQUERY'] = urlquery
-        os.environ['QUERY_STRING'] = urlquery
-
-        #print request, idents
         for value in request['white']:
             self.idents.append('allow=%s' % value)
         for value in request['black']:
@@ -317,6 +305,13 @@ class ScraperController(BaseController):
         childpid   = os.fork()
         
         if childpid == 0:
+                # set the environment variables only in the child process
+            os.environ['SCRAPER_GUID'] = scraperguid
+            os.environ['RUNID'] = self.m_runID
+            os.environ['SCRAPER_NAME'] = scrapername
+            os.environ['URLQUERY'] = urlquery
+            os.environ['QUERY_STRING'] = urlquery
+            
             logger.debug('processexec: %s' % scrapername)
             streamprintsin.close()
             streamjsonsin.close()
@@ -366,13 +361,8 @@ class ScraperController(BaseController):
 
 
 
-# one of these representing the whole controller
+# Should this be ForkingMixIn?
 class ControllerHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
-    """
-    Wrapper class providing a forking server. Note that we run forking
-    and not threaded as we may want to change the user and group id of
-    the executed scripts.
-    """
     pass
 
 
