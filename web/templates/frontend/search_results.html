@@ -7,7 +7,10 @@
         {{ form.q }}
         <input type="submit" value="Go" />
     </form></h2>
-	<p>{{ num_results }} {% ifequal num_results 1 %}result{% else %}results{% endifequal %} found &bull; <a href="/feeds/latest_code_objects_by_search_term/{{ query }}">Create RSS feed for this search term</a></p>
+    <p>
+      {{ num_results }} result{{num_results|pluralize}} found &bull; 
+      <a href="/feeds/latest_code_objects_by_search_term/{{ query }}">Create RSS feed for this search term</a>
+    </p>
 {% endblock %}
 
 {% block content %}
@@ -27,7 +30,10 @@
                     {% include 'frontend/includes/code_object_line.html' %}
                 {% endfor %}
             </ul>
+        {% else %}
+            <p>No scrapers found</p>
         {% endif %}
+        
 
     </div>
 {% endblock %}
