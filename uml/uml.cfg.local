@@ -3,7 +3,6 @@ host	= 127.0.0.1
 port	= 9000
 umllist	= uml001,uml002
 confurl	= allwhite
-path    = ../scraperlibs
 use_queue = False
 queue_name= test_run_queue
 return_queue_name= test_queue_return

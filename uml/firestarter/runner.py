@@ -94,13 +94,6 @@ def buildjdata(code, options, config):
     if jdata.get("draft"):
         jdata["runid"] = "draft|||%s" % jdata["runid"]
 
-    # the sys.path added internally into the controller (strange configuration)
-    jdata["paths"] = [ ]
-    if config.has_option ('dispatcher', 'path') :
-        for path in config.get('dispatcher', 'path').split(','):
-            if path:
-                jdata["paths"].append(path)
-
     # set the white and blacklists
     jdata["white"] = [ ]
     jdata["black"] = [ ]

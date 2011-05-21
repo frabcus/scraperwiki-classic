@@ -282,25 +282,25 @@ class ScraperController(BaseController):
 
  
     def execute(self, request):
-        logger.debug('Execute %s' % request.get("scrapername"))
+            # environment variables, if not reset, appear to leak between scrapers (particularly urlquery).  Don't know how this is possible
         self.idents = []
-        if request.get("scraperid"):
-            self.idents.append('scraperid=%s' % request.get("scraperid"))
-            os.environ['SCRAPER_GUID'] = request.get("scraperid")
+        logger.debug(str(request))
+        
+        scraperguid = request.get("scraperid", "")
+        os.environ['SCRAPER_GUID'] = scraperguid
+        self.idents.append('scraperid=%s' % scraperguid)
 
-        self.m_runID = None
-        if request.get("runid"):
-            self.idents.append ('runid=%s' % request.get("runid"))
-            os.environ['RUNID'] = request.get("runid")
-            self.m_runID = request.get("runid")
+        self.m_runID = request.get("runid", "")
+        self.idents.append ('runid=%s' % self.m_runID)
+        os.environ['RUNID'] = self.m_runID
 
-        if request.get("scrapername"):
-            self.idents.append ('scrapername=%s' % request.get("scrapername"))
-            os.environ['SCRAPER_NAME'] = request.get("scrapername")
+        scrapername = request.get("scrapername", "")
+        self.idents.append ('scrapername=%s' % scrapername)
+        os.environ['SCRAPER_NAME'] = scrapername
 
-        if request.get("urlquery"):
-            os.environ['URLQUERY'] = request.get("urlquery")
-            os.environ['QUERY_STRING'] = request.get("urlquery")
+        urlquery = request.get("urlquery", "")
+        os.environ['URLQUERY'] = urlquery
+        os.environ['QUERY_STRING'] = urlquery
 
         #print request, idents
         for value in request['white']:
@@ -309,13 +309,15 @@ class ScraperController(BaseController):
             self.idents.append('block=%s' % value)
         self.idents.append('')   # to get an extra \n at the end
 
+        logger.debug('Execute %s' % scrapername)
+        
         streamprintsin, streamprintsout = socket.socketpair()
         streamjsonsin, streamjsonsout = socket.socketpair()
         
         childpid   = os.fork()
         
         if childpid == 0:
-            logger.debug('processexec: %s' % (request.get("scrapername")))
+            logger.debug('processexec: %s' % scrapername)
             streamprintsin.close()
             streamjsonsin.close()
             tmpscriptfile = '/tmp/scraper.%d' % os.getpid() 
@@ -323,7 +325,7 @@ class ScraperController(BaseController):
                 # eventually calls execvp("php exec.php") and never returns
         
         else:
-            logger.debug('childpid %s: %s' % (childpid, request.get("scrapername")))
+            logger.debug('childpid %s: %s' % (childpid, scrapername))
             runidstocontrollers[self.m_runID] = self
             pidstorunids[childpid] = self.m_runID
 
@@ -333,7 +335,7 @@ class ScraperController(BaseController):
             try:
                 endingmessage = self.processrelayoutput(streamprintsin, streamjsonsin, childpid)
             except Exception, e:
-                logger.exception('process main exception: %s  %s' % (childpid, request.get("scrapername")))
+                logger.exception('process main exception: %s  %s' % (childpid, scrapername))
                 endingmessage = None
 
             waited_pid, waited_status = os.waitpid(childpid, 0)
