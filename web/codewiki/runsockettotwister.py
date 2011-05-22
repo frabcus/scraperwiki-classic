@@ -40,6 +40,8 @@ class RunnerSocket:
                 }
         self.soc.send(json.dumps(rdata)+"\r\n") 
 
+# should identify the django type with a special automode
+# automode
 
         # incoming messages from twister are delimited by ",\r\n"
     def next(self):

@@ -39,6 +39,12 @@
     {# the primary library #}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editor.js?{{settings.REVISION}}"></script>
 
+    {# for popupDiff history #}
+    {% with scraper.language|lower as language %}
+      {% include 'codewiki/includes/codemirror_parsers.html' %}
+    {% endwith %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/codeviewer.js?{{settings.REVISION}}"></script>  {# highlightCode(code, Parser), highlightOtherCode(greencode, redcode, matcheropcodes, Parser) #}
+
     {% if not debug %}
         <script type="text/javascript">
 
@@ -57,163 +63,170 @@
 </head>
 
 <body>
-    {# Hidden inputs for passing to js #}
-    <input type="hidden" id="short_name"        value="{{ scraper.short_name }}"/>
-    <input type="hidden" id="scraper_guid"      value="{{ scraper.guid }}"/>
-    <input type="hidden" id="sourcescraper"     value="{{ source_scraper }}"/>            
-    <input type="hidden" id="fork"              value="{{ fork }}"/>            
-    <input type="hidden" id="username"          value="{{ request.user.username }}"/>
-    <input type="hidden" id="userrealname"      value="{{ request.user.get_profile.name }}"/>
-    <input type="hidden" id="isstaff"           value="{% if request.user.is_staff %}yes{% endif %}"/>
-    <input type="hidden" id="scraperlanguage"   value="{{ scraper.language }}"/>
-    <input type="hidden" id="originalrev"       value="{{rev}}"/>
-    <input type="hidden" id="codemirror_url"    value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
-    <input type="hidden" id="id_wiki_type"      value="{{scraper.wiki_type}}"/>
 
-    {# declare all the URLs the javascript is going to want access to #}
-    <input type="hidden" id="userprofileurl"    value="{% url profiles_profile_detail 'XXX' %}"/>
-    <input type="hidden" id="saveurl"           value="{% url handle_editor_save %}"/>
-    <input type="hidden" id="proxycachedurl"    value="{% url proxycached %}"/>
-    <input type="hidden" id="quickhelpurl"      value="{% url quickhelp %}"/>
+{# Hidden inputs for passing to js #}
+<input type="hidden" id="short_name"        value="{{ scraper.short_name }}"/>
+<input type="hidden" id="scraper_guid"      value="{{ scraper.guid }}"/>
+<input type="hidden" id="sourcescraper"     value="{{ source_scraper }}"/>            
+<input type="hidden" id="fork"              value="{{ fork }}"/>            
+<input type="hidden" id="username"          value="{{ request.user.username }}"/>
+<input type="hidden" id="userrealname"      value="{{ request.user.get_profile.name }}"/>
+<input type="hidden" id="isstaff"           value="{% if request.user.is_staff %}yes{% endif %}"/>
+<input type="hidden" id="scraperlanguage"   value="{{ scraper.language }}"/>
+<input type="hidden" id="originalrev"       value="{{rev}}"/>
+<input type="hidden" id="codemirror_url"    value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
+<input type="hidden" id="id_wiki_type"      value="{{scraper.wiki_type}}"/>
 
-    {% if scraper.short_name %}
-        <input type="hidden" id="viewrunurl"    value="{% url rpcexecute scraper.short_name %}"/>
-        <input type="hidden" id="editorreloadurl" value="{% url reload scraper.short_name %}"/>
-    {% endif %}
+{# declare all the URLs the javascript is going to want access to #}
+<input type="hidden" id="userprofileurl"    value="{% url profiles_profile_detail 'XXX' %}"/>
+<input type="hidden" id="saveurl"           value="{% url handle_editor_save %}"/>
+<input type="hidden" id="proxycachedurl"    value="{% url proxycached %}"/>
+<input type="hidden" id="quickhelpurl"      value="{% url quickhelp %}"/>
+<input type="hidden" id="rawcodeurl"        value="{% url raw scraper.short_name %}"/>
+<input type="hidden" id="diffsequrl"        value="{% url diffseq scraper.short_name %}"/>
 
-        <div class="editor">
-            <div id="divDraftSavedWarning" class="draft_warning" style="display:none;">
-                A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next={% url handle_session_draft %}">sign in or create an account</a>.
-            </div>
-            {% ifequal rev 'draft' %}
-                <div class="draft_warning">
-                    Warning: this scraper has not been saved or committed. <a href="{% url login %}?next={% url handle_session_draft %}">Sign in or create an account</a> to save it permanently, or <a href="{% url delete_draft %}">discard changes</a>
-                </div>
-            {% endifequal %}
 
-            {# Header #}
-            <div class="editor_header">
-                <div class="title">
-                    <a id="aCloseEditor" href="{% url frontpage %}" title="Home">
-                        <img src="{{ MEDIA_URL }}images/editor_logo.png" width="39" height="25"/>
-                    </a>
-                    {% if scraper.owner %}
-                        {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %}
-                    {% else %}
-                        {% if request.user.get_profile.name %}{{ request.user.get_profile.name }}{% else %}{{request.user.username}}{% endif %}
-                    {% endif %}
-                    / <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
-                </div>
-                <div class="page_tabs small">
-                    {% if scraper.id %}
-                        {% include 'codewiki/includes/tabs.html' %}
-                    {% else %}
-                        {% include 'codewiki/includes/cancel_button.html' %}
-                    {% endif %}
-                </div>
-                <span id="border_hide"></span>
-            </div>
+{% if scraper.short_name %}
+    <input type="hidden" id="viewrunurl"    value="{% url rpcexecute scraper.short_name %}"/>
+    <input type="hidden" id="editorreloadurl" value="{% url reload scraper.short_name %}"/>
+{% endif %}
 
-            {# Code editor #}
-            <div class="editor_code" id="codeeditordiv">
-               <textarea id="id_code" style="width:90%" rows="10" cols="80" name="code">{{code}}</textarea>
-            </div>
+<div class="editor">
+    <div id="divDraftSavedWarning" class="draft_warning" style="display:none;">
+        A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next={% url handle_session_draft %}">sign in or create an account</a>.
+    </div>
+    {% ifequal rev 'draft' %}
+        <div class="draft_warning">
+            Warning: this scraper has not been saved or committed. <a href="{% url login %}?next={% url handle_session_draft %}">Sign in or create an account</a> to save it permanently, or <a href="{% url delete_draft %}">discard changes</a>
+        </div>
+    {% endifequal %}
 
-            {# Controls #}
-            <div class="editor_controls">
-                <a class="helplink" href="{% url docsroot scraper.language %}" target="_blank" title="Show useful commands">Documentation</a>
-                {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
-                  <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R)"/>
-                {% endifnotequal %}{% endifnotequal %}
-                {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'javascript' %}
-                  <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P)"/>
-                {% endifnotequal %}{% endifequal %}
-
-                {# hidden if not necessary #}
-                <select id="automode">
-                    <option name="autotype" value="autotype" id="id_autotype">broadcast</option>
-                    <option name="autosave" value="autosave" id="id_autosave"  {% if scraper.id %}selected{% endif %}>editing</option>
-                    <option name="autoload" value="autoload" id="id_autoload" disabled>watching</option>
-                    <option name="draft"    value="draft"    id="id_draft" {% if not scraper.id %}selected{% endif %}>draft editing</option>
-                </select>
-
-                {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
-                  <label for="id_urlquery" class="hide">Urlquery:</label>
-                  <input id="id_urlquery" type="text" class="text" name="urlquery" title="URL query string passed to the view" /> 
-                {% endifnotequal %}{% endifnotequal %}{% endifequal %}
-
-                <img id="running_annimation" src="{{MEDIA_URL}}/images/running.gif"/>
-                <span id="watcherstatus"></span>
-            
-                <div class="right">
-                    <span class="last_saved"><span id="idlastrevnumber">{% if rev.rev %} Rev: {{rev.rev}} {% endif %}</span></span>
-                    {% if scraper.id %}
-                        <a id="aCloseEditor1" href="{% url code_overview scraper.wiki_type scraper.short_name %}">close editor</a>
-                    {% else %}
-                        <a id="aCloseEditor1" href="{% url frontpage %}">close editor</a>
-                    {% endif %}
-                    <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save" title="Save this {{scraper.wiki_type}} (Ctrl + S)"/>
-                </div>
-            </div>
-
-            {# Consoles #}
-            <div id="outputeditordiv" class="editor_output">
-                <div class="tabs">
-                    <ul>
-                    {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
-                        <li class="console">
-                            <a href="#" title="Console output from scraper">Console</a>
-                        </li>
-                        <li class="data">
-                            <a href="#" title="The data that this scraper generates">Data</a>
-                        </li>
-                        <li class="sources">
-                            <a href="#" title="Pages you are scraping">Sources</a>
-                        </li>
-                    {% endifnotequal %}{% endifnotequal %}
-                        <li class="chat">
-                            <a href="#" title="Communicate to others">Chat</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="info">
-                    <div id="output_console" class="output">
-                        <div class="output_content"></div>
-                    </div>
-                    <div id="output_data" class="output">
-                        <table class="output_content">
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    <div id="output_sources" class="output">
-                        <div class="output_content"></div>
-                    </div>
-                    <div id="output_chat" class="output">
-                        <table class="output_content">
-                            <tbody></tbody>
-                        </table>
-                        <input type="text" name="chat_line" value="" id="chat_line"/>
-                    </div>
-                </div>
-            </div>
-      </div>
-  
-      <div id="feedback_messages">
+    {# Header #}
+    <div class="editor_header">
+      <div class="title">
+        <a id="aCloseEditor" href="{% url frontpage %}" title="Home">
+          <img src="{{ MEDIA_URL }}images/editor_logo.png" width="39" height="25"/>
+        </a>
+        {% if scraper.owner %}
+          {% if scraper.owner.get_profile.name %}{{ scraper.owner.get_profile.name }}{% else %}{{scraper.owner.username}}{% endif %}
+        {% else %}
+          {% if request.user.get_profile.name %}{{ request.user.get_profile.name }}{% else %}{{request.user.username}}{% endif %}
+        {% endif %}
+        / 
+        <input id="id_title" type="text" title="Untitled" value="{{scraper.title}}" name="title"/>
       </div>
 
-     {% comment %}
-      {% if request.user.is_staff %}
-      <div style="hidden">  {# for temporary safekeeping #}
-        <p>
-          <input type="checkbox" id="showautomode" checked />Always show automode dropdown.  
-          <input type="checkbox" id="popuplinenumbers"/>Show line numbers in popup of cached page.
-        </p>
-          <p class="staff">
-          You are using Codemirror-{{codemirrorversion}}.
-          Last typed timestamp: <span class="staff" id="lasttypedtimestamp">...</span>
-          </p>
+      <div class="page_tabs small">
+        {% if scraper.id %}
+          {% include 'codewiki/includes/tabs.html' %}
+        {% else %}
+          {% include 'codewiki/includes/cancel_button.html' %}
+        {% endif %}
       </div>
-     {% endif %}
-    {% endcomment %}
+    </div>
+
+    {# Code editor #}
+    <div class="editor_code" id="codeeditordiv">
+        <textarea id="id_code" style="width:90%" rows="10" cols="80" name="code">{{code}}</textarea>
+    </div>
+
+    {# Controls #}
+    <div class="editor_controls">
+        <a class="helplink" href="{% url docsroot scraper.language %}" target="_blank" title="Show useful commands">Documentation</a>
+        {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
+            <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R)"/>
+        {% endifnotequal %}{% endifnotequal %}
+        {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'javascript' %}
+            <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P)"/>
+        {% endifnotequal %}{% endifequal %}
+
+        {# hidden if not necessary #}
+        <select id="automode">
+            <option name="autotype" value="autotype" id="id_autotype">broadcast</option>
+            <option name="autosave" value="autosave" id="id_autosave"  {% if scraper.id %}selected{% endif %}>editing</option>
+            <option name="autoload" value="autoload" id="id_autoload" disabled>watching</option>
+            <option name="draft"    value="draft"    id="id_draft" {% if not scraper.id %}selected{% endif %}>draft editing</option>
+        </select>
+
+        {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
+            <label for="id_urlquery" class="hide">Urlquery:</label>
+            <input id="id_urlquery" type="text" class="text" name="urlquery" title="URL query string passed to the view" /> 
+        {% endifnotequal %}{% endifnotequal %}{% endifequal %}
+
+        <img id="running_annimation" src="{{MEDIA_URL}}/images/running.gif"/>
+        <span id="watcherstatus"></span>
+    
+        <div class="right">
+            <span id="idlastrevnumber" {% if not rev %}class="hide"{% endif %}>
+                Rev: <span>{{rev}}</span>
+            </span>
+
+            {% if scraper.id %}
+                <a id="aCloseEditor1" href="{% url code_overview scraper.wiki_type scraper.short_name %}">close editor</a>
+            {% else %}
+                <a id="aCloseEditor1" href="{% url frontpage %}">close editor</a>
+            {% endif %}
+            <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save" title="Save this {{scraper.wiki_type}} (Ctrl + S)"/>
+        </div>
+    </div>
+
+    {# Consoles #}
+    <div id="outputeditordiv" class="editor_output">
+        <div class="tabs">
+            <ul>
+            {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
+                <li class="console">
+                    <a href="#" title="Console output from scraper">Console</a>
+                </li>
+                <li class="data">
+                    <a href="#" title="The data that this scraper generates">Data</a>
+                </li>
+                <li class="sources">
+                    <a href="#" title="Pages you are scraping">Sources</a>
+                </li>
+            {% endifnotequal %}{% endifnotequal %}
+                <li class="chat">
+                    <a href="#" title="Communicate to others">Chat</a>
+                </li>
+            </ul>
+        </div>
+        <div class="info">
+            <div id="output_console" class="output">
+                <div class="output_content"></div>
+            </div>
+            <div id="output_data" class="output">
+                <table class="output_content">
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="output_sources" class="output">
+                <div class="output_content"></div>
+            </div>
+            <div id="output_chat" class="output">
+                <table class="output_content">
+                    <tbody></tbody>
+                </table>
+                <input type="text" name="chat_line" value="" id="chat_line"/>
+            </div>
+        </div>
+    </div>
+
+    <div class="hide">
+      <div class="codepreviewer">
+        <span class="revelem">
+            <span class="revchange">-1</span>
+            <span class="revchange">+1</span>
+            <span class="prevrev">PREVREV</span>
+            <span class="ihistory_date">DATE</span>
+            <span class="rev">CURRREV</span>
+        </span>
+        <div>
+            <div class="linenumbers"></div>
+            <pre class="outputlines"></pre>
+        </div>
+      </div>
+    </div>
+</div>
+
 </body>
 </html>

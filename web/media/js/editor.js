@@ -1226,6 +1226,14 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             return true;
         });
 
+        if (isstaff)
+            $('#idlastrevnumber').click(popupDiff); 
+        $('.codepreviewer .revchange').click(function() 
+        {
+            var revchange = parseInt($(this).text()); 
+            loadRevIntoPopup(revchange); 
+        }); 
+
         $(window).unload(function()
         {
             bSuppressDisconnectionMessages = true; 
@@ -1568,7 +1576,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     };
 
 
-    function parsehighlightcode(sdata, lmimetype)
+    function lparsehighlightcode(sdata, lmimetype)
     {
         var cachejson; 
         try 
@@ -1614,6 +1622,64 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     }
 
 
+        // share this with history.html through codeviewer.js, and start to bring in the diff technology from there
+        // and also set the date for the revision
+    var fetchedcache = { }; // cached code of different versions
+    function cachefetch(cid, callback)
+    {
+        if (cid && (fetchedcache[cid] == undefined))
+        {
+            var url; 
+            if (cid.substring(0, 4) == "?rev")
+                url = $("#rawcodeurl").val()+cid; 
+            else
+                url = $("#diffsequrl").val()+cid; 
+            $.ajax({url:url, success: function(sdata) 
+            {
+                fetchedcache[cid] = sdata; 
+                callback(); 
+            }}); 
+        }
+        else
+            callback(); 
+    }
+
+    function loadRevIntoPopup(revchange)
+    {
+        var codepreviewerdiv = $('.simplemodal-wrap .codepreviewer'); 
+        var currrev = parseInt(codepreviewerdiv.find('span.rev').text()); 
+        var rev = parseInt(codepreviewerdiv.find('span.prevrev').text()); 
+        var newrev = Math.max(0, Math.min(currrev, rev + revchange)); 
+        codepreviewerdiv.find('span.prevrev').text(newrev); 
+        var cidrev = "?rev="+newrev; 
+        cachefetch(cidrev, function() 
+        { 
+            var wrapheight = $('.simplemodal-wrap').height(); 
+            codepreviewerdiv.find('.outputlines').empty(); 
+            codepreviewerdiv.find('.linenumbers').empty(); 
+            highlightCode(fetchedcache[cidrev], Parser, codepreviewerdiv); 
+            $('.simplemodal-wrap').css("height", wrapheight + "px").css("overflow", "auto"); 
+        }); 
+    }
+
+    function popupDiff()
+    {
+        var rev = parseInt($("#idlastrevnumber span").text()); 
+        var prevrev = rev - 1; 
+        if (prevrev < 0)
+            return; 
+        modaloptions = { overlayClose: true, 
+                         overlayCss: { cursor:"auto" }, 
+                         containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:0, width:"90%", "text-align":"left", cursor:"auto" }, 
+                         containerId: 'simplemodal-container' 
+                       }; 
+        $('.codepreviewer').modal(modaloptions); 
+        var codepreviewerdiv = $('.simplemodal-wrap .codepreviewer'); 
+        codepreviewerdiv.find('span.prevrev').text(rev); 
+        codepreviewerdiv.find('span.rev').text(rev); 
+        loadRevIntoPopup(0); 
+    }
+
 
     function popupCached(cacheid, lmimetype)
     {
@@ -1630,7 +1696,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             { 
                 $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, timeout: 10000, success: function(sdata) 
                 {
-                    cachejson = parsehighlightcode(sdata, lmimetype); 
+                    cachejson = lparsehighlightcode(sdata, lmimetype); 
                     if (cachejson["content"].length < 15000)  // don't cache huge things
                         cachehidlookup[cacheid] = cachejson; 
 

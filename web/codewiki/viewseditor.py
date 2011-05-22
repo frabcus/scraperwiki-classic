@@ -140,7 +140,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         assert 'currcommit' not in status 
         # assert not status['ismodified']  # should hold, but disabling it for now
         context['code'] = status["code"]
-        context['rev'] = status.get('prevcommit')
+        context['rev'] = status.get('prevcommit',{}).get("rev") or 0
 
     # create a temporary scraper object
     else:

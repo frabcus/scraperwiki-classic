@@ -4325,18 +4325,7 @@ body.fullscreen #embedinstructions textarea {
 }
 
 
-
-
-/* last saved date / revision */
-
-.last_saved {
-	color: #808080;
-	margin: 0;
-	padding: 0.5em 0em 0.5em 0;
-}
-
 /* infobox */
-
 .infobox {
 	border: solid 1px #ccc;
 	font-size: 0.9em;

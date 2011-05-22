@@ -578,20 +578,6 @@ dl.quick_help li code {
 	display: none;
 }
 
-/* Feedback messages */
-
-#feedback_messages {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	background: url(../images/message_back.png);
-	width: 50%;
-	padding: 1em 1em 2em 1em;
-	text-align: left;
-	color: #fff;
-	text-shadow: 2px 2px 3px #000;
-	display: none;
-}
 
 .chathidden {
 	display: none;
@@ -609,12 +595,19 @@ a.cachepopup {
 
 a.cachepopup:hover {
 	background-color: #ffffd7;
-	; cursor: pointer;
+	cursor: pointer;
 	text-decoration: none;
 }
 
-/* quickhelp */
+#idlastrevnumber {
+	color: #808080;
+	margin: 0;
+	padding: 0.5em 0em 0.5em 0;
+    cursor: pointer;
+}
 
+
+/* quickhelp */
 div.quickhelp {
 	padding: 1em;
 	font-size: 0.9em;

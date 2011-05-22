@@ -139,8 +139,8 @@
 {% endblock %}
 
 
-{% block run_script %}
-  {{ block.super }}
+{% block jrun_script %}
+<script type="text/javascript" defer="defer">
 
 var fetchedcache = { }; // cached code of different versions
 function cachefetch(cid, callback)
@@ -369,4 +369,5 @@ $(document).ready(function()
     }
 
 }); 
+</script>
 {% endblock %}
