@@ -17,9 +17,10 @@ DESC="Twister"
 NAME=twister
 VARDIR=/var
 PIDFILE=$VARDIR/run/$NAME.pid
+LOGFILE=$VARDIR/log/$NAME.log
 DAEMON=/bin/sh
 CONFIG=/var/www/scraperwiki/uml/uml.cfg
-DAEMON_ARGS="/var/www/scraperwiki/uml/twister/twister.sh --pidfile=$PIDFILE --config=$CONFIG --setuid"
+DAEMON_ARGS="/var/www/scraperwiki/uml/twister/twister.sh --pidfile=$PIDFILE --config=$CONFIG --logfile=$LOGFILE --setuid"
 SCRIPTNAME=/etc/init.d/$NAME
 
 

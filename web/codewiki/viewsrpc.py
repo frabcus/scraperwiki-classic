@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 
 from django.conf import settings
 
-from codewiki import models
+from codewiki import models, runsockettotwister
 import frontend
 import urllib
 import subprocess
@@ -48,6 +48,7 @@ def MakeRunner(request, scraper, code):
     
     runner.stdin.close()
     return runner
+
 
 
 def scraperwikitag(scraper, html, panepresent):
@@ -123,12 +124,17 @@ def rpcexecute(request, short_name, revision=None):
     if scraper.language == 'javascript':
         HttpResponse(code, mimetype='application/javascript')
 
+    
+# uncomment this line and comment next two lines to enable runner through twisted
+    #runnerstream = runsockettotwister.RunnerSocket(scraper, revision, request.META["QUERY_STRING"])
     runner = MakeRunner(request, scraper, code)
+    runnerstream = runner.stdout
+
 
     # we build the response on the fly in case we get a contentheader value before anything happens
     response = None 
     panepresent = {"scraperwikipane":[], "firstfivelines":[]}
-    for line in runner.stdout:
+    for line in runnerstream:
         try:
             message = json.loads(line)
         except:

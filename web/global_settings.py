@@ -201,6 +201,8 @@ CODEMIRROR_URL = "CodeMirror-%s/" % CODEMIRROR_VERSION
 
 APPROXLENOUTPUTLIMIT = 3000
 
+CONFIGFILE = "/var/www/scraperwiki/uml/uml.cfg"
+
 HTTPPROXYURL = "http://localhost:9005"
 DISPATCHERURL = "http://localhost:9000"
 

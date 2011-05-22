@@ -9,6 +9,7 @@ except: import simplejson as json
 import subprocess
 
 from codewiki.models import Code, Scraper, ScraperRunEvent, DomainScrape
+from codewiki import runsockettotwister
 import frontend 
 import settings
 import datetime
@@ -91,7 +92,7 @@ def kill_running_runid(runid):
 
 
 
-def runmessageloop(runner, event, approxlenoutputlimit):
+def runmessageloop(runnerstream, event, approxlenoutputlimit):
     # a partial implementation of editor.js
     exceptionmessage = [ ]
     completiondata = None
@@ -100,7 +101,7 @@ def runmessageloop(runner, event, approxlenoutputlimit):
     
     temptailmessage = "\n\n[further output lines suppressed]\n"
     while True:
-        line = runner.stdout.readline().strip()
+        line = runnerstream.readline().strip()
         if not line:
             break
         try:
@@ -241,32 +242,39 @@ class ScraperRunner(threading.Thread):
             pass # print "\n\nHold on this scraper isn't overdue!!!! %s\n\n" % self.scraper.short_name
             #return
         
-        guid = self.scraper.guid
-        code = self.scraper.saved_code().encode('utf-8')
-
-        runner_path = "%s/runner.py" % settings.FIREBOX_PATH
-        failed = False
-        
         start = time.time()
-        args = [runner_path]
-        args.append('--guid=%s' % self.scraper.guid)
-        args.append('--language=%s' % self.scraper.language.lower())
-        args.append('--name=%s' % self.scraper.short_name)
         
-        runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        runner.stdin.write(code)
-        runner.stdin.close()
+# this allows for using twister version
+        if False:
+            runnerstream = runsockettotwister.RunnerSocket(self.scraper, None, "")
+            pid = os.getpid()
+        else:
+            guid = self.scraper.guid
+            code = self.scraper.saved_code().encode('utf-8')
+    
+            runner_path = "%s/runner.py" % settings.FIREBOX_PATH
+            
+            args = [runner_path]
+            args.append('--guid=%s' % self.scraper.guid)
+            args.append('--language=%s' % self.scraper.language.lower())
+            args.append('--name=%s' % self.scraper.short_name)
+        
+            runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            runner.stdin.write(code)
+            runner.stdin.close()
+            runnerstream = runner.stdout
+            pid = runner.pid
         
         event = ScraperRunEvent()
         event.scraper = self.scraper    # better to pointing directly to a code object
-        event.pid = runner.pid          # only applies when this runner is active
+        event.pid = pid          # only applies when this runner is active
         event.run_id = ''               # set by execution status
         event.run_started = datetime.datetime.now()   # reset by execution status
         event.run_ended = event.run_started  # actually used as last_updated
         event.output = ""
         event.save()
 
-        exceptionmessage = runmessageloop(runner, event, settings.APPROXLENOUTPUTLIMIT)
+        exceptionmessage = runmessageloop(runnerstream, event, settings.APPROXLENOUTPUTLIMIT)
         
         event.run_ended = datetime.datetime.now()
         event.pid = -1  # disable it

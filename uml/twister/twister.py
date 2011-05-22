@@ -120,6 +120,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.isumlmonitoring = None  # used to designate as not being initialized at all (bug if connection lost before it was successfully connected)
 
     def connectionMade(self):
+        logger.info("connection client# %d" % self.factory.clientcount)
         self.factory.clientConnectionMade(self)
             # we don't know what scraper they've opened until information is send with first clientcommmand
     
@@ -161,6 +162,9 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                     parsed_data = json.loads(line)
                 except ValueError:
                     self.writejson({'content':"Command not json parsable:  %s " % line, 'message_type':'console'})
+                    continue
+                if type(parsed_data) != dict or 'command' not in parsed_data:
+                    self.writejson({'content':"Command not json dict with command:  %s " % line, 'message_type':'console'})
                     continue
                 command = parsed_data.get('command')
                 self.clientcommand(command, parsed_data)
@@ -488,12 +492,6 @@ class RunnerFactory(protocol.ServerFactory):
         # set the visible heartbeat goingthere
         #self.lc = task.LoopingCall(self.announce)
         #self.lc.start(10)
-
-        self.m_conf        = ConfigParser.ConfigParser()
-        config = '/var/www/scraperwiki/uml/uml.cfg'
-        self.m_conf.readfp (open(config))
-        self.twisterstatusurl = self.m_conf.get('twister', 'statusurl')
-        
 
     # every 10 seconds sends out a quiet poll
     def announce(self):
