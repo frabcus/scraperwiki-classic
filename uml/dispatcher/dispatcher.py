@@ -36,7 +36,7 @@ logging.config.fileConfig(poptions.config)
 logger = logging.getLogger('dispatcher')
 
 #stdoutlog = open('/var/www/scraperwiki/uml/var/log/dispatcher.log'+"-stdout", 'a', 0)
-stdoutlog = sys.stdout
+stdoutlog = None
 
 child = None
 
@@ -360,8 +360,9 @@ if __name__ == '__main__' :
     if os.fork() == 0 :
         os.setsid()
         sys.stdin = open('/dev/null')
-        sys.stdout = stdoutlog
-        sys.stderr = stdoutlog
+        if stdoutlog:
+            sys.stdout = stdoutlog
+            sys.stderr = stdoutlog
         if os.fork() == 0:
             ppid = os.getppid()
             while ppid != 1:
@@ -404,6 +405,5 @@ if __name__ == '__main__' :
     DispatcherHandler.protocol_version = "HTTP/1.0"
     httpd = DispatcherHTTPServer(('', config.getint('dispatcher', 'port')), DispatcherHandler)
     sa = httpd.socket.getsockname()
-    sys.stdout.write("Serving HTTP on %s port %s\n" % (sa[0], sa[1]))
-    sys.stdout.flush()
+    logger.info("Serving HTTP on %s port %s\n" % (sa[0], sa[1]))
     httpd.serve_forever()

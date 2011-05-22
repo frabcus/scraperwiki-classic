@@ -18,11 +18,8 @@ import re
 import cgi
 import ConfigParser
 import threading
-import optparse
-import pwd
-import grp
-import logging
-import logging.config
+import optparse, pwd, grp
+import logging, logging.config
 
 try    : import json
 except : import simplejson as json

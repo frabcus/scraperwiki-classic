@@ -3,8 +3,11 @@
 DESC="Twister"
 NAME=twister
 DAEMON=/bin/sh
-DAEMON_ARGS="/var/www/scraperwiki/uml/twister/twister.sh --daemon --subproc --varDir=./var"
-PIDFILE=./var/run/$NAME.pid
+VARDIR=/var/www/scraperwiki/uml/var
+PIDFILE=$VARDIR/run/$NAME.pid
+LOGFILE=$VARDIR/log/$NAME.log
+CONFIG=/var/www/scraperwiki/uml/uml.cfg
+DAEMON_ARGS="/var/www/scraperwiki/uml/twister/twister.sh --pidfile=$PIDFILE --config=$CONFIG --logfile=$LOGFILE"
 
 do_start()
 {

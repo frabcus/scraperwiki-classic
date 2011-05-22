@@ -43,7 +43,7 @@ poptions, pargs = parser.parse_args()
 logging.config.fileConfig(configfile)
 logger = logging.getLogger('dataproxy')
 datalib.logger = logger
-stdoutlog = open(poptions.logfile+"-stdout", 'a', 0)
+stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)
 
 
 class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -181,9 +181,10 @@ if __name__ == '__main__':
     # daemon mode
     if os.fork() == 0 :
         os.setsid()
-        sys.stdin  = open('/dev/null')
-        sys.stdout = stdoutlog
-        sys.stderr = stdoutlog
+        sys.stdin = open('/dev/null')
+        if stdoutlog:
+            sys.stdout = stdoutlog
+            sys.stderr = stdoutlog
         if os.fork() == 0 :
             ppid = os.getppid()
             while ppid != 1 :

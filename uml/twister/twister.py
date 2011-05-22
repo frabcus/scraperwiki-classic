@@ -17,11 +17,27 @@ import sys
 import os
 import signal
 import time
-from optparse import OptionParser
 import ConfigParser
 import datetime
+import optparse, grp, pwd
+import logging, logging.config
 
-varDir = './var'
+parser = optparse.OptionParser()
+parser.add_option("--pidfile")
+parser.add_option("--config")
+parser.add_option("--logfile")
+parser.add_option("--setuid", action="store_true")
+poptions, pargs = parser.parse_args()
+
+config = ConfigParser.ConfigParser()
+config.readfp(open(poptions.config))
+
+logging.config.fileConfig(poptions.config)
+logger = logging.getLogger('twister')
+
+    # primarily to pick up syntax errors
+stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)  
+
 
 try:    import json
 except: import simplejson as json
@@ -49,13 +65,13 @@ class spawnRunner(protocol.ProcessProtocol):
         self.buffer = ''
     
     def connectionMade(self):
-        print "Starting run"
+        logger.debug("Starting run")
         self.transport.write(self.code)
         self.transport.closeStdin()
     
     # messages from the UML
     def outReceived(self, data):
-        print "out", self.client.guid, data[:100]
+        logger.debug("runner to client# %d %s" % (self.client.clientnumber, data[:100]))
             # although the client can parse the records itself, it is necessary to split them up here correctly so that this code can insert its own records into the stream.
         lines  = (self.buffer+data).split("\r\n")
         self.buffer = lines.pop(-1)  # usually an empty
@@ -76,9 +92,9 @@ class spawnRunner(protocol.ProcessProtocol):
         self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished'}))
         self.client.factory.notifyMonitoringClients(self.client)
         if reason.type == 'twisted.internet.error.ProcessDone':
-            print "run process ended ", reason
+            logger.debug("run process ended %s" % reason)
         else:
-            print "run process ended ok"
+            logger.debug("run process ended ok")
 
 
 
@@ -124,11 +140,13 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             self.factory.anonymouscount += 1
         self.cchatname = "%s|%s" % (self.username, self.chatname)
         self.factory.clientConnectionRegistered(self)  # this will cause a notifyEditorClients to be called for everyone on this scraper
+        logger.info("connection open: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
 
 
     def connectionLost(self, reason):
         if self.processrunning:
             self.kill_run(reason='connection lost')
+        logger.info("connection lost: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
         self.factory.clientConnectionLost(self)
 
         
@@ -149,6 +167,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         
             
     def clientcommand(self, command, parsed_data):
+        logger.debug("command %s client# %d" % (command, self.clientnumber))
         
         # update the lasttouch values on associated aggregations
         if command != 'automode':
@@ -300,7 +319,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         if reason:
             msg = "%s (%s)" % (msg, reason)
         self.writeall(json.dumps({'message_type':'executionstatus', 'content':'killsignal', 'message':msg}))
-        print msg
+        logger.debug(msg)
         try:      # (should kill using the new dispatcher call)
             os.kill(self.processrunning.pid, signal.SIGKILL)
         except:
@@ -333,7 +352,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             args.append('--draft')
 
         args = [i.encode('utf8') for i in args]
-        print "./firestarter/runner.py: %s" % args
+        logger.debug("./firestarter/runner.py: %s" % args)
 
         # from here we should somehow get the runid
         self.processrunning = reactor.spawnProcess(spawnRunner(self, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
@@ -656,93 +675,62 @@ class RunnerFactory(protocol.ServerFactory):
 
 
 
-def execute (port) :
-    runnerfactory = RunnerFactory()
-    reactor.listenTCP(port, runnerfactory)
-    reactor.run()   # this function never returns
 
 
-def sigTerm (signum, frame) :
-    try    : os.kill (child, signal.SIGTERM)
-    except : pass
-    try    : os.remove (varDir + '/run/twister.pid')
-    except : pass
+def sigTerm(signum, frame):
+    os.kill(child, signal.SIGTERM)
+    try:
+        os.remove(poptions.pidfile)
+    except OSError:
+        pass  # no such file
     sys.exit (1)
 
 
+
 if __name__ == "__main__":
-    
-    parser = OptionParser()
-
-    parser.add_option("-p", "--port", dest="port", action="store", type='int',
-                      help="Port that receives connections from orbited.",  
-                      default=9010, metavar="port no (int)")
-    parser.add_option("-v", "--varDir", dest="varDir", action="store", type='string',
-                      help="/var directory for logging and pid files",  
-                      default="/var", metavar="/var directory (string)")
-    parser.add_option("-s", "--subproc", dest="subproc", action="store_true",
-                      help="run in subprocess",  
-                      default=False, metavar="run in subprocess")
-    parser.add_option("-d", "--daemon", dest="daemon", action="store_true",
-                      help="run as daemon",  
-                      default=False, metavar="run as daemon")
-    parser.add_option("-u", "--uid", dest="uid", action="store", type='int',
-                      help="run as specified user",  
-                      default=None, metavar="run as specified user")
-    parser.add_option("-g", "--gid", dest="gid", action="store", type='int',
-                      help="run as specified group",  
-                      default=None, metavar="run as specified group")
-
-    (options, args) = parser.parse_args()
-    varDir = options.varDir
-
-    #  If executing in daemon mode then fork and detatch from the
-    #  controlling terminal. Basically this is the fork-setsid-fork
-    #  sequence.
-    #
-    if options.daemon :
-
-        if os.fork() == 0 :
-            os .setsid()
-            sys.stdin  = open ('/dev/null')
-            sys.stdout = open (options.varDir + '/log/twister', 'w', 0)
-            sys.stderr = sys.stdout
-            if os.fork() == 0 :
+    # daemon mode
+    if os.fork() == 0 :
+        os.setsid()
+        sys.stdin = open('/dev/null')
+        if stdoutlog:
+            sys.stdout = stdoutlog
+            sys.stderr = stdoutlog
+        if os.fork() == 0:
+            ppid = os.getppid()
+            while ppid != 1:
+                time.sleep(1)
                 ppid = os.getppid()
-                while ppid != 1 :
-                    time.sleep (1)
-                    ppid = os.getppid()
-            else :
-                os._exit (0)
-        else :
-            os.wait()
-            sys.exit (1)
+        else:
+            os._exit(0)
+    else:
+        os.wait()
+        sys.exit(1)
 
-        pf = open (options.varDir + '/run/twister.pid', 'w')
-        pf.write  ('%d\n' % os.getpid())
-        pf.close  ()
+    pf = open(poptions.pidfile, 'w')
+    pf.write('%d\n' % os.getpid())
+    pf.close()
 
-    if options.gid is not None : os.setregid (options.gid, options.gid)
-    if options.uid is not None : os.setreuid (options.uid, options.uid)
-    
-    #  If running in subproc mode then the server executes as a child
-    #  process. The parent simply loops on the death of the child and
-    #  recreates it in the event that it croaks.
-    #
-    if options.subproc :
+    if poptions.setuid:
+        gid = grp.getgrnam("nogroup").gr_gid
+        os.setregid(gid, gid)
+        uid = pwd.getpwnam("nobody").pw_uid
+        os.setreuid(uid, uid)
 
-        signal.signal (signal.SIGTERM, sigTerm)
+    #  subproc mode
+    signal.signal(signal.SIGTERM, sigTerm)
+    while True:
+        child = os.fork()
+        if child == 0 :
+            time.sleep (1)
+            break
 
-        while True :
+        sys.stdout.write("Forked subprocess: %d\n" % child)
+        sys.stdout.flush()
 
-            child = os.fork()
-            if child == 0 :
-                time.sleep (1)
-                break
+        os.wait()
 
-            sys.stdout.write("Forked subprocess: %d\n" % child)
-            sys.stdout.flush()
-    
-            os.wait()
-
-    execute (options.port)
+    runnerfactory = RunnerFactory()
+    port = config.getint('twister', 'port')
+    reactor.listenTCP(port, runnerfactory)
+    logger.info("Twister listening on port %d" % port)
+    reactor.run()   # this function never returns

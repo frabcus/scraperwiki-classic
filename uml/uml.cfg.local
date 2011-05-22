@@ -9,6 +9,7 @@ return_queue_name= test_queue_return
 
 [twister]
 statusurl = http://localhost:8000/scrapers/twister/status
+port      = 9010
 
 [webproxy]
 host	= 127.0.0.1
@@ -102,10 +103,10 @@ count	= 2
 
 
 [loggers]
-keys=root,dataproxy,controller,runner,dispatcher
+keys=root,dataproxy,controller,runner,dispatcher,twister
 
 [handlers]
-keys=consoleHandler,logfileHandlerDataproxyDebug,logfileHandlerDataproxyWarning,logfileHandlerDataproxyEmail,logfileHandlerControllerDebug,logfileHandlerControllerWarning,logfileHandlerRunnerDebug,logfileHandlerDispatcherWarning,logfileHandlerDispatcherDebug
+keys=consoleHandler,logfileHandlerWarnings,logfileHandlerEmails,logfileHandlerDataproxyDebug,logfileHandlerControllerDebug,logfileHandlerRunnerDebug,logfileHandlerDispatcherDebug,logfileHandlerTwisterDebug
 
 [formatters]
 keys=simpleFormatter
@@ -117,26 +118,32 @@ handlers=consoleHandler
 
 [logger_dataproxy]
 level=DEBUG
-handlers=logfileHandlerDataproxyDebug,logfileHandlerDataproxyWarning
+handlers=logfileHandlerDataproxyDebug,logfileHandlerWarnings
 qualname=dataproxy
 propagate=0
 
 [logger_controller]
 level=DEBUG
-handlers=logfileHandlerControllerDebug,logfileHandlerControllerWarning
+handlers=logfileHandlerControllerDebug,logfileHandlerWarnings
 qualname=controller
 propagate=0
 
 [logger_runner]
 level=DEBUG
-handlers=logfileHandlerRunnerDebug
+handlers=logfileHandlerRunnerDebug,logfileHandlerWarnings
 qualname=runner
 propagate=0
 
 [logger_dispatcher]
 level=DEBUG
-handlers=logfileHandlerDispatcherDebug,logfileHandlerDispatcherWarning
+handlers=logfileHandlerDispatcherDebug,logfileHandlerWarnings
 qualname=dispatcher
+propagate=0
+
+[logger_twister]
+level=DEBUG
+handlers=logfileHandlerTwisterDebug,logfileHandlerWarnings
+qualname=twister
 propagate=0
 
 
@@ -147,19 +154,24 @@ formatter=simpleFormatter
 args=(sys.stdout,)
 
 
+[handler_logfileHandlerWarnings]
+class=handlers.RotatingFileHandler
+level=WARNING
+formatter=simpleFormatter
+args=('/var/www/scraperwiki/uml/var/log/warnings.log', "a", 100000, 5)
+
+[handler_logfileHandlerEmails]
+class=handlers.SMTPHandler
+level=CRITICAL
+formatter=simpleFormatter
+args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 'ScraperWiki critical error')
+
+
 [handler_logfileHandlerControllerDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/www/scraperwiki/uml/var/log/controller.log', "a", 100000, 5)
-
-[handler_logfileHandlerControllerWarning]
-class=handlers.RotatingFileHandler
-level=WARNING
-formatter=simpleFormatter
-args=('/var/www/scraperwiki/uml/var/log/controller.log-warn', "a", 100000, 5)
-
-
 
 [handler_logfileHandlerDataproxyDebug]
 class=handlers.RotatingFileHandler
@@ -167,31 +179,11 @@ level=DEBUG
 formatter=simpleFormatter
 args=('/var/www/scraperwiki/uml/var/log/dataproxy.log', "a", 100000, 5)
 
-[handler_logfileHandlerDataproxyWarning]
-class=handlers.RotatingFileHandler
-level=WARNING
-formatter=simpleFormatter
-args=('/var/www/scraperwiki/uml/var/log/dataproxy.log-warn', "a", 100000, 5)
-
-[handler_logfileHandlerDataproxyEmail]
-class=handlers.SMTPHandler
-level=CRITICAL
-formatter=simpleFormatter
-args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 'ScraperWiki error in dataproxy')
-
-
 [handler_logfileHandlerDispatcherDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/www/scraperwiki/uml/var/log/dispatcher.log', "a", 100000, 5)
-
-[handler_logfileHandlerDispatcherWarning]
-class=handlers.RotatingFileHandler
-level=WARNING
-formatter=simpleFormatter
-args=('/var/www/scraperwiki/uml/var/log/dispatcher.log-warn', "a", 100000, 5)
-
 
 [handler_logfileHandlerRunnerDebug]
 class=handlers.RotatingFileHandler
@@ -199,6 +191,11 @@ level=DEBUG
 formatter=simpleFormatter
 args=('/var/www/scraperwiki/uml/var/log/runner.log', "a", 100000, 5)
 
+[handler_logfileHandlerTwisterDebug]
+class=handlers.RotatingFileHandler
+level=DEBUG
+formatter=simpleFormatter
+args=('/var/www/scraperwiki/uml/var/log/twister.log', "a", 100000, 5)
 
 [formatter_simpleFormatter]
 format=%(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s
