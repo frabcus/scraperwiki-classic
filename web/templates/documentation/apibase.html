@@ -15,7 +15,6 @@ var showinglookup = {
 
 $(function()
 {
-
     ZeroClipboard.setMoviePath( '{{ MEDIA_URL }}js/ZeroClipboard.swf' );
     var el = $('#id_apiuri_copy');
     var parent = el.parent();
@@ -233,14 +232,20 @@ $(function()
 {% block content %}
 
 <p class="language_chooser">
-    {% if not docindex %}
-    <a href="{% url docs language %}" class="back" title="Back to documentation homepage">
+    {% if scrapername %}
+      <a href="{% url code_overview 'scraper' scrapername %}" class="back" title="Back to scraper overview">
         <img src="{{ MEDIA_URL }}/images/icons/back_arrow.png" width="16" height="16" alt="" />
-        Back to contents</a>
+        Back to scraper
+      </a>
+    {% else %}
+      <a href="{% url docs language %}" class="back" title="Back to documentation homepage">
+        <img src="{{ MEDIA_URL }}/images/icons/back_arrow.png" width="16" height="16" alt="" />
+        Back to contents
+      </a>
     {% endif %}
-   <br class="clear"/>
+    <br class="clear"/>
 </p>
-   <br class="clear"/>
+    <br class="clear"/>
    
    
    
@@ -277,8 +282,8 @@ $(function()
                 </select>
         	</li> 
         	<li class="name">
-                <label for="id_name">name<span class="desc"> of the scraper</span> <span id="overviewreturn">(return to <a href="{% url code_overview 'scraper' 'XXX' %}">overview</a>)</label>
-                <input type="text" name="name" id="id_name" value="{{name}}">
+                <label for="id_name">name<span class="desc"> of the scraper</span> <span id="overviewreturn">(go to <a href="{% url code_overview 'scraper' 'XXX' %}">scraper</a>)</label>
+                <input type="text" name="name" id="id_name" value="{{scrapername}}">
         	</li> 
         	<li class="username">
                 <label for="id_username">username</label>

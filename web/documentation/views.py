@@ -81,8 +81,9 @@ def docexternal(request):
     api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
 
     context = {'language':language, 'api_base':api_base }
-    context["name"] = request.GET.get("name", "")
+    context["scrapername"] = request.GET.get("name", "")
     return render_to_response('documentation/apibase.html', context, context_instance=RequestContext(request))
+
 
 def api_explorer(request):
     url = request.POST.get("apiurl")
