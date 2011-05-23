@@ -140,7 +140,15 @@ $(function()
 	$('#more_requester_div .back').live('click', function(){
 		requester_hide();
 		return false;
-	});	
+	});
+	
+	$('a.submit_link').each(function(){
+		id = $(this).siblings(':submit').attr('id');
+		$(this).addClass(id + '_link')
+	}).bind('click', function(){
+		$(this).siblings(':submit').trigger('click');
+	}).siblings(':submit').hide();
+	
 });
 
 

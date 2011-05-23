@@ -9,8 +9,7 @@ above). You'll get a web based code editor.
 type Ctrl+R.
 </p>
 
-<code>print "Hello, coding in the cloud!"
-</code>
+<code>print "Hello, coding in the cloud!"</code>
 
 <p>(As we go through this tutorial, you can copy and paste each 
 block of code onto the end of your growing scraper, and run it each time.)</p>
@@ -66,8 +65,7 @@ a schema up front.</p>
 
 <p>Replace "print data" in the lxml loop with this save command:</p>
 
-<code>    scraperwiki.sqlite.save(unique_keys=['country'], data=data)
-</code>
+<code>scraperwiki.sqlite.save(unique_keys=['country'], data=data)</code>
 
 <p>The unique keys (just country in this case) identify each piece of data.
 When the scraper runs again, existing data with the same values for the
@@ -88,8 +86,7 @@ data.  The easiest way to get it all out is to "Download spreadsheet (CSV)".
 <p>For more complex queries "Explore with ScraperWiki API". Try this
 query in the SQL query box.</p>
 
-<code>select * from swdata order by years_in_school desc limit 10
-</code>
+<code>select * from swdata order by years_in_school desc limit 10</code>
 
 <p>It gives you the records for the ten countries where children spend
 the most years at school. </p>

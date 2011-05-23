@@ -16,12 +16,18 @@
 {% block content %}
     <div class="content">
         {% if tags %}
-            <ul class="tag_list tags">
+        <!--    <ul class="tag_list tags">
                 <li>Tags found:</li>
                 {% for tag in tags %}
                 <li><a href="{% url single_tag tag.name %}">{{tag.name}}</a></li>
                 {% endfor %}
-            </ul>
+            </ul>   -->
+            
+            <div class="tag_suggestion">
+                <a  href="{% url single_tag tag.name %}" class="yes">Yes! Show me</a>
+                <h4>Are you looking for all scrapers <em>tagged</em> with <a href="{% url single_tag tag.name %}" class="single_tag">{{tag.name}}</a>?</h4>
+            </div>
+            
         {% endif %}
 
         {% if scrapers %}

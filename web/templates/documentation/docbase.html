@@ -8,8 +8,7 @@
 
 {% block run_script %}
     // Add copy button bumf to every <code> element
-    $("code").wrap('<div class="code_wrapper" style="position:relative"/>');
-    $("code").after('<a href="#" class="copy_to_clipboard" title="Click to copy this snippet to your clipboard">Copy</a>');
+    $("code").wrap('<div class="code_outer" style="position:relative"/>').after('<a href="#" class="copy_to_clipboard" title="Click to copy this snippet to your clipboard">Copy</a>');
 
     // Make the copy button work
     ZeroClipboard.setMoviePath( '{{ MEDIA_URL }}js/ZeroClipboard.swf' );
@@ -25,7 +24,7 @@
         code.text(t);
             
         clip = new ZeroClipboard.Client();
-        clip.setText(code.text());
+        clip.setText(code.text().replace(/\s+\n/, "\n"));
         clip.setHandCursor( true );
 
         clip.addEventListener( 'complete', function(client, text) {

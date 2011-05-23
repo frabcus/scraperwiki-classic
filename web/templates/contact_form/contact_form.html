@@ -82,7 +82,9 @@
     { 
         $("#id_subject_dropdown").change(function() { 
             if ($(this).val() == 'request') {
-                $("#requesting_data_tip").show(500);
+                $("#requesting_data_tip").slideDown(250);
+            } else {
+                $("#requesting_data_tip").slideUp(250);
             }
         }); 
     }
