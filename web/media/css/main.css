@@ -496,6 +496,29 @@ body.search #header_inner:hover form #id_q {
 	border-color: #fff;
 }
 
+body.search .tag_suggestion {
+	background-color: #F4F8FB;
+	padding: 10px 15px;
+	line-height: 20px;
+	color: #456;
+}
+
+body.search .tag_suggestion h4 {
+	margin: 0;
+	padding: 0;
+}
+
+body.search .tag_suggestion .single_tag {
+	margin: 0 5px;
+}
+
+body.search .tag_suggestion .yes {
+	float: right;
+	background: transparent url(../images/icons/forward_arrow.png) 100% 70% no-repeat;
+	padding-right: 20px;
+	font-size: 14px;
+}
+
 
 /* FRONTPAGE HEADER */
 
