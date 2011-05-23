@@ -142,9 +142,13 @@ $(function()
 		return false;
 	});
 	
-	$('a#submit_link').bind('click', function(){
+	$('a.submit_link').each(function(){
+		id = $(this).siblings(':submit').attr('id');
+		$(this).addClass(id + '_link')
+	}).bind('click', function(){
 		$(this).siblings(':submit').trigger('click');
 	}).siblings(':submit').hide();
+	
 });
 
 

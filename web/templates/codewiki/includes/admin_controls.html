@@ -1,32 +1,34 @@
 <h3>Delete &amp; reset</h3>
 {% if user_owns_it or user.is_staff %}    
   {% if user.is_staff and not user_owns_it %}
-    <div class="staff">
+    <div class="staff delete_and_reset">
   {% else %}
-    <div>
+    <div class="delete_and_reset">
   {% endif %}
+
+    {% ifequal scraper.wiki_type 'scraper' %}
+      <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
+        <input type="hidden" name="delete_data" value="1" />
+        <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
+        <a href="#" class="submit_link"><img src="{{ MEDIA_URL }}images/icons/clean.png" width="16" height="16" alt="" /> Clear the datastore</a>
+        <p>Removes all data for this scraper. This cannot be undone.</p>
+      </form>
+    {% endifequal %}
 
   <form action="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" method="post">
     <input type="hidden" name="delete_scraper" value="1" />
     <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this {{scraper.wiki_type}}?" />
-    <p>Deletes this {{ scraper.wiki_type }}. There is no undo.</p>
+    <a href="#" class="submit_link"><img src="{{ MEDIA_URL }}images/icons/cross.png" width="16" height="16" alt="" /> Delete this {{scraper.wiki_type}}</a>
+    <p>Careful &ndash; This cannot be undone!</p>
   </form>
-
-  {% ifequal scraper.wiki_type 'scraper' %}
-    <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
-      <input type="hidden" name="delete_data" value="1" />
-      <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
-      <p>Removes all data for this scraper. There is no undo.</p>
-    </form>
-  {% endifequal %}
   </div>
 {% else %}
   <p class="infobox">Only the creator of a {{scraper.wiki_type}} can delete it.</p>
 {% endif %}
 
 {% if user.is_staff %}
+<h3>Admin only</h3>
 <div class="staff">
-  <h3>Admin only</h3>
   <p><a href="/admin/codewiki/{{scraper.wiki_type}}/{{scraper.pk}}/">{{scraper.wiki_type|capfirst}}'s Django admin page</a></p>
 
   {% ifequal scraper.wiki_type 'scraper' %}
