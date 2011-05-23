@@ -77,10 +77,9 @@ $(function()
             $('#id_category_title').val($(this).find('strong').text());
             $('#options, #result').show();
 
-            // jsondict option only exists for sqlite selection (not available in piston)
-            var jd = $("#id_format option[value='jsonlist']"); 
-            jd.attr("disabled", (id == "sqlite" ? "" : "disabled")); 
-            if ((id != "sqlite") && jd.attr("selected"))
+            // jsondict option is the only one available when not doing sqlite selection
+            $("#id_format option[value!='jsondict']").attr("disabled", (id == "sqlite" ? "" : "disabled")); 
+            if ((id != "sqlite") && !$("#id_format option[value='jsondict']").attr("selected"))
                 $("#id_format option[value='jsondict']").attr("selected", true); 
             setTimeout(rewriteapiurl, 400); 
         }
@@ -122,7 +121,7 @@ $(function()
         else
             $("#overviewreturn").hide(); 
 
-        var t = setTimeout(resizeZO(), 500);
+        var t = setTimeout(resizeZO, 500);
     }
 
     $('#detail select').each(function() { $(this).change(rewriteapiurl) }); 
@@ -269,9 +268,12 @@ $(function()
         	<li class="format">
                 <label for="id_format">format</label>
                 <select type="text" name="format" id="id_format">
-                    <option value="csv">csv</option>
                     <option value="jsondict" selected>jsondict</option>
                     <option value="jsonlist">jsonlist</option>
+                    <option value="csv">csv</option>
+                    {% if user.is_staff %}
+                      <option value="htmltable">htmltable (staff only)</option>
+                    {% endif %}
                 </select>
         	</li> 
         	<li class="name">

@@ -47,7 +47,7 @@ def stringnot(v):
     return v
 
 
-def stream_csv(dataproxy):
+def stream_rows(dataproxy, format):
     n = 0
     while True:
         line = dataproxy.receiveonelinenj()
@@ -59,17 +59,33 @@ def stream_csv(dataproxy):
         if "error" in ret:
             yield str(ret)
             break
+        
         fout = StringIO()
-        writer = csv.writer(fout, dialect='excel')
-        if n == 0:
-            writer.writerow([ k.encode('utf-8') for k in ret["keys"] ])
-        for row in ret["data"]:
-            writer.writerow([ stringnot(v)  for v in row ])
+        
+            # csv and json numerical values are typed, but not htmltable numerics
+        if format == "csv":
+            writer = csv.writer(fout, dialect='excel')
+            if n == 0:
+                writer.writerow([ k.encode('utf-8') for k in ret["keys"] ])
+            for row in ret["data"]:
+                writer.writerow([ stringnot(v)  for v in row ])
+        elif format == "htmltable":
+            if n == 0:
+                            # there seems to be an 8px margin imposed on the body tag when delivering a page that has no <body> tag
+                fout.write('<table border="1" style="border-collapse:collapse; ">\n')
+                fout.write("<tr> <th>%s</th> </tr>\n" % ("</th> <th>".join([ k.encode('utf-8') for k in ret["keys"] ])))
+            for row in ret["data"]:
+                fout.write("<tr> <td>%s</td> </tr>\n" % ("</td> <td>".join([ str(stringnot(v)).replace("<", "&lt;")  for v in row ])))
+        else:
+            assert False, "Bad format "+format
         
         yield fout.getvalue()
         n += 1
         if not ret.get("moredata"):
+            if format == "htmltable":
+                yield "</table>\n"
             break  
+        
 
 
 def data_handler(request):
@@ -133,24 +149,37 @@ def sqlite_handler(request):
     
     # this is inlined from the dataproxy.request() function to allow for receiveoneline to perform multiple readlines in this case
         # (this is the stream-chunking thing.  the right interface is not yet apparent)
+    
     dataproxy.m_socket.sendall(simplejson.dumps(req) + '\n')
     
-    if format not in ["csv", "jsondict", "jsonlist"]:
+    if format not in ["jsondict", "jsonlist", "csv", "htmltable"]:
         return HttpResponse("Error: the format '%s' is not supported" % format)
     
-    if format == "csv":
-        st = stream_csv(dataproxy)
-        response = HttpResponse(mimetype='text/csv')  # used to take st
+    if format in ["csv", 'htmltable']:   # may also apply to jsondict
+        strea = stream_rows(dataproxy, format)
+        
+        if format == "csv":
+            mimetype = 'text/csv'
+        else:
+            mimetype = 'text/html'
+            
+        response = HttpResponse(mimetype=mimetype)  # used to take strea
         #response = HttpResponse(st, mimetype='text/csv')  # when streamchunking was tried
-        response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
-        for s in st:
+        
+        if format == "csv":
+            response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
+        for s in strea:
             response.write(s)
-        # unless you put in a content length, the middleware will measure the length of your data
-        # (unhelpfully consuming everything in your generator) before then returning a zero length result 
-        #response["Content-Length"] = 1000000000
+        
+        
+# unless you put in a content length, the middleware will measure the length of your data
+# (unhelpfully consuming everything in your generator) before then returning a zero length result 
+#response["Content-Length"] = 1000000000
         return response
     
+    
     # json is not chunked.  The output is of finite fixed bite sizes because it is generally used by browsers which aren't going to survive a huge download
+    # however could chunk the jsondict type stream_wise as above by manually creating the outer bracketing as with htmltable
     result = dataproxy.receiveonelinenj()
     if format == "jsondict":
         try:

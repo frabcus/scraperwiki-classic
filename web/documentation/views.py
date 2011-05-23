@@ -8,7 +8,8 @@ import re
 import codewiki
 import settings
 import urllib2
-
+import urlparse
+import cgi
 
 def docmain(request, language=None, path=None):
     from titles import page_titles
@@ -84,16 +85,29 @@ def docexternal(request):
     return render_to_response('documentation/apibase.html', context, context_instance=RequestContext(request))
 
 def api_explorer(request):
-    styout = '<pre style="color:#036;">%s</pre>'  # can't be done by formatting the iframe
     url = request.POST.get("apiurl")
     if not url:
         url = request.GET.get("apiurl")
     if not url:
-        return HttpResponse(styout % "Select a function, add values above, \nthen click 'Run' to see live data")
+        return HttpResponse('<pre style="color:#036;">%s</pre>' % "Select a function, add values above, \nthen click 'Run' to see live data")
+    
+    querystring = urlparse.urlparse(url)[4]
+    params = dict(cgi.parse_qsl(querystring))
+    format = params.get("format")
+    
     api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
     assert url[:len(api_base)] == api_base
-    result = urllib2.urlopen(url).read()
-    return HttpResponse(styout % re.sub("<", "&lt;", result))
+    try:
+        dresult = urllib2.urlopen(url).read()
+    except urllib2.URLError:
+        dresult = "Sorry, unable to open:\n%s\n\nThis error has been logged" % url
+        #logger.log("api_explorer failed to load from %s" % url)
+    
+    if format == "htmltable":  # elements already escaped
+        result = dresult
+    else:
+        result = '<pre style="color:#036;">%s</pre>' % re.sub("<", "&lt;", dresult)    # can't be done by formatting the iframe
+    return HttpResponse(result)
 
 
 
