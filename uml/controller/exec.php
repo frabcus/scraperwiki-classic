@@ -38,6 +38,16 @@ for ($idx = 1; $idx < count($argv); $idx += 1)
    }
 }
 
+// make the $_GET array
+$QUERY_STRING = getenv("QUERY_STRING");
+$QUERY_STRING_a = explode('&', $QUERY_STRING);
+$_GET = array(); 
+for ($i = 0; $i < count($QUERY_STRING_a); $i++)
+{
+    $QUERY_STRING_b = split('=', $QUERY_STRING_a[$i]);
+    $_GET[urldecode($QUERY_STRING_b[0])] = urldecode($QUERY_STRING_b[1]); 
+}
+
 
 $dsinfo = split (':', $datastore) ;
 SW_DataStoreClass::create ($dsinfo[0], $dsinfo[1]) ;
