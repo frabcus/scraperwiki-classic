@@ -82,8 +82,10 @@
 <input type="hidden" id="saveurl"           value="{% url handle_editor_save %}"/>
 <input type="hidden" id="proxycachedurl"    value="{% url proxycached %}"/>
 <input type="hidden" id="quickhelpurl"      value="{% url quickhelp %}"/>
-<input type="hidden" id="rawcodeurl"        value="{% url raw scraper.short_name %}"/>
-<input type="hidden" id="diffsequrl"        value="{% url diffseq scraper.short_name %}"/>
+{% if scraper.short_name %}
+  <input type="hidden" id="rawcodeurl"        value="{% url raw scraper.short_name %}"/>
+  <input type="hidden" id="diffsequrl"        value="{% url diffseq scraper.short_name %}"/>
+{% endif %}
 
 
 {% if scraper.short_name %}
