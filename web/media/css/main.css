@@ -2516,6 +2516,10 @@ background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%);
 	display: inline-block;
 }
 
+body.views a.btnDeleteScraper_link {
+	margin-top: 5px;
+}
+
 a.btnDeleteScraper_link:hover {
 	color: #a66;
 	background: #ffffff;
@@ -4842,9 +4846,7 @@ dl.tutoriallist dd {
     padding-bottom:5px;
 }
 
-div.documentationpage dt {
-    color:#003; font-size:120%; padding-top:10px;
-}
+
 
 div.documentationpage h2 {
     margin-top: 1.25em;
@@ -4853,7 +4855,7 @@ div.documentationpage h2 {
 }
 
 div.documentationpage h3 {
-    margin-top: 1.25em;
+    margin-top: 1.5em;
     padding-top:0;
     padding-bottom:0;
 }
@@ -4867,9 +4869,23 @@ div.documentationpage #getting_help li {
 	list-style-type: disc;
     margin-left: 2em;
 }
+
+div.documentationpage dt {
+	background-color: #F4F8FB;
+	margin-top: 1em;
+	padding: 0.3em 1em;
+	font-size:17px;
+	line-height: 22px;
+}
+
+div.documentationpage dd + dt {
+	margin-top: 1.5em;
+}
+
 div.documentationpage dd {
-    padding-top:2px;
-    padding-bottom:2px;
+	margin: 0.5em 2em 0 2em;
+	font-size: 15px;
+	color: #234;
 }
 
 div.documentationpage code {
