@@ -140,7 +140,11 @@ $(function()
 	$('#more_requester_div .back').live('click', function(){
 		requester_hide();
 		return false;
-	});	
+	});
+	
+	$('a#submit_link').bind('click', function(){
+		$(this).siblings(':submit').trigger('click');
+	}).siblings(':submit').hide();
 });
 
 
