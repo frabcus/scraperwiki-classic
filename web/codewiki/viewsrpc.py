@@ -134,6 +134,7 @@ def rpcexecute(request, short_name, revision=None):
     # we build the response on the fly in case we get a contentheader value before anything happens
     response = None 
     panepresent = {"scraperwikipane":[], "firstfivelines":[]}
+    contenttypesettings = { }
     for line in runnerstream:
         try:
             message = json.loads(line)
@@ -160,6 +161,7 @@ def rpcexecute(request, short_name, revision=None):
         
         # parameter values have been borrowed from http://php.net/manual/en/function.header.php
         elif message['message_type'] == "httpresponseheader":
+            contenttypesettings[message['headerkey']] = message['headervalue']
             if message['headerkey'] == 'Content-Type':
                 if not response:
                     response = HttpResponse(mimetype=message['headervalue'])
@@ -187,11 +189,13 @@ def rpcexecute(request, short_name, revision=None):
         response = HttpResponse('no output for some unknown reason')
         
     # now decide about inserting the powered by scraperwiki panel (avoid doing it on json)
+    # print [response['Content-Type']]  default is DEFAULT_CONTENT_TYPE, comes out as 'text/html; charset=utf-8'
     if not panepresent["scraperwikipane"]:
         firstcode = "".join(panepresent["firstfivelines"]).strip()
-        if not re.match("[\w_\s=]*[\(\[\{]", firstcode):
-            if re.search("(?i)<\s*(?:b|i|a|h\d|script|ul|table).*?>", firstcode):
-                response.write(scraperwikitag(scraper, '<div id="scraperwikipane" class="version-2"/>', panepresent))
+        if not contenttypesettings:   # suppress if content-type was set
+            if not re.match("[\w_\s=]*[\(\[\{]", firstcode):   # looks like it is not json code
+                if re.search("(?i)<\s*(?:b|i|a|h\d|script|ul|table).*?>", firstcode):   # looks like it is html
+                    response.write(scraperwikitag(scraper, '<div id="scraperwikipane" class="version-2"/>', panepresent))
     
     return response
                 
