@@ -36,6 +36,8 @@ def httpresponseheader(headerkey, headervalue):
     import scraperwiki
     scraperwiki.dumpMessage({'message_type': 'httpresponseheader', 'headerkey': headerkey, 'headervalue': headervalue})
 
+def GET():
+    return dict(cgi.parse_qsl(os.getenv("QUERY_STRING")))
 
 #  The code will install a set of specific handlers to be used when a URL
 #  is opened. See the "urllibSetup" and "urllib2Setup" functions below.
