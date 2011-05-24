@@ -84,6 +84,36 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.sendall('\n'.join(status) + '\n')
 
 
+    def find_process_for_port( self, lport ):
+        """
+        Use the ss command (from iproute) to show all of the HTTP requests 
+        that are currently established along with the process info.
+        """
+        cmd = "ss -o state established '( dport = :http )' -p"
+    
+        try:
+            # Launch the subprocess and read the output
+            p = subprocess.Popen(cmd, stdout = subprocess.PIPE,shell=True)
+            content = p.communicate()[0]
+            p.wait()
+        except Exception,e:
+            print e
+            return None
+
+        
+        for line in content.split('\n')[1:]:
+            if ':%s' % lport in line:
+                proc = " ".join(line.split()).split()[-1]
+                if proc.startswith('users:(('):
+                    # Strip the bit that isn't relevant
+                    proc = proc[len('users:(('):-2]
+                    return proc.split(',')[1]
+                else:
+                    # if we found the port but no process info we should bail
+                    return None
+        return None
+
+
     def sendIdent(self, query) :
         self.sendConnectionHeaders()
 
@@ -93,13 +123,20 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         # On OSX, they come out as python/ruby etc.
         # XXX todo, get PHP working on OSX
         pid = None
-        p    = re.compile ('(?:exec.[a-z]+|[Pp]ython|[Rr]uby) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
-        lsof = subprocess.Popen([ 'lsof', '-n', '-P', '-i' ], stdout = subprocess.PIPE).communicate()[0]
-        for line in lsof.split('\n') :
-            m = p.match(line)
-            if m:
-                pid = int(m.group(1))
-                break
+        
+        pid = self.find_process_for_port( lport )
+        if pid is None:
+            logging.debug('Failed to find pid with "ss" so trying lsof')
+            # If we can't find the pid from 'ss' then we should try lsof
+            p    = re.compile ('(?:exec.[a-z]+|[Pp]ython|[Rr]uby) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
+            lsof = subprocess.Popen([ 'lsof', '-n', '-P', '-i' ], stdout = subprocess.PIPE).communicate()[0]
+            for line in lsof.split('\n') :
+                m = p.match(line)
+                if m:
+                    pid = int(m.group(1))
+                    break
+        else:
+            logging.debug('Found process using ss')            
 
         if pid:
             logger.debug(' Ident (%s,%s) is pid %s' % (lport, rport, pid))
