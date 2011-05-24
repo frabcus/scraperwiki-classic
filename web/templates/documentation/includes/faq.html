@@ -20,6 +20,7 @@
            <li><a href="#clear_datastore">I made a column or a table I don't need, how do I remove it?</a></li>
            <li><a href="#view_parameters">How do I get query parameters in my view?</a></li>
            <li><a href="#cpu_limit">What is the CPU limit, and what do I do if my scraper reaches it?</a></li>
+           <li><a href="#https">Can I scrape secure (https://) sites?</a></li>
      </ul>
      <h2>Licensing questions</h2>
      <ul>
@@ -166,6 +167,15 @@ print_r($output);
                </p>
                <p>That also lets you recover more easily from other parsing errors.
                </p>
+           </dd>
+
+           <dt id="https">Can I scrape secure (https://) sites?</dtd>
+           <dd>
+               <p>Yes. Here's an example, in Python.</p>
+               <code>url = "https://cia.gov"
+import urllib                                                                                                             
+print urllib.urlopen(url).read() 
+</code>
            </dd>
 
            <dt id="licence">Who owns the code I write on ScraperWiki?</dt>
