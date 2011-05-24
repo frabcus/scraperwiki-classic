@@ -170,7 +170,24 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
         assert path == '/Execute'
             # BaseHTTPRequestHandler.rfile is the input stream
-        request = json.loads(self.connection.recv(int(self.headers['Content-Length'])))
+        remlength = int(self.headers['Content-Length'])
+        jincoming = []
+        while True:
+            sjincoming = self.connection.recv(remlength)
+            if not sjincoming:
+                break
+            jincoming.append(sjincoming)
+            remlength -= len(sjincoming)
+            if remlength <= 0:
+                break
+        if remlength != 0:
+            emsg = {"error":"incoming message incomplete", "headers":str(self.headers), "lengths":str(map(len, jincoming))}
+            logger.error(str(emsg))
+            self.connection.sendall(json.dumps(emsg) + '\n')
+            self.connection.close()
+            return
+
+        request = json.loads("".join(jincoming))
         self.execute(request)
         self.connection.close()
 

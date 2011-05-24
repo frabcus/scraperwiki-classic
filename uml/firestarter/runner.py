@@ -46,7 +46,7 @@ def writereadstream(dhost, dport, jdata):
     soc.send('Content-Length: %s\r\n' % len(sdata))
     soc.send('Connection: close\r\n')
     soc.send('\r\n')
-    soc.send(sdata)
+    soc.sendall(sdata)
 
     
     sbuffer = [ ]

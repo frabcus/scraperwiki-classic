@@ -275,7 +275,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             soc.send('Content-Length: %s\r\n' % self.headers['Content-Length'])
             soc.send('Connection: close\r\n')
             soc.send("\r\n")
-            soc.send(sdata)
+            soc.sendall(sdata)
 
         while True:
             logger.debug("into select "+str([soc, self.connection]))
