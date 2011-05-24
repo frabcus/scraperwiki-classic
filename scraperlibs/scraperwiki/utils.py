@@ -33,6 +33,7 @@ def log(message=""):
 
 def httpresponseheader(headerkey, headervalue):
     ''' eg httpresponseheader('Content-Type', 'text/plain') '''
+    import scraperwiki
     scraperwiki.dumpMessage({'message_type': 'httpresponseheader', 'headerkey': headerkey, 'headervalue': headervalue})
 
 
