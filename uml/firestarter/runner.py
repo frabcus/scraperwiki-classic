@@ -19,7 +19,7 @@ except: import json
 configfile = '/var/www/scraperwiki/uml/uml.cfg'
 
 parser = optparse.OptionParser()
-parser.add_option("--guid")
+parser.add_option("--guid", default='')
 parser.add_option("--language", default='python')
 parser.add_option("--name", default='', metavar="SCRAPER_NAME")
 parser.add_option("--cpulimit", default='80')
