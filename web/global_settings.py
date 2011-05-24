@@ -167,7 +167,7 @@ DEFAULT_API_ITEMS = 100
 
 # Requited for the template_settings context processor. Each varible listed
 # here will be made availible in all templates that are passed the
-# RequestContext.  Be carful of listing database and other private settings 
+# RequestContext.  Be careful of listing database and other private settings 
 # here
 TEMPLATE_SETTINGS = [
  'API_DOMAIN',
