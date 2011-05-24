@@ -74,13 +74,15 @@
 		{% paginate %}
     {% endif %}
 
-    {% if solicitations %}
-      <h2>{{ profile.name }}&rsquo;s requests for datasets</h2>    	
-        <ul>
-          {% for solicitation in solicitations %}
-             <li><a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>{% if solicitation.has_bounty %} <span class="bounty"><a href="{% url market_view solicitation.id %}">&pound;{{solicitation.price}} bounty</a></span>{% endif %}</li>
-          {% endfor %}
-        </ul>
+    {% if settings.ENABLE_MARKETPLACE %}
+        {% if solicitations %}
+          <h2>{{ profile.name }}&rsquo;s requests for datasets</h2>    	
+            <ul>
+              {% for solicitation in solicitations %}
+                 <li><a href="{% url market_view solicitation.id %}">{{solicitation.title}}</a>{% if solicitation.has_bounty %} <span class="bounty"><a href="{% url market_view solicitation.id %}">&pound;{{solicitation.price}} bounty</a></span>{% endif %}</li>
+              {% endfor %}
+            </ul>
+        {% endif %}
     {% endif %}
     </div>
 
