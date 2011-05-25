@@ -3,6 +3,7 @@ import os, sys, unittest, uuid, time
 from copy import deepcopy
 from selenium import selenium
 from selenium_test import SeleniumTest
+from urlparse import urlparse
 
 
 class TestScrapers(SeleniumTest):
@@ -101,7 +102,7 @@ class TestScrapers(SeleniumTest):
             print s.get_body_text()
             self.fail('An error occurred deleting data')
         
-        self.failUnless(s.is_text_present('Your scraper has been deleted'), msg='The scraper has not been deleted')
+        self.assertEqual('/', urlparse(s.get_location()).path, 'Did not redirect to front page after deleting scraper')
 
 
     def _check_delete_view(self, name):
@@ -117,7 +118,7 @@ class TestScrapers(SeleniumTest):
             print s.get_body_text()
             self.fail('An error occurred deleting data')
         
-        self.failUnless(s.is_text_present( 'Your view has been deleted' ), msg='The view has not been deleted')
+        self.assertEqual('/', urlparse(s.get_location()).path, 'Did not redirect to front page after deleting view')
 
 
     def _wait_for_run(self):
