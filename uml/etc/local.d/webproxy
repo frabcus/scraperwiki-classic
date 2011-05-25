@@ -2,10 +2,11 @@
 
 DESC="WebProxy"
 NAME=webproxy
-CONFIG=/var/www/scraperwiki/uml/uml.cfg.local
-DAEMON=/var/www/scraperwiki/uml/httpproxy/httpproxy.py
-DAEMON_ARGS="--daemon --subproc --varDir=./var --config=$CONFIG --mode=P"
-PIDFILE=./var/run/$NAME.pid
+DAEMON=/var/www/scraperwiki/uml/httpproxy/webproxy.py
+VARDIR=/var/www/scraperwiki/uml/var
+CONFIG=/var/www/scraperwiki/uml/uml.cfg
+PIDFILE=$VARDIR/run/$NAME.pid
+DAEMON_ARGS="--pidfile=$PIDFILE --config=$CONFIG"
 
 do_start()
 {

@@ -42,8 +42,8 @@ config.readfp(open(poptions.config))
 logging.config.fileConfig(poptions.config)
 logger = logging.getLogger('controller')
 
+stdoutlog = None
 #stdoutlog = open('/var/www/scraperwiki/uml/var/log/controller.log'+"-stdout", 'a', 0)
-stdoutlog = sys.stdout
 
 
 # one of these per scraper executing the code and relaying it to the scrapercontroller
@@ -150,7 +150,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         else:
             logger.warning(' Ident (%s,%s) not found:\n%s' % (lport, rport, lsof))
 
-        # Send notification back through the controller to the dispatcher . (usually of a http request)
+        # Send notification back through the controller to the dispatcher . (normally of a http request)
+        # we find which controller socket to send it to from the runid
     def sendNotify(self, query):
         params = cgi.parse_qs(query)
         runid = params['runid'][0]
@@ -496,9 +497,10 @@ if __name__ == '__main__' :
     # daemon
     if os.fork() == 0 :
         os .setsid()
-        sys.stdin  = open ('/dev/null')
-        sys.stdout = stdoutlog
-        sys.stderr = stdoutlog
+        sys.stdin = open('/dev/null')
+        if stdoutlog:
+            sys.stdout = stdoutlog
+            sys.stderr = stdoutlog
         if os.fork() == 0:
             ppid = os.getppid()
             while ppid != 1:

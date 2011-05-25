@@ -39,51 +39,27 @@ def httpresponseheader(headerkey, headervalue):
     import scraperwiki
     scraperwiki.dumpMessage({'message_type': 'httpresponseheader', 'headerkey': headerkey, 'headervalue': headervalue})
 
+# deprecated if possible
 def GET():
     return dict(cgi.parse_qsl(os.getenv("QUERY_STRING")))
 
-#  The code will install a set of specific handlers to be used when a URL
-#  is opened. See the "urllibSetup" and "urllib2Setup" functions below.
-#
-urllibopener  = None
-urllib2cj     = None
+
 urllib2opener = None
-
-
-#  The "urllib2Setup" function is called with zero or more handlers. An opener
-#  is constructed using these, plus a cookie processor, and is installed as the
-#  urllib2 opener. The opener also overrides the user-agent header.
-#
-def urllib2Setup (*handlers) :
-    global urllib2cj
+def urllibSetup(http_proxy):
+        # this proxies for urllib
+    os.environ['http_proxy' ] = http_proxy  
+        # this proxies for urllib2
     global urllib2opener
-    urllib2cj = cookielib.CookieJar()
-    urllib2opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(urllib2cj), *handlers)
-    urllib2opener.addheaders = [('User-agent', 'ScraperWiki')]
-    urllib2.install_opener (urllib2opener)
-
-#  Similarly for urllib, but no handlers.
-#
-def urllibSetup () :
-    global urllibopener
-    urllibopener = urllib.URLopener()
-    urllibopener.addheaders = [('User-agent', 'ScraperWiki')]
-    urllib._urlopener = urllibopener
+    urllib2handlers = [ urllib2.ProxyHandler({'http':http_proxy }) ]
+    urllib2opener = urllib2.build_opener(*urllib2handlers)
+    urllib2.install_opener(urllib2opener)
 
 
 #  Scrape a URL optionally with parameters. This is effectively a wrapper around
 #  urllib2.orlopen().
 #
 def scrape (url, params = None) :
-
-    #  Normally the "urllib2Setup" function would have been called from
-    #  the controller to specify http, https and ftp proxies, however check
-    #  in case not and call without any handlers.
-    #
     global urllib2opener
-    if urllib2opener is None :
-        urllib2Setup ()
-
     data = params and urllib.urlencode(params) or None
 
     fin  = urllib2opener.open(url, data)
