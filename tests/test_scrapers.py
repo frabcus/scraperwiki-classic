@@ -1,6 +1,4 @@
 import os, sys, unittest, uuid, time
-
-from copy import deepcopy
 from selenium import selenium
 from selenium_test import SeleniumTest
 
@@ -68,7 +66,7 @@ class TestScrapers(SeleniumTest):
         self.wait_for_page('visit dashboard')
         
         scraper_count = s.get_xpath_count('//li[@class="code_object_line"]')        
-        self.failUnless( str(count) == scraper_count, msg='There are %s items instead of %s' % (scraper_count,count,) )
+        self.failUnless( count == scraper_count, msg='There are %s items instead of %s' % (scraper_count,count,) )
         
 
     def _check_clear_data(self, name):
@@ -176,7 +174,7 @@ class TestScrapers(SeleniumTest):
         
                 
     def test_php_create(self):   
-        s = self.selenium                     
+        s = self.selenium
         name = self._create_type( 'PHP scraper', 'php')   
         self._wait_for_run()
         

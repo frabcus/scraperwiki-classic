@@ -1,6 +1,6 @@
 import unittest
 from selenium import selenium
-
+import simplejson as json
 
 class SeleniumTest(unittest.TestCase):
 
@@ -9,15 +9,19 @@ class SeleniumTest(unittest.TestCase):
 
     _selenium_host = ''
     _selenium_port = 4444
-    _selenium_browser = "*firefox"
+    _selenium_browser = None
 
     _app_url = ''
 
     def setUp(self):
         self.verificationErrors = []
         self.selenium = selenium(SeleniumTest._selenium_host, SeleniumTest._selenium_port, 
-                        SeleniumTest._selenium_browser, SeleniumTest._app_url)
+                        json.dumps(SeleniumTest._selenium_browser), SeleniumTest._app_url)
+        print self._testMethodName
         self.selenium.start()
+            
+            # extract a title for the job from name of test.  must be done in the constructor or after start()
+        self.selenium.set_context("sauce:job-name=%s" % self._testMethodName)  
         self.selenium.window_maximize()
 
     def wait_for_page(self, doing=None):
