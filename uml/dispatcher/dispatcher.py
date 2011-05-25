@@ -330,7 +330,7 @@ class UMLScanner(threading.Thread) :
                     if uml.livestatus == "unresponsive":  # don't overwrite closing
                         logger.warning('unresponsive UML %s back to live' % uml.uname)
                         uml.livestatus = "live"
-                except urllib2.URLError:
+                except Exception:
                     if uml.livestatus == "live":
                         logger.warning('UML %s now unresponsive' % uml.uname)
                         uml.livestatus = "unresponsive"

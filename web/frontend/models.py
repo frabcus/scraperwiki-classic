@@ -324,6 +324,7 @@ def data_enquiry_post_save(sender, **kwargs):
             cat = h.get_task_category_by_name('To Do')
 
             task_owner = h.search_people_by_email(settings.HIGHRISE_ASSIGN_TASK_TO)[0]
+            print "task_owner = %s", task_owner
                 
             h.create_task_for_person('Data Request Followup', task_owner.id, cat.id, requester.id)
         except highrise.HighRiseException, ex:

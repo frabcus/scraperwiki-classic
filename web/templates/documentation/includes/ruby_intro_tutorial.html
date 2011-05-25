@@ -68,7 +68,7 @@ a schema up front.</p>
 <p>Replace "puts data.to_json" in the Nokogiri loop (just before the "end" line)
 with this save command:</p>
 
-<code>ScraperWiki.save(unique_keys=['country'], data=data)
+<code>  ScraperWiki.save(unique_keys=['country'], data=data)
 </code>
 
 <p>The unique keys (just country in this case) identify each piece of data.

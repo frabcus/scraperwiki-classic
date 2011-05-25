@@ -38,6 +38,8 @@ def run_event(request, run_id):
 
 
 def running_scrapers(request):
+    from codewiki.management.commands.run_scrapers import Command
+        
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:10]  
     
     statusscrapers = GetDispatcherStatus()
@@ -56,6 +58,9 @@ def running_scrapers(request):
 
     context = { 'statusscrapers': statusscrapers, 'events':recentevents }
     context['activeumls'] = GetUMLstatuses()
+
+    c = Command()
+    context['overdue_count'] = c.get_overdue_scrapers().count()
 
     return render_to_response('codewiki/running_scrapers.html', context, context_instance=RequestContext(request))
 

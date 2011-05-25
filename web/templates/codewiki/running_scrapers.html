@@ -398,6 +398,10 @@ $(document).ready(function() {
     <p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
 </div>
 
+<h1>Number of overdue scrapers</h1>
+<p><b>{{overdue_count}}</b></p>
+
+
 <h1 id="umlstatus"><a href="#umlstatus">#</a> UML Status</h1>
   (does not update)
 
@@ -418,6 +422,7 @@ $(document).ready(function() {
   </tr>
 {% endfor %}
 </table>
+
 
 <table border="1" style="width:auto; margin:auto">
 <tr><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>
@@ -456,6 +461,7 @@ $(document).ready(function() {
   </tr>
 {% endfor %}
 </table>
+
 
 
 <h1>Recent runs</h1>

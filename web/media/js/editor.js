@@ -343,7 +343,11 @@ $(document).ready(function() {
     function setupKeygrabs()
     {
         if (navigator.userAgent.toLowerCase().indexOf("mac") != -1) 
+        {
             addHotkey('meta+s', saveScraper); 
+            addHotkey('meta+r', sendCode);
+            addHotkey('meta+p', popupPreview); 
+        }
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+p', popupPreview); 

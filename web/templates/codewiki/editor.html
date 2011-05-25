@@ -136,10 +136,10 @@
     <div class="editor_controls">
         <a class="helplink" href="{% url docsroot scraper.language %}" target="_blank" title="Show useful commands">Documentation</a>
         {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
-            <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R)"/>
+            <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R, Opt + R)"/>
         {% endifnotequal %}{% endifnotequal %}
         {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'javascript' %}
-            <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P)"/>
+            <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P, Opt + P)"/>
         {% endifnotequal %}{% endifequal %}
 
         {# hidden if not necessary #}
@@ -168,7 +168,7 @@
             {% else %}
                 <a id="aCloseEditor1" href="{% url frontpage %}">close editor</a>
             {% endif %}
-            <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save" title="Save this {{scraper.wiki_type}} (Ctrl + S)"/>
+            <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save" title="Save this {{scraper.wiki_type}} (Ctrl + S, Opt + S)"/>
         </div>
     </div>
 
