@@ -107,7 +107,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 if proc.startswith('users:(('):
                     # Strip the bit that isn't relevant
                     proc = proc[len('users:(('):-2]
-                    return proc.split(',')[1]
+                    return int(proc.split(',')[1])
                 else:
                     # if we found the port but no process info we should bail
                     return None
