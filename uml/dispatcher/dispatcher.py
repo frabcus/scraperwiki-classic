@@ -228,7 +228,9 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     def execute(self):
         # unpack the json packed up by runner.py
-        sdata = self.rfile.read(int(self.headers['Content-Length']))
+        remlength = int(self.headers['Content-Length'])
+            # this is done with a recv in a loop in controller.  wonder whether rfile.read is more stable
+        sdata = self.rfile.read(remlength)
         if len(sdata) != int(self.headers['Content-Length']):
             logger.error("failed to receive full record from runner")
 

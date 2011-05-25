@@ -1,6 +1,9 @@
 #!/bin/sh -
 "exec" "python" "-O" "$0" "$@"
 
+# replace the ident with a querystring
+# log the time it takes ident to call back
+# generalize to handle transparent proxies
 
 import BaseHTTPServer
 import SocketServer
@@ -240,6 +243,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
 
 
+        # this is calling back into the controller for relaying to the client
     def notify (self, host, **query) :
 
         query['message_type'] = 'sources'
