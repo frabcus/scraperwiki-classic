@@ -145,7 +145,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             if controller:
                 self.connection.sendall('\n'.join(controller.idents))
             else:
-                logger.warning('Ident scraper not longer present for pid %s' % m.group(1))
+                logger.warning('Ident scraper not longer present for pid %s' % pid)
             return
         else:
             logger.warning(' Ident (%s,%s) not found:\n%s' % (lport, rport, lsof))
