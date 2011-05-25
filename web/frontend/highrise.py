@@ -66,7 +66,8 @@ class HighRiseException(Exception): pass
 
 class HighRise(object):
     note_xml_template = '<note><body>%s</body></note>'
-    task_xml_template = '<task><body>%s</body><frame>%s</frame><owner-id type="integer">%s</owner-id>%s%s</task>'
+    #task_xml_template = '<task><body>%s</body><frame>%s</frame><owner-id type="integer">%s</owner-id>%s%s</task>'
+    task_xml_template = '<task><body>%s</body><frame>%s</frame>%s%s<owner-id type="integer">%s</owner-id></task>'
     tag_xml_template = '<name>%s</name>'
     person_xml_template = '''
 <person>
@@ -137,6 +138,9 @@ class HighRise(object):
         people = doc.xpath('/people/person')
         return [Person(p) for p in people]
 
+    def get_person_by_id(self, person_id):
+        pass
+
     def create_note_for_person(self, note, person_id):
         url = self.base_url + '/people/%s/notes.xml' % person_id
         xml_note = self.note_xml_template % note
@@ -158,12 +162,14 @@ class HighRise(object):
         else:
             subject = ''
 
-        xml_task = self.task_xml_template % (task, frame, person_id, category, subject)
+        xml_task = self.task_xml_template % (task, frame, category, subject, person_id)
+        print xml_task
         req = urllib2.Request(url, xml_task, {"Content-type": "application/xml"})
         resp = urllib2.urlopen(req)
         if resp.code != 201:
             raise HighRiseException("Error creating task")
         xml = resp.read()
+        print xml
 
     def tag_person(self, person_id, tag_text):
         url = self.base_url + '/people/%s/tags.xml' % person_id
