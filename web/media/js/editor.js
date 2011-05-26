@@ -1364,7 +1364,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                         guid            : guid,
                         language        : scraperlanguage,
                         code            : currentcode,
-                        earliesteditor  : earliesteditor.toUTCString(), // goes into the comment of the commit to help batch sessions
+                        earliesteditor  : earliesteditor.toUTCString() // goes into the comment of the commit to help batch sessions
                     }
 
         // on success

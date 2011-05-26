@@ -252,7 +252,7 @@ class ScraperRunner(threading.Thread):
             guid = self.scraper.guid
             code = self.scraper.saved_code().encode('utf-8')
     
-            runner_path = "%s/runner.py" % settings.FIREBOX_PATH
+            runner_path = os.path.join(settings.FIREBOX_PATH, "runner.py")
             
             args = [runner_path]
             args.append('--guid=%s' % self.scraper.guid)

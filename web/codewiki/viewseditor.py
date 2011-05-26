@@ -58,7 +58,13 @@ def run_event_json(request, run_id):
     try:
         event = models.ScraperRunEvent.objects.get(run_id=run_id)
     except models.ScraperRunEvent.DoesNotExist:
-        raise Http404
+        event = None
+    if not event:
+        try:
+            event = models.ScraperRunEvent.objects.get(pk=run_id)
+        except models.ScraperRunEvent.DoesNotExist:
+            raise Http404
+    
     if not event.scraper.actionauthorized(request.user, "readcode"):
         raise Http404
     

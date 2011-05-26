@@ -31,6 +31,7 @@ if __name__ == '__main__':
     parser.add_option("--tests", default="test_registration,test_scrapers")
 
     (options, args) = parser.parse_args()
+    
     SeleniumTest._selenium_host = options.shost
     SeleniumTest._selenium_port = options.sport
     SeleniumTest._app_url = options.url

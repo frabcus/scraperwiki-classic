@@ -17,7 +17,6 @@ class SeleniumTest(unittest.TestCase):
         self.verificationErrors = []
         self.selenium = selenium(SeleniumTest._selenium_host, SeleniumTest._selenium_port, 
                         json.dumps(SeleniumTest._selenium_browser), SeleniumTest._app_url)
-        print self._testMethodName
         self.selenium.start()
             
             # extract a title for the job from name of test.  must be done in the constructor or after start()
@@ -26,6 +25,7 @@ class SeleniumTest(unittest.TestCase):
 
     def wait_for_page(self, doing=None):
         hit_limit = True
+        print "waiting_for_page", self.selenium.get_location()
         try:
             self.selenium.wait_for_page_to_load('30000')
             hit_limit = False

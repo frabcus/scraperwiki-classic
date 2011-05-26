@@ -3,6 +3,7 @@ from selenium import selenium
 from selenium_test import SeleniumTest
 from urlparse import urlparse
 
+langlinkname = { "python":"Python", "ruby":"Ruby", "php":"PHP" }
 
 class TestScrapers(SeleniumTest):
     """
@@ -16,17 +17,25 @@ class TestScrapers(SeleniumTest):
     logged_in_text = "Logged in"
     new_scraper_link = "Create new scraper"
 
-    def _load_data(self, type='python', obj='scraper'):
-        thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_%s.txt' % (type, obj,))
-        try:
-            f = open(thefile)
-            code = f.read().replace('\n', '\r\n')
-            f.close()
-        except:
-            code = '# No test object'
+    def test_ruby_create(self):  
+        self._language_create("ruby")
+                
+    def test_php_create(self):  
+        self._language_create("php")
+    
+    def test_python_create(self):  
+        self._language_create("python")
+    
+    
+    def _load_data(self, language, obj):
+        thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_%s.txt' % (language, obj,))
+            
+        f = open(thefile)
+        code = f.read().replace('\n', '\r\n')
+        f.close()
     
         return code
-        
+
     
     def _add_comment(self, name):
         s = self.selenium
@@ -139,9 +148,10 @@ class TestScrapers(SeleniumTest):
             print 'Scraper returned some data!!!'
             
     
-    def test_python_create(self):
+    
+    def _language_create(self, language):
         s = self.selenium        
-        name = self._create_type( 'Python scraper', 'python')
+        name = self._create_type(language)
         self._wait_for_run()
         
         s.click('aCloseEditor1')
@@ -150,47 +160,13 @@ class TestScrapers(SeleniumTest):
         self._add_comment(name)
             
         self._check_dashboard_count()
-        view_name = self._create_view('Python view', 'python', name )
+        view_name = self._create_view(language, name)
         self._check_clear_data( name )
         self._check_delete_scraper(name )
         self._check_delete_view( view_name )        
         self._check_dashboard_count(count=1)
                      
-    def test_ruby_create(self):  
-        s = self.selenium                      
-        name = self._create_type( 'Ruby scraper', 'ruby')
-        self._wait_for_run()
-                    
-        s.click('aCloseEditor1')
-        self.wait_for_page()
-            
-        self._add_comment(name)            
-            
-        self._check_dashboard_count()                
-        view_name = self._create_view('Ruby view', 'ruby', name )        
-        self._check_clear_data( name )
-        self._check_delete_scraper(name )
-        self._check_delete_view( view_name )
-        self._check_dashboard_count(count=1)                             
-        
-                
-    def test_php_create(self):   
-        s = self.selenium
-        name = self._create_type( 'PHP scraper', 'php')   
-        self._wait_for_run()
-        
-        s.click('aCloseEditor1')
-        self.wait_for_page()
-            
-        self._add_comment(name)            
-            
-        self._check_dashboard_count()
-        view_name = self._create_view('PHP view', 'php', name )                
-        self._check_clear_data( name )
-        self._check_delete_scraper(name )
-        self._check_delete_view( view_name )                     
-        self._check_dashboard_count(count=1)
-                            
+
     def _create_user(self):
         s = self.selenium
         s.click("link=%s" % self.login_text)
@@ -214,7 +190,7 @@ class TestScrapers(SeleniumTest):
         self.failUnless(s.is_text_present(self.logged_in_text), msg='User is not signed in and should be')
         
         
-    def _create_type(self, link_name, type):
+    def _create_type(self, language):
         name = 'se_test_%s' % str( uuid.uuid4() ).replace('-', '_')
         
         s = self.selenium
@@ -226,13 +202,15 @@ class TestScrapers(SeleniumTest):
         # user for each scraper/view pair
         self._create_user()
         
+        link_name = '%s scraper' % langlinkname[language]
+        
         s.answer_on_next_prompt( name )        
         s.click('link=%s' % self.new_scraper_link)        
         time.sleep(1)        
         s.click( 'link=%s' % link_name )
         self.wait_for_page()
         
-        code = self._load_data(type)
+        code = self._load_data(language, 'scraper')
         s.type('//body[@class="editbox"]', "%s" % code)        
         s.click('btnCommitPopup')
         self.wait_for_page()
@@ -240,12 +218,13 @@ class TestScrapers(SeleniumTest):
         return name
             
             
-    def _create_view(self, link_name, type, shortname):
+    def _create_view(self, language, shortname):
         """ Must be on the scraper homepage """
         s = self.selenium
         name = 'se_test_%s' % str( uuid.uuid4() ).replace('-', '_')
-        print name
         
+        link_name = '%s view' % langlinkname[language]
+
         s.open('/scrapers/%s' % shortname)
         s.wait_for_page_to_load("30000")      
                 
@@ -255,15 +234,14 @@ class TestScrapers(SeleniumTest):
                 
         s.click( 'link=%s' % link_name )
         self.wait_for_page()
-        code = self._load_data(type,obj='view')
+        code = self._load_data(language, 'view')
         code = code.replace('{{sourcescraper}}', name)
         
         s.type('//body[@class="editbox"]', "%s" % code)        
         s.click('btnCommitPopup')
         self.wait_for_page()
         time.sleep(1)
-        
-        
+
         return name
 
 
