@@ -281,9 +281,9 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             soc.sendall(sdata)
 
         while True:
-            logger.debug("into select "+str([soc, self.connection]))
+            logger.debug("into select %s %s" % (short_name, str([soc, self.connection])))
             rback, wback, eback = select.select([soc, self.connection], [], [])
-            logger.debug("done select "+str(rback))
+            logger.debug("done select %s %s" % (short_name, str(rback)))
             if self.connection in rback:
                 soc.sendall("close for runner changed signal")
                 logger.debug("dispatcher to runner connection termination: %s  %s" % (short_name, runID))

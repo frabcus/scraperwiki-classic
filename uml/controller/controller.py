@@ -80,7 +80,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         runids = runidstocontrollers.keys()  # to protect from multithreading
         for runid in runids:
             status.append('runID=%s' % (runid))
-        logger.info("Sending status "+str(status))
+        logger.info("Sending status on %d scrapers" % len(runids))
         self.sendConnectionHeaders()
         self.connection.sendall('\n'.join(status) + '\n')
 
@@ -412,7 +412,7 @@ class ScraperController(BaseController):
                 sigmap = dict((k, v) for v, k in signal.__dict__.iteritems() if v.startswith('SIG'))
                 if exitmessage['term_sig'] in sigmap:
                     exitmessage['term_sig_text'] = sigmap[exitmessage['term_sig']]
-                    
+
             logger.debug("%s endmessage: %s  exitmessage: %s" % (scrapername, endingmessage, exitmessage))
             del runidstocontrollers[self.m_runID]
             del pidstorunids[childpid]
@@ -424,6 +424,7 @@ class ScraperController(BaseController):
                 except socket.error, e:
                     logger.exception("ending message error: %s" % scrapername)
                 self.connection.close()
+                logger.debug("close connection on %s" % (scrapername))
 
             streamprintsin.close()
             streamjsonsin.close()
