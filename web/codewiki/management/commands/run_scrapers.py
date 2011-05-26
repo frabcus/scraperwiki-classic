@@ -119,7 +119,8 @@ def runmessageloop(runnerstream, event, approxlenoutputlimit):
             elif content == "runcompleted":
                 completiondata = data
                 completionmessage = str(data.get("elapsed_seconds")) + " seconds elapsed, " 
-                completionmessage += str(data.get("CPU_seconds")) + " CPU seconds used";
+                if data.get("CPU_seconds"):
+                    completionmessage += str(data.get("CPU_seconds")) + " CPU seconds used";
                 if "exit_status" in data and data.get("exit_status") != 0:
                     completionmessage += ", exit status " + str(data.get("exit_status"));
                 if "term_sig_text" in data:

@@ -60,7 +60,7 @@ for i in range(%d):\r
     print i
 print "done", i, len(str(x))
 """
-        while len(manyrunnerindex) < 25:
+        while len(manyrunnerindex) < 30:
             i = max(manyrunnerindex) + 1
             link_name = 'Python scraper'
             
@@ -70,7 +70,7 @@ print "done", i, len(str(x))
             s.open("/scrapers/new/python#plain")
             code = bcode % (i, i, i)
             code = "print '888',\r\n"*100+code   # bunch of junk at the top
-            s.type('css=#id_code', bcode)
+            s.type('css=#id_code', code)
             time.sleep(1)
             s.click('btnCommitPopup')
             self.wait_for_page()
