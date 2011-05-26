@@ -51,15 +51,16 @@ class TestManyRuns(SeleniumTest):
         code = """
 import scraperwiki, time, urllib\r
 x=1\r
-print urllib.urlopen("http://api.dev.scraperwiki.com/api/1.0/scraper/getinfo?name=manyrunnerscript_%d").read()
+print len(urllib.urlopen("http://api.dev.scraperwiki.com/api/1.0/scraper/getinfo?name=manyrunnerscript_%d").read())
 for i in range(%d):\r
     for j in range(1, %d00):\r
         x*=j\r
     scraperwiki.sqlite.save(["i"], {"i":i, "x":len(str(x))})\r
     time.sleep(i*0.1+7)
+    print i
 print "done", i, len(str(x))
 """
-        while len(manyrunnerindex) < 50:
+        while len(manyrunnerindex) < 20:
             i = max(manyrunnerindex) + 1
             link_name = 'Python scraper'
             
@@ -76,7 +77,7 @@ print "done", i, len(str(x))
             manyrunnerindex.add(i)
 
         # go in and set each one running (many user must be staff status to do this)
-        for i in manyrunnerindex:
+        for i in list(manyrunnerindex)[:10]:
             s.open("/scrapers/manyrunnerscript_%d/" % i)
             if s.get_css_count('css=#btnScheduleScraper'):
                 s.click("btnScheduleScraper")

@@ -64,6 +64,8 @@ def writereadstream(dhost, dport, jdata):
                 else:
                     sys.stdout.write(line + '\r\n')
                     sys.stdout.flush()
+                    nbytes += len(line)
+                    nrecords += 1
             else:
                 bgap = True
             sbuffer = [ ssrec.pop(0) ]  # next one in

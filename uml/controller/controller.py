@@ -80,6 +80,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         runids = runidstocontrollers.keys()  # to protect from multithreading
         for runid in runids:
             status.append('runID=%s' % (runid))
+        logger.info("Sending status "+str(status))
         self.sendConnectionHeaders()
         self.connection.sendall('\n'.join(status) + '\n')
 
@@ -395,7 +396,7 @@ class ScraperController(BaseController):
                 if exitmessage['term_sig'] in sigmap:
                     exitmessage['term_sig_text'] = sigmap[exitmessage['term_sig']]
                     
-            logger.debug("endmessage: %s  exitmessage: %s" % (endingmessage, exitmessage))
+            logger.debug("%s endmessage: %s  exitmessage: %s" % (scrapername, endingmessage, exitmessage))
             del runidstocontrollers[self.m_runID]
             del pidstorunids[childpid]
 

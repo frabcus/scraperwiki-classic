@@ -79,15 +79,16 @@ def allocateUML(scraperstatus):
     return uml
 
 def releaseUML(scraperstatus):
+    uname = scraperstatus["uname"]
+    
     UMLLock.acquire()
-    
-    uml = UMLs[scraperstatus["uname"]]
-    
+    uml = UMLs[uname]
     del runningscrapers[scraperstatus["runID"]]
     uml.runids.remove(scraperstatus["runID"])
     
-    if uml.livestatus != "live" and len(uml.runids) == 0:
-        del UMLs[scraperstatus["uname"]]
+    if uml.livestatus == "closing" and len(uml.runids) == 0:
+        del UMLs[uname]
+        logger.info('closing UML %s removed' % uname)
     
     UMLLock.release ()
 
@@ -182,7 +183,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             logger.info('UML %s closing' % uname)
             self.connection.send('UML %s closing' % uname)
         else:
-            logger.info('UML %s closing' % uname)
+            logger.info('UML %s removed' % uname)
             self.connection.send('UML %s removed' % uname)
         self.connection.send('\n')
 
@@ -332,7 +333,7 @@ class UMLScanner(threading.Thread) :
                         uml.livestatus = "live"
                 except Exception:
                     if uml.livestatus == "live":
-                        logger.warning('UML %s now unresponsive' % uml.uname)
+                        logger.warning('UML %s now unresponsive while %d scrapers were running' % (uml.uname, len(uml.runids)))
                         uml.livestatus = "unresponsive"
                     elif uml.livestatus == "closing":
                         logger.warning('Closing UML %s unresponsive' % uml.uname)
