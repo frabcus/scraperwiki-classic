@@ -48,7 +48,7 @@ class TestManyRuns(SeleniumTest):
         print "number of manyrunnerscripts", scraper_count
         
         # manufacture more runner scripts if necessary
-        code = """
+        bcode = """
 import scraperwiki, time, urllib\r
 x=1\r
 print len(urllib.urlopen("http://api.dev.scraperwiki.com/api/1.0/scraper/getinfo?name=manyrunnerscript_%d").read())
@@ -60,7 +60,7 @@ for i in range(%d):\r
     print i
 print "done", i, len(str(x))
 """
-        while len(manyrunnerindex) < 20:
+        while len(manyrunnerindex) < 25:
             i = max(manyrunnerindex) + 1
             link_name = 'Python scraper'
             
@@ -68,7 +68,9 @@ print "done", i, len(str(x))
             s.answer_on_next_prompt(scriptname)
             print "Making", scriptname
             s.open("/scrapers/new/python#plain")
-            s.type('css=#id_code', code % (i, i, i))
+            code = bcode % (i, i, i)
+            code = "print '888',\r\n"*100+code   # bunch of junk at the top
+            s.type('css=#id_code', bcode)
             time.sleep(1)
             s.click('btnCommitPopup')
             self.wait_for_page()
@@ -77,7 +79,7 @@ print "done", i, len(str(x))
             manyrunnerindex.add(i)
 
         # go in and set each one running (many user must be staff status to do this)
-        for i in list(manyrunnerindex)[:10]:
+        for i in list(manyrunnerindex)[:22]:
             s.open("/scrapers/manyrunnerscript_%d/" % i)
             if s.get_css_count('css=#btnScheduleScraper'):
                 s.click("btnScheduleScraper")

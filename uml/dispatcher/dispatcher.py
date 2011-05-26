@@ -282,6 +282,9 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             soc.send("\r\n")
             soc.sendall(sdata)
 
+            # this simply sends whatever chunks there are right back to runner without buffering them
+            # if they were buffered then could detect the execution end json object and break in a timely manner here
+            # rather than wait for the close or (more reliably) the shutdown signal to filter through (sometimes delayed).  
         while True:
             logger.debug("into select %s" % (short_name))
             rback, wback, eback = select.select([soc, self.connection], [], [], 60)
@@ -295,7 +298,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 break
             
             rec = soc.recv(8192)
-            logger.debug("done recv %s %s" % (short_name, [rec[:100]]))
+            logger.debug("done recv %s %s" % (short_name, [rec[:80]]))
             if not rec:
                 logger.debug("controller to dispatcher connection termination: %s  %s" % (short_name, runID))
                 soc.close()
