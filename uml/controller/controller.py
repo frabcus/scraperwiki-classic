@@ -200,8 +200,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             return
 
         request = json.loads("".join(jincoming))
-        self.execute(request)
-        self.connection.close()
+        self.execute(request)   # actually runs everything
 
 
     def do_GET (self) :
@@ -231,7 +230,8 @@ def saveunicode(text):
 # one of these per scraper receiving the data
 class ScraperController(BaseController):
  
-    def processrelayoutput(self, streamprintsin, streamjsonsin, childpid):
+            # takes the output from the exec.py process call and sends it out to the dispatcher
+    def processrelayoutput(self, streamprintsin, streamjsonsin, childpid, scrapername):
         ostimes1 = os.times()
         
         rlist = [ self.connection, streamprintsin, streamjsonsin ] 
@@ -260,7 +260,10 @@ class ScraperController(BaseController):
             # further incoming signals (sometimes empty) from the controller can be assumed to be a termination message
             if self.connection in rback:
                 line = self.connection.recv(200)
-                logger.debug("got message to remove %s  %d" % (str([line]), childpid))
+                if not line:
+                    logger.debug("incoming connection to %s gone down, so killing exec process" % (scrapername, childpid))
+                else:
+                    logger.debug("got message to kill exec process %s  %s %d" % (str([line]), scrapername, childpid))
                 os.kill(childpid, signal.SIGKILL)
                 break
             
@@ -293,9 +296,13 @@ class ScraperController(BaseController):
                     streamjsonsin.close()
                     rlist.remove(streamjsonsin)
 
-            # output the sequence of valud json objects delimited by \n
-            for jsonoutput in jsonoutputlist:
-                self.connection.sendall(jsonoutput + '\n')
+            # output the sequence of valid json objects to the dispatcher delimited by \n
+            try:
+                for jsonoutput in jsonoutputlist:
+                    self.connection.sendall(jsonoutput + '\n')
+            except socket.error, e:
+                logger.exception("socket error sending %s  %s" % (scrapername, jsonoutput[:1000]))
+                return None
 
         ostimes2 = os.times()
 
@@ -365,7 +372,7 @@ class ScraperController(BaseController):
         streamprintsin, streamprintsout = socket.socketpair()
         streamjsonsin, streamjsonsout = socket.socketpair()
         
-        childpid   = os.fork()
+        childpid = os.fork()
         
         if childpid == 0:
                 # set the environment variables only in the child process
@@ -391,7 +398,7 @@ class ScraperController(BaseController):
             streamjsonsout.close()
 
             try:
-                endingmessage = self.processrelayoutput(streamprintsin, streamjsonsin, childpid)
+                endingmessage = self.processrelayoutput(streamprintsin, streamjsonsin, childpid, scrapername)
             except Exception, e:
                 logger.exception('process main exception: %s  %s' % (childpid, scrapername))
                 endingmessage = None
@@ -412,7 +419,11 @@ class ScraperController(BaseController):
 
             if endingmessage:
                 endingmessage.update(exitmessage)
-                self.connection.sendall(json.dumps(endingmessage) + '\n')
+                try:
+                    self.connection.sendall(json.dumps(endingmessage) + '\n')
+                except socket.error, e:
+                    logger.exception("ending message error: %s" % scrapername)
+                self.connection.close()
 
             streamprintsin.close()
             streamjsonsin.close()
@@ -420,7 +431,7 @@ class ScraperController(BaseController):
             try:
                 os.remove('/tmp/scraper.%d' % childpid)
             except OSError:
-                pass
+                logger.exception('failed to delete /tmp/scraper.%d' % childpid)
 
 
 
