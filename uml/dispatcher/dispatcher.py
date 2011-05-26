@@ -282,8 +282,10 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         while True:
             logger.debug("into select %s %s" % (short_name, str([soc, self.connection])))
-            rback, wback, eback = select.select([soc, self.connection], [], [])
-            logger.debug("done select %s %s" % (short_name, str(rback)))
+            rback, wback, eback = select.select([soc, self.connection], [], [], 60)
+            if not rback:
+                logger.debug("soft timeout on select.select for %s" % short_name)
+
             if self.connection in rback:
                 soc.sendall("close for runner changed signal")
                 logger.debug("dispatcher to runner connection termination: %s  %s" % (short_name, runID))
@@ -291,6 +293,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 break
             
             rec = soc.recv(8192)
+            logger.debug("done recv %s %s" % (short_name, [rec]))
             if not rec:
                 logger.debug("controller to dispatcher connection termination: %s  %s" % (short_name, runID))
                 soc.close()

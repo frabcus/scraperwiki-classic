@@ -240,22 +240,19 @@ class ScraperController(BaseController):
         
         while len(rlist) > 2 and self.connection in rlist:
             try:
-                rback, wback, eback = select.select(rlist, [ ], [ ]) 
-            
-                # shouldn't be happening any more, but try to track down which it is when it does
+                rback, wback, eback = select.select(rlist, [ ], [ ], 60) 
             except select.error, e:   
                 logger.warning("bad file descriptor childpid: %d"%childpid)
                 logger.warning([streamprintsin.fileno(), streamjsonsin.fileno(), self.connection.fileno()]) 
                 for fd in rlist:
-                    if type(fd) == int:
-                        fdn = fd
-                    else:
-                        fdn = fd.fileno()
                     try:
-                        os.fstat(fdn)
-                    except:
-                        logger.exception("bad osserror: %d" % fdn)
-                raise
+                        select.select([fd], [ ], [ ]) 
+                    except select.error, e:   
+                        logger.exception("bad socket was: %d" % fd.fileno())
+                break
+            
+            if not rback:
+                logger.debug("soft timeout on select.select for %s" % scrapername)
             
             # further incoming signals (sometimes empty) from the controller can be assumed to be a termination message
             if self.connection in rback:
@@ -423,8 +420,8 @@ class ScraperController(BaseController):
                     self.connection.sendall(json.dumps(endingmessage) + '\n')
                 except socket.error, e:
                     logger.exception("ending message error: %s" % scrapername)
-                self.connection.close()
-                logger.debug("close connection on %s" % (scrapername))
+                self.connection.shutdown()
+                logger.debug("shutdown connection on %s" % (scrapername))
 
             streamprintsin.close()
             streamjsonsin.close()
@@ -433,6 +430,7 @@ class ScraperController(BaseController):
                 os.remove('/tmp/scraper.%d' % childpid)
             except OSError:
                 logger.exception('failed to delete /tmp/scraper.%d' % childpid)
+            self.connection.close()
 
 
 
