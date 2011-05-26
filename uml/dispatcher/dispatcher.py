@@ -79,6 +79,7 @@ def allocateUML(scraperstatus):
     return uml
 
 def releaseUML(scraperstatus):
+    logger.debug("uml %s releasing on: %s  %s" % (scraperstatus["uname"], scraperstatus["short_name"], scraperstatus["runID"]))
     uname = scraperstatus["uname"]
     
     UMLLock.acquire()
@@ -253,14 +254,14 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         uml = allocateUML(scraperstatus)
         if not uml:
             logger.error("no uml allocated for: %s  %s" % (short_name, runID))
-            self.connection.send(json.dumps({'message_type': 'executionstatus', 'content': 'runcompleted', 'exit_status':"No UML allocated"}))
+            self.connection.sendall(json.dumps({'message_type': 'executionstatus', 'content': 'runcompleted', 'exit_status':"No UML allocated"})+'\n')
             return
 
         logger.debug("uml %s allocated for execute on: %s  %s" % (scraperstatus["uname"], short_name, runID))
         
         # this is the first message sent back to runner.py
-        json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]}) + '\n'
-        self.connection.send(json_msg)
+        json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})
+        self.connection.sendall(json_msg+'\n')
 
         # this is what connects to the controller
         soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
@@ -269,9 +270,10 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         try:
             soc.connect((uml.server, uml.port))
         except socket.error, e:
-            logger.exception("execute")
-            self.connection.send(json.dumps({'message_type': 'executionstatus', 'content': 'runcompleted', 'exit_status':"Failed to connect to controller"}))
-            soc = None
+            logger.warning("refused connection to uml %s" % uname)
+            self.connection.sendall(json.dumps({'message_type': 'executionstatus', 'content': 'runcompleted', 'exit_status':"Failed to connect to controller"})+'\n')
+            releaseUML(scraperstatus)
+            return
 
         if soc:
             soc.send('POST /Execute HTTP/1.1\r\n')
@@ -281,19 +283,19 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             soc.sendall(sdata)
 
         while True:
-            logger.debug("into select %s %s" % (short_name, str([soc, self.connection])))
+            logger.debug("into select %s" % (short_name))
             rback, wback, eback = select.select([soc, self.connection], [], [], 60)
             if not rback:
                 logger.debug("soft timeout on select.select for %s" % short_name)
 
             if self.connection in rback:
-                soc.sendall("close for runner changed signal")
+                soc.sendall("close for runner changed signal")   # any message sent to soc will cause the controller to close the process
                 logger.debug("dispatcher to runner connection termination: %s  %s" % (short_name, runID))
                 soc.close()
                 break
             
             rec = soc.recv(8192)
-            logger.debug("done recv %s %s" % (short_name, [rec]))
+            logger.debug("done recv %s %s" % (short_name, [rec[:100]]))
             if not rec:
                 logger.debug("controller to dispatcher connection termination: %s  %s" % (short_name, runID))
                 soc.close()
@@ -302,12 +304,11 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             try:
                 self.connection.sendall(rec)
             except socket.error, e:
-                soc.sendall("close for runner connection exception")
+                soc.sendall("close for runner connection exception")   # any message sent to soc will cause the controller to close the process
                 logger.debug("dispatcher to runner connection error on: %s  %s" % (short_name, runID))
                 soc.close()
                 break
 
-        logger.debug("uml %s releasing on: %s  %s" % (scraperstatus["uname"], short_name, runID))
         releaseUML(scraperstatus)
 
     do_HEAD   = do_GET
@@ -320,7 +321,7 @@ class UMLScanner(threading.Thread) :
     def __init__(self):
         threading.Thread.__init__ (self)
 
-    def run (self):
+    def run(self):
         while True:
             time.sleep(10)
 
@@ -328,13 +329,16 @@ class UMLScanner(threading.Thread) :
             umls = UMLs.values()
             UMLLock.release()
 
+            logger.debug("checking umls %d" % len(umls))
             for uml in umls:
                 try:
                     res = urllib2.urlopen("http://%s:%s/Status" % (uml.server, uml.port), timeout=2).read()
                     if uml.livestatus == "unresponsive":  # don't overwrite closing
                         logger.warning('unresponsive UML %s back to live' % uml.uname)
                         uml.livestatus = "live"
-                except Exception:
+                except Exception, e:
+                    if type(e) == TypeError:
+                        logger.exception("wrong version of python?")
                     if uml.livestatus == "live":
                         logger.warning('UML %s now unresponsive while %d scrapers were running' % (uml.uname, len(uml.runids)))
                         uml.livestatus = "unresponsive"
@@ -343,9 +347,9 @@ class UMLScanner(threading.Thread) :
                         
                 if uml.livestatus == "unresponsive" and uml.runids:
                     for runid in uml.runids:
-                        logger.warning('Killing runid %s on unresponsive UML %s' % (runid, uml.uname))
+                        logger.warning('Killing runid %s %s on unresponsive UML %s' % (runid, runningscrapers[runid]["short_name"], uml.uname))
                         #runningscrapers[runid]["socket"].close()     # may cause select.select to hang
-                        runningscrapers[runid]["connection"].close()  # should enable a clean break to occur
+                        runningscrapers[runid]["connection"].close()  # seems to enable a cleaner break to occur
 
 
 class DispatcherHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):

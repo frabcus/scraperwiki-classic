@@ -80,7 +80,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         runids = runidstocontrollers.keys()  # to protect from multithreading
         for runid in runids:
             status.append('runID=%s' % (runid))
-        logger.info("Sending status on %d scrapers" % len(runids))
+        #logger.info("Sending status on %d scrapers" % len(runids))
         self.sendConnectionHeaders()
         self.connection.sendall('\n'.join(status) + '\n')
 
@@ -420,8 +420,13 @@ class ScraperController(BaseController):
                     self.connection.sendall(json.dumps(endingmessage) + '\n')
                 except socket.error, e:
                     logger.exception("ending message error: %s" % scrapername)
-                self.connection.shutdown(socket.SHUT_WR)
+                
+                    # this stimulates the select.select in the dispatcher more reliably than a simple close()
                 logger.debug("shutdown connection on %s" % (scrapername))
+                try:
+                    self.connection.shutdown(socket.SHUT_WR)  
+                except socket.error, e:
+                    logger.info("socket shutdown error endpoint already shutdown: %s" % scrapername)
 
             streamprintsin.close()
             streamjsonsin.close()
