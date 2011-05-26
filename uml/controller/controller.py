@@ -420,7 +420,7 @@ class ScraperController(BaseController):
                     self.connection.sendall(json.dumps(endingmessage) + '\n')
                 except socket.error, e:
                     logger.exception("ending message error: %s" % scrapername)
-                self.connection.shutdown()
+                self.connection.shutdown(socket.SHUT_WR)
                 logger.debug("shutdown connection on %s" % (scrapername))
 
             streamprintsin.close()
