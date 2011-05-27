@@ -2482,6 +2482,83 @@ div.metadata dt, div.metadata dd {
 
 #scraper_contributors ul {
 	padding: 0;
+	border: 1px solid #ddd;
+	margin-bottom: 0;
+}
+
+#scraper_contributors li {
+	padding: 10px;
+	line-height: 24px;
+}
+
+#scraper_contributors li:nth-child(2n) {
+	background-color: #F4F8FB;
+}
+
+#scraper_contributors li a {
+	text-decoration: none;
+}
+
+#scraper_contributors li a:hover {
+	color: #13537d;
+}
+
+#scraper_contributors img.gravatar {
+	margin: 0 7px 0 0;
+	height: 24px;
+	width: 24px;
+	vertical-align: top;
+}
+
+#addneweditor {
+	background-image: none;
+	padding: 5px 10px;
+	background: #f6f6f6;
+background: -moz-linear-gradient(top, #f6f6f6 0%, #e6e6e6 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f6f6f6), color-stop(100%,#e6e6e6));
+background: -webkit-linear-gradient(top, #f6f6f6 0%,#e6e6e6 100%);
+background: -o-linear-gradient(top, #f6f6f6 0%,#e6e6e6 100%);
+background: -ms-linear-gradient(top, #f6f6f6 0%,#e6e6e6 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F6F6F6', endColorstr='#E6E6E6',GradientType=0 );
+background: linear-gradient(top, #f6f6f6 0%,#e6e6e6 100%);
+border: 1px solid #ddd;
+border-top: navajowhite;
+}
+
+#addneweditor a {
+	text-decoration: none;
+	color: #3d7b35;
+	font-size: 14px;
+	cursor: pointer;
+	display: block;
+	padding: 4px 0;
+	text-shadow: 0 1px 0 #fff;
+}
+
+#addneweditor a:hover {
+	color: #23461e;
+}
+
+#addneweditor a img {
+	margin-right: 3px;
+	vertical-align: -2px;
+}
+
+#addneweditor span {
+	font-size: 14px;
+	color: #333;
+}
+
+#addneweditor input.text {
+	padding: 2px 4px;
+	width: 140px;
+	margin-left: 4px;
+}
+
+#addneweditor .addbutton, #addneweditor .cancelbutton {
+	float: right;
+	margin-left: 10px;
+	margin-top: 3px;
 }
 
 #add_view_to_site {
@@ -2520,7 +2597,7 @@ background: -o-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100
 background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%); /* IE10+ */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#EDE1E1',GradientType=0 ); /* IE6-9 */
 background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%); /* W3C */
-	margin: 30px 0 10px 0;
+	margin: 20px 0 10px 0;
 	display: inline-block;
 }
 
@@ -2541,7 +2618,7 @@ background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#f7eaea 100%);
 }
 
 a.btnClearDatastore_link {
-	margin: 0 0 10px 0;
+	margin: 5px 0 10px 0;
 	display: inline-block;
 }
 
