@@ -2561,6 +2561,62 @@ border-top: navajowhite;
 	margin-top: 3px;
 }
 
+#privacy_status {
+	background-color: #F4F8FB;
+	padding: 15px;
+	margin-top: 15px;
+}
+
+#privacy_status h4 {
+	padding-bottom: 0;
+}
+
+#privacy_status h4 img {
+	margin-right: 5px;
+	vertical-align: top;
+}
+
+#privacy_status h4 a {
+	float: right;
+	font-size: 13px;
+	margin: 1px 5px 0 0;
+	cursor: pointer;
+}
+
+#privacy_status p {
+	padding: 5px 0 0 26px;
+	margin: 0;
+}
+
+#privacy_status table {
+	display: none;
+}
+
+#privacy_status table tr td {
+	padding-top: 20px;
+}
+
+#privacy_status table tr.first td {
+	padding-top: 0;
+}
+
+#privacy_status label {
+	display: block;
+}
+
+#privacy_status table .radio {
+	text-align: left;
+	width: 30px;
+}
+
+#privacy_status table p {
+	padding: 0;
+	font-size: 14px;
+}
+
+
+
+
 #add_view_to_site {
 	margin-top: 40px;
 	margin-bottom: -20px;
