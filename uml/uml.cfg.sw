@@ -113,37 +113,82 @@ via	= 9104
 mem	= 1024M
 count = 25
 
+
 [loggers]
-keys=root,dataproxy,controller
+keys=root,dataproxy,controller,runner,dispatcher,twister,proxy,django
 
 [handlers]
-keys=consoleHandler,logfileHandlerDataproxyDebug,logfileHandlerDataproxyWarning,logfileHandlerDataproxyEmail,logfileHandlerControllerDebug,logfileHandlerControllerWarning
+keys=consoleHandler,logfileHandlerWarnings,logfileHandlerEmail,logfileHandlerDataproxyDebug,logfileHandlerControllerDebug,logfileHandlerDispatcherDebug,logfileHandlerRunnerDebug,logfileHandlerTwisterDebug,logfileHandlerProxyDebug,logfileHandlerDjangoDebug
 
 [formatters]
 keys=simpleFormatter
 
 
 [logger_root]
-level=CRITICAL
+level=ERROR
 handlers=consoleHandler
 
 [logger_dataproxy]
 level=DEBUG
-handlers=logfileHandlerDataproxyDebug,logfileHandlerDataproxyWarning
+handlers=logfileHandlerDataproxyDebug,logfileHandlerWarnings
 qualname=dataproxy
 propagate=0
 
 [logger_controller]
 level=DEBUG
-handlers=logfileHandlerControllerDebug,logfileHandlerControllerWarning
+handlers=logfileHandlerControllerDebug,logfileHandlerWarnings
 qualname=controller
 propagate=0
+
+[logger_runner]
+level=DEBUG
+handlers=logfileHandlerRunnerDebug,logfileHandlerWarnings
+qualname=runner
+propagate=0
+
+[logger_dispatcher]
+level=DEBUG
+handlers=logfileHandlerDispatcherDebug,logfileHandlerWarnings
+qualname=dispatcher
+propagate=0
+
+[logger_twister]
+level=DEBUG
+handlers=logfileHandlerTwisterDebug,logfileHandlerWarnings
+qualname=twister
+propagate=0
+
+[logger_proxy]
+level=DEBUG
+handlers=logfileHandlerProxyDebug,logfileHandlerWarnings
+qualname=proxy
+propagate=0
+
+[logger_django]
+level=DEBUG
+handlers=logfileHandlerDjangoDebug,logfileHandlerWarnings
+qualname=django
+propagate=0
+
+
 
 [handler_consoleHandler]
 class=StreamHandler
 level=DEBUG
 formatter=simpleFormatter
 args=(sys.stdout,)
+
+[handler_logfileHandlerWarnings]
+class=handlers.RotatingFileHandler
+level=WARNING
+formatter=simpleFormatter
+args=('/var/log/scraperwiki/allwarnings.log', "a", 100000, 5)
+
+[handler_logfileHandlerEmail]
+class=handlers.SMTPHandler
+level=CRITICAL
+formatter=simpleFormatter
+args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 'ScraperWiki critical error in system')
 
 
 [handler_logfileHandlerControllerDebug]
@@ -152,34 +197,44 @@ level=DEBUG
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/controller.log', "a", 100000, 5)
 
-[handler_logfileHandlerControllerWarning]
-class=handlers.RotatingFileHandler
-level=WARNING
-formatter=simpleFormatter
-args=('/var/log/scraperwiki/controller.log-warn', "a", 100000, 5)
-
-
-
 [handler_logfileHandlerDataproxyDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/dataproxy.log', "a", 100000, 5)
 
-[handler_logfileHandlerDataproxyWarning]
+[handler_logfileHandlerDispatcherDebug]
 class=handlers.RotatingFileHandler
-level=WARNING
+level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/dataproxy.log-warn', "a", 100000, 5)
+args=('/var/log/scraperwiki/dispatcher.log', "a", 100000, 5)
 
-[handler_logfileHandlerDataproxyEmail]
-class=handlers.SMTPHandler
-level=CRITICAL
+[handler_logfileHandlerRunnerDebug]
+class=handlers.RotatingFileHandler
+level=DEBUG
 formatter=simpleFormatter
-args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 'ScraperWiki error in dataproxy')
+args=('/var/log/scraperwiki/runner.log', "a", 100000, 5)
 
+[handler_logfileHandlerTwisterDebug]
+class=handlers.RotatingFileHandler
+level=DEBUG
+formatter=simpleFormatter
+args=('/var/log/scraperwiki/twister.log', "a", 100000, 5)
+
+[handler_logfileHandlerProxyDebug]
+class=handlers.RotatingFileHandler
+level=DEBUG
+formatter=simpleFormatter
+args=('/var/log/scraperwiki/proxy.log', "a", 100000, 5)
+
+[handler_logfileHandlerDjangoDebug]
+class=handlers.RotatingFileHandler
+level=DEBUG
+formatter=simpleFormatter
+args=('/var/log/scraperwiki/django.log', "a", 100000, 5)
 
 
 [formatter_simpleFormatter]
 format=%(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s
+
 
