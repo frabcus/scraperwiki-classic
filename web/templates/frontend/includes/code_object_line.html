@@ -21,6 +21,19 @@
           <td class="label">Language</td>
           <td class="link"><a href="{% url editor_edit code.wiki_type code.short_name %}" title="Edit this {{code.wiki_type|lower}}">{{code.language|lower}}</a></td>
         </tr>
+        
+        {% ifequal code.privacy_status 'visible' %}
+	    <tr class="status protected">
+          <td class="label">Status</td>
+          <td class="link">Protected</td>
+        </tr>
+        {% endifequal %}
+	    {% ifequal code.privacy_status 'private' %}
+	    <tr class="status private">
+          <td class="label">Status</td>
+          <td class="link">Private</td>
+        </tr>
+        {% endifequal %}
 
         {% if code.is_sick_and_not_running %}
           <tr class="notes">
@@ -28,21 +41,13 @@
             <td class="link about_sick"><a href="{% url code_overview code.wiki_type code.short_name %}">Maintenance<br/>required</a>
           </tr>
         {% endif %}
+        
     </table>
     
     <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
     
     <h3>
-      <a class="owner" href="{% if code.owner.username %}{% url profiles_profile_detail code.owner.username %}{% endif %}">
-        {% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}
-      </a> 
-      / 
-      <a href="{% url code_overview code.wiki_type code.short_name %}">
-        {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
-      </a>
-      {% ifnotequal code.privacy_status 'public' %}
-        <small>[{{code.privacy_status}}]</small>
-      {% endifnotequal %}
+      <a class="owner" href="{% if code.owner.username %}{% url profiles_profile_detail code.owner.username %}{% endif %}">{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}</a> / <a href="{% url code_overview code.wiki_type code.short_name %}">{% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}</a>
     </h3>
     
     <p class="context">

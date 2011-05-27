@@ -3379,7 +3379,8 @@ strong.language {
 	margin-left: 3px;
 }
 
-.code_about .codewiki_type td.link {
+.code_about .codewiki_type td.link,
+.code_about .status td.link {
 	background-repeat: no-repeat;
 	background-position: left center;
 	min-width: 8em;
@@ -3391,6 +3392,14 @@ strong.language {
 
 .code_about .codewiki_type.view td.link {
 	background-image: url(../images/icons/view.png);
+}
+
+.code_about .status.private td.link {
+	background-image: url(../images/icons/shield-private.png);
+}
+
+.code_about .status.protected td.link {
+	background-image: url(../images/icons/shield-protected.png);
 }
 
 .code_about .fork td.link {

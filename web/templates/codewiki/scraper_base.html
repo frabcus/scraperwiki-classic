@@ -1,5 +1,12 @@
 {% extends "frontend/base.html" %}
 
+{% block meta %}
+    <meta property="og:title" content="SCRAPER TITLE" />
+    <meta property="og:description" content="SCRAPER DESCRIPTION" />
+    <meta property="og:image" content="SCRAPER IMAGE URL" />
+    <meta property="og:site_name" content="ScraperWiki" />
+{% endblock %}
+
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/code_object_comments/{{ scraper.short_name }}" />{% endblock %}
 
