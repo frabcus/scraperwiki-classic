@@ -1,6 +1,5 @@
 import unittest
 from selenium import selenium
-import simplejson as json
 
 class SeleniumTest(unittest.TestCase):
 
@@ -16,7 +15,7 @@ class SeleniumTest(unittest.TestCase):
     def setUp(self):
         self.verificationErrors = []
         self.selenium = selenium(SeleniumTest._selenium_host, SeleniumTest._selenium_port, 
-                        json.dumps(SeleniumTest._selenium_browser), SeleniumTest._app_url)
+                                 SeleniumTest._selenium_browser, SeleniumTest._app_url)
         self.selenium.start()
             
             # extract a title for the job from name of test.  must be done in the constructor or after start()
