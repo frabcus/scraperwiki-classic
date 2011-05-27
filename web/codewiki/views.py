@@ -40,8 +40,9 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
     try:
         scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
-        message =  "Sorry, this %s does not exist" % wiki_type
-        return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':message}, context_instance=RequestContext(request)))
+        message =  "Sorry, that %s doesn't seem to exist" % wiki_type
+        heading = "404: File not found"
+        return HttpResponseNotFound(render_to_string('404.html', {'heading':heading, 'body':message}, context_instance=RequestContext(request)))
     
     if rdirect and wiki_type != scraper.wiki_type:
         return HttpResponseRedirect(reverse(rdirect, args=[scraper.wiki_type, short_name]))

@@ -149,6 +149,9 @@ $(function()
 		$(this).siblings(':submit').trigger('click');
 	}).siblings(':submit').hide();
 	
+	$('#fourohfoursearch').val($('body').attr('class').replace("scrapers ", "").replace("views ", ""));
+	
+	
 });
 
 
