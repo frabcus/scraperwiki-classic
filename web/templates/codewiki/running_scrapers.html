@@ -459,7 +459,7 @@ $(document).ready(function() {
   </tr>
 {% for run_event in events %}
   <tr>
-    <td><a href="{% url code_overview run_event.scraper.wiki_type run_event.scraper.short_name %}">{{run_event.scraper.title}}</a></td> 
+    <td {% ifnotequal run_event.pid -1 %}style="color:white; background:black"{% endifnotequal %}><a href="{% url code_overview run_event.scraper.wiki_type run_event.scraper.short_name %}">{{run_event.scraper.title}}</a></td> 
     <td>{{run_event.run_started|timesince}} ago (<small>{{run_event.run_started}}</small>)</td> 
     <td>{{run_event.getduration}} seconds</td> 
     <td><a href="{% url scraper_history run_event.scraper.wiki_type run_event.scraper.short_name %}#run_{{ run_event.id }}">{{run_event.outputsummary}}</a></td>
