@@ -5,15 +5,7 @@
 
 {% block header %}
 	<h2>
-      <a href="{% url profiles_profile_detail scraper.owner.username %}">
-        {% if scraper.owner %}
-          {% if scraper.owner.get_profile.name %}
-            {{scraper.owner.get_profile.name}}
-          {% else %}
-            {{scraper.owner.username}}
-          {% endif %}
-        {% endif %}
-       </a> / 
+      <a href="{% if scraper.owner.username %}{% url profiles_profile_detail scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a> / 
        {% if user.is_authenticated %}
          <span id="hCodeTitle" title="Click to edit&hellip;">{{ scraper.title }}</span> 
          <a id="aEditTitle" title="Edit title">Edit title</a>

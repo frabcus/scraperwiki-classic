@@ -48,7 +48,7 @@ def execute(sqlquery, data=None, verbose=1):
             ldata = [ ifsencode_trunc(v, 50)  for v in data.values() ]
         else:
             ldata = [ str(data) ]
-        scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command':'sqliteexecute', "sqlquery":sqlquery, "ldata":ldata})
+        scraperwiki.dumpMessage({'message_type':'sqlitecall', 'command':'sqliteexecute', "val1":sqlquery, "lval2":ldata})
     
     return result
     
@@ -107,7 +107,7 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
     if type(data) == dict:
         rjdata = convdata(unique_keys, data)
         if rjdata.get("error"):
-            return rjdata
+            raise databaseexception(rjdata)
         if date:
             rjdata["date"] = date
     else:
@@ -115,7 +115,7 @@ def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
         for ldata in data:
             ljdata = convdata(unique_keys, ldata)
             if ljdata.get("error"):
-                return ljdata
+                raise databaseexception(ljdata)
             rjdata.append(ljdata)
     result = scraperwiki.datastore.request({"maincommand":'save_sqlite', "unique_keys":unique_keys, "data":rjdata, "swdatatblname":table_name})
 

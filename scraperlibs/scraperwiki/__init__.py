@@ -5,8 +5,7 @@ except : import simplejson as json
 logfd = None   # set to os.fdopen(3, 'w', 0) for consuming json objects
 
 def dumpMessage(d):
-    logfd.write(json.dumps(d))
-    logfd.write('\n')
+    logfd.write(json.dumps(d) + '\n')
     logfd.flush()
 
 

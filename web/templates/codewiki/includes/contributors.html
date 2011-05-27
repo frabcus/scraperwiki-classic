@@ -21,6 +21,12 @@
       {% endfor %}
     {% endwith %}
 
+    {% with 'email' as role %}
+      {% for contributor in userrolemap.email %}  
+        {% include 'codewiki/includes/contributor.html' %}
+      {% endfor %}
+    {% endwith %}
+
 {% if user.is_staff %} 
 <div class="staff"> <!-- staff only, dark launch-->
     {% if user_owns_it %}

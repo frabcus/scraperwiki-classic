@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 
 from django.conf import settings
 
-from codewiki import models
+from codewiki import models, runsockettotwister
 import frontend
 import urllib
 import subprocess
@@ -48,6 +48,7 @@ def MakeRunner(request, scraper, code):
     
     runner.stdin.close()
     return runner
+
 
 
 def scraperwikitag(scraper, html, panepresent):
@@ -102,7 +103,7 @@ def scraperwikitag(scraper, html, panepresent):
 
 def rpcexecute(request, short_name, revision=None):
     try:
-        scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=short_name)
+        scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
         return HttpResponseNotFound(render_to_string('404.html', {'heading':'Not found', 'body':"Sorry, this view does not exist"}, context_instance=RequestContext(request)))
     if not scraper.actionauthorized(request.user, "rpcexecute"):
@@ -123,12 +124,18 @@ def rpcexecute(request, short_name, revision=None):
     if scraper.language == 'javascript':
         HttpResponse(code, mimetype='application/javascript')
 
+    
+# uncomment this line and comment next two lines to enable runner through twisted
+    #runnerstream = runsockettotwister.RunnerSocket(scraper, revision, request.META["QUERY_STRING"])
     runner = MakeRunner(request, scraper, code)
+    runnerstream = runner.stdout
+
 
     # we build the response on the fly in case we get a contentheader value before anything happens
     response = None 
     panepresent = {"scraperwikipane":[], "firstfivelines":[]}
-    for line in runner.stdout:
+    contenttypesettings = { }
+    for line in runnerstream:
         try:
             message = json.loads(line)
         except:
@@ -154,6 +161,7 @@ def rpcexecute(request, short_name, revision=None):
         
         # parameter values have been borrowed from http://php.net/manual/en/function.header.php
         elif message['message_type'] == "httpresponseheader":
+            contenttypesettings[message['headerkey']] = message['headervalue']
             if message['headerkey'] == 'Content-Type':
                 if not response:
                     response = HttpResponse(mimetype=message['headervalue'])
@@ -181,11 +189,13 @@ def rpcexecute(request, short_name, revision=None):
         response = HttpResponse('no output for some unknown reason')
         
     # now decide about inserting the powered by scraperwiki panel (avoid doing it on json)
+    # print [response['Content-Type']]  default is DEFAULT_CONTENT_TYPE, comes out as 'text/html; charset=utf-8'
     if not panepresent["scraperwikipane"]:
         firstcode = "".join(panepresent["firstfivelines"]).strip()
-        if not re.match("[\w_\s=]*[\(\[\{]", firstcode):
-            if re.search("(?i)<\s*(?:b|i|a|h\d|script|ul|table).*?>", firstcode):
-                response.write(scraperwikitag(scraper, '<div id="scraperwikipane" class="version-2"/>', panepresent))
+        if not contenttypesettings:   # suppress if content-type was set
+            if not re.match("[\w_\s=]*[\(\[\{]", firstcode):   # looks like it is not json code
+                if re.search("(?i)<\s*(?:b|i|a|h\d|script|ul|table).*?>", firstcode):   # looks like it is html
+                    response.write(scraperwikitag(scraper, '<div id="scraperwikipane" class="version-2"/>', panepresent))
     
     return response
                 

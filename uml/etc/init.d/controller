@@ -20,9 +20,11 @@ CONFIG=/scraperwiki/scripts/uml.cfg
 
 # set up the directory paths for the different exec.py/rb/php scripts
 # PYTHONPATH also applies to controller.py; PHPPATH is nonstandard and implemented within exec.php
-export PYTHONPATH=/var/www/scraperwiki/scraperlibs/
-export RUBYLIB=/var/www/scraperwiki/scraperlibs/
-export PHPPATH=/var/www/scraperwiki/scraperlibs/
+export PYTHONPATH=/scraperwiki/live/scraperlibs/
+export RUBYLIB=/scraperwiki/live/scraperlibs/
+export PHPPATH=/scraperwiki/live/scraperlibs/
+
+export PYTHONUNBUFFERED=True
 
 PIDFILE=$VARDIR/run/$NAME.pid
 DAEMON_ARGS="--setuid --firewall=auto --pidfile=$PIDFILE --config=$CONFIG"

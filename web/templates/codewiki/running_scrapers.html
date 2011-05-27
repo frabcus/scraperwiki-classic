@@ -374,29 +374,14 @@ $(document).ready(function() {
     <div id="jdatareceived"></div>
 </div>
 
-<h3><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h3>
-<small>refreshed: <span id="murefsh"></span></small>
-<table>
-<tr>
-  <th><a href="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki.html">Django server (horsell)</a></th>
-  <th><a href="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki.html">Datastore server (burbage)</a></th>
-</tr>
-
-<tr>
-  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki-cpu-day.png"></td>
-  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki-mysql_queries-day.png"></td>
-</tr>
-
-<tr><th colspan="2"><a href="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki.html">UML server (rush)</a></th></tr>
-<tr>
-  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-cpu-day.png"></td>
-  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-load-day.png"></td>
-</tr>
-</table>
 
 <div id="divLogo" style="float:left">
     <p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
 </div>
+
+<h1>Number of overdue scrapers</h1>
+<p><b>{{overdue_count}}</b></p>
+
 
 <h1 id="umlstatus"><a href="#umlstatus">#</a> UML Status</h1>
   (does not update)
@@ -418,6 +403,7 @@ $(document).ready(function() {
   </tr>
 {% endfor %}
 </table>
+
 
 <table border="1" style="width:auto; margin:auto">
 <tr><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>
@@ -441,21 +427,22 @@ $(document).ready(function() {
 
     <td>
     {% if status.killable %}
-
-    {% if status.scraperrunevent %}
-    <form action="{% url scraper_killrunning status.runID status.scraperrunevent.id %}" method="post">
-    {% else %}
-    <form action="{% url scraper_killrunning status.runID %}" method="post">
-    {% endif %}
-        <input type="hidden" id="hidKillRun" name="killrun" value="1" />
-        <input type="submit" id="btnKillRun" class="danger" value="Kill running scraper" />
-    </form>
+      {% if status.scraperrunevent %}
+        <form action="{% url scraper_killrunning status.runID status.scraperrunevent.id %}" method="post">
+      {% else %}
+        <form action="{% url scraper_killrunning status.runID %}" method="post">
+      {% endif %}
+          <input type="hidden" id="hidKillRun" name="killrun" value="1" />
+          <input type="submit" id="btnKillRun" class="danger" value="Kill running scraper" />
+        </form>
     {% endif %}
     </td>
+
     <td><small>{{status.runID}}</small></td>
   </tr>
 {% endfor %}
 </table>
+
 
 
 <h1>Recent runs</h1>
@@ -475,6 +462,26 @@ $(document).ready(function() {
     
   </tr>
 {% endfor %}
+</table>
+
+<h3><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h3>
+<small>refreshed: <span id="murefsh"></span></small>
+<table>
+<tr>
+  <th><a href="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki.html">Django server (horsell)</a></th>
+  <th><a href="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki.html">Datastore server (burbage)</a></th>
+</tr>
+
+<tr>
+  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki-cpu-day.png"></td>
+  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki-mysql_queries-day.png"></td>
+</tr>
+
+<tr><th colspan="2"><a href="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki.html">UML server (rush)</a></th></tr>
+<tr>
+  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-cpu-day.png"></td>
+  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-load-day.png"></td>
+</tr>
 </table>
 
 

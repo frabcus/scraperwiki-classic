@@ -93,6 +93,7 @@ class scraperwiki
 
    static function attach($name, $asname=null)
    {
+      $ds = SW_DataStoreClass::create();
       array_push(self::$attachlist, array("name"=>$name, "asname"=>$asname)); 
       $result = $ds->request(array('maincommand'=>'sqlitecommand', 'command'=>'attach', "name"=>$name, "asname"=>$asname));
    }

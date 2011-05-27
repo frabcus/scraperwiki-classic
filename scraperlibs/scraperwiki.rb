@@ -269,14 +269,6 @@ module ScraperWiki
     end
 
 
-    def ScraperWiki.getKeys(name)
-        raise SqliteException.new("getKeys has been deprecated")
-    end
-
-    def ScraperWiki.getData(name, limit=-1, offset=0)
-        raise SqliteException.new("getData has been deprecated")
-    end
-    
     def ScraperWiki.getDataByDate(name, start_date, end_date, limit=-1, offset=0)
         raise SqliteException.new("getDataByDate has been deprecated")
     end
@@ -302,18 +294,7 @@ module ScraperWiki
             raise SqliteException.new(res["error"])
         end
         if verbose:
-            if data.kind_of?(Array) 
-                data.each do |value|
-                    ldata = [ ]
-                    if value == nil
-                        value  = ''
-                    end
-                    ldata.push(ScraperWiki._unicode_truncate(value.to_s, 50))
-                end
-            else
-                ldata = data
-            end
-            ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>"attach", 'val1'=>sqlquery, 'val2'=>ldata})
+            ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>"attach", 'val1'=>name, 'val2'=>asname})
         end
         return res
     end

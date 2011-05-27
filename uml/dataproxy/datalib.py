@@ -193,7 +193,7 @@ class Database:
         
         except sqlite3.Error, e:
             signal.alarm(0)
-            logger.exception("Testing exception output")
+            logger.exception("Testing exception output "+sqlquery[:1000])
             return {"error":"sqlite3.Error: "+str(e)}
 
 
@@ -273,7 +273,7 @@ class SqliteSaveInfo:
     def sqliteexecute(self, sqlquery, data=None):
         res = self.database.sqliteexecute(sqlquery, data, None, None)
         if "error" in res:
-            logger.warning("%s  %s" % (self.short_name, str(res)))
+            logger.warning("%s  %s" % (self.database.short_name, str(res)))
         return res
     
     def rebuildinfo(self):
@@ -355,7 +355,7 @@ class SqliteSaveInfo:
             if "error" in lres:  
                 if lres["error"] != 'sqlite3.Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped':
                     return lres
-                logger.info("%s:  %s" % (self.short_name, str(lres)))
+                logger.info("%s:  %s" % (self.database.short_name, str(lres)))
             res["droppedindex"] = idxname
         return res
             

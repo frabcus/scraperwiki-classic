@@ -1,9 +1,8 @@
 $(document).ready(function() {
 
     // editor window dimensions
-    var editor_id = 'id_code';
-    var codeeditor = undefined;
-    var codemirroriframe = undefined; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
+    var codeeditor = null;
+    var codemirroriframe = null; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
     var codeeditorbackgroundimage = 'none'; 
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
@@ -67,7 +66,15 @@ $(document).ready(function() {
     var chainpatchnumber = 0; // counts them going out
     var lasttypetime = new Date(); 
 
-    setupCodeEditor();
+    if (window.location.hash != "#plain")
+        setupCodeEditor();
+    else
+    {
+        $('#id_code').keypress(function() { ChangeInEditor("edit"); }); 
+        setupKeygrabs();
+        resizeControls('first');
+    }
+    
     setupMenu();
     setupTabs();
     setupToolbar();
@@ -131,20 +138,26 @@ $(document).ready(function() {
     function ChangeInEditor(changetype) 
     {
         lasttypetime = new Date(); 
-        var historysize = codeeditor.historySize(); // should have (+ historysize.shiftedoffstack)
-        var automode = $('select#automode option:selected').val(); 
-
-        if (changetype == "saved")
-            savedundo = atsavedundo;    // (+historysize.shiftedoffstack)
-        if (changetype == "reload")
-            savedundo = historysize.undo;   // (+historysize.shiftedoffstack) 
-
-        if ((changetype == "reload") || (changetype == "initialized"))
-            lastsavedcode = codeeditor.getCode(); 
-
-        if (historysize.undo + historysize.redo < savedundo)
-            savedundo = -1; 
-        var lpageIsDirty = (historysize.undo != savedundo); 
+        var lpageIsDirty; 
+        if (codeeditor)
+        {
+            var historysize = codeeditor.historySize(); 
+            var automode = $('select#automode option:selected').val(); 
+    
+            if (changetype == "saved")
+                savedundo = atsavedundo
+            if (changetype == "reload")
+                savedundo = historysize.undo + historysize.lostundo; 
+            if ((changetype == "reload") || (changetype == "initialized"))
+                lastsavedcode = codeeditor.getCode(); 
+    
+            var lpageIsDirty = (historysize.undo + historysize.lostundo != savedundo); 
+        }
+        else
+        {
+            lpageIsDirty = (changetype == "edit"); 
+            $('select#automode #id_autotype').attr('disabled', true); 
+        }
 
         if (pageIsDirty != lpageIsDirty)
         {
@@ -158,7 +171,7 @@ $(document).ready(function() {
         // that will be applied when someone else opens a window
             if (pageIsDirty && (automode != 'autotype'))
                 $('select#automode #id_autotype').attr('disabled', true); 
-            else if (!pageIsDirty && !$('select#automode #id_autosave').attr('disabled'))
+            else if (!pageIsDirty && !$('select#automode #id_autosave').attr('disabled') && codeeditor)
                 $('select#automode #id_autotype').attr('disabled', false); 
         }
 
@@ -173,6 +186,8 @@ $(document).ready(function() {
     // and make it appear selected for the broadcast user
         if (automode == 'autotype')
         {
+            //assert codeeditor;
+
             // send any edits up the line (first to the chat page to show we can decode it)
             var historystack = codeeditor.editor.history.history; 
             var redohistorystack = codeeditor.editor.history.redoHistory; 
@@ -266,8 +281,8 @@ $(document).ready(function() {
             lineNumbers: true,
             indentUnit: indentUnits[scraperlanguage],
             readOnly: false, // cannot be changed once started up
-            undoDepth: 200,  // defaults to 50.  wait till we get lostundo value
-            undoDelay: 800, // 2 seconds  (default is 800)
+            undoDepth: 200,  // defaults to 50.  
+            undoDelay: 300,  // (default is 800)
             tabMode: "shift", 
             disableSpellcheck: true,
             autoMatchParens: true,
@@ -280,18 +295,18 @@ $(document).ready(function() {
             //noScriptCaching: true, // essential when hacking the codemirror libraries
 
             // this is called once the codemirror window has finished initializing itself
-            initCallback: function() {
-                    codemirroriframe = codeeditor.frame // $("#id_code").next().children(":first"); (the object is now a HTMLIFrameElement so you have to set the height as an attribute rather than a function)
-                    codemirroriframeheightdiff = codemirroriframe.height - $("#codeeditordiv").height(); 
-                    codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
-                    setupKeygrabs();
-                    resizeControls('first');
-                    setCodeeditorBackgroundImage(codeeditorbackgroundimage); // in case the signal got in first
-                    ChangeInEditor("initialized"); 
-                } 
-          };
-
-          codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
+            initCallback: function() 
+            {
+                codemirroriframe = codeeditor.frame // $("#id_code").next().children(":first"); (the object is now a HTMLIFrameElement so you have to set the height as an attribute rather than a function)
+                codemirroriframeheightdiff = codemirroriframe.height - $("#codeeditordiv").height(); 
+                codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
+                setupKeygrabs();
+                resizeControls('first');
+                setCodeeditorBackgroundImage(codeeditorbackgroundimage); // in case the signal got in first
+                ChangeInEditor("initialized"); 
+            } 
+        };
+        codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
     }
 
 
@@ -309,34 +324,36 @@ $(document).ready(function() {
     function setCodeeditorBackgroundImage(lcodeeditorbackgroundimage)
     {
         codeeditorbackgroundimage = lcodeeditorbackgroundimage; 
-        if (codemirroriframe != undefined) // also signifies the frame has been built
+        if (codemirroriframe) // also signifies the frame has been built
             codeeditor.win.document.body.style.backgroundImage = codeeditorbackgroundimage; 
+        else
+            $('#id_code').css("background-image", lcodeeditorbackgroundimage); 
     }
 
     //add hotkey - this is a hack to convince codemirror (which is in an iframe) / jquery to play nice with each other
     //which means we have to do some seemingly random binds/unbinds
     function addHotkey(sKeyCombination, oFunction)
     {
-        $(document).bind('keydown', sKeyCombination, function(){return false;});
-        $(codeeditor.win.document).unbind('keydown', sKeyCombination);
-
-        $(codeeditor.win.document).bind('keydown', sKeyCombination,
-            function(evt){
-                oFunction();
-                return false; 
-            }
-        );
+        $(document).bind('keydown', sKeyCombination, function() { return false; });
+        var cd = (codeeditor ? codeeditor.win.document : document); 
+        $(cd).unbind('keydown', sKeyCombination);
+        $(cd).bind('keydown', sKeyCombination, function(evt) { oFunction(); return false; }); 
     }
 
     function setupKeygrabs()
     {
-		if ( navigator.userAgent.toLowerCase().indexOf("mac")!=-1 ) 
-			addHotkey('meta+s', saveScraper); 
+        if (navigator.userAgent.toLowerCase().indexOf("mac") != -1) 
+        {
+            addHotkey('meta+s', saveScraper); 
+            addHotkey('meta+r', sendCode);
+            addHotkey('meta+p', popupPreview); 
+        }
         addHotkey('ctrl+s', saveScraper); 
         addHotkey('ctrl+r', sendCode);
         addHotkey('ctrl+p', popupPreview); 
     };
 
+        // context sensitive detection (not used at the moment)
     function popupHelp()
     {
         // establish what word happens to be under the cursor here (and maybe even return the entire line for more context)
@@ -383,7 +400,7 @@ $(document).ready(function() {
     //Setup Menu
     function setupMenu()
     {
-        $('#oldquickhelp').click(popupHelp); 
+        //$('#oldquickhelp').click(popupHelp); 
         $('#chat_line').bind('keypress', function(eventObject) 
         {
             var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
@@ -644,14 +661,18 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
               if (data.content == "startingrun")
                 startingrun(data.runID, data.uml, data.chatname);
               else if (data.content == "runcompleted") {
-                var completeMsg = "Finished: " + data.elapsed_seconds + " seconds elapsed, " + data.CPU_seconds + " CPU seconds used"; 
+                var messageparts = [ ];
+                if (data.elapsed_seconds != undefined)
+                    messageparts.push(data.elapsed_seconds + " seconds elapsed"); 
+                if (data.CPU_seconds)
+                    messageparts.push(data.CPU_seconds + " CPU seconds used"); 
                 if (data.exit_status)
-                    completeMsg = completeMsg + ", exit status " + data.exit_status;
+                    messageparts.push("exit status " + data.exit_status); 
                 if (data.term_sig_text)
-                    completeMsg = completeMsg + ", terminated by " + data.term_sig_text;
+                    messageparts.push("terminated by " + data.term_sig_text);
                 else if (data.term_sig)
-                    completeMsg = completeMsg + ", terminated by signal " + data.term_sig;
-                writeToConsole(completeMsg);
+                    messageparts.push("terminated by signal " + data.term_sig);
+                writeToConsole("Finished: "+messageparts.join(", "));
               } else if (data.content == "killsignal")
                 writeToConsole(data.message); 
               else if (data.content == "runfinished")
@@ -719,7 +740,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         }
 
         //send the data
-        var code = codeeditor.getCode(); 
+        var code = (codeeditor ? codeeditor.getCode() : $('#id_code').val())
         var urlquery = (!$('#id_urlquery').length || $('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
         data = {
             "command"   : "run",
@@ -746,7 +767,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         {
             if (pageIsDirty)
                 saveScraper(); 
-            else if (lastsavedcode && (lastsavedcode != code))
+            else if (lastsavedcode && (lastsavedcode != code) && codeeditor)
             {
                 var historysize = codeeditor.historySize(); 
                 writeToChat("Page should have been marked dirty but wasn't: historysize="+historysize.undo+"  savedundo="+savedundo); 
@@ -1118,9 +1139,12 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function makeSelection(selrange)
     {
-        var linehandlestart = codeeditor.nthLine(selrange.startline + 1); 
-        var linehandleend = (selrange.endline == selrange.startline ? linehandlestart : codeeditor.nthLine(selrange.endline + 1)); 
-        codeeditor.selectLines(linehandlestart, selrange.startoffset, linehandleend, selrange.endoffset); 
+        if (codeeditor)
+        {
+            var linehandlestart = codeeditor.nthLine(selrange.startline + 1); 
+            var linehandleend = (selrange.endline == selrange.startline ? linehandlestart : codeeditor.nthLine(selrange.endline + 1)); 
+            codeeditor.selectLines(linehandlestart, selrange.startoffset, linehandleend, selrange.endoffset); 
+        }
     }
 
     function transmitSelection()
@@ -1144,9 +1168,13 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function reloadScraper()
     {
         $('.editor_controls #btnCommitPopup').val('Loading...').addClass('darkness');
-        var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: codeeditor.getCode() }, timeout: 10000 }); 
+        var oldcode = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
+        var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: oldcode }, timeout: 10000 }); 
         var reloaddata = $.evalJSON(reloadajax.responseText); 
-        codeeditor.setCode(reloaddata.code); 
+        if (codeeditor)
+            codeeditor.setCode(reloaddata.code); 
+        else
+            $("#id_code").val(reloaddata.code); 
         rev = reloaddata.rev; 
         updateLastSavedRev(rev);
         chainpatchnumber = 0; 
@@ -1202,6 +1230,14 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             return true;
         });
 
+        if (isstaff)
+            $('#idlastrevnumber').click(popupDiff); 
+        $('.codepreviewer .revchange').click(function() 
+        {
+            var revchange = parseInt($(this).text()); 
+            loadRevIntoPopup(revchange); 
+        }); 
+
         $(window).unload(function()
         {
             bSuppressDisconnectionMessages = true; 
@@ -1210,11 +1246,17 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             //if (conn)  conn.close();  
         });  
 
+        /*
+        This fires when making a new scraper on some browsers (while doing the
+        redirect), so need to prevent that case. Julian had this problem.
+
         $(window).bind('beforeunload', function() 
         { 
             if (pageIsDirty && !bSuppressDisconnectionMessages)
                 return "You have unsaved changes, close the editor anyway?";
         });
+
+        */
 
 
         if (wiki_type == 'view')
@@ -1267,7 +1309,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 // throw the value straight in or run the code which brings it back in via writeRunOutput()
                 if (scraperlanguage == "html")
                 {
-                    var code = codeeditor.getCode(); 
+                    var code = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
                     activepreviewiframe.document.write(code); 
                     activepreviewiframe.document.close(); 
                     activepreviewiframe = undefined; 
@@ -1304,8 +1346,15 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         if (!bSuccess)
             return; 
 
-        atsavedundo = codeeditor.historySize().undo;  // update only when success
-        var currentcode = codeeditor.getCode(); 
+        if (codeeditor)
+        {
+            var historysize = codeeditor.historySize(); 
+            atsavedundo = historysize.undo + historysize.lostundo; 
+        }
+        else
+            atsavedundo = 1; 
+
+        var currentcode = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
         var sdata = {
                         title           : $('#id_title').val(),
                         commit_message  : "cccommit",   // could get some use out of this if we wanted to
@@ -1315,7 +1364,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                         guid            : guid,
                         language        : scraperlanguage,
                         code            : currentcode,
-                        earliesteditor  : earliesteditor.toUTCString(), // goes into the comment of the commit to help batch sessions
+                        earliesteditor  : earliesteditor.toUTCString() // goes into the comment of the commit to help batch sessions
                     }
 
         // on success
@@ -1361,8 +1410,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         },
         error: function(jqXHR, textStatus, errorThrown)
         {
-            writeToChat("Response error: " + textStatus + "  :" + jqXHR.responseText); 
-            alert('Sorry, something went wrong with the save ['+textStatus+'], please try copying your code and then reloading the page');
+            var errmessage = "Response error: " + textStatus + "  thrown: " + errorThrown + "  text:" + jqXHR.responseText; 
+            writeToChat(errmessage);
+            alert('Sorry, something went wrong with the save, please try copying your code and then reloading the page. Technical details: ' + textStatus);
             window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
         }});
 
@@ -1530,7 +1580,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     };
 
 
-    function parsehighlightcode(sdata, lmimetype)
+    function lparsehighlightcode(sdata, lmimetype)
     {
         var cachejson; 
         try 
@@ -1576,6 +1626,64 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     }
 
 
+        // share this with history.html through codeviewer.js, and start to bring in the diff technology from there
+        // and also set the date for the revision
+    var fetchedcache = { }; // cached code of different versions
+    function cachefetch(cid, callback)
+    {
+        if (cid && (fetchedcache[cid] == undefined))
+        {
+            var url; 
+            if (cid.substring(0, 4) == "?rev")
+                url = $("#rawcodeurl").val()+cid; 
+            else
+                url = $("#diffsequrl").val()+cid; 
+            $.ajax({url:url, success: function(sdata) 
+            {
+                fetchedcache[cid] = sdata; 
+                callback(); 
+            }}); 
+        }
+        else
+            callback(); 
+    }
+
+    function loadRevIntoPopup(revchange)
+    {
+        var codepreviewerdiv = $('.simplemodal-wrap .codepreviewer'); 
+        var currrev = parseInt(codepreviewerdiv.find('span.rev').text()); 
+        var rev = parseInt(codepreviewerdiv.find('span.prevrev').text()); 
+        var newrev = Math.max(0, Math.min(currrev, rev + revchange)); 
+        codepreviewerdiv.find('span.prevrev').text(newrev); 
+        var cidrev = "?rev="+newrev; 
+        cachefetch(cidrev, function() 
+        { 
+            var wrapheight = $('.simplemodal-wrap').height(); 
+            codepreviewerdiv.find('.outputlines').empty(); 
+            codepreviewerdiv.find('.linenumbers').empty(); 
+            highlightCode(fetchedcache[cidrev], Parser, codepreviewerdiv); 
+            $('.simplemodal-wrap').css("height", wrapheight + "px").css("overflow", "auto"); 
+        }); 
+    }
+
+    function popupDiff()
+    {
+        var rev = parseInt($("#idlastrevnumber span").text()); 
+        var prevrev = rev - 1; 
+        if (prevrev < 0)
+            return; 
+        modaloptions = { overlayClose: true, 
+                         overlayCss: { cursor:"auto" }, 
+                         containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:0, width:"90%", "text-align":"left", cursor:"auto" }, 
+                         containerId: 'simplemodal-container' 
+                       }; 
+        $('.codepreviewer').modal(modaloptions); 
+        var codepreviewerdiv = $('.simplemodal-wrap .codepreviewer'); 
+        codepreviewerdiv.find('span.prevrev').text(rev); 
+        codepreviewerdiv.find('span.rev').text(rev); 
+        loadRevIntoPopup(0); 
+    }
+
 
     function popupCached(cacheid, lmimetype)
     {
@@ -1592,7 +1700,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             { 
                 $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, timeout: 10000, success: function(sdata) 
                 {
-                    cachejson = parsehighlightcode(sdata, lmimetype); 
+                    cachejson = lparsehighlightcode(sdata, lmimetype); 
                     if (cachejson["content"].length < 15000)  // don't cache huge things
                         cachehidlookup[cacheid] = cachejson; 
 
@@ -1752,26 +1860,33 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     
 
     //resize code editor
-   function resizeCodeEditor(){
-      if (codemirroriframe){
-          //resize the iFrame inside the editor wrapping div
-          codemirroriframe.height = (($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px');
-          codemirroriframe.width = (($("#codeeditordiv").width() + codemirroriframewidthdiff) + 'px');
-
-          //resize the output area so the console scrolls correclty
-          iWindowHeight = $(window).height();
-          iEditorHeight = $("#codeeditordiv").height();
-          iControlsHeight = $('.editor_controls').height();
-          iCodeEditorTop = parseInt($("#codeeditordiv").position().top);
-          iOutputEditorTabs = $('#outputeditordiv .tabs').height();
-          iOutputEditorDiv = iWindowHeight - (iEditorHeight + iControlsHeight + iCodeEditorTop) - 30; 
-          $("#outputeditordiv").height(iOutputEditorDiv + 'px');   
-          //$("#outputeditordiv .info").height($("#outputeditordiv").height() - parseInt($("#outputeditordiv .info").position().top) + 'px');
-          $("#outputeditordiv .info").height((iOutputEditorDiv - iOutputEditorTabs) + 'px');
-          //iOutputEditorTabs
-      }
-    }
+   function resizeCodeEditor()
+   {
+       if (codemirroriframe)
+       {
+            //resize the iFrame inside the editor wrapping div
+            codemirroriframe.height = (($("#codeeditordiv").height() + codemirroriframeheightdiff) + 'px');
+            codemirroriframe.width = (($("#codeeditordiv").width() + codemirroriframewidthdiff) + 'px');
     
+            //resize the output area so the console scrolls correclty
+            iWindowHeight = $(window).height();
+            iEditorHeight = $("#codeeditordiv").height();
+            iControlsHeight = $('.editor_controls').height();
+            iCodeEditorTop = parseInt($("#codeeditordiv").position().top);
+            iOutputEditorTabs = $('#outputeditordiv .tabs').height();
+            iOutputEditorDiv = iWindowHeight - (iEditorHeight + iControlsHeight + iCodeEditorTop) - 30; 
+            $("#outputeditordiv").height(iOutputEditorDiv + 'px');   
+            //$("#outputeditordiv .info").height($("#outputeditordiv").height() - parseInt($("#outputeditordiv .info").position().top) + 'px');
+            $("#outputeditordiv .info").height((iOutputEditorDiv - iOutputEditorTabs) + 'px');
+            //iOutputEditorTabs
+        }
+        else
+        {
+            $("#id_code").css("height", ($("#codeeditordiv").height()-10) + 'px'); 
+            $("#id_code").css("width", ($("#codeeditordiv").width()-8) + 'px'); 
+        }
+    }
+
 
     //click bar to resize
     function resizeControls(sDirection) {

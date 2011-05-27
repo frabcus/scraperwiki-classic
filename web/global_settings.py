@@ -88,7 +88,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
   'django_notify.context_processors.notifications',
   'frontend.context_processors.site',
   'frontend.context_processors.template_settings',
-  'frontend.context_processors.site_messages',
+  # 'frontend.context_processors.site_messages', # disabled as not used since design revamp April 2011
 ]
 
 SCRAPERWIKI_APPS = [
@@ -167,7 +167,7 @@ DEFAULT_API_ITEMS = 100
 
 # Requited for the template_settings context processor. Each varible listed
 # here will be made availible in all templates that are passed the
-# RequestContext.  Be carful of listing database and other private settings 
+# RequestContext.  Be careful of listing database and other private settings 
 # here
 TEMPLATE_SETTINGS = [
  'API_DOMAIN',
@@ -196,10 +196,12 @@ RSS_ITEMS = 50
 VIEW_SCREENSHOT_SIZES = {'small': (110, 73), 'medium': (220, 145), 'large': (800, 600)}
 SCRAPER_SCREENSHOT_SIZES = {'small': (110, 73), 'medium': (220, 145) }
 
-CODEMIRROR_VERSION = "0.92"
+CODEMIRROR_VERSION = "0.94"
 CODEMIRROR_URL = "CodeMirror-%s/" % CODEMIRROR_VERSION
 
 APPROXLENOUTPUTLIMIT = 3000
+
+CONFIGFILE = "/var/www/scraperwiki/uml/uml.cfg"
 
 HTTPPROXYURL = "http://localhost:9005"
 DISPATCHERURL = "http://localhost:9000"

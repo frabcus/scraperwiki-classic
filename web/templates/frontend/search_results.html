@@ -7,18 +7,28 @@
         {{ form.q }}
         <input type="submit" value="Go" />
     </form></h2>
-	<p>{{ num_results }} {% ifequal num_results 1 %}result{% else %}results{% endifequal %} found &bull; <a href="/feeds/latest_code_objects_by_search_term/{{ query }}">Create RSS feed for this search term</a></p>
+    <p>
+      {{ num_results }} result{{num_results|pluralize}} found &bull; 
+      <a href="/feeds/latest_code_objects_by_search_term/{{ query }}">Create RSS feed for this search term</a>
+    </p>
 {% endblock %}
 
 {% block content %}
     <div class="content">
         {% if tags %}
-            <ul class="tag_list tags">
-                <li>Tags found:</li>
-                {% for tag in tags %}
-                <li><a href="{% url single_tag tag.name %}">{{tag.name}}</a></li>
-                {% endfor %}
-            </ul>
+            <div class="tag_suggestion">
+                {% if tags|length_is:"1" %}
+                    <a  href="{% url single_tag tags.0.name %}" class="yes">Yes! Show me</a>
+                    <h4>Are you looking for all scrapers <em>tagged</em> with 
+                    <a href="{% url single_tag tags.0.name %}" class="single_tag">{{tags.0.name}}</a>?</h4>
+                {% else %}
+                    <h4>Looking for all scrapers with a certain <em>tag</em>? Choose one:
+                    {% for tag in tags %}
+                        <a href="{% url single_tag tag.name %}" class="single_tag">{{tag.name}}</a>
+                    {% endfor %}
+                {% endif %}
+
+            </div>
         {% endif %}
 
         {% if scrapers %}
@@ -27,7 +37,10 @@
                     {% include 'frontend/includes/code_object_line.html' %}
                 {% endfor %}
             </ul>
+        {% else %}
+            <p>No scrapers found</p>
         {% endif %}
+        
 
     </div>
 {% endblock %}

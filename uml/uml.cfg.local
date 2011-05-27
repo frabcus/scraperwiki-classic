@@ -1,15 +1,15 @@
 [dispatcher]
 host	= 127.0.0.1
 port	= 9000
-umllist	= uml001
+umllist	= uml001,uml002
 confurl	= allwhite
-path    = ../scraperlibs
 use_queue = False
 queue_name= test_run_queue
 return_queue_name= test_queue_return
 
 [twister]
 statusurl = http://localhost:8000/scrapers/twister/status
+port      = 9010
 
 [webproxy]
 host	= 127.0.0.1
@@ -53,9 +53,19 @@ resourcedir = ../resourcedir
 max_api_distance = 10
 secure	= 127.0.0.1
 
+; Ross' machine
+[ross-work.local]
+host    = 127.0.0.1
+tap = 127.0.0.1
+eth = 127.0.0.1
+port    = 9001
+via = 9001
+mem = 128M
+count   = 25
+
 
 ; Francis's machine
-[bat.local]
+[bat]
 host	= 127.0.0.1
 tap	= 127.0.0.1
 eth	= 127.0.0.1
@@ -82,39 +92,73 @@ via	= 9001
 mem	= 128M
 count	= 25
 
+[uml002]
+host	= 127.0.0.1
+tap	= 192.168.254.101
+eth	= 192.168.254.1
+port	= 9001
+via	= 9001
+mem	= 128M
+count	= 2
+
 
 
 [loggers]
-keys=root,dataproxy,controller,runner
+keys=root,dataproxy,controller,runner,dispatcher,twister,proxy,django
 
 [handlers]
-keys=consoleHandler,logfileHandlerDataproxyDebug,logfileHandlerDataproxyWarning,logfileHandlerDataproxyEmail,logfileHandlerControllerDebug,logfileHandlerControllerWarning,logfileHandlerRunnerDebug
+keys=consoleHandler,logfileHandlerWarnings,logfileHandlerEmail,logfileHandlerDataproxyDebug,logfileHandlerControllerDebug,logfileHandlerDispatcherDebug,logfileHandlerRunnerDebug,logfileHandlerTwisterDebug,logfileHandlerProxyDebug,logfileHandlerDjangoDebug
 
 [formatters]
 keys=simpleFormatter
 
 
 [logger_root]
-level=DEBUG
+level=ERROR
 handlers=consoleHandler
 
 [logger_dataproxy]
 level=DEBUG
-handlers=logfileHandlerDataproxyDebug,logfileHandlerDataproxyWarning
+handlers=logfileHandlerDataproxyDebug,logfileHandlerWarnings
 qualname=dataproxy
 propagate=0
 
 [logger_controller]
 level=DEBUG
-handlers=logfileHandlerControllerDebug,logfileHandlerControllerWarning
+handlers=logfileHandlerControllerDebug,logfileHandlerWarnings
 qualname=controller
 propagate=0
 
 [logger_runner]
 level=DEBUG
-handlers=logfileHandlerRunnerDebug
+handlers=logfileHandlerRunnerDebug,logfileHandlerWarnings
 qualname=runner
 propagate=0
+
+[logger_dispatcher]
+level=DEBUG
+handlers=logfileHandlerDispatcherDebug,logfileHandlerWarnings
+qualname=dispatcher
+propagate=0
+
+[logger_twister]
+level=DEBUG
+handlers=logfileHandlerTwisterDebug,logfileHandlerWarnings
+qualname=twister
+propagate=0
+
+[logger_proxy]
+level=DEBUG
+handlers=logfileHandlerProxyDebug,logfileHandlerWarnings
+qualname=proxy
+propagate=0
+
+[logger_django]
+level=DEBUG
+handlers=logfileHandlerDjangoDebug,logfileHandlerWarnings
+qualname=django
+propagate=0
+
 
 
 [handler_consoleHandler]
@@ -123,45 +167,60 @@ level=DEBUG
 formatter=simpleFormatter
 args=(sys.stdout,)
 
+[handler_logfileHandlerWarnings]
+class=handlers.RotatingFileHandler
+level=WARNING
+formatter=simpleFormatter
+args=('/var/log/scraperwiki/allwarnings.log', "a", 100000, 5)
+
+[handler_logfileHandlerEmail]
+class=handlers.SMTPHandler
+level=CRITICAL
+formatter=simpleFormatter
+args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 'ScraperWiki critical error in system')
+
 
 [handler_logfileHandlerControllerDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/www/scraperwiki/uml/var/log/controller.log', "a", 100000, 5)
-
-[handler_logfileHandlerControllerWarning]
-class=handlers.RotatingFileHandler
-level=WARNING
-formatter=simpleFormatter
-args=('/var/www/scraperwiki/uml/var/log/controller.log-warn', "a", 100000, 5)
-
-
+args=('/var/log/scraperwiki/controller.log', "a", 100000, 5)
 
 [handler_logfileHandlerDataproxyDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/www/scraperwiki/uml/var/log/dataproxy.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/dataproxy.log', "a", 100000, 5)
 
-[handler_logfileHandlerDataproxyWarning]
+[handler_logfileHandlerDispatcherDebug]
 class=handlers.RotatingFileHandler
-level=WARNING
+level=DEBUG
 formatter=simpleFormatter
-args=('/var/www/scraperwiki/uml/var/log/dataproxy.log-warn', "a", 100000, 5)
-
-[handler_logfileHandlerDataproxyEmail]
-class=handlers.SMTPHandler
-level=CRITICAL
-formatter=simpleFormatter
-args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 'ScraperWiki error in dataproxy')
-
+args=('/var/log/scraperwiki/dispatcher.log', "a", 100000, 5)
 
 [handler_logfileHandlerRunnerDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/www/scraperwiki/uml/var/log/runner.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/runner.log', "a", 100000, 5)
+
+[handler_logfileHandlerTwisterDebug]
+class=handlers.RotatingFileHandler
+level=DEBUG
+formatter=simpleFormatter
+args=('/var/log/scraperwiki/twister.log', "a", 100000, 5)
+
+[handler_logfileHandlerProxyDebug]
+class=handlers.RotatingFileHandler
+level=DEBUG
+formatter=simpleFormatter
+args=('/var/log/scraperwiki/proxy.log', "a", 100000, 5)
+
+[handler_logfileHandlerDjangoDebug]
+class=handlers.RotatingFileHandler
+level=DEBUG
+formatter=simpleFormatter
+args=('/var/log/scraperwiki/django.log', "a", 100000, 5)
 
 
 [formatter_simpleFormatter]

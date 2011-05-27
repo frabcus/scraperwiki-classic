@@ -33,9 +33,16 @@
     <a href="{% url code_overview code.wiki_type code.short_name %}" class="screenshot">{% screen_shot code 'small' %}</a>
     
     <h3>
-      <a class="owner" href="{% if code.owner.username %}{% url profiles_profile_detail code.owner.username %}{% endif %}">{% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}</a> / <a href="{% url code_overview code.wiki_type code.short_name %}">
-      {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
+      <a class="owner" href="{% if code.owner.username %}{% url profiles_profile_detail code.owner.username %}{% endif %}">
+        {% if code.owner.get_profile.name %}{{ code.owner.get_profile.name }}{% else %}{{code.owner.username}}{% endif %}
+      </a> 
+      / 
+      <a href="{% url code_overview code.wiki_type code.short_name %}">
+        {% if code.title %}{{ code.title }}{% else %}{{ code.short_name }}{% endif %}
       </a>
+      {% ifnotequal code.privacy_status 'public' %}
+        <small>[{{code.privacy_status}}]</small>
+      {% endifnotequal %}
     </h3>
     
     <p class="context">

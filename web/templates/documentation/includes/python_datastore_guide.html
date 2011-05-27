@@ -104,3 +104,12 @@ print scraperwiki.sqlite.table_info("src.swdata")
 </code>
 
 <p>Access to other scrapers data through the attach interface is read-only.</p>
+
+<h2>Trapping errors</h2>
+
+<p>You can detect and handle errors in your sql queries.</p>
+<code>try:
+    scraperwiki.sqlite.execute("select * from table_that_doesnot_exist")
+except scraperwiki.sqlite.SqliteError, e:
+    print str(e)
+</code>

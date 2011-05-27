@@ -35,10 +35,6 @@ class FrontEndViewsTests(TestCase):
                                                        'password': '123'})
         self.assertEqual(response.status_code, 200)
 
-    def test_help(self):
-        response = self.client.get(reverse('help'))
-        self.assertEqual(response.status_code, 200)
-
     def test_terms(self):
         response = self.client.get(reverse('terms'))
         self.assertEqual(response.status_code, 200)
@@ -51,40 +47,46 @@ class FrontEndViewsTests(TestCase):
         response = self.client.get(reverse('about'))
         self.assertEqual(response.status_code, 200)
 
-    def test_help(self):
-        response = self.client.get(reverse('help'))
+    def test_docs_ruby(self):
+        response = self.client.get(reverse('docs', kwargs={'language': 'ruby'}))
         self.assertEqual(response.status_code, 200)
+
+    def test_docs_python(self):
+        response = self.client.get(reverse('docs', kwargs={'language': 'python'}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_docs_php(self):
+        response = self.client.get(reverse('docs', kwargs={'language': 'php'}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_help(self):
+        response = self.client.get('/help/', follow=True)
+        self.assertEqual(response.redirect_chain, [('http://testserver/docs/', 301)])
 
     def test_contact_form(self):
         response = self.client.get(reverse('contact_form'))
         self.assertEqual(response.status_code, 200)
 
-    def test_tutorials(self):    
-        scraper = Scraper(title=u'Python1', language='python', istutorial=True)
-        scraper.save()
+    def test_live_tutorials(self):    
+        # make some dummy tutorials
+        ix = 0 
+        for lang in ['ruby', 'python', 'php']:
+            ix = ix + 1
+            for i in range(ix):
+                scraper = Scraper(title=unicode(lang + str(i)), language=lang, istutorial=True)
+                scraper.save()
 
-        scraper = Scraper(title=u'Python2', language='python', istutorial=True)
-        scraper.save()
+        # check the pages render right
+        ix = 0
+        for lang in ['ruby', 'python', 'php']:
+            ix = ix + 1
 
-        scraper = Scraper(title=u'Python3', language='python', istutorial=True)
-        scraper.save()
+            response = self.client.get(reverse('tutorials', kwargs={'language':lang}))
+            self.assertEqual(response.status_code, 200)
 
-        scraper = Scraper(title=u'PHP1', language='php', istutorial=True)
-        scraper.save()
+            tutorials = response.context['tutorials']
+            # print "***TUT:", tutorials
+            self.assertEqual(tutorials.keys(), [lang])
+            self.assertEqual(ix, len(tutorials[lang]))
 
-        scraper = Scraper(title=u'PHP2', language='php', istutorial=True)
-        scraper.save()
 
-        response = self.client.get(reverse('help', args=['tutorials', 'python']))
-        self.assertEqual(response.status_code, 200)
-
-        tutorials =  response.context['tutorials']
-        self.assertTrue('python' in tutorials)
-        self.assertEqual(3, len(tutorials['python']))
-
-        response = self.client.get(reverse('help', args=['tutorials', 'php']))
-        self.assertEqual(response.status_code, 200)
-
-        tutorials =  response.context['tutorials']
-        self.assertTrue('php' in tutorials)
-        self.assertEqual(2, len(tutorials['php']))

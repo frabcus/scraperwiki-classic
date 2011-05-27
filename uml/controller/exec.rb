@@ -1,12 +1,18 @@
 #!/usr/bin/ruby
 
-require 'rubygems'   # for nokigiri to work on all machines, and for JSON/Iconv on OSX
+$stdout.sync = true
 
+require 'rubygems'   # for nokigiri to work on all machines, and for JSON/Iconv on OSX
 require 'json'
 require 'iconv'
+require 'optparse'
+require	'scraperwiki'
+require 'scraperwiki/datastore'
+require 'scraperwiki/stacktrace'
+
+$logfd  = IO.new(3)
 
 class ConsoleStream
-
     def initialize(fd)
         @fd   = fd
         @text = ''
@@ -50,103 +56,35 @@ class ConsoleStream
     def close
         @fd.close()
     end
-
 end
 
-
-USAGE       = ' [--script=name] [--path=path] [-http=proxy] [--https=proxy] [--ftp=proxy] [--ds=server:port]'
-script      = nil
-path        = nil
-httpProxy   = nil
-httpsProxy  = nil
-ftpProxy    = nil
-ds   = nil
-uid         = nil
-gid         = nil
-
-ARGV.each do |a|
-
-    if a.slice(0.. 8) == '--script='
-        script     = a.slice(9 ..-1)
-        next
-    end
-
-    if a.slice(0.. 6) == '--path='
-        path       = a.slice(7 ..-1)
-        next
-    end
-
-    if a.slice(0.. 6) == '--http='
-        httpProxy  = a.slice(7 ..-1)
-        next
-    end
-
-    if a.slice(0.. 7) == '--https='
-        httpsProxy = a.slice(8 ..-1)
-        next
-    end
-
-    if a.slice(0.. 5) == '--ftp='
-        ftpProxy   = a.slice(6 ..-1)
-        next
-    end
-
-    if a.slice(0.. 4) == '--ds='
-        ds  = a.slice(5 ..-1)
-        next
-    end
-
-    if a.slice(0.. 5) == '--uid='
-        uid        = a.slice(6 ..-1).to_i
-        next
-    end
-
-    if a.slice(0.. 5) == '--gid='
-        gid        = a.slice(6 ..-1).to_i
-        next
-    end
-
-    print "usage: ", "exec.rb ", USAGE
-    Process.exit(1)
-end
-
-if gid    # nogroup
-    Process::Sys.setregid(gid, gid)
-end
-if uid    # nobody
-    Process::Sys.setreuid(uid, uid)
-end
-
-if path
-    path.split(':').each { |p| $LOAD_PATH << p ; }
-end
-
-require	'scraperwiki'
-
-$logfd  = IO.new(3)
 $stdout = ConsoleStream.new($logfd)
 $stderr = ConsoleStream.new($logfd)
 
-
-##  Pass the configuration to the datastore. At this stage no connection
-##  is made; a connection will be made on demand if the scraper tries
-##  to save anything.
-##
-require 'scraperwiki/datastore'
-host, port = ds.split(':')
-SW_DataStore.create(host, port)
-
-require 'scraperwiki/stacktrace'
-
-#  Set up a CPU time limit handler which simply throws a Ruby
-#  exception.
 Signal.trap("XCPU") do
     raise Exception, "ScraperWiki CPU time exceeded"
 end
 
-ARGV.clear # Clear command line args so that we can use Test::Unit
+options = {}
+OptionParser.new do|opts|
+   opts.on( '--script=[SCRIPT]') do|script|
+     options[:script] = script
+   end
+   opts.on( '--ds=[DS]') do|ds|
+     options[:ds] = ds
+   end
+   opts.on( '--gid=[GID]') do|gid|
+     Process::Sys.setregid(gid.to_i, gid.to_i)
+   end
+   opts.on( '--uid=[UID]') do|uid|
+     Process::Sys.setreuid(uid.to_i, uid.to_i)
+   end
+end.parse(ARGV)
 
-code = File.new(script, 'r').read()
+host, port = options[:ds].split(':')
+SW_DataStore.create(host, port)
+
+code = File.new(options[:script], 'r').read()
 begin
     eval code
 rescue Exception => e
@@ -156,7 +94,5 @@ rescue Exception => e
     $logfd.write(JSON.generate(est) + "\n")
 end
 
-
-# force ConsoleStream to output last line, even if no \n
 $stdout.flush
 $stderr.flush

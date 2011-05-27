@@ -2,13 +2,13 @@
 import sys
 import os
 import optparse
-import hashlib
 import urllib2
 import ConfigParser
 import socket
 import time
 import logging
 import logging.config
+import uuid
 
 try:    import simplejson as json
 except: import json
@@ -19,7 +19,7 @@ except: import json
 configfile = '/var/www/scraperwiki/uml/uml.cfg'
 
 parser = optparse.OptionParser()
-parser.add_option("--guid")
+parser.add_option("--guid", default='')
 parser.add_option("--language", default='python')
 parser.add_option("--name", default='', metavar="SCRAPER_NAME")
 parser.add_option("--cpulimit", default='80')
@@ -45,39 +45,36 @@ def writereadstream(dhost, dport, jdata):
     soc.send('POST /Execute HTTP/1.1\r\n')
     soc.send('Content-Length: %s\r\n' % len(sdata))
     soc.send('Connection: close\r\n')
-
-    # these parameters are lifted out by the dispatcher for its operation until we can get to the bottom of what's going on with _read_write
-    soc.send("x-scraperid: %s\r\n" % jdata["scraperid"])
-    soc.send("x-testname: %s\r\n" % jdata["scrapername"])
-    soc.send("x-runid: %s\r\n" % jdata["runid"])
-    
     soc.send('\r\n')
-    soc.send(sdata)
+    soc.sendall(sdata)
 
-    soc_file = soc.makefile('r')
-    status_line = soc_file.readline().split()
-    nbytes, nrecords = 0, 0
-    if status_line[1] == '200':
     
-        # Ignore the HTTP headers
-        while True: 
-            line = soc_file.readline()
-            if line.strip() == "":
-                break
+    sbuffer = [ ]
+    bgap = False
+    nbytes, nrecords = 0, 0
+    while True:
+        srec = soc.recv(8192)
+        ssrec = srec.split("\n")  # multiple strings if a "\n" exists
+        sbuffer.append(ssrec.pop(0))
+        while ssrec:
+            line = "".join(sbuffer)
+            if line.strip():
+                if not bgap:
+                    pass # logger.debug("hhh: "+line)   # discard headers
+                else:
+                    sys.stdout.write(line + '\r\n')
+                    sys.stdout.flush()
+                    nbytes += len(line)
+                    nrecords += 1
+            else:
+                bgap = True
+            sbuffer = [ ssrec.pop(0) ]  # next one in
+        if not srec:
+            break
+    
+    logger.debug('%s:  ending %d bytes  %d records  %s' % (jdata["scrapername"], nbytes, nrecords, jdata["runid"]))
             
-        while True:
-            line = soc_file.readline().strip()
-            if line == '':
-                soc_file.close()
-                break
-            sys.stdout.write(line + '\r\n')
-            sys.stdout.flush()
-            
-            nbytes += len(line)
-            nrecords += 1
-        logger.debug('%s:  %d bytes  %d records' % (jdata["scrapername"], nbytes, nrecords))
-            
-    else:
+    if False:
         soc_file.close()
         logger.warning('fail on %s: %s' % (jdata["scrapername"], str(status_line)))
         sys.stdout.write(json.dumps({'message_type' : 'fail', 'content' : status_line[2].strip()}) + '\r\n')
@@ -95,20 +92,9 @@ def buildjdata(code, options, config):
     jdata["scrapername"] = options.name
 
     # set the runid
-    s = hashlib.sha1()
-    s.update(str(os.urandom(16)))
-    s.update(str(os.getpid()))
-    s.update(str(time.time()))
-    jdata["runid"] = '%.6f_%s' % (time.time(), s.hexdigest())
+    jdata["runid"] = '%.6f_%s' % (time.time(), uuid.uuid4())
     if jdata.get("draft"):
         jdata["runid"] = "draft|||%s" % jdata["runid"]
-
-    # the sys.path added internally into the controller (strange configuration)
-    jdata["paths"] = [ ]
-    if config.has_option ('dispatcher', 'path') :
-        for path in config.get('dispatcher', 'path').split(','):
-            if path:
-                jdata["paths"].append(path)
 
     # set the white and blacklists
     jdata["white"] = [ ]
@@ -133,7 +119,7 @@ def buildjdata(code, options, config):
 if __name__ == "__main__":
     code = sys.stdin.read()
     jdata = buildjdata(code, options, config)
-    logger.debug('%s: ' % (jdata["scrapername"]))
+    logger.debug('%s: starting   %s' % (jdata["scrapername"], jdata["runid"]))
 
     dhost = config.get('dispatcher', 'host')
     dport = config.getint('dispatcher', 'port')

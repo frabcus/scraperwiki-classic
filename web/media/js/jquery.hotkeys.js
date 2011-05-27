@@ -109,7 +109,8 @@ Note:
             if (typeof data === "string"){
                 data = {'combi': data};
             }
-            if(data.combi){
+// added in "data &&" due to exception in #plain case, even when addHotkeys not called.  unexplained
+            if(data && data.combi){   
                 for (var x=0; x < handle.length; x++){
                     var eventType = handle[x];
                     var combi = data.combi.toLowerCase(),

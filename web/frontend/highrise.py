@@ -62,10 +62,12 @@ class Tag(object):
     def __unicode__(self):
         return u'%s (%s)' % (self.name, self.id)
 
+class HighRiseException(Exception): pass
 
 class HighRise(object):
     note_xml_template = '<note><body>%s</body></note>'
-    task_xml_template = '<task><body>%s</body><frame>%s</frame><owner-id type="integer">%s</owner-id>%s%s</task>'
+    #task_xml_template = '<task><body>%s</body><frame>%s</frame><owner-id type="integer">%s</owner-id>%s%s</task>'
+    task_xml_template = '<task><body>%s</body><frame>%s</frame>%s%s<owner-id type="integer">%s</owner-id></task>'
     tag_xml_template = '<name>%s</name>'
     person_xml_template = '''
 <person>
@@ -103,6 +105,8 @@ class HighRise(object):
     def list_task_categories(self):
         url = self.base_url + '/task_categories.xml'
         resp = urllib2.urlopen(url)
+        if resp.code != 200:
+            raise HighRiseException("Error listing categories")
         xml = resp.read()
         doc = etree.XML(xml)
         categories = doc.xpath('/task-categories/task-category')
@@ -117,6 +121,8 @@ class HighRise(object):
     def list_tags(self):
         url = self.base_url + '/tags.xml'
         resp = urllib2.urlopen(url)
+        if resp.code != 200:
+            raise HighRiseException("Error listing tags")
         xml = resp.read()
         doc = etree.XML(xml)
         tags = doc.xpath('/tags/tag')
@@ -125,16 +131,23 @@ class HighRise(object):
     def search_people_by_email(self, email):
         url = self.base_url + '/people/search.xml?criteria[email]=%s' % email
         resp = urllib2.urlopen(url)
+        if resp.code != 200:
+            raise HighRiseException("Error searching for people")
         xml = resp.read()
         doc = etree.XML(xml)
         people = doc.xpath('/people/person')
         return [Person(p) for p in people]
+
+    def get_person_by_id(self, person_id):
+        pass
 
     def create_note_for_person(self, note, person_id):
         url = self.base_url + '/people/%s/notes.xml' % person_id
         xml_note = self.note_xml_template % note
         req = urllib2.Request(url, xml_note, {"Content-type": "application/xml"})
         resp = urllib2.urlopen(req)
+        if resp.code != 201:
+            raise HighRiseException("Error creating note")
         xml = resp.read()
 
     def create_task_for_person(self, task, person_id, category_id=None, subject_id='', frame='this_week'):
@@ -149,16 +162,22 @@ class HighRise(object):
         else:
             subject = ''
 
-        xml_task = self.task_xml_template % (task, frame, person_id, category, subject)
+        xml_task = self.task_xml_template % (task, frame, category, subject, person_id)
+        print xml_task
         req = urllib2.Request(url, xml_task, {"Content-type": "application/xml"})
         resp = urllib2.urlopen(req)
+        if resp.code != 201:
+            raise HighRiseException("Error creating task")
         xml = resp.read()
+        print xml
 
     def tag_person(self, person_id, tag_text):
         url = self.base_url + '/people/%s/tags.xml' % person_id
         xml_note = self.tag_xml_template % tag_text
         req = urllib2.Request(url, xml_note, {"Content-type": "application/xml"})
         resp = urllib2.urlopen(req)
+        if resp.code != 201:
+            raise HighRiseException("Error tagging person")
         doc = etree.XML(resp.read())
         return Tag(doc)
 
@@ -167,5 +186,7 @@ class HighRise(object):
         xml_person = self.person_xml_template % (first_name, last_name, email)
         req = urllib2.Request(url, xml_person, {"Content-type": "application/xml"})
         resp = urllib2.urlopen(req)
+        if resp.code != 201:
+            raise HighRiseException("Error creating person")
         doc = etree.XML(resp.read())
         return Person(doc)

@@ -65,10 +65,10 @@ a schema up front.</p>
 
 <p>Replace "print_r($record);" in the loop with this save command:</p>
 
-<code>scraperwiki::save(array('country'), $record);
+<code>    scraperwiki::save(array('country'), $record);
 </code>
 
-<p>The unique key should be whatever uniquely identifies each piece of data.
+<p>The unique keys (just country in this case) identify each piece of data.
 When the scraper runs again, existing data with the same values for the
 unique keys is replaced.</p>
 

@@ -51,9 +51,10 @@ def template_settings(request):
             template_settings[setting] = settings_dict[setting]
     return {'settings' : template_settings}
 
-def site_messages(request):
-    message = Message.objects.get_active_message(datetime.datetime.now())
-    return {'site_message': mark_safe(message.text)}
+# not used since design revamp in April 2011, commented out in global_settings.py too
+# def site_messages(request):
+#    message = Message.objects.get_active_message(datetime.datetime.now())
+#    return {'site_message': mark_safe(message.text)}
 
 #################################################################################
 # SQL Debug code

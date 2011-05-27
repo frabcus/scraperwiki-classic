@@ -66,7 +66,7 @@ class TestRegistration(SeleniumTest):
         self.wait_for_page()
         
         # Make sure that the bio we set is present
-        self.failUnless(s.is_text_present("Registered email address"))        
+        self.failUnless(s.is_text_present(email), msg='email address is missing')
         self.failUnless(s.is_text_present(bio), msg='Bio text is missing')                
 
     def test_create_valid(self):

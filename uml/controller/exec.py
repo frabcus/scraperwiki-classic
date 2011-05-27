@@ -6,12 +6,15 @@ import  socket
 import  signal
 import  string
 import  time
-import  urllib2
-import optparse
+import  urllib2, urllib
+import  optparse
+import  scraperwiki
+
 
 try    : import json
 except : import simplejson as json
 
+    # Unfortunately necessary to do this because PYTHONUNBUFFERED=True does nto get good enough results and tends to still concatenate lines when short and rapid
 class ConsoleStream:
     def __init__(self, fd):
         self.m_text = ''
@@ -42,63 +45,39 @@ class ConsoleStream:
     def fileno(self):
         return self.m_fd.fileno()
 
+
 parser = optparse.OptionParser()
 parser.add_option("--script", metavar="name")
-parser.add_option("--path", metavar="path")
-parser.add_option("--http", metavar="proxy")
-parser.add_option("--https", metavar="proxy")
-parser.add_option("--ftp", metavar="proxy")
 parser.add_option("--ds", metavar="server:port")
 parser.add_option("--gid")    # nogroup
 parser.add_option("--uid")    # nobody
 options, args = parser.parse_args()
 
-if options.gid is not None :
+if options.gid:
     os.setregid(int(options.gid), int(options.gid))
-if options.uid is not None :
+if options.uid:
     os.setreuid(int(options.uid), int(options.uid))
 
-if options.path is not None :
-    for p in string.split (options.path, ':') :
-        sys.path.append(p)
-
-
-#  Imports cannot be done until sys.path is set
-import  scraperwiki
-
 scraperwiki.logfd = os.fdopen(3, 'w', 0)
-sys.stdout = ConsoleStream(scraperwiki.logfd)
-sys.stderr = ConsoleStream(scraperwiki.logfd)
-
-
-##os.environ['http_proxy' ] = options.http
-##os.environ['https_proxy'] = options.https
-os.environ['ftp_proxy'  ] = options.ftp
-scraperwiki.utils.urllibSetup   ()
-
-scraperwiki.utils.urllib2Setup \
-    (
-##        urllib2.ProxyHandler ({'http':  options.http }),
-##        urllib2.ProxyHandler ({'https': options.https}),
-        urllib2.ProxyHandler ({'ftp':   options.ftp  })
-    )
-
 
 host, port = string.split(options.ds, ':')
 scraperwiki.datastore.create(host, port)
 
+sys.stdout = ConsoleStream(scraperwiki.logfd)
+sys.stderr = ConsoleStream(scraperwiki.logfd)
 
+# in the future can divert to webproxy
+#scraperwiki.utils.urllibSetup(http_proxy='http://127.0.0.1:9002')
 
 #  Set up a CPU time limit handler which simply throws a python so it can be handled cleanly before the hard limit is reached
 def sigXCPU(signum, frame) :
     raise Exception("ScraperWiki CPU time exceeded")
 signal.signal(signal.SIGXCPU, sigXCPU)
 
-
 code = open(options.script).read()
 try:
     import imp
-    mod = imp.new_module ('scraper')
+    mod = imp.new_module('scraper')
     exec code.rstrip() + "\n" in mod.__dict__
 
 except Exception, e:
@@ -107,6 +86,5 @@ except Exception, e:
     scraperwiki.dumpMessage(etb)
 
 
-# force ConsoleStream to output last line, even if no \n
 sys.stdout.flush()
 sys.stderr.flush()

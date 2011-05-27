@@ -2,10 +2,10 @@
 
 DESC="Dispatcher"
 NAME=dispatcher
-CONFIG=/var/www/scraperwiki/uml/uml.cfg.local
+CONFIG=/var/www/scraperwiki/uml/uml.cfg
 DAEMON=/var/www/scraperwiki/uml/dispatcher/dispatcher.py
-DAEMON_ARGS="--daemon --subproc --varDir=./var --config=$CONFIG"
 PIDFILE=./var/run/$NAME.pid
+DAEMON_ARGS="--config=$CONFIG --pidfile=$PIDFILE"
 
 do_start()
 {

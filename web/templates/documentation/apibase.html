@@ -15,7 +15,6 @@ var showinglookup = {
 
 $(function()
 {
-
     ZeroClipboard.setMoviePath( '{{ MEDIA_URL }}js/ZeroClipboard.swf' );
     var el = $('#id_apiuri_copy');
     var parent = el.parent();
@@ -77,10 +76,9 @@ $(function()
             $('#id_category_title').val($(this).find('strong').text());
             $('#options, #result').show();
 
-            // jsondict option only exists for sqlite selection (not available in piston)
-            var jd = $("#id_format option[value='jsonlist']"); 
-            jd.attr("disabled", (id == "sqlite" ? "" : "disabled")); 
-            if ((id != "sqlite") && jd.attr("selected"))
+            // jsondict option is the only one available when not doing sqlite selection
+            $("#id_format option[value!='jsondict']").attr("disabled", (id == "sqlite" ? "" : "disabled")); 
+            if ((id != "sqlite") && !$("#id_format option[value='jsondict']").attr("selected"))
                 $("#id_format option[value='jsondict']").attr("selected", true); 
             setTimeout(rewriteapiurl, 400); 
         }
@@ -122,7 +120,7 @@ $(function()
         else
             $("#overviewreturn").hide(); 
 
-        var t = setTimeout(resizeZO(), 500);
+        var t = setTimeout(resizeZO, 500);
     }
 
     $('#detail select').each(function() { $(this).change(rewriteapiurl) }); 
@@ -234,14 +232,20 @@ $(function()
 {% block content %}
 
 <p class="language_chooser">
-    {% if not docindex %}
-    <a href="{% url docs language %}" class="back" title="Back to documentation homepage">
+    {% if scrapername %}
+      <a href="{% url code_overview 'scraper' scrapername %}" class="back" title="Back to scraper overview">
         <img src="{{ MEDIA_URL }}/images/icons/back_arrow.png" width="16" height="16" alt="" />
-        Back to contents</a>
+        Back to scraper
+      </a>
+    {% else %}
+      <a href="{% url docs language %}" class="back" title="Back to documentation homepage">
+        <img src="{{ MEDIA_URL }}/images/icons/back_arrow.png" width="16" height="16" alt="" />
+        Back to contents
+      </a>
     {% endif %}
-   <br class="clear"/>
+    <br class="clear"/>
 </p>
-   <br class="clear"/>
+    <br class="clear"/>
    
    
    
@@ -269,14 +273,17 @@ $(function()
         	<li class="format">
                 <label for="id_format">format</label>
                 <select type="text" name="format" id="id_format">
-                    <option value="csv">csv</option>
                     <option value="jsondict" selected>jsondict</option>
                     <option value="jsonlist">jsonlist</option>
+                    <option value="csv">csv</option>
+                    {% if user.is_staff %}
+                      <option value="htmltable">htmltable (staff only)</option>
+                    {% endif %}
                 </select>
         	</li> 
         	<li class="name">
-                <label for="id_name">name<span class="desc"> of the scraper</span> <span id="overviewreturn">(return to <a href="{% url code_overview 'scraper' 'XXX' %}">overview</a>)</label>
-                <input type="text" name="name" id="id_name" value="{{name}}">
+                <label for="id_name">name<span class="desc"> of the scraper</span> <span id="overviewreturn">(go to <a href="{% url code_overview 'scraper' 'XXX' %}">scraper</a>)</label>
+                <input type="text" name="name" id="id_name" value="{{scrapername}}">
         	</li> 
         	<li class="username">
                 <label for="id_username">username</label>
@@ -295,7 +302,7 @@ $(function()
                 <input type="text" name="history_start_date" id="id_history_start_date">
         	</li> 
         	<li class="quietfields">
-                <label for="id_quietfields">quietfields<span class="desc"> not included in the output for quicker respnse, delimited by '|' (eg 'code|runevents')</span></label>
+                <label for="id_quietfields">quietfields<span class="desc"> not included in the output for quicker respnse, delimited by '|' (eg 'code|runevents|datasummary|userroles')</span></label>
                 <input type="text" name="quietfields" id="id_quietfields">
         	</li> 
         	<li class="attach">

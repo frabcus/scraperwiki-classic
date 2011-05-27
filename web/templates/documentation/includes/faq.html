@@ -18,6 +18,9 @@
      <h2>Technical detail questions</h2>
      <ul>
            <li><a href="#clear_datastore">I made a column or a table I don't need, how do I remove it?</a></li>
+           <li><a href="#view_parameters">How do I get query parameters in my view?</a></li>
+           <li><a href="#cpu_limit">What is the CPU limit, and what do I do if my scraper reaches it?</a></li>
+           <li><a href="#https">Can I scrape secure (https://) sites?</a></li>
      </ul>
      <h2>Licensing questions</h2>
      <ul>
@@ -42,7 +45,7 @@
                <p>If you need a parallel, <a href="http://www.dracos.co.uk/play/great-ideas-generator/">and every self respecting website does</a>, then it's like GitHub, except with an execute button and a database behind it.
                </p>
            </dd>
-           <dt id="who">Who is ScraperWiki for?<dt>
+           <dt id="who">Who is ScraperWiki for?</dt>
 
            <dd>
                <p>ScraperWiki is useful both for programmers who want to write screen scrapers with less fuss, and for journalists, activists and the general public who want to discover and re-use interesting, useful data.
@@ -132,6 +135,47 @@
                 "alter table" SQL commands to modify the schema how you like.
                 See the {% doc_link_full 'LANG_datastore_guide' language %}.
                 </p>
+           </dd>
+
+           <dt id="view_parameters">How do I get query parameters in my view?</dt>
+           <dd>
+				<p>Getting the query string is done the same way in each language, via the environment variable, but depending on your chosen language the code required might be different</p>
+				<p>In a <strong>Python view</strong> you can use the GET function in <a href='/docs/python/python_help_documentation/'>scraperwiki.utils</a></p>
+				
+				<p>With a <strong>Ruby view</strong> you can use:
+					<code>require 'cgi'
+param_dict = CGI::parse( ENV['QUERY_STRING'] )
+</code></p>				
+				
+				<p><strong>PHP views</strong> can get access to the query using parse_str
+					<code>parse_str( $_ENV["QUERY_STRING"], $output);
+print_r($output);
+</code></p>								
+           </dd>
+
+           <dt id="cpu_limit">What is the CPU limit, and what do I do if my scraper reaches it?</dt>
+           <dd>
+               <p>Each scraper run has a limit of roughly 80 seconds of processing time. 
+               After that, in Python and Ruby you will get an exception
+               "ScraperWiki CPU time exceeded". In PHP it will end "terminated by SIGXCPU".
+               </p>
+               <p>In many cases this happens when you are first scraping a site, catching
+               up with the backlog of existing data. The best way to handle it is to make
+               your scraper do a chunk at a time using the save_var and get_var functions
+               in the {% doc_link_full 'LANG_help_documentation' language %} to remember your
+               place.
+               </p>
+               <p>That also lets you recover more easily from other parsing errors.
+               </p>
+           </dd>
+
+           <dt id="https">Can I scrape secure (https://) sites?</dtd>
+           <dd>
+               <p>Yes. Here's an example, in Python.</p>
+               <code>url = "https://cia.gov"
+import urllib                                                                                                             
+print urllib.urlopen(url).read() 
+</code>
            </dd>
 
            <dt id="licence">Who owns the code I write on ScraperWiki?</dt>

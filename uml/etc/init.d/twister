@@ -11,16 +11,16 @@
 
 # Do NOT "set -e"
 
-NOBODY=`grep nobody /etc/passwd | cut -d: -f3`
-NOGROUP=`grep nogroup /etc/group | cut -d: -f3`
-
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Twister"
 NAME=twister
+VARDIR=/var
+PIDFILE=$VARDIR/run/$NAME.pid
+LOGFILE=$VARDIR/log/$NAME.log
 DAEMON=/bin/sh
-DAEMON_ARGS="/var/www/scraperwiki/uml/twister/twister.sh --daemon --subproc --uid=$NOBODY --gid=$NOGROUP"
-PIDFILE=/var/run/$NAME.pid
+CONFIG=/var/www/scraperwiki/uml/uml.cfg
+DAEMON_ARGS="/var/www/scraperwiki/uml/twister/twister.sh --pidfile=$PIDFILE --config=$CONFIG --logfile=$LOGFILE --setuid"
 SCRIPTNAME=/etc/init.d/$NAME
 
 

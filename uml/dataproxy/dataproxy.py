@@ -43,7 +43,7 @@ poptions, pargs = parser.parse_args()
 logging.config.fileConfig(configfile)
 logger = logging.getLogger('dataproxy')
 datalib.logger = logger
-stdoutlog = open(poptions.logfile+"-stdout", 'a', 0)
+stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)
 
 
 class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -75,7 +75,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return runID, short_name
 
     def process(self, db, request):
-        logger.debug(str(("rrr", request)))
+        logger.debug(str(("rrr", request))[:100])
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
         elif "maincommand" not in request:
@@ -92,7 +92,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             elif request["command"] == "attach":
                 res = db.sqliteattach(request.get("name"), request.get("asname"))
             elif request["command"] == "commit":
-                res = db.commit()
+                res = db.sqlitecommit()
         
         elif request["maincommand"] == "sqliteexecute":
             res = db.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"), streamchunking=request.get("streamchunking"))
@@ -181,9 +181,10 @@ if __name__ == '__main__':
     # daemon mode
     if os.fork() == 0 :
         os.setsid()
-        sys.stdin  = open('/dev/null')
-        sys.stdout = stdoutlog
-        sys.stderr = stdoutlog
+        sys.stdin = open('/dev/null')
+        if stdoutlog:
+            sys.stdout = stdoutlog
+            sys.stderr = stdoutlog
         if os.fork() == 0 :
             ppid = os.getppid()
             while ppid != 1 :

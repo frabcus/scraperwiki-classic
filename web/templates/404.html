@@ -1,8 +1,14 @@
 {% extends "frontend/base.html" %}
 
 {% block title %}404{% endblock %}
+
+{% block header %}
+	<h2>404: Page not found</h2>
+{% endblock %}
+
+
 {% block content %}
-    <div class="attention">
+    <div class="attention" style="text-align: center">
       {% if heading %}
         <h1>{{heading}}</h1>
       {% else %}

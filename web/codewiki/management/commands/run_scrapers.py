@@ -9,7 +9,8 @@ except: import simplejson as json
 import subprocess
 
 from codewiki.models import Code, Scraper, ScraperRunEvent, DomainScrape
-import frontend
+from codewiki import runsockettotwister
+import frontend 
 import settings
 import datetime
 import time
@@ -27,22 +28,27 @@ import urlparse
 def GetDispatcherStatus():
     result = [ ]
     now = time.time()
+    fin,lines = None, None
     
-    fin = urllib2.urlopen(settings.DISPATCHERURL + '/Status')
-    lines = fin.readlines()
+    try:
+        # Make an attempt to handle the possibility that the dispatcher is down.
+        fin = urllib2.urlopen(settings.DISPATCHERURL + '/Status')
+        lines = fin.readlines()
+    except urllib2.URLError, e:
+        msg = 'The dispatcher at %s appears to be down for run_scrapers script:\n%s' % (settings.DISPATCHERURL,e)
+        mail_admins(subject="[ScraperWiki] Dispatcher down?", message=msg, fail_silently=True)
+        raise
+    else:
+        fin.close()
+        
+        
     for line in lines:
         if re.match("\s*$", line):
             continue
-        # Lines are in the form key1=value1;key2=value2;..... Split on ; and then on = and assemble
-        # results dictionary. This makes the code independent of ordering. At the end, calculate
-        # the run time.
-        #
-        data = {}
-        for pair in line.strip().split(';') :
-            key, value = pair.split ('=')
-            data[key] = value
-        data['runtime'] = now - float(data['time'])
-        result.append(data)
+        mline = re.match('uname=([\w\-_\.]+);scraperID=([\w\._]*?);short_name=([^;]*?);runID=([^;]*?);runtime=([\d\.\-]*)\s*$', line)
+        assert mline, line
+        if mline:
+            result.append( {'uname':mline.group(1), 'scraperID':mline.group(2), 'short_name':mline.group(3), 'runID':mline.group(4), 'runtime':float(mline.group(5)) } )
     return result
 
 
@@ -69,11 +75,14 @@ def is_currently_running(scraper):
 
 
 def kill_running_runid(runid):
+    print settings.DISPATCHERURL + '/Kill?'+runid
     response = urllib2.urlopen(settings.DISPATCHERURL + '/Kill?'+runid).read()
+    print response
     mresponse = re.match("Scraper (\S+) (killed|not killed|not found)", response)
     print response
     
-    if not mresponse:  return False
+    if not mresponse:  
+        return False
     
     assert mresponse
     assert mresponse.group(1) == runid
@@ -83,7 +92,7 @@ def kill_running_runid(runid):
 
 
 
-def runmessageloop(runner, event, approxlenoutputlimit):
+def runmessageloop(runnerstream, event, approxlenoutputlimit):
     # a partial implementation of editor.js
     exceptionmessage = [ ]
     completiondata = None
@@ -92,7 +101,7 @@ def runmessageloop(runner, event, approxlenoutputlimit):
     
     temptailmessage = "\n\n[further output lines suppressed]\n"
     while True:
-        line = runner.stdout.readline().strip()
+        line = runnerstream.readline().strip()
         if not line:
             break
         try:
@@ -110,13 +119,15 @@ def runmessageloop(runner, event, approxlenoutputlimit):
             elif content == "runcompleted":
                 completiondata = data
                 completionmessage = str(data.get("elapsed_seconds")) + " seconds elapsed, " 
-                completionmessage += str(data.get("CPU_seconds")) + " CPU seconds used";
+                if data.get("CPU_seconds"):
+                    completionmessage += str(data.get("CPU_seconds")) + " CPU seconds used";
                 if "exit_status" in data and data.get("exit_status") != 0:
                     completionmessage += ", exit status " + str(data.get("exit_status"));
                 if "term_sig_text" in data:
                     completionmessage += ", terminated by " + data.get("term_sig_text");
                 elif "term_sig" in data:
                     completionmessage += ", terminated by signal " + str(data.get("term_sig"));
+            
             event.save()
             
         elif message_type == "sources":
@@ -220,6 +231,7 @@ def getemailtext(event):
 
 # class to manage running one scraper
 class ScraperRunner(threading.Thread):
+    
     def __init__(self, scraper, verbose):
         super(ScraperRunner, self).__init__()
         self.scraper = scraper
@@ -231,32 +243,39 @@ class ScraperRunner(threading.Thread):
             pass # print "\n\nHold on this scraper isn't overdue!!!! %s\n\n" % self.scraper.short_name
             #return
         
-        guid = self.scraper.guid
-        code = self.scraper.saved_code().encode('utf-8')
-
-        runner_path = "%s/runner.py" % settings.FIREBOX_PATH
-        failed = False
-        
         start = time.time()
-        args = [runner_path]
-        args.append('--guid=%s' % self.scraper.guid)
-        args.append('--language=%s' % self.scraper.language.lower())
-        args.append('--name=%s' % self.scraper.short_name)
         
-        runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        runner.stdin.write(code)
-        runner.stdin.close()
+# this allows for using twister version
+        if False:
+            runnerstream = runsockettotwister.RunnerSocket(self.scraper, None, "")
+            pid = os.getpid()
+        else:
+            guid = self.scraper.guid
+            code = self.scraper.saved_code().encode('utf-8')
+    
+            runner_path = os.path.join(settings.FIREBOX_PATH, "runner.py")
+            
+            args = [runner_path]
+            args.append('--guid=%s' % self.scraper.guid)
+            args.append('--language=%s' % self.scraper.language.lower())
+            args.append('--name=%s' % self.scraper.short_name)
+        
+            runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            runner.stdin.write(code)
+            runner.stdin.close()
+            runnerstream = runner.stdout
+            pid = runner.pid
         
         event = ScraperRunEvent()
         event.scraper = self.scraper    # better to pointing directly to a code object
-        event.pid = runner.pid          # only applies when this runner is active
+        event.pid = pid          # only applies when this runner is active
         event.run_id = ''               # set by execution status
         event.run_started = datetime.datetime.now()   # reset by execution status
         event.run_ended = event.run_started  # actually used as last_updated
         event.output = ""
         event.save()
 
-        exceptionmessage = runmessageloop(runner, event, settings.APPROXLENOUTPUTLIMIT)
+        exceptionmessage = runmessageloop(runnerstream, event, settings.APPROXLENOUTPUTLIMIT)
         
         event.run_ended = datetime.datetime.now()
         event.pid = -1  # disable it
@@ -286,7 +305,7 @@ class ScraperRunner(threading.Thread):
 
 
 # this is invoked by the crontab with the function
-#   python manage.py run_scrapers.
+#   python manage.py run_scrapers
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -296,28 +315,60 @@ class Command(BaseCommand):
                         help='Print lots'),
         make_option('--max-concurrent', '-m', dest='max_concurrent',
                         help='Maximum number of scrapers to schedule'),
+        make_option('--ignore-emails', dest='ignore_emails', action="store_true",
+                        help='Ignore email scrapers'),
+                        
     )
     help = 'Run a scraper, or all scrapers.  By default all scrapers are run.'
 
+    def __init__(self):
+        self.ignore_emails = False # tests need a default value, so can call get_overdue_scrapers directly
+        super(Command, self).__init__
+
     def run_scraper(self, scraper, options):
+        """
+        Creates and runs the thread that will actually initiate the execution 
+        of the  scraper passed to this method
+        """
         t = ScraperRunner(scraper, options.get('verbose'))
         t.start()
 
+
     def get_overdue_scrapers(self):
+        """
+        Obtains a queryset of scrapers that should have already been run, we 
+        will order these with the ones that have run least recently hopefully
+        being near the top of the list.
+        
+        If this command was starting with --ignore-emails then we will exclude 
+        those scrapers that are actually email scrapers in disguise.
+        """
         #get all scrapers where interval > 0 and require running
         scrapers = Scraper.objects.exclude(privacy_status="deleted").filter(run_interval__gt=0)
-        scrapers = scrapers.extra(where=["(DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW() or last_run is null)"])
+        scrapers = scrapers.extra(where=["(DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW() or last_run is null)"]).order_by('-last_run')
+        if self.ignore_emails:
+            scrapers = scrapers.exclude(users__usercoderole__role="email")            
+        
         return scrapers
     
+    
     def handle(self, **options):
+        """
+        Executes the command by fetching the scrapers that are overdue and 
+        sending off messages to the dispatcher to execute them.
+        """
+        self.ignore_emails = options.get('ignore_emails') or False
+                
         if options['short_name']:
+            # If given a shortname then just execute that single scraper
             scrapers = Scraper.objects.exclude(privacy_status="deleted").get(short_name=options['short_name'])
             self.run_scraper(scrapers, options)
             return
         
+        # Get a list of the scrapers that are overdue
         scrapers = self.get_overdue_scrapers()
 
-        # limit to the first n scrapers
+        # limit to the first n scrapers if we were told to limit them.
         if 'max_concurrent' in options:
             try:
                 scrapers = scrapers[:int(options['max_concurrent'])]
@@ -328,11 +379,16 @@ class Command(BaseCommand):
             try:
                 if not is_currently_running(scraper):
                     self.run_scraper(scraper, options)
+                    
+                    # Unsure why this is required? Can we safely remove this?
                     import time
                     time.sleep(5)
                 else:
                     if options.get('verbose', False):
                         print "%s is already running" % scraper.short_name
             except Exception, e:
+                msg = 'There was a problem in run_scrapers:\n%s\n%s' % (scraper.short_name,str(e),)
+                mail_admins(subject="[ScraperWiki] run_scrapers error", message=msg, fail_silently=True)                
+                
                 print "Error running scraper: " + scraper.short_name
                 print e

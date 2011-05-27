@@ -61,6 +61,8 @@ def dashboard(request, page_number=1):
     user = request.user
     owned_or_edited_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=user)
     #scrapers_all.filter((Q(usercoderole__user=user) & Q(usercoderole__role='owner')) | (Q(usercoderole__user=user) & Q(usercoderole__role='editor')))
+    # v difficult to sort by owner and then editor status
+        #owned_or_edited_code_objects = owned_or_edited_code_objects.order_by('usercoderole__role', '-created_at')
     
     paginator = Paginator(owned_or_edited_code_objects, settings.SCRAPERS_PER_PAGE)
 
@@ -78,14 +80,20 @@ def dashboard(request, page_number=1):
     return render_to_response('frontend/dashboard.html', context, context_instance = RequestContext(request))
 
 
-    # may want to pagenate this if the plugin profile app doesn't get in the way
+    # this goes through an unhelpfully located one-file app called 'profile' 
+    # located at scraperwiki/lib/python/site-packages/profiles   The templates are in web/templates/profiles
+    # It would help to copy the sourcecode into the main site to make it easier to find and maintain
 def profile_detail(request, username):
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
+    
+        # sorts against what the current user can see and what the identity of the profiled_user
+    extra_context = { }
     owned_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=profiled_user)
-    solicitations = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
-    return profile_views.profile_detail(request, username=username, extra_context={'solicitations': solicitations,
-                                                                                   'owned_code_objects': owned_code_objects})
+    extra_context['owned_code_objects'] = owned_code_objects
+    extra_context['emailer_code_objects'] = owned_code_objects.filter(Q(usercoderole__user=user) & Q(usercoderole__role='email'))
+    extra_context['solicitations'] = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
+    return profile_views.profile_detail(request, username=username, extra_context=extra_context)
 
 
 def edit_profile(request):

@@ -2,6 +2,7 @@
 	http://localhost:8000/media/css/main.css?
 	http://redesign.scraperwiki.com/media/css/main.css?
 	http://media.redesign2.scraperwiki.com/css/main.css?
+	http://media.scraperwiki.com/css/main.css?e9aae10812f6
 */
 
 /* HORS D'OUVRE */
@@ -495,6 +496,29 @@ body.search #header_inner:hover form #id_q {
 	border-color: #fff;
 }
 
+body.search .tag_suggestion {
+	background-color: #F4F8FB;
+	padding: 10px 15px;
+	line-height: 20px;
+	color: #456;
+}
+
+body.search .tag_suggestion h4 {
+	margin: 0;
+	padding: 0;
+}
+
+body.search .tag_suggestion .single_tag {
+	margin: 0 5px;
+}
+
+body.search .tag_suggestion .yes {
+	float: right;
+	background: transparent url(../images/icons/forward_arrow.png) 100% 70% no-repeat;
+	padding-right: 20px;
+	font-size: 14px;
+}
+
 
 /* FRONTPAGE HEADER */
 
@@ -920,8 +944,11 @@ body.frontpage #page_inner .tags li a {
 	font-weight: bold;
 }
 
+/*
+
 body.profiles .profilebio {
 	padding: 10px 20px;
+	min-width: 200px;
 }
 
 body.profiles .profilebio p {
@@ -938,12 +965,197 @@ body.profiles .profilesettings ul {
 	margin: 0;
 }
 
+*/
+
+body.profiles div.first,
+body.profiles #divContent form {
+	position: relative;
+}
+
+body.profiles .profilepic,
+body.profiles .profilebio {
+	float: left;
+	margin-right: 20px;
+}
+
+body.profiles .profilebio {
+	width: 340px;
+}
+
+body.profiles .profilesettings {
+	position: absolute;
+	top: 0;
+	right: 0;
+	background-color: #F4F8FB;
+	font-size: 14px;
+	padding: 0 20px;
+}
+
+body.profiles .profilepic img {
+	border: 4px solid #fff;
+	-webkit-box-shadow: 0px 2px 5px #ccc;
+	-moz-box-shadow: 0px 2px 5px #ccc;
+	box-shadow: 0px 2px 5px #ccc;
+	-moz-transform: rotate(-2deg);
+	-webkit-transform: rotate(-2deg);
+	-o-transform: rotate(-2deg);
+	-ms-transform: rotate(-2deg);
+	transform: rotate(-2deg);
+}
+
+body.profiles .profilepic img:hover,
+body.profiles .profilepic a:hover img {
+	-moz-transform: rotate(0deg);
+	-webkit-transform: rotate(0deg);
+	-o-transform: rotate(0deg);
+	-ms-transform: rotate(0deg);
+	transform: rotate(0deg);
+}
+
+body.profiles .profilepic a {
+	text-decoration: none;
+}
+
+body.profiles .profilepic a span {
+	text-align: center;
+	display: block;
+	width: 140px;
+	font-size: 12px;
+	padding-top: 5px;
+}
+
+body.profiles .profilepic a:hover span {
+	text-decoration: underline;
+}
+
+body.profiles .profilebio h3 {
+	font-size: 24px;
+	color: #333;
+}
+
+body.profiles .profilebio p {
+	margin-top: 0;
+}
+
+body.profiles .profilesettings span.label {
+	display: block;
+	color: #5c82a9;
+	border-bottom: 1px solid #9dc5dc;
+	padding-bottom: 4px;
+	font-size: 12px;
+	margin-bottom: 4px;
+}
+
+body.profiles .profilesettings a,
+a.submit_link {
+	display: block;
+	border: 1px solid #99a;
+	border-bottom-color: #88a;
+	box-shadow: 0 1px 0 rgba(0, 0, 0, .1);
+	-webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, .1);
+	font-size: 12px;
+	line-height: 22px;
+	padding: 2px 10px 1px 10px;
+	text-decoration: none;
+	color: #246;
+	text-shadow: 0px 1px 0px #fff;
+	font-weight: bold;
+	background: #ffffff; /* Old browsers */
+	background: -moz-linear-gradient(top, #ffffff 0%, #ffffff 2%, #f6f6f6 2%, #dee5ea 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(2%,#ffffff), color-stop(2%,#f6f6f6), color-stop(100%,#dee5ea)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#dee5ea 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#dee5ea 100%); /* Opera11.10+ */
+	background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#dee5ea 100%); /* IE10+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFFFFF', endColorstr='#DEE5EA',GradientType=0 ); /* IE6-9 */
+	background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#dee5ea 100%); /* W3C */
+}
+
+body.profiles .profilesettings a:hover,
+a.submit_link:hover {
+background: #ffffff; /* Old browsers */
+background: -moz-linear-gradient(top, #ffffff 0%, #ffffff 2%, #f6f6f6 2%, #e8edf2 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(2%,#ffffff), color-stop(2%,#f6f6f6), color-stop(100%,#e8edf2)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#e8edf2 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#e8edf2 100%); /* Opera11.10+ */
+background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#e8edf2 100%); /* IE10+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#E8EDF2',GradientType=0 ); /* IE6-9 */
+background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#e8edf2 100%); /* W3C */
+color: #468;
+}
+
+body.profiles .profilesettings a:active,
+a.submit_link:active {
+	position: relative;
+	top: 1px;
+}
+
+body.profiles .profilesettings a img,
+a.submit_link img {
+	vertical-align: -3px;
+	margin-right: 4px;
+}
+
+body.profiles .profilesettings .save a {
+	color: #262;
+}
+
+body.profiles .profilesettings .save a:hover {
+	color: #484;
+}
+
+body.profiles .profilesettings .cancel a {
+	color: #944;
+}
+
+body.profiles .profilesettings .cancel a:hover {
+	color: #a66;
+}
+
 body.profiles h2.scrapersandviews {
 	margin-top: 20px;
 	border-top: 1px solid #ccc;
 	padding-top: 15px;
 }
 
+body.profiles.edit #divContent label {
+	font-size: 14px;
+	color: #666;
+}
+
+body.profiles.edit p.name label,
+body.profiles.edit p.email label,
+body.profiles.edit p.alerts label {
+	display: inline-block;
+	width: 7.6em;
+}
+
+body.profiles.edit p.name input,
+body.profiles.edit p.email input {
+	padding: 2px 4px;
+	width: 19em;
+}
+
+body.profiles.edit p.bio label {
+	padding-bottom: 5px;
+	display: block;
+}
+
+body.profiles.edit p.bio textarea {
+	width: 29em;
+	padding: 0.5em;
+}
+
+body.profiles.edit p.alert_explanation {
+	font-style: italic;
+	font-size: 14px;
+	color: #666;
+}
+
+body.profiles.edit small.error_hint {
+	margin-left: 8.3em;
+	padding-top: 0.5em;
+	display: inline-block;
+}
 
 
 
@@ -2286,6 +2498,54 @@ div.metadata dt, div.metadata dd {
 	color: #555;
 }
 
+body.scrapers .content.right div.staff {
+	padding: 10px;
+}
+
+a.btnDeleteScraper_link {
+	color: #944;
+	background: #ffffff; /* Old browsers */
+background: -moz-linear-gradient(top, #ffffff 0%, #ffffff 2%, #f6f6f6 2%, #ede1e1 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(2%,#ffffff), color-stop(2%,#f6f6f6), color-stop(100%,#ede1e1)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%); /* Opera11.10+ */
+background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%); /* IE10+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#EDE1E1',GradientType=0 ); /* IE6-9 */
+background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#ede1e1 100%); /* W3C */
+	margin: 30px 0 10px 0;
+	display: inline-block;
+}
+
+body.views a.btnDeleteScraper_link {
+	margin-top: 5px;
+}
+
+a.btnDeleteScraper_link:hover {
+	color: #a66;
+	background: #ffffff;
+background: -moz-linear-gradient(top, #ffffff 0%, #ffffff 2%, #f6f6f6 2%, #f7eaea 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(2%,#ffffff), color-stop(2%,#f6f6f6), color-stop(100%,#f7eaea));
+background: -webkit-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#f7eaea 100%);
+background: -o-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#f7eaea 100%);
+background: -ms-linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#f7eaea 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#F7EAEA',GradientType=0 );
+background: linear-gradient(top, #ffffff 0%,#ffffff 2%,#f6f6f6 2%,#f7eaea 100%);
+}
+
+a.btnClearDatastore_link {
+	margin: 0 0 10px 0;
+	display: inline-block;
+}
+
+.delete_and_reset {
+	text-align: center;
+}
+
+.delete_and_reset p {
+	margin: 0;
+	font-size: 14px;
+}
+
 
 
 
@@ -2601,12 +2861,6 @@ body.contact form .postphone {
 	padding: 8px 12px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
-}
-
-body.password #divContent {
-	text-align: center;
-	width: 548px;
-	padding: 20px 120px;
 }
 
 
@@ -2950,6 +3204,10 @@ ul.scraper_list h3 {
 	width: 60%;
 	margin-left: 100px;
 }
+ul.scraper_list h3 small {
+	font-size: 10px;
+    color: #111;
+}
 
 ul.scraper_list .context {
 	color: #666;
@@ -3116,6 +3374,7 @@ strong.language {
 .code_about .codewiki_type td.link {
 	background-repeat: no-repeat;
 	background-position: left center;
+	min-width: 8em;
 }
 
 .code_about .codewiki_type.scraper td.link {
@@ -4325,18 +4584,7 @@ body.fullscreen #embedinstructions textarea {
 }
 
 
-
-
-/* last saved date / revision */
-
-.last_saved {
-	color: #808080;
-	margin: 0;
-	padding: 0.5em 0em 0.5em 0;
-}
-
 /* infobox */
-
 .infobox {
 	border: solid 1px #ccc;
 	font-size: 0.9em;
@@ -4602,9 +4850,7 @@ dl.tutoriallist dd {
     padding-bottom:5px;
 }
 
-div.documentationpage dt {
-    color:#003; font-size:120%; padding-top:10px;
-}
+
 
 div.documentationpage h2 {
     margin-top: 1.25em;
@@ -4613,7 +4859,7 @@ div.documentationpage h2 {
 }
 
 div.documentationpage h3 {
-    margin-top: 1.25em;
+    margin-top: 1.5em;
     padding-top:0;
     padding-bottom:0;
 }
@@ -4627,9 +4873,23 @@ div.documentationpage #getting_help li {
 	list-style-type: disc;
     margin-left: 2em;
 }
+
+div.documentationpage dt {
+	background-color: #F4F8FB;
+	margin-top: 1em;
+	padding: 0.3em 1em;
+	font-size:17px;
+	line-height: 22px;
+}
+
+div.documentationpage dd + dt {
+	margin-top: 1.5em;
+}
+
 div.documentationpage dd {
-    padding-top:2px;
-    padding-bottom:2px;
+	margin: 0.5em 2em 0 2em;
+	font-size: 15px;
+	color: #234;
 }
 
 div.documentationpage code {
@@ -4649,7 +4909,7 @@ div.documentationpage code {
 	border-radius: 4px;
 }
 
-div.documentationpage .code_wrapper {
+div.documentationpage .code_outer {
 	position: relative;
 }
 
@@ -4989,3 +5249,67 @@ a.your-own {
     background:url(../images/icons/control_play.png) no-repeat;
     background-position: left 60%;
 }
+
+
+
+
+/* YOUR DASHBOARD */
+
+body.dashboard #divContent {
+	padding-top: 5px;
+}
+
+
+
+
+
+/* PASSWORD RESET */
+
+body.password #divContent {
+	text-align: center;
+	width: 548px;
+	padding: 20px 120px;
+}
+
+body.password ul.form li label {
+	float: none;
+	display: inline-block;
+	margin-right: 10px;
+	width: 10em;
+	text-align: right;
+}
+
+body.password ul.form li input {
+	width: 15em;
+	padding: 2px;
+	margin-bottom: 10px;
+}
+
+body.password ul.form li.last {
+	padding-top: 15px;
+	border-top: 1px solid #ccc;
+	margin: 20px 60px;
+}
+
+body.password ul.form li.last input {
+	width: auto;
+	padding: 0;
+	margin: 0;
+}
+
+body.password.reset #divContent p {
+	padding: 0 50px;
+}
+
+body.password #divErrors {
+	margin-bottom: 15px;
+}
+
+body.password.reset.confirm #divContent ul.form li label {
+	width: 10em;
+	display: inline-block;
+	text-align: right;
+	padding-right: 10px;
+}
+
+
