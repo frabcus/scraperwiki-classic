@@ -57,11 +57,18 @@ def GetUMLstatuses():
     for umlurl in settings.UMLURLS:
         umlname = "uml0"+umlurl[-2:] # make its name
         try:
-            stat = urllib2.urlopen(umlurl + "/Status", timeout=2).read()
-            result[umlname] = { "runids":re.findall("runID=(.*)\n", stat) }
+            stat, ereason = urllib2.urlopen(umlurl + "/Status", timeout=2).read(), None
         except urllib2.URLError, e:
-            result[umlname] = { "error":e.reason }
-    
+            stat, ereason = None, e.reason
+        except TypeError:
+            stat, ereason = urllib2.urlopen(umlurl + "/Status").read(), None  # no timeout field exists in Python2.5
+        
+        if stat:
+            result[umlname] = { "runidnames":re.findall("runID=(.*?)&scrapername=(.*)\n", stat) }
+        else:
+            result[umlname] = { "error":ereason }
+            
+        
     # fake data
     #if not settings.UMLURLS:
     #    result["uml001"] = { "runids":["zzzz.xxx_1", "zzzz.xxx_2"] }

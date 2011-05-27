@@ -52,21 +52,26 @@ def diffseq(request, short_name):
     return HttpResponse(json.dumps(result))
 
 
-# NB: It only accepts the run_id hashes (NOT the Django id) so people can't
-# run through every value and get the URL names of each scraper.
+# django-ids are used on history page.  runs from private scrapers give no information
 def run_event_json(request, run_id):
+    event = None
     try:
         event = models.ScraperRunEvent.objects.get(run_id=run_id)
     except models.ScraperRunEvent.DoesNotExist:
-        event = None
-    if not event:
+        pass
+    except models.ScraperRunEvent.MultipleObjectsReturned:
+        pass
+
+    if not event and re.match("\d+$", run_id):
         try:
             event = models.ScraperRunEvent.objects.get(pk=run_id)
         except models.ScraperRunEvent.DoesNotExist:
-            raise Http404
+            pass
+    if not event:
+        return HttpResponse(json.dumps({"error":"run event does not exist", "output":"ERROR: run event does not exist"}))
     
     if not event.scraper.actionauthorized(request.user, "readcode"):
-        raise Http404
+        return HttpResponse(json.dumps({"error":"unauthorized", "output":"ERROR: unauthorized run event"}))
     
     result = { 'records_produced':event.records_produced, 'pages_scraped':event.pages_scraped, "output":event.output, 
                'first_url_scraped':event.first_url_scraped, 'exception_message':event.exception_message }

@@ -79,7 +79,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         status = []
         runids = runidstocontrollers.keys()  # to protect from multithreading
         for runid in runids:
-            status.append('runID=%s' % (runid))
+            status.append('runID=%s&scrapername=%s' % (runid, runidstocontrollers.get(runid).m_scrapername))
         #logger.info("Sending status on %d scrapers" % len(runids))
         self.sendConnectionHeaders()
         self.connection.sendall('\n'.join(status) + '\n')
@@ -318,8 +318,8 @@ class ScraperController(BaseController):
         language = request.get('language', 'python')
         resource.setrlimit(resource.RLIMIT_CPU, (request['cpulimit'], request['cpulimit']+1))
 
-        # language extensions
-        lexec = { 'php':'exec.php', 'ruby':'exec.rb', 'python':'exec.py' }[language]
+        # language extensions (default to exec.py in case junk setting has got through)
+        lexec = { 'php':'exec.php', 'ruby':'exec.rb', 'python':'exec.py' }.get(language, 'exec.py')
         
         execscript = os.path.join(os.path.dirname(sys.argv[0]), lexec)
         args = [    execscript,
@@ -349,14 +349,16 @@ class ScraperController(BaseController):
 
  
     def execute(self, request):
+        self.m_runID = request.get("runid", "")
+        self.m_scrapername = request.get("scrapername", "")
+        
         self.idents = []
         
         scraperguid = request.get("scraperid", "")
         self.idents.append('scraperid=%s' % scraperguid)
-        self.m_runID = request.get("runid", "")
-        self.idents.append ('runid=%s' % self.m_runID)
-        scrapername = request.get("scrapername", "")
-        self.idents.append ('scrapername=%s' % scrapername)
+        self.idents.append('runid=%s' % self.m_runID)
+        scrapername = self.m_scrapername
+        self.idents.append('scrapername=%s' % scrapername)
         urlquery = request.get("urlquery", "")
         for value in request['white']:
             self.idents.append('allow=%s' % value)

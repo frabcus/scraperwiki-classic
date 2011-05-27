@@ -27,8 +27,9 @@ parser.add_option("--urlquery", default='')
 parser.add_option("--draft", action="store_true", default=False)
 options, args = parser.parse_args()
 
-logging.config.fileConfig(configfile)
-logger = logging.getLogger('runner')
+# too much of a difficult issue with file permissions to get this right
+#logging.config.fileConfig(configfile)
+#logger = logging.getLogger('runner')
 
 config = ConfigParser.ConfigParser()
 config.readfp(open(configfile))
@@ -36,6 +37,11 @@ config.readfp(open(configfile))
 
 def writereadstream(dhost, dport, jdata):
     soc_file = None
+    
+    if jdata["language"] not in ["python", "php", "ruby"]:
+        sys.stdout.write(json.dumps({'message_type' : 'fail', 'content' : "no such language %s" % jdata["scraperlanguage"]}) + '\r\n')
+        sys.stdout.flush()
+        return 
     
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.connect((dhost, dport))
@@ -72,11 +78,11 @@ def writereadstream(dhost, dport, jdata):
         if not srec:
             break
     
-    logger.debug('%s:  ending %d bytes  %d records  %s' % (jdata["scrapername"], nbytes, nrecords, jdata["runid"]))
+    #logger.debug('%s:  ending %d bytes  %d records  %s' % (jdata["scrapername"], nbytes, nrecords, jdata["runid"]))
             
     if False:
         soc_file.close()
-        logger.warning('fail on %s: %s' % (jdata["scrapername"], str(status_line)))
+        #logger.warning('fail on %s: %s' % (jdata["scrapername"], str(status_line)))
         sys.stdout.write(json.dumps({'message_type' : 'fail', 'content' : status_line[2].strip()}) + '\r\n')
         sys.stdout.flush()
 
@@ -119,7 +125,7 @@ def buildjdata(code, options, config):
 if __name__ == "__main__":
     code = sys.stdin.read()
     jdata = buildjdata(code, options, config)
-    logger.debug('%s: starting   %s' % (jdata["scrapername"], jdata["runid"]))
+    #logger.debug('%s: starting   %s' % (jdata["scrapername"], jdata["runid"]))
 
     dhost = config.get('dispatcher', 'host')
     dport = config.getint('dispatcher', 'port')

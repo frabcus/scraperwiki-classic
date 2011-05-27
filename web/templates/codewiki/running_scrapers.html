@@ -393,8 +393,8 @@ $(document).ready(function() {
     {% if umlstatus.error %}
       <b>{{umlstatus.error}}</b>
     {% else %}
-      {% if umlstatus.runids %}
-        {% for runid in umlstatus.runids %}<a href="{% url run_event runid %}">*</a>{% endfor %}
+      {% if umlstatus.runidnames %}
+        {% for runid, scrapername in umlstatus.runidnames %}<a href="{% url run_event runid %}">{{scrapername}}</a>{% endfor %}
       {% else %}
         no running processes
       {% endif %}

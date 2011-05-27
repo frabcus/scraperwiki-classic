@@ -190,7 +190,6 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
     def killScraper(self, runID):
-        UMLLock.acquire()
         scraperstatus = runningscrapers.get(runID)
         if scraperstatus:
             scraperstatus["socket"].sendall("close for kill command")
@@ -199,7 +198,6 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 # closing this end however is consistent with select.select not hanging and should be used for the values running on unresponsive umls
             #scraperstatus["connection"].close()  
             
-        UMLLock.release()
 
         if scraperstatus:
             logger.info('Scraper %s killed on uname %s' % (runID, scraperstatus["uname"]))
@@ -297,7 +295,12 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 soc.close()
                 break
             
-            rec = soc.recv(8192)
+            try:
+                rec = soc.recv(8192)
+            except socket.error:
+                logger.debug("controller socket error: %s  %s" % (short_name, runID))
+                rec = None
+                
             logger.debug("done recv %s %s" % (short_name, [rec[:80]]))
             if not rec:
                 logger.debug("controller to dispatcher connection termination: %s  %s" % (short_name, runID))
