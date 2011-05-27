@@ -331,12 +331,10 @@ class UMLScanner(threading.Thread) :
         while True:
             time.sleep(10)
 
-            UMLLock.acquire()
-            umls = UMLs.values()
-            UMLLock.release()
+            # beware that things can change in lookup lists as we are using them, which is why copies are made before looping and get() is used to access
 
-            logger.debug("checking umls %d" % len(umls))
-            for uml in umls:
+            logger.debug("checking umls %d" % len(UMLs))
+            for uml in UMLs.values():
                 try:
                     res = urllib2.urlopen("http://%s:%s/Status" % (uml.server, uml.port), timeout=2).read()
                     if uml.livestatus == "unresponsive":  # don't overwrite closing
@@ -352,10 +350,12 @@ class UMLScanner(threading.Thread) :
                         logger.warning('Closing UML %s unresponsive' % uml.uname)
                         
                 if uml.livestatus == "unresponsive" and uml.runids:
-                    for runid in uml.runids:
-                        logger.warning('Killing runid %s %s on unresponsive UML %s' % (runid, runningscrapers[runid]["short_name"], uml.uname))
-                        #runningscrapers[runid]["socket"].close()     # may cause select.select to hang
-                        runningscrapers[runid]["connection"].close()  # seems to enable a cleaner break to occur
+                    for runid in uml.runids[:]:
+                        scraperstatus = runningscrapers.get(runid)
+                        if scraperstatus:
+                            logger.warning('Killing runid %s %s on unresponsive UML %s' % (runid, scraperstatus["short_name"], uml.uname))
+                            #runningscrapers[runid]["socket"].close()     # may cause select.select to hang
+                            scraperstatus["connection"].close()  # seems to enable a cleaner break to occur
 
 
 class DispatcherHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
