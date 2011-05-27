@@ -173,8 +173,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 if key != 'runid' :
                     msg[key] = value[0]
             line  = json.dumps(msg) + '\n'
-            controller.connection.sendall(line)
-
+            try:
+                controller.connection.sendall(line)
+            except socket.error, e:
+                logger.warning("notification sendall failed %s" % controller.m_scrapername)
         self.sendConnectionHeaders()
 
     # this request is put together by runner.py

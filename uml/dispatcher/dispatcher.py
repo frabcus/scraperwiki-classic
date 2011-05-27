@@ -350,7 +350,7 @@ class UMLScanner(threading.Thread) :
                         logger.warning('Closing UML %s unresponsive' % uml.uname)
                         
                 if uml.livestatus == "unresponsive" and uml.runids:
-                    for runid in uml.runids[:]:
+                    for runid in list(uml.runids)[:]:
                         scraperstatus = runningscrapers.get(runid)
                         if scraperstatus:
                             logger.warning('Killing runid %s %s on unresponsive UML %s' % (runid, scraperstatus["short_name"], uml.uname))

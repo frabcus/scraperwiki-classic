@@ -396,7 +396,7 @@ $(document).ready(function() {
       <b>{{umlstatus.error}}</b>
     {% else %}
       {% if umlstatus.runidnames %}
-        {% for runid, scrapername in umlstatus.runidnames %}<a href="{% url run_event runid %}">{{scrapername}}</a>{% endfor %}
+        {% for runid, scrapername in umlstatus.runidnames %}<a href="{% url run_event runid %}">{{scrapername}}</a> {% endfor %}
       {% else %}
         no running processes
       {% endif %}
@@ -415,7 +415,7 @@ $(document).ready(function() {
     <td>{{status.uname}}</td>
     <td>
     {% if status.scraper %}
-      <a href="{% url code_overview status.scraper.wiki_type status.scraper.short_name %}">{{status.scraper.title}}</a>
+      <a href="{% url code_overview status.scraper.wiki_type status.scraper.short_name %}">{{status.scraper.short_name}}</a>
     {% else %}
       {{status.scraperID}}--
     {% endif %}
