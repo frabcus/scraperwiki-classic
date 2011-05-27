@@ -31,8 +31,9 @@ class ScraperViewsTests(TestCase):
         from codewiki.vc import MercurialInterface
         from django.conf import settings
         from codewiki.models.scraper import Scraper
+        from codewiki.models.code import Code
 
-        s = Scraper.objects.get(short_name=name)
+        s = Code.objects.get(short_name=name)
         m = s.vcs
 
         try:
