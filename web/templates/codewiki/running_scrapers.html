@@ -383,10 +383,12 @@ $(document).ready(function() {
 <p><b>{{overdue_count}}</b></p>
 
 
-<h1 id="umlstatus"><a href="#umlstatus">#</a> UML Status</h1>
+<h1 id="umlstatus">UML Status <a href="#umlstatus">#</a></h1>
   (does not update)
 
-<table border="1" style="width:auto; margin:auto">
+
+<h3>Current runs (from each UML controller)</h3>
+<table border="1" style="width:auto; margin:auto; border-collapse:collapse">
 {% for umlname, umlstatus in activeumls.items %}
   <tr><th>{{umlname}}</th>
     <td>
@@ -405,10 +407,12 @@ $(document).ready(function() {
 </table>
 
 
-<table border="1" style="width:auto; margin:auto">
-<tr><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>
+<h3>Current runs (from dispatcher)</h3>
+<table border="1" style="width:auto; margin:auto; border-collapse:collapse">
+<tr><th>umlname</th><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>
 {% for status in statusscrapers %}
   <tr>
+    <td>{{status.uname}}</td>
     <td>
     {% if status.scraper %}
       <a href="{% url code_overview status.scraper.wiki_type status.scraper.short_name %}">{{status.scraper.title}}</a>
@@ -445,8 +449,8 @@ $(document).ready(function() {
 
 
 
-<h1>Recent runs</h1>
-<table border="1" style="width:auto; margin:auto">
+<h3>Recent runs (from django)</h3>
+<table border="1" style="width:auto; margin:auto; border-collapse:collapse">
   <tr>
     <th>Scraper</th>
     <th>Started</th>
@@ -474,14 +478,17 @@ $(document).ready(function() {
 
 <tr>
   <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki-cpu-day.png"></td>
-  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki-mysql_queries-day.png"></td>
+  <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki-cpu-day.png"></td>
 </tr>
 
-<tr><th colspan="2"><a href="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki.html">UML server (rush)</a></th></tr>
+{% comment %}
+<tr><th colspan="2"><a href="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki.html">UML server (rush)</a></th></tr>
 <tr>
   <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-cpu-day.png"></td>
   <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-load-day.png"></td>
 </tr>
+{% endcomment %}
+
 </table>
 
 

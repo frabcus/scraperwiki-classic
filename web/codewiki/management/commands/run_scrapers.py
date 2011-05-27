@@ -49,6 +49,7 @@ def GetDispatcherStatus():
         assert mline, line
         if mline:
             result.append( {'uname':mline.group(1), 'scraperID':mline.group(2), 'short_name':mline.group(3), 'runID':mline.group(4), 'runtime':float(mline.group(5)) } )
+    result.sort(key=lambda x:x["uname"])
     return result
 
 
