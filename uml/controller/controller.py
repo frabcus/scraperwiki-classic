@@ -150,11 +150,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             logging.debug('Found process using ss')            
 
         if pid:
-            logger.debug(' Ident (%s,%s) is pid %s' % (lport, rport, pid))
             runid = pidstorunids.get(pid)
             controller = runidstocontrollers.get(runid)
             if controller:
                 self.connection.sendall('\n'.join(controller.idents))
+                logger.debug(' Ident port %s is for scraper %s' % (rport, controller.m_scrapername))
             else:
                 logger.warning('Ident scraper not longer present for pid %s' % pid)
             return
@@ -243,13 +243,13 @@ class ScraperController(BaseController):
         while len(rlist) > 2 and self.connection in rlist:
             try:
                 rback, wback, eback = select.select(rlist, [ ], [ ], 60) 
-            except select.error, e:   
+            except select.error, e: 
                 logger.warning("bad file descriptor childpid: %d"%childpid)
                 logger.warning([streamprintsin.fileno(), streamjsonsin.fileno(), self.connection.fileno()]) 
                 for fd in rlist:
                     try:
-                        select.select([fd], [ ], [ ]) 
-                    except select.error, e:   
+                        select.select([fd], [ ], [ ], 0) 
+                    except select.error, e:
                         logger.exception("bad socket was: %d" % fd.fileno())
                 break
             
@@ -561,7 +561,13 @@ if __name__ == '__main__' :
         autoFirewall()
     
     ScraperController.protocol_version = "HTTP/1.0"
-    httpd = ControllerHTTPServer(('', config.getint(socket.gethostname(), 'port')), ScraperController)
+    try:
+        port = config.getint(socket.gethostname(), 'port')
+        httpd = ControllerHTTPServer(('', port), ScraperController)
+    except socket.error, e:
+        logger.error("setting up error with hostname %s port %s" % (socket.gethostname(), port))
+        sigTerm(None, None)
+        
     sa = httpd.socket.getsockname()
     logger.info("Serving HTTP on %s port %s" % (sa[0], sa[1]))
     httpd.serve_forever()

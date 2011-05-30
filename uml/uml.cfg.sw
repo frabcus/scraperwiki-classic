@@ -182,7 +182,7 @@ args=(sys.stdout,)
 class=handlers.RotatingFileHandler
 level=WARNING
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/allwarnings.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/allwarnings.log', "a", 10000000, 5)
 
 [handler_logfileHandlerEmail]
 class=handlers.SMTPHandler
@@ -195,43 +195,43 @@ args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/controller.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/controller.log', "a", 10000000, 5)
 
 [handler_logfileHandlerDataproxyDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/dataproxy.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/dataproxy.log', "a", 10000000, 5)
 
 [handler_logfileHandlerDispatcherDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/dispatcher.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/dispatcher.log', "a", 10000000, 5)
 
 [handler_logfileHandlerRunnerDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/runner.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/runner.log', "a", 10000000, 5)
 
 [handler_logfileHandlerTwisterDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/twister.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/twister.log', "a", 10000000, 5)
 
 [handler_logfileHandlerProxyDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/proxy.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/proxy.log', "a", 10000000, 5)
 
 [handler_logfileHandlerDjangoDebug]
 class=handlers.RotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/django.log', "a", 100000, 5)
+args=('/var/log/scraperwiki/django.log', "a", 10000000, 5)
 
 
 [formatter_simpleFormatter]

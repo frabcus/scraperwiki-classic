@@ -123,10 +123,8 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     def sendConfig(self):
         sconfig = []
-        UMLLock.acquire()
-        for uml in UMLs.values():
+        for uml in UMLs.values()[:]:
             sconfig.append("name=%s;server=%s;port=%d;count=%d;runids=%d;livestatus=%s" % (uml.uname, uml.server, uml.port, uml.count, len(uml.runids), uml.livestatus))
-        UMLLock.release()
         
         logger.debug("sendConfig: "+str(sconfig)[:20])
         self.connection.send('\n'.join(sconfig))
@@ -135,11 +133,9 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         # this is interpreted by codewiki/management/commands/run_scrapers.GetDispatcherStatus
     def sendStatus(self):
         res = []
-        UMLLock.acquire()
-        for scraperstatus in runningscrapers.values():
+        for scraperstatus in runningscrapers.values()[:]:
             res.append('uname=%s;scraperID=%s;short_name=%s;runID=%s;runtime=%s' % \
                        (scraperstatus["uname"], scraperstatus["scraperID"], scraperstatus["short_name"], scraperstatus["runID"], time.time()-scraperstatus["time"]))
-        UMLLock.release()
         logger.debug("sendStatus: "+str(res)[:20])
         
         self.connection.send('\n'.join(res))
@@ -283,18 +279,33 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             # this simply sends whatever chunks there are right back to runner without buffering them
             # if they were buffered then could detect the execution end json object and break in a timely manner here
             # rather than wait for the close or (more reliably) the shutdown signal to filter through (sometimes delayed).  
+        socketterminationmessage = None
         while True:
             logger.debug("into select %s" % (short_name))
-            rback, wback, eback = select.select([soc, self.connection], [], [], 60)
+            try:
+                rback, wback, eback = select.select([soc, self.connection], [], [], 6)
+            except select.error, e: 
+                logger.warning("select error on %s" % (short_name))
+                try:
+                    socketterminationmessage = "select error for %s was on soc" % (short_name)
+                    select.select([soc], [], [], 0)
+                    socketterminationmessage = "select error for %s was on connection" % (short_name)
+                    select.select([self.connection], [], [], 0)
+                    socketterminationmessage = "unexplained select error"
+                except select.error, e: 
+                    pass
+                break
+                
+                
             if not rback:
                 logger.debug("soft timeout on select.select for %s" % short_name)
-
+                continue
+            
             if self.connection in rback:
-                soc.sendall("close for runner changed signal")   # any message sent to soc will cause the controller to close the process
-                logger.debug("dispatcher to runner connection termination: %s  %s" % (short_name, runID))
-                soc.close()
+                socketterminationmessage = "close for runner changed signal"
                 break
             
+            assert soc in rback
             try:
                 rec = soc.recv(8192)
             except socket.error:
@@ -304,17 +315,22 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             logger.debug("done recv %s %s" % (short_name, [rec[:80]]))
             if not rec:
                 logger.debug("controller to dispatcher connection termination: %s  %s" % (short_name, runID))
-                soc.close()
                 break
             
             try:
                 self.connection.sendall(rec)
             except socket.error, e:
-                soc.sendall("close for runner connection exception")   # any message sent to soc will cause the controller to close the process
-                logger.debug("dispatcher to runner connection error on: %s  %s" % (short_name, runID))
-                soc.close()
+                socketterminationmessage = "close for runner connection exception"
                 break
 
+        if socketterminationmessage:
+            logger.debug("%s: %s  %s" % (socketterminationmessage, short_name, runID))
+            try:
+                soc.sendall(socketterminationmessage)   # any message sent to soc will cause the controller to close the process
+            except socket.error, e:
+                logger.warning("socket error on termination message %s" % (short_name))
+        soc.close()
+        
         releaseUML(scraperstatus)
 
     do_HEAD   = do_GET

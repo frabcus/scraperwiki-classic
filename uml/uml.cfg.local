@@ -1,7 +1,7 @@
 [dispatcher]
 host	= 127.0.0.1
 port	= 9000
-umllist	= uml001,uml002
+umllist	= uml001
 confurl	= allwhite
 use_queue = False
 queue_name= test_run_queue
