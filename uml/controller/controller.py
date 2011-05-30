@@ -260,7 +260,7 @@ class ScraperController(BaseController):
             if self.connection in rback:
                 line = self.connection.recv(200)
                 if not line:
-                    logger.debug("incoming connection to %s gone down, so killing exec process" % (scrapername, childpid))
+                    logger.debug("incoming connection to %s gone down, so killing exec process %d" % (scrapername, childpid))
                 else:
                     logger.debug("got message to kill exec process %s  %s %d" % (str([line]), scrapername, childpid))
                 os.kill(childpid, signal.SIGKILL)
