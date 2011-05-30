@@ -283,7 +283,7 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         while True:
             logger.debug("into select %s" % (short_name))
             try:
-                rback, wback, eback = select.select([soc, self.connection], [], [], 6)
+                rback, wback, eback = select.select([soc, self.connection], [], [], 60)
             except select.error, e: 
                 logger.warning("select error on %s" % (short_name))
                 try:
