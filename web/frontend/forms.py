@@ -52,7 +52,7 @@ class UserProfileForm(forms.ModelForm):
     
     def clean_email(self):
         email = self.cleaned_data['email']
-        if email != self.user.email and User.objects.filter(email__iexact=email).count > 0:
+        if email != self.user.email and User.objects.filter(email__iexact=email).count() > 0:
             raise forms.ValidationError("This email address is already used by another account.")
 
         return email
