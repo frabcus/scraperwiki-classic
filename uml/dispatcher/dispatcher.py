@@ -123,10 +123,8 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
     def sendConfig(self):
         sconfig = []
-        UMLLock.acquire()
-        for uml in UMLs.values():
+        for uml in UMLs.values()[:]:
             sconfig.append("name=%s;server=%s;port=%d;count=%d;runids=%d;livestatus=%s" % (uml.uname, uml.server, uml.port, uml.count, len(uml.runids), uml.livestatus))
-        UMLLock.release()
         
         logger.debug("sendConfig: "+str(sconfig)[:20])
         self.connection.send('\n'.join(sconfig))
@@ -135,11 +133,9 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         # this is interpreted by codewiki/management/commands/run_scrapers.GetDispatcherStatus
     def sendStatus(self):
         res = []
-        UMLLock.acquire()
-        for scraperstatus in runningscrapers.values():
+        for scraperstatus in runningscrapers.values()[:]:
             res.append('uname=%s;scraperID=%s;short_name=%s;runID=%s;runtime=%s' % \
                        (scraperstatus["uname"], scraperstatus["scraperID"], scraperstatus["short_name"], scraperstatus["runID"], time.time()-scraperstatus["time"]))
-        UMLLock.release()
         logger.debug("sendStatus: "+str(res)[:20])
         
         self.connection.send('\n'.join(res))
@@ -190,7 +186,6 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
     def killScraper(self, runID):
-        UMLLock.acquire()
         scraperstatus = runningscrapers.get(runID)
         if scraperstatus:
             scraperstatus["socket"].sendall("close for kill command")
@@ -199,7 +194,6 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 # closing this end however is consistent with select.select not hanging and should be used for the values running on unresponsive umls
             #scraperstatus["connection"].close()  
             
-        UMLLock.release()
 
         if scraperstatus:
             logger.info('Scraper %s killed on uname %s' % (runID, scraperstatus["uname"]))
@@ -285,33 +279,62 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             # this simply sends whatever chunks there are right back to runner without buffering them
             # if they were buffered then could detect the execution end json object and break in a timely manner here
             # rather than wait for the close or (more reliably) the shutdown signal to filter through (sometimes delayed).  
+        socketterminationmessage = None
         while True:
             logger.debug("into select %s" % (short_name))
-            rback, wback, eback = select.select([soc, self.connection], [], [], 60)
+            try:
+                rback, wback, eback = select.select([soc, self.connection], [], [], 60)
+            except select.error, e: 
+                logger.warning("select error on %s" % (short_name))
+                try:
+                    socketterminationmessage = "select error for %s was on soc" % (short_name)
+                    select.select([soc], [], [], 0)
+                    socketterminationmessage = "select error for %s was on connection" % (short_name)
+                    select.select([self.connection], [], [], 0)
+                    socketterminationmessage = "unexplained select error"
+                except select.error, e: 
+                    pass
+                break
+            except socket.error, e:
+                socketterminationmessage = "select socket.error"
+                logger.exception("select socket.error %s" % (short_name))
+                break
+                
+                
             if not rback:
                 logger.debug("soft timeout on select.select for %s" % short_name)
-
+                continue
+            
             if self.connection in rback:
-                soc.sendall("close for runner changed signal")   # any message sent to soc will cause the controller to close the process
-                logger.debug("dispatcher to runner connection termination: %s  %s" % (short_name, runID))
-                soc.close()
+                socketterminationmessage = "close for runner changed signal"
                 break
             
-            rec = soc.recv(8192)
+            assert soc in rback
+            try:
+                rec = soc.recv(8192)
+            except socket.error:
+                logger.debug("controller socket error: %s  %s" % (short_name, runID))
+                rec = None
+                
             logger.debug("done recv %s %s" % (short_name, [rec[:80]]))
             if not rec:
                 logger.debug("controller to dispatcher connection termination: %s  %s" % (short_name, runID))
-                soc.close()
                 break
             
             try:
                 self.connection.sendall(rec)
             except socket.error, e:
-                soc.sendall("close for runner connection exception")   # any message sent to soc will cause the controller to close the process
-                logger.debug("dispatcher to runner connection error on: %s  %s" % (short_name, runID))
-                soc.close()
+                socketterminationmessage = "close for runner connection exception"
                 break
 
+        if socketterminationmessage:
+            logger.debug("%s: %s  %s" % (socketterminationmessage, short_name, runID))
+            try:
+                soc.sendall(socketterminationmessage)   # any message sent to soc will cause the controller to close the process
+            except socket.error, e:
+                logger.warning("socket error on termination message %s" % (short_name))
+        soc.close()
+        
         releaseUML(scraperstatus)
 
     do_HEAD   = do_GET
@@ -328,12 +351,10 @@ class UMLScanner(threading.Thread) :
         while True:
             time.sleep(10)
 
-            UMLLock.acquire()
-            umls = UMLs.values()
-            UMLLock.release()
+            # beware that things can change in lookup lists as we are using them, which is why copies are made before looping and get() is used to access
 
-            logger.debug("checking umls %d" % len(umls))
-            for uml in umls:
+            logger.debug("checking umls %d" % len(UMLs))
+            for uml in UMLs.values():
                 try:
                     res = urllib2.urlopen("http://%s:%s/Status" % (uml.server, uml.port), timeout=2).read()
                     if uml.livestatus == "unresponsive":  # don't overwrite closing
@@ -349,10 +370,14 @@ class UMLScanner(threading.Thread) :
                         logger.warning('Closing UML %s unresponsive' % uml.uname)
                         
                 if uml.livestatus == "unresponsive" and uml.runids:
-                    for runid in uml.runids:
-                        logger.warning('Killing runid %s %s on unresponsive UML %s' % (runid, runningscrapers[runid]["short_name"], uml.uname))
-                        #runningscrapers[runid]["socket"].close()     # may cause select.select to hang
-                        runningscrapers[runid]["connection"].close()  # seems to enable a cleaner break to occur
+                    for runid in list(uml.runids)[:]:
+                        scraperstatus = runningscrapers.get(runid)
+                        if scraperstatus:
+                            logger.warning('Killing runid %s %s on unresponsive UML %s' % (runid, scraperstatus["short_name"], uml.uname))
+                                # may cause select.select to hang (though this could be an artifact of the way we have simulated/tested closed umls)
+                            #runningscrapers[runid]["socket"].close()     
+                                # seems to enable a cleaner break to occur (though doesn't work and causes this to properly hang.  Possibly there's an uncaught exception)
+                            scraperstatus["connection"].close()  
 
 
 class DispatcherHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):

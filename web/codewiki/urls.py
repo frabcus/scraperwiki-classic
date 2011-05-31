@@ -18,6 +18,9 @@ urlpatterns = patterns('',
     # running a scraper by calling a url (from scraperwikiviews.com)
     url(r'^run/(?P<short_name>[\w_\-\.]+)/(?:(?P<revision>\d+)/)?$', 
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    
+    
+        # up here because clashes with a scraper whose short name is 'run_event_json'
+    url(r'^scrapers/run_event_json/(?P<run_id>[\w_\-\.\?]*)/?$', viewseditor.run_event_json, name='run_event_json'),  
 
     url(r'^views/(?P<short_name>[\w_\-\.]+)/admin/$',     views.view_admin,             name='view_admin'),    
     url(r'^scrapers/(?P<short_name>[\w_\-\.]+)/admin/$',  views.scraper_admin,          name='scraper_admin'),
@@ -66,7 +69,6 @@ urlpatterns = patterns('',
     # editor call-backs from ajax for reloading and diff
     url(r'^editor/raw/(?P<short_name>[\-\w\.]+)$',        viewseditor.raw,    name="raw"),      # raw code not wrapped in javascript
     url(r'^editor/diffseq/(?P<short_name>[\-\w\.]+)$',    viewseditor.diffseq,name="diffseq"),
-    url(r'^scrapers/run_event_json/(?P<run_id>[\w_\-\.\?]+)/$', viewseditor.run_event_json, name='run_event_json'),  
     
     url(r'^editor/reload/(?P<short_name>[\-\w\.]+)$',     viewseditor.reload, name="reload"),   
     url(r'^proxycached$',                                 views.proxycached,  name="proxycached"), # ?cachedid=1234

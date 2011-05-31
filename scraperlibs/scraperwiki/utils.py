@@ -59,10 +59,9 @@ def urllibSetup(http_proxy):
 #  urllib2.orlopen().
 #
 def scrape (url, params = None) :
-    global urllib2opener
     data = params and urllib.urlencode(params) or None
 
-    fin  = urllib2opener.open(url, data)
+    fin  = urllib2.urlopen(url, data)
     text = fin.read()
     fin.close()   # get the mimetype here
 

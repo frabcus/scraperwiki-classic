@@ -79,7 +79,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         status = []
         runids = runidstocontrollers.keys()  # to protect from multithreading
         for runid in runids:
-            status.append('runID=%s' % (runid))
+            status.append('runID=%s&scrapername=%s' % (runid, runidstocontrollers.get(runid).m_scrapername))
         #logger.info("Sending status on %d scrapers" % len(runids))
         self.sendConnectionHeaders()
         self.connection.sendall('\n'.join(status) + '\n')
@@ -150,11 +150,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             logging.debug('Found process using ss')            
 
         if pid:
-            logger.debug(' Ident (%s,%s) is pid %s' % (lport, rport, pid))
             runid = pidstorunids.get(pid)
             controller = runidstocontrollers.get(runid)
             if controller:
                 self.connection.sendall('\n'.join(controller.idents))
+                logger.debug(' Ident port %s is for scraper %s' % (rport, controller.m_scrapername))
             else:
                 logger.warning('Ident scraper not longer present for pid %s' % pid)
             return
@@ -173,8 +173,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 if key != 'runid' :
                     msg[key] = value[0]
             line  = json.dumps(msg) + '\n'
-            controller.connection.sendall(line)
-
+            try:
+                controller.connection.sendall(line)
+            except socket.error, e:
+                logger.warning("notification sendall failed %s" % controller.m_scrapername)
         self.sendConnectionHeaders()
 
     # this request is put together by runner.py
@@ -241,14 +243,17 @@ class ScraperController(BaseController):
         while len(rlist) > 2 and self.connection in rlist:
             try:
                 rback, wback, eback = select.select(rlist, [ ], [ ], 60) 
-            except select.error, e:   
-                logger.warning("bad file descriptor childpid: %d"%childpid)
+            except select.error, e: 
+                logger.warning("bad file descriptor childpid: %d %s" % (childpid, scrapername))
                 logger.warning([streamprintsin.fileno(), streamjsonsin.fileno(), self.connection.fileno()]) 
                 for fd in rlist:
                     try:
-                        select.select([fd], [ ], [ ]) 
-                    except select.error, e:   
+                        select.select([fd], [ ], [ ], 0) 
+                    except select.error, e:
                         logger.exception("bad socket was: %d" % fd.fileno())
+                break
+            except socket.error, e:
+                logger.exception("select socket.error %s" % (scrapername))
                 break
             
             if not rback:
@@ -258,7 +263,7 @@ class ScraperController(BaseController):
             if self.connection in rback:
                 line = self.connection.recv(200)
                 if not line:
-                    logger.debug("incoming connection to %s gone down, so killing exec process" % (scrapername, childpid))
+                    logger.debug("incoming connection to %s gone down, so killing exec process %d" % (scrapername, childpid))
                 else:
                     logger.debug("got message to kill exec process %s  %s %d" % (str([line]), scrapername, childpid))
                 os.kill(childpid, signal.SIGKILL)
@@ -318,8 +323,8 @@ class ScraperController(BaseController):
         language = request.get('language', 'python')
         resource.setrlimit(resource.RLIMIT_CPU, (request['cpulimit'], request['cpulimit']+1))
 
-        # language extensions
-        lexec = { 'php':'exec.php', 'ruby':'exec.rb', 'python':'exec.py' }[language]
+        # language extensions (default to exec.py in case junk setting has got through)
+        lexec = { 'php':'exec.php', 'ruby':'exec.rb', 'python':'exec.py' }.get(language, 'exec.py')
         
         execscript = os.path.join(os.path.dirname(sys.argv[0]), lexec)
         args = [    execscript,
@@ -349,14 +354,16 @@ class ScraperController(BaseController):
 
  
     def execute(self, request):
+        self.m_runID = request.get("runid", "")
+        self.m_scrapername = request.get("scrapername", "")
+        
         self.idents = []
         
         scraperguid = request.get("scraperid", "")
         self.idents.append('scraperid=%s' % scraperguid)
-        self.m_runID = request.get("runid", "")
-        self.idents.append ('runid=%s' % self.m_runID)
-        scrapername = request.get("scrapername", "")
-        self.idents.append ('scrapername=%s' % scrapername)
+        self.idents.append('runid=%s' % self.m_runID)
+        scrapername = self.m_scrapername
+        self.idents.append('scrapername=%s' % scrapername)
         urlquery = request.get("urlquery", "")
         for value in request['white']:
             self.idents.append('allow=%s' % value)
@@ -557,7 +564,13 @@ if __name__ == '__main__' :
         autoFirewall()
     
     ScraperController.protocol_version = "HTTP/1.0"
-    httpd = ControllerHTTPServer(('', config.getint(socket.gethostname(), 'port')), ScraperController)
+    try:
+        port = config.getint(socket.gethostname(), 'port')
+        httpd = ControllerHTTPServer(('', port), ScraperController)
+    except socket.error, e:
+        logger.error("setting up error with hostname %s port %s" % (socket.gethostname(), port))
+        sigTerm(None, None)
+        
     sa = httpd.socket.getsockname()
     logger.info("Serving HTTP on %s port %s" % (sa[0], sa[1]))
     httpd.serve_forever()
