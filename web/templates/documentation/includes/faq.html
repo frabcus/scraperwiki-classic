@@ -21,6 +21,7 @@
            <li><a href="#view_parameters">How do I get query parameters in my view?</a></li>
            <li><a href="#cpu_limit">What is the CPU limit, and what do I do if my scraper reaches it?</a></li>
            <li><a href="#https">Can I scrape secure (https://) sites?</a></li>
+           <li><a href="#editor">Is there an editor other than the CodeMirror one?</a></li>
      </ul>
      <h2>Licensing questions</h2>
      <ul>
@@ -169,13 +170,26 @@ print_r($output);
                </p>
            </dd>
 
-           <dt id="https">Can I scrape secure (https://) sites?</dtd>
+           <dt id="https">Can I scrape secure (https://) sites?</dt>
            <dd>
                <p>Yes. Here's an example, in Python.</p>
                <code>url = "https://cia.gov"
 import urllib                                                                                                             
 print urllib.urlopen(url).read() 
 </code>
+           </dd>
+
+           <dt id="editor">Is there an editor other than the CodeMirror one?</dt>
+           <dd>
+                <p>Currently, the only other option is a plain HTML textarea editor. You can
+                access that by adding #plain on the end of the URL while editing a scraper.
+                </p>
+                <p>This should be enough for you to use it with browser plugins that let you
+                spawn vim or emacs for a textarea. It will also work in browsers
+                for which CodeMirror doesn't work.
+                </p>
+                <p>Let us know if this is useful, and what other software you used it with.
+                </p> 
            </dd>
 
            <dt id="licence">Who owns the code I write on ScraperWiki?</dt>
