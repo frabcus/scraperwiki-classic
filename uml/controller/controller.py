@@ -244,13 +244,16 @@ class ScraperController(BaseController):
             try:
                 rback, wback, eback = select.select(rlist, [ ], [ ], 60) 
             except select.error, e: 
-                logger.warning("bad file descriptor childpid: %d"%childpid)
+                logger.warning("bad file descriptor childpid: %d %s" % (childpid, scrapername))
                 logger.warning([streamprintsin.fileno(), streamjsonsin.fileno(), self.connection.fileno()]) 
                 for fd in rlist:
                     try:
                         select.select([fd], [ ], [ ], 0) 
                     except select.error, e:
                         logger.exception("bad socket was: %d" % fd.fileno())
+                break
+            except socket.error, e:
+                logger.exception("select socket.error %s" % (scrapername))
                 break
             
             if not rback:

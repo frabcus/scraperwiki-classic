@@ -295,6 +295,10 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 except select.error, e: 
                     pass
                 break
+            except socket.error, e:
+                socketterminationmessage = "select socket.error"
+                logger.exception("select socket.error %s" % (short_name))
+                break
                 
                 
             if not rback:
@@ -370,8 +374,10 @@ class UMLScanner(threading.Thread) :
                         scraperstatus = runningscrapers.get(runid)
                         if scraperstatus:
                             logger.warning('Killing runid %s %s on unresponsive UML %s' % (runid, scraperstatus["short_name"], uml.uname))
-                            #runningscrapers[runid]["socket"].close()     # may cause select.select to hang
-                            scraperstatus["connection"].close()  # seems to enable a cleaner break to occur
+                                # may cause select.select to hang (though this could be an artifact of the way we have simulated/tested closed umls)
+                            #runningscrapers[runid]["socket"].close()     
+                                # seems to enable a cleaner break to occur (though doesn't work and causes this to properly hang.  Possibly there's an uncaught exception)
+                            scraperstatus["connection"].close()  
 
 
 class DispatcherHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
