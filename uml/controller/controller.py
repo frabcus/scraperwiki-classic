@@ -180,42 +180,51 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.sendConnectionHeaders()
 
     # this request is put together by runner.py
-    def do_POST (self) :
-        scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
-        assert path == '/Execute'
-            # BaseHTTPRequestHandler.rfile is the input stream
-        remlength = int(self.headers['Content-Length'])
-        jincoming = []
-        while True:
-            sjincoming = self.connection.recv(remlength)
-            if not sjincoming:
-                break
-            jincoming.append(sjincoming)
-            remlength -= len(sjincoming)
-            if remlength <= 0:
-                break
-        if remlength != 0:
-            emsg = {"error":"incoming message incomplete", "headers":str(self.headers), "lengths":str(map(len, jincoming))}
-            logger.error(str(emsg))
-            self.connection.sendall(json.dumps(emsg) + '\n')
+    def do_POST (self):
+        try:
+            scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
+            assert path == '/Execute'
+                # BaseHTTPRequestHandler.rfile is the input stream
+            remlength = int(self.headers['Content-Length'])
+            jincoming = []
+            while True:
+                sjincoming = self.connection.recv(remlength)
+                if not sjincoming:
+                    break
+                jincoming.append(sjincoming)
+                remlength -= len(sjincoming)
+                if remlength <= 0:
+                    break
+            if remlength != 0:
+                emsg = {"error":"incoming message incomplete", "headers":str(self.headers), "lengths":str(map(len, jincoming))}
+                logger.error(str(emsg))
+                self.connection.sendall(json.dumps(emsg) + '\n')
+                self.connection.close()
+                return
+
+            request = json.loads("".join(jincoming))
+            self.execute(request)   # actually runs everything
+        except Exception, e:
+            logger.exception("Uncaught exception in do_POST (path = %s): %s" % (path, e))
+        finally:
             self.connection.close()
-            return
-
-        request = json.loads("".join(jincoming))
-        self.execute(request)   # actually runs everything
 
 
-    def do_GET (self) :
-        scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
-        if path == '/Ident':
-            self.sendIdent(query)
-        elif path == '/Status':
-            self.sendStatus()
-        elif path == '/Notify':    # used to relay notification of http requests back to the dispatcher
-            self.sendNotify(query)
-        else:
-            self.send_error(404, 'Action %s not found' % path)
-        self.connection.close()
+    def do_GET (self):
+        try:
+            scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
+            if path == '/Ident':
+                self.sendIdent(query)
+            elif path == '/Status':
+                self.sendStatus()
+            elif path == '/Notify':    # used to relay notification of http requests back to the dispatcher
+                self.sendNotify(query)
+            else:
+                self.send_error(404, 'Action %s not found' % path)
+        except Exception, e:
+            logger.exception("Uncaught exception in do_GET (path = %s): %s" % (path, e))
+        finally:
+            self.connection.close()
 
 
 def saveunicode(text):

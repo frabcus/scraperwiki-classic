@@ -220,8 +220,8 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 self.killScraper(query)
             else:
                 self.execute()
-        except Exception, ex:
-            logger.exception("Uncaught exception in do_GET (path = %s): %s" % (path, ex))
+        except Exception, e:
+            logger.exception("Uncaught exception in do_GET (path = %s): %s" % (path, e))
         finally:
             self.connection.close()
 
