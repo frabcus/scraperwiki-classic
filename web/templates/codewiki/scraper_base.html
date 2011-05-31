@@ -1,5 +1,12 @@
 {% extends "frontend/base.html" %}
 
+{% block meta %}
+    <meta property="og:title" content="SCRAPER TITLE" />
+    <meta property="og:description" content="SCRAPER DESCRIPTION" />
+    <meta property="og:image" content="SCRAPER IMAGE URL" />
+    <meta property="og:site_name" content="ScraperWiki" />
+{% endblock %}
+
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}
 {% block rss %}<link rel="alternate" type="application/rss+xml" title="RSS" href="/feeds/code_object_comments/{{ scraper.short_name }}" />{% endblock %}
 
@@ -13,11 +20,17 @@
          {{ scraper.title }}
        {% endif %}
     </h2>
-	<p>{{scraper.wiki_type|lower}} 
-	    &bull; {{scraper.language|lower}}
-        {% ifnotequal scraper.privacy_status 'public' %}
-	    &bull; [{{scraper.privacy_status}}]
-        {% endifnotequal %}
+	<p>{{scraper.language|lower}} &bull;
+	    
+        {% ifequal scraper.privacy_status 'public' %}
+	    <abbr title="This {{scraper.wiki_type|lower}} can be viewed and edited by anyone">public {{scraper.wiki_type|lower}}</abbr>
+        {% endifequal %}
+	    {% ifequal scraper.privacy_status 'visible' %}
+	    <abbr title="This {{scraper.wiki_type|lower}} can be viewed by anyone, but edited only by its owner and listed contributors">protected {{scraper.wiki_type|lower}}</abbr>
+        {% endifequal %}
+	    {% ifequal scraper.privacy_status 'private' %}
+	    <abbr title="This {{scraper.wiki_type|lower}} can only be viewed or edited by its owner or listed contributors">private {{scraper.wiki_type|lower}}</abbr>
+        {% endifequal %} 
 	{% if scraper.forked_from %}
         &bull; Fork of <a href="{% url code_overview scraper.forked_from.wiki_type scraper.forked_from.short_name %}">{{scraper.forked_from.short_name}}</a>
     {% endif %}

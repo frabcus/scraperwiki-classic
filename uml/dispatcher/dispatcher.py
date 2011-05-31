@@ -205,21 +205,25 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
     def do_GET (self) :
-        scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
-        self.sendConnectionHeaders()
-        if path == '/Config':
-            self.sendConfig()
-        elif path == '/Status':
-            self.sendStatus()
-        elif path == '/Add':
-            self.saddUML(query)
-        elif path == '/Remove':
-            self.removeUML(query)
-        elif path == '/Kill':
-            self.killScraper(query)
-        else:
-            self.execute()
-        self.connection.close()
+        try:
+            scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
+            self.sendConnectionHeaders()
+            if path == '/Config':
+                self.sendConfig()
+            elif path == '/Status':
+                self.sendStatus()
+            elif path == '/Add':
+                self.saddUML(query)
+            elif path == '/Remove':
+                self.removeUML(query)
+            elif path == '/Kill':
+                self.killScraper(query)
+            else:
+                self.execute()
+        except Exception, e:
+            logger.exception("Uncaught exception in do_GET (path = %s): %s" % (path, e))
+        finally:
+            self.connection.close()
 
 
     def execute(self):

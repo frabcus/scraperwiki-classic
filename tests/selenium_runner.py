@@ -24,7 +24,7 @@ if __name__ == '__main__':
     parser.add_option("--username")
     parser.add_option("--accesskey")
     parser.add_option("--os")
-    parser.add_option("--browser")
+    parser.add_option("--browser", default="*firefox")
     parser.add_option("--browserversion")
     
         # control the tests to be run from here
@@ -35,8 +35,13 @@ if __name__ == '__main__':
     SeleniumTest._selenium_host = options.shost
     SeleniumTest._selenium_port = options.sport
     SeleniumTest._app_url = options.url
-    SeleniumTest._selenium_browser = { "username":options.username, "access-key":options.accesskey, 
-                                       "os":options.os, "browser":options.browser, "browser-version":options.browserversion }
+
+    if options.username and options.accesskey and options.os and options.browser and options.browserversion:
+        SeleniumTest._selenium_browser = json.dumps({ "username":options.username, "access-key":options.accesskey, 
+                                                      "os":options.os, "browser":options.browser, "browser-version":options.browserversion })
+    else:
+        print "browser = %s" % options.browser
+        SeleniumTest._selenium_browser = options.browser
 
     if 'localhost' in options.url:
         print '*' * 80

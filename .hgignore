@@ -41,3 +41,4 @@ syntax: regexp
 ^debug.log$
 ^error.log$
 ^info.log$
+^splitscrapers$
