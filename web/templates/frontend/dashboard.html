@@ -17,7 +17,9 @@
     {% if owned_or_edited_code_objects_pagenated.object_list %}
       <ul class="scraper_list">
       {% for code in owned_or_edited_code_objects_pagenated.object_list %}
-        {% include 'frontend/includes/code_object_line.html' %}
+        {% with 1 as on_dashboard %}
+            {% include 'frontend/includes/code_object_line.html' %}
+        {% endwith %}
       {% endfor %}
     </ul>
   {% else %}
