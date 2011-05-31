@@ -1,7 +1,10 @@
-<html>
-<head>
+{% extends "frontend/base.html" %}
+
+{% block title %}Key Performance Indicators{% endblock %}
+
 <title>Key Performance Indicators</title>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.5.2.js"></script>
+
+{% block javascript %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.js"></script>
 <script>
 $(function(){
@@ -82,16 +85,22 @@ $(function(){
 
 });
 </script>
-</head>
-<body>
-<h1>Key Performance Indicators</h1>
+{% endblock %}
 
-<div id="placeholder1" style="width:200px;height:200px"></div>
-<div id="placeholder2" style="width:200px;height:200px"></div>
+{% block header %}
+<h2>Key Performance Indicators</h2>
+{% endblock %}
+
+{% block content_outer  %}
+    <div id="page_outer">
+                <div id="page_inner">
+
+<p id="placeholder1" style="width:200px;height:200px"></p>
+<p id="placeholder2" style="width:200px;height:200px"></p>
 
 {% for year in data %}
   <h2>{{year.year}}</h2>
-  <table border="1">
+  <table class="data">
     <tr>
        <th>&nbsp;</th>
      {% for month in year.months %}
@@ -137,5 +146,7 @@ $(function(){
   </table>
 {% endfor %}
 
-</body>
-</html>
+</div></div>
+{% endblock %}
+
+
