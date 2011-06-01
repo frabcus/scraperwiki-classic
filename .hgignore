@@ -31,6 +31,7 @@ syntax: regexp
 ^downloads$
 ^francis-laptop.wsgi$
 ^resourcedir/
+^uml/log/
 ^uml/var/
 ^uml/controller/uml.cfg$
 ^uml/firestarter/runner_config.py$
