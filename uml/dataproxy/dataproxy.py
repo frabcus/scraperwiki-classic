@@ -111,38 +111,39 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         # this morphs into the long running two-way connection
     def do_GET (self) :
-        (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
-        params = dict(cgi.parse_qsl(query))
-
-        if 'short_name' in params:
-            if self.connection.getpeername()[0] != config.get('dataproxy', 'secure') :
-                self.connection.send(json.dumps({"error":"short_name only accepted from secure hosts"})+'\n')
-                return
-            short_name = params.get('short_name', '')
-            runID = 'fromfrontend.%s.%s' % (short_name, time.time()) 
-            dataauth = "fromfrontend"
-        else :
-            runID, short_name = self.ident(params['uml'], params['port'])
-            if runID[:8] == "draft|||" and short_name:
-                dataauth = "draft"
-            else:
-                dataauth = "writable"
-        
-        if path == '' or path is None :
-            path = '/'
-
-        if scm not in ['http', 'https'] or fragment :
-            self.connection.send(json.dumps({"error":"Malformed URL %s" % self.path})+'\n')
-            return
-
-        db = datalib.Database(self, config.get('dataproxy', 'resourcedir'), short_name, dataauth, runID)
-        self.connection.send(json.dumps({"status":"good"})+'\n')
-
-                # enter the loop that now waits for single requests (delimited by \n) 
-                # and sends back responses through a socket
-                # all with json objects -- until the connection is terminated
-        sbuffer = [ ]
         try:
+            (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
+            params = dict(cgi.parse_qsl(query))
+
+            if 'short_name' in params:
+                if self.connection.getpeername()[0] != config.get('dataproxy', 'secure') :
+                    self.connection.send(json.dumps({"error":"short_name only accepted from secure hosts"})+'\n')
+                    return
+                short_name = params.get('short_name', '')
+                runID = 'fromfrontend.%s.%s' % (short_name, time.time()) 
+                dataauth = "fromfrontend"
+            else :
+                runID, short_name = self.ident(params['uml'], params['port'])
+                if runID[:8] == "draft|||" and short_name:
+                    dataauth = "draft"
+                else:
+                    dataauth = "writable"
+            
+            if path == '' or path is None :
+                path = '/'
+
+            if scm not in ['http', 'https'] or fragment :
+                self.connection.send(json.dumps({"error":"Malformed URL %s" % self.path})+'\n')
+                return
+
+            db = datalib.Database(self, config.get('dataproxy', 'resourcedir'), short_name, dataauth, runID)
+            self.connection.send(json.dumps({"status":"good"})+'\n')
+
+                    # enter the loop that now waits for single requests (delimited by \n) 
+                    # and sends back responses through a socket
+                    # all with json objects -- until the connection is terminated
+            sbuffer = [ ]
+
             while True:
                 srec = self.connection.recv(255)
                 ssrec = srec.split("\n")  # multiple strings if a "\n" exists
@@ -155,8 +156,9 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     sbuffer = [ ssrec.pop(0) ]  # next one in
                 if not srec:
                     break
-                
-        finally :
+        except Exception, e:
+            logger.exception("Uncaught exception in do_GET: %s" % e)
+        finally:
             self.connection.close()
 
 

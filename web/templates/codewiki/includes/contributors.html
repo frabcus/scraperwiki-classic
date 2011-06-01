@@ -27,25 +27,23 @@
       {% endfor %}
     {% endwith %}
 
-{% if user.is_staff %} 
-<div class="staff"> <!-- staff only, dark launch-->
+</ul>
+
+{# {% if user.is_staff %} #} 
     {% if user_owns_it %}
       {% ifnotequal scraper.privacy_status 'public' %}
-        <li id="addneweditor">
+        <div class="staff" id="addneweditor"><!-- staff only, dark launch-->
           <span class="hide">
-            Type in the username of another editor:
-            <input type="text">
-            <input type="button" value="Add" class="addbutton">
+            Editor username:
+            <input type="text" class="text">
             <input type="button" value="Cancel" class="cancelbutton">
+            <input type="button" value="Add" class="addbutton">
           </span>
-          <a>[Add new editor]</a>
-        </li>
+          <a><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16" /> Add a new editor</a>
+        </div> <!-- end staff only, dark launch -->
       {% endifnotequal %}
     {% endif %}
-</div> <!-- end staff only, dark launch -->
-{% endif %} 
-
-</ul>
+{# {% endif %} #}
 
 {% comment %}
     {% if userrolemap.follow %}
@@ -62,7 +60,7 @@
     </ul>
     {% endif %}
 {% endcomment %}
-
+<!--
 <p class="{% ifnotequal scraper.privacy_status 'public' %}xxxreport{% endifnotequal %}">This {{scraper.wiki_type}} <span id="spnPrivacyStatusChoice">{{privacy_status_name}}</span>.
   <select class="hide" id="optionsPrivacyStatusChoices">  {# this select gets taken apart and rebuilt by jeditable #}
   {% for value, name in PRIVACY_STATUSES %} 
@@ -70,12 +68,75 @@
   {% endfor %}
   </select>
 
-  {% if user.is_staff %} 
-    <span class="staff"> <!-- staff only, dark launch-->
+  {% if user.is_staff %}
+    <span class="staff">
     {% if user_owns_it %}
       <a id="aPrivacyStatusChoice" class="edit">[edit status]</a>
     {% endif %}
-    </span> <!-- end staff only, dark launch -->
-  {% endif %} 
+    </span>
+  {% endif %}
 </p>
+-->
+<script type="text/javascript">
+$(function(){
+   $('#show_privacy_choices').click(function(){
+       $('#privacy_status table').show();
+       $('#privacy_status>h4, #privacy_status>p').hide();
+   })
+});
 
+</script>
+
+<div id="privacy_status">
+    {% ifequal scraper.privacy_status 'public' %}
+        <h4><img src="{{ MEDIA_URL }}images/icons/shield-public.png" width="16" height="16" /> 
+            This {{scraper.wiki_type}} is public 
+            {% if user.is_staff %} 
+                {% if user_owns_it %}
+                <a class="staff" id="show_privacy_choices">[edit]</a>
+                {% endif %}
+            {% endif %}
+        </h4>
+        <p>Anyone can see this scraper, and any registered user can edit it.</p>
+    {% endifequal %}
+    {% ifequal scraper.privacy_status 'visible' %}
+        <h4><img src="{{ MEDIA_URL }}images/icons/shield-protected.png" width="16" height="16" /> 
+            This {{scraper.wiki_type}} is protected 
+            {% if user.is_staff %} 
+                {% if user_owns_it %}
+                <a class="staff" id="show_privacy_choices">[edit]</a>
+                {% endif %}
+            {% endif %}
+        </h4>
+        <p>Anyone can see this scraper, but only the contributors listed above can edit it.</p>
+    {% endifequal %}
+    {% ifequal scraper.privacy_status 'private' %}
+        <h4><img src="{{ MEDIA_URL }}images/icons/shield-private.png" width="16" height="16" /> 
+            This {{scraper.wiki_type}} is private 
+            {% if user.is_staff %} 
+                {% if user_owns_it %}
+                <a class="staff" id="show_privacy_choices">[edit]</a>
+                {% endif %}
+            {% endif %}
+        </h4>
+        <p>Only the contributors listed above can see or edit this scraper.</p>
+    {% endifequal %}
+
+    <form>
+        <table cellspacing="0" cellpadding="0">
+            <tr class="first">
+                <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public" /></td>
+                <td><h4><label for="privacy_public">Public</label></h4><p><label for="privacy_public">Everyone can see and edit this {{scraper.wiki_type}}.</label></p></td>
+            </tr>
+            <tr>
+                <td class="radio"><input type="radio" name="privacy_status" value="protected" id="privacy_protected" checked="checked"/></td>
+                <td><h4><label for="privacy_protected">Protected</label></h4><p><label for="privacy_protected">Everyone can see this {{scraper.wiki_type}}, but only selected contributors can edit it.</label></p></td>
+            </tr>
+            <tr>
+                <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private" /></td>
+                <td><h4><label for="privacy_private">Private</label></h4><p><label for="privacy_private">Only selected contributors can see or edit this {{scraper.wiki_type}}.</label></p></td>
+            </tr>
+        </table>
+        
+    </form>
+</div>
