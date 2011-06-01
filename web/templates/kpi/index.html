@@ -17,6 +17,7 @@ $(function(){
   var months_scrapers = new Array();
   var months_views = new Array();
   var months_users = new Array();
+  var active_coders = new Array();
 
   {% for year in data %}
     {% for month in year.months %}
@@ -27,13 +28,15 @@ $(function(){
       months_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_scrapers}}]);
       months_views.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_views}}]);
       months_users.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_users}}]);
+      active_coders.push([{{forloop.counter0|add:year.offset}}, {{month.active_coders}}]);
     {% endfor %}
   {% endfor %}
 
-  $("#placeholder1").width(ticks.length * 50);
-  $("#placeholder2").width(ticks.length * 50);
+  $("#totals_graph").width(ticks.length * 50);
+  $("#new_graph").width(ticks.length * 50);
+  $("#active_graph").width(ticks.length * 50);
 
-  $.plot($("#placeholder1"), [
+  $.plot($("#totals_graph"), [
         {
             data: total_scrapers, 
             label: 'Total Scrapers',
@@ -58,7 +61,7 @@ $(function(){
           }
         });
 
-  $.plot($("#placeholder2"), [
+  $.plot($("#new_graph"), [
         {
             data: months_scrapers,
             label: 'New Scrapers',
@@ -83,6 +86,20 @@ $(function(){
           }
         });
 
+  $.plot($("#active_graph"), [
+        {
+            data: active_coders,
+            label: 'Active Coders',
+            lines: { show: true },
+            points: { show: true }
+        },
+        ],
+        {
+          xaxis: {
+              ticks: ticks
+          }
+        });
+
   $('.legend').css('left', '30px');
 
 });
@@ -98,14 +115,16 @@ $(function(){
     <div id="page_outer">
                 <div id="page_inner">
 
-<p id="placeholder1" style="width:200px;height:200px"></p>
-<p id="placeholder2" style="width:200px;height:200px"></p>
+<p id="totals_graph" style="width:200px;height:200px"></p>
+<p id="new_graph" style="width:200px;height:200px"></p>
+<p id="active_graph" style="width:200px;height:200px"></p>
 
 <table class="data">
     <th>
        <th>Scrapers</th>
        <th>Views</th>
        <th>Users</th>
+       <th>Active coders</th>
     </th>
 
     {% for year in data reversed %}
@@ -116,6 +135,7 @@ $(function(){
                <td> {{month.total_scrapers|intcomma}} ({{ month.this_months_scrapers|plusminus_int|intcomma }}) </td>
                <td> {{month.total_views|intcomma}} ({{ month.this_months_views|plusminus_int|intcomma }}) </td>
                <td> {{month.total_users|intcomma}} ({{ month.this_months_users|plusminus_int|intcomma }}) </td>
+               <td> {{month.active_coders|intcomma}} ({{ month.delta_active_coders|plusminus_int|intcomma }}) </td>
            </tr>
         {% endfor %}
     {% endfor %}

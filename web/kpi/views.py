@@ -42,6 +42,37 @@ def index(request):
                 # There shouldn't be any data for the future!
                 break
         years_list.append({'year': year, 'months': months_list, 'offset': i * 12})
+   
+    # work out unique active code writers / month ...
+    for code in Code.objects.all():
+        #raise Exception(code.get_commit_log())
+        for commitentry in code.get_commit_log():
+            user = commitentry['user']
+            when = commitentry['date']
+
+            username = user.username
+            year = when.year
+
+            month_data = years_list[year - START_YEAR]['months'][when.month - 1]
+            if 'active_coders' not in month_data.keys():
+                month_data['active_coders'] = {}
+            month_data['active_coders'][username] = 1
+    # ... and count how many entries there are
+    last_active_coders = 0
+    for i, year in enumerate(range(START_YEAR, datetime.date.today().year + 1)):
+        for month in range(1, 13):
+            month_data = years_list[i]['months'][month - 1]
+            if 'active_coders' not in month_data.keys():
+                month_data['active_coders'] = 0
+            else:
+                month_data['active_coders'] = len(month_data['active_coders'])
+
+            month_data['delta_active_coders'] = month_data['active_coders'] - last_active_coders
+            last_active_coders = month_data['active_coders']
+            
+            next_month = one_month_in_the_future(month, year) 
+            if next_month > datetime.date.today():
+                break
 
     context['data'] = years_list 
     
