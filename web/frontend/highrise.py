@@ -62,6 +62,28 @@ class Tag(object):
     def __unicode__(self):
         return u'%s (%s)' % (self.name, self.id)
 
+class User(object):
+    def __init__(self, xml):
+        self.xml = xml
+
+    @property
+    def name(self):
+        return self.xml.xpath('name')[0].text
+
+    @property
+    def email(self):
+        return self.xml.xpath('email-address')[0].text
+
+    @property
+    def id(self):
+        return self.xml.xpath('id')[0].text
+
+    def __repr__(self):
+        return self.__unicode__()
+
+    def __unicode__(self):
+        return u'%s <%s> (%s)' % (self.name, self.email, self.id)
+
 class HighRiseException(Exception): pass
 
 class HighRise(object):
@@ -127,6 +149,22 @@ class HighRise(object):
         doc = etree.XML(xml)
         tags = doc.xpath('/tags/tag')
         return [Tag(t) for t in tags]
+
+    def get_user_by_email(self, email):
+        for u in self.list_users():
+            if u.email == email:
+                return u
+        return None
+
+    def list_users(self):
+        url = self.base_url + '/users.xml'
+        resp = urllib2.urlopen(url)
+        if resp.code != 200:
+            raise HighRiseException("Error listing users")
+        xml = resp.read()
+        doc = etree.XML(xml)
+        users = doc.xpath('/users/user')
+        return [User(u) for u in users]
 
     def search_people_by_email(self, email):
         url = self.base_url + '/people/search.xml?criteria[email]=%s' % email
