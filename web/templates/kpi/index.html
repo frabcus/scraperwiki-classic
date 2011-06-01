@@ -1,8 +1,10 @@
 {% extends "frontend/base.html" %}
+{% load number_stuff %}
+{% load humanize %}
 
-{% block title %}Key Performance Indicators{% endblock %}
+{% block title %}Key performance indicators{% endblock %}
 
-<title>Key Performance Indicators</title>
+<title>Key performance indicators</title>
 
 {% block javascript %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.js"></script>
@@ -88,7 +90,8 @@ $(function(){
 {% endblock %}
 
 {% block header %}
-<h2>Key Performance Indicators</h2>
+<h2>Key performance indicators</h2>
+<p>How we measure how well we're doing</p>
 {% endblock %}
 
 {% block content_outer  %}
@@ -98,53 +101,25 @@ $(function(){
 <p id="placeholder1" style="width:200px;height:200px"></p>
 <p id="placeholder2" style="width:200px;height:200px"></p>
 
-{% for year in data %}
-  <h2>{{year.year}}</h2>
-  <table class="data">
-    <tr>
-       <th>&nbsp;</th>
-     {% for month in year.months %}
-       <th>{{month.month}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>New Scrapers</th>
-     {% for month in year.months %}
-       <th>{{month.this_months_scrapers}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>Total Scrapers</th>
-     {% for month in year.months %}
-       <th>{{month.total_scrapers}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>New Views</th>
-     {% for month in year.months %}
-       <th>{{month.this_months_views}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>Total Views</th>
-     {% for month in year.months %}
-       <th>{{month.total_views}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>New Users</th>
-     {% for month in year.months %}
-       <th>{{month.this_months_users}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>Total Users</th>
-     {% for month in year.months %}
-       <th>{{month.total_users}}</th>
-     {% endfor %}
-    </tr>
-  </table>
-{% endfor %}
+<table class="data">
+    <th>
+       <th>Scrapers</th>
+       <th>Views</th>
+       <th>Users</th>
+    </th>
+
+    {% for year in data reversed %}
+        {% for month in year.months reversed %}
+           <tr>
+               <td>{{ year.year }}, {{month.month}} </td>
+
+               <td> {{month.total_scrapers|intcomma}} ({{ month.this_months_scrapers|plusminus_int|intcomma }}) </td>
+               <td> {{month.total_views|intcomma}} ({{ month.this_months_views|plusminus_int|intcomma }}) </td>
+               <td> {{month.total_users|intcomma}} ({{ month.this_months_users|plusminus_int|intcomma }}) </td>
+           </tr>
+        {% endfor %}
+    {% endfor %}
+</table>
 
 </div></div>
 {% endblock %}
