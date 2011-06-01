@@ -75,11 +75,11 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  ('Content-Type: text/text\n')
         self.connection.send  ('\n')
 
+            # usually used to tell if controller still alive
     def sendStatus(self):
         status = []
-        runids = runidstocontrollers.keys()  # to protect from multithreading
-        for runid in runids:
-            status.append('runID=%s&scrapername=%s' % (runid, runidstocontrollers.get(runid).m_scrapername))
+        for runid, controller in runidstocontrollers.items()[:]:
+            status.append('runID=%s&scrapername=%s' % (runid, controller.m_scrapername))
         #logger.info("Sending status on %d scrapers" % len(runids))
         self.sendConnectionHeaders()
         self.connection.sendall('\n'.join(status) + '\n')
@@ -266,7 +266,10 @@ class ScraperController(BaseController):
                     logger.debug("incoming connection to %s gone down, so killing exec process %d" % (scrapername, childpid))
                 else:
                     logger.debug("got message to kill exec process %s  %s %d" % (str([line]), scrapername, childpid))
-                os.kill(childpid, signal.SIGKILL)
+                try:
+                    os.kill(childpid, signal.SIGKILL)
+                except OSError:
+                    logger.debug("OSError on os.kill")
                 break
             
             jsonoutputlist = [ ]
@@ -304,6 +307,10 @@ class ScraperController(BaseController):
                     self.connection.sendall(jsonoutput + '\n')
             except socket.error, e:
                 logger.exception("socket error sending %s  %s" % (scrapername, jsonoutput[:1000]))
+                try:
+                    os.kill(childpid, signal.SIGKILL)
+                except OSError:
+                    logger.debug("OSError on os.kill")
                 return None
 
         ostimes2 = os.times()
@@ -517,7 +524,11 @@ def autoFirewall():
 
 
 def sigTerm(signum, frame):
-    os.kill(child, signal.SIGTERM)
+    try:
+        os.kill(child, signal.SIGTERM)
+    except OSError:
+        pass  # no such file
+        
     try:
         os.remove(poptions.pidfile)
     except OSError:

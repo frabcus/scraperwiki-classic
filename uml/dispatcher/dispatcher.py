@@ -301,14 +301,20 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 break
                 
                 
+                
             if not rback:
                 logger.debug("soft timeout on select.select for %s" % short_name)
+                uml = UMLs.get(scraperstatus["uname"])
+                if not uml or uml.livestatus == "unresponsive":
+                    socketterminationmessage = "close because uml %s unresponsive" % scraperstatus["uname"]
+                    break
                 continue
             
             if self.connection in rback:
                 socketterminationmessage = "close for runner changed signal"
                 break
             
+            # incoming messages from the controller to relay forward
             assert soc in rback
             try:
                 rec = soc.recv(8192)
@@ -352,11 +358,14 @@ class UMLScanner(threading.Thread) :
             time.sleep(10)
 
             # beware that things can change in lookup lists as we are using them, which is why copies are made before looping and get() is used to access
-
+            umltimes = [ ]
             logger.debug("checking umls %d" % len(UMLs))
             for uml in UMLs.values():
                 try:
+                    stime = time.time()
+                            # timeout of 2 secs is probably too severe (leave in for now to enable failure and testing)
                     res = urllib2.urlopen("http://%s:%s/Status" % (uml.server, uml.port), timeout=2).read()
+                    umltimes.append(time.time() - stime)
                     if uml.livestatus == "unresponsive":  # don't overwrite closing
                         logger.warning('unresponsive UML %s back to live' % uml.uname)
                         uml.livestatus = "live"
@@ -369,23 +378,18 @@ class UMLScanner(threading.Thread) :
                     elif uml.livestatus == "closing":
                         logger.warning('Closing UML %s unresponsive' % uml.uname)
                         
-                if uml.livestatus == "unresponsive" and uml.runids:
-                    for runid in list(uml.runids)[:]:
-                        scraperstatus = runningscrapers.get(runid)
-                        if scraperstatus:
-                            logger.warning('Killing runid %s %s on unresponsive UML %s' % (runid, scraperstatus["short_name"], uml.uname))
-                                # may cause select.select to hang (though this could be an artifact of the way we have simulated/tested closed umls)
-                            #runningscrapers[runid]["socket"].close()     
-                                # seems to enable a cleaner break to occur (though doesn't work and causes this to properly hang.  Possibly there's an uncaught exception)
-                            scraperstatus["connection"].close()  
-
+            if umltimes and max(umltimes) > 1.8:
+                logger.info("uml response times: %s" % str(umltimes))
 
 class DispatcherHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     pass
 
 
 def sigTerm(signum, frame):
-    os.kill(child, signal.SIGTERM)
+    try:
+        os.kill(child, signal.SIGTERM)
+    except OSError:
+        pass
     try:
         os.remove(poptions.pidfile)
     except OSError:
