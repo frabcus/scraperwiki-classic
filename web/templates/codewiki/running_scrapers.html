@@ -40,7 +40,9 @@ span.desc { background-color:black; color:white; width:100px; display:inline-blo
 
 #page_inner h2 { margin-top: 1em; }
 #page_inner h3 { margin-top: 0.5em; }
-#page_inner table, #page_inner table tr, #page_inner table td, #page_inner table th { border: 1px solid #000; width:auto; margin-right:auto; border-collapse:collapse; margin-top: 0.9em; }
+#page_inner table { width:auto; margin-right:auto; margin-top: 0.9em; }
+#page_inner table td { padding: 0.3em 0; }
+#page_inner table th { padding: 0.3em 0; }
 
 </style>
 
@@ -398,7 +400,7 @@ $(document).ready(function() {
 <h2 id="umlstatus">UML status <small>(reload page to update)</small> <a href="#umlstatus">#</a></h2>
 
 <h3>Current runs (from each UML controller)</h3>
-<table>
+<table class="data">
 {% for umlname, umlstatus in activeumls.items %}
   <tr><th>{{umlname}}</th>
     <td>
@@ -418,8 +420,8 @@ $(document).ready(function() {
 
 
 <h3>Current runs (from dispatcher)</h3>
-<table>
-<tr><th>umlname</th><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>
+<table class="data">
+<tr><th>UML</th><th>Scraper</th><th>Time</th><th>Kill button</th><th>Run id</th></tr>
 {% for status in statusscrapers %}
   <tr>
     <td>{{status.uname}}</td>
@@ -433,9 +435,9 @@ $(document).ready(function() {
 
     <td>
     {% if status.scraperrunevent %}
-      <a href="{% url scraper_history status.scraperrunevent.scraper.wiki_type status.scraperrunevent.scraper.short_name %}#run_{{ status.scraperrunevent.id }}">{{status.runtime|floatformat}} seconds</a>
+      <a href="{% url scraper_history status.scraperrunevent.scraper.wiki_type status.scraperrunevent.scraper.short_name %}#run_{{ status.scraperrunevent.id }}">{{status.runtime|floatformat}} secs</a>
     {% else %}
-      {{status.runtime|floatformat}} seconds
+      {{status.runtime|floatformat}} secs
     {% endif %}
     </td>
 
@@ -460,7 +462,7 @@ $(document).ready(function() {
 
 
 <h3>Recent runs (from django, max {{ eventsmax }})</h3>
-<table>
+<table class="data">
   <tr>
     <th>Scraper</th>
     <th>Started</th>
@@ -471,7 +473,7 @@ $(document).ready(function() {
   <tr>
     <td {% ifnotequal run_event.pid -1 %}style="color:white; background:black"{% endifnotequal %}><a href="{% url code_overview run_event.scraper.wiki_type run_event.scraper.short_name %}">{{run_event.scraper.title}}</a></td> 
     <td>{{run_event.run_started|timesince}} ago (<small>{{run_event.run_started}}</small>)</td> 
-    <td>{{run_event.getduration}} seconds</td> 
+    <td>{{run_event.getduration}} secs</td> 
     <td><a href="{% url scraper_history run_event.scraper.wiki_type run_event.scraper.short_name %}#run_{{ run_event.id }}">{{run_event.outputsummary}}</a></td>
     
   </tr>
