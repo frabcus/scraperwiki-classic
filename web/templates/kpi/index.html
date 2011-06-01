@@ -89,7 +89,7 @@ $(function(){
   $.plot($("#active_graph"), [
         {
             data: active_coders,
-            label: 'Active Coders',
+            label: 'Active Coders (committed at least one line of code in month)',
             lines: { show: true },
             points: { show: true }
         },
@@ -124,7 +124,7 @@ $(function(){
        <th>Scrapers</th>
        <th>Views</th>
        <th>Users</th>
-       <th>Active coders</th>
+       <th>Active Coders</th>
     </th>
 
     {% for year in data reversed %}

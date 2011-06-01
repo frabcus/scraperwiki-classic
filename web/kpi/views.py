@@ -43,10 +43,13 @@ def index(request):
                 break
         years_list.append({'year': year, 'months': months_list, 'offset': i * 12})
    
-    # work out unique active code writers / month ...
+    # work out unique active code writers / month ..
     for code in Code.objects.all():
-        #raise Exception(code.get_commit_log())
         for commitentry in code.get_commit_log():
+            # don't count editing own emailer for now
+            if code.is_emailer():
+                continue
+
             user = commitentry['user']
             when = commitentry['date']
 
