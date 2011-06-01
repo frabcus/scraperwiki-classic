@@ -42,6 +42,7 @@ def index(request):
                 # There shouldn't be any data for the future!
                 break
         years_list.append({'year': year, 'months': months_list, 'offset': i * 12})
+    years_list[-1]['months'][-1]['current_month'] = True
    
     # work out unique active code writers / month ..
     for code in Code.objects.all():

@@ -5487,6 +5487,8 @@ form.fourohfourhint p {
 
 /* KPI */
 
-
+body.kpi tr.this_month {
+	color: #b0b0b0;
+}
 
 

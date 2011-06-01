@@ -129,7 +129,11 @@ $(function(){
 
     {% for year in data reversed %}
         {% for month in year.months reversed %}
-           <tr>
+           {% if month.current_month %}
+               <tr class="this_month">
+           {% else %}
+               <tr>
+           {% endif %}
                <td>{{ year.year }}, {{month.month}} </td>
 
                <td> {{month.total_scrapers|intcomma}} ({{ month.this_months_scrapers|plusminus_int|intcomma }}) </td>
