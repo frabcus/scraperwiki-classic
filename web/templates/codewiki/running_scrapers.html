@@ -1,10 +1,12 @@
 {% extends "frontend/base.html" %}
 
+{% block title %}UML status{% endblock %}
+
 {% block css %}
 
 <style type="text/css">
 
-div#monitoroutput { width:80%; margin-left:auto; margin-right:auto; border: thick blue solid; margin-top:5px; }
+div#monitoroutput { width:90%; margin-left:none; margin-right:auto; border: thick blue solid; margin-top:5px; }
 
 div#monitoringusers { border: thin red solid; overflow:auto; text-align:left }
 div#draftscraperusers { border: thin red solid; overflow:auto; text-align:left }
@@ -34,6 +36,10 @@ span.desc { background-color:black; color:white; width:100px; display:inline-blo
 #monitoroutput ul#scraperentries ul.scraperusers li.bktyping {  background-color:#000; }
 
 #jdatareceived { font-size:75%; overflow-x: auto; white-space:nowrap; height:10em; } 
+
+#page_inner h2 { margin-top: 1em; }
+#page_inner h3 { margin-top: 0.5em; }
+#page_inner table, #page_inner table tr, #page_inner table td, #page_inner table th { border: 1px solid #000; width:auto; margin-right:auto; border-collapse:collapse; margin-top: 0.9em; }
 
 </style>
 
@@ -345,11 +351,14 @@ $(document).ready(function() {
 
 
 {% block header %}
-<h2>ScraperWiki UML status</h2>
+<h2>UML status</h2>
 <p>What's going on in twister, the UMLs and related places</p>
 {% endblock %}
 
 {% block content_outer  %}
+
+    <div id="page_outer">
+                <div id="page_inner">
 
 
 <form>
@@ -361,6 +370,7 @@ $(document).ready(function() {
 </fieldset>
 </form>
 
+<h2>Users currently editing code</h2>
 <div id="monitoroutput">
     <div id="connectionstatusdiv"><span id="connectionstatus">...</span> Servertime: <span id="servernowtime"></span></div>
     <div id="monitoringusers"><span class="desc">Monitoring:</span> <ul></ul></div>
@@ -370,21 +380,14 @@ $(document).ready(function() {
     <div id="jdatareceived"></div>
 </div>
 
-
-<div id="divLogo" style="float:left">
-    <p><a href="{% url frontpage %}"><span class="hide">ScraperWiki</span></a></p>
-</div>
-
-<h1>Number of overdue scrapers</h1>
-<p><b>{{overdue_count}}</b></p>
+<h2>Scheduler backlog</h2>
+<p>Number of overdue scrapers: <b>{{overdue_count}}</b></p>
 
 
-<h1 id="umlstatus">UML Status <a href="#umlstatus">#</a></h1>
-  (does not update)
-
+<h2 id="umlstatus">UML status <small>(reload page to update)</small> <a href="#umlstatus">#</a></h2>
 
 <h3>Current runs (from each UML controller)</h3>
-<table border="1" style="width:auto; margin:auto; border-collapse:collapse">
+<table>
 {% for umlname, umlstatus in activeumls.items %}
   <tr><th>{{umlname}}</th>
     <td>
@@ -404,7 +407,7 @@ $(document).ready(function() {
 
 
 <h3>Current runs (from dispatcher)</h3>
-<table border="1" style="width:auto; margin:auto; border-collapse:collapse">
+<table>
 <tr><th>umlname</th><th>Scraper</th><th>time</th><th>kill button</th><th>Runid</th></tr>
 {% for status in statusscrapers %}
   <tr>
@@ -446,7 +449,7 @@ $(document).ready(function() {
 
 
 <h3>Recent runs (from django)</h3>
-<table border="1" style="width:auto; margin:auto; border-collapse:collapse">
+<table>
   <tr>
     <th>Scraper</th>
     <th>Started</th>
@@ -464,7 +467,8 @@ $(document).ready(function() {
 {% endfor %}
 </table>
 
-<h3><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h3>
+<!--
+<h2><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h2>
 <small>refreshed: <span id="murefsh"></span></small>
 <table>
 <tr>
@@ -476,6 +480,7 @@ $(document).ready(function() {
   <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/horsell.scraperwiki-cpu-day.png"></td>
   <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki-cpu-day.png"></td>
 </tr>
+-->
 
 {% comment %}
 <tr><th colspan="2"><a href="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki.html">UML server (rush)</a></th></tr>
@@ -486,6 +491,8 @@ $(document).ready(function() {
 {% endcomment %}
 
 </table>
+
+</div></div>
 
 {% endblock %}
 
