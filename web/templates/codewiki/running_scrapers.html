@@ -1,19 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
-<html lang="en">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css" />
-    <script>
-        document.domain = document.domain;
-    </script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.5.2.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js"></script>
-    <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>	
-    <script src="http://{{ settings.ORBITED_DOMAIN }}:{{ settings.ORBITED_PORT }}/static/Orbited.js"></script>
-    <script>Orbited.settings.streaming = false</script>
-    <style type="text/css">
+{% extends "frontend/base.html" %}
+
+{% block css %}
+
+<style type="text/css">
 
 div#monitoroutput { width:80%; margin-left:auto; margin-right:auto; border: thick blue solid; margin-top:5px; }
 
@@ -46,11 +35,14 @@ span.desc { background-color:black; color:white; width:100px; display:inline-blo
 
 #jdatareceived { font-size:75%; overflow-x: auto; white-space:nowrap; height:10em; } 
 
+</style>
 
+{% endblock %}
 
-
-    </style>
-
+{% block javascript %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js"></script>
+    <script src="http://{{ settings.ORBITED_DOMAIN }}:{{ settings.ORBITED_PORT }}/static/Orbited.js"></script>
+    <script>Orbited.settings.streaming = false</script>
 
     {# Needed for orbited, dont remove #}
     <script>document.domain = document.domain;</script>
@@ -349,11 +341,15 @@ $(document).ready(function() {
     refreshImagesInit(); 
 }); 
 </script>
+{% endblock %}
 
-<title>ScraperWiki UML status</title>
-</head>
 
-<body>
+{% block header %}
+<h2>ScraperWiki UML status</h2>
+<p>What's going on in twister, the UMLs and related places</p>
+{% endblock %}
+
+{% block content_outer  %}
 
 
 <form>
@@ -491,6 +487,5 @@ $(document).ready(function() {
 
 </table>
 
+{% endblock %}
 
-</body>
-</html>
