@@ -326,10 +326,10 @@ class DispatcherHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 logger.debug("controller socket error: %s  %s" % (short_name, runID))
                 rec = None
                 
-            logger.debug("done recv %s %s" % (short_name, [rec[:80]]))
             if not rec:
                 logger.debug("controller to dispatcher connection termination: %s  %s" % (short_name, runID))
                 break
+            logger.debug("done recv %s %s" % (short_name, [rec[:80]]))
             
             try:
                 self.connection.sendall(rec)
@@ -363,13 +363,12 @@ class UMLScanner(threading.Thread) :
 
             # beware that things can change in lookup lists as we are using them, which is why copies are made before looping and get() is used to access
             umltimes = [ ]
-            logger.debug("checking umls %d" % len(UMLs))
             for uml in UMLs.values():
                 try:
                     stime = time.time()
                             # timeout of 2 secs is probably too severe (leave in for now to enable failure and testing)
                     res = urllib2.urlopen("http://%s:%s/Status" % (uml.server, uml.port), timeout=2).read()
-                    umltimes.append(time.time() - stime)
+                    umltimes.append("%.3f" % time.time() - stime)
                     if uml.livestatus == "unresponsive":  # don't overwrite closing
                         logger.warning('unresponsive UML %s back to live' % uml.uname)
                         uml.livestatus = "live"
@@ -382,8 +381,7 @@ class UMLScanner(threading.Thread) :
                     elif uml.livestatus == "closing":
                         logger.warning('Closing UML %s unresponsive' % uml.uname)
                         
-            if umltimes and max(umltimes) > 1.8:
-                logger.info("uml response times: %s" % str(umltimes))
+            logger.debug("uml response times: %s" % str(umltimes))
 
 class DispatcherHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     pass
