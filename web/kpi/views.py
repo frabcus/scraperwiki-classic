@@ -46,10 +46,10 @@ def index(request):
    
     # work out unique active code writers / month ..
     for code in Code.objects.all():
+        # don't count editing own emailer for now
+        if code.is_emailer():
+            continue
         for commitentry in code.get_commit_log():
-            # don't count editing own emailer for now
-            if code.is_emailer():
-                continue
 
             user = commitentry['user']
             when = commitentry['date']
