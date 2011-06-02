@@ -101,11 +101,14 @@ def kill_running_runid(runid):
 
 
 def runmessageloop(runnerstream, event, approxlenoutputlimit):
+    TAIL_LINES = 5
     # a partial implementation of editor.js
     exceptionmessage = [ ]
     completiondata = None
     outputmessage = [ ]
     domainscrapes = { }  # domain: [domain, pages, bytes] 
+    discarded_lines = 0
+    discarded_characters = 0
     
     temptailmessage = "\n\n[further output lines suppressed]\n"
     while True:
@@ -195,17 +198,22 @@ def runmessageloop(runnerstream, event, approxlenoutputlimit):
             event.run_ended = datetime.datetime.now()
             event.save()
 
+        while len(outputmessage) >= TAIL_LINES:
+            discarded = outputmessage.pop(0)
+            discarded_lines += 1
+            discarded_characters += len(discarded)
+
     # append last few lines of the output
     if outputmessage:
         #assert len(event.output) >= approxlenoutputlimit
         outputtail = [ outputmessage.pop() ] 
-        while outputmessage and len(outputtail) < 5 and sum(map(len, outputtail)) < approxlenoutputlimit:
+        while outputmessage and len(outputtail) < TAIL_LINES and sum(map(len, outputtail)) < approxlenoutputlimit:
             outputtail.append(outputmessage.pop())
         outputtail.reverse()
             
         omittedmessage = ""
-        if outputmessage:
-            omittedmessage = "\n    [%d lines, %d characters omitted]\n\n" % (len(outputmessage), sum(map(len, outputmessage)))
+        if discarded_lines > 0:
+            omittedmessage = "\n    [%d lines, %d characters omitted]\n\n" % (discarded_lines, discarded_characters)
         event.output = "%s%s%s" % (event.output[:-len(temptailmessage)], omittedmessage, "".join(outputtail))
         
 
