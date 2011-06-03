@@ -17,6 +17,7 @@ import traceback
 import datetime
 import tempfile
 import imp
+import cgi
 
 import scraperwiki   # in order to get dumpMessage function
     
