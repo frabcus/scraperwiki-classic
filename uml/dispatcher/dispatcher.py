@@ -16,6 +16,10 @@ import pwd
 import grp
 import logging
 import logging.config
+try:
+    import cloghandler
+except:
+    pass
 import urllib2
 import random
 

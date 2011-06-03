@@ -21,6 +21,10 @@ import ConfigParser
 import datetime
 import optparse, grp, pwd
 import logging, logging.config
+try:
+    import cloghandler
+except:
+    pass
 
 parser = optparse.OptionParser()
 parser.add_option("--pidfile")

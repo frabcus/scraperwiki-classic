@@ -8,6 +8,10 @@ import socket
 import time
 import logging
 import logging.config
+try:
+    import cloghandler
+except:
+    pass
 import uuid
 
 try:    import simplejson as json
