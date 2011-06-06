@@ -135,7 +135,7 @@ def email(message_body=None, old_revision=None, new_revision=None):
     if not message_body:
         message_body = "(no deploy comment)"
     
-    message = """From: ScraperWiki <mercurial@scraperwiki.com>
+    message = """From: ScraperWiki <developers@scraperwiki.com>
 Subject: New Scraperwiki Deployment to %(version)s (deployed by %(user)s)
 
 %(user)s deployed changeset %(changeset)s, with the following comment:

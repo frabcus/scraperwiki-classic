@@ -40,7 +40,8 @@ def run_event(request, run_id):
 def running_scrapers(request):
     from codewiki.management.commands.run_scrapers import Command
         
-    recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:10]  
+    recenteventsmax = 20
+    recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  
     
     statusscrapers = GetDispatcherStatus()
     for status in statusscrapers:
@@ -56,7 +57,7 @@ def running_scrapers(request):
             if status['scraper'].owner() == request.user:
                 status['killable'] = True
 
-    context = { 'statusscrapers': statusscrapers, 'events':recentevents }
+    context = { 'statusscrapers': statusscrapers, 'events':recentevents, 'eventsmax':recenteventsmax }
     context['activeumls'] = GetUMLstatuses()
 
     c = Command()

@@ -21,6 +21,10 @@ import urllib2
 import ConfigParser
 import optparse
 import logging, logging.config
+try:
+    import cloghandler
+except:
+    pass
 import hashlib
 import OpenSSL
 import re

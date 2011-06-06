@@ -1,7 +1,12 @@
-<html>
-<head>
-<title>Key Performance Indicators</title>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.5.2.js"></script>
+{% extends "frontend/base.html" %}
+{% load number_stuff %}
+{% load humanize %}
+
+{% block title %}Key performance indicators{% endblock %}
+
+<title>Key performance indicators</title>
+
+{% block javascript %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.js"></script>
 <script>
 $(function(){
@@ -12,6 +17,7 @@ $(function(){
   var months_scrapers = new Array();
   var months_views = new Array();
   var months_users = new Array();
+  var active_coders = new Array();
 
   {% for year in data %}
     {% for month in year.months %}
@@ -22,13 +28,15 @@ $(function(){
       months_scrapers.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_scrapers}}]);
       months_views.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_views}}]);
       months_users.push([{{forloop.counter0|add:year.offset}}, {{month.this_months_users}}]);
+      active_coders.push([{{forloop.counter0|add:year.offset}}, {{month.active_coders}}]);
     {% endfor %}
   {% endfor %}
 
-  $("#placeholder1").width(ticks.length * 50);
-  $("#placeholder2").width(ticks.length * 50);
+  $("#totals_graph").width(ticks.length * 50);
+  $("#new_graph").width(ticks.length * 50);
+  $("#active_graph").width(ticks.length * 50);
 
-  $.plot($("#placeholder1"), [
+  $.plot($("#totals_graph"), [
         {
             data: total_scrapers, 
             label: 'Total Scrapers',
@@ -53,7 +61,7 @@ $(function(){
           }
         });
 
-  $.plot($("#placeholder2"), [
+  $.plot($("#new_graph"), [
         {
             data: months_scrapers,
             label: 'New Scrapers',
@@ -78,64 +86,66 @@ $(function(){
           }
         });
 
+  $.plot($("#active_graph"), [
+        {
+            data: active_coders,
+            label: 'Active Coders (committed at least once in month)',
+            lines: { show: true },
+            points: { show: true }
+        },
+        ],
+        {
+          xaxis: {
+              ticks: ticks
+          }
+        });
+
   $('.legend').css('left', '30px');
 
 });
 </script>
-</head>
-<body>
-<h1>Key Performance Indicators</h1>
+{% endblock %}
 
-<div id="placeholder1" style="width:200px;height:200px"></div>
-<div id="placeholder2" style="width:200px;height:200px"></div>
+{% block header %}
+<h2>Key performance indicators</h2>
+<p>How we measure how well we're doing</p>
+{% endblock %}
 
-{% for year in data %}
-  <h2>{{year.year}}</h2>
-  <table border="1">
-    <tr>
-       <th>&nbsp;</th>
-     {% for month in year.months %}
-       <th>{{month.month}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>New Scrapers</th>
-     {% for month in year.months %}
-       <th>{{month.this_months_scrapers}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>Total Scrapers</th>
-     {% for month in year.months %}
-       <th>{{month.total_scrapers}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>New Views</th>
-     {% for month in year.months %}
-       <th>{{month.this_months_views}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>Total Views</th>
-     {% for month in year.months %}
-       <th>{{month.total_views}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>New Users</th>
-     {% for month in year.months %}
-       <th>{{month.this_months_users}}</th>
-     {% endfor %}
-    </tr>
-    <tr>
-       <th>Total Users</th>
-     {% for month in year.months %}
-       <th>{{month.total_users}}</th>
-     {% endfor %}
-    </tr>
-  </table>
-{% endfor %}
+{% block content_outer  %}
+    <div id="page_outer">
+                <div id="page_inner">
 
-</body>
-</html>
+<p id="totals_graph" style="width:200px;height:200px"></p>
+<p id="new_graph" style="width:200px;height:200px"></p>
+<p id="active_graph" style="width:200px;height:200px"></p>
+
+<table class="data">
+    <th>
+       <th>Scrapers</th>
+       <th>Views</th>
+       <th>Users</th>
+       <th>Active Coders</th>
+    </th>
+
+    {% for year in data reversed %}
+        {% for month in year.months reversed %}
+           {% if month.current_month %}
+               <tr class="this_month">
+           {% else %}
+               <tr>
+           {% endif %}
+               <td>{{ year.year }}, {{month.month}} </td>
+
+               <td> {{month.total_scrapers|intcomma}} ({{ month.this_months_scrapers|plusminus_int|intcomma }}) </td>
+               <td> {{month.total_views|intcomma}} ({{ month.this_months_views|plusminus_int|intcomma }}) </td>
+               <td> {{month.total_users|intcomma}} ({{ month.this_months_users|plusminus_int|intcomma }}) </td>
+               <td> {{month.active_coders|intcomma}} ({{ month.delta_active_coders|plusminus_int|intcomma }}) </td>
+           </tr>
+        {% endfor %}
+    {% endfor %}
+</table>
+
+</div></div>
+{% endblock %}
+
+

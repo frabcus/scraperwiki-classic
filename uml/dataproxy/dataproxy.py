@@ -20,6 +20,10 @@ import socket
 
 import logging
 import logging.config
+try:
+    import cloghandler
+except:
+    pass
 
 try   : import json
 except: import simplejson as json

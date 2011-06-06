@@ -20,6 +20,10 @@ import ConfigParser
 import threading
 import optparse, pwd, grp
 import logging, logging.config
+try:
+    import cloghandler
+except:
+    pass
 
 try    : import json
 except : import simplejson as json

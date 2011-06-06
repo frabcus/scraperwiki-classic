@@ -360,6 +360,10 @@ class Code(models.Model):
         else:
             tagging.models.Tag.objects.update_tags(self.view, tag_names)
 
+    # is the automatically made, builtin emailer
+    def is_emailer(self):
+        return self.short_name[-8:] == '.emailer'
+
 
 
 class UserCodeRole(models.Model):

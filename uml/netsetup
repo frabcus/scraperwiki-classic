@@ -28,6 +28,11 @@ iptables -t nat	-F
 # Allow ssh access which is on port 7822
 #
 iptables 	-A INPUT	-p tcp			--dport 7822		-j ACCEPT
+iptables    -A INPUT    -p tcp          --sport 7822        -j ACCEPT
+
+# Allow outgoing ssh access
+#
+iptables   -A INPUT    -p tcp          --sport 22      -j ACCEPT
 
 # Allow access for any traffic originating locally, ie., on the UML subnet and on
 # the loopback device
@@ -58,6 +63,9 @@ iptables	-A INPUT	-p tcp			--sport 443		-j ACCEPT
 # Allow incoming replies from the data proxy
 #
 iptables	-A INPUT	-p tcp -s 89.16.177.176	--sport 9003		-j ACCEPT
+
+# While this server is acting as the dataproxy allow 
+/sbin/iptables -A INPUT    -p tcp -s scraperwiki.com --dport 9003 -j ACCEPT
 
 # Allow passive FTP
 #

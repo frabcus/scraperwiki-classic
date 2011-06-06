@@ -18,7 +18,8 @@ from codewiki.models import SCHEDULE_OPTIONS, Scraper, Code
 class SearchForm(forms.Form):
     q = forms.CharField(label='Find datasets', max_length=50)
     
-    
+
+# see also is_emailer in the Code model
 def get_emailer_for_user(user):
     try:
         queryset = Scraper.objects.exclude(privacy_status="deleted")

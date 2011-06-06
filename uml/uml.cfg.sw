@@ -32,7 +32,7 @@ port	= 9004
 
 [dataproxy]
 dbtype  = mysql
-host    = 89.16.177.176
+host    = 89.16.177.195
 port    = 9003
 user    = datastore
 passwd  = 3jFjLrje6dFJ7cQE
@@ -179,7 +179,7 @@ formatter=simpleFormatter
 args=(sys.stdout,)
 
 [handler_logfileHandlerWarnings]
-class=handlers.RotatingFileHandler
+class=handlers.ConcurrentRotatingFileHandler
 level=WARNING
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/allwarnings.log', "a", 10000000, 5)
@@ -192,43 +192,43 @@ args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 
 
 
 [handler_logfileHandlerControllerDebug]
-class=handlers.RotatingFileHandler
+class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/controller.log', "a", 10000000, 5)
 
 [handler_logfileHandlerDataproxyDebug]
-class=handlers.RotatingFileHandler
+class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/dataproxy.log', "a", 10000000, 5)
 
 [handler_logfileHandlerDispatcherDebug]
-class=handlers.RotatingFileHandler
+class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/dispatcher.log', "a", 10000000, 5)
 
 [handler_logfileHandlerRunnerDebug]
-class=handlers.RotatingFileHandler
+class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/runner.log', "a", 10000000, 5)
 
 [handler_logfileHandlerTwisterDebug]
-class=handlers.RotatingFileHandler
+class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/twister.log', "a", 10000000, 5)
 
 [handler_logfileHandlerProxyDebug]
-class=handlers.RotatingFileHandler
+class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/proxy.log', "a", 10000000, 5)
 
 [handler_logfileHandlerDjangoDebug]
-class=handlers.RotatingFileHandler
+class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/django.log', "a", 10000000, 5)
