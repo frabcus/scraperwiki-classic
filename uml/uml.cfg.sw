@@ -32,7 +32,7 @@ port	= 9004
 
 [dataproxy]
 dbtype  = mysql
-host    = 89.16.177.176
+host    = 89.16.177.195
 port    = 9003
 user    = datastore
 passwd  = 3jFjLrje6dFJ7cQE
