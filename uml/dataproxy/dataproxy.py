@@ -226,6 +226,7 @@ if __name__ == '__main__':
     port = config.getint('dataproxy', 'port')
     ProxyHandler.protocol_version = "HTTP/1.0"
     httpd = ProxyHTTPServer(('', port), ProxyHandler)
+    httpd.max_children = 160
     sa = httpd.socket.getsockname()
     logger.info(str(("Serving HTTP on", sa[0], "port", sa[1], "...")))
     httpd.serve_forever()
