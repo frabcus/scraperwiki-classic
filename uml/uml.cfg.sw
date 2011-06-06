@@ -201,7 +201,7 @@ args=('/var/log/scraperwiki/controller.log', "a", 10000000, 5)
 class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/dataproxy.log', "a", 10000000, 5)
+args=('/var/log/scraperwiki/dataproxy.log', "a", 1000000000, 5)
 
 [handler_logfileHandlerDispatcherDebug]
 class=handlers.ConcurrentRotatingFileHandler
