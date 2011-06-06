@@ -50,6 +50,9 @@ def index(request):
         if code.is_emailer():
             continue
         for commitentry in code.get_commit_log():
+            # some early scrapers have a servername as user for the first revision, and get no user entry
+            if 'user' not in commitentry:
+                continue
 
             user = commitentry['user']
             when = commitentry['date']
