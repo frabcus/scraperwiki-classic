@@ -1,16 +1,18 @@
 // set this up outside ready, so can be called with template variables for initial values
 var lastRev = null;
 var lastRevDateEpoch = null;
-function updateLastSavedRev(rev, revdateepoch)
+var lastRevPrefix = "";
+function updateLastSavedRev(rev, revdateepoch, prefix)
 {   
     lastRev = rev;
     lastRevDateEpoch = revdateepoch;
+    lastRevPrefix = prefix;
     doUpdateLastSavedRev();
 }
 function doUpdateLastSavedRev() {
     if (lastRev != null) {
         var tago = jQuery.timeago(new Date(lastRevDateEpoch * 1000));
-        $("#idlastrev").html('<span title="Rev: ' + String(lastRev) + '">Updated ' + tago + '</span>');
+        $("#idlastrev").html('<span title="Rev: ' + String(lastRev) + '">' + lastRevPrefix + ' ' + tago + '</span>');
     }
     setTimeout(doUpdateLastSavedRev, 5000);
 }
@@ -1188,7 +1190,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             codeeditor.setCode(reloaddata.code); 
         else
             $("#id_code").val(reloaddata.code); 
-        updateLastSavedRev(reloaddata.rev);
+        updateLastSavedRev(reloaddata.rev, reloaddata.revdateepoch, "Saved");
         chainpatchnumber = 0; 
         //codeeditor.focus(); 
         if (reloaddata.selrange)
@@ -1404,7 +1406,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             if (res.draft != 'True') 
             {
                 window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
-                updateLastSavedRev(res.rev, res.revdateepoch);
+                updateLastSavedRev(res.rev, res.revdateepoch, "Saved");
                 if (res.rev == null)
                 {
                     writeToChat("No difference (null revision number)"); 
