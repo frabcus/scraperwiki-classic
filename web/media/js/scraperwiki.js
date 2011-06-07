@@ -399,6 +399,30 @@ function setupScraperEditInPlace(wiki_type, short_name)
         }}); 
     }); 
 
+    $('#show_privacy_choices').click(function(){
+        $('#privacy_status table').show();
+        $('#privacy_status>h4, #privacy_status>p').hide();
+    })
+
+    $('#cancelprivacy').click(function() 
+    {
+        $('#privacy_status table').hide();
+        $('#privacy_status>h4, #privacy_status>p').show();
+    }); 
+    $('#saveprivacy').click(function() 
+    {
+        var radio_value = $('input[name=privacy_status]:checked').val(); 
+        var sdata = { value:radio_value }; 
+        $.ajax({url:$("#adminprivacystatusurl").val(), type: 'POST', data:sdata, success:function(result)
+        {
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                document.location.reload(true)
+        }}); 
+    }); 
+
+
 
 
      //scheduler

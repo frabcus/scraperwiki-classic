@@ -77,15 +77,6 @@
   {% endif %}
 </p>
 -->
-<script type="text/javascript">
-$(function(){
-   $('#show_privacy_choices').click(function(){
-       $('#privacy_status table').show();
-       $('#privacy_status>h4, #privacy_status>p').hide();
-   })
-});
-
-</script>
 
 <div id="privacy_status">
     {% ifequal scraper.privacy_status 'public' %}
@@ -122,19 +113,32 @@ $(function(){
         <p>Only the contributors listed above can see or edit this scraper.</p>
     {% endifequal %}
 
-    <form>
+    <form id="privacy_status_form">
         <table cellspacing="0" cellpadding="0">
             <tr class="first">
-                <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public" /></td>
+                <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public" 
+                {% ifequal scraper.privacy_status 'public' %} checked="checked" {% endifequal %}
+                /></td>
                 <td><h4><label for="privacy_public">Public</label></h4><p><label for="privacy_public">Everyone can see and edit this {{scraper.wiki_type}}.</label></p></td>
             </tr>
             <tr>
-                <td class="radio"><input type="radio" name="privacy_status" value="protected" id="privacy_protected" checked="checked"/></td>
+                <td class="radio"><input type="radio" name="privacy_status" value="visible" id="privacy_protected" 
+                {% ifequal scraper.privacy_status 'visible' %} checked="checked" {% endifequal %}
+                /></td>
                 <td><h4><label for="privacy_protected">Protected</label></h4><p><label for="privacy_protected">Everyone can see this {{scraper.wiki_type}}, but only selected contributors can edit it.</label></p></td>
             </tr>
             <tr>
-                <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private" /></td>
+                <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private" 
+                {% ifequal scraper.privacy_status 'private' %} checked="checked" {% endifequal %}
+                /></td>
                 <td><h4><label for="privacy_private">Private</label></h4><p><label for="privacy_private">Only selected contributors can see or edit this {{scraper.wiki_type}}.</label></p></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="button" value="Save" id="saveprivacy">
+                    <input type="button" value="Cancel" id="cancelprivacy">
+                </td>
             </tr>
         </table>
         
