@@ -127,12 +127,14 @@
                 /></td>
                 <td><h4><label for="privacy_protected">Protected</label></h4><p><label for="privacy_protected">Everyone can see this {{scraper.wiki_type}}, but only selected contributors can edit it.</label></p></td>
             </tr>
-            <tr>
+            {% if user.is_staff %}
+            <tr class="staff">
                 <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private" 
                 {% ifequal scraper.privacy_status 'private' %} checked="checked" {% endifequal %}
                 /></td>
                 <td><h4><label for="privacy_private">Private</label></h4><p><label for="privacy_private">Only selected contributors can see or edit this {{scraper.wiki_type}}.</label></p></td>
             </tr>
+            {% endif %}
             <tr>
                 <td>&nbsp;</td>
                 <td>
