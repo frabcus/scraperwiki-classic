@@ -259,6 +259,12 @@ $(document).ready(function() {
 
     //setup code editor
     function setupCodeEditor(){
+        // destroy any existing codemirror
+        if (codeeditor) {
+            codeeditor.toTextArea("id_code"); 
+            codeeditor = null;
+        }
+
         parsers['python'] = ['../contrib/python/js/parsepython.js'];
         parsers['php'] = ['../contrib/php/js/tokenizephp.js', '../contrib/php/js/parsephp.js', '../contrib/php/js/parsephphtmlmixed.js' ];
         parsers['ruby'] = ['../../ruby-in-codemirror/js/tokenizeruby.js', '../../ruby-in-codemirror/js/parseruby.js'];
@@ -293,6 +299,8 @@ $(document).ready(function() {
         parsers['php'] = parsers['html'].concat(parsers['php']);
         stylesheets['php'] = stylesheets['html'].concat(stylesheets['php']); 
 
+        expectedreadonly = codeeditorreadonly;
+
         codemirroroptions = {
             parserfile: parsers[scraperlanguage],
             stylesheet: stylesheets[scraperlanguage],
@@ -301,7 +309,7 @@ $(document).ready(function() {
             textWrapping: true,
             lineNumbers: true,
             indentUnit: indentUnits[scraperlanguage],
-            readOnly: false, // cannot be changed once started up
+            readOnly: expectedreadonly, // cannot be changed once started up
             undoDepth: 200,  // defaults to 50.  
             undoDelay: 300,  // (default is 800)
             tabMode: "shift", 
@@ -323,8 +331,22 @@ $(document).ready(function() {
                 codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
                 setupKeygrabs();
                 resizeControls('first');
-                setCodeMirrorReadOnly(codeeditorreadonly); // in case the signal got in first
                 ChangeInEditor("initialized"); 
+
+                if (expectedreadonly) {
+                    setCodeeditorBackgroundImage('url(/media/images/staff.png)');
+                    $('.editor_controls #btnCommitPopup').hide();
+                    $('.editor_controls #btnForkNow').show();
+                } else {
+                    setCodeeditorBackgroundImage('none');
+                    $('.editor_controls #btnCommitPopup').show();
+                    $('.editor_controls #btnForkNow').hide();
+                }
+
+                if (expectedreadonly != codeeditorreadonly) {
+                    codeeditorreadonly = expectedreadonly;
+                    setCodeMirrorReadOnly(codeeditorreadonly); // in case the signal got in first
+                }
             } 
         };
         codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
@@ -342,16 +364,11 @@ $(document).ready(function() {
     }
 
     function setCodeMirrorReadOnly(val) {
-        codeeditorreadonly = val;
-        if (val) {
-            setCodeeditorBackgroundImage('url(/media/images/staff.png)');
-            $('.editor_controls #btnCommitPopup').hide();
-            $('.editor_controls #btnForkNow').show();
-        } else {
-            setCodeeditorBackgroundImage('none');
-            $('.editor_controls #btnCommitPopup').show();
-            $('.editor_controls #btnForkNow').hide();
+        if (codeeditorreadonly == val) {
+            return;
         }
+        codeeditorreadonly = val;
+        setupCodeEditor();
     }
 
     function setCodeeditorBackgroundImage(lcodeeditorbackgroundimage)
