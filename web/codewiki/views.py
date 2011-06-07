@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpRespons
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 from django.core.management import call_command
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.contrib.auth.models import User
 from django.views.decorators.http import condition
 import textile
@@ -35,7 +36,7 @@ PRIVACY_STATUSES_UI = [ ('public', 'can be edited by anyone who is logged on'),
 def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
     if action in ["delete_scraper", "delete_data"]:
         if not (request.method == 'POST' and request.POST.get(action, None) == '1'):
-            raise Http404
+            raise SuspiciousOperation # not the best description of error, but best available, see comment on getscraperor404 below
     
     try:
         scraper = models.Code.objects.get(short_name=short_name)
@@ -52,22 +53,28 @@ def getscraperorresponse(request, wiki_type, short_name, rdirect, action):
     return scraper
 
 
+# XXX This should not throw 404s for malformed request or lack of permissions, but 
+# unfortunately Django has no such built in exceptions. Could hand roll our own like this:
+#   http://theglenbot.com/creating-a-custom-http403-exception-in-django/
+# Am using PermissionDenied and SuspiciousOperation as partial workaround meanwhile, see:
+#   http://groups.google.com/group/django-users/browse_thread/thread/8d3dda89858ff2ee
 def getscraperor404(request, short_name, action):
     try:
         scraper = models.Code.objects.get(short_name=short_name)
     except models.Code.DoesNotExist:
         raise Http404
+    
     if not scraper.actionauthorized(request.user, action):
-        raise Http404
+        raise PermissionDenied
         
     # extra post conditions to make spoofing these calls a bit of a hassle
     if action in ["changeadmin", "settags", "set_privacy_status"]:
         if not (request.method == 'POST' and request.is_ajax()):
-            raise Http404
+            raise SuspiciousOperation
     
     if action in ["schedule_scraper", "run_scraper", "screenshoot_scraper", ]:
         if request.POST.get(action, None) != '1':
-            raise Http404
+            raise SuspiciousOperation
         
     return scraper
 
