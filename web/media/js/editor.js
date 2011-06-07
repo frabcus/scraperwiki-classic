@@ -259,7 +259,7 @@ $(document).ready(function() {
 
     //setup code editor
     function setupCodeEditor(){
-        // destroy any existing codemirror
+        // destroy any existing codemirror, so we can remake it with right readonly state
         if (codeeditor) {
             codeeditor.toTextArea("id_code"); 
             codeeditor = null;
@@ -299,6 +299,8 @@ $(document).ready(function() {
         parsers['php'] = parsers['html'].concat(parsers['php']);
         stylesheets['php'] = stylesheets['html'].concat(stylesheets['php']); 
 
+        // track what readonly state we thought we were going to, in case it
+        // changes mid setup of CodeMirror
         expectedreadonly = codeeditorreadonly;
 
         codemirroroptions = {
@@ -333,6 +335,7 @@ $(document).ready(function() {
                 resizeControls('first');
                 ChangeInEditor("initialized"); 
 
+                // set up other readonly values, after rebuilding the CodeMirror editor
                 if (expectedreadonly) {
                     setCodeeditorBackgroundImage('url(/media/images/staff.png)');
                     $('.editor_controls #btnCommitPopup').hide();
@@ -343,9 +346,11 @@ $(document).ready(function() {
                     $('.editor_controls #btnForkNow').hide();
                 }
 
+                // our readonly state was changed under our feet while setting
+                // up CodeMirror; force a resetup of CodeMirror again
                 if (expectedreadonly != codeeditorreadonly) {
                     codeeditorreadonly = expectedreadonly;
-                    setCodeMirrorReadOnly(codeeditorreadonly); // in case the signal got in first
+                    setCodeMirrorReadOnly(codeeditorreadonly); 
                 }
             } 
         };
@@ -368,6 +373,7 @@ $(document).ready(function() {
             return;
         }
         codeeditorreadonly = val;
+        // resetup editor for new readonly state
         setupCodeEditor();
     }
 
