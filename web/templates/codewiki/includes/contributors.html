@@ -60,23 +60,6 @@
     </ul>
     {% endif %}
 {% endcomment %}
-<!--
-<p class="{% ifnotequal scraper.privacy_status 'public' %}xxxreport{% endifnotequal %}">This {{scraper.wiki_type}} <span id="spnPrivacyStatusChoice">{{privacy_status_name}}</span>.
-  <select class="hide" id="optionsPrivacyStatusChoices">  {# this select gets taken apart and rebuilt by jeditable #}
-  {% for value, name in PRIVACY_STATUSES %} 
-    <option value="{{value}}">{{name}}</option>
-  {% endfor %}
-  </select>
-
-  {% if user.is_staff %}
-    <span class="staff">
-    {% if user_owns_it %}
-      <a id="aPrivacyStatusChoice" class="edit">[edit status]</a>
-    {% endif %}
-    </span>
-  {% endif %}
-</p>
--->
 
 <div id="privacy_status">
     {% ifequal scraper.privacy_status 'public' %}
