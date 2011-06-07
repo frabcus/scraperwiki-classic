@@ -41,9 +41,6 @@
     {% include 'codewiki/includes/tabs.html' %}
 {% endblock %}
 {% block content %}
-    <input type="hidden" id="adminsettagurl" value="{% url scraper_admin_settags scraper.short_name %}"/>
-    <input type="hidden" id="admincontroleditors" value="{% url scraper_admin_controleditors scraper.short_name %}"/>
-
     <div class="content full">
         <div class="page_tab_body">
             {% block tab %}

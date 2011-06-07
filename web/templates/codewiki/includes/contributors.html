@@ -1,3 +1,6 @@
+<input type="hidden" id="admincontroleditors" value="{% url scraper_admin_controleditors scraper.short_name %}"/>
+<input type="hidden" id="adminprivacystatusurl" value="{% url scraper_admin_privacystatus scraper.short_name %}"/>
+
 <ul>
     {% if not userrolemap.owner %}
       <li style="color:red">[Error: this scraper has no creator]</li>
@@ -97,7 +100,6 @@
     {% endifequal %}
 
     <form id="privacy_status_form">
-        <input type="hidden" id="adminprivacystatusurl" value="{% url scraper_admin_privacystatus scraper.short_name %}"/>
         <table cellspacing="0" cellpadding="0">
             <tr class="first">
                 <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public" 
