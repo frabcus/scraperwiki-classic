@@ -181,6 +181,13 @@ div.page_tabs.small {
 	background-color: #6fb1e6;
 	color: #fff;
 }
+.editor_controls .fork, #meta_form .button.fork {
+	background-image: url(../images/icons/fork.png);
+	border-color: #2680c6;
+	background-color: #6fb1e6;
+	color: #fff;
+}
+
 
 .editor_controls input.darkness, .editor_controls input.darkness:disabled {
 	color: #FFFFFF;

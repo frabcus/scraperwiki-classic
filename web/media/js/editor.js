@@ -1231,8 +1231,15 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             saveScraper();  
             return false;
         });
-        
         $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')); 
+
+        // the fork button
+        $('.editor_controls #btnForkNow').live('click', function()
+        {
+            forkScraper();  
+            return false;
+        });
+        $('.editor_controls #btnForkNow').val('fork' + (wiki_type == 'scraper' ? ' scraper' : '')); 
 
         // close editor link (quickhelp link is target blank so no need for this)
         $('#aCloseEditor, #aCloseEditor1, .page_tabs a').click(function()
@@ -1435,6 +1442,14 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
         $('.editor_controls #btnCommitPopup').val('Saving ...');
     }
+
+    // cause a fork of scraper being edited
+    function forkScraper()
+    {
+        document.location = $('#fork_url_action').val();
+        //document.location.reload(true)
+    }
+
 
     function cgiescape(text) 
     {
