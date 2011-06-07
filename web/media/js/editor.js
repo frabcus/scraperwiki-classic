@@ -345,8 +345,12 @@ $(document).ready(function() {
         codeeditorreadonly = val;
         if (val) {
             setCodeeditorBackgroundImage('url(/media/images/staff.png)');
+            $('.editor_controls #btnCommitPopup').hide();
+            $('.editor_controls #btnForkNow').show();
         } else {
             setCodeeditorBackgroundImage('none');
+            $('.editor_controls #btnCommitPopup').show();
+            $('.editor_controls #btnForkNow').hide();
         }
     }
 
