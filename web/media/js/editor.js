@@ -1,9 +1,21 @@
-// outside ready, so can be called with template variables
+// set this up outside ready, so can be called with template variables for initial values
+var lastRev = null;
+var lastRevDateEpoch = null;
 function updateLastSavedRev(rev, revdateepoch)
 {   
-    if (rev != null)
-        $("#idlastrev").html('<span title="Epoch: ' + String(revdateepoch) + '">Rev: ' + String(rev) + '</span>');
+    lastRev = rev;
+    lastRevDateEpoch = revdateepoch;
+    doUpdateLastSavedRev();
 }
+function doUpdateLastSavedRev() {
+    if (lastRev != null) {
+        var tago = jQuery.timeago(new Date(lastRevDateEpoch * 1000));
+        $("#idlastrev").html('<span title="Rev: ' + String(lastRev) + '">Updated ' + tago + '</span>');
+    }
+    setTimeout(doUpdateLastSavedRev, 5000);
+}
+doUpdateLastSavedRev();
+
 
 $(document).ready(function() {
 
@@ -1269,6 +1281,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             $('.editor_controls #run').hide();
         else
             $('.editor_controls #run').bind('click.run', sendCode);
+
+
+
     }
 
     function popupPreview() 
@@ -1668,8 +1683,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function popupDiff()
     {
-        var rev = $("#idlastrev span").text(); 
-        alert(rev);
+        var rev = parseInt($("#idlastrev span").attr("title").replace("Rev: ", ""));
         var prevrev = rev - 1; 
         if (prevrev < 0)
             return; 
