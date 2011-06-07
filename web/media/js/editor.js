@@ -818,6 +818,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function showhideAutomodeSelector()
     {
+        // $('select#automode').show(); return; // XXX temporary for debugging
+
         var automode = $('select#automode option:selected').val(); 
         if ($('input#showautomode').attr('checked') || (automode == 'autotype') || (username ? (loggedineditors.length >= 2) : (loggedineditors.length >= 1)))
             $('select#automode').show(); 
