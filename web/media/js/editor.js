@@ -1,3 +1,10 @@
+// outside ready, so can be called with template variables
+function updateLastSavedRev(rev, revdateepoch)
+{   
+    if (rev != null)
+        $("#idlastrev").html('<span title="Epoch: ' + String(revdateepoch) + '">Rev: ' + String(rev) + '</span>');
+}
+
 $(document).ready(function() {
 
     // editor window dimensions
@@ -1159,12 +1166,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         sendjson({"command":'giveselrange', "selrange":selrange, "username":username}); 
     }
 
-    function updateLastSavedRev(rev)
-    {   
-        if (rev != null)
-            $("#idlastrevnumber").text("Rev: " + String(rev)); 
-    }
-
     function reloadScraper()
     {
         $('.editor_controls #btnCommitPopup').val('Loading...').addClass('darkness');
@@ -1175,8 +1176,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             codeeditor.setCode(reloaddata.code); 
         else
             $("#id_code").val(reloaddata.code); 
-        rev = reloaddata.rev; 
-        updateLastSavedRev(rev);
+        updateLastSavedRev(reloaddata.rev);
         chainpatchnumber = 0; 
         //codeeditor.focus(); 
         if (reloaddata.selrange)
@@ -1231,7 +1231,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         });
 
         if (isstaff)
-            $('#idlastrevnumber').click(popupDiff); 
+            $('#idlastrev').click(popupDiff); 
         $('.codepreviewer .revchange').click(function() 
         {
             var revchange = parseInt($(this).text()); 
@@ -1389,7 +1389,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             if (res.draft != 'True') 
             {
                 window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
-                updateLastSavedRev(res.rev);
+                updateLastSavedRev(res.rev, res.revdateepoch);
                 if (res.rev == null)
                 {
                     writeToChat("No difference (null revision number)"); 
@@ -1668,7 +1668,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function popupDiff()
     {
-        var rev = parseInt($("#idlastrevnumber span").text()); 
+        var rev = $("#idlastrev span").text(); 
+        alert(rev);
         var prevrev = rev - 1; 
         if (prevrev < 0)
             return; 

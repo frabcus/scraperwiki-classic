@@ -159,9 +159,11 @@
         <span id="watcherstatus"></span>
     
         <div class="right">
-            <span id="idlastrevnumber" >
-                Rev: <span>{{rev}}</span>
+            <span id="idlastrev" >
             </span>
+            {% if revdateepoch %}
+            <script>updateLastSavedRev({{rev}}, {{revdateepoch}});</script>
+            {% endif %}
 
             {% if scraper.id %}
                 <a id="aCloseEditor1" href="{% url code_overview scraper.wiki_type scraper.short_name %}">close editor</a>
