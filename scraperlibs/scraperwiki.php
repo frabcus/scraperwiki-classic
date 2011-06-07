@@ -172,11 +172,13 @@ class scraperwiki
 
    static function scrape($url)
    {
-      $curl = curl_init ($url ) ;
-      curl_setopt ($curl, CURLOPT_RETURNTRANSFER, true) ;
-      $res  = curl_exec ($curl) ;
-      curl_close ($curl) ;
-      return   $res;
+      $curl = curl_init($url);
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+      curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
+      $res = curl_exec($curl);
+      curl_close($curl);
+      return $res;
    }
 
    // the meta functions weren't being used to any extent in PHP anyway
