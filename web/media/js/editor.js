@@ -12,7 +12,7 @@ function updateLastSavedRev(rev, revdateepoch, prefix)
 function doUpdateLastSavedRev() {
     if (lastRev != null) {
         var tago = jQuery.timeago(new Date(lastRevDateEpoch * 1000));
-        $("#idlastrev").html('<span title="Rev: ' + String(lastRev) + '">' + lastRevPrefix + ' ' + tago + '</span>');
+        $("#idlastrev").html('<span title="Revision: ' + String(lastRev) + '">' + lastRevPrefix + ' ' + tago + '</span>');
     }
     setTimeout(doUpdateLastSavedRev, 5000);
 }
@@ -1685,7 +1685,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function popupDiff()
     {
-        var rev = parseInt($("#idlastrev span").attr("title").replace("Rev: ", ""));
+        var rev = parseInt($("#idlastrev span").attr("title").replace("Revision: ", ""));
         var prevrev = rev - 1; 
         if (prevrev < 0)
             return; 
