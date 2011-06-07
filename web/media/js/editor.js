@@ -24,7 +24,7 @@ $(document).ready(function() {
     // editor window dimensions
     var codeeditor = null;
     var codemirroriframe = null; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
-    var codeeditorbackgroundimage = 'none'; 
+    var codeeditorreadonly = false; 
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
@@ -323,7 +323,7 @@ $(document).ready(function() {
                 codemirroriframewidthdiff = codemirroriframe.width - $("#codeeditordiv").width(); 
                 setupKeygrabs();
                 resizeControls('first');
-                setCodeeditorBackgroundImage(codeeditorbackgroundimage); // in case the signal got in first
+                setCodeMirrorReadOnly(codeeditorreadonly); // in case the signal got in first
                 ChangeInEditor("initialized"); 
             } 
         };
@@ -341,12 +341,19 @@ $(document).ready(function() {
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
     }
 
+    function setCodeMirrorReadOnly(val) {
+        codeeditorreadonly = val;
+        if (val) {
+            setCodeeditorBackgroundImage('url(/media/images/staff.png)');
+        } else {
+            setCodeeditorBackgroundImage('none');
+        }
+    }
 
     function setCodeeditorBackgroundImage(lcodeeditorbackgroundimage)
     {
-        codeeditorbackgroundimage = lcodeeditorbackgroundimage; 
         if (codemirroriframe) // also signifies the frame has been built
-            codeeditor.win.document.body.style.backgroundImage = codeeditorbackgroundimage; 
+            codeeditor.win.document.body.style.backgroundImage = lcodeeditorbackgroundimage; 
         else
             $('#id_code').css("background-image", lcodeeditorbackgroundimage); 
     }
@@ -805,7 +812,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         if (automode == 'draft')
         {
             $('#watcherstatus').text("draft mode"); // consider also hiding select#automode
-            setCodeeditorBackgroundImage('none')
+            setCodeMirrorReadOnly(false);
 
         // You can never go back from draft mode. (what if someone else (including you) had edited?)
         // often you will do this in a duplicate window that you take into draft mode and then discard,
@@ -824,7 +831,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         {
             $('select#automode #id_autosave').attr('disabled', true); 
             $('select#automode #id_autotype').attr('disabled', true); 
-            setCodeeditorBackgroundImage('url(/media/images/staff.png)')
+            setCodeMirrorReadOnly(true);
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
             $('.editor_controls #run').attr('disabled', true);
             $('.editor_controls #preview').attr('disabled', true);
@@ -938,7 +945,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                     $('select#automode').val('autoload'); // watching
                     $('select#automode #id_autosave').attr('disabled', false); 
                     $('select#automode #id_autotype').attr('disabled', true); 
-                    setCodeeditorBackgroundImage('url(/media/images/staff.png)')
+                    setCodeMirrorReadOnly(true);
                     $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                     $('.editor_controls #run').attr('disabled', true);
                     $('.editor_controls #preview').attr('disabled', true);
@@ -947,7 +954,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             }
             else if (((automode != 'autosave') && (automode != 'autotype')) || (data.broadcastingeditor == undefined))
             {
-                setCodeeditorBackgroundImage('none')
+                setCodeMirrorReadOnly(false);
                 $('select#automode #id_autosave').attr('disabled', false); 
                 $('select#automode #id_autotype').attr('disabled', pageIsDirty); 
                 $('select#automode').val('autosave'); // editing
@@ -972,7 +979,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 $('select#automode').val('autoload'); // watching
                 $('select#automode #id_autosave').attr('disabled', true); 
                 $('select#automode #id_autotype').attr('disabled', true); 
-                setCodeeditorBackgroundImage('url(/media/images/staff.png)')
+                setCodeMirrorReadOnly(true);
                 $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                 $('.editor_controls #run').attr('disabled', true);
                 $('.editor_controls #preview').attr('disabled', true);
@@ -990,7 +997,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 $('select#automode #id_autotype').attr('disabled', true); 
                 $('select#automode').val('autosave'); // editing
                 $('select#automode #id_autoload').attr('disabled', true); 
-                setCodeeditorBackgroundImage('none')
+                setCodeMirrorReadOnly(false);
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
