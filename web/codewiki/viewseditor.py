@@ -174,6 +174,8 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
                         scraper.title = templatescraper.title
             except models.Code.DoesNotExist:
                 startupcode = startupcode.replace("Blank", "Missing template for")
+
+        context['rev'] = 'unsaved'
             
         # replace the phrase: sourcescraper = 'working-example' with sourcescraper = 'replacement-name'
         inputscrapername = request.GET.get('sourcescraper', False)

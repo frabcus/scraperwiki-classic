@@ -1161,9 +1161,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function updateLastSavedRev(rev)
     {   
-        if (rev == null)
-            $("#idlastrevnumber").text("Rev: unchanged"); 
-        else
+        if (rev != null)
             $("#idlastrevnumber").text("Rev: " + String(rev)); 
     }
 
