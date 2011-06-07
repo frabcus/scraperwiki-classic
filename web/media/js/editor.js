@@ -178,12 +178,12 @@ $(document).ready(function() {
         if (changetype != 'edit')
             return; 
 
-    // to do: arrange for there to be only one autotype/broadcast window for a user
-    // if the set it for one clients, then any other client that is in this mode gets 
-    // reverted back to editing.  So it's clear which window is actually active and sending signals
+        // to do: arrange for there to be only one autotype/broadcast window for a user
+        // if the set it for one clients, then any other client that is in this mode gets 
+        // reverted back to editing.  So it's clear which window is actually active and sending signals
 
-    // also may want a facility for a watching user to be able to select an area in his window
-    // and make it appear selected for the broadcast user
+        // also may want a facility for a watching user to be able to select an area in his window
+        // and make it appear selected for the broadcast user
         if (automode == 'autotype')
         {
             //assert codeeditor;
@@ -219,8 +219,8 @@ $(document).ready(function() {
                     lchainpatches.push(chainpatch); 
                 }
 
-                    // arrange for the chainpatches list (which is reversed) to add the upper ones first, because the line numbering 
-                    // is detected against the final version after this chainpatch group has been done, so upper ones have occurred
+                // arrange for the chainpatches list (which is reversed) to add the upper ones first, because the line numbering 
+                // is detected against the final version after this chainpatch group has been done, so upper ones have occurred
                 lchainpatches.sort(function(a,b) {return b["insertlinenumber"] - a["insertlinenumber"]});  
                 while (lchainpatches.length)
                     chainpatches.push(lchainpatches.pop()); 
