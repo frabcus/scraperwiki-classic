@@ -32,21 +32,19 @@
 
 </ul>
 
-{# {% if user.is_staff %} #} 
-    {% if user_owns_it %}
-      {% ifnotequal scraper.privacy_status 'public' %}
-        <div class="staff" id="addneweditor"><!-- staff only, dark launch-->
-          <span class="hide">
-            Editor username:
-            <input type="text" class="text">
-            <input type="button" value="Cancel" class="cancelbutton">
-            <input type="button" value="Add" class="addbutton">
-          </span>
-          <a><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16" /> Add a new editor</a>
-        </div> <!-- end staff only, dark launch -->
-      {% endifnotequal %}
-    {% endif %}
-{# {% endif %} #}
+{% if user_owns_it %}
+  {% ifnotequal scraper.privacy_status 'public' %}
+    <div id="addneweditor">
+      <span class="hide">
+        Editor username:
+        <input type="text" class="text">
+        <input type="button" value="Cancel" class="cancelbutton">
+        <input type="button" value="Add" class="addbutton">
+      </span>
+      <a><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16" /> Add a new editor</a>
+    </div> 
+  {% endifnotequal %}
+{% endif %}
 
 {% comment %}
     {% if userrolemap.follow %}
