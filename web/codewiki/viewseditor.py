@@ -124,7 +124,7 @@ blankstartupcode = { 'scraper' : { 'python': "# Blank Python\n",
 
 def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     
-        # quick and dirty corrections to incoming urls, which should really be filtered in the url.py settings
+    # quick and dirty corrections to incoming urls, which should really be filtered in the url.py settings
     language = language.lower()
     if language not in blankstartupcode[wiki_type]:
         language = 'python'
@@ -215,9 +215,9 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
 
 
 
-    # save a code object (source scraper is to make thin link from the view to the scraper
-    # this is called in two places, due to those draft scrapers saved in the session
-    # would be better if the saving was deferred and not done right following a sign in
+# save a code object (source scraper is to make thin link from the view to the scraper
+# this is called in two places, due to those draft scrapers saved in the session
+# would be better if the saving was deferred and not done right following a sign in
 def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourcescraper=''):
     assert code_object.actionauthorized(user, "savecode")
     code_object.line_count = int(code_text.count("\n"))
