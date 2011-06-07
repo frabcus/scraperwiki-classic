@@ -76,7 +76,7 @@ def contrib(request, short_name):
     return render_to_response('documentation/docbase.html', context, context_instance=RequestContext(request))
 
 
-def docexternal(request):
+def docsexternal(request):
     language = request.session.get('language', 'python')
     api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
 

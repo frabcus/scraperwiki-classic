@@ -4,7 +4,7 @@ from documentation import views
 urlpatterns = patterns('',
    url(r'^(?:(?P<language>(python|ruby|php|html))/)?$', views.docmain, name="docsroot"),
    url(r'^api_explorer___$',                views.api_explorer, name="api_explore"),
-   url(r'^api$',                            views.docexternal, name="docsexternal"),
+   url(r'^api$',                            views.docsexternal, name="docsexternal"),
    url(r'^contrib/(?P<short_name>[\w_\-\./]+)/$', views.contrib, name="docscontrib"),
    url(r'^(?P<language>(python|ruby|php))/$',views.docmain, name="docs"),      
    url(r'^tutorials/$',views.tutorials, name="tutorials"),            
