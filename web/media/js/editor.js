@@ -1002,15 +1002,17 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 setCodeMirrorReadOnly(false);
                 $('select#automode #id_autosave').attr('disabled', false); 
                 $('select#automode #id_autotype').attr('disabled', pageIsDirty); 
-                if (pageIsDirty) {
-                    $('select#automode').val('autosave'); // editing
-                } else {
-                    $('select#automode').val('autotype'); // editing (broadcast)
-                }
+                var newmode = 'autosave';
+                /* This forces broadcast mode (see all edits realtime rather than at save time).
+                 * Bit buggy, so disabled for now
+                   if (!pageIsDirty) {
+                    newmode = 'autotype'; // editing (broadcast)
+                }*/
+                $('select#automode').val(newmode); 
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
-                sendjson({"command":'automode', "automode":'autotype'}); 
+                sendjson({"command":'automode', "automode":newmode}); 
             }
         }
 
@@ -1052,7 +1054,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
-                sendjson({"command":'automode', "automode":'autotype'}); 
+                sendjson({"command":'automode', "automode":'autosave'}); 
             }
         }
     }
