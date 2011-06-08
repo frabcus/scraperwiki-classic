@@ -287,7 +287,7 @@ class Code(models.Model):
         app_label = 'codewiki'
 
 
-        # all authorization to go through here
+    # all authorization to go through here
     def actionauthorized(self, user, action):
         if user and not user.is_anonymous():
             roles = [ usercoderole.role  for usercoderole in UserCodeRole.objects.filter(code=self, user=user) ]
