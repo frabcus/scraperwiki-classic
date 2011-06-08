@@ -87,7 +87,7 @@ $(document).ready(function() {
     var chainpatchnumber = 0; // counts them going out
     var lasttypetime = new Date(); 
 
-    setCodeMirrorReadOnly(false); // would be nice to know when we call this what initial state is! so it doesn't do reload so quick when readonly
+    setCodeMirrorReadOnly(false); // would be nice to know when we call this what initial state is! so it doesn't do reload so quick when readonle
     setupMenu();
     setupTabs();
     setupToolbar();
@@ -998,11 +998,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 setCodeMirrorReadOnly(false);
                 $('select#automode #id_autosave').attr('disabled', false); 
                 $('select#automode #id_autotype').attr('disabled', pageIsDirty); 
-                $('select#automode').val('autosave'); // editing
+                $('select#automode').val('autotype'); // editing (broadcast)
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
-                sendjson({"command":'automode', "automode":'autosave'}); 
+                sendjson({"command":'automode', "automode":'autotype'}); 
             }
         }
 
@@ -1036,13 +1036,13 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             {
                 $('select#automode #id_autosave').attr('disabled', false); 
                 $('select#automode #id_autotype').attr('disabled', true); 
-                $('select#automode').val('autosave'); // editing
+                $('select#automode').val('autosave'); // editing (broadcast)
                 $('select#automode #id_autoload').attr('disabled', true); 
                 setCodeMirrorReadOnly(false);
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
-                sendjson({"command":'automode', "automode":'autosave'}); 
+                sendjson({"command":'automode', "automode":'autotype'}); 
             }
         }
     }
