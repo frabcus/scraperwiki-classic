@@ -893,7 +893,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         // $('select#automode').show(); return; 
         
         // never show it, other buttons do functions more clearly now
-        $('select#automode').hide(); 
+        if (isstaff) {
+            $('select#automode').show().addClass("staff");
+        } else {
+            $('select#automode').hide().removeClass("staff"); 
+        }
         return; 
 
         /* Conditional version, based on whether just single user and needed or not
