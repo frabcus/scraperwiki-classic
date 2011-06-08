@@ -97,7 +97,7 @@
 {% endif %}
 
 <div class="editor">
-    <div id="divDraftSavedWarning" class="draft_warning" 
+    <div id="alert_outer" class="draft_warning" 
         {% ifnotequal rev 'draft' %}
             style="display:none;"
         {% endifnotequal %}
@@ -107,7 +107,7 @@
         or <a href="{% url delete_draft %}">discard changes</a>.
     </div>
 
-    <div id="divProtectedWarning" class="protected_warning" style="display:none;" >
+    <div id="alert_outer" class="protected_warning" style="display:none;" >
         This {{scraper.wiki_type}} is protected, so you can only watch other people editing. Ask the owner 
         <a href="{% if scraper.owner.username %}{% url profiles_profile_detail scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a>
         to give you permission to edit it, or 

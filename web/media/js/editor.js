@@ -47,7 +47,7 @@ $(document).ready(function() {
     var savecode_authorized = $('#savecode_authorized').val(); // obviously don't trust this, check server side, but use it for choosing UI stuff
     if (!savecode_authorized) {
         username = null;
-        $('#divProtectedWarning').show();
+        $('#alert_outer.protected_warning').show();
     }
 
     // runtime information
