@@ -35,13 +35,19 @@ $(document).ready(function() {
     var username        = $('#username').val(); 
     var userrealname    = $('#userrealname').val(); 
     var isstaff         = $('#isstaff').val(); 
-    var savecode_authorized = $('#savecode_authorized').val(); // obviously don't trust this, check server side, but use it for choosing UI stuff
     var scraperlanguage = $('#scraperlanguage').val(); 
     var run_type        = $('#code_running_mode').val();
     var codemirror_url  = $('#codemirror_url').val();
     var wiki_type       = $('#id_wiki_type').val(); 
     var rev             = $('#originalrev').val(); 
     var lastsavedcode   = ''; // used to tell if we should expect a null back from the revision log
+
+    // if we're not authorized to edit, fake us up as anonymous for now (so
+    // twisted doesn't try and make us the editor ever)
+    var savecode_authorized = $('#savecode_authorized').val(); // obviously don't trust this, check server side, but use it for choosing UI stuff
+    if (!savecode_authorized) {
+        username = null;
+    }
 
     // runtime information
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
@@ -891,7 +897,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function showhideAutomodeSelector()
     {
         // always show it for debugging
-        $('select#automode').show(); return; 
+        // $('select#automode').show(); return; 
         
         // never show it, other buttons do functions more clearly now
         $('select#automode').hide();
@@ -999,7 +1005,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
             if (data.broadcastingeditor == username)   
             {
-                    // convert all the autosaving pages to watching (apart from the one that the user changed to autotype)
+               // convert all the autosaving pages to watching (apart from the one that the user changed to autotype)
                 if (automode == 'autosave')
                 {
                     $('select#automode #id_autoload').attr('disabled', false); 
@@ -1067,7 +1073,13 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 $('select#automode').val('autosave'); // editing
                 $('select#automode #id_autoload').attr('disabled', true); 
                 $('.editor_controls #watch_button_area').hide();
-                setCodeMirrorReadOnly(false);
+                if (!savecode_authorized) {
+                    // special case, if not authorized then we are internally
+                    // to this javascript an anonymous user, and want to be readonly
+                    setCodeMirrorReadOnly(true);
+                } else {
+                    setCodeMirrorReadOnly(false);
+                }
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
