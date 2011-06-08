@@ -1045,7 +1045,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             {
                 $('select#automode #id_autosave').attr('disabled', false); 
                 $('select#automode #id_autotype').attr('disabled', true); 
-                $('select#automode').val('autosave'); // editing (broadcast)
+                $('select#automode').val('autosave'); // editing
                 $('select#automode #id_autoload').attr('disabled', true); 
                 $('.editor_controls #watch_button_area').hide();
                 setCodeMirrorReadOnly(false);
