@@ -14,7 +14,7 @@ body {
 
 /* Draft warning */
 
-div.draft_warning {
+div.draft_warning, div.protected_warning {
 	background: #ffce5d;
 	text-align: center;
 	font-size: 0.8em;
