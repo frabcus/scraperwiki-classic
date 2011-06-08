@@ -49,11 +49,11 @@ PRIVACY_STATUSES = (
     ('deleted', 'Deleted'),
 )
 
-STAFF_ACTIONS = ["run_scraper", "screenshoot_scraper"]
-CREATOR_ACTIONS = ["delete_data", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ]
-STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS # let staff also do anything a creator can
-EDITOR_ACTIONS = ["changeadmin", "savecode", "settags" ]
-VISIBLE_ACTIONS = ["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription" ]
+STAFF_ACTIONS = set(["run_scraper", "screenshoot_scraper"])
+CREATOR_ACTIONS = set(["delete_data", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ])
+EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags" ])
+STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let staff also do anything a creator / editor can, except save code is a bit rude
+VISIBLE_ACTIONS = set(["rpcexecute", "readcode", "readcodeineditor", "overview", "history", "comments", "exportsqlite", "setfollow", "apidataread", "apiscraperinfo", "apiscraperruninfo", "getdescription"])
 
 
 def scraper_search_query(user, query):
@@ -313,8 +313,6 @@ class Code(models.Model):
         if action in EDITOR_ACTIONS:
             if self.privacy_status == "public":
                 return user.is_authenticated()
-            if user.is_superuser:
-                return True
             return "editor" in roles or "owner" in roles
         
         if action in VISIBLE_ACTIONS:
