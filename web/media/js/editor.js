@@ -925,7 +925,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function parseISOdate(sdatetime) // used to try and parse an ISOdate, but it's highly irregular and IE can't do it
         {  return new Date(parseInt(sdatetime)); }
 
-    function timeago(ctime, servernowtime)
+    function swtimeago(ctime, servernowtime)
     {
         var seconds = (servernowtime.getTime() - ctime.getTime())/1000; 
         return (seconds < 120 ? seconds.toFixed(0) + " seconds" : (seconds/60).toFixed(1) + " minutes"); 
@@ -969,7 +969,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         if (boutputstatus)  // first time
         {
             stext = [ ]; 
-            stext.push("Editing began " + timeago(earliesteditor, servernowtime) + " ago, last touched " + timeago(lasttouchedtime, servernowtime) + " ago"); 
+            stext.push("Editing began " + swtimeago(earliesteditor, servernowtime) + " ago, last touched " + swtimeago(lasttouchedtime, servernowtime) + " ago"); 
             var othereditors = [ ]; 
             for (var i = 0; i < data.loggedineditors.length; i++) 
             {
