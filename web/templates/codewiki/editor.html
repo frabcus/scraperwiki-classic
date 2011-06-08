@@ -144,7 +144,7 @@
             <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P, Opt + P)"/>
         {% endifnotequal %}{% endifequal %}
 
-        <input type="button" id="btnWatch" class="watch button" name="action" value="Watch" title="Give up editing; watches someone else editing instead"/>
+        <!--<input type="button" id="btnWatch" class="watch button" name="action" value="Watch" title="Give up editing; watches someone else editing instead"/> -->
 
         {# hidden if not necessary #}
         <select id="automode">
@@ -160,7 +160,10 @@
         {% endifnotequal %}{% endifnotequal %}{% endifequal %}
 
         <img id="running_annimation" src="{{MEDIA_URL}}/images/running.gif"/>
+
+        <span id="watch_button_area">You are editing (<a id="btnWatch">give up</a>), </span>
         <span id="watcherstatus"></span>
+
     
         <div class="right">
             <span id="idlastrev" >

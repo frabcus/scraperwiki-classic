@@ -862,7 +862,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         // Draft windows will be able to pop up a diff with the current saved version, so using this as a patch could readily provide a route back through a reload
             $('select#automode #id_autosave').attr('disabled', true); 
             $('select#automode #id_autoload').attr('disabled', true); 
-            $('.editor_controls #btnWatch').hide();
+            $('.editor_controls #watch_button_area').hide();
             $('select#automode #id_autotype').attr('disabled', true); 
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
             $('.editor_controls #run').attr('disabled', false);
@@ -873,7 +873,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         {
             $('select#automode #id_autosave').attr('disabled', true); 
             $('select#automode #id_autotype').attr('disabled', true); 
-            $('.editor_controls #btnWatch').hide();
+            $('.editor_controls #watch_button_area').hide();
             setCodeMirrorReadOnly(true);
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
             $('.editor_controls #run').attr('disabled', true);
@@ -973,7 +973,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         else if (username && (editingusername == username))
         {
             $('select#automode #id_autoload').attr('disabled', (loggedineditors.length == 1)); // no point in being a watcher if no one else is available to edit
-            $('.editor_controls #btnWatch').toggle((loggedineditors.length != 1));
+            $('.editor_controls #watch_button_area').toggle((loggedineditors.length != 1));
 
             if (loggedineditors.length >= 2)
                 setwatcherstatusmultieditinguser(); // sets links to call self
@@ -986,7 +986,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 if (automode == 'autosave')
                 {
                     $('select#automode #id_autoload').attr('disabled', false); 
-                    $('.editor_controls #btnWatch').hide();
+                    $('.editor_controls #watch_button_area').hide();
                     $('select#automode').val('autoload'); // watching
                     $('select#automode #id_autosave').attr('disabled', false); 
                     $('select#automode #id_autotype').attr('disabled', true); 
@@ -1025,7 +1025,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             if (automode != 'autoload')
             {
                 $('select#automode #id_autoload').attr('disabled', false); 
-                $('.editor_controls #btnWatch').hide();
+                $('.editor_controls #watch_button_area').hide();
                 $('select#automode').val('autoload'); // watching
                 $('select#automode #id_autosave').attr('disabled', true); 
                 $('select#automode #id_autotype').attr('disabled', true); 
@@ -1047,7 +1047,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 $('select#automode #id_autotype').attr('disabled', true); 
                 $('select#automode').val('autosave'); // editing (broadcast)
                 $('select#automode #id_autoload').attr('disabled', true); 
-                $('.editor_controls #btnWatch').hide();
+                $('.editor_controls #watch_button_area').hide();
                 setCodeMirrorReadOnly(false);
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
                 $('.editor_controls #run').attr('disabled', false);
