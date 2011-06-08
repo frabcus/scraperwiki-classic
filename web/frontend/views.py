@@ -80,14 +80,14 @@ def dashboard(request, page_number=1):
     return render_to_response('frontend/dashboard.html', context, context_instance = RequestContext(request))
 
 
-    # this goes through an unhelpfully located one-file app called 'profile' 
-    # located at scraperwiki/lib/python/site-packages/profiles   The templates are in web/templates/profiles
-    # It would help to copy the sourcecode into the main site to make it easier to find and maintain
+# this goes through an unhelpfully located one-file app called 'profile' 
+# located at scraperwiki/lib/python/site-packages/profiles   The templates are in web/templates/profiles
+# It would help to copy the sourcecode into the main site to make it easier to find and maintain
 def profile_detail(request, username):
     user = request.user
     profiled_user = get_object_or_404(User, username=username)
     
-        # sorts against what the current user can see and what the identity of the profiled_user
+    # sorts against what the current user can see and what the identity of the profiled_user
     extra_context = { }
     owned_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=profiled_user)
     extra_context['owned_code_objects'] = owned_code_objects
