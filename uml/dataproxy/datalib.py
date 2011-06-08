@@ -187,13 +187,13 @@ class Database:
                     break
                 arg["moredata"] = True
                 logger.debug("midchunk %s %d" % (self.short_name, len(data)))
-                self.dataproxy.connection.send(json.dumps(arg)+'\n')
+                self.dataproxy.connection.sendall(json.dumps(arg)+'\n')
             return arg
 
         
         except sqlite3.Error, e:
             signal.alarm(0)
-            logger.exception("Testing exception output "+sqlquery[:1000])
+            logger.debug("user sqlerror "+sqlquery[:1000])
             return {"error":"sqlite3.Error: "+str(e)}
 
 
@@ -349,7 +349,8 @@ class SqliteSaveInfo:
             
         res = { "newindex": newidxname }
         lres = self.sqliteexecute("create unique index `%s` on `%s` (%s)" % (newidxname, self.swdatatblname, ",".join(["`%s`"%k  for k in unique_keys])))
-        if "error" in lres:  return lres
+        if "error" in lres:  
+            return lres
         if idxname:
             lres = self.sqliteexecute("drop index main.`%s`" % idxname)
             if "error" in lres:  

@@ -51,12 +51,16 @@ class Command(BaseCommand):
                 when = commitentry['date']
 
                 username = user.username
-                year = when.year
+                year = when.year - START_YEAR
+                month = when.month - 1
 
-                month_data = years_list[year - START_YEAR][when.month - 1]
-                if 'active_coders' not in month_data.keys():
-                    month_data['active_coders'] = {}
-                month_data['active_coders'][username] = 1
+                if month < 0 or month > 12 or year < 0 or year > datetime.date.today().year - START_YEAR:
+                    print "Ignoring out of date range log entry year %d month %d when %s" % (year, month, str(when))
+                else:
+                    month_data = years_list[year][month]
+                    if 'active_coders' not in month_data.keys():
+                        month_data['active_coders'] = {}
+                    month_data['active_coders'][username] = 1
         # ... and count how many entries there are
         last_active_coders = 0
         for i, year in enumerate(range(START_YEAR, datetime.date.today().year + 1)):
