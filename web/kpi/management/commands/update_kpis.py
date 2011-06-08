@@ -10,4 +10,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # count records in database
         record_count_now = Scraper.objects.aggregate(record_count=Sum('record_count'))['record_count']
-        DatastoreRecordCount.objects.create(date=datetime.date.today(), record_count=record_count_now)
+        drc = DatastoreRecordCount.objects.get_or_create(date=datetime.date.today(), defaults = {'record_count':  record_count_now})[0]
+        drc.record_count = record_count_now
+        drc.save()
+
