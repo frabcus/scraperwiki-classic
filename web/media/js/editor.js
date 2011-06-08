@@ -35,7 +35,7 @@ $(document).ready(function() {
     var username        = $('#username').val(); 
     var userrealname    = $('#userrealname').val(); 
     var isstaff         = $('#isstaff').val(); 
-    var savecode_authorized = $('#savecode_authorized').val(); 
+    var savecode_authorized = $('#savecode_authorized').val(); // obviously don't trust this, check server side, but use it for choosing UI stuff
     var scraperlanguage = $('#scraperlanguage').val(); 
     var run_type        = $('#code_running_mode').val();
     var codemirror_url  = $('#codemirror_url').val();
