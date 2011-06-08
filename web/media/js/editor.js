@@ -889,13 +889,19 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function showhideAutomodeSelector()
     {
-        // $('select#automode').show(); return; // XXX temporary for debugging
+        // always show it for debugging
+        // $('select#automode').show(); return; 
+        
+        // never show it, other buttons do functions more clearly now
+        $('select#automode').hide(); 
+        return; 
 
+        /* Conditional version, based on whether just single user and needed or not
         var automode = $('select#automode option:selected').val(); 
         if ($('input#showautomode').attr('checked') || (automode == 'autotype') || (username ? (loggedineditors.length >= 2) : (loggedineditors.length >= 1)))
             $('select#automode').show(); 
         else
-            $('select#automode').hide(); 
+            $('select#automode').hide();  */
     }
 
     function parseISOdate(sdatetime) // used to try and parse an ISOdate, but it's highly irregular and IE can't do it
