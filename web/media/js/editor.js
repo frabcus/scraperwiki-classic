@@ -87,7 +87,7 @@ $(document).ready(function() {
     var chainpatchnumber = 0; // counts them going out
     var lasttypetime = new Date(); 
 
-    setCodeMirrorReadOnly(false);
+    setCodeMirrorReadOnly(false); // would be nice to know when we call this what initial state is! so it doesn't do reload so quick when readonly
     setupMenu();
     setupTabs();
     setupToolbar();
