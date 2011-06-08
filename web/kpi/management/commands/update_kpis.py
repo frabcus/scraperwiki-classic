@@ -4,16 +4,9 @@ from django.db.models import Sum
 from kpi.models import DatastoreRecordCount, MonthlyCounts
 from codewiki.models import Scraper, Code, View, User
 
+from kpi.views import START_YEAR, one_month_in_the_future
+
 import datetime
-
-START_YEAR = 2010
-
-def one_month_in_the_future(month, year):
-    if month == 12:
-        new_month = 1
-    else:
-        new_month = month + 1
-    return datetime.date(year + (month / 12), new_month, 1)
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
