@@ -98,6 +98,7 @@
     {% endifequal %}
 
     <form id="privacy_status_form">
+        <a id="hide_privacy_choices">[cancel]</a>
         <table cellspacing="0" cellpadding="0">
             <tr class="first">
                 <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public" 
@@ -119,14 +120,7 @@
                 <td><h4><label for="privacy_private">Private</label></h4><p><label for="privacy_private">Only selected contributors can see or edit this {{scraper.wiki_type}}.</label></p></td>
             </tr>
             {% endif %}
-            <tr>
-                <td>&nbsp;</td>
-                <td>
-                    <input type="button" value="Save" id="saveprivacy">
-                    <input type="button" value="Cancel" id="cancelprivacy">
-                </td>
-            </tr>
         </table>
-        
+        <input type="button" value="Save" id="saveprivacy">
     </form>
 </div>

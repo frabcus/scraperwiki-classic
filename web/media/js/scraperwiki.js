@@ -392,13 +392,13 @@ function setupScraperEditInPlace(wiki_type, short_name)
     // Changing between public / protected(visible) / private
 
     $('#show_privacy_choices').click(function(){
-        $('#privacy_status table').show();
+        $('#privacy_status form').show();
         $('#privacy_status>h4, #privacy_status>p').hide();
     })
 
-    $('#cancelprivacy').click(function() 
+    $('#hide_privacy_choices').click(function() 
     {
-        $('#privacy_status table').hide();
+        $('#privacy_status form').hide();
         $('#privacy_status>h4, #privacy_status>p').show();
     }); 
     $('#saveprivacy').click(function() 
@@ -412,7 +412,11 @@ function setupScraperEditInPlace(wiki_type, short_name)
             else 
                 document.location.reload(true)
         }}); 
-    }); 
+    }).hide();
+
+	$('#privacy_status :radio').change(function(){
+		$('#saveprivacy').trigger('click');
+	});
 
 
 
