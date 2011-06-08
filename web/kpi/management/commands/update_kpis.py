@@ -55,7 +55,8 @@ class Command(BaseCommand):
                 month = when.month - 1
 
                 if month < 0 or month > 12 or year < 0 or year > datetime.date.today().year - START_YEAR:
-                    print "Ignoring out of date range log entry year %d month %d when %s" % (year, month, str(when))
+                    # print "Ignoring out of date range log entry year %d month %d when %s" % (year, month, str(when))
+                    pass
                 else:
                     month_data = years_list[year][month]
                     if 'active_coders' not in month_data.keys():
