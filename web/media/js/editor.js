@@ -1501,7 +1501,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
             // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
             if (res.draft == 'True')
-                $('#divDraftSavedWarning').show();
+                $('.draft_warning').show();
 
             // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
             if (res.url && window.location.pathname != res.url)
