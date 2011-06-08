@@ -24,7 +24,7 @@ $(document).ready(function() {
     // editor window dimensions
     var codeeditor = null;
     var codemirroriframe = null; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
-    var codeeditorreadonly = false; 
+    var codeeditorreadonly = null; 
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
@@ -87,8 +87,7 @@ $(document).ready(function() {
     var chainpatchnumber = 0; // counts them going out
     var lasttypetime = new Date(); 
 
-    setupCodeEditor();
-    
+    setCodeMirrorReadOnly(false);
     setupMenu();
     setupTabs();
     setupToolbar();
