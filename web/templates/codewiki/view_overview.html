@@ -1,4 +1,5 @@
 {% extends "codewiki/scraper_base.html" %}
+{% block javascript %}<script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>{% endblock %}
 {% load humanize %}
 {% load markup %}
 {% block tab %}
@@ -58,7 +59,7 @@
 <br class="clear"/>    
 <div class="content full" id="add_view_to_site">
     <a name="embed"></a>
-    <h3>Add this view to your site</h3>
+    <h3>Add this view to your site <span id="copy"></span></h3>
     <code>{% filter force_escape|linebreaksbr %}<div>
             <iframe width="100%" height="400px" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}"></iframe>
             <img src="http://scraperwiki.com/media/images/powered.png" alt="Powered by ScraperWiki.com" />
@@ -75,4 +76,34 @@
     {% if user.is_authenticated %}
         setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this view.");
     {% endif %}
+    $("#add_view_to_site h3").append('<a href="#" class="copy_to_clipboard" title="Click to copy this snippet to your clipboard">Copy</a>');
+
+    // Make the copy button work
+    ZeroClipboard.setMoviePath( '{{ MEDIA_URL }}js/ZeroClipboard.swf' );
+    $(".copy_to_clipboard").each(function(i) {
+        
+        var el = $(this);
+        var parent = el.parent();
+        var code = parent.siblings('code');
+            
+        clip = new ZeroClipboard.Client();
+        clip.setText(code.text());
+        clip.setHandCursor( true );
+
+        clip.addEventListener( 'complete', function(client, text) {
+            //  alert("Copied text to clipboard: " + text );
+            el.text('Copied').addClass('copied');
+            el.focus(); // so flash doesn't have keyboard focus afterwards
+        });
+        
+        clip.addEventListener( 'onMouseOver', function(client, text) {
+            if(el.is('.copied')){
+                el.text('Copy').removeClass('copied');
+            }
+        });
+        
+        clip.glue(el[0], parent[0]);
+        
+    });
+    
 {% endblock %}
