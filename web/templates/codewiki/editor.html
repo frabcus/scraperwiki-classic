@@ -21,6 +21,7 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.simplemodal.1.4.js"></script>    
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.timeago.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/codemirror.js"></script>
 
     {# for the popup preview of cached HTML #}
@@ -69,9 +70,11 @@
 <input type="hidden" id="scraper_guid"      value="{{ scraper.guid }}"/>
 <input type="hidden" id="sourcescraper"     value="{{ source_scraper }}"/>            
 <input type="hidden" id="fork"              value="{{ fork }}"/>            
+<input type="hidden" id="fork_url_action"   value="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}"/>
 <input type="hidden" id="username"          value="{{ request.user.username }}"/>
 <input type="hidden" id="userrealname"      value="{{ request.user.get_profile.name }}"/>
 <input type="hidden" id="isstaff"           value="{% if request.user.is_staff %}yes{% endif %}"/>
+<input type="hidden" id="savecode_authorized" value="{{ savecode_authorized }}"/>
 <input type="hidden" id="scraperlanguage"   value="{{ scraper.language }}"/>
 <input type="hidden" id="originalrev"       value="{{rev}}"/>
 <input type="hidden" id="codemirror_url"    value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
@@ -94,14 +97,23 @@
 {% endif %}
 
 <div class="editor">
-    <div id="divDraftSavedWarning" class="draft_warning" style="display:none;">
-        A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next={% url handle_session_draft %}">sign in or create an account</a>.
+    <div id="draft_warning" class="alert_outer" 
+        {% ifnotequal rev 'draft' %}
+            style="display:none;"
+        {% endifnotequal %}
+    >
+        A temporary version of your scraper has been saved. 
+        <a href="{% url login %}?next={% url handle_session_draft %}">Sign in or create an account</a> to save it permanently, 
+        or <a href="{% url delete_draft %}">discard changes</a>.
     </div>
-    {% ifequal rev 'draft' %}
-        <div class="draft_warning">
-            Warning: this scraper has not been saved or committed. <a href="{% url login %}?next={% url handle_session_draft %}">Sign in or create an account</a> to save it permanently, or <a href="{% url delete_draft %}">discard changes</a>
-        </div>
-    {% endifequal %}
+
+    <div id="protected_warning" class="alert_outer" style="display:none;" >
+        This {{scraper.wiki_type}} is protected, so you can only watch other people editing. Ask the owner 
+        <a href="{% if scraper.owner.username %}{% url profiles_profile_detail scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a>
+        to give you permission to edit it, or 
+        <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">fork it</a>.
+    </div>
+
 
     {# Header #}
     <div class="editor_header">
@@ -156,19 +168,26 @@
         {% endifnotequal %}{% endifnotequal %}{% endifequal %}
 
         <img id="running_annimation" src="{{MEDIA_URL}}/images/running.gif"/>
+
+        <!--<input type="button" id="btnWatch" class="watch button" name="action" value="Watch" title="Give up editing; watches someone else editing instead"/> -->
+        <span id="watch_button_area" style="display:none">You are editing (<a id="btnWatch">relinquish</a>), </span>
         <span id="watcherstatus"></span>
+
     
         <div class="right">
-            <span id="idlastrevnumber" {% if not rev %}class="hide"{% endif %}>
-                Rev: <span>{{rev}}</span>
+            <span id="idlastrev" >
             </span>
+            {% if revdateepoch %}
+            <script>updateLastSavedRev({{rev}}, {{revdateepoch}}, "Last edited");</script>
+            {% endif %}
 
-            {% if scraper.id %}
+            <!-- {% if scraper.id %}
                 <a id="aCloseEditor1" href="{% url code_overview scraper.wiki_type scraper.short_name %}">close editor</a>
             {% else %}
                 <a id="aCloseEditor1" href="{% url frontpage %}">close editor</a>
-            {% endif %}
+            {% endif %} -->
             <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save" title="Save this {{scraper.wiki_type}} (Ctrl + S, Opt + S)"/>
+            <input type="button" id="btnForkNow" class="fork button" name="action" value="Fork" title="Fork this {{scraper.wiki_type}}"/>
         </div>
     </div>
 

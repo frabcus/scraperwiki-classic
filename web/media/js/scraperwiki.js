@@ -339,16 +339,6 @@ function setupScraperEditInPlace(wiki_type, short_name)
     $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
 
 
-    // changing privacy status
-    $('#spnPrivacyStatusChoice').editable($("#adminprivacystatusurl").val(), 
-    {
-        indicator : 'Saving...', tooltip:'Click to edit...', cancel:'Cancel', submit:'Save',
-        onblur: 'ignore', event:'dblclick', placeholder:'', type: 'select', 
-        data: optiontojson('#optionsPrivacyStatusChoices', $('#spnPrivacyStatusChoice').text()), 
-        callback: function() { document.location.reload(true); }
-    }); 
-    $('#aPrivacyStatusChoice').click(function()  {  $('#spnPrivacyStatusChoice').dblclick(); });
-
     // changing editor status
     $('#addneweditor a').click(function()
     {
@@ -398,6 +388,36 @@ function setupScraperEditInPlace(wiki_type, short_name)
                 document.location.reload(true)
         }}); 
     }); 
+
+    // Changing between public / protected(visible) / private
+
+    $('#show_privacy_choices').click(function(){
+        $('#privacy_status form').show();
+        $('#privacy_status>h4, #privacy_status>p').hide();
+    })
+
+    $('#hide_privacy_choices').click(function() 
+    {
+        $('#privacy_status form').hide();
+        $('#privacy_status>h4, #privacy_status>p').show();
+    }); 
+    $('#saveprivacy').click(function() 
+    {
+        var radio_value = $('input[name=privacy_status]:checked').val(); 
+        var sdata = { value:radio_value }; 
+        $.ajax({url:$("#adminprivacystatusurl").val(), type: 'POST', data:sdata, success:function(result)
+        {
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                document.location.reload(true)
+        }}); 
+    }).hide();
+
+	$('#privacy_status :radio').change(function(){
+		$('#saveprivacy').trigger('click');
+	});
+
 
 
 

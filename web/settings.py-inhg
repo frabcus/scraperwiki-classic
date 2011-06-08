@@ -38,6 +38,7 @@ DATAPROXY_PORT  = 9003	# Dataproxy port - see uml.cfg
 FEEDBACK_EMAIL = 'feedback@somedomain.com'
 FEEDBACK_EMAIL_TITLE = '[ScraperWiki Feedback]'
 
+DEFAULT_FROM_EMAIL = 'bugs@scraperwiki.com'
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = '1025'
 EMAIL_SUBJECT_PREFIX = "[ScraperWiki Bugs] "

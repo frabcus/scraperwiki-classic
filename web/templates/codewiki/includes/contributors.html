@@ -1,3 +1,6 @@
+<input type="hidden" id="admincontroleditors" value="{% url scraper_admin_controleditors scraper.short_name %}"/>
+<input type="hidden" id="adminprivacystatusurl" value="{% url scraper_admin_privacystatus scraper.short_name %}"/>
+
 <ul>
     {% if not userrolemap.owner %}
       <li style="color:red">[Error: this scraper has no creator]</li>
@@ -29,21 +32,19 @@
 
 </ul>
 
-{# {% if user.is_staff %} #} 
-    {% if user_owns_it %}
-      {% ifnotequal scraper.privacy_status 'public' %}
-        <div class="staff" id="addneweditor"><!-- staff only, dark launch-->
-          <span class="hide">
-            Editor username:
-            <input type="text" class="text">
-            <input type="button" value="Cancel" class="cancelbutton">
-            <input type="button" value="Add" class="addbutton">
-          </span>
-          <a><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16" /> Add a new editor</a>
-        </div> <!-- end staff only, dark launch -->
-      {% endifnotequal %}
-    {% endif %}
-{# {% endif %} #}
+{% if user_owns_it %}
+  {% ifnotequal scraper.privacy_status 'public' %}
+    <div id="addneweditor">
+      <span class="hide">
+        Editor username:
+        <input type="text" class="text">
+        <input type="button" value="Cancel" class="cancelbutton">
+        <input type="button" value="Add" class="addbutton">
+      </span>
+      <a><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16" /> Add a new editor</a>
+    </div> 
+  {% endifnotequal %}
+{% endif %}
 
 {% comment %}
     {% if userrolemap.follow %}
@@ -60,32 +61,6 @@
     </ul>
     {% endif %}
 {% endcomment %}
-<!--
-<p class="{% ifnotequal scraper.privacy_status 'public' %}xxxreport{% endifnotequal %}">This {{scraper.wiki_type}} <span id="spnPrivacyStatusChoice">{{privacy_status_name}}</span>.
-  <select class="hide" id="optionsPrivacyStatusChoices">  {# this select gets taken apart and rebuilt by jeditable #}
-  {% for value, name in PRIVACY_STATUSES %} 
-    <option value="{{value}}">{{name}}</option>
-  {% endfor %}
-  </select>
-
-  {% if user.is_staff %}
-    <span class="staff">
-    {% if user_owns_it %}
-      <a id="aPrivacyStatusChoice" class="edit">[edit status]</a>
-    {% endif %}
-    </span>
-  {% endif %}
-</p>
--->
-<script type="text/javascript">
-$(function(){
-   $('#show_privacy_choices').click(function(){
-       $('#privacy_status table').show();
-       $('#privacy_status>h4, #privacy_status>p').hide();
-   })
-});
-
-</script>
 
 <div id="privacy_status">
     {% ifequal scraper.privacy_status 'public' %}
@@ -122,21 +97,30 @@ $(function(){
         <p>Only the contributors listed above can see or edit this scraper.</p>
     {% endifequal %}
 
-    <form>
+    <form id="privacy_status_form">
+        <a id="hide_privacy_choices">[cancel]</a>
         <table cellspacing="0" cellpadding="0">
             <tr class="first">
-                <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public" /></td>
+                <td class="radio"><input type="radio" name="privacy_status" value="public" id="privacy_public" 
+                {% ifequal scraper.privacy_status 'public' %} checked="checked" {% endifequal %}
+                /></td>
                 <td><h4><label for="privacy_public">Public</label></h4><p><label for="privacy_public">Everyone can see and edit this {{scraper.wiki_type}}.</label></p></td>
             </tr>
             <tr>
-                <td class="radio"><input type="radio" name="privacy_status" value="protected" id="privacy_protected" checked="checked"/></td>
+                <td class="radio"><input type="radio" name="privacy_status" value="visible" id="privacy_protected" 
+                {% ifequal scraper.privacy_status 'visible' %} checked="checked" {% endifequal %}
+                /></td>
                 <td><h4><label for="privacy_protected">Protected</label></h4><p><label for="privacy_protected">Everyone can see this {{scraper.wiki_type}}, but only selected contributors can edit it.</label></p></td>
             </tr>
-            <tr>
-                <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private" /></td>
+            {% if user.is_staff %}
+            <tr class="staff">
+                <td class="radio"><input type="radio" name="privacy_status" value="private" id="privacy_private" 
+                {% ifequal scraper.privacy_status 'private' %} checked="checked" {% endifequal %}
+                /></td>
                 <td><h4><label for="privacy_private">Private</label></h4><p><label for="privacy_private">Only selected contributors can see or edit this {{scraper.wiki_type}}.</label></p></td>
             </tr>
+            {% endif %}
         </table>
-        
+        <input type="button" value="Save" id="saveprivacy">
     </form>
 </div>

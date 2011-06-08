@@ -14,13 +14,10 @@ body {
 
 /* Draft warning */
 
-div.draft_warning {
-	background: #ffce5d;
+#draft_warning, #protected_warning {
 	text-align: center;
 	font-size: 0.8em;
-	padding: 0.4em 0 0.4em 0;
 	border-bottom: solid 1px #c38938;
-	color: #000;
 }
 
 /* Header */
@@ -120,10 +117,6 @@ div.page_tabs.small {
 	top: 0.35em;
 }
 
-.editor_controls a {
-	font-size: 0.8em;
-}
-
 .editor_controls input.button, #meta_form input.button {
 	font-size: 0.7em
 
@@ -181,6 +174,13 @@ div.page_tabs.small {
 	background-color: #6fb1e6;
 	color: #fff;
 }
+.editor_controls .fork, #meta_form .button.fork {
+	background-image: url(../images/icons/fork.png);
+	border-color: #2680c6;
+	background-color: #6fb1e6;
+	color: #fff;
+}
+
 
 .editor_controls input.darkness, .editor_controls input.darkness:disabled {
 	color: #FFFFFF;
@@ -475,8 +475,11 @@ span.hiddenfields {
 	line-height: 1em;
 }
 
+#watcherstatus, #watch_button_area {
+	font-size: 0.8em;
+}
+
 #watcherstatus .plusone {
-	color: black;
 	cursor: pointer;
 }
 
@@ -599,11 +602,12 @@ a.cachepopup:hover {
 	text-decoration: none;
 }
 
-#idlastrevnumber {
+#idlastrev {
 	color: #808080;
 	margin: 0;
 	padding: 0.5em 0em 0.5em 0;
     cursor: pointer;
+	font-size: 0.8em;
 }
 
 

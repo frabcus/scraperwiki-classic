@@ -1,4 +1,5 @@
 <div id="divScraperTags" class="content full">
+  <input type="hidden" id="adminsettagurl" value="{% url scraper_admin_settags scraper.short_name %}"/>
 
   <h2>Tags
   {% ifequal scraper.privacy_status 'public' %}

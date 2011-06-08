@@ -13,10 +13,17 @@ import difflib
 import re
 import urllib
 import os
+import time
 from codewiki.management.commands.run_scrapers import GetDispatcherStatus
 
 try:                 import json
 except ImportError:  import simplejson as json
+
+# XXX not sure where this should go
+def _datetime_to_epoch(dt):
+    if dt:
+        return time.mktime(dt.timetuple())
+    return None
 
 
 def getscraperor404(request, short_name, action):
@@ -93,7 +100,9 @@ def reload(request, short_name):
     scraper = getscraperor404(request, short_name, "readcode")
     oldcodeineditor = request.POST.get('oldcode')
     status = scraper.get_vcs_status(-1)
-    result = { "code": status["code"], "rev":status.get('prevcommit',{}).get('rev') }
+    result = { "code": status["code"], "rev":status.get('prevcommit',{}).get('rev'),
+               "revdateepoch":_datetime_to_epoch(status.get('prevcommit',{}).get("date")) 
+            }
     if oldcodeineditor:
         result["selrange"] = vc.DiffLineSequenceChanges(oldcodeineditor, status["code"])
     return HttpResponse(json.dumps(result))
@@ -115,7 +124,7 @@ blankstartupcode = { 'scraper' : { 'python': "# Blank Python\n",
 
 def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     
-        # quick and dirty corrections to incoming urls, which should really be filtered in the url.py settings
+    # quick and dirty corrections to incoming urls, which should really be filtered in the url.py settings
     language = language.lower()
     if language not in blankstartupcode[wiki_type]:
         language = 'python'
@@ -133,6 +142,8 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         scraper = draftscraper.get('scraper')
         context['code'] = draftscraper.get('code', ' missing')
         context['rev'] = 'draft'
+        context['revdate'] = 'draft'
+        context['revdateepoch'] = None
     
     # Load an existing scraper preference
     elif short_name != "__new__":
@@ -152,6 +163,8 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         # assert not status['ismodified']  # should hold, but disabling it for now
         context['code'] = status["code"]
         context['rev'] = status.get('prevcommit',{}).get("rev") or 0
+        context['revdate'] = status.get('prevcommit',{}).get("date")
+        context['revdateepoch'] = _datetime_to_epoch(context['revdate'])
 
     # create a temporary scraper object
     else:
@@ -174,6 +187,10 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
                         scraper.title = templatescraper.title
             except models.Code.DoesNotExist:
                 startupcode = startupcode.replace("Blank", "Missing template for")
+
+        context['rev'] = 'unsaved'
+        context['revdate'] = 'unsaved'
+        context['revdateepoch'] = None
             
         # replace the phrase: sourcescraper = 'working-example' with sourcescraper = 'replacement-name'
         inputscrapername = request.GET.get('sourcescraper', False)
@@ -193,14 +210,19 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
 
     context['scraper'] = scraper
     context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())
+
+    if scraper.actionauthorized(request.user, "savecode") or context['rev'] in ('draft', 'unsaved'):
+        context['savecode_authorized'] = "true"
+    else:
+        context['savecode_authorized'] = ""
     
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
 
 
 
-    # save a code object (source scraper is to make thin link from the view to the scraper
-    # this is called in two places, due to those draft scrapers saved in the session
-    # would be better if the saving was deferred and not done right following a sign in
+# save a code object (source scraper is to make thin link from the view to the scraper
+# this is called in two places, due to those draft scrapers saved in the session
+# would be better if the saving was deferred and not done right following a sign in
 def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourcescraper=''):
     assert code_object.actionauthorized(user, "savecode")
     code_object.line_count = int(code_text.count("\n"))
@@ -231,8 +253,15 @@ def save_code(code_object, user, code_text, earliesteditor, commitmessage, sourc
             code_object.add_user_role(user, 'editor')
     else:
         code_object.add_user_role(user, 'owner')
+
+    revdate = None
+    if rev != None:
+        status = code_object.get_vcs_status(-1)
+        assert 'currcommit' not in status
+        assert rev == status.get('prevcommit',{}).get("rev")
+        revdate = status.get('prevcommit',{}).get("date")
     
-    return rev # None if no change
+    return (rev, revdate) # None if no change
 
 
     # called from the editor
@@ -283,9 +312,9 @@ def handle_editor_save(request):
         earliesteditor = request.POST.get('earliesteditor', "")
         if not scraper.actionauthorized(request.user, "savecode"):
             return HttpResponse(json.dumps({'status':'Failed', 'message':"Not allowed to save this scraper"}))
-        rev = save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
+        (rev, revdate) = save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
         response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
-        return HttpResponse(json.dumps({'redirect':'true', 'url':response_url, 'rev':rev }))
+        return HttpResponse(json.dumps({'redirect':'true', 'url':response_url, 'rev':rev, 'revdateepoch':_datetime_to_epoch(revdate) }))
 
     # User is not logged in, save the scraper to the session
     else:
