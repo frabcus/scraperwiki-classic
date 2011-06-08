@@ -305,7 +305,8 @@ body.frontpage #nav_inner li.frontpage {
 
 /* ALERT BAR */
 
-#alert_outer {
+#alert_outer,
+.alert_outer {
 	display: none;
 	color: #411;
 	padding: 10px 0 11px 0;
@@ -318,16 +319,19 @@ body.frontpage #nav_inner li.frontpage {
 	filter: dropshadow(color=#ffee99, offx=0, offy=1);
 }
 
-#alert_outer h2 {
+#alert_outer h2,
+.alert_outer h2 {
 	font-size: 18px;
 	line-height: 18px;
 }
 
-#alert_outer a {
+#alert_outer a,
+.alert_outer a {
 	color: #a22;
 }
 
-#alert_outer a:hover {
+#alert_outer a:hover,
+.alertouter a:hover {
 	color: #822;
 }
 

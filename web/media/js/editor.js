@@ -47,7 +47,7 @@ $(document).ready(function() {
     var savecode_authorized = $('#savecode_authorized').val(); // obviously don't trust this, check server side, but use it for choosing UI stuff
     if (!savecode_authorized) {
         username = null;
-        $('#alert_outer.protected_warning').show();
+        $('#protected_warning').show();
     }
 
     // runtime information
@@ -1501,7 +1501,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
             // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
             if (res.draft == 'True')
-                $('.draft_warning').show();
+                $('#draft_warning').show();
 
             // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
             if (res.url && window.location.pathname != res.url)
