@@ -87,14 +87,7 @@ $(document).ready(function() {
     var chainpatchnumber = 0; // counts them going out
     var lasttypetime = new Date(); 
 
-    if (window.location.hash != "#plain")
-        setupCodeEditor();
-    else
-    {
-        $('#id_code').keypress(function() { ChangeInEditor("edit"); }); 
-        setupKeygrabs();
-        resizeControls('first');
-    }
+    setupCodeEditor();
     
     setupMenu();
     setupTabs();
@@ -263,6 +256,22 @@ $(document).ready(function() {
         if (codeeditor) {
             codeeditor.toTextArea("id_code"); 
             codeeditor = null;
+            codemirroriframe = null;
+        }
+
+        if (window.location.hash == "#plain")
+        {
+            $('#id_code').keypress(function() { ChangeInEditor("edit"); }); 
+            setupKeygrabs();
+            resizeControls('first');
+            if (codeeditorreadonly) {
+                $('#id_code').attr("readonly", "yes");
+                setCodeeditorBackgroundImage('url(/media/images/staff.png)');
+            } else {
+                $('#id_code').attr("readonly", "");
+                setCodeeditorBackgroundImage('none');
+            }
+            return;
         }
 
         parsers['python'] = ['../contrib/python/js/parsepython.js'];
@@ -338,19 +347,17 @@ $(document).ready(function() {
                 // set up other readonly values, after rebuilding the CodeMirror editor
                 if (expectedreadonly) {
                     setCodeeditorBackgroundImage('url(/media/images/staff.png)');
-                    $('.editor_controls #btnCommitPopup').hide();
-                    $('.editor_controls #btnForkNow').show();
                 } else {
                     setCodeeditorBackgroundImage('none');
-                    $('.editor_controls #btnCommitPopup').show();
-                    $('.editor_controls #btnForkNow').hide();
                 }
 
                 // our readonly state was changed under our feet while setting
                 // up CodeMirror; force a resetup of CodeMirror again
                 if (expectedreadonly != codeeditorreadonly) {
                     codeeditorreadonly = expectedreadonly;
-                    setCodeMirrorReadOnly(codeeditorreadonly); 
+                    setTimeout(function() {
+                        setCodeMirrorReadOnly(codeeditorreadonly); 
+                    }, 200);
                 }
             } 
         };
@@ -373,7 +380,15 @@ $(document).ready(function() {
             return;
         }
         codeeditorreadonly = val;
-        // resetup editor for new readonly state
+
+        if (codeeditorreadonly) {
+            $('.editor_controls #btnCommitPopup').hide();
+            $('.editor_controls #btnForkNow').show();
+        } else {
+            $('.editor_controls #btnCommitPopup').show();
+            $('.editor_controls #btnForkNow').hide();
+        }
+
         setupCodeEditor();
     }
 
