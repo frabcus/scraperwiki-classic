@@ -210,6 +210,11 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
 
     context['scraper'] = scraper
     context['quick_help_template'] = 'codewiki/includes/%s_quick_help_%s.html' % (scraper.wiki_type, scraper.language.lower())
+
+    if scraper.actionauthorized(request.user, "savecode"):
+        context['savecode_authorized'] = "true"
+    else:
+        context['savecode_authorized'] = ""
     
     return render_to_response('codewiki/editor.html', context, context_instance=RequestContext(request))
 

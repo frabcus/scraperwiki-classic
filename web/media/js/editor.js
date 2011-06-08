@@ -35,6 +35,7 @@ $(document).ready(function() {
     var username        = $('#username').val(); 
     var userrealname    = $('#userrealname').val(); 
     var isstaff         = $('#isstaff').val(); 
+    var savecode_authorized = $('#savecode_authorized').val(); 
     var scraperlanguage = $('#scraperlanguage').val(); 
     var run_type        = $('#code_running_mode').val();
     var codemirror_url  = $('#codemirror_url').val();
@@ -890,7 +891,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function showhideAutomodeSelector()
     {
         // always show it for debugging
-        // $('select#automode').show(); return; 
+        $('select#automode').show(); return; 
         
         // never show it, other buttons do functions more clearly now
         $('select#automode').hide();
