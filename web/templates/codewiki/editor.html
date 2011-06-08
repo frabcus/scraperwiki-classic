@@ -97,14 +97,15 @@
 {% endif %}
 
 <div class="editor">
-    <div id="divDraftSavedWarning" class="draft_warning" style="display:none;">
-        A temporary version of your scraper has been saved. To save it permanently you need to <a href="{% url login %}?next={% url handle_session_draft %}">sign in or create an account</a>.
+    <div id="divDraftSavedWarning" class="draft_warning" 
+        {% ifnotequal rev 'draft' %}
+            style="display:none;"
+        {% endifnotequal %}
+    >
+        A temporary version of your scraper has been saved. 
+        <a href="{% url login %}?next={% url handle_session_draft %}">Sign in or create an account</a> to save it permanently, 
+        or <a href="{% url delete_draft %}">discard changes</a>.
     </div>
-    {% ifequal rev 'draft' %}
-        <div class="draft_warning">
-            Warning: this scraper has not been saved or committed. <a href="{% url login %}?next={% url handle_session_draft %}">Sign in or create an account</a> to save it permanently, or <a href="{% url delete_draft %}">discard changes</a>
-        </div>
-    {% endifequal %}
 
     {# Header #}
     <div class="editor_header">
