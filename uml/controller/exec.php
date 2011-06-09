@@ -1,11 +1,11 @@
-#!/usr/bin/php5
+#!/usr/local/bin/php
 <?php
 
 // set the include paths to scraperlibs from an environment variable (what can be done automatically for python and ruby)
 foreach (split(':', getenv('PHPPATH')) as $dir)
     ini_set('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
 
-$logfd = fopen("/proc/self/fd/3", "w") ;
+$logfd = fopen("php://fd/3", "w") ;
 
 require_once 'scraperwiki.php';
 require_once 'scraperwiki/datastore.php';
