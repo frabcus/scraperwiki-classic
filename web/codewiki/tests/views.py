@@ -1,5 +1,5 @@
 """
-At the moment, this only tests some scraper.views
+At the moment, this only tests some codewiki.views
 """
 
 from django.core.urlresolvers import reverse
