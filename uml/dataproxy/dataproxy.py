@@ -35,8 +35,6 @@ configfile = '/var/www/scraperwiki/uml/uml.cfg'
 config = ConfigParser.ConfigParser()
 config.readfp(open(configfile))
 
-child      = None
-
 parser = optparse.OptionParser()
 parser.add_option("--setuid", action="store_true")
 parser.add_option("--pidfile")
@@ -48,7 +46,6 @@ poptions, pargs = parser.parse_args()
 logging.config.fileConfig(configfile)
 logger = logging.getLogger('dataproxy')
 datalib.logger = logger
-stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)
 
 
 class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -81,34 +78,8 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def process(self, db, request):
         logger.debug(str(("request", request))[:100])
-        if type(request) != dict:
-            res = {"error":'request must be dict', "content":str(request)}
-        elif "maincommand" not in request:
-            res = {"error":'request must contain maincommand', "content":str(request)}
-            
-        elif request["maincommand"] == 'clear_datastore':
-            res = db.clear_datastore()
-        
-        elif request["maincommand"] == 'sqlitecommand':
-            if request["command"] == "downloadsqlitefile":
-                res = db.downloadsqlitefile(seek=request["seek"], length=request["length"])
-            elif request["command"] == "datasummary":
-                res = db.datasummary(request.get("limit", 10))
-            elif request["command"] == "attach":
-                res = db.sqliteattach(request.get("name"), request.get("asname"))
-            elif request["command"] == "commit":
-                res = db.sqlitecommit()
-        
-                # in the case of stream chunking there is one sendall in a loop in this function
-        elif request["maincommand"] == "sqliteexecute":
-            res = db.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"), streamchunking=request.get("streamchunking"))
-        
-        elif request["maincommand"] == 'save_sqlite':
-            res = db.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
-        
-        else:
-            res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
-            logger.error(json.dumps(res))
+
+        res = db.process(request)
         
         sres = json.dumps(res)
         logger.debug(sres[:200])
@@ -118,74 +89,77 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         # this morphs into the long running two-way connection
     def do_GET (self) :
-        (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
-        params = dict(cgi.parse_qsl(query))
-
-        firstmessage = {"status":"good"}
-        if 'short_name' in params:
-            if self.connection.getpeername()[0] != config.get('dataproxy', 'secure') :
-                firstmessage = {"error":"short_name only accepted from secure hosts"}
-            else:
-                short_name = params.get('short_name', '')
-                runID = 'fromfrontend.%s.%s' % (short_name, time.time()) 
-                dataauth = "fromfrontend"
-        
-        else:
-            runID, short_name = self.ident(params['uml'], params['port'])
-            if not runID:
-                firstmessage = {"error":"ident failed no runID"}
-            elif runID[:8] == "draft|||" and short_name:
-                dataauth = "draft"
-            else:
-                dataauth = "writable"
-        
-        if path == '' or path is None :
-            path = '/'
-
-        if scm not in ['http', 'https'] or fragment:
-            firstmessage = {"error":"Malformed URL %s" % self.path}
-
-        # consolidate sending back to trap socket errors
         try:
-            self.connection.sendall(json.dumps(firstmessage)+'\n')
-        except socket.error:
-            logger.warning("connection to dataproxy socket.error: "+str(firstmessage))
-        if "error" in firstmessage:
-            logger.warning("connection to dataproxy refused error: "+str(firstmessage["error"]))
-            self.connection.close()
-            return
-        
-        logger.debug("connection made to dataproxy for %s %s - %s" % (dataauth, short_name, runID))
-        db = datalib.Database(self, config.get('dataproxy', 'resourcedir'), short_name, dataauth, runID)
+            (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
+            params = dict(cgi.parse_qsl(query))
 
-                # enter the loop that now waits for single requests (delimited by \n) 
-                # and sends back responses through a socket
-                # all with json objects -- until the connection is terminated
-        sbuffer = [ ]
-
-        while True:
-            try:
-                srec = self.connection.recv(255)
-            except socket.error:
-                logger.warning("connection to from uml recv error: "+str([runID, short_name]))
-                break
+            firstmessage = {"status":"good"}
+            if 'short_name' in params:
+                if self.connection.getpeername()[0] != config.get('dataproxy', 'secure') :
+                    firstmessage = {"error":"short_name only accepted from secure hosts"}
+                else:
+                    short_name = params.get('short_name', '')
+                    runID = 'fromfrontend.%s.%s' % (short_name, time.time()) 
+                    dataauth = "fromfrontend"
             
-            ssrec = srec.split("\n")  # multiple strings if a "\n" exists
-            sbuffer.append(ssrec.pop(0))
-            while ssrec:
-                line = "".join(sbuffer)
-                if line:
-                    request = json.loads(line) 
-                    try:
-                        self.process(db, request)
-                    except socket.error:
-                        logger.warning("connection sending to uml socket.error: "+str([runID, short_name]))
-                        srec = ""  # break out of loop
-                sbuffer = [ ssrec.pop(0) ]  # next one in
-            if not srec:
-                break
-        logger.debug("ending connection %s - %s" % (short_name, runID))
-        self.connection.close()
+            else:
+                runID, short_name = self.ident(params['uml'], params['port'])
+                if not runID:
+                    firstmessage = {"error":"ident failed no runID"}
+                elif runID[:8] == "draft|||" and short_name:
+                    dataauth = "draft"
+                else:
+                    dataauth = "writable"
+            
+            if path == '' or path is None :
+                path = '/'
+
+            if scm not in ['http', 'https'] or fragment:
+                firstmessage = {"error":"Malformed URL %s" % self.path}
+
+            # consolidate sending back to trap socket errors
+            try:
+                self.connection.sendall(json.dumps(firstmessage)+'\n')
+            except socket.error:
+                logger.warning("connection to dataproxy socket.error: "+str(firstmessage))
+            if "error" in firstmessage:
+                logger.warning("connection to dataproxy refused error: "+str(firstmessage["error"]))
+                self.connection.close()
+                return
+            
+            logger.debug("connection made to dataproxy for %s %s - %s" % (dataauth, short_name, runID))
+            db = datalib.SQLiteDatabase(self, config.get('dataproxy', 'resourcedir'), short_name, dataauth, runID)
+
+                    # enter the loop that now waits for single requests (delimited by \n) 
+                    # and sends back responses through a socket
+                    # all with json objects -- until the connection is terminated
+            sbuffer = [ ]
+
+            while True:
+                try:
+                    srec = self.connection.recv(255)
+                except socket.error:
+                    logger.warning("connection to from uml recv error: "+str([runID, short_name]))
+                    break
+                
+                ssrec = srec.split("\n")  # multiple strings if a "\n" exists
+                sbuffer.append(ssrec.pop(0))
+                while ssrec:
+                    line = "".join(sbuffer)
+                    if line:
+                        request = json.loads(line) 
+                        try:
+                            self.process(db, request)
+                        except socket.error:
+                            logger.warning("connection sending to uml socket.error: "+str([runID, short_name]))
+                            srec = ""  # break out of loop
+                    sbuffer = [ ssrec.pop(0) ]  # next one in
+                if not srec:
+                    break
+            logger.debug("ending connection %s - %s" % (short_name, runID))
+            self.connection.close()
+        except:
+            logger.error("do_GET uncaught exception: %s %s %s" % sys.exc_info())
 
 
     do_HEAD   = do_GET
@@ -199,7 +173,6 @@ class ProxyHTTPServer(SocketServer.ForkingMixIn, BaseHTTPServer.HTTPServer):
 
 def sigTerm(signum, frame):
     #logger.debug("terminating")    # many of these, only one terminated
-    os.kill(child, signal.SIGTERM)
     os.remove(poptions.pidfile)
     logger.warning("terminated")
     sys.exit(1)
@@ -210,9 +183,6 @@ if __name__ == '__main__':
     if os.fork() == 0 :
         os.setsid()
         sys.stdin = open('/dev/null')
-        if stdoutlog:
-            sys.stdout = stdoutlog
-            sys.stderr = stdoutlog
         if os.fork() == 0 :
             ppid = os.getppid()
             while ppid != 1 :
@@ -228,22 +198,11 @@ if __name__ == '__main__':
     pf.write('%d\n' % os.getpid())
     pf.close()
         
-
     if poptions.setuid:
         gid = grp.getgrnam("nogroup").gr_gid
         os.setregid(gid, gid)
         uid = pwd.getpwnam("nobody").pw_uid
         os.setreuid(uid, uid)
-
-    # subproc mode
-    signal.signal(signal.SIGTERM, sigTerm)
-    while True:
-        child = os.fork()
-        if child == 0:
-            break
-        logger.info("%s: Forked subprocess: %d" % (datetime.datetime.now().ctime(), child))
-        os.wait()
-
 
     port = config.getint('dataproxy', 'port')
     ProxyHandler.protocol_version = "HTTP/1.0"
