@@ -55,8 +55,20 @@ $(document).ready(function()
 }); 
 
 
+    // load in the whole new page and snip out the piece (this is too easy)
+function reload_scraper_contributors()
+{
+    $("#scraper_contributors h3").css("background", "#888"); 
+    $.get(document.location, function(htmlpage)  
+    { 
+        $("#scraper_contributors").html($(htmlpage).find("#scraper_contributors").html())
+        setupChangeEditorStatus(); 
+    }); 
 
-// all used only by the code_overview page
+    // original action: 
+    //    document.location.reload(true);
+}
+
 function setupScraperEditInPlace(wiki_type, short_name)
 {
     //about
@@ -141,120 +153,6 @@ function setupScraperEditInPlace(wiki_type, short_name)
     $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
 
 
-    // changing editor status
-    $('#addneweditor a').click(function()
-    {
-        $('#addneweditor a').hide()
-        $('#addneweditor span').show(); 
-    }); 
-    $('#addneweditor input.cancelbutton').click(function()
-    {
-        $('#addneweditor span').hide(); 
-        $('#addneweditor a').show()
-    }); 
-    $('#addneweditor input.addbutton').click(function()
-    {
-        var thisli = $(this).parents("li:first"); 
-        var sdata = { roleuser:$('#addneweditor input:text').val(), newrole:'editor' }; 
-        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
-        {
-            $('#addneweditor input:text').val(''); 
-            if (result.substring(0, 6) == "Failed")
-                alert(result); 
-            else 
-                document.location.reload(true)
-        }}); 
-        $('#addneweditor span').hide(); 
-        $('#addneweditor a').show(); 
-    }); 
-
-    $('.demotebutton').click(function() 
-    {
-        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'follow' }; 
-        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
-        {
-            if (result.substring(0, 6) == "Failed")
-                alert(result); 
-            else 
-                document.location.reload(true)
-        }}); 
-    }); 
-    $('.promotebutton').click(function() 
-    {
-        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'editor' }; 
-        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
-        {
-            if (result.substring(0, 6) == "Failed")
-                alert(result); 
-            else 
-                document.location.reload(true)
-        }}); 
-    }); 
-
-
-    if ($('#addneweditor input:text').length)
-        $('#addneweditor input:text').autocomplete(
-    {
-        minLength: 2,
-        open: function() {  $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); }, 
-        close: function() {  $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); }, 
-        //select: function(event, ui) { rewriteapiurl(); },
-        source: function(request, response) 
-        {
-            var nolist = [ ]; 
-            $("ul#contributorslist li span").each(function(i, el) { nolist.push($(el).text()); }); 
-            $.ajax(
-            {
-                url: $('#id_api_base').val()+"scraper/usersearch",
-                dataType: "jsonp",
-                data: { format:"jsondict", maxrows:12, searchquery:request.term, nolist:nolist.join(" ") },
-                success: function(data) 
-                {
-                    response($.map(data, function(item) { return  { label: item.username, desc: item.profilename, value: item.username }})); 
-                }
-            })
-        },
-        focus: function(event, ui)  { $( "#addneweditor input:text" ).val(ui.item.label);  return false; }
-    })
-    .data( "autocomplete" )._renderItem = function(ul, item) 
-    {
-        return $( "<li></li>" )
-        .data( "item.autocomplete", item )
-        .append( '<a><strong>' + item.desc + '</strong><br/><span>' + item.label + '</span></a>' )
-        .appendTo(ul);
-    };
-
-
-    // Changing between public / protected(visible) / private
-
-    $('#show_privacy_choices').click(function(){
-        $('#privacy_status form').show();
-        $('#privacy_status>h4, #privacy_status>p').hide();
-    })
-
-    $('#hide_privacy_choices').click(function() 
-    {
-        $('#privacy_status form').hide();
-        $('#privacy_status>h4, #privacy_status>p').show();
-    }); 
-    $('#saveprivacy').click(function() 
-    {
-        var radio_value = $('input[name=privacy_status]:checked').val(); 
-        var sdata = { value:radio_value }; 
-        $.ajax({url:$("#adminprivacystatusurl").val(), type: 'POST', data:sdata, success:function(result)
-        {
-            if (result.substring(0, 6) == "Failed")
-                alert(result); 
-            else 
-                document.location.reload(true)
-        }}); 
-    }).hide();
-
-	$('#privacy_status :radio').change(function(){
-		$('#saveprivacy').trigger('click');
-	});
-
-
 
 
      //scheduler
@@ -321,4 +219,121 @@ function setupScraperEditInPlace(wiki_type, short_name)
            });
            return false;
        });
+}
+
+
+function setupChangeEditorStatus()
+{
+    // changing editor status
+    $('#addneweditor a').click(function()
+    {
+        $('#addneweditor a').hide()
+        $('#addneweditor span').show(); 
+    }); 
+    $('#addneweditor input.cancelbutton').click(function()
+    {
+        $('#addneweditor span').hide(); 
+        $('#addneweditor a').show()
+    }); 
+    $('#addneweditor input.addbutton').click(function()
+    {
+        var thisli = $(this).parents("li:first"); 
+        var sdata = { roleuser:$('#addneweditor input:text').val(), newrole:'editor' }; 
+        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
+        {
+            $('#addneweditor input:text').val(''); 
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                reload_scraper_contributors(); 
+        }}); 
+        $('#addneweditor span').hide(); 
+        $('#addneweditor a').show(); 
+    }); 
+
+    $('.demotebutton').click(function() 
+    {
+        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'follow' }; 
+        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
+        {
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                reload_scraper_contributors(); 
+        }}); 
+    }); 
+    $('.promotebutton').click(function() 
+    {
+        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'editor' }; 
+        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
+        {
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                reload_scraper_contributors(); 
+        }}); 
+    }); 
+
+
+    if ($('#addneweditor input:text').length)
+        $('#addneweditor input:text').autocomplete(
+    {
+        minLength: 2,
+        open: function() {  $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); }, 
+        close: function() {  $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); }, 
+        //select: function(event, ui) { rewriteapiurl(); },
+        source: function(request, response) 
+        {
+            var nolist = [ ]; 
+            $("ul#contributorslist li span").each(function(i, el) { nolist.push($(el).text()); }); 
+            $.ajax(
+            {
+                url: $('#id_api_base').val()+"scraper/usersearch",
+                dataType: "jsonp",
+                data: { format:"jsondict", maxrows:12, searchquery:request.term, nolist:nolist.join(" ") },
+                success: function(data) 
+                {
+                    response($.map(data, function(item) { return  { label: item.username, desc: item.profilename, value: item.username }})); 
+                }
+            })
+        },
+        focus: function(event, ui)  { $( "#addneweditor input:text" ).val(ui.item.label);  return false; }
+    })
+    .data( "autocomplete" )._renderItem = function(ul, item) 
+    {
+        return $( "<li></li>" )
+        .data( "item.autocomplete", item )
+        .append( '<a><strong>' + item.desc + '</strong><br/><span>' + item.label + '</span></a>' )
+        .appendTo(ul);
+    };
+
+
+    // Changing between public / protected(visible) / private
+
+    $('#show_privacy_choices').click(function(){
+        $('#privacy_status form').show();
+        $('#privacy_status>h4, #privacy_status>p').hide();
+    })
+
+    $('#hide_privacy_choices').click(function() 
+    {
+        $('#privacy_status form').hide();
+        $('#privacy_status>h4, #privacy_status>p').show();
+    }); 
+    $('#saveprivacy').click(function() 
+    {
+        var radio_value = $('input[name=privacy_status]:checked').val(); 
+        var sdata = { value:radio_value }; 
+        $.ajax({url:$("#adminprivacystatusurl").val(), type: 'POST', data:sdata, success:function(result)
+        {
+            if (result.substring(0, 6) == "Failed")
+                alert(result); 
+            else 
+                reload_scraper_contributors(); 
+        }}); 
+    }).hide();
+
+	$('#privacy_status :radio').change(function(){
+		$('#saveprivacy').trigger('click');
+	});
 }
