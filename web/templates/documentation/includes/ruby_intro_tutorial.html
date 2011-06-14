@@ -1,5 +1,10 @@
 <h2>1. Make a new scraper</h2>
 
+<p>We're going to scrape the averge number of years children spend
+in school in different countries from 
+<a href="http://unstats.un.org/unsd/demographic/products/socind/education.htm">this page</a> on a UN site.
+</p>
+
 <p>Pick "new scraper" from the main menu on the right, and choose Ruby.
 (If you're more comfortable with Python or PHP, choose a different language
 above). You'll get a web based code editor.
@@ -20,9 +25,6 @@ printed in the Console tab at the bottom of the editor.
 </p>
 
 <h2>2. Download HTML from the web</h2>
-
-<p>We're going to scrape the averge number of years children spend
-in school in different countries from a UN site.</p>
 
 <p>You can use any normal Ruby library to crawl the web, such as Net::HTTP
 or Mechanize. There is also a simple built in ScraperWiki function which may
@@ -68,14 +70,15 @@ a schema up front.</p>
 <p>Replace "puts data.to_json" in the Nokogiri loop (just before the "end" line)
 with this save command:</p>
 
-<code>  ScraperWiki.save(unique_keys=['country'], data=data)
+<code>  ScraperWiki.save_sqlite(unique_keys=['country'], data=data)
 </code>
 
 <p>The unique keys (just country in this case) identify each piece of data.
 When the scraper runs again, existing data with the same values for the
 unique keys is replaced.</p>
 
-<p>Go to the Data tab in the editor to see the data loading in.</p>
+<p>Go to the Data tab in the editor to see the data loading in. 
+Wait until it has finished.</p>
 
 <h2>5. Getting the data out again</h2>
 

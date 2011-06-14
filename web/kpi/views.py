@@ -22,7 +22,7 @@ def index(request):
     user = request.user
     context = {}
 
-    if not user.is_authenticated() or not user.is_superuser:
+    if not user.is_authenticated() or not user.is_staff:
         raise PermissionDenied
 
     years_list = []

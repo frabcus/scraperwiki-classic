@@ -1,5 +1,5 @@
 """
-At the moment, this only tests some scraper.views
+At the moment, this only tests some codewiki.views
 """
 
 from django.core.urlresolvers import reverse
@@ -8,7 +8,7 @@ from django.test import TestCase
 import codewiki
 
 class ScraperViewsTests(TestCase):
-    fixtures = ['test_data.json']
+    fixtures = ['./fixtures/test_data.json']
     
     def test_scraper_list(self):
         """
@@ -62,7 +62,7 @@ class ScraperViewsTests(TestCase):
     def test_scraper_export_csv(self):
         response = self.client.get(reverse('export_csv',
                             kwargs={'short_name': 'test_scraper'}))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302) # this now redirects to the API
 
     def test_scraper_all_tags(self):
         response = self.client.get(reverse('all_tags'))

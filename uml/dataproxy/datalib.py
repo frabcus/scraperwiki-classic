@@ -42,9 +42,11 @@ def authorizer_writemain(action_code, tname, cname, sql_location, trigger):
     return authorizer_readonly(action_code, tname, cname, sql_location, trigger)
     
 
+class Database(object):
+    def process(self):
+        raise NotImplementedError
 
-
-class Database:
+class SQLiteDatabase(Database):
 
     def __init__(self, ldataproxy, resourcedir, short_name, dataauth, runID):
         self.dataproxy = ldataproxy  # this is just to give access to self.dataproxy.connection.send()
@@ -58,20 +60,53 @@ class Database:
         self.authorizer_func = None  
         self.sqlitesaveinfo = { }  # tablename -> info
 
+        self.scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
+
+    def process(self, request):
+        if type(request) != dict:
+            res = {"error":'request must be dict', "content":str(request)}
+        elif "maincommand" not in request:
+            res = {"error":'request must contain maincommand', "content":str(request)}
+
+        elif request["maincommand"] == 'clear_datastore':
+            res = self.clear_datastore()
+
+        elif request["maincommand"] == 'sqlitecommand':
+            if request["command"] == "downloadsqlitefile":
+                res = self.downloadsqlitefile(seek=request["seek"], length=request["length"])
+            elif request["command"] == "datasummary":
+                res = self.datasummary(request.get("limit", 10))
+            elif request["command"] == "attach":
+                res = self.sqliteattach(request.get("name"), request.get("asname"))
+            elif request["command"] == "commit":
+                res = self.sqlitecommit()
+
+                # in the case of stream chunking there is one sendall in a loop in this function
+        elif request["maincommand"] == "sqliteexecute":
+            res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"), streamchunking=request.get("streamchunking"))
+
+        elif request["maincommand"] == 'save_sqlite':
+            res = self.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
+
+        else:
+            res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
+            logger.error(json.dumps(res))
+
+        return res
+
+
 
     def clear_datastore(self):
-        scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
-        scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+        scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
         if os.path.isfile(scrapersqlitefile):
-            deletedscrapersqlitefile = os.path.join(scraperresourcedir, "DELETED-defaultdb.sqlite")
+            deletedscrapersqlitefile = os.path.join(self.scraperresourcedir, "DELETED-defaultdb.sqlite")
             shutil.move(scrapersqlitefile, deletedscrapersqlitefile)
         return {"status":"good"}
 
     
             # To do this properly would need to ensure file doesn't change during this process
     def downloadsqlitefile(self, seek, length):
-        scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
-        scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+        scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
         lscrapersqlitefile = os.path.join(self.short_name, "defaultdb.sqlite")
         if not os.path.isfile(scrapersqlitefile):
             return {"status":"No sqlite database"}
@@ -110,12 +145,11 @@ class Database:
         
         if not self.m_sqlitedbconn:
             if self.short_name:
-                scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
-                if not os.path.isdir(scraperresourcedir):
+                if not os.path.isdir(self.scraperresourcedir):
                     if not bcreate: 
                         return False
-                    os.mkdir(scraperresourcedir)
-                scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+                    os.mkdir(self.scraperresourcedir)
+                scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:")   # draft scrapers make a local version
@@ -150,8 +184,7 @@ class Database:
         
         result = {"tables":tables}
         if self.short_name:
-            scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
-            scrapersqlitefile = os.path.join(scraperresourcedir, "defaultdb.sqlite")
+            scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
             if os.path.isfile(scrapersqlitefile):
                 result["filesize"] = os.path.getsize(scrapersqlitefile)
         return result
