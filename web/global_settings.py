@@ -208,9 +208,6 @@ DISPATCHERURL = "http://localhost:9000"
 
 PAGINATION_DEFAULT_PAGINATION=20
 
-    # should be in localsettings instead
-UMLURLS = ["http://89.16.177.195:9101", "http://89.16.177.195:9102", "http://89.16.177.195:9103", "http://89.16.177.195:9104"]
-
 ENABLE_MARKETPLACE = False
 
 # tell south to do migrations when doing tests
