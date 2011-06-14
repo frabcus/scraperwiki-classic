@@ -10,7 +10,8 @@ var showinglookup = {
     getinfo:'.format, .name, .version, .history_start_date, .quietfields, .callback',
     getruninfo:'.format, .name, .runid, .callback',
     getuserinfo:'.format, .username, .callback',
-    search:'.format, .searchquery, .maxrows, .callback'
+    search:'.format, .searchquery, .maxrows, .callback',
+    usersearch:'.format, .searchquery, .nolist, .maxrows, .callback'
 }
 
 $(function()
@@ -290,6 +291,7 @@ $(function()
         <li><a href="#getruninfo"><strong>scraperwiki.scraper.getruninfo</strong><small>See what the scraper did&nbsp;during&nbsp;each&nbsp;run</small></a></li>
         <li><a href="#getuserinfo"><strong>scraperwiki.scraper.getuserinfo</strong><small>Find out information about a user</small></a></li>
         <li><a href="#search"><strong>scraperwiki.scraper.search</strong><small>Search the titles and descriptions of&nbsp;all&nbsp;our&nbsp;scrapers</small></a></li>
+        <li><a href="#usersearch"><strong>scraperwiki.scraper.usersearch</strong><small>Search for a user by name</small></a></li>
     </ul>
 
     <div id="detail">
@@ -355,7 +357,11 @@ $(function()
                 <label for="id_maxrows">maxrows</label>
                 <input type="text" name="maxrows" id="id_maxrows" value="5">
         	</li> 
-        	<li class="callback">
+        	<li class="nolist">
+            <label for="id_nolist">nolist<span class="desc">, space separated list of users not to return</span></label>
+                <input type="text" name="nolist" id="id_nolist">
+        	</li> 
+         	<li class="callback">
                 <label for="id_callback">callback<span class="desc"> for JSONP (optional)</span></label>
                 <input type="text" name="callback" id="id_callback">
         	</li> 
