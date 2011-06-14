@@ -1,4 +1,9 @@
 {% extends "codewiki/scraper_base.html" %}
+
+{% block javascript %}
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/codeoverview.js?{{settings.REVISION}}"></script>
+{% endblock %}
+
 {% load humanize %}
 {% load schedule %}
 {% block tab %}
@@ -8,6 +13,7 @@
 <fieldset>
     <input type="hidden" id="hidScheduleOptions" value="{ {% for schedule_option, schedule_text in schedule_options %}'{{schedule_option|safe}}':'{{schedule_text|safe}}', {% endfor %} 'selected': 'PLACEHOLDER' }" />
     <input type="hidden" id="hidLicenseChoices" value="{ {% for name, text in license_choices %}'{{name}}':'{{text}}', {% endfor %} }" />
+    <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
 </fieldset>
 
 <div class="page_title">
@@ -220,62 +226,14 @@
     {{block.super}}
 
 {% if user.is_authenticated %}
+$(document).ready(function() 
+{
     setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
     setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
+    setupScraperEditInPlace('{{scraper.wiki_type}}', '{{scraper.short_name}}');
+});
 {% endif %}
 
-
-
-$("#downloadcsvtable").hide(); 
-// detect clicks on data tabs
-$('.data_tab').click(function data_tab_clicked() 
-{
-    // do nothing if already selected
-    if ($(this).hasClass('selected')) 
-        return;
-    
-    // make tab selected
-    $('.data_tab').removeClass('selected'); // all
-    $(this).addClass('selected');
-
-    // show and hide
-    $('.data_content').hide(); // all
-    var tab_content_name = $(this).attr('id').replace('data_tab', 'data_content');
-    var tablename = $(this).find("span.tablename").text(); 
-    $('#' + tab_content_name).show();
-
-    $("#downloadcsvtable").show(); 
-    $("#downloadcsvtable").attr("href", "/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+`"+encodeURI(tablename)+"`"); 
-    //$("#downloadcsvtable").text("/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+"+tablename); 
-}); 
-$('#data_tab_1').click();
-
-
-$('.sqlite_view_schema:last').hide(); 
-$('#sqlite_schema').hide(); 
-$('.sqlite_view_schema').click( function() 
-{
-    $('#sqlite_schema').toggle(500); 
-    $('.sqlite_view_schema').toggle(); 
-});
-
-
-$("#popupinteractivesqlite").click(function() 
-{
-    var url = "http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'quickcheck_datastore' %}?src="+decodeURIComponent('{{scraper.short_name}}'); 
-    $.modal('<iframe width="100%" height="100%" src='+url+'></iframe>', 
-    {
-        overlayClose: true,
-        containerCss: { borderColor:"#0ff", height:"80%", padding:0, width:"90%" }, 
-        overlayCss: { cursor:"auto" }, 
-        onShow: function() 
-        {
-            $('.simplemodal-wrap').css("overflow", "hidden"); 
-            $('.simplemodal-wrap iframe').width($('.simplemodal-wrap').width()-2); 
-            $('.simplemodal-wrap iframe').height($('.simplemodal-wrap').height()-2); 
-        }
-    }); 
-}); 
-
 {% endblock %}
+
 

@@ -1,7 +1,7 @@
 <input type="hidden" id="admincontroleditors" value="{% url scraper_admin_controleditors scraper.short_name %}"/>
 <input type="hidden" id="adminprivacystatusurl" value="{% url scraper_admin_privacystatus scraper.short_name %}"/>
 
-<ul>
+<ul id="contributorslist">
     {% if not userrolemap.owner %}
       <li style="color:red">[Error: this scraper has no creator]</li>
     {% endif %}

@@ -207,6 +207,7 @@ def code_overview(request, wiki_type, short_name):
                 ckanparams["resources_description"] = "Scraped data"
                 context["ckansubmit"] = "http://ckan.net/package/new?%s" % urllib.urlencode(ckanparams)
 
+    context["api_base"] = "http://%s/api/1.0/" % settings.API_DOMAIN
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 

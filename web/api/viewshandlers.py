@@ -250,6 +250,9 @@ def usersearch_handler(request):
     except ValueError: 
         maxrows = 5
     
+        # usernames we don't want to be returned in the search
+    nolist = request.GET.get("nolist", "").split()
+    
     if query:
         users = User.objects.filter(username__icontains=query)
         userprofiles = User.objects.filter(userprofile__name__icontains=query)
@@ -259,9 +262,12 @@ def usersearch_handler(request):
     users_all = users_all.order_by('-date_joined')
 
     result = [ ]
-    for user in users_all[:maxrows]:
-        res = {'username':user.username, "profilename":user.get_profile().name, "date_joined":user.date_joined.isoformat() }
-        result.append(res)
+    for user in users_all[:(maxrows+len(nolist))]:
+        if user.username not in nolist:
+            res = {'username':user.username, "profilename":user.get_profile().name, "date_joined":user.date_joined.isoformat() }
+            result.append(res)
+        if len(result) > maxrows:
+            break
     
     res = json.dumps(result, indent=4)
     callback = request.GET.get("callback")
