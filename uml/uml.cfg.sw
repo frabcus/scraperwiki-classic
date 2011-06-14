@@ -1,117 +1,85 @@
 [dispatcher]
-host	= 89.16.177.212
-port	= 9000
-umllist	= uml001,uml002,uml003,uml004
-confurl	= http://localhost:8080/whitelist/config
-path	= /scraperwiki/live/scrapers,/scraperwiki/live/scraperlibs
+host    = 89.16.177.212
+port    = 9000
+umllist = uml001,uml002,uml003,uml004
+confurl = http://localhost:8080/whitelist/config
+path    = /scraperwiki/live/scrapers,/scraperwiki/live/scraperlibs
 
 [twister]
 statusurl = http://localhost:8080/scrapers/twister/status
+port      = 9010
 
 [webproxy]
-host	= 89.16.177.195
-port	= 9002
-dbhost	= 89.16.177.176
-user	= cache
-passwd	= 4dlk4eaaA44A1gTx
-db	= swcache_live
+host    = 46.43.55.84
+port    = 9002
 
 [httpproxy]
-host	= 89.16.177.195
-port	= 9005
+host    = 46.43.55.84
+port    = 9005
 cache   = 127.0.0.1:11211
 
 [httpsproxy]
-host	= 89.16.177.195
-port	= 9006
+host    = 46.43.55.84
+port    = 9006
 cache   = 127.0.0.1:11211
 
 [ftpproxy]
-host	= 89.16.177.195
-port	= 9004
+host    = 46.43.55.84
+port    = 9004
 
 [dataproxy]
 dbtype  = mysql
-host    = 89.16.177.195
+host    = 46.43.55.84
 port    = 9003
 user    = datastore
-passwd  = 3jFjLrje6dFJ7cQE
+passwd  = 
 db      = datastore_live
 secure  = 89.16.177.212
 resourcedir = /var/www/scraperwiki/resourcedir
 max_api_distance = 10
 
+
 [uml001]
-host = 89.16.177.195
-tap	= 192.168.254.101
-eth	= 192.168.254.1
-port = 9001
-via	= 9101
-mem	= 1024M
-count = 25
+host    = 46.43.55.84
+tap = 192.168.254.101
+eth = 192.168.254.1
+port    = 9001
+via = 9101
+mem = 1024M
+count   = 25
+
+
 
 [uml002]
-host = 89.16.177.195
-tap	= 192.168.254.102
-eth	= 192.168.254.2
-port = 9001
-via	= 9102
-mem	= 1024M
-count = 25
+host    = 46.43.55.84
+tap = 192.168.254.102
+eth = 192.168.254.2
+port    = 9001
+via = 9102
+mem = 1024M
+count   = 25
+
+
 
 [uml003]
-host = 89.16.177.195
-tap	= 192.168.254.103
-eth	= 192.168.254.3
-port = 9001
-via	= 9103
-mem	= 1024M
-count = 25
+host    = 46.43.55.84
+tap = 192.168.254.103
+eth = 192.168.254.3
+port    = 9001
+via = 9103
+mem = 1024M
+count   = 25
+
+
 
 [uml004]
-host = 89.16.177.195
-tap	= 192.168.254.104
-eth	= 192.168.254.4
-port = 9001
-via	= 9104
-mem	= 1024M
-count = 25
-
-[uml005]
-host = 46.43.55.84
-tap	= 192.168.254.101
-eth	= 192.168.254.1
-port = 9001
-via	= 9101
-mem	= 1024M
-count = 25
-
-[uml006]
-host = 46.43.55.84
-tap	= 192.168.254.102
-eth	= 192.168.254.2
-port = 9001
-via	= 9102
-mem	= 1024M
-count = 25
-
-[uml007]
-host = 46.43.55.84
-tap	= 192.168.254.103
-eth	= 192.168.254.3
-port = 9001
-via	= 9103
-mem	= 1024M
-count = 25
-
-[uml008]
-host = 46.43.55.84
-tap	= 192.168.254.104
-eth	= 192.168.254.4
-port = 9001
-via	= 9104
-mem	= 1024M
-count = 25
+host    = 46.43.55.84
+tap = 192.168.254.104
+eth = 192.168.254.4
+port    = 9001
+via = 9104
+mem = 1024M
+count   = 25
 
 
 [loggers]
@@ -170,8 +138,6 @@ handlers=logfileHandlerDjangoDebug,logfileHandlerWarnings
 qualname=django
 propagate=0
 
-
-
 [handler_consoleHandler]
 class=StreamHandler
 level=DEBUG
@@ -182,7 +148,7 @@ args=(sys.stdout,)
 class=handlers.ConcurrentRotatingFileHandler
 level=WARNING
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/allwarnings.log', "a", 10000000, 5)
+args=('/var/log/scraperwiki/allwarnings.log', "a", 1000000000, 5)
 
 [handler_logfileHandlerEmail]
 class=handlers.SMTPHandler
@@ -195,7 +161,7 @@ args=(('localhost', 25,), 'server@scraperwiki.com', ['julian@scraperwiki.com'], 
 class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/controller.log', "a", 10000000, 5)
+args=('/var/log/scraperwiki/controller.log', "a", 1000000000, 5)
 
 [handler_logfileHandlerDataproxyDebug]
 class=handlers.ConcurrentRotatingFileHandler
@@ -207,31 +173,31 @@ args=('/var/log/scraperwiki/dataproxy.log', "a", 1000000000, 5)
 class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/dispatcher.log', "a", 10000000, 5)
+args=('/var/log/scraperwiki/dispatcher.log', "a", 1000000000, 5)
 
 [handler_logfileHandlerRunnerDebug]
 class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/runner.log', "a", 10000000, 5)
+args=('/var/log/scraperwiki/runner.log', "a", 1000000000, 5)
 
 [handler_logfileHandlerTwisterDebug]
 class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/twister.log', "a", 10000000, 5)
+args=('/var/log/scraperwiki/twister.log', "a", 1000000000, 5)
 
 [handler_logfileHandlerProxyDebug]
 class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/proxy.log', "a", 10000000, 5)
+args=('/var/log/scraperwiki/proxy.log', "a", 1000000000, 5)
 
 [handler_logfileHandlerDjangoDebug]
 class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
-args=('/var/log/scraperwiki/django.log', "a", 10000000, 5)
+args=('/var/log/scraperwiki/django.log', "a", 1000000000, 5)
 
 
 [formatter_simpleFormatter]
