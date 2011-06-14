@@ -244,7 +244,7 @@ def scraper_search_handler(request):
 
 
 def usersearch_handler(request):
-    query = request.GET.get('query') 
+    query = request.GET.get('searchquery') 
     try:   
         maxrows = int(request.GET.get('maxrows', ""))
     except ValueError: 
