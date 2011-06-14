@@ -243,6 +243,33 @@ def scraper_search_handler(request):
     return response
 
 
+def usersearch_handler(request):
+    query = request.GET.get('query') 
+    try:   
+        maxrows = int(request.GET.get('maxrows', ""))
+    except ValueError: 
+        maxrows = 5
+    
+    if query:
+        users = User.objects.filter(username__icontains=query)
+        userprofiles = User.objects.filter(userprofile__name__icontains=query)
+        users_all = users | userprofiles
+    else:
+        users_all = User.objects.all()
+    users_all = users_all.order_by('-date_joined')
+
+    result = [ ]
+    for user in users_all[:maxrows]:
+        res = {'username':user.username, "profilename":user.get_profile().name, "date_joined":user.date_joined.isoformat() }
+        result.append(res)
+    
+    res = json.dumps(result, indent=4)
+    callback = request.GET.get("callback")
+    if callback:
+        res = "%s(%s)" % (callback, res)
+    response = HttpResponse(res, mimetype='application/json; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename=search.json'
+    return response
 
 
 def userinfo_handler(request):

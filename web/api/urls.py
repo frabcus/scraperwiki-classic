@@ -13,13 +13,14 @@ except: import simplejson as json
 urlpatterns = patterns('',
     
     # current api
-    url(r'^1\.0/datastore/sqlite$',     viewshandlers.sqlite_handler,name="method_sqlite"),
-    url(r'^1\.0/datastore/getdata$',    viewshandlers.data_handler,  name="method_getdata"),
-    url(r'^1\.0/scraper/search$',       viewshandlers.scraper_search_handler,      name="method_search"),
-    url(r'^1\.0/scraper/getuserinfo$',  viewshandlers.userinfo_handler,    name="method_getuserinfo"),
+    url(r'^1\.0/datastore/sqlite$',     viewshandlers.sqlite_handler,         name="method_sqlite"),
+    url(r'^1\.0/datastore/getdata$',    viewshandlers.data_handler,           name="method_getdata"),
+    url(r'^1\.0/scraper/search$',       viewshandlers.scraper_search_handler, name="method_search"),
+    url(r'^1\.0/scraper/getuserinfo$',  viewshandlers.userinfo_handler,       name="method_getuserinfo"),
+    url(r'^1\.0/scraper/usersearch$',   viewshandlers.usersearch_handler,     name="method_usersearch"),
     
-    url(r'^1\.0/scraper/getruninfo$',   viewshandlers.runevent_handler,     name="method_getruninfo"),
-    url(r'^1\.0/scraper/getinfo$',      viewshandlers.scraperinfo_handler,        name="method_getinfo"),
+    url(r'^1\.0/scraper/getruninfo$',   viewshandlers.runevent_handler,       name="method_getruninfo"),
+    url(r'^1\.0/scraper/getinfo$',      viewshandlers.scraperinfo_handler,    name="method_getinfo"),
 
     # deprecated api
     url(r'^1\.0/datastore/search$', lambda request: HttpResponse(json.dumps({ "error":"Sorry, this function has been deprecated.", "message":"no search is possible across different databases" }))),
