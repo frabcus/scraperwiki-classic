@@ -236,7 +236,7 @@ def scraper_admin_controleditors(request, short_name):
     if newrole not in ['editor', 'follow']:
         return HttpResponse("Failed: role '%s' unrecognized" % newrole)
     if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
-        return HttpResponse("Failed: user is already '%s'" % newrole)
+        return HttpResponse("Warning: user is already '%s'" % newrole)
     newuserrole = scraper.set_user_role(roleuser, newrole)
     context = { "role":newuserrole.role, "contributor":newuserrole.user }
     context["user_owns_it"] = (request.user in scraper.userrolemap()["owner"])
