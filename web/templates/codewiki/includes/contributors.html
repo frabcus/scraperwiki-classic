@@ -41,7 +41,9 @@
         <input type="button" value="Cancel" class="cancelbutton">
         <input type="button" value="Add" class="addbutton">
       </span>
-      <a><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16" /> Add a new editor</a>
+      <a><img src="{{ MEDIA_URL }}images/icons/add.png" width="16" height="16" /> Add a new editor
+        <img id="contributors_loading" src="{{ MEDIA_URL }}images/load.gif" style="display: none">
+      </a>
     </div> 
   {% endifnotequal %}
 {% endif %}

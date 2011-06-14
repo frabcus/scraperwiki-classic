@@ -58,11 +58,12 @@ $(document).ready(function()
     // load in the whole new page and snip out the piece (this is too easy)
 function reload_scraper_contributors()
 {
-    $("#scraper_contributors h3").css("background", "#888"); 
+    $('#contributors_loading').show();
     $.get(document.location, function(htmlpage)  
     { 
         $("#scraper_contributors").html($(htmlpage).find("#scraper_contributors").html())
         setupChangeEditorStatus(); 
+        $('#contributors_loading').hide();
     }); 
 
     // original action: 
