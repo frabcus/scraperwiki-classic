@@ -230,49 +230,72 @@ function setupChangeEditorStatus()
     {
         $('#addneweditor a').hide()
         $('#addneweditor span').show(); 
+        $('#contributorserror').hide();
     }); 
     $('#addneweditor input.cancelbutton').click(function()
     {
         $('#addneweditor span').hide(); 
         $('#addneweditor a').show()
+        $('#contributorserror').hide();
     }); 
     $('#addneweditor input.addbutton').click(function()
     {
+        $('#contributorserror').hide();
         var thisli = $(this).parents("li:first"); 
         var sdata = { roleuser:$('#addneweditor input:text').val(), newrole:'editor' }; 
         $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
         {
             $('#addneweditor input:text').val(''); 
-            if (result.substring(0, 6) == "Failed")
-                alert(result); 
-            else 
+            if (result.substring(0, 6) == "Failed") {
+                $('#contributorserror').text(result).show(300);
+            } else {
                 reload_scraper_contributors(); 
-        }}); 
-        $('#addneweditor span').hide(); 
-        $('#addneweditor a').show(); 
+                $('#addneweditor span').hide(); 
+                $('#addneweditor a').show(); 
+            }
+        },
+        error:function(jq, textStatus, errorThrown)
+        {
+            $('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
+        }
+ 
+        }); 
     }); 
 
     $('.demotebutton').click(function() 
     {
+        $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'follow' }; 
         $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
         {
             if (result.substring(0, 6) == "Failed")
-                alert(result); 
+                $('#contributorserror').text(result).show(300);
             else 
                 reload_scraper_contributors(); 
-        }}); 
+        },
+        error:function(jq, textStatus, errorThrown)
+        {
+            $('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
+        }
+
+        }); 
     }); 
     $('.promotebutton').click(function() 
     {
+        $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'editor' }; 
         $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
         {
             if (result.substring(0, 6) == "Failed")
-                alert(result); 
+                $('#contributorserror').text(result).show(300);
             else 
                 reload_scraper_contributors(); 
-        }}); 
+        },
+        error:function(jq, textStatus, errorThrown)
+        {
+            $('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
+        }
+        }); 
     }); 
 
 
