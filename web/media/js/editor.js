@@ -78,6 +78,7 @@ $(document).ready(function() {
     var iselectednexteditor = 1; 
     var nanonymouseditors = 0; // number of anonymous editors
     var chatname = "";         // special in case of Anonymous users (yes, this unnecessarily gets set every time we call recordEditorStatus)
+    var clientnumber = -1;     // allocated by twister for this window, so we can find it via django
     var chatpeopletimes = { }; // last time each person made a chat message
 
     // these actually get set by the server
@@ -200,7 +201,7 @@ $(document).ready(function() {
         // that will be applied when someone else opens a window
             if (pageIsDirty && (automode != 'autotype'))
                 $('select#automode #id_autotype').attr('disabled', true); 
-            else if (!pageIsDirty && !$('select#automode #id_autosave').attr('disabled') && codeeditor)
+            else if (!pageIsDirty && !$('select#automode #id_autosave').attr('disabled') && codemirroriframe)
                 $('select#automode #id_autotype').attr('disabled', false); 
         }
 
@@ -839,27 +840,37 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             "urlquery"  : urlquery,
             "automode"  : $('select#automode option:selected').val()
         }
+
         $('.editor_controls #run').val('Sending');
         $('.editor_controls #run').unbind('click.run'); // prevent a second call to it
-        sendjson(data); 
-        autosavefunction(code); 
+        if (guid)
+            autosavefunction(code, "editorstimulaterun"); 
+        else
+        {
+            sendjson(data); 
+            autosavefunction(code, null); 
+        }
     }
 
-    function autosavefunction(code)
+    function autosavefunction(code, stimulate_run)
     {
         // do a save to the system every time we run (this would better be done via twisted at some point)
         var automode = $('select#automode option:selected').val(); 
         if ((automode == 'autosave') || (automode == 'autotype'))
         {
             if (pageIsDirty)
-                saveScraper(); 
-            else if (lastsavedcode && (lastsavedcode != code) && codeeditor)
+                saveScraper(stimulate_run); 
+            else if (lastsavedcode && (lastsavedcode != code) && codemirroriframe)
             {
                 var historysize = codeeditor.historySize(); 
                 writeToChat("Page should have been marked dirty but wasn't: historysize="+historysize.undo+"  savedundo="+savedundo); 
-                saveScraper(); 
+                saveScraper(stimulate_run); 
             }
+            else if (stimulate_run == "editorstimulaterun")
+                saveScraper("editorstimulaterun_nosave"); 
         }
+        //else if (stimulate_run == "editorstimulaterun")
+        //    saveScraper("editorstimulaterun_nosave"); 
     } 
 
 
@@ -971,6 +982,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         loggedineditors = data.loggedineditors;  // this is a list
         nanonymouseditors = data.nanonymouseditors; 
         chatname = data.chatname; 
+        clientnumber = data.clientnumber; 
 
         if (data.message)
             writeToChat('<i>'+cgiescape(data.message)+'</i>'); 
@@ -1264,7 +1276,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function makeSelection(selrange)
     {
-        if (codeeditor)
+        if (codemirroriframe)
         {
             var linehandlestart = codeeditor.nthLine(selrange.startline + 1); 
             var linehandleend = (selrange.endline == selrange.startline ? linehandlestart : codeeditor.nthLine(selrange.endline + 1)); 
@@ -1288,7 +1300,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         var oldcode = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
         var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: oldcode }, timeout: 10000 }); 
         var reloaddata = $.evalJSON(reloadajax.responseText); 
-        if (codeeditor)
+        if (codemirroriframe)
             codeeditor.setCode(reloaddata.code); 
         else
             $("#id_code").val(reloaddata.code); 
@@ -1330,7 +1342,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         // actually the save button
         $('.editor_controls #btnCommitPopup').live('click', function()
         {
-            saveScraper();  
+            saveScraper(false);  
             return false;
         });
         $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')); 
@@ -1452,7 +1464,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         }); 
     }
 
-    function saveScraper()
+    function saveScraper(stimulate_run)
     {
         if ($('.editor_controls #btnCommitPopup').attr('disabled'))
             return; 
@@ -1477,7 +1489,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         if (!bSuccess)
             return; 
 
-        if (codeeditor)
+        if (codemirroriframe)
         {
             var historysize = codeeditor.historySize(); 
             atsavedundo = historysize.undo + historysize.lostundo; 
@@ -1495,9 +1507,15 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                         guid            : guid,
                         language        : scraperlanguage,
                         code            : currentcode,
-                        earliesteditor  : earliesteditor.toUTCString(), // goes into the comment of the commit for grouping a series of commits done in same session
-                        windowguid      : $('#window_guid').val()
+                        earliesteditor  : earliesteditor.toUTCString() // goes into the comment of the commit for grouping a series of commits done in same session
                     }
+
+        if (stimulate_run)
+        {
+            sdata.stimulate_run = stimulate_run; 
+            sdata.urlquery = (!$('#id_urlquery').length || $('#id_urlquery').hasClass('hint') ? '' : $('#id_urlquery').val()); 
+            sdata.clientnumber = clientnumber; 
+        }
 
         // on success
         $.ajax({ url:$('input#saveurl').val(), type:'POST', contentType:"application/json", dataType:"html", data:sdata, timeout: 10000, success:function(response) 
@@ -1508,6 +1526,12 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 alert("Save failed error message: "+res.message); 
                 return; 
             }
+            if (stimulate_run == "editorstimulaterun_nosave")
+            {
+                writeToChat(response); 
+                return; 
+            }
+
 
             // 'A temporary version of your scraper has been saved. To save it permanently you need to log in'
             if (res.draft == 'True')
@@ -1548,7 +1572,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
         }});
 
-        $('.editor_controls #btnCommitPopup').val('Saving ...');
+        if (stimulate_run != "editorstimulaterun_nosave")
+            $('.editor_controls #btnCommitPopup').val('Saving ...');
     }
 
     // cause a fork of scraper being edited

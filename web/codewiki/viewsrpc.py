@@ -126,7 +126,8 @@ def rpcexecute(request, short_name, revision=None):
 
     
 # uncomment this line and comment next two lines to enable runner through twisted
-    #runnerstream = runsockettotwister.RunnerSocket(scraper, revision, request.META["QUERY_STRING"])
+    #runnerstream = runsockettotwister.RunnerSocket()
+    #runnerstream = runsockettotwister.runscraper(scraper, revision, request.META["QUERY_STRING"])
     runner = MakeRunner(request, scraper, code)
     runnerstream = runner.stdout
 

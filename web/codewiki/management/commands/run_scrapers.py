@@ -263,7 +263,8 @@ class ScraperRunner(threading.Thread):
         
 # this allows for using twister version
         if False:
-            runnerstream = runsockettotwister.RunnerSocket(self.scraper, None, "")
+            runnerstream = runsockettotwister.RunnerSocket()
+            runnerstream = runsockettotwister.runscraper(self.scraper, None, "")
             pid = os.getpid()
         else:
             guid = self.scraper.guid

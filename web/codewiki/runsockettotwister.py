@@ -14,18 +14,23 @@ except ImportError: import simplejson as json
 config = ConfigParser.ConfigParser()
 config.readfp(open(settings.CONFIGFILE))
 
+
+
 class RunnerSocket:
-    def __init__(self, scraper, rev, query_string):
+    def __init__(self):
         self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.jsonsbuffer = [ ]
         self.jsonoutputlist = [ ]
         
         self.soc.connect(("127.0.0.1", config.getint("twister", "port")))
         
+
+    def runscraper(self, scraper, rev, query_string):
         data = { "command":'connection_open', "guid":scraper.guid, 
                  "username":"DJANGOFRONTEND", "userrealname":"DJANGOFRONTEND", 
                  "language":scraper.language, "scrapername":scraper.short_name, 
                  "isstaff":True }
+        
         self.soc.send(json.dumps(data)+"\r\n") 
         jdata = self.next()
         cdata = json.loads(jdata)
@@ -40,8 +45,16 @@ class RunnerSocket:
                 }
         self.soc.send(json.dumps(rdata)+"\r\n") 
 
-# should identify the django type with a special automode
-# automode
+    def stimulate_run_from_editor(self, guid, username, short_name, clientnumber, language, code, urlquery):
+        data = { "command":'stimulate_run', "language":language, "code":code, "urlquery":urlquery, "username":username, "scrapername":short_name, "clientnumber":clientnumber, "guid":guid }
+        self.soc.send(json.dumps(data)+"\r\n") 
+        jdata = self.readline()
+        self.soc.close()
+        print [jdata]
+        if not jdata:
+            return { "error":"blank stimulation response" }
+        cdata = json.loads(jdata)
+        return cdata
 
         # incoming messages from twister are delimited by ",\r\n"
     def next(self):
@@ -72,4 +85,5 @@ class RunnerSocket:
         except StopIteration:
             return ""
         
+
 

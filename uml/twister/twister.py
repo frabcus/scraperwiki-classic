@@ -7,6 +7,7 @@ This script is the interface between the UML/firebox set up and the frontend Orb
 There is one client object (class RunnerProtocol) per editor window
 These recieve and send all messages between the browser and the UML
 An instance of a scraper running in the UML is spawnRunner
+
 The RunnerFactory organizes lists of these clients and manages their states
 There is one UserEditorsOnOneScraper per user per scraper to handle one user opening multiple windows onto the same scraper
 There is one EditorsOnOneScraper per scraper which bundles logged in users into a list of UserEditorsOnOneScrapers
@@ -188,7 +189,39 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         # data uploaded when a new connection is made from the editor
         if command == 'connection_open':
             self.lconnectionopen(parsed_data)
-            
+
+                # finds the appriate client and presses the run button on it
+        elif command == 'stimulate_run':
+            scrapername = parsed_data["scrapername"]
+            guid = parsed_data["guid"]
+            username = parsed_data["username"]
+            clientnumber = parsed_data["clientnumber"]
+
+            client = None
+            eoos = self.factory.guidclientmap.get(guid)
+            if eoos:
+                usereditor = eoos.usereditormap.get(username)
+                if usereditor:
+                    for lclient in usereditor.userclients:
+                        if lclient.clientnumber == clientnumber:
+                            client = lclient
+            if client:
+                logger.info("stimulate on : %s %s client# %d" % (client.cchatname, client.scrapername, client.clientnumber))
+
+            if client:
+                logger.info("stimulate on : %s %s client# %d" % (client.cchatname, client.scrapername, client.clientnumber))
+                if not client.processrunning:
+                    client.runcode(parsed_data)
+                    self.writejson({"status":"run started"})  
+                else:
+                    self.writejson({"status":"client already running"})  
+            else:
+                logger.info("client not found %s" % parsed_data)
+                self.writejson({"status":"client not found"})  
+
+            self.transport.loseConnection()
+
+
         elif command == 'saved':
             line = json.dumps({'message_type' : "saved", 'chatname' : self.chatname})
             otherline = json.dumps({'message_type' : "othersaved", 'chatname' : self.chatname})
@@ -333,6 +366,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         except:
             pass
 
+    
+            # this more recently can be called from stimulate_run from django
     def runcode(self, parsed_data):
         code = parsed_data.get('code', '')
         code = code.encode('utf8')
@@ -346,10 +381,9 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         scrapername = parsed_data.get('scrapername', '')
         scraperlanguage = parsed_data.get('language', '')
         urlquery = parsed_data.get('urlquery', '')
-        automode = parsed_data.get('automode', '')
         username = parsed_data.get('username', '')
-        
-        
+        automode = parsed_data.get('automode', '')
+
         assert guid == self.guid
         args = ['./firestarter/runner.py']
         args.append('--guid=%s' % guid)
@@ -469,11 +503,13 @@ class EditorsOnOneScraper:
         editorstatusdata["message"] = message
         for client in self.anonymouseditors:
             editorstatusdata["chatname"] = client.chatname
+            editorstatusdata["clientnumber"] = client.clientnumber
             client.writejson(editorstatusdata); 
         
         for usereditor in self.usereditormap.values():
             for client in usereditor.userclients:
                 editorstatusdata["chatname"] = client.chatname
+                editorstatusdata["clientnumber"] = client.clientnumber
                 client.writejson(editorstatusdata) 
     
     def Dcountclients(self):
@@ -634,6 +670,7 @@ class RunnerFactory(protocol.ServerFactory):
             editorstatusdata["nowtime"] = jstime(datetime.datetime.now())
             editorstatusdata['earliesteditor'] = jstime(client.clientsessionbegan)
             editorstatusdata["scraperlasttouch"] = jstime(client.clientlasttouch)
+            editorstatusdata["clientnumber"] = client.clientnumber
             
             client.writejson(editorstatusdata); 
             self.draftscraperclients.append(client)
@@ -671,11 +708,6 @@ class RunnerFactory(protocol.ServerFactory):
         # check that all clients are accounted for
         assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
         self.notifyMonitoringClients(client)
-
-
-
-
-
 
 
 

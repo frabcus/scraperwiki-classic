@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 from codewiki import models
+import runsockettotwister
 
 import vc
 import difflib
@@ -132,9 +133,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     
     context = {'selected_tab':'code'}
     
-        # lookup key for this window to coordinate between twister and django
-    context["windowguid"] = "window%s" % uuid.uuid4()
-        
     if re.match('[\d\.\w]+$', request.GET.get('codemirrorversion', '')):
         context["codemirrorversion"] = request.GET.get('codemirrorversion')
     else:
@@ -273,6 +271,8 @@ def handle_editor_save(request):
     guid = request.POST.get('guid', '')
     title = request.POST.get('title', '')
     language = request.POST.get('language', '').lower()
+    code = request.POST.get('code', "")
+    stimulaterun = request.POST.get('stimulate_run', '')
     
     if not title or title.lower() == 'untitled':
         return HttpResponse(json.dumps({'status' : 'Failed', 'message':"title is blank or untitled"}))
@@ -306,8 +306,20 @@ def handle_editor_save(request):
                 scraper.forked_from = models.Code.objects.exclude(privacy_status="deleted").get(short_name=fork)
             except models.Code.DoesNotExist:
                 pass
-            
-    code = request.POST.get('code', "")
+
+    if stimulaterun in ["editorstimulaterun", "editorstimulaterun_nosave"]:
+        clientnumber = int(request.POST.get('clientnumber', '-1'))
+        urlquery = request.POST.get('urlquery', '')
+        if request.user.is_authenticated() and scraper.actionauthorized(request.user, "stimulate_run"):
+            runnerstream = runsockettotwister.RunnerSocket()
+            stimulaterunmessage = runnerstream.stimulate_run_from_editor(guid, request.user.username, scraper.short_name, clientnumber, language, code, urlquery)
+        else:
+            stimulaterunmessage = {"message":"not authorized to run"}
+
+    if stimulaterun == "editorstimulaterun_nosave":
+        stimulaterunmessage['status'] = 'notsaved'
+        return HttpResponse(json.dumps(stimulaterunmessage))
+    
     sourcescraper = request.POST.get('sourcescraper', "")
     commitmessage = request.POST.get('commit_message', "")
     
@@ -316,6 +328,7 @@ def handle_editor_save(request):
         earliesteditor = request.POST.get('earliesteditor', "")
         if not scraper.actionauthorized(request.user, "savecode"):
             return HttpResponse(json.dumps({'status':'Failed', 'message':"Not allowed to save this scraper"}))
+        
         (rev, revdate) = save_code(scraper, request.user, code, earliesteditor, commitmessage, sourcescraper)  
         response_url = reverse('editor_edit', kwargs={'wiki_type': scraper.wiki_type, 'short_name': scraper.short_name})
         return HttpResponse(json.dumps({'redirect':'true', 'url':response_url, 'rev':rev, 'revdateepoch':_datetime_to_epoch(revdate) }))
