@@ -15,6 +15,7 @@ import urllib
 import os
 import time
 from codewiki.management.commands.run_scrapers import GetDispatcherStatus
+import uuid
 
 try:                 import json
 except ImportError:  import simplejson as json
@@ -131,6 +132,9 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     
     context = {'selected_tab':'code'}
     
+        # lookup key for this window to coordinate between twister and django
+    context["windowguid"] = "window%s" % uuid.uuid4()
+        
     if re.match('[\d\.\w]+$', request.GET.get('codemirrorversion', '')):
         context["codemirrorversion"] = request.GET.get('codemirrorversion')
     else:

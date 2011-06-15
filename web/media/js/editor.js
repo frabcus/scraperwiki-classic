@@ -1,30 +1,10 @@
-// set this up outside ready, so can be called with template variables for initial values
-var lastRev = null;
-var lastRevDateEpoch = null;
-var lastRevPrefix = "";
-function updateLastSavedRev(rev, revdateepoch, prefix)
-{   
-    lastRev = rev;
-    lastRevDateEpoch = revdateepoch;
-    lastRevPrefix = prefix;
-    doUpdateLastSavedRev();
-}
-function doUpdateLastSavedRev() {
-    if (lastRev != null) {
-        var tago = jQuery.timeago(new Date(lastRevDateEpoch * 1000));
-        $("#idlastrev").html('<span title="Revision: ' + String(lastRev) + '">' + lastRevPrefix + ' ' + tago + '</span>');
-    }
-    setTimeout(doUpdateLastSavedRev, 5000);
-}
-doUpdateLastSavedRev();
-
 
 $(document).ready(function() {
 
     // editor window dimensions
     var codeeditor = null;
     var codemirroriframe = null; // the actual iframe of codemirror that needs resizing (also signifies the frame has been built)
-    var codeeditorreadonly = null; 
+    var codeeditorreadonly = false; 
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
@@ -39,7 +19,34 @@ $(document).ready(function() {
     var run_type        = $('#code_running_mode').val();
     var codemirror_url  = $('#codemirror_url').val();
     var wiki_type       = $('#id_wiki_type').val(); 
-    var rev             = $('#originalrev').val(); 
+
+    var lastRev         = $('#originalrev').val(); 
+    var lastRevDateEpoch= ($('#originalrevdateepoch').val() ? parseInt($('#originalrevdateepoch').val()) : 0); 
+    var lastRevPrefix   = "Last edited";
+
+    var lastupdaterevcall = null; 
+    function doUpdateLastSavedRev() 
+    {
+        lastupdaterevcall = null; 
+        if ((lastRev != null) && (lastRev != "unsaved"))
+        {
+            var tago = jQuery.timeago(new Date(lastRevDateEpoch * 1000));
+            $("#idlastrev").html('<span title="Revision: ' + String(lastRev) + '">' + lastRevPrefix + ' ' + tago + '</span>');
+            lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 500);
+        }
+    }
+    function updateLastSavedRev(rev, revdateepoch)
+    {   
+        lastRev = rev;
+        lastRevDateEpoch = revdateepoch;
+        lastRevPrefix = "Saved";
+        if (lastupdaterevcall != null)
+            clearTimeout(lastupdaterevcall); 
+        lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 50); 
+    }
+    lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 50); 
+
+
     var lastsavedcode   = ''; // used to tell if we should expect a null back from the revision log
 
     // if we're not authorized to edit, fake us up as anonymous for now (so
@@ -87,7 +94,7 @@ $(document).ready(function() {
     var pageIsDirty = false;
     var atsavedundo = 0; // recorded at start of save operation
     var savedundo = 0; 
-    var lastundo = 0; 
+    var lastundo = 0;
 
     var cachehidlookup = { }; // this itself is a cache of a cache
     
@@ -95,13 +102,12 @@ $(document).ready(function() {
     var chainpatchnumber = 0; // counts them going out
     var lasttypetime = new Date(); 
 
-    setCodeMirrorReadOnly(false); // would be nice to know when we call this what initial state is! so it doesn't do reload so quick when readonle
+    setupCodeEditor(); 
     setupMenu();
     setupTabs();
     setupToolbar();
     setupResizeEvents();
     setupOrbited();
-
 
     function CM_cleanText(text)  { return text.replace(/\u00a0/g, " ").replace(/\u200b/g, ""); }
     function CM_isBR(node)  { var nn = node.nodeName; return nn == "BR" || nn == "br"; }
@@ -160,7 +166,7 @@ $(document).ready(function() {
     {
         lasttypetime = new Date(); 
         var lpageIsDirty; 
-        if (codeeditor)
+        if (codemirroriframe)
         {
             var historysize = codeeditor.historySize(); 
             var automode = $('select#automode option:selected').val(); 
@@ -171,6 +177,8 @@ $(document).ready(function() {
                 savedundo = historysize.undo + historysize.lostundo; 
             if ((changetype == "reload") || (changetype == "initialized"))
                 lastsavedcode = codeeditor.getCode(); 
+            if (changetype == "initialized")
+                lastundo = 0; 
     
             var lpageIsDirty = (historysize.undo + historysize.lostundo != savedundo); 
         }
@@ -205,19 +213,23 @@ $(document).ready(function() {
 
         // also may want a facility for a watching user to be able to select an area in his window
         // and make it appear selected for the broadcast user
-        if (automode == 'autotype')
+        if ((automode == 'autotype') && codemirroriframe)
         {
             //assert codeeditor;
 
             // send any edits up the line (first to the chat page to show we can decode it)
             var historystack = codeeditor.editor.history.history; 
             var redohistorystack = codeeditor.editor.history.redoHistory; 
+            var lostundo = codeeditor.editor.history.lostundo; 
             var rdhL = redohistorystack.length - 1; 
-            while (lastundo != historystack.length)
+            while (lastundo != historystack.length + lostundo)
             {
                 var chains; 
-                if (lastundo < historystack.length)
-                    chains = historystack[lastundo++]; 
+                if (lastundo < historystack.length + lostundo)
+                {
+                    chains = historystack[lastundo - lostundo]; 
+                    lastundo++; 
+                }
                 else if (rdhL >= 0)
                 {
                     chains = redohistorystack[rdhL--]; 
@@ -230,7 +242,7 @@ $(document).ready(function() {
                 for (var i = 0; i < chains.length; i++)
                 {
                     var chain = chains[i]; 
-                    var chainpatch = { command:'typing', insertlinenumber:CM_lineNumber(chain[0].from), deletions:[ ], insertions:[ ], "chainpatchnumber":(chainpatchnumber++), "rev":rev }
+                    var chainpatch = { command:'typing', insertlinenumber:CM_lineNumber(chain[0].from), deletions:[ ], insertions:[ ], "chainpatchnumber":(chainpatchnumber++), "rev":lastRev }
                     for (var k = 0; k < chain.length; k++)
                         chainpatch["deletions"].push(chain[k].text); 
     
@@ -258,26 +270,23 @@ $(document).ready(function() {
 
 
     //setup code editor
-    function setupCodeEditor(){
+    function setupCodeEditor()
+    {
         // destroy any existing codemirror, so we can remake it with right readonly state
         if (codeeditor) {
             codeeditor.toTextArea("id_code"); 
             codeeditor = null;
-            codemirroriframe = null;
+            codemirroriframe = null;  // this only gets set once again when we know the editor has been initialized
         }
 
+// should use window.location.search
         if (window.location.hash == "#plain")
         {
             $('#id_code').keypress(function() { ChangeInEditor("edit"); }); 
             setupKeygrabs();
             resizeControls('first');
-            if (codeeditorreadonly) {
-                $('#id_code').attr("readonly", "yes");
-                setCodeeditorBackgroundImage('url(/media/images/staff.png)');
-            } else {
-                $('#id_code').attr("readonly", "");
-                setCodeeditorBackgroundImage('none');
-            }
+            $('#id_code').attr("readonly", (codeeditorreadonly ? "yes" : ""));
+            setCodeeditorBackgroundImage(codeeditorreadonly ? 'url(/media/images/staff.png)' : 'none');
             return;
         }
 
@@ -317,7 +326,7 @@ $(document).ready(function() {
 
         // track what readonly state we thought we were going to, in case it
         // changes mid setup of CodeMirror
-        expectedreadonly = codeeditorreadonly;
+        var expectedreadonly = codeeditorreadonly;
 
         codemirroroptions = {
             parserfile: parsers[scraperlanguage],
@@ -352,22 +361,28 @@ $(document).ready(function() {
                 ChangeInEditor("initialized"); 
 
                 // set up other readonly values, after rebuilding the CodeMirror editor
+                setCodeeditorBackgroundImage(expectedreadonly ? 'url(/media/images/staff.png)' : 'none');
+
                 if (expectedreadonly) {
-                    setCodeeditorBackgroundImage('url(/media/images/staff.png)');
+                    $('.editor_controls #btnCommitPopup').hide();
+                    $('.editor_controls #btnForkNow').show();
                 } else {
-                    setCodeeditorBackgroundImage('none');
+                    $('.editor_controls #btnCommitPopup').show();
+                    $('.editor_controls #btnForkNow').hide();
                 }
 
                 // our readonly state was changed under our feet while setting
                 // up CodeMirror; force a resetup of CodeMirror again
-                if (expectedreadonly != codeeditorreadonly) {
-                    codeeditorreadonly = expectedreadonly;
-                    setTimeout(function() {
-                        setCodeMirrorReadOnly(codeeditorreadonly); 
-                    }, 200);
+                if (expectedreadonly != codeeditorreadonly) 
+                {
+                    var lcodeeditorreadonly = codeeditorreadonly; 
+                    codeeditorreadonly = expectedreadonly;  // set it back 
+                    setCodeMirrorReadOnly(lcodeeditorreadonly);
                 }
             } 
         };
+
+            // now puts it in a state of building where codeeditor!=null and codemirroriframe==null
         codeeditor = CodeMirror.fromTextArea("id_code", codemirroroptions); 
     }
 
@@ -382,21 +397,15 @@ $(document).ready(function() {
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
     }
 
-    function setCodeMirrorReadOnly(val) {
-        if (codeeditorreadonly == val) {
+    function setCodeMirrorReadOnly(val) 
+    {
+        if (codeeditorreadonly == val) 
             return;
-        }
         codeeditorreadonly = val;
+        writeToChat('set codemirror editor to ' + (codeeditorreadonly ? "readonly" : "editable")); 
 
-        if (codeeditorreadonly) {
-            $('.editor_controls #btnCommitPopup').hide();
-            $('.editor_controls #btnForkNow').show();
-        } else {
-            $('.editor_controls #btnCommitPopup').show();
-            $('.editor_controls #btnForkNow').hide();
-        }
-
-        setupCodeEditor();
+            // this rebuilds the entire code editor again!!!
+        setTimeout(setupCodeEditor, 1); 
     }
 
     function setCodeeditorBackgroundImage(lcodeeditorbackgroundimage)
@@ -1026,12 +1035,15 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 setCodeMirrorReadOnly(false);
                 $('select#automode #id_autosave').attr('disabled', false); 
                 $('select#automode #id_autotype').attr('disabled', pageIsDirty); 
-                var newmode = 'autosave';
+                var newmode = 'autosave'; 
+
                 /* This forces broadcast mode (see all edits realtime rather than at save time).
                  * Bit buggy, so disabled for now
                    if (!pageIsDirty) {
                     newmode = 'autotype'; // editing (broadcast)
                 }*/
+//newmode = 'autotype'; 
+
                 $('select#automode').val(newmode); 
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
@@ -1280,7 +1292,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             codeeditor.setCode(reloaddata.code); 
         else
             $("#id_code").val(reloaddata.code); 
-        updateLastSavedRev(reloaddata.rev, reloaddata.revdateepoch, "Saved");
+        updateLastSavedRev(reloaddata.rev, reloaddata.revdateepoch);
         chainpatchnumber = 0; 
         //codeeditor.focus(); 
         if (reloaddata.selrange)
@@ -1388,9 +1400,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             $('.editor_controls #run').hide();
         else
             $('.editor_controls #run').bind('click.run', sendCode);
-
-
-
     }
 
     function popupPreview() 
@@ -1486,7 +1495,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                         guid            : guid,
                         language        : scraperlanguage,
                         code            : currentcode,
-                        earliesteditor  : earliesteditor.toUTCString() // goes into the comment of the commit to help batch sessions
+                        earliesteditor  : earliesteditor.toUTCString(), // goes into the comment of the commit for grouping a series of commits done in same session
+                        windowguid      : $('#window_guid').val()
                     }
 
         // on success
@@ -1511,7 +1521,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             if (res.draft != 'True') 
             {
                 window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
-                updateLastSavedRev(res.rev, res.revdateepoch, "Saved");
+                updateLastSavedRev(res.rev, res.revdateepoch);
                 if (res.rev == null)
                 {
                     writeToChat("No difference (null revision number)"); 
@@ -1544,8 +1554,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     // cause a fork of scraper being edited
     function forkScraper()
     {
-        document.location = $('#fork_url_action').val();
-        //document.location.reload(true)
+        window.open($('#fork_url_action').val());
     }
 
 

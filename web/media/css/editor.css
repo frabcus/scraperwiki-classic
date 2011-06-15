@@ -493,6 +493,10 @@ span.hiddenfields {
 	cursor: pointer;
 }
 
+#btnWatch {
+	cursor: pointer;
+}
+
 /* Overlays and help */
 
 /* note that height of popup is set from editor.js showPopup() */
