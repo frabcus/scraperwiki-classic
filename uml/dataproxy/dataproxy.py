@@ -44,8 +44,6 @@ parser.add_option("--logfile")
 parser.add_option("--toaddrs", default="")
 poptions, pargs = parser.parse_args()
 
-logging.config.fileConfig(configfile)
-
 class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     __base         = BaseHTTPServer.BaseHTTPRequestHandler
     __base_handle  = __base.handle
@@ -197,6 +195,8 @@ if __name__ == '__main__':
         os.setregid(gid, gid)
         uid = pwd.getpwnam("nobody").pw_uid
         os.setreuid(uid, uid)
+
+    logging.config.fileConfig(configfile)
 
     port = config.getint('dataproxy', 'port')
     ProxyHandler.protocol_version = "HTTP/1.0"
