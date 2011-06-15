@@ -11,13 +11,11 @@ import base64
 import shutil
 import re
 import sys
-
-
-logger = None   # set by dataproxy
-
-try   : import json
-except: import simplejson as json
-
+import logging
+try:
+    import json
+except:
+    import simplejson as json
 
 def authorizer_readonly(action_code, tname, cname, sql_location, trigger):
     #print "authorizer_readonly", (action_code, tname, cname, sql_location, trigger)
@@ -62,6 +60,8 @@ class SQLiteDatabase(Database):
 
         self.scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
 
+        self.logger = logging.getLogger('dataproxy')
+
     def process(self, request):
         if type(request) != dict:
             res = {"error":'request must be dict', "content":str(request)}
@@ -90,7 +90,7 @@ class SQLiteDatabase(Database):
 
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
-            logger.error(json.dumps(res))
+            self.logger.error(json.dumps(res))
 
         return res
 
@@ -141,7 +141,7 @@ class SQLiteDatabase(Database):
             self.authorizer_func = authorizer_writemain
         
         def progress_handler():
-            logger.debug("progress on %s" % self.runID)
+            self.logger.debug("progress on %s" % self.runID)
         
         if not self.m_sqlitedbconn:
             if self.short_name:
@@ -179,7 +179,7 @@ class SQLiteDatabase(Database):
                 tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                 
         except sqlite3.Error, e:
-            logger.warning("datasummary sqlite.error %s" % str(e))
+            self.logger.warning("datasummary sqlite.error %s" % str(e))
             return {"error":"sqlite3.Error: "+str(e)}
         
         result = {"tables":tables}
@@ -191,7 +191,7 @@ class SQLiteDatabase(Database):
     
     
     def sqliteexecute(self, sqlquery, data, attachlist, streamchunking):
-        logger.debug("XXXX %s %s - %s %s" % (self.runID[:5], self.short_name, sqlquery, str(data)[:50]))
+        self.logger.debug("XXXX %s %s - %s %s" % (self.runID[:5], self.short_name, sqlquery, str(data)[:50]))
 
         self.establishconnection(True)
         try:
@@ -219,19 +219,19 @@ class SQLiteDatabase(Database):
                 if len(data) < streamchunking:
                     break
                 arg["moredata"] = True
-                logger.debug("midchunk %s %d" % (self.short_name, len(data)))
+                self.logger.debug("midchunk %s %d" % (self.short_name, len(data)))
                 self.dataproxy.connection.sendall(json.dumps(arg)+'\n')
             return arg
 
         
         except sqlite3.Error, e:
             signal.alarm(0)
-            logger.debug("user sqlerror "+sqlquery[:1000])
+            self.logger.debug("user sqlerror "+sqlquery[:1000])
             return {"error":"sqlite3.Error: "+str(e)}
 
 
     def sqliteattach(self, name, asname):
-        logger.debug("attach to %s  %s as %s" % (self.short_name, name, asname))
+        self.logger.debug("attach to %s  %s as %s" % (self.short_name, name, asname))
         self.establishconnection(True)
         if self.authorizer_func == authorizer_writemain:
             self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
@@ -240,7 +240,7 @@ class SQLiteDatabase(Database):
             attachscrapersqlitefile = os.path.join(self.m_resourcedir, name, "defaultdb.sqlite")
             self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, asname or name))
         except sqlite3.Error, e:
-            logger.exception("attaching")
+            self.logger.exception("attaching")
             return {"error":"sqlite3.Error: "+str(e)}
         return {"status":"attach succeeded"}
 
@@ -302,11 +302,12 @@ class SqliteSaveInfo:
         self.swdatakeys = [ ]
         self.swdatatypes = [  ]
         self.sqdatatemplate = ""
+        self.logger = logging.getLogger('dataproxy')
 
     def sqliteexecute(self, sqlquery, data=None):
         res = self.database.sqliteexecute(sqlquery, data, None, None)
         if "error" in res:
-            logger.warning("%s  %s" % (self.database.short_name, str(res)))
+            self.logger.warning("%s  %s" % (self.database.short_name, str(res)))
         return res
     
     def rebuildinfo(self):
@@ -389,7 +390,7 @@ class SqliteSaveInfo:
             if "error" in lres:  
                 if lres["error"] != 'sqlite3.Error: index associated with UNIQUE or PRIMARY KEY constraint cannot be dropped':
                     return lres
-                logger.info("%s:  %s" % (self.database.short_name, str(lres)))
+                self.logger.info("%s:  %s" % (self.database.short_name, str(lres)))
             res["droppedindex"] = idxname
         return res
             

@@ -25,8 +25,10 @@ try:
 except:
     pass
 
-try   : import json
-except: import simplejson as json
+try:
+    import json
+except:
+    import simplejson as json
 
 # note: there is a symlink from /var/www/scraperwiki to the scraperwiki directory
 # which allows us to get away with being crap with the paths
@@ -42,11 +44,7 @@ parser.add_option("--logfile")
 parser.add_option("--toaddrs", default="")
 poptions, pargs = parser.parse_args()
 
-
 logging.config.fileConfig(configfile)
-logger = logging.getLogger('dataproxy')
-datalib.logger = logger
-
 
 class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     __base         = BaseHTTPServer.BaseHTTPRequestHandler
@@ -77,12 +75,12 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return runID, short_name
 
     def process(self, db, request):
-        logger.debug(str(("request", request))[:100])
+        self.logger.debug(str(("request", request))[:100])
 
         res = db.process(request)
         
         sres = json.dumps(res)
-        logger.debug(sres[:200])
+        self.logger.debug(sres[:200])
         self.connection.sendall(sres+'\n')
             
 
@@ -90,6 +88,8 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # this morphs into the long running two-way connection
     def do_GET (self) :
         try:
+            self.logger = logging.getLogger('dataproxy')
+
             (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
             params = dict(cgi.parse_qsl(query))
 
@@ -121,13 +121,13 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             try:
                 self.connection.sendall(json.dumps(firstmessage)+'\n')
             except socket.error:
-                logger.warning("connection to dataproxy socket.error: "+str(firstmessage))
+                self.logger.warning("connection to dataproxy socket.error: "+str(firstmessage))
             if "error" in firstmessage:
-                logger.warning("connection to dataproxy refused error: "+str(firstmessage["error"]))
+                self.logger.warning("connection to dataproxy refused error: "+str(firstmessage["error"]))
                 self.connection.close()
                 return
             
-            logger.debug("connection made to dataproxy for %s %s - %s" % (dataauth, short_name, runID))
+            self.logger.debug("connection made to dataproxy for %s %s - %s" % (dataauth, short_name, runID))
             db = datalib.SQLiteDatabase(self, config.get('dataproxy', 'resourcedir'), short_name, dataauth, runID)
 
                     # enter the loop that now waits for single requests (delimited by \n) 
@@ -139,7 +139,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 try:
                     srec = self.connection.recv(255)
                 except socket.error:
-                    logger.warning("connection to from uml recv error: "+str([runID, short_name]))
+                    self.logger.warning("connection to from uml recv error: "+str([runID, short_name]))
                     break
                 
                 ssrec = srec.split("\n")  # multiple strings if a "\n" exists
@@ -151,15 +151,15 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                         try:
                             self.process(db, request)
                         except socket.error:
-                            logger.warning("connection sending to uml socket.error: "+str([runID, short_name]))
+                            self.logger.warning("connection sending to uml socket.error: "+str([runID, short_name]))
                             srec = ""  # break out of loop
                     sbuffer = [ ssrec.pop(0) ]  # next one in
                 if not srec:
                     break
-            logger.debug("ending connection %s - %s" % (short_name, runID))
+            self.logger.debug("ending connection %s - %s" % (short_name, runID))
             self.connection.close()
         except:
-            logger.error("do_GET uncaught exception: %s %s %s" % sys.exc_info())
+            self.logger.error("do_GET uncaught exception: %s %s %s" % sys.exc_info())
 
 
     do_HEAD   = do_GET
@@ -170,12 +170,6 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 class ProxyHTTPServer(SocketServer.ForkingMixIn, BaseHTTPServer.HTTPServer):
     pass
-
-def sigTerm(signum, frame):
-    #logger.debug("terminating")    # many of these, only one terminated
-    os.remove(poptions.pidfile)
-    logger.warning("terminated")
-    sys.exit(1)
 
 if __name__ == '__main__':
 
@@ -209,6 +203,7 @@ if __name__ == '__main__':
     httpd = ProxyHTTPServer(('', port), ProxyHandler)
     httpd.max_children = 160
     sa = httpd.socket.getsockname()
+    logger = logging.getLogger('dataproxy')
     logger.info(str(("Serving HTTP on", sa[0], "port", sa[1], "...")))
     httpd.serve_forever()
 
