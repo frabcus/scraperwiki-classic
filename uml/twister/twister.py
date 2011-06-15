@@ -36,9 +36,6 @@ poptions, pargs = parser.parse_args()
 config = ConfigParser.ConfigParser()
 config.readfp(open(poptions.config))
 
-logging.config.fileConfig(poptions.config)
-logger = logging.getLogger('twister')
-
     # primarily to pick up syntax errors
 stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)  
 
@@ -67,15 +64,16 @@ class spawnRunner(protocol.ProcessProtocol):
         self.runID = None
         self.umlname = ''
         self.buffer = ''
+        self.logger = logging.getLogger('twister')
     
     def connectionMade(self):
-        logger.debug("Starting run")
+        self.logger.debug("Starting run")
         self.transport.write(self.code)
         self.transport.closeStdin()
     
     # messages from the UML
     def outReceived(self, data):
-        logger.debug("runner to client# %d %s" % (self.client.clientnumber, data[:100]))
+        self.logger.debug("runner to client# %d %s" % (self.client.clientnumber, data[:100]))
             # although the client can parse the records itself, it is necessary to split them up here correctly so that this code can insert its own records into the stream.
         lines  = (self.buffer+data).split("\r\n")
         self.buffer = lines.pop(-1)  # usually an empty
@@ -96,9 +94,9 @@ class spawnRunner(protocol.ProcessProtocol):
         self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished'}))
         self.client.factory.notifyMonitoringClients(self.client)
         if reason.type == 'twisted.internet.error.ProcessDone':
-            logger.debug("run process ended %s" % reason)
+            self.logger.debug("run process ended %s" % reason)
         else:
-            logger.debug("run process ended ok")
+            self.logger.debug("run process ended ok")
 
 
 
@@ -122,9 +120,11 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.guidclienteditors = None  # the EditorsOnOneScraper object
         self.automode = 'autosave'     # draft, autosave, autoload, autotype
         self.isumlmonitoring = None  # used to designate as not being initialized at all (bug if connection lost before it was successfully connected)
+        self.logger = logging.getLogger('twister')
+
 
     def connectionMade(self):
-        logger.info("connection client# %d" % self.factory.clientcount)
+        self.logger.info("connection client# %d" % self.factory.clientcount)
         self.factory.clientConnectionMade(self)
             # we don't know what scraper they've opened until information is send with first clientcommmand
     
@@ -145,13 +145,13 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             self.factory.anonymouscount += 1
         self.cchatname = "%s|%s" % (self.username, self.chatname)
         self.factory.clientConnectionRegistered(self)  # this will cause a notifyEditorClients to be called for everyone on this scraper
-        logger.info("connection open: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
+        self.logger.info("connection open: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
 
 
     def connectionLost(self, reason):
         if self.processrunning:
             self.kill_run(reason='connection lost')
-        logger.info("connection lost: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
+        self.logger.info("connection lost: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
         self.factory.clientConnectionLost(self)
 
         
@@ -175,7 +175,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         
             
     def clientcommand(self, command, parsed_data):
-        logger.debug("command %s client# %d" % (command, self.clientnumber))
+        self.logger.debug("command %s client# %d" % (command, self.clientnumber))
         
         # update the lasttouch values on associated aggregations
         if command != 'automode':
@@ -327,7 +327,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         if reason:
             msg = "%s (%s)" % (msg, reason)
         self.writeall(json.dumps({'message_type':'executionstatus', 'content':'killsignal', 'message':msg}))
-        logger.debug(msg)
+        self.logger.debug(msg)
         try:      # (should kill using the new dispatcher call)
             os.kill(self.processrunning.pid, signal.SIGKILL)
         except:
@@ -360,7 +360,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             args.append('--draft')
 
         args = [i.encode('utf8') for i in args]
-        logger.debug("./firestarter/runner.py: %s" % args)
+        self.logger.debug("./firestarter/runner.py: %s" % args)
 
         # from here we should somehow get the runid
         self.processrunning = reactor.spawnProcess(spawnRunner(self, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
@@ -718,6 +718,8 @@ if __name__ == "__main__":
         uid = pwd.getpwnam("nobody").pw_uid
         os.setreuid(uid, uid)
 
+    logging.config.fileConfig(poptions.config)
+
     #  subproc mode
     signal.signal(signal.SIGTERM, sigTerm)
     while True:
@@ -734,5 +736,6 @@ if __name__ == "__main__":
     runnerfactory = RunnerFactory()
     port = config.getint('twister', 'port')
     reactor.listenTCP(port, runnerfactory)
+    logger = logging.getLogger('twister')
     logger.info("Twister listening on port %d" % port)
     reactor.run()   # this function never returns
