@@ -93,7 +93,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             firstmessage = {"status":"good"}
             if 'short_name' in params:
-                if self.connection.getpeername()[0] != config.get('dataproxy', 'secure') :
+                if self.connection.getpeername()[0] != config.get('dataproxy', 'secure'):
                     firstmessage = {"error":"short_name only accepted from secure hosts"}
                 else:
                     short_name = params.get('short_name', '')
@@ -108,6 +108,17 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     dataauth = "draft"
                 else:
                     dataauth = "writable"
+                
+                    # send back identification so we can compare against it (sometimes it doesn't quite work out)
+                firstmessage["short_name"] = short_name
+                firstmessage["runID"] = runID
+                firstmessage["dataauth"] = dataauth
+
+                # run verification of the names against what we identified
+                if runID != params.get('vrunid') or short_name != params.get("vscrapername"):
+                    self.logger.error("Mismatching scrapername %s" % str([runID, short_name, params.get('vrunid'), params.get("vscrapername")]))
+                    firstmessage["error"] = "Mismatching scrapername from ident"
+                    firstmessage["status"] = "bad: mismatching scrapername from ident"
             
             if path == '' or path is None :
                 path = '/'

@@ -10,6 +10,7 @@ return_queue_name= test_queue_return
 [twister]
 statusurl = http://localhost:8000/scrapers/twister/status
 port      = 9010
+djangokey = jshdowpabzsdofosiw976gbjksjdbfslkaoapwebnvdjflg
 
 [webproxy]
 host	= 127.0.0.1

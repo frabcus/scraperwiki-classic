@@ -6,12 +6,16 @@ class SW_DataStoreClass
    protected      $m_socket   ;
    protected      $m_host     ;
    protected      $m_port     ;
+   protected $m_scrapername;
+   protected $m_runid;
 
-   function __construct ($host, $port)
+   function __construct ($host, $port, $scrapername, $runid)
    {
       $this->m_socket    = null     ;
       $this->m_host      = $host    ;
       $this->m_port      = $port    ;
+      $this->m_scrapername = $scrapername;
+      $this->m_runid = $runid;
    }
 
 
@@ -28,7 +32,7 @@ class SW_DataStoreClass
             $this->m_socket    = socket_create (AF_INET, SOCK_STREAM, SOL_TCP) ;
             socket_connect     ($this->m_socket, $this->m_host, $this->m_port) ;
             socket_getsockname ($this->m_socket, $addr, $port) ;
-            $getmsg = sprintf  ("GET /?uml=%s&port=%s HTTP/1.1\n\n", trim(`/bin/hostname`), $port) ;
+            $getmsg = sprintf  ("GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n", trim(`/bin/hostname`), $port, urlencode($this->m_scrapername), urlencode($this->m_runid)) ;
             socket_send        ($this->m_socket, $getmsg, strlen($getmsg), MSG_EOR) ;
             socket_recv        ($this->m_socket, $buffer, 0xffff, 0) ;
             $result = json_decode($buffer, true);
@@ -70,11 +74,12 @@ class SW_DataStoreClass
       $this->m_socket = undef ;
    }
 
-   static function create ($host = null, $port = null)
+    // function used both to iniatialize the settings and get the object
+   static function create ($host = null, $port = null, $scrapername = null, $runid = null)
    {
       if (is_null(self::$m_ds))
-         self::$m_ds = new SW_DataStoreClass ($host, $port) ;
-      return   self::$m_ds ;
+         self::$m_ds = new SW_DataStoreClass ($host, $port, $scrapername, $runid);
+      return self::$m_ds;
    }
 }
 

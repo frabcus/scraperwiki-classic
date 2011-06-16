@@ -656,6 +656,7 @@ $(document).ready(function() {
                 alert("Malformed json: '''" + sdata + "'''"); 
                 continue
             }
+console.log(jdata); 
 
             if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
                 receivechatqueue.push(jdata); 

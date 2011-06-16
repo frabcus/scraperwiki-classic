@@ -315,6 +315,7 @@ def handle_editor_save(request):
             stimulaterunmessage = runnerstream.stimulate_run_from_editor(guid, request.user.username, scraper.short_name, clientnumber, language, code, urlquery)
         else:
             stimulaterunmessage = {"message":"not authorized to run"}
+        print "stimulate", stimulaterunmessage
 
     if stimulaterun == "editorstimulaterun_nosave":
         stimulaterunmessage['status'] = 'notsaved'

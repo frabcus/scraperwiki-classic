@@ -126,6 +126,11 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
     def connectionMade(self):
         self.logger.info("connection client# %d" % self.factory.clientcount)
+        
+        # this returns localhost and is unable to distinguish between orbited or django source
+        #socket = self.transport.getHandle()
+        #self.logger.info("  %s %s" % (socket.getpeername(), type(socket.getpeername())))
+        
         self.factory.clientConnectionMade(self)
             # we don't know what scraper they've opened until information is send with first clientcommmand
     
@@ -146,7 +151,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             self.factory.anonymouscount += 1
         self.cchatname = "%s|%s" % (self.username, self.chatname)
         self.factory.clientConnectionRegistered(self)  # this will cause a notifyEditorClients to be called for everyone on this scraper
-        self.logger.info("connection open: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
+        self.logger.info("connection open: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber)) 
 
 
     def connectionLost(self, reason):
@@ -208,15 +213,24 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             if client:
                 logger.info("stimulate on : %s %s client# %d" % (client.cchatname, client.scrapername, client.clientnumber))
 
+            if parsed_data.get('django_key') != config.get('twister', 'djangokey'):
+                logger.error("djangokey_mismatch")
+                self.writejson({'status':'twister djangokey mismatch'})
+                client.writejson({"message_type":"console", "content":"twister djangokey mismatch"})  
+                client.writejson({'message_type':'executionstatus', 'content':'runfinished'})
+                client = None
+            
             if client:
                 logger.info("stimulate on : %s %s client# %d" % (client.cchatname, client.scrapername, client.clientnumber))
                 if not client.processrunning:
                     client.runcode(parsed_data)
                     self.writejson({"status":"run started"})  
                 else:
+                    client.writejson({"message_type":"console", "content":"client already running"})  
                     self.writejson({"status":"client already running"})  
             else:
-                logger.info("client not found %s" % parsed_data)
+                parsed_data.pop("code", None)   # shorten the log message
+                logger.warning("client not found %s" % parsed_data)
                 self.writejson({"status":"client not found"})  
 
             self.transport.loseConnection()
@@ -251,6 +265,10 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                     self.writejson({'content':"Not supposed to run! "+self.automode, 'message_type':'console'}); 
                     return 
             
+            if parsed_data.get('guid'):
+                self.writejson({'content':"scraper run can only be done through stimulate_run method", 'message_type':'console'}); 
+                return 
+
             self.runcode(parsed_data)
         
         elif command == "kill":
@@ -383,7 +401,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         urlquery = parsed_data.get('urlquery', '')
         username = parsed_data.get('username', '')
         automode = parsed_data.get('automode', '')
-
+        
         assert guid == self.guid
         args = ['./firestarter/runner.py']
         args.append('--guid=%s' % guid)

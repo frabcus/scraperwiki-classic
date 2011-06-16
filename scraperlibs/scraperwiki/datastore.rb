@@ -1,6 +1,7 @@
 require 'json'
 require 'singleton'
 require 'thread'
+require 'cgi'
 
 # the python version of this makes use of a global static copy of the class 
 # so the connection is made only once to the dataproxy
@@ -12,12 +13,14 @@ class SW_DataStore
     
     include Singleton
 
-    attr_accessor :m_port, :m_host
+    attr_accessor :m_port, :m_host, :m_scrapername, :m_runid
 
     def initialize
       @m_socket = nil
       @m_host = nil
       @m_port = nil
+      @m_scrapername = nil
+      @m_runid = nil
     end
 
 
@@ -29,7 +32,7 @@ class SW_DataStore
         if @m_socket == nil
             @m_socket = TCPSocket.open(@m_host, @m_port)
             proto, port, name, ip = @m_socket.addr()
-            getmsg = "GET /?uml=%s&port=%s HTTP/1.1\n\n" % [Socket.gethostname(), port]
+            getmsg = "GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n" % [Socket.gethostname(), port, CGI::escape(@m_scrapername), CGI::escape(@m_runid)]
             @m_socket.send(getmsg, 0)
             @m_socket.flush()
             buffer = @m_socket.recv(1024)
@@ -66,7 +69,8 @@ class SW_DataStore
         return JSON.parse(text)
     end
 
-    def SW_DataStore.create(host = nil, port = nil)
+    # function used to both initialize the settings and get an instance
+    def SW_DataStore.create(host=nil, port = nil, scrapername = nil, runid = nil)
         instance = SW_DataStore.instance
         # so, it might be intended that the host and port are
         # set once, never to be changed, but this is ruby so
@@ -74,6 +78,8 @@ class SW_DataStore
         if host && port && instance.m_port.nil? && instance.m_host.nil?
           instance.m_host = host
           instance.m_port = port
+          instance.m_scrapername = scrapername
+          instance.m_runid = runid
         elsif host && port
           raise "Can't change host and port once connection made"
         elsif !(instance.m_port) || !(instance.m_host)

@@ -47,10 +47,12 @@ class ConsoleStream:
 
 
 parser = optparse.OptionParser()
-parser.add_option("--script", metavar="name")
+parser.add_option("--script", metavar="name")    # not the scraper name, this is tmp file name which we load and execute
 parser.add_option("--ds", metavar="server:port")
 parser.add_option("--gid")    # nogroup
 parser.add_option("--uid")    # nobody
+parser.add_option("--scrapername")
+parser.add_option("--runid")
 options, args = parser.parse_args()
 
 if options.gid:
@@ -61,7 +63,7 @@ if options.uid:
 scraperwiki.logfd = os.fdopen(3, 'w', 0)
 
 host, port = string.split(options.ds, ':')
-scraperwiki.datastore.create(host, port)
+scraperwiki.datastore.create(host, port, options.scrapername, options.runid)
 
 sys.stdout = ConsoleStream(scraperwiki.logfd)
 sys.stderr = ConsoleStream(scraperwiki.logfd)

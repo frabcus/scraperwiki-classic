@@ -29,7 +29,7 @@ class RunnerSocket:
         data = { "command":'connection_open', "guid":scraper.guid, 
                  "username":"DJANGOFRONTEND", "userrealname":"DJANGOFRONTEND", 
                  "language":scraper.language, "scrapername":scraper.short_name, 
-                 "isstaff":True }
+                 "isstaff":True, "django_key":config.get('twister', 'djangokey') }
         
         self.soc.send(json.dumps(data)+"\r\n") 
         jdata = self.next()
@@ -46,11 +46,12 @@ class RunnerSocket:
         self.soc.send(json.dumps(rdata)+"\r\n") 
 
     def stimulate_run_from_editor(self, guid, username, short_name, clientnumber, language, code, urlquery):
-        data = { "command":'stimulate_run', "language":language, "code":code, "urlquery":urlquery, "username":username, "scrapername":short_name, "clientnumber":clientnumber, "guid":guid }
+        data = { "command":'stimulate_run', "language":language, "code":code, "urlquery":urlquery, 
+                 "username":username, "scrapername":short_name, "clientnumber":clientnumber, "guid":guid, 
+                 "django_key":config.get('twister', 'djangokey') }
         self.soc.send(json.dumps(data)+"\r\n") 
         jdata = self.readline()
         self.soc.close()
-        print [jdata]
         if not jdata:
             return { "error":"blank stimulation response" }
         cdata = json.loads(jdata)

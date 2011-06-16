@@ -79,10 +79,16 @@ OptionParser.new do|opts|
    opts.on( '--uid=[UID]') do|uid|
      Process::Sys.setreuid(uid.to_i, uid.to_i)
    end
+   opts.on( '--scrapername=[SCRAPERNAME]') do|scrapername|
+     options[:scrapername] = scrapername
+   end
+   opts.on( '--runid=[RUNID]') do|runid|
+     options[:runid] = runid
+   end
 end.parse(ARGV)
 
 host, port = options[:ds].split(':')
-SW_DataStore.create(host, port)
+SW_DataStore.create(host, port, options[:scrapername], options[:runid])
 
 code = File.new(options[:script], 'r').read()
 begin
