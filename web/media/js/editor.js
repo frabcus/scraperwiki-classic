@@ -53,8 +53,12 @@ $(document).ready(function() {
     // twisted doesn't try and make us the editor ever)
     var savecode_authorized = $('#savecode_authorized').val(); // obviously don't trust this, check server side, but use it for choosing UI stuff
     if (!savecode_authorized) {
+        if (!username) {
+            $('#login_warning').show();
+        } else {
+            $('#protected_warning').show();
+        }
         username = null;
-        $('#protected_warning').show();
     }
 
     // runtime information
@@ -1103,11 +1107,12 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                     // special case, if not authorized then we are internally
                     // to this javascript an anonymous user, and want to be readonly
                     setCodeMirrorReadOnly(true);
+                    $('.editor_controls #run').attr('disabled', true);
                 } else {
                     setCodeMirrorReadOnly(false);
+                    $('.editor_controls #run').attr('disabled', false);
                 }
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
-                $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
                 sendjson({"command":'automode', "automode":'autosave'}); 
             }

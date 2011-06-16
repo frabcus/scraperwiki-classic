@@ -81,10 +81,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
             # usually used to tell if controller still alive
     def sendStatus(self):
+        logger.info("Sending status")
         status = []
         for runid, controller in runidstocontrollers.items()[:]:
             status.append('runID=%s&scrapername=%s' % (runid, controller.m_scrapername))
-        #logger.info("Sending status on %d scrapers" % len(runids))
         self.sendConnectionHeaders()
         self.connection.sendall('\n'.join(status) + '\n')
 
@@ -215,6 +215,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
     def do_GET (self):
+        logger.info("Connection made to do_GET")
         try:
             scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
             if path == '/Ident':
@@ -576,13 +577,6 @@ if __name__ == '__main__' :
 
     # subproc
     signal.signal(signal.SIGTERM, sigTerm)
-    while True:
-        child = os.fork()
-        if child == 0 :
-            break
-        logger.info("Forked subprocess: %d" % child)
-        os.wait()
-        logger.warning("Forked subprocess ended: %d" % child)
 
     if poptions.firewall == 'auto' :
         autoFirewall()

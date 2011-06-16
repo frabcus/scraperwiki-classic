@@ -71,10 +71,8 @@
     {% ifequal scraper.privacy_status 'public' %}
         <h4><img src="{{ MEDIA_URL }}images/icons/shield-public.png" width="16" height="16" /> 
             This {{scraper.wiki_type}} is public 
-            {% if user.is_staff %} 
-                {% if user_owns_it %}
-                <a class="staff" id="show_privacy_choices">[edit]</a>
-                {% endif %}
+            {% if user_owns_it %}
+                <a id="show_privacy_choices">[edit]</a>
             {% endif %}
         </h4>
         <p>Anyone can see this scraper, and any registered user can edit it.</p>
@@ -82,10 +80,8 @@
     {% ifequal scraper.privacy_status 'visible' %}
         <h4><img src="{{ MEDIA_URL }}images/icons/shield-protected.png" width="16" height="16" /> 
             This {{scraper.wiki_type}} is protected 
-            {% if user.is_staff %} 
-                {% if user_owns_it %}
-                <a class="staff" id="show_privacy_choices">[edit]</a>
-                {% endif %}
+            {% if user_owns_it %}
+                <a id="show_privacy_choices">[edit]</a>
             {% endif %}
         </h4>
         <p>Anyone can see this scraper, but only the contributors listed above can edit it.</p>
@@ -93,10 +89,8 @@
     {% ifequal scraper.privacy_status 'private' %}
         <h4><img src="{{ MEDIA_URL }}images/icons/shield-private.png" width="16" height="16" /> 
             This {{scraper.wiki_type}} is private 
-            {% if user.is_staff %} 
-                {% if user_owns_it %}
-                <a class="staff" id="show_privacy_choices">[edit]</a>
-                {% endif %}
+            {% if user_owns_it %}
+                <a id="show_privacy_choices">[edit]</a>
             {% endif %}
         </h4>
         <p>Only the contributors listed above can see or edit this scraper.</p>
