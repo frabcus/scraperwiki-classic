@@ -53,8 +53,12 @@ $(document).ready(function() {
     // twisted doesn't try and make us the editor ever)
     var savecode_authorized = $('#savecode_authorized').val(); // obviously don't trust this, check server side, but use it for choosing UI stuff
     if (!savecode_authorized) {
+        if (!username) {
+            $('#login_warning').show();
+        } else {
+            $('#protected_warning').show();
+        }
         username = null;
-        $('#protected_warning').show();
     }
 
     // runtime information
