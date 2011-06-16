@@ -67,7 +67,7 @@ class UML(object):
         return len(self.runids) == 0
 
     def add_runid(self, runid):
-        if len(self.runids) < self.count():
+        if len(self.runids) < self.count:
             self.runids.add(runid)
         else:
             raise 
