@@ -118,9 +118,9 @@
 
     <div id="login_warning" class="alert_outer" style="display:none;" >
         You need to <a href="{% url login %}?next={% url editor_edit
-        scraper.wiki_type scraper.short_name %}">sign in or create an account</a> to edit an existing scraper.  
-        Meanwhile, you can view the source code, and watch or chat to anyone
-        else who is editing it.
+        scraper.wiki_type scraper.short_name %}">sign in or create an account</a> to edit an existing scraper, 
+        or you can <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">fork it</a>.
+        Meanwhile, view the source code and watch other people editing below.
     </div>
 
 
