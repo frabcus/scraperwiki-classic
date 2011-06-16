@@ -140,6 +140,7 @@ class SQLiteDatabase(Database):
         else:
             self.authorizer_func = authorizer_writemain
         
+        
         def progress_handler():
             self.logger.debug("progress on %s" % self.runID)
         
