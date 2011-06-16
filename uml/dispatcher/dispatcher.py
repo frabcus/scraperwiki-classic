@@ -163,7 +163,7 @@ class UMLList(object):
             raise UnknownUMLException()
 
     def values(self):
-        return self.UMLs
+        return self.UMLs.values()
 
 
 
@@ -185,7 +185,7 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def sendConfig(self):
         config = self.server.uml_list.get_config()
-        self.logger.debug("sendConfig: "+str(sconfig)[:20])
+        self.logger.debug("sendConfig: "+ config[:20])
         self.connection.send(config)
         self.connection.send('\n')
 
@@ -404,10 +404,10 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 
 class UMLScanner(threading.Thread) :
-    def __init__(self, url_list):
+    def __init__(self, uml_list):
         threading.Thread.__init__ (self)
         self.logger = logging.getLogger('dispatcher')
-        self.url_list = url_list
+        self.uml_list = uml_list
 
     def run(self):
         while True:
@@ -415,16 +415,17 @@ class UMLScanner(threading.Thread) :
 
             # beware that things can change in lookup lists as we are using them, which is why copies are made before looping and get() is used to access
             umltimes = [ ]
-            for uml in self.url_list.values():
+            for uml in self.uml_list.values():
                 try:
                     stime = time.time()
                             # timeout of 2 secs is probably too severe (leave in for now to enable failure and testing)
-                    res = urllib2.urlopen(url.status_url(), timeout=2).read()
+                    res = urllib2.urlopen(uml.status_url(), timeout=4).read()
                     umltimes.append("%.3f" % (time.time() - stime))
                     if uml.livestatus == "unresponsive":  # don't overwrite closing
                         self.logger.warning('unresponsive UML %s back to live' % uml.uname)
                         uml.livestatus = "live"
                 except Exception, e:
+                    self.logger.warning("Exception in UMLScanner %s" % e)
                     if type(e) == TypeError:
                         self.logger.exception("wrong version of python?")
                     if uml.livestatus == "live":
@@ -437,11 +438,13 @@ class UMLScanner(threading.Thread) :
 
 class DispatcherHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     def __init__(self, *args, **kwargs):
-        super(DispatcherHTTPServer, self).__init__(*args, **kwargs)
+        BaseHTTPServer.HTTPServer.__init__(self, *args, **kwargs)
+
         self.uml_list = UMLList()
 
         for uname in config.get('dispatcher', 'umllist').split(',') :
             self.uml_list.addUML(uname)
+
 
 
 if __name__ == '__main__' :
@@ -476,12 +479,14 @@ if __name__ == '__main__' :
     # Set the logging up after switching to nobody.nogroup
     logging.config.fileConfig(poptions.config)
 
-    if poptions.monitor:
-        mtr = UMLScanner()
-        mtr.start()
 
     DispatcherHandler.protocol_version = "HTTP/1.0"
     httpd = DispatcherHTTPServer(('', config.getint('dispatcher', 'port')), DispatcherHandler)
+
+    if poptions.monitor:
+        mtr = UMLScanner(httpd.uml_list)
+        mtr.start()
+
     sa = httpd.socket.getsockname()
     logger = logging.getLogger('dispatcher')
     logger.info("Serving HTTP on %s port %s\n" % (sa[0], sa[1]))
