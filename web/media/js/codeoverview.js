@@ -62,6 +62,7 @@ function reload_scraper_contributors()
     $.get(document.location, function(htmlpage)  
     { 
         $("#scraper_contributors").html($(htmlpage).find("#scraper_contributors").html())
+        $("#header_inner").html($(htmlpage).find("#header_inner").html())
         setupChangeEditorStatus(); 
         $('#contributors_loading').hide();
     }); 
