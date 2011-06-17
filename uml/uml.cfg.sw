@@ -8,6 +8,7 @@ path    = /scraperwiki/live/scrapers,/scraperwiki/live/scraperlibs
 [twister]
 statusurl = http://localhost:8080/scrapers/twister/status
 port      = 9010
+djangokey = jshdowpabzsdofosiw976gbjksjdbfslkaoapwebnvdjflg
 
 [webproxy]
 host    = 46.43.55.84

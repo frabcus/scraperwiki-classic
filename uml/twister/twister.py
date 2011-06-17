@@ -7,6 +7,7 @@ This script is the interface between the UML/firebox set up and the frontend Orb
 There is one client object (class RunnerProtocol) per editor window
 These recieve and send all messages between the browser and the UML
 An instance of a scraper running in the UML is spawnRunner
+
 The RunnerFactory organizes lists of these clients and manages their states
 There is one UserEditorsOnOneScraper per user per scraper to handle one user opening multiple windows onto the same scraper
 There is one EditorsOnOneScraper per scraper which bundles logged in users into a list of UserEditorsOnOneScrapers
@@ -36,9 +37,6 @@ poptions, pargs = parser.parse_args()
 config = ConfigParser.ConfigParser()
 config.readfp(open(poptions.config))
 
-logging.config.fileConfig(poptions.config)
-logger = logging.getLogger('twister')
-
     # primarily to pick up syntax errors
 stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)  
 
@@ -67,15 +65,16 @@ class spawnRunner(protocol.ProcessProtocol):
         self.runID = None
         self.umlname = ''
         self.buffer = ''
+        self.logger = logging.getLogger('twister')
     
     def connectionMade(self):
-        logger.debug("Starting run")
+        self.logger.debug("Starting run")
         self.transport.write(self.code)
         self.transport.closeStdin()
     
     # messages from the UML
     def outReceived(self, data):
-        logger.debug("runner to client# %d %s" % (self.client.clientnumber, data[:100]))
+        self.logger.debug("runner to client# %d %s" % (self.client.clientnumber, data[:100]))
             # although the client can parse the records itself, it is necessary to split them up here correctly so that this code can insert its own records into the stream.
         lines  = (self.buffer+data).split("\r\n")
         self.buffer = lines.pop(-1)  # usually an empty
@@ -96,9 +95,9 @@ class spawnRunner(protocol.ProcessProtocol):
         self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished'}))
         self.client.factory.notifyMonitoringClients(self.client)
         if reason.type == 'twisted.internet.error.ProcessDone':
-            logger.debug("run process ended %s" % reason)
+            self.logger.debug("run process ended %s" % reason)
         else:
-            logger.debug("run process ended ok")
+            self.logger.debug("run process ended ok")
 
 
 
@@ -122,9 +121,16 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.guidclienteditors = None  # the EditorsOnOneScraper object
         self.automode = 'autosave'     # draft, autosave, autoload, autotype
         self.isumlmonitoring = None  # used to designate as not being initialized at all (bug if connection lost before it was successfully connected)
+        self.logger = logging.getLogger('twister')
+
 
     def connectionMade(self):
-        logger.info("connection client# %d" % self.factory.clientcount)
+        self.logger.info("connection client# %d" % self.factory.clientcount)
+        
+        # this returns localhost and is unable to distinguish between orbited or django source
+        #socket = self.transport.getHandle()
+        #self.logger.info("  %s %s" % (socket.getpeername(), type(socket.getpeername())))
+        
         self.factory.clientConnectionMade(self)
             # we don't know what scraper they've opened until information is send with first clientcommmand
     
@@ -145,13 +151,13 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             self.factory.anonymouscount += 1
         self.cchatname = "%s|%s" % (self.username, self.chatname)
         self.factory.clientConnectionRegistered(self)  # this will cause a notifyEditorClients to be called for everyone on this scraper
-        logger.info("connection open: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
+        self.logger.info("connection open: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber)) 
 
 
     def connectionLost(self, reason):
         if self.processrunning:
             self.kill_run(reason='connection lost')
-        logger.info("connection lost: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
+        self.logger.info("connection lost: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
         self.factory.clientConnectionLost(self)
 
         
@@ -175,7 +181,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         
             
     def clientcommand(self, command, parsed_data):
-        logger.debug("command %s client# %d" % (command, self.clientnumber))
+        self.logger.debug("command %s client# %d" % (command, self.clientnumber))
         
         # update the lasttouch values on associated aggregations
         if command != 'automode':
@@ -188,7 +194,48 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         # data uploaded when a new connection is made from the editor
         if command == 'connection_open':
             self.lconnectionopen(parsed_data)
+
+                # finds the appriate client and presses the run button on it
+        elif command == 'stimulate_run':
+            scrapername = parsed_data["scrapername"]
+            guid = parsed_data["guid"]
+            username = parsed_data["username"]
+            clientnumber = parsed_data["clientnumber"]
+
+            client = None
+            eoos = self.factory.guidclientmap.get(guid)
+            if eoos:
+                usereditor = eoos.usereditormap.get(username)
+                if usereditor:
+                    for lclient in usereditor.userclients:
+                        if lclient.clientnumber == clientnumber:
+                            client = lclient
+            if client:
+                logger.info("stimulate on : %s %s client# %d" % (client.cchatname, client.scrapername, client.clientnumber))
+
+            if parsed_data.get('django_key') != config.get('twister', 'djangokey'):
+                logger.error("djangokey_mismatch")
+                self.writejson({'status':'twister djangokey mismatch'})
+                client.writejson({"message_type":"console", "content":"twister djangokey mismatch"})  
+                client.writejson({'message_type':'executionstatus', 'content':'runfinished'})
+                client = None
             
+            if client:
+                logger.info("stimulate on : %s %s client# %d" % (client.cchatname, client.scrapername, client.clientnumber))
+                if not client.processrunning:
+                    client.runcode(parsed_data)
+                    self.writejson({"status":"run started"})  
+                else:
+                    client.writejson({"message_type":"console", "content":"client already running"})  
+                    self.writejson({"status":"client already running"})  
+            else:
+                parsed_data.pop("code", None)   # shorten the log message
+                logger.warning("client not found %s" % parsed_data)
+                self.writejson({"status":"client not found"})  
+
+            self.transport.loseConnection()
+
+
         elif command == 'saved':
             line = json.dumps({'message_type' : "saved", 'chatname' : self.chatname})
             otherline = json.dumps({'message_type' : "othersaved", 'chatname' : self.chatname})
@@ -218,6 +265,10 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                     self.writejson({'content':"Not supposed to run! "+self.automode, 'message_type':'console'}); 
                     return 
             
+            if parsed_data.get('guid'):
+                self.writejson({'content':"scraper run can only be done through stimulate_run method", 'message_type':'console'}); 
+                return 
+
             self.runcode(parsed_data)
         
         elif command == "kill":
@@ -327,12 +378,14 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         if reason:
             msg = "%s (%s)" % (msg, reason)
         self.writeall(json.dumps({'message_type':'executionstatus', 'content':'killsignal', 'message':msg}))
-        logger.debug(msg)
+        self.logger.debug(msg)
         try:      # (should kill using the new dispatcher call)
             os.kill(self.processrunning.pid, signal.SIGKILL)
         except:
             pass
 
+    
+            # this more recently can be called from stimulate_run from django
     def runcode(self, parsed_data):
         code = parsed_data.get('code', '')
         code = code.encode('utf8')
@@ -346,9 +399,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         scrapername = parsed_data.get('scrapername', '')
         scraperlanguage = parsed_data.get('language', '')
         urlquery = parsed_data.get('urlquery', '')
-        automode = parsed_data.get('automode', '')
         username = parsed_data.get('username', '')
-        
+        automode = parsed_data.get('automode', '')
         
         assert guid == self.guid
         args = ['./firestarter/runner.py']
@@ -360,7 +412,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             args.append('--draft')
 
         args = [i.encode('utf8') for i in args]
-        logger.debug("./firestarter/runner.py: %s" % args)
+        self.logger.debug("./firestarter/runner.py: %s" % args)
 
         # from here we should somehow get the runid
         self.processrunning = reactor.spawnProcess(spawnRunner(self, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
@@ -469,11 +521,13 @@ class EditorsOnOneScraper:
         editorstatusdata["message"] = message
         for client in self.anonymouseditors:
             editorstatusdata["chatname"] = client.chatname
+            editorstatusdata["clientnumber"] = client.clientnumber
             client.writejson(editorstatusdata); 
         
         for usereditor in self.usereditormap.values():
             for client in usereditor.userclients:
                 editorstatusdata["chatname"] = client.chatname
+                editorstatusdata["clientnumber"] = client.clientnumber
                 client.writejson(editorstatusdata) 
     
     def Dcountclients(self):
@@ -634,6 +688,7 @@ class RunnerFactory(protocol.ServerFactory):
             editorstatusdata["nowtime"] = jstime(datetime.datetime.now())
             editorstatusdata['earliesteditor'] = jstime(client.clientsessionbegan)
             editorstatusdata["scraperlasttouch"] = jstime(client.clientlasttouch)
+            editorstatusdata["clientnumber"] = client.clientnumber
             
             client.writejson(editorstatusdata); 
             self.draftscraperclients.append(client)
@@ -671,11 +726,6 @@ class RunnerFactory(protocol.ServerFactory):
         # check that all clients are accounted for
         assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
         self.notifyMonitoringClients(client)
-
-
-
-
-
 
 
 
@@ -718,6 +768,8 @@ if __name__ == "__main__":
         uid = pwd.getpwnam("nobody").pw_uid
         os.setreuid(uid, uid)
 
+    logging.config.fileConfig(poptions.config)
+
     #  subproc mode
     signal.signal(signal.SIGTERM, sigTerm)
     while True:
@@ -734,5 +786,6 @@ if __name__ == "__main__":
     runnerfactory = RunnerFactory()
     port = config.getint('twister', 'port')
     reactor.listenTCP(port, runnerfactory)
+    logger = logging.getLogger('twister')
     logger.info("Twister listening on port %d" % port)
     reactor.run()   # this function never returns

@@ -81,10 +81,10 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
             # usually used to tell if controller still alive
     def sendStatus(self):
+        logger.info("Sending status")
         status = []
         for runid, controller in runidstocontrollers.items()[:]:
             status.append('runID=%s&scrapername=%s' % (runid, controller.m_scrapername))
-        #logger.info("Sending status on %d scrapers" % len(runids))
         self.sendConnectionHeaders()
         self.connection.sendall('\n'.join(status) + '\n')
 
@@ -215,6 +215,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
     def do_GET (self):
+        logger.info("Connection made to do_GET")
         try:
             scm, netloc, path, query, fragment = urlparse.urlsplit(self.path)
             if path == '/Ident':
@@ -335,7 +336,7 @@ class ScraperController(BaseController):
                  'elapsed_seconds' : int(ostimes2[4] - ostimes1[4]), 'CPU_seconds':int(ostimes2[0] - ostimes1[0]) }
 
  
-    def processrunscript(self, streamprintsout, streamjsonsout, request, tmpscriptfile):
+    def processrunscript(self, streamprintsout, streamjsonsout, request, tmpscriptfile, scrapername, runid):
         fout = open(tmpscriptfile, 'w')
         fout.write(request['code'].encode('utf-8'))
         fout.close()
@@ -349,7 +350,7 @@ class ScraperController(BaseController):
         execscript = os.path.join(os.path.dirname(sys.argv[0]), lexec)
         args = [    execscript,
                     '--ds=%s:%s' % (config.get('dataproxy', 'host'), config.get('dataproxy', 'port')),
-                    '--script=%s' % tmpscriptfile,
+                    '--script=%s' % tmpscriptfile, '--scrapername=%s' % scrapername, '--runid=%s' % runid
                ]
 
         if poptions.setuid:
@@ -410,7 +411,7 @@ class ScraperController(BaseController):
             streamprintsin.close()
             streamjsonsin.close()
             tmpscriptfile = '/tmp/scraper.%d' % os.getpid() 
-            self.processrunscript(streamprintsout.fileno(), streamjsonsout.fileno(), request, tmpscriptfile)  
+            self.processrunscript(streamprintsout.fileno(), streamjsonsout.fileno(), request, tmpscriptfile, scrapername, self.m_runID)  
                 # eventually calls execvp("php exec.php") and never returns
         
         else:
@@ -576,13 +577,6 @@ if __name__ == '__main__' :
 
     # subproc
     signal.signal(signal.SIGTERM, sigTerm)
-    while True:
-        child = os.fork()
-        if child == 0 :
-            break
-        logger.info("Forked subprocess: %d" % child)
-        os.wait()
-        logger.warning("Forked subprocess ended: %d" % child)
 
     if poptions.firewall == 'auto' :
         autoFirewall()

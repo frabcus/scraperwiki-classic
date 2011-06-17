@@ -42,9 +42,6 @@ poptions, pargs = parser.parse_args()
 config = ConfigParser.ConfigParser()
 config.readfp(open(poptions.config))
 
-logging.config.fileConfig(poptions.config)
-logger = logging.getLogger('proxy')
-
 stdoutlog = None
 stdoutlog = open('/var/www/scraperwiki/uml/var/log/proxy.log'+"-stdout", 'a', 0)
 
@@ -69,6 +66,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     def __init__ (self, *alist, **adict) :
         self.m_allowed = []
         self.m_blocked = []
+        self.logger = logging.getLogger('proxy')
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
     def hostAllowed (self, path, scraperID) :
@@ -149,12 +147,12 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         # TODO: Add better handling for the page not being found in the cache
         if not id:
-            logger.warning('No ID argument passed to sendPage()')
+            self.logger.warning('No ID argument passed to sendPage()')
             return 
 
         page = cache_client.get(id)
         if not page:
-            logger.warning('Page not found in cache')
+            self.logger.warning('Page not found in cache')
             self.sendReply ('Page not found in cache')
             return
 
@@ -280,7 +278,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
     def retrieve (self, method):
-        logger.info([method, self.path])
+        self.logger.info([method, self.path])
         #  If this is a transparent HTTP or HTTPS proxy then modify the path with the
         #  protocol and the host.
         if mode == 'H':
@@ -380,7 +378,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 soc = self._connect_to (scheme, netloc)
                 if soc is not None:
                     req = "%s %s %s\r\n" % (self.command, urlparse.urlunparse (('', '', path, params, query, '')), self.request_version)
-                    logger.debug(req)
+                    self.logger.debug(req)
                     soc.send(req)
                     self.headers['Connection'] = 'close'
                     for key, value in self.headers.items() :
@@ -568,16 +566,10 @@ if __name__ == '__main__' :
         os.setregid(gid, gid)
         os.setreuid(uid, uid)
 
+    logging.config.fileConfig(poptions.config)
+
     # subproc
     signal.signal(signal.SIGTERM, sigTerm)
-    while True:
-        child = os.fork()
-        if child == 0 :
-            break
-        logger.info("Forked subprocess: %d" % child)
-        os.wait()
-        logger.warning("Forked subprocess ended: %d" % child)
-
 
     HTTPProxyHandler.protocol_version  = "HTTP/1.0"
         #HTTPSProxyHandler.protocol_version = "HTTPS/1.0"
@@ -586,6 +578,8 @@ if __name__ == '__main__' :
     httpd = HTTPProxyServer(('', port), HTTPProxyHandler)
 
     sa = httpd.socket.getsockname()
+
+    logger = logging.getLogger('proxy')
     logger.info("Serving on %s port %s ..." % (sa[0], sa[1]))
 
     httpd.serve_forever()

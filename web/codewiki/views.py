@@ -207,6 +207,7 @@ def code_overview(request, wiki_type, short_name):
                 ckanparams["resources_description"] = "Scraped data"
                 context["ckansubmit"] = "http://ckan.net/package/new?%s" % urllib.urlencode(ckanparams)
 
+    context["api_base"] = "http://%s/api/1.0/" % settings.API_DOMAIN
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
@@ -235,7 +236,7 @@ def scraper_admin_controleditors(request, short_name):
     if newrole not in ['editor', 'follow']:
         return HttpResponse("Failed: role '%s' unrecognized" % newrole)
     if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
-        return HttpResponse("Failed: user is already '%s'" % newrole)
+        return HttpResponse("Warning: user is already '%s'" % newrole)
     newuserrole = scraper.set_user_role(roleuser, newrole)
     context = { "role":newuserrole.role, "contributor":newuserrole.user }
     context["user_owns_it"] = (request.user in scraper.userrolemap()["owner"])

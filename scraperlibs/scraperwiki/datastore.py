@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import  string
-import  socket
-import  urllib
-import  cgi
-import  datetime
-import  types
-import  socket
-import  re
+import string
+import socket
+import urllib
+import cgi
+import datetime
+import types
+import socket
+import re
+import os
 import scraperwiki
 
 try   : import json
@@ -18,13 +19,19 @@ import scraperwiki
 m_socket = None
 m_host = None
 m_port = None
+m_scrapername = None
+m_runid = None
 
         # make everything global to the module for simplicity as opposed to half in and half out of a single class
-def create(host, port):
+def create(host, port, scrapername, runid):
     global m_host
     global m_port
+    global m_scrapername
+    global m_runid
     m_host = host
     m_port = int(port)
+    m_scrapername = scrapername
+    m_runid = runid
 
         # a \n delimits the end of the record.  you cannot read beyond it or it will hang
 def receiveoneline(socket):
@@ -47,15 +54,21 @@ def ensure_connected():
     if not m_socket:
         m_socket = socket.socket()
         m_socket.connect((m_host, m_port))
-        m_socket.sendall('GET /?uml=%s&port=%d HTTP/1.1\n\n' % (socket.gethostname(), m_socket.getsockname()[1]))
+        data = {"uml":socket.gethostname(), "port":m_socket.getsockname()[1]}
+        data["vscrapername"] = m_scrapername
+        data["vrunid"] = m_runid
+        m_socket.sendall('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         line = receiveoneline(m_socket)  # comes back with True, "Ok"
         res = json.loads(line)
         assert res.get("status") == "good", res
+        
 
 def request(req):
     ensure_connected()
     m_socket.sendall(json.dumps(req)+'\n')
     line = receiveoneline(m_socket)
+    if not line:
+        return {"error":"blank returned from dataproxy"}
     return json.loads(line)
 
 

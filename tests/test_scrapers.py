@@ -154,7 +154,7 @@ class TestScrapers(SeleniumTest):
         name = self._create_type(language)
         self._wait_for_run()
         
-        s.click('aCloseEditor1')
+        s.click('link=Scraper')
         self.wait_for_page()
             
         self._add_comment(name)

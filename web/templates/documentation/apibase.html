@@ -10,7 +10,8 @@ var showinglookup = {
     getinfo:'.format, .name, .version, .history_start_date, .quietfields, .callback',
     getruninfo:'.format, .name, .runid, .callback',
     getuserinfo:'.format, .username, .callback',
-    search:'.format, .searchquery, .maxrows, .callback'
+    search:'.format, .searchquery, .maxrows, .callback',
+    usersearch:'.format, .searchquery, .nolist, .maxrows, .callback'
 }
 
 $(function()
@@ -137,6 +138,9 @@ $(function()
         $(this).keyup(rewriteapiurl); 
     }); 
 
+    /////////////////////
+    // auto completions 
+    /////////////////////
     var autocompletedata = 
     {
         minLength: 2,
@@ -171,6 +175,36 @@ $(function()
     };
 
     $('#detail #id_quietfields').autocomplete({source: [ "", "code", "userroles", "runevents", "datasummary" ]}); 
+
+    $('#detail #id_username').autocomplete(
+    {
+        minLength: 2,
+        open: function() {  $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); }, 
+        close: function() {  $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); rewriteapiurl(); }, 
+        select: function(event, ui) { rewriteapiurl(); },
+        source: function(request, response) 
+        {
+            $.ajax(
+            {
+                url: $('#id_api_base').val()+"scraper/usersearch",
+                dataType: "jsonp",
+                data: { format:"jsondict", maxrows: 12, searchquery: request.term },
+                success: function(data) 
+                {
+                    response($.map(data, function(item) { return  { label: item.username, desc: item.profilename, value: item.username }})); 
+                }
+            })
+        },
+        focus: function(event, ui)  { $( "#detail #id_username" ).val(ui.item.label);  return false; }
+    })
+    .data( "autocomplete" )._renderItem = function(ul, item) 
+    {
+        return $( "<li></li>" )
+        .data( "item.autocomplete", item )
+        .append( '<a><strong>' + item.desc + '</strong><br/><span>' + item.label + '</span></a>' )
+        .appendTo(ul);
+    };
+
 
     var scraperlistcall = null; 
     $('#detail #id_name').bind('keyup change', function()
@@ -219,6 +253,12 @@ $(function()
         e.preventDefault();
     }); 
 
+    // some keyboard shortcuts
+    $("#options input").bind('keydown', 'ctrl+r', function(evt) { $("#id_apiuri_run").click(); return false; });
+    if (navigator.userAgent.toLowerCase().indexOf("mac") != -1) {
+        $("#options input").bind('keydown', 'meta+r', function(evt) { $("#id_apiuri_run").click(); return false; });
+    } 
+
 });
 </script>
 {% endblock %}
@@ -257,6 +297,7 @@ $(function()
         <li><a href="#getruninfo"><strong>scraperwiki.scraper.getruninfo</strong><small>See what the scraper did&nbsp;during&nbsp;each&nbsp;run</small></a></li>
         <li><a href="#getuserinfo"><strong>scraperwiki.scraper.getuserinfo</strong><small>Find out information about a user</small></a></li>
         <li><a href="#search"><strong>scraperwiki.scraper.search</strong><small>Search the titles and descriptions of&nbsp;all&nbsp;our&nbsp;scrapers</small></a></li>
+        <li><a href="#usersearch"><strong>scraperwiki.scraper.usersearch</strong><small>Search for a user by name</small></a></li>
     </ul>
 
     <div id="detail">
@@ -322,7 +363,11 @@ $(function()
                 <label for="id_maxrows">maxrows</label>
                 <input type="text" name="maxrows" id="id_maxrows" value="5">
         	</li> 
-        	<li class="callback">
+        	<li class="nolist">
+            <label for="id_nolist">nolist<span class="desc">, space separated list of users not to return</span></label>
+                <input type="text" name="nolist" id="id_nolist">
+        	</li> 
+         	<li class="callback">
                 <label for="id_callback">callback<span class="desc"> for JSONP (optional)</span></label>
                 <input type="text" name="callback" id="id_callback">
         	</li> 
@@ -335,7 +380,7 @@ $(function()
             <div id="id_apiuri_wrapper">
                 <a id="id_apiuri" href="" title="This is a link! Click to visit, or right-click to copy"></a>
                 <a href="#" id="id_apiuri_copy" title="Copy to clipboard"><span><img src="{{ MEDIA_URL }}/images/icons/clipboard.png" width="16" height="16" alt="" /> Copy</span></a>
-                <a href="#" id="id_apiuri_run" title="Show live response to this function"><span><img src="{{ MEDIA_URL }}/images/icons/terminal_run.png" width="16" height="16" alt="" /> Run</span></a>
+                <a href="#" id="id_apiuri_run" title="Call function and show output (Ctrl + R, Cmd + R)"><span><img src="{{ MEDIA_URL }}/images/icons/terminal_run.png" width="16" height="16" alt="" /> Run</span></a>
             </div>
         </div>
         <div id="response">

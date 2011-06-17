@@ -11,7 +11,7 @@
     {# See http://orbited.org/wiki/Deployment#Cross-SubdomainDeployment for explanation #}
     <script>document.domain = document.domain;</script>
 
-    <script src="http://{{ settings.ORBITED_DOMAIN }}:{{ settings.ORBITED_PORT }}/static/Orbited.js"></script>
+    <script src="http://{{ settings.ORBITED_DOMAIN }}:{{ settings.ORBITED_PORT }}/static/Orbited.js"></-t>
     <script>Orbited.settings.streaming = false</script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.5.2.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.7.2.custom.min.js"></script>
@@ -68,6 +68,7 @@
 {# Hidden inputs for passing to js #}
 <input type="hidden" id="short_name"        value="{{ scraper.short_name }}"/>
 <input type="hidden" id="scraper_guid"      value="{{ scraper.guid }}"/>
+<input type="hidden" id="window_guid"       value="{{ windowguid }}"/>
 <input type="hidden" id="sourcescraper"     value="{{ source_scraper }}"/>            
 <input type="hidden" id="fork"              value="{{ fork }}"/>            
 <input type="hidden" id="fork_url_action"   value="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}"/>
@@ -77,6 +78,7 @@
 <input type="hidden" id="savecode_authorized" value="{{ savecode_authorized }}"/>
 <input type="hidden" id="scraperlanguage"   value="{{ scraper.language }}"/>
 <input type="hidden" id="originalrev"       value="{{rev}}"/>
+<input type="hidden" id="originalrevdateepoch" value="{{revdateepoch}}"/>
 <input type="hidden" id="codemirror_url"    value="{{MEDIA_URL}}CodeMirror-{{codemirrorversion}}/"/>
 <input type="hidden" id="id_wiki_type"      value="{{scraper.wiki_type}}"/>
 
@@ -97,11 +99,11 @@
 {% endif %}
 
 <div class="editor">
-    <div id="draft_warning" class="alert_outer" 
-        {% ifnotequal rev 'draft' %}
-            style="display:none;"
-        {% endifnotequal %}
-    >
+    {% ifnotequal rev 'draft' %}
+    <div id="draft_warning" class="alert_outer" style="display:none;">
+    {% else %}
+    <div id="draft_warning" class="alert_outer">
+    {% endifnotequal %}
         A temporary version of your scraper has been saved. 
         <a href="{% url login %}?next={% url handle_session_draft %}">Sign in or create an account</a> to save it permanently, 
         or <a href="{% url delete_draft %}">discard changes</a>.
@@ -113,6 +115,19 @@
         to give you permission to edit it, or 
         <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">fork it</a>.
     </div>
+
+    <div id="login_warning" class="alert_outer" style="display:none;" >
+        You need to 
+        {% if scraper.short_name %}
+            <a href="{% url login %}?next={% url editor_edit scraper.wiki_type scraper.short_name %}">sign in or create an account</a> 
+        {% else %}
+            sign in or create an account
+        {% endif %}
+        to edit an existing scraper, 
+        or you can <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">fork it</a>.
+        Meanwhile, view the source code and watch other people editing below.
+    </div>
+
 
 
     {# Header #}
@@ -148,10 +163,10 @@
     <div class="editor_controls">
         <a class="helplink" href="{% url docsroot scraper.language %}" target="_blank" title="Show useful commands">Documentation</a>
         {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
-            <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R, Opt + R)"/>
+            <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R, Cmd + R)"/>
         {% endifnotequal %}{% endifnotequal %}
         {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'javascript' %}
-            <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P, Opt + P)"/>
+            <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P, Cmd + P)"/>
         {% endifnotequal %}{% endifequal %}
 
         {# hidden if not necessary #}
@@ -177,16 +192,13 @@
         <div class="right">
             <span id="idlastrev" >
             </span>
-            {% if revdateepoch %}
-            <script>updateLastSavedRev({{rev}}, {{revdateepoch}}, "Last edited");</script>
-            {% endif %}
 
             <!-- {% if scraper.id %}
                 <a id="aCloseEditor1" href="{% url code_overview scraper.wiki_type scraper.short_name %}">close editor</a>
             {% else %}
                 <a id="aCloseEditor1" href="{% url frontpage %}">close editor</a>
             {% endif %} -->
-            <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save" title="Save this {{scraper.wiki_type}} (Ctrl + S, Opt + S)"/>
+            <input type="button" id="btnCommitPopup" class="commit button" name="action" value="Save" title="Save this {{scraper.wiki_type}} (Ctrl + S, Cmd + S)"/>
             <input type="button" id="btnForkNow" class="fork button" name="action" value="Fork" title="Fork this {{scraper.wiki_type}}"/>
         </div>
     </div>

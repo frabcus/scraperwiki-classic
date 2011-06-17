@@ -91,7 +91,7 @@ def profile_detail(request, username):
     extra_context = { }
     owned_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=profiled_user)
     extra_context['owned_code_objects'] = owned_code_objects
-    extra_context['emailer_code_objects'] = owned_code_objects.filter(Q(usercoderole__user=user) & Q(usercoderole__role='email'))
+    extra_context['emailer_code_objects'] = owned_code_objects.filter(Q(usercoderole__user__username=username) & Q(usercoderole__role='email'))
     extra_context['solicitations'] = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
     return profile_views.profile_detail(request, username=username, extra_context=extra_context)
 
