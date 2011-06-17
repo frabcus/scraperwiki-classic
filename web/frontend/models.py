@@ -310,34 +310,35 @@ def data_enquiry_post_save(sender, **kwargs):
         instance = kwargs['instance']
         send_mail('Data Request', instance.email_message(), instance.email, [settings.FEEDBACK_EMAIL], fail_silently=False)
 
-        try:
-            h = highrise.HighRise(settings.HIGHRISE_PROJECT, settings.HIGHRISE_KEY)
-
+        if instance.category not in ['public']:
             try:
-                requester = h.search_people_by_email(instance.email)[0]
-            except IndexError:
-                requester = h.create_person(instance.first_name, instance.last_name, instance.email)
-                h.tag_person(requester.id, 'Lead')
+                h = highrise.HighRise(settings.HIGHRISE_PROJECT, settings.HIGHRISE_KEY)
 
-            h.create_note_for_person(instance.email_message(), requester.id)
+                try:
+                    requester = h.search_people_by_email(instance.email.decode('utf-8'))[0]
+                except IndexError:
+                    requester = h.create_person(instance.first_name, instance.last_name, instance.email)
+                    h.tag_person(requester.id, 'Lead')
 
-            cat = h.get_task_category_by_name('To Do')
+                h.create_note_for_person(instance.email_message(), requester.id)
 
-            task_owner = h.get_user_by_email(settings.HIGHRISE_ASSIGN_TASK_TO)
+                cat = h.get_task_category_by_name('To Do')
 
-            # Split out so we can tell which one is causing the problems
-            rid = requester.id
-            cid = cat.id
-            tid = task_owner.id
-            
-            h.create_task_for_person('Data Request Followup', tid, cid, rid)
-        except highrise.HighRiseException, ex:
-            msg = "%s\n\n%s" % (ex.message, instance.email_message())
-            mail_admins('HighRise update failed', msg)
-        except AttributeError, eAttr:
-            # We expect this from create_task_for_person with missing data.
-            msg = "%s\n\n%s" % (str(eAttr), instance.email_message())
-            mail_admins('HighRise update failed', msg)
+                task_owner = h.get_user_by_email(settings.HIGHRISE_ASSIGN_TASK_TO)
+
+                # Split out so we can tell which one is causing the problems
+                rid = requester.id
+                cid = cat.id
+                tid = task_owner.id
+                
+                h.create_task_for_person('Data Request Followup', tid, cid, rid)
+            except highrise.HighRiseException, ex:
+                msg = "%s\n\n%s" % (ex.message, instance.email_message())
+                mail_admins('HighRise update failed', msg)
+            except AttributeError, eAttr:
+                # We expect this from create_task_for_person with missing data.
+                msg = "%s\n\n%s" % (str(eAttr), instance.email_message())
+                mail_admins('HighRise update failed', msg)
             
 
 post_save.connect(data_enquiry_post_save, sender=DataEnquiry)
