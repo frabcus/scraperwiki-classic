@@ -113,7 +113,7 @@
         This {{scraper.wiki_type}} is protected, so you can only watch other people editing. Ask the owner 
         <a href="{% if scraper.owner.username %}{% url profiles_profile_detail scraper.owner.username %}{% endif %}">{% if scraper.owner %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %}{% endif %}</a>
         to give you permission to edit it, or 
-        <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">fork it</a>.
+        <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">fork it</a>.
     </div>
 
     <div id="login_warning" class="alert_outer" style="display:none;" >
@@ -124,7 +124,7 @@
             sign in or create an account
         {% endif %}
         to edit an existing scraper, 
-        or you can <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">fork it</a>.
+        or you can <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">fork it</a>.
         Meanwhile, view the source code and watch other people editing below.
     </div>
 
