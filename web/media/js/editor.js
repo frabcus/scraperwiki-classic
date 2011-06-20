@@ -22,6 +22,8 @@ $(document).ready(function() {
 
     var lastRev         = $('#originalrev').val(); 
     var lastRevDateEpoch= ($('#originalrevdateepoch').val() ? parseInt($('#originalrevdateepoch').val()) : 0); 
+    var lastRevUserName = $('#originalrevusername').val(); 
+    var lastRevUserRealName = $('#originalrevuserrealname').val(); 
     var lastRevPrefix   = "Last edited";
 
     var lastupdaterevcall = null; 
@@ -32,7 +34,10 @@ $(document).ready(function() {
         {
             var twhen = new Date(lastRevDateEpoch * 1000);
             var tago = jQuery.timeago(twhen);
-            $("#idlastrev").html('<span title="Revision: ' + String(lastRev) + '\nDate: ' + String(twhen) + '">' + lastRevPrefix + ' ' + tago + '</span>');
+            $("#idlastrev").html('<span title="' + 
+                    'By ' + lastRevUserName + ' (' + lastRevUserRealName + '), ' +
+                    ' rev ' + String(lastRev) + ' \n' + 
+                    'on ' + String(twhen) + '">' + lastRevPrefix + ' ' + tago + '</span>');
             lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 500);
         }
     }
@@ -40,6 +45,8 @@ $(document).ready(function() {
     {   
         lastRev = rev;
         lastRevDateEpoch = revdateepoch;
+        lastRevUserName = username;
+        lastRevUserRealName = userrealname;
         lastRevPrefix = "Saved";
         if (lastupdaterevcall != null)
             clearTimeout(lastupdaterevcall); 

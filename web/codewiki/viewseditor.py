@@ -180,6 +180,8 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         context['rev'] = status.get('prevcommit',{}).get("rev") or 0
         context['revdate'] = status.get('prevcommit',{}).get("date")
         context['revdateepoch'] = _datetime_to_epoch(context['revdate'])
+        context['revusername'] = status.get('prevcommit',{}).get("user").username
+        context['revuserrealname'] = status.get('prevcommit',{}).get("user").get_profile().name
 
     # create a temporary scraper object
     else:
