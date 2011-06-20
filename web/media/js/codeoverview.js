@@ -51,7 +51,7 @@ function setupScraperOverview(short_name)
     $('.sqlite_view_schema:last').hide(); 
     $('#sqlite_schema').hide(); 
     $('#data_tab_1').click();
-});
+}
 
 
     // load in the whole new page and snip out the piece (this is too easy)
