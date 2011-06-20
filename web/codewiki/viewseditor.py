@@ -164,24 +164,26 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         if rollback_rev is not None:
             rollback_rev = int(rollback_rev)
             assert rollback_rev >= 0 # too confusing for now otherwise!
-            # get revision *after* as we want the 'code' after the change
-            # (see below it uses prevcommit to get rev number)
-            get_rev = rollback_rev + 1
+            get_rev = rollback_rev
             context['rollback_rev'] = rollback_rev
+            use_commit = 'currcommit'
         else:
-            # default to getting most recent revision
+            # default to getting most recent (from file should it have changed
+            # but not been committed), hence the revision is always previous
+            # commit
             get_rev = -1
+            use_commit = 'prevcommit'
         status = scraper.get_vcs_status(get_rev)
         if rollback_rev is None:
             assert 'currcommit' not in status 
 
         # assert not status['ismodified']  # should hold, but disabling it for now
         context['code'] = status["code"]
-        context['rev'] = status.get('prevcommit',{}).get("rev") or 0
-        context['revdate'] = status.get('prevcommit',{}).get("date")
+        context['rev'] = status.get(use_commit,{}).get("rev") or 0
+        context['revdate'] = status.get(use_commit,{}).get("date")
         context['revdateepoch'] = _datetime_to_epoch(context['revdate'])
-        context['revusername'] = status.get('prevcommit',{}).get("user").username
-        context['revuserrealname'] = status.get('prevcommit',{}).get("user").get_profile().name
+        context['revusername'] = status.get(use_commit,{}).get("user").username
+        context['revuserrealname'] = status.get(use_commit,{}).get("user").get_profile().name
 
     # create a temporary scraper object
     else:

@@ -132,7 +132,10 @@ class MercurialInterface:
         status["isadded"] = ("code" in added)  # false if actually committed (ie true means we're in an awkward state)
         return status
         
-
+    
+    # rev -1 or None returnst he current saved file (even if not committed)
+    # other negative numbers return revisions backwards from end in version control
+    # positive numbers revisions forward
     def getstatus(self, rev=None):
         status = { }
         scraperfile = "code"
