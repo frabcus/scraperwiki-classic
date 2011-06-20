@@ -225,15 +225,16 @@
 {% block run_script %}
     {{block.super}}
 
-{% if user.is_authenticated %}
 $(document).ready(function() 
 {
+    setupScraperOverview('{{scraper.short_name}}');
+{% if user.is_authenticated %}
     setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
     setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
-    setupScraperEditInPlace('{{scraper.wiki_type}}', '{{scraper.short_name}}');
+    setupScraperEditInPlace('{{scraper.short_name}}');
     setupChangeEditorStatus(); 
-});
 {% endif %}
+});
 
 {% endblock %}
 

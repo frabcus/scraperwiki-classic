@@ -1,7 +1,7 @@
 
 
 
-$(document).ready(function() 
+function setupScraperOverview(short_name)
 {
     $('.data_tab').click(function() 
     {
@@ -20,8 +20,7 @@ $(document).ready(function()
         $('#' + tab_content_name).show();
     
         $("#downloadcsvtable").show(); 
-        $("#downloadcsvtable").attr("href", "/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+`"+encodeURI(tablename)+"`"); 
-        //$("#downloadcsvtable").text("/api/1.0/datastore/sqlite?format=csv&name={{scraper.short_name}}&query=select+*+from+"+tablename); 
+        $("#downloadcsvtable").attr("href", "/api/1.0/datastore/sqlite?format=csv&name=" + short_name + "&query=select+*+from+`"+encodeURI(tablename)+"`"); 
     }); 
 
     $('.sqlite_view_schema').click( function() 
@@ -33,7 +32,7 @@ $(document).ready(function()
     
     $("#popupinteractivesqlite").click(function() 
     {
-        var url = "http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'quickcheck_datastore' %}?src="+decodeURIComponent('{{scraper.short_name}}'); 
+        var url = "http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'quickcheck_datastore' %}?src="+decodeURIComponent(short_name); 
         $.modal('<iframe width="100%" height="100%" src='+url+'></iframe>', 
         {
             overlayClose: true,
@@ -52,7 +51,7 @@ $(document).ready(function()
     $('.sqlite_view_schema:last').hide(); 
     $('#sqlite_schema').hide(); 
     $('#data_tab_1').click();
-}); 
+});
 
 
     // load in the whole new page and snip out the piece (this is too easy)
@@ -71,7 +70,7 @@ function reload_scraper_contributors()
     //    document.location.reload(true);
 }
 
-function setupScraperEditInPlace(wiki_type, short_name)
+function setupScraperEditInPlace(short_name)
 {
     //about
     $('#divAboutScraper').editable('admin/', {
