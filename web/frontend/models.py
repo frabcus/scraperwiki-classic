@@ -277,7 +277,7 @@ class DataEnquiry(models.Model):
         return u"%s %s <%s>" % (self.first_name, self.last_name, self.email)
 
     def email_message(self):
-        return u"""
+        msg =  u"""
             Category: %s
             First Name: %s
             Last Name: %s
@@ -305,6 +305,8 @@ class DataEnquiry(models.Model):
                self.visualisation,
                self.application)
 
+        return msg.encode('utf-8')
+
 def data_enquiry_post_save(sender, **kwargs):
     if kwargs['created']:
         instance = kwargs['instance']
@@ -315,9 +317,11 @@ def data_enquiry_post_save(sender, **kwargs):
                 h = highrise.HighRise(settings.HIGHRISE_PROJECT, settings.HIGHRISE_KEY)
 
                 try:
-                    requester = h.search_people_by_email(instance.email.decode('utf-8'))[0]
+                    requester = h.search_people_by_email(instance.email.encode('utf-8'))[0]
                 except IndexError:
-                    requester = h.create_person(instance.first_name, instance.last_name, instance.email)
+                    requester = h.create_person(instance.first_name.encode('utf-8'),
+                                                instance.last_name.encode('utf-8'),
+                                                instance.email.encode('utf-8'))
                     h.tag_person(requester.id, 'Lead')
 
                 h.create_note_for_person(instance.email_message(), requester.id)
