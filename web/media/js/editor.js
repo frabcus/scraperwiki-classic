@@ -30,8 +30,9 @@ $(document).ready(function() {
         lastupdaterevcall = null; 
         if ((lastRev != null) && (lastRev != "unsaved"))
         {
-            var tago = jQuery.timeago(new Date(lastRevDateEpoch * 1000));
-            $("#idlastrev").html('<span title="Revision: ' + String(lastRev) + '">' + lastRevPrefix + ' ' + tago + '</span>');
+            var twhen = new Date(lastRevDateEpoch * 1000);
+            var tago = jQuery.timeago(twhen);
+            $("#idlastrev").html('<span title="Revision: ' + String(lastRev) + '\nDate: ' + String(twhen) + '">' + lastRevPrefix + ' ' + tago + '</span>');
             lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 500);
         }
     }
