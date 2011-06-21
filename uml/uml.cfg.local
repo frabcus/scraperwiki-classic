@@ -75,7 +75,7 @@ via	= 9001
 mem	= 128M
 count	= 25
 
-[ubuntu]
+[ubuntu1]
 host	= 127.0.0.1
 tap	= 127.0.0.1
 eth	= 127.0.0.1

@@ -22,7 +22,19 @@ $(document).ready(function() {
 
     var lastRev         = $('#originalrev').val(); 
     var lastRevDateEpoch= ($('#originalrevdateepoch').val() ? parseInt($('#originalrevdateepoch').val()) : 0); 
+    var lastRevUserName = $('#originalrevusername').val(); 
+    var lastRevUserRealName = $('#originalrevuserrealname').val(); 
+    var rollbackRev = $('#rollback_rev').val(); 
+    if (rollbackRev == "") {
+        rollbackRev = null; 
+    } else {
+        rollbackRev = parseInt(rollbackRev);
+    }
+
     var lastRevPrefix   = "Last edited";
+    if (rollbackRev != null) {
+        lastRevPrefix   = "Rollback preview of ";
+    }
 
     var lastupdaterevcall = null; 
     function doUpdateLastSavedRev() 
@@ -30,8 +42,12 @@ $(document).ready(function() {
         lastupdaterevcall = null; 
         if ((lastRev != null) && (lastRev != "unsaved"))
         {
-            var tago = jQuery.timeago(new Date(lastRevDateEpoch * 1000));
-            $("#idlastrev").html('<span title="Revision: ' + String(lastRev) + '">' + lastRevPrefix + ' ' + tago + '</span>');
+            var twhen = new Date(lastRevDateEpoch * 1000);
+            var tago = jQuery.timeago(twhen);
+            $("#idlastrev").html('<span title="' + 
+                    'By ' + lastRevUserRealName + ' (' + lastRevUserName + '), ' +
+                    ' rev ' + String(lastRev) + ' \n' + 
+                    'on ' + String(twhen) + '">' + lastRevPrefix + ' ' + tago + '</span>');
             lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 500);
         }
     }
@@ -39,10 +55,14 @@ $(document).ready(function() {
     {   
         lastRev = rev;
         lastRevDateEpoch = revdateepoch;
+        lastRevUserName = username;
+        lastRevUserRealName = userrealname;
         lastRevPrefix = "Saved";
         if (lastupdaterevcall != null)
             clearTimeout(lastupdaterevcall); 
         lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 50); 
+        rollbackRev = null;
+        $('#rollback_warning').hide();
     }
     lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 50); 
 
@@ -660,7 +680,6 @@ $(document).ready(function() {
                 alert("Malformed json: '''" + sdata + "'''"); 
                 continue
             }
-console.log(jdata); 
 
             if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
                 receivechatqueue.push(jdata); 
@@ -1065,6 +1084,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+                if (rollbackRev != null) {
+                    $('.editor_controls #btnCommitPopup').val('Rollback'); 
+                    $('#rollback_warning').show();
+                }
                 sendjson({"command":'automode', "automode":newmode}); 
             }
         }
