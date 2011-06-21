@@ -3054,7 +3054,7 @@ body.contact p.last {
 	margin-bottom: 40px;
 }
 
-body.contact form img {
+body.contact form img#postman {
 	position: absolute;
 	top: 20px;
 	right: -280px;
