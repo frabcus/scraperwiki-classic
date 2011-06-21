@@ -26,6 +26,9 @@ $(document).ready(function() {
     var lastRevUserRealName = $('#originalrevuserrealname').val(); 
     var rollbackRev = $('#rollback_rev').val(); 
     var lastRevPrefix   = "Last edited";
+    if (rollbackRev != null) {
+        lastRevPrefix   = "Rollback preview of ";
+    }
 
     var lastupdaterevcall = null; 
     function doUpdateLastSavedRev() 
