@@ -39,7 +39,7 @@ $(document).ready(function() {
             var twhen = new Date(lastRevDateEpoch * 1000);
             var tago = jQuery.timeago(twhen);
             $("#idlastrev").html('<span title="' + 
-                    'By ' + lastRevUserName + ' (' + lastRevUserRealName + '), ' +
+                    'By ' + lastRevUserRealName + ' (' + lastRevUserName + '), ' +
                     ' rev ' + String(lastRev) + ' \n' + 
                     'on ' + String(twhen) + '">' + lastRevPrefix + ' ' + tago + '</span>');
             lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 500);
