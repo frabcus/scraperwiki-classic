@@ -4496,6 +4496,11 @@ a.historysave {
 	background: url(../images/icons/disk.png) no-repeat;
 }
 
+a.rollbackchanges {
+	font-size: 10px;
+	cursor: pointer;
+}
+
 .editor_controls #run {
 	
 }
