@@ -24,6 +24,7 @@ $(document).ready(function() {
     var lastRevDateEpoch= ($('#originalrevdateepoch').val() ? parseInt($('#originalrevdateepoch').val()) : 0); 
     var lastRevUserName = $('#originalrevusername').val(); 
     var lastRevUserRealName = $('#originalrevuserrealname').val(); 
+    var rollbackRev = $('#rollback_rev').val(); 
     var lastRevPrefix   = "Last edited";
 
     var lastupdaterevcall = null; 
@@ -51,6 +52,8 @@ $(document).ready(function() {
         if (lastupdaterevcall != null)
             clearTimeout(lastupdaterevcall); 
         lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 50); 
+        rollbackRev = null;
+        $('#rollback_warning').hide();
     }
     lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 50); 
 
@@ -1072,6 +1075,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+                if (rollbackRev != null) {
+                    $('.editor_controls #btnCommitPopup').val('Rollback'); 
+                    $('#rollback_warning').show();
+                }
                 sendjson({"command":'automode', "automode":newmode}); 
             }
         }
