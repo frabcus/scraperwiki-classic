@@ -1,5 +1,10 @@
 {% extends "codewiki/scraper_base.html" %}
-{% block javascript %}<script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>{% endblock %}
+
+{% block javascript %}
+    {{block.super}}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>
+{% endblock %}
+
 {% load humanize %}
 {% load markup %}
 {% block tab %}
