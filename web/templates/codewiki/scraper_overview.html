@@ -227,8 +227,6 @@ $(document).ready(function()
 {% if user.is_authenticated %}
     setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
     setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
-    setupScraperEditInPlace('{{scraper.short_name}}');
-    setupChangeEditorStatus(); 
 {% endif %}
 });
 

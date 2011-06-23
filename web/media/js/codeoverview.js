@@ -51,6 +51,55 @@ function setupScraperOverview(short_name)
     $('.sqlite_view_schema:last').hide(); 
     $('#sqlite_schema').hide(); 
     $('#data_tab_1').click();
+
+     //scheduler
+     //
+     if ($('#spnRunInterval').length > 0) {
+         $('#spnRunInterval').editable('admin/', {
+                  indicator : 'Saving...',
+                  tooltip   : 'Click to edit...',
+                  cancel    : 'Cancel',
+                  submit    : 'Save',
+                  onblur: 'ignore',
+                  data   : $('#hidScheduleOptions').val().replace('PLACEHOLDER', $('#spnRunIntervalInner').attr('rawInterval')),
+                  type   : 'select',
+                  event: 'dblclick',
+                  placeholder: '',
+                  submitdata : {short_name: short_name}
+              });
+      }
+
+      $('#aEditSchedule').click(
+           function(){
+                sCurrent = $('#spnRunIntervalInner').html().trim();               
+                $('#spnRunInterval').dblclick();
+                $('#spnRunInterval select').val(sCurrent);
+                return false;
+           }
+       );
+
+     //license
+     $('#spnLicenseChoice').editable('admin/', {
+              indicator : 'Saving...',
+              tooltip   : 'Click to edit...',
+              cancel    : 'Cancel',
+              submit    : 'Save',
+              onblur: 'ignore',
+              data   : $('#hidLicenseChoices').val(),
+              type   : 'select',
+              event: 'dblclick',
+              placeholder: '',
+              submitdata : {short_name: short_name}
+          });
+
+      $('#aEditLicense').click (
+           function(){
+                sCurrent = $('#spnLicenseChoice').html().trim();
+                $('#spnLicenseChoice').dblclick();
+                $('#spnLicenseChoice select').val(sCurrent);
+                return false;
+           }
+       );          
 }
 
 
@@ -70,7 +119,7 @@ function reload_scraper_contributors()
     //    document.location.reload(true);
 }
 
-function setupScraperEditInPlace(short_name)
+function setupCodeOverview(short_name)
 {
     //about
     $('#divAboutScraper').editable('admin/', {
@@ -152,58 +201,6 @@ function setupScraperEditInPlace(short_name)
     });
     $('#divEditTagsControls').hide();
     $('#addtagmessage').css("display", ($("#divScraperTags ul.tags li a").length == 0 ? "block" : "none")); 
-
-
-
-
-     //scheduler
-     //
-     if ($('#spnRunInterval').length > 0) {
-         $('#spnRunInterval').editable('admin/', {
-                  indicator : 'Saving...',
-                  tooltip   : 'Click to edit...',
-                  cancel    : 'Cancel',
-                  submit    : 'Save',
-                  onblur: 'ignore',
-                  data   : $('#hidScheduleOptions').val().replace('PLACEHOLDER', $('#spnRunIntervalInner').attr('rawInterval')),
-                  type   : 'select',
-                  event: 'dblclick',
-                  placeholder: '',
-                  submitdata : {short_name: short_name}
-              });
-      }
-
-      $('#aEditSchedule').click(
-           function(){
-                sCurrent = $('#spnRunIntervalInner').html().trim();               
-                $('#spnRunInterval').dblclick();
-                $('#spnRunInterval select').val(sCurrent);
-                return false;
-           }
-       );
-
-     //license
-     $('#spnLicenseChoice').editable('admin/', {
-              indicator : 'Saving...',
-              tooltip   : 'Click to edit...',
-              cancel    : 'Cancel',
-              submit    : 'Save',
-              onblur: 'ignore',
-              data   : $('#hidLicenseChoices').val(),
-              type   : 'select',
-              event: 'dblclick',
-              placeholder: '',
-              submitdata : {short_name: short_name}
-          });
-
-      $('#aEditLicense').click (
-           function(){
-                sCurrent = $('#spnLicenseChoice').html().trim();
-                $('#spnLicenseChoice').dblclick();
-                $('#spnLicenseChoice select').val(sCurrent);
-                return false;
-           }
-       );          
 }
 
 

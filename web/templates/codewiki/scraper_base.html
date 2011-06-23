@@ -53,3 +53,16 @@
     </div>
 {% endblock %}
 
+{% block run_script %}
+    {{block.super}}
+
+$(document).ready(function()
+{
+{% if user.is_authenticated %}
+    setupCodeOverview('{{scraper.short_name}}');
+    setupChangeEditorStatus();
+{% endif %}
+});
+
+{% endblock %}
+
