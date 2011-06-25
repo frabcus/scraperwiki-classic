@@ -1,4 +1,5 @@
 #!/bin/sh -
+
 "exec" "python" "-O" "$0" "$@"
 
 """
@@ -306,6 +307,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                 return
 
             usereditor = self.guidclienteditors.usereditormap[self.username]
+ 
+                # this mode is defunct so nondraftcount should always be the same as len(usereditor.userclients)
             if automode == 'draft':
                 usereditor.nondraftcount -= 1
                 if self.processrunning:
@@ -593,35 +596,32 @@ class RunnerFactory(protocol.ServerFactory):
             umlstatuschanges["draftscraperusers"] = [ { "chatname":cclient.cchatname, "present":(cclient.cchatname in draftscraperusers), "running":draftscraperusers.get(cclient.cchatname, False) } ]
         
         # the complexity here reflects the complexity of the structure.  the running flag could be set on any one of the clients
+        # nondraftcount and draft mode has been removed from here
         def scraperentry(eoos, cclient):  # local function
-            scrapereditors = { }   # chatname -> (lasttouch, nondraftcount)
-            scraperdrafteditors = [ ]
+            scrapereditors = { }   # chatname -> (lasttouch, [clientnumbers])
             running = False        # we could make this an updated member of EditorsOnOneScraper like lasttouch
             
             for usereditor in eoos.usereditormap.values():
-                if usereditor.nondraftcount != 0:
-                    scrapereditors[usereditor.userclients[0].cchatname] = (usereditor.userlasttouch, usereditor.nondraftcount)
-                else:
-                    scraperdrafteditors.append(usereditor.userclients[0].cchatname)
-                    
-                for uclient in usereditor.userclients:
-                    running = running or bool(uclient.processrunning)
+                cchatname = usereditor.userclients[0].cchatname
+                clientnumbers = [uclient.clientnumber  for uclient in usereditor.userclients]
+                scrapereditors[cchatname] = (usereditor.userlasttouch, clientnumbers)
+                running = running or max([ bool(uclient.processrunning)  for uclient in usereditor.userclients ])
             
             for uclient in eoos.anonymouseditors:
-                if uclient.automode != 'draft': 
-                    scrapereditors[uclient.cchatname] = (uclient.clientlasttouch, 1)
-                else:
-                    scraperdrafteditors.append(uclient.cchatname)
-                running = running or bool(uclient.processrunning)
+                assert uclient.automode != 'draft' 
+                scrapereditors[uclient.cchatname] = (uclient.clientlasttouch, [uclient.clientnumber])
             
-            ### scraperdrafteditors
+                # diff mode
             if cclient:
-                scraperusercclient = {'chatname':cclient.cchatname, 'present':(cclient.cchatname in scrapereditors), 'userlasttouch':jstime(cclient.clientlasttouch) }
-                if scraperusercclient['present']:
-                    scraperusercclient['nondraftcount'] = (not cclient.username and 1 or eoos.usereditormap[cclient.username].nondraftcount)
+                scraperusercclient = {'chatname':cclient.cchatname, 'userlasttouch':jstime(cclient.clientlasttouch) }
+                if cclient.cchatname in scrapereditors:
+                    scraperusercclient['present'] = True
+                    scraperusercclient['uclients'] = scrapereditors[cclient.cchatname][1]
+                else:
+                    scraperusercclient['present'] = False
                 scraperusers = [ scraperusercclient ]
             else:
-                scraperusers = [ {'chatname':cchatname, 'present':True, 'userlasttouch':jstime(ultc[0]), 'nondraftcount':ultc[1] }  for cchatname, ultc in scrapereditors.items() ]
+                scraperusers = [ {'chatname':cchatname, 'userlasttouch':jstime(ultc[0]), 'uclients':ultc[1], 'present':True }  for cchatname, ultc in scrapereditors.items() ]
             
             return {'scrapername':eoos.scrapername, 'present':True, 'running':running, 'scraperusers':scraperusers, 'scraperlasttouch':jstime(eoos.scraperlasttouch) }
         

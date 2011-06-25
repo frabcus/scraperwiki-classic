@@ -10,15 +10,16 @@ $(document).ready(function() {
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
 
     // variable transmitted through the html
-    var short_name      = $('#short_name').val();
-    var guid            = $('#scraper_guid').val();
-    var username        = $('#username').val(); 
-    var userrealname    = $('#userrealname').val(); 
-    var isstaff         = $('#isstaff').val(); 
+    var short_name = $('#short_name').val();
+    var guid = $('#scraper_guid').val();
+    var username = $('#username').val(); 
+    var userrealname = $('#userrealname').val(); 
+    var isstaff = $('#isstaff').val(); 
     var scraperlanguage = $('#scraperlanguage').val(); 
-    var run_type        = $('#code_running_mode').val();
-    var codemirror_url  = $('#codemirror_url').val();
-    var wiki_type       = $('#id_wiki_type').val(); 
+    var run_type = $('#code_running_mode').val();
+    var codemirror_url = $('#codemirror_url').val();
+    var wiki_type = $('#id_wiki_type').val(); 
+    var savecode_authorized = $('#savecode_authorized').val(); 
 
     var lastRev         = $('#originalrev').val(); 
     var lastRevDateEpoch= ($('#originalrevdateepoch').val() ? parseInt($('#originalrevdateepoch').val()) : 0); 
@@ -51,14 +52,13 @@ $(document).ready(function() {
 
     // if we're not authorized to edit, fake us up as anonymous for now (so
     // twisted doesn't try and make us the editor ever)
-    var savecode_authorized = $('#savecode_authorized').val(); // obviously don't trust this, check server side, but use it for choosing UI stuff
     if (!savecode_authorized) {
         if (!username) {
             $('#login_warning').show();
         } else {
             $('#protected_warning').show();
+        username = '';
         }
-        username = null;
     }
 
     // runtime information
@@ -583,6 +583,7 @@ $(document).ready(function() {
         data = { "command":'connection_open', 
                  "guid":guid, 
                  "username":username, 
+                 "savecode_authorized":savecode_authorized, 
                  "userrealname":userrealname, 
                  "language":scraperlanguage, 
                  "scrapername":short_name, 
@@ -994,7 +995,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         if (boutputstatus)  // first time
         {
             stext = [ ]; 
-            stext.push("Editing began " + swtimeago(earliesteditor, servernowtime) + " ago, last touched " + swtimeago(lasttouchedtime, servernowtime) + " ago"); 
+            stext.push("Editing began " + swtimeago(earliesteditor, servernowtime) + " ago, last touched " + swtimeago(lasttouchedtime, servernowtime) + " ago.  You are client#"+clientnumber); 
             var othereditors = [ ]; 
             for (var i = 0; i < data.loggedineditors.length; i++) 
             {
