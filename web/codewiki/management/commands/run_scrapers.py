@@ -300,20 +300,22 @@ class ScraperRunner(threading.Thread):
         
         elapsed = (time.time() - start)
 
-        # Update the scrapers meta information
-        self.scraper.update_meta()
-        self.scraper.last_run = datetime.datetime.now()
+        # Update the scrapers meta information. Get the scraper from
+        # the db again in case it has changed during the lifetime of the run
+        scraper = Scraper.objects.get(id=self.scraper.id)
+        scraper.update_meta()
+        scraper.last_run = datetime.datetime.now()
         if exceptionmessage:
-            self.scraper.status = 'sick'
+            scraper.status = 'sick'
         else:
-            self.scraper.status = 'ok'
-        self.scraper.save()
+            scraper.status = 'ok'
+        scraper.save()
 
         # Send email if this is an email scraper
-        emailers = self.scraper.users.filter(usercoderole__role='email')
+        emailers = scraper.users.filter(usercoderole__role='email')
         if emailers.count() > 0:
             subject, message = getemailtext(event)
-            if self.scraper.status == 'ok':
+            if scraper.status == 'ok':
                 if message:  # no email if blank
                     for user in emailers:
                         send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[user.email], fail_silently=True)

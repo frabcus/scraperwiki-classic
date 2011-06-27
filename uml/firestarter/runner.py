@@ -43,7 +43,7 @@ def writereadstream(dhost, dport, jdata):
     soc_file = None
     
     if jdata["language"] not in ["python", "php", "ruby"]:
-        sys.stdout.write(json.dumps({'message_type' : 'fail', 'content' : "no such language %s" % jdata["scraperlanguage"]}) + '\r\n')
+        sys.stdout.write(json.dumps({'message_type' : 'fail', 'content' : "no such language %s" % jdata["language"]}) + '\r\n')
         sys.stdout.flush()
         return 
     
