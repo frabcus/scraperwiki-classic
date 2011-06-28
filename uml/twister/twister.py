@@ -144,6 +144,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.scraperlanguage = parsed_data.get('language', '')
         self.isstaff = (parsed_data.get('isstaff') == "yes")
         self.isumlmonitoring = (parsed_data.get('umlmonitoring') == "yes")
+        self.savecode_authorized = (parsed_data.get('savecode_authorized') == "yes")
         
         if self.username:
             self.chatname = self.userrealname or self.username
@@ -511,7 +512,8 @@ class EditorsOnOneScraper:
                 # order by who has first session (and not all draft mode) in order to determin who is the editor
         usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
         usereditors.sort(key=lambda x: x.usersessionpriority)
-        editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors ]
+        editorstatusdata["loggedinusers"] = [ usereditor.username  for usereditor in usereditors  if not usereditor.savecode_authorized ]
+        editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors  if usereditor.savecode_authorized ]
         
         # notify if there is a broadcasting editor so the windows can sort out which one's are autoloading
         for usereditor in usereditors:
@@ -706,10 +708,16 @@ class RunnerFactory(protocol.ServerFactory):
             pass  # didn't even get to connection open
         
         elif client.isumlmonitoring:
-            self.umlmonitoringclients.remove(client)
+            if client in self.umlmonitoringclients:
+                self.umlmonitoringclients.remove(client)
+            else:
+                logger.error("No place to remove client %d" % client.clientnumber)
 
         elif not client.guid:
-            self.draftscraperclients.remove(client)
+            if client in self.draftscraperclients:
+                self.draftscraperclients.remove(client)
+            else:
+                logger.error("No place to remove client %d" % client.clientnumber)
             
         elif (client.guid in self.guidclientmap):   
             if not self.guidclientmap[client.guid].RemoveClient(client):
@@ -721,10 +729,12 @@ class RunnerFactory(protocol.ServerFactory):
                     message = "%s leaves" % client.chatname
                 self.guidclientmap[client.guid].notifyEditorClients(message)
         else:
-            pass  # shouldn't happen
+            logger.error("No place to remove client %d" % client.clientnumber)
         
         # check that all clients are accounted for
-        assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
+        Dtclients = len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
+        if len(self.clients) != Dtclients:
+            logger.error("Miscount of clients %d %d" % (Dtclients))
         self.notifyMonitoringClients(client)
 
 

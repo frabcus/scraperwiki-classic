@@ -188,9 +188,6 @@ $(document).ready(function() {
         servernowtime = parseISOdate(jdata.nowtime); 
         $("#monitoroutput #servernowtime").html(servernowtime.toUTCString()); 
 
-        if (jdata.message)
-            $("#monitoroutput #message").html(jdata.message); 
-
         if (jdata.umlmonitoringusers)
         {
             if (jdata.message_type == "umlstatus")
@@ -392,7 +389,6 @@ $(document).ready(function() {
 
     <div id="monitoradmin">
         <div id="connectionstatusdiv"><span id="connectionstatus">...</span> <strong>Server time:</strong> <span id="servernowtime"></span></div>
-        <div id="message">... (no message yet) ...</div>
         <div id="jdatareceived"></div>
     </div>
     <a id="showmonitoradmin" href="#">toggle connection admin...</a>

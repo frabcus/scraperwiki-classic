@@ -47,19 +47,7 @@ $(document).ready(function() {
     }
     lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 50); 
 
-
     var lastsavedcode   = ''; // used to tell if we should expect a null back from the revision log
-
-    // if we're not authorized to edit, fake us up as anonymous for now (so
-    // twisted doesn't try and make us the editor ever)
-    if (!savecode_authorized) {
-        if (!username) {
-            $('#login_warning').show();
-        } else {
-            $('#protected_warning').show();
-        username = '';
-        }
-    }
 
     // runtime information
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
@@ -78,7 +66,8 @@ $(document).ready(function() {
 
     // information handling who else is watching and editing during this session
     var editingusername = "";  // primary editor
-    var loggedineditors = [ ]; // list of who else is here and their windows open
+    var loggedinusers = [ ];   // all people watching
+    var loggedineditors = [ ]; // list of who else is here and their windows open who have editing rights
     var iselectednexteditor = 1; 
     var nanonymouseditors = 0; // number of anonymous editors
     var chatname = "";         // special in case of Anonymous users (yes, this unnecessarily gets set every time we call recordEditorStatus)
@@ -537,6 +526,9 @@ $(document).ready(function() {
 
         $('select#automode').change(changeAutomode); 
         $('input#showautomode').change(showhideAutomodeSelector); 
+
+        if (!savecode_authorized) 
+            $(username ? '#protected_warning' : '#login_warning').show();
     }
     
     //Setup Tabs
@@ -985,6 +977,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
         editingusername = (data.loggedineditors ? data.loggedineditors[0] : '');  // the first in the list is the primary editor
         loggedineditors = data.loggedineditors;  // this is a list
+        loggedinusers = data.loggedinusers;      // this is a list
         nanonymouseditors = data.nanonymouseditors; 
         chatname = data.chatname; 
         clientnumber = data.clientnumber; 
@@ -996,6 +989,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         {
             stext = [ ]; 
             stext.push("Editing began " + swtimeago(earliesteditor, servernowtime) + " ago, last touched " + swtimeago(lasttouchedtime, servernowtime) + " ago.  You are client#"+clientnumber); 
+
             var othereditors = [ ]; 
             for (var i = 0; i < data.loggedineditors.length; i++) 
             {
@@ -1003,9 +997,19 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                     othereditors.push(data.loggedineditors[i]); 
             }
             if (othereditors.length)
-                stext.push("; Other editors: " + othereditors.join(", ")); 
+                stext.push((savecode_authorized ? "; Other editors" : "; Editors"), othereditors.join(", ")); 
+
+            var otherusers = [ ]; 
+            for (var i = 0; i < data.loggedinusers.length; i++) 
+            {
+                if (data.loggedinusers[i] != username)
+                    otherusers.push(data.loggedinusers[i]); 
+            }
+            if (otherusers.length)
+                stext.push((!savecode_authorized ? "; Other users" : "; Users"), otherusers.join(", ")); 
+
             if (nanonymouseditors - (username ? 0 : 1) > 0) 
-                stext.push("; there are " + (nanonymouseditors-(username ? 0 : 1)) + " anonymous editors watching"); 
+                stext.push("; there are " + (nanonymouseditors-(username ? 0 : 1)) + " anonymous users watching"); 
             stext.push("."); 
             writeToChat(cgiescape(stext.join(""))); 
         }
