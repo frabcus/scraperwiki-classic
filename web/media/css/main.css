@@ -3054,7 +3054,7 @@ body.contact p.last {
 	margin-bottom: 40px;
 }
 
-body.contact form img {
+body.contact form img#postman {
 	position: absolute;
 	top: 20px;
 	right: -280px;
@@ -4494,6 +4494,11 @@ a.historyrun {
 a.historysave {
 	padding-left: 17px;
 	background: url(../images/icons/disk.png) no-repeat;
+}
+
+a.rollbackchanges {
+	font-size: 10px;
+	cursor: pointer;
 }
 
 .editor_controls #run {

@@ -49,6 +49,12 @@
               {{itemloggroup.list|length}} times
             {% endifnotequal %}
             <span class="history_date">{{ itemfirst.datetime|date:"H:i, j F Y" }}</span>
+            {% if user.is_authenticated %}
+                {% ifnotequal itemloggroup_list|first itemloggroup %}
+                <a class="rollbackchanges" title="Revert code to just after this change; to revision {{itemfirst.rev}}" 
+                   href="{% url editor_edit scraper.wiki_type scraper.short_name %}?rollback_rev={{itemfirst.rev}}">rollback</a>
+                {% endifnotequal %}
+            {% endif %}
           </span>
 
           <div class="history_view_changes">
@@ -256,6 +262,7 @@ function previewchanges_hide(block)
     codepreviewerdiv.hide(); 
     block.find(".history_view_changes .hidechanges").hide(); 
     block.find(".history_view_changes .showchanges").show(); 
+    block.find(".history_editor_info .rollbackchanges").hide(); 
 }
 
 function previewchanges_show(block)
@@ -264,6 +271,7 @@ function previewchanges_show(block)
 
     block.find(".history_view_changes .showchanges").hide(); 
     block.find(".history_view_changes .hidechanges").show(); 
+    block.find(".history_editor_info .rollbackchanges").show(); 
 
     var rev = block.find("span.revlist span.revelem:first span.rev").text();  
     var prevrev = block.find("span.revlist span.revelem:last span.prevrev").text();  
