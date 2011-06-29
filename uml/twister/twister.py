@@ -130,7 +130,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         
         # this returns localhost and is unable to distinguish between orbited or django source
         #socket = self.transport.getHandle()
-        #self.logger.info("  %s %s" % (socket.getpeername(), type(socket.getpeername())))
+        #self.logger.info("socket  %s %s" % (socket.getpeername(), type(socket.getpeername())))
         
         self.factory.clientConnectionMade(self)
             # we don't know what scraper they've opened until information is send with first clientcommmand

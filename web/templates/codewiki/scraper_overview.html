@@ -218,18 +218,20 @@
 
 {% endblock %}
 
-{% block run_script %}
-    {{block.super}}
 
+{% block jrun_script %}
+<script>
+{{block.super}}
 $(document).ready(function() 
 {
     setupScraperOverview('{{scraper.short_name}}');
+    setupChangeEditorStatus();
 {% if user.is_authenticated %}
     setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
     setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
 {% endif %}
 });
-
-{% endblock %}
+</script>
+{% endblock jrun_script %}
 
 

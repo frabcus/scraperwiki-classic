@@ -2,17 +2,19 @@
 {% load humanize %}
 {% load month_name %}
 
-{% block tab %}
+
 {% load gravatar %}
 
 {% block javascript %}
+  {{ block.super }}
   {% with scraper.language|lower as language %}
     {% include 'codewiki/includes/codemirror_parsers.html' %}
   {% endwith %}
 
   <script type="text/javascript" src="{{ MEDIA_URL }}js/codeviewer.js?{{settings.REVISION}}"></script>  {# highlightCode(code, Parser), highlightOtherCode(greencode, redcode, matcheropcodes, Parser) #}
-{% endblock %}
+{% endblock javascript %}
 
+{% block tab %}
 <input type="hidden" id="rawcodeurl" value="{% url raw scraper.short_name %}"/>
 <input type="hidden" id="diffsequrl" value="{% url diffseq scraper.short_name %}"/>
 <input type="hidden" id="run_event_json" value="{% url run_event_json 'XXX' %}"/>

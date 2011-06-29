@@ -44,6 +44,7 @@
 {% block tabs %}
     {% include 'codewiki/includes/tabs.html' %}
 {% endblock %}
+
 {% block content %}
     <div class="content full">
         <div class="page_tab_body">
@@ -51,18 +52,7 @@
             {% endblock %}
         </div>
     </div>
-{% endblock %}
+{% endblock content %}
 
-{% block run_script %}
-    {{block.super}}
 
-$(document).ready(function()
-{
-{% if user.is_authenticated %}
-    setupCodeOverview('{{scraper.short_name}}');
-    setupChangeEditorStatus();
-{% endif %}
-});
-
-{% endblock %}
 

@@ -226,11 +226,13 @@
 	{% endblock %}
 
     <script type="text/javascript" defer="defer">
-        {% block run_script %}{% endblock %}
+        {% block run_script %}
+        {% endblock %}
     </script>
     
         {# use this one if you want your editor to syntax highlight the javascript #}
-    {% block jrun_script %}{% endblock %}  
+    {% block jrun_script %}
+    {% endblock %}  
 
 {% if sqldebug %}
 <div id="debug">
