@@ -1017,7 +1017,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                     othereditors.push(data.loggedineditors[i]); 
             }
             if (othereditors.length)
-                stext.push((savecode_authorized ? "; Other editors" : "; Editors"), othereditors.join(", ")); 
+                stext.push((savecode_authorized ? "; Other editors: " : "; Editors: "), othereditors.join(", ")); 
 
             var otherusers = [ ]; 
             for (var i = 0; i < data.loggedinusers.length; i++) 
@@ -1026,7 +1026,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                     otherusers.push(data.loggedinusers[i]); 
             }
             if (otherusers.length)
-                stext.push((!savecode_authorized ? "; Other users" : "; Users"), otherusers.join(", ")); 
+                stext.push((!savecode_authorized ? "; Other users: " : "; Users: "), otherusers.join(", ")); 
 
             if (nanonymouseditors - (username ? 0 : 1) > 0) 
                 stext.push("; there are " + (nanonymouseditors-(username ? 0 : 1)) + " anonymous users watching"); 

@@ -8,6 +8,8 @@ from django.conf import settings
 
 from codewiki import models
 import runsockettotwister
+from codewiki.management.commands.run_scrapers import GetDispatcherStatus
+import frontend
 
 import vc
 import difflib
@@ -15,7 +17,7 @@ import re
 import urllib
 import os
 import time
-from codewiki.management.commands.run_scrapers import GetDispatcherStatus
+
 import uuid
 
 try:                 import json
@@ -182,9 +184,13 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         context['rev'] = status.get(use_commit,{}).get("rev") or 0
         context['revdate'] = status.get(use_commit,{}).get("date")
         context['revdateepoch'] = _datetime_to_epoch(context['revdate'])
-        context['revusername'] = status.get(use_commit,{}).get("user").username
-        context['revuserrealname'] = status.get(use_commit,{}).get("user").get_profile().name
-
+        revuser = status.get(use_commit,{}).get("user")
+        context['revusername'] = revuser.username
+        try:
+            context['revuserrealname'] = revuser.get_profile().name
+        except frontend.models.UserProfile.DoesNotExist:
+            context['revuserrealname'] = revuser.username
+            
     # create a temporary scraper object
     else:
         if wiki_type == 'view':

@@ -512,8 +512,14 @@ class EditorsOnOneScraper:
                 # order by who has first session (and not all draft mode) in order to determin who is the editor
         usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
         usereditors.sort(key=lambda x: x.usersessionpriority)
-        editorstatusdata["loggedinusers"] = [ usereditor.username  for usereditor in usereditors  if not usereditor.savecode_authorized ]
-        editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors  if usereditor.savecode_authorized ]
+        print [ usereditor.__dict__  for usereditor in usereditors ]
+        editorstatusdata["loggedinusers"] = [ ]
+        editorstatusdata["loggedineditors"] = [ ]
+        for usereditor in usereditors:
+            if usereditor.userclients[-1].savecode_authorized:   # as recorded in last client for this user
+                editorstatusdata["loggedineditors"].append(usereditor.username)
+            else:
+                editorstatusdata["loggedinusers"].append(usereditor.username)
         
         # notify if there is a broadcasting editor so the windows can sort out which one's are autoloading
         for usereditor in usereditors:
