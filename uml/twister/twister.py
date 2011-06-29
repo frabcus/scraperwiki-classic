@@ -1,4 +1,5 @@
 #!/bin/sh -
+
 "exec" "python" "-O" "$0" "$@"
 
 """
@@ -129,7 +130,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         
         # this returns localhost and is unable to distinguish between orbited or django source
         #socket = self.transport.getHandle()
-        #self.logger.info("  %s %s" % (socket.getpeername(), type(socket.getpeername())))
+        #self.logger.info("socket  %s %s" % (socket.getpeername(), type(socket.getpeername())))
         
         self.factory.clientConnectionMade(self)
             # we don't know what scraper they've opened until information is send with first clientcommmand
@@ -143,6 +144,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.scraperlanguage = parsed_data.get('language', '')
         self.isstaff = (parsed_data.get('isstaff') == "yes")
         self.isumlmonitoring = (parsed_data.get('umlmonitoring') == "yes")
+        self.savecode_authorized = (parsed_data.get('savecode_authorized') == "yes")
         
         if self.username:
             self.chatname = self.userrealname or self.username
@@ -306,6 +308,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                 return
 
             usereditor = self.guidclienteditors.usereditormap[self.username]
+ 
+                # this mode is defunct so nondraftcount should always be the same as len(usereditor.userclients)
             if automode == 'draft':
                 usereditor.nondraftcount -= 1
                 if self.processrunning:
@@ -508,7 +512,14 @@ class EditorsOnOneScraper:
                 # order by who has first session (and not all draft mode) in order to determin who is the editor
         usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
         usereditors.sort(key=lambda x: x.usersessionpriority)
-        editorstatusdata["loggedineditors"] = [ usereditor.username  for usereditor in usereditors ]
+        print [ usereditor.__dict__  for usereditor in usereditors ]
+        editorstatusdata["loggedinusers"] = [ ]
+        editorstatusdata["loggedineditors"] = [ ]
+        for usereditor in usereditors:
+            if usereditor.userclients[-1].savecode_authorized:   # as recorded in last client for this user
+                editorstatusdata["loggedineditors"].append(usereditor.username)
+            else:
+                editorstatusdata["loggedinusers"].append(usereditor.username)
         
         # notify if there is a broadcasting editor so the windows can sort out which one's are autoloading
         for usereditor in usereditors:
@@ -593,35 +604,32 @@ class RunnerFactory(protocol.ServerFactory):
             umlstatuschanges["draftscraperusers"] = [ { "chatname":cclient.cchatname, "present":(cclient.cchatname in draftscraperusers), "running":draftscraperusers.get(cclient.cchatname, False) } ]
         
         # the complexity here reflects the complexity of the structure.  the running flag could be set on any one of the clients
+        # nondraftcount and draft mode has been removed from here
         def scraperentry(eoos, cclient):  # local function
-            scrapereditors = { }   # chatname -> (lasttouch, nondraftcount)
-            scraperdrafteditors = [ ]
+            scrapereditors = { }   # chatname -> (lasttouch, [clientnumbers])
             running = False        # we could make this an updated member of EditorsOnOneScraper like lasttouch
             
             for usereditor in eoos.usereditormap.values():
-                if usereditor.nondraftcount != 0:
-                    scrapereditors[usereditor.userclients[0].cchatname] = (usereditor.userlasttouch, usereditor.nondraftcount)
-                else:
-                    scraperdrafteditors.append(usereditor.userclients[0].cchatname)
-                    
-                for uclient in usereditor.userclients:
-                    running = running or bool(uclient.processrunning)
+                cchatname = usereditor.userclients[0].cchatname
+                clientnumbers = [uclient.clientnumber  for uclient in usereditor.userclients]
+                scrapereditors[cchatname] = (usereditor.userlasttouch, clientnumbers)
+                running = running or max([ bool(uclient.processrunning)  for uclient in usereditor.userclients ])
             
             for uclient in eoos.anonymouseditors:
-                if uclient.automode != 'draft': 
-                    scrapereditors[uclient.cchatname] = (uclient.clientlasttouch, 1)
-                else:
-                    scraperdrafteditors.append(uclient.cchatname)
-                running = running or bool(uclient.processrunning)
+                assert uclient.automode != 'draft' 
+                scrapereditors[uclient.cchatname] = (uclient.clientlasttouch, [uclient.clientnumber])
             
-            ### scraperdrafteditors
+                # diff mode
             if cclient:
-                scraperusercclient = {'chatname':cclient.cchatname, 'present':(cclient.cchatname in scrapereditors), 'userlasttouch':jstime(cclient.clientlasttouch) }
-                if scraperusercclient['present']:
-                    scraperusercclient['nondraftcount'] = (not cclient.username and 1 or eoos.usereditormap[cclient.username].nondraftcount)
+                scraperusercclient = {'chatname':cclient.cchatname, 'userlasttouch':jstime(cclient.clientlasttouch) }
+                if cclient.cchatname in scrapereditors:
+                    scraperusercclient['present'] = True
+                    scraperusercclient['uclients'] = scrapereditors[cclient.cchatname][1]
+                else:
+                    scraperusercclient['present'] = False
                 scraperusers = [ scraperusercclient ]
             else:
-                scraperusers = [ {'chatname':cchatname, 'present':True, 'userlasttouch':jstime(ultc[0]), 'nondraftcount':ultc[1] }  for cchatname, ultc in scrapereditors.items() ]
+                scraperusers = [ {'chatname':cchatname, 'userlasttouch':jstime(ultc[0]), 'uclients':ultc[1], 'present':True }  for cchatname, ultc in scrapereditors.items() ]
             
             return {'scrapername':eoos.scrapername, 'present':True, 'running':running, 'scraperusers':scraperusers, 'scraperlasttouch':jstime(eoos.scraperlasttouch) }
         
@@ -706,10 +714,16 @@ class RunnerFactory(protocol.ServerFactory):
             pass  # didn't even get to connection open
         
         elif client.isumlmonitoring:
-            self.umlmonitoringclients.remove(client)
+            if client in self.umlmonitoringclients:
+                self.umlmonitoringclients.remove(client)
+            else:
+                logger.error("No place to remove client %d" % client.clientnumber)
 
         elif not client.guid:
-            self.draftscraperclients.remove(client)
+            if client in self.draftscraperclients:
+                self.draftscraperclients.remove(client)
+            else:
+                logger.error("No place to remove client %d" % client.clientnumber)
             
         elif (client.guid in self.guidclientmap):   
             if not self.guidclientmap[client.guid].RemoveClient(client):
@@ -721,10 +735,12 @@ class RunnerFactory(protocol.ServerFactory):
                     message = "%s leaves" % client.chatname
                 self.guidclientmap[client.guid].notifyEditorClients(message)
         else:
-            pass  # shouldn't happen
+            logger.error("No place to remove client %d" % client.clientnumber)
         
         # check that all clients are accounted for
-        assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
+        Dtclients = len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
+        if len(self.clients) != Dtclients:
+            logger.error("Miscount of clients %d %d" % (Dtclients))
         self.notifyMonitoringClients(client)
 
 

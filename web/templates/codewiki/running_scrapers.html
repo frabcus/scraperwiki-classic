@@ -188,9 +188,6 @@ $(document).ready(function() {
         servernowtime = parseISOdate(jdata.nowtime); 
         $("#monitoroutput #servernowtime").html(servernowtime.toUTCString()); 
 
-        if (jdata.message)
-            $("#monitoroutput #message").html(jdata.message); 
-
         if (jdata.umlmonitoringusers)
         {
             if (jdata.message_type == "umlstatus")
@@ -273,15 +270,20 @@ $(document).ready(function() {
                         var cele = ele + " ul li#"+idcchatname; 
                         if (cpresent)
                         {
+                            var uclientlist = [ ];
+                            for (var k = 0; k < scraperuser.uclients.length; k++)
+                                uclientlist.push(String(scraperuser.uclients[k])); 
                             if (!$(cele).attr("id"))
+                            {
                                 $(ele+" ul").append("<li id=\""+idcchatname+"\" class=\"luser\">"
                                                     +getUserfromCChatname(chatname)+" "
                                                     +getNewDatetimeSpan(userlasttouch)
-                                                    +' (<span class="nondraftcount">'+scraperuser.nondraftcount+"</span>)</li>"); 
+                                                    +' (<span class="nondraftcount">'+uclientlist.join(", ")+"</span>)</li>"); 
+                            }
                             else
                             {
                                 $(cele + " .lasttouchdiff .lasttouch").text(String(userlasttouch.getTime())); 
-                                $(cele + " .nondraftcount").text(String(scraperuser.nondraftcount)); 
+                                $(cele + " .nondraftcount").text(uclientlist.join(", ")); 
                             }
                         }
                         else
@@ -387,7 +389,6 @@ $(document).ready(function() {
 
     <div id="monitoradmin">
         <div id="connectionstatusdiv"><span id="connectionstatus">...</span> <strong>Server time:</strong> <span id="servernowtime"></span></div>
-        <div id="message">... (no message yet) ...</div>
         <div id="jdatareceived"></div>
     </div>
     <a id="showmonitoradmin" href="#">toggle connection admin...</a>
