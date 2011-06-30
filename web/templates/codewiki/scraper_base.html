@@ -12,10 +12,9 @@
 
     {% if user.is_authenticated %}
         <script type='text/javascript'>
-        $(document).ready(function()
-        {
+        $(document).ready(function() {
             setupCodeOverview('{{scraper.short_name}}');
-        }
+        });
         </script>
     {% endif %}
 
