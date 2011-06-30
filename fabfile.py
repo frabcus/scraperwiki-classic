@@ -20,7 +20,7 @@ def dev():
 
 def www():
     "The main www server (horsell)"
-    env.hosts = ['horsell.scraperwiki.com:7822']
+    env.hosts = ['scraperwiki.com:7822']
     env.path = '/var/www/scraperwiki'
     env.branch = 'stable'
     env.web_path = 'file:///home/scraperwiki/scraperwiki'
