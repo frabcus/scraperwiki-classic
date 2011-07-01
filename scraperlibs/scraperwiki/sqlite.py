@@ -31,6 +31,10 @@ def ifsencode_trunc(v, t):
 
 
 def execute(sqlquery, data=None, verbose=1):
+        # helpfully wrap singletons into a list, as is done for the % operator, because singleton tuples can be hard to understand
+    if data is not None and "?" in sqlquery and type(data) not in [list, tuple]:
+        data = [data]
+        
     global attachlist
     result = scraperwiki.datastore.request({"maincommand":'sqliteexecute', "sqlquery":sqlquery, "data":data, "attachlist":attachlist})
     if "error" in result:
@@ -159,8 +163,6 @@ def commit(verbose=1):
 
 
 def select(sqlquery, data=None, verbose=1):
-    if data is not None and "?" in sqlquery and type(data) not in [list, tuple]:
-        data = [data]
     sqlquery = "select %s" % sqlquery   # maybe check if select or another command is there already?
     result = execute(sqlquery, data, verbose=verbose)
     return [ dict(zip(result["keys"], d))  for d in result["data"] ]
