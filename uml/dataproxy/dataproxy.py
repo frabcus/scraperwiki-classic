@@ -17,6 +17,7 @@ import grp
 import pwd
 import datalib
 import socket
+import traceback
 
 import logging
 import logging.config
@@ -168,7 +169,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.logger.debug("ending connection %s - %s" % (short_name, runID))
             self.connection.close()
         except:
-            self.logger.error("do_GET uncaught exception: %s %s %s" % sys.exc_info())
+            self.logger.error("do_GET uncaught exception: %s" % traceback.format_exc())
 
 
     do_HEAD   = do_GET

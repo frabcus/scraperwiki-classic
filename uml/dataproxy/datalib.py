@@ -215,20 +215,24 @@ class SQLiteDatabase(Database):
 
                 # this loop has the one internal jsend in it
             while True:
-                data = self.m_sqlitedbcursor.fetchmany(streamchunking)
-                arg = {"keys":keys, "data":data} 
-                if len(data) < streamchunking:
+                odata = self.m_sqlitedbcursor.fetchmany(streamchunking)
+                arg = {"keys":keys, "data":odata} 
+                if len(odata) < streamchunking:
                     break
                 arg["moredata"] = True
-                self.logger.debug("midchunk %s %d" % (self.short_name, len(data)))
+                self.logger.debug("midchunk %s %d" % (self.short_name, len(odata)))
                 self.dataproxy.connection.sendall(json.dumps(arg)+'\n')
             return arg
 
         
         except sqlite3.Error, e:
             signal.alarm(0)
-            self.logger.debug("user sqlerror "+sqlquery[:1000])
-            return {"error":"sqlite3.Error: "+str(e)}
+            self.logger.debug("user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000]))
+            return {"error":"sqlite3.Error: %s" % str(e)}
+        except ValueError, e:
+            signal.alarm(0)
+            self.logger.debug("user sqlerror %s %s" % (sqlquery[:1000], str(data)[:1000]))
+            return {"error":"sqlite3.Error: %s" % str(e)}
 
 
     def sqliteattach(self, name, asname):
