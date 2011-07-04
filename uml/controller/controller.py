@@ -586,7 +586,7 @@ if __name__ == '__main__' :
         port = config.getint(socket.gethostname(), 'port')
         httpd = ControllerHTTPServer(('', port), ScraperController)
     except socket.error, e:
-        logger.error("setting up error with hostname %s port %s" % (socket.gethostname(), port))
+        logger.error("setting up error with hostname %s port %s : %s" % (socket.gethostname(), port,e,))
         sigTerm(None, None)
         
     sa = httpd.socket.getsockname()
