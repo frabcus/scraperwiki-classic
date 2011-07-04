@@ -1403,7 +1403,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             if (pageIsDirty && !confirm("You have unsaved changes, leave the editor anyway?"))
                 return false; 
             bSuppressDisconnectionMessages = true; 
-            sendjson({"command":'loseconnection'});   //if (conn)  conn.close(); not as effective 
+            //sendjson({"command":'loseconnection'});  
+			if (conn)  conn.reset(); 
             return true;
         });
 
