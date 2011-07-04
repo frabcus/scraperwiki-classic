@@ -20,7 +20,11 @@ $(document).ready(function() {
     var codemirror_url = $('#codemirror_url').val();
     var wiki_type = $('#id_wiki_type').val(); 
     var savecode_authorized = $('#savecode_authorized').val(); 
-
+    
+    var texteditor = $('#texteditor').val(); 
+    if (window.location.hash == "#plain")
+        texteditor = "plain"; 
+    
     var lastRev         = $('#originalrev').val(); 
     var lastRevDateEpoch= ($('#originalrevdateepoch').val() ? parseInt($('#originalrevdateepoch').val()) : 0); 
     var lastRevUserName = $('#originalrevusername').val(); 
@@ -293,8 +297,7 @@ $(document).ready(function() {
             codemirroriframe = null;  // this only gets set once again when we know the editor has been initialized
         }
 
-// should use window.location.search
-        if (window.location.hash == "#plain")
+        if (texteditor == "plain")
         {
             $('#id_code').keypress(function() { ChangeInEditor("edit"); }); 
             setupKeygrabs();

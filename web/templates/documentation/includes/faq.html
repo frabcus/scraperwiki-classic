@@ -197,16 +197,19 @@ print urllib.urlopen(url).read()
 </code>
            </dd>
 
-           <dt id="editor">Is there an editor other than the CodeMirror one?</dt>
+           <dt id="editor">Is there an editor other than the <a href="http://codemirror.net/1/index.html">CodeMirror 1</a>?</dt>
            <dd>
-                <p>Currently, the only other option is a plain HTML textarea editor. You can
-                access that by adding #plain on the end of the URL while editing a scraper.
-                </p>
-                <p>This should be enough for you to use it with browser plugins that let you
+                <p>At the moment, no.  The editor and pair programming functions have been integrated into the internal 
+                workings of this library.</p>
+                <p>You can, however, disable the editor and use a plain old HTML textarea editor
+                by adding either "?textarea=plain" or "#plain" to the end of the URL while editing the 
+                scraper.</p>
+                <p>This should be enough for you to use it with browser plugins that 
                 spawn vim or emacs for a textarea. It will also work in browsers
                 for which CodeMirror doesn't work.
                 </p>
-                <p>Let us know if this is useful, and what other software you used it with.
+                <p>Please give us feedback about this feature so we know if we should make it more available 
+                (for example by adding a setting to your user account so that the editor is always a textarea for you).
                 </p> 
            </dd>
 
