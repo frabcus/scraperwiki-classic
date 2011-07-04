@@ -138,7 +138,8 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 #                line = lsof.split('\n')[1]
 #                pid = int(line.split(' ')[1])
 #            except:
-#                logging.debug('Failed to find pid with lsof -i')
+#
+                logging.debug('Failed to find pid with lsof -i')
                 
         if pid is None:
             p    = re.compile ('(?:exec.[a-z]+|[Pp]ython|[Rr]uby) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
