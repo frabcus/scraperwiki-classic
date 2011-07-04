@@ -481,6 +481,7 @@ $(document).ready(function() {
 {% endfor %}
 </table>
 
+{% comment %}
 <h2><a href="http://munin.scraperwiki.com/">Munin dashboard</a></h2>
 <small>refreshed: <span id="murefsh"></span></small>
 <table>
@@ -494,15 +495,15 @@ $(document).ready(function() {
   <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/burbage.scraperwiki-cpu-day.png"></td>
 </tr>
 
-{% comment %}
+
 <tr><th colspan="2"><a href="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki.html">UML server (rush)</a></th></tr>
 <tr>
   <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-cpu-day.png"></td>
   <td><img class="irefresh" src="http://munin.scraperwiki.com/scraperwiki/rush.scraperwiki-load-day.png"></td>
 </tr>
-{% endcomment %}
 
 </table>
+{% endcomment %}
 
 </div></div>
 
