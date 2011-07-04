@@ -736,7 +736,7 @@ $(document).ready(function() {
           if (data.message_type == "console") {
               writeRunOutput(data.content);     // able to divert text to the preview iframe
           } else if (data.message_type == "sources") {
-              writeToSources(data.url, data.mimetype, data.bytes, data.failedmessage, data.cached, data.cacheid, data.ddiffer)
+              writeToSources(data.url, data.mimetype, data.bytes, data.failedmessage, data.cached, data.cacheid, data.ddiffer, data.fetchtime)
           } else if (data.message_type == "editorstatus") {
               recordEditorStatus(data); 
           } else if (data.message_type == "chat") {
@@ -1914,7 +1914,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             $.modal(cachejson["objcontent"], modaloptions); 
     }
 
-    function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, ddiffer) 
+    function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, ddiffer, fetchtime) 
     {
         //remove items if over max
         while ($('#output_sources div.output_content').children().size() >= outputMaxItems) 
@@ -1933,18 +1933,23 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         var alink = '<a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a>'; 
         if ((failedmessage == undefined) || (failedmessage == ''))
         {
-            smessage.push(bytes + ' bytes loaded'); 
+            smessage.push('<span class="bytesloaded">', bytes, 'bytes loaded</span>, '); 
             if (lmimetype.substring(0, 5) != "text/") 
                 smessage.push("<b>"+lmimetype+"</b>"); 
-            if (cacheid != undefined)
-                smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
+
+            // this is the orange up-arrow link that doesn't work because something wrong in the server, so hide it for now
+            //if (cacheid != undefined)
+            //    smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
+
             if (cached == 'True')
                 smessage.push('(from cache)'); 
         }
         else
             smessage.push(failedmessage); 
         if (ddiffer == "True")
-            smessage.push('<span style="background:rad"><b>BAD CACHE</b></span>'); 
+            smessage.push('<span style="background:red"><b>BAD CACHE</b></span>, '); 
+        if (fetchtime != undefined)
+            smessage.push('<span class="">response time: ', Math.round(fetchtime*1000), 'ms</span>, '); 
 
         smessage.push(alink); 
 

@@ -370,6 +370,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #   * Cache timeout is set to zero
         #   * Page was not in the cache anyway
         #
+        starttime = time.time()
         if isSW or cacheFor <= 0 or cached is None:
 
             startat = time.strftime ('%Y-%m-%d %H:%M:%S')
@@ -442,7 +443,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
                 cacheid         = cacheid,
                 last_cacheid    = cached is not None or '',
                 cached          = cached is not None,
-                ddiffers        = ddiffers
+                ddiffers        = ddiffers,
+                fetchtime       = time.time() - starttime
             )
 
         self.connection.sendall (page)
