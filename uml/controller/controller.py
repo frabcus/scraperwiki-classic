@@ -139,7 +139,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 #                pid = int(line.split(' ')[1])
 #            except:
 #
-                logging.debug('Failed to find pid with lsof -i')
+#                logging.debug('Failed to find pid with lsof -i')
                 
         if pid is None:
             p    = re.compile ('(?:exec.[a-z]+|[Pp]ython|[Rr]uby) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
@@ -586,7 +586,7 @@ if __name__ == '__main__' :
         port = config.getint(socket.gethostname(), 'port')
         httpd = ControllerHTTPServer(('', port), ScraperController)
     except socket.error, e:
-        logger.error("setting up error with hostname %s port %s" % (socket.gethostname(), port))
+        logger.error("setting up error with hostname %s port %s : %s" % (socket.gethostname(), port,e,))
         sigTerm(None, None)
         
     sa = httpd.socket.getsockname()
