@@ -75,12 +75,17 @@
 <br class="clear"/>  
 
 {% endblock %}
-{% block run_script %}
-    {{block.super}}
-
+{% block jrun_script %}
+<script>
+{{block.super}}
+$(document).ready(function() 
+{
+    setupCodeOverview('{{scraper.short_name}}');
+    setupChangeEditorStatus();
     {% if user.is_authenticated %}
         setupButtonConfirmation("btnDeleteScraper", "Are you absolutely sure? THERE IS NO UNDO, clicking 'ok' will delete this view.");
     {% endif %}
+
     $("#add_view_to_site h3").append('<a href="#" class="copy_to_clipboard" title="Click to copy this snippet to your clipboard">Copy</a>');
 
     // Make the copy button work
@@ -110,5 +115,6 @@
         clip.glue(el[0], parent[0]);
         
     });
-    
+});
+</script>
 {% endblock %}
