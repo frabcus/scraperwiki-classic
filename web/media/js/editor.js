@@ -20,7 +20,11 @@ $(document).ready(function() {
     var codemirror_url = $('#codemirror_url').val();
     var wiki_type = $('#id_wiki_type').val(); 
     var savecode_authorized = $('#savecode_authorized').val(); 
-
+    
+    var texteditor = $('#texteditor').val(); 
+    if (window.location.hash == "#plain")
+        texteditor = "plain"; 
+    
     var lastRev         = $('#originalrev').val(); 
     var lastRevDateEpoch= ($('#originalrevdateepoch').val() ? parseInt($('#originalrevdateepoch').val()) : 0); 
     var lastRevUserName = $('#originalrevusername').val(); 
@@ -293,8 +297,7 @@ $(document).ready(function() {
             codemirroriframe = null;  // this only gets set once again when we know the editor has been initialized
         }
 
-// should use window.location.search
-        if (window.location.hash == "#plain")
+        if (texteditor == "plain")
         {
             $('#id_code').keypress(function() { ChangeInEditor("edit"); }); 
             setupKeygrabs();
@@ -665,7 +668,7 @@ $(document).ready(function() {
             var jdata; 
             try 
             {
-                //writeToChat(cgiescape(sdata)); // for debug of what's coming out
+                //writeToChat("--- "+cgiescape(sdata)); // for debug of what's coming out
                 jdata = $.evalJSON(sdata);
             } 
             catch(err) 
@@ -1563,7 +1566,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             }
             if (stimulate_run == "editorstimulaterun_nosave")
             {
-                writeToChat(response); 
+                if (res.status != "notsaved")
+                    writeToChat(response); 
                 return; 
             }
 
@@ -2019,7 +2023,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             {
                 chatpeopletimes[sechatname] = servernowtime; 
                 $('.editor_output div.tabs li.chat').addClass('chatalert');
-                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('chatalert'); }, 1500); 
+                //window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('chatalert'); }, 1500); 
             }
         }
     }
@@ -2059,6 +2063,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         $('.editor_output div.tabs ul').children().removeClass('selected');
         $('.editor_output div.tabs li.' + sTab).addClass('selected');
         $('.editor_output div.tabs li.' + sTab).removeClass('new');
+        if (sTab == 'chat')
+            $('.editor_output div.tabs li.chat').removeClass('chatalert');
+        
         setTabScrollPosition(sTab, 'show'); 
     }
     
