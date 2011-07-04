@@ -129,20 +129,19 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         # XXX todo, get PHP working on OSX
         pid = None
         
-        pid = self.find_process_for_port( lport )
-        if pid is None:
-            logging.debug('Failed to find pid with "ss" so trying lsof -i')
-            # If we can't find the pid from 'ss' then we should try lsof
-            try:
-                lsof = subprocess.Popen([ 'lsof','-i', ':%s' % lport ], stdout = subprocess.PIPE).communicate()[0]
-                line = lsof.split('\n')[1]
-                pid = int(line.split(' ')[1])
-            except:
+        # Temporarily resorting back to lsof
+        #pid = self.find_process_for_port( lport )
+        
+#        if pid is None:
+#            try:
+#                lsof = subprocess.Popen([ 'lsof','-i', ':%s' % lport ], stdout = subprocess.PIPE).communicate()[0]
+#                line = lsof.split('\n')[1]
+#                pid = int(line.split(' ')[1])
+#            except:
+#
                 logging.debug('Failed to find pid with lsof -i')
                 
         if pid is None:
-            logging.debug('Failed to find pid with "ss" so trying lsof')
-            # If we can't find the pid from 'ss' then we should try lsof
             p    = re.compile ('(?:exec.[a-z]+|[Pp]ython|[Rr]uby) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
             lsof = subprocess.Popen([ 'lsof', '-n', '-P', '-i' ], stdout = subprocess.PIPE).communicate()[0]
             for line in lsof.split('\n') :
