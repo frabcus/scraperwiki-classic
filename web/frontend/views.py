@@ -255,7 +255,7 @@ def search(request, q=""):
 
         tags = Tag.objects.filter(name__icontains=q)
         scrapers = scraper_search_query(request.user, q)
-        scrapers = scrapers.exclude(usercoderole__role='email')  # so we can search for "email" without getting all the emailers -- would be a type search if we needed it
+        scrapers = scrapers.exclude(usercoderole__role='email').exclude(privacy_status='private')  # so we can search for "email" without getting all the emailers -- would be a type search if we needed it
         num_results = tags.count() + scrapers.count()
         return render_to_response('frontend/search_results.html',
             {
@@ -370,8 +370,8 @@ def tag(request, tag):
         raise Http404
 
     #get all scrapers and views with this tag
-    scrapers = TaggedItem.objects.get_by_model(Scraper.objects.exclude(privacy_status="deleted"), tag)
-    views = TaggedItem.objects.get_by_model(View.objects.exclude(privacy_status="deleted"), tag)
+    scrapers = TaggedItem.objects.get_by_model(Scraper.objects.exclude(privacy_status="deleted").exclude(privacy_status='private'), tag)
+    views = TaggedItem.objects.get_by_model(View.objects.exclude(privacy_status="deleted").exclude(privacy_status='private'), tag)
     code_objects = sorted(list(scrapers) + list(views), key=lambda x: x.created_at, reverse=True)
     
     #get all open and pending solicitations with this tag

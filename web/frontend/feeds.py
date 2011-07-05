@@ -68,8 +68,10 @@ class LatestCodeObjectsByTag(Feed):
         return "Items recently created on ScraperWiki with tag '%s'" % obj.name
 
     def items(self, obj):
-       scrapers = TaggedItem.objects.get_by_model(Scraper, obj)
-       views = TaggedItem.objects.get_by_model(View, obj)
+       scrapers = TaggedItem.objects.get_by_model(Scraper, obj).exclude(privacy_status='private').order_by('-created_at')
+       views = TaggedItem.objects.get_by_model(View, obj).exclude(privacy_status='private').order_by('-created_at')
+       # If we turn this into a list then scarey things will happen
+       # TODO: Fix this so we are not fetching the complete set each time
        return sorted(list(views) + list(scrapers), key=lambda x: x.created_at, reverse=True)[:settings.RSS_ITEMS]
 
 
