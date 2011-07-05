@@ -13,10 +13,12 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
+
 from tagging.models import Tag, TaggedItem
-from tagging.utils import get_tag, calculate_cloud, LOGARITHMIC
+from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, get_queryset_and_model
+from tagging.models import Tag, TaggedItem
+
 from codewiki.models import Code, Scraper, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
-from tagging.models import Tag, TaggedItem
 from market.models import Solicitation, SolicitationStatus
 from django.db.models import Q
 from frontend.forms import CreateAccountForm
@@ -337,70 +339,67 @@ def get_involved(request):
         return render_to_response('frontend/get_involved.html', data, context_instance=RequestContext(request))
 
 def stats(request):
-
     return render_to_response('frontend/stats.html', {}, context_instance=RequestContext(request))
-
-#hack - get a merged list of scraper and soplicitation tags
-def _get_merged_tags(min_count = None):
-    scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True)
-    view_tags = Tag.objects.usage_for_model(View, counts=True)
-    solicitation_tags = Tag.objects.usage_for_model(Solicitation, counts=True)
-
-    all_tags = {}
-
-    for tag in itertools.chain(scraper_tags, view_tags, solicitation_tags):
-        existing = all_tags.get(tag.name, None)
-        if existing:
-            existing.count += tag.count
-        else:
-            all_tags[tag.name] = tag
-
-    return calculate_cloud(all_tags.values(), steps=4, distribution=LOGARITHMIC)
     
 
 def tags(request):
+    # would be good to limit this only to scrapers/views that this user has right to see (user_visible_code_objects; not the private ones), however 
+    # the construction of the function tagging.models._get_usage() is a complex SQL query with group by 
+    # that is not available in the django ORM.  
+    all_tags = {}
+    
+    # trial code for filtering out the tags for private scrapers you can't see
+    if True:
+        user_visible_code_objects = scraper_search_query(request.user, None)
+        code_objects = user_visible_code_objects.extra(
+            tables=['tagging_taggeditem', "tagging_tag"],
+            where=['codewiki_code.id = tagging_taggeditem.object_id', 'tagging_taggeditem.tag_id = tagging_tag.id'], 
+            select={"tag_id":"tagging_taggeditem.tag_id"})
+        #print code_objects.query
 
-    tags = _get_merged_tags()
+        # sum through all the tags on all the objects
+        lalltags = { }
+        for x in code_objects:
+            lalltags[x.tag_id] = lalltags.get(x.tag_id, 0)+1
+
+        # convert above dict to format required by cloud
+        for tag_id, count in lalltags.items():
+            tag = Tag.objects.get(id=tag_id)
+            tag.count = count
+            all_tags[tag.name] = tag
+
+
+    # old method that would show tags to scrapers that are private
+    else:
+        scraper_tags = Tag.objects.usage_for_model(Scraper, counts=True)
+        view_tags = Tag.objects.usage_for_model(View, counts=True)
+        for tag in itertools.chain(scraper_tags, view_tags):
+            existing = all_tags.get(tag.name, None)
+            if existing:
+                existing.count += tag.count
+            else:
+                all_tags[tag.name] = tag
+
+    tags = calculate_cloud(all_tags.values(), steps=4, distribution=LOGARITHMIC)
 
     return render_to_response('frontend/tags.html', {'tags':tags}, context_instance=RequestContext(request))
     
 def tag(request, tag):
-    tag = get_tag(tag)
-    if not tag:
+    ttag = get_tag(tag)
+    if not ttag:
         raise Http404
 
-    #get all scrapers and views with this tag
-    scrapers = TaggedItem.objects.get_by_model(Scraper.objects.exclude(privacy_status="deleted").exclude(privacy_status='private'), tag)
-    views = TaggedItem.objects.get_by_model(View.objects.exclude(privacy_status="deleted").exclude(privacy_status='private'), tag)
-    code_objects = sorted(list(scrapers) + list(views), key=lambda x: x.created_at, reverse=True)
-    
-    #get all open and pending solicitations with this tag
-    solicitations_open = Solicitation.objects.filter(deleted=False, status=SolicitationStatus.objects.get(status='open')).order_by('created_at')
-    solicitations_pending = Solicitation.objects.filter(deleted=False, status=SolicitationStatus.objects.get(status='pending')).order_by('created_at')
-    solicitations_completed = Solicitation.objects.filter(deleted=False, status=SolicitationStatus.objects.get(status='completed')).order_by('created_at')
+    # query set of code objects this user can see
+    user_visible_code_objects = scraper_search_query(request.user, None)
 
-    solicitations_open = TaggedItem.objects.get_by_model(solicitations_open, tag)
-    solicitations_pending = TaggedItem.objects.get_by_model(solicitations_pending, tag)
-    solicitations_completed = TaggedItem.objects.get_by_model(solicitations_completed, tag)
+    # inlining of tagging.models.get_by_model() but removing the content_type_id condition so that tags 
+    # attached to scrapers and views get interpreted as tags on code objects
+    code_objects = user_visible_code_objects.extra(
+        tables=['tagging_taggeditem'],
+        where=['tagging_taggeditem.tag_id = %s', 'codewiki_code.id = tagging_taggeditem.object_id'], 
+        params=[ttag.pk])
 
-    #do some maths to work out how complete the tag is at the moment
-    solicitations_percent_complete = 0
-    total_solicitations = solicitations_completed.count() + solicitations_open.count() + solicitations_pending.count()
-    if total_solicitations > 0:
-        solicitations_percent_complete = float(solicitations_completed.count()) / float(total_solicitations) * 100
-
-    scrapers_fixed_percentage = 0
-    if scrapers.count() > 0:
-        scrapers_fixed_percentage = 100.0 - float(scrapers.filter(status='sick').count()) / float(scrapers.count()) * 100
-        
-    return render_to_response('frontend/tag.html', {
-        'tag' : tag,
-        'scrapers': code_objects,
-        'solicitations_open':solicitations_open,
-        'solicitations_pending':solicitations_pending,
-        'solicitations_percent_complete': solicitations_percent_complete,
-        'scrapers_fixed_percentage': scrapers_fixed_percentage
-    }, context_instance = RequestContext(request))
+    return render_to_response('frontend/tag.html', {'tag' : ttag, 'scrapers': code_objects}, context_instance=RequestContext(request))
 
 def resend_activation_email(request):
     form = ResendActivationEmailForm(request.POST or None)
