@@ -348,23 +348,25 @@ def tags(request):
     # that is not available in the django ORM.  
     all_tags = {}
     
-    # trial code for filtering out the tags for private scrapers you can't see
+    # trial code for filtering down by tags that you can't see
     if True:
         user_visible_code_objects = scraper_search_query(request.user, None)
         code_objects = user_visible_code_objects.extra(
             tables=['tagging_taggeditem', "tagging_tag"],
             where=['codewiki_code.id = tagging_taggeditem.object_id', 'tagging_taggeditem.tag_id = tagging_tag.id'], 
-            select={"tag_id":"tagging_taggeditem.tag_id"})
+            select={"tag_name":"tagging_tag.name"})
         #print code_objects.query
+        # This query needs to be annotated with a count(*) and a GROUP BY tagging_taggeditem.tag_id
 
         # sum through all the tags on all the objects
         lalltags = { }
         for x in code_objects:
-            lalltags[x.tag_id] = lalltags.get(x.tag_id, 0)+1
+            lalltags[x.tag_name] = lalltags.get(x.tag_name, 0)+1
 
-        # convert above dict to format required by cloud
-        for tag_id, count in lalltags.items():
-            tag = Tag.objects.get(id=tag_id)
+        # convert above dict to format required by calculate_cloud
+        # though you should be able to inline this function and change tags.html to avoid the need for <type Tag> objects
+        for tag_name, count in lalltags.items():
+            tag = Tag.objects.get(name=tag_name)
             tag.count = count
             all_tags[tag.name] = tag
 
