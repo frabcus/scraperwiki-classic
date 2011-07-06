@@ -346,7 +346,13 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
         # this message helps kill it better and killing it from the browser end
         elif command == 'loseconnection':
-            self.transport.loseConnection()
+			# Suspect it is possible in some cases that the client sends this command, and before
+			# we have had a chance to close the connection from here, the client has already gone.
+			# To cover this case let's handle the exception here and log that loseConnection failed
+            try:
+                self.transport.loseConnection()
+            except: 
+                self.logger.debug('Closing connection on already closed connection failed')
     
     # message to the client
     def writeline(self, line):

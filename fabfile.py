@@ -5,6 +5,7 @@ from fabric.api import *
 # globals
 PROJECT_NAME = 'ScraperWiki'
 
+# If git+git fails then sudo easy_install pip==0.8.2
 # environments
 def dev():
     "On the scraperwiki server, accessible from http://dev.scraperwiki.com"

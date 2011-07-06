@@ -9,15 +9,6 @@
 
 {% block javascript %}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/codeoverview.js?{{settings.REVISION}}"></script>
-
-    {% if user.is_authenticated %}
-        <script type='text/javascript'>
-        $(document).ready(function() {
-            setupCodeOverview('{{scraper.short_name}}');
-        });
-        </script>
-    {% endif %}
-
 {% endblock %}
 
 {% block title %}{% if scraper.owner.get_profile.name %}{{scraper.owner.get_profile.name}}{% else %}{{scraper.owner.username}}{% endif %} / {{ scraper.title }}{% endblock %}

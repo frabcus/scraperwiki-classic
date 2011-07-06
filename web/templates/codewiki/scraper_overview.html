@@ -224,6 +224,7 @@
 {{block.super}}
 $(document).ready(function() 
 {
+    setupCodeOverview('{{scraper.short_name}}');
     setupScraperOverview('{{scraper.short_name}}');
     setupChangeEditorStatus();
 {% if user.is_authenticated %}

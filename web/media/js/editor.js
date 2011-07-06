@@ -20,7 +20,11 @@ $(document).ready(function() {
     var codemirror_url = $('#codemirror_url').val();
     var wiki_type = $('#id_wiki_type').val(); 
     var savecode_authorized = $('#savecode_authorized').val(); 
-
+    
+    var texteditor = $('#texteditor').val(); 
+    if (window.location.hash == "#plain")
+        texteditor = "plain"; 
+    
     var lastRev         = $('#originalrev').val(); 
     var lastRevDateEpoch= ($('#originalrevdateepoch').val() ? parseInt($('#originalrevdateepoch').val()) : 0); 
     var lastRevUserName = $('#originalrevusername').val(); 
@@ -293,8 +297,7 @@ $(document).ready(function() {
             codemirroriframe = null;  // this only gets set once again when we know the editor has been initialized
         }
 
-// should use window.location.search
-        if (window.location.hash == "#plain")
+        if (texteditor == "plain")
         {
             $('#id_code').keypress(function() { ChangeInEditor("edit"); }); 
             setupKeygrabs();
@@ -665,7 +668,7 @@ $(document).ready(function() {
             var jdata; 
             try 
             {
-                //writeToChat(cgiescape(sdata)); // for debug of what's coming out
+                //writeToChat("--- "+cgiescape(sdata)); // for debug of what's coming out
                 jdata = $.evalJSON(sdata);
             } 
             catch(err) 
@@ -736,7 +739,7 @@ $(document).ready(function() {
           if (data.message_type == "console") {
               writeRunOutput(data.content);     // able to divert text to the preview iframe
           } else if (data.message_type == "sources") {
-              writeToSources(data.url, data.mimetype, data.bytes, data.failedmessage, data.cached, data.cacheid, data.ddiffer)
+              writeToSources(data.url, data.mimetype, data.bytes, data.failedmessage, data.cached, data.cacheid, data.ddiffer, data.fetchtime)
           } else if (data.message_type == "editorstatus") {
               recordEditorStatus(data); 
           } else if (data.message_type == "chat") {
@@ -1403,7 +1406,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             if (pageIsDirty && !confirm("You have unsaved changes, leave the editor anyway?"))
                 return false; 
             bSuppressDisconnectionMessages = true; 
-            sendjson({"command":'loseconnection'});   //if (conn)  conn.close(); not as effective 
+            sendjson({"command":'loseconnection'});  
+			// Neither reset() nor close() is fast .... if (conn)  conn.reset(); 
             return true;
         });
 
@@ -1562,7 +1566,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             }
             if (stimulate_run == "editorstimulaterun_nosave")
             {
-                writeToChat(response); 
+                if (res.status != "notsaved")
+                    writeToChat(response); 
                 return; 
             }
 
@@ -1914,7 +1919,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             $.modal(cachejson["objcontent"], modaloptions); 
     }
 
-    function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, ddiffer) 
+    function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, ddiffer, fetchtime) 
     {
         //remove items if over max
         while ($('#output_sources div.output_content').children().size() >= outputMaxItems) 
@@ -1933,18 +1938,23 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         var alink = '<a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a>'; 
         if ((failedmessage == undefined) || (failedmessage == ''))
         {
-            smessage.push(bytes + ' bytes loaded'); 
+            smessage.push('<span class="bytesloaded">', bytes, 'bytes loaded</span>, '); 
             if (lmimetype.substring(0, 5) != "text/") 
                 smessage.push("<b>"+lmimetype+"</b>"); 
-            if (cacheid != undefined)
-                smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
+
+            // this is the orange up-arrow link that doesn't work because something wrong in the server, so hide it for now
+            //if (cacheid != undefined)
+            //    smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
+
             if (cached == 'True')
                 smessage.push('(from cache)'); 
         }
         else
             smessage.push(failedmessage); 
         if (ddiffer == "True")
-            smessage.push('<span style="background:rad"><b>BAD CACHE</b></span>'); 
+            smessage.push('<span style="background:red"><b>BAD CACHE</b></span>, '); 
+        if (fetchtime != undefined)
+            smessage.push('<span class="">response time: ', Math.round(fetchtime*1000), 'ms</span>, '); 
 
         smessage.push(alink); 
 
@@ -2013,7 +2023,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             {
                 chatpeopletimes[sechatname] = servernowtime; 
                 $('.editor_output div.tabs li.chat').addClass('chatalert');
-                window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('chatalert'); }, 1500); 
+                //window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('chatalert'); }, 1500); 
             }
         }
     }
@@ -2053,6 +2063,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         $('.editor_output div.tabs ul').children().removeClass('selected');
         $('.editor_output div.tabs li.' + sTab).addClass('selected');
         $('.editor_output div.tabs li.' + sTab).removeClass('new');
+        if (sTab == 'chat')
+            $('.editor_output div.tabs li.chat').removeClass('chatalert');
+        
         setTabScrollPosition(sTab, 'show'); 
     }
     
