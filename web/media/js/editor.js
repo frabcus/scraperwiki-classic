@@ -899,24 +899,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         lasttypetime = new Date(); 
         var automode = $('select#automode option:selected').val(); 
         if (automode == 'draft')
-        {
-            $('#watcherstatus').text("draft mode"); // consider also hiding select#automode
-            setCodeMirrorReadOnly(false);
-
-        // You can never go back from draft mode. (what if someone else (including you) had edited?)
-        // often you will do this in a duplicate window that you take into draft mode and then discard,
-        // though the UI for making these duplicate windows is a pain as you have to fully close the editor, and then open two editors from the overview page
-        // because you can't clone from the close window button as it's activated to disconnect the connection to the editor
-        // Draft windows will be able to pop up a diff with the current saved version, so using this as a patch could readily provide a route back through a reload
-            $('select#automode #id_autosave').attr('disabled', true); 
-            $('select#automode #id_autoload').attr('disabled', true); 
-            $('.editor_controls #watch_button_area').hide();
-            $('select#automode #id_autotype').attr('disabled', true); 
-            $('.editor_controls #btnCommitPopup').attr('disabled', true); 
-            $('.editor_controls #run').attr('disabled', false);
-            $('.editor_controls #preview').attr('disabled', false);
-        }
-                // self demote from editing to watching
+            ;
+        // self demote from editing to watching
         else if (automode == 'autoload')
         {
             $('select#automode #id_autosave').attr('disabled', true); 
@@ -989,6 +973,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
     { 
+console.log(data); 
         var boutputstatus = (lasttouchedtime == undefined); 
         //console.log($.toJSON(data)); 
         if (data.nowtime)
@@ -1040,11 +1025,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
         var automode = $('select#automode option:selected').val(); 
 
-        // draft editing do not disturb
+        // draft editing nothing to do
         if (automode == 'draft') 
-        {
             ;
-        }
 
         // you are the editing user
         else if (username && (editingusername == username))
@@ -1127,26 +1110,23 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         else
         {
             $('#watcherstatus').text(""); 
-            if (automode != 'draft')
-            {
-                $('select#automode #id_autosave').attr('disabled', false); 
-                $('select#automode #id_autotype').attr('disabled', true); 
-                $('select#automode').val('autosave'); // editing
-                $('select#automode #id_autoload').attr('disabled', true); 
-                $('.editor_controls #watch_button_area').hide();
-                if (!savecode_authorized) {
-                    // special case, if not authorized then we are internally
-                    // to this javascript an anonymous user, and want to be readonly
-                    setCodeMirrorReadOnly(true);
-                    $('.editor_controls #run').attr('disabled', true);
-                } else {
-                    setCodeMirrorReadOnly(false);
-                    $('.editor_controls #run').attr('disabled', false);
-                }
-                $('.editor_controls #btnCommitPopup').attr('disabled', false); 
-                $('.editor_controls #preview').attr('disabled', false);
-                sendjson({"command":'automode', "automode":'autosave'}); 
+            $('select#automode #id_autosave').attr('disabled', false); 
+            $('select#automode #id_autotype').attr('disabled', true); 
+            $('select#automode').val('autosave'); // editing
+            $('select#automode #id_autoload').attr('disabled', true); 
+            $('.editor_controls #watch_button_area').hide();
+            if (!savecode_authorized) {
+                // special case, if not authorized then we are internally
+                // to this javascript an anonymous user, and want to be readonly
+                setCodeMirrorReadOnly(true);
+                $('.editor_controls #run').attr('disabled', true);
+            } else {
+                setCodeMirrorReadOnly(false);
+                $('.editor_controls #run').attr('disabled', false);
             }
+            $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+            $('.editor_controls #preview').attr('disabled', false);
+            sendjson({"command":'automode', "automode":'autosave'}); 
         }
     }
 
