@@ -187,7 +187,7 @@ $(document).ready(function() {
         if (codemirroriframe)
         {
             var historysize = codeeditor.historySize(); 
-            var automode = $('select#automode option:selected').val(); 
+            var automode = $('input#automode').val(); 
     
             if (changetype == "saved")
                 savedundo = atsavedundo
@@ -201,25 +201,12 @@ $(document).ready(function() {
             var lpageIsDirty = (historysize.undo + historysize.lostundo != savedundo); 
         }
         else
-        {
             lpageIsDirty = (changetype == "edit"); 
-            $('select#automode #id_autotype').attr('disabled', true); 
-        }
 
         if (pageIsDirty != lpageIsDirty)
         {
             pageIsDirty = lpageIsDirty; 
             $('#aCloseEditor1').css("font-style", ((pageIsDirty && guid) ? "italic" : "normal")); 
-
-        // we can only enter broadcast mode from a clean file
-        // in the future we could maintain a stack of patches here and upload them when the broadcast mode is entered
-        // so that they apply retrospectively.  
-        // also we can do the saving through twister and bank a stack of patches there
-        // that will be applied when someone else opens a window
-            if (pageIsDirty && (automode != 'autotype'))
-                $('select#automode #id_autotype').attr('disabled', true); 
-            else if (!pageIsDirty && !$('select#automode #id_autosave').attr('disabled') && codemirroriframe)
-                $('select#automode #id_autotype').attr('disabled', false); 
         }
 
         if (changetype != 'edit')
@@ -547,9 +534,6 @@ $(document).ready(function() {
         });
         $('#id_urlquery').blur();
 
-        $('select#automode').change(changeAutomode); 
-        $('input#showautomode').change(showhideAutomodeSelector); 
-
         if (!savecode_authorized) 
             $(username ? '#protected_warning' : '#login_warning').show();
     }
@@ -858,7 +842,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             "scrapername":short_name,
             "code"      : code,
             "urlquery"  : urlquery,
-            "automode"  : $('select#automode option:selected').val()
+            "automode"  : $('input#automode').val()
         }
 
         $('.editor_controls #run').val('Sending');
@@ -875,7 +859,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function autosavefunction(code, stimulate_run)
     {
         // do a save to the system every time we run (this would better be done via twisted at some point)
-        var automode = $('select#automode option:selected').val(); 
+        var automode = $('input#automode').val(); 
         if ((automode == 'autosave') || (automode == 'autotype'))
         {
             if (pageIsDirty)
@@ -894,17 +878,17 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     } 
 
 
-    function changeAutomode() 
+    function changeAutomode(newautomode) 
     {
+        $('input#automode').val(newautomode);
+
         lasttypetime = new Date(); 
-        var automode = $('select#automode option:selected').val(); 
+        var automode = $('input#automode').val(); 
         if (automode == 'draft')
             ;
         // self demote from editing to watching
         else if (automode == 'autoload')
         {
-            $('select#automode #id_autosave').attr('disabled', true); 
-            $('select#automode #id_autotype').attr('disabled', true); 
             $('.editor_controls #watch_button_area').hide();
             setCodeMirrorReadOnly(true);
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
@@ -919,32 +903,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         sendjson(data); 
     }; 
 
-    function showhideAutomodeSelector()
-    {
-        // always show it for debugging
-        // $('select#automode').show(); return; 
-        
-        // never show it, other buttons do functions more clearly now
-        $('select#automode').hide();
-        return
-
-        /*
-        // show it for staff only
-        if (isstaff) {
-            $('select#automode').show().addClass("staff");
-        } else {
-            $('select#automode').hide().removeClass("staff"); 
-        }
-        return; 
-        */
-
-        /* Conditional version, based on whether just single user and needed or not
-        var automode = $('select#automode option:selected').val(); 
-        if ($('input#showautomode').attr('checked') || (automode == 'autotype') || (username ? (loggedineditors.length >= 2) : (loggedineditors.length >= 1)))
-            $('select#automode').show(); 
-        else
-            $('select#automode').hide();  */
-    }
 
     function parseISOdate(sdatetime) // used to try and parse an ISOdate, but it's highly irregular and IE can't do it
         {  return new Date(parseInt(sdatetime)); }
@@ -973,7 +931,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     // when the editor status is determined it is sent back to the server
     function recordEditorStatus(data) 
     { 
-console.log(data); 
         var boutputstatus = (lasttouchedtime == undefined); 
         //console.log($.toJSON(data)); 
         if (data.nowtime)
@@ -1021,9 +978,8 @@ console.log(data);
             stext.push("."); 
             writeToChat(cgiescape(stext.join(""))); 
         }
-        showhideAutomodeSelector(); 
 
-        var automode = $('select#automode option:selected').val(); 
+        var automode = $('input#automode').val(); 
 
         // draft editing nothing to do
         if (automode == 'draft') 
@@ -1032,7 +988,6 @@ console.log(data);
         // you are the editing user
         else if (username && (editingusername == username))
         {
-            $('select#automode #id_autoload').attr('disabled', (loggedineditors.length == 1)); // no point in being a watcher if no one else is available to edit
             $('.editor_controls #watch_button_area').toggle((loggedineditors.length != 1));
 
             if (loggedineditors.length >= 2)
@@ -1045,11 +1000,8 @@ console.log(data);
                // convert all the autosaving pages to watching (apart from the one that the user changed to autotype)
                 if (automode == 'autosave')
                 {
-                    $('select#automode #id_autoload').attr('disabled', false); 
                     $('.editor_controls #watch_button_area').hide();
-                    $('select#automode').val('autoload'); // watching
-                    $('select#automode #id_autosave').attr('disabled', false); 
-                    $('select#automode #id_autotype').attr('disabled', true); 
+                    changeAutomode('autoload'); // watching
                     setCodeMirrorReadOnly(true);
                     $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                     $('.editor_controls #run').attr('disabled', true);
@@ -1060,8 +1012,6 @@ console.log(data);
             else if (((automode != 'autosave') && (automode != 'autotype')) || (data.broadcastingeditor == undefined))
             {
                 setCodeMirrorReadOnly(false);
-                $('select#automode #id_autosave').attr('disabled', false); 
-                $('select#automode #id_autotype').attr('disabled', pageIsDirty); 
                 var newmode = 'autosave'; 
 
                 /* This forces broadcast mode (see all edits realtime rather than at save time).
@@ -1071,7 +1021,7 @@ console.log(data);
                 }*/
 //newmode = 'autotype'; 
 
-                $('select#automode').val(newmode); 
+                changeAutomode(newmode); 
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
@@ -1093,11 +1043,8 @@ console.log(data);
 
             if (automode != 'autoload')
             {
-                $('select#automode #id_autoload').attr('disabled', false); 
                 $('.editor_controls #watch_button_area').hide();
-                $('select#automode').val('autoload'); // watching
-                $('select#automode #id_autosave').attr('disabled', true); 
-                $('select#automode #id_autotype').attr('disabled', true); 
+                changeAutomode('autoload'); // watching
                 setCodeMirrorReadOnly(true);
                 $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                 $('.editor_controls #run').attr('disabled', true);
@@ -1110,10 +1057,7 @@ console.log(data);
         else
         {
             $('#watcherstatus').text(""); 
-            $('select#automode #id_autosave').attr('disabled', false); 
-            $('select#automode #id_autotype').attr('disabled', true); 
-            $('select#automode').val('autosave'); // editing
-            $('select#automode #id_autoload').attr('disabled', true); 
+            changeAutomode('autosave'); // editing
             $('.editor_controls #watch_button_area').hide();
             if (!savecode_authorized) {
                 // special case, if not authorized then we are internally
@@ -1375,8 +1319,7 @@ console.log(data);
         // the watch button
         $('.editor_controls #btnWatch').live('click', function()
         {
-            $('select#automode').val('autoload');
-            changeAutomode();
+            changeAutomode('autoload');
             return false;
         });
  

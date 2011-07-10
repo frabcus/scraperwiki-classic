@@ -178,13 +178,8 @@
             <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P, Cmd + P)"/>
         {% endifnotequal %}{% endifequal %}
 
-        {# hidden if not necessary #}
-        <select id="automode">
-            <option name="autotype" value="autotype" id="id_autotype">broadcast</option>
-            <option name="autosave" value="autosave" id="id_autosave"  {% if scraper.id %}selected{% endif %}>editing</option>
-            <option name="autoload" value="autoload" id="id_autoload" disabled>watching</option>
-            <option name="draft"    value="draft"    id="id_draft" {% if not scraper.id %}selected{% endif %}>draft editing</option>
-        </select>
+        {# used to be a dropdown select option #}
+        <input type="hidden" id="automode" class="staff" value="{% if scraper.id %}autosave{% else %}draft{% endif %}"/>
 
         {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
             <label for="id_urlquery" class="hide">Urlquery:</label>
@@ -197,7 +192,6 @@
         <span id="watch_button_area" style="display:none">You are editing (<a id="btnWatch">relinquish</a>), </span>
         <span id="watcherstatus"></span>
 
-    
         <div class="right">
             <span id="idlastrev" >
             </span>

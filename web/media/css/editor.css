@@ -118,9 +118,7 @@ div.page_tabs.small {
 }
 
 .editor_controls input.button, #meta_form input.button {
-	font-size: 0.7em
-
-;
+	font-size: 0.7em;
 	/* button is the class, not the type */
     -webkit-border-radius: 4px;
 	-moz-border-radius: 4px;
@@ -241,23 +239,6 @@ div.page_tabs.small {
 
 .helplink a {
 	text-decoration: none;
-}
-
-select#automode {
-	font-size: 0.8em;
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	background-color: #e3e3e3;
-	background-repeat: no-repeat;
-	background-position: 2px 49%;
-	padding: 0.2em 0.1em 0.3em 12px;
-	border: solid 1px #9f9f9f;
-	color: #333;
-	font-weight: bold;
-}
-
-select#automode {
-	display: none
 }
 
 #meta_form {
