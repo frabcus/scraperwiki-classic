@@ -539,8 +539,8 @@ def autoFirewall():
 def sigTerm(signum, frame):
     try:
         if child:
-            os.kill(child, signal.SIGTERM)
-    except OSError:
+            os.kill(int(child), signal.SIGTERM)
+    except:
         pass  # no such file
         
     try:

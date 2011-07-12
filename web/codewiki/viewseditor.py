@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.core.mail import mail_admins
 
 from codewiki import models
 import runsockettotwister
@@ -187,6 +188,14 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         context['revdate'] = status.get(use_commit,{}).get("date")
         context['revdateepoch'] = _datetime_to_epoch(context['revdate'])
         revuser = status.get(use_commit,{}).get("user")
+        if revuser is None:
+            # Unable to get the user for the revision although we clearly have the vcs_status
+            # so we should email the current context and status to admins so we can see what 
+            # is going on - RJ
+            msg = "Failed to get revision user when looking for %s\n" % (short_name,)
+            msg = '%sContext: %s\n\nStatus: %s' % (msg, context,status,)
+            mail_admins(subject="[SW Bug] HG problem fetching user", message=msg, fail_silently=True)
+        
         context['revusername'] = revuser.username
         try:
             context['revuserrealname'] = revuser.get_profile().name
