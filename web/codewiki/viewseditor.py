@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.core.mail import mail_admins
 
 from codewiki import models
 import runsockettotwister
@@ -187,12 +188,16 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         context['revdate'] = status.get(use_commit,{}).get("date")
         context['revdateepoch'] = _datetime_to_epoch(context['revdate'])
         revuser = status.get(use_commit,{}).get("user")
+        # If there is no user for the revision we should just use the scraper owner        
+        if revuser is None:
+            revuser = scraper.owner()
+            
         context['revusername'] = revuser.username
         try:
             context['revuserrealname'] = revuser.get_profile().name
         except frontend.models.UserProfile.DoesNotExist:
             context['revuserrealname'] = revuser.username
-            
+        
     # create a temporary scraper object
     else:
         if wiki_type == 'view':
