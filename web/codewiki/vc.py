@@ -133,7 +133,7 @@ class MercurialInterface:
         return status
         
     
-    # rev -1 or None returnst he current saved file (even if not committed)
+    # rev -1 or None returns the current saved file (even if not committed)
     # other negative numbers return revisions backwards from end in version control
     # positive numbers revisions forward
     def getstatus(self, rev=None):

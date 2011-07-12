@@ -104,9 +104,9 @@ def reload(request, short_name):
     scraper = getscraperor404(request, short_name, "readcode")
     oldcodeineditor = request.POST.get('oldcode')
     status = scraper.get_vcs_status(-1)
-    result = { "code": status["code"], "rev":status.get('prevcommit',{}).get('rev'),
+    result = { "code": status["code"], "rev":status.get('prevcommit',{}).get('rev', ''),
                "revdateepoch":_datetime_to_epoch(status.get('prevcommit',{}).get("date")) 
-            }
+             }
     if oldcodeineditor:
         result["selrange"] = vc.DiffLineSequenceChanges(oldcodeineditor, status["code"])
     return HttpResponse(json.dumps(result))
@@ -164,11 +164,10 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
             return HttpResponseNotFound(render_to_string('404.html', scraper.authorizationfailedmessage(request.user, "readcodeineditor"), context_instance=RequestContext(request)))
        
         # link from history page can take us to "rollback" mode and see earlier revision
-        rollback_rev = request.GET.get('rollback_rev', None)
-        if rollback_rev is not None:
-            rollback_rev = int(rollback_rev)
-            assert rollback_rev >= 0 # too confusing for now otherwise!
-            get_rev = rollback_rev
+        rollback_rev = request.GET.get('rollback_rev', '')
+        if rollback_rev != "":
+            get_rev = int(rollback_rev)
+            assert get_rev >= 0 # too confusing for now otherwise!
             context['rollback_rev'] = rollback_rev
             use_commit = 'currcommit'
         else:
@@ -177,13 +176,14 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
             # commit
             get_rev = -1
             use_commit = 'prevcommit'
+
         status = scraper.get_vcs_status(get_rev)
-        if rollback_rev is None:
+        if rollback_rev == "":
             assert 'currcommit' not in status 
 
         # assert not status['ismodified']  # should hold, but disabling it for now
         context['code'] = status["code"]
-        context['rev'] = status.get(use_commit,{}).get("rev") or 0
+        context['rev'] = status.get(use_commit,{}).get("rev", "0")
         context['revdate'] = status.get(use_commit,{}).get("date")
         context['revdateepoch'] = _datetime_to_epoch(context['revdate'])
         revuser = status.get(use_commit,{}).get("user")
