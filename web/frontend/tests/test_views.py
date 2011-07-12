@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 import frontend
-from codewiki.models import Scraper
+from codewiki.models import Scraper, Code
 
 class FrontEndViewsTests(TestCase):
     fixtures = ['./fixtures/test_data.json']
@@ -88,5 +88,18 @@ class FrontEndViewsTests(TestCase):
             # print "***TUT:", tutorials
             self.assertEqual(tutorials.keys(), [lang])
             self.assertEqual(ix, len(tutorials[lang]))
+
+class FrontEndViewsSearchTests(TestCase):
+    fixtures = ['test_data']
+
+    def test_search(self):
+        print "all", Scraper.objects.all(), Scraper.objects.all()[0].title
+        scrapers = Code.objects.filter(title__icontains="test")
+        print "found", scrapers
+        response = self.client.get(reverse('search', kwargs={'q':'test'}))
+        print response.context
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['num_results'], 1)
+    
 
 
