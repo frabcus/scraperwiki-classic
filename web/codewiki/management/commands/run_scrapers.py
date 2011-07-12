@@ -302,7 +302,7 @@ class ScraperRunner(threading.Thread):
 
         # Update the scrapers meta information. Get the scraper from
         # the db again in case it has changed during the lifetime of the run
-        scraper = Scraper.objects.get(id=self.scraper.id)
+        scraper = Scraper.objects.get( id = self.scraper.id )
         scraper.update_meta()
         scraper.last_run = datetime.datetime.now()
         if exceptionmessage:
