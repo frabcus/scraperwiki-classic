@@ -13,7 +13,7 @@ SHELL=/bin/bash
 0 4 * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py update_kpis
 
 # Update various bits of meta information for each scraper every hour
-8 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py update_scraper_meta
+#8 * * * * cd /var/www/scraperwiki/ && source bin/activate && cd web && python manage.py update_scraper_meta
 
 # Every minute, get new screenshots of scrapers from screenshot server
 * * * * * rsync -qazr -e "ssh -i /home/scraperdeploy/screenshooter-key.rsa" screenshooter@kippax.scraperwiki.com:/home/screenshooter/screenshots/ /var/www/scraperwiki/web/media/screenshots/
