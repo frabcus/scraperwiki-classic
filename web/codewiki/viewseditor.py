@@ -189,18 +189,19 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         context['revdateepoch'] = _datetime_to_epoch(context['revdate'])
         revuser = status.get(use_commit,{}).get("user")
         if revuser is None:
-            # Unable to get the user for the revision although we clearly have the vcs_status
-            # so we should email the current context and status to admins so we can see what 
-            # is going on - RJ
-            msg = "Failed to get revision user when looking for %s\n" % (short_name,)
-            msg = '%sContext: %s\n\nStatus: %s' % (msg, context,status,)
-            mail_admins(subject="[SW Bug] HG problem fetching user", message=msg, fail_silently=True)
-        
-        context['revusername'] = revuser.username
-        try:
-            context['revuserrealname'] = revuser.get_profile().name
-        except frontend.models.UserProfile.DoesNotExist:
-            context['revuserrealname'] = revuser.username
+            #msg = "Failed to get revision user when looking for %s\n" % (short_name,)
+            #msg = '%sContext: %s\n\nStatus: %s' % (msg, context,status,)
+            #mail_admins(subject="[SW Bug] HG problem fetching user", message=msg, fail_silently=True)
+            # This isn't ideal, but it will do for now under the circumstances, maybe we should pick a user
+            # from the settings.ADMINS
+            context['revusername']     = 'System'
+            context['revuserrealname'] = 'ScraperWiki Admin'
+        else:            
+            context['revusername'] = revuser.username
+            try:
+                context['revuserrealname'] = revuser.get_profile().name
+            except frontend.models.UserProfile.DoesNotExist:
+                context['revuserrealname'] = revuser.username
             
     # create a temporary scraper object
     else:
