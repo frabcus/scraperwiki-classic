@@ -24,7 +24,7 @@ class RunnerSocket:
         
         self.soc.connect(("127.0.0.1", config.getint("twister", "port")))
         
-
+            # not used
     def runscraper(self, scraper, rev, query_string):
         data = { "command":'connection_open', "guid":scraper.guid, 
                  "username":"DJANGOFRONTEND", "userrealname":"DJANGOFRONTEND", 
@@ -45,10 +45,26 @@ class RunnerSocket:
                 }
         self.soc.send(json.dumps(rdata)+"\r\n") 
 
+
+    def runview(self, user, scraper, rev, query_string):
+        data = { "command":'rpcrun', "guid":scraper.guid, "username":user.username, 
+                 "language":scraper.language, "scrapername":scraper.short_name, "urlquery":query_string }
+        data["django_key"] = config.get('twister', 'djangokey')
+        data["code"] = scraper.saved_code(rev)
+        try:
+            data['userrealname'] = user.get_profile().name
+        except frontend.models.UserProfile.DoesNotExist:
+            data['userrealname'] = user.username
+        except AttributeError:
+            data['userrealname'] = user.username
+        self.soc.send(json.dumps(data)+"\r\n") 
+
+
     def stimulate_run_from_editor(self, guid, username, short_name, clientnumber, language, code, urlquery):
         data = { "command":'stimulate_run', "language":language, "code":code, "urlquery":urlquery, 
-                 "username":username, "scrapername":short_name, "clientnumber":clientnumber, "guid":guid, 
-                 "django_key":config.get('twister', 'djangokey') }
+                 "username":username, "scrapername":short_name, "clientnumber":clientnumber, "guid":guid }
+        data["django_key"] = config.get('twister', 'djangokey')
+
         self.soc.send(json.dumps(data)+"\r\n") 
         jdata = self.readline()
         self.soc.close()
@@ -56,6 +72,7 @@ class RunnerSocket:
             return { "error":"blank stimulation response" }
         cdata = json.loads(jdata)
         return cdata
+
 
         # incoming messages from twister are delimited by ",\r\n"
     def next(self):

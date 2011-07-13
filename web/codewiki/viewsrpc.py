@@ -125,12 +125,13 @@ def rpcexecute(request, short_name, revision=None):
         HttpResponse(code, mimetype='application/javascript')
 
     
-# uncomment this line and comment next two lines to enable runner through twisted
-    #runnerstream = runsockettotwister.RunnerSocket()
-    #runnerstream = runsockettotwister.runscraper(scraper, revision, request.META["QUERY_STRING"])
-    runner = MakeRunner(request, scraper, code)
-    runnerstream = runner.stdout
-
+    # run it the socket method for staff members who can handle being broken
+    if request.user.is_staff:
+        runnerstream = runsockettotwister.RunnerSocket()
+        runnerstream.runview(request.user, scraper, revision, request.META["QUERY_STRING"])
+    else:
+        runner = MakeRunner(request, scraper, code)
+        runnerstream = runner.stdout
 
     # we build the response on the fly in case we get a contentheader value before anything happens
     response = None 

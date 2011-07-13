@@ -12,12 +12,16 @@ div#monitoradmin { display: none; font-family: monospace; overflow: auto; backgr
 div#monitoringusers { border: thin red solid; overflow:auto; text-align:left }
 div#draftscraperusers { border: thin red solid; overflow:auto; text-align:left }
 div#connectionstatusdiv { overflow:auto;  text-align:left }
+div#rpcrunningclients { border: thin red solid; overflow:auto; text-align:left }
 
 div#monitoringusers ul {  display:inline;   }
 div#monitoringusers li {  border: thin blue solid; display:inline;  }
 
 div#monitoroutput div#draftscraperusers ul {  display:inline;   }
 div#monitoroutput div#draftscraperusers li {  border: thin blue solid; display:inline;   }
+
+div#rpcrunningclients ul {  display:inline;   }
+div#rpcrunningclients li {  border: thin purple solid; display:inline;  }
 
 ul#scraperentries {  display:block; text-align:left }
 li.scraper {  border: thin red solid; display:block; }
@@ -26,6 +30,7 @@ li.scraper a.scrapername { width:100px; background-color:blue; color:white; disp
 ul.scraperusers {  display:inline; vertical-align:top; height:100%; border:0; padding:0; margin:0 }
 li.luser {  border: thin black solid; display:inline;  }
 
+li.lscraper {  border: thin green solid; display:inline;  }
 
 span.desc { background-color:black; color:white; width:100px; display:inline-block; } 
 
@@ -212,6 +217,38 @@ $(document).ready(function() {
             }
         }
 
+        if (jdata.rpcrunningclients)
+        {
+            if (jdata.message_type == "umlstatus")
+                $("#monitoroutput #rpcrunningclients ul").html(""); 
+            for (i = 0; i < jdata.rpcrunningclients.length; i++)
+            {
+                var rpcrunningclient = jdata.rpcrunningclients[i]; 
+                var clientnumber = rpcrunningclient.clientnumber; 
+                var chatname = rpcrunningclient.chatname; 
+                var scrapername = rpcrunningclient.scrapername; 
+                var idclientnumber = "RPC_" + clientnumber; 
+                var present = rpcrunningclient.present; 
+                var lasttouch = parseISOdate(rpcrunningclient.lasttouch); 
+                var ele = "#monitoroutput #rpcrunningclients ul li#"+idclientnumber; 
+                if (present)
+                {
+                    if (!$(ele).attr("id"))
+                    {
+                        var lli = [ '<li id="', idclientnumber, '" class="lscraper">', getScraperfromScrapername(scrapername), ' ' ]; 
+                        if (chatname != "|Anonymous")
+                            lli.push('(', getUserfromCChatname(chatname), ') '); 
+                        lli.push(getNewDatetimeSpan(lasttouch), '</li>'); 
+                        $("#monitoroutput #rpcrunningclients ul").append(lli.join("")); 
+                    }
+                    else
+                        $(ele + " .lasttouchdiff .lasttouch").text(String(lasttouch.getTime())); 
+                }
+                else
+                    $(ele).remove(); 
+            }
+        }
+
         if (jdata.draftscraperusers)
         {
             if (jdata.message_type == "umlstatus")
@@ -384,11 +421,12 @@ $(document).ready(function() {
     <div id="monitorvisible">
         <div id="draftscraperusers"><span class="desc">Drafts:</span> <ul></ul></div>
         <ul id="scraperentries"></ul>
+        <div id="rpcrunningclients"><span class="desc">RPCrunning:</span> <ul></ul></div>
         <div id="monitoringusers"><span class="desc">Monitoring:</span> <ul></ul></div>
     </div>
 
+    <div id="connectionstatusdiv"><span id="connectionstatus">...</span> <strong>Server time:</strong> <span id="servernowtime"></span></div>
     <div id="monitoradmin">
-        <div id="connectionstatusdiv"><span id="connectionstatus">...</span> <strong>Server time:</strong> <span id="servernowtime"></span></div>
         <div id="jdatareceived"></div>
     </div>
     <a id="showmonitoradmin" href="#">toggle connection admin...</a>
