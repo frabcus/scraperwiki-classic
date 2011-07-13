@@ -119,7 +119,8 @@ $(document).ready(function() {
         {
             var chainpatch = chainpatches.shift(); 
             //writeToChat("-- "+$.toJSON(chainpatch)); 
-            sendjson(chainpatch); 
+            if (bConnected)
+                sendjson(chainpatch); 
         }
         // clear out the ones that are pure typing messages sent in non-broadcast mode
         while ((chainpatches.length > 0) && (chainpatches[0].insertlinenumber == undefined))
