@@ -73,6 +73,10 @@ div.page_tabs.small {
 	right: 0px;
 }
 
+div.page_tabs a.othertypingalert {
+    background-color: #ffff87;
+}
+
 /* Code */
 
 .editor_code {

@@ -50,6 +50,7 @@ $(document).ready(function() {
             lastupdaterevcall = setTimeout(writeUpdateLastSavedRev, 60000);
         }
     }
+    
     function updateLastSavedRev(rev, revdateepoch)
     {   
         lastRev = rev;
@@ -58,11 +59,12 @@ $(document).ready(function() {
         lastRevUserRealName = userrealname;
         chainpatchnumber = 0; 
         nextchainpatchnumbertoreceive = 0; 
+        receivechainpatchqueue.length = 0; 
         lastreceivedchainpatch = null; 
-        chainpatches = []; // can't find the array.clear() function
+        chainpatches.length = 0; 
         lastRevPrefix = "Saved";
         if (lastupdaterevcall != null)
-            clearTimeout(lastupdaterevcall); 
+            window.clearTimeout(lastupdaterevcall); 
         lastupdaterevcall = setTimeout(writeUpdateLastSavedRev, 50); 
         rollbackRev = "";
         $('#rollback_warning').hide();
@@ -81,10 +83,12 @@ $(document).ready(function() {
     var sTabCurrent = ''; 
     var sChatTabMessage = 'Chat'; 
     var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
-    var receiverecordqueue = [ ]; 
-    var receivechatqueue = [ ]; 
     var runID = ''; 
     var uml = ''; 
+
+    var receiverecordcall = null; 
+    var receiverecordqueue = [ ]; 
+    var receivechatqueue = [ ]; 
 
     // information handling who else is watching and editing during this session
     var editingusername = "";  // primary editor
@@ -117,8 +121,11 @@ $(document).ready(function() {
     var lasttypetime = new Date(); 
     var chainpatches = [ ];   // stack going out
     var chainpatchnumber = 0; // counts them going out 
+
+    var receivechainpatchqueue = [ ]; // coming in
+    var receivechainpatchcall = null; // or function or "waitingforonchange", "doingothertyping"
     var nextchainpatchnumbertoreceive = 0; 
-    var lastreceivedchainpatch = null;
+    var lastreceivedchainpatch = null; 
 
     setupCodeEditor(); 
     setupMenu();
@@ -153,6 +160,11 @@ $(document).ready(function() {
         var text = [ ];
         for (var cur = (from ? from.nextSibling : codeeditor.editor.container.firstChild); cur != to; cur = cur.nextSibling)
         {
+
+// perhaps is happening because the lines have been already snipped out by the next chainpatch
+// must verify
+if (!cur)  
+    writeToChat("null cur: "+cur+" "+from+"  "+to); 
             if (CM_isBR(cur))
             {
                 lines.push(CM_cleanText(text.join(""))); 
@@ -217,15 +229,19 @@ $(document).ready(function() {
         if (automode != 'autosave')
             return; 
         
-        
+        // if patches are coming in of we are waiting for a timeout then don't send any patches back 
+        // as this can create a ping-pong effect between two windows of the same editing user
+        if (receivechainpatchcall != null)
+            return; 
         
         // make outgoing patches
         if (codemirroriframe)
         {
             // send any edits up the line (first to the chat page to show we can decode it)
             var historystack = codeeditor.editor.history.history; 
-            var redohistorystack = codeeditor.editor.history.redoHistory; 
             var lostundo = codeeditor.editor.history.lostundo; 
+
+            var redohistorystack = codeeditor.editor.history.redoHistory; 
             var rdhL = redohistorystack.length - 1; 
             var ptime = (new Date()).getTime(); 
             while (lastundo != historystack.length + lostundo)
@@ -269,6 +285,8 @@ $(document).ready(function() {
                                        rev:lastRev, clientnumber:clientnumber, historypos:historypos, ptime:ptime, chatname:chatname }
                     lchainpatches.push(chainpatch); 
                     chainpatchnumber++; 
+                    if (nextchainpatchnumbertoreceive >= 0)
+                        nextchainpatchnumbertoreceive = chainpatchnumber; 
                 }
 
                 // arrange for the chainpatches list (which is reversed) to add the upper ones first, because the line numbering 
@@ -679,6 +697,12 @@ $(document).ready(function() {
 
             if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
                 receivechatqueue.push(jdata); 
+            else if (jdata.message_type == 'othertyping')
+            {
+                $('#lasttypedtimestamp').text(String(new Date())); 
+                if (jdata.insertlinenumber != undefined)
+                    receivechainpatchqueue.push(jdata); 
+            }
             else
                 receiverecordqueue.push(jdata); 
 
@@ -690,9 +714,16 @@ $(document).ready(function() {
                 $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
             }
 
-            if (receiverecordqueue.length + receivechatqueue.length == 1)
-                window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  // delay of 1ms makes it work better in FireFox (possibly so it doesn't take priority over the similar function calls in Orbited.js)
+            if ((receiverecordcall == null) && (receiverecordqueue.length + receivechatqueue.length >= 1))
+                receiverecordcall = window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  
 
+            if (receivechainpatchqueue.length != 0)
+            {
+                if (receivechainpatchcall != null)
+                    window.clearTimeout(receivechainpatchcall); 
+                receivechainpatchcall = window.setTimeout(function() { receiveChainpatchFromQueue(null); }, 10);  
+            }
+            
             // clear batched up data that's choking the system
             if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
                 window.setTimeout(clearJunkFromQueue, 1); 
@@ -719,18 +750,18 @@ $(document).ready(function() {
     // run our own queue not in the timeout system (letting chat messages get to the front)
     function receiveRecordFromQueue() 
     {
-        var jdata = undefined; 
-        if (receivechatqueue.length > 0)
+        receiverecordcall = null; 
+        var jdata; 
+        if (receivechatqueue.length != 0)
             jdata = receivechatqueue.shift(); 
-        else if (receiverecordqueue.length > 0) 
+        else if (receiverecordqueue.length != 0) 
             jdata = receiverecordqueue.shift(); 
-
-        if (jdata != undefined) 
-        {
-            receiveRecord(jdata);
-            if (receiverecordqueue.length + receivechatqueue.length >= 1)
-                window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
-        }
+        else
+            return; 
+        
+        receiveRecord(jdata);
+        if (receiverecordqueue.length + receivechatqueue.length >= 1)
+            receiverecordcall = window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
     }
 
     //read data back from twisted
@@ -794,10 +825,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
               writeToConsole(data.headerkey + ": " + data.headervalue, "httpresponseheader"); 
           } else if (data.message_type == "typing") {
               $('#lasttypedtimestamp').text(String(new Date())); 
-          } else if (data.message_type == "othertyping") {
-              $('#lasttypedtimestamp').text(String(new Date())); 
-              if (data.insertlinenumber != undefined)
-                  recordOtherTyping(data); 
           } else {
               writeToConsole(data.content, data.message_type); 
           }
@@ -1073,19 +1100,53 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         }
     }
 
+
+    // code shared with reload code so we can use same system to suppress edited messages from codemirror
+    function receiveChainpatchFromQueue(reloadedcode)
+    {
+        // handle bail out conditions
+        if (reloadedcode == null)
+        {
+            if (nextchainpatchnumbertoreceive == -1)
+                receivechainpatchqueue.length = 0; 
+            var chainpatch = (receivechainpatchqueue.length != 0 ? receivechainpatchqueue.shift() : null); 
+            if ((chainpatch != null) && ((chainpatch.chainpatchnumber != nextchainpatchnumbertoreceive) || (chainpatch.rev != lastRev)))
+            {
+                    // this will be handled some other time (for someone joining in as we are already in full flow)
+                writeToChat('<i>'+chainpatch.chatname+' typed something but this window is not synchronized to receive it</i>'); 
+                nextchainpatchnumbertoreceive = -1; 
+                receivechainpatchqueue.length = 0; 
+                chainpatch = null; 
+            }
+            if (chainpatch == null)
+            {
+                receivechainpatchcall = null; 
+                $('li#idtopcodetab a').removeClass("othertypingalert").css("background-color", "#ffffff");
+                return; 
+            }
+        }
+
+            // the callback into the onchange function appears to happen in same thread without a timeout 
+            // so we have to suppress the re-edits with this flag here.
+            // some callbacks into onchange are deferred, so it is unpredictable and hard to detect 
+            // (unless we were going to watch the patches being created and compare them to the one we committed to tell the difference between typing)
+            // so we're going to use a few second delay to suppress messages going through and highlight with an chatalert colour on the tab
+            // which will help see stuff when it appears to go wrong.  
+        $('li#idtopcodetab a').addClass("othertypingalert").css("background-color", "#ffff87"); // backgroundcolour setting by class doesn't work
+        if ((reloadedcode != null) && (receivechainpatchcall != null))
+            window.clearTimeout(receivechainpatchcall); 
+        receivechainpatchcall = "doingothertyping"; 
+        if (reloadedcode == null)
+            recordOtherTyping(chainpatch);  
+        else
+            codeeditor.setCode(reloadedcode); 
+        receivechainpatchcall = window.setTimeout(function() { receiveChainpatchFromQueue(null); }, (((reloadedcode == null) && (receivechainpatchqueue.length != 0)) ? 10 : 5000));  
+    }
+
+              
     // incoming patches
     function recordOtherTyping(chainpatch)
     {
-        if (nextchainpatchnumbertoreceive == -1)
-            return; 
-        if ((chainpatch.chainpatchnumber != nextchainpatchnumbertoreceive) || (chainpatch.rev != lastRev))
-        {
-                // this will be handled some other time (for someone joining in as we are already in full flow)
-            writeToChat('<i>'+chainpatch.chatname+' typed something but this window is not synchronized to receive it</i>'); 
-            nextchainpatchnumbertoreceive = -1; 
-            return; 
-        }
-
         var mismatchlines = [ ]; 
         var linehandle = codeeditor.nthLine(chainpatch["insertlinenumber"]); 
 
@@ -1202,6 +1263,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 writeToChat("prevchainpatch " + $.toJSON(lastreceivedchainpatch)); 
         }
         nextchainpatchnumbertoreceive++;  // next value expected
+        chainpatchnumber = nextchainpatchnumbertoreceive; 
         lastreceivedchainpatch = chainpatch; 
     }
 
@@ -1297,7 +1359,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: oldcode }, timeout: 10000 }); 
         var reloaddata = $.evalJSON(reloadajax.responseText); 
         if (codemirroriframe)
-            codeeditor.setCode(reloaddata.code); 
+            receiveChainpatchFromQueue(reloaddata.code)
         else
             $("#id_code").val(reloaddata.code); 
         updateLastSavedRev(reloaddata.rev, reloaddata.revdateepoch);
