@@ -19,6 +19,9 @@ var servernowtime = new Date();
 var earliesteditor = servernowtime; 
 var lasttouchedtime = undefined; 
 
+var cachehidlookup = { }; // this itself is a cache of a cache
+
+var SelectEditorLine; // function
 
 function cgiescape(text) 
 {
@@ -50,6 +53,94 @@ function setTabScrollPosition(sTab, command)
         $(divtab).animate({ scrollTop: scrollPositions[sTab] }, 0);
     }
 }
+
+function showTextPopup(sLongMessage) 
+{
+    $.modal('<pre class="popupoutput">'+cgiescape(sLongMessage)+'</pre>', 
+            {overlayClose: true, 
+                containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
+                overlayCss: { cursor:"auto" }
+            });
+}
+
+
+function lparsehighlightcode(sdata, lmimetype)
+{
+    var cachejson; 
+    try 
+    {
+        cachejson = $.evalJSON(sdata);
+    } 
+    catch (err) 
+    {
+        return { "objcontent": $('<pre class="popupoutput">Malformed json: ' + cgiescape(sdata) + "</pre>") }; 
+    }
+
+    lmimetype = cachejson["mimetype"];  // the incoming value is incorrect because of failure to use closure and httpproxy.py isn't sending the value out properly (see line 489)
+    if ((lmimetype != "text/html") || (cachejson["content"].length > 20000))
+    {
+        var res = [ ]; 
+        res.push("<h2>mimetype: "+lmimetype+"</h2>"); 
+        if (cachejson["encoding"] == "base64")
+            res.push("<h2>Encoded as: "+cachejson["encoding"]+"</h2>"); 
+        res.push('<pre>', cgiescape(cachejson["content"]), '</pre>'); 
+        cachejson["objcontent"] = $(res.join("")); 
+        return cachejson; 
+    }
+    // could highlight text/javascript and text/css
+
+    var lineNo = 1; 
+    var cpnumbers= ($('input#popuplinenumbers').attr('checked') ? $('<div id="cp_linenumbers"></div>') : undefined); 
+    var cpoutput = $('<div id="cp_output"></div>'); 
+    function addLine(line) 
+    {
+        if (cpnumbers)
+            cpnumbers.append(String(lineNo++)+'<br>'); 
+        var kline = $('<span>').css('background-color', '#fae7e7'); 
+        for (var i = 0; i < line.length; i++) 
+            cpoutput.append(line[i]);
+        cpoutput.append('<br>'); 
+    }
+    highlightText(cachejson["content"], addLine, HTMLMixedParser); 
+    cachejson["objcontent"] = $('<div id="cp_whole"></div>'); 
+    if (cpnumbers)
+        cachejson["objcontent"].append(cpnumbers); 
+    cachejson["objcontent"].append(cpoutput); 
+    return cachejson; 
+}
+
+
+function popupCached(cacheid, lmimetype)
+{
+    modaloptions = { overlayClose: true, 
+                        overlayCss: { cursor:"auto" }, 
+                        containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:0, width:"90%", "text-align":"left", cursor:"auto" }, 
+                        containerId: 'simplemodal-container' 
+                    }; 
+
+    var cachejson = cachehidlookup[cacheid]; 
+    if (cachejson == undefined)
+    {
+        modaloptions['onShow'] = function() 
+        { 
+            $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, timeout: 10000, success: function(sdata) 
+            {
+                cachejson = lparsehighlightcode(sdata, lmimetype); 
+                if (cachejson["content"].length < 15000)  // don't cache huge things
+                    cachehidlookup[cacheid] = cachejson; 
+
+                var wrapheight = $('.simplemodal-wrap').height(); 
+                $('.simplemodal-wrap #loadingheader').remove(); 
+                $('.simplemodal-wrap').append(cachejson["objcontent"]); 
+                $('.simplemodal-wrap').css("height", wrapheight + "px").css("overflow", "auto"); 
+            }})
+        }
+        $.modal('<h1 id="loadingheader">Loading ['+cacheid+'] ...</h1>', modaloptions); 
+    }
+    else
+        $.modal(cachejson["objcontent"], modaloptions); 
+}
+
 
 function clearOutput() 
 {
@@ -104,12 +195,11 @@ function writeToConsole(sMessage, sMessageType, iLine)
     }
 
     // add clickable line number link
-    if (iLine != undefined) {
+    if (iLine != undefined) 
+    {
         oLineLink = $('<a href="#">Line ' + iLine + ' - </a>'); 
         oConsoleItem.prepend(oLineLink);
-        oLineLink.click( function() { 
-            codeeditor.selectLines(codeeditor.nthLine(iLine), 0, codeeditor.nthLine(iLine + 1), 0); 
-        }); 
+        oLineLink.click(function() { SelectEditorLine(iLine); }); 
     }
 
     
@@ -254,5 +344,67 @@ function showTab(sTab)
         $('.editor_output div.tabs li.chat').removeClass('chatalert');
     
     setTabScrollPosition(sTab, 'show'); 
+}
+
+
+
+function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blockedurlquoted) 
+{
+    if (stackdump) 
+    {
+        for (var i = 0; i < stackdump.length; i++) 
+        {
+            var stackentry = stackdump[i]; 
+            sMessage = (stackentry.file !== undefined ? (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file) : ""); 
+            if (sMessage === undefined) {
+                alert("sMessage is undefined in writeExceptionDump, internal error")
+            }
+            if (stackentry.furtherlinetext !== undefined) {
+                sMessage += " -- " + stackentry.furtherlinetext;
+            }
+            linenumber = (stackentry.file == "<string>" ? stackentry.linenumber : undefined); 
+            writeToConsole(sMessage, 'exceptiondump', linenumber); 
+            if (stackentry.duplicates > 1) {
+                writeToConsole("  + " + stackentry.duplicates + " duplicates", 'exceptionnoesc'); 
+            }
+        }
+    }
+
+    if (blockedurl) 
+    {
+        sMessage = "The link " + blockedurl.substring(0,50) + " has been blocked. "; 
+        sMessage += "Click <a href=\"/whitelist/?url=" + blockedurlquoted + "\" target=\"_blank\">here</a> for details."; 
+        writeToConsole(sMessage, 'exceptionnoesc'); 
+    } 
+    else 
+        writeToConsole(exceptiondescription, 'exceptiondump'); 
+}
+
+
+//Setup Tabs
+function setupTabs()
+{
+    $('.editor_output .console a').click(function(){
+        showTab('console');
+        return false;
+    });
+    $('.editor_output .data a').click(function(){
+        showTab('data');
+        return false;
+    })
+    $('.editor_output .sources a').click(function(){
+        showTab('sources');
+        return false;
+    })
+    $('.editor_output .chat a').click(function(){
+        showTab('chat');
+        return false;
+    })
+
+    //show default tab
+    if ($('.editor_output div.tabs li.console').length)
+        showTab('console'); 
+    else
+        showTab('chat'); 
 }
 

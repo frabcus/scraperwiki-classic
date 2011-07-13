@@ -1,4 +1,6 @@
 
+
+
 $(document).ready(function() {
 
     // editor window dimensions
@@ -75,16 +77,8 @@ $(document).ready(function() {
 
     // runtime information
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
-    var conn = undefined; // Orbited connection
-    var bConnected  = false; 
-    var bSuppressDisconnectionMessages = false; 
-    var buffer = "";
     var runID = ''; 
     var uml = ''; 
-
-    var receiverecordcall = null; 
-    var receiverecordqueue = [ ]; 
-    var receivechatqueue = [ ]; 
 
     var parsers = Array();
     var stylesheets = Array();
@@ -97,14 +91,16 @@ $(document).ready(function() {
     var savedundo = 0; 
     var lastundo = 0;
 
-    var cachehidlookup = { }; // this itself is a cache of a cache
-    
+    var receiverecordcall = null; 
+    var receiverecordqueue = [ ]; 
+    var receivechatqueue = [ ]; 
+    var receivechainpatchqueue = [ ]; // coming in
+    var receivechainpatchcall = null; // or function or "waitingforonchange", "doingothertyping"
+
     var lasttypetime = new Date(); 
     var chainpatches = [ ];   // stack going out
     var chainpatchnumber = 0; // counts them going out 
 
-    var receivechainpatchqueue = [ ]; // coming in
-    var receivechainpatchcall = null; // or function or "waitingforonchange", "doingothertyping"
     var nextchainpatchnumbertoreceive = 0; 
     var lastreceivedchainpatch = null; 
 
@@ -131,6 +127,12 @@ $(document).ready(function() {
 
         if (chainpatches.length > 0)
             window.setTimeout(sendChainPatches, 2); 
+    }
+
+    // called from editortabs.js
+    SelectEditorLine = function(iLine)
+    {
+        codeeditor.selectLines(codeeditor.nthLine(iLine), 0, codeeditor.nthLine(iLine + 1), 0); 
     }
 
 
@@ -327,15 +329,6 @@ $(document).ready(function() {
     }
 
 
-    function setupOrbited() 
-    {
-        TCPSocket = Orbited.TCPSocket;
-        conn = new TCPSocket(); 
-        conn.open('localhost', '9010'); 
-        buffer = " "; 
-        sChatTabMessage = 'Connecting...'; 
-        $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
-    }
 
     function setCodeMirrorReadOnly(val) 
     {
@@ -435,7 +428,12 @@ $(document).ready(function() {
             {
                 eventObject.preventDefault();
                 if (bConnected) 
-                    sendChat(); 
+                {
+                    lasttypetime = new Date(); 
+                    data = {"command":'chat', "guid":guid, "username":username, "text":$('#chat_line').val()};
+                    sendjson(data); 
+                    $('#chat_line').val(''); 
+                }
                 return false; 
             }
             return true; 
@@ -474,32 +472,6 @@ $(document).ready(function() {
             $(username ? '#protected_warning' : '#login_warning').show();
     }
     
-    //Setup Tabs
-    function setupTabs()
-    {
-        $('.editor_output .console a').click(function(){
-            showTab('console');
-            return false;
-        });
-        $('.editor_output .data a').click(function(){
-            showTab('data');
-            return false;
-        })
-        $('.editor_output .sources a').click(function(){
-            showTab('sources');
-            return false;
-        })
-        $('.editor_output .chat a').click(function(){
-            showTab('chat');
-            return false;
-        })
-
-        //show default tab
-       if ($('.editor_output div.tabs li.console').length)
-           showTab('console'); 
-       else
-           showTab('chat'); 
-    }
     
 
     conn.onopen = function(code)
@@ -507,11 +479,7 @@ $(document).ready(function() {
         sChatTabMessage = 'Chat'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
 
-        if (conn.readyState == conn.READY_STATE_OPEN)
-            mreadystate = 'Ready'; 
-        else
-            mreadystate = 'readystate=' + conn.readyState;
-        writeToChat('Connection opened: ' + mreadystate); 
+        writeToChat('Connection opened: ' + (conn.readyState == conn.READY_STATE_OPEN ? 'Ready' : 'readystate=' + conn.readyState)); 
         bConnected = true; 
 
         // send the username and guid of this connection to twisted so it knows who's logged on
@@ -527,110 +495,42 @@ $(document).ready(function() {
         sendjson(data);
     }
 
-    conn.onclose = function(code)
-    {
-        if (code == Orbited.Statuses.ServerClosedConnection)
-            mcode = 'ServerClosedConnection'; 
-        else if (code == Orbited.Errors.ConnectionTimeout)
-            mcode = 'ConnectionTimeout'; 
-        else if (code == Orbited.Errors.InvalidHandshake)
-            mcode = 'InvalidHandshake'; 
-        else if (code == Orbited.Errors.UserConnectionReset)
-            mcode = 'UserConnectionReset'; 
-        else if (code == Orbited.Errors.Unauthorized)
-            mcode = 'Unauthorized'; 
-        else if (code == Orbited.Errors.RemoteConnectionFailed)
-            mcode = 'RemoteConnectionFailed'; 
-        else if (code == Orbited.Statuses.SocketControlKilled)
-            mcode = 'SocketControlKilled'; 
-        else
-            mcode = 'code=' + code;
-
-        writeToChat('Connection closed: ' + mcode); 
-        bConnected = false; 
-
-        // couldn't find a way to make a reconnect button work!
-            // the bSuppressDisconnectionMessages technique doesn't seem to work (unload is not invoked), so delay message in the hope that window will close first
-        window.setTimeout(function() 
-        {
-            if (!bSuppressDisconnectionMessages)
-            {
-                writeToChat('<b>You will need to reload the page to reconnect</b>');  
-                writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
-                writeToConsole("(You can still save your work)", "exceptionnoesc"); 
-            }
-        }, 250); 
-
-
-        $('.editor_controls #run').val('Unconnected');
-        $('.editor_controls #run').unbind('click.run');
-        $('.editor_controls #run').unbind('click.abort');
-        $('#running_annimation').hide(); 
-
-        sChatTabMessage = 'Disconnected'; 
-        $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
-    }
 
     //read data back from twisted
-    conn.onread = function(ldata) 
+    ReceiveRecordJ = function(jdata)
     {
-        buffer = buffer+ldata;
-        while (true) 
+        if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
+            receivechatqueue.push(jdata); 
+        else if (jdata.message_type == 'othertyping')
         {
-            var linefeed = buffer.indexOf("\n"); 
-            if (linefeed == -1)
-                break; 
-            sdata = buffer.substring(0, linefeed); 
-            buffer = buffer.substring(linefeed+1); 
-            sdata = sdata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
-            if (sdata.length == 0)
-                continue; 
-
-            var jdata; 
-            try 
-            {
-                //writeToChat("--- "+cgiescape(sdata)); // for debug of what's coming out
-                jdata = $.evalJSON(sdata);
-            } 
-            catch(err) 
-            {
-                alert("Malformed json: '''" + sdata + "'''"); 
-                continue
-            }
-
-            if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
-                receivechatqueue.push(jdata); 
-            else if (jdata.message_type == 'othertyping')
-            {
-                $('#lasttypedtimestamp').text(String(new Date())); 
-                if (jdata.insertlinenumber != undefined)
-                    receivechainpatchqueue.push(jdata); 
-            }
-            else
-                receiverecordqueue.push(jdata); 
-
-            // allow the user to clear the choked data if they want
-            if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'runfinished')) 
-            {
-                $('.editor_controls #run').val('Finishing');
-                $('.editor_controls #run').unbind('click.abort');
-                $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
-            }
-
-            if ((receiverecordcall == null) && (receiverecordqueue.length + receivechatqueue.length >= 1))
-                receiverecordcall = window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  
-
-            if (receivechainpatchqueue.length != 0)
-            {
-                if (receivechainpatchcall != null)
-                    window.clearTimeout(receivechainpatchcall); 
-                receivechainpatchcall = window.setTimeout(function() { receiveChainpatchFromQueue(null); }, 10);  
-            }
-            
-            // clear batched up data that's choking the system
-            if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
-                window.setTimeout(clearJunkFromQueue, 1); 
+            $('#lasttypedtimestamp').text(String(new Date())); 
+            if (jdata.insertlinenumber != undefined)
+                receivechainpatchqueue.push(jdata); 
         }
+        else
+            receiverecordqueue.push(jdata); 
+
+        // allow the user to clear the choked data if they want
+        if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'runfinished')) 
+        {
+            $('.editor_controls #run').val('Finishing');
+            $('.editor_controls #run').unbind('click.abort');
+            $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
+        }
+
+        if ((receiverecordcall == null) && (receiverecordqueue.length + receivechatqueue.length >= 1))
+            receiverecordcall = window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  
+
+        if (receivechainpatchqueue.length != 0)
+        {
+            if (receivechainpatchcall != null)
+                window.clearTimeout(receivechainpatchcall); 
+            receivechainpatchcall = window.setTimeout(function() { receiveChainpatchFromQueue(null); }, 10);  
+        }
+        
+        // clear batched up data that's choking the system
+        if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
+            window.setTimeout(clearJunkFromQueue, 1); 
     }
 
     function clearJunkFromQueue() 
@@ -733,37 +633,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
           }
       }
 
-    function sendChat() 
-    {
-        lasttypetime = new Date(); 
-        data = {"command":'chat', "guid":guid, "username":username, "text":$('#chat_line').val()};
-        sendjson(data); 
-        $('#chat_line').val(''); 
-    }
-
-    //send a message to the server (needs linefeed delimeter because sometimes records get concattenated)
-    function sendjson(json_data) 
-    {
-        var jdata = $.toJSON(json_data); 
-        try 
-        {
-            if (jdata.length < 10000)  // only concatenate for smallish strings
-                conn.send(jdata + "\r\n");  
-            else
-            {
-                conn.send(jdata);  
-                conn.send("\r\n");  // this goes out in a second chunk
-            }
-        } 
-        catch(err) 
-        {
-            if (!bSuppressDisconnectionMessages)
-            {
-                writeToConsole("Send error: " + err, "exceptionnoesc"); 
-                writeToChat(jdata); 
-            }
-        }
-    }
 
     //send code request run
     function sendCode() 
@@ -1196,7 +1065,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         // the fork button
         $('.editor_controls #btnForkNow').live('click', function()
         {
-            forkScraper();  
+            window.open($('#fork_url_action').val()); 
             return false;
         });
         $('.editor_controls #btnForkNow').val('fork' + (wiki_type == 'scraper' ? ' scraper' : '')); 
@@ -1234,7 +1103,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             sendjson({"command":'loseconnection'}); 
             //if (conn)  conn.close();  
         });  
-
+        $(window).bind('beforeunload', function() 
+        { 
+            bSuppressDisconnectionMessages = true; 
+        }); 
+        
         /*
         This fires when making a new scraper on some browsers (while doing the
         redirect), so need to prevent that case. Julian had this problem.
@@ -1423,13 +1296,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             $('.editor_controls #btnCommitPopup').val('Saving ...');
     }
 
-    // cause a fork of scraper being edited
-    function forkScraper()
-    {
-        window.open($('#fork_url_action').val());
-    }
-
-
     function setupResizeEvents()
     {
         $(window).resize(onWindowResize);
@@ -1467,39 +1333,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     }
 
 
-    function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blockedurlquoted) 
-    {
-        if (stackdump) 
-        {
-            for (var i = 0; i < stackdump.length; i++) 
-            {
-                var stackentry = stackdump[i]; 
-                sMessage = (stackentry.file !== undefined ? (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file) : ""); 
-                if (sMessage === undefined) {
-                    alert("sMessage is undefined in writeExceptionDump, internal error")
-                }
-                if (stackentry.furtherlinetext !== undefined) {
-                    sMessage += " -- " + stackentry.furtherlinetext;
-                }
-                linenumber = (stackentry.file == "<string>" ? stackentry.linenumber : undefined); 
-                writeToConsole(sMessage, 'exceptiondump', linenumber); 
-                if (stackentry.duplicates > 1) {
-                    writeToConsole("  + " + stackentry.duplicates + " duplicates", 'exceptionnoesc'); 
-                }
-            }
-        }
-
-        if (blockedurl) 
-        {
-            sMessage = "The link " + blockedurl.substring(0,50) + " has been blocked. "; 
-            sMessage += "Click <a href=\"/whitelist/?url=" + blockedurlquoted + "\" target=\"_blank\">here</a> for details."; 
-            writeToConsole(sMessage, 'exceptionnoesc'); 
-        } 
-        else 
-        {
-            writeToConsole(exceptiondescription, 'exceptiondump'); 
-        }
-    }
 
     function writeRunOutput(sMessage) 
     {
@@ -1508,61 +1341,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             activepreviewiframe.document.write(sMessage); 
     }
 
-    function showTextPopup(sLongMessage) 
-    {
-        $.modal('<pre class="popupoutput">'+cgiescape(sLongMessage)+'</pre>', 
-                {overlayClose: true, 
-                 containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
-                 overlayCss: { cursor:"auto" }
-                });
-    }
 
 
 
-    function lparsehighlightcode(sdata, lmimetype)
-    {
-        var cachejson; 
-        try 
-        {
-            cachejson = $.evalJSON(sdata);
-        } 
-        catch (err) 
-        {
-            return { "objcontent": $('<pre class="popupoutput">Malformed json: ' + cgiescape(sdata) + "</pre>") }; 
-        }
-
-        lmimetype = cachejson["mimetype"];  // the incoming value is incorrect because of failure to use closure and httpproxy.py isn't sending the value out properly (see line 489)
-        if ((lmimetype != "text/html") || (cachejson["content"].length > 20000))
-        {
-            var res = [ ]; 
-            res.push("<h2>mimetype: "+lmimetype+"</h2>"); 
-            if (cachejson["encoding"] == "base64")
-                res.push("<h2>Encoded as: "+cachejson["encoding"]+"</h2>"); 
-            res.push('<pre>', cgiescape(cachejson["content"]), '</pre>'); 
-            cachejson["objcontent"] = $(res.join("")); 
-            return cachejson; 
-        }
-        // could highlight text/javascript and text/css
-
-        var lineNo = 1; 
-        var cpnumbers= ($('input#popuplinenumbers').attr('checked') ? $('<div id="cp_linenumbers"></div>') : undefined); 
-        var cpoutput = $('<div id="cp_output"></div>'); 
-        function addLine(line) 
-        {
-            if (cpnumbers)
-                cpnumbers.append(String(lineNo++)+'<br>'); 
-            var kline = $('<span>').css('background-color', '#fae7e7'); 
-            for (var i = 0; i < line.length; i++) 
-                cpoutput.append(line[i]);
-            cpoutput.append('<br>'); 
-        }
-        highlightText(cachejson["content"], addLine, HTMLMixedParser); 
-        cachejson["objcontent"] = $('<div id="cp_whole"></div>'); 
-        if (cpnumbers)
-            cachejson["objcontent"].append(cpnumbers); 
-        cachejson["objcontent"].append(cpoutput); 
-        return cachejson; 
-    }
 
 
         // share this with history.html through codeviewer.js, and start to bring in the diff technology from there
@@ -1624,36 +1405,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     }
 
 
-    function popupCached(cacheid, lmimetype)
-    {
-        modaloptions = { overlayClose: true, 
-                         overlayCss: { cursor:"auto" }, 
-                         containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:0, width:"90%", "text-align":"left", cursor:"auto" }, 
-                         containerId: 'simplemodal-container' 
-                       }; 
-
-        var cachejson = cachehidlookup[cacheid]; 
-        if (cachejson == undefined)
-        {
-            modaloptions['onShow'] = function() 
-            { 
-                $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, timeout: 10000, success: function(sdata) 
-                {
-                    cachejson = lparsehighlightcode(sdata, lmimetype); 
-                    if (cachejson["content"].length < 15000)  // don't cache huge things
-                        cachehidlookup[cacheid] = cachejson; 
-
-                    var wrapheight = $('.simplemodal-wrap').height(); 
-                    $('.simplemodal-wrap #loadingheader').remove(); 
-                    $('.simplemodal-wrap').append(cachejson["objcontent"]); 
-                    $('.simplemodal-wrap').css("height", wrapheight + "px").css("overflow", "auto"); 
-                }})
-            }
-            $.modal('<h1 id="loadingheader">Loading ['+cacheid+'] ...</h1>', modaloptions); 
-        }
-        else
-            $.modal(cachejson["objcontent"], modaloptions); 
-    }
 
 
 
@@ -1688,8 +1439,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
 
     //click bar to resize
-    function resizeControls(sDirection) {
-    
+    function resizeControls(sDirection) 
+    {
         if (sDirection == 'first')
             previouscodeeditorheight = $(window).height() * 3/5; 
         else if (sDirection != 'up' && sDirection != 'down')
