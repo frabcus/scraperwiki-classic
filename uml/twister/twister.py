@@ -184,7 +184,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         
             
     def clientcommand(self, command, parsed_data):
-        self.logger.debug("command %s client# %d" % (command, self.clientnumber))
+        if command != 'typing':
+            self.logger.debug("command %s client# %d" % (command, self.clientnumber))
         
         # update the lasttouch values on associated aggregations
         if command != 'automode':
@@ -250,6 +251,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
     # should record the rev and chainpatchnumber so when we join to this scraper we know
         elif command == 'typing':
+            self.logger.debug("command %s client# %d insertlinenumber %s" % (command, self.clientnumber, parsed_data.get("insertlinenumber")))
             jline = {'message_type' : "typing", 'content' : "%s typing" % self.chatname}
             jotherline = parsed_data.copy()
             jotherline.pop("command")
@@ -490,7 +492,9 @@ class EditorsOnOneScraper:
         usereditors.sort(key=lambda x: x.usersessionpriority)
         editorstatusdata["loggedinusers"] = [ ]
         editorstatusdata["loggedineditors"] = [ ]
+        editorstatusdata["countclients"] = len(self.anonymouseditors)  # so we know what windows are connected to this editor (if any)
         for usereditor in usereditors:
+            editorstatusdata["countclients"] += len(usereditor.userclients)
             if usereditor.userclients[-1].savecode_authorized:   # as recorded in last client for this user
                 editorstatusdata["loggedineditors"].append(usereditor.username)
             else:
@@ -658,7 +662,7 @@ class RunnerFactory(protocol.ServerFactory):
 
         
         else:   # draft scraper type (hardcode the output that would have gone with notifyEditorClients
-            editorstatusdata = {'message_type':"editorstatus", "loggedineditors":[], "loggedinusers":[], "nanonymouseditors":1, "chatname":client.chatname, "message":"Draft scraper connection" }
+            editorstatusdata = {'message_type':"editorstatus", "loggedineditors":[], "loggedinusers":[], "nanonymouseditors":1, "countclients":1, "chatname":client.chatname, "message":"Draft scraper connection" }
             editorstatusdata["nowtime"] = jstime(datetime.datetime.now())
             editorstatusdata['earliesteditor'] = jstime(client.clientsessionbegan)
             editorstatusdata["scraperlasttouch"] = jstime(client.clientlasttouch)

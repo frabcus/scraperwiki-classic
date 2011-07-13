@@ -96,6 +96,7 @@ $(document).ready(function() {
     var loggedineditors = [ ]; // list of who else is here and their windows open who have editing rights
     var iselectednexteditor = 1; 
     var nanonymouseditors = 0; // number of anonymous editors
+    var countclientsconnected = 0; 
     var chatname = "";         // special in case of Anonymous users (yes, this unnecessarily gets set every time we call recordEditorStatus)
     var clientnumber = -1;     // allocated by twister for this window, so we can find it via django
     var chatpeopletimes = { }; // last time each person made a chat message
@@ -160,11 +161,9 @@ $(document).ready(function() {
         var text = [ ];
         for (var cur = (from ? from.nextSibling : codeeditor.editor.container.firstChild); cur != to; cur = cur.nextSibling)
         {
-
-// perhaps is happening because the lines have been already snipped out by the next chainpatch
-// must verify
-if (!cur)  
-    writeToChat("null cur: "+cur+" "+from+"  "+to); 
+            if (!cur)  // a notable failure case, possibly when the lines we are copying have themselves been trimmed out
+                return null; 
+            
             if (CM_isBR(cur))
             {
                 lines.push(CM_cleanText(text.join(""))); 
@@ -234,8 +233,8 @@ if (!cur)
         if (receivechainpatchcall != null)
             return; 
         
-        // make outgoing patches
-        if (codemirroriframe)
+        // make outgoing patches (if there is anyone to receive them)
+        if (codemirroriframe && (countclientsconnected != 1))
         {
             // send any edits up the line (first to the chat page to show we can decode it)
             var historystack = codeeditor.editor.history.history; 
@@ -275,15 +274,20 @@ if (!cur)
                         deletions.push(chain[k].text);  // these values I think can be changed retrospectively to collapse an undo value
     
                     var lines = CM_newLines(chain[0].from, chain[chain.length - 1].to); 
-                    for (var j = 0; j < lines.length; j++)
-                        insertions.push(lines[j]); 
+                    if (lines != null)
+                    {
+                        for (var j = 0; j < lines.length; j++)
+                            insertions.push(lines[j]); 
                     
-                    // duplicates that can happen with the final line (deletions[-1]==insertions[-1]) which we could trim out, but best to leave in 
-                    // in case it does overwrite the last change that was sent on that line but mismatched by unreliability of CM_newLines
+                        // duplicates that can happen with the final line (deletions[-1]==insertions[-1]) which we could trim out, but best to leave in 
+                        // in case it does overwrite the last change that was sent on that line but mismatched by unreliability of CM_newLines
 
-                    var chainpatch = { command:'typing', insertlinenumber:insertlinenumber, deletions:deletions, insertions:insertions, chainpatchnumber:chainpatchnumber, 
-                                       rev:lastRev, clientnumber:clientnumber, historypos:historypos, ptime:ptime, chatname:chatname }
-                    lchainpatches.push(chainpatch); 
+                        var chainpatch = { command:'typing', insertlinenumber:insertlinenumber, deletions:deletions, insertions:insertions, chainpatchnumber:chainpatchnumber, 
+                                           rev:lastRev, clientnumber:clientnumber, historypos:historypos, ptime:ptime, chatname:chatname }
+                        lchainpatches.push(chainpatch); 
+                    }
+                    else
+                        writeToChat("<i>Chain patch failed to be generated</i>"); // advance so it is, so all the watchers can get out of sync accordingly
                     chainpatchnumber++; 
                     if (nextchainpatchnumbertoreceive >= 0)
                         nextchainpatchnumbertoreceive = chainpatchnumber; 
@@ -299,8 +303,13 @@ if (!cur)
         
         // plain text area case not coded for
         else 
+        {
+            chainpatchnumber++; 
+            if (nextchainpatchnumbertoreceive >= 0)
+                nextchainpatchnumbertoreceive = chainpatchnumber; 
             chainpatches.push({"command":'typing', "chainpatchnumber":(chainpatchnumber++), "rev":lastRev, "clientnumber":clientnumber}); 
-
+        }
+        
         if (chainpatches.length > 0)
             sendChainPatches(); 
     }
@@ -989,8 +998,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         loggedineditors = data.loggedineditors;  // this is a list
         loggedinusers = data.loggedinusers;      // this is a list
         nanonymouseditors = data.nanonymouseditors; 
-        chatname = data.chatname; 
+        chatname = data.chatname;   // yes this is reset every time (though it's always the same)
         clientnumber = data.clientnumber; 
+        countclientsconnected = data.countclients; 
 
         if (data.message)
             writeToChat('<i>'+cgiescape(data.message)+'</i>'); 
@@ -1052,7 +1062,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                     $('.editor_controls #btnCommitPopup').val('Rollback'); 
                     $('#rollback_warning').show();
                 }
-                sendjson({"command":'automode', "automode":newmode}); 
+                sendjson({"command":'automode', "automode":'autosave'}); 
             }
         }
 
