@@ -36,7 +36,6 @@ def run_event(request, run_id):
     return HttpResponseRedirect(reverse('scraper_history', args=[scraper.wiki_type, scraper.short_name]) + "#run_" + str(event.id))
 
 
-
 def running_scrapers(request):
     from codewiki.management.commands.run_scrapers import Command
         
@@ -64,7 +63,6 @@ def running_scrapers(request):
     context['overdue_count'] = c.get_overdue_scrapers().count()
 
     return render_to_response('codewiki/running_scrapers.html', context, context_instance=RequestContext(request))
-
 
 def scraper_killrunning(request, run_id, event_id):
     event = None

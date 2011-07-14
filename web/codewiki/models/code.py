@@ -72,6 +72,7 @@ def scraper_search_query(user, query):
     return scrapers_all.distinct()
 
 
+
 class Code(models.Model):
 
     # model fields

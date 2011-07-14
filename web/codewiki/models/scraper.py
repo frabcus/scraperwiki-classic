@@ -47,8 +47,27 @@ LICENSE_CHOICES = (
     ('Other', 'Other'),
 )
 
-class Scraper (code.Code):
 
+    # unfortunately has to be a scrapers list because run_interval and last_run not available to code objects
+def scrapers_overdue():
+    """
+    Obtains a queryset of scrapers that should have already been run, we 
+    will order these with the ones that have run least recently hopefully
+    being near the top of the list.
+    """
+    scrapers = Scraper.objects.exclude(privacy_status="deleted")
+    scrapers = scrapers.filter(run_interval__gt=0)
+    qselect = {}
+    qselect["secondsto_nextrun"] = "IF(run_interval>0, IF(last_run is not null, TIMESTAMPDIFF(SECOND, NOW(), DATE_ADD(last_run, INTERVAL run_interval SECOND)), 0), 99999)"
+    qselect["overdue_proportion"] = "IF(run_interval>0, IF(last_run is not null, TIMESTAMPDIFF(SECOND, NOW(), DATE_ADD(last_run, INTERVAL run_interval SECOND))/run_interval, -1.0), 1.0)"
+    qwhere = ["(last_run is null or DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW())"]
+    #qwhere = [ ]
+    scrapers = scrapers.extra(select=qselect, where=qwhere)
+    scrapers = scrapers.order_by('overdue_proportion')
+    return scrapers
+
+
+class Scraper (code.Code):
     has_geo      = models.BooleanField(default=False)        # to be deleted
     has_temporal = models.BooleanField(default=False)        # to be deleted
     last_run     = models.DateTimeField(blank=True, null=True)    

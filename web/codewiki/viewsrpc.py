@@ -229,3 +229,8 @@ def testactiveumls(n):
         result.append('\n'.join(lns))
     return result
 
+def overdue_scrapers(request):
+    if request.GET.get("django_key") == runsockettotwister.config.get('twister', 'djangokey') or request.user.is_staff:
+        scrapers = models.scrapers_overdue()
+        return HttpResponse(json.dumps([(float(scraper.overdue_proportion), scraper.short_name)  for scraper in scrapers]))
+    return HttpResponse("Not authorized")
