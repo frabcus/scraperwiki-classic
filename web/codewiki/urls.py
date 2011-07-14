@@ -40,8 +40,6 @@ urlpatterns = patterns('',
 
         # events and monitoring (prob shouldn't have it in the scrapers path)
     url(r'^scrapers/running_scrapers/$',                  viewsuml.running_scrapers,    name='running_scrapers'),
-        # in theory this could be a function in the api for searching scrapers on a criteria, but we have a special case here
-    url(r'^twistercontrols/overdue_scrapers/$',           viewsrpc.overdue_scrapers,    name='overdue_scrapers'),
     
     url(r'^scrapers/scraper_killrunning/(?P<run_id>[\w_\-\.\|]+)(?:/(?P<event_id>[\w_\-]+))?$',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),

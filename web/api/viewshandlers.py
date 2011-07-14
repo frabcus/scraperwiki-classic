@@ -20,8 +20,9 @@ from django.core.serializers.json import DateTimeAwareJSONEncoder
 from django.utils import simplejson
 
 
-from codewiki.models import Scraper, Code, ScraperRunEvent, scraper_search_query
+from codewiki.models import Scraper, Code, ScraperRunEvent, scraper_search_query, scrapers_overdue
 from codewiki.managers.datastore import DataStore
+import frontend
 from cStringIO import StringIO
 
 try:     import json
@@ -206,14 +207,22 @@ def scraper_search_handler(request):
     except ValueError: 
         maxrows = 5
     result = [ ]  # list of dicts
-    scrapers = scraper_search_query(user=None, query=query)
+
+    if query == "*OVERDUE*":
+        scrapers = scrapers_overdue()  # should be handling hiding private scrapers from list unless authorized caller (eg twister)
+    else:
+        scrapers = scraper_search_query(user=None, query=query)
+        
     for scraper in scrapers[:maxrows]:
         res = {'short_name':scraper.short_name }
         res['title'] = scraper.title
         owners = scraper.userrolemap()["owner"]
         if owners:
             owner = owners[0]
-            ownername = owner.get_profile().name
+            try:
+                ownername = owner.get_profile().name
+            except frontend.models.UserProfile.DoesNotExist:
+                ownername = owner.username
             if not ownername:
                 ownername = owner.username
             if ownername:
@@ -221,6 +230,8 @@ def scraper_search_handler(request):
         res['description'] = scraper.description
         res['created'] = scraper.created_at.isoformat()
         res['privacy_status'] = scraper.privacy_status
+        if query == "*OVERDUE*":
+            res['overdue_proportion'] = float(scraper.overdue_proportion)
         result.append(res)
     
     if request.GET.get("format") == "csv":

@@ -15,7 +15,6 @@ config = ConfigParser.ConfigParser()
 config.readfp(open(settings.CONFIGFILE))
 
 
-
 class RunnerSocket:
     def __init__(self):
         self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
