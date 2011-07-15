@@ -47,6 +47,7 @@ class FrontEndViewsTests(TestCase):
         response = self.client.get(reverse('about'))
         self.assertEqual(response.status_code, 200)
 
+class FrontEndViewsDocumentationTests(TestCase):
     def test_docs_ruby(self):
         response = self.client.get(reverse('docs', kwargs={'language': 'ruby'}))
         self.assertEqual(response.status_code, 200)
@@ -93,7 +94,9 @@ class FrontEndViewsSearchTests(TestCase):
     fixtures = ['test_data']
 
     def test_search(self):
-        print "all", Scraper.objects.all(), Scraper.objects.all()[0].title
+        print "all", Scraper.objects.all()
+        s = Scraper.objects.all()[0]
+        print "fields", s.title, s.short_name, s.run_interval, s.created_at, s.status
         scrapers = Code.objects.filter(title__icontains="test")
         print "found", scrapers
         response = self.client.get(reverse('search', kwargs={'q':'test'}))
