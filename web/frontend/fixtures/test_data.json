@@ -999,31 +999,34 @@
     }, 
     {
         "pk": 1, 
-        "model": "codewiki.code", 
+        "model": "codewiki.scraper", 
         "fields": {
-            "short_name": "test_scraper" 
+            "short_name": "xxx_test_scraper",
+            "has_geo": 0, 
+            "has_temporal": 0, 
+            "last_run": null, 
+            "license": "", 
+            "license_link": null, 
+            "record_count": 0, 
+            "relations": [], 
+            "run_interval": 86400
         }
     },
     {
         "pk": 1, 
-        "model": "codewiki.scraper", 
+        "model": "codewiki.code", 
         "fields": {
-            "status": "published", 
-            "has_geo": 0, 
-            "record_count": 0, 
+            "status": "ok", 
+            "privacy_status": "public", 
             "description": "", 
-            "license": "", 
             "title": "Test Scraper", 
             "deleted": 0, 
             "created_at": "2010-02-19 07:09:14", 
-            "has_temporal": 0, 
-            "last_run": null, 
             "source": "", 
             "featured": 0, 
             "line_count": 0, 
-            "run_interval": 0, 
             "published": 1, 
-            "first_published_at": "2010-02-19 07:08:53", 
+            "first_published_at": "2010-02-19 07:09:53", 
             "guid": "0"
         }
     }, 
