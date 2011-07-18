@@ -958,8 +958,8 @@
         "model": "auth.user", 
         "fields": {
             "username": "test_admin", 
-            "first_name": "", 
-            "last_name": "", 
+            "first_name": "Administrative", 
+            "last_name": "Testuser", 
             "is_active": 1, 
             "is_superuser": 1, 
             "is_staff": 1, 
@@ -976,8 +976,8 @@
         "model": "auth.user", 
         "fields": {
             "username": "test_user", 
-            "first_name": "", 
-            "last_name": "", 
+            "first_name": "Generalpurpose", 
+            "last_name": "Testuser", 
             "is_active": 1, 
             "is_superuser": 0, 
             "is_staff": 0, 

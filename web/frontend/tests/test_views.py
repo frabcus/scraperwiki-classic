@@ -93,13 +93,18 @@ class FrontEndViewsDocumentationTests(TestCase):
 class FrontEndViewsSearchTests(TestCase):
     fixtures = ['test_data']
 
-    def test_search(self):
-        s = Scraper.objects.all()[0]
-        c = Code.objects.all()[0]
+    def test_scraper_search(self):
         scrapers = Code.objects.filter(title__icontains="test")
         response = self.client.get(reverse('search', kwargs={'q':'test'}))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context['num_results'], 1)
+        self.assertEqual(response.context['scrapers_num_results'], 1)
     
+#    def test_user_search(self):
+#        scrapers = Code.objects.filter(title__icontains="test")
+#        response = self.client.get(reverse('search', kwargs={'q':'test'}))
+#        self.assertEqual(response.status_code, 200)
+#        self.assertEqual(response.context['scrapers_num_results'], 1)
+    
+
 
 
