@@ -94,13 +94,10 @@ class FrontEndViewsSearchTests(TestCase):
     fixtures = ['test_data']
 
     def test_search(self):
-        print "all", Scraper.objects.all()
         s = Scraper.objects.all()[0]
-        print "fields", s.title, s.short_name, s.run_interval, s.created_at, s.status
+        c = Code.objects.all()[0]
         scrapers = Code.objects.filter(title__icontains="test")
-        print "found", scrapers
         response = self.client.get(reverse('search', kwargs={'q':'test'}))
-        print response.context
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['num_results'], 1)
     

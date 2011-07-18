@@ -1001,7 +1001,6 @@
         "pk": 1, 
         "model": "codewiki.scraper", 
         "fields": {
-            "short_name": "xxx_test_scraper",
             "has_geo": 0, 
             "has_temporal": 0, 
             "last_run": null, 
@@ -1016,6 +1015,7 @@
         "pk": 1, 
         "model": "codewiki.code", 
         "fields": {
+            "short_name": "test_scraper",
             "status": "ok", 
             "privacy_status": "public", 
             "description": "", 
