@@ -41,7 +41,7 @@ class TestScrapers(SeleniumTest):
         s = self.selenium
         
         s.open('/scrapers/%s/' % name)        
-        self.wait_for_page('view the scraper page')        
+        self.wait_for_page('view the scraper page to add comment')        
         
         s.click('link=Discussion (0)')    
         self.wait_for_page('visiting discussion')
@@ -83,7 +83,7 @@ class TestScrapers(SeleniumTest):
         s = self.selenium     
                 
         s.open('/scrapers/%s/' % name)        
-        self.wait_for_page('view the scraper page')        
+        self.wait_for_page('view the scraper page to check we cleared the data')        
         s.click('btnClearDatastore')
         s.get_confirmation()
         self.wait_for_page('clear the datastore')
@@ -100,7 +100,7 @@ class TestScrapers(SeleniumTest):
         s = self.selenium     
                 
         s.open('/scrapers/%s/' % name)
-        self.wait_for_page('view the scraper page')                
+        self.wait_for_page('view the scraper page so we can delete it')                
         s.click('btnDeleteScraper')
         s.get_confirmation()        
         self.wait_for_page('delete the scraper')
@@ -116,7 +116,7 @@ class TestScrapers(SeleniumTest):
         s = self.selenium     
                 
         s.open('/views/%s/' % name)
-        self.wait_for_page('view the scraper page')                
+        self.wait_for_page('view the page to delete the view')                
         s.click('btnDeleteScraper')
         s.get_confirmation()        
         self.wait_for_page()
