@@ -72,7 +72,6 @@ def scraper_search_query(user, query):
     return scrapers_all.distinct()
 
 
-
 class Code(models.Model):
 
     # model fields
@@ -362,6 +361,37 @@ class Code(models.Model):
     # is the automatically made, builtin emailer
     def is_emailer(self):
         return self.short_name[-8:] == '.emailer'
+
+
+class CodeSetting(models.Model):
+    """
+    A single key=value setting for a scraper/view that is editable for that
+    view/scraper by the owner (or editor). There will be several (potentially)
+    of these per scraper/view that are only visible to owners and editors where 
+    the scraper/view is private/protected.
+    
+    It is passed through the system with the code when executed and so will
+    be available within the scraper code via an internal api setting - such
+    as scraperwiki.setting('name')
+
+    
+    Records the user who last saved the setting (and when) so that there is 
+    a minimal amount of auditing available.  
+    """
+    code  = models.ForeignKey(Code, related_name='settings')
+    key   = models.CharField(max_length=100)
+    value = models.TextField()
+    last_edited = models.ForeignKey(User)
+    last_edit_date = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return repr(self)
+
+    def __repr__(self):
+        return '<CodeSetting: %s for %s>' % (self.key, self.code.short_name,)
+
+    class Meta:
+        app_label = 'codewiki'
 
 
 
