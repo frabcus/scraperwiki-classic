@@ -175,7 +175,7 @@
     <div class="editor_controls">
         <a class="helplink" href="{% url docsroot scraper.language %}" target="_blank" title="Show useful commands">Documentation</a>
         {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
-            <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R, Cmd + R)"/>
+            <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R, Cmd + R)" disabled />
         {% endifnotequal %}{% endifnotequal %}
         {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'javascript' %}
             <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P, Cmd + P)"/>

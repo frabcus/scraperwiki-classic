@@ -765,6 +765,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         chatname = data.chatname;   // yes this is reset every time (though it's always the same)
         clientnumber = data.clientnumber; 
         countclientsconnected = data.countclients; 
+        var automode = $('input#automode').val(); 
 
         if (data.message)
             writeToChat('<i>'+cgiescape(data.message)+'</i>'); 
@@ -773,6 +774,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         {
             stext = [ ]; 
             stext.push("Editing began " + swtimeago(earliesteditor, servernowtime) + " ago, last touched " + swtimeago(lasttouchedtime, servernowtime) + " ago.  You are client#"+clientnumber); 
+            $('.editor_controls #run').attr('disabled', false);  // enable now we have identity (this gets disabled lower down if we lack the permissions)
 
             var othereditors = [ ]; 
             for (var i = 0; i < data.loggedineditors.length; i++) 
@@ -797,8 +799,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             stext.push("."); 
             writeToChat(cgiescape(stext.join(""))); 
         }
-
-        var automode = $('input#automode').val(); 
 
         // draft editing nothing to do
         if (automode == 'draft') 
@@ -1260,7 +1260,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
             // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
             if (res.url && window.location.pathname != res.url)
+            {
                 window.location = res.url;
+                return;   // without this it sends an erroneous saved signal up to twister
+            }
 
             // ordinary save case.
             if (res.draft != 'True') 
