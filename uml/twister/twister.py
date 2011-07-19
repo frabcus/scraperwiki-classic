@@ -767,7 +767,9 @@ class RunnerFactory(protocol.ServerFactory):
             # next function will be called when some actual data gets sent
 
     def clientConnectionRegistered(self, client):
-        self.connectedclients.remove(client)
+        # Can't remove from the list if it isn't in there so we need to check
+        if client in self.connectedclients:
+            self.connectedclients.remove(client)
         
         if client.username:
             client.chatname = client.userrealname or client.username
