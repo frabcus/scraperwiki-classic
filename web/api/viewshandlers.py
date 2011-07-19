@@ -230,8 +230,12 @@ def scraper_search_handler(request):
         res['description'] = scraper.description
         res['created'] = scraper.created_at.isoformat()
         res['privacy_status'] = scraper.privacy_status
+        res['language'] = scraper.language
         if query == "*OVERDUE*":
             res['overdue_proportion'] = float(scraper.overdue_proportion)
+            res['code'] = scraper.get_vcs_status(-1)["code"]
+            res['guid'] = scraper.guid
+            
         result.append(res)
     
     if request.GET.get("format") == "csv":
@@ -250,7 +254,7 @@ def scraper_search_handler(request):
     if callback:
         res = "%s(%s)" % (callback, res)
     response = HttpResponse(res, mimetype='application/json; charset=utf-8')
-    response['Content-Disposition'] = 'attachment; filename=search.json'
+    #response['Content-Disposition'] = 'attachment; filename=search.json'
     return response
 
 
@@ -469,7 +473,7 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
                 info['datasummary'] = sqlitedata
     
     if 'userroles' not in quietfields:
-        info['userroles']   = { }
+        info['userroles'] = { }
         for ucrole in scraper.usercoderole_set.all():
             if ucrole.role not in info['userroles']:
                 info['userroles'][ucrole.role] = [ ]
@@ -477,7 +481,7 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
         
     status = scraper.get_vcs_status(rev)
     if 'code' not in quietfields:
-        info['code']        = status["code"]
+        info['code'] = status["code"]
     
     for committag in ["currcommit", "prevcommit", "nextcommit"]:
         if committag in status:

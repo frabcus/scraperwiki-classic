@@ -259,7 +259,6 @@ class SQLiteDatabase(Database):
 
     def save_sqlite(self, unique_keys, data, swdatatblname):
         res = { }
-        
         if type(data) == dict:
             data = [data]
         

@@ -22,7 +22,10 @@ import time
 import ConfigParser
 import datetime
 import optparse, grp, pwd
+import urllib, urlparse
 import logging, logging.config
+
+
 try:
     import cloghandler
 except:
@@ -54,7 +57,8 @@ from twisted.internet import protocol, utils, reactor, task
 from twisted.web.client import Agent
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
-from twisted.internet.defer import succeed
+from twisted.internet.defer import succeed, Deferred
+from twisted.internet.defer import Deferred
 
 agent = Agent(reactor)
 
@@ -93,14 +97,38 @@ class spawnRunner(protocol.ProcessProtocol):
                     line = json.dumps(parsed_data)  # inject values into the field
             self.client.writeall(line)
 
+        # could move into a proper function in the client once slimmed down slightly
     def processEnded(self, reason):
         self.client.processrunning = None
         self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished'}))
-        self.client.factory.notifyMonitoringClients(self.client)
+        
+        if self.client.clienttype == "editing":
+            self.client.factory.notifyMonitoringClients(self.client)
+        elif self.client.clienttype == "scheduledrun":
+            self.client.factory.scheduledruncomplete(client, reason.type == 'twisted.internet.error.ProcessDone')
+
         if reason.type == 'twisted.internet.error.ProcessDone':
             logger.debug("run process ended %s" % reason)
         else:
             logger.debug("run process ended ok")
+
+
+
+def MakeRunner(scrapername, guid, language, urlquery, username, code, client):
+    args = ['./firestarter/runner.py']
+    args.append('--guid=%s' % guid)
+    args.append('--language=%s' % language)
+    args.append('--name=%s' % scrapername)
+    args.append('--urlquery=%s' % urlquery)
+    if not username:
+        args.append('--draft')
+
+    code = code.encode('utf8')
+    args = [i.encode('utf8') for i in args]
+    logger.debug("./firestarter/runner.py: %s" % args)
+
+    # from here we should somehow get the runid
+    return reactor.spawnProcess(spawnRunner(client, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
 
 
 
@@ -123,7 +151,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.clientlasttouch = self.clientsessionbegan
         self.guidclienteditors = None  # the EditorsOnOneScraper object
         self.automode = 'autosave'     # autosave, autoload, or draft when guid is not set
-        self.clienttype = None # 'editing', 'umlmonitoring', or 'rpcrunning' 
+        self.clienttype = None # 'editing', 'umlmonitoring', 'rpcrunning', or 'scheduledrun'
 
 
     def connectionMade(self):
@@ -357,8 +385,11 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
     
     # message to the client
     def writeline(self, line):
-        self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together
-
+        if self.clienttype != "scheduledrun":
+            self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together
+        else:
+            logger.debug("should send back to run object: "+line)
+            
     def writejson(self, data):
         self.writeline(json.dumps(data))
 
@@ -397,38 +428,13 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             # this more recently can be called from stimulate_run from django
     def runcode(self, parsed_data):
         code = parsed_data.get('code', '')
-        code = code.encode('utf8')
-        
-        # these could all be fetched (or verified) from self
-        # may want to have a verification of the login information by a callback to django to make sure the 
-        # username that is declared really is authorized to write to the scraper declared
-        
         guid = parsed_data.get('guid', '')
         scraperlanguage = parsed_data.get('language', 'python')
         scrapername = parsed_data.get('scrapername', '')
-        scraperlanguage = parsed_data.get('language', '')
         urlquery = parsed_data.get('urlquery', '')
         username = parsed_data.get('username', '')
-        automode = parsed_data.get('automode', '')
-        
-        assert guid == self.guid
-        args = ['./firestarter/runner.py']
-        args.append('--guid=%s' % guid)
-        args.append('--language=%s' % scraperlanguage)
-        args.append('--name=%s' % scrapername)
-        args.append('--urlquery=%s' % urlquery)
-        if not username:
-            args.append('--draft')
-          # should also have argument for saying it's running from editor to give it priority
-
-        args = [i.encode('utf8') for i in args]
-        logger.debug("./firestarter/runner.py: %s" % args)
-
-        # from here we should somehow get the runid
-        self.processrunning = reactor.spawnProcess(spawnRunner(self, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
+        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self)
         self.factory.notifyMonitoringClients(self)
-
-
         
 
 class UserEditorsOnOneScraper:
@@ -537,6 +543,27 @@ class EditorsOnOneScraper:
         return len(self.anonymouseditors) + sum([len(usereditor.userclients)  for usereditor in self.usereditormap.values()])
 
 
+apiurl = "http://localhost:8010"  # should be in config
+class requestoverduescrapersReceiver(protocol.Protocol):
+    def __init__(self, finished, factory):
+        self.finished = finished
+        self.factory = factory
+        self.rbuffer = [ ]
+        
+    def dataReceived(self, bytes):
+        self.rbuffer.append(bytes)
+        
+    def connectionLost(self, reason):
+        if reason.type == 'twisted.web.client.ResponseDone':
+            jdata = json.loads("".join(self.rbuffer))
+            self.factory.requestoverduescrapersAction(jdata)
+        else:
+            logger.info("nope "+reason.getErrorMessage())
+        self.finished.callback(None)
+
+
+        
+
 class RunnerFactory(protocol.ServerFactory):
     protocol = RunnerProtocol
     
@@ -550,18 +577,73 @@ class RunnerFactory(protocol.ServerFactory):
         self.umlmonitoringclients = [ ]
         self.draftscraperclients = [ ]
         self.rpcrunningclients = [ ]
+        self.scheduledrunners = { } # maps from short_name to client objects (that are also put into guidclientmap)
         
-        self.guidclientmap = { }  # maps to EditorsOnOneScraper objects
+        self.guidclientmap = { }  # maps from short_name to EditorsOnOneScraper objects
         
         # set the visible heartbeat goingthere
-        #self.lc = task.LoopingCall(self.announce)
-        #self.lc.start(10)
+#        self.lc = task.LoopingCall(self.requestoverduescrapers)
+#        self.lc.start(10)
 
-    # every 10 seconds sends out a quiet poll
-    def announce(self):
-        pass
+    #
+    # system of functions for fetching the overdue scrapers and knocking them out
+    #
+    def requestoverduescrapers(self):
+        logger.info("requestoverduescrapers")
+        uget = {"format":"jsondict", "searchquery":"*OVERDUE*", "maxrows":5}
+        url = urlparse.urljoin(apiurl, '/api/1.0/scraper/search')
+        d = agent.request('GET', "%s?%s" % (url, urllib.urlencode(uget)))
+        d.addCallbacks(self.requestoverduescrapersResponse, self.requestoverduescrapersFailure)
 
-        
+    def requestoverduescrapersFailure(self, failure):
+        logger.info("requestoverduescrapers failure received "+str(failure))
+
+    def requestoverduescrapersResponse(self, response):
+        finished = Deferred()
+        response.deliverBody(requestoverduescrapersReceiver(finished, self))
+        return finished
+
+    def requestoverduescrapersAction(self, overduelist):
+        logger.info("overdue "+str(overduelist))
+        while len(scheduledrunners) < 5:
+            scraperoverdue = overduelist.pop(0)
+            scrapername = scraperoverdue["short_name"]
+            if scrapername in scheduledrunners:
+                continue
+            if scrapername in self.guidclientmap:
+                continue
+
+                # fabricate a new client (not actually connected to a socket or made by the factory)
+            sclient = RunnerProtocol()
+            sclient.factory = self
+            sclient.guid = scraperoverdue.get('guid', '')
+            sclient.username = '*TWISTER*'
+            sclient.userrealname = sclient.username
+            sclient.scrapername = scrapername
+            sclient.clienttype = 'scheduledrun'
+            sclient.originalrev = scraperoverdue.get('rev', '')
+            sclient.savecode_authorized = False
+
+            code = scraperoverdue.get('code', '')
+            language = scraperoverdue.get('language', '')
+            urlquery = ""
+
+            scheduledrunners[scrapername] = sclient
+            self.clientConnectionMade(sclient)
+            self.clientConnectionRegistered(sclient)  
+
+            logger.info("starting off scheduled client: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber)) 
+            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, language, urlquery, sclient.username, code, sclient)
+            self.notifyMonitoringClients(sclient)
+
+
+    def scheduledruncomplete(self, sclient, processsucceeded):
+        self.clientConnectionLost(sclient)
+        del scheduledrunners[sclient.scrapername]
+            # do some post-back to a run object connection
+# need to then do something special when the process running is complete
+
+
     # able to send out just a change for on a particular client in umlstatuschanges, or the full state of what's happening as umlstatusdata if required
     def notifyMonitoringClients(self, cclient):  # cclient is the one whose state has changed (it can be normal editor or a umlmonitoring case)
         Dtclients = len(self.connectedclients) + len(self.rpcrunningclients) + len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
