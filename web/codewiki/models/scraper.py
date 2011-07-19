@@ -61,7 +61,8 @@ def scrapers_overdue():
     qselect["secondsto_nextrun"] = "IF(run_interval>0, IF(last_run is not null, TIMESTAMPDIFF(SECOND, NOW(), DATE_ADD(last_run, INTERVAL run_interval SECOND)), 0), 99999)"
     qselect["overdue_proportion"] = "IF(run_interval>0, IF(last_run is not null, TIMESTAMPDIFF(SECOND, NOW(), DATE_ADD(last_run, INTERVAL run_interval SECOND))/run_interval, -1.0), 1.0)"
     qwhere = ["(last_run is null or DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW())"]
-    #qwhere = [ ]
+        # uncomment this line if you want everything to be overdue
+    #qwhere = [ ]  
     scrapers = scrapers.extra(select=qselect, where=qwhere)
     scrapers = scrapers.order_by('overdue_proportion')
     return scrapers

@@ -325,10 +325,43 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
             self.runcode(parsed_data)
         
+        elif command == "umlcontrol":
+                # allows monitoring client to remotely kill processes
+            if self.clienttype != "umlmonitoring":
+                logger.error("umlcontrol called by non-monitoring client")
+                return
+                
+            logger.info("umlcontrol %s" % ([parsed_data]))
+
+            subcommand = parsed_data.get("subcommand")
+            if subcommand == "killscraper":
+                scrapername = parsed_data["scrapername"]
+                for eoos in self.factory.guidclientmap.values():   # would be better if it was by scrapername instead of guid
+                    if eoos.scrapername == scrapername:
+                        for usereditor in eoos.usereditormap.values():
+                            for uclient in usereditor.userclients:
+                                if uclient.processrunning:
+                                    logger.info("umlcontrol killing run on client# %d %s" % (uclient.clientnumber, scrapername))
+                                    uclient.kill_run()
+
+            if subcommand == "killallscheduled":
+                for client in self.factory.scheduledrunners.values():
+                    if client.processrunning:
+                       logger.info("umlcontrol killing run on client# %d %s" % (client.clientnumber, client.scrapername))
+                       client.kill_run()
+                    else:
+                        logger.info("umlcontrol client# %d %s wasn't running" % (client.clientnumber, client.scrapername))
+                       
+            if "maxscheduledscrapers" in parsed_data:
+                self.factory.maxscheduledscrapers = parsed_data["maxscheduledscrapers"]
+                self.factory.notifyMonitoringClients(None)
+
         elif command == "kill":
             if self.processrunning:
                 self.kill_run()
-            elif self.username and self.guid:   # allows the killing of a process in another open window by same user
+                
+                # allows the killing of a process in another open window by same user
+            elif self.username and self.guid:   
                 usereditor = self.guidclienteditors.usereditormap[self.username]
                 for client in usereditor.userclients:
                     if client.processrunning:
@@ -584,18 +617,21 @@ class RunnerFactory(protocol.ServerFactory):
         self.scheduledrunners = { } # maps from short_name to client objects (that are also put into guidclientmap)
         
         self.guidclientmap = { }  # maps from short_name to EditorsOnOneScraper objects
-        
+
+        self.maxscheduledscrapers = 5
+        self.notifiedmaxscheduledscrapers = self.maxscheduledscrapers
+
         # set the visible heartbeat going which is used to call back and look up the schedulers
-        # *** UNCOMMENT THIS to enable new type of scheduling
+        #*** UNCOMMENT THIS to enable new type of scheduling
         #self.lc = task.LoopingCall(self.requestoverduescrapers)
         #self.lc.start(30)
-
+        
     #
     # system of functions for fetching the overdue scrapers and knocking them out
     #
     def requestoverduescrapers(self):
         logger.info("requestoverduescrapers")
-        uget = {"format":"jsondict", "searchquery":"*OVERDUE*", "maxrows":5}
+        uget = {"format":"jsondict", "searchquery":"*OVERDUE*", "maxrows":self.maxscheduledscrapers+5}
         url = urlparse.urljoin(config.get("twister", "apiurl"), '/api/1.0/scraper/search')
         d = agent.request('GET', "%s?%s" % (url, urllib.urlencode(uget)))
         d.addCallbacks(self.requestoverduescrapersResponse, self.requestoverduescrapersFailure)
@@ -610,7 +646,7 @@ class RunnerFactory(protocol.ServerFactory):
 
     def requestoverduescrapersAction(self, overduelist):
         logger.info("overdue "+str([od.get("short_name")  for od in overduelist]))
-        while len(self.scheduledrunners) < 5 and overduelist:
+        while len(self.scheduledrunners) < self.maxscheduledscrapers and overduelist:
             scraperoverdue = overduelist.pop(0)
             scrapername = scraperoverdue["short_name"]
             if scrapername in self.scheduledrunners:
@@ -660,10 +696,15 @@ class RunnerFactory(protocol.ServerFactory):
         if len(self.clients) != Dtclients:
             logger.error("Miscount of clients %d %d" % (len(self.clients), Dtclients))
         
-        # both of these are in the same format and read the same, but changes are shorter
+        # both of these are in the same format and read the same, but umlstatuschanges are shorter
         umlstatuschanges = {'message_type':"umlchanges", "nowtime":jstime(datetime.datetime.now()) }; 
-        if cclient.clienttype == "umlmonitoring":
+        if self.notifiedmaxscheduledscrapers != self.maxscheduledscrapers:
+            self.notifiedmaxscheduledscrapers = self.maxscheduledscrapers
+            umlstatuschanges["maxscheduledscrapers"] = self.maxscheduledscrapers
+
+        if cclient and cclient.clienttype == "umlmonitoring":
              umlstatusdata = {'message_type':"umlstatus", "nowtime":umlstatuschanges["nowtime"]}
+             umlstatusdata["maxscheduledscrapers"] = self.maxscheduledscrapers
         else:
              umlstatusdata = None
         
@@ -680,13 +721,13 @@ class RunnerFactory(protocol.ServerFactory):
         #umlmonitoringusers = set([ client.cchatname  for client in self.umlmonitoringclients ])
         if umlstatusdata:
             umlstatusdata["umlmonitoringusers"] = [ {"chatname":chatname, "present":True, "lasttouch":jstime(chatnamelasttouch) }  for chatname, chatnamelasttouch in umlmonitoringusers.items() ]
-        if cclient.clienttype == "umlmonitoring":
+        if cclient and cclient.clienttype == "umlmonitoring":
             umlstatuschanges["umlmonitoringusers"] = [ {"chatname":cclient.cchatname, "present":(cclient.cchatname in umlmonitoringusers), "lasttouch":jstime(cclient.clientlasttouch) } ]
 
         # rpcrunningclients
         if umlstatusdata:
             umlstatusdata["rpcrunningclients"] = [ {"clientnumber":client.clientnumber, "present":True, "chatname":client.chatname, "scrapername":client.scrapername, "lasttouch":jstime(client.clientlasttouch)}  for client in self.rpcrunningclients ]
-        if cclient.clienttype == "rpcrunning":
+        if cclient and cclient.clienttype == "rpcrunning":
             umlstatuschanges["rpcrunningclients"] = [ {"chatname":cclient.clientnumber, "present":(cclient in self.rpcrunningclients), "chatname":cclient.cchatname, "scrapername":cclient.scrapername, "lasttouch":jstime(cclient.clientlasttouch) } ]
 
         # handle draft scraper users and the run states (one for each user, though there may be multiple draft scrapers for them)
@@ -695,7 +736,7 @@ class RunnerFactory(protocol.ServerFactory):
             draftscraperusers[client.cchatname] = bool(client.processrunning) or draftscraperusers.get(client.cchatname, False)
         if umlstatusdata:
             umlstatusdata["draftscraperusers"] = [ {"chatname":chatname, "present":True, "running":crunning }  for chatname, crunning in draftscraperusers.items() ]
-        if not cclient.clienttype == "umlmonitoring" and not cclient.guid:
+        if cclient and not cclient.clienttype == "umlmonitoring" and not cclient.guid:
             umlstatuschanges["draftscraperusers"] = [ { "chatname":cclient.cchatname, "present":(cclient.cchatname in draftscraperusers), "running":draftscraperusers.get(cclient.cchatname, False) } ]
 
         # the complexity here reflects the complexity of the structure.  the running flag could be set on any one of the clients
@@ -732,7 +773,7 @@ class RunnerFactory(protocol.ServerFactory):
             for eoos in self.guidclientmap.values():
                 umlstatusdata["scraperentries"].append(scraperentry(eoos, None))
                 
-        if cclient.clienttype in ["editing", "scheduledrun"] and cclient.guid:
+        if cclient and cclient.clienttype in ["editing", "scheduledrun"] and cclient.guid:
             if cclient.guid in self.guidclientmap:
                 umlstatuschanges["scraperentries"] = [ scraperentry(self.guidclientmap[cclient.guid], cclient) ]
             else:
@@ -742,7 +783,7 @@ class RunnerFactory(protocol.ServerFactory):
         #print "\numlstatus", umlstatusdata
         
         # new monitoring client
-        if cclient.clienttype == "umlmonitoring":
+        if cclient and cclient.clienttype == "umlmonitoring":
             cclient.writejson(umlstatusdata) 
         
         # send only updates to current clients
