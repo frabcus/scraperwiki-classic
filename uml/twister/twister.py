@@ -768,9 +768,11 @@ class RunnerFactory(protocol.ServerFactory):
 
     def clientConnectionRegistered(self, client):
         # Can't remove from the list if it isn't in there so we need to check
-        if client in self.connectedclients:
+        try:
             self.connectedclients.remove(client)
-        
+        except:
+            logging.error('Failed to remove client %s as it is not in the connectedclient list' % client)
+            
         if client.username:
             client.chatname = client.userrealname or client.username
         elif client.clienttype == "editing":
