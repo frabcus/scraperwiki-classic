@@ -155,7 +155,7 @@ $(document).ready(function() {
 
     function getIDfromCChatname(cchatname)
     {
-        vv = cchatname.split("|"); 
+        vv = cchatname.replace(/\*/g, "STAR").split("|"); 
         if (vv[0])
             return vv[0]; 
         return vv[1]; // anonymous type

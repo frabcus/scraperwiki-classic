@@ -54,11 +54,12 @@ except: import simplejson as json
 from twisted.internet import protocol, utils, reactor, task
 
 # for calling back to the scrapers/twister/status
-from twisted.web.client import Agent
+from twisted.web.client import Agent, ResponseDone
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import succeed, Deferred
 from twisted.internet.defer import Deferred
+from twisted.internet.error import ProcessDone
 
 agent = Agent(reactor)
 
@@ -105,12 +106,9 @@ class spawnRunner(protocol.ProcessProtocol):
         if self.client.clienttype == "editing":
             self.client.factory.notifyMonitoringClients(self.client)
         elif self.client.clienttype == "scheduledrun":
-            self.client.factory.scheduledruncomplete(client, reason.type == 'twisted.internet.error.ProcessDone')
+            self.client.factory.scheduledruncomplete(self.client, reason.type == ProcessDone)
 
-        if reason.type == 'twisted.internet.error.ProcessDone':
-            logger.debug("run process ended %s" % reason)
-        else:
-            logger.debug("run process ended ok")
+        logger.debug("run process %s ended client# %d %s" % (self.client.clienttype, self.client.clientnumber, str([reason])))
 
 
 
@@ -387,8 +385,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
     def writeline(self, line):
         if self.clienttype != "scheduledrun":
             self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together
-        else:
-            logger.debug("should send back to run object: "+line)
+        #else:
+        #    logger.debug("should send back to run object: "+line)
             
     def writejson(self, data):
         self.writeline(json.dumps(data))
@@ -425,7 +423,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             pass
 
     
-            # this more recently can be called from stimulate_run from django
+            # this more recently can be called from stimulate_run from django (many of these parameters could be in the client)
     def runcode(self, parsed_data):
         code = parsed_data.get('code', '')
         guid = parsed_data.get('guid', '')
@@ -554,11 +552,11 @@ class requestoverduescrapersReceiver(protocol.Protocol):
         self.rbuffer.append(bytes)
         
     def connectionLost(self, reason):
-        if reason.type == 'twisted.web.client.ResponseDone':
+        if reason.type == ResponseDone:
             jdata = json.loads("".join(self.rbuffer))
             self.factory.requestoverduescrapersAction(jdata)
         else:
-            logger.info("nope "+reason.getErrorMessage())
+            logger.info("nope "+str([reason.getErrorMessage(), reason.type]))
         self.finished.callback(None)
 
 
@@ -581,9 +579,9 @@ class RunnerFactory(protocol.ServerFactory):
         
         self.guidclientmap = { }  # maps from short_name to EditorsOnOneScraper objects
         
-        # set the visible heartbeat goingthere
-#        self.lc = task.LoopingCall(self.requestoverduescrapers)
-#        self.lc.start(10)
+        # set the visible heartbeat going which is used to call back and look up the schedulers
+        #self.lc = task.LoopingCall(self.requestoverduescrapers)
+        #self.lc.start(30)
 
     #
     # system of functions for fetching the overdue scrapers and knocking them out
@@ -604,42 +602,45 @@ class RunnerFactory(protocol.ServerFactory):
         return finished
 
     def requestoverduescrapersAction(self, overduelist):
-        logger.info("overdue "+str(overduelist))
-        while len(scheduledrunners) < 5:
+        logger.info("overdue "+str([od.get("short_name")  for od in overduelist]))
+        while len(self.scheduledrunners) < 5:
             scraperoverdue = overduelist.pop(0)
             scrapername = scraperoverdue["short_name"]
-            if scrapername in scheduledrunners:
+            if scrapername in self.scheduledrunners:
                 continue
-            if scrapername in self.guidclientmap:
-                continue
+            
+                    # avoids scheduling cases where someone is editing
+            #if scrapername in self.guidclientmap:
+            #    continue
 
                 # fabricate a new client (not actually connected to a socket or made by the factory)
             sclient = RunnerProtocol()
             sclient.factory = self
             sclient.guid = scraperoverdue.get('guid', '')
-            sclient.username = '*TWISTER*'
+            sclient.username = '*SCHEDULED*'
             sclient.userrealname = sclient.username
             sclient.scrapername = scrapername
             sclient.clienttype = 'scheduledrun'
             sclient.originalrev = scraperoverdue.get('rev', '')
             sclient.savecode_authorized = False
+            sclient.scraperlanguage = scraperoverdue.get('language', '')
 
             code = scraperoverdue.get('code', '')
-            language = scraperoverdue.get('language', '')
             urlquery = ""
 
-            scheduledrunners[scrapername] = sclient
+            self.scheduledrunners[scrapername] = sclient
             self.clientConnectionMade(sclient)
             self.clientConnectionRegistered(sclient)  
 
-            logger.info("starting off scheduled client: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber)) 
-            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, language, urlquery, sclient.username, code, sclient)
+            logger.info("starting off scheduled client: %s %s client# %d" % (sclient.cchatname, sclient.scrapername, sclient.clientnumber)) 
+            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient)
             self.notifyMonitoringClients(sclient)
 
 
     def scheduledruncomplete(self, sclient, processsucceeded):
+        logger.debug("scheduledruncomplete %d" % sclient.clientnumber)
         self.clientConnectionLost(sclient)
-        del scheduledrunners[sclient.scrapername]
+        del self.scheduledrunners[sclient.scrapername]
             # do some post-back to a run object connection
 # need to then do something special when the process running is complete
 
@@ -722,7 +723,7 @@ class RunnerFactory(protocol.ServerFactory):
             for eoos in self.guidclientmap.values():
                 umlstatusdata["scraperentries"].append(scraperentry(eoos, None))
                 
-        if cclient.clienttype == "editing" and cclient.guid:
+        if cclient.clienttype in ["editing", "scheduledrun"] and cclient.guid:
             if cclient.guid in self.guidclientmap:
                 umlstatuschanges["scraperentries"] = [ scraperentry(self.guidclientmap[cclient.guid], cclient) ]
             else:
@@ -826,6 +827,7 @@ class RunnerFactory(protocol.ServerFactory):
                 logger.error("No place to remove client %d" % client.clientnumber)
             
         elif (client.guid in self.guidclientmap):   
+            logger.debug("removing client %d" % client.clientnumber)
             if not self.guidclientmap[client.guid].RemoveClient(client):
                 del self.guidclientmap[client.guid]
             else:
