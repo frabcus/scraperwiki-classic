@@ -13,10 +13,15 @@ import subprocess
 import re
 import base64
 import cgi
+import ConfigParser
+import datetime
+
 
 try:                import json
 except ImportError: import simplejson as json
 
+config = ConfigParser.ConfigParser()
+config.readfp(open(settings.CONFIGFILE))
 
 def MakeRunner(request, scraper, code):
     runner_path = "%s/runner.py" % settings.FIREBOX_PATH
@@ -229,3 +234,83 @@ def testactiveumls(n):
         result.append('\n'.join(lns))
     return result
 
+def twistermakesrunevent(request):
+    try:
+        return Dtwistermakesrunevent(request)
+    except Exception, e:
+        print e
+    return HttpResponse("no done")
+        
+
+def Dtwistermakesrunevent(request):
+    if request.POST.get("django_key") != config.get('twister', 'djangokey'):
+        return HttpResponse("no access")
+    run_id = request.POST.get("run_id")
+    if not run_id:
+        return HttpResponse("bad run_id")
+    matchingevents = models.ScraperRunEvent.objects.filter(run_id=run_id)
+    if not matchingevents:
+        event = models.ScraperRunEvent()
+        event.scraper = models.Scraper.objects.get(short_name=request.POST.get("scrapername"))
+        clientnumber = request.POST.get("clientnumber")  # would be used to kill it
+        #event.pid = "client# "+ request.POST.get("clientnumber") # only applies when this runner is active
+        event.pid = (100000000+int(clientnumber)) # only applies when this runner is active
+        event.run_id = run_id               # set by execution status
+        event.run_started = datetime.datetime.now()   # reset by execution status
+    else:
+        event = matchingevents[0]
+
+    
+    # standard updates
+    event.output = request.POST.get("output")
+    event.records_produced = int(request.POST.get("records_produced"))
+    event.pages_scraped = int(request.POST.get("pages_scraped"))
+    event.first_url_scraped = request.POST.get("first_url_scraped", "")
+    event.exception_message = request.POST.get("exception_message", "")
+    event.run_ended = datetime.datetime.now()   # last update time
+
+    # run finished case
+    if request.POST.get("exitstatus"):
+        event.pid = -1  # disable the running state of the event
+        
+        event.scraper.status = request.POST.get("exitstatus") == "exceptionmessage" and "sick" or "ok"
+        event.scraper.last_run = datetime.datetime.now()
+        event.scraper.update_meta()
+        event.scraper.save()
+
+        domainscrapes = json.loads(request.POST.get("domainscrapes"))
+        for netloc, vals in domainscrapes.items():
+            domainscrape = DomainScrape(scraper_run_event=event, domain=netloc)
+            domainscrape.pages_scraped = vals["pages_scraped"]
+            domainscrape.bytes_scraped = vals["bytes_scraped"]
+            domainscrape.save()
+
+    event.save()
+
+    # Send email if this is an email scraper
+    emailers = event.scraper.users.filter(usercoderole__role='email')
+    if emailers.count() > 0:
+        subject, message = getemailtext(event)
+        if scraper.status == 'ok':
+            if message:  # no email if blank
+                for user in emailers:
+                    send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[user.email], fail_silently=True)
+        else:
+            mail_admins(subject="SICK EMAILER: %s" % subject, message=message)
+
+    return HttpResponse("done")
+
+
+    # maybe detect the subject title here
+def getemailtext(event):
+    message = event.output
+    message = re.sub("(?:^|\n)EXECUTIONSTATUS:.*", "", message).strip()
+    
+    msubject = re.search("(?:^|\n)EMAILSUBJECT:(.*)", message)
+    if msubject:
+        subject = msubject.group(1)    # snip out the subject
+        message = "%s%s" % (message[:msubject.start(0)], message[msubject.end(0):])
+    else:
+        subject = 'Your ScraperWiki Email - %s' % event.scraper.short_name
+    
+    return subject, message

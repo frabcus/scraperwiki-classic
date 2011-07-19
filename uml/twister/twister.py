@@ -61,6 +61,8 @@ from twisted.internet.defer import succeed, Deferred
 from twisted.internet.defer import Deferred
 from twisted.internet.error import ProcessDone
 
+from twisterscheduledruns import ScheduledRunMessageLoopHandler
+
 agent = Agent(reactor)
 
 def jstime(dt):
@@ -106,7 +108,8 @@ class spawnRunner(protocol.ProcessProtocol):
         if self.client.clienttype == "editing":
             self.client.factory.notifyMonitoringClients(self.client)
         elif self.client.clienttype == "scheduledrun":
-            self.client.factory.scheduledruncomplete(self.client, reason.type == ProcessDone)
+            self.client.scheduledrunmessageloophandler.schedulecompleted()
+            self.client.factory.scheduledruncomplete(self.client, reason.type==ProcessDone)
 
         logger.debug("run process %s ended client# %d %s" % (self.client.clienttype, self.client.clientnumber, str([reason])))
 
@@ -385,8 +388,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
     def writeline(self, line):
         if self.clienttype != "scheduledrun":
             self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together
-        #else:
-        #    logger.debug("should send back to run object: "+line)
+        else:
+            self.scheduledrunmessageloophandler.receiveline(line)
             
     def writejson(self, data):
         self.writeline(json.dumps(data))
@@ -553,10 +556,13 @@ class requestoverduescrapersReceiver(protocol.Protocol):
         
     def connectionLost(self, reason):
         if reason.type == ResponseDone:
-            jdata = json.loads("".join(self.rbuffer))
-            self.factory.requestoverduescrapersAction(jdata)
+            try:
+                jdata = json.loads("".join(self.rbuffer))
+                self.factory.requestoverduescrapersAction(jdata)
+            except ValueError:
+                logger.warning("request overdue bad json: "+str(self.rbuffer))
         else:
-            logger.info("nope "+str([reason.getErrorMessage(), reason.type]))
+            logger.warning("nope "+str([reason.getErrorMessage(), reason.type]))
         self.finished.callback(None)
 
 
@@ -580,6 +586,7 @@ class RunnerFactory(protocol.ServerFactory):
         self.guidclientmap = { }  # maps from short_name to EditorsOnOneScraper objects
         
         # set the visible heartbeat going which is used to call back and look up the schedulers
+        # *** UNCOMMENT THIS to enable new type of scheduling
         #self.lc = task.LoopingCall(self.requestoverduescrapers)
         #self.lc.start(30)
 
@@ -589,7 +596,7 @@ class RunnerFactory(protocol.ServerFactory):
     def requestoverduescrapers(self):
         logger.info("requestoverduescrapers")
         uget = {"format":"jsondict", "searchquery":"*OVERDUE*", "maxrows":5}
-        url = urlparse.urljoin(apiurl, '/api/1.0/scraper/search')
+        url = urlparse.urljoin(config.get("twister", "apiurl"), '/api/1.0/scraper/search')
         d = agent.request('GET', "%s?%s" % (url, urllib.urlencode(uget)))
         d.addCallbacks(self.requestoverduescrapersResponse, self.requestoverduescrapersFailure)
 
@@ -603,15 +610,15 @@ class RunnerFactory(protocol.ServerFactory):
 
     def requestoverduescrapersAction(self, overduelist):
         logger.info("overdue "+str([od.get("short_name")  for od in overduelist]))
-        while len(self.scheduledrunners) < 5:
+        while len(self.scheduledrunners) < 5 and overduelist:
             scraperoverdue = overduelist.pop(0)
             scrapername = scraperoverdue["short_name"]
             if scrapername in self.scheduledrunners:
                 continue
             
                     # avoids scheduling cases where someone is editing
-            #if scrapername in self.guidclientmap:
-            #    continue
+            if scrapername in self.guidclientmap:
+                continue
 
                 # fabricate a new client (not actually connected to a socket or made by the factory)
             sclient = RunnerProtocol()
@@ -620,16 +627,18 @@ class RunnerFactory(protocol.ServerFactory):
             sclient.username = '*SCHEDULED*'
             sclient.userrealname = sclient.username
             sclient.scrapername = scrapername
-            sclient.clienttype = 'scheduledrun'
+            sclient.clienttype = "scheduledrun"
             sclient.originalrev = scraperoverdue.get('rev', '')
             sclient.savecode_authorized = False
             sclient.scraperlanguage = scraperoverdue.get('language', '')
-
             code = scraperoverdue.get('code', '')
             urlquery = ""
 
+            self.clientConnectionMade(sclient)  # allocates the client number
             self.scheduledrunners[scrapername] = sclient
-            self.clientConnectionMade(sclient)
+            djangokey = config.get("twister", "djangokey")
+            djangourl = config.get("twister", "djangourl")
+            sclient.scheduledrunmessageloophandler = ScheduledRunMessageLoopHandler(sclient, logging, djangokey, djangourl, agent)
             self.clientConnectionRegistered(sclient)  
 
             logger.info("starting off scheduled client: %s %s client# %d" % (sclient.cchatname, sclient.scrapername, sclient.clientnumber)) 
