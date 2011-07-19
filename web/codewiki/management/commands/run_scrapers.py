@@ -63,7 +63,9 @@ def GetUMLstatuses():
             stat, ereason = None, e.reason
         except TypeError:
             stat, ereason = urllib2.urlopen(umlurl + "/Status").read(), None  # no timeout field exists in Python2.5
-        
+        except:
+            stat,ereason = None, 'Bad connection'
+            
         if stat:
             result[umlname] = { "runidnames":re.findall("runID=(.*?)&scrapername=(.*)\n", stat) }
         else:

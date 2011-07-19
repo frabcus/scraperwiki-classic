@@ -128,19 +128,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         # On OSX, they come out as python/ruby etc.
         # XXX todo, get PHP working on OSX
         pid = None
-        
-        # Temporarily resorting back to lsof
-        #pid = self.find_process_for_port( lport )
-        
-#        if pid is None:
-#            try:
-#                lsof = subprocess.Popen([ 'lsof','-i', ':%s' % lport ], stdout = subprocess.PIPE).communicate()[0]
-#                line = lsof.split('\n')[1]
-#                pid = int(line.split(' ')[1])
-#            except:
-#
-#                logging.debug('Failed to find pid with lsof -i')
-                
         if pid is None:
             p    = re.compile ('(?:exec.[a-z]+|[Pp]ython|[Rr]uby) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
             lsof = subprocess.Popen([ 'lsof', '-n', '-P', '-i' ], stdout = subprocess.PIPE).communicate()[0]
@@ -149,8 +136,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
                 if m:
                     pid = int(m.group(1))
                     break
-        else:
-            logging.debug('Found process using ss')            
 
         if pid:
             runid = pidstorunids.get(pid)

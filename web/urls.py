@@ -39,7 +39,7 @@ urlpatterns = patterns('',
     url(r'^captcha/', include('captcha.urls')),
     
     # allows direct viewing of the django tables
-    url(r'^admin/(.*)', admin.site.root, name="admin"),
+    url(r'^admin/', include(admin.site.urls)),
 
     #paypal
     (r'^paypal/notifications/56db6e2700d04e38a5d/', include('paypal.standard.ipn.urls')),
