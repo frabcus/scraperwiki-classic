@@ -26,6 +26,10 @@ div#rpcrunningclients li {  border: thin purple solid; display:inline;  }
 ul#scraperentries {  display:block; text-align:left }
 li.scraper {  border: thin red solid; display:block; }
 
+a.killrunning { display:none }
+li.bkrunning a.killrunning, a#killallscheduled { display:inline; background-color: #f08a38; color: #000; border-radius: 2px; -moz-border-radius: 2px; border: solid 1px #bf6312; cursor: pointer; }
+
+
 li.scraper a.scrapername { width:100px; background-color:blue; color:white; display:inline-block; }
 ul.scraperusers {  display:inline; vertical-align:top; height:100%; border:0; padding:0; margin:0 }
 li.luser {  border: thin black solid; display:inline;  }
@@ -63,7 +67,8 @@ span.desc { background-color:black; color:white; width:100px; display:inline-blo
     <script>Orbited.settings.streaming = false</script>
 
 <script type="text/javascript">
-$(document).ready(function() {
+$(document).ready(function() 
+{
     var bConnected = false; 
     var username = $('#username').val(); 
     var userrealname = $('#userrealname').val(); 
@@ -141,6 +146,7 @@ $(document).ready(function() {
         }
     }
 
+
     function receiveRecordFromQueue() 
     {
         var jdata = undefined; 
@@ -182,6 +188,7 @@ $(document).ready(function() {
     {
         return new Date(parseInt(sdatetime)); 
     }
+
 
     //read data back from twisted
     function receiveRecord(jdata) 
@@ -259,7 +266,7 @@ $(document).ready(function() {
                 var idchatname = "DRA_" + getIDfromCChatname(chatname); 
                 var present = jdata.draftscraperusers[i].present; 
                 var running = jdata.draftscraperusers[i].running; 
-                ele = "#monitoroutput #draftscraperusers ul li#"+idchatname; 
+                var ele = "#monitoroutput #draftscraperusers ul li#"+idchatname; 
                 if (present)
                 {
                     if (!$(ele).attr("id"))
@@ -286,12 +293,24 @@ $(document).ready(function() {
                 var running = scraperentry.running; 
                 var scraperusers = scraperentry.scraperusers; 
 
-                idscrapername = "SCR_" + scrapername.replace(".", "--"); 
-                ele = "#monitoroutput ul#scraperentries li#"+idscrapername; 
+                var idscrapername = "SCR_" + scrapername.replace(".", "--"); 
+                var ele = "#monitoroutput ul#scraperentries li#"+idscrapername; 
                 if (scraperpresent)
                 {
                     if (!$(ele).attr("id"))
-                        $("#monitoroutput ul#scraperentries").append("<li id=\""+idscrapername+"\" class=\"scraper\">"+getScraperfromScrapername(scrapername)+" <ul class=\"scraperusers\"></ul></li>"); 
+                    {
+                        var lil = ['<li id="', idscrapername, '" class="scraper">' ]; 
+                        if (isstaff)
+                            lil.push('<a class="killrunning" title="Kill running scraper">X</a>'); 
+                        lil.push(getScraperfromScrapername(scrapername), ' <ul class="scraperusers"></ul></li>'); 
+                        $("#monitoroutput ul#scraperentries").append(lil.join("")); 
+                        $("#monitoroutput ul#scraperentries a.killrunning").click(function() 
+                        {
+                            var scrapername = $(this).parent().find("a.scrapername").text(); 
+                            sendjson({command:'umlcontrol', subcommand:'killscraper', scrapername:scrapername}); 
+                            $(this).css("background-color", "blue"); 
+                        }); 
+                    }
                     if (running)
                         $(ele).addClass("bkrunning"); 
                     else
@@ -346,6 +365,8 @@ $(document).ready(function() {
             window.setTimeout(function() { $(hidcchatname).removeClass("bktyping") }, 250);
             $(hidcchatname + " .lasttouchdiff .lasttouch").text(String(servernowtime.getTime())); 
         }
+        if (jdata.maxscheduledscrapers)
+            $("#maxscheduledscrapers input").val(jdata.maxscheduledscrapers); 
 
         // update all the timeagos
         $(".lasttouchdiff .lasttouch").each( function(index) 
@@ -359,11 +380,12 @@ $(document).ready(function() {
     //send a message to the server
     function sendjson(jdata) 
     {
-        try {
+        try 
+        {
             conn.send($.toJSON(jdata));  
-        } catch(err) {
-            alert("Send error: " + $.toJSON(err)); 
         }
+        catch(err) 
+        { alert("Send error: " + $.toJSON(err)); }
     }
 
 
@@ -388,9 +410,31 @@ $(document).ready(function() {
     }
     refreshImagesInit(); 
 
-    $("#showmonitoradmin").click(function(i) { 
+    $("#showmonitoradmin").click(function(i) 
+    { 
         $("#monitoradmin").toggle(500);
     });
+    
+    if (isstaff)
+    {
+        $("a#killallscheduled").click(function()
+        {
+            sendjson({command:'umlcontrol', subcommand:'killallscheduled'}); 
+            $(this).css("background-color", "blue"); 
+        }); 
+        $("#maxscheduledscrapers input").bind('keypress', function(eventObject) 
+        {
+            var key = (eventObject.charCode ? eventObject.charCode : eventObject.keyCode ? eventObject.keyCode : 0);
+            var target = eventObject.target.tagName.toLowerCase();
+            if (key === 13 && target === 'input') 
+            {
+                eventObject.preventDefault();
+                sendjson({command:'umlcontrol', maxscheduledscrapers:parseInt($("#maxscheduledscrapers input").val()) }); 
+                return false; 
+            }
+            return true; 
+        });
+    }
 }); 
 </script>
 {% endblock %}
@@ -423,6 +467,11 @@ $(document).ready(function() {
         <ul id="scraperentries"></ul>
         <div id="rpcrunningclients"><span class="desc">RPCrunning:</span> <ul></ul></div>
         <div id="monitoringusers"><span class="desc">Monitoring:</span> <ul></ul></div>
+        <div id="maxscheduledscrapers">
+            {% if user.is_staff %}<a id="killallscheduled" title="Kill all scheduled runs">XX</a>{% endif %}
+            <label>Max scheduled scrapers</label>
+            <input type="text" value="0">
+        </div>
     </div>
 
     <div id="connectionstatusdiv"><span id="connectionstatus">...</span> <strong>Server time:</strong> <span id="servernowtime"></span></div>
