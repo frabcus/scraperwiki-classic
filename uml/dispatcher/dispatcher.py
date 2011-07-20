@@ -104,6 +104,8 @@ class UMLList(object):
                 uml.add_runid(scraperstatus["runID"])
                 runningscrapers[scraperstatus["runID"]] = scraperstatus
                 break
+            else:
+                uml = None
             
         self.UMLLock.release()
         return uml
