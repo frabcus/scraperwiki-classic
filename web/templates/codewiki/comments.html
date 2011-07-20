@@ -20,6 +20,7 @@
    {% show_gravatar user 'medium' %}
    <div>
     	<textarea name="comment" id="id_comment" rows="3"></textarea>
+		{% csrf_token %}
     	{{ form.content_type }} 
     	{{ form.object_pk }} 
     	{{ form.timestamp }} 

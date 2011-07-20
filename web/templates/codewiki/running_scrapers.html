@@ -243,8 +243,6 @@ $(document).ready(function()
                     if (!$(ele).attr("id"))
                     {
                         var lli = [ '<li id="', idclientnumber, '" class="lscraper">', getScraperfromScrapername(scrapername), ' ' ]; 
-                        if (chatname != "|Anonymous")
-                            lli.push('(', getUserfromCChatname(chatname), ') '); 
                         lli.push(getNewDatetimeSpan(lasttouch), '</li>'); 
                         $("#monitoroutput #rpcrunningclients ul").append(lli.join("")); 
                     }
