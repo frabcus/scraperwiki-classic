@@ -728,7 +728,7 @@ class RunnerFactory(protocol.ServerFactory):
         if umlstatusdata:
             umlstatusdata["rpcrunningclients"] = [ {"clientnumber":client.clientnumber, "present":True, "chatname":client.chatname, "scrapername":client.scrapername, "lasttouch":jstime(client.clientlasttouch)}  for client in self.rpcrunningclients ]
         if cclient and cclient.clienttype == "rpcrunning":
-            umlstatuschanges["rpcrunningclients"] = [ {"chatname":cclient.clientnumber, "present":(cclient in self.rpcrunningclients), "chatname":cclient.cchatname, "scrapername":cclient.scrapername, "lasttouch":jstime(cclient.clientlasttouch) } ]
+            umlstatuschanges["rpcrunningclients"] = [ {"clientnumber":cclient.clientnumber, "present":(cclient in self.rpcrunningclients), "chatname":cclient.cchatname, "scrapername":cclient.scrapername, "lasttouch":jstime(cclient.clientlasttouch) } ]
 
         # handle draft scraper users and the run states (one for each user, though there may be multiple draft scrapers for them)
         draftscraperusers = { }  # chatname -> running state
