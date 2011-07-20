@@ -219,6 +219,9 @@ class ScraperRunEvent(models.Model):
         app_label = 'codewiki'
 
 class DomainScrape(models.Model):
+    """
+    Record of a domain that was scraped by a run event
+    """
     scraper_run_event = models.ForeignKey(ScraperRunEvent)
     domain            = models.CharField(max_length=128)
     bytes_scraped     = models.IntegerField(default=0)
