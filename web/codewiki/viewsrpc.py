@@ -257,6 +257,12 @@ def Dtwistermakesrunevent(request):
         event.pid = (100000000+int(clientnumber)) # only applies when this runner is active
         event.run_id = run_id               # set by execution status
         event.run_started = datetime.datetime.now()   # reset by execution status
+
+        # set the last_run field so we don't select this one again for the overdue scrapers
+        # this field should't exist because we should use the runobjects isntead, 
+        # where we can work from a far richer report on what has been happening.
+        event.scraper.last_run = datetime.datetime.now()
+        event.scraper.save()
     else:
         event = matchingevents[0]
 
