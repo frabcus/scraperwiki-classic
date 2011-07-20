@@ -1,4 +1,6 @@
 
+
+
 $(document).ready(function() {
 
     // editor window dimensions
@@ -25,27 +27,21 @@ $(document).ready(function() {
     if (window.location.hash == "#plain")
         texteditor = "plain"; 
     
-    var lastRev         = $('#originalrev').val(); 
-    var lastRevDateEpoch= ($('#originalrevdateepoch').val() ? parseInt($('#originalrevdateepoch').val()) : 0); 
+    var lastRev = $('#originalrev').val(); 
+    var lastRevDateEpoch = ($('#originalrevdateepoch').val() ? parseInt($('#originalrevdateepoch').val()) : 0); 
     var lastRevUserName = $('#originalrevusername').val(); 
     var lastRevUserRealName = $('#originalrevuserrealname').val(); 
     var rollbackRev = $('#rollback_rev').val(); 
-    if (rollbackRev == "") {
-        rollbackRev = null; 
-    } else {
-        rollbackRev = parseInt(rollbackRev);
-    }
 
-    var lastRevPrefix   = "Last edited";
-    if (rollbackRev != null) {
-        lastRevPrefix   = "Rollback preview of ";
-    }
+    var lastRevPrefix = "Last edited";
+    if (rollbackRev != "") 
+        lastRevPrefix = "Rollback preview of ";
 
     var lastupdaterevcall = null; 
-    function doUpdateLastSavedRev() 
+    function writeUpdateLastSavedRev() 
     {
         lastupdaterevcall = null; 
-        if ((lastRev != null) && (lastRev != "unsaved"))
+        if ((lastRev != "") && (lastRev != "unsaved"))
         {
             var twhen = new Date(lastRevDateEpoch * 1000);
             var tago = jQuery.timeago(twhen);
@@ -53,55 +49,36 @@ $(document).ready(function() {
                     'By ' + lastRevUserRealName + ' (' + lastRevUserName + '), ' +
                     ' rev ' + String(lastRev) + ' \n' + 
                     'on ' + String(twhen) + '">' + lastRevPrefix + ' ' + tago + '</span>');
-            lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 500);
+            lastupdaterevcall = window.setTimeout(writeUpdateLastSavedRev, 60000);
         }
     }
+    
     function updateLastSavedRev(rev, revdateepoch)
     {   
         lastRev = rev;
         lastRevDateEpoch = revdateepoch;
         lastRevUserName = username;
         lastRevUserRealName = userrealname;
+        chainpatchnumber = 0; 
+        nextchainpatchnumbertoreceive = 0; 
+        receivechainpatchqueue.length = 0; 
+        lastreceivedchainpatch = null; 
+        chainpatches.length = 0; 
         lastRevPrefix = "Saved";
         if (lastupdaterevcall != null)
-            clearTimeout(lastupdaterevcall); 
-        lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 50); 
-        rollbackRev = null;
+            window.clearTimeout(lastupdaterevcall); 
+        lastupdaterevcall = window.setTimeout(writeUpdateLastSavedRev, 50); 
+        rollbackRev = "";
         $('#rollback_warning').hide();
     }
-    lastupdaterevcall = setTimeout(doUpdateLastSavedRev, 50); 
+    lastupdaterevcall = window.setTimeout(writeUpdateLastSavedRev, 50); 
 
     var lastsavedcode   = ''; // used to tell if we should expect a null back from the revision log
 
     // runtime information
     var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
-    var conn = undefined; // Orbited connection
-    var bConnected  = false; 
-    var bSuppressDisconnectionMessages = false; 
-    var buffer = "";
-    var outputMaxItems = 400;
-    var sTabCurrent = ''; 
-    var sChatTabMessage = 'Chat'; 
-    var scrollPositions = { 'console':0, 'data':0, 'sources':0, 'chat':0 }; 
-    var receiverecordqueue = [ ]; 
-    var receivechatqueue = [ ]; 
     var runID = ''; 
     var uml = ''; 
-
-    // information handling who else is watching and editing during this session
-    var editingusername = "";  // primary editor
-    var loggedinusers = [ ];   // all people watching
-    var loggedineditors = [ ]; // list of who else is here and their windows open who have editing rights
-    var iselectednexteditor = 1; 
-    var nanonymouseditors = 0; // number of anonymous editors
-    var chatname = "";         // special in case of Anonymous users (yes, this unnecessarily gets set every time we call recordEditorStatus)
-    var clientnumber = -1;     // allocated by twister for this window, so we can find it via django
-    var chatpeopletimes = { }; // last time each person made a chat message
-
-    // these actually get set by the server
-    var servernowtime = new Date(); 
-    var earliesteditor = servernowtime; 
-    var lasttouchedtime = undefined; 
 
     var parsers = Array();
     var stylesheets = Array();
@@ -114,11 +91,18 @@ $(document).ready(function() {
     var savedundo = 0; 
     var lastundo = 0;
 
-    var cachehidlookup = { }; // this itself is a cache of a cache
-    
-    var chainpatches = [ ]; 
-    var chainpatchnumber = 0; // counts them going out
+    var receiverecordcall = null; 
+    var receiverecordqueue = [ ]; 
+    var receivechatqueue = [ ]; 
+    var receivechainpatchqueue = [ ]; // coming in
+    var receivechainpatchcall = null; // or function or "waitingforonchange", "doingothertyping"
+
     var lasttypetime = new Date(); 
+    var chainpatches = [ ];   // stack going out
+    var chainpatchnumber = 0; // counts them going out 
+
+    var nextchainpatchnumbertoreceive = 0; 
+    var lastreceivedchainpatch = null; 
 
     setupCodeEditor(); 
     setupMenu();
@@ -126,57 +110,30 @@ $(document).ready(function() {
     setupToolbar();
     setupResizeEvents();
     setupOrbited();
-
-    function CM_cleanText(text)  { return text.replace(/\u00a0/g, " ").replace(/\u200b/g, ""); }
-    function CM_isBR(node)  { var nn = node.nodeName; return nn == "BR" || nn == "br"; }
-    function CM_nodeText(node)  { return node.textContent || node.innerText || node.nodeValue || ""; }
-    function CM_lineNumber(node)
-    {
-        if (node == null)
-            return 1; 
-        if (node.parentNode != codeeditor.win.document.body)
-            return -1; 
-        var num = 1;
-        while (node)
-        {
-            num++; 
-            node = node.previousSibling; 
-            while (node && !CM_isBR(node))
-                 node = node.previousSibling; 
-        }
-        return num;
-    }
-
-    function CM_newLines(from, to) 
-    {
-        var lines = [ ];
-        var text = [ ];
-        for (var cur = (from ? from.nextSibling : codeeditor.editor.container.firstChild); cur != to; cur = cur.nextSibling)
-        {
-            if (CM_isBR(cur))
-            {
-                lines.push(CM_cleanText(text.join(""))); 
-                text = [ ];
-            }
-            else
-                text.push(CM_nodeText(cur)); 
-        }
-        lines.push(CM_cleanText(text.join(""))); 
-        return lines; 
-    }
+    
 
     // keep delivery load of chain patches down and remove excess typing signals
     function sendChainPatches()
     {
         if (chainpatches.length > 0)
-            sendjson(chainpatches.shift()); 
-
+        {
+            var chainpatch = chainpatches.shift(); 
+            //writeToChat("-- "+$.toJSON(chainpatch)); 
+            if (bConnected)
+                sendjson(chainpatch); 
+        }
         // clear out the ones that are pure typing messages sent in non-broadcast mode
         while ((chainpatches.length > 0) && (chainpatches[0].insertlinenumber == undefined))
             chainpatches.shift(); 
 
         if (chainpatches.length > 0)
-            setTimeout(sendChainPatches, 2); 
+            window.setTimeout(sendChainPatches, 2); 
+    }
+
+    // called from editortabs.js
+    SelectEditorLine = function(iLine)
+    {
+        codeeditor.selectLines(codeeditor.nthLine(iLine), 0, codeeditor.nthLine(iLine + 1), 0); 
     }
 
 
@@ -187,7 +144,7 @@ $(document).ready(function() {
         if (codemirroriframe)
         {
             var historysize = codeeditor.historySize(); 
-            var automode = $('select#automode option:selected').val(); 
+            var automode = $('input#automode').val(); 
     
             if (changetype == "saved")
                 savedundo = atsavedundo
@@ -201,86 +158,55 @@ $(document).ready(function() {
             var lpageIsDirty = (historysize.undo + historysize.lostundo != savedundo); 
         }
         else
-        {
             lpageIsDirty = (changetype == "edit"); 
-            $('select#automode #id_autotype').attr('disabled', true); 
-        }
 
         if (pageIsDirty != lpageIsDirty)
         {
             pageIsDirty = lpageIsDirty; 
             $('#aCloseEditor1').css("font-style", ((pageIsDirty && guid) ? "italic" : "normal")); 
-
-        // we can only enter broadcast mode from a clean file
-        // in the future we could maintain a stack of patches here and upload them when the broadcast mode is entered
-        // so that they apply retrospectively.  
-        // also we can do the saving through twister and bank a stack of patches there
-        // that will be applied when someone else opens a window
-            if (pageIsDirty && (automode != 'autotype'))
-                $('select#automode #id_autotype').attr('disabled', true); 
-            else if (!pageIsDirty && !$('select#automode #id_autosave').attr('disabled') && codemirroriframe)
-                $('select#automode #id_autotype').attr('disabled', false); 
         }
 
         if (changetype != 'edit')
             return; 
-
-        // to do: arrange for there to be only one autotype/broadcast window for a user
-        // if the set it for one clients, then any other client that is in this mode gets 
-        // reverted back to editing.  So it's clear which window is actually active and sending signals
-
-        // also may want a facility for a watching user to be able to select an area in his window
-        // and make it appear selected for the broadcast user
-        if ((automode == 'autotype') && codemirroriframe)
+        if (automode != 'autosave')
+            return; 
+        
+        // if patches are coming in of we are waiting for a timeout then don't send any patches back 
+        // as this can create a ping-pong effect between two windows of the same editing user
+        if (receivechainpatchcall != null)
+            return; 
+        
+        // make outgoing patches (if there is anyone to receive them)
+        if (codemirroriframe && (countclientsconnected != 1))
         {
-            //assert codeeditor;
-
-            // send any edits up the line (first to the chat page to show we can decode it)
-            var historystack = codeeditor.editor.history.history; 
-            var redohistorystack = codeeditor.editor.history.redoHistory; 
-            var lostundo = codeeditor.editor.history.lostundo; 
-            var rdhL = redohistorystack.length - 1; 
-            while (lastundo != historystack.length + lostundo)
+            var llchainpatches = [ ];
+            lastundo = MakeChainPatches(llchainpatches, codeeditor, lastundo); 
+            for (var i = 0; i < llchainpatches.length; i++)
             {
-                var chains; 
-                if (lastundo < historystack.length + lostundo)
-                {
-                    chains = historystack[lastundo - lostundo]; 
-                    lastundo++; 
-                }
-                else if (rdhL >= 0)
-                {
-                    chains = redohistorystack[rdhL--]; 
-                    lastundo--; 
-                }
+                var chainpatch = llchainpatches[i]; 
+                chainpatch['chainpatchnumber'] = chainpatchnumber;
+                chainpatch['chatname'] = chatname;
+                chainpatch['rev'] = lastRev; 
+                chainpatch['clientnumber'] = clientnumber; 
+                if (chainpatch['insertions'] != null)
+                    chainpatches.push(chainpatch); 
                 else
-                    break; 
-    
-                var lchainpatches = [ ]; 
-                for (var i = 0; i < chains.length; i++)
-                {
-                    var chain = chains[i]; 
-                    var chainpatch = { command:'typing', insertlinenumber:CM_lineNumber(chain[0].from), deletions:[ ], insertions:[ ], "chainpatchnumber":(chainpatchnumber++), "rev":lastRev }
-                    for (var k = 0; k < chain.length; k++)
-                        chainpatch["deletions"].push(chain[k].text); 
-    
-                    var lines = CM_newLines(chain[0].from, chain[chain.length - 1].to); 
-                    for (var j = 0; j < lines.length; j++)
-                        chainpatch["insertions"].push(lines[j]); 
-                    lchainpatches.push(chainpatch); 
-                }
-
-                // arrange for the chainpatches list (which is reversed) to add the upper ones first, because the line numbering 
-                // is detected against the final version after this chainpatch group has been done, so upper ones have occurred
-                lchainpatches.sort(function(a,b) {return b["insertlinenumber"] - a["insertlinenumber"]});  
-                while (lchainpatches.length)
-                    chainpatches.push(lchainpatches.pop()); 
+                    writeToChat("<i>Chain patch failed to be generated</i>"); // still advance chainpatchnumber so all the watchers can get out of sync accordingly
+                chainpatchnumber++; 
             }
+            if (nextchainpatchnumbertoreceive >= 0)
+                nextchainpatchnumbertoreceive = chainpatchnumber; 
         }
-
-        else if ((automode == 'autosave') && bConnected)
-            chainpatches.push({"command":'typing'}); 
-
+        
+        // plain text area case not coded for
+        else 
+        {
+            chainpatches.push({"command":'typing', "chainpatchnumber":chainpatchnumber, "rev":lastRev, "clientnumber":clientnumber}); 
+            chainpatchnumber++; 
+            if (nextchainpatchnumbertoreceive >= 0)
+                nextchainpatchnumbertoreceive = chainpatchnumber; 
+        }
+        
         if (chainpatches.length > 0)
             sendChainPatches(); 
     }
@@ -404,15 +330,6 @@ $(document).ready(function() {
     }
 
 
-    function setupOrbited() 
-    {
-        TCPSocket = Orbited.TCPSocket;
-        conn = new TCPSocket(); 
-        conn.open('localhost', '9010'); 
-        buffer = " "; 
-        sChatTabMessage = 'Connecting...'; 
-        $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
-    }
 
     function setCodeMirrorReadOnly(val) 
     {
@@ -422,7 +339,7 @@ $(document).ready(function() {
         writeToChat('set codemirror editor to ' + (codeeditorreadonly ? "readonly" : "editable")); 
 
             // this rebuilds the entire code editor again!!!
-        setTimeout(setupCodeEditor, 1); 
+        window.setTimeout(setupCodeEditor, 1); 
     }
 
     function setCodeeditorBackgroundImage(lcodeeditorbackgroundimage)
@@ -512,7 +429,12 @@ $(document).ready(function() {
             {
                 eventObject.preventDefault();
                 if (bConnected) 
-                    sendChat(); 
+                {
+                    lasttypetime = new Date(); 
+                    data = {"command":'chat', "guid":guid, "username":username, "text":$('#chat_line').val()};
+                    sendjson(data); 
+                    $('#chat_line').val(''); 
+                }
                 return false; 
             }
             return true; 
@@ -547,39 +469,10 @@ $(document).ready(function() {
         });
         $('#id_urlquery').blur();
 
-        $('select#automode').change(changeAutomode); 
-        $('input#showautomode').change(showhideAutomodeSelector); 
-
         if (!savecode_authorized) 
             $(username ? '#protected_warning' : '#login_warning').show();
     }
     
-    //Setup Tabs
-    function setupTabs()
-    {
-        $('.editor_output .console a').click(function(){
-            showTab('console');
-            return false;
-        });
-        $('.editor_output .data a').click(function(){
-            showTab('data');
-            return false;
-        })
-        $('.editor_output .sources a').click(function(){
-            showTab('sources');
-            return false;
-        })
-        $('.editor_output .chat a').click(function(){
-            showTab('chat');
-            return false;
-        })
-
-        //show default tab
-       if ($('.editor_output div.tabs li.console').length)
-           showTab('console'); 
-       else
-           showTab('chat'); 
-    }
     
 
     conn.onopen = function(code)
@@ -587,11 +480,7 @@ $(document).ready(function() {
         sChatTabMessage = 'Chat'; 
         $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
 
-        if (conn.readyState == conn.READY_STATE_OPEN)
-            mreadystate = 'Ready'; 
-        else
-            mreadystate = 'readystate=' + conn.readyState;
-        writeToChat('Connection opened: ' + mreadystate); 
+        writeToChat('Connection opened: ' + (conn.readyState == conn.READY_STATE_OPEN ? 'Ready' : 'readystate=' + conn.readyState)); 
         bConnected = true; 
 
         // send the username and guid of this connection to twisted so it knows who's logged on
@@ -602,112 +491,60 @@ $(document).ready(function() {
                  "userrealname":userrealname, 
                  "language":scraperlanguage, 
                  "scrapername":short_name, 
+                 "originalrev":lastRev, 
                  "isstaff":isstaff };
         sendjson(data);
     }
 
-    conn.onclose = function(code)
-    {
-        if (code == Orbited.Statuses.ServerClosedConnection)
-            mcode = 'ServerClosedConnection'; 
-        else if (code == Orbited.Errors.ConnectionTimeout)
-            mcode = 'ConnectionTimeout'; 
-        else if (code == Orbited.Errors.InvalidHandshake)
-            mcode = 'InvalidHandshake'; 
-        else if (code == Orbited.Errors.UserConnectionReset)
-            mcode = 'UserConnectionReset'; 
-        else if (code == Orbited.Errors.Unauthorized)
-            mcode = 'Unauthorized'; 
-        else if (code == Orbited.Errors.RemoteConnectionFailed)
-            mcode = 'RemoteConnectionFailed'; 
-        else if (code == Orbited.Statuses.SocketControlKilled)
-            mcode = 'SocketControlKilled'; 
-        else
-            mcode = 'code=' + code;
-
-        writeToChat('Connection closed: ' + mcode); 
-        bConnected = false; 
-
-        // couldn't find a way to make a reconnect button work!
-            // the bSuppressDisconnectionMessages technique doesn't seem to work (unload is not invoked), so delay message  in the hope that window will close first
-        window.setTimeout(function() 
-        {
-            if (!bSuppressDisconnectionMessages)
-            {
-                writeToChat('<b>You will need to reload the page to reconnect</b>');  
-                writeToConsole("Connection to execution server lost, you will need to reload this page.", "exceptionnoesc"); 
-                writeToConsole("(You can still save your work)", "exceptionnoesc"); 
-            }
-        }, 250); 
-
-
-        $('.editor_controls #run').val('Unconnected');
-        $('.editor_controls #run').unbind('click.run');
-        $('.editor_controls #run').unbind('click.abort');
-        $('#running_annimation').hide(); 
-
-        sChatTabMessage = 'Disconnected'; 
-        $('.editor_output div.tabs li.chat a').html(sChatTabMessage);
-    }
 
     //read data back from twisted
-    conn.onread = function(ldata) 
+    ReceiveRecordJ = function(jdata)
     {
-        buffer = buffer+ldata;
-        while (true) 
+        if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
+            receivechatqueue.push(jdata); 
+        else if (jdata.message_type == 'othertyping')
         {
-            var linefeed = buffer.indexOf("\n"); 
-            if (linefeed == -1)
-                break; 
-            sdata = buffer.substring(0, linefeed); 
-            buffer = buffer.substring(linefeed+1); 
-            sdata = sdata.replace(/[\s,]+$/g, '');  // trailing commas cannot be evaluated in IE
-            if (sdata.length == 0)
-                continue; 
-
-            var jdata; 
-            try 
-            {
-                //writeToChat("--- "+cgiescape(sdata)); // for debug of what's coming out
-                jdata = $.evalJSON(sdata);
-            } 
-            catch(err) 
-            {
-                alert("Malformed json: '''" + sdata + "'''"); 
-                continue
-            }
-
-            if ((jdata.message_type == 'chat') || (jdata.message_type == 'editorstatus'))
-                receivechatqueue.push(jdata); 
-            else
-                receiverecordqueue.push(jdata); 
-
-            // allow the user to clear the choked data if they want
-            if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'runfinished')) 
-            {
-                $('.editor_controls #run').val('Finishing');
-                $('.editor_controls #run').unbind('click.abort');
-                $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
-            }
-
-            if (receiverecordqueue.length + receivechatqueue.length == 1)
-                window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  // delay of 1ms makes it work better in FireFox (possibly so it doesn't take priority over the similar function calls in Orbited.js)
-
-            // clear batched up data that's choking the system
-            if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
-                window.setTimeout(clearJunkFromQueue, 1); 
+            $('#lasttypedtimestamp').text(String(new Date())); 
+            if (jdata.insertlinenumber != undefined)
+                receivechainpatchqueue.push(jdata); 
         }
+        else
+            receiverecordqueue.push(jdata); 
+
+        // allow the user to clear the choked data if they want
+        if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'runfinished')) 
+        {
+            $('.editor_controls #run').val('Finishing');
+            $('.editor_controls #run').unbind('click.abort');
+            $('.editor_controls #run').bind('click.stopping', clearJunkFromQueue);
+        }
+
+        if ((receiverecordcall == null) && (receiverecordqueue.length + receivechatqueue.length >= 1))
+            receiverecordcall = window.setTimeout(function() { receiveRecordFromQueue(); }, 1);  
+
+        if (receivechainpatchqueue.length != 0)
+        {
+            if (receivechainpatchcall != null)
+                window.clearTimeout(receivechainpatchcall); 
+            receivechainpatchcall = window.setTimeout(function() { receiveChainpatchFromQueue(null); }, 10);  
+        }
+        
+        // clear batched up data that's choking the system
+        if ((jdata.message_type == 'executionstatus')  && (jdata.content == 'killrun'))
+            window.setTimeout(clearJunkFromQueue, 1); 
     }
 
     function clearJunkFromQueue() 
     {
         var lreceiverecordqueue = [ ]; 
-        for (var i = 0; i < receiverecordqueue.length; i++) {
+        for (var i = 0; i < receiverecordqueue.length; i++) 
+        {
             jdata = receiverecordqueue[i]; 
             if ((jdata.message_type != "data") && (jdata.message_type != "console") && (jdata.message_type != "sqlitecall"))
                 lreceiverecordqueue.push(jdata); 
         }
-        if (receiverecordqueue.length != lreceiverecordqueue.length) {
+        if (receiverecordqueue.length != lreceiverecordqueue.length) 
+        {
             message = "Clearing " + (receiverecordqueue.length - lreceiverecordqueue.length) + " records from receiverqueue, leaving: " + lreceiverecordqueue.length; 
             writeToConsole(message); 
             receiverecordqueue = lreceiverecordqueue; 
@@ -717,18 +554,18 @@ $(document).ready(function() {
     // run our own queue not in the timeout system (letting chat messages get to the front)
     function receiveRecordFromQueue() 
     {
-        var jdata = undefined; 
-        if (receivechatqueue.length > 0)
+        receiverecordcall = null; 
+        var jdata; 
+        if (receivechatqueue.length != 0)
             jdata = receivechatqueue.shift(); 
-        else if (receiverecordqueue.length > 0) 
+        else if (receiverecordqueue.length != 0) 
             jdata = receiverecordqueue.shift(); 
-
-        if (jdata != undefined) 
-        {
-            receiveRecord(jdata);
-            if (receiverecordqueue.length + receivechatqueue.length >= 1)
-                window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
-        }
+        else
+            return; 
+        
+        receiveRecord(jdata);
+        if (receiverecordqueue.length + receivechatqueue.length >= 1)
+            receiverecordcall = window.setTimeout(function() { receiveRecordFromQueue(); }, 1); 
     }
 
     //read data back from twisted
@@ -792,46 +629,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
               writeToConsole(data.headerkey + ": " + data.headervalue, "httpresponseheader"); 
           } else if (data.message_type == "typing") {
               $('#lasttypedtimestamp').text(String(new Date())); 
-          } else if (data.message_type == "othertyping") {
-              $('#lasttypedtimestamp').text(String(new Date())); 
-              if (data.insertlinenumber != undefined)
-                  recordOtherTyping(data); 
           } else {
               writeToConsole(data.content, data.message_type); 
           }
       }
 
-    function sendChat() 
-    {
-        lasttypetime = new Date(); 
-        data = {"command":'chat', "guid":guid, "username":username, "text":$('#chat_line').val()};
-        sendjson(data); 
-        $('#chat_line').val(''); 
-    }
-
-    //send a message to the server (needs linefeed delimeter because sometimes records get concattenated)
-    function sendjson(json_data) 
-    {
-        var jdata = $.toJSON(json_data); 
-        try 
-        {
-            if (jdata.length < 10000)  // only concatenate for smallish strings
-                conn.send(jdata + "\r\n");  
-            else
-            {
-                conn.send(jdata);  
-                conn.send("\r\n");  // this goes out in a second chunk
-            }
-        } 
-        catch(err) 
-        {
-            if (!bSuppressDisconnectionMessages)
-            {
-                writeToConsole("Send error: " + err, "exceptionnoesc"); 
-                writeToChat(jdata); 
-            }
-        }
-    }
 
     //send code request run
     function sendCode() 
@@ -858,7 +660,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             "scrapername":short_name,
             "code"      : code,
             "urlquery"  : urlquery,
-            "automode"  : $('select#automode option:selected').val()
+            "automode"  : $('input#automode').val()
         }
 
         $('.editor_controls #run').val('Sending');
@@ -875,8 +677,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function autosavefunction(code, stimulate_run)
     {
         // do a save to the system every time we run (this would better be done via twisted at some point)
-        var automode = $('select#automode option:selected').val(); 
-        if ((automode == 'autosave') || (automode == 'autotype'))
+        var automode = $('input#automode').val(); 
+        if (automode == 'autosave')
         {
             if (pageIsDirty)
                 saveScraper(stimulate_run); 
@@ -894,33 +696,17 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     } 
 
 
-    function changeAutomode() 
+    function changeAutomode(newautomode) 
     {
-        lasttypetime = new Date(); 
-        var automode = $('select#automode option:selected').val(); 
-        if (automode == 'draft')
-        {
-            $('#watcherstatus').text("draft mode"); // consider also hiding select#automode
-            setCodeMirrorReadOnly(false);
+        $('input#automode').val(newautomode);
 
-        // You can never go back from draft mode. (what if someone else (including you) had edited?)
-        // often you will do this in a duplicate window that you take into draft mode and then discard,
-        // though the UI for making these duplicate windows is a pain as you have to fully close the editor, and then open two editors from the overview page
-        // because you can't clone from the close window button as it's activated to disconnect the connection to the editor
-        // Draft windows will be able to pop up a diff with the current saved version, so using this as a patch could readily provide a route back through a reload
-            $('select#automode #id_autosave').attr('disabled', true); 
-            $('select#automode #id_autoload').attr('disabled', true); 
-            $('.editor_controls #watch_button_area').hide();
-            $('select#automode #id_autotype').attr('disabled', true); 
-            $('.editor_controls #btnCommitPopup').attr('disabled', true); 
-            $('.editor_controls #run').attr('disabled', false);
-            $('.editor_controls #preview').attr('disabled', false);
-        }
-                // self demote from editing to watching
+        lasttypetime = new Date(); 
+        var automode = $('input#automode').val(); 
+        if (automode == 'draft')
+            ;
+        // self demote from editing to watching
         else if (automode == 'autoload')
         {
-            $('select#automode #id_autosave').attr('disabled', true); 
-            $('select#automode #id_autotype').attr('disabled', true); 
             $('.editor_controls #watch_button_area').hide();
             setCodeMirrorReadOnly(true);
             $('.editor_controls #btnCommitPopup').attr('disabled', true); 
@@ -935,32 +721,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         sendjson(data); 
     }; 
 
-    function showhideAutomodeSelector()
-    {
-        // always show it for debugging
-        // $('select#automode').show(); return; 
-        
-        // never show it, other buttons do functions more clearly now
-        $('select#automode').hide();
-        return
-
-        /*
-        // show it for staff only
-        if (isstaff) {
-            $('select#automode').show().addClass("staff");
-        } else {
-            $('select#automode').hide().removeClass("staff"); 
-        }
-        return; 
-        */
-
-        /* Conditional version, based on whether just single user and needed or not
-        var automode = $('select#automode option:selected').val(); 
-        if ($('input#showautomode').attr('checked') || (automode == 'autotype') || (username ? (loggedineditors.length >= 2) : (loggedineditors.length >= 1)))
-            $('select#automode').show(); 
-        else
-            $('select#automode').hide();  */
-    }
 
     function parseISOdate(sdatetime) // used to try and parse an ISOdate, but it's highly irregular and IE can't do it
         {  return new Date(parseInt(sdatetime)); }
@@ -1002,8 +762,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         loggedineditors = data.loggedineditors;  // this is a list
         loggedinusers = data.loggedinusers;      // this is a list
         nanonymouseditors = data.nanonymouseditors; 
-        chatname = data.chatname; 
+        chatname = data.chatname;   // yes this is reset every time (though it's always the same)
         clientnumber = data.clientnumber; 
+        countclientsconnected = data.countclients; 
+        var automode = $('input#automode').val(); 
 
         if (data.message)
             writeToChat('<i>'+cgiescape(data.message)+'</i>'); 
@@ -1012,6 +774,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         {
             stext = [ ]; 
             stext.push("Editing began " + swtimeago(earliesteditor, servernowtime) + " ago, last touched " + swtimeago(lasttouchedtime, servernowtime) + " ago.  You are client#"+clientnumber); 
+            $('.editor_controls #run').attr('disabled', false);  // enable now we have identity (this gets disabled lower down if we lack the permissions)
 
             var othereditors = [ ]; 
             for (var i = 0; i < data.loggedineditors.length; i++) 
@@ -1036,20 +799,14 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             stext.push("."); 
             writeToChat(cgiescape(stext.join(""))); 
         }
-        showhideAutomodeSelector(); 
 
-        var automode = $('select#automode option:selected').val(); 
-
-        // draft editing do not disturb
+        // draft editing nothing to do
         if (automode == 'draft') 
-        {
-            ;
-        }
+            return;
 
         // you are the editing user
-        else if (username && (editingusername == username))
+        if (username && (editingusername == username))
         {
-            $('select#automode #id_autoload').attr('disabled', (loggedineditors.length == 1)); // no point in being a watcher if no one else is available to edit
             $('.editor_controls #watch_button_area').toggle((loggedineditors.length != 1));
 
             if (loggedineditors.length >= 2)
@@ -1057,46 +814,19 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             else
                 $('#watcherstatus').html(""); 
 
-            if (data.broadcastingeditor == username)   
-            {
-               // convert all the autosaving pages to watching (apart from the one that the user changed to autotype)
-                if (automode == 'autosave')
-                {
-                    $('select#automode #id_autoload').attr('disabled', false); 
-                    $('.editor_controls #watch_button_area').hide();
-                    $('select#automode').val('autoload'); // watching
-                    $('select#automode #id_autosave').attr('disabled', false); 
-                    $('select#automode #id_autotype').attr('disabled', true); 
-                    setCodeMirrorReadOnly(true);
-                    $('.editor_controls #btnCommitPopup').attr('disabled', true); 
-                    $('.editor_controls #run').attr('disabled', true);
-                    $('.editor_controls #preview').attr('disabled', true);
-                    sendjson({"command":'automode', "automode":'autoload-nodemote'}); 
-                }
-            }
-            else if (((automode != 'autosave') && (automode != 'autotype')) || (data.broadcastingeditor == undefined))
+            if (automode == 'autoload')
             {
                 setCodeMirrorReadOnly(false);
-                $('select#automode #id_autosave').attr('disabled', false); 
-                $('select#automode #id_autotype').attr('disabled', pageIsDirty); 
-                var newmode = 'autosave'; 
-
-                /* This forces broadcast mode (see all edits realtime rather than at save time).
-                 * Bit buggy, so disabled for now
-                   if (!pageIsDirty) {
-                    newmode = 'autotype'; // editing (broadcast)
-                }*/
-//newmode = 'autotype'; 
-
-                $('select#automode').val(newmode); 
+                changeAutomode('autosave'); 
                 $('.editor_controls #run').attr('disabled', false);
                 $('.editor_controls #preview').attr('disabled', false);
                 $('.editor_controls #btnCommitPopup').attr('disabled', false); 
-                if (rollbackRev != null) {
+                if (rollbackRev != "") 
+                {
                     $('.editor_controls #btnCommitPopup').val('Rollback'); 
                     $('#rollback_warning').show();
                 }
-                sendjson({"command":'automode', "automode":newmode}); 
+                sendjson({"command":'automode', "automode":'autosave'}); 
             }
         }
 
@@ -1110,11 +840,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
             if (automode != 'autoload')
             {
-                $('select#automode #id_autoload').attr('disabled', false); 
                 $('.editor_controls #watch_button_area').hide();
-                $('select#automode').val('autoload'); // watching
-                $('select#automode #id_autosave').attr('disabled', true); 
-                $('select#automode #id_autotype').attr('disabled', true); 
+                changeAutomode('autoload'); // watching
                 setCodeMirrorReadOnly(true);
                 $('.editor_controls #btnCommitPopup').attr('disabled', true); 
                 $('.editor_controls #run').attr('disabled', true);
@@ -1127,124 +854,87 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         else
         {
             $('#watcherstatus').text(""); 
-            if (automode != 'draft')
+            changeAutomode('autosave'); // editing
+            $('.editor_controls #watch_button_area').hide();
+            if (!savecode_authorized) 
             {
-                $('select#automode #id_autosave').attr('disabled', false); 
-                $('select#automode #id_autotype').attr('disabled', true); 
-                $('select#automode').val('autosave'); // editing
-                $('select#automode #id_autoload').attr('disabled', true); 
-                $('.editor_controls #watch_button_area').hide();
-                if (!savecode_authorized) {
-                    // special case, if not authorized then we are internally
-                    // to this javascript an anonymous user, and want to be readonly
-                    setCodeMirrorReadOnly(true);
-                    $('.editor_controls #run').attr('disabled', true);
-                } else {
-                    setCodeMirrorReadOnly(false);
-                    $('.editor_controls #run').attr('disabled', false);
-                }
-                $('.editor_controls #btnCommitPopup').attr('disabled', false); 
-                $('.editor_controls #preview').attr('disabled', false);
-                sendjson({"command":'automode', "automode":'autosave'}); 
+                // special case, if not authorized then we are internally
+                // to this javascript an anonymous user, and want to be readonly
+                setCodeMirrorReadOnly(true);
+                $('.editor_controls #run').attr('disabled', true);
+            } 
+            else 
+            {
+                setCodeMirrorReadOnly(false);
+                $('.editor_controls #run').attr('disabled', false);
             }
+            $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+            $('.editor_controls #preview').attr('disabled', false);
+            sendjson({"command":'automode', "automode":'autosave'}); 
         }
     }
 
-    function recordOtherTyping(chainpatch)
-    {
-        var linehandle = codeeditor.nthLine(chainpatch["insertlinenumber"]); 
 
-        // change within a single line
-        if ((chainpatch["deletions"].length == 1) && (chainpatch["insertions"].length == 1))
+    // code shared with reload code so we can use same system to suppress edited messages from codemirror
+    function receiveChainpatchFromQueue(reloadedcode)
+    {
+        // handle bail out conditions
+        if (reloadedcode == null)
         {
-            var linecontent = codeeditor.lineContent(linehandle); 
-            var deletestr = chainpatch["deletions"][0]; 
-            var insertstr = chainpatch["insertions"][0]; 
-            if (linecontent != deletestr)
+            if (nextchainpatchnumbertoreceive == -1)
+                receivechainpatchqueue.length = 0; 
+            var chainpatch = (receivechainpatchqueue.length != 0 ? receivechainpatchqueue.shift() : null); 
+            if ((chainpatch != null) && ((chainpatch.chainpatchnumber != nextchainpatchnumbertoreceive) || (chainpatch.rev != lastRev)))
             {
-                writeToChat("Lines disagree " + $.toJSON(chainpatch)); 
-                writeToChat(linecontent); 
-                writeToChat(deletestr); 
+                    // this will be handled some other time (for someone joining in as we are already in full flow)
+                writeToChat('<i>'+chainpatch.chatname+' typed something but this window is not synchronized to receive it</i>'); 
+                nextchainpatchnumbertoreceive = -1; 
+                receivechainpatchqueue.length = 0; 
+                chainpatch = null; 
+            }
+            if (chainpatch == null)
+            {
+                receivechainpatchcall = null; 
+                $('li#idtopcodetab a').removeClass("othertypingalert").css("background-color", "#ffffff");
                 return; 
             }
-
-            codeeditor.setLineContent(linehandle, insertstr); 
-            var ifront = 0; 
-            while ((ifront < deletestr.length) && (ifront < insertstr.length) && (deletestr.charAt(ifront) == insertstr.charAt(ifront)))
-                ifront++; 
-            if (ifront < insertstr.length)
-            {
-                var iback = insertstr.length - 1; 
-                while ((iback > ifront) && (iback - insertstr.length + deletestr.length > 0) && (deletestr.charAt(iback - insertstr.length + deletestr.length) == insertstr.charAt(iback)))
-                    iback--; 
-                codeeditor.selectLines(linehandle, ifront, linehandle, iback+1); 
-            }
-
-            else 
-                codeeditor.selectLines(linehandle, ifront, codeeditor.nextLine(linehandle), 0); 
         }
 
-        // change across multiple lines
-        else
+            // the callback into the onchange function appears to happen in same thread without a timeout 
+            // so we have to suppress the re-edits with this flag here.
+            // some callbacks into onchange are deferred, so it is unpredictable and hard to detect 
+            // (unless we were going to watch the patches being created and compare them to the one we committed to tell the difference between typing)
+            // so we're going to use a few second delay to suppress messages going through and highlight with an chatalert colour on the tab
+            // which will help see stuff when it appears to go wrong.  
+        $('li#idtopcodetab a').addClass("othertypingalert").css("background-color", "#ffff87"); // backgroundcolour setting by class doesn't work
+        if ((reloadedcode != null) && (receivechainpatchcall != null))
+            window.clearTimeout(receivechainpatchcall); 
+        receivechainpatchcall = "doingothertyping"; 
+        if (reloadedcode == null)
         {
-            var insertions = chainpatch["insertions"]; 
-            var deletions = chainpatch["deletions"]; 
-            if (true) // check line content
-            {
-                var dlinehandle = linehandle; 
-                for (var i = 0; i < deletions.length; i++)
-                {
-                    if (codeeditor.lineContent(dlinehandle) != deletions[i])
-                    {
-                        writeToChat("Lines " + i + " disagree " + $.toJSON(chainpatch)); 
-                        writeToChat(codeeditor.lineContent(dlinehandle)); 
-                        writeToChat(deletions[i]); 
-                        return; 
-                    }
-                    dlinehandle = codeeditor.nextLine(dlinehandle); 
-                }
-            }
+            var mismatchlines = recordOtherTyping(chainpatch, codeeditor);  
 
-            // apply the patch
-            var nlinehandle = linehandle; 
-            var il = 0; 
-            while ((il < deletions.length - 1) && (il < insertions.length))
+            // log the mismatch cases, which look like they are coming from the unreliability of 
+            // CM_newLines where the lines are changed prior to the next undo stack commit
+            // therefore the set of patches are actually inconsistent, usually between immediate successor patches, 
+            // so we have the previous patch and the ptime difference to verify this
+            if (mismatchlines.length != 0)
             {
-                codeeditor.setLineContent(nlinehandle, insertions[il]); 
-                nlinehandle = codeeditor.nextLine(nlinehandle); 
-                il++; 
+                writeToChat("Mismatches "+$.toJSON(mismatchlines)); 
+                writeToChat("chainpatch " + $.toJSON(chainpatch)); 
+                if (lastreceivedchainpatch)
+                    writeToChat("prevchainpatch " + $.toJSON(lastreceivedchainpatch)); 
             }
-            if (il == insertions.length)
-            {
-                while (il < deletions.length)
-                {
-                    codeeditor.removeLine(nlinehandle); 
-                    il++; 
-                }
-                nlinehandle = codeeditor.prevLine(nlinehandle); 
-            }
-            else
-                codeeditor.setLineContent(nlinehandle, insertions.slice(il).join("\n"));  // all remaining lines replace the last line
-
-            // find the selection range
-            var ifront = 0; 
-            while ((ifront < insertions[0].length) && (ifront < deletions[0].length) && (insertions[0].charAt(ifront) == deletions[0].charAt(ifront)))
-                ifront++; 
-            var finsertstr = insertions[insertions.length-1]; 
-            var fdeletestr = deletions[deletions.length-1]; 
-            var iback = finsertstr.length - 1; 
-            while ((iback >= 0) && (iback - finsertstr.length + fdeletestr.length > 0) && (fdeletestr.charAt(iback - finsertstr.length + fdeletestr.length) == finsertstr.charAt(iback)))
-                iback--; 
-            if ((insertions.length == 0) && (iback < ifront))
-                iback = ifront; 
-            if (iback == finsertstr.length - 1)
-            {
-                nlinehandle = codeeditor.nextLine(nlinehandle); 
-                iback = 0; 
-            }
-            codeeditor.selectLines(linehandle, ifront, nlinehandle, iback); 
+            nextchainpatchnumbertoreceive++;  // next value expected
+            chainpatchnumber = nextchainpatchnumbertoreceive; 
+            lastreceivedchainpatch = chainpatch; 
         }
+        else
+            codeeditor.setCode(reloadedcode); 
+        receivechainpatchcall = window.setTimeout(function() { receiveChainpatchFromQueue(null); }, (((reloadedcode == null) && (receivechainpatchqueue.length != 0)) ? 10 : 5000));  
     }
+
+              
 
     function startingrun(lrunID, luml, lchatname) 
     {
@@ -1301,15 +991,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         }
     }
 
-    function clearOutput() 
-    {
-        $('#output_console div').html('');
-        $('#output_sources div').html('');
-        $('#output_data table').html('');
-        $('.editor_output div.tabs li.console').removeClass('new');
-        $('.editor_output div.tabs li.data').removeClass('new');
-        $('.editor_output div.tabs li.sources').removeClass('new');
-    }
 
     function makeSelection(selrange)
     {
@@ -1338,12 +1019,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         var reloadajax = $.ajax({ url: $('input#editorreloadurl').val(), async: false, type: 'POST', data: { oldcode: oldcode }, timeout: 10000 }); 
         var reloaddata = $.evalJSON(reloadajax.responseText); 
         if (codemirroriframe)
-            codeeditor.setCode(reloaddata.code); 
+            receiveChainpatchFromQueue(reloaddata.code)
         else
             $("#id_code").val(reloaddata.code); 
         updateLastSavedRev(reloaddata.rev, reloaddata.revdateepoch);
-        chainpatchnumber = 0; 
-        //codeeditor.focus(); 
         if (reloaddata.selrange)
             makeSelection(reloaddata.selrange); 
         ChangeInEditor("reload"); 
@@ -1387,7 +1066,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         // the fork button
         $('.editor_controls #btnForkNow').live('click', function()
         {
-            forkScraper();  
+            window.open($('#fork_url_action').val()); 
             return false;
         });
         $('.editor_controls #btnForkNow').val('fork' + (wiki_type == 'scraper' ? ' scraper' : '')); 
@@ -1395,8 +1074,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         // the watch button
         $('.editor_controls #btnWatch').live('click', function()
         {
-            $('select#automode').val('autoload');
-            changeAutomode();
+            changeAutomode('autoload');
             return false;
         });
  
@@ -1426,7 +1104,11 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             sendjson({"command":'loseconnection'}); 
             //if (conn)  conn.close();  
         });  
-
+        $(window).bind('beforeunload', function() 
+        { 
+            bSuppressDisconnectionMessages = true; 
+        }); 
+        
         /*
         This fires when making a new scraper on some browsers (while doing the
         redirect), so need to prevent that case. Julian had this problem.
@@ -1578,13 +1260,15 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
             // server returned a different URL for the new scraper that has been created.  Now go to it (and reload)
             if (res.url && window.location.pathname != res.url)
+            {
                 window.location = res.url;
+                return;   // without this it sends an erroneous saved signal up to twister
+            }
 
             // ordinary save case.
             if (res.draft != 'True') 
             {
                 window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
-                updateLastSavedRev(res.rev, res.revdateepoch);
                 if (res.rev == null)
                 {
                     writeToChat("No difference (null revision number)"); 
@@ -1594,6 +1278,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 }
                 else 
                 {
+                    updateLastSavedRev(res.rev, res.revdateepoch);
                     writeToChat("Saved rev number: " + res.rev); 
                     $('.editor_controls #btnCommitPopup').val('Saved').addClass('darkness'); 
                     if (bConnected)
@@ -1615,23 +1300,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             $('.editor_controls #btnCommitPopup').val('Saving ...');
     }
 
-    // cause a fork of scraper being edited
-    function forkScraper()
-    {
-        window.open($('#fork_url_action').val());
-    }
-
-
-    function cgiescape(text) 
-    {
-        if (typeof text == 'number')
-            return String(text); 
-        if (typeof text != 'string')
-            return "&lt;NONSTRING "+(typeof text)+"&gt;"; // should convert on server
-        return (text ? text.replace(/&/g, '&amp;').replace(/</g, '&lt;') : "");
-    }
-
-    
     function setupResizeEvents()
     {
         $(window).resize(onWindowResize);
@@ -1669,39 +1337,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     }
 
 
-    function writeExceptionDump(exceptiondescription, stackdump, blockedurl, blockedurlquoted) 
-    {
-        if (stackdump) 
-        {
-            for (var i = 0; i < stackdump.length; i++) 
-            {
-                var stackentry = stackdump[i]; 
-                sMessage = (stackentry.file !== undefined ? (stackentry.file == "<string>" ? stackentry.linetext : stackentry.file) : ""); 
-                if (sMessage === undefined) {
-                    alert("sMessage is undefined in writeExceptionDump, internal error")
-                }
-                if (stackentry.furtherlinetext !== undefined) {
-                    sMessage += " -- " + stackentry.furtherlinetext;
-                }
-                linenumber = (stackentry.file == "<string>" ? stackentry.linenumber : undefined); 
-                writeToConsole(sMessage, 'exceptiondump', linenumber); 
-                if (stackentry.duplicates > 1) {
-                    writeToConsole("  + " + stackentry.duplicates + " duplicates", 'exceptionnoesc'); 
-                }
-            }
-        }
-
-        if (blockedurl) 
-        {
-            sMessage = "The link " + blockedurl.substring(0,50) + " has been blocked. "; 
-            sMessage += "Click <a href=\"/whitelist/?url=" + blockedurlquoted + "\" target=\"_blank\">here</a> for details."; 
-            writeToConsole(sMessage, 'exceptionnoesc'); 
-        } 
-        else 
-        {
-            writeToConsole(exceptiondescription, 'exceptiondump'); 
-        }
-    }
 
     function writeRunOutput(sMessage) 
     {
@@ -1710,123 +1345,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             activepreviewiframe.document.write(sMessage); 
     }
 
-    function showTextPopup(sLongMessage) 
-    {
-        $.modal('<pre class="popupoutput">'+cgiescape(sLongMessage)+'</pre>', 
-                {overlayClose: true, 
-                 containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
-                 overlayCss: { cursor:"auto" }
-                });
-    }
-
-    //Write to console/data/sources
-    function writeToConsole(sMessage, sMessageType, iLine) 
-    {
-        // if an exception set the class accordingly
-        var sShortClassName = '';
-        var sLongClassName = 'message_expander';
-        var sExpand = '...more'
-
-        var sLongMessage = undefined; 
-        if (sMessageType == 'httpresponseheader') 
-            sShortClassName = 'exception';
-
-        if (sMessageType == 'exceptiondump') 
-            sShortClassName = 'exception';
-
-        var escsMessage = cgiescape(sMessage); 
-        if (sMessageType == 'exceptionnoesc') {
-            sShortClassName = 'exception';
-            escsMessage = sMessage; // no escaping
-        }
-        else if (sMessage.length > 110) {
-            sLongMessage = sMessage; 
-            escsMessage = cgiescape(sMessage.replace(/^\s+|\s+$/g, "").substring(0, 100)); 
-        }
-
-        //create new item
-        var oConsoleItem = $('<span></span>');
-        oConsoleItem.addClass('output_item');
-        oConsoleItem.addClass(sShortClassName);
-        
-        oConsoleItem.html(escsMessage); 
-
-        if(sLongMessage != undefined) 
-        {
-            oMoreLink = $('<a href="#"></a>');
-            oMoreLink.addClass('expand_link');
-            oMoreLink.text(sExpand)
-            oMoreLink.longMessage = sLongMessage;
-            oConsoleItem.append(oMoreLink);
-            oMoreLink.click(function() { showTextPopup(sLongMessage); });
-        }
-
-        // add clickable line number link
-        if (iLine != undefined) {
-            oLineLink = $('<a href="#">Line ' + iLine + ' - </a>'); 
-            oConsoleItem.prepend(oLineLink);
-            oLineLink.click( function() { 
-                codeeditor.selectLines(codeeditor.nthLine(iLine), 0, codeeditor.nthLine(iLine + 1), 0); 
-            }); 
-        }
-
-        
-        //remove items if over max
-        while ($('#output_console div.output_content').children().size() >= outputMaxItems) 
-            $('#output_console div.output_content').children(':first').remove();
-
-        //append to console
-        $('#output_console div.output_content').append(oConsoleItem);
-        $('.editor_output div.tabs li.console').addClass('new');
-
-        setTabScrollPosition('console', 'bottom'); 
-    };
 
 
-    function lparsehighlightcode(sdata, lmimetype)
-    {
-        var cachejson; 
-        try 
-        {
-            cachejson = $.evalJSON(sdata);
-        } 
-        catch (err) 
-        {
-            return { "objcontent": $('<pre class="popupoutput">Malformed json: ' + cgiescape(sdata) + "</pre>") }; 
-        }
 
-        lmimetype = cachejson["mimetype"];  // the incoming value is incorrect because of failure to use closure and httpproxy.py isn't sending the value out properly (see line 489)
-        if ((lmimetype != "text/html") || (cachejson["content"].length > 20000))
-        {
-            var res = [ ]; 
-            res.push("<h2>mimetype: "+lmimetype+"</h2>"); 
-            if (cachejson["encoding"] == "base64")
-                res.push("<h2>Encoded as: "+cachejson["encoding"]+"</h2>"); 
-            res.push('<pre>', cgiescape(cachejson["content"]), '</pre>'); 
-            cachejson["objcontent"] = $(res.join("")); 
-            return cachejson; 
-        }
-        // could highlight text/javascript and text/css
-
-        var lineNo = 1; 
-        var cpnumbers= ($('input#popuplinenumbers').attr('checked') ? $('<div id="cp_linenumbers"></div>') : undefined); 
-        var cpoutput = $('<div id="cp_output"></div>'); 
-        function addLine(line) 
-        {
-            if (cpnumbers)
-                cpnumbers.append(String(lineNo++)+'<br>'); 
-            var kline = $('<span>').css('background-color', '#fae7e7'); 
-            for (var i = 0; i < line.length; i++) 
-                cpoutput.append(line[i]);
-            cpoutput.append('<br>'); 
-        }
-        highlightText(cachejson["content"], addLine, HTMLMixedParser); 
-        cachejson["objcontent"] = $('<div id="cp_whole"></div>'); 
-        if (cpnumbers)
-            cachejson["objcontent"].append(cpnumbers); 
-        cachejson["objcontent"].append(cpoutput); 
-        return cachejson; 
-    }
 
 
         // share this with history.html through codeviewer.js, and start to bring in the diff technology from there
@@ -1888,187 +1409,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     }
 
 
-    function popupCached(cacheid, lmimetype)
-    {
-        modaloptions = { overlayClose: true, 
-                         overlayCss: { cursor:"auto" }, 
-                         containerCss:{ borderColor:"#00f", "borderLeft":"2px solid black", height:"80%", padding:0, width:"90%", "text-align":"left", cursor:"auto" }, 
-                         containerId: 'simplemodal-container' 
-                       }; 
-
-        var cachejson = cachehidlookup[cacheid]; 
-        if (cachejson == undefined)
-        {
-            modaloptions['onShow'] = function() 
-            { 
-                $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, timeout: 10000, success: function(sdata) 
-                {
-                    cachejson = lparsehighlightcode(sdata, lmimetype); 
-                    if (cachejson["content"].length < 15000)  // don't cache huge things
-                        cachehidlookup[cacheid] = cachejson; 
-
-                    var wrapheight = $('.simplemodal-wrap').height(); 
-                    $('.simplemodal-wrap #loadingheader').remove(); 
-                    $('.simplemodal-wrap').append(cachejson["objcontent"]); 
-                    $('.simplemodal-wrap').css("height", wrapheight + "px").css("overflow", "auto"); 
-                }})
-            }
-            $.modal('<h1 id="loadingheader">Loading ['+cacheid+'] ...</h1>', modaloptions); 
-        }
-        else
-            $.modal(cachejson["objcontent"], modaloptions); 
-    }
-
-    function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, ddiffer, fetchtime) 
-    {
-        //remove items if over max
-        while ($('#output_sources div.output_content').children().size() >= outputMaxItems) 
-            $('#output_sources div.output_content').children(':first').remove();
-
-        // normalize the mimetypes
-        if (lmimetype == undefined)
-            lmimetype = "text/html"; 
-        else if (lmimetype == "text/html")
-            ; 
-        else if (lmimetype == "application/json")
-            lmimetype = "text/json"; 
-
-        //append to sources tab
-        var smessage = [ ]; 
-        var alink = '<a href="' + sUrl + '" target="_new">' + sUrl.substring(0, 100) + '</a>'; 
-        if ((failedmessage == undefined) || (failedmessage == ''))
-        {
-            smessage.push('<span class="bytesloaded">', bytes, 'bytes loaded</span>, '); 
-            if (lmimetype.substring(0, 5) != "text/") 
-                smessage.push("<b>"+lmimetype+"</b>"); 
-
-            // this is the orange up-arrow link that doesn't work because something wrong in the server, so hide it for now
-            //if (cacheid != undefined)
-            //    smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
-
-            if (cached == 'True')
-                smessage.push('(from cache)'); 
-        }
-        else
-            smessage.push(failedmessage); 
-        if (ddiffer == "True")
-            smessage.push('<span style="background:red"><b>BAD CACHE</b></span>, '); 
-        if (fetchtime != undefined)
-            smessage.push('<span class="">response time: ', Math.round(fetchtime*1000), 'ms</span>, '); 
-
-        smessage.push(alink); 
-
-        $('#output_sources div.output_content').append('<span class="output_item">' + smessage.join(" ") + '</span>')
-        $('.editor_output div.tabs li.sources').addClass('new');
-        
-        if (cacheid != undefined)  
-            $('a#cacheid-'+cacheid).click(function() { popupCached(cacheid, lmimetype); return false; }); 
-
-        setTabScrollPosition('sources', 'bottom'); 
-    }
-
-    function writeToData(aRowData) 
-    {
-        while ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) 
-            $('#output_data table.output_content tbody').children(':first').remove();
-
-        var oRow = $('<tr></tr>');
-
-        $.each(aRowData, function(i){
-            var oCell = $('<td></td>');
-            oCell.html(cgiescape(aRowData[i]));
-            oRow.append(oCell);
-        });
-
-        $('#output_data table.output_content').append(oRow);  // oddly, append doesn't work if we add tbody into this selection
-        setTabScrollPosition('data', 'bottom'); 
-        $('.editor_output div.tabs li.data').addClass('new');
-    }
-
-    function writeToSqliteData(command, val1, lval2) 
-    {
-        while ($('#output_data table.output_content tbody').children().size() >= outputMaxItems) 
-            $('#output_data table.output_content tbody').children(':first').remove();
-
-        var row = [ ]; 
-        row.push('<tr><td><b>'+cgiescape(command)+'</b></td>'); 
-        if (val1)
-            row.push('<td>'+cgiescape(val1)+'</td>'); 
-        if (lval2)
-        {
-            for (var i = 0; i < lval2.length; i++)
-                row.push('<td>'+cgiescape(lval2[i])+'</td>'); 
-        }
-        row.push('</tr>'); 
-
-        $('#output_data table.output_content').append($(row.join("")));  
-        setTabScrollPosition('data', 'bottom'); 
-        $('.editor_output div.tabs li.data').addClass('new');
-    }
-
-    function writeToChat(seMessage, sechatname) 
-    {
-        while ($('#output_chat table.output_content tbody').children().size() >= outputMaxItems) 
-            $('#output_chat table.output_content tbody').children(':first').remove();
-
-        var oRow = $('<tr><td>' + (sechatname ? sechatname + ": " : "") + seMessage + '</td></tr>');
-        $('#output_chat table.output_content').append(oRow);
-        setTabScrollPosition('chat', 'bottom'); 
-        $('.editor_output div.tabs li.chat').addClass('new');
-
-        if (sechatname && (sechatname != chatname))
-        {
-                // currently highlights when there is more than a minute gap.  But could be longer
-            if ((chatpeopletimes[sechatname] == undefined) || ((servernowtime.getTime() - chatpeopletimes[sechatname].getTime())/1000 > 60))
-            {
-                chatpeopletimes[sechatname] = servernowtime; 
-                $('.editor_output div.tabs li.chat').addClass('chatalert');
-                //window.setTimeout(function() { $('.editor_output div.tabs li.chat').removeClass('chatalert'); }, 1500); 
-            }
-        }
-    }
-
-    // some are implemented with tables, and some with span rows.  
-    function setTabScrollPosition(sTab, command) 
-    {
-        divtab = '#output_' + sTab; 
-        contenttab = '#output_' + sTab; 
-
-        if ((sTab == 'console') || (sTab == 'sources')) {
-            divtab = '#output_' + sTab + ' div';
-            contenttab = '#output_' + sTab + ' .output_content';
-        }
-
-        if (command == 'hide')
-            scrollPositions[sTab] = $(divtab).scrollTop();
-        else {
-            if (command == 'bottom')
-                scrollPositions[sTab] = $(contenttab).height()+$(divtab)[0].scrollHeight; 
-            $(divtab).animate({ scrollTop: scrollPositions[sTab] }, 0);
-        }
-    }
 
 
-    //show tab
-    function showTab(sTab)
-    {
-        setTabScrollPosition(sTabCurrent, 'hide'); 
-        $('.editor_output .info').children().hide();
-        $('.editor_output .controls').children().hide();        
-        
-        $('#output_' + sTab).show();
-        $('#controls_' + sTab).show();
-        sTabCurrent = sTab; 
 
-        $('.editor_output div.tabs ul').children().removeClass('selected');
-        $('.editor_output div.tabs li.' + sTab).addClass('selected');
-        $('.editor_output div.tabs li.' + sTab).removeClass('new');
-        if (sTab == 'chat')
-            $('.editor_output div.tabs li.chat').removeClass('chatalert');
-        
-        setTabScrollPosition(sTab, 'show'); 
-    }
-    
 
     //resize code editor
    function resizeCodeEditor()
@@ -2100,8 +1443,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
 
     //click bar to resize
-    function resizeControls(sDirection) {
-    
+    function resizeControls(sDirection) 
+    {
         if (sDirection == 'first')
             previouscodeeditorheight = $(window).height() * 3/5; 
         else if (sDirection != 'up' && sDirection != 'down')
@@ -2126,6 +1469,4 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         resizeCodeEditor();
     }
 
-   
-   
 });

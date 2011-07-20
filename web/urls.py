@@ -16,10 +16,12 @@ from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.contrib import admin
 admin.autodiscover()
 
-from frontend.feeds import LatestCodeObjects, LatestCodeObjectsBySearchTerm, LatestCodeObjectsByTag, CommentsForCode
+from frontend.feeds import LatestCodeObjects, LatestCodeObjectsBySearchTerm, LatestCodeObjectsByTag, CommentsForCode, LatestViewObjects, LatestScraperObjects
 
 feeds = {
     'all_code_objects': LatestCodeObjects,
+    'all_scrapers': LatestScraperObjects,    
+    'all_views':   LatestViewObjects,        
     'latest_code_objects_by_search_term': LatestCodeObjectsBySearchTerm,
     'latest_code_objects_by_tag': LatestCodeObjectsByTag,
     'code_object_comments': CommentsForCode,
@@ -39,7 +41,7 @@ urlpatterns = patterns('',
     url(r'^captcha/', include('captcha.urls')),
     
     # allows direct viewing of the django tables
-    url(r'^admin/(.*)', admin.site.root, name="admin"),
+    url(r'^admin/', include(admin.site.urls)),
 
     #paypal
     (r'^paypal/notifications/56db6e2700d04e38a5d/', include('paypal.standard.ipn.urls')),

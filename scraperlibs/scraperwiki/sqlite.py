@@ -73,7 +73,7 @@ def databaseexception(errmap):
 
 def save(unique_keys, data, table_name="swdata", verbose=2, date=None):
     if unique_keys != None and type(unique_keys) not in [ list, tuple ]:
-        return { "error":'unique_keys must a list or tuple', "unique_keys_type":str(type(unique_keys)) }
+        raise databaseexception({ "error":'unique_keys must a list or tuple', "unique_keys_type":str(type(unique_keys)) })
 
     def convdata(unique_keys, scraper_data):
         if unique_keys:

@@ -75,6 +75,30 @@ class LatestCodeObjectsByTag(Feed):
        return sorted(list(views) + list(scrapers), key=lambda x: x.created_at, reverse=True)[:settings.RSS_ITEMS]
 
 
+class LatestViewObjects(Feed):
+    title = "Latest items | %s" % current_site.name
+    link = "/browse"
+    description = "All the latest views added to ScraperWiki"
+
+    def item_link(self, obj):
+        return obj.get_absolute_url()
+        
+    def items(self):
+        return View.objects.filter(privacy_status="public").order_by('-created_at')[:settings.RSS_ITEMS]
+
+
+class LatestScraperObjects(Feed):
+    title = "Latest items | %s" % current_site.name
+    link = "/browse"
+    description = "All the latest scrapers added to ScraperWiki"
+
+    def item_link(self, obj):
+        return obj.get_absolute_url()
+        
+    def items(self):
+        return Scraper.objects.filter(privacy_status="public").order_by('-created_at')[:settings.RSS_ITEMS]
+
+
 class LatestCodeObjects(Feed):
     title = "Latest items | %s" % current_site.name
     link = "/browse"

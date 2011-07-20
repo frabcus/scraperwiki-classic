@@ -22,11 +22,16 @@ import time
 import ConfigParser
 import datetime
 import optparse, grp, pwd
+import urllib, urlparse
 import logging, logging.config
+
+
 try:
     import cloghandler
 except:
     pass
+
+
 
 parser = optparse.OptionParser()
 parser.add_option("--pidfile")
@@ -41,6 +46,7 @@ config.readfp(open(poptions.config))
     # primarily to pick up syntax errors
 stdoutlog = poptions.logfile and open(poptions.logfile+"-stdout", 'a', 0)  
 
+logger = logging.getLogger('twister')
 
 try:    import json
 except: import simplejson as json
@@ -48,10 +54,14 @@ except: import simplejson as json
 from twisted.internet import protocol, utils, reactor, task
 
 # for calling back to the scrapers/twister/status
-from twisted.web.client import Agent
+from twisted.web.client import Agent, ResponseDone
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
-from twisted.internet.defer import succeed
+from twisted.internet.defer import succeed, Deferred
+from twisted.internet.defer import Deferred
+from twisted.internet.error import ProcessDone
+
+from twisterscheduledruns import ScheduledRunMessageLoopHandler
 
 agent = Agent(reactor)
 
@@ -66,16 +76,15 @@ class spawnRunner(protocol.ProcessProtocol):
         self.runID = None
         self.umlname = ''
         self.buffer = ''
-        self.logger = logging.getLogger('twister')
     
     def connectionMade(self):
-        self.logger.debug("Starting run")
+        logger.debug("Starting run")
         self.transport.write(self.code)
         self.transport.closeStdin()
     
     # messages from the UML
     def outReceived(self, data):
-        self.logger.debug("runner to client# %d %s" % (self.client.clientnumber, data[:100]))
+        logger.debug("runner to client# %d %s" % (self.client.clientnumber, data[:100]))
             # although the client can parse the records itself, it is necessary to split them up here correctly so that this code can insert its own records into the stream.
         lines  = (self.buffer+data).split("\r\n")
         self.buffer = lines.pop(-1)  # usually an empty
@@ -91,14 +100,36 @@ class spawnRunner(protocol.ProcessProtocol):
                     line = json.dumps(parsed_data)  # inject values into the field
             self.client.writeall(line)
 
+        # could move into a proper function in the client once slimmed down slightly
     def processEnded(self, reason):
         self.client.processrunning = None
         self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished'}))
-        self.client.factory.notifyMonitoringClients(self.client)
-        if reason.type == 'twisted.internet.error.ProcessDone':
-            self.logger.debug("run process ended %s" % reason)
-        else:
-            self.logger.debug("run process ended ok")
+        
+        if self.client.clienttype == "editing":
+            self.client.factory.notifyMonitoringClients(self.client)
+        elif self.client.clienttype == "scheduledrun":
+            self.client.scheduledrunmessageloophandler.schedulecompleted()
+            self.client.factory.scheduledruncomplete(self.client, reason.type==ProcessDone)
+
+        logger.debug("run process %s ended client# %d %s" % (self.client.clienttype, self.client.clientnumber, str([reason])))
+
+
+
+def MakeRunner(scrapername, guid, language, urlquery, username, code, client):
+    args = ['./firestarter/runner.py']
+    args.append('--guid=%s' % guid)
+    args.append('--language=%s' % language)
+    args.append('--name=%s' % scrapername)
+    args.append('--urlquery=%s' % urlquery)
+    if not username:
+        args.append('--draft')
+
+    code = code.encode('utf8')
+    args = [i.encode('utf8') for i in args]
+    logger.debug("./firestarter/runner.py: %s" % args)
+
+    # from here we should somehow get the runid
+    return reactor.spawnProcess(spawnRunner(client, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
 
 
 
@@ -120,13 +151,12 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.clientsessionbegan = datetime.datetime.now()
         self.clientlasttouch = self.clientsessionbegan
         self.guidclienteditors = None  # the EditorsOnOneScraper object
-        self.automode = 'autosave'     # draft, autosave, autoload, autotype
-        self.isumlmonitoring = None  # used to designate as not being initialized at all (bug if connection lost before it was successfully connected)
-        self.logger = logging.getLogger('twister')
+        self.automode = 'autosave'     # autosave, autoload, or draft when guid is not set
+        self.clienttype = None # 'editing', 'umlmonitoring', 'rpcrunning', or 'scheduledrun'
 
 
     def connectionMade(self):
-        self.logger.info("connection client# %d" % self.factory.clientcount)
+        logger.info("connection client# %d" % self.factory.clientcount)
         
         # this returns localhost and is unable to distinguish between orbited or django source
         #socket = self.transport.getHandle()
@@ -143,23 +173,26 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.scrapername = parsed_data.get('scrapername', '')
         self.scraperlanguage = parsed_data.get('language', '')
         self.isstaff = (parsed_data.get('isstaff') == "yes")
-        self.isumlmonitoring = (parsed_data.get('umlmonitoring') == "yes")
-        self.savecode_authorized = (parsed_data.get('savecode_authorized') == "yes")
-        
-        if self.username:
-            self.chatname = self.userrealname or self.username
+
+        if parsed_data.get('umlmonitoring') == "yes":
+            self.clienttype = "umlmonitoring"
         else:
-            self.chatname = "Anonymous%d" % self.factory.anonymouscount
-            self.factory.anonymouscount += 1
-        self.cchatname = "%s|%s" % (self.username, self.chatname)
-        self.factory.clientConnectionRegistered(self)  # this will cause a notifyEditorClients to be called for everyone on this scraper
-        self.logger.info("connection open: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber)) 
+            self.clienttype = "editing"
+
+        self.savecode_authorized = (parsed_data.get('savecode_authorized') == "yes")
+        self.originalrev = parsed_data.get('originalrev', '')
+        
+            # this will cause a notifyEditorClients to be called for everyone on this scraper
+        self.factory.clientConnectionRegistered(self)  
+        if self.clienttype == "editing":
+            logger.info("connection open: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber)) 
 
 
     def connectionLost(self, reason):
-        if self.processrunning:
-            self.kill_run(reason='connection lost')
-        self.logger.info("connection lost: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
+        if self.clienttype == "editing":
+            if self.processrunning:
+                self.kill_run(reason='connection lost')
+            logger.info("connection lost: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber))
         self.factory.clientConnectionLost(self)
 
         
@@ -183,12 +216,13 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         
             
     def clientcommand(self, command, parsed_data):
-        self.logger.debug("command %s client# %d" % (command, self.clientnumber))
+        if command != 'typing':
+            logger.debug("command %s client# %d" % (command, self.clientnumber))
         
         # update the lasttouch values on associated aggregations
-        if command != 'automode':
+        if command != 'automode' and self.clienttype == "editing":
             self.clientlasttouch = datetime.datetime.now()
-            if self.guid and self.automode != 'draft' and self.username:
+            if self.guid and self.username:
                 assert self.username in self.guidclienteditors.usereditormap
                 self.guidclienteditors.usereditormap[self.username].userlasttouch = self.clientlasttouch
                 self.guidclienteditors.scraperlasttouch = self.clientlasttouch
@@ -218,9 +252,10 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             if parsed_data.get('django_key') != config.get('twister', 'djangokey'):
                 logger.error("djangokey_mismatch")
                 self.writejson({'status':'twister djangokey mismatch'})
-                client.writejson({"message_type":"console", "content":"twister djangokey mismatch"})  
-                client.writejson({'message_type':'executionstatus', 'content':'runfinished'})
-                client = None
+                if client:
+                    client.writejson({"message_type":"console", "content":"twister djangokey mismatch"})  
+                    client.writejson({'message_type':'executionstatus', 'content':'runfinished'})
+                    client = None
             
             if client:
                 logger.info("stimulate on : %s %s client# %d" % (client.cchatname, client.scrapername, client.clientnumber))
@@ -237,24 +272,41 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
             self.transport.loseConnection()
 
+        elif command == 'rpcrun':
+            self.username = parsed_data.get('username', '')
+            self.userrealname = parsed_data.get('userrealname', self.username)
+            self.scrapername = parsed_data.get('scrapername', '')
+            self.scraperlanguage = parsed_data.get('language', '')
+            self.guid = parsed_data.get("guid", '')
+            if parsed_data.get('django_key') == config.get('twister', 'djangokey'):
+                self.clienttype = "rpcrunning"
+                self.factory.clientConnectionRegistered(self)  
+                self.runcode(parsed_data)
+                    # termination is by the calling function when it receives an executionstatus runfinished message
+            else:
+                logger.error("djangokey_mismatch")
+                self.writejson({'status':'twister djangokey mismatch'})
+                self.transport.loseConnection()
+
 
         elif command == 'saved':
             line = json.dumps({'message_type' : "saved", 'chatname' : self.chatname})
             otherline = json.dumps({'message_type' : "othersaved", 'chatname' : self.chatname})
+            self.guidclienteditors.rev = parsed_data["rev"]
+            self.guidclienteditors.chainpatchnumber = 0
             self.writeall(line, otherline)
             self.factory.notifyMonitoringClientsSmallmessage(self, "savenote")
 
 
-    # this signal needs to be more organized, esp to send out the the monitoring users to update the activity
-    # and find a way for showing to watching users if anything at all is going on in the last hour
-    # Long term inactivity will be the trigger that allows someone else to grab the editorship from another user.  
+    # should record the rev and chainpatchnumber so when we join to this scraper we know
         elif command == 'typing':
+            logger.debug("command %s client# %d insertlinenumber %s" % (command, self.clientnumber, parsed_data.get("insertlinenumber")))
             jline = {'message_type' : "typing", 'content' : "%s typing" % self.chatname}
-            jotherline = {'message_type' : "othertyping", 'content' : "%s typing" % self.chatname}
-            if "insertlinenumber" in parsed_data:
-                jotherline["insertlinenumber"] = parsed_data["insertlinenumber"]
-                jotherline["deletions"] = parsed_data["deletions"]
-                jotherline["insertions"] = parsed_data["insertions"]
+            jotherline = parsed_data.copy()
+            jotherline.pop("command")
+            jotherline["message_type"] = "othertyping"
+            jotherline["content"] = jline["content"]
+            self.guidclienteditors.chainpatchnumber = parsed_data.get("chainpatchnumber")
             self.writeall(json.dumps(jline), json.dumps(jotherline))
             self.factory.notifyMonitoringClientsSmallmessage(self, "typingnote")
             
@@ -273,13 +325,46 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
             self.runcode(parsed_data)
         
+        elif command == "umlcontrol":
+                # allows monitoring client to remotely kill processes
+            if self.clienttype != "umlmonitoring":
+                logger.error("umlcontrol called by non-monitoring client")
+                return
+                
+            logger.info("umlcontrol %s" % ([parsed_data]))
+
+            subcommand = parsed_data.get("subcommand")
+            if subcommand == "killscraper":
+                scrapername = parsed_data["scrapername"]
+                for eoos in self.factory.guidclientmap.values():   # would be better if it was by scrapername instead of guid
+                    if eoos.scrapername == scrapername:
+                        for usereditor in eoos.usereditormap.values():
+                            for uclient in usereditor.userclients:
+                                if uclient.processrunning:
+                                    logger.info("umlcontrol killing run on client# %d %s" % (uclient.clientnumber, scrapername))
+                                    uclient.kill_run()
+
+            if subcommand == "killallscheduled":
+                for client in self.factory.scheduledrunners.values():
+                    if client.processrunning:
+                       logger.info("umlcontrol killing run on client# %d %s" % (client.clientnumber, client.scrapername))
+                       client.kill_run()
+                    else:
+                        logger.info("umlcontrol client# %d %s wasn't running" % (client.clientnumber, client.scrapername))
+                       
+            if "maxscheduledscrapers" in parsed_data:
+                self.factory.maxscheduledscrapers = parsed_data["maxscheduledscrapers"]
+                self.factory.notifyMonitoringClients(None)
+
         elif command == "kill":
             if self.processrunning:
                 self.kill_run()
-            elif self.username and self.guid:   # allows the killing of a process in another open window by same user
+                
+                # allows the killing of a process in another open window by same user
+            elif self.username and self.guid:   
                 usereditor = self.guidclienteditors.usereditormap[self.username]
                 for client in usereditor.userclients:
-                    if client.automode != 'draft' and client.processrunning:
+                    if client.processrunning:
                         client.kill_run()
 
         elif command == 'chat':
@@ -288,10 +373,9 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         
         elif command == 'requesteditcontrol':
             for usereditor in self.guidclienteditors.usereditormap.values():
-                if usereditor.nondraftcount:
-                    for client in usereditor.userclients:
-                        if client.automode == 'autotype' or client.automode == 'autosave':
-                            client.writejson({'message_type':'requestededitcontrol', "username":self.username})
+                for client in usereditor.userclients:
+                    if client.automode == 'autosave':
+                        client.writejson({'message_type':'requestededitcontrol', "username":self.username})
         
         elif command == 'giveselrange':
             self.writeall(None, json.dumps({'message_type':'giveselrange', 'selrange':parsed_data.get('selrange'), 'chatname':self.chatname }))
@@ -309,18 +393,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
             usereditor = self.guidclienteditors.usereditormap[self.username]
  
-                # this mode is defunct so nondraftcount should always be the same as len(usereditor.userclients)
-            if automode == 'draft':
-                usereditor.nondraftcount -= 1
-                if self.processrunning:
-                    self.kill_run(reason='convert to draft')
-                
-            elif self.automode == 'draft':  # change back from draft (can't happen for now)
-                assert False
-                usereditor.nondraftcount += 1
-
                 # self-demote to autoload mode while choosing to promote a particular person to editing mode
-            elif automode == 'autoload':
+            if automode == 'autoload':
                 selectednexteditor = parsed_data.get('selectednexteditor')
                 if selectednexteditor and selectednexteditor in self.guidclienteditors.usereditormap:
                     assert self.guidclienteditors.usereditormap[selectednexteditor].usersessionpriority >= usereditor.usersessionpriority
@@ -328,18 +402,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                 usereditor.usersessionpriority = self.guidclienteditors.usersessionprioritynext
                 self.guidclienteditors.usersessionprioritynext += 1
             
-                # another of the same users windows takes it out of autotype mode
-            elif automode == 'autosave':
-                for client in usereditor.userclients:
-                    if client.automode == 'autotype':
-                        client.automode = 'autosave'
-            
-                # for the watching windows of same broadcast user to not demote the main window
-            elif automode == 'autoload-nodemote':
-                automode = 'autoload'
-            
             self.automode = automode
-            assert usereditor.nondraftcount == len([lclient  for lclient in usereditor.userclients  if lclient.automode != 'draft'])
             
             self.guidclienteditors.notifyEditorClients("")
             self.factory.notifyMonitoringClients(self)
@@ -352,12 +415,15 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             try:
                 self.transport.loseConnection()
             except: 
-                self.logger.debug('Closing connection on already closed connection failed')
+                logger.debug('Closing connection on already closed connection failed')
     
     # message to the client
     def writeline(self, line):
-        self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together
-
+        if self.clienttype != "scheduledrun":
+            self.transport.write(line+",\r\n")  # note the comma added to the end for json parsing when strung together
+        else:
+            self.scheduledrunmessageloophandler.receiveline(line)
+            
     def writejson(self, data):
         self.writeline(json.dumps(data))
 
@@ -365,19 +431,17 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         if line: 
             self.writeline(line)  
         
-        if self.automode == 'draft':
-            pass
-        elif self.guidclienteditors:
+        if self.guidclienteditors:
             if not otherline:
                 otherline = line
             
             for client in self.guidclienteditors.anonymouseditors:
-                if client != self and client.automode != 'draft':
+                if client != self:
                     client.writeline(otherline); 
             
             for usereditor in self.guidclienteditors.usereditormap.values():
                 for client in usereditor.userclients:
-                    if client != self and client.automode != 'draft':
+                    if client != self:
                         client.writeline(otherline); 
         else:
             assert not self.guid
@@ -388,47 +452,23 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         if reason:
             msg = "%s (%s)" % (msg, reason)
         self.writeall(json.dumps({'message_type':'executionstatus', 'content':'killsignal', 'message':msg}))
-        self.logger.debug(msg)
+        logger.debug(msg)
         try:      # (should kill using the new dispatcher call)
             os.kill(self.processrunning.pid, signal.SIGKILL)
         except:
             pass
 
     
-            # this more recently can be called from stimulate_run from django
+            # this more recently can be called from stimulate_run from django (many of these parameters could be in the client)
     def runcode(self, parsed_data):
         code = parsed_data.get('code', '')
-        code = code.encode('utf8')
-        
-        # these could all be fetched (or verified) from self
-        # may want to have a verification of the login information by a callback to django to make sure the 
-        # username that is declared really is authorized to write to the scraper declared
-        
         guid = parsed_data.get('guid', '')
         scraperlanguage = parsed_data.get('language', 'python')
         scrapername = parsed_data.get('scrapername', '')
-        scraperlanguage = parsed_data.get('language', '')
         urlquery = parsed_data.get('urlquery', '')
         username = parsed_data.get('username', '')
-        automode = parsed_data.get('automode', '')
-        
-        assert guid == self.guid
-        args = ['./firestarter/runner.py']
-        args.append('--guid=%s' % guid)
-        args.append('--language=%s' % scraperlanguage)
-        args.append('--name=%s' % scrapername)
-        args.append('--urlquery=%s' % urlquery)
-        if not username or automode == "draft":
-            args.append('--draft')
-
-        args = [i.encode('utf8') for i in args]
-        self.logger.debug("./firestarter/runner.py: %s" % args)
-
-        # from here we should somehow get the runid
-        self.processrunning = reactor.spawnProcess(spawnRunner(self, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
+        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self)
         self.factory.notifyMonitoringClients(self)
-
-
         
 
 class UserEditorsOnOneScraper:
@@ -437,10 +477,6 @@ class UserEditorsOnOneScraper:
         self.userclients = [ ]
         self.usersessionbegan = None
         self.usersessionpriority = lusersessionpriority  # list of users on a scraper sorted by this number, and first one in list gets the editorship
-        self.nondraftcount = 0
-                # need another value to mark which are the watchers and which are the editors (or derive this)
-                # the states are enacted by the browser (by changing the dropdown or allowing user to change the drop down)
-                # on the basis of the information supplied to it
         self.userlasttouch = datetime.datetime.now()
         self.AddUserClient(client)
     
@@ -449,23 +485,17 @@ class UserEditorsOnOneScraper:
         if not self.userclients:
             assert not self.usersessionbegan
             self.usersessionbegan = client.clientsessionbegan
-        if client.automode != 'draft':
-            self.nondraftcount += 1
         self.userclients.append(client)
-        assert self.nondraftcount == len([lclient  for lclient in self.userclients  if lclient.automode != 'draft'])
         
     def RemoveUserClient(self, client):
         assert self.username == client.username
         assert client in self.userclients
         self.userclients.remove(client)
-        if client.automode != 'draft':
-            self.nondraftcount -= 1
-        assert self.nondraftcount == len([lclient  for lclient in self.userclients  if lclient.automode != 'draft'])
         return len(self.userclients)
         
         
 class EditorsOnOneScraper:
-    def __init__(self, guid, scrapername, scraperlanguage):
+    def __init__(self, guid, scrapername, scraperlanguage, originalrev):
         self.guid = guid
         self.scrapername = scrapername
         self.scraperlanguage = scraperlanguage
@@ -474,6 +504,8 @@ class EditorsOnOneScraper:
         self.scraperlasttouch = datetime.datetime.now()
         self.usereditormap = { }  # maps username to UserEditorsOnOneScraper
         self.usersessionprioritynext = 0
+        self.originalrev = originalrev
+        self.chainpatchnumber = 0
         
     def AddClient(self, client):
         assert client.guid == self.guid
@@ -516,23 +548,17 @@ class EditorsOnOneScraper:
         editorstatusdata["scraperlasttouch"] = jstime(self.scraperlasttouch)
         
                 # order by who has first session (and not all draft mode) in order to determin who is the editor
-        usereditors = [ usereditor  for usereditor in self.usereditormap.values()  if usereditor.nondraftcount ]
+        usereditors = self.usereditormap.values()
         usereditors.sort(key=lambda x: x.usersessionpriority)
-        print [ usereditor.__dict__  for usereditor in usereditors ]
         editorstatusdata["loggedinusers"] = [ ]
         editorstatusdata["loggedineditors"] = [ ]
+        editorstatusdata["countclients"] = len(self.anonymouseditors)  # so we know what windows are connected to this editor (if any)
         for usereditor in usereditors:
+            editorstatusdata["countclients"] += len(usereditor.userclients)
             if usereditor.userclients[-1].savecode_authorized:   # as recorded in last client for this user
                 editorstatusdata["loggedineditors"].append(usereditor.username)
             else:
                 editorstatusdata["loggedinusers"].append(usereditor.username)
-        
-        # notify if there is a broadcasting editor so the windows can sort out which one's are autoloading
-        for usereditor in usereditors:
-            for client in usereditor.userclients:
-                if client.automode == 'autotype':
-                    editorstatusdata["broadcastingeditor"] = usereditor.username
-                    
         
         editorstatusdata["nanonymouseditors"] = len(self.anonymouseditors)
         editorstatusdata["message"] = message
@@ -551,6 +577,30 @@ class EditorsOnOneScraper:
         return len(self.anonymouseditors) + sum([len(usereditor.userclients)  for usereditor in self.usereditormap.values()])
 
 
+apiurl = "http://localhost:8010"  # should be in config
+class requestoverduescrapersReceiver(protocol.Protocol):
+    def __init__(self, finished, factory):
+        self.finished = finished
+        self.factory = factory
+        self.rbuffer = [ ]
+        
+    def dataReceived(self, bytes):
+        self.rbuffer.append(bytes)
+        
+    def connectionLost(self, reason):
+        if reason.type == ResponseDone:
+            try:
+                jdata = json.loads("".join(self.rbuffer))
+                self.factory.requestoverduescrapersAction(jdata)
+            except ValueError:
+                logger.warning("request overdue bad json: "+str(self.rbuffer))
+        else:
+            logger.warning("nope "+str([reason.getErrorMessage(), reason.type]))
+        self.finished.callback(None)
+
+
+        
+
 class RunnerFactory(protocol.ServerFactory):
     protocol = RunnerProtocol
     
@@ -560,28 +610,101 @@ class RunnerFactory(protocol.ServerFactory):
         self.anonymouscount = 1
         self.announcecount = 0
         
+        self.connectedclients = [ ]
         self.umlmonitoringclients = [ ]
         self.draftscraperclients = [ ]
-        self.guidclientmap = { }  # maps to EditorsOnOneScraper objects
+        self.rpcrunningclients = [ ]
+        self.scheduledrunners = { } # maps from short_name to client objects (that are also put into guidclientmap)
         
-        # set the visible heartbeat goingthere
-        #self.lc = task.LoopingCall(self.announce)
-        #self.lc.start(10)
+        self.guidclientmap = { }  # maps from short_name to EditorsOnOneScraper objects
 
-    # every 10 seconds sends out a quiet poll
-    def announce(self):
-        pass
+        self.maxscheduledscrapers = 5
+        self.notifiedmaxscheduledscrapers = self.maxscheduledscrapers
 
+        # set the visible heartbeat going which is used to call back and look up the schedulers
+        #*** UNCOMMENT THIS to enable new type of scheduling
+        #self.lc = task.LoopingCall(self.requestoverduescrapers)
+        #self.lc.start(30)
         
-    # throw in the kitchen sink to get the features.  optimize for changes later
-    # should also allocate an automode (from among the windows that a scraper user has)
+    #
+    # system of functions for fetching the overdue scrapers and knocking them out
+    #
+    def requestoverduescrapers(self):
+        logger.info("requestoverduescrapers")
+        uget = {"format":"jsondict", "searchquery":"*OVERDUE*", "maxrows":self.maxscheduledscrapers+5}
+        url = urlparse.urljoin(config.get("twister", "apiurl"), '/api/1.0/scraper/search')
+        d = agent.request('GET', "%s?%s" % (url, urllib.urlencode(uget)))
+        d.addCallbacks(self.requestoverduescrapersResponse, self.requestoverduescrapersFailure)
+
+    def requestoverduescrapersFailure(self, failure):
+        logger.info("requestoverduescrapers failure received "+str(failure))
+
+    def requestoverduescrapersResponse(self, response):
+        finished = Deferred()
+        response.deliverBody(requestoverduescrapersReceiver(finished, self))
+        return finished
+
+    def requestoverduescrapersAction(self, overduelist):
+        logger.info("overdue "+str([od.get("short_name")  for od in overduelist]))
+        while len(self.scheduledrunners) < self.maxscheduledscrapers and overduelist:
+            scraperoverdue = overduelist.pop(0)
+            scrapername = scraperoverdue["short_name"]
+            if scrapername in self.scheduledrunners:
+                continue
+            
+                    # avoids scheduling cases where someone is editing
+            if scrapername in self.guidclientmap:
+                continue
+
+                # fabricate a new client (not actually connected to a socket or made by the factory)
+            sclient = RunnerProtocol()
+            sclient.factory = self
+            sclient.guid = scraperoverdue.get('guid', '')
+            sclient.username = '*SCHEDULED*'
+            sclient.userrealname = sclient.username
+            sclient.scrapername = scrapername
+            sclient.clienttype = "scheduledrun"
+            sclient.originalrev = scraperoverdue.get('rev', '')
+            sclient.savecode_authorized = False
+            sclient.scraperlanguage = scraperoverdue.get('language', '')
+            code = scraperoverdue.get('code', '')
+            urlquery = ""
+
+            self.clientConnectionMade(sclient)  # allocates the client number
+            self.scheduledrunners[scrapername] = sclient
+            djangokey = config.get("twister", "djangokey")
+            djangourl = config.get("twister", "djangourl")
+            sclient.scheduledrunmessageloophandler = ScheduledRunMessageLoopHandler(sclient, logging, djangokey, djangourl, agent)
+            self.clientConnectionRegistered(sclient)  
+
+            logger.info("starting off scheduled client: %s %s client# %d" % (sclient.cchatname, sclient.scrapername, sclient.clientnumber)) 
+            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient)
+            self.notifyMonitoringClients(sclient)
+
+
+    def scheduledruncomplete(self, sclient, processsucceeded):
+        logger.debug("scheduledruncomplete %d" % sclient.clientnumber)
+        self.clientConnectionLost(sclient)
+        del self.scheduledrunners[sclient.scrapername]
+            # do some post-back to a run object connection
+# need to then do something special when the process running is complete
+
+
+    # able to send out just a change for on a particular client in umlstatuschanges, or the full state of what's happening as umlstatusdata if required
     def notifyMonitoringClients(self, cclient):  # cclient is the one whose state has changed (it can be normal editor or a umlmonitoring case)
-        assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
+        Dtclients = len(self.connectedclients) + len(self.rpcrunningclients) + len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
+        if len(self.clients) != Dtclients:
+            logger.error("Miscount of clients %d %d" % (len(self.clients), Dtclients))
         
-        # both of these are in the same format and read the same, but changes are shorter
+        # both of these are in the same format and read the same, but umlstatuschanges are shorter
         umlstatuschanges = {'message_type':"umlchanges", "nowtime":jstime(datetime.datetime.now()) }; 
-        if cclient.isumlmonitoring:
+        if self.notifiedmaxscheduledscrapers != self.maxscheduledscrapers:
+            self.notifiedmaxscheduledscrapers = self.maxscheduledscrapers
+            umlstatuschanges["maxscheduledscrapers"] = self.maxscheduledscrapers
+
+        if cclient and cclient.clienttype == "umlmonitoring":
              umlstatusdata = {'message_type':"umlstatus", "nowtime":umlstatuschanges["nowtime"]}
+             umlstatusdata["maxscheduledscrapers"] = self.maxscheduledscrapers
         else:
              umlstatusdata = None
         
@@ -594,23 +717,29 @@ class RunnerFactory(protocol.ServerFactory):
                 umlmonitoringusers[client.cchatname] = max(client.clientlasttouch, umlmonitoringusers[client.cchatname])
             else:
                 umlmonitoringusers[client.cchatname] = client.clientlasttouch
+
         #umlmonitoringusers = set([ client.cchatname  for client in self.umlmonitoringclients ])
         if umlstatusdata:
             umlstatusdata["umlmonitoringusers"] = [ {"chatname":chatname, "present":True, "lasttouch":jstime(chatnamelasttouch) }  for chatname, chatnamelasttouch in umlmonitoringusers.items() ]
-        if cclient.isumlmonitoring:
+        if cclient and cclient.clienttype == "umlmonitoring":
             umlstatuschanges["umlmonitoringusers"] = [ {"chatname":cclient.cchatname, "present":(cclient.cchatname in umlmonitoringusers), "lasttouch":jstime(cclient.clientlasttouch) } ]
-        
+
+        # rpcrunningclients
+        if umlstatusdata:
+            umlstatusdata["rpcrunningclients"] = [ {"clientnumber":client.clientnumber, "present":True, "chatname":client.chatname, "scrapername":client.scrapername, "lasttouch":jstime(client.clientlasttouch)}  for client in self.rpcrunningclients ]
+        if cclient and cclient.clienttype == "rpcrunning":
+            umlstatuschanges["rpcrunningclients"] = [ {"chatname":cclient.clientnumber, "present":(cclient in self.rpcrunningclients), "chatname":cclient.cchatname, "scrapername":cclient.scrapername, "lasttouch":jstime(cclient.clientlasttouch) } ]
+
         # handle draft scraper users and the run states (one for each user, though there may be multiple draft scrapers for them)
         draftscraperusers = { }  # chatname -> running state
         for client in self.draftscraperclients:
             draftscraperusers[client.cchatname] = bool(client.processrunning) or draftscraperusers.get(client.cchatname, False)
         if umlstatusdata:
             umlstatusdata["draftscraperusers"] = [ {"chatname":chatname, "present":True, "running":crunning }  for chatname, crunning in draftscraperusers.items() ]
-        if not cclient.isumlmonitoring and not cclient.guid:
+        if cclient and not cclient.clienttype == "umlmonitoring" and not cclient.guid:
             umlstatuschanges["draftscraperusers"] = [ { "chatname":cclient.cchatname, "present":(cclient.cchatname in draftscraperusers), "running":draftscraperusers.get(cclient.cchatname, False) } ]
-        
+
         # the complexity here reflects the complexity of the structure.  the running flag could be set on any one of the clients
-        # nondraftcount and draft mode has been removed from here
         def scraperentry(eoos, cclient):  # local function
             scrapereditors = { }   # chatname -> (lasttouch, [clientnumbers])
             running = False        # we could make this an updated member of EditorsOnOneScraper like lasttouch
@@ -622,7 +751,6 @@ class RunnerFactory(protocol.ServerFactory):
                 running = running or max([ bool(uclient.processrunning)  for uclient in usereditor.userclients ])
             
             for uclient in eoos.anonymouseditors:
-                assert uclient.automode != 'draft' 
                 scrapereditors[uclient.cchatname] = (uclient.clientlasttouch, [uclient.clientnumber])
             
                 # diff mode
@@ -645,7 +773,7 @@ class RunnerFactory(protocol.ServerFactory):
             for eoos in self.guidclientmap.values():
                 umlstatusdata["scraperentries"].append(scraperentry(eoos, None))
                 
-        if cclient.guid:
+        if cclient and cclient.clienttype in ["editing", "scheduledrun"] and cclient.guid:
             if cclient.guid in self.guidclientmap:
                 umlstatuschanges["scraperentries"] = [ scraperentry(self.guidclientmap[cclient.guid], cclient) ]
             else:
@@ -655,7 +783,7 @@ class RunnerFactory(protocol.ServerFactory):
         #print "\numlstatus", umlstatusdata
         
         # new monitoring client
-        if cclient.isumlmonitoring:
+        if cclient and cclient.clienttype == "umlmonitoring":
             cclient.writejson(umlstatusdata) 
         
         # send only updates to current clients
@@ -672,21 +800,38 @@ class RunnerFactory(protocol.ServerFactory):
             
 
     def clientConnectionMade(self, client):
-        assert client.isumlmonitoring == None
+        assert client.clienttype == None
         client.clientnumber = self.clientcount
         self.clients.append(client)
+        self.connectedclients.append(client)
         self.clientcount += 1
             # next function will be called when some actual data gets sent
 
     def clientConnectionRegistered(self, client):
-        assert client.isumlmonitoring != None
-        
-        if client.isumlmonitoring:
-            self.umlmonitoringclients.append(client)
+        # Can't remove from the list if it isn't in there so we need to check
+        try:
+            self.connectedclients.remove(client)
+        except:
+            logging.error('Failed to remove client %s as it is not in the connectedclient list' % client)
             
+        if client.username:
+            client.chatname = client.userrealname or client.username
+        elif client.clienttype == "editing":
+            client.chatname = "Anonymous%d" % self.anonymouscount
+            self.anonymouscount += 1
+        else:
+            client.chatname = "Anonymous"
+        client.cchatname = "%s|%s" % (client.username, client.chatname)
+
+        assert client.clienttype in ["umlmonitoring", "editing", "rpcrunning"]
+        
+        if client.clienttype == "umlmonitoring":
+            self.umlmonitoringclients.append(client)
+        elif client.clienttype == 'rpcrunning':
+            self.rpcrunningclients.append(client)
         elif client.guid:
             if client.guid not in self.guidclientmap:
-                self.guidclientmap[client.guid] = EditorsOnOneScraper(client.guid, client.scrapername, client.scraperlanguage)
+                self.guidclientmap[client.guid] = EditorsOnOneScraper(client.guid, client.scrapername, client.scraperlanguage, client.originalrev)
             
             if client.username in self.guidclientmap[client.guid].usereditormap:
                 message = "%s opens another window" % client.chatname
@@ -698,7 +843,7 @@ class RunnerFactory(protocol.ServerFactory):
 
         
         else:   # draft scraper type (hardcode the output that would have gone with notifyEditorClients
-            editorstatusdata = {'message_type':"editorstatus", "loggedineditors":[], "nanonymouseditors":1, "chatname":client.chatname, "message":"Draft scraper connection" }
+            editorstatusdata = {'message_type':"editorstatus", "loggedineditors":[], "loggedinusers":[], "nanonymouseditors":1, "countclients":1, "chatname":client.chatname, "message":"Draft scraper connection" }
             editorstatusdata["nowtime"] = jstime(datetime.datetime.now())
             editorstatusdata['earliesteditor'] = jstime(client.clientsessionbegan)
             editorstatusdata["scraperlasttouch"] = jstime(client.clientlasttouch)
@@ -707,21 +852,25 @@ class RunnerFactory(protocol.ServerFactory):
             client.writejson(editorstatusdata); 
             self.draftscraperclients.append(client)
         
-        
-        # check that all clients are accounted for
-        assert len(self.clients) == len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
         self.notifyMonitoringClients(client)
             
     
     def clientConnectionLost(self, client):
         self.clients.remove(client)  # main list
         
-        if client.isumlmonitoring == None:
-            pass  # didn't even get to connection open
+            # connection open but nothing else happened
+        if client.clienttype == None:
+            self.connectedclients.remove(client)
         
-        elif client.isumlmonitoring:
+        elif client.clienttype == "umlmonitoring":
             if client in self.umlmonitoringclients:
                 self.umlmonitoringclients.remove(client)
+            else:
+                logger.error("No place to remove client %d" % client.clientnumber)
+
+        elif client.clienttype == "rpcrunning":
+            if client in self.rpcrunningclients:
+                self.rpcrunningclients.remove(client)
             else:
                 logger.error("No place to remove client %d" % client.clientnumber)
 
@@ -732,6 +881,7 @@ class RunnerFactory(protocol.ServerFactory):
                 logger.error("No place to remove client %d" % client.clientnumber)
             
         elif (client.guid in self.guidclientmap):   
+            logger.debug("removing client %d" % client.clientnumber)
             if not self.guidclientmap[client.guid].RemoveClient(client):
                 del self.guidclientmap[client.guid]
             else:
@@ -743,10 +893,6 @@ class RunnerFactory(protocol.ServerFactory):
         else:
             logger.error("No place to remove client %d" % client.clientnumber)
         
-        # check that all clients are accounted for
-        Dtclients = len(self.umlmonitoringclients) + len(self.draftscraperclients) + sum([eoos.Dcountclients()  for eoos in self.guidclientmap.values()])
-        if len(self.clients) != Dtclients:
-            logger.error("Miscount of clients %d %d" % (Dtclients))
         self.notifyMonitoringClients(client)
 
 
@@ -808,6 +954,5 @@ if __name__ == "__main__":
     runnerfactory = RunnerFactory()
     port = config.getint('twister', 'port')
     reactor.listenTCP(port, runnerfactory)
-    logger = logging.getLogger('twister')
     logger.info("Twister listening on port %d" % port)
     reactor.run()   # this function never returns

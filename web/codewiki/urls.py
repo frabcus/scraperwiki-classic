@@ -38,11 +38,12 @@ urlpatterns = patterns('',
     url(r'^scrapers/unfollow/(?P<short_name>[\w_\-\.]+)/$', views.unfollow,             name='scraper_unfollow'),
     
 
-    # events and monitoring (pehaps should have both wiki_types possible)
+        # events and monitoring (prob shouldn't have it in the scrapers path)
     url(r'^scrapers/running_scrapers/$',                  viewsuml.running_scrapers,    name='running_scrapers'),
     
     url(r'^scrapers/scraper_killrunning/(?P<run_id>[\w_\-\.\|]+)(?:/(?P<event_id>[\w_\-]+))?$',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),
+    url(r'^scraper-admin/twistermakesrunevent/$',         viewsrpc.twistermakesrunevent), 
         
     url(r'^scrapers/schedule-scraper/(?P<short_name>[\w_\-\.]+)/$', 
                                                           views.scraper_schedule_scraper,name='scraper_schedule_scraper'),
@@ -82,13 +83,13 @@ urlpatterns = patterns('',
 
 
     url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$', views.export_sqlite,   name='export_sqlite'),
+    url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),   # this gets redirected to the api preview
 
-    #
-    # to clean out soon
-    #
-    url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),   # this gets redirected
+
+        # this to be cleaned out completely
     url(r'^scrapers/metadata_api/(?P<scraper_guid>[\w_\-\.]+)/(?P<metadata_name>.+)/$', metadata, name='metadata_api'),
 
+    # old redirects
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/(?:run|full)/$',   # redirect because it's so common
                    lambda request, wiki_type, short_name: HttpResponseRedirect("http://%s%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=[short_name])))),
     url(r'^(?P<wiki_type>scraper)s/export2/(?P<short_name>[\w_\-\.]+)/$', 
