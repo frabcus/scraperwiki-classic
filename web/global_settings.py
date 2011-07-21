@@ -67,6 +67,7 @@ MIDDLEWARE_CLASSES = [
     'piston.middleware.ConditionalMiddlewareCompatProxy',
     'piston.middleware.CommonMiddlewareCompatProxy',
     'pagination.middleware.PaginationMiddleware',    
+    'middleware.csrfcookie.CsrfAlwaysSetCookieMiddleware'
 ]
 
 AUTHENTICATION_BACKENDS = [
