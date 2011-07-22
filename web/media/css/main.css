@@ -249,7 +249,7 @@ body.frontpage #nav_inner li.frontpage {
 	color: #d33;
 }
 
-#nav_inner li.user ul form #nav_submit {
+#nav_inner li.user ul form #nav_login_submit {
 	float: right;
 	margin-top: 5px;
 }

@@ -209,7 +209,7 @@ class TestRegistration(SeleniumTest):
         self.wait_for_page()
 
         s.type( 'id_user_or_email', 'abcdefghijklmnopqrstuvwxyz')
-        s.click('login')
+        s.click('id=login_submit')
         self.wait_for_page()
         self.failUnless(s.is_text_present(self.login_fail), msg='Login did not fail even without password')                
         
@@ -223,6 +223,9 @@ class TestRegistration(SeleniumTest):
         s.type( 'id_password', 'abcdefghijklmnopqrstuvwxyz')
         
         
-        s.click('login')
+        s.click('id=login_submit')
         self.wait_for_page()
         self.failUnless(s.is_text_present(self.login_fail), 'Login did not fail with fake details')                        
+
+
+
