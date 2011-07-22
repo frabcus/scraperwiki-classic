@@ -76,6 +76,7 @@
 				    <ul>
 						<li class="login_form">
 						    <form method="post" action="{% url login %}" id="nav_login_form">
+                                {% csrf_token %}
                                 <label for="id_nav_user_or_email">Username or email:</label>
                                 <input type="text" id="id_nav_user_or_email" name="user_or_email" />
                                 <label for="id_nav_password">Password:</label>
