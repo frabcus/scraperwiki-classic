@@ -1,7 +1,8 @@
+#!/usr/bin/env python
+
 import sys, unittest, imp, optparse
 from selenium_test import SeleniumTest
 import simplejson as json
-
 
 #   eg:
 #
@@ -11,26 +12,30 @@ import simplejson as json
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
+
+    parser.add_option("-u", "--url", dest="url", action="store", type='string',
+                      help="URL of the ScraperWiki web application to test, defaults to http://localhost:8000/",  
+                      default="http://localhost:8000/", metavar="application url (string)")
+
+    parser.add_option("--tests", default="test_registration,test_scrapers", help="Comma separated list of modules to run tests from, defaults to 'test_registration,test_scrapers'")
+
     parser.add_option("-s", "--seleniumhost", dest="shost", action="store", type='string',
                       help="The host that Selenium RC is running on",  
                       default="localhost", metavar="selenium host (string)")
     parser.add_option("-p", "--seleniumport", dest="sport", action="store", type='int',
                       help="The port that Selenium RC is running on",  
                       default=4444, metavar="Selenium port")
-    parser.add_option("-u", "--url", dest="url", action="store", type='string',
-                      help="The application url",  
-                      default="http://localhost:8000/", metavar="application url (string)")
+    parser.add_option("--username", help="Login to Selenium RC, if needed")
+    parser.add_option("--accesskey", help="Access control to Selenium RC, if needeed")
+    parser.add_option("--os", help="Operating system to run browser on, passed to Selenium RC, optional")
+    parser.add_option("--browser", default="*firefox", help="Which browser, e.g. *firefox, *chrome, *safari, *iexplore. Put in a bad value to see full list. Defaults to *firefox.")
+    parser.add_option("--browserversion", help="Passed into selenium with browser parameter, optional")
     
-    parser.add_option("--username")
-    parser.add_option("--accesskey")
-    parser.add_option("--os")
-    parser.add_option("--browser", default="*firefox")
-    parser.add_option("--browserversion")
-    
-        # control the tests to be run from here
-    parser.add_option("--tests", default="test_registration,test_scrapers")
-
     (options, args) = parser.parse_args()
+
+    if len(args) > 0:
+        parser.print_help()
+        sys.exit(1)
     
     SeleniumTest._selenium_host = options.shost
     SeleniumTest._selenium_port = options.sport
