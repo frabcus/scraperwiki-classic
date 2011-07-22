@@ -66,6 +66,7 @@
 <div class="signup">
 
 	<form method="post" action="." id="registration_form">
+        {% csrf_token %}
         <h3>Create a free account</h3>
         {% if registration_form.non_field_errors %}
             <div id="main_error">
