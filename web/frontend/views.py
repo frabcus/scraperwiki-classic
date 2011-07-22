@@ -19,7 +19,6 @@ from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, g
 from tagging.models import Tag, TaggedItem
 
 from codewiki.models import Code, Scraper, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
-from market.models import Solicitation, SolicitationStatus
 from django.db.models import Q
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
@@ -94,7 +93,6 @@ def profile_detail(request, username):
     owned_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=profiled_user)
     extra_context['owned_code_objects'] = owned_code_objects
     extra_context['emailer_code_objects'] = owned_code_objects.filter(Q(usercoderole__user__username=username) & Q(usercoderole__role='email'))
-    extra_context['solicitations'] = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
     return profile_views.profile_detail(request, username=username, extra_context=extra_context)
 
 
@@ -304,15 +302,6 @@ def get_involved(request):
         view_no_tags_count = TaggedItem.objects.get_no_tags(View.objects.exclude(privacy_status="deleted")).count()
         view_tags_percent = 100 - int(view_no_tags_count / float(view_count) * 100)
 
-        #scraper requests
-        status = SolicitationStatus.objects.get(status='open')
-        solicitation_count = Solicitation.objects.filter().count()
-        solicitation_open_count = Solicitation.objects.filter(status=status).count()    
-        try:
-            solicitation_percent = int(solicitation_open_count / float(solicitation_count) * 100)        
-        except ZeroDivisionError:
-            solicitation_percent = 100
-        
         #scraper status
         scraper_sick_count = Scraper.objects.filter(status='sick').exclude(privacy_status="deleted").count()
         scraper_sick_percent = 100 - int(scraper_sick_count / float(scraper_count) * 100)
@@ -328,9 +317,6 @@ def get_involved(request):
             'scraper_tags_percent': scraper_tags_percent,
             'view_no_tags_count': view_no_tags_count,
             'view_tags_percent': view_tags_percent,
-            'solicitation_count': solicitation_count,
-            'solicitation_open_count': solicitation_open_count,
-            'solicitation_percent': solicitation_percent,
             'scraper_sick_count': scraper_sick_count,
             'scraper_sick_percent': scraper_sick_percent,
             'language': 'python', 

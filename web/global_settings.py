@@ -99,7 +99,6 @@ SCRAPERWIKI_APPS = [
     'codewiki',
     'notification',
     'payment',  	
-    'market',
     'api',
     'whitelist',
     'cropper',
@@ -179,8 +178,7 @@ TEMPLATE_SETTINGS = [
  'MAX_MAP_POINTS',
  'REVISION',
  'VIEW_DOMAIN',
- 'CODEMIRROR_URL',
- 'ENABLE_MARKETPLACE',
+ 'CODEMIRROR_URL'
 ]
 
 try:
@@ -209,8 +207,6 @@ HTTPPROXYURL = "http://localhost:9005"
 DISPATCHERURL = "http://localhost:9000"
 
 PAGINATION_DEFAULT_PAGINATION=20
-
-ENABLE_MARKETPLACE = False
 
 # tell south to do migrations when doing tests
 SOUTH_TESTS_MIGRATE = True

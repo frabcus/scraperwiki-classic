@@ -468,60 +468,6 @@
         }
     }, 
     {
-        "pk": 71, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_solicitation", 
-            "name": "Can add solicitation", 
-            "content_type": 24
-        }
-    }, 
-    {
-        "pk": 68, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_solicitationstatus", 
-            "name": "Can add solicitation status", 
-            "content_type": 23
-        }
-    }, 
-    {
-        "pk": 72, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_solicitation", 
-            "name": "Can change solicitation", 
-            "content_type": 24
-        }
-    }, 
-    {
-        "pk": 69, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_solicitationstatus", 
-            "name": "Can change solicitation status", 
-            "content_type": 23
-        }
-    }, 
-    {
-        "pk": 73, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_solicitation", 
-            "name": "Can delete solicitation", 
-            "content_type": 24
-        }
-    }, 
-    {
-        "pk": 70, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_solicitationstatus", 
-            "name": "Can delete solicitation status", 
-            "content_type": 23
-        }
-    }, 
-    {
         "pk": 62, 
         "model": "auth.permission", 
         "fields": {
