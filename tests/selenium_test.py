@@ -1,4 +1,5 @@
 import unittest
+import atexit
 from selenium import selenium
 
 class SeleniumTest(unittest.TestCase):
@@ -19,8 +20,11 @@ class SeleniumTest(unittest.TestCase):
         self.selenium = selenium(SeleniumTest._selenium_host, SeleniumTest._selenium_port, 
                                  SeleniumTest._selenium_browser, SeleniumTest._app_url)
         self.selenium.start()
+
+        # make sure we quit the selenium when the script dies
+        atexit.register(self.tearDown)
             
-            # extract a title for the job from name of test.  must be done in the constructor or after start()
+        # extract a title for the job from name of test.  must be done in the constructor or after start()
         self.selenium.set_context("sauce:job-name=%s" % self._testMethodName)  
         self.selenium.window_maximize()
 
@@ -65,3 +69,5 @@ class SeleniumTest(unittest.TestCase):
     def tearDown(self):
         self.selenium.stop()
         self.assertEqual([], self.verificationErrors)
+
+
