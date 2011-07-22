@@ -197,7 +197,7 @@ class TestRegistration(SeleniumTest):
         s.click("link=%s" % self.login_text)
         self.wait_for_page()
 
-        s.click('login')
+        s.click('id=login_submit')
         self.wait_for_page()
         self.failUnless(s.is_text_present(self.login_fail), msg='Login did not fail and it should have')        
         
@@ -222,10 +222,21 @@ class TestRegistration(SeleniumTest):
         s.type( 'id_user_or_email', 'abcdefghijklmnopqrstuvwxyz')
         s.type( 'id_password', 'abcdefghijklmnopqrstuvwxyz')
         
-        
         s.click('id=login_submit')
         self.wait_for_page()
         self.failUnless(s.is_text_present(self.login_fail), 'Login did not fail with fake details')                        
+
+    def test_login_navbar_junk_details(self):
+        s = self.selenium
+        s.open("/")
+
+        s.type( 'id_nav_user_or_email', 'abcdefghijklmnopqrstuvwxyz')
+        s.type( 'id_nav_password', 'abcdefghijklmnopqrstuvwxyz')
+        
+        s.click('id=nav_login_submit')
+        self.wait_for_page()
+        self.failUnless(s.is_text_present(self.login_fail), 'Login did not fail with fake details')                        
+
 
 
 
