@@ -16,6 +16,7 @@ import datetime
 import time
 import threading
 import urllib2
+from urllib import urlencode
 
 import re
 import os
@@ -263,10 +264,12 @@ class ScraperRunner(threading.Thread):
         
         start = time.time()
         
-# this allows for using twister version
+        # this allows for using twister version
         if False:
+            # Get all the settings as key=value pairs ready for the query string
+            qstring = urlencode(  [ (s.key, s.value,) for s in self.scraper.settings.all() ] )
             runnerstream = runsockettotwister.RunnerSocket()
-            runnerstream = runsockettotwister.runscraper(self.scraper, None, "")
+            runnerstream = runsockettotwister.runscraper(self.scraper, None, qstring)
             pid = os.getpid()
         else:
             guid = self.scraper.guid
