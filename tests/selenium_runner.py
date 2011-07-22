@@ -4,23 +4,111 @@ import sys, unittest, imp, optparse, time
 from selenium_test import SeleniumTest
 import simplejson as json
 
-# This is a copy of unittest.TextTestRunner, that adds extra option of pausing
-# whenever there is an error. It uses _WritelnDecorator and _TextTestResult
-# from unittest, which might cause problems with future versions of Python.
-# (if so easiest thing may be to copy them from older verisons)
+# This is a copy of unittest._WritelnDecorator, unittest._TextTestResult, and
+# unittest.TextTestRunner, that adds extra option of pausing whenever there is an
+# error. 
+
+class _OurWritelnDecorator:
+    """Used to decorate file-like objects with a handy 'writeln' method"""
+    def __init__(self,stream):
+        self.stream = stream
+
+    def __getattr__(self, attr):
+        return getattr(self.stream,attr)
+
+    def writeln(self, arg=None):
+        if arg: self.write(arg)
+        self.write('\n') # text-mode streams translate to \r\n if needed
+
+
+class _OurTextTestResult(unittest.TestResult):
+    """A test result class that can print formatted text results to a stream.
+
+    Used by TextTestRunner.
+    """
+    separator1 = '=' * 70
+    separator2 = '-' * 70
+
+    def __init__(self, stream, descriptions, verbosity, pause_on_failure):
+        unittest.TestResult.__init__(self)
+        self.stream = stream
+        self.showAll = verbosity > 1
+        self.dots = verbosity == 1
+        self.descriptions = descriptions
+        self.pause_on_failure = pause_on_failure
+
+    def getDescription(self, test):
+        if self.descriptions:
+            return test.shortDescription() or str(test)
+        else:
+            return str(test)
+
+    def startTest(self, test):
+        unittest.TestResult.startTest(self, test)
+        if self.showAll:
+            self.stream.write(self.getDescription(test))
+            self.stream.write(" ... ")
+            self.stream.flush()
+
+    def addSuccess(self, test):
+        unittest.TestResult.addSuccess(self, test)
+        if self.showAll:
+            self.stream.writeln("ok")
+        elif self.dots:
+            self.stream.write('.')
+            self.stream.flush()
+
+    def pauseIfSetTo(self):
+        if self.pause_on_failure:
+            raw_input("press return to continue >>> ")
+
+    def addError(self, test, err):
+        unittest.TestResult.addError(self, test, err)
+        if self.showAll:
+            self.stream.writeln("ERROR")
+            self.pauseIfSetTo()
+        elif self.dots:
+            self.stream.write('E')
+            self.stream.flush()
+
+    def addFailure(self, test, err):
+        unittest.TestResult.addFailure(self, test, err)
+        if self.showAll:
+            self.stream.writeln("FAIL")
+            self.pauseIfSetTo()
+        elif self.dots:
+            self.stream.write('F')
+            self.stream.flush()
+
+    def printErrors(self):
+        if self.dots or self.showAll:
+            self.stream.writeln()
+        self.printErrorList('ERROR', self.errors)
+        self.printErrorList('FAIL', self.failures)
+
+    def printErrorList(self, flavour, errors):
+        for test, err in errors:
+            self.stream.writeln(self.separator1)
+            self.stream.writeln("%s: %s" % (flavour,self.getDescription(test)))
+            self.stream.writeln(self.separator2)
+            self.stream.writeln("%s" % err)
+
+
+
 class OurTextTestRunner:
     """A test runner class that displays results in textual form.
 
     It prints out the names of tests as they are run, errors as they
     occur, and a summary of the results at the end of the test run.
     """
-    def __init__(self, stream=sys.stderr, descriptions=1, verbosity=1):
-        self.stream = unittest._WritelnDecorator(stream)
+    def __init__(self, stream=sys.stderr, descriptions=1, verbosity=1, pause_on_failure=False):
+        self.stream = _OurWritelnDecorator(stream)
         self.descriptions = descriptions
         self.verbosity = verbosity
+        self.pause_on_failure = pause_on_failure
 
     def _makeResult(self):
-        return unittest._TextTestResult(self.stream, self.descriptions, self.verbosity)
+        return _OurTextTestResult(self.stream, self.descriptions, self.verbosity, self.pause_on_failure)
 
     def run(self, test):
         "Run the given test case or test suite."
@@ -66,6 +154,8 @@ if __name__ == '__main__':
                      help="Comma separated list of modules to run tests from, defaults to 'test_registration,test_scrapers'")
     parser.add_option("--verbosity", dest="verbosity", action="store", default=1, type='int', 
                      help="How much to display while running the tests, try 0, 1, 2. Default is 1.")
+    parser.add_option("--pause", dest="pause", action="store_true", default=False, 
+                     help="Pause whenever a test fails, so you can look at browser and logs and see what is happening")
 
     parser.add_option("-s", "--seleniumhost", dest="shost", action="store", type='string',
                       help="The host that Selenium RC is running on",  
@@ -112,7 +202,7 @@ if __name__ == '__main__':
         elif options.verbosity > 0:
             print 'module %s' % (module.__name__)
         loader = unittest.TestLoader().loadTestsFromModule( module )
-        OurTextTestRunner( verbosity=options.verbosity ).run( loader )
+        OurTextTestRunner( verbosity=options.verbosity, pause_on_failure = options.pause ).run( loader )
     
     
     
