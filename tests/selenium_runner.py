@@ -89,6 +89,7 @@ if __name__ == '__main__':
     SeleniumTest._selenium_host = options.shost
     SeleniumTest._selenium_port = options.sport
     SeleniumTest._app_url = options.url
+    SeleniumTest._verbosity = options.verbosity
 
     if options.username and options.accesskey and options.os and options.browser and options.browserversion:
         SeleniumTest._selenium_browser = json.dumps({ "username":options.username, "access-key":options.accesskey, 

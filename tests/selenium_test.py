@@ -12,7 +12,9 @@ class SeleniumTest(unittest.TestCase):
 
     _app_url = ''
 
-    def setUp(self, verbosity=1):
+    _verbosity = 1
+
+    def setUp(self):
         self.verificationErrors = []
         self.selenium = selenium(SeleniumTest._selenium_host, SeleniumTest._selenium_port, 
                                  SeleniumTest._selenium_browser, SeleniumTest._app_url)
@@ -22,11 +24,9 @@ class SeleniumTest(unittest.TestCase):
         self.selenium.set_context("sauce:job-name=%s" % self._testMethodName)  
         self.selenium.window_maximize()
 
-        self.verbosity = verbosity
-
     def wait_for_page(self, doing=None):
         hit_limit = True
-        if self.verbosity > 1:
+        if self._verbosity > 1:
             print "  SeleniumTest: waiting_for_page", self.selenium.get_location()
         try:
             self.selenium.wait_for_page_to_load('30000')
