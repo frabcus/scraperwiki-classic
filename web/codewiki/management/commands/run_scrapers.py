@@ -284,6 +284,9 @@ class ScraperRunner(threading.Thread):
             args.append('--language=%s' % self.scraper.language.lower())
             args.append('--name=%s' % self.scraper.short_name)
         
+            if self.scraper.privacy_status != 'public':
+                args.append('--urlquery=%s' % urlencode(  [ (s.key, s.value,) for s in self.scraper.settings.all() ] ) )
+
             runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             runner.stdin.write(code)
             runner.stdin.close()
