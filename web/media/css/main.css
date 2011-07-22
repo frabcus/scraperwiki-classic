@@ -224,7 +224,10 @@ body.frontpage #nav_inner li.frontpage {
 }
 
 #nav_inner li.user ul form #id_user_or_email,
-#nav_inner li.user ul form #id_password {
+#nav_inner li.user ul form #id_nav_user_or_email,
+#nav_inner li.user ul form #id_password,
+#nav_inner li.user ul form #id_nav_password,
+{
 	margin-bottom: 5px;
 	padding: 2px;
 	width: 140px;
@@ -246,7 +249,7 @@ body.frontpage #nav_inner li.frontpage {
 	color: #d33;
 }
 
-#nav_inner li.user ul form #submit {
+#nav_inner li.user ul form #nav_submit {
 	float: right;
 	margin-top: 5px;
 }
