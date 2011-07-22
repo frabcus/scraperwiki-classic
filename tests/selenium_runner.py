@@ -45,8 +45,8 @@ if __name__ == '__main__':
         SeleniumTest._selenium_browser = json.dumps({ "username":options.username, "access-key":options.accesskey, 
                                                       "os":options.os, "browser":options.browser, "browser-version":options.browserversion })
     else:
-        print "browser = %s" % options.browser
         SeleniumTest._selenium_browser = options.browser
+    print "SeleniumRC %s:%d, ScraperWiki %s, Browser %s" % (SeleniumTest._selenium_host, SeleniumTest._selenium_port, SeleniumTest._app_url, str(SeleniumTest._selenium_browser))
 
     if 'localhost' in options.url:
         print '*' * 80
@@ -56,8 +56,8 @@ if __name__ == '__main__':
         
     for testsmodule in options.tests.split(","):
         module = imp.load_module(testsmodule, *imp.find_module(testsmodule))
+        print '\n%s\nRunning tests from module: %s\n' % ("="*80,repr(module))
         loader = unittest.TestLoader().loadTestsFromModule( module )
-        print 'Test cases loaded from current module - %s' % repr(module)        
         unittest.TextTestRunner( verbosity=2 ).run( loader )
     
     
