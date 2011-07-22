@@ -9,6 +9,7 @@ from handlers import ScraperMetadataHandler
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.views.generic.simple import redirect_to
 
 
 metadata = Resource(handler=ScraperMetadataHandler)
@@ -40,6 +41,7 @@ urlpatterns = patterns('',
 
         # events and monitoring (prob shouldn't have it in the scrapers path)
     url(r'^scrapers/running_scrapers/$',                  viewsuml.running_scrapers,    name='running_scrapers'),
+    
     
     url(r'^scrapers/scraper_killrunning/(?P<run_id>[\w_\-\.\|]+)(?:/(?P<event_id>[\w_\-]+))?$',
                                                           viewsuml.scraper_killrunning, name='scraper_killrunning'),
@@ -100,5 +102,7 @@ urlpatterns = patterns('',
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/code$', 
                    lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('raw', args=[short_name])+"?"+request.META["QUERY_STRING"])),
 
+    url(r'^scrapers/$',  redirect_to,   {'url': '/browse/scrapers'}),    
+    url(r'^views/$',     redirect_to,   {'url': '/browse/views'}),        
 )
 

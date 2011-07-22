@@ -237,7 +237,6 @@ def runmessageloop(runnerstream, event, approxlenoutputlimit):
 def getemailtext(event):
     message = event.output
     message = re.sub("(?:^|\n)EXECUTIONSTATUS:.*", "", message).strip()
-    
     msubject = re.search("(?:^|\n)EMAILSUBJECT:(.*)", message)
     if msubject:
         subject = msubject.group(1)    # snip out the subject
@@ -266,8 +265,11 @@ class ScraperRunner(threading.Thread):
         
         # this allows for using twister version
         if False:
-            # Get all the settings as key=value pairs ready for the query string
-            qstring = urlencode(  [ (s.key, s.value,) for s in self.scraper.settings.all() ] )
+            qstring = ''
+            if self.scraper.privacy_status != 'public':
+                # Get all the settings as key=value pairs ready for the query string if protected or 
+                # private
+                qstring = urlencode(  [ (s.key, s.value,) for s in self.scraper.settings.all() ] )
             runnerstream = runsockettotwister.RunnerSocket()
             runnerstream = runsockettotwister.runscraper(self.scraper, None, qstring)
             pid = os.getpid()
