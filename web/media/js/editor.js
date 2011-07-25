@@ -163,7 +163,6 @@ $(document).ready(function() {
         if (pageIsDirty != lpageIsDirty)
         {
             pageIsDirty = lpageIsDirty; 
-            $('#aCloseEditor1').css("font-style", ((pageIsDirty && guid) ? "italic" : "normal")); 
         }
 
         if (changetype != 'edit')
