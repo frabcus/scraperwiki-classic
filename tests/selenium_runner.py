@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, unittest, imp, optparse, time
+import sys, unittest, imp, optparse, time, traceback
 from selenium_test import SeleniumTest
 import simplejson as json
 
@@ -58,15 +58,16 @@ class _OurTextTestResult(unittest.TestResult):
             self.stream.write('.')
             self.stream.flush()
 
-    def pauseIfSetTo(self):
+    def pauseIfSetTo(self, err):
         if self.pause_on_failure:
+            traceback.print_exc(err)
             raw_input("press return to continue >>> ")
 
     def addError(self, test, err):
         unittest.TestResult.addError(self, test, err)
         if self.showAll:
             self.stream.writeln("ERROR")
-            self.pauseIfSetTo()
+            self.pauseIfSetTo(err)
         elif self.dots:
             self.stream.write('E')
             self.stream.flush()
@@ -75,7 +76,7 @@ class _OurTextTestResult(unittest.TestResult):
         unittest.TestResult.addFailure(self, test, err)
         if self.showAll:
             self.stream.writeln("FAIL")
-            self.pauseIfSetTo()
+            self.pauseIfSetTo(err)
         elif self.dots:
             self.stream.write('F')
             self.stream.flush()
