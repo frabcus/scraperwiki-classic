@@ -8,7 +8,7 @@ from django.test import TestCase
 import codewiki
 
 class ScraperViewsTests(TestCase):
-    fixtures = ['./fixtures/test_data.json']
+    fixtures = ['test_data.json']
     
     def test_scraper_list(self):
         """
