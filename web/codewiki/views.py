@@ -393,6 +393,8 @@ def convtounicode(text):
 
 
 def proxycached(request):
+    from httplib import BadStatusLine
+    
     cacheid = request.POST.get('cacheid')
     
     # delete this later when no more need for debugging
@@ -404,6 +406,7 @@ def proxycached(request):
     
     proxyurl = settings.HTTPPROXYURL + "/Page?" + cacheid
     result = { 'proxyurl':proxyurl, 'cacheid':cacheid }
+    
     try:
         fin = urllib2.urlopen(proxyurl)
         result["mimetype"] = fin.headers.type
@@ -415,6 +418,9 @@ def proxycached(request):
     except urllib2.URLError, e: 
         result['type'] = 'exception'
         result['content'] = str(e)
+    except BadStatusLine, sl:
+        result['type'] = 'exception'
+        result['content'] = str(sl)
     
     return HttpResponse(json.dumps(result), mimetype="application/json")
 
