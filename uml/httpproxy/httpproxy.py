@@ -161,7 +161,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.connection.send  ('Connection: Close\n')
         self.connection.send  ('Pragma: no-cache\n')
         self.connection.send  ('Cache-Control: no-cache\n')
-        self.connection.send  ('Content-Type: text/text\n')
+        self.connection.send  ('Content-Type: text/plain\n')
         self.connection.send  ('\n' )
         self.connection.send  (reply)
         self.connection.send  ('\n' )
