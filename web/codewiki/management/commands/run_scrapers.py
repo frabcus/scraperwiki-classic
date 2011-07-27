@@ -167,6 +167,7 @@ def runmessageloop(runnerstream, event, approxlenoutputlimit):
         elif message_type == "exception":   # only one of these ever
             event.exception_message = data.get('exceptiondescription')
             
+            
             for stackentry in data.get("stackdump"):
                 sMessage = stackentry.get('file')
                 if sMessage:
