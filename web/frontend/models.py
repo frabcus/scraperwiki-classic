@@ -128,6 +128,7 @@ class UserProfile(models.Model):
     alerts_last_sent = models.DateTimeField(auto_now_add=True)
     alert_frequency  = models.IntegerField(null=True, blank=True)
     alert_types      = models.ManyToManyField(AlertTypes)
+    beta_user        = models.BooleanField( default=False )
     
     objects = models.Manager()
     
@@ -321,11 +322,14 @@ def data_enquiry_post_save(sender, **kwargs):
                 except Exception,err:
                     # Removed indexerror to catch problems that seem to happen when we 
                     # can't find the user.                    
-                    requester = h.create_person(instance.first_name.encode('utf-8'),
-                                                instance.last_name.encode('utf-8'),
-                                                instance.email.encode('utf-8'))
-                    h.tag_person(requester.id, 'Lead')
-                    mail_admins('HighRise failed to find user with error', str(err))                    
+                    try:
+                        requester = h.create_person(instance.first_name.encode('utf-8'),
+                                                    instance.last_name.encode('utf-8'),
+                                                    instance.email)
+                        h.tag_person(requester.id, 'Lead')
+                    except Exception, e2:
+                        mail_admins('HighRise failed to find user with errors', str(err) + ',' + str(e2))                    
+                        return
 
                 h.create_note_for_person(instance.email_message(), requester.id)
 
