@@ -59,7 +59,6 @@ TEMPLATE_LOADERS = [
 ]
 
 MIDDLEWARE_CLASSES = [
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -189,7 +188,7 @@ except:
 
 MAX_DATA_POINTS = 500
 
-BLOG_FEED = 'http://blog.scraperwiki.com/feed/'
+BLOG_FEED = 'http://blog.scraperwiki.com/feed/atom'
 
 DATA_TABLE_ROWS = 10
 RSS_ITEMS = 50

@@ -125,6 +125,11 @@ class ScheduledRunMessageLoopHandler:
         elif message_type == "exception":   # only one of these ever
             self.exception_message = data.get('exceptiondescription')
             
+            # TODO/TOCONSIDER
+            # If this is a specific type of message (such as Python NameError/SyntaxError)
+            # we should probably hit a flag to say it should not be scheduled (without changing the 
+            # run_interval) and then reset the flag each save. If it is broken why try to run it?
+            
             for stackentry in data.get("stackdump"):
                 sMessage = stackentry.get('file')
                 if sMessage:

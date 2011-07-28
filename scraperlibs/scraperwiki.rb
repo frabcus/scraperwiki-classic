@@ -77,6 +77,9 @@ module ScraperWiki
         if unique_keys != nil && !unique_keys.kind_of?(Array)
             raise 'unique_keys must be nil or an array'
         end
+        if data == nil
+            raise 'data must have a non-nil value'
+        end
 
         ds = SW_DataStore.create()
 

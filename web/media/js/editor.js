@@ -86,7 +86,10 @@ $(document).ready(function() {
     var parserConfig = Array();
     var parserName = Array();
     var codemirroroptions = undefined; 
+
     var pageIsDirty = false;
+    $('.editor_controls #btnCommitPopup').attr('disabled', !pageIsDirty); 
+
     var atsavedundo = 0; // recorded at start of save operation
     var savedundo = 0; 
     var lastundo = 0;
@@ -163,7 +166,7 @@ $(document).ready(function() {
         if (pageIsDirty != lpageIsDirty)
         {
             pageIsDirty = lpageIsDirty; 
-            $('#aCloseEditor1').css("font-style", ((pageIsDirty && guid) ? "italic" : "normal")); 
+            $('.editor_controls #btnCommitPopup').attr('disabled', !pageIsDirty); 
         }
 
         if (changetype != 'edit')
@@ -1186,9 +1189,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     function saveScraper(stimulate_run)
     {
-        if ($('.editor_controls #btnCommitPopup').attr('disabled'))
-            return; 
-
         var bSuccess = false;
 
         //if saving then check if the title is set (must be if guid is set)

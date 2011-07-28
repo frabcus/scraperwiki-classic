@@ -389,7 +389,7 @@ def tags(request):
 def tag(request, tag):
     ttag = get_tag(tag)
     if not ttag:
-        raise Http404
+        raise Http404()
 
     # query set of code objects this user can see
     user_visible_code_objects = scraper_search_query(request.user, None)

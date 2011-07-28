@@ -16,6 +16,7 @@ import datetime
 import time
 import threading
 import urllib2
+from urllib import urlencode
 
 import re
 import os
@@ -166,6 +167,7 @@ def runmessageloop(runnerstream, event, approxlenoutputlimit):
         elif message_type == "exception":   # only one of these ever
             event.exception_message = data.get('exceptiondescription')
             
+            
             for stackentry in data.get("stackdump"):
                 sMessage = stackentry.get('file')
                 if sMessage:
@@ -236,7 +238,6 @@ def runmessageloop(runnerstream, event, approxlenoutputlimit):
 def getemailtext(event):
     message = event.output
     message = re.sub("(?:^|\n)EXECUTIONSTATUS:.*", "", message).strip()
-    
     msubject = re.search("(?:^|\n)EMAILSUBJECT:(.*)", message)
     if msubject:
         subject = msubject.group(1)    # snip out the subject
@@ -263,10 +264,15 @@ class ScraperRunner(threading.Thread):
         
         start = time.time()
         
-# this allows for using twister version
+        # this allows for using twister version
         if False:
+            qstring = ''
+            if self.scraper.privacy_status != 'public':
+                # Get all the settings as key=value pairs ready for the query string if protected or 
+                # private
+                qstring = urlencode(  [ (s.key, s.value,) for s in self.scraper.settings.all() ] )
             runnerstream = runsockettotwister.RunnerSocket()
-            runnerstream = runsockettotwister.runscraper(self.scraper, None, "")
+            runnerstream = runsockettotwister.runscraper(self.scraper, None, qstring)
             pid = os.getpid()
         else:
             guid = self.scraper.guid
@@ -279,6 +285,9 @@ class ScraperRunner(threading.Thread):
             args.append('--language=%s' % self.scraper.language.lower())
             args.append('--name=%s' % self.scraper.short_name)
         
+#            if self.scraper.privacy_status != 'public':
+#                args.append('--urlquery=%s' % urlencode(  [ (s.key, s.value,) for s in self.scraper.settings.all() ] ) )
+
             runner = subprocess.Popen(args, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             runner.stdin.write(code)
             runner.stdin.close()
