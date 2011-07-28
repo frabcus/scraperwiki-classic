@@ -5,6 +5,7 @@ page_titles = {
     "docindex" : ("",""),
     "gmap_topic_guide" : ("Google Maps",""),
     "jquery_topic_guide" : ("Using JQuery",""),
+    "intro_screencast" : ("Introductory screencast",""),
     
     "faq" : ("Frequently Asked Questions",""),    
     
