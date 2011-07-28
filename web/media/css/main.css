@@ -4279,6 +4279,10 @@ table.example_table {
 	margin-top: 5px;
 }
 
+.ui-tooltip-content {
+    line-height: 18px;
+}
+
 /* API */
 
 code.api_call {

@@ -4,7 +4,14 @@
     {% if title %}Documentation / {{title}}{% else %}Documentation{% endif %}
 {% endblock %}
 
-{% block javascript %}<script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>{% endblock %}
+{% block javascript %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>
+    <script src="{{ MEDIA_URL }}js/jquery.qtip.min.js" type="text/javascript"></script>
+{% endblock %}
+
+{% block css %}
+    <link href="{{ MEDIA_URL }}css/jquery.qtip.min.css" rel="stylesheet" type="text/css" />
+{% endblock css %}
 
 {% block run_script %}
     // Add copy button bumf to every <code> element
@@ -42,6 +49,27 @@
         clip.glue(el[0], parent[0]);
         
     });
+
+    // popup bubbles on index page doclinks
+    $(document).ready(function(){
+            //create a bubble popup for each DOM element with class attribute as "text", "button" or "link" and LI, P, IMG elements.
+            $(".doclink").each(function() {
+                var span = $(this).find('span');
+                var bubble_text = span.html().replace(/^- /, "");
+                $(this).qtip({
+                    content: bubble_text,
+                    style: {
+                          classes: 'ui-tooltip-dark ui-tooltip-rounded'
+                    },
+                    position: {
+                          my: 'middle right',  
+                          at: 'middle left' 
+                    }
+                });
+                span.hide();
+            })
+    });
+
 {% endblock %}
 
 {% block header %}

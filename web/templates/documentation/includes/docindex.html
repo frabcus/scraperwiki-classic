@@ -8,22 +8,22 @@ scheduled to scrape and refine data.
 in SQL API gets the data out as JSON or CSV files.  -->
 </p>
 
-<h3>First steps</h3>
+<h3>First steps (anyone)</h3>
 <ul>
-          {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
-    <li> {% doc_link_full 'intro_screencast' language %} </li>
-    <li> {% doc_link_full 'LANG_intro_tutorial' language %} </li>
-    <li> {% doc_link_full 'LANG_view_guide' language %} </li>
-    <li> <a href='{% url tutorials language %}'>Live tutorials</a></li>
+    {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
+    <li class="doclink"> {% doc_link_full 'intro_screencast' language %} <span>- Step by step guide to ScraperWiki interface (15 mins)</span></li>
+    <li class="doclink"> {% doc_link_full 'LANG_intro_tutorial' language %} <span>- Write a real scraper by copying and pasting code (30 mins)</span></li>
+    <li class="doclink"> {% doc_link_full 'LANG_view_guide' language %} <span>- Learn to make a view by copying and pasting code (30 mins)</span></li>
+    <li class="doclink"> <a href='{% url tutorials language %}'>Live tutorials</a> <span>- A series of tutorials taking place entirely in the online code editor</span></li>
 </ul>
 
-<h3>Reference</h3>
+<h3>Reference (programmers)</h3>
 <ul>
-        {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
-  <li> {% doc_link_full 'LANG_help_documentation' language %}</li>  
-  <li> <a href="{% url docsexternal %}">Web API docs</a></li>
-  <li> {% doc_link_full 'LANG_libraries' language %} </li>
-    <li> {% doc_link_full 'LANG_datastore_guide' language %} </li>
+  {# find the text for the links are to be found in web/documentation/titles.py rather than in the templates #}
+  <li class="doclink"> {% doc_link_full 'LANG_help_documentation' language %} <span>- The ScraperWiki-specific functions you can call from inside a scraper/view</span></li>  
+  <li class="doclink"> {% doc_link_full 'LANG_datastore_guide' language %} <span>- Everything you can do with the ScraperWiki datastore</span></li>
+  <li class="doclink"> {% doc_link_full 'LANG_libraries' language %} <span>- List of other modules available from inside scrapers/views, e.g. Mechanize</span></li>
+  <li class="doclink"> <a href="{% url docsexternal %}">Web API docs</a> <span>- Get data out of ScraperWiki via URLs, includes a query builder</li>
 </ul>
 	
 </div>
@@ -94,5 +94,6 @@ in SQL API gets the data out as JSON or CSV files.  -->
 </div> {% endif %}
 
 </div>
+
 
 
