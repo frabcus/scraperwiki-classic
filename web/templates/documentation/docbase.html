@@ -53,8 +53,8 @@
     // popup bubbles on index page doclinks
     $(document).ready(function(){
             //create a bubble popup for each DOM element with class attribute as "text", "button" or "link" and LI, P, IMG elements.
-            $(".doclink").each(function() {
-                var span = $(this).find('span');
+            $(".doclink a").each(function() {
+                var span = $(this).parent().find('span');
                 var bubble_text = span.html().replace(/^- /, "");
                 $(this).qtip({
                     content: bubble_text,
@@ -62,8 +62,8 @@
                           classes: 'ui-tooltip-dark ui-tooltip-rounded'
                     },
                     position: {
-                          my: 'middle right',  
-                          at: 'middle left' 
+                          my: 'middle left',  
+                          at: 'middle right' 
                     }
                 });
                 span.hide();
