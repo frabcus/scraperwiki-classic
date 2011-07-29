@@ -92,11 +92,12 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
             params = dict(cgi.parse_qsl(query))
 
+            dataauth = None
+                    
             firstmessage = {"status":"good"}
             if 'short_name' in params:
                 if self.connection.getpeername()[0] != config.get('dataproxy', 'secure'):
                     firstmessage = {"error":"short_name only accepted from secure hosts"}
-                    dataauth = None
                 else:
                     short_name = params.get('short_name', '')
                     runID = 'fromfrontend.%s.%s' % (short_name, time.time()) 
