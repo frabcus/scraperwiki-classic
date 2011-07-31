@@ -131,6 +131,7 @@ $(function()
 </div>
 
 <form action="." method="post" id="request_form">
+    {% csrf_token %}
     {% if form.non_field_errors %}
         <div id="main_error">{{form.non_field_errors.0}}</div>
     {% endif %}

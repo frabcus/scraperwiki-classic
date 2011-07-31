@@ -20,6 +20,7 @@
 {% block content %}
     <div class="content">
         <form action="/contact/" method="POST">
+            {% csrf_token %}
             <ul class="form">
             <li>
                 {{ form.subject_dropdown.label_tag }}

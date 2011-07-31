@@ -8,6 +8,7 @@
 
     {% ifequal scraper.wiki_type 'scraper' %}
       <form action="{% url scraper_delete_data scraper.short_name %}" method="post">
+        {% csrf_token %}        
         <input type="hidden" name="delete_data" value="1" />
         <input type="submit" id="btnClearDatastore" class="danger" value="Clear the datastore?" />
         <a href="#" class="submit_link"><img src="{{ MEDIA_URL }}images/icons/clean.png" width="16" height="16" alt="" /> Clear the datastore</a>
@@ -16,6 +17,7 @@
     {% endifequal %}
 
   <form action="{% url scraper_delete_scraper scraper.wiki_type scraper.short_name %}" method="post">
+    {% csrf_token %}    
     <input type="hidden" name="delete_scraper" value="1" />
     <input type="submit" id="btnDeleteScraper" class="danger" value="Delete this {{scraper.wiki_type}}?" />
     <a href="#" class="submit_link"><img src="{{ MEDIA_URL }}images/icons/cross.png" width="16" height="16" alt="" /> Delete this {{scraper.wiki_type}}</a>
@@ -33,6 +35,7 @@
 
   {% ifequal scraper.wiki_type 'scraper' %}
     <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
+      {% csrf_token %}
       <input type="hidden" name="run_scraper" value="1" />
       <input type="submit" id="btnRunScraper" class="" value="Run now (as if scheduled)" />
     </form>
@@ -40,6 +43,7 @@
 
   {% comment %} 
   <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post">
+    {% csrf_token %}    
     <input type="hidden" name="screenshoot_scraper" value="1" />
     <input type="submit" id="btnScreenshootScraper" class="" value="Screenshoot this scraper" />
     <p>Take a screenshot of this scraper.</p>
