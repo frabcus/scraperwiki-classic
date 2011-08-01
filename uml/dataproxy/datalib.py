@@ -187,7 +187,6 @@ class SQLiteDatabase(Database):
                 tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                 
         except sqlite3.Error, e:
-            self.logger.warning("datasummary sqlite.error %s" % str(e))
             return {"error":"sqlite3.Error: "+str(e)}
         
         result = {"tables":tables}

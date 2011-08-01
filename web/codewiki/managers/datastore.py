@@ -56,9 +56,8 @@ class DataStore(object):
         self.sbuffer = [ ] # reset the buffer just for sake of that's what's worked in the past
         try:
             ret = json.loads(self.receiveonelinenj())
-        except:
-            pass
-            
+        except ValueError, e:
+            raise Exception( e.message )
         assert "moredata" not in ret
         return ret
     
