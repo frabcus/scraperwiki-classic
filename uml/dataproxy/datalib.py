@@ -168,7 +168,7 @@ class SQLiteDatabase(Database):
     def datasummary(self, limit):
         if not self.establishconnection(False):
             self.logger.warning('Failed to connecto sqlite database for summary %s' % (self.short_name or 'draft') )
-             return {"status":"No sqlite database"} # don't change this return string, is a structured one
+            return {"status":"No sqlite database"} # don't change this return string, is a structured one
         
         self.authorizer_func = authorizer_readonly
         tables = { }
