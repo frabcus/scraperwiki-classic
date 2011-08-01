@@ -76,7 +76,10 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def process(self, db, request):
         self.logger.debug(str(("request", request))[:100])
 
-        res = db.process(request)
+        try:
+            res = db.process(request)
+        except Exception, edb:
+            self.logger.warning( str(edb) )
         
         sres = json.dumps(res)
         self.logger.debug(sres[:200])
