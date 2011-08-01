@@ -79,11 +79,12 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         sres = ''
         try:
             res = db.process(request)
-            sres = json.dumps(res)            
         except Exception, edb:
             self.logger.warning( str(edb) )
-        
-        self.logger.debug(sres[:200])
+
+        sres = json.dumps(res)            
+        if sres:
+            self.logger.debug(sres[:200])
         self.connection.sendall(sres+'\n')
             
 
