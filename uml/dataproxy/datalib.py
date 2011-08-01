@@ -181,11 +181,16 @@ class SQLiteDatabase(Database):
                 if limit != -1:
                     self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, (limit,))
                     if limit != 0:
+                        rows = []
                         for r in self.m_sqlitedbcursor:
-                            self.logger.debug( r )                            
+                            row = []                           
                             for c in r:
-                                self.logger.debug( type(c) )
-                        tables[name]["rows"] = list(self.m_sqlitedbcursor)
+                                if type(c) == buffer:
+                                    row.append( unicode(c) )
+                                else:
+                                    row.append(c)
+                            rows.append(row)
+                        tables[name]["rows"] = rows
                     tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
                 tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                 
