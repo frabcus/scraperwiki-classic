@@ -226,7 +226,17 @@ class SQLiteDatabase(Database):
 
             # non-chunking return point
             if not streamchunking:
-                return {"keys":keys, "data":self.m_sqlitedbcursor.fetchall()}
+                rows = []
+                for r in self.m_sqlitedbcursor:
+                    row = []
+                    for c in r:
+                        if type(c) == buffer:
+                            row.append( unicode(c) )
+                        else:
+                            row.append(c)
+                    rows.append(row)
+                return {"keys":keys, "data": rows}                
+#                return {"keys":keys, "data":self.m_sqlitedbcursor.fetchall()}
 
                 # this loop has the one internal jsend in it
             while True:
