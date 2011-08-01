@@ -208,6 +208,8 @@ def code_overview(request, wiki_type, short_name):
                 context["ckansubmit"] = "http://ckan.net/package/new?%s" % urllib.urlencode(ckanparams)
 
     context["api_base"] = "http://%s/api/1.0/" % settings.API_DOMAIN
+    
+    dataproxy.close()
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
@@ -304,6 +306,8 @@ def scraper_delete_data(request, short_name):
         scraper.scraper.update_meta()
     scraper.save()
     request.notifications.add("Your data has been deleted")
+    
+    dataproxy.close()
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 
@@ -459,4 +463,5 @@ def export_sqlite(request, short_name):
     response = HttpResponse(stream_sqlite(dataproxy, initsqlitedata["filesize"], memblock), mimetype='application/octet-stream')
     response['Content-Disposition'] = 'attachment; filename=%s.sqlite' % (short_name)
     response["Content-Length"] = initsqlitedata["filesize"]
+    dataproxy.close()
     return response

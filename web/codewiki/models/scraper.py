@@ -105,6 +105,11 @@ class Scraper (code.Code):
                 print "logthis", datasummary
         except Exception, e:
             print "logthis", e
+        finally:
+            try:
+                dataproxy.close()
+            except:
+                pass
 
 
     def save(self, *args, **kwargs):
