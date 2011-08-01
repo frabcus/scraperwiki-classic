@@ -176,8 +176,7 @@ class SQLiteDatabase(Database):
         self.authorizer_func = authorizer_readonly
         tables = { }
         try:
-            for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
-                self.logger.debug('Executing %s' % sql )                
+            for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):          
                 tables[name] = {"sql":sql}
                 if limit != -1:
                     self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, (limit,))
@@ -194,7 +193,7 @@ class SQLiteDatabase(Database):
             scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
             if os.path.isfile(scrapersqlitefile):
                 result["filesize"] = os.path.getsize(scrapersqlitefile)
-        self.logger.debug( result )                                
+                 
         return result
     
     
