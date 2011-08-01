@@ -76,6 +76,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def process(self, db, request):
         self.logger.debug(str(("request", request))[:100])
 
+        sres = ''
         try:
             res = db.process(request)
             sres = json.dumps(res)            

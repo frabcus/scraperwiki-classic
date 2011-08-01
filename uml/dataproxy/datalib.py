@@ -154,6 +154,7 @@ class SQLiteDatabase(Database):
                 scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
                 self.logger.debug('Connecting to %s' % scrapersqlitefile )
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
+                self.logger.debug('Connected to %s' % scrapersqlitefile )                
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:")   # draft scrapers make a local version
             self.m_sqlitedbconn.set_authorizer(authorizer_all)
@@ -170,10 +171,13 @@ class SQLiteDatabase(Database):
             self.logger.warning('Failed to connecto sqlite database for summary %s' % (self.short_name or 'draft') )
             return {"status":"No sqlite database"} # don't change this return string, is a structured one
         
+        self.logger.debug('Performing datasummary for %s' % self.short_name )                
+                        
         self.authorizer_func = authorizer_readonly
         tables = { }
         try:
             for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
+                self.logger.debug('Executing %s' % sql )                
                 tables[name] = {"sql":sql}
                 if limit != -1:
                     self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, (limit,))
@@ -191,6 +195,7 @@ class SQLiteDatabase(Database):
             scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
             if os.path.isfile(scrapersqlitefile):
                 result["filesize"] = os.path.getsize(scrapersqlitefile)
+        self.logger.debug( result )                                
         return result
     
     
