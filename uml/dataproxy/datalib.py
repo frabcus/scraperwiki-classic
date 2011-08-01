@@ -67,10 +67,10 @@ class SQLiteDatabase(Database):
             res = {"error":'request must be dict', "content":str(request)}
         elif "maincommand" not in request:
             res = {"error":'request must contain maincommand', "content":str(request)}
-
+        elif request["maincommand"] == 'save_sqlite':
+            res = self.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
         elif request["maincommand"] == 'clear_datastore':
             res = self.clear_datastore()
-
         elif request["maincommand"] == 'sqlitecommand':
             if request["command"] == "downloadsqlitefile":
                 res = self.downloadsqlitefile(seek=request["seek"], length=request["length"])
@@ -84,9 +84,6 @@ class SQLiteDatabase(Database):
                 # in the case of stream chunking there is one sendall in a loop in this function
         elif request["maincommand"] == "sqliteexecute":
             res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"), streamchunking=request.get("streamchunking"))
-
-        elif request["maincommand"] == 'save_sqlite':
-            res = self.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
 
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
@@ -241,7 +238,16 @@ class SQLiteDatabase(Database):
                 # this loop has the one internal jsend in it
             while True:
                 odata = self.m_sqlitedbcursor.fetchmany(streamchunking)
-                arg = {"keys":keys, "data":odata} 
+                rows = []
+                for r in odata:
+                    row = []
+                    for c in r:
+                        if type(c) == buffer:
+                            row.append(unicode(c))
+                        else:
+                            row.append(c)
+                    rows.append(row)
+                arg = {"keys":keys, "data":rows} 
                 if len(odata) < streamchunking:
                     break
                 arg["moredata"] = True
