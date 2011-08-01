@@ -182,8 +182,9 @@ class SQLiteDatabase(Database):
                     self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, (limit,))
                     if limit != 0:
                         for r in self.m_sqlitedbcursor:
+                            self.logger.debug( r )                            
                             for c in r:
-                                print type(c)
+                                self.logger.debug( type(c) )
                         tables[name]["rows"] = list(self.m_sqlitedbcursor)
                     tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
                 tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
