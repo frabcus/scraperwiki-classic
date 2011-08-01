@@ -41,6 +41,10 @@ MEDIA_ADMIN_DIR = SCRAPERWIKI_DIR + '/media-admin'
 LOGIN_URL = '/login/'
 HOME_DIR = ""
 
+# MySQL default overdue scraper query
+OVERDUE_SQL = "(DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW() or last_run is null)"
+OVERDUE_SQL_PARAMS = []
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a trailing slash.
 URL_ROOT = ""
 MEDIA_ROOT = URL_ROOT + 'media/'

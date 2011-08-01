@@ -31,7 +31,7 @@ class TestScrapers(SeleniumTest):
         thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_%s.txt' % (language, obj,))
             
         f = open(thefile)
-        code = f.read().replace('\n', '\r\n')
+        code = f.read().replace('\n', '<br>') #'\r\n')
         f.close()
     
         return code
@@ -132,6 +132,7 @@ class TestScrapers(SeleniumTest):
         """ We'll click run and then wait for 3 seconds, each time checking 
             whether we have in fact finished.  
         """
+        #import pdb; pdb.set_trace()
         self.selenium.click('run')
         success,total_checks = False, 12
         
@@ -142,10 +143,15 @@ class TestScrapers(SeleniumTest):
             time.sleep(3)
             total_checks -= 1
             
-        if self.selenium.is_text_present('seconds elapsed:'):
+        if self.selenium.is_text_present(' seconds elapsed'):
             # If the scraper has executed check that we have the expected output
-            self.failUnless( self.selenium.is_text_present('hello') and self.selenium.is_text_present('world')) 
+            self.failUnless( self.selenium.is_text_present('<td>hello</td>') and self.selenium.is_text_present('<td>world</td>')) 
+            self.failIf( self.selenium.is_text_present('Traceback') )
+            success = True
             print 'Scraper returned some data!!!'
+        
+        self.failUnless(success)
+        
             
     
     
