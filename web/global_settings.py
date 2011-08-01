@@ -41,6 +41,10 @@ MEDIA_ADMIN_DIR = SCRAPERWIKI_DIR + '/media-admin'
 LOGIN_URL = '/login/'
 HOME_DIR = ""
 
+# MySQL default overdue scraper query
+OVERDUE_SQL = "(DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW() or last_run is null)"
+OVERDUE_SQL_PARAMS = []
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a trailing slash.
 URL_ROOT = ""
 MEDIA_ROOT = URL_ROOT + 'media/'
@@ -59,6 +63,7 @@ TEMPLATE_LOADERS = [
 ]
 
 MIDDLEWARE_CLASSES = [
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -66,6 +71,7 @@ MIDDLEWARE_CLASSES = [
     'piston.middleware.ConditionalMiddlewareCompatProxy',
     'piston.middleware.CommonMiddlewareCompatProxy',
     'pagination.middleware.PaginationMiddleware',    
+    'middleware.csrfcookie.CsrfAlwaysSetCookieMiddleware'
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -97,7 +103,6 @@ SCRAPERWIKI_APPS = [
     'codewiki',
     'notification',
     'payment',  	
-    'market',
     'api',
     'whitelist',
     'cropper',
@@ -177,8 +182,7 @@ TEMPLATE_SETTINGS = [
  'MAX_MAP_POINTS',
  'REVISION',
  'VIEW_DOMAIN',
- 'CODEMIRROR_URL',
- 'ENABLE_MARKETPLACE',
+ 'CODEMIRROR_URL'
 ]
 
 try:
@@ -207,8 +211,6 @@ HTTPPROXYURL = "http://localhost:9005"
 DISPATCHERURL = "http://localhost:9000"
 
 PAGINATION_DEFAULT_PAGINATION=20
-
-ENABLE_MARKETPLACE = False
 
 # tell south to do migrations when doing tests
 SOUTH_TESTS_MIGRATE = True

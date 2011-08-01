@@ -14,28 +14,7 @@
 
     <h2 id="technical">Technical tasks</h2>
 
-    {% if settings.ENABLE_MARKETPLACE %}
-    <div class="task_complete">
-        <a href="{% url market_list %}">
-            {% dial solicitation_percent 200 100 %}
-        </a>
-        <h3>Write a scraper someone has requested <small>({{solicitation_percent}}% complete)</small></h3>
-        {% ifequal solicitation_open_count 0 %}
-            <p>No need! They&rsquo;ve all been done.</p>
-        {% else %}
-            <p>
-                There are currently <strong>{{solicitation_open_count}} datasets</strong> that need scrapers writing for them. 
-                These have either been requested by people who can&rsquo;t program but would like to use the data locked away on the web
-                or programers who need help getting at numerous datasets, such as scraping data from every council in the UK. Take a look and see if there is anything you can help out with.
-            </p>
-            <form action="{% url market_list %}" method="get">
-                <input type="submit" value="Show me requested scrapers"/>
-            </form>
-        {% endifequal %}
-    </div>
-    {% endif %}
-
-    <div class="task_complete">
+   <div class="task_complete">
         <a href="{% url scraper_list_wiki_type 'scraper' %}?filter=sick">
             {% dial scraper_sick_percent 200 100 %}   
         </a>
@@ -61,22 +40,6 @@
 
     <h2 id="nontechnical">Non-technical tasks</h2>
 
-    {% if settings.ENABLE_MARKETPLACE %}
-    <div class="task_complete">
-        <a href="{% url market_solicitation %}">
-            <img class="photo" src="{{MEDIA_URL}}/images/requests.jpg"/>
-        </a>
-        <h3>Request or suggest a dataset</h3>
-        <p>
-            Do you know of a good dataset that you think should be on ScraperWiki? Can you find all the individual websites listing councillors expenses, or parking suspensions, or planning applications?
-            What dataset would you really like to see in a spreadsheet rather than scattered across pages on a government website? <a href="{% url market_list %}">Click here to see what other people have suggested</a>.
-        </p>
-        <form action="{% url market_solicitation %}" method="get">
-            <input type="submit" value="Suggest a dataset"/>
-        </form>
-    </div>
-    {% endif %}
-    
     <div class="task_complete">
         <a href="{% url scraper_list_wiki_type 'scraper' %}?filter=no_description">
             {% dial scraper_description_percent 200 100 %}    

@@ -2,6 +2,7 @@ import django
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 from django.core.mail import send_mail, mail_admins
+from django.db.models import F
 
 try:    import json
 except: import simplejson as json
@@ -373,9 +374,12 @@ class Command(BaseCommand):
         If this command was starting with --ignore-emails then we will exclude 
         those scrapers that are actually email scrapers in disguise.
         """
+        
         #get all scrapers where interval > 0 and require running
         scrapers = Scraper.objects.exclude(privacy_status="deleted").filter(run_interval__gt=0)
-        scrapers = scrapers.extra(where=["(DATE_ADD(last_run, INTERVAL run_interval SECOND) < NOW() or last_run is null)"]).order_by('-last_run')
+        from django.conf import settings
+        scrapers = scrapers.extra(where=[settings.OVERDUE_SQL], params=settings.OVERDUE_SQL_PARAMS).order_by('-last_run')
+        
         if self.ignore_emails:
             scrapers = scrapers.exclude(users__usercoderole__role="email")            
         

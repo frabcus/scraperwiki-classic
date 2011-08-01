@@ -26,3 +26,25 @@ enabled.default=info,access,warn,error
 # Turn debug on for the "Proxy" logger
 [loggers]
 Proxy=debug,info,access,warn,error
+keys=root
+
+[logger_root]
+level=ERROR
+handlers=defaulthandler
+
+[handlers]
+keys=defaulthandler
+
+[handler_defaulthandler]
+class=handlers.RotatingFileHandler
+level=WARNING
+formatter=simpleFormatter
+args=('/var/log/scraperwiki/orbited.log', "a", 100000, 5)
+
+
+[formatters]
+keys=simpleFormatter
+
+[formatter_simpleFormatter]
+format=%(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s
+

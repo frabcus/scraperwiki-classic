@@ -46,9 +46,6 @@ urlpatterns = patterns('',
     #paypal
     (r'^paypal/notifications/56db6e2700d04e38a5d/', include('paypal.standard.ipn.urls')),
     
-    # market place
-    url(r'^market/', include('market.urls')),
-
     # favicon
     (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/media/images/favicon.ico'}),
 

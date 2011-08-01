@@ -22,6 +22,7 @@
 {% block content %}
     <div class="content">
     	<form method="post">
+        {% csrf_token %}
        <!--     <ul class="form">
                 <li>
                   {{ form.name.label_tag }}

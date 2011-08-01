@@ -534,6 +534,7 @@ $(document).ready(function()
       {% else %}
         <form action="{% url scraper_killrunning status.runID %}" method="post">
       {% endif %}
+          {% csrf_token %}
           <input type="hidden" id="hidKillRun" name="killrun" value="1" />
           <input type="submit" id="btnKillRun" class="danger" value="Kill running scraper" />
         </form>

@@ -1,4 +1,5 @@
 import unittest
+import atexit
 from selenium import selenium
 
 class SeleniumTest(unittest.TestCase):
@@ -12,19 +13,25 @@ class SeleniumTest(unittest.TestCase):
 
     _app_url = ''
 
+    _verbosity = 1
+
     def setUp(self):
         self.verificationErrors = []
         self.selenium = selenium(SeleniumTest._selenium_host, SeleniumTest._selenium_port, 
                                  SeleniumTest._selenium_browser, SeleniumTest._app_url)
         self.selenium.start()
+
+        # make sure we quit the selenium when the script dies
+        atexit.register(self.tearDown)
             
-            # extract a title for the job from name of test.  must be done in the constructor or after start()
+        # extract a title for the job from name of test.  must be done in the constructor or after start()
         self.selenium.set_context("sauce:job-name=%s" % self._testMethodName)  
         self.selenium.window_maximize()
 
     def wait_for_page(self, doing=None):
         hit_limit = True
-        print "waiting_for_page", self.selenium.get_location()
+        if self._verbosity > 1:
+            print "  SeleniumTest: waiting_for_page", self.selenium.get_location()
         try:
             self.selenium.wait_for_page_to_load('30000')
             hit_limit = False
@@ -62,3 +69,5 @@ class SeleniumTest(unittest.TestCase):
     def tearDown(self):
         self.selenium.stop()
         self.assertEqual([], self.verificationErrors)
+
+

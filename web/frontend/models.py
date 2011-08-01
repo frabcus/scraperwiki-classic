@@ -47,8 +47,7 @@ class AlertTypes(models.Model):
 class Alerts(models.Model):
     """
     Stores 'alerts' for an object. Alerts can be anything, such as when a
-    scraper was run, saved, committed or when a comment has been added to the
-    market place.
+    scraper was run, saved, committed or when a comment has been added.
         
     'message_type' is for storing diferent types of message.  
     
