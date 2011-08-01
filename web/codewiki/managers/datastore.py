@@ -38,6 +38,7 @@ class DataStore(object):
             res = self.sbuffer.pop(0)
             if res:
                 return res
+                
         while True:
             srec = self.m_socket.recv(1024)
             if not srec:
