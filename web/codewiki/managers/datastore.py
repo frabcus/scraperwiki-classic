@@ -27,9 +27,10 @@ class DataStore(object):
         return self.receiveoneline()
 
     def close(self) :
-        self.m_socket.send('.\n')
-        self.m_socket.close()
-        self.m_socket = None
+        if self.m_socket:
+            self.m_socket.send('.\n')
+            self.m_socket.close()
+            self.m_socket = None
 
     # a \n delimits the end of the record.  you cannot read beyond it or it will hang; unless there is a moredata=True parameter
     def receiveonelinenj(self):
