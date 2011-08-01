@@ -143,6 +143,7 @@ class SQLiteDatabase(Database):
         
         def progress_handler():
             self.logger.debug("progress on %s" % self.runID)
+            pass
         
         if not self.m_sqlitedbconn:
             if self.short_name:
@@ -151,20 +152,22 @@ class SQLiteDatabase(Database):
                         return False
                     os.mkdir(self.scraperresourcedir)
                 scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
+                self.logger.debug('Connecting to %s' % scrapersqlitefile )
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:")   # draft scrapers make a local version
             self.m_sqlitedbconn.set_authorizer(authorizer_all)
-            try:
-                self.m_sqlitedbconn.set_progress_handler(progress_handler, 1000000)  # can be order of 0.4secs 
-            except AttributeError:
-                pass  # must be python version 2.6
+#            try:
+#                self.m_sqlitedbconn.set_progress_handler(progress_handler, 1000000)  # can be order of 0.4secs 
+#            except AttributeError:
+#                pass  # must be python version 2.6
             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
         return True
                 
                 
     def datasummary(self, limit):
         if not self.establishconnection(False):
+            self.logger.warning('Failed to connecto sqlite database for summary %s' % (self.short_name or 'draft') )
              return {"status":"No sqlite database"} # don't change this return string, is a structured one
         
         self.authorizer_func = authorizer_readonly
