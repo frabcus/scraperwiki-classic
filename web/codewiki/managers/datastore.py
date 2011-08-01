@@ -54,7 +54,11 @@ class DataStore(object):
         
     def receiveoneline(self):
         self.sbuffer = [ ] # reset the buffer just for sake of that's what's worked in the past
-        ret = json.loads(self.receiveonelinenj())
+        try:
+            ret = json.loads(self.receiveonelinenj())
+        except:
+            pass
+            
         assert "moredata" not in ret
         return ret
     
