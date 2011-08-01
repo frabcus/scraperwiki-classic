@@ -54,10 +54,7 @@ class DataStore(object):
         
     def receiveoneline(self):
         self.sbuffer = [ ] # reset the buffer just for sake of that's what's worked in the past
-        try:
-            ret = json.loads(self.receiveonelinenj())
-        except ValueError, e:
-            raise Exception("%s:%s" % (e.message, text))
+        ret = json.loads(self.receiveonelinenj())
         assert "moredata" not in ret
         return ret
     
