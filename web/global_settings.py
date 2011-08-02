@@ -130,6 +130,7 @@ INSTALLED_APPS = [
     'piston',      # needs 'django-piston' and 'phpserialize' (this to be deleted)
     'captcha',
     'pagination',    
+    'compressor',
 ] + SCRAPERWIKI_APPS
 
 PISTON_STREAM_OUTPUT = True

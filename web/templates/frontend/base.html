@@ -6,15 +6,11 @@
 
     {% block meta %}{% endblock %}
 
+	{% load compress %}
+	
+	{% compress js %}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-1.5.2.js"></script>
-            {# May want to review contents (which includes everything) and slim down this ui file #}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery-ui-1.8.12.custom.min.js"></script>
-    {% comment %}
-        {# pulling these files from a diffierent server makes it difficult develop offline and to control which point versions is used #}
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-    {% endcomment %}
-
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.easing.compatibility.js"></script>		
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.cycle.all.min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jeditable.js"></script>		
@@ -22,6 +18,8 @@
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.hotkeys.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/json-min.js"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/scraperwiki.js?{{settings.REVISION}}"></script>		
+	{% endcompress %}
+
 	{% block javascript %}{% endblock %}
 
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.8.12.css" />
