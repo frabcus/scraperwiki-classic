@@ -6,6 +6,7 @@
 	{% include 'shared/form_errors.html' %}
 
 	<form method="post" action="/accounts/register/">
+        {% csrf_token %}
 	    {% if form.username.errors %}
 
 	    {% endif %}

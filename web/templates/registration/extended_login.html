@@ -29,6 +29,7 @@
 {% block content %}
 <div class="login">
     <form method="post" action="." id="login_form">
+        {% csrf_token %}
         {% if login_form.non_field_errors %}
             <div id="main_error">
                 {% for error in login_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
@@ -52,11 +53,10 @@
         </ul>
         <div class="last">
         <p class="remember_me">
-            {{ login_form.remember_me }}
-	        {{ login_form.remember_me.label_tag }}
+            {{ login_form.remember_me }}&nbsp;{{ login_form.remember_me.label_tag }}
         </p>
         <p class="last">
-		    <input type="submit" name="login" value="Log in" />
+		    <input type="submit" id="login_submit" name="login" value="Log in" />
 		</p>
 		</div>
 		<br class="clear" />
@@ -66,6 +66,7 @@
 <div class="signup">
 
 	<form method="post" action="." id="registration_form">
+        {% csrf_token %}
         <h3>Create a free account</h3>
         {% if registration_form.non_field_errors %}
             <div id="main_error">

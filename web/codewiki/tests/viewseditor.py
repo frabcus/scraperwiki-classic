@@ -8,7 +8,7 @@ from django.test import TestCase
 import codewiki
 
 class ScraperViewsEditorTests(TestCase):
-    fixtures = ['./fixtures/test_data.json']
+    fixtures = ['test_data.json']
     
     def test_raw_content(self):
         response = self.client.get(reverse('raw', kwargs={'short_name': 'test_scraper'}))

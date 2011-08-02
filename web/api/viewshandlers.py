@@ -154,6 +154,7 @@ def sqlite_handler(request):
     dataproxy.m_socket.sendall(simplejson.dumps(req) + '\n')
     
     if format not in ["jsondict", "jsonlist", "csv", "htmltable"]:
+        dataproxy.close()
         return HttpResponse("Error: the format '%s' is not supported" % format)
     
     if format in ["csv", 'htmltable']:   # may also apply to jsondict
@@ -171,7 +172,8 @@ def sqlite_handler(request):
             response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
         for s in strea:
             response.write(s)
-        
+    
+        dataproxy.close()
         
 # unless you put in a content length, the middleware will measure the length of your data
 # (unhelpfully consuming everything in your generator) before then returning a zero length result 
@@ -195,6 +197,8 @@ def sqlite_handler(request):
         result = "%s(%s)" % (callback, result)
     response = HttpResponse(result, mimetype='application/json; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename=%s.json' % (scraper.short_name)
+    
+    dataproxy.close()
     return response
 
 

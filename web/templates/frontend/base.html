@@ -75,14 +75,15 @@
                 <a href="{% url login %}?next={% ifequal request.get_full_path '/' %}/dashboard/{% else %}{{ request.get_full_path }}{% endifequal %}">Log in</a>
 				    <ul>
 						<li class="login_form">
-						    <form method="post" action="{% url login %}">
-                                <label for="id_user_or_email">Username or email:</label>
-                                <input type="text" id="id_user_or_email" name="user_or_email" />
-                                <label for="id_password">Password:</label>
-                                <input type="password" id="id_password" name="password" />
+						    <form method="post" action="{% url login %}" id="nav_login_form">
+                                {% csrf_token %}
+                                <label for="id_nav_user_or_email">Username or email:</label>
+                                <input type="text" id="id_nav_user_or_email" name="user_or_email" />
+                                <label for="id_nav_password">Password:</label>
+                                <input type="password" id="id_nav_password" name="password" />
                                 <a id="forgotten" href="/accounts/password/reset/">Forgotten?</a>
                                 <input type="hidden" name="redirect" value="{% ifequal request.get_full_path '/' %}/dashboard/{% else %}{{ request.get_full_path }}{% endifequal %}"/>
-                                <input type="submit" class="submit" id="submit" name="login" value="Log in" />
+                                <input type="submit" class="submit" id="nav_login_submit" name="login" value="Log in" />
                                 <span class="clear"></span>
                             </form>
 						</li>
@@ -92,6 +93,7 @@
 				{% endif %}
 				<li class="search">
 					<form id="navSearch" action="/search/" method="post">
+                        {% csrf_token %}
 		            	<input type="text" id="nav_search_q" name="q"/>
 		            	<input type="submit" id="nav_search_go" value="Go" />
 					</form>

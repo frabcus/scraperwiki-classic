@@ -19,7 +19,6 @@ from tagging.utils import get_tag, calculate_cloud, get_tag_list, LOGARITHMIC, g
 from tagging.models import Tag, TaggedItem
 
 from codewiki.models import Code, Scraper, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
-from market.models import Solicitation, SolicitationStatus
 from django.db.models import Q
 from frontend.forms import CreateAccountForm
 from frontend.models import UserToUserRole
@@ -94,7 +93,6 @@ def profile_detail(request, username):
     owned_code_objects = scraper_search_query(request.user, None).filter(usercoderole__user=profiled_user)
     extra_context['owned_code_objects'] = owned_code_objects
     extra_context['emailer_code_objects'] = owned_code_objects.filter(Q(usercoderole__user__username=username) & Q(usercoderole__role='email'))
-    extra_context['solicitations'] = Solicitation.objects.filter(deleted=False, user_created=profiled_user).order_by('-created_at')[:5]  
     return profile_views.profile_detail(request, username=username, extra_context=extra_context)
 
 
@@ -250,11 +248,43 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None):
     return render_to_response('frontend/browse.html', dictionary, context_instance=RequestContext(request))
 
 
+def search_urls(request, partial):
+    """
+    When we search we want to handle anything that looks like a url and search for it within the 
+    codewiki.DomainScrape. This isn't mapped to a URL at the moment, it is expected that it will 
+    only be called from the search view.
+    
+    This does not take account of private scrapers that you do have access to, instead showing
+    only public and protected scrapers, for now.
+    """
+    from codewiki.models import DomainScrape
+    from urlparse import urlparse
+
+    url = urlparse(partial)
+    dsqs = DomainScrape.objects.filter(scraper_run_event__scraper__privacy_status__in=['public','protected'],
+                                       domain='%s://%s' % (url.scheme,url.netloc,) ).distinct('scraper_run_event__scraper')
+    
+    ctx = {
+        'form'     : SearchForm(initial={'q': partial}),
+        'scrapers_num_results'    : dsqs.count(),
+        'scrapers' : [ d.scraper for d in dsqs.all().distinct() ],
+    }
+    
+    # TODO: We need a template for url search results
+    return render_to_response('frontend/search_url_results.html', ctx, context_instance = RequestContext(request))
+
+
+
 def search(request, q=""):
     if (q != ""):
         form = SearchForm(initial={'q': q})
         q = q.strip()
 
+        # If q looks like a url then we should just pass it through to search_urls
+        # and return that instead.
+        if re.match('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', q):
+            return search_urls(request,q)
+        
         tags = Tag.objects.filter(name__icontains=q)
         scrapers = scraper_search_query(request.user, q)
         scrapers = scrapers.exclude(usercoderole__role='email').exclude(privacy_status='private')  # so we can search for "email" without getting all the emailers -- would be a type search if we needed it
@@ -304,15 +334,6 @@ def get_involved(request):
         view_no_tags_count = TaggedItem.objects.get_no_tags(View.objects.exclude(privacy_status="deleted")).count()
         view_tags_percent = 100 - int(view_no_tags_count / float(view_count) * 100)
 
-        #scraper requests
-        status = SolicitationStatus.objects.get(status='open')
-        solicitation_count = Solicitation.objects.filter().count()
-        solicitation_open_count = Solicitation.objects.filter(status=status).count()    
-        try:
-            solicitation_percent = int(solicitation_open_count / float(solicitation_count) * 100)        
-        except ZeroDivisionError:
-            solicitation_percent = 100
-        
         #scraper status
         scraper_sick_count = Scraper.objects.filter(status='sick').exclude(privacy_status="deleted").count()
         scraper_sick_percent = 100 - int(scraper_sick_count / float(scraper_count) * 100)
@@ -328,9 +349,6 @@ def get_involved(request):
             'scraper_tags_percent': scraper_tags_percent,
             'view_no_tags_count': view_no_tags_count,
             'view_tags_percent': view_tags_percent,
-            'solicitation_count': solicitation_count,
-            'solicitation_open_count': solicitation_open_count,
-            'solicitation_percent': solicitation_percent,
             'scraper_sick_count': scraper_sick_count,
             'scraper_sick_percent': scraper_sick_percent,
             'language': 'python', 

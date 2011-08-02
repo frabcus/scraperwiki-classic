@@ -1,6 +1,6 @@
 {% extends "frontend/base.html" %}
 
-{% block title %}Documentation / External API{% endblock %}
+{% block title %}Documentation / Web API{% endblock %}
 
 {% block javascript %}
 <script type="text/javascript" src="{{ MEDIA_URL }}js/ZeroClipboard.js?"></script>
@@ -265,8 +265,8 @@ $(function()
 
 
 {% block header %}
-   <h2><a href="{% url docs language %}">Documentation</a> / External API</h2>
-  <p>How to get data out of ScraperWiki via a REST API</p>
+   <h2><a href="{% url docs language %}">Documentation</a> / Web API</h2>
+  <p>How to get data out of ScraperWiki via an HTTP interface</p>
 {% endblock %}
 
 {% block content %}
@@ -291,7 +291,7 @@ $(function()
    
 <div id="api_explorer">
     <ul id="functions">
-        <li class="selected"><a href="#intro"><strong>About the External API</strong><small>Get data out of ScraperWiki</small></a></li>
+        <li class="selected"><a href="#intro"><strong>About the Web API</strong><small>Get data out of ScraperWiki</small></a></li>
         <li><a href="#sqlite"><strong>scraperwiki.datastore.sqlite</strong><small>Query and extract your data via a general&nbsp;purpose&nbsp;SQL&nbsp;interface</small></a></li>
         <li><a href="#getinfo"><strong>scraperwiki.scraper.getinfo</strong><small>Extract data about a scraper&rsquo;s code, owner,&nbsp;history&nbsp;etc</small></a></li>
         <li><a href="#getruninfo"><strong>scraperwiki.scraper.getruninfo</strong><small>See what the scraper did&nbsp;during&nbsp;each&nbsp;run</small></a></li>
@@ -302,7 +302,7 @@ $(function()
 
     <div id="detail">
         <div id="intro">
-            <p class="first">The ScraperWiki external interface allows you to extract data in the form you want for use on the web or in your own applications.  You can also extract information about the state of any scraper.</p>
+            <p class="first">ScraperWiki's external interface allows you to extract data in the form you want for use on the web or in your own applications.  You can also extract information about the state of any scraper.</p>
         	<span></span>
         	<p class="last">&laquo; Please select the function that you want to learn how to use.</p>
         </div>

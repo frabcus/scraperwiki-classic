@@ -208,6 +208,8 @@ def code_overview(request, wiki_type, short_name):
                 context["ckansubmit"] = "http://ckan.net/package/new?%s" % urllib.urlencode(ckanparams)
 
     context["api_base"] = "http://%s/api/1.0/" % settings.API_DOMAIN
+    
+    dataproxy.close()
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
@@ -237,6 +239,8 @@ def scraper_admin_controleditors(request, short_name):
         return HttpResponse("Failed: role '%s' unrecognized" % newrole)
     if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
         return HttpResponse("Warning: user is already '%s'" % newrole)
+    if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role='owner'):
+        return HttpResponse("Failed: user is already owner")
     newuserrole = scraper.set_user_role(roleuser, newrole)
     context = { "role":newuserrole.role, "contributor":newuserrole.user }
     context["user_owns_it"] = (request.user in scraper.userrolemap()["owner"])
@@ -304,6 +308,8 @@ def scraper_delete_data(request, short_name):
         scraper.scraper.update_meta()
     scraper.save()
     request.notifications.add("Your data has been deleted")
+    
+    dataproxy.close()
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
 

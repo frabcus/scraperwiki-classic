@@ -76,10 +76,15 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def process(self, db, request):
         self.logger.debug(str(("request", request))[:100])
 
-        res = db.process(request)
-        
-        sres = json.dumps(res)
-        self.logger.debug(sres[:200])
+        sres = ''
+        try:
+            res = db.process(request)
+        except Exception, edb:
+            self.logger.warning( str(edb) )
+
+        sres = json.dumps(res)            
+        if sres:
+            self.logger.debug(sres[:200])
         self.connection.sendall(sres+'\n')
             
 
@@ -92,11 +97,12 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             (scm, netloc, path, params, query, fragment) = urlparse.urlparse(self.path, 'http')
             params = dict(cgi.parse_qsl(query))
 
+            dataauth = None
+                    
             firstmessage = {"status":"good"}
             if 'short_name' in params:
                 if self.connection.getpeername()[0] != config.get('dataproxy', 'secure'):
                     firstmessage = {"error":"short_name only accepted from secure hosts"}
-                    dataauth = None
                 else:
                     short_name = params.get('short_name', '')
                     runID = 'fromfrontend.%s.%s' % (short_name, time.time()) 

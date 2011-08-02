@@ -67,10 +67,10 @@ class SQLiteDatabase(Database):
             res = {"error":'request must be dict', "content":str(request)}
         elif "maincommand" not in request:
             res = {"error":'request must contain maincommand', "content":str(request)}
-
+        elif request["maincommand"] == 'save_sqlite':
+            res = self.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
         elif request["maincommand"] == 'clear_datastore':
             res = self.clear_datastore()
-
         elif request["maincommand"] == 'sqlitecommand':
             if request["command"] == "downloadsqlitefile":
                 res = self.downloadsqlitefile(seek=request["seek"], length=request["length"])
@@ -84,9 +84,6 @@ class SQLiteDatabase(Database):
                 # in the case of stream chunking there is one sendall in a loop in this function
         elif request["maincommand"] == "sqliteexecute":
             res = self.sqliteexecute(sqlquery=request["sqlquery"], data=request["data"], attachlist=request.get("attachlist"), streamchunking=request.get("streamchunking"))
-
-        elif request["maincommand"] == 'save_sqlite':
-            res = self.save_sqlite(unique_keys=request["unique_keys"], data=request["data"], swdatatblname=request["swdatatblname"])
 
         else:
             res = {"error":'Unknown maincommand: %s' % request["maincommand"]}
@@ -143,6 +140,7 @@ class SQLiteDatabase(Database):
         
         def progress_handler():
             self.logger.debug("progress on %s" % self.runID)
+            pass
         
         if not self.m_sqlitedbconn:
             if self.short_name:
@@ -151,36 +149,49 @@ class SQLiteDatabase(Database):
                         return False
                     os.mkdir(self.scraperresourcedir)
                 scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
+                self.logger.debug('Connecting to %s' % scrapersqlitefile )
                 self.m_sqlitedbconn = sqlite3.connect(scrapersqlitefile)
+                self.logger.debug('Connected to %s' % scrapersqlitefile )                
             else:
                 self.m_sqlitedbconn = sqlite3.connect(":memory:")   # draft scrapers make a local version
             self.m_sqlitedbconn.set_authorizer(authorizer_all)
-            try:
-                self.m_sqlitedbconn.set_progress_handler(progress_handler, 1000000)  # can be order of 0.4secs 
-            except AttributeError:
-                pass  # must be python version 2.6
+#            try:
+#                self.m_sqlitedbconn.set_progress_handler(progress_handler, 1000000)  # can be order of 0.4secs 
+#            except AttributeError:
+#                pass  # must be python version 2.6
             self.m_sqlitedbcursor = self.m_sqlitedbconn.cursor()
         return True
                 
                 
     def datasummary(self, limit):
         if not self.establishconnection(False):
-             return {"status":"No sqlite database"} # don't change this return string, is a structured one
+            self.logger.warning('Failed to connecto sqlite database for summary %s' % (self.short_name or 'draft') )
+            return {"status":"No sqlite database"} # don't change this return string, is a structured one
         
+        self.logger.debug('Performing datasummary for %s' % self.short_name )                
+                        
         self.authorizer_func = authorizer_readonly
         tables = { }
         try:
-            for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):
+            for name, sql in list(self.m_sqlitedbcursor.execute("select name, sql from sqlite_master where type='table'")):          
                 tables[name] = {"sql":sql}
                 if limit != -1:
                     self.m_sqlitedbcursor.execute("select * from `%s` order by rowid desc limit ?" % name, (limit,))
                     if limit != 0:
-                        tables[name]["rows"] = list(self.m_sqlitedbcursor)
+                        rows = []
+                        for r in self.m_sqlitedbcursor:
+                            row = []                           
+                            for c in r:
+                                if type(c) == buffer:
+                                    row.append( unicode(c) )
+                                else:
+                                    row.append(c)
+                            rows.append(row)
+                        tables[name]["rows"] = rows
                     tables[name]["keys"] = map(lambda x:x[0], self.m_sqlitedbcursor.description)
                 tables[name]["count"] = list(self.m_sqlitedbcursor.execute("select count(1) from `%s`" % name))[0][0]
                 
         except sqlite3.Error, e:
-            self.logger.warning("datasummary sqlite.error %s" % str(e))
             return {"error":"sqlite3.Error: "+str(e)}
         
         result = {"tables":tables}
@@ -188,6 +199,7 @@ class SQLiteDatabase(Database):
             scrapersqlitefile = os.path.join(self.scraperresourcedir, "defaultdb.sqlite")
             if os.path.isfile(scrapersqlitefile):
                 result["filesize"] = os.path.getsize(scrapersqlitefile)
+                 
         return result
     
     
@@ -211,12 +223,31 @@ class SQLiteDatabase(Database):
 
             # non-chunking return point
             if not streamchunking:
-                return {"keys":keys, "data":self.m_sqlitedbcursor.fetchall()}
+                rows = []
+                for r in self.m_sqlitedbcursor:
+                    row = []
+                    for c in r:
+                        if type(c) == buffer:
+                            row.append( unicode(c) )
+                        else:
+                            row.append(c)
+                    rows.append(row)
+                return {"keys":keys, "data": rows}                
+#                return {"keys":keys, "data":self.m_sqlitedbcursor.fetchall()}
 
                 # this loop has the one internal jsend in it
             while True:
                 odata = self.m_sqlitedbcursor.fetchmany(streamchunking)
-                arg = {"keys":keys, "data":odata} 
+                rows = []
+                for r in odata:
+                    row = []
+                    for c in r:
+                        if type(c) == buffer:
+                            row.append(unicode(c))
+                        else:
+                            row.append(c)
+                    rows.append(row)
+                arg = {"keys":keys, "data":rows} 
                 if len(odata) < streamchunking:
                     break
                 arg["moredata"] = True
