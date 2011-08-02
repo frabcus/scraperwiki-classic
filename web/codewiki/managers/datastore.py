@@ -28,9 +28,15 @@ class DataStore(object):
 
     def close(self) :
         if self.m_socket:
-            self.m_socket.send('.\n')
-            self.m_socket.close()
-            self.m_socket = None
+            try:
+                # Try and flush some data but bear in mind that the proxy may have already 
+                # closed the connection for us - as it does tend to do from time to time
+                self.m_socket.send('.\n')
+                self.m_socket.close()
+            except:
+                pass
+                
+        self.m_socket = None
 
     # a \n delimits the end of the record.  you cannot read beyond it or it will hang; unless there is a moredata=True parameter
     def receiveonelinenj(self):
