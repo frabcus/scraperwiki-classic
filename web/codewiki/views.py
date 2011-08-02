@@ -228,6 +228,7 @@ def scraper_admin_privacystatus(request, short_name):
     return HttpResponse(dict(PRIVACY_STATUSES_UI)[scraper.privacy_status])
 
 def scraper_admin_controleditors(request, short_name):
+    import pdb; pdb.set_trace()
     scraper = getscraperor404(request, short_name, "set_controleditors")
     username = request.GET.get('roleuser', '')
     lroleuser = User.objects.filter(username=username)
@@ -239,6 +240,8 @@ def scraper_admin_controleditors(request, short_name):
         return HttpResponse("Failed: role '%s' unrecognized" % newrole)
     if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
         return HttpResponse("Warning: user is already '%s'" % newrole)
+    if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role='owner'):
+        return HttpResponse("Failed: user is already owner")
     newuserrole = scraper.set_user_role(roleuser, newrole)
     context = { "role":newuserrole.role, "contributor":newuserrole.user }
     context["user_owns_it"] = (request.user in scraper.userrolemap()["owner"])
