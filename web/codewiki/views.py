@@ -228,7 +228,6 @@ def scraper_admin_privacystatus(request, short_name):
     return HttpResponse(dict(PRIVACY_STATUSES_UI)[scraper.privacy_status])
 
 def scraper_admin_controleditors(request, short_name):
-    import pdb; pdb.set_trace()
     scraper = getscraperor404(request, short_name, "set_controleditors")
     username = request.GET.get('roleuser', '')
     lroleuser = User.objects.filter(username=username)
