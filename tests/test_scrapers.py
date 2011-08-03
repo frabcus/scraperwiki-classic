@@ -139,7 +139,7 @@ class TestScrapers(SeleniumTest):
         run_enabled = "selenium.browserbot.getCurrentWindow().document.getElementById('run').disabled == false"
         s.wait_for_condition(run_enabled, 5000)
         s.click('run')
-        success,total_checks = False, 12
+        success,total_checks,reconnects = False, 12, 1
 
         # Dev server is slow, allow a page refresh on problems and give a longer timeout
         if s.browserURL == "http://dev.scraperwiki.com/":
@@ -173,8 +173,7 @@ class TestScrapers(SeleniumTest):
         
         self.failUnless(success)
         
-            
-    
+
     
     def _language_create(self, language):
         s = self.selenium        
