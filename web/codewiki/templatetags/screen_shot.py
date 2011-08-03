@@ -8,7 +8,7 @@ register = Library()
 @register.inclusion_tag('codewiki/templatetags/screenshot.html')
 def screen_shot(code_object, size='medium'):
     
-    has_screenshot = code_object.has_screenshot(size=size):
+    has_screenshot = code_object.has_screenshot(size=size)
     if has_screenshot:
         url = settings.MEDIA_URL + 'screenshots/' + size + '/' + code_object.get_screenshot_filename(size=size)
     else:
