@@ -1,6 +1,6 @@
 from django.template import Library
 from django.template.defaultfilters import stringfilter
-import settings
+from django.conf import settings
 
 import re
 register = Library()

@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.contrib import auth
 from django.shortcuts import get_object_or_404
-import settings
+from django.conf import settings
 from frontend.forms import SigninForm, UserProfileForm, SearchForm, ResendActivationEmailForm, DataEnquiryForm
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.models import User
