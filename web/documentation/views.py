@@ -2,6 +2,8 @@ from django.template import RequestContext, TemplateDoesNotExist
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.views.decorators.cache import cache_page
+
 from codewiki.models import Code
 import os
 import re
@@ -11,6 +13,7 @@ import urllib2
 import urlparse
 import cgi
 
+@cache_page(60 * 15)
 def docmain(request, language=None, path=None):
     from titles import page_titles
 
@@ -40,6 +43,7 @@ def docmain(request, language=None, path=None):
     return render_to_response('documentation/docbase.html', context, context_instance=RequestContext(request))
 
 
+@cache_page(60 * 15)
 def tutorials(request,language=None):
     from codewiki.models import Scraper, View
 
@@ -59,6 +63,7 @@ def tutorials(request,language=None):
 
 
     # should also filter, say, on isstartup=True and on privacy_status=visible to limit what can be injected into here
+@cache_page(60 * 15)    
 def contrib(request, short_name):
     context = { }
     try:
@@ -75,7 +80,7 @@ def contrib(request, short_name):
     context["language"] = "python"
     return render_to_response('documentation/docbase.html', context, context_instance=RequestContext(request))
 
-
+@cache_page(60 * 15)
 def docsexternal(request):
     language = request.session.get('language', 'python')
     api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
