@@ -223,6 +223,9 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None):
     if not special_filter:
         all_code_objects = all_code_objects.exclude(wiki_type='scraper', scraper__record_count=0)
     
+    
+    all_code_objects = all_code_objects.select_related('owner')
+    
     # Number of results to show from settings
     paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)
 
