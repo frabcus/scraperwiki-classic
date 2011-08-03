@@ -31,7 +31,9 @@ class TestScrapers(SeleniumTest):
         thefile = os.path.join( os.path.dirname( __file__ ), 'sample_data/%s_%s.txt' % (language, obj,))
             
         f = open(thefile)
-        code = f.read().replace('\n', '<br>') #'\r\n')
+        # The file seems to be directly inserted into the source of the page, so some characters need
+        # to be html encoded.
+        code = f.read().replace('&','&amp').replace('<','&lt').replace('>','&gt').replace('\n', '<br>')
         f.close()
     
         return code
@@ -67,15 +69,15 @@ class TestScrapers(SeleniumTest):
         
     def _check_dashboard_count(self, count=2):
         """ 
-        Go to the current user's dashboard and make sure they 
-        have a scraper there 
+        Go to the current user's dashboard and verify the 
+        number of scrapers there 
         """
         s = self.selenium
                 
         s.click('link=Your dashboard')
         self.wait_for_page('visit dashboard')
         
-        scraper_count = s.get_xpath_count('//li[@class="code_object_line"]')        
+        scraper_count = s.get_xpath_count('//li[@class="code_object_line"]')      
         self.failUnless( count == scraper_count, msg='There are %s items instead of %s' % (scraper_count,count,) )
         
 
@@ -132,14 +134,33 @@ class TestScrapers(SeleniumTest):
         """ We'll click run and then wait for 3 seconds, each time checking 
             whether we have in fact finished.  
         """
-        #import pdb; pdb.set_trace()
-        self.selenium.click('run')
-        success,total_checks = False, 12
+        s = self.selenium
         
-        while not self.selenium.is_text_present('runfinished'):
-            if total_checks == 0:
+        run_enabled = "selenium.browserbot.getCurrentWindow().document.getElementById('run').disabled == false"
+        s.wait_for_condition(run_enabled, 5000)
+        s.click('run')
+        success,total_checks = False, 12
+
+        # Dev server is slow, allow a page refresh on problems and give a longer timeout
+        if s.browserURL == "http://dev.scraperwiki.com/":
+            reconnects = 5
+            total_checks = 40
+
+        while not (s.is_text_present('Starting run ...') and s.is_text_present('runfinished')):
+            if total_checks == 0 and reconnects == 0:
                 self.fail('Running the scraper seemed to fail')
-                return 
+                return
+            elif ((s.is_text_present('Connection to execution server lost') and (reconnects > 0))
+                    or (s.is_text_present('runfinished') and not s.is_text_present('Starting run') and (reconnects > 0))
+                    or (total_checks == 0) and (reconnects > 0)):
+                # Refresh and start anew, something went wrong
+                s.refresh()
+                self.wait_for_page()
+                time.sleep(1)
+                s.wait_for_condition(run_enabled, 5000)
+                s.click('run')
+                reconnects -= 1
+                total_checks = 40
             time.sleep(3)
             total_checks -= 1
             
@@ -164,12 +185,14 @@ class TestScrapers(SeleniumTest):
         self.wait_for_page()
             
         self._add_comment(name)
-            
+        
+        # Check for precreated e-mail scraper and new scraper
         self._check_dashboard_count()
         view_name = self._create_view(language, name)
         self._check_clear_data( name )
         self._check_delete_scraper(name )
         self._check_delete_view( view_name )        
+        # Only e-mail scraper should be left
         self._check_dashboard_count(count=1)
                      
 
@@ -212,18 +235,25 @@ class TestScrapers(SeleniumTest):
         
         s.answer_on_next_prompt( name )        
         s.click('link=%s' % self.new_scraper_link)        
-        time.sleep(1)        
+        time.sleep(1)
         s.click( 'link=%s' % link_name )
         self.wait_for_page()
+
+        # Prompt and wait for save button to activate
+        s.type_keys('//body[@class="editbox"]', "\16")
+        s.wait_for_condition("selenium.browserbot.getCurrentWindow().document.getElementById('btnCommitPopup').disabled == false", 5000)
         
+        # Load the scraper code and insert directly into page source
         code = self._load_data(language, 'scraper')
-        s.type('//body[@class="editbox"]', "%s" % code)        
+        s.type('//body[@class="editbox"]', "%s" % code)
+
         s.click('btnCommitPopup')
         self.wait_for_page()
         time.sleep(1)
+        
         return name
-            
-            
+        
+        
     def _create_view(self, language, shortname):
         """ Must be on the scraper homepage """
         s = self.selenium
@@ -237,9 +267,14 @@ class TestScrapers(SeleniumTest):
         s.answer_on_next_prompt( name )        
         s.click('//a[@class="editor_view"]')        
         time.sleep(1)        
-                
         s.click( 'link=%s' % link_name )
+
         self.wait_for_page()
+
+        # Prompt save button to activate
+        self.selenium.type_keys('//body[@class="editbox"]',"                       ")
+        time.sleep(1)
+
         code = self._load_data(language, 'view')
         code = code.replace('{{sourcescraper}}', name)
         
