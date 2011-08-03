@@ -77,7 +77,7 @@ class TestScrapers(SeleniumTest):
         s.click('link=Your dashboard')
         self.wait_for_page('visit dashboard')
         
-        scraper_count = s.get_xpath_count('//li[@class="code_object_line"]')      
+        scraper_count = int(s.get_xpath_count('//li[@class="code_object_line"]'))    
         self.failUnless( count == scraper_count, msg='There are %s items instead of %s' % (scraper_count,count,) )
         
 
