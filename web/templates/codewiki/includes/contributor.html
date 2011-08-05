@@ -23,7 +23,7 @@
     <span class="hide">{{contributor.username}}</span>
 	{% ifequal role 'editor' %}
 		{% ifequal request.user.username contributor.username %}
-			<input type="button" value="detach" class="detachbutton"/>
+			<input type="button" value="remove" class="detachbutton"/>
 		{% endifequal %}		
 	{% endifequal %}
 
