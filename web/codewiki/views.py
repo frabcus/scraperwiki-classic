@@ -244,7 +244,7 @@ def scraper_admin_controleditors(request, short_name):
     # If there is no role and we are the user that is applying this (i.e. to ourselves)
     # then we can remove the role. Otherwise check they already are a role.
     if newrole == '' and request.user == roleuser:
-        scraper.set_user_role(request.user, 'editor', remove=True):
+        scraper.set_user_role(request.user, 'editor', remove=True)
     elif models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
         return HttpResponse("Warning: user is already '%s'" % newrole)
     
