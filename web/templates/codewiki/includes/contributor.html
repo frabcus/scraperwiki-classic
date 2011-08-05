@@ -22,11 +22,11 @@
 
     <span class="hide">{{contributor.username}}</span>
 
-		{% ifequal role 'editor' %}
-			{% ifequal request.user.username contributor.username %}
-				<input type="button" value="demote" class="detachbutton"/>
-			{% endifequal %}		
-		{% endifequal %}
+	{% ifequal role 'editor' %}
+		{% ifequal request.user.username contributor.username %}
+			<input type="button" value="demote" class="detachbutton"/>
+		{% endifequal %}		
+	{% endifequal %}
 	
     {% if user_owns_it %}
       {% ifnotequal scraper.privacy_status 'public' %}

@@ -240,6 +240,7 @@ def scraper_admin_controleditors(request, short_name):
         
     newrole = request.GET.get('newrole', '')
     
+    # We allow '' for removing a role
     if newrole not in ['editor', 'follow', '']:
         return HttpResponse("Failed: role '%s' unrecognized" % newrole)
 
@@ -250,10 +251,10 @@ def scraper_admin_controleditors(request, short_name):
     if request.user.id == roleuser.id and newrole == '':
         scraper.set_user_role(request.user, 'editor', remove=True)
         context = { "role":'', "contributor":request.user }        
-        processed = True
-        
+        processed = True    
     elif models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
         return HttpResponse("Warning: user is already '%s'" % newrole)
+    
     
     if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role='owner'):
         return HttpResponse("Failed: user is already owner")
@@ -267,6 +268,7 @@ def scraper_admin_controleditors(request, short_name):
     if processed:
         return render_to_response('codewiki/includes/contributor.html', context, context_instance=RequestContext(request))
     return HttpResponse("Failed: unknown")
+
 
 
 def view_admin(request, short_name):
