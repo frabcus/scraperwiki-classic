@@ -309,6 +309,10 @@ class DataEnquiry(models.Model):
 
 def data_enquiry_post_save(sender, **kwargs):
     if kwargs['created']:
+        
+        if not hasattr(settings,'HIGHRISE_ENABLED') or settings.HIGHRISE_ENABLED == False:
+            return
+        
         instance = kwargs['instance']
         send_mail('Data Request', instance.email_message(), instance.email, [settings.FEEDBACK_EMAIL], fail_silently=False)
 
@@ -327,7 +331,7 @@ def data_enquiry_post_save(sender, **kwargs):
                                                     instance.email)
                         h.tag_person(requester.id, 'Lead')
                     except Exception, e2:
-                        mail_admins('HighRise failed to find user with errors', str(err) + ',' + str(e2))                    
+                        mail_admins('HighRise failed to find/create user with errors', str(err) + ',' + str(e2))                    
                         return
 
                 h.create_note_for_person(instance.email_message(), requester.id)

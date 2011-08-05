@@ -3,6 +3,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 from django.core.mail import send_mail, mail_admins
 from django.db.models import F
+from django.conf import settings
 
 try:    import json
 except: import simplejson as json
@@ -12,7 +13,7 @@ import subprocess
 from codewiki.models import Code, Scraper, ScraperRunEvent, DomainScrape
 from codewiki import runsockettotwister
 import frontend 
-import settings
+
 import datetime
 import time
 import threading

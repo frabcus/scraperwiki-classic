@@ -64,6 +64,7 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = [
+    'django.middleware.gzip.GZipMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -131,6 +132,7 @@ INSTALLED_APPS = [
     'piston',      # needs 'django-piston' and 'phpserialize' (this to be deleted)
     'captcha',
     'pagination',    
+    'compressor',
 ] + SCRAPERWIKI_APPS
 
 PISTON_STREAM_OUTPUT = True

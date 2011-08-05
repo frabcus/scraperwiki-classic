@@ -93,3 +93,6 @@ if DEBUG:
         'django.template.loaders.app_directories.load_template_source',
     ]
     SQL_DEBUG = False
+
+
+HIGHRISE_ENABLED = False

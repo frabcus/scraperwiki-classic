@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.contrib import auth
 from django.shortcuts import get_object_or_404
-import settings
+from django.conf import settings
 from frontend.forms import SigninForm, UserProfileForm, SearchForm, ResendActivationEmailForm, DataEnquiryForm
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.contrib.auth.models import User
@@ -202,7 +202,7 @@ def browse_wiki_type(request, wiki_type=None, page_number=1):
     return browse(request, page_number, wiki_type, special_filter)
 
 def browse(request, page_number=1, wiki_type=None, special_filter=None):
-    all_code_objects = scraper_search_query(request.user, None)
+    all_code_objects = scraper_search_query(request.user, None).select_related('owner','owner__userprofile_set')
     if wiki_type:
         all_code_objects = all_code_objects.filter(wiki_type=wiki_type) 
 
@@ -222,6 +222,7 @@ def browse(request, page_number=1, wiki_type=None, special_filter=None):
     # filter out scrapers that have no records
     if not special_filter:
         all_code_objects = all_code_objects.exclude(wiki_type='scraper', scraper__record_count=0)
+    
     
     # Number of results to show from settings
     paginator = Paginator(all_code_objects, settings.SCRAPERS_PER_PAGE)

@@ -3,7 +3,7 @@ import datetime
 
 from django.db import models
 from django.contrib.auth.models import User
-import settings
+from django.conf import settings
 
 # to delete and deprecate
 class api_key(models.Model):

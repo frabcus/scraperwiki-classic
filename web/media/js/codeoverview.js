@@ -104,16 +104,30 @@ function setupScraperOverview(short_name)
 
 
     // load in the whole new page and snip out the piece (this is too easy)
-function reload_scraper_contributors()
+function reload_scraper_contributors(redirect)
 {
     $('#contributors_loading').show();
-    $.get(document.location, function(htmlpage)  
-    { 
-        $("#scraper_contributors").html($(htmlpage).find("#scraper_contributors").html())
-        $("#header_inner").html($(htmlpage).find("#header_inner").html())
-        setupChangeEditorStatus(); 
-        $('#contributors_loading').hide();
-    }); 
+    $.ajax(
+		{
+			url:document.location,
+			cache: false,
+			type: 'GET', 
+			success:function(htmlpage){
+		        $("#scraper_contributors").html($(htmlpage).find("#scraper_contributors").html())
+		        $("#header_inner").html($(htmlpage).find("#header_inner").html())
+		        setupChangeEditorStatus(); 
+		        $('#contributors_loading').hide();
+			},
+			error: function(jq, textStatus, errorThrown){
+				if ( redirect ) {
+					window.location.href = redirect;
+					return false;
+				}
+
+				alert( textStatus );
+				alert( errorThrown );
+			}
+		});
 
     // original action: 
     //    document.location.reload(true);
@@ -204,6 +218,27 @@ function setupCodeOverview(short_name)
 }
 
 
+function changeRoles(sdata, redirect_to_on_fail) {
+    $.ajax(
+		{
+			url:$("#admincontroleditors").val(), 
+			type: 'GET', 
+			data:sdata, 
+			success:function(result)
+        	{
+            	if (result.substring(0, 6) == "Failed")
+                	$('#contributorserror').text(result).show(300);
+            	else 
+                	reload_scraper_contributors(redirect_to_on_fail); 
+        	},
+        	error:function(jq, textStatus, errorThrown)
+        	{
+            	$('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
+        	}
+		}
+	); 	
+}
+
 function setupChangeEditorStatus()
 {
     // changing editor status
@@ -225,58 +260,41 @@ function setupChangeEditorStatus()
         var thisli = $(this).parents("li:first"); 
         var sdata = { roleuser:$('#addneweditor input:text').val(), newrole:'editor' }; 
         $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
-        {
-            $('#addneweditor input:text').val(''); 
-            if (result.substring(0, 6) == "Failed") {
-                $('#contributorserror').text(result).show(300);
-            } else {
-                reload_scraper_contributors(); 
-                $('#addneweditor span').hide(); 
-                $('#addneweditor a').show(); 
-            }
-        },
-        error:function(jq, textStatus, errorThrown)
-        {
-            $('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
-        }
- 
+	        {
+           
+	            if (result.substring(0, 6) == "Failed") {
+	                $('#contributorserror').text(result).show(300);
+	            } else {
+	                reload_scraper_contributors(); 
+	                $('#addneweditor span').hide(); 
+	                $('#addneweditor a').show(); 
+	            }
+	        },
+	        error:function(jq, textStatus, errorThrown)
+	        {
+	            $('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
+	        }
         }); 
+    }); 
+
+    $('.detachbutton').click(function() 
+    {
+        $('#contributorserror').hide();
+        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
+		changeRoles( sdata, '/dashboard/' );
     }); 
 
     $('.demotebutton').click(function() 
     {
         $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'follow' }; 
-        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
-        {
-            if (result.substring(0, 6) == "Failed")
-                $('#contributorserror').text(result).show(300);
-            else 
-                reload_scraper_contributors(); 
-        },
-        error:function(jq, textStatus, errorThrown)
-        {
-            $('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
-        }
-
-        }); 
+		changeRoles( sdata );
     }); 
     $('.promotebutton').click(function() 
     {
         $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'editor' }; 
-        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
-        {
-            if (result.substring(0, 6) == "Failed")
-                $('#contributorserror').text(result).show(300);
-            else 
-                reload_scraper_contributors(); 
-        },
-        error:function(jq, textStatus, errorThrown)
-        {
-            $('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
-        }
-        }); 
+		changeRoles( sdata );
     }); 
 
 

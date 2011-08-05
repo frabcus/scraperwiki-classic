@@ -8,7 +8,7 @@ from django.views.generic import date_based, list_detail
 from django.views.generic.simple import direct_to_template
 from django.contrib import admin
 import django.contrib.auth.views as auth_views
-import settings
+from django.conf import settings
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
