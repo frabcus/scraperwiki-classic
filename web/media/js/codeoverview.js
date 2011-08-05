@@ -107,13 +107,18 @@ function setupScraperOverview(short_name)
 function reload_scraper_contributors()
 {
     $('#contributors_loading').show();
-    $.get(document.location, function(htmlpage)  
-    { 
-        $("#scraper_contributors").html($(htmlpage).find("#scraper_contributors").html())
-        $("#header_inner").html($(htmlpage).find("#header_inner").html())
-        setupChangeEditorStatus(); 
-        $('#contributors_loading').hide();
-    }); 
+    $.ajax(
+		{
+			url:document.location,
+			cache: false,
+			type: 'GET', 
+			success:function(htmlpage){
+		        $("#scraper_contributors").html($(htmlpage).find("#scraper_contributors").html())
+		        $("#header_inner").html($(htmlpage).find("#header_inner").html())
+		        setupChangeEditorStatus(); 
+		        $('#contributors_loading').hide();
+			}
+		});
 
     // original action: 
     //    document.location.reload(true);
@@ -249,6 +254,7 @@ function setupChangeEditorStatus()
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
         $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
         {
+			alert( result );
             if (result.substring(0, 6) == "Failed")
                 $('#contributorserror').text(result).show(300);
             else 
