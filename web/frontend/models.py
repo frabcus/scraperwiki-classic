@@ -309,12 +309,11 @@ class DataEnquiry(models.Model):
 
 def data_enquiry_post_save(sender, **kwargs):
     if kwargs['created']:
-        
-        if not hasattr(settings,'HIGHRISE_ENABLED') or settings.HIGHRISE_ENABLED == False:
-            return
-        
         instance = kwargs['instance']
         send_mail('Data Request', instance.email_message(), instance.email, [settings.FEEDBACK_EMAIL], fail_silently=False)
+
+        if not hasattr(settings,'HIGHRISE_ENABLED') or settings.HIGHRISE_ENABLED == False:
+            return
 
         if instance.category not in ['public']:
             try:
