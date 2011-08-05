@@ -241,20 +241,28 @@ def scraper_admin_controleditors(request, short_name):
     if newrole not in ['editor', 'follow', '']:
         return HttpResponse("Failed: role '%s' unrecognized" % newrole)
 
+    processed = False
+    
     # If there is no role and we are the user that is applying this (i.e. to ourselves)
     # then we can remove the role. Otherwise check they already are a role.
-    if newrole == '' and request.user == roleuser:
+    if newrole == '' and request.user.id == roleuser.id:
         scraper.set_user_role(request.user, 'editor', remove=True)
+        context = { "role":'', "contributor":newuserrole.user }        
+        processed = True
+        
     elif models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
         return HttpResponse("Warning: user is already '%s'" % newrole)
     
     if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role='owner'):
         return HttpResponse("Failed: user is already owner")
         
-    newuserrole = scraper.set_user_role(roleuser, newrole)
-    context = { "role":newuserrole.role, "contributor":newuserrole.user }
+    if not processed:
+        newuserrole = scraper.set_user_role(roleuser, newrole)
+        context = { "role":newuserrole.role, "contributor":newuserrole.user }
+        processed = True
+        
     context["user_owns_it"] = (request.user in scraper.userrolemap()["owner"])
-    if newuserrole:
+    if processed:
         return render_to_response('codewiki/includes/contributor.html', context, context_instance=RequestContext(request))
     return HttpResponse("Failed: unknown")
 
