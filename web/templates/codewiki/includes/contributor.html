@@ -24,7 +24,7 @@
 
 		{% ifequal role 'editor' %}
 			{% ifequal request.user.username contributor.username %}
-				<input type="button" value="remove" class="detachbutton"/>
+				<input type="button" value="demote" class="detachbutton"/>
 			{% endifequal %}		
 		{% endifequal %}
 	
