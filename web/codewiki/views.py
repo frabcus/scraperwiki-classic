@@ -207,9 +207,11 @@ def code_overview(request, wiki_type, short_name):
                 ckanparams["resources_description"] = "Scraped data"
                 context["ckansubmit"] = "http://ckan.net/package/new?%s" % urllib.urlencode(ckanparams)
 
+    if dataproxy:
+        dataproxy.close()
+
     context["api_base"] = "http://%s/api/1.0/" % settings.API_DOMAIN
     
-    dataproxy.close()
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
@@ -245,9 +247,9 @@ def scraper_admin_controleditors(request, short_name):
     
     # If there is no role and we are the user that is applying this (i.e. to ourselves)
     # then we can remove the role. Otherwise check they already are a role.
-    if newrole == '' and request.user.id == roleuser.id:
+    if request.user.id == roleuser.id and newrole == '':
         scraper.set_user_role(request.user, 'editor', remove=True)
-        context = { "role":'', "contributor":newuserrole.user }        
+        context = { "role":'', "contributor":request.user }        
         processed = True
         
     elif models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):

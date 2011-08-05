@@ -117,6 +117,10 @@ function reload_scraper_contributors()
 		        $("#header_inner").html($(htmlpage).find("#header_inner").html())
 		        setupChangeEditorStatus(); 
 		        $('#contributors_loading').hide();
+			},
+			error: function(jq, textStatus, errorThrown){
+				alert( textStatus );
+				alert( errorThrown );
 			}
 		});
 
@@ -254,7 +258,6 @@ function setupChangeEditorStatus()
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
         $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
         {
-			alert( result );
             if (result.substring(0, 6) == "Failed")
                 $('#contributorserror').text(result).show(300);
             else 
