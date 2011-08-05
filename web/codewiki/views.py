@@ -230,36 +230,39 @@ def scraper_admin_privacystatus(request, short_name):
     return HttpResponse(dict(PRIVACY_STATUSES_UI)[scraper.privacy_status])
 
 def scraper_admin_controleditors(request, short_name):
-    scraper = getscraperor404(request, short_name, "set_controleditors")
-    username = request.GET.get('roleuser', '')
-    
+    username  = request.GET.get('roleuser', '')
+    newrole   = request.GET.get('newrole', '')    
+    processed = False
+
+    if not username:
+        return HttpResponse("Failed: username not provided")
+        
     try:
         roleuser = User.objects.get(username=username)
     except User.DoesNotExist:
         return HttpResponse("Failed: username '%s' not found" % username)
         
-    newrole = request.GET.get('newrole', '')
-    
     # We allow '' for removing a role
     if newrole not in ['editor', 'follow', '']:
         return HttpResponse("Failed: role '%s' unrecognized" % newrole)
 
-    processed = False
-    
-    # If there is no role and we are the user that is applying this (i.e. to ourselves)
-    # then we can remove the role. Otherwise check they already are a role.
-    if request.user.id == roleuser.id and newrole == '':
+    if  request.user.id == roleuser.id and newrole == '':
+        # If there is no role and we are the user that is applying this (i.e. to ourselves)
+        # then we can remove the role. Otherwise check they already are a role.
+        scraper = getscraperor404(request, short_name, "remove_self_editor")    
         scraper.set_user_role(request.user, 'editor', remove=True)
         context = { "role":'', "contributor":request.user }        
-        processed = True    
-    elif models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
-        return HttpResponse("Warning: user is already '%s'" % newrole)
+        processed = True        
+    else:
+        scraper = getscraperor404(request, short_name, "set_controleditors")        
+
+    if not processed:    
+        if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
+            return HttpResponse("Warning: user is already '%s'" % newrole)
     
-    
-    if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role='owner'):
-        return HttpResponse("Failed: user is already owner")
+        if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role='owner'):
+            return HttpResponse("Failed: user is already owner")
         
-    if not processed:
         newuserrole = scraper.set_user_role(roleuser, newrole)
         context = { "role":newuserrole.role, "contributor":newuserrole.user }
         processed = True
