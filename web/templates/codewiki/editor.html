@@ -45,6 +45,8 @@
     <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/tokenizejavascript.js" type="text/javascript"></script> 
     <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsejavascript.js" type="text/javascript"></script> 
     <script src="{{ MEDIA_URL }}CodeMirror-{{codemirrorversion}}/js/parsehtmlmixed.js" type="text/javascript"></script> 
+	{% endcompress %}
+
 	
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editorconnection.js?{{settings.REVISION}}"></script>
     <script type="text/javascript" src="{{ MEDIA_URL }}js/editortabs.js?{{settings.REVISION}}"></script>
@@ -58,7 +60,6 @@
     {% endwith %}
 
     <script type="text/javascript" src="{{ MEDIA_URL }}js/codeviewer.js?{{settings.REVISION}}"></script> 
-	{% endcompress %}
 
 
  {# highlightCode(code, Parser), highlightOtherCode(greencode, redcode, matcheropcodes, Parser) #}
