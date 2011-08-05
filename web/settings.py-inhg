@@ -89,3 +89,6 @@ if DEBUG:
         'frontend.context_processors.sqldebug',
     )
     SQL_DEBUG = False
+
+
+HIGHRISE_ENABLED = False

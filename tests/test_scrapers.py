@@ -164,10 +164,10 @@ class TestScrapers(SeleniumTest):
             time.sleep(3)
             total_checks -= 1
             
-        if self.selenium.is_text_present(' seconds elapsed'):
+        if self.selenium.is_text_present('seconds elapsed'):
             # If the scraper has executed check that we have the expected output
-            self.failUnless( self.selenium.is_text_present('<td>hello</td>') and self.selenium.is_text_present('<td>world</td>')) 
-            self.failIf( self.selenium.is_text_present('Traceback') )
+            self.failUnless( s.is_text_present('hello') and s.is_text_present('world') ) 
+            self.failIf( s.is_text_present('Traceback') )
             success = True
             print 'Scraper returned some data!!!'
         
