@@ -104,7 +104,7 @@ function setupScraperOverview(short_name)
 
 
     // load in the whole new page and snip out the piece (this is too easy)
-function reload_scraper_contributors()
+function reload_scraper_contributors(redirect)
 {
     $('#contributors_loading').show();
     $.ajax(
@@ -119,6 +119,11 @@ function reload_scraper_contributors()
 		        $('#contributors_loading').hide();
 			},
 			error: function(jq, textStatus, errorThrown){
+				if ( redirect ) {
+					window.location.href = redirect;
+					return false;
+				}
+
 				alert( textStatus );
 				alert( errorThrown );
 			}
@@ -213,7 +218,7 @@ function setupCodeOverview(short_name)
 }
 
 
-function changeRoles(sdata) {
+function changeRoles(sdata, redirect_to_on_fail) {
     $.ajax(
 		{
 			url:$("#admincontroleditors").val(), 
@@ -224,7 +229,7 @@ function changeRoles(sdata) {
             	if (result.substring(0, 6) == "Failed")
                 	$('#contributorserror').text(result).show(300);
             	else 
-                	reload_scraper_contributors(); 
+                	reload_scraper_contributors(redirect_to_on_fail); 
         	},
         	error:function(jq, textStatus, errorThrown)
         	{
@@ -276,7 +281,7 @@ function setupChangeEditorStatus()
     {
         $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
-		changeRoles( sdata );
+		changeRoles( sdata, '/dashboard/' );
     }); 
 
     $('.demotebutton').click(function() 
