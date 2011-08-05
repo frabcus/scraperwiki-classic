@@ -250,12 +250,13 @@ def scraper_admin_controleditors(request, short_name):
         # If there is no role and we are the user that is applying this (i.e. to ourselves)
         # then we can remove the role. Otherwise check they already are a role.
 
+        scraper = getscraperor404(request, short_name, "remove_self_editor")            
+        
         # If the user is an owner then we should disregard this request as they cannot remove
         # that role
         if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role='owner').count():
             return HttpResponse("Failed: You cannot remove yourself as owner" )            
             
-        scraper = getscraperor404(request, short_name, "remove_self_editor")    
         scraper.set_user_role(request.user, 'editor', remove=True)
         context = { "role":'', "contributor":request.user }        
         processed = True        
