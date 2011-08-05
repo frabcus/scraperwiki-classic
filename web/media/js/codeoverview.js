@@ -243,6 +243,24 @@ function setupChangeEditorStatus()
         }); 
     }); 
 
+    $('.leavebutton').click(function() 
+    {
+        $('#contributorserror').hide();
+        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
+        $.ajax({url:$("#admincontroleditors").val(), type: 'GET', data:sdata, success:function(result)
+        {
+            if (result.substring(0, 6) == "Failed")
+                $('#contributorserror').text(result).show(300);
+            else 
+                reload_scraper_contributors(); 
+        },
+        error:function(jq, textStatus, errorThrown)
+        {
+            $('#contributorserror').text("Connection failed: " + textStatus + " " + errorThrown).show(300);
+        }
+        }); 
+    }); 
+
     $('.demotebutton').click(function() 
     {
         $('#contributorserror').hide();

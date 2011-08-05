@@ -230,17 +230,26 @@ def scraper_admin_privacystatus(request, short_name):
 def scraper_admin_controleditors(request, short_name):
     scraper = getscraperor404(request, short_name, "set_controleditors")
     username = request.GET.get('roleuser', '')
-    lroleuser = User.objects.filter(username=username)
-    if not lroleuser:
+    
+    try:
+        roleuser = User.objects.get(username=username)
+    except User.DoesNotExist:
         return HttpResponse("Failed: username '%s' not found" % username)
-    roleuser = lroleuser[0]
+        
     newrole = request.GET.get('newrole', '')
-    if newrole not in ['editor', 'follow']:
+    
+    # If there is no role and we are the user that is applying this (i.e. to ourselves)
+    # then we can remove the fole
+    if newrole not in ['editor', 'follow', '']:
         return HttpResponse("Failed: role '%s' unrecognized" % newrole)
-    if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
+    if newrole == '' and request.user == roleuser:
+        scraper.set_user_role(request.user, 'editor', remove=True):
+    elif models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):
         return HttpResponse("Warning: user is already '%s'" % newrole)
+    
     if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role='owner'):
         return HttpResponse("Failed: user is already owner")
+        
     newuserrole = scraper.set_user_role(roleuser, newrole)
     context = { "role":newuserrole.role, "contributor":newuserrole.user }
     context["user_owns_it"] = (request.user in scraper.userrolemap()["owner"])

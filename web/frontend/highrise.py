@@ -201,7 +201,6 @@ class HighRise(object):
             subject = ''
 
         xml_task = self.task_xml_template % (task, frame, category, subject, person_id)
-        print xml_task
         req = urllib2.Request(url, xml_task, {"Content-type": "application/xml"})
         resp = urllib2.urlopen(req)
         if resp.code != 201:
