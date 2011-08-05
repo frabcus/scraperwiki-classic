@@ -243,7 +243,7 @@ function setupChangeEditorStatus()
         }); 
     }); 
 
-    $('.leavebutton').click(function() 
+    $('.detachbutton').click(function() 
     {
         $('#contributorserror').hide();
         var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
