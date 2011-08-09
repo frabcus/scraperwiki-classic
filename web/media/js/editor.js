@@ -87,7 +87,7 @@ $(document).ready(function() {
     var parserName = Array();
     var codemirroroptions = undefined; 
 
-    var pageIsDirty = false;
+    var pageIsDirty = true;
     $('.editor_controls #btnCommitPopup').attr('disabled', !pageIsDirty); 
 
     var atsavedundo = 0; // recorded at start of save operation
