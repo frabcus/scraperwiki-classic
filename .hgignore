@@ -12,6 +12,8 @@ syntax: regexp
 ^build$
 ^pysqlite-2.6.0$
 ^develop-eggs$
+^web/media/CACHE$
+^docs$
 ^eggs$
 ^include$
 ^share$
