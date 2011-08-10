@@ -49,7 +49,7 @@ everything that has been downloaded.</p>
 
 <code>import lxml.html
 root = lxml.html.fromstring(html)
-for tr in root.cssselect("table[align='left'] tr.tcont"):
+for tr in root.cssselect("div[align='left'] tr.tcont"):
     tds = tr.cssselect("td")
     data = {
       'country' : tds[0].text_content(),
