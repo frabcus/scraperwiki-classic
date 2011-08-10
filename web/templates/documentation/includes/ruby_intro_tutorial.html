@@ -51,7 +51,7 @@ everything that has been downloaded.</p>
 <code>require 'nokogiri'
 
 doc = Nokogiri::HTML(html)
-for v in doc.search("table[@align='left'] tr.tcont")
+for v in doc.search("div[@align='left'] tr.tcont")
   cells = v.search('td')
   data = {
     'country' =&gt; cells[0].inner_html,

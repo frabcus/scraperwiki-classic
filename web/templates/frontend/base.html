@@ -22,8 +22,11 @@
 
 	{% block javascript %}{% endblock %}
 
+	{% compress css %}
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/jquery-ui-1.8.12.css" />
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/main.css?{{settings.REVISION}}" />
+	{% endcompress %}
+	
 	{% block css %}{% endblock %}
 	{% block rss %}{% endblock %}
 

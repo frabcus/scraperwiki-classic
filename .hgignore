@@ -14,6 +14,7 @@ syntax: regexp
 ^develop-eggs$
 ^eggs$
 ^include$
+^share$
 ^lib$
 ^Lib$
 ^parts$
