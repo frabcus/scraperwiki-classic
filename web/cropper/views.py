@@ -27,6 +27,9 @@ PDF version:    1.3"""
 # middle-ware began consuming the stream to measure the content-length and then there was 
 # nothing left to send out.
 
+# for future ref this is likely gzip middleware, which can't work until it knows how much 
+# data it is going to be compressing - ross.
+
 dkpercent = 83  # percentage darkness used by the cropper
 
 def pdfinfo(pdffile):
