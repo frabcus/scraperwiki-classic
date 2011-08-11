@@ -241,27 +241,28 @@ def scraper_admin_controleditors(request, short_name):
         roleuser = User.objects.get(username=username)
     except User.DoesNotExist:
         return HttpResponse("Failed: username '%s' not found" % username)
-        
+    
     # We allow '' for removing a role
     if newrole not in ['editor', 'follow', '']:
         return HttpResponse("Failed: role '%s' unrecognized" % newrole)
 
-    if  request.user.id == roleuser.id and newrole == '':
-        # If there is no role and we are the user that is applying this (i.e. to ourselves)
-        # then we can remove the role. Otherwise check they already are a role.
-
-        scraper = getscraperor404(request, short_name, "remove_self_editor")            
+    if newrole == '':
+        # Make sure we are either removing the role from ourselves or have permission
+        # to remove it from another user
+        if request.user.id == roleuser.id:
+            scraper = getscraperor404(request, short_name, "remove_self_editor")
+        else:
+            scraper = getscraperor404(request, short_name, "set_controleditors")
         
-        # If the user is an owner then we should disregard this request as they cannot remove
-        # that role
+        # If the user is an owner and is trying to remove their own role then we 
+        # should disregard this request as they cannot remove that role
         if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role='owner').count():
-            return HttpResponse("Failed: You cannot remove yourself as owner" )            
-            
-        scraper.set_user_role(request.user, 'editor', remove=True)
+            return HttpResponse("Failed: You cannot remove yourself as owner" )                
+        scraper.set_user_role(roleuser, 'editor', remove=True)
         context = { "role":'', "contributor":request.user }        
         processed = True        
     else:
-        scraper = getscraperor404(request, short_name, "set_controleditors")        
+        scraper = getscraperor404(request, short_name, "set_controleditors")
 
     if not processed:    
         if models.UserCodeRole.objects.filter(code=scraper, user=roleuser, role=newrole):

@@ -170,18 +170,29 @@ if __name__ == '__main__':
     parser.add_option("--browser", default="*firefox", 
                       help="Which browser, e.g. *firefox, *chrome, *safari, *iexplore. Put in a bad value to see full list. Defaults to *firefox.")
     parser.add_option("--browserversion", help="Passed into selenium with browser parameter, optional")
+    parser.add_option("--adminusername", action="store", type="string", default="", dest="adminusername",
+                      help="Specify Django admin account username for more complete testing coverage. Requires --adminpassword")
+    parser.add_option("--adminpassword", action="store", type="string", default="", dest="adminpassword",
+                      help="Specify Django admin account password. Requires --adminuser")
+
     
     (options, args) = parser.parse_args()
-
     if len(args) > 0:
         parser.print_help()
         sys.exit(1)
+
+    if (bool(options.adminusername) ^ bool(options.adminpassword)):
+        parser.print_help()
+        sys.exit(1)
+    elif (bool(options.adminusername) and bool(options.adminpassword)):
+        SeleniumTest._adminuser = {"username":options.adminusername, "password":options.adminpassword}
+    else:
+        SeleniumTest._adminuser = {}
     
     SeleniumTest._selenium_host = options.shost
     SeleniumTest._selenium_port = options.sport
     SeleniumTest._app_url = options.url
     SeleniumTest._verbosity = options.verbosity
-
     if options.username and options.accesskey and options.os and options.browser and options.browserversion:
         SeleniumTest._selenium_browser = json.dumps({ "username":options.username, "access-key":options.accesskey, 
                                                       "os":options.os, "browser":options.browser, "browser-version":options.browserversion })
