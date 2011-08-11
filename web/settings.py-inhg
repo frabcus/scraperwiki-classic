@@ -88,6 +88,10 @@ if DEBUG:
     TEMPLATE_CONTEXT_PROCESSORS += (
         'frontend.context_processors.sqldebug',
     )
+    TEMPLATE_LOADERS = [
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.load_template_source',
+    ]
     SQL_DEBUG = False
 
 
