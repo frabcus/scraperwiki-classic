@@ -287,7 +287,7 @@ function setupChangeEditorStatus()
     $('.demotebutton').click(function() 
     {
         $('#contributorserror').hide();
-        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'follow' }; 
+        var sdata = { roleuser:$(this).parents("li:first").find("span").text(), newrole:'' }; 
 		changeRoles( sdata );
     }); 
     $('.promotebutton').click(function() 
