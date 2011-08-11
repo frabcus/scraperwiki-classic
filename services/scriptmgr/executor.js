@@ -80,6 +80,11 @@ exports.run_script = function( http_request, http_response ) {
 		
 };
 
+/******************************************************************************
+* Actually extracts the code and then checks config to determine whether we 
+* should run this as if on a developer machine or whether to run as if on an
+* actual server.
+******************************************************************************/
 function execute(http_req, http_res, request_data) {
 	http_res.writeHead(200, {'Content-Type': 'text/plain'});
 	
@@ -95,15 +100,16 @@ function execute(http_req, http_res, request_data) {
 		// write request_data.code to tmpfile
 		fs.writeFile(tmpfile, request_data.code, function(err) {
     		if(err) {
-        		sys.puts(err);
+				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
+				http_res.end( JSON.stringify(r) );
+				return;				
     		} else {
 				e = spawn('./exec.py', ['--script ',tmpfile,'--ds','127.0.0.1:9005','--scrapername',scraper_name, '--runid', run_id]);
 				e.stdout.on('data', function (data) {
-					// We need to write this and stderr back to the controller.
-  					console.log('stdout: ' + data);
+					write_to_caller( http_res, data );
 				});
 				e.stderr.on('data', function (data) {
-  					console.log('stdout: ' + data);
+					write_to_caller( http_res, data );
 				});				
 				e.on('exit', function (code) {
   					console.log('child process exited with code ' + code);
@@ -131,5 +137,9 @@ function execute(http_req, http_res, request_data) {
         streamprintsin, streamprintsout = socket.socketpair()
         streamjsonsin, streamjsonsout = socket.socketpair()
        */
+	
+}
+
+function write_to_caller(http_res, output) {
 	
 }
