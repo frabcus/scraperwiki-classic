@@ -24,6 +24,7 @@
 var http = require('http');
 var url  = require('url');
 var _    = require('underscore')._;
+var qs   = require('querystring');
 
 var exec = require('./executor');
 
@@ -37,7 +38,12 @@ _routemap = {
 };
 
 // default settings options
-_config = { devmode: true, port: 8001 }
+_config = { 
+	devmode: true, 
+	port: 8001, 
+	vm_count: 50, 
+	extra_path: '../../scraperlibs'
+};
 
 /******************************************************************************
 * Initialises the http server used for accepting (and then processing) requests
@@ -45,13 +51,11 @@ _config = { devmode: true, port: 8001 }
 * accepted it is long running until the connection is closed, or local script
 * execution is stopped.
 ******************************************************************************/
-// Check parameters
 
-exec.set_mode( _config.devmode );
+exec.set_config( _config );
 
 
 http.createServer(function (req, res) {
-	
 	var handler = _routemap[url.parse(req.url).pathname] || _routemap['/']
 	handler(req,res)
 	
@@ -61,12 +65,14 @@ console.log('+ Server started listening on port ' + _config.port );
 	
 
 /******************************************************************************
-*
+* Handles a run request when a client POSTs code to be executed along with a 
+* run id, a scraper id and the scraper name
 *
 ******************************************************************************/
 function handleRun(req,res) {
 	console.log( '+ Handling /run request' );
 	exec.run_script( req, res);
+	console.log( '+ Run request completed' );	
 }
 
 /******************************************************************************
@@ -75,11 +81,22 @@ function handleRun(req,res) {
 ******************************************************************************/
 function handleKill(req,res) {
 	console.log( '+ Handling /kill request' );
-		
-    // call exec.kill_script(run_id) and depending on result 
-	// we should decide what to do
 
-	res.end('/kill');	
+
+	var url_parts = url.parse(req.url, true);
+	var query = url_parts.query;
+	
+	if ( ! query.run_id ) {
+		write_error( res, "Missing parameter" );
+		return;
+	}
+
+	var result = exec.kill_script( query.run_id );
+	if ( ! result ) {
+		write_error( res, "Failed to kill script, may no longer be running" );
+		return;
+	}
+	res.end();	
 }
 
 /******************************************************************************
@@ -88,9 +105,8 @@ function handleKill(req,res) {
 ******************************************************************************/
 function handleStatus(req,res) {
 	
-	// call exec.get_status() and return it
-	
-	res.end('/status');	
+	exec.get_status(res);
+	res.end('');	
 }
 
 /******************************************************************************
@@ -109,6 +125,7 @@ function handleIdent(req,res) {
 *
 ******************************************************************************/
 function handleNotify(req,res) {
+	
 	res.end('/notify');	
 }
 	
@@ -121,3 +138,11 @@ function handleUrlError(req,res) {
 	res.writeHead(404, {'Content-Type': 'text/html'}); 
 	res.end('URL not found'); 
 }	
+
+/******************************************************************************
+* Write the error message in our standard (ish) json format
+******************************************************************************/
+function write_error(res, msg, headers) {
+	r = {"error": msg, "headers": headers || '' , "lengths":  -1 };
+	res.end( JSON.stringify(r) );
+}

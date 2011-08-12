@@ -1,33 +1,62 @@
 /******************************************************************************
 * executor.js
 *
+* A running script is indexed by its run_id but looks similar to the following
+* for both status and kill calls
 * 
+* { pid: -1, vm: '', run_id: '', scraper_name: '', language: '' }
 * 
 ******************************************************************************/
 var lxc = require('./lxc')
+var util = require('./utils')
 var mu  = require('mu')
 var qs  = require('querystring');
 var fs  = require('fs');
 var spawn = require('child_process').spawn;
 
-// Should we lxc, or are we running on a dev machine?
 var use_lxc = true;
+var extra_path;
+
+// A list of all of the currently running scripts
+var scripts = [ ];
+var max_runs = 100;
 
 /******************************************************************************
-* 
-* 
+* Called to configure the executor, allowing it to determine whether we are
+* using LXC, or whether it is on a local dev machine.
 ******************************************************************************/
-exports.set_mode = function( is_dev_mode ) {
-	use_lxc = !is_dev_mode;
+exports.set_config = function( config ) {
+	use_lxc = ! config.devmode;
+
+	if ( use_lxc ) {
+		lxc.init(config.vm_count);
+	}
+	
+	extra_path = config.extra_path;
+	max_runs = config.vm_count;
 }
 
 
 /******************************************************************************
-* 
+* Attempts to kill the script that is running with the specified run id whether 
+* it is an lxc instance (lxc-kill) or a local process (kill by pid)
 * 
 ******************************************************************************/
 exports.kill_script = function( run_id ) {
+	if ( ! use_lxc ) {
+		var s = scripts[run_id];
+		if ( s ) {
+			pid = s.pid;
+			
+			process.kill(pid, 'SIGKILL');
+			
+			delete scripts[run_id];
+  			console.log('Killed process PID: ' + pid);					
+			return true;
+		};
+	}	
 	
+	return false;
 }
 
 
@@ -36,8 +65,16 @@ exports.kill_script = function( run_id ) {
 * 
 * 
 ******************************************************************************/
-exports.get_status = function() {
+exports.get_status = function(response) {
+	var count = 0;
 	
+    for(var runID in scripts) {
+		var script = scripts[runID];
+		response.write('runID=' + runID + "&scrapername=" + script.scraper_name + "\n");
+		count = count +1;
+	}	
+	
+	console.log("+ Get status returning data for " + count + " running scripts");
 }
 
 /******************************************************************************
@@ -54,6 +91,11 @@ exports.get_details = function(details) {
 * we can find it from the post data.
 ******************************************************************************/
 exports.run_script = function( http_request, http_response ) {
+	
+	if ( scripts.length > max_runs ) {
+		http_response.end("Too busy");		
+		return;
+	};
 	
 	// Handle the request being closed by the client	
 	http_request.on("close", function() {
@@ -88,23 +130,42 @@ exports.run_script = function( http_request, http_response ) {
 function execute(http_req, http_res, request_data) {
 	http_res.writeHead(200, {'Content-Type': 'text/plain'});
 	
-	run_id 		 = request_data.run_id;
-	scraper_name = request_data.scrapername;
-	scraper_guid = request_data.scraperid;
-	query 		 = request_data.urlquery;
-
+	script = { run_id : request_data.run_id, 
+		 	scraper_name : request_data.scrapername,
+		    scraper_guid : request_data.scraperid,
+		 	query : request_data.urlquery, 
+		 	pid: -1, vm: '', language: request_data.language || 'python'}
+	
 	if ( ! use_lxc ) {
 		// Execute the code locally using the relevant file (exec.whatever)
-		var tmpfile = '/tmp/script.py';
-		
-		// write request_data.code to tmpfile
+		// TODO: Reset this ...
+		var tmpfile = '/tmp/script' + scripts.length + '.py';
 		fs.writeFile(tmpfile, request_data.code, function(err) {
+			
     		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
 				http_res.end( JSON.stringify(r) );
 				return;				
     		} else {
-				e = spawn('./exec.py', ['--script ',tmpfile,'--ds','127.0.0.1:9005','--scrapername',scraper_name, '--runid', run_id]);
+
+				http_req.connection.addListener('close', function () {
+					// Let's handle the user quitting early
+					delete scripts[script.run_id];					
+					console.log(' - Connection was closed');
+			    });
+
+	
+				args = ['--script',tmpfile,'--ds','127.0.0.1:9005','--scrapername',script.scraper_name, '--runid', script.run_id]
+
+				exe = './exec.' + util.extension_for_language(script.language);
+				
+				console.log( scripts.length + " running");
+ 				e = spawn(exe, args, { env: util.env_for_language(script.language, extra_path) });
+				script.pid = e.pid
+				scripts[ script.run_id ] = script
+				
+				console.log( "Script " + script.run_id + " executed with " + script.pid )
+
 				e.stdout.on('data', function (data) {
 					write_to_caller( http_res, data );
 				});
@@ -113,6 +174,9 @@ function execute(http_req, http_res, request_data) {
 				});				
 				e.on('exit', function (code) {
   					console.log('child process exited with code ' + code);
+					delete scripts[script.run_id];
+  					console.log('child process removed from script list');					
+					http_res.end();
 				});
     		}
 		}); 		
@@ -123,7 +187,6 @@ function execute(http_req, http_res, request_data) {
 	}
 
 
-	http_res.end();
 	
 	/*
         self.idents.append('scraperid=%s' % scraperguid)
@@ -140,6 +203,49 @@ function execute(http_req, http_res, request_data) {
 	
 }
 
+
+/******************************************************************************
+* Write the response to the caller, or in this case write it back down the long
+* lived socket that connected to us.
+******************************************************************************/
 function write_to_caller(http_res, output) {
-	
+	msg = output.toString();
+	r = { 'message_type':'console', 'content': msg  };
+	http_res.write( JSON.stringify(r) + "\n");
 }
+/*
+ if streamprintsin in rback:
+                srecprints = streamprintsin.recv(8192)   # returns '' if nothing more to come
+                printsbuffer.append(srecprints)
+                if not srecprints or srecprints[-1] == '\n':
+                    line = "".join(printsbuffer)
+                    if line:
+                        jsonoutputlist.append(json.dumps({ 'message_type':'console', 'content':saveunicode(line) }))
+                    del printsbuffer[:]
+                if not srecprints:
+                    streamprintsin.close()
+                    rlist.remove(streamprintsin)
+
+            # valid json objects coming in from file descriptor 3
+            if streamjsonsin in rback:
+                srecjsons = streamjsonsin.recv(8192)
+                if srecjsons:
+                    ssrecjsons = srecjsons.split("\n")
+                    jsonsbuffer.append(ssrecjsons.pop(0))
+                    while ssrecjsons:
+                        jsonoutputlist.append("".join(jsonsbuffer))
+                        del jsonsbuffer[:]
+                        jsonsbuffer.append(ssrecjsons.pop(0))
+                else:
+                    streamjsonsin.close()
+                    rlist.remove(streamjsonsin)
+
+            # output the sequence of valid json objects to the dispatcher delimited by \n
+            try:
+                for jsonoutput in jsonoutputlist:
+                    self.connection.sendall(jsonoutput + '\n')
+
+        return { 'message_type':'executionstatus', 'content':'runcompleted', 
+                 'elapsed_seconds' : int(ostimes2[4] - ostimes1[4]), 'CPU_seconds':int(ostimes2[0] - ostimes1[0]) }
+
+*/

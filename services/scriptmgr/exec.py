@@ -53,20 +53,23 @@ parser.add_option("--gid")    # nogroup
 parser.add_option("--uid")    # nobody
 parser.add_option("--scrapername")
 parser.add_option("--runid")
+parser.add_option("--path")
 options, args = parser.parse_args()
 
 if options.gid:
     os.setregid(int(options.gid), int(options.gid))
 if options.uid:
     os.setreuid(int(options.uid), int(options.uid))
+if options.path:
+    sys.path.append( options.path )
 
-scraperwiki.logfd = os.fdopen(3, 'w', 0)
+#scraperwiki.logfd = os.fdopen(3, 'w', 0)
 
 host, port = string.split(options.ds, ':')
 scraperwiki.datastore.create(host, port, options.scrapername, options.runid)
 
-sys.stdout = ConsoleStream(scraperwiki.logfd)
-sys.stderr = ConsoleStream(scraperwiki.logfd)
+#sys.stdout = ConsoleStream(os.fdopen(1, 'w', 0))
+#sys.stderr = ConsoleStream(os.fdopen(2, 'w', 0))
 
 # in the future can divert to webproxy
 #scraperwiki.utils.urllibSetup(http_proxy='http://127.0.0.1:9002')
