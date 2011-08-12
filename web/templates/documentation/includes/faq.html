@@ -20,6 +20,7 @@
            <li><a href="#clear_datastore">I made a column or a table I don't need, how do I remove it?</a></li>
            <li><a href="#view_parameters">How do I get query parameters in my view?</a></li>
            <li><a href="#cpu_limit">What is the CPU limit, and what do I do if my scraper reaches it?</a></li>
+           <li><a href="#memory_limit">What is the limit on memory use?</a></li>
            <li><a href="#https">Can I scrape secure (https://) sites?</a></li>
            <li><a href="#editor">Is there an editor other than the CodeMirror one?</a></li>
            <li><a href="#rollback">How do I revert to an earlier version of my code?</a></li>
@@ -185,6 +186,13 @@ print_r($output);
                place.
                </p>
                <p>That also lets you recover more easily from other parsing errors.
+               </p>
+           </dd>
+
+           <dt id="memory_limit">What is the limit on memory use?</dt>
+           <dd>
+               <p>The sandbox in which the scrapers run gives them at most
+                1Gb of memory. When this is exceeded, you will likely get a SIGKILL.
                </p>
            </dd>
 
