@@ -40,16 +40,13 @@ exports.set_config = function( config ) {
 /******************************************************************************
 * Attempts to kill the script that is running with the specified run id whether 
 * it is an lxc instance (lxc-kill) or a local process (kill by pid)
-* 
 ******************************************************************************/
 exports.kill_script = function( run_id ) {
 	if ( ! use_lxc ) {
 		var s = scripts[run_id];
 		if ( s ) {
 			pid = s.pid;
-			
 			process.kill(pid, 'SIGKILL');
-			
 			delete scripts[run_id];
   			console.log('Killed process PID: ' + pid);					
 			return true;
@@ -156,10 +153,8 @@ function execute(http_req, http_res, request_data) {
 
 	
 				args = ['--script',tmpfile,'--ds','127.0.0.1:9005','--scrapername',script.scraper_name, '--runid', script.run_id]
-
 				exe = './exec.' + util.extension_for_language(script.language);
-				
-				console.log( scripts.length + " running");
+
  				e = spawn(exe, args, { env: util.env_for_language(script.language, extra_path) });
 				script.pid = e.pid
 				scripts[ script.run_id ] = script
