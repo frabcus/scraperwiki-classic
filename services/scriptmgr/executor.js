@@ -55,12 +55,16 @@ exports.kill_script = function( run_id ) {
 		if ( s ) {
 			pid = s.pid;
 			process.kill(pid, 'SIGKILL');
+			s = scripts[run_id];
 			delete scripts[run_id];
+			delete scripts_ip[s.ip];
 			
   			console.log('Killed process PID: ' + pid);					
 			return true;
 		};
-	}	
+	} else {
+		
+	}
 	
 	return false;
 }
@@ -96,9 +100,12 @@ exports.get_details = function(details) {
 exports.run_script = function( http_request, http_response ) {
 	
 	if ( scripts.length > max_runs ) {
-		http_response.end("Too busy");		
+		r = {"error":"Too busy", "headers": http_request.headers , "lengths":  -1 };
+		http_response.end( JSON.stringify(r) );
 		return;
 	};
+
+	console.log('Setting up close event etc');
 	
 	// Handle the request being closed by the client	
 	http_request.on("close", function() {
@@ -110,6 +117,8 @@ exports.run_script = function( http_request, http_response ) {
 	var body = '';
     http_request.on('data', function (data) {
     	body += data;
+
+		console.log('Got some data');
 	});
 	
     http_request.on('end', function () {
@@ -117,10 +126,26 @@ exports.run_script = function( http_request, http_response ) {
 		if ( body == undefined || body.length == 0 || body.length != len ) {
 			r = {"error":"incoming message incomplete", "headers": http_request.headers , "lengths":  len.toString() };
 			http_response.end( JSON.stringify(r) );
+			
+			console.log('Incomplete incoming message');			
 			return;
 		};
 		
-		execute(http_request, http_response, post_data);
+		console.log('Calling execute with ');
+
+		// HACK: Unfortunately the data being posted is a messy POST 
+		// request and isn't structured the way POST requests should 
+		// be. 
+		// TODO: Fix how (and what) messages are passed around the system
+		// and document them.
+		var parms;
+		for ( var v in post_data ) {
+			parms = v;
+		}
+
+		console.log(parms);
+		execute(http_request, http_response, parms);
+		console.log('Done calling execute');		
 	});
 		
 };
@@ -131,10 +156,12 @@ exports.run_script = function( http_request, http_response ) {
 * actual server.
 * TODO: Refactor executor to be two classes one for local and one for lxc
 ******************************************************************************/
-function execute(http_req, http_res, request_data) {
+function execute(http_req, http_res, raw_request_data) {
 	http_res.writeHead(200, {'Content-Type': 'text/plain'});
 	
-	script = { run_id : request_data.run_id, 
+	request_data = JSON.parse( raw_request_data );
+	
+	script = { run_id : request_data.runid, 
 			 	scraper_name : request_data.scrapername,
 			    scraper_guid : request_data.scraperid,
 			 	query : request_data.urlquery, 
@@ -153,50 +180,71 @@ function execute(http_req, http_res, request_data) {
 				return;				
 	   		} else {
 
-				http_req.connection.addListener('close', function () {
-					// Let's handle the user quitting early
-					delete scripts[script.run_id];					
-					console.log(' - Connection was closed');
-			    });
-
-
 				args = ['--script',tmpfile,'--ds','127.0.0.1:9005','--scrapername',script.scraper_name, '--runid', script.run_id]
 				exe = './exec.' + util.extension_for_language(script.language);
 
+				var startTime = new Date();
 				e = spawn(exe, args, { env: util.env_for_language(script.language, extra_path) });
 				script.pid = e.pid;
 				script.ip = '127.0.0.1';
 				
 				scripts[ script.run_id ] = script;
 				scripts_ip[ script.ip ] = script;
+
+				http_req.connection.addListener('close', function () {
+					// Let's handle the user quitting early it might be a KILL
+					// command from the dispatcher
+					if ( e ) e.kill('SIGKILL');
+					console.log(' - Sent kill signal');					
+					delete scripts[script.run_id];					
+					console.log(' - Connection was closed');
+			    });
 			
 				console.log( "Script " + script.run_id + " executed with " + script.pid );
 
 				e.stdout.on('data', function (data) {
-					write_to_caller( http_res, data );
+					write_to_caller( http_res, data );					
 				});
+				
 				e.stderr.on('data', function (data) {
 					write_to_caller( http_res, data );
 				});				
-				e.on('exit', function (code) {
-	 				console.log('child process exited with code ' + code);
+				
+				e.on('exit', function (code, signal) {
+					if ( code == null )
+	 					console.log('child process exited badly, we may have killed it');
+					else 
+	 					console.log('child process exited with code ' + code);					
 					delete scripts[script.run_id];
 					delete scripts_ip[ script.ip ];
 					
 	 				console.log('child process removed from script list');					
-					http_res.end();
+
+					var endTime = new Date();
+					elapsed = (endTime - startTime) / 1000;
+// signal if not null
+        			res =  { 'message_type':'executionstatus', 'content':'runcompleted', 
+                 'elapsed_seconds' : elapsed, 'CPU_seconds': 1, 'exit_status': 0 };
+					http_res.end( JSON.stringify( res ) + "\n" );
+										
+					console.log('Finished writing responses');
+					
+//        			return { 'message_type':'executionstatus', 'content':'runcompleted', 
+//                 'elapsed_seconds' : int(ostimes2[4] - ostimes1[4]), 'CPU_seconds':int(ostimes2[0] - ostimes1[0]) }
+					
 				});
 	     	}
 		}); // end of writefile
 	} else {
 		
 		// Use LXC to allocate us an instance and run with it
+		/*
 		var res = lxc.exec( script, code );
 		if ( res ) {
 			http_res.end( res );
 			return;				
 		}
-		
+		*/
 	}
 
 
@@ -222,9 +270,14 @@ function execute(http_req, http_res, request_data) {
 * lived socket that connected to us.
 ******************************************************************************/
 function write_to_caller(http_res, output) {
-	msg = output.toString();
-	r = { 'message_type':'console', 'content': msg  };
-	http_res.write( JSON.stringify(r) + "\n");
+	var msg = output.toString();
+	var parts = msg.split("\n");
+	for (var i=0; i < parts.length; i++) {
+		if ( parts[i].length > 0 ) {
+			r = { 'message_type':'console', 'content': parts[i]  };
+			http_res.write( JSON.stringify(r) + "\n");
+		}
+	};
 }
 /*
  if streamprintsin in rback:
