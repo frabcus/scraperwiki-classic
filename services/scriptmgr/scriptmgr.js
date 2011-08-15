@@ -29,7 +29,7 @@ var qs   = require('querystring');
 var exec = require('./executor');
 
 _routemap = {
-	'/run'   : handleRun,
+	'/Execute'   : handleRun,
 	'/kill'  : handleKill,
 	'/status': handleStatus,
 	'/ident' : handleIdent,
@@ -40,7 +40,7 @@ _routemap = {
 // default settings options
 _config = { 
 	devmode: true, 
-	port: 8001, 
+	port: 9001, 
 	vm_count: 50, 
 	extra_path: '../../scraperlibs'
 };
@@ -59,7 +59,7 @@ http.createServer(function (req, res) {
 	var handler = _routemap[url.parse(req.url).pathname] || _routemap['/']
 	handler(req,res)
 	
-}).listen(8001, "127.0.0.1");
+}).listen(_config.port, "127.0.0.1");
 
 console.log('+ Server started listening on port ' + _config.port );
 	

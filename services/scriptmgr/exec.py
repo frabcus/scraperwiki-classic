@@ -14,6 +14,7 @@ import  scraperwiki
 try    : import json
 except : import simplejson as json
 
+
     # Unfortunately necessary to do this because PYTHONUNBUFFERED=True does nto get good enough results and tends to still concatenate lines when short and rapid
 class ConsoleStream:
     def __init__(self, fd):
@@ -36,7 +37,7 @@ class ConsoleStream:
 
     def flush(self) :
         if self.m_text:
-            scraperwiki.dumpMessage({'message_type': 'console', 'content': self.m_text})
+            self.flush();
             self.m_text = ''
 
     def close(self):
@@ -63,12 +64,12 @@ if options.uid:
 if options.path:
     sys.path.append( options.path )
 
-#scraperwiki.logfd = os.fdopen(3, 'w', 0)
 
 host, port = string.split(options.ds, ':')
 scraperwiki.datastore.create(host, port, options.scrapername, options.runid)
 
-#sys.stdout = ConsoleStream(os.fdopen(1, 'w', 0))
+#sys.stdout = ConsoleStream(sys.stdout)
+#sys.stderr = ConsoleStream(sys.stderr)
 #sys.stderr = ConsoleStream(os.fdopen(2, 'w', 0))
 
 # in the future can divert to webproxy
@@ -89,7 +90,6 @@ except Exception, e:
     etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
     assert etb.get('message_type') == 'exception'
     scraperwiki.dumpMessage(etb)
-
 
 sys.stdout.flush()
 sys.stderr.flush()
