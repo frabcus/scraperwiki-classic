@@ -76,12 +76,12 @@ function handleRun(req,res) {
 }
 
 /******************************************************************************
-*
-*
+* When provided with a Run ID (run_id) then it will attempt to kill the script
+* by sending the request on to the executor which will either lxc-kill or 
+* sigkill the relevant script.
 ******************************************************************************/
 function handleKill(req,res) {
-	console.log( '+ Handling /kill request' );
-
+	console.log( '+ Handling kill request' );
 
 	var url_parts = url.parse(req.url, true);
 	var query = url_parts.query;
@@ -100,8 +100,8 @@ function handleKill(req,res) {
 }
 
 /******************************************************************************
-*
-*
+* Returns the status of the service, which is essentially just a list of run
+* ids and names.  This is the same regardless of execution method.
 ******************************************************************************/
 function handleStatus(req,res) {
 	
@@ -110,7 +110,7 @@ function handleStatus(req,res) {
 }
 
 /******************************************************************************
-*
+* Handle ident callback from http proxy
 *
 ******************************************************************************/
 function handleIdent(req,res) {
@@ -121,7 +121,7 @@ function handleIdent(req,res) {
 }
 
 /******************************************************************************
-*
+* Handle notify callback from http proxy
 *
 ******************************************************************************/
 function handleNotify(req,res) {
