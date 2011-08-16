@@ -7,7 +7,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from settings import MAX_API_ITEMS, API_DOMAIN
+from settings import MAX_API_ITEMS, API_URL
 from django.views.decorators.http import condition
 from tagging.models import Tag
 

@@ -72,7 +72,7 @@ ORBITED_URL = 'http://localhost:8001'
 
 # TEST_RUNNER = 'django-test-coverage.runner.run_tests'
 
-API_DOMAIN = 'localhost'
+API_URL = 'http://localhost'
 MEDIA_URL = '/media/'
 MAIN_URL  = 'http://scraperwiki.com'  # aka Site.objects.get_current().domain (though as we have put 3 other domains here, why not this one too unless making things gratuitously awkward)
 VIEW_DOMAIN = 'localhost:8000'
