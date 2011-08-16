@@ -27,6 +27,8 @@ var extra_path;
 var scripts = [ ];
 var scripts_ip = [ ];
 var max_runs = 100;
+var dataproxy = '';
+var httpproxy;
 
 /******************************************************************************
 * Called to configure the executor, allowing it to determine whether we are
@@ -39,7 +41,12 @@ exports.set_config = function( config ) {
 		console.log('Initialising LXC...')
 		lxc.init(config.vm_count);
 	}
-	
+
+	if ( config.devmode ) {
+		httpproxy = config.httpproxy;
+	};
+
+	dataproxy = config.dataproxy;
 	extra_path = config.extra_path;
 	max_runs = config.vm_count;
 }
@@ -132,6 +139,7 @@ exports.run_script = function( http_request, http_response ) {
 		};
 		
 		console.log('Calling execute with ');
+		console.log( post_data );
 
 		// HACK: Unfortunately the data being posted is a messy POST 
 		// request and isn't structured the way POST requests should 
@@ -179,12 +187,16 @@ function execute(http_req, http_res, raw_request_data) {
 				http_res.end( JSON.stringify(r) );
 				return;				
 	   		} else {
-
-				args = ['--script',tmpfile,'--ds','127.0.0.1:9005','--scrapername',script.scraper_name, '--runid', script.run_id]
+				args = ['--script',tmpfile,'--ds', dataproxy,'--scrapername',script.scraper_name, '--runid', script.run_id]
 				exe = './exec.' + util.extension_for_language(script.language);
 
 				var startTime = new Date();
-				e = spawn(exe, args, { env: util.env_for_language(script.language, extra_path) });
+				var environ = util.env_for_language(script.language, extra_path) 
+				if (httpproxy) {
+					environ['http_proxy'] = 'http://' + httpproxy;
+				};
+				
+				e = spawn(exe, args, { env: environ });
 				script.pid = e.pid;
 				script.ip = '127.0.0.1';
 				
@@ -274,7 +286,21 @@ function write_to_caller(http_res, output) {
 	var parts = msg.split("\n");
 	for (var i=0; i < parts.length; i++) {
 		if ( parts[i].length > 0 ) {
+			
+			try {
+				// Removing the need for the extra FD by checking if we can parse
+				// the JSON
+				s = JSON.parse(parts[i]);
+				if ( s ) {
+					http_res.write( parts[i] );
+				}
+				continue;
+			}catch(err) {
+				//
+			}
+			
 			r = { 'message_type':'console', 'content': parts[i]  };
+			console.log(r);
 			http_res.write( JSON.stringify(r) + "\n");
 		}
 	};

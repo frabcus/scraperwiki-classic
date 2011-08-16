@@ -32,8 +32,8 @@ _routemap = {
 	'/Execute'   : handleRun,
 	'/kill'  : handleKill,
 	'/status': handleStatus,
-	'/ident' : handleIdent,
-	'/notify': handleNotify,
+	'/Ident' : handleIdent,
+	'/Notify': handleNotify,
 	'/'      : handleUrlError,
 };
 
@@ -42,7 +42,9 @@ _config = {
 	devmode: true, 
 	port: 9001, 
 	vm_count: 50, 
-	extra_path: '../../scraperlibs'
+	extra_path: '../../scraperlibs',
+	dataproxy: '127.0.0.1:9003',
+	httpproxy: '127.0.0.1:9005',
 };
 
 /******************************************************************************
@@ -115,7 +117,32 @@ function handleStatus(req,res) {
 ******************************************************************************/
 function handleIdent(req,res) {
 	
+ 	var urlObj = url.parse(req.url, true);	
+	console.log( "**************************************** IDENT" );
+	console.log( urlObj );
+	console.log( "**********************************************" );	
+	
 	// call exec.get_details(details) and return it
+/* for line in string.split (ident, '\n'):
+            if line == '' :
+                continue
+            key, value = string.split (line, '=')
+            if key == 'runid' :
+                runID     = value
+                continue
+            if key == 'scraperid' :
+                scraperID = value
+                continue
+            if key == 'allow'  :
+                self.m_allowed.append (value)
+                continue
+            if key == 'block'  :
+                self.m_blocked.append (value)
+                continue
+            if key == 'option' :
+                name, opt = string.split (value, ':')
+                if name == 'webcache' : cache = int(opt)
+*/
 		
 	res.end('/ident');	
 }

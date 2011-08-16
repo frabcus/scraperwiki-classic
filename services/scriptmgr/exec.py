@@ -68,6 +68,8 @@ if options.path:
 host, port = string.split(options.ds, ':')
 scraperwiki.datastore.create(host, port, options.scrapername, options.runid)
 
+scraperwiki.logfd = sys.stderr
+
 #sys.stdout = ConsoleStream(sys.stdout)
 #sys.stderr = ConsoleStream(sys.stderr)
 #sys.stderr = ConsoleStream(os.fdopen(2, 'w', 0))
