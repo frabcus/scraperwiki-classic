@@ -127,7 +127,7 @@ class Scraper (code.Code):
             return datetime.datetime.now() - datetime.timedelta(1, 0, 0)  # one day ago
         return self.last_run + datetime.timedelta(0, self.run_interval, 0)
 
-    def get_screenshot_url(self, domain):
+    def get_screenshot_url(self, url_prefix):
         try:
             url = self.scraperrunevent_set.latest('run_started').first_url_scraped
         except:
@@ -148,7 +148,7 @@ class Scraper (code.Code):
                 pass
 
             # send to the editor rather than to no longer existing code page
-        return 'http://%s%s' % (domain, reverse('editor_edit', args=[self.wiki_type, self.short_name]))
+        return '%s%s' % (url_prefix, reverse('editor_edit', args=[self.wiki_type, self.short_name]))
 
     class Meta:
         app_label = 'codewiki'
