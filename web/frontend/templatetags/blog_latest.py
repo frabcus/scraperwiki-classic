@@ -29,7 +29,8 @@ def blog_latest():
 
         #make it https://, as everything on page needs to be
         headline_image_url = headline_image_url.replace('http://', 'https://')
-    
+        headline.summary = headline.summary.replace('http://stats.wordpress.com/', 'https://stats.wordpress.com/')
+
         #get a few other recent stories
         subs = []
         subs.append(feed.entries[1])
