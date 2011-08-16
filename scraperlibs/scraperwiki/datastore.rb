@@ -29,6 +29,7 @@ class SW_DataStore
         # back to get the scraperID. Since the data proxy may be on another machine
         # and the peer address it sees will have been subject to NAT or masquerading,
         # send the UML name and the socket port number in the request.
+
         if @m_socket == nil
             @m_socket = TCPSocket.open(@m_host, @m_port)
             proto, port, name, ip = @m_socket.addr()

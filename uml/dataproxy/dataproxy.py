@@ -56,11 +56,22 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         runID      = None
         short_name = None
 
-        host      = config.get(uml, 'host')
+        # we will set host to either host of the uml or (if we have lxc_server set)
+        # to the LXC server.
+        lxc = False
+        try:
+            host = config.get("dataproxy", 'lxc_server')
+            lxc = True
+        except:
+            host      = config.get(uml, 'host')
+            
         via       = config.get(uml, 'via' )
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
-        lident     = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()   
+        if lxc:
+            lident = urllib.urlopen ('http://%s/Ident?%s:%s' % (host, rem[0], loc[1])).read()               
+        else:
+            lident = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()   
 
                 # should be using cgi.parse_qs(query) technology here
         for line in lident.split('\n'):
@@ -116,14 +127,15 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     dataauth = "draft"
                 else:
                     dataauth = "writable"
-                
+
+                self.logger.debug( '.%s.' % short_name)
                     # send back identification so we can compare against it (sometimes it doesn't quite work out)
                 firstmessage["short_name"] = short_name
                 firstmessage["runID"] = runID
                 firstmessage["dataauth"] = dataauth
 
                 # run verification of the names against what we identified
-                if runID != params.get('vrunid') or short_name != params.get("vscrapername", ""):
+                if runID != params.get('vrunid') or short_name != params.get("vscrapername", None):
                     self.logger.error("Mismatching scrapername %s" % str([runID, short_name, params.get('vrunid'), params.get("vscrapername")]))
                     firstmessage["error"] = "Mismatching scrapername from ident"
                     firstmessage["status"] = "bad: mismatching scrapername from ident"
@@ -136,6 +148,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             # consolidate sending back to trap socket errors
             try:
+                self.logger.debug( firstmessage )
                 self.connection.sendall(json.dumps(firstmessage)+'\n')
             except socket.error:
                 self.logger.warning("connection to dataproxy socket.error: "+str(firstmessage))

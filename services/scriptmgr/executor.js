@@ -18,6 +18,7 @@ var lxc = require('./lxc')
 var util = require('./utils')
 var qs  = require('querystring');
 var fs  = require('fs');
+var sys = require('sys');
 var spawn = require('child_process').spawn;
 
 var use_lxc = true;
@@ -96,7 +97,13 @@ exports.get_status = function(response) {
 * 
 ******************************************************************************/
 exports.get_details = function(details) {
+	if ( details.ip ) {
+		return scripts_ip[details.ip];
+	} else if ( details.runid ) {
+		return scripts[details.runid];
+	}
 	
+	return null;
 }
 
 
@@ -105,6 +112,8 @@ exports.get_details = function(details) {
 * we can find it from the post data.
 ******************************************************************************/
 exports.run_script = function( http_request, http_response ) {
+	
+	http_request.setEncoding( 'utf8');
 	
 	if ( scripts.length > max_runs ) {
 		r = {"error":"Too busy", "headers": http_request.headers , "lengths":  -1 };
@@ -122,37 +131,20 @@ exports.run_script = function( http_request, http_response ) {
 	
 	len = http_request.headers['content-length'] || -1
 	var body = '';
+
     http_request.on('data', function (data) {
     	body += data;
-
-		console.log('Got some data');
 	});
 	
     http_request.on('end', function () {
-        var post_data = qs.parse(body);
 		if ( body == undefined || body.length == 0 || body.length != len ) {
 			r = {"error":"incoming message incomplete", "headers": http_request.headers , "lengths":  len.toString() };
 			http_response.end( JSON.stringify(r) );
-			
 			console.log('Incomplete incoming message');			
 			return;
 		};
-		
-		console.log('Calling execute with ');
-		console.log( post_data );
 
-		// HACK: Unfortunately the data being posted is a messy POST 
-		// request and isn't structured the way POST requests should 
-		// be. 
-		// TODO: Fix how (and what) messages are passed around the system
-		// and document them.
-		var parms;
-		for ( var v in post_data ) {
-			parms = v;
-		}
-
-		console.log(parms);
-		execute(http_request, http_response, parms);
+		execute(http_request, http_response, body);
 		console.log('Done calling execute');		
 	});
 		
@@ -167,16 +159,22 @@ exports.run_script = function( http_request, http_response ) {
 function execute(http_req, http_res, raw_request_data) {
 	http_res.writeHead(200, {'Content-Type': 'text/plain'});
 	
-	request_data = JSON.parse( raw_request_data );
+	try {
+		request_data = JSON.parse( raw_request_data );
+	} catch ( err )
+	{
+		dumpError( err );
+	}
 	
 	script = { run_id : request_data.runid, 
-			 	scraper_name : request_data.scrapername,
+			 	scraper_name : request_data.scrapername || "",
 			    scraper_guid : request_data.scraperid,
 			 	query : request_data.urlquery, 
 			 	pid: -1, 
 				vm: '', 
 				language: request_data.language || 'python',
-				ip: ''};
+				ip: '',
+				response: http_res };
 	
 	if ( ! use_lxc ) {
 		// Execute the code locally using the relevant file (exec.whatever)
@@ -187,7 +185,22 @@ function execute(http_req, http_res, raw_request_data) {
 				http_res.end( JSON.stringify(r) );
 				return;				
 	   		} else {
-				args = ['--script',tmpfile,'--ds', dataproxy,'--scrapername',script.scraper_name, '--runid', script.run_id]
+				if ( script.language == 'ruby') {
+					args = ['--script=' + tmpfile,'--ds=' + dataproxy, '--runid=' + script.run_id]
+					if ( script.scraper_name ) {
+						args.push('--scrapername=' + script.scraper_name )
+					}
+					console.log( '********************** RUBY' );					
+					console.log( args );
+				} else {
+					args = ['--script',tmpfile,'--ds', dataproxy, '--runid', script.run_id]
+					if ( script.scraper_name ) {
+						args.push('--scrapername')
+						args.push( script.scraper_name )
+					}
+					console.log( args );
+				}
+				
 				exe = './exec.' + util.extension_for_language(script.language);
 
 				var startTime = new Date();
@@ -208,7 +221,10 @@ function execute(http_req, http_res, raw_request_data) {
 					// command from the dispatcher
 					if ( e ) e.kill('SIGKILL');
 					console.log(' - Sent kill signal');					
-					delete scripts[script.run_id];					
+					if ( script ) {
+						delete scripts[script.run_id];					
+						delete scripts_ip[ script.ip ];					
+					}
 					console.log(' - Connection was closed');
 			    });
 			
@@ -219,7 +235,15 @@ function execute(http_req, http_res, raw_request_data) {
 				});
 				
 				e.stderr.on('data', function (data) {
-					write_to_caller( http_res, data );
+					try {
+						s = JSON.parse(data);
+						if ( s ) {
+							console.log('Writing ' + data)
+							http_res.write( data );
+						}
+					}catch(err) {
+						write_to_caller( http_res, data );
+					}					
 				});				
 				
 				e.on('exit', function (code, signal) {
@@ -227,8 +251,10 @@ function execute(http_req, http_res, raw_request_data) {
 	 					console.log('child process exited badly, we may have killed it');
 					else 
 	 					console.log('child process exited with code ' + code);					
-					delete scripts[script.run_id];
-					delete scripts_ip[ script.ip ];
+					if ( script ) {
+						delete scripts[script.run_id];
+						delete scripts_ip[ script.ip ];
+					}
 					
 	 				console.log('child process removed from script list');					
 
@@ -240,10 +266,6 @@ function execute(http_req, http_res, raw_request_data) {
 					http_res.end( JSON.stringify( res ) + "\n" );
 										
 					console.log('Finished writing responses');
-					
-//        			return { 'message_type':'executionstatus', 'content':'runcompleted', 
-//                 'elapsed_seconds' : int(ostimes2[4] - ostimes1[4]), 'CPU_seconds':int(ostimes2[0] - ostimes1[0]) }
-					
 				});
 	     	}
 		}); // end of writefile
@@ -284,14 +306,15 @@ function execute(http_req, http_res, raw_request_data) {
 function write_to_caller(http_res, output) {
 	var msg = output.toString();
 	var parts = msg.split("\n");
+	
 	for (var i=0; i < parts.length; i++) {
 		if ( parts[i].length > 0 ) {
-			
 			try {
 				// Removing the need for the extra FD by checking if we can parse
 				// the JSON
 				s = JSON.parse(parts[i]);
 				if ( s ) {
+					console.log( s.message_type );
 					http_res.write( parts[i] );
 				}
 				continue;
@@ -305,39 +328,19 @@ function write_to_caller(http_res, output) {
 		}
 	};
 }
-/*
- if streamprintsin in rback:
-                srecprints = streamprintsin.recv(8192)   # returns '' if nothing more to come
-                printsbuffer.append(srecprints)
-                if not srecprints or srecprints[-1] == '\n':
-                    line = "".join(printsbuffer)
-                    if line:
-                        jsonoutputlist.append(json.dumps({ 'message_type':'console', 'content':saveunicode(line) }))
-                    del printsbuffer[:]
-                if not srecprints:
-                    streamprintsin.close()
-                    rlist.remove(streamprintsin)
 
-            # valid json objects coming in from file descriptor 3
-            if streamjsonsin in rback:
-                srecjsons = streamjsonsin.recv(8192)
-                if srecjsons:
-                    ssrecjsons = srecjsons.split("\n")
-                    jsonsbuffer.append(ssrecjsons.pop(0))
-                    while ssrecjsons:
-                        jsonoutputlist.append("".join(jsonsbuffer))
-                        del jsonsbuffer[:]
-                        jsonsbuffer.append(ssrecjsons.pop(0))
-                else:
-                    streamjsonsin.close()
-                    rlist.remove(streamjsonsin)
 
-            # output the sequence of valid json objects to the dispatcher delimited by \n
-            try:
-                for jsonoutput in jsonoutputlist:
-                    self.connection.sendall(jsonoutput + '\n')
-
-        return { 'message_type':'executionstatus', 'content':'runcompleted', 
-                 'elapsed_seconds' : int(ostimes2[4] - ostimes1[4]), 'CPU_seconds':int(ostimes2[0] - ostimes1[0]) }
-
-*/
+function dumpError(err) {
+  if (typeof err === 'object') {
+    if (err.message) {
+      console.log('\nMessage: ' + err.message)
+    }
+    if (err.stack) {
+      console.log('\nStacktrace:')
+      console.log('====================')
+      console.log(err.stack);
+    }
+  } else {
+    console.log('dumpError :: argument is not an object');
+  }
+}

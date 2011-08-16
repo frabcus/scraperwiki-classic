@@ -120,30 +120,34 @@ function handleIdent(req,res) {
  	var urlObj = url.parse(req.url, true);	
 	console.log( "**************************************** IDENT" );
 	console.log( urlObj );
+	
+	// Why oh why oh why do we use ?sdfsdf instead of a proper 
+	// query string. Sigh.
+	var s;
+	for ( var v in urlObj.query )
+		s = v.substring( 0, v.indexOf(':'))
+	console.log( s );
+	
+	script = exec.get_details( { ip: s } );
+	if ( script ){
+		res.write( 'scraperid=' + script.scraper_guid + "\n");
+		res.write( 'runid=' + script.run_id  + "\n");		
+		res.write( 'scraperid=' + script.scraper_name + "\n");
+		res.write( 'urlquery=' + script.query + "\n");		
+		if ( script.white ) {
+			res.write( 'allow=' + script.white + "\n");		
+		} else {
+			res.write( "allow=.*\n");		
+		}
+		if ( script.black ) {
+			res.write( 'block=' + script.black + "\n");				
+		}	
+		res.end('\n')
+	}
+	console.log(script);
+	
 	console.log( "**********************************************" );	
 	
-	// call exec.get_details(details) and return it
-/* for line in string.split (ident, '\n'):
-            if line == '' :
-                continue
-            key, value = string.split (line, '=')
-            if key == 'runid' :
-                runID     = value
-                continue
-            if key == 'scraperid' :
-                scraperID = value
-                continue
-            if key == 'allow'  :
-                self.m_allowed.append (value)
-                continue
-            if key == 'block'  :
-                self.m_blocked.append (value)
-                continue
-            if key == 'option' :
-                name, opt = string.split (value, ':')
-                if name == 'webcache' : cache = int(opt)
-*/
-		
 	res.end('/ident');	
 }
 
@@ -152,6 +156,17 @@ function handleIdent(req,res) {
 *
 ******************************************************************************/
 function handleNotify(req,res) {
+	
+	var urlObj = url.parse(req.url, true);	
+	console.log( "**************************************** NOTIFY" );
+	console.log( urlObj.query );
+	
+	script = exec.get_details( {runid: urlObj.query.runid } );		
+	if ( script ) {
+		delete urlObj.query.runid;
+		s = JSON.stringify( urlObj.query );
+		script.response.write( s );
+	}
 	
 	res.end('/notify');	
 }
