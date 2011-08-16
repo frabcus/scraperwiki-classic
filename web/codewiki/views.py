@@ -210,7 +210,7 @@ def code_overview(request, wiki_type, short_name):
     if dataproxy:
         dataproxy.close()
 
-    context["api_base"] = "http://%s/api/1.0/" % settings.API_DOMAIN
+    context["api_base"] = "%s/api/1.0/" % settings.API_URL
     
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 

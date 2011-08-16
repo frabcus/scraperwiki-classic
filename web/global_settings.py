@@ -178,7 +178,7 @@ DEFAULT_API_ITEMS = 100
 # RequestContext.  Be careful of listing database and other private settings 
 # here
 TEMPLATE_SETTINGS = [
- 'API_DOMAIN',
+ 'API_URL',
  'ORBITED_URL',
  'MAX_DATA_POINTS',
  'MAX_MAP_POINTS',
