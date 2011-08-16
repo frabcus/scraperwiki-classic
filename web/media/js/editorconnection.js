@@ -86,7 +86,7 @@ function setupOrbited()
 			
             try 
             {
-                writeToChat("--- "+cgiescape(sdata)); // for debug of what's coming out
+                //writeToChat("--- "+cgiescape(sdata)); // for debug of what's coming out
                 jdata = $.evalJSON(sdata);
             } 
             catch(err) 
