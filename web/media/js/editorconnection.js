@@ -74,6 +74,16 @@ function setupOrbited()
                 continue; 
 
             var jdata; 
+
+            try 
+            {
+				// Check if the sdata appears to be an integer
+				var i = parseInt( sdata, 10 );
+				if ( ! isNaN(i)) continue; // it is an integer, we don't want it.		
+			} catch (errorParse) {
+				// nothing to do
+			}
+			
             try 
             {
                 //writeToChat("--- "+cgiescape(sdata)); // for debug of what's coming out
@@ -81,7 +91,10 @@ function setupOrbited()
             } 
             catch(err) 
             {
-                alert("Malformed json: '''" + sdata + "'''"); 
+				if (window.console != undefined) {
+        			console.log( "Malformed json: '''" + sdata + "'''" );
+    			}
+                //alert("Malformed json: '''" + sdata + "'''"); 
                 continue
             }
             ReceiveRecordJ(jdata); 

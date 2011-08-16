@@ -90,7 +90,9 @@ class ScheduledRunMessageLoopHandler:
                 self.output = "%sEXECUTIONSTATUS: uml=%s runid=%s\n" % (self.output, data.get("uml"), data.get("runID"))
             elif content == "runcompleted":
                 self.completiondata = data
-                self.completionmessage = str(data.get("elapsed_seconds")) + " seconds elapsed, " 
+                self.completionmessage = '';
+                if data.get('elapsed_seconds'):
+                    completionmessage += str(data.get("elapsed_seconds")) + " seconds elapsed, " 
                 if data.get("CPU_seconds"):
                     self.completionmessage += str(data.get("CPU_seconds")) + " CPU seconds used";
                 if "exit_status" in data and data.get("exit_status") != 0:

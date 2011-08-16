@@ -92,7 +92,31 @@ class UMLList(object):
         self.UMLLock = threading.Lock()
         self.UMLs = {} # maps uname => UML object
 
+        # Will attempt to add LXC as a target, based on the configuration
+        # file and presence of mainlxc as a section.
+        try:
+            self.addLXC('mainlxc')
+        except:
+            pass
+        
+
+    def addLXC(self, name):
+        if not config.has_section(uname):
+            raise UnknownUMLException()
+        if uname in self.UMLs:
+            raise DuplicateUMLException()
+
+        host = config.get(uname, 'host')
+        port = config.getint(uname, 'via')
+        count = config.getint(uname, 'count')
+
+        self.UMLLock.acquire()
+        self.UMLs[uname] = UML(uname, host, port, count)
+        self.UMLLock.release()
+        
+
     def allocateUML(self, scraperstatus):
+                
         self.UMLLock.acquire()
 
         umls = self.UMLs.values()
@@ -319,7 +343,7 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         try:
             soc.connect((uml.server, uml.port))
-        except socket.error, e:
+        except:
             self.logger.warning("refused connection to uml %s" % uname)
             self.connection.sendall(json.dumps({'message_type': 'executionstatus', 'content': 'runcompleted', 'exit_status':"Failed to connect to controller"})+'\n')
             self.server.uml_list.releaseUML(scraperstatus)

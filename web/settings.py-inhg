@@ -68,8 +68,7 @@ PAYPAL_RECEIVER_EMAIL = "your_paypal_sandbox_email@example.com"
 EMAIL_FROM = 'noreply@localhost'
 TEAM_EMAIL = 'all@scraperwiki.com'
 
-ORBITED_PORT = 8001
-ORBITED_DOMAIN = 'localhost'
+ORBITED_URL = 'http://localhost:8001'
 
 # TEST_RUNNER = 'django-test-coverage.runner.run_tests'
 

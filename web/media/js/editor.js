@@ -546,6 +546,7 @@ $(document).ready(function() {
             if ((jdata.message_type != "data") && (jdata.message_type != "console") && (jdata.message_type != "sqlitecall"))
                 lreceiverecordqueue.push(jdata); 
         }
+
         if (receiverecordqueue.length != lreceiverecordqueue.length) 
         {
             message = "Clearing " + (receiverecordqueue.length - lreceiverecordqueue.length) + " records from receiverqueue, leaving: " + lreceiverecordqueue.length; 
@@ -575,7 +576,7 @@ $(document).ready(function() {
     function receiveRecord(data) {
           if (data.nowtime)
              servernowtime = parseISOdate(data.nowtime); 
-
+			
           if (data.message_type == "console") {
               writeRunOutput(data.content);     // able to divert text to the preview iframe
           } else if (data.message_type == "sources") {
@@ -622,8 +623,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 writeToConsole("Finished: "+messageparts.join(", "));
               } else if (data.content == "killsignal")
                 writeToConsole(data.message); 
-              else if (data.content == "runfinished")
+              else if (data.content == "runfinished") {
                 endingrun(data.content); 
+			  }
               else 
                 writeToConsole(data.content); 
 

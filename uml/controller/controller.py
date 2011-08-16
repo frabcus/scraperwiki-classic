@@ -120,10 +120,18 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
     def sendIdent(self, query) :
+        from urlparse import urlparse
+        
         self.sendConnectionHeaders()
 
         # given the port and socket, find the pid holding it open using a grep on lsof
-        (lport, rport) = query.split(':')
+        # We have changed this over to use rpartition so we can check for an IP
+        (head, sep, rport) = query.rpartition(':')
+        if ':' in head:
+            lport = head[head.index(':')+1:]
+        else:
+            lport = head
+        
         # On Linux, process names come out as exec.py/exec.rb etc.
         # On OSX, they come out as python/ruby etc.
         # XXX todo, get PHP working on OSX
