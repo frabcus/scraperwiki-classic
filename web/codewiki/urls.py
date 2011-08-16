@@ -16,7 +16,7 @@ metadata = Resource(handler=ScraperMetadataHandler)
 
 urlpatterns = patterns('',
     
-    # running a scraper by calling a url (from scraperwikiviews.com)
+    # running a scraper by calling a url (from views.scraperwiki.com)
     url(r'^run/(?P<short_name>[\w_\-\.]+)/(?:(?P<revision>\d+)/)?$', 
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    
     
