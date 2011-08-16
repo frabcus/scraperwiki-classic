@@ -363,7 +363,7 @@ def scraper_run_scraper(request, short_name):
 
 def scraper_screenshoot_scraper(request, wiki_type, short_name):
     scraper = getscraperor404(request, short_name, "screenshoot_scraper")
-    call_command('take_screenshot', short_name=short_name, domain=settings.VIEW_DOMAIN, verbose=False)
+    call_command('take_screenshot', short_name=short_name, url_prefix=settings.VIEW_URL, verbose=False)
     return HttpResponseRedirect(reverse('code_overview', args=[code_object.wiki_type, short_name]))
 
 
