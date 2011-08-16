@@ -59,7 +59,7 @@ span.desc { background-color:black; color:white; width:100px; display:inline-blo
 
 {% block javascript %}
     <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.json-2.2.min.js"></script>
-    <script src="http://{{ settings.ORBITED_DOMAIN }}:{{ settings.ORBITED_PORT }}/static/Orbited.js"></script>
+    <script src="{{ settings.ORBITED_URL }}/static/Orbited.js"></script>
     <script>Orbited.settings.streaming = false</script>
 
     {# Needed for orbited, dont remove #}
