@@ -76,7 +76,6 @@ $(document).ready(function() {
     var lastsavedcode   = ''; // used to tell if we should expect a null back from the revision log
 
     // runtime information
-    var activepreviewiframe = undefined; // used for spooling running console data into the preview popup
     var runID = ''; 
     var uml = ''; 
 
@@ -642,6 +641,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     //send code request run
     function sendCode() 
+
     {
         if (!$('.editor_controls #run').length || $('.editor_controls #run').attr('disabled'))
             return; 
@@ -986,14 +986,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         $('#running_annimation').hide();
         runID = ''; 
         uml = ''; 
-
-        // suppress any more activity to the preview frame
-        if (activepreviewiframe != undefined) 
-        {
-            if (activepreviewiframe.document)
-                activepreviewiframe.document.close(); 
-            activepreviewiframe = undefined; 
-        }
     }
 
 
@@ -1155,43 +1147,19 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 previewmessage = ' [' + urlquery + '] is an invalid query string'; 
         }
 
-        previewscreen = ['<h3>View preview'];
-        if (viewurl)
-             previewscreen.push(' (<a href="'+viewurl+'" target="scraperwiki_preview_' + short_name + '">open in new window</a>'+previewmessage+')'); 
-        previewscreen.push('</h3>'); 
-        isrc = ""; // isrc = viewurl; (would allow direct inclusion from saved version)
-                   // force the preview iframe to fill most of what it should.  needs more work
-        previewscreen.push('<iframe id="previewiframe" width="100%" height="'+($(window).height()*8/10-50)+'px" src="'+isrc+'"></iframe>'); 
-
-        $.modal(previewscreen.join(""), 
-        { 
-            overlayClose: true,
-            containerCss: { borderColor:"#fff", height:"80%", padding:0, width:"90%" }, 
-            overlayCss: { cursor:"auto" }, 
-            onShow: function() 
-            {
-                ifrm = document.getElementById('previewiframe');
-                activepreviewiframe = (ifrm.contentWindow ? ifrm.contentWindow : (ifrm.contentDocument.document ? ifrm.contentDocument.document : ifrm.contentDocument));
-                activepreviewiframe.document.open(); 
-
-                // throw the value straight in or run the code which brings it back in via writeRunOutput()
-                if (scraperlanguage == "html")
-                {
-                    var code = (codeeditor ? codeeditor.getCode() : $("#id_code").val()); 
-                    activepreviewiframe.document.write(code); 
-                    activepreviewiframe.document.close(); 
-                    activepreviewiframe = undefined; 
-                    autosavefunction(code); 
-                }
-                else
-                    sendCode(); // trigger the running once we're ready for the output
-            }
-        }); 
+        saveScraper(null,function() {
+            w = window.open(viewurl, "scraperwiki_preview_" + short_name);
+        }, false); // false - do request synchronously so popup is allowed
+        sendCode(); // trigger the running once we're ready for the output
     }
 
-    function saveScraper(stimulate_run)
+    function saveScraper(stimulate_run, callback, async)
     {
         var bSuccess = false;
+        if (async == null) {
+            // default to asynchronous saving
+            async = true;
+        }
 
         //if saving then check if the title is set (must be if guid is set)
         if(shortNameIsSet() == false)
@@ -1240,7 +1208,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         }
 
         // on success
-        $.ajax({ url:$('input#saveurl').val(), type:'POST', contentType:"application/json", dataType:"html", data:sdata, timeout: 10000, success:function(response) 
+        $.ajax({ url:$('input#saveurl').val(), type:'POST', contentType:"application/json", dataType:"html", data:sdata, timeout: 10000, async: async, success:function(response) 
         {
             res = $.evalJSON(response);
             if (res.status == 'Failed')
@@ -1289,6 +1257,10 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 lastsavedcode = currentcode; 
             }
             ChangeInEditor("saved"); 
+
+            if (callback) {
+                callback();
+            }
         },
         error: function(jqXHR, textStatus, errorThrown)
         {
@@ -1343,8 +1315,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function writeRunOutput(sMessage) 
     {
         writeToConsole(sMessage, 'console'); 
-        if ((activepreviewiframe != undefined) && (activepreviewiframe.document != undefined))
-            activepreviewiframe.document.write(sMessage); 
     }
 
 
