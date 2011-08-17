@@ -141,8 +141,8 @@ class TestScrapers(SeleniumTest):
         s.click('run')
         success,total_checks,reconnects = False, 12, 1
 
-        # Dev server is slow, allow a page refresh on problems and give a longer timeout
-        if s.browserURL == "http://dev.scraperwiki.com/":
+        # Dev server is slow, allow a page refresh on problems and give a longer timeout (allow https or http)
+        if "dev.scraperwiki.com" in s.browserURL:
             reconnects = 5
             total_checks = 40
 
