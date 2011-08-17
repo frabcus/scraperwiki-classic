@@ -1245,9 +1245,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             }
 
             // ordinary save case.
+            window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
             if (res.draft != 'True') 
             {
-                window.setTimeout(function() { $('.editor_controls #btnCommitPopup').val('save' + (wiki_type == 'scraper' ? ' scraper' : '')).removeClass('darkness'); }, 1100);  
                 if (res.rev == null)
                 {
                     writeToChat("No difference (null revision number)"); 
