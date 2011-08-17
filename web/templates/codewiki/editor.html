@@ -125,7 +125,7 @@
     {% else %}
     <div id="draft_warning" class="alert_outer">
     {% endifnotequal %}
-        A temporary version of your scraper has been saved. 
+        A temporary version of your {{scraper.wiki_type}} has been saved. 
         <a href="{% url login %}?next={% url handle_session_draft %}">Sign in or create an account</a> to save it permanently, 
         or <a href="{% url delete_draft %}">discard changes</a>.
     </div>
@@ -144,7 +144,7 @@
         {% else %}
             sign in or create an account
         {% endif %}
-        to edit an existing scraper, 
+        to edit an existing {{scraper.wiki_type}}, 
         or you can <a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}" target="_blank">fork it</a>.
         Meanwhile, view the source code and watch other people editing below.
     </div>
