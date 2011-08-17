@@ -142,6 +142,8 @@ def code_overview(request, wiki_type, short_name):
     if request.user.is_staff:
         context["PRIVACY_STATUSES"] = PRIVACY_STATUSES_UI[0:3]  
     context["privacy_status_name"] = dict(PRIVACY_STATUSES_UI).get(scraper.privacy_status)
+
+    context["api_base"] = "%s/api/1.0/" % settings.API_URL
     
     # view tpe
     if wiki_type == 'view':
@@ -210,8 +212,6 @@ def code_overview(request, wiki_type, short_name):
     if dataproxy:
         dataproxy.close()
 
-    context["api_base"] = "%s/api/1.0/" % settings.API_URL
-    
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
 
