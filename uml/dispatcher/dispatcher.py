@@ -344,7 +344,7 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
             soc.connect((uml.server, uml.port))
         except:
-            self.logger.warning("refused connection to uml %s" % uname)
+            self.logger.warning("refused connection to uml %s" % scraperstatus["uname"])
             self.connection.sendall(json.dumps({'message_type': 'executionstatus', 'content': 'runcompleted', 'exit_status':"Failed to connect to controller"})+'\n')
             self.server.uml_list.releaseUML(scraperstatus)
             return
