@@ -3,6 +3,26 @@
 *
 * Utility functions for working with the processes locally
 ******************************************************************************/
+var streamLogger = require('streamlogger');
+var logger;
+
+/******************************************************************************
+* Set up logging to the specific file with the level where level = 
+* debug: 0, info: 1, warn: 2, fatal: 3  
+******************************************************************************/
+exports.setup_logging = function( logfile, level ) {
+	logger = new streamLogger.StreamLogger( logfile );	
+	logger.level = level;
+	
+	process.on('SIGHUP', function () {
+  		logger.reopen();
+	});
+	
+	exports.log = logger;
+};
+
+
+
 var exts = {
 	'python' : 'py', 
 	'ruby'   : 'rb', 	

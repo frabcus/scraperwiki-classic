@@ -40,7 +40,7 @@ exports.init = function( settings ) {
 	use_lxc = ! settings.devmode;
 
 	if ( use_lxc ) {
-		console.log('Initialising LXC...')
+		util.log.info("Initialising LXCs");
 		lxc.init(settings.vm_count);
 	}
 
@@ -68,7 +68,7 @@ exports.kill_script = function( run_id ) {
 			delete scripts[run_id];
 			delete scripts_ip[s.ip];
 			
-  			console.log('Killed process PID: ' + pid);					
+  			util.log.debug('Killed process PID: ' + pid);					
 			return true;
 		};
 	} else {
@@ -90,7 +90,7 @@ exports.get_status = function(response) {
 		response.write('runID=' + runID + "&scrapername=" + script.scraper_name + "\n");
 	}	
 	
-	console.log("+ Get status returning data for " + scripts.length + " running scripts");
+	util.log.debug("+ Get status returning data for " + scripts.length + " running scripts");
 }
 
 /******************************************************************************
@@ -122,11 +122,9 @@ exports.run_script = function( http_request, http_response ) {
 		return;
 	};
 
-	console.log('Setting up close event etc');
-	
 	// Handle the request being closed by the client	
 	http_request.on("close", function() {
-		console.log('- Client killed the connection')
+		util.log.debug('Client killed the connection')
 		http_response.end();
 	});
 	
@@ -141,12 +139,12 @@ exports.run_script = function( http_request, http_response ) {
 		if ( body == undefined || body.length == 0 || body.length != len ) {
 			r = {"error":"incoming message incomplete", "headers": http_request.headers , "lengths":  len.toString() };
 			http_response.end( JSON.stringify(r) );
-			console.log('Incomplete incoming message');			
+			util.log.warn('Incomplete incoming message');			
 			return;
 		};
 
 		execute(http_request, http_response, body);
-		console.log('Done calling execute');		
+		util.log.debug('Done calling execute');		
 	});
 		
 };
@@ -175,7 +173,9 @@ function execute(http_req, http_res, raw_request_data) {
 				vm: '', 
 				language: request_data.language || 'python',
 				ip: '',
-				response: http_res };
+				response: http_res,
+				black: request_data.black || '',
+				white: request_data.white || ''  };
 	
 	if ( ! use_lxc ) {
 		// Execute the code locally using the relevant file (exec.whatever)
@@ -191,15 +191,14 @@ function execute(http_req, http_res, raw_request_data) {
 					if ( script.scraper_name ) {
 						args.push('--scrapername=' + script.scraper_name )
 					}
-					console.log( '********************** RUBY' );					
-					console.log( args );
+					util.log.debug( args );
 				} else {
 					args = ['--script',tmpfile,'--ds', dataproxy, '--runid', script.run_id]
 					if ( script.scraper_name ) {
 						args.push('--scrapername')
 						args.push( script.scraper_name )
 					}
-					console.log( args );
+					util.log.debug( args );
 				}
 				
 				exe = './scripts/exec.' + util.extension_for_language(script.language);
@@ -221,15 +220,13 @@ function execute(http_req, http_res, raw_request_data) {
 					// Let's handle the user quitting early it might be a KILL
 					// command from the dispatcher
 					if ( e ) e.kill('SIGKILL');
-					console.log(' - Sent kill signal');					
 					if ( script ) {
 						delete scripts[script.run_id];					
 						delete scripts_ip[ script.ip ];					
 					}
-					console.log(' - Connection was closed');
 			    });
 			
-				console.log( "Script " + script.run_id + " executed with " + script.pid );
+				util.log.debug( "Script " + script.run_id + " executed with " + script.pid );
 
 				e.stdout.on('data', function (data) {
 					write_to_caller( http_res, data, true );					
@@ -239,7 +236,6 @@ function execute(http_req, http_res, raw_request_data) {
 					try {
 						s = JSON.parse(data);
 						if ( s ) {
-							console.log('Writing ' + data)
 							http_res.write( data );
 						}
 					}catch(err) {
@@ -249,24 +245,25 @@ function execute(http_req, http_res, raw_request_data) {
 				
 				e.on('exit', function (code, signal) {
 					if ( code == null )
-	 					console.log('child process exited badly, we may have killed it');
+						util.log.debug('child process exited badly, we may have killed it');
 					else 
-	 					console.log('child process exited with code ' + code);					
+	 					util.log.debug('child process exited with code ' + code);					
 					if ( script ) {
 						delete scripts[script.run_id];
 						delete scripts_ip[ script.ip ];
 					}
 					
-	 				console.log('child process removed from script list');					
+	 				util.log.debug('child process removed from script list');					
 
 					var endTime = new Date();
 					elapsed = (endTime - startTime) / 1000;
-// signal if not null
+
+					// 'CPU_seconds': 1, Temporarily removed
         			res =  { 'message_type':'executionstatus', 'content':'runcompleted', 
-                 'elapsed_seconds' : elapsed, 'CPU_seconds': 1, 'exit_status': 0 };
+                 'elapsed_seconds' : elapsed, 'exit_status': 0 };
 					http_res.end( JSON.stringify( res ) + "\n" );
 										
-					console.log('Finished writing responses');
+					util.log.debug('Finished writing responses');
 				});
 	     	}
 		}); // end of writefile
@@ -312,7 +309,6 @@ function write_to_caller(http_res, output, isstdout) {
 	sub = msg.substring(0,100);
 	if ( sub.indexOf('html') >= 0 && sub.indexOf('>') >= 0  && sub.indexOf('<') >= 0) {
 		r = { 'message_type':'console', 'content': msg  };
-		console.log(r);
 		http_res.write( JSON.stringify(r) + "\n");
 		return;
 	}
@@ -325,7 +321,6 @@ function write_to_caller(http_res, output, isstdout) {
 				// the JSON
 				s = JSON.parse(parts[i]);
 				if ( s ) {
-					console.log( s.message_type );
 					http_res.write( parts[i] );
 				}
 				continue;
@@ -334,7 +329,6 @@ function write_to_caller(http_res, output, isstdout) {
 			}
 			
 			r = { 'message_type':'console', 'content': parts[i]  };
-			console.log(r);
 			http_res.write( JSON.stringify(r) + "\n");
 		}
 	};
@@ -344,12 +338,10 @@ function write_to_caller(http_res, output, isstdout) {
 function dumpError(err) {
   if (typeof err === 'object') {
     if (err.message) {
-      console.log('\nMessage: ' + err.message)
+      util.log.warn('Message: ' + err.message)
     }
     if (err.stack) {
-      console.log('\nStacktrace:')
-      console.log('====================')
-      console.log(err.stack);
+      util.log.warn(err.stack);
     }
   } else {
     console.log('dumpError :: argument is not an object');

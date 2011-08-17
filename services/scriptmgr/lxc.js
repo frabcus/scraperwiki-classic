@@ -112,11 +112,9 @@ function create_vm ( name ) {
 					write_to_caller( http_res, data );
 				});				
 				e.on('exit', function (code) {
-	 				console.log('child process exited with code ' + code);
 					delete scripts[script.run_id];
 					delete scripts_ip[ script.ip ];
 					
-	 				console.log('child process removed from script list');					
 					http_res.end();
 				});
 				*/
