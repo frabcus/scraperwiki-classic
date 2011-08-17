@@ -33,9 +33,9 @@ $(document).ready(function() {
     var lastRevUserRealName = $('#originalrevuserrealname').val(); 
     var rollbackRev = $('#rollback_rev').val(); 
 
-    var lastRevPrefix = "Last edited";
+    var inRollback = false;
     if (rollbackRev != "") 
-        lastRevPrefix = "Rollback preview of ";
+        inRollback = true;
 
     var lastupdaterevcall = null; 
     function writeUpdateLastSavedRev() 
@@ -43,12 +43,18 @@ $(document).ready(function() {
         lastupdaterevcall = null; 
         if ((lastRev != "") && (lastRev != "unsaved") && (lastRev != "draft"))
         {
+            if (inRollback) {
+                prefix = "Rollback preview of ";
+            } else {
+                prefix = "Last edited";
+            }
+
             var twhen = new Date(lastRevDateEpoch * 1000);
             var tago = jQuery.timeago(twhen);
             $("#idlastrev").html('<span title="' + 
                     'By ' + lastRevUserRealName + ' (' + lastRevUserName + '), ' +
                     ' rev ' + String(lastRev) + ' \n' + 
-                    'on ' + String(twhen) + '">' + lastRevPrefix + ' ' + tago + '</span>');
+                    'on ' + String(twhen) + '">' + prefix + ' ' + tago + '</span>');
             lastupdaterevcall = window.setTimeout(writeUpdateLastSavedRev, 60000);
         }
     }
@@ -64,7 +70,7 @@ $(document).ready(function() {
         receivechainpatchqueue.length = 0; 
         lastreceivedchainpatch = null; 
         chainpatches.length = 0; 
-        lastRevPrefix = "Saved";
+        inRollback = false;
         if (lastupdaterevcall != null)
             window.clearTimeout(lastupdaterevcall); 
         lastupdaterevcall = window.setTimeout(writeUpdateLastSavedRev, 50); 
@@ -87,7 +93,6 @@ $(document).ready(function() {
     var codemirroroptions = undefined; 
 
     var pageIsDirty = true;
-    $('.editor_controls #btnCommitPopup').attr('disabled', !pageIsDirty); 
 
     var atsavedundo = 0; // recorded at start of save operation
     var savedundo = 0; 
@@ -165,7 +170,11 @@ $(document).ready(function() {
         if (pageIsDirty != lpageIsDirty)
         {
             pageIsDirty = lpageIsDirty; 
-            $('.editor_controls #btnCommitPopup').attr('disabled', !pageIsDirty); 
+            if ((lastRev != "") && (lastRev != "unsaved") && (lastRev != "draft") && (!inRollback)) {
+                $('.editor_controls #btnCommitPopup').attr('disabled', !pageIsDirty); 
+            } else {
+                $('.editor_controls #btnCommitPopup').attr('disabled', false); 
+            }
         }
 
         if (changetype != 'edit')
