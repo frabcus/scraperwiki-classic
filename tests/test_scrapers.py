@@ -182,7 +182,7 @@ class TestScrapers(SeleniumTest):
         time.sleep(1)
         s.open("/logout")
         self.wait_for_page()
-        s.click("xpath=//body")
+        #s.click("xpath=//body") # this was here, not sure what for, gave a strange error from Selenium for me - FAI
         s.type('id_nav_user_or_email', username)
         s.type('id_nav_password', password)
         s.click('nav_login_submit')
