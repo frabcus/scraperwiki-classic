@@ -80,7 +80,7 @@ def contrib(request, short_name):
 
 def docsexternal(request):
     language = request.session.get('language', 'python')
-    api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
+    api_base = "%s/api/1.0/" % settings.API_URL
 
     context = {'language':language, 'api_base':api_base }
     context["scrapername"] = request.GET.get("name", "")
@@ -98,7 +98,7 @@ def api_explorer(request):
     params = dict(cgi.parse_qsl(querystring))
     format = params.get("format")
     
-    api_base = "http://%s/api/1.0/" % settings.API_DOMAIN
+    api_base = "%s/api/1.0/" % settings.API_URL
     assert url[:len(api_base)] == api_base
     try:
         dresult = urllib2.urlopen(url).read()

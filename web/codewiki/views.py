@@ -210,7 +210,7 @@ def code_overview(request, wiki_type, short_name):
     if dataproxy:
         dataproxy.close()
 
-    context["api_base"] = "http://%s/api/1.0/" % settings.API_DOMAIN
+    context["api_base"] = "%s/api/1.0/" % settings.API_URL
     
     return render_to_response('codewiki/scraper_overview.html', context, context_instance=RequestContext(request))
 
@@ -363,7 +363,7 @@ def scraper_run_scraper(request, short_name):
 
 def scraper_screenshoot_scraper(request, wiki_type, short_name):
     scraper = getscraperor404(request, short_name, "screenshoot_scraper")
-    call_command('take_screenshot', short_name=short_name, domain=settings.VIEW_DOMAIN, verbose=False)
+    call_command('take_screenshot', short_name=short_name, url_prefix=settings.VIEW_URL, verbose=False)
     return HttpResponseRedirect(reverse('code_overview', args=[code_object.wiki_type, short_name]))
 
 
