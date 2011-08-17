@@ -72,19 +72,16 @@ process.on('uncaughtException', function (err) {
 
 
 http.createServer(function (req, res) {
-	var handler = _routemap[url.parse(req.url).pathname] || _routemap['/']
-	handler(req,res)
-	
+	var handler = _routemap[url.parse(req.url).pathname] || _routemap['/'];
+	handler(req,res);
 }).listen(settings.port, settings.listen_on || "0.0.0.0");
 
 // Log information to the logfile.
 util.log.info('Server started listening on port ' + settings.port );
-	
 
 /******************************************************************************
 * Handles a run request when a client POSTs code to be executed along with a 
 * run id, a scraper id and the scraper name
-*
 ******************************************************************************/
 function handleRun(req,res) {
 	util.log.debug( 'Starting run request' );

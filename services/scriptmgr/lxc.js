@@ -54,7 +54,7 @@ exports.kill = function( script ) {
 	vm = vms_by_runid[ script.run_id ];
 	if ( vm ) {
 		// trigger an lxc-kill
-		// lxc-kill -n 'vm'
+		// lxc-stop -n 'vm'
 
 		// Clean up indices
 		delete vms_by_run_id[ script.run_id ];		
