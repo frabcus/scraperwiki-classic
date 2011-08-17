@@ -41,7 +41,7 @@ $(document).ready(function() {
     function writeUpdateLastSavedRev() 
     {
         lastupdaterevcall = null; 
-        if ((lastRev != "") && (lastRev != "unsaved"))
+        if ((lastRev != "") && (lastRev != "unsaved") && (lastRev != "draft"))
         {
             var twhen = new Date(lastRevDateEpoch * 1000);
             var tago = jQuery.timeago(twhen);
