@@ -21,13 +21,13 @@ class TestScrapers(SeleniumTest):
     new_scraper_link = "Create new scraper"
 
 
-    def test_ruby_create(self):  
+    def test_ruby_create(self):
         self._language_create("ruby")
-                
-    def test_php_create(self):  
+
+    def test_php_create(self):
         self._language_create("php")
-    
-    def test_python_create(self):  
+
+    def test_python_create(self):
         self._language_create("python")
 
     def test_common_features(self):
@@ -182,7 +182,6 @@ class TestScrapers(SeleniumTest):
         time.sleep(1)
         s.open("/logout")
         self.wait_for_page()
-        #s.click("xpath=//body") # this was here, not sure what for, gave a strange error from Selenium for me - FAI
         s.type('id_nav_user_or_email', username)
         s.type('id_nav_password', password)
         s.click('nav_login_submit')
