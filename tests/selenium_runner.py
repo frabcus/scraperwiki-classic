@@ -173,7 +173,7 @@ if __name__ == '__main__':
     parser.add_option("--adminusername", action="store", type="string", default="", dest="adminusername",
                       help="Specify Django admin account username for more complete testing coverage. Requires --adminpassword")
     parser.add_option("--adminpassword", action="store", type="string", default="", dest="adminpassword",
-                      help="Specify Django admin account password. Requires --adminuser")
+                      help="Specify Django admin account password. Requires --adminusername")
 
     
     (options, args) = parser.parse_args()
