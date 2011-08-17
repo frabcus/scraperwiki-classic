@@ -54,7 +54,7 @@ exports.kill = function( script ) {
 	vm = vms_by_runid[ script.run_id ];
 	if ( vm ) {
 		// trigger an lxc-kill
-		// lxc-kill -n 'vm'
+		// lxc-stop -n 'vm'
 
 		// Clean up indices
 		delete vms_by_run_id[ script.run_id ];		
@@ -112,11 +112,9 @@ function create_vm ( name ) {
 					write_to_caller( http_res, data );
 				});				
 				e.on('exit', function (code) {
-	 				console.log('child process exited with code ' + code);
 					delete scripts[script.run_id];
 					delete scripts_ip[ script.ip ];
 					
-	 				console.log('child process removed from script list');					
 					http_res.end();
 				});
 				*/

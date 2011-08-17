@@ -25,26 +25,16 @@ var http = require('http');
 var url  = require('url');
 var _    = require('underscore')._;
 var qs   = require('querystring');
-
 var exec = require('./executor');
+var util = require('./utils')
 
 _routemap = {
 	'/Execute'   : handleRun,
-	'/kill'  : handleKill,
-	'/status': handleStatus,
+	'/Kill'  : handleKill,
+	'/Status': handleStatus,
 	'/Ident' : handleIdent,
 	'/Notify': handleNotify,
 	'/'      : handleUrlError,
-};
-
-// default settings options
-_config = { 
-	devmode: true, 
-	port: 9001, 
-	vm_count: 50, 
-	extra_path: '../../scraperlibs',
-	dataproxy: '127.0.0.1:9003',
-	httpproxy: '127.0.0.1:9005',
 };
 
 /******************************************************************************
@@ -53,28 +43,49 @@ _config = {
 * accepted it is long running until the connection is closed, or local script
 * execution is stopped.
 ******************************************************************************/
+var opts = require('opts');
+var options = [
+  { short       : 'c', 
+	long        : 'config',
+    description : 'Specify the configuration file to use',
+  }
+];
+opts.parse(options, true);
 
-exec.set_config( _config );
+var config_path = opts.get('config') || './appsettings.scriptmgr.js';
+var settings = require(config_path).settings;
+
+// Load settings and store them locally
+exec.init( settings );
+
+util.setup_logging( settings.logfile, settings.loglevel );
+if (settings.devmode) {
+	util.log.emitter.addListener('loggedMessage', function(message,levelName) {
+    	console.log(levelName.toUpperCase() + ": " + message);
+  	});
+};
+
+// Handle uncaught exceptions and make sure they get logged
+process.on('uncaughtException', function (err) {
+  util.log.fatal('Caught exception: ' + err);
+});
 
 
 http.createServer(function (req, res) {
-	var handler = _routemap[url.parse(req.url).pathname] || _routemap['/']
-	handler(req,res)
-	
-}).listen(_config.port, "127.0.0.1");
+	var handler = _routemap[url.parse(req.url).pathname] || _routemap['/'];
+	handler(req,res);
+}).listen(settings.port, settings.listen_on || "0.0.0.0");
 
-console.log('+ Server started listening on port ' + _config.port );
-	
+// Log information to the logfile.
+util.log.info('Server started listening on port ' + settings.port );
 
 /******************************************************************************
 * Handles a run request when a client POSTs code to be executed along with a 
 * run id, a scraper id and the scraper name
-*
 ******************************************************************************/
 function handleRun(req,res) {
-	console.log( '+ Handling /run request' );
+	util.log.debug( 'Starting run request' );
 	exec.run_script( req, res);
-	console.log( '+ Run request completed' );	
 }
 
 /******************************************************************************
@@ -83,7 +94,7 @@ function handleRun(req,res) {
 * sigkill the relevant script.
 ******************************************************************************/
 function handleKill(req,res) {
-	console.log( '+ Handling kill request' );
+	util.log.debug( 'Handling kill request' );
 
 	var url_parts = url.parse(req.url, true);
 	var query = url_parts.query;
@@ -92,6 +103,8 @@ function handleKill(req,res) {
 		write_error( res, "Missing parameter" );
 		return;
 	}
+
+	util.log.debug( 'Killing ' + query.run_id );
 
 	var result = exec.kill_script( query.run_id );
 	if ( ! result ) {
@@ -118,42 +131,53 @@ function handleStatus(req,res) {
 function handleIdent(req,res) {
 	
  	var urlObj = url.parse(req.url, true);	
-	console.log( "**************************************** IDENT" );
-	console.log( urlObj );
-	console.log( "**********************************************" );	
+	util.log.debug('Ident request')
 	
-	// call exec.get_details(details) and return it
-/* for line in string.split (ident, '\n'):
-            if line == '' :
-                continue
-            key, value = string.split (line, '=')
-            if key == 'runid' :
-                runID     = value
-                continue
-            if key == 'scraperid' :
-                scraperID = value
-                continue
-            if key == 'allow'  :
-                self.m_allowed.append (value)
-                continue
-            if key == 'block'  :
-                self.m_blocked.append (value)
-                continue
-            if key == 'option' :
-                name, opt = string.split (value, ':')
-                if name == 'webcache' : cache = int(opt)
-*/
-		
-	res.end('/ident');	
+	// Why oh why oh why do we use ?sdfsdf instead of a proper 
+	// query string. Sigh.
+	var s;
+	for ( var v in urlObj.query )
+		s = v.substring( 0, v.indexOf(':'))
+	
+	script = exec.get_details( { ip: s } );
+	if ( script ){
+		res.write( 'scraperid=' + script.scraper_guid + "\n");
+		res.write( 'runid=' + script.run_id  + "\n");		
+		res.write( 'scraperid=' + script.scraper_name + "\n");
+		res.write( 'urlquery=' + script.query + "\n");		
+		if ( script.white ) {
+			res.write( 'allow=' + script.white + "\n");		
+		} else {
+			res.write( "allow=.*\n");		
+		}
+		if ( script.black ) {
+			res.write( 'block=' + script.black + "\n");				
+		}	
+		res.end('\n')
+	}
+	else {
+		write_error( res, "Unable to find script for IP " + s);
+		res.end('')	;
+	}
 }
 
 /******************************************************************************
-* Handle notify callback from http proxy
-*
+* Handle notify callback from http proxy by telling the caller what we have 
+* just fetched.
 ******************************************************************************/
 function handleNotify(req,res) {
 	
-	res.end('/notify');	
+	var urlObj = url.parse(req.url, true);	
+	util.log.debug( 'Notify request ' + req.url);
+	
+	script = exec.get_details( {runid: urlObj.query.runid } );		
+	if ( script ) {
+		delete urlObj.query.runid;
+		s = JSON.stringify( urlObj.query );
+		script.response.write( s );
+	}
+	
+	res.end('');	
 }
 	
 
@@ -162,6 +186,8 @@ function handleNotify(req,res) {
 * than it not being valid somehow.
 ******************************************************************************/
 function handleUrlError(req,res) { 
+	util.log.debug('404 ' + req.url );
+	
 	res.writeHead(404, {'Content-Type': 'text/html'}); 
 	res.end('URL not found'); 
 }	
@@ -170,6 +196,8 @@ function handleUrlError(req,res) {
 * Write the error message in our standard (ish) json format
 ******************************************************************************/
 function write_error(res, msg, headers) {
+	util.log.warn( msg );
+		
 	r = {"error": msg, "headers": headers || '' , "lengths":  -1 };
 	res.end( JSON.stringify(r) );
 }

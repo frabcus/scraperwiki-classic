@@ -240,9 +240,11 @@ function writeToSources(sUrl, lmimetype, bytes, failedmessage, cached, cacheid, 
             smessage.push("<b>"+lmimetype+"</b>"); 
 
         // this is the orange up-arrow link that doesn't work because something wrong in the server, so hide it for now
-        //if (cacheid != undefined)
-        //    smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
-
+//        if (cacheid != undefined) {
+//            smessage.push('<a id="cacheid-'+cacheid+'" title="Popup html" class="cachepopup">&nbsp;&nbsp;</a>'); 
+//			smessage.push( cacheid );
+//		}
+		
         if (cached == 'True')
             smessage.push('(from cache)'); 
     }

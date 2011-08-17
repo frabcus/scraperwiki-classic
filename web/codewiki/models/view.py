@@ -40,8 +40,8 @@ class View(code.Code):
                 if scraper not in self.relations.all():
                     self.relations.add(scraper)
 
-    def get_screenshot_url(self, domain):
-        return 'http://%s%s' % (domain, reverse('rpcexecute', args=[self.short_name]))
+    def get_screenshot_url(self, url_prefix):
+        return '%s%s' % (url_prefix, reverse('rpcexecute', args=[self.short_name]))
 
     def content_type(self):
         return ContentType.objects.get(app_label="codewiki", model="View")

@@ -30,6 +30,7 @@ user    = scraperwiki
 passwd  = scraperwiki
 db      = scraperwiki_cache
 cache   = 127.0.0.1:11211
+lxc_server = 127.0.0.1
 
 [httpsproxy]
 host	= 127.0.0.1
@@ -54,6 +55,7 @@ db	= scraperwiki_datastore
 resourcedir = ../resourcedir
 max_api_distance = 10
 secure	= 127.0.0.1
+lxc_server = 127.0.0.1:9001
 
 ; Ross' machine
 [ross-work.local]

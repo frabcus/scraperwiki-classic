@@ -58,7 +58,8 @@ class SQLiteDatabase(Database):
         self.authorizer_func = None  
         self.sqlitesaveinfo = { }  # tablename -> info
 
-        self.scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
+        if self.short_name:
+            self.scraperresourcedir = os.path.join(self.m_resourcedir, self.short_name)
 
         self.logger = logging.getLogger('dataproxy')
 

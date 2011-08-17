@@ -32,7 +32,7 @@ function setupScraperOverview(short_name)
     
     $("#popupinteractivesqlite").click(function() 
     {
-        var url = "http://{{settings.VIEW_DOMAIN}}{% url rpcexecute 'quickcheck_datastore' %}?src="+decodeURIComponent(short_name); 
+        var url = "{{settings.VIEW_URL}}{% url rpcexecute 'quickcheck_datastore' %}?src="+decodeURIComponent(short_name); 
         $.modal('<iframe width="100%" height="100%" src='+url+'></iframe>', 
         {
             overlayClose: true,

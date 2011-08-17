@@ -10,11 +10,15 @@
 {% block tab %}
 {% load screen_shot %}
 
+<fieldset>
+    <input type="text" id="id_api_base" value="{{api_base}}" class="hide">
+</fieldset>
+
 <div class="page_title">
     <ul class="title_links">
         <li class="embed"><a href="#embed">Add to your site</a></li>
         <li class="fork"><a href="{% url editor scraper.wiki_type scraper.language %}?fork={{scraper.short_name}}">Fork this {{scraper.wiki_type}}</a></li>
-        <li class="view"><a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">View as full page</a></li>
+        <li class="view"><a href="{{settings.VIEW_URL}}{% url rpcexecute scraper.short_name %}">View as full page</a></li>
     </ul>
 </div>
 
@@ -23,7 +27,7 @@
     {{htmlcode|safe}}
 {% else %}
     <div class="screenshot_large">
-      <a href="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}">
+      <a href="{{settings.VIEW_URL}}{% url rpcexecute scraper.short_name %}">
           <span>Click to open this view</span>
       </a>
       {% screen_shot scraper 'large' %}
@@ -66,8 +70,8 @@
     <a name="embed"></a>
     <h3>Add this view to your site <span id="copy"></span></h3>
     <code>{% filter force_escape|linebreaksbr %}<div>
-            <iframe width="100%" height="400px" src="http://{{settings.VIEW_DOMAIN}}{% url rpcexecute scraper.short_name %}"></iframe>
-            <img src="http://scraperwiki.com/media/images/powered.png" alt="Powered by ScraperWiki.com" />
+            <iframe width="100%" height="400px" src="{{settings.VIEW_URL}}{% url rpcexecute scraper.short_name %}"></iframe>
+            <img src="https://scraperwiki.com/media/images/powered.png" alt="Powered by ScraperWiki.com" />
         </div>{% endfilter %}
     </code>
 </div>

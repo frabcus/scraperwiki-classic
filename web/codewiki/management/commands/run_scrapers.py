@@ -147,7 +147,7 @@ def runmessageloop(runnerstream, event, approxlenoutputlimit):
             event.save()
             
         elif message_type == "sources":
-            event.pages_scraped += 1  # soon to be deprecated 
+            event.pages_scraped += 1  
             
             url = data.get('url')
             netloc = "%s://%s" % urlparse.urlparse(url)[:2]

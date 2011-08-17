@@ -16,7 +16,7 @@ metadata = Resource(handler=ScraperMetadataHandler)
 
 urlpatterns = patterns('',
     
-    # running a scraper by calling a url (from scraperwikiviews.com)
+    # running a scraper by calling a url (from views.scraperwiki.com)
     url(r'^run/(?P<short_name>[\w_\-\.]+)/(?:(?P<revision>\d+)/)?$', 
                                                           viewsrpc.rpcexecute,          name='rpcexecute'),    
     
@@ -93,7 +93,7 @@ urlpatterns = patterns('',
 
     # old redirects
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/(?:run|full)/$',   # redirect because it's so common
-                   lambda request, wiki_type, short_name: HttpResponseRedirect("http://%s%s" % (settings.VIEW_DOMAIN, reverse('rpcexecute', args=[short_name])))),
+                   lambda request, wiki_type, short_name: HttpResponseRedirect("%s%s" % (settings.VIEW_URL, reverse('rpcexecute', args=[short_name])))),
     url(r'^(?P<wiki_type>scraper)s/export2/(?P<short_name>[\w_\-\.]+)/$', 
                    lambda request, wiki_type, short_name: HttpResponseRedirect(reverse('code_overview', args=[wiki_type, short_name]))),
     #url(r'^(?P<wiki_type>scraper)s/export/(?P<short_name>[\w_\-\.]+)/$', 

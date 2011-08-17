@@ -21,13 +21,13 @@ class TestScrapers(SeleniumTest):
     new_scraper_link = "Create new scraper"
 
 
-    def test_ruby_create(self):  
+    def test_ruby_create(self):
         self._language_create("ruby")
-                
-    def test_php_create(self):  
+
+    def test_php_create(self):
         self._language_create("php")
-    
-    def test_python_create(self):  
+
+    def test_python_create(self):
         self._language_create("python")
 
     def test_common_features(self):
@@ -52,8 +52,6 @@ class TestScrapers(SeleniumTest):
     def _add_comment(self, name):
         s = self.selenium
               
-        self.wait_for_page('view the scraper page to add comment')        
-        
         s.click('link=Discussion (0)')    
         self.wait_for_page('visiting discussion')
         comment = 'A test comment'
@@ -62,15 +60,8 @@ class TestScrapers(SeleniumTest):
         s.click('id_submit')
         time.sleep(2)
 
-        # Currently we expect _add_comment to fail due to CSRF issues, but it will 
-        # not fail on live. To resolve this we'll currently handle both cases :(
-        if s.is_text_present(comment):
-            print 'Working comments'
-            self.failUnless(s.is_text_present(comment))
-            self.failUnless(s.is_text_present("Discussion (1)"))        
-        else:
-            print 'Broken comments'            
-#            self.failUnless(s.is_text_present('CSRF verification failed. Request aborted.'))
+        self.failUnless(s.is_text_present(comment))
+        self.failUnless(s.is_text_present("Discussion (1)"))        
 
         s.open('/scrapers/%s/' % name)        
         self.wait_for_page('view the scraper page')        
@@ -150,8 +141,8 @@ class TestScrapers(SeleniumTest):
         s.click('run')
         success,total_checks,reconnects = False, 12, 1
 
-        # Dev server is slow, allow a page refresh on problems and give a longer timeout
-        if s.browserURL == "http://dev.scraperwiki.com/":
+        # Dev server is slow, allow a page refresh on problems and give a longer timeout (allow https or http)
+        if "dev.scraperwiki.com" in s.browserURL:
             reconnects = 5
             total_checks = 40
 
@@ -191,7 +182,6 @@ class TestScrapers(SeleniumTest):
         time.sleep(1)
         s.open("/logout")
         self.wait_for_page()
-        s.click("xpath=//body")
         s.type('id_nav_user_or_email', username)
         s.type('id_nav_password', password)
         s.click('nav_login_submit')

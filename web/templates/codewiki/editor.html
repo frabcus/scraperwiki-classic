@@ -67,6 +67,7 @@
 		
           var _gaq = _gaq || [];
           _gaq.push(['_setAccount', 'UA-21451224-1']);
+          _gaq.push(['_setDomainName', 'none']);
           _gaq.push(['_trackPageview']);
 
           (function() {
@@ -114,7 +115,7 @@
 
 
 {% if scraper.short_name %}
-    <input type="hidden" id="viewrunurl"    value="{% url rpcexecute scraper.short_name %}"/>
+    <input type="hidden" id="viewrunurl"    value="{{settings.VIEW_URL}}{% url rpcexecute scraper.short_name %}"/>
     <input type="hidden" id="editorreloadurl" value="{% url reload scraper.short_name %}"/>
 {% endif %}
 
@@ -186,7 +187,7 @@
 
     {# Controls #}
     <div class="editor_controls">
-        <a class="helplink" href="{% url docsroot scraper.language %}" target="_blank" title="Show useful commands">Documentation</a>
+        <a class="helplink" href="{% url docsroot scraper.language %}" target="scraperwiki_docs_{{ scraper.short_name }}" title="Show useful commands">Documentation</a>
         {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
             <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R, Cmd + R)" disabled />
         {% endifnotequal %}{% endifnotequal %}

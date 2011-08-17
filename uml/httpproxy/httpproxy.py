@@ -131,7 +131,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         @param  netloc  : Hostname or hostname:port
         @return         : Socket
         """
-
+        
         i = netloc.find(':')
         if i >= 0 : host_port = netloc[:i], int(netloc[i+1:])
         else      : host_port = netloc, scheme == 'https' and 443 or 80
@@ -226,9 +226,18 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         elif mode == 'S' : port = 443
         else             : port = loc[1]
         
+        lxc_server = None
+        try:
+            lxc_server = config.get(varName, 'lxc_server')
+        except:
+            pass
+        
         for attempt in range(5):
             try:
-                ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
+                if lxc_server:
+                    ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)).read()
+                else:
+                    ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
                 if ident.strip() != "":
                     break
             except:
@@ -321,7 +330,11 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         #  If this is a transparent HTTP or HTTPS proxy then modify the path with the
         #  protocol and the host.
         #
-        if   mode == 'H' : self.path = 'http://%s%s'  % (self.headers['host'], self.path)
+
+        if   mode == 'H' : 
+            if not self.path.startswith('http://'):
+                self.path = 'http://%s%s'  % (self.headers['host'], self.path)
+                
         elif mode == 'S' : self.path = 'https://%s%s' % (self.headers['host'], self.path)
 
         #  This ensures that we only add headers into requests that are going into the scraperwiki
@@ -427,6 +440,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             startat = time.strftime ('%Y-%m-%d %H:%M:%S')
             soc = None
             try :
+                print 'Connecting to ', netloc, scheme
                 soc = self._connect_to (scheme, netloc)
                 if soc is not None :
                     self.log_request()

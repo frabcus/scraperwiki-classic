@@ -37,7 +37,7 @@ class ConsoleStream:
 
     def flush(self) :
         if self.m_text:
-            self.flush();
+            scraperwiki.dumpMessage({'message_type': 'console', 'content': self.m_text})
             self.m_text = ''
 
     def close(self):
@@ -66,7 +66,7 @@ if options.path:
 
 
 host, port = string.split(options.ds, ':')
-scraperwiki.datastore.create(host, port, options.scrapername, options.runid)
+scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid)
 
 scraperwiki.logfd = sys.stderr
 
