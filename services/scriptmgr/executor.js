@@ -231,7 +231,7 @@ function execute(http_req, http_res, raw_request_data) {
 				console.log( "Script " + script.run_id + " executed with " + script.pid );
 
 				e.stdout.on('data', function (data) {
-					write_to_caller( http_res, data );					
+					write_to_caller( http_res, data, true );					
 				});
 				
 				e.stderr.on('data', function (data) {
@@ -242,7 +242,7 @@ function execute(http_req, http_res, raw_request_data) {
 							http_res.write( data );
 						}
 					}catch(err) {
-						write_to_caller( http_res, data );
+						write_to_caller( http_res, data, false);
 					}					
 				});				
 				
@@ -303,10 +303,20 @@ function execute(http_req, http_res, raw_request_data) {
 * Write the response to the caller, or in this case write it back down the long
 * lived socket that connected to us.
 ******************************************************************************/
-function write_to_caller(http_res, output) {
+function write_to_caller(http_res, output, isstdout) {
 	var msg = output.toString();
-	var parts = msg.split("\n");
+	var parts = msg.split("\n");	
+
+	// Hacky solution to making sure HTML is sent all on one line.
+	sub = msg.substring(0,100);
+	if ( sub.indexOf('html') >= 0 && sub.indexOf('>') >= 0  && sub.indexOf('<') >= 0) {
+		r = { 'message_type':'console', 'content': msg  };
+		console.log(r);
+		http_res.write( JSON.stringify(r) + "\n");
+		return;
+	}
 	
+
 	for (var i=0; i < parts.length; i++) {
 		if ( parts[i].length > 0 ) {
 			try {
