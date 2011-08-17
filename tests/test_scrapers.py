@@ -52,8 +52,6 @@ class TestScrapers(SeleniumTest):
     def _add_comment(self, name):
         s = self.selenium
               
-        self.wait_for_page('view the scraper page to add comment')        
-        
         s.click('link=Discussion (0)')    
         self.wait_for_page('visiting discussion')
         comment = 'A test comment'
