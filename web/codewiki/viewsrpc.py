@@ -199,7 +199,7 @@ def rpcexecute(request, short_name, revision=None):
     # print [response['Content-Type']]  default is DEFAULT_CONTENT_TYPE, comes out as 'text/html; charset=utf-8'
     
     # How about 
-    if scraper.language == 'html' or ('Content-Type' in response  and 'text/html' in response['Content-Type']):
+    if 'Content-Type' in response  and 'text/html' in response['Content-Type']:
         response.write(scraperwikitag(scraper, '<div id="scraperwikipane" class="version-2"/>', panepresent))
     return response
             
