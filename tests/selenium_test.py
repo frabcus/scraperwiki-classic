@@ -31,7 +31,7 @@ class SeleniumTest(unittest.TestCase):
     def wait_for_page(self, doing=None):
         hit_limit = True
         if self._verbosity > 1:
-            print "  SeleniumTest: waiting_for_page", self.selenium.get_location()
+            print "  SeleniumTest: waiting_for_page start, currently at", self.selenium.get_location()
         try:
             self.selenium.wait_for_page_to_load('30000')
             hit_limit = False
@@ -48,6 +48,9 @@ class SeleniumTest(unittest.TestCase):
                 else:
                     msg = 'It took longer than 60 seconds to: %s' % doing
                 self.fail(msg=msg)
+
+        if self._verbosity > 1:
+            print "  SeleniumTest: waiting_for_page end, now at", self.selenium.get_location()
 
 
     def login(self, username, password):
