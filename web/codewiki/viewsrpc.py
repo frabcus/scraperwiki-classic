@@ -127,7 +127,7 @@ def rpcexecute(request, short_name, revision=None):
     if scraper.language == 'html':
         return HttpResponse(scraperwikitag(scraper, code, None))
     if scraper.language == 'javascript':
-        HttpResponse(code, mimetype='application/javascript')
+        return HttpResponse(code, mimetype='application/javascript')
 
     
     # run it the socket method for staff members who can handle being broken
