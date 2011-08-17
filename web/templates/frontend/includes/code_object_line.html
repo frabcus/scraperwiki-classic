@@ -8,7 +8,7 @@
         {% ifequal code.wiki_type 'view' %}
           <tr class="codewiki_type {{code.wiki_type|lower}}">
             <td class="label">Type</td>
-            <td class="link"><a href="{% url rpcexecute code.short_name %}">{{code.wiki_type|lower}}</a></td>
+            <td class="link"><a href="{{settings.VIEW_URL}}{% url rpcexecute code.short_name %}">{{code.wiki_type|lower}}</a></td>
           </tr>
         {% else %}
           <tr class="codewiki_type {{code.wiki_type|lower}}">
