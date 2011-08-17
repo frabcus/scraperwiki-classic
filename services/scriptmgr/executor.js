@@ -201,7 +201,7 @@ function execute(http_req, http_res, raw_request_data) {
 					console.log( args );
 				}
 				
-				exe = './exec.' + util.extension_for_language(script.language);
+				exe = './scripts/exec.' + util.extension_for_language(script.language);
 
 				var startTime = new Date();
 				var environ = util.env_for_language(script.language, extra_path) 
