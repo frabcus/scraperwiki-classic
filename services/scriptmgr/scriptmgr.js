@@ -37,33 +37,44 @@ _routemap = {
 	'/'      : handleUrlError,
 };
 
-// default settings options
-_config = { 
-	devmode: true, 
-	port: 9001, 
-	vm_count: 50, 
-	extra_path: '../../scraperlibs',
-	dataproxy: '127.0.0.1:9003',
-	httpproxy: '127.0.0.1:9005',
-};
-
 /******************************************************************************
 * Initialises the http server used for accepting (and then processing) requests
 * from a remote dispatcher service.  In general once a request has been 
 * accepted it is long running until the connection is closed, or local script
 * execution is stopped.
 ******************************************************************************/
+var opts = require('opts');
+var options = [
+  { short       : 'c', 
+	long        : 'config',
+    description : 'Specify the configuration file to use',
+  }
+];
+opts.parse(options, true);
 
-exec.set_config( _config );
+var config_path = opts.get('config') || './appsettings.scriptmgr.js';
+var settings = require(config_path).settings;
 
+// Load settings and store them locally
+exec.init( settings );
 
+// Handle uncaught exceptions and make sure they get logged
+process.on('uncaughtException', function (err) {
+  console.log('Caught exception: ' + err);
+});
+
+process.on('SIGHUP', function () {
+  console.log('Got SIGHUP.');
+});
+
+// launch the server...
 http.createServer(function (req, res) {
 	var handler = _routemap[url.parse(req.url).pathname] || _routemap['/']
 	handler(req,res)
 	
-}).listen(_config.port, "127.0.0.1");
+}).listen(settings.port, settings.listen_on || "0.0.0.0");
 
-console.log('+ Server started listening on port ' + _config.port );
+console.log('+ Server started listening on port ' + settings.port );
 	
 
 /******************************************************************************

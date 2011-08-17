@@ -21,6 +21,7 @@ var fs  = require('fs');
 var sys = require('sys');
 var spawn = require('child_process').spawn;
 
+
 var use_lxc = true;
 var extra_path;
 
@@ -35,21 +36,21 @@ var httpproxy;
 * Called to configure the executor, allowing it to determine whether we are
 * using LXC, or whether it is on a local dev machine.
 ******************************************************************************/
-exports.set_config = function( config ) {
-	use_lxc = ! config.devmode;
+exports.init = function( settings ) {
+	use_lxc = ! settings.devmode;
 
 	if ( use_lxc ) {
 		console.log('Initialising LXC...')
-		lxc.init(config.vm_count);
+		lxc.init(settings.vm_count);
 	}
 
-	if ( config.devmode ) {
-		httpproxy = config.httpproxy;
+	if ( settings.devmode ) {
+		httpproxy = settings.httpproxy;
 	};
 
-	dataproxy = config.dataproxy;
-	extra_path = config.extra_path;
-	max_runs = config.vm_count;
+	dataproxy = settings.dataproxy;
+	extra_path = settings.extra_path;
+	max_runs = settings.vm_count;
 }
 
 
