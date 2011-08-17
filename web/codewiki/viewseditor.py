@@ -369,7 +369,6 @@ def handle_editor_save(request):
         request.session['ScraperDraft'] = draft_session_scraper
 
         # Set a message with django_notify telling the user their scraper is safe
-        request.notifications.add("You need to sign in or create an account - don't worry, your scraper is safe ")
         response_url = reverse('editor', kwargs={'wiki_type': scraper.wiki_type, 'language': scraper.language.lower()})
         return HttpResponse(json.dumps({'status':'OK', 'draft':'True', 'url':response_url}))
 
