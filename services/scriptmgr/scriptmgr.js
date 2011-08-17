@@ -159,14 +159,14 @@ function handleIdent(req,res) {
 		res.end('\n')
 	}
 	else {
-		write_error( res, "Unable to find script with the IP " + s);
+		write_error( res, "Unable to find script for IP " + s);
 		res.end('')	;
 	}
 }
 
 /******************************************************************************
-* Handle notify callback from http proxy
-*
+* Handle notify callback from http proxy by telling the caller what we have 
+* just fetched.
 ******************************************************************************/
 function handleNotify(req,res) {
 	
