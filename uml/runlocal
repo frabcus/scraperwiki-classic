@@ -9,8 +9,8 @@
 	}
 
 cmp -s uml.cfg uml.cfg.local || {
-	echo	"runlocal: uml.cfg different to uml.cfg.local"
-	exit	1
+	echo	"runlocal: warning uml.cfg different to uml.cfg.local"
+    diff -u uml.cfg uml.cfg.local
 	}
 
 # XXX I think we have to have a copy of uml.cfg here (not a symlink) as it runs
