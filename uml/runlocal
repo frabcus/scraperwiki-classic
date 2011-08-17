@@ -30,7 +30,7 @@ rm	-rf	./var/run
 mkdir 	-p 	./var/log
 mkdir 	-p 	./var/run
 
-#./etc/local.d/controller	restart
+./etc/local.d/controller	restart
 ./etc/local.d/dataproxy		restart
 ./etc/local.d/dispatcher	restart
 ./etc/local.d/ftpproxy		restart
