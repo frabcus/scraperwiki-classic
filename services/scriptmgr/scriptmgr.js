@@ -68,6 +68,7 @@ if (settings.devmode) {
 // Handle uncaught exceptions and make sure they get logged
 process.on('uncaughtException', function (err) {
   util.log.fatal('Caught exception: ' + err);
+console.log( err.stack );
 });
 
 

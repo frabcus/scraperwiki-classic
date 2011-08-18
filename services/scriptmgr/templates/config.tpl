@@ -1,6 +1,6 @@
-# Auto-generated config for {{name}}
+# Auto-generated config for <%= name %>
 
-lxc.utsname = {{name}}
+lxc.utsname = <%= name %>
 
 lxc.tty = 4
 lxc.pts = 1024
@@ -10,7 +10,7 @@ lxc.network.type = veth
 lxc.network.flags = up
 lxc.network.name = eth0
 lxc.network.link = br0
-lxc.network.ipv4 = {{ip}}
+lxc.network.ipv4 = <%= ip %>
  
 lxc.cgroup.devices.deny = a
 

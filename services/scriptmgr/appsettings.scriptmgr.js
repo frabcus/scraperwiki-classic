@@ -7,14 +7,14 @@
 ******************************************************************************/
 exports.settings =
 { 
-	devmode: true, 
+	devmode: false, 
 	port: 9001, 
-	vm_count: 50, 
+	vm_count: 1, 
 	extra_path: '../../scraperlibs',
 	dataproxy: '127.0.0.1:9003',
 	httpproxy: '127.0.0.1:9005',
 	listen_on: '127.0.0.1',
 	logfile: '/var/log/scraperwiki/scriptmgr.log',
 	loglevel: 0, // debug: 0, info: 1, warn: 2, fatal: 3 
-	mount_folder: '/tmp',
+	mount_folder: './test/tmp',
 };

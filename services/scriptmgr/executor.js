@@ -40,7 +40,6 @@ exports.init = function( settings ) {
 	use_lxc = ! settings.devmode;
 
 	if ( use_lxc ) {
-		util.log.info("Initialising LXCs");
 		lxc.init(settings.vm_count, settings.mount_folder);
 	}
 
@@ -162,7 +161,7 @@ function execute(http_req, http_res, raw_request_data) {
 		request_data = JSON.parse( raw_request_data );
 	} catch ( err )
 	{
-		dumpError( err );
+		util.dumpError( err );
 	}
 	
 	script = { run_id : request_data.runid, 
@@ -229,11 +228,11 @@ function execute(http_req, http_res, raw_request_data) {
 				util.log.debug( "Script " + script.run_id + " executed with " + script.pid );
 
 				e.stdout.on('data', function (data) {
-					handle_process_output( true );
+					handle_process_output( http_res, data, true );
 				});
 				
 				e.stderr.on('data', function (data) {
-					handle_process_output( false );					
+					handle_process_output( http_res, data, false );					
 				});				
 				
 				e.on('exit', function (code, signal) {
@@ -263,24 +262,37 @@ function execute(http_req, http_res, raw_request_data) {
 	} else {
 		
 		// Use LXC to allocate us an instance and run with it
-		var res = lxc.exec( script, code );
+		var res = lxc.exec( script, request_data.code );
+		console.log( 'Running on ' + res );
 		if ( res == null ) {
 			var r = {"error": "No virtual machines available"}
 			http_res.end( JSON.stringify(r) );
 			return;				
 		}
- 		e = spawn('lxc-create', ['-n', res, '-f', '/mnt/' + res + '/config']);
+		
+		var tmpfile = '/tmp/script.' + util.extension_for_language(script.language);
+		/*fs.writeFile(tmpfile, request_data.code, function(err) {
+	   		if(err) {
+				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
+				http_res.end( JSON.stringify(r) );
+				return;				
+	   		} 
+		});*/		
+		var startTime = new Date();		
+		console.log( 'Spawning' );		
+ 		e = spawn('lxc-execute', ['-n', res, ]);
 		e.stdout.on('data', function (data) {
-			handle_process_output( true );
+			handle_process_output( http_res, data, true );
 		});
 		e.stderr.on('data', function (data) {
-			handle_process_output( false );					
+			handle_process_output( http_res, data, false );					
 		});				
 		e.on('exit', function (code, signal) {
 			if ( code == null )
-				util.log.debug('child process exited badly, we may have killed it');
+				console.log('child process exited badly, we may have killed it');
 			else 
-					util.log.debug('child process exited with code ' + code);					
+				console.log('child process exited with code ' + code);					
+
 			if ( script ) {
 				delete scripts[script.run_id];
 				delete scripts_ip[ script.ip ];
@@ -294,7 +306,10 @@ function execute(http_req, http_res, raw_request_data) {
 			// 'CPU_seconds': 1, Temporarily removed
       		res =  { 'message_type':'executionstatus', 'content':'runcompleted', 
                'elapsed_seconds' : elapsed, 'exit_status': 0 };
-			http_res.end( JSON.stringify( res ) + "\n" );
+			if ( script && script.response ) {
+				console.log('Done');
+				script.response.end( JSON.stringify( res ) + "\n" );
+			}
 								
 			util.log.debug('Finished writing responses');
 		});
@@ -307,7 +322,7 @@ function execute(http_req, http_res, raw_request_data) {
 /******************************************************************************
 * Makes sure the process output goes back to the client
 ******************************************************************************/
-function handle_process_output(stdout) {
+function handle_process_output(http_res, data, stdout) {
 	if (stdout) {
 		util.write_to_caller( http_res, data, true );				
 		return;
@@ -327,15 +342,3 @@ function handle_process_output(stdout) {
 }
 
 
-function dumpError(err) {
-  if (typeof err === 'object') {
-    if (err.message) {
-      util.log.warn('Message: ' + err.message)
-    }
-    if (err.stack) {
-      util.log.warn(err.stack);
-    }
-  } else {
-    console.log('dumpError :: argument is not an object');
-  }
-}

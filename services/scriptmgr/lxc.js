@@ -21,14 +21,22 @@ var vms_by_runid = [ ]; // maps of runid -> vm name
 
 var root_folder = '';
 
+var config_tpl = '';
+var fstab_tpl  = '';
+
+
 /******************************************************************************
-* 
+* Initialise the LXC handling by storing some properties and caching some 
+* templates ( only until we have created the relevant config files ).
 ******************************************************************************/
 exports.init = function(count, lxc_root_folder) {
 	root_folder = lxc_root_folder;
-		
-	vms = _.map( _.range(1, count), function(num){ return 'vm' + num; } );	
-	vms = _.invoke( vms, 'create_vm' );
+	
+	config_tpl = fs.readFileSync( './templates/config.tpl', "utf-8");
+	fstab_tpl = fs.readFileSync('./templates/fstab.tpl', "utf-8");
+
+	vms = _.map( _.range(1, count + 1), function(num){ return 'vm' + num; } );	
+	_.map( vms, function(v) { create_vm(v); } );
 };
 
 
@@ -45,6 +53,7 @@ exports.exec = function(script, code) {
 * Kill the LXC instance that is currently running the provided script
 ******************************************************************************/
 exports.kill = function( script ) {
+		console.log('looking for ' + script.run_id );
 	var vm = vms_by_runid[ script.run_id ];
 	if ( vm ) {
 		// trigger an lxc-kill
@@ -80,55 +89,57 @@ function create_vm ( name ) {
 	num = parseInt( name.substring(2) );
 	
 	// TODO: Fix me
-	ctx = {'name': name, 'ip': '10.0.1.' + (num + 1).toString() }
+	var ctx = {'name': name, 'ip': '10.0.1.' + (num + 1).toString() }
 
-	// Create the config file so that we can create our VM
-	Mu.render('./templates/config.tpl', ctx, {}, function (err, output) {
-	  if (err) {
-	  	throw err;
-	  }
 
-  	  var buffer = '';
+	var compiled = _.template( config_tpl );
+	var cfg = compiled( ctx );
+	console.log( cfg );
+	
+	var fs_compiled = _.template( fstab_tpl );
+	var fstab = compiled( ctx );
+	
+	path.exists(root_folder, function (exists) {	
+  		if ( ! exists ) {
+			fs.mkdirSync( root_folder, "0777" );
+		}	
+	});
+	
+	
+	path.exists(folder, function (exists) {
+  		if ( ! exists ) {
+			fs.mkdirSync( folder, "0777" );
+		} else {
+			return;
+		}
 
-  	  output.addListener('data', function (c) {buffer += c; })
-      output.addListener('end', function () {
-	  	var path = path.join(folder,'/config');
-		
-		fs.writeFile(path, buffer, function(err) {
+		var tgt = path.join( folder, 'config')
+		fs.writeFile(tgt, cfg, function(err) {
 		    if(err) {
 		        sys.puts(err);
 		    } else {
+				console.log('Running lxc-create')
 				// call lxc-create -n name -f folder/config
-			 	e = spawn('lxc-create', ['-n', name, '-f', path]);
+			 	e = spawn('lxc-create', ['-n', name, '-f', tgt]);
 				e.on('exit', function (code, signal) {
-						util.log.debug('LXC-Create exited with code ' + code);					
+					if ( code && code == 127 ) {
+						util.log.fatal('LXC-Create exited with code ' + code);											
+					} else {
+						util.log.info('LXC-Create exited with code ' + code);																	
+					}
 				});
-			
 		    }
-		}); // end writefile
-	  }); // addListener('end...
-	}); // end Mu.render(...
+		});
 	
-	// Render the fstab for our vm
-	Mu.render('./templates/fstab.tpl', ctx, {}, function (err, output) {
-	  if (err) {
-	  	throw err;
-	  }
-
-  	  var buffer = '';
-
-  	  output.addListener('data', function (c) {buffer += c; })
-      output.addListener('end', function () {
-		var path = folder + '/fstab';
-		
-		fs.writeFile(path, buffer, function(err) {
+		tgt = path.join( folder, 'fstab')
+		console.log('Writing fstab to ' + tgt);	
+		fs.writeFile(tgt, fstab, function(err) {
 		    if(err) {
 		        sys.puts(err);
-		    } 
-		}); 	
-
-	  });
-	});	
+		    } else {
+		    }
+		});	
+	});
 	
 	return v;
 }
