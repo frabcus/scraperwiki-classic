@@ -43,12 +43,13 @@ stdoutlog = None
 runningscrapers = { }   # maps runid => { scraperID, runID, short_name, uname, socket }
 
 class UML(object):
-    def __init__(self, uname, server, port, count):
+    def __init__(self, uname, server, port, count, beta_only=False):
         self.uname = uname
         self.server = server
         self.port = port
         self.count = count
         self.runids = set()
+        self.beta_only = beta_only
         self.livestatus = "live"  # or closing, or unresponsive
 
         self.logger = logging.getLogger('dispatcher')
@@ -92,30 +93,9 @@ class UMLList(object):
         self.UMLLock = threading.Lock()
         self.UMLs = {} # maps uname => UML object
 
-        # Will attempt to add LXC as a target, based on the configuration
-        # file and presence of mainlxc as a section.
-        try:
-            self.addLXC('mainlxc')
-        except:
-            pass
-        
+                
 
-    def addLXC(self, name):
-        if not config.has_section(uname):
-            raise UnknownUMLException()
-        if uname in self.UMLs:
-            raise DuplicateUMLException()
-
-        host = config.get(uname, 'host')
-        port = config.getint(uname, 'via')
-        count = config.getint(uname, 'count')
-
-        self.UMLLock.acquire()
-        self.UMLs[uname] = UML(uname, host, port, count)
-        self.UMLLock.release()
-        
-
-    def allocateUML(self, scraperstatus):
+    def allocateUML(self, scraperstatus, beta_flag=False):
                 
         self.UMLLock.acquire()
 
@@ -123,7 +103,7 @@ class UMLList(object):
         uml = None
         while umls:
             uml = umls.pop(random.randint(0, len(umls)-1))
-            if uml.is_available():
+            if uml.is_available() and (beta_flag == uml.beta_only):
                 scraperstatus["uname"] = uml.uname
                 uml.add_runid(scraperstatus["runID"])
                 runningscrapers[scraperstatus["runID"]] = scraperstatus
@@ -159,9 +139,13 @@ class UMLList(object):
         host = config.get(uname, 'host')
         port = config.getint(uname, 'via')
         count = config.getint(uname, 'count')
-
+        try:
+            beta_only = config.getboolean(uname, 'beta_only')
+        except ConfigParser.NoOptionError:
+            beta_only = False
+        
         self.UMLLock.acquire()
-        self.UMLs[uname] = UML(uname, host, port, count)
+        self.UMLs[uname] = UML(uname, host, port, count, beta_only)
         self.UMLLock.release()
 
     def removeUML(self, uname):
@@ -319,13 +303,20 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         scraperID = jdata['scraperid']
         short_name = jdata['scrapername']
         runID = jdata['runid']
+        beta_flag = False
+       
+        # if we have a user dict in the json being sent (added by Django) then we 
+        # should check it to see if we are a beta user or not. 
+        if 'user' in jdata:
+            userdict = jdata['user']
+            beta_flag = 'beta_user' in userdict and userdict['beta_user'] == True
 
         assert runID not in runningscrapers
        
         scraperstatus = { 'scraperID':scraperID, 'runID':runID, 'short_name':short_name, 'time':time.time() }
         scraperstatus["connection"] = self.connection  # used to close it
         
-        uml = self.server.uml_list.allocateUML(scraperstatus)
+        uml = self.server.uml_list.allocateUML(scraperstatus, beta_flag)
         if not uml:
             self.logger.error("no uml allocated for: %s  %s" % (short_name, runID))
             self.connection.sendall(json.dumps({'message_type': 'executionstatus', 'content': 'runcompleted', 'exit_status':"No UML allocated"})+'\n')

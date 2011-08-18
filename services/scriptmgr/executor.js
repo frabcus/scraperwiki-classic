@@ -20,10 +20,11 @@ var qs  = require('querystring');
 var fs  = require('fs');
 var sys = require('sys');
 var spawn = require('child_process').spawn;
-
+var path  = require('path');
 
 var use_lxc = true;
 var extra_path;
+var code_folder = '/tmp';
 
 // A list of all of the currently running scripts
 var scripts = [ ];
@@ -47,6 +48,7 @@ exports.init = function( settings ) {
 		httpproxy = settings.httpproxy;
 	};
 
+	code_folder = settings.code_folder;
 	dataproxy = settings.dataproxy;
 	extra_path = settings.extra_path;
 	max_runs = settings.vm_count;
@@ -178,7 +180,7 @@ function execute(http_req, http_res, raw_request_data) {
 	
 	if ( ! use_lxc ) {
 		// Execute the code locally using the relevant file (exec.whatever)
-		var tmpfile = '/tmp/script.' + util.extension_for_language(script.language);
+		var tmpfile = path.join( code_folder, "script." + util.extension_for_language(script.language) );
 		fs.writeFile(tmpfile, request_data.code, function(err) {
 	   		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
@@ -270,51 +272,50 @@ function execute(http_req, http_res, raw_request_data) {
 			return;				
 		}
 		
-		var tmpfile = '/tmp/script.' + util.extension_for_language(script.language);
-		/*fs.writeFile(tmpfile, request_data.code, function(err) {
+		var tmpfile = path.join(code_folder, "script." + util.extension_for_language(script.language) );
+		fs.writeFile(tmpfile, request_data.code, function(err) {
 	   		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
 				http_res.end( JSON.stringify(r) );
 				return;				
 	   		} 
-		});*/		
-		var startTime = new Date();		
-		console.log( 'Spawning' );		
- 		e = spawn('lxc-execute', ['-n', res, ]);
-		e.stdout.on('data', function (data) {
-			handle_process_output( http_res, data, true );
-		});
-		e.stderr.on('data', function (data) {
-			handle_process_output( http_res, data, false );					
-		});				
-		e.on('exit', function (code, signal) {
-			if ( code == null )
-				console.log('child process exited badly, we may have killed it');
-			else 
-				console.log('child process exited with code ' + code);					
 
-			if ( script ) {
-				delete scripts[script.run_id];
-				delete scripts_ip[ script.ip ];
-			}
+			var startTime = new Date();		
+			console.log( 'Spawning' );		
+	 		e = spawn('lxc-execute', ['-n', res, ]);
+			e.stdout.on('data', function (data) {
+				handle_process_output( http_res, data, true );
+			});
+			e.stderr.on('data', function (data) {
+				handle_process_output( http_res, data, false );					
+			});				
+			e.on('exit', function (code, signal) {
+				if ( code == null )
+					console.log('child process exited badly, we may have killed it');
+				else 
+					console.log('child process exited with code ' + code);					
+
+				if ( script ) {
+					delete scripts[script.run_id];
+					delete scripts_ip[ script.ip ];
+				}
 			
-			util.log.debug('child process removed from script list');					
+				util.log.debug('child process removed from script list');					
 
-			var endTime = new Date();
-			elapsed = (endTime - startTime) / 1000;
+				var endTime = new Date();
+				elapsed = (endTime - startTime) / 1000;
 
-			// 'CPU_seconds': 1, Temporarily removed
-      		res =  { 'message_type':'executionstatus', 'content':'runcompleted', 
-               'elapsed_seconds' : elapsed, 'exit_status': 0 };
-			if ( script && script.response ) {
-				console.log('Done');
-				script.response.end( JSON.stringify( res ) + "\n" );
-			}
+				// 'CPU_seconds': 1, Temporarily removed
+	      		res =  { 'message_type':'executionstatus', 'content':'runcompleted', 
+	               'elapsed_seconds' : elapsed, 'exit_status': 0 };
+				if ( script && script.response ) {
+					console.log('Done');
+					script.response.end( JSON.stringify( res ) + "\n" );
+				}
 								
-			util.log.debug('Finished writing responses');
+				util.log.debug('Finished writing responses');
+			});
 		});
-
-
 	}
 }
 
