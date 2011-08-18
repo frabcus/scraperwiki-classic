@@ -42,6 +42,7 @@ syntax: regexp
 ^uml/uml.cfg$
 ^uml/uml.cfg.francis$
 ^uml/controller/swlogger.py$
+^uml/jaunty/
 ^debug.log$
 ^error.log$
 ^info.log$
