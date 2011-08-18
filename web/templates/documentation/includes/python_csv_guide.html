@@ -2,13 +2,18 @@
 spreadsheet. To process them often requires special cases, such as
 parsing dates or removing bad rows.</p>
 
+<p>For more details, read the <a href="http://docs.python.org/library/csv.html">full
+Python CSV documentation</a>.
+
 <h2>Reading rows</h2>
 
-<p>Download the CSV file first. If there are quirks in the input file, you might
-also want to preprocess the data using the .replace() function.
+<p>Download the CSV file first. (If there are quirks in the input file, you
+might at this point want to preprocess the data using, for example, the
+.replace function)
+</p>
 
 <code>import scraperwiki
-data = scraperwiki.scrape("https://s3-eu-west-1.amazonaws.com/ukhmgdata-cabinetoffice/Spend-data-2010-11-01/Spend-Transactions-with-descriptions-HMT-09-Sep-2010.csv")
+data = scraperwiki.scrape("http://s3-eu-west-1.amazonaws.com/ukhmgdata-cabinetoffice/Spend-data-2010-11-01/Spend-Transactions-with-descriptions-HMT-09-Sep-2010.csv")
 </code>
 
 <p>Load it into the standard Python CSV reader. It needs to be a list of lines.</p>

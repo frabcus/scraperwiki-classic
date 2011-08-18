@@ -44,10 +44,10 @@ in SQL API gets the data out as JSON or CSV files.  -->
 
 <div class="content half left index">
 {% if user.is_staff %} <div class="staff">
-    <h3>Scraping topic guides</h3>
+    <h3>Scraping guides</h3>
     <ul>
-    {% ifequal language 'python' %}
      <li class="doclink">{% doc_link_full 'LANG_csv_guide' language %} <span> Get data from comma-separated value spreadsheet files </span> </li>
+    {% ifequal language 'python' %}
      <li><a href="{% url docscontrib 'python_mechanize_cheat_sheet' %}">Using Mechanize with Python</a></li>
      <li><a href="{% url docscontrib 'csv_cheat_sheet' %}">Working with CSV files</a></li>
      <li><a href="{% url docscontrib 'excel_cheat_sheet' %}">Reading Excel files</a></li>
