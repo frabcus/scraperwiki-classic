@@ -1173,6 +1173,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             draftpreviewwindow = window.open(viewurl, "scraperwiki_preview_" + short_name);
             draftpreviewwindow.document.open();
             draftpreviewwindow.focus();
+            // note that this could bypass this sendCode for HTML mode, as the
+            // code removed by this commit did for the insecure popup window.
+            // https://bitbucket.org/ScraperWiki/scraperwiki/changeset/63fbb9f04f58
             sendCode();
         } else {
             // non-draft case, we can open the real URL, so we do that after saving (so people can copy it)
