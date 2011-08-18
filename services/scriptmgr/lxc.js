@@ -9,6 +9,8 @@ var _    = require('underscore')._;
 var mu   = require('mu');
 var fs   = require('fs');
 var spawn = require('child_process').spawn;
+var util  = require('./utils.js');
+var path  = require('path');
 
 // All of our virtual machines
 var vms = [ ]; // vm name -> objects
@@ -35,15 +37,7 @@ exports.init = function(count, lxc_root_folder) {
 ******************************************************************************/
 exports.exec = function(script, code) {
 	// execute lxc-execute on a vm, after we've been allocated on
-	vm = allocate_vm( script );
-	if ( ! vm ) {
-		r = {"error":"No VM resource is available", "headers": '' , "lengths":  -1 };
-		return JSON.stringify(r);
-	}
-	
-	// 
-	
-	
+	return allocate_vm( script );
 };
 
 
@@ -51,10 +45,11 @@ exports.exec = function(script, code) {
 * Kill the LXC instance that is currently running the provided script
 ******************************************************************************/
 exports.kill = function( script ) {
-	vm = vms_by_runid[ script.run_id ];
+	var vm = vms_by_runid[ script.run_id ];
 	if ( vm ) {
 		// trigger an lxc-kill
 		// lxc-stop -n 'vm'
+		e = spawn('lxc-stop', ['-n', vm]);
 
 		// Clean up indices
 		delete vms_by_run_id[ script.run_id ];		
@@ -80,10 +75,11 @@ function create_vm ( name ) {
 	// will be the vm number + 1 (as vm0 has ip 10.0.1.1 )
 
 	// write config and fstab to ...	
-	var folder = '/mnt/' + name;
+	var folder = path.join(root_folder, name);
 	
 	num = parseInt( name.substring(2) );
 	
+	// TODO: Fix me
 	ctx = {'name': name, 'ip': '10.0.1.' + (num + 1).toString() }
 
 	// Create the config file so that we can create our VM
@@ -96,28 +92,18 @@ function create_vm ( name ) {
 
   	  output.addListener('data', function (c) {buffer += c; })
       output.addListener('end', function () {
-		var path = folder + '/config';
+	  	var path = path.join(folder,'/config');
 		
 		fs.writeFile(path, buffer, function(err) {
 		    if(err) {
 		        sys.puts(err);
 		    } else {
 				// call lxc-create -n name -f folder/config
-			 	//e = spawn(exe, args, { env: util.env_for_language(script.language, extra_path) });
-				/*
-				e.stdout.on('data', function (data) {
-					write_to_caller( http_res, data );
+			 	e = spawn('lxc-create', ['-n', name, '-f', path]);
+				e.on('exit', function (code, signal) {
+						util.log.debug('LXC-Create exited with code ' + code);					
 				});
-				e.stderr.on('data', function (data) {
-					write_to_caller( http_res, data );
-				});				
-				e.on('exit', function (code) {
-					delete scripts[script.run_id];
-					delete scripts_ip[ script.ip ];
-					
-					http_res.end();
-				});
-				*/
+			
 		    }
 		}); // end writefile
 	  }); // addListener('end...
@@ -148,14 +134,46 @@ function create_vm ( name ) {
 }
 
 
+
+/*****************************************************************************
+* Release the VM using the provided script. 
+*****************************************************************************/
+function release_vm ( script, name ) {
+	var k;
+	
+	for ( var key in vms ) {
+		var vm = vms[key];
+		k = key;
+		if ( ! vm.script.run_id == script.run_id ) {
+			v = vm;
+			break;
+		};
+	}
+
+	if ( ! v ) {
+		return;
+	};
+
+	// Remove it from the two lookup tables
+	delete vms_by_runid[ script.run_id ]
+	delete vms_by_ip[ script.ip ]
+	
+	v.running = false;
+	v.script = null;
+	vms[k] = v;
+}
+
 /*****************************************************************************
 * Allocate a vm to the calling script.  We will check to find one that isn't
 * running and either allocate it or return null if none are found.
+*
+* TODO: Fix this and use filter
 ******************************************************************************/
 function allocate_vm ( script ) {
-	var v;
+	var v, k;
 	for ( var key in vms ) {
-		vm = vms[key];
+		var vm = vms[key];
+		k = key;
 		if ( ! vm.running ) {
 			v = vm;
 			break;
@@ -168,5 +186,6 @@ function allocate_vm ( script ) {
 	
 	v.running = true;
 	v.script = script;
+	vms[k] = v;
 	return v
 }

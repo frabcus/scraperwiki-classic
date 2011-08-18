@@ -41,7 +41,7 @@ exports.init = function( settings ) {
 
 	if ( use_lxc ) {
 		util.log.info("Initialising LXCs");
-		lxc.init(settings.vm_count);
+		lxc.init(settings.vm_count, settings.mount_folder);
 	}
 
 	if ( settings.devmode ) {
@@ -229,18 +229,11 @@ function execute(http_req, http_res, raw_request_data) {
 				util.log.debug( "Script " + script.run_id + " executed with " + script.pid );
 
 				e.stdout.on('data', function (data) {
-					write_to_caller( http_res, data, true );					
+					handle_process_output( true );
 				});
 				
 				e.stderr.on('data', function (data) {
-					try {
-						s = JSON.parse(data);
-						if ( s ) {
-							http_res.write( data );
-						}
-					}catch(err) {
-						write_to_caller( http_res, data, false);
-					}					
+					handle_process_output( false );					
 				});				
 				
 				e.on('exit', function (code, signal) {
@@ -270,68 +263,67 @@ function execute(http_req, http_res, raw_request_data) {
 	} else {
 		
 		// Use LXC to allocate us an instance and run with it
-		/*
 		var res = lxc.exec( script, code );
-		if ( res ) {
-			http_res.end( res );
+		if ( res == null ) {
+			var r = {"error": "No virtual machines available"}
+			http_res.end( JSON.stringify(r) );
 			return;				
 		}
-		*/
+ 		e = spawn('lxc-create', ['-n', res, '-f', '/mnt/' + res + '/config']);
+		e.stdout.on('data', function (data) {
+			handle_process_output( true );
+		});
+		e.stderr.on('data', function (data) {
+			handle_process_output( false );					
+		});				
+		e.on('exit', function (code, signal) {
+			if ( code == null )
+				util.log.debug('child process exited badly, we may have killed it');
+			else 
+					util.log.debug('child process exited with code ' + code);					
+			if ( script ) {
+				delete scripts[script.run_id];
+				delete scripts_ip[ script.ip ];
+			}
+			
+			util.log.debug('child process removed from script list');					
+
+			var endTime = new Date();
+			elapsed = (endTime - startTime) / 1000;
+
+			// 'CPU_seconds': 1, Temporarily removed
+      		res =  { 'message_type':'executionstatus', 'content':'runcompleted', 
+               'elapsed_seconds' : elapsed, 'exit_status': 0 };
+			http_res.end( JSON.stringify( res ) + "\n" );
+								
+			util.log.debug('Finished writing responses');
+		});
+
+
 	}
-
-
-	
-	/*
-        self.idents.append('scraperid=%s' % scraperguid)
-        self.idents.append('runid=%s' % self.m_runID)
-        self.idents.append('scrapername=%s' % scrapername)
-        for value in request['white']:
-            self.idents.append('allow=%s' % value)
-        for value in request['black']:
-            self.idents.append('block=%s' % value)
-
-        streamprintsin, streamprintsout = socket.socketpair()
-        streamjsonsin, streamjsonsout = socket.socketpair()
-       */
-	
 }
 
 
 /******************************************************************************
-* Write the response to the caller, or in this case write it back down the long
-* lived socket that connected to us.
+* Makes sure the process output goes back to the client
 ******************************************************************************/
-function write_to_caller(http_res, output, isstdout) {
-	var msg = output.toString();
-	var parts = msg.split("\n");	
-
-	// Hacky solution to making sure HTML is sent all on one line.
-	sub = msg.substring(0,100);
-	if ( sub.indexOf('html') >= 0 && sub.indexOf('>') >= 0  && sub.indexOf('<') >= 0) {
-		r = { 'message_type':'console', 'content': msg  };
-		http_res.write( JSON.stringify(r) + "\n");
+function handle_process_output(stdout) {
+	if (stdout) {
+		util.write_to_caller( http_res, data, true );				
 		return;
-	}
-	
-
-	for (var i=0; i < parts.length; i++) {
-		if ( parts[i].length > 0 ) {
-			try {
-				// Removing the need for the extra FD by checking if we can parse
-				// the JSON
-				s = JSON.parse(parts[i]);
-				if ( s ) {
-					http_res.write( parts[i] );
-				}
-				continue;
-			}catch(err) {
-				//
-			}
-			
-			r = { 'message_type':'console', 'content': parts[i]  };
-			http_res.write( JSON.stringify(r) + "\n");
+	} 
+	try 
+	{
+		s = JSON.parse(data);
+		if ( s ) {
+			http_res.write( data );
+			sent = true;
 		}
-	};
+	}
+	catch(err) 
+	{
+		util.write_to_caller( http_res, data, false);			
+	}		
 }
 
 

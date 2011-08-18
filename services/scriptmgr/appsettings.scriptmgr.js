@@ -15,5 +15,6 @@ exports.settings =
 	httpproxy: '127.0.0.1:9005',
 	listen_on: '127.0.0.1',
 	logfile: '/var/log/scraperwiki/scriptmgr.log',
-	loglevel: 0, // debug: 0, info: 1, warn: 2, fatal: 3  
+	loglevel: 0, // debug: 0, info: 1, warn: 2, fatal: 3 
+	mount_folder: '/tmp',
 };
