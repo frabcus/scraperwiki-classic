@@ -10,6 +10,7 @@ $(document).ready(function() {
     var codemirroriframeheightdiff = 0; // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var codemirroriframewidthdiff = 0;  // the difference in pixels between the iframe and the div that is resized; usually 0 (check)
     var previouscodeeditorheight = 0; //$("#codeeditordiv").height() * 3/5;    // saved for the double-clicking on the drag bar
+    var draftpreviewwindow = null;
 
     // variable transmitted through the html
     var short_name = $('#short_name').val();
@@ -995,6 +996,15 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         $('#running_annimation').hide();
         runID = ''; 
         uml = ''; 
+
+        // suppress any more activity to the preview frame
+        if (draftpreviewwindow != undefined) 
+        {
+            if (draftpreviewwindow.document)
+                draftpreviewwindow.document.close(); 
+            draftpreviewwindow = undefined; 
+        }
+
     }
 
 
@@ -1156,10 +1166,21 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 previewmessage = ' [' + urlquery + '] is an invalid query string'; 
         }
 
-        saveScraper(null,function() {
-            w = window.open(viewurl, "scraperwiki_preview_" + short_name);
-        }, false); // false - do request synchronously so popup is allowed
-        sendCode(); // trigger the running once we're ready for the output
+        // draft case, we can't open the real URL, so we pipe the output from run into another window
+        // XXX we could do it this way all the time if preferred, and maybe then merge Run/Preview buttons?
+        if (short_name == "") {
+            window.close("scraperwiki_preview_" + short_name);
+            draftpreviewwindow = window.open(viewurl, "scraperwiki_preview_" + short_name);
+            draftpreviewwindow.document.open();
+            draftpreviewwindow.focus();
+            sendCode();
+        } else {
+            // non-draft case, we can open the real URL, so we do that after saving (so people can copy it)
+            saveScraper(null,function() {
+                w = window.open(viewurl, "scraperwiki_preview_" + short_name);
+            }, false); // false - do request synchronously so popup is allowed
+            sendCode(); // trigger the running once we're ready for the output
+        }
     }
 
     function saveScraper(stimulate_run, callback, async)
@@ -1324,6 +1345,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
     function writeRunOutput(sMessage) 
     {
         writeToConsole(sMessage, 'console'); 
+        if ((draftpreviewwindow != undefined) && (draftpreviewwindow.document != undefined)) {
+            draftpreviewwindow.document.write(sMessage); 
+       }
     }
 
 
