@@ -17,13 +17,13 @@ might at this point want to preprocess the data using, for example, the
 <code>data = ScraperWiki.scrape("http://s3-eu-west-1.amazonaws.com/ukhmgdata-cabinetoffice/Spend-data-2010-11-01/Spend-Transactions-with-descriptions-HMT-09-Sep-2010.csv")
 </code>
 
-<p>Load it into the standard Ruby CSV reader. It needs to be a list of lines.</p>
+<p>Load it into the standard Ruby CSV reader. It needs to be an array of lines.</p>
 
 <code>require 'fastercsv'
 fcsv = FCSV.new(data)
 </code>
 
-<p>You can then loop through the rows as if they were a list.</p>
+<p>You can then loop through the rows as if they were an array.</p>
 
 <code>for row in fcsv:
   puts format("£%s spent on %s", row[7], row[3])
