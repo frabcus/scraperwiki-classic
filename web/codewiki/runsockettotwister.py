@@ -59,9 +59,24 @@ class RunnerSocket:
         self.soc.send(json.dumps(data)+"\r\n") 
 
 
-    def stimulate_run_from_editor(self, guid, username, short_name, clientnumber, language, code, urlquery):
+    def stimulate_run_from_editor(self, guid, user, short_name, clientnumber, language, code, urlquery):
         data = { "command":'stimulate_run', "language":language, "code":code, "urlquery":urlquery, 
-                 "username":username, "scrapername":short_name, "clientnumber":clientnumber, "guid":guid }
+                 "username":user.username, "scrapername":short_name, "clientnumber":clientnumber, "guid":guid }
+
+        # Tack on useful user information to the request so that 
+        # we can eventually also add a security token to allow the 
+        # other services to check what this user is allowed to do 
+        # with this particular scraper.
+        try:
+            profile = user.get_profile()
+            data['user'] = { "beta_user": profile.beta_user, 
+                             "id": user.id                   }
+        except:
+            # TODO: Need to decide what to do with this. Implies that 
+            # an anonymous user is doing this and that security will
+            # already have been checked.
+            pass
+            
         data["django_key"] = config.get('twister', 'djangokey')
 
         self.soc.send(json.dumps(data)+"\r\n") 

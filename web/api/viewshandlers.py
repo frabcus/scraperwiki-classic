@@ -240,6 +240,18 @@ def scraper_search_handler(request):
             res['code'] = scraper.get_vcs_status(-1)["code"]
             res['guid'] = scraper.guid
             
+            try:
+                profile = owner.get_profile()
+                res['user'] = { "beta_user": profile.beta_user, 
+                                 "id": owner.id                   
+                             }
+            except:
+                # TODO: Need to decide what to do with this. Implies that 
+                # an anonymous user is doing this and that security will
+                # already have been checked.
+                pass
+            
+            
         result.append(res)
     
     if request.GET.get("format") == "csv":

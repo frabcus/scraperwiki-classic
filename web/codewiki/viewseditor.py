@@ -342,7 +342,7 @@ def handle_editor_save(request):
         urlquery = request.POST.get('urlquery', '')
         if request.user.is_authenticated() and scraper.actionauthorized(request.user, "stimulate_run"):
             runnerstream = runsockettotwister.RunnerSocket()
-            stimulaterunmessage = runnerstream.stimulate_run_from_editor(guid, request.user.username, scraper.short_name, clientnumber, language, code, urlquery)
+            stimulaterunmessage = runnerstream.stimulate_run_from_editor(guid, request.user, scraper.short_name, clientnumber, language, code, urlquery)
         else:
             stimulaterunmessage = {"message":"not authorized to run"}
 
