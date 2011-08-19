@@ -1,0 +1,52 @@
+<p>Use <a href="https://secure.simplistix.co.uk/svn/xlrd/trunk/xlrd/doc/xlrd.html">XLRD</a> 
+to read from Excel spreadsheet files.</p>
+
+
+<p>Open the file</p>
+<code>surl = "https://spreadsheets.google.com/ccc?key=0AqwaVIkgSiFYdGxjSGZOUlZFcGJ4cVFoZGZJTXl1ZlE&mp;hl=en#gid=4"
+book = xlrd.open_workbook(file_contents=urllib.urlopen(surl).read())
+</code>
+
+<p>Count and select the sheets</p>
+<code>for n, sheet in enumerate(book.sheets()):
+    print "Sheet %d has %d columns and %d rows" % (n, sheet.ncols, sheet.nrows)
+</code>
+
+<p>Standard function for handling date objects</p>
+<code>import datetime
+
+def cellval(cell, datemode):
+    if cell.ctype == xlrd.XL_CELL_DATE:
+        datetuple = xlrd.xldate_as_tuple(cell.value, datemode)
+        if datetuple[3:] == (0, 0, 0):
+            return datetime.date(datetuple[0], datetuple[1], datetuple[2])
+        return datetime.date(datetuple[0], datetuple[1], datetuple[2], datetuple[3], datetuple[4], datetuple[5])
+    if cell.ctype == xlrd.XL_CELL_EMPTY:    return None
+    if cell.ctype == xlrd.XL_CELL_BOOLEAN:  return cell.value == 1
+    return cell.value
+</code>
+
+<p>Make dicts from the rows and save it</p>
+<code>keys = sheet.row_values(0)
+for rownumber in range(1, sheet.nrows):
+    values = [ cellval(sheet.cell(rownumber, j), book.datemode)  for j in range(sheet.ncols) ]
+    data = dict(zip(keys, values))
+    data["rownumber"] = rownumber
+    scraperwiki.sqlite.save(unique_keys=["rownumber"], data=data)
+</code>
+
+<p>There are cases with bad dates.</p>
+<code>try:
+    datetuple = xlrd.xldate_as_tuple(cell.value, datemode)
+except Exception, e:
+    print "BAD", cell, e
+    return str(cell)
+try:
+    if datetuple[3:] == (0, 0, 0):
+        return datetime.date(datetuple[0], datetuple[1], datetuple[2])
+    return datetime.date(datetuple[0], datetuple[1], datetuple[2], datetuple[3], datetuple[4], datetuple[5])
+except ValueError, e:
+    print "BAD value", datetuple, cell, e
+    return str(cell)
+</code>
+

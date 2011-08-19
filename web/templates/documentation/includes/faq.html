@@ -24,6 +24,7 @@
            <li><a href="#https">Can I scrape secure (https://) sites?</a></li>
            <li><a href="#editor">Is there an editor other than the CodeMirror one?</a></li>
            <li><a href="#rollback">How do I revert to an earlier version of my code?</a></li>
+           <li><a href="#viewsbanner">When do views show a "powered by ScraperWiki" banner?</a></li>
      </ul>
      <h2>Licensing questions</h2>
      <ul>
@@ -226,6 +227,22 @@ print urllib.urlopen(url).read()
                <p>On the history page for the scraper, view the commit that you 
                want to go back to.  There's then a link called "rollback".
                </p>
+           </dd>
+
+           <dt id="viewsbanner">When do views show a "powered by ScraperWiki" banner?</dt>
+           <dd>
+                <p>On views
+                <a href="https://views.scraperwiki.com/run/top_10_receivers_of_cabinet_office_money/">such as this</a>,
+                you will see a banner at the top right saying "powered by ScraperWiki".
+                This appears on all HTML views, and is a link back to the view. It gives us and you credit,
+                and ensures sources are cited.
+                </p>
+                <p>You can call httpresponseheader (see {% doc_link_full 'LANG_help_documentation' language %})
+                to set the MIME type to something else such as image/png. ScraperWiki will then no
+                longer attempt to add the banner.
+                </p>
+                <p>If you are finding the banners annoying in a particular set of cases, please get in 
+                touch. At some point we'll add ways to vary the banner for different circumstances.</p>
            </dd>
 
            <dt id="licence">Who owns the code I write on ScraperWiki?</dt>
