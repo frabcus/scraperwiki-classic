@@ -446,7 +446,7 @@ class UMLScanner(threading.Thread) :
         while True:
             time.sleep(10)
 
-            // removeUML
+            # removeUML
 
             # beware that things can change in lookup lists as we are using them, which is why copies are made before looping and get() is used to access
             umltimes = [ ]
