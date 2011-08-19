@@ -151,8 +151,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         context['rev'] = 'draft'
         context['revdate'] = 'draft'
         context['revdateepoch'] = None
-        # Necessary?
-        #del request.session['ScraperDraft']
     
     # Load an existing scraper preference
     elif short_name != "__new__":
