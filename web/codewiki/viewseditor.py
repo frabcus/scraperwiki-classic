@@ -151,6 +151,8 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         context['rev'] = 'draft'
         context['revdate'] = 'draft'
         context['revdateepoch'] = None
+        # Necessary?
+        #del request.session['ScraperDraft']
     
     # Load an existing scraper preference
     elif short_name != "__new__":
@@ -392,6 +394,8 @@ def handle_session_draft(request):
         # we reload into editor but only save for an authorized user
     if draft_scraper.actionauthorized(request.user, "savecode"):
         save_code(draft_scraper, request.user, draft_code, earliesteditor, commitmessage, sourcescraper)
+        if 'ScraperDraft' in request.session:
+            del request.session['ScraperDraft']        
 
     response_url = reverse('editor_edit', kwargs={'wiki_type': draft_scraper.wiki_type, 'short_name' : draft_scraper.short_name})
     return HttpResponseRedirect(response_url)
