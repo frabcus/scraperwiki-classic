@@ -40,6 +40,8 @@ config.readfp(open(poptions.config))
 #stdoutlog = open('/var/www/scraperwiki/uml/var/log/dispatcher.log'+"-stdout", 'a', 0)
 stdoutlog = None
 
+
+runningscraperLock = threading.Lock()
 runningscrapers = { }   # maps runid => { scraperID, runID, short_name, uname, socket }
 
 class UML(object):
@@ -51,7 +53,6 @@ class UML(object):
         self.runids = set()
         self.beta_only = beta_only
         self.livestatus = "live"  # or closing, or unresponsive
-
         self.logger = logging.getLogger('dispatcher')
 
     def is_available(self):
@@ -106,7 +107,9 @@ class UMLList(object):
             if uml.is_available() and (beta_flag == uml.beta_only):
                 scraperstatus["uname"] = uml.uname
                 uml.add_runid(scraperstatus["runID"])
+                runningscraperLock.acquire()
                 runningscrapers[scraperstatus["runID"]] = scraperstatus
+                runningscraperLock.release()
                 break
             else:
                 uml = None
@@ -120,7 +123,11 @@ class UMLList(object):
         
         self.UMLLock.acquire()
         uml = self.UMLs[uname]
+        
+        runningscraperLock.acquire()        
         del runningscrapers[scraperstatus["runID"]]
+        runningscraperLock.release()
+        
         uml.runids.remove(scraperstatus["runID"])
         
         if uml.livestatus == "closing" and len(uml.runids) == 0:
@@ -202,9 +209,13 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # this is interpreted by codewiki/management/commands/run_scrapers.GetDispatcherStatus
     def sendStatus(self):
         res = []
-        for scraperstatus in runningscrapers.values():
-            res.append('uname=%s;scraperID=%s;short_name=%s;runID=%s;runtime=%s' % \
-                       (scraperstatus["uname"], scraperstatus["scraperID"], scraperstatus["short_name"], scraperstatus["runID"], time.time()-scraperstatus["time"]))
+        try:
+            runningscraperLock.acquire()            
+            for scraperstatus in runningscrapers.values():
+                res.append('uname=%s;scraperID=%s;short_name=%s;runID=%s;runtime=%s' % \
+                           (scraperstatus["uname"], scraperstatus["scraperID"], scraperstatus["short_name"], scraperstatus["runID"], time.time()-scraperstatus["time"]))
+        finally:
+            runningscraperLock.release()            
         self.logger.debug("sendStatus: "+str(res)[:20])
         
         self.connection.send('\n'.join(res))
@@ -245,7 +256,10 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 
     def killScraper(self, runID):
+        runningscraperLock.acquire()        
         scraperstatus = runningscrapers.get(runID)
+        runningscraperLock.release()
+        
         if scraperstatus:
             scraperstatus["socket"].sendall("close for kill command")
                 # if you close the socket here, then the select.select([socket]) will hang forever not getting any message from it
@@ -428,8 +442,11 @@ class UMLScanner(threading.Thread) :
         self.uml_list = uml_list
 
     def run(self):
+             
         while True:
             time.sleep(10)
+
+            // removeUML
 
             # beware that things can change in lookup lists as we are using them, which is why copies are made before looping and get() is used to access
             umltimes = [ ]
@@ -443,6 +460,7 @@ class UMLScanner(threading.Thread) :
                         self.logger.warning('unresponsive UML %s back to live' % uml.uname)
                         uml.livestatus = "live"
                 except Exception, e:
+                    
                     self.logger.warning("Exception in UMLScanner %s" % e)
                     if type(e) == TypeError:
                         self.logger.exception("wrong version of python?")

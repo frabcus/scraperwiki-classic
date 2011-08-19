@@ -236,15 +236,18 @@ def scraper_search_handler(request):
         res['privacy_status'] = scraper.privacy_status
         res['language'] = scraper.language
         if query == "*OVERDUE*":
+            # This should be blocked  unless the request came from an internal
+            # IP address. We should determine what this is in configuration
             res['overdue_proportion'] = float(scraper.overdue_proportion)
             res['code'] = scraper.get_vcs_status(-1)["code"]
             res['guid'] = scraper.guid
             
+            # TODO: We need scraper permissions here
+            
             try:
                 profile = owner.get_profile()
                 res['user'] = { "beta_user": profile.beta_user, 
-                                 "id": owner.id                   
-                             }
+                                 "id": owner.id }
             except:
                 # TODO: Need to decide what to do with this. Implies that 
                 # an anonymous user is doing this and that security will

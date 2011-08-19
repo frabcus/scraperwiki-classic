@@ -63,6 +63,8 @@ class RunnerSocket:
         data = { "command":'stimulate_run', "language":language, "code":code, "urlquery":urlquery, 
                  "username":user.username, "scrapername":short_name, "clientnumber":clientnumber, "guid":guid }
 
+        # TODO: We need scraper permissions here
+
         # Tack on useful user information to the request so that 
         # we can eventually also add a security token to allow the 
         # other services to check what this user is allowed to do 
