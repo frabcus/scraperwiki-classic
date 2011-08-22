@@ -36,7 +36,7 @@
 
     <ul class="cloud tags">
         {% for tag in tags %}
-            <li class="c{{tag.font_size}}"><a href="{% url single_tag tag.name %}">{{tag.name|lower}}</a></li>
+            <li class="c{{tag.font_size}}"><a href="{% url single_tag tag.name|urlencode %}">{{tag.name|lower}}</a></li>
         {% endfor %}
     </ul>
 
