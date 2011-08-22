@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import patterns, url
 from piston.resource import Resource
 
-from api import viewshandlers
+from api import viewshandlers, v2views
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 
@@ -28,11 +28,29 @@ urlpatterns = patterns('',
     url(r'^1\.0/datastore/getdatabydate$', lambda request: HttpResponse(json.dumps({ "error":"Sorry, this function has been deprecated.", "message":"use scraperwiki.datastore.sqlite with bounds on your date field" }))),
     url(r'^1\.0/datastore/getdatabylocation$', lambda request: HttpResponse(json.dumps({ "error":"Sorry, this function has been deprecated.", "message":"use scraperwiki.datastore.sqlite bounds on the lat lng values" }))),
     url(r'^1\.0/geo/postcodetolatlng/$', lambda request: HttpResponse(json.dumps({ "error":"Sorry, this function has been deprecated.", "message":"use the scraperwiki postcode view to do it" }))),
-
     
     # explorer redirects
     url(r'^1\.0/explore/scraperwiki.(?:scraper|datastore).(?P<shash>\w+)$', 
                    lambda request, shash: HttpResponseRedirect("%s#%s" % (reverse('docsexternal'), shash))),
     url(r'^(?:1\.0|1\.0/explore/.*|)$', 
                    lambda request: HttpResponseRedirect(reverse('docsexternal'))),
+
+
+    # V2 API - Not an especially pleasant way of versioning the API (would be more sensible if 
+    # the version num in the URL specified the factory somehow). Anyway.
+    url(r'^2\.0/datastore/sqlite$',     v2views.sqlite_handler,         name="v2_method_sqlite"),
+    url(r'^2\.0/datastore/getdata$',    v2views.data_handler,           name="v2_method_getdata"),
+    url(r'^2\.0/scraper/search$',       v2views.scraper_search_handler, name="v2_method_search"),
+    url(r'^2\.0/scraper/getuserinfo$',  v2views.userinfo_handler,       name="v2_method_getuserinfo"),
+    url(r'^2\.0/scraper/usersearch$',   v2views.usersearch_handler,     name="v2_method_usersearch"),
+    
+    url(r'^2\.0/scraper/getruninfo$',   v2views.runevent_handler,       name="v2_method_getruninfo"),
+    url(r'^2\.0/scraper/getinfo$',      v2views.scraperinfo_handler,    name="v2_method_getinfo"),
+    
+    # explorer redirects
+    url(r'^2\.0/explore/scraperwiki.(?:scraper|datastore).(?P<shash>\w+)$', 
+                   lambda request, shash: HttpResponseRedirect("%s#%s" % (reverse('docsexternal'), shash))),
+    url(r'^(?:2\.0|2\.0/explore/.*|)$', 
+                   lambda request: HttpResponseRedirect(reverse('docsexternal'))),
+
 )
