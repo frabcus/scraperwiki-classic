@@ -70,8 +70,6 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_notify.middleware.NotificationsMiddleware',
-    'piston.middleware.ConditionalMiddlewareCompatProxy',
-    'piston.middleware.CommonMiddlewareCompatProxy',
     'pagination.middleware.PaginationMiddleware',    
     'middleware.csrfcookie.CsrfAlwaysSetCookieMiddleware'
 ]
@@ -129,14 +127,11 @@ INSTALLED_APPS = [
     'django_notify',
     'tagging',
     'contact_form',
-    'piston',      # needs 'django-piston' and 'phpserialize' (this to be deleted)
     'captcha',
     'pagination',    
     'compressor',
     'django_hstsmiddleware',
 ] + SCRAPERWIKI_APPS
-
-PISTON_STREAM_OUTPUT = True
 
 TEST_RUNNER = 'scraperwiki_tests.run_tests' 
 

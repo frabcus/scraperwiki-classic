@@ -2,9 +2,6 @@ from django.conf.urls.defaults import *
 
 from codewiki import views, viewsrpc, viewsuml, viewseditor
 
-
-from piston.resource import Resource
-
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
