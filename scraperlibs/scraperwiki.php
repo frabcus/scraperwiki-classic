@@ -181,6 +181,7 @@ class scraperwiki
       return $res;
    }
 
+   // These are DEPRECATED and just here for compatibility
    // the meta functions weren't being used to any extent in PHP anyway
    static function get_metadata($metadata_name, $default = null)
    {

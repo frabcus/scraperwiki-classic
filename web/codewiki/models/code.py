@@ -47,7 +47,7 @@ PRIVACY_STATUSES = (
     ('deleted', 'Deleted'),
 )
 
-STAFF_ACTIONS = set(["run_scraper", "screenshoot_scraper"])
+STAFF_ACTIONS = set(["run_scraper"])
 CREATOR_ACTIONS = set(["delete_data", "schedule_scraper", "delete_scraper", "killrunning", "set_privacy_status", "schedulescraper", "set_controleditors" ])
 EDITOR_ACTIONS = set(["changeadmin", "savecode", "settags", "stimulate_run", "remove_self_editor"])
 STAFF_EXTRA_ACTIONS = CREATOR_ACTIONS | EDITOR_ACTIONS - set(['savecode']) # let staff also do anything a creator / editor can, except save code is a bit rude (for now!)
