@@ -265,12 +265,6 @@ class Code(models.Model):
     def content_type(self):
         return ContentType.objects.get(app_label="codewiki", model="Code")
 
-    def get_metadata(self, name, default=None):
-        try:
-            return json.loads(self.scrapermetadata_set.get(name=name).value)
-        except:
-            return default
-
     def get_screenshot_filename(self, size='medium'):
         return "%s.png" % self.short_name
 

@@ -156,6 +156,7 @@ class Scraper (code.Code):
         
 
 
+# DEPRECTATED. Needs removing, and migration to strip it
 class ScraperMetadata(models.Model):
     """
     Allows named metadata to be associated with a scraper
