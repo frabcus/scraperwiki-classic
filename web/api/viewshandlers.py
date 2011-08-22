@@ -212,7 +212,7 @@ def scraper_search_handler(request):
         maxrows = 5
     result = [ ]  # list of dicts
 
-    if query == "*OVERDUE*":
+    if query == "*OVERDUE*":                        
         scrapers = scrapers_overdue()  # should be handling hiding private scrapers from list unless authorized caller (eg twister)
     else:
         scrapers = scraper_search_query(user=None, query=query)
@@ -235,9 +235,11 @@ def scraper_search_handler(request):
         res['created'] = scraper.created_at.isoformat()
         res['privacy_status'] = scraper.privacy_status
         res['language'] = scraper.language
-        if query == "*OVERDUE*":
-            # This should be blocked  unless the request came from an internal
-            # IP address. We should determine what this is in configuration
+        client_ip = request.META["REMOTE_ADDR"]        
+        # Make sure that this request comes from a machine with an INTERNAL_IP
+        # This is probably not enough yet to keep information save, 
+        # TODO: Make this safer
+        if query == "*OVERDUE*" and client_ip in settings.INTERNAL_IPS:                        
             res['overdue_proportion'] = float(scraper.overdue_proportion)
             res['code'] = scraper.get_vcs_status(-1)["code"]
             res['guid'] = scraper.guid
