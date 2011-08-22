@@ -242,7 +242,8 @@ def scraper_search_handler(request):
             res['code'] = scraper.get_vcs_status(-1)["code"]
             res['guid'] = scraper.guid
             
-            # TODO: We need scraper permissions here
+            # Fetch the permissions
+            res['permissions'] = scraper.permissions.all()
             
             try:
                 profile = owner.get_profile()
