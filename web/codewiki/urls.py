@@ -2,17 +2,11 @@ from django.conf.urls.defaults import *
 
 from codewiki import views, viewsrpc, viewsuml, viewseditor
 
-
-from piston.resource import Resource
-
-from handlers import ScraperMetadataHandler
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.views.generic.simple import redirect_to
 
-
-metadata = Resource(handler=ScraperMetadataHandler)
 
 urlpatterns = patterns('',
     
@@ -81,10 +75,6 @@ urlpatterns = patterns('',
 
     url(r'^scrapers/export_sqlite/(?P<short_name>[\w_\-\.]+)/$', views.export_sqlite,   name='export_sqlite'),
     url(r'^scrapers/export/(?P<short_name>[\w_\-\.]+)/$', views.export_csv,             name='export_csv'),   # this gets redirected to the api preview
-
-
-        # this to be cleaned out completely
-    url(r'^scrapers/metadata_api/(?P<scraper_guid>[\w_\-\.]+)/(?P<metadata_name>.+)/$', metadata, name='metadata_api'),
 
     # old redirects
     url(r'^(?P<wiki_type>scraper|view)s/(?P<short_name>[\w_\-\.]+)/(?:run|full)/$',   # redirect because it's so common

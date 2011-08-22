@@ -336,9 +336,7 @@ def scraper_delete_data(request, short_name):
     if isinstance(scraper, HttpResponse):  return scraper
     dataproxy = DataStore(scraper.short_name)
     dataproxy.request({"maincommand":"clear_datastore"})
-    if scraper.wiki_type == "scraper":
-        scraper.scraper.scrapermetadata_set.all().delete()
-        scraper.scraper.update_meta()
+    scraper.scraper.update_meta()
     scraper.save()
     request.notifications.add("Your data has been deleted")
     

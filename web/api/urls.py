@@ -1,5 +1,4 @@
 from django.conf.urls.defaults import patterns, url
-from piston.resource import Resource
 
 from api import viewshandlers, v2views
 from django.core.urlresolvers import reverse
