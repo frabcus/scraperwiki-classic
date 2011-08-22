@@ -92,9 +92,5 @@ if DEBUG:
         'django.template.loaders.app_directories.load_template_source',
     ]
     SQL_DEBUG = False
-else:
-    HSTS_REDIRECT_TO = '/'
-    HSTS_INCLUDE_SUBDOMAINS = True
-    MIDDLEWARE = ['django_hstsmiddleware.middleware.HSTSMiddleware'] + MIDDLEWARE
 
 HIGHRISE_ENABLED = False
