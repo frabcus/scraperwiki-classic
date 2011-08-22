@@ -139,9 +139,9 @@ class UMLList(object):
 
     def addUML(self, uname):
         if not config.has_section(uname):
-            raise UnknownUMLException()
+            raise UnknownUMLException('Unknown UML %s' % uname)
         if uname in self.UMLs:
-            raise DuplicateUMLException()
+            raise DuplicateUMLException('Duplicate UML %s' % uname)
 
         host = config.get(uname, 'host')
         port = config.getint(uname, 'via')
