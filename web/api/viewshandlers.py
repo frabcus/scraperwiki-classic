@@ -216,7 +216,7 @@ def scraper_search_handler(request):
     if "HTTP_X_REAL_IP" in request.META:
         client_ip = request.META["HTTP_X_REAL_IP"]        
     else:
-        client_ip = request.META["REMOTE_ADDR"]                
+        client_ip = "Not specified"
 
     print 'Client IP is', client_ip
     if query == "*OVERDUE*"  and client_ip in settings.INTERNAL_IPS:                        
