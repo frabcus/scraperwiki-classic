@@ -461,7 +461,7 @@ class UMLScanner(threading.Thread) :
                         uml.livestatus = "live"
                 except Exception, e:
                     
-                    self.logger.warning("Exception in UMLScanner %s" % e)
+                    self.logger.warning("Exception in UMLScanner: %s" % traceback.format_exc())
                     if type(e) == TypeError:
                         self.logger.exception("wrong version of python?")
                     if uml.livestatus == "live":
