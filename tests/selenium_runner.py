@@ -178,10 +178,12 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()
     if len(args) > 0:
+        print "No arguments required, just options"
         parser.print_help()
         sys.exit(1)
 
     if (bool(options.adminusername) ^ bool(options.adminpassword)):
+        print "Need --adminusername and --adminpassword"
         parser.print_help()
         sys.exit(1)
     elif (bool(options.adminusername) and bool(options.adminpassword)):
