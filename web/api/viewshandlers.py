@@ -213,8 +213,13 @@ def scraper_search_handler(request):
         maxrows = 5
     result = [ ]  # list of dicts
 
-    client_ip = request.META["HTTP_X_REAL_IP"]        
+    if "HTTP_X_REAL_IP" in request.META:
+        client_ip = request.META["HTTP_X_REAL_IP"]        
+    else:
+        client_ip = request.META["REMOTE_ADDR"]                
+
     if query == "*OVERDUE*"  and client_ip in settings.INTERNAL_IPS:                        
+        print 'client_ip was ', client_ip        
         scrapers = scrapers_overdue()  # should be handling hiding private scrapers from list unless authorized caller (eg twister)
     else:
         scrapers = scraper_search_query(user=None, query=query)
