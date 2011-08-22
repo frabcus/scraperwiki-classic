@@ -1,6 +1,7 @@
 import urllib
 import urllib2
 
+from django.conf import settings
 from django.template import RequestContext, loader, Context
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import render_to_response
@@ -235,6 +236,7 @@ def scraper_search_handler(request):
         res['created'] = scraper.created_at.isoformat()
         res['privacy_status'] = scraper.privacy_status
         res['language'] = scraper.language
+        
         client_ip = request.META["REMOTE_ADDR"]        
         # Make sure that this request comes from a machine with an INTERNAL_IP
         # This is probably not enough yet to keep information save, 
