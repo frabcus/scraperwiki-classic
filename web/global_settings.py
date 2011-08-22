@@ -218,3 +218,5 @@ PAGINATION_DEFAULT_PAGINATION=20
 # tell south to do migrations when doing tests
 SOUTH_TESTS_MIGRATE = True
 
+# To be overridden in actual settings files
+SESSION_COOKIE_SECURE = False
