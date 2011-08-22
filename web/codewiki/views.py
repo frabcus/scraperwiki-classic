@@ -72,7 +72,7 @@ def getscraperor404(request, short_name, action):
         if not (request.method == 'POST' and request.is_ajax()):
             raise SuspiciousOperation
     
-    if action in ["schedule_scraper", "run_scraper", "screenshoot_scraper", ]:
+    if action in ["schedule_scraper", "run_scraper", ]:
         if request.POST.get(action, None) != '1':
             raise SuspiciousOperation
         
@@ -358,12 +358,6 @@ def scraper_run_scraper(request, short_name):
         scraper.scraper.save()
         call_command('run_scrapers', short_name=short_name)
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
-
-def scraper_screenshoot_scraper(request, wiki_type, short_name):
-    scraper = getscraperor404(request, short_name, "screenshoot_scraper")
-    call_command('take_screenshot', short_name=short_name, url_prefix=settings.VIEW_URL, verbose=False)
-    return HttpResponseRedirect(reverse('code_overview', args=[code_object.wiki_type, short_name]))
-
 
 def scraper_delete_scraper(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, None, "delete_scraper")

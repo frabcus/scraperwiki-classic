@@ -41,15 +41,6 @@
     </form>
   {% endifequal %}
 
-  {% comment %} 
-  <form action="{% url scraper_screenshoot_scraper scraper.wiki_type scraper.short_name %}" method="post">
-    {% csrf_token %}    
-    <input type="hidden" name="screenshoot_scraper" value="1" />
-    <input type="submit" id="btnScreenshootScraper" class="" value="Screenshoot this scraper" />
-    <p>Take a screenshot of this scraper.</p>
-  </form>
-  {% endcomment %} 
-
 </div>
 {% endif %}
 
