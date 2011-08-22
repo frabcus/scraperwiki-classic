@@ -133,6 +133,7 @@ INSTALLED_APPS = [
     'captcha',
     'pagination',    
     'compressor',
+    'django_hstsmiddleware',
 ] + SCRAPERWIKI_APPS
 
 PISTON_STREAM_OUTPUT = True
