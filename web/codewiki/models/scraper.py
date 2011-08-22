@@ -69,8 +69,6 @@ def scrapers_overdue():
 
 
 class Scraper (code.Code):
-    has_geo      = models.BooleanField(default=False)        # to be deleted
-    has_temporal = models.BooleanField(default=False)        # to be deleted
     last_run     = models.DateTimeField(blank=True, null=True)    
     license      = models.CharField(max_length=100, blank=True, choices=LICENSE_CHOICES, default='Unknown')
     license_link = models.URLField(verify_exists=False, null=True, blank=True)
