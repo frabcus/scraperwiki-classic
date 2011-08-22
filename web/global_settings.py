@@ -130,7 +130,6 @@ INSTALLED_APPS = [
     'captcha',
     'pagination',    
     'compressor',
-    'django_hstsmiddleware',
 ] + SCRAPERWIKI_APPS
 
 TEST_RUNNER = 'scraperwiki_tests.run_tests' 
