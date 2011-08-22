@@ -228,6 +228,7 @@ module ScraperWiki
         return result["data"][0][0]
     end
 
+    # These are DEPRECATED and just here for compatibility
     def ScraperWiki.get_metadata(metadata_name, default = nil)
         if !$metadatamessagedone == nil
             puts "*** instead of get_metadata('"+metadata_name+"') please use\n    get_var('"+metadata_name+"')"
@@ -237,6 +238,7 @@ module ScraperWiki
         return result
     end
 
+    # These are DEPRECATED and just here for compatibility
     def ScraperWiki.save_metadata(metadata_name, value)
         if !$metadatamessagedone
             puts "*** instead of save_metadata('"+metadata_name+"') please use\n    save_var('"+metadata_name+"')"
