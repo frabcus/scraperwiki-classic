@@ -64,7 +64,13 @@ class RunnerSocket:
                  "username":user.username, "scrapername":short_name, "clientnumber":clientnumber, "guid":guid }
 
         # Fetch the permissions
-        data['permissions'] = scraper.permissions.all()
+        permissions = []
+        for perm in scraper.permissions.all():
+            permissions.append({'source':perm.code, 
+                                'target':perm.permitted_object,
+                                'can_read': perm.can_read, 
+                                'can_write':perm.can_write})
+        data['permissions'] = permissions
 
         # Tack on useful user information to the request so that 
         # we can eventually also add a security token to allow the 

@@ -243,7 +243,14 @@ def scraper_search_handler(request):
             res['guid'] = scraper.guid
             
             # Fetch the permissions
-            res['permissions'] = scraper.permissions.all()
+            permissions = []
+            for perm in scraper.permissions.all():
+                permissions.append({'source':   perm.code, 
+                                    'target':   perm.permitted_object,
+                                    'can_read': perm.can_read, 
+                                    'can_write':perm.can_write})
+            res['permissions'] = permissions
+
             
             try:
                 profile = owner.get_profile()
