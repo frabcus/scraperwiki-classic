@@ -176,7 +176,8 @@ function execute(http_req, http_res, raw_request_data) {
 				ip: '',
 				response: http_res,
 				black: request_data.black || '',
-				white: request_data.white || ''  };
+				white: request_data.white || '',
+				permissions: request_data.permissions || []  };
 	
 	if ( ! use_lxc ) {
 		// Execute the code locally using the relevant file (exec.whatever)
