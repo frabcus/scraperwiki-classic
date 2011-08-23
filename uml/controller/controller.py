@@ -310,6 +310,10 @@ class ScraperController(BaseController):
         lexec = { 'php':'exec.php', 'ruby':'exec.rb', 'python':'exec.py' }.get(language, 'exec.py')
         
         execscript = os.path.join(os.path.dirname(sys.argv[0]), lexec)
+        logger.debug('processrunscript: execscript is %s' % execscript)
+        if not os.path.isfile(execscript):
+            raise Exception("Couldn't find exec script in processrunscript %s" % execscript)
+
         args = [    execscript,
                     '--ds=%s:%s' % (config.get('dataproxy', 'host'), config.get('dataproxy', 'port')),
                     '--script=%s' % tmpscriptfile, '--scrapername=%s' % scrapername, '--runid=%s' % runid
@@ -332,9 +336,14 @@ class ScraperController(BaseController):
         os.close(streamprintsout)
         os.close(streamjsonsout)
 
+        try:
             # the actual execution of the scraper (never returns)
-        os.execvp(execscript, args)
-
+            os.execvp(execscript, args)
+        except Exception, e:
+            # print the exception as well, as our logging file descriptors are
+            # broken by the stream open/closing dance just above.
+            print "Error calling os.execvp: %s" % traceback.format_exc()
+            raise
  
     def execute(self, request):
         self.m_runID = request.get("runid", "")
