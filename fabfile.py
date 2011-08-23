@@ -19,7 +19,19 @@ def dev():
     env.webserver = True
     env.email_deploy = False
 
-def www():
+def dev_services():
+    "The UML and datastore server (burbage)"
+    env.hosts = ['kippax.scraperwiki.com']
+    env.path = '/var/www/scraperwiki'
+    env.branch = 'default'
+    env.web_path = 'file:///home/scraperwiki/scraperwiki'
+    env.activate = env.path + '/bin/activate'
+    env.user = 'scraperdeploy'
+    env.deploy_version = "umls"
+    env.webserver = False
+    env.email_deploy = "deploy@scraperwiki.com"
+
+def live():
     "The main www server"
     env.hosts = ['scraperwiki.com:7822']
     env.path = '/var/www/scraperwiki'
@@ -31,7 +43,7 @@ def www():
     env.webserver = True
     env.email_deploy = "deploy@scraperwiki.com"
 
-def services():
+def live_services():
     "The UML and datastore server (burbage)"
     env.hosts = ['burbage.scraperwiki.com:7822']
     env.path = '/var/www/scraperwiki'
