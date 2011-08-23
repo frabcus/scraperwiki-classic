@@ -1,0 +1,1 @@
+// Will be executor for JS scrapers
