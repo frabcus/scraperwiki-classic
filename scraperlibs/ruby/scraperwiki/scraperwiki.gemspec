@@ -12,8 +12,6 @@ Gem::Specification.new do |s|
   s.summary     = %q{ScraperWiki client library for Ruby}
   s.description = %q{Ruby code used for accessing}
 
-  s.files         = `git ls-files`.split("\n")
-#  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-#  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.files         = `hg locate -f -I .`.split("\n")
   s.require_paths = ["lib"]
 end
