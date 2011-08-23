@@ -10,7 +10,6 @@ import  urllib2, urllib
 import  optparse
 import  scraperwiki
 
-
 try    : import json
 except : import simplejson as json
 
