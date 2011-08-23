@@ -272,8 +272,9 @@ function execute(http_req, http_res, raw_request_data) {
 			http_res.end( JSON.stringify(r) );
 			return;				
 		}
-		
-		var tmpfile = path.join(code_folder, "script." + util.extension_for_language(script.language) );
+				
+		var extension = util.extension_for_language(script.language);
+		var tmpfile = path.join(lxc.code_folder, "script." + extension );
 		fs.writeFile(tmpfile, request_data.code, function(err) {
 	   		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
@@ -282,8 +283,11 @@ function execute(http_req, http_res, raw_request_data) {
 	   		} 
 
 			var startTime = new Date();		
-			console.log( 'Spawning' );		
-	 		e = spawn('lxc-execute', ['-n', res, ]);
+
+			// Pass the data proxy and runid to the script that will trigger the exec.py
+			cmd = "/home/startup/run" + extension + ".sh " + dataproxy + " " + script.run_id;
+	 		e = spawn('lxc-execute', ['-n', res, cmd]);
+	
 			e.stdout.on('data', function (data) {
 				handle_process_output( http_res, data, true );
 			});

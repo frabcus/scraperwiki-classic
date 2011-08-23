@@ -344,7 +344,7 @@ def handle_editor_save(request):
             runnerstream = runsockettotwister.RunnerSocket()
             stimulaterunmessage = runnerstream.stimulate_run_from_editor(scraper, request.user, clientnumber, language, code, urlquery)
         else:
-            stimulaterunmessage = {"message":"not authorized to run"}
+            stimulaterunmessage = {"message":"not authorised to run"}
 
     if stimulaterun == "editorstimulaterun_nosave":
         stimulaterunmessage['status'] = 'notsaved'

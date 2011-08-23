@@ -68,6 +68,10 @@ exports.kill = function( script ) {
 };
 
 
+exports.code_folder = get_code_folder = function(name) {
+	return path.join(root_folder, name + '/code/');
+}
+
 /*****************************************************************************
 * Create a new VM based on newly created config files - if not already created
 ******************************************************************************/
@@ -94,10 +98,9 @@ function create_vm ( name ) {
 
 	var compiled = _.template( config_tpl );
 	var cfg = compiled( ctx );
-	console.log( cfg );
 	
 	var fs_compiled = _.template( fstab_tpl );
-	var fstab = compiled( ctx );
+	var fstab = fs_compiled( ctx );
 	
 	path.exists(root_folder, function (exists) {	
   		if ( ! exists ) {
@@ -112,6 +115,12 @@ function create_vm ( name ) {
 		} else {
 			return;
 		}
+
+		// Mount a specific code folder
+		var cfolder = get_code_folder(name);
+		path.exists(cfolder, function (exists) {
+	  		if ( ! exists ) fs.mkdirSync( cfolder, "0777" );
+		});
 
 		var tgt = path.join( folder, 'config')
 		fs.writeFile(tgt, cfg, function(err) {
@@ -130,7 +139,7 @@ function create_vm ( name ) {
 				});
 		    }
 		});
-	
+					
 		tgt = path.join( folder, 'fstab')
 		console.log('Writing fstab to ' + tgt);	
 		fs.writeFile(tgt, fstab, function(err) {
