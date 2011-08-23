@@ -713,7 +713,7 @@ if __name__ == '__main__' :
         if os.fork() == 0 :
             os .setsid()
             sys.stdin  = open ('/dev/null')
-            sys.stdout = open ('%s/log/%s' % (varDir, varName), 'w', 0)
+            sys.stdout = open ('%s/log/scraperwiki/%s' % (varDir, varName), 'w', 0)
             sys.stderr = sys.stdout
             if os.fork() == 0 :
                 ppid = os.getppid()
