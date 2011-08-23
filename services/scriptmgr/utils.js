@@ -88,8 +88,7 @@ exports.env_for_language = function( lang, extra_path ) {
 		return { PHPPATH: extra_path};		
 	} else if ( lang == 'js' ) {
 		return { NODE_PATH: process.env.NODE_PATH + ":" + extra_path };
-	}
-	
+	}	
 };
 
 				

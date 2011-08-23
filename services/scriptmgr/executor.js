@@ -285,8 +285,9 @@ function execute(http_req, http_res, raw_request_data) {
 			var startTime = new Date();		
 
 			// Pass the data proxy and runid to the script that will trigger the exec.py
-			cmd = "/home/startup/run" + extension + ".sh " + dataproxy + " " + script.run_id;
-	 		e = spawn('lxc-execute', ['-n', res, cmd]);
+			var cmd = "/home/startup/run" + extension + ".sh " + dataproxy + " " + script.run_id;
+			var cfgpath = '/mnt/' + res + '/config';
+	 		e = spawn('lxc-execute', ['-n', res, '-f', cfgpath,cmd]);
 	
 			e.stdout.on('data', function (data) {
 				handle_process_output( http_res, data, true );
