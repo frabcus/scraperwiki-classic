@@ -20,6 +20,7 @@ import ConfigParser
 import threading
 import optparse, pwd, grp
 import logging, logging.config
+import traceback
 try:
     import cloghandler
 except:
