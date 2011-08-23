@@ -143,6 +143,8 @@ class OurTextTestRunner:
 # python selenium_runner.py --url=http://dev.scraperwiki.com --seleniumhost=ondemand.saucelabs.com 
 #           --username=goatchurch --accesskey=6727bb66-998e-464c-b8f1-bb4f31d1a531 --os="Windows 2003" 
 #           --browser=firefox --browserversion=3.6.--tests=test_scrapers,test_scrapers
+#
+# ./tests/selenium_runner.py --url=https://dev.scraperwiki.com/ --adminusername=frabcus --adminpassword=XXXXX --pause --verbosity=2
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
