@@ -201,7 +201,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
             request = json.loads("".join(jincoming))
             self.execute(request)   # actually runs everything
         except Exception, e:
-            logger.exception("Uncaught exception in do_POST (path = %s): %s" % (path, e))
+            logger.exception("Uncaught exception in do_POST (path = %s): %s" % (path, traceback.format_exc()))
         finally:
             self.connection.close()
 
