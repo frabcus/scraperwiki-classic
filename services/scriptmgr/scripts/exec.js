@@ -36,7 +36,7 @@ process.on('SIGXCPU', function () {
 });
 
 try {
-	var script = require(opts.get('script'));
+	var script = require( opts.get('script'));
 	script.main();
 } catch( err ) {
 	console.log( err );
