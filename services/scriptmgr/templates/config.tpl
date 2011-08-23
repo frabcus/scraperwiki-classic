@@ -28,4 +28,4 @@ lxc.cgroup.devices.allow = c 1:8 rwm
 lxc.cgroup.devices.allow = c 136:* rwm
 lxc.cgroup.devices.allow = c 5:2 rwm
 # rtc
-xc.cgroup.devices.allow = c 254:0 rwm
+lxc.cgroup.devices.allow = c 254:0 rwm

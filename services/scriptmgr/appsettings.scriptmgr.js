@@ -9,7 +9,7 @@ exports.settings =
 { 
 	devmode: false, 
 	port: 9001, 
-	vm_count: 1, 
+	vm_count: 10, 
 	extra_path: '../../scraperlibs',
 	dataproxy: '127.0.0.1:9003',
 	httpproxy: '127.0.0.1:9005',
