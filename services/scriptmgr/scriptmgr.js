@@ -48,6 +48,7 @@ var options = [
   { short       : 'c', 
 	long        : 'config',
     description : 'Specify the configuration file to use',
+	value : true 
   }
 ];
 opts.parse(options, true);
