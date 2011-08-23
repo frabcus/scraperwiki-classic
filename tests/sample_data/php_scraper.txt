@@ -5,7 +5,7 @@
 
 require  'scraperwiki/simple_html_dom.php';
 
-$html = scraperwiki::scrape("http://scraperwiki.com/hello_world.html");
+$html = scraperwiki::scrape("https://scraperwiki.com/hello_world.html");
 
 # Use the PHP Simple HTML DOM Parser to extract <td> tags
 $dom = new simple_html_dom();
