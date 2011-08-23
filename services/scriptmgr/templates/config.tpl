@@ -5,7 +5,7 @@ lxc.utsname = <%= name %>
 lxc.tty = 4
 lxc.pts = 1024
 lxc.rootfs = /mnt/vm0/rootfs
-lxc.mount = /mnt/vm0/fstab
+lxc.mount = /mnt/<%= name %>/fstab
 lxc.network.type = veth
 lxc.network.flags = up
 lxc.network.name = eth0
