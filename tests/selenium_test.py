@@ -2,6 +2,11 @@ import unittest
 import atexit
 from selenium import selenium
 
+
+# XXX make this a static member
+def SeleniumTest_atexit():
+    SeleniumTest._selenium.stop()
+
 class SeleniumTest(unittest.TestCase):
 
     _valid_username = ''
@@ -11,18 +16,26 @@ class SeleniumTest(unittest.TestCase):
     _selenium_port = 4444
     _selenium_browser = None
 
+    _selenium = None
+
     _app_url = ''
 
     _verbosity = 1
 
     def setUp(self):
         self.verificationErrors = []
-        self.selenium = selenium(SeleniumTest._selenium_host, SeleniumTest._selenium_port, 
-                                 SeleniumTest._selenium_browser, SeleniumTest._app_url)
-        self.selenium.start()
 
-        # make sure we quit the selenium when the script dies
-        atexit.register(self.tearDown)
+        # make singleton Selenium connection and new browser window
+        if SeleniumTest._selenium == None:
+            SeleniumTest._selenium = selenium(SeleniumTest._selenium_host, SeleniumTest._selenium_port, 
+                                     SeleniumTest._selenium_browser, SeleniumTest._app_url)
+            SeleniumTest._selenium.start()
+
+            # make sure we quit the selenium when the script dies
+            atexit.register(SeleniumTest_atexit)
+        self.selenium = SeleniumTest._selenium
+        self.selenium.delete_all_visible_cookies()
+        #do_command('deleteAllCookies', [])
             
         # extract a title for the job from name of test.  must be done in the constructor or after start()
         self.selenium.set_context("sauce:job-name=%s" % self._testMethodName)  
@@ -73,7 +86,6 @@ class SeleniumTest(unittest.TestCase):
             self.selenium.type( k, v )
         
     def tearDown(self):
-        self.selenium.stop()
         self.assertEqual([], self.verificationErrors)
 
 
