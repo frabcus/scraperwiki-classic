@@ -177,7 +177,12 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 while ssrec:
                     line = "".join(sbuffer)
                     if line:
-                        request = json.loads(line) 
+                        try:
+                            request = json.loads(line) 
+                        except ValueError, ve:
+                            # add the content of the line for debugging
+                            raise ValueError("%s; reading line '%s'" % (str(ve), line))
+
                         try:
                             self.process(db, request)
                         except socket.error:
