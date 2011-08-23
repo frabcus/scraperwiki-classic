@@ -3,6 +3,7 @@
 *
 * Utility functions for working with the processes locally
 ******************************************************************************/
+var path  = require('path');
 
 /******************************************************************************
 * Write the response to the caller, or in this case write it back down the long
@@ -80,14 +81,16 @@ exports.extension_for_language = function( lang ) {
 * Works out what environment variables we want to pass to the script
 ******************************************************************************/
 exports.env_for_language = function( lang, extra_path ) {
+	var ep = path.join(extra_path, lang)
+	
 	if ( lang == 'python' ) {
-		return {PYTHONPATH: extra_path, PYTHONUNBUFFERED: 'true'};
+		return {PYTHONPATH: ep, PYTHONUNBUFFERED: 'true'};
 	} else if ( lang == 'ruby') {
-		return { RUBYLIB: extra_path };		
+		return { RUBYLIB: ep };		
 	} else if ( lang == 'php') {
-		return { PHPPATH: extra_path};		
-	} else if ( lang == 'js' ) {
-		return { NODE_PATH: process.env.NODE_PATH + ":" + extra_path };
+		return { PHPPATH: ep};		
+	} else if ( lang == 'javascript' ) {
+		return { NODE_PATH: process.env.NODE_PATH + ":" + ep };
 	}	
 };
 
