@@ -89,37 +89,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.sendConnectionHeaders()
         self.connection.sendall('\n'.join(status) + '\n')
 
-
-    def find_process_for_port( self, lport ):
-        """
-        Use the ss command (from iproute) to show all of the HTTP requests 
-        that are currently established along with the process info.
-        """
-        cmd = "ss -o state established '( dport = :http )' -p"
-    
-        try:
-            # Launch the subprocess and read the output
-            p = subprocess.Popen(cmd, stdout = subprocess.PIPE,shell=True)
-            content = p.communicate()[0]
-            p.wait()
-        except Exception,e:
-            print e
-            return None
-
-        
-        for line in content.split('\n')[1:]:
-            if ':%s' % lport in line:
-                proc = " ".join(line.split()).split()[-1]
-                if proc.startswith('users:(('):
-                    # Strip the bit that isn't relevant
-                    proc = proc[len('users:(('):-2]
-                    return int(proc.split(',')[1])
-                else:
-                    # if we found the port but no process info we should bail
-                    return None
-        return None
-
-
     def sendIdent(self, query) :
         from urlparse import urlparse
         
@@ -341,6 +310,10 @@ class ScraperController(BaseController):
         lexec = { 'php':'exec.php', 'ruby':'exec.rb', 'python':'exec.py' }.get(language, 'exec.py')
         
         execscript = os.path.join(os.path.dirname(sys.argv[0]), lexec)
+        logger.debug('processrunscript: execscript is %s' % execscript)
+        if not os.path.isfile(execscript):
+            raise Exception("Couldn't find exec script in processrunscript %s" % execscript)
+
         args = [    execscript,
                     '--ds=%s:%s' % (config.get('dataproxy', 'host'), config.get('dataproxy', 'port')),
                     '--script=%s' % tmpscriptfile, '--scrapername=%s' % scrapername, '--runid=%s' % runid
@@ -363,9 +336,14 @@ class ScraperController(BaseController):
         os.close(streamprintsout)
         os.close(streamjsonsout)
 
+        try:
             # the actual execution of the scraper (never returns)
-        os.execvp(execscript, args)
-
+            os.execvp(execscript, args)
+        except Exception, e:
+            # print the exception as well, as our logging file descriptors are
+            # broken by the stream open/closing dance just above.
+            print "Error calling os.execvp: %s" % traceback.format_exc()
+            raise
  
     def execute(self, request):
         self.m_runID = request.get("runid", "")
