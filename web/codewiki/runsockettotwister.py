@@ -59,9 +59,9 @@ class RunnerSocket:
         self.soc.send(json.dumps(data)+"\r\n") 
 
 
-    def stimulate_run_from_editor(self, guid, user, short_name, clientnumber, language, code, urlquery):
+    def stimulate_run_from_editor(self, scraper, user, clientnumber, language, code, urlquery):
         data = { "command":'stimulate_run', "language":language, "code":code, "urlquery":urlquery, 
-                 "username":user.username, "scrapername":short_name, "clientnumber":clientnumber, "guid":guid }
+                 "username":user.username, "scrapername":scraper.short_name, "clientnumber":clientnumber, "guid":scraper.guid }
 
         # Fetch the permissions
         permissions = []
