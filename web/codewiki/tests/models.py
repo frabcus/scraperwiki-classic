@@ -1,4 +1,4 @@
-from django.test import TransactionTestCase
+from django.test import TestCase
 from django.core.urlresolvers import reverse as reverse_url
 from datetime import datetime
 import os.path
@@ -6,7 +6,7 @@ import unittest
 
 from scraper import models
 
-class Test__unicode__(TransactionTestCase):
+class Test__unicode__(TestCase):
     '''
     Simple test to verify the __unicode__ method
     of the various models doesn't work
