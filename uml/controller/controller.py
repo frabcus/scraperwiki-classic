@@ -89,37 +89,6 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.sendConnectionHeaders()
         self.connection.sendall('\n'.join(status) + '\n')
 
-
-    def find_process_for_port( self, lport ):
-        """
-        Use the ss command (from iproute) to show all of the HTTP requests 
-        that are currently established along with the process info.
-        """
-        cmd = "ss -o state established '( dport = :http )' -p"
-    
-        try:
-            # Launch the subprocess and read the output
-            p = subprocess.Popen(cmd, stdout = subprocess.PIPE,shell=True)
-            content = p.communicate()[0]
-            p.wait()
-        except Exception,e:
-            print e
-            return None
-
-        
-        for line in content.split('\n')[1:]:
-            if ':%s' % lport in line:
-                proc = " ".join(line.split()).split()[-1]
-                if proc.startswith('users:(('):
-                    # Strip the bit that isn't relevant
-                    proc = proc[len('users:(('):-2]
-                    return int(proc.split(',')[1])
-                else:
-                    # if we found the port but no process info we should bail
-                    return None
-        return None
-
-
     def sendIdent(self, query) :
         from urlparse import urlparse
         
