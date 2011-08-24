@@ -266,12 +266,12 @@ function execute(http_req, http_res, raw_request_data) {
 		
 		// Use LXC to allocate us an instance and run with it
 		var res = lxc.exec( script, request_data.code );
-		console.log( 'Running on ' + res );
 		if ( res == null ) {
 			var r = {"error": "No virtual machines available"}
 			http_res.end( JSON.stringify(r) );
 			return;				
 		}
+		console.log( 'Running on ' + res );		
 				
 		var extension = util.extension_for_language(script.language);
 		var tmpfile = path.join(lxc.code_folder, "script." + extension );
@@ -287,7 +287,7 @@ function execute(http_req, http_res, raw_request_data) {
 			// Pass the data proxy and runid to the script that will trigger the exec.py
 			var cmd = "/home/startup/run" + extension + ".sh " + dataproxy + " " + script.run_id;
 			var cfgpath = '/mnt/' + res + '/config';
-	 		e = spawn('lxc-execute', ['-n', res, '-f', cfgpath,cmd]);
+	 		e = spawn('lxc-execute', ['-n', res, '-f', cfgpath, cmd]);
 	
 			e.stdout.on('data', function (data) {
 				handle_process_output( http_res, data, true );
@@ -300,7 +300,9 @@ function execute(http_req, http_res, raw_request_data) {
 					console.log('child process exited badly, we may have killed it');
 				else 
 					console.log('child process exited with code ' + code);					
-
+				if ( code == 255 ) {
+					console.log( ['-n', res, '-f', cfgpath, cmd] );
+				}
 				if ( script ) {
 					delete scripts[script.run_id];
 					delete scripts_ip[ script.ip ];
