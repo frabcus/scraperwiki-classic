@@ -102,7 +102,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         import re
-
+        
+        print 'Checking whether ', path, ' is allowed with ', self.m_allowed, ' and ', self.m_blocked
         if allowAll :
             return True
 
