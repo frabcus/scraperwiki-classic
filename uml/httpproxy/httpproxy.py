@@ -63,8 +63,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         self.m_allowed = []
         self.m_blocked = []
-        print self.server.womble
-
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
@@ -329,6 +327,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Handle GET and POST requests.
         """
+        print self.server.womble
 
         #  If this is a transparent HTTP or HTTPS proxy then modify the path with the
         #  protocol and the host.
