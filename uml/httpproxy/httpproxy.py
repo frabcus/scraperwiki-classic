@@ -334,6 +334,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.server.lock.acquire()
         self.allowed = self.server.allowed 
         self.blocked = self.server.blocked
+        print 'COOL', self.allowed
         self.server.lock.release()
 
         #  If this is a transparent HTTP or HTTPS proxy then modify the path with the
@@ -649,15 +650,12 @@ class WhitelistThread(Thread):
                     
             if encoded:
                 self.server.lock.acquire()
-                print 'Setting lists'          
                 self.server.allowed = encoded['white'][:]
                 self.server.blocked = encoded['black'][:]
-                print self.server.allowed
-                print self.server.blocked
                 self.server.lock.release()          
                 
-            print 'Sleeping '          
-            time.sleep(30)
+            # Sleep for 5 more minutes
+            time.sleep(300)
     
 
 class HTTPSProxyServer (HTTPProxyServer) :
