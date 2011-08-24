@@ -317,17 +317,8 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         scraperID = jdata['scraperid']
         short_name = jdata['scrapername']
         runID = jdata['runid']
-        beta_flag = False
+        beta_flag = 'beta_user' in jdata and jdata['beta_user'] == True
        
-        # if we have a user dict in the json being sent (added by Django) then we 
-        # should check it to see if we are a beta user or not. 
-        if 'user' in jdata:
-            userdict = jdata['user']
-            beta_flag = 'beta_user' in userdict and userdict['beta_user'] == True
-            self.logger.debug(userdict)
-        else:
-            self.logger.debug(jdata)
-
         assert runID not in runningscrapers
        
         scraperstatus = { 'scraperID':scraperID, 'runID':runID, 'short_name':short_name, 'time':time.time() }

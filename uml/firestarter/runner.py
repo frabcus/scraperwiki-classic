@@ -29,6 +29,7 @@ parser.add_option("--name", default='', metavar="SCRAPER_NAME")
 parser.add_option("--cpulimit", default='80')
 parser.add_option("--urlquery", default='')
 parser.add_option("--draft", action="store_true", default=False)
+parser.add_option("--beta_user", action="store_true", default=False)
 options, args = parser.parse_args()
 
 # too much of a difficult issue with file permissions to get this right
@@ -100,7 +101,8 @@ def buildjdata(code, options, config):
     jdata["scraperid"] = options.guid
     jdata["urlquery"] = options.urlquery
     jdata["scrapername"] = options.name
-
+    jdata["beta_user"] = options.beta_user
+    
     # set the runid
     jdata["runid"] = '%.6f_%s' % (time.time(), uuid.uuid4())
     if jdata.get("draft"):
