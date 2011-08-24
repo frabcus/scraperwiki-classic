@@ -334,7 +334,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         self.server.lock.acquire()
         self.allowed = self.server.allowed 
         self.blocked = self.server.blocked
-        print 'COOL', self.allowed
         self.server.lock.release()
 
         #  If this is a transparent HTTP or HTTPS proxy then modify the path with the
