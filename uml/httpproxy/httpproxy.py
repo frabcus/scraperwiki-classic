@@ -103,15 +103,13 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         import re
         
-        print 'Checking whether ', path, ' is allowed with ', self.m_allowed, ' and ', self.m_blocked
         if allowAll :
-            print 'AllowAll is set'
             return True
 
         # XXX Workaround - if ident failed then allow by default
-        if not scraperID:
-            print 'No scraperId'            
-            return True
+#        if not scraperID:
+#            print 'No scraperId'            
+#            return True
 
         allowed = False
         if re.match("http://127.0.0.1[/:]", path):
@@ -119,16 +117,12 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         
         # first if it is the white-list
         for allow in self.m_allowed :
-            print 'Checking ', path, ' against ', allow
             if re.match(allow, path) :
-                print 'Match'
                 allowed = True
         
         # but not if it is in the black-list
         for block in self.m_blocked :
-            print 'Checking ', path, ' against ', block            
             if re.match(block, path) :
-                print 'Match'
                 allowed = False
         
         return allowed
