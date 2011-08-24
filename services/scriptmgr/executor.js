@@ -282,6 +282,8 @@ function execute(http_req, http_res, raw_request_data) {
 				return;				
 	   		} 
 
+			util.log.debug('File written to ' + path.join(lxc.code_folder, "script." + extension ));
+			
 			var startTime = new Date();		
 
 			// Pass the data proxy and runid to the script that will trigger the exec.py
