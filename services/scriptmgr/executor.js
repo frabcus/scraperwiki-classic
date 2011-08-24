@@ -274,8 +274,7 @@ function execute(http_req, http_res, raw_request_data) {
 		console.log( 'Running on ' + res );		
 				
 		var extension = util.extension_for_language(script.language);
-		var tmpfile = path.join(lxc.code_folder(), "script." + extension );
-		util.log.debug('Writing tmpfile to ' + tmpfile )
+		var tmpfile = path.join(lxc.code_folder(res), "script." + extension );
 		fs.writeFile(tmpfile, request_data.code, function(err) {
 	   		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
