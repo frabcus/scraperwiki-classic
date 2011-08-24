@@ -332,8 +332,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         Handle GET and POST requests.
         """
         self.server.lock.acquire()
-        self.m_allowed = self.server.allowed 
-        self.m_blocked = self.server.blocked
+        self.m_allowed = self.server.allowed[:]
+        self.m_blocked = self.server.blocked[:]
         self.server.lock.release()
 
         #  If this is a transparent HTTP or HTTPS proxy then modify the path with the
