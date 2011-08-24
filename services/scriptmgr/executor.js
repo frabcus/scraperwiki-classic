@@ -293,7 +293,8 @@ function execute(http_req, http_res, raw_request_data) {
 			util.log.debug('Command: ' + cmd);
 						
 //	 		e = spawn('lxc-execute', ['-n', res, '-f', cfgpath, cmd]);
-	 		e = spawn('lxc-execute -n ' + res + ' -f '+ cfgpath + ' ' + cmd);	
+			var run = 'lxc-execute -n ' + res + ' -f '+ cfgpath + ' ' + cmd;
+	 		e = spawn( run.replace(' ', '\ ') );	
 	
 			e.stdout.on('data', function (data) {
 				handle_process_output( http_res, data, true );
