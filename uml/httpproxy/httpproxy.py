@@ -24,6 +24,9 @@ import OpenSSL
 import re
 import memcache
 from threading import Thread
+try    : import json
+except : import simplejson as json
+
 
 global config
 global cache_client
@@ -328,8 +331,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Handle GET and POST requests.
         """
+        self.server.lock.acquire()
         self.allowed = self.server.allowed 
         self.blocked = self.server.blocked
+        self.server.lock.release()
 
         #  If this is a transparent HTTP or HTTPS proxy then modify the path with the
         #  protocol and the host.
@@ -627,11 +632,29 @@ class WhitelistThread(Thread):
     def run(self):
         while 1:
             print 'Attempting lookup '
-            self.server.lock.acquire()
-            print 'Setting lists'          
-            self.server.allowed = []
-            self.server.blocked = []
-            self.server.lock.release()          
+            data = None
+            try:
+                data = urllib2.urlopen(self.url).read()
+            except:
+                print 'Failed to fetch whitelist from server'          
+            
+            encoded = None
+            
+            if data:
+                try:
+                    encoded = json.encode(data)
+                except:
+                    pass
+                    
+            if encoded:
+                self.server.lock.acquire()
+                print 'Setting lists'          
+                self.server.allowed = encoded['white'][:]
+                self.server.blocked = encoded['black'][:]
+                print self.server.allowed
+                print self.server.blocked
+                self.server.lock.release()          
+                
             print 'Sleeping '          
             time.sleep(30)
     
