@@ -409,7 +409,7 @@ class ScraperController(BaseController):
                 if exitmessage['term_sig'] in sigmap:
                     exitmessage['term_sig_text'] = sigmap[exitmessage['term_sig']]
 
-            logger.debug("%s endmessage: %s  exitmessage: %s" % (scrapername, endingmessage, exitmessage))
+            logger.debug("scraper: %s endmessage: %s  exitmessage: %s" % (scrapername, endingmessage, exitmessage))
             del runidstocontrollers[self.m_runID]
             del pidstorunids[childpid]
 
