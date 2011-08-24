@@ -158,7 +158,7 @@ function handleIdent(req,res) {
 		res.end('\n')
 	}
 	else {
-		write_error( res, "Unable to find script for IP " + s + " we have " + exec.known_ips);
+		write_error( res, "Unable to find script for IP " + s + " we have " + exec.known_ips());
 	}
 }
 
