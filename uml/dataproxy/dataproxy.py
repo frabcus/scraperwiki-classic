@@ -63,7 +63,8 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             host = config.get("dataproxy", 'lxc_server')
             lxc = True
         except:
-            host      = config.get(uml, 'host')
+            host = None
+            uml_host      = config.get(uml, 'host')
             
         via       = config.get(uml, 'via' )
         rem       = self.connection.getpeername()
@@ -71,7 +72,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if lxc and rem[0] == host:
             lident = urllib.urlopen ('http://%s/Ident?%s:%s' % (host, rem[0], loc[1])).read()               
         else:
-            lident = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()   
+            lident = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (uml_host, via, port, loc[1])).read()   
 
                 # should be using cgi.parse_qs(query) technology here
         for line in lident.split('\n'):
