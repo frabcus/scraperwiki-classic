@@ -603,9 +603,9 @@ class HTTPProxyServer \
             BaseHTTPServer.HTTPServer
         ) :
 
-    def __init__(self,*args,**kwargs):
-        self.womble = 'ross'
-        super(HTTPProxyServer, self).__init__(args,kwargs)
+    def __init__(self, *args, **kwargs):
+        self.womble = 'ross'        
+        HTTPProxyServer.__init__(self, *args, **kwargs)
 
 
 class HTTPSProxyServer (HTTPProxyServer) :
