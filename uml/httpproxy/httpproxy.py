@@ -641,9 +641,12 @@ class WhitelistThread(Thread):
             encoded = None
             
             if data:
+                print 'Data is ', data
                 try:
                     encoded = json.encode(data)
-                except:
+                    print encoded
+                except Exception,e:
+                    print e,'Failed to encode data'
                     pass
                     
             if encoded:
