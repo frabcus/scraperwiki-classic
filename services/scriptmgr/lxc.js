@@ -78,7 +78,7 @@ exports.kill = function( script ) {
 	if ( vm ) {
 		// trigger an lxc-kill
 		// lxc-stop -n 'vm'
-		e = spawn('lxc-stop', ['-n', vm]);
+		e = spawn('/usr/bin/lxc-stop', ['-n', vm]);
 
 		// Clean up indices
 		delete vms_by_run_id[ script.run_id ];		
@@ -149,7 +149,7 @@ function create_vm ( name ) {
 		    } else {
 				console.log('Running lxc-create')
 				// call lxc-create -n name -f folder/config
-			 	e = spawn('lxc-create', ['-n', name, '-f', tgt]);
+			 	e = spawn('/usr/bin/lxc-create', ['-n', name, '-f', tgt]);
 				e.on('exit', function (code, signal) {
 					if ( code && code == 127 ) {
 						util.log.fatal('LXC-Create exited with code ' + code);											
