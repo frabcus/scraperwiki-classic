@@ -58,13 +58,13 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         # we will set host to either host of the uml or (if we have lxc_server set)
         # to the LXC server.
+        uml_host      = config.get(uml, 'host')        
         lxc = False
         try:
             host = config.get("dataproxy", 'lxc_server')
             lxc = True
         except:
             host = None
-            uml_host      = config.get(uml, 'host')
             
         via       = config.get(uml, 'via' )
         rem       = self.connection.getpeername()
