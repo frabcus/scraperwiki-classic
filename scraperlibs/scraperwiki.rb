@@ -3,6 +3,7 @@ require	'uri'
 require	'net/http'
 require 'scraperwiki/datastore'
 require 'generator'
+require 'httpclient'
 
 class SqliteException < RuntimeError
 end
@@ -26,34 +27,15 @@ module ScraperWiki
         ScraperWiki.dumpMessage({'message_type' => 'httpresponseheader', 'headerkey' => headerkey, 'headervalue' => headervalue})
     end
 
-    def ScraperWiki._follow_redirects(response, limit = 10)
-      # You should choose better exception.
-      raise ArgumentError, 'HTTP redirect too deep' if limit == 0
-
-      #response = Net::HTTP.get_response(uri)
-      case response
-        when Net::HTTPSuccess then 
-          response
-        when Net::HTTPRedirection then 
-          new_response = Net::HTTP.get_response(URI.parse(response['location']))
-          _follow_redirects(new_response, limit - 1)
-        else
-          response.error!
-      end
-    end
-
     def ScraperWiki.scrape(url, params = nil)
-        uri  = URI.parse(url)
-        if params.nil?
-            response = Net::HTTP.get_response(uri)
-        else
-            if uri.path == ''
-                uri.path = '/' # must post to a path
-            end
-            response = Net::HTTP.post_form(uri, params)
-        end
-        
-        return ScraperWiki._follow_redirects(response).body
+      client = HTTPClient.new
+      client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+      if params.nil? 
+        return client.get_content(url)
+      else
+        return client.post_content(url, params)
+      end
     end
 
     def ScraperWiki.gb_postcode_to_latlng(postcode)
