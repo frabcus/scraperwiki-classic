@@ -50,10 +50,20 @@ exports.exec = function(script, code) {
 	var cf = get_code_folder(name);
 	// delete the contents of cf
 
-	fs.unlinkSync( path.join(cf, 'script.py') );
-	fs.unlinkSync( path.join(cf, 'script.rb') );
-	fs.unlinkSync( path.join(cf, 'script.php') );
-	fs.unlinkSync( path.join(cf, 'script.js') );			
+	// TODO: Fix this and only unlink if exists
+	try {
+		fs.unlinkSync( path.join(cf, 'script.py') );
+	} catch(e){}
+
+	try {
+		fs.unlinkSync( path.join(cf, 'script.rb') );
+	} catch(e){}		
+	try {	
+		fs.unlinkSync( path.join(cf, 'script.php') );
+	} catch(e){}			
+	try {	
+		fs.unlinkSync( path.join(cf, 'script.js') );			
+	} catch(e){}			
 	
 	return name;
 };
