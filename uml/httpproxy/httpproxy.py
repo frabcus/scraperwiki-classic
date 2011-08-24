@@ -64,13 +64,13 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         Class constructor. All arguments (positional and keyed) are passed down to
         the base class constructor.
         """
-
+        BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
+        
         self.server.lock.acquire()
         self.m_allowed = self.server.allowed[:]
         self.m_blocked = self.server.blocked[:]
         self.server.lock.release()
-
-        BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
+        
 
     def log_message (self, format, *args) :
 
