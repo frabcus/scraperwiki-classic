@@ -619,21 +619,20 @@ class HTTPProxyServer \
 class WhitelistThread(Thread):
     
     def __init__ (self,url, server):
-      Thread.__init__(self)
-      self.url = url
-      self.server = server
+        Thread.__init__(self)
+        self.url = url
+        self.server = server
 
-   def run(self):
-      while 1:
-          print 'Attempting lookup '
-          self.server.lock.acquire()
-          print 'Setting lists'          
-          self.server.allowed = []
-          self.server.blocked = []
-          self.server.lock.release()          
-          print 'Sleeping '          
-          time.sleep(30)
-          
+    def run(self):
+        while 1:
+            print 'Attempting lookup '
+            self.server.lock.acquire()
+            print 'Setting lists'          
+            self.server.allowed = []
+            self.server.blocked = []
+            self.server.lock.release()          
+            print 'Sleeping '          
+            time.sleep(30)
     
 
 class HTTPSProxyServer (HTTPProxyServer) :
