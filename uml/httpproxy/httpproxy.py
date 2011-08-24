@@ -368,9 +368,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if scheme not in [ 'http', 'https' ] or fragment or not netloc :
             self.send_error (400, "Malformed URL %s" % self.path)
             return
-        if not self.hostAllowed (self.path, scraperID) :
-            self.send_error (403, self.blockmessage(self.path))
-            return
+#        if not self.hostAllowed (self.path, scraperID) :
+#            self.send_error (403, self.blockmessage(self.path))
+#            return
 
         if runID is not None :
             statusLock.acquire ()
