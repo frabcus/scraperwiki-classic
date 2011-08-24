@@ -610,7 +610,7 @@ class HTTPProxyServer \
         self.blocked = []
         self.lock = threading.Lock()
         
-        url = config.getint (varName, 'whitelist_url')
+        url = config.get (varName, 'whitelist_url')
         self.current = WhitelistThread(url,self)
         self.current.start()    
         
