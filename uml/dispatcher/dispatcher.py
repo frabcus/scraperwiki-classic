@@ -324,6 +324,7 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if 'user' in jdata:
             userdict = jdata['user']
             beta_flag = 'beta_user' in userdict and userdict['beta_user'] == True
+            self.logger.info(userdict)
 
         assert runID not in runningscrapers
        
