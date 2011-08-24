@@ -107,7 +107,7 @@ class BaseController (BaseHTTPServer.BaseHTTPRequestHandler) :
         # XXX todo, get PHP working on OSX
         pid = None
         if pid is None:
-            p    = re.compile ('(?:exec.[a-z]+|[Pp]ython|[Rr]uby) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
+            p    = re.compile ('(?:exec.[a-z]+|[Pp]ython|[Rr]uby|[Pp][Hh][Pp]) *([0-9]*).*TCP.*:%s.*:%s.*' % (lport, rport))
             lsof = subprocess.Popen([ 'lsof', '-n', '-P', '-i' ], stdout = subprocess.PIPE).communicate()[0]
             for line in lsof.split('\n') :
                 m = p.match(line)

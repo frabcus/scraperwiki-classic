@@ -28,20 +28,4 @@
   <p class="infobox">Only the creator of a {{scraper.wiki_type}} can delete it.</p>
 {% endif %}
 
-{% if user.is_staff %}
-<h3>Admin only</h3>
-<div class="staff">
-  <p><a href="/admin/codewiki/{{scraper.wiki_type}}/{{scraper.pk}}/">{{scraper.wiki_type|capfirst}}'s Django admin page</a></p>
-
-  {% ifequal scraper.wiki_type 'scraper' %}
-    <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
-      {% csrf_token %}
-      <input type="hidden" name="run_scraper" value="1" />
-      <input type="submit" id="btnRunScraper" class="" value="Run now (as if scheduled)" />
-    </form>
-  {% endifequal %}
-
-</div>
-{% endif %}
-
 
