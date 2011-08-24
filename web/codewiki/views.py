@@ -365,7 +365,7 @@ def scraper_delete_scraper(request, wiki_type, short_name):
     scraper.privacy_status = "deleted"
     scraper.save()
     request.notifications.add("Your %s has been deleted" % wiki_type)
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect(reverse('dashboard'))
 
 
 
