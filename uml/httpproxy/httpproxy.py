@@ -65,8 +65,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         the base class constructor.
         """
 
-        self.m_allowed = []
-        self.m_blocked = []
+        self.server.lock.acquire()
+        self.m_allowed = self.server.allowed[:]
+        self.m_blocked = self.server.blocked[:]
+        self.server.lock.release()
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
 
