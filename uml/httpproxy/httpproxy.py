@@ -63,6 +63,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
         self.m_allowed = []
         self.m_blocked = []
+        print self.server.womble
 
 
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
@@ -596,12 +597,16 @@ class HTTPSProxyHandler (HTTPProxyHandler) :
         self.connection = self.request
         self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
         self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
+        
 
 class HTTPProxyServer \
         (   SocketServer.ThreadingMixIn,
             BaseHTTPServer.HTTPServer
         ) :
-    pass
+
+    def __init__(self,*args,**kwargs):
+        self.womble = 'ross'
+        super(HTTPProxyServer, self).__init__(args,kwargs)
 
 
 class HTTPSProxyServer (HTTPProxyServer) :
