@@ -159,7 +159,6 @@ function handleIdent(req,res) {
 	}
 	else {
 		write_error( res, "Unable to find script for IP " + s);
-		res.end('')	;
 	}
 }
 
