@@ -93,5 +93,4 @@ if DEBUG:
     ]
     SQL_DEBUG = False
 
-
 HIGHRISE_ENABLED = False

@@ -115,12 +115,17 @@ class spawnRunner(protocol.ProcessProtocol):
 
 
 
-def MakeRunner(scrapername, guid, language, urlquery, username, code, client):
+def MakeRunner(scrapername, guid, language, urlquery, username, code, client, user=None):
     args = ['./firestarter/runner.py']
     args.append('--guid=%s' % guid)
     args.append('--language=%s' % language)
     args.append('--name=%s' % scrapername)
     args.append('--urlquery=%s' % urlquery)
+    try:
+        if user is not None and user.get('beta_user',False):
+            args.append('--beta_user')
+    except:
+        pas
     if not username:
         args.append('--draft')
 
@@ -467,7 +472,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         scrapername = parsed_data.get('scrapername', '')
         urlquery = parsed_data.get('urlquery', '')
         username = parsed_data.get('username', '')
-        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self)
+        user = parsed_data.get('user', None)
+        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, user=user)
         self.factory.notifyMonitoringClients(self)
         
 

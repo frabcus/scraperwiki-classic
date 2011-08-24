@@ -5,7 +5,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 
-# to delete and deprecate
+
 class api_key(models.Model):
     user = models.ForeignKey(User)
     key = models.CharField(blank=True, max_length=32)

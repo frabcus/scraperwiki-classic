@@ -58,20 +58,27 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         # we will set host to either host of the uml or (if we have lxc_server set)
         # to the LXC server.
+        try:
+            # This may be the VM name being passed through as part of the ident
+            uml_host  = config.get(uml, 'host')                    
+        except:
+            uml_host = None            
+        
         lxc = False
         try:
-            host = config.get("dataproxy", 'lxc_server')
+            host      = config.get("dataproxy", 'lxc_server')
             lxc = True
         except:
-            host      = config.get(uml, 'host')
+            host = None
+            uml_host = None
             
-        via       = config.get(uml, 'via' )
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
-        if lxc:
+        if lxc and rem[0] == host[0:host.find(':')]:
             lident = urllib.urlopen ('http://%s/Ident?%s:%s' % (host, rem[0], loc[1])).read()               
         else:
-            lident = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (host, via, port, loc[1])).read()   
+            via    = config.get(uml, 'via' )
+            lident = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (uml_host, via, port, loc[1])).read()   
 
                 # should be using cgi.parse_qs(query) technology here
         for line in lident.split('\n'):
@@ -135,8 +142,8 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 firstmessage["dataauth"] = dataauth
 
                 # run verification of the names against what we identified
-                if runID != params.get('vrunid') or short_name != params.get("vscrapername", None):
-                    self.logger.error("Mismatching scrapername %s" % str([runID, short_name, params.get('vrunid'), params.get("vscrapername")]))
+                if runID != params.get('vrunid') or short_name != params.get("vscrapername", ''):
+                    self.logger.error("Mismatching scrapername %s" % str([runID, short_name, params.get('vrunid'), params.get("vscrapername", '')]))
                     firstmessage["error"] = "Mismatching scrapername from ident"
                     firstmessage["status"] = "bad: mismatching scrapername from ident"
             
@@ -177,7 +184,12 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 while ssrec:
                     line = "".join(sbuffer)
                     if line:
-                        request = json.loads(line) 
+                        try:
+                            request = json.loads(line) 
+                        except ValueError, ve:
+                            # add the content of the line for debugging
+                            raise ValueError("%s; reading line '%s'" % (str(ve), line))
+
                         try:
                             self.process(db, request)
                         except socket.error:

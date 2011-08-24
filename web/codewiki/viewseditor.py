@@ -115,9 +115,9 @@ def reload(request, short_name):
 
 
 
-blankstartupcode = { 'scraper' : { 'python': "# Blank Python\n", 
-                                    'php':   "<?php\n# Blank PHP\n?>\n", 
-                                    'ruby':  "# Blank Ruby\n",
+blankstartupcode = { 'scraper' : { 'python': "import scraperwiki\n\n# Blank Python\n\n", 
+                                    'php':   "<?php\n\n# Blank PHP\n\n?>\n", 
+                                    'ruby':  "# Blank Ruby\n\n",
                                  }, 
                      'view'    : { 'python': "# Blank Python\nsourcescraper = ''\n", 
                                    'php':    "<?php\n# Blank PHP\n$sourcescraper = ''\n?>\n", 
@@ -342,9 +342,9 @@ def handle_editor_save(request):
         urlquery = request.POST.get('urlquery', '')
         if request.user.is_authenticated() and scraper.actionauthorized(request.user, "stimulate_run"):
             runnerstream = runsockettotwister.RunnerSocket()
-            stimulaterunmessage = runnerstream.stimulate_run_from_editor(guid, request.user.username, scraper.short_name, clientnumber, language, code, urlquery)
+            stimulaterunmessage = runnerstream.stimulate_run_from_editor(scraper, request.user, clientnumber, language, code, urlquery)
         else:
-            stimulaterunmessage = {"message":"not authorized to run"}
+            stimulaterunmessage = {"message":"not authorised to run"}
 
     if stimulaterun == "editorstimulaterun_nosave":
         stimulaterunmessage['status'] = 'notsaved'
@@ -392,6 +392,8 @@ def handle_session_draft(request):
         # we reload into editor but only save for an authorized user
     if draft_scraper.actionauthorized(request.user, "savecode"):
         save_code(draft_scraper, request.user, draft_code, earliesteditor, commitmessage, sourcescraper)
+        if 'ScraperDraft' in request.session:
+            del request.session['ScraperDraft']        
 
     response_url = reverse('editor_edit', kwargs={'wiki_type': draft_scraper.wiki_type, 'short_name' : draft_scraper.short_name})
     return HttpResponseRedirect(response_url)

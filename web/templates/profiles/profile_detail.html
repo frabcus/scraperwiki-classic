@@ -76,13 +76,5 @@
 
     </div>
 
-    {% if user.is_staff %}
-        <div class="staff">
-            <p><b>Admin only</b></p>
-
-            <p><a href="/admin/auth/user/{{profile.user.pk}}/">User&rsquo;s Django admin page</a></b></p>
-        </div>
-    {% endif %}
-
  
     {% endblock %}

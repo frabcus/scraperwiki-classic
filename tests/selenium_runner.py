@@ -143,6 +143,8 @@ class OurTextTestRunner:
 # python selenium_runner.py --url=http://dev.scraperwiki.com --seleniumhost=ondemand.saucelabs.com 
 #           --username=goatchurch --accesskey=6727bb66-998e-464c-b8f1-bb4f31d1a531 --os="Windows 2003" 
 #           --browser=firefox --browserversion=3.6.--tests=test_scrapers,test_scrapers
+#
+# ./tests/selenium_runner.py --url=https://dev.scraperwiki.com/ --adminusername=frabcus --adminpassword=XXXXX --pause --verbosity=2
 
 if __name__ == '__main__':
     parser = optparse.OptionParser()
@@ -152,7 +154,7 @@ if __name__ == '__main__':
                       default="http://localhost:8000/", metavar="application url (string)")
 
     parser.add_option("--tests", default="test_registration,test_scrapers", 
-                     help="Comma separated list of modules to run tests from, defaults to 'test_registration,test_scrapers'")
+                     help="Comma separated list of tests to run, defaults to 'test_registration,test_scrapers'. Each parameter can either be a) a module name, e.g. test_registration, b) a class within a module, e.g. test_registration.TestRegistration, or c) just one test method, e.g. test_registration.TestRegistration.test_invalid_email")
     parser.add_option("--verbosity", dest="verbosity", action="store", default=1, type='int', 
                      help="How much to display while running the tests, try 0, 1, 2. Default is 1.")
     parser.add_option("--pause", dest="pause", action="store_true", default=False, 
@@ -178,10 +180,12 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()
     if len(args) > 0:
+        print "No arguments required, just options"
         parser.print_help()
         sys.exit(1)
 
     if (bool(options.adminusername) ^ bool(options.adminpassword)):
+        print "Need --adminusername and --adminpassword"
         parser.print_help()
         sys.exit(1)
     elif (bool(options.adminusername) and bool(options.adminpassword)):
@@ -207,13 +211,12 @@ if __name__ == '__main__':
         local services inside the virtualenv'
             print '*' * 80
         
-    for testsmodule in options.tests.split(","):
-        module = imp.load_module(testsmodule, *imp.find_module(testsmodule))
+    for testsstring in options.tests.split(","):
         if options.verbosity > 1:
-            print '\n%s\nRunning tests from module: %s\n' % ("="*80,module.__name__)
+            print '\n%s\nRunning tests: %s\n' % ("="*80,testsstring)
         elif options.verbosity > 0:
-            print 'module %s' % (module.__name__)
-        loader = unittest.TestLoader().loadTestsFromModule( module )
+            print 'tests %s' % (testsstring)
+        loader = unittest.TestLoader().loadTestsFromName( testsstring )
         OurTextTestRunner( verbosity=options.verbosity, pause_on_failure = options.pause ).run( loader )
     
     

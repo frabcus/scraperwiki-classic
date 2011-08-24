@@ -1,14 +1,9 @@
-from codewiki.models import Code, View, Scraper, ScraperMetadata, UserCodeRole, ScraperRunEvent
+from codewiki.models import Code, View, Scraper, UserCodeRole, ScraperRunEvent
 from django.contrib import admin
 from django.db import models
 
 class UserCodeRoleInlines(admin.TabularInline):
     model = UserCodeRole
-    extra = 1
-
-class ScraperMetadataInlines(admin.TabularInline):
-    model = ScraperMetadata
-    max_num = 100
     extra = 1
 
 class ScraperRunEventInlines(admin.TabularInline):
@@ -41,5 +36,4 @@ class ViewAdmin(CodeAdmin):
 
 admin.site.register(Scraper, ScraperAdmin)
 admin.site.register(View, ViewAdmin)
-admin.site.register(ScraperMetadata)
 admin.site.register(ScraperRunEvent)

@@ -234,7 +234,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         
         for attempt in range(5):
             try:
-                if lxc_server:
+                # If the connection comes form the lxc_server (that we know about form config)
+                # then use it.
+                if lxc_server and '10.0' in rem[0]:
                     ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)).read()
                 else:
                     ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
@@ -366,9 +368,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if scheme not in [ 'http', 'https' ] or fragment or not netloc :
             self.send_error (400, "Malformed URL %s" % self.path)
             return
-        if not self.hostAllowed (self.path, scraperID) :
-            self.send_error (403, self.blockmessage(self.path))
-            return
+#        if not self.hostAllowed (self.path, scraperID) :
+#            self.send_error (403, self.blockmessage(self.path))
+#            return
 
         if runID is not None :
             statusLock.acquire ()
@@ -713,7 +715,7 @@ if __name__ == '__main__' :
         if os.fork() == 0 :
             os .setsid()
             sys.stdin  = open ('/dev/null')
-            sys.stdout = open ('%s/log/%s' % (varDir, varName), 'w', 0)
+            sys.stdout = open ('%s/log/scraperwiki/%s' % (varDir, varName), 'w', 0)
             sys.stderr = sys.stdout
             if os.fork() == 0 :
                 ppid = os.getppid()

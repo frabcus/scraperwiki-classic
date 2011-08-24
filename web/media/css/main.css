@@ -2431,30 +2431,6 @@ div.tab_tools form {
 	display: inline;
 }
 
-/* meta data */
-
-div.metadata dl {
-	padding: 0;
-	margin: 0;
-	line-height: 1.5em;
-}
-
-div.metadata dt {
-	float: left;
-	font-weight: normal;
-	font-style: italic;
-}
-
-div.metadata dd {
-	position: relative;
-	left: 1em;
-}
-
-div.metadata dt, div.metadata dd {
-	padding: 0;
-	margin: 0;
-}
-
 /* Scraper pages */
 
 #scraper_about .text_wiki {

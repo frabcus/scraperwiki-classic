@@ -181,24 +181,21 @@
            has not been run yet.
         {% endif %}
     </p>
-    <p>
-      <span title="Exact time of next run: {{scraper.scraper.next_run}}">
-          It is scheduled to run 
-          <span id="spnRunInterval">
-              {% include 'codewiki/includes/run_interval.html' %}
-          </span>
-      </span>
-    </p>
 
-    {% if user_owns_it %}    
-        {% ifnotequal scraper.scraper.next_run|timeuntil '0 minutes' %}
-            <form action="{% url scraper_schedule_scraper scraper.short_name %}" method="post">
-                {% csrf_token %}
-                <input type="hidden" name="schedule_scraper" value="1" />
-                <input type="submit" id="btnScheduleScraper" class="" value="Schedule next run ASAP" />
-            </form>
-            <br/>
-        {% endifnotequal %}
+    <div id="spnRunInterval">
+       {% include 'codewiki/includes/run_interval.html' %}
+    </div>
+
+    {% if user.is_staff %}
+    <div class="staff">
+      {% ifequal scraper.wiki_type 'scraper' %}
+        <form action="{% url scraper_run_scraper scraper.short_name %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="run_scraper" value="1" />
+          <input type="submit" id="btnRunScraper" class="" value="Run now (as if scheduled)" />
+        </form>
+      {% endifequal %}
+    </div>
     {% endif %}
 
     {% include 'codewiki/includes/admin_controls.html' %}
@@ -223,7 +220,7 @@ $(document).ready(function()
     setupScraperOverview('{{scraper.short_name}}');
     setupChangeEditorStatus();
 {% if user.is_authenticated %}
-    setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA and METADATA.");
+    setupButtonConfirmation("btnClearDatastore", "Are you sure? Clicking 'ok' will delete all SCRAPED DATA.");
     setupButtonConfirmation("btnDeleteScraper", "Are you sure? Clicking 'ok' will delete THE ENTIRE SCRAPER and it's data.");
 {% endif %}
 });

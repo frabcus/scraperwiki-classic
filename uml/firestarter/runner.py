@@ -29,6 +29,7 @@ parser.add_option("--name", default='', metavar="SCRAPER_NAME")
 parser.add_option("--cpulimit", default='80')
 parser.add_option("--urlquery", default='')
 parser.add_option("--draft", action="store_true", default=False)
+parser.add_option("--beta_user", action="store_true", default=False)
 options, args = parser.parse_args()
 
 # too much of a difficult issue with file permissions to get this right
@@ -100,27 +101,12 @@ def buildjdata(code, options, config):
     jdata["scraperid"] = options.guid
     jdata["urlquery"] = options.urlquery
     jdata["scrapername"] = options.name
-
+    jdata["beta_user"] = options.beta_user
+    
     # set the runid
     jdata["runid"] = '%.6f_%s' % (time.time(), uuid.uuid4())
     if jdata.get("draft"):
         jdata["runid"] = "draft|||%s" % jdata["runid"]
-
-    # set the white and blacklists
-    jdata["white"] = [ ]
-    jdata["black"] = [ ]
-    confurl = config.get('dispatcher', 'confurl')
-    conftxt = "white=.*"  # hard code the whitelist to avoid accessing it (better for local versions)
-    if confurl != "allwhite":
-        try:
-            conftxt = urllib2.urlopen(confurl).read().replace('\r', '')
-        except IOError:
-            if confurl[:26] != 'http://dev.scraperwiki.com':    # known problem
-                print json.dumps({ 'message_type':'console', 'content': "Failed to open: %s" % confurl })
-    for line in conftxt.split('\n'):
-        kv = line.split('=')
-        if len(kv) == 2 and kv[0] in ['white', 'black']:
-            jdata[kv[0]].append(kv[1])
 
     return jdata
 

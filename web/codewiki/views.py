@@ -72,7 +72,7 @@ def getscraperor404(request, short_name, action):
         if not (request.method == 'POST' and request.is_ajax()):
             raise SuspiciousOperation
     
-    if action in ["schedule_scraper", "run_scraper", "screenshoot_scraper", ]:
+    if action in ["schedule_scraper", "run_scraper", ]:
         if request.POST.get(action, None) != '1':
             raise SuspiciousOperation
         
@@ -320,7 +320,9 @@ def scraper_admin(request, short_name):
     if element_id == 'spnRunInterval':
         scraper.run_interval = int(request.POST.get('value', None))
         scraper.save() # XXX need to save so template render gets new values, bad that it saves below also!
-        response_text = render_to_string('codewiki/includes/run_interval.html', {'scraper': scraper}, context_instance=RequestContext(request))
+        context = {'scraper': scraper}
+        context["user_owns_it"] = (request.user in scraper.userrolemap()["owner"])
+        response_text = render_to_string('codewiki/includes/run_interval.html', context, context_instance=RequestContext(request))
 
     if element_id == 'spnLicenseChoice':
         scraper.license = request.POST.get('value', None)
@@ -336,9 +338,7 @@ def scraper_delete_data(request, short_name):
     if isinstance(scraper, HttpResponse):  return scraper
     dataproxy = DataStore(scraper.short_name)
     dataproxy.request({"maincommand":"clear_datastore"})
-    if scraper.wiki_type == "scraper":
-        scraper.scraper.scrapermetadata_set.all().delete()
-        scraper.scraper.update_meta()
+    scraper.scraper.update_meta()
     scraper.save()
     request.notifications.add("Your data has been deleted")
     
@@ -361,19 +361,13 @@ def scraper_run_scraper(request, short_name):
         call_command('run_scrapers', short_name=short_name)
     return HttpResponseRedirect(reverse('code_overview', args=[scraper.wiki_type, short_name]))
 
-def scraper_screenshoot_scraper(request, wiki_type, short_name):
-    scraper = getscraperor404(request, short_name, "screenshoot_scraper")
-    call_command('take_screenshot', short_name=short_name, url_prefix=settings.VIEW_URL, verbose=False)
-    return HttpResponseRedirect(reverse('code_overview', args=[code_object.wiki_type, short_name]))
-
-
 def scraper_delete_scraper(request, wiki_type, short_name):
     scraper = getscraperorresponse(request, wiki_type, short_name, None, "delete_scraper")
     if isinstance(scraper, HttpResponse):  return scraper
     scraper.privacy_status = "deleted"
     scraper.save()
     request.notifications.add("Your %s has been deleted" % wiki_type)
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect(reverse('dashboard'))
 
 
 

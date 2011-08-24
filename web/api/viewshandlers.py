@@ -1,6 +1,7 @@
 import urllib
 import urllib2
 
+from django.conf import settings
 from django.template import RequestContext, loader, Context
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import render_to_response
@@ -212,7 +213,13 @@ def scraper_search_handler(request):
         maxrows = 5
     result = [ ]  # list of dicts
 
-    if query == "*OVERDUE*":
+    if "HTTP_X_REAL_IP" in request.META:
+        client_ip = request.META["HTTP_X_REAL_IP"]        
+    else:
+        client_ip = "Not specified"
+
+    print 'Client IP is', client_ip
+    if query == "*OVERDUE*"  and client_ip in settings.INTERNAL_IPS:                        
         scrapers = scrapers_overdue()  # should be handling hiding private scrapers from list unless authorized caller (eg twister)
     else:
         scrapers = scraper_search_query(user=None, query=query)
@@ -235,10 +242,36 @@ def scraper_search_handler(request):
         res['created'] = scraper.created_at.isoformat()
         res['privacy_status'] = scraper.privacy_status
         res['language'] = scraper.language
-        if query == "*OVERDUE*":
+        
+
+        # Make sure that this request comes from a machine with an INTERNAL_IP
+        # This is probably not enough yet to keep information save, 
+        # TODO: Make this safer
+        if query == "*OVERDUE*" and client_ip in settings.INTERNAL_IPS:                        
             res['overdue_proportion'] = float(scraper.overdue_proportion)
             res['code'] = scraper.get_vcs_status(-1)["code"]
             res['guid'] = scraper.guid
+            
+            # Fetch the permissions
+            permissions = []
+            for perm in scraper.permissions.all():
+                permissions.append({'source':   perm.code, 
+                                    'target':   perm.permitted_object,
+                                    'can_read': perm.can_read, 
+                                    'can_write':perm.can_write})
+            res['permissions'] = permissions
+
+            
+            try:
+                profile = owner.get_profile()
+                res['user'] = { "beta_user": profile.beta_user, 
+                                 "id": owner.id }
+            except:
+                # TODO: Need to decide what to do with this. Implies that 
+                # an anonymous user is doing this and that security will
+                # already have been checked.
+                pass
+            
             
         result.append(res)
     

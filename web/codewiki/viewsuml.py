@@ -4,6 +4,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
+from django.contrib.auth.decorators import login_required
 
 from codewiki.models import Scraper, Code, ScraperRunEvent
 
@@ -36,8 +37,12 @@ def run_event(request, run_id):
     return HttpResponseRedirect(reverse('scraper_history', args=[scraper.wiki_type, scraper.short_name]) + "#run_" + str(event.id))
 
 
+@login_required
 def running_scrapers(request):
     from codewiki.management.commands.run_scrapers import Command
+        
+    if not request.user.is_staff:
+        return HttpResponseRedirect( reverse('dashboard') )    
         
     recenteventsmax = 20
     recentevents = ScraperRunEvent.objects.all().order_by('-run_started')[:recenteventsmax]  

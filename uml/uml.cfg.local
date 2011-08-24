@@ -103,6 +103,7 @@ mem = 256M
 count = 25
 via = 9001
 count = 50
+beta_only = 1
 
 [uml001]
 host	= 127.0.0.1
@@ -112,6 +113,7 @@ port	= 9001
 via	= 9001
 mem	= 128M
 count	= 25
+beta_only = 0
 
 [uml002]
 host	= 127.0.0.1
@@ -121,6 +123,7 @@ port	= 9001
 via	= 9001
 mem	= 128M
 count	= 2
+beta_only = 0
 
 
 

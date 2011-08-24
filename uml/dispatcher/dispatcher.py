@@ -15,6 +15,7 @@ import pwd
 import grp
 import logging
 import logging.config
+import traceback
 try:
     import cloghandler
 except:
@@ -40,17 +41,19 @@ config.readfp(open(poptions.config))
 #stdoutlog = open('/var/www/scraperwiki/uml/var/log/dispatcher.log'+"-stdout", 'a', 0)
 stdoutlog = None
 
+
+runningscraperLock = threading.Lock()
 runningscrapers = { }   # maps runid => { scraperID, runID, short_name, uname, socket }
 
 class UML(object):
-    def __init__(self, uname, server, port, count):
+    def __init__(self, uname, server, port, count, beta_only=False):
         self.uname = uname
         self.server = server
         self.port = port
         self.count = count
         self.runids = set()
+        self.beta_only = beta_only
         self.livestatus = "live"  # or closing, or unresponsive
-
         self.logger = logging.getLogger('dispatcher')
 
     def is_available(self):
@@ -92,30 +95,9 @@ class UMLList(object):
         self.UMLLock = threading.Lock()
         self.UMLs = {} # maps uname => UML object
 
-        # Will attempt to add LXC as a target, based on the configuration
-        # file and presence of mainlxc as a section.
-        try:
-            self.addLXC('mainlxc')
-        except:
-            pass
-        
+                
 
-    def addLXC(self, name):
-        if not config.has_section(uname):
-            raise UnknownUMLException()
-        if uname in self.UMLs:
-            raise DuplicateUMLException()
-
-        host = config.get(uname, 'host')
-        port = config.getint(uname, 'via')
-        count = config.getint(uname, 'count')
-
-        self.UMLLock.acquire()
-        self.UMLs[uname] = UML(uname, host, port, count)
-        self.UMLLock.release()
-        
-
-    def allocateUML(self, scraperstatus):
+    def allocateUML(self, scraperstatus, beta_flag=False):
                 
         self.UMLLock.acquire()
 
@@ -123,10 +105,12 @@ class UMLList(object):
         uml = None
         while umls:
             uml = umls.pop(random.randint(0, len(umls)-1))
-            if uml.is_available():
+            if uml.is_available() and (beta_flag == uml.beta_only):
                 scraperstatus["uname"] = uml.uname
                 uml.add_runid(scraperstatus["runID"])
+                runningscraperLock.acquire()
                 runningscrapers[scraperstatus["runID"]] = scraperstatus
+                runningscraperLock.release()
                 break
             else:
                 uml = None
@@ -140,7 +124,11 @@ class UMLList(object):
         
         self.UMLLock.acquire()
         uml = self.UMLs[uname]
+        
+        runningscraperLock.acquire()        
         del runningscrapers[scraperstatus["runID"]]
+        runningscraperLock.release()
+        
         uml.runids.remove(scraperstatus["runID"])
         
         if uml.livestatus == "closing" and len(uml.runids) == 0:
@@ -152,16 +140,20 @@ class UMLList(object):
 
     def addUML(self, uname):
         if not config.has_section(uname):
-            raise UnknownUMLException()
+            raise UnknownUMLException('Unknown UML %s' % uname)
         if uname in self.UMLs:
-            raise DuplicateUMLException()
+            raise DuplicateUMLException('Duplicate UML %s' % uname)
 
         host = config.get(uname, 'host')
         port = config.getint(uname, 'via')
         count = config.getint(uname, 'count')
-
+        try:
+            beta_only = config.getboolean(uname, 'beta_only')
+        except ConfigParser.NoOptionError:
+            beta_only = False
+        
         self.UMLLock.acquire()
-        self.UMLs[uname] = UML(uname, host, port, count)
+        self.UMLs[uname] = UML(uname, host, port, count, beta_only)
         self.UMLLock.release()
 
     def removeUML(self, uname):
@@ -218,9 +210,13 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # this is interpreted by codewiki/management/commands/run_scrapers.GetDispatcherStatus
     def sendStatus(self):
         res = []
-        for scraperstatus in runningscrapers.values():
-            res.append('uname=%s;scraperID=%s;short_name=%s;runID=%s;runtime=%s' % \
-                       (scraperstatus["uname"], scraperstatus["scraperID"], scraperstatus["short_name"], scraperstatus["runID"], time.time()-scraperstatus["time"]))
+        try:
+            runningscraperLock.acquire()            
+            for scraperstatus in runningscrapers.values():
+                res.append('uname=%s;scraperID=%s;short_name=%s;runID=%s;runtime=%s' % \
+                           (scraperstatus["uname"], scraperstatus["scraperID"], scraperstatus["short_name"], scraperstatus["runID"], time.time()-scraperstatus["time"]))
+        finally:
+            runningscraperLock.release()            
         self.logger.debug("sendStatus: "+str(res)[:20])
         
         self.connection.send('\n'.join(res))
@@ -261,7 +257,10 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 
     def killScraper(self, runID):
+        runningscraperLock.acquire()        
         scraperstatus = runningscrapers.get(runID)
+        runningscraperLock.release()
+        
         if scraperstatus:
             scraperstatus["socket"].sendall("close for kill command")
                 # if you close the socket here, then the select.select([socket]) will hang forever not getting any message from it
@@ -319,13 +318,14 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         scraperID = jdata['scraperid']
         short_name = jdata['scrapername']
         runID = jdata['runid']
-
+        beta_flag = 'beta_user' in jdata and jdata['beta_user'] == True
+       
         assert runID not in runningscrapers
        
         scraperstatus = { 'scraperID':scraperID, 'runID':runID, 'short_name':short_name, 'time':time.time() }
         scraperstatus["connection"] = self.connection  # used to close it
         
-        uml = self.server.uml_list.allocateUML(scraperstatus)
+        uml = self.server.uml_list.allocateUML(scraperstatus, beta_flag)
         if not uml:
             self.logger.error("no uml allocated for: %s  %s" % (short_name, runID))
             self.connection.sendall(json.dumps({'message_type': 'executionstatus', 'content': 'runcompleted', 'exit_status':"No UML allocated"})+'\n')
@@ -437,8 +437,11 @@ class UMLScanner(threading.Thread) :
         self.uml_list = uml_list
 
     def run(self):
+             
         while True:
             time.sleep(10)
+
+            # removeUML
 
             # beware that things can change in lookup lists as we are using them, which is why copies are made before looping and get() is used to access
             umltimes = [ ]
@@ -452,7 +455,8 @@ class UMLScanner(threading.Thread) :
                         self.logger.warning('unresponsive UML %s back to live' % uml.uname)
                         uml.livestatus = "live"
                 except Exception, e:
-                    self.logger.warning("Exception in UMLScanner %s" % e)
+                    
+                    self.logger.warning("Exception in UMLScanner: %s" % traceback.format_exc())
                     if type(e) == TypeError:
                         self.logger.exception("wrong version of python?")
                     if uml.livestatus == "live":

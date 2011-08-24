@@ -48,6 +48,7 @@ var options = [
   { short       : 'c', 
 	long        : 'config',
     description : 'Specify the configuration file to use',
+	value : true 
   }
 ];
 opts.parse(options, true);
@@ -68,6 +69,7 @@ if (settings.devmode) {
 // Handle uncaught exceptions and make sure they get logged
 process.on('uncaughtException', function (err) {
   util.log.fatal('Caught exception: ' + err);
+console.log( err.stack );
 });
 
 
@@ -145,19 +147,20 @@ function handleIdent(req,res) {
 		res.write( 'runid=' + script.run_id  + "\n");		
 		res.write( 'scraperid=' + script.scraper_name + "\n");
 		res.write( 'urlquery=' + script.query + "\n");		
+		util.log.debug( script.white );
 		if ( script.white ) {
 			res.write( 'allow=' + script.white + "\n");		
 		} else {
 			res.write( "allow=.*\n");		
 		}
+		util.log.debug( script.black );		
 		if ( script.black ) {
 			res.write( 'block=' + script.black + "\n");				
 		}	
 		res.end('\n')
 	}
 	else {
-		write_error( res, "Unable to find script for IP " + s);
-		res.end('')	;
+		write_error( res, "Unable to find script for IP " + s + " we have " + exec.known_ips());
 	}
 }
 

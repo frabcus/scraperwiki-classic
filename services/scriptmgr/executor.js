@@ -20,10 +20,11 @@ var qs  = require('querystring');
 var fs  = require('fs');
 var sys = require('sys');
 var spawn = require('child_process').spawn;
-
+var path  = require('path');
 
 var use_lxc = true;
 var extra_path;
+var code_folder = '/tmp';
 
 // A list of all of the currently running scripts
 var scripts = [ ];
@@ -40,14 +41,14 @@ exports.init = function( settings ) {
 	use_lxc = ! settings.devmode;
 
 	if ( use_lxc ) {
-		util.log.info("Initialising LXCs");
-		lxc.init(settings.vm_count);
+		lxc.init(settings.vm_count, settings.mount_folder);
 	}
 
 	if ( settings.devmode ) {
 		httpproxy = settings.httpproxy;
 	};
 
+	code_folder = settings.code_folder;
 	dataproxy = settings.dataproxy;
 	extra_path = settings.extra_path;
 	max_runs = settings.vm_count;
@@ -78,7 +79,9 @@ exports.kill_script = function( run_id ) {
 	return false;
 }
 
-
+exports.known_ips = function() {
+	return scripts_ip;
+}
 
 /******************************************************************************
 * Iterates through the list of scripts that we know is running and outputs 
@@ -162,7 +165,7 @@ function execute(http_req, http_res, raw_request_data) {
 		request_data = JSON.parse( raw_request_data );
 	} catch ( err )
 	{
-		dumpError( err );
+		util.dumpError( err );
 	}
 	
 	script = { run_id : request_data.runid, 
@@ -175,11 +178,12 @@ function execute(http_req, http_res, raw_request_data) {
 				ip: '',
 				response: http_res,
 				black: request_data.black || '',
-				white: request_data.white || ''  };
+				white: request_data.white || '',
+				permissions: request_data.permissions || []  };
 	
 	if ( ! use_lxc ) {
 		// Execute the code locally using the relevant file (exec.whatever)
-		var tmpfile = '/tmp/script.' + util.extension_for_language(script.language);
+		var tmpfile = path.join( code_folder, "script." + util.extension_for_language(script.language) );
 		fs.writeFile(tmpfile, request_data.code, function(err) {
 	   		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
@@ -229,18 +233,11 @@ function execute(http_req, http_res, raw_request_data) {
 				util.log.debug( "Script " + script.run_id + " executed with " + script.pid );
 
 				e.stdout.on('data', function (data) {
-					write_to_caller( http_res, data, true );					
+					handle_process_output( http_res, data, true );
 				});
 				
 				e.stderr.on('data', function (data) {
-					try {
-						s = JSON.parse(data);
-						if ( s ) {
-							http_res.write( data );
-						}
-					}catch(err) {
-						write_to_caller( http_res, data, false);
-					}					
+					handle_process_output( http_res, data, false );					
 				});				
 				
 				e.on('exit', function (code, signal) {
@@ -270,80 +267,95 @@ function execute(http_req, http_res, raw_request_data) {
 	} else {
 		
 		// Use LXC to allocate us an instance and run with it
-		/*
-		var res = lxc.exec( script, code );
-		if ( res ) {
-			http_res.end( res );
+		var res = lxc.exec( script, request_data.code );
+		if ( res == null ) {
+			var r = {"error": "No virtual machines available"}
+			http_res.end( JSON.stringify(r) );
 			return;				
 		}
-		*/
+		console.log( 'Running on ' + res );		
+				
+		var extension = util.extension_for_language(script.language);
+		var tmpfile = path.join(lxc.code_folder(res), "script." + extension );
+		fs.writeFile(tmpfile, request_data.code, function(err) {
+	   		if(err) {
+				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
+				http_res.end( JSON.stringify(r) );
+				return;				
+	   		} 
+
+			util.log.debug('File written to ' + tmpfile );
+			
+			var startTime = new Date();		
+
+			// Pass the data proxy and runid to the script that will trigger the exec.py
+			var cfgpath = '/mnt/' + res + '/config';
+						
+	 		e = spawn('/usr/bin/lxc-execute', ['-n', res, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, script.run_id ]);
+	
+			script.vm = res;
+			script.ip = lxc.ip_for_vm(res);
+				
+			scripts[ script.run_id ] = script;
+			scripts_ip[ script.ip ] = script;
+	
+			e.stdout.on('data', function (data) {
+				handle_process_output( http_res, data, true );
+			});
+			e.stderr.on('data', function (data) {
+				handle_process_output( http_res, data, false );					
+			});				
+			
+			e.on('exit', function (code, signal) {
+				if ( code == null )
+					console.log('child process exited badly, we may have killed it');
+				else 
+					console.log('child process exited with code ' + code);					
+				if ( script ) {
+					delete scripts[script.run_id];
+					delete scripts_ip[ script.ip ];
+				}
+			
+				util.log.debug('child process removed from script list');					
+
+				var endTime = new Date();
+				elapsed = (endTime - startTime) / 1000;
+
+				// 'CPU_seconds': 1, Temporarily removed
+	      		res =  { 'message_type':'executionstatus', 'content':'runcompleted', 
+	               'elapsed_seconds' : elapsed, 'exit_status': 0 };
+				if ( script && script.response ) {
+					console.log('Done');
+					script.response.end( JSON.stringify( res ) + "\n" );
+				}
+								
+				util.log.debug('Finished writing responses');
+			});
+		});
 	}
-
-
-	
-	/*
-        self.idents.append('scraperid=%s' % scraperguid)
-        self.idents.append('runid=%s' % self.m_runID)
-        self.idents.append('scrapername=%s' % scrapername)
-        for value in request['white']:
-            self.idents.append('allow=%s' % value)
-        for value in request['black']:
-            self.idents.append('block=%s' % value)
-
-        streamprintsin, streamprintsout = socket.socketpair()
-        streamjsonsin, streamjsonsout = socket.socketpair()
-       */
-	
 }
 
 
 /******************************************************************************
-* Write the response to the caller, or in this case write it back down the long
-* lived socket that connected to us.
+* Makes sure the process output goes back to the client
 ******************************************************************************/
-function write_to_caller(http_res, output, isstdout) {
-	var msg = output.toString();
-	var parts = msg.split("\n");	
-
-	// Hacky solution to making sure HTML is sent all on one line.
-	sub = msg.substring(0,100);
-	if ( sub.indexOf('html') >= 0 && sub.indexOf('>') >= 0  && sub.indexOf('<') >= 0) {
-		r = { 'message_type':'console', 'content': msg  };
-		http_res.write( JSON.stringify(r) + "\n");
+function handle_process_output(http_res, data, stdout) {
+	if (stdout) {
+		util.write_to_caller( http_res, data, true );				
 		return;
-	}
-	
-
-	for (var i=0; i < parts.length; i++) {
-		if ( parts[i].length > 0 ) {
-			try {
-				// Removing the need for the extra FD by checking if we can parse
-				// the JSON
-				s = JSON.parse(parts[i]);
-				if ( s ) {
-					http_res.write( parts[i] );
-				}
-				continue;
-			}catch(err) {
-				//
-			}
-			
-			r = { 'message_type':'console', 'content': parts[i]  };
-			http_res.write( JSON.stringify(r) + "\n");
+	} 
+	try 
+	{
+		s = JSON.parse(data);
+		if ( s ) {
+			http_res.write( data );
+			sent = true;
 		}
-	};
+	}
+	catch(err) 
+	{
+		util.write_to_caller( http_res, data, false);			
+	}		
 }
 
 
-function dumpError(err) {
-  if (typeof err === 'object') {
-    if (err.message) {
-      util.log.warn('Message: ' + err.message)
-    }
-    if (err.stack) {
-      util.log.warn(err.stack);
-    }
-  } else {
-    console.log('dumpError :: argument is not an object');
-  }
-}

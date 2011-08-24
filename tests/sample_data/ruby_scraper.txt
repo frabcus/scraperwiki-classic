@@ -5,7 +5,7 @@
 require 'nokogiri'
 
 # retrieve a page
-starting_url = 'http://scraperwiki.com/hello_world.html'
+starting_url = 'https://scraperwiki.com/hello_world.html'
 html = ScraperWiki.scrape(starting_url)
 
 # use Nokogiri to get all <td> tags

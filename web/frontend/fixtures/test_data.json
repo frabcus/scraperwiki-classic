@@ -947,8 +947,6 @@
         "pk": 1, 
         "model": "codewiki.scraper", 
         "fields": {
-            "has_geo": 0, 
-            "has_temporal": 0, 
             "last_run": null, 
             "license": "", 
             "license_link": null, 

@@ -182,6 +182,7 @@ class TestScrapers(SeleniumTest):
         time.sleep(1)
         s.open("/logout")
         self.wait_for_page()
+        time.sleep(1) # likewise
         s.type('id_nav_user_or_email', username)
         s.type('id_nav_password', password)
         s.click('nav_login_submit')

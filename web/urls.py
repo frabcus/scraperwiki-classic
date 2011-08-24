@@ -2,6 +2,7 @@ from django.conf.urls.defaults import *
 
 # please use "import <something> as local_name" as this removes issues of name collision.
 import frontend.views as frontend_views
+from codewiki import viewsuml
 
 from django.contrib.syndication.views import feed as feed_view
 from django.views.generic import date_based, list_detail
@@ -54,6 +55,9 @@ urlpatterns = patterns('',
 
     # API
     (r'^api/', include('api.urls', namespace='foo', app_name='api')),
+
+    # Status
+    url(r'^running_scrapers/$', viewsuml.running_scrapers,    name='running_scrapers'),
 
     # Documentation
     (r'^docs/', include('documentation.urls')),

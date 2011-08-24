@@ -9,6 +9,8 @@ var _    = require('underscore')._;
 var mu   = require('mu');
 var fs   = require('fs');
 var spawn = require('child_process').spawn;
+var util  = require('./utils.js');
+var path  = require('path');
 
 // All of our virtual machines
 var vms = [ ]; // vm name -> objects
@@ -19,14 +21,22 @@ var vms_by_runid = [ ]; // maps of runid -> vm name
 
 var root_folder = '';
 
+var config_tpl = '';
+var fstab_tpl  = '';
+
+
 /******************************************************************************
-* 
+* Initialise the LXC handling by storing some properties and caching some 
+* templates ( only until we have created the relevant config files ).
 ******************************************************************************/
 exports.init = function(count, lxc_root_folder) {
 	root_folder = lxc_root_folder;
-		
-	vms = _.map( _.range(1, count), function(num){ return 'vm' + num; } );	
-	vms = _.invoke( vms, 'create_vm' );
+	
+	config_tpl = fs.readFileSync( './templates/config.tpl', "utf-8");
+	fstab_tpl = fs.readFileSync('./templates/fstab.tpl', "utf-8");
+
+	vms = _.map( _.range(1, count + 1), function(num){ return 'vm' + num; } );	
+	_.map( vms, function(v) { create_vm(v); } );
 };
 
 
@@ -35,15 +45,27 @@ exports.init = function(count, lxc_root_folder) {
 ******************************************************************************/
 exports.exec = function(script, code) {
 	// execute lxc-execute on a vm, after we've been allocated on
-	vm = allocate_vm( script );
-	if ( ! vm ) {
-		r = {"error":"No VM resource is available", "headers": '' , "lengths":  -1 };
-		return JSON.stringify(r);
-	}
+	var name = allocate_vm( script );
+	// clean up the files that may still be there.....
+	var cf = get_code_folder(name);
+	// delete the contents of cf
+
+	// TODO: Fix this and only unlink if exists
+	try {
+		fs.unlinkSync( path.join(cf, 'script.py') );
+	} catch(e){}
+
+	try {
+		fs.unlinkSync( path.join(cf, 'script.rb') );
+	} catch(e){}		
+	try {	
+		fs.unlinkSync( path.join(cf, 'script.php') );
+	} catch(e){}			
+	try {	
+		fs.unlinkSync( path.join(cf, 'script.js') );			
+	} catch(e){}			
 	
-	// 
-	
-	
+	return name;
 };
 
 
@@ -51,10 +73,12 @@ exports.exec = function(script, code) {
 * Kill the LXC instance that is currently running the provided script
 ******************************************************************************/
 exports.kill = function( script ) {
-	vm = vms_by_runid[ script.run_id ];
+		console.log('looking for ' + script.run_id );
+	var vm = vms_by_runid[ script.run_id ];
 	if ( vm ) {
 		// trigger an lxc-kill
 		// lxc-stop -n 'vm'
+		e = spawn('/usr/bin/lxc-stop', ['-n', vm]);
 
 		// Clean up indices
 		delete vms_by_run_id[ script.run_id ];		
@@ -63,6 +87,15 @@ exports.kill = function( script ) {
 	return false;
 };
 
+
+exports.code_folder = get_code_folder = function(name) {
+	return path.join(root_folder, name + '/code/');
+}
+
+exports.ip_for_vm = function(name) {
+	var num = parseInt( name.substring(2) );
+	return '10.0.1.' + (num + 1).toString();
+}
 
 /*****************************************************************************
 * Create a new VM based on newly created config files - if not already created
@@ -80,82 +113,112 @@ function create_vm ( name ) {
 	// will be the vm number + 1 (as vm0 has ip 10.0.1.1 )
 
 	// write config and fstab to ...	
-	var folder = '/mnt/' + name;
+	var folder = path.join(root_folder, name);
 	
 	num = parseInt( name.substring(2) );
 	
-	ctx = {'name': name, 'ip': '10.0.1.' + (num + 1).toString() }
+	// TODO: Fix me
+	var ctx = {'name': name, 'ip': '10.0.1.' + (num + 1).toString() }
 
-	// Create the config file so that we can create our VM
-	Mu.render('./templates/config.tpl', ctx, {}, function (err, output) {
-	  if (err) {
-	  	throw err;
-	  }
 
-  	  var buffer = '';
+	var compiled = _.template( config_tpl );
+	var cfg = compiled( ctx );
+	
+	var fs_compiled = _.template( fstab_tpl );
+	var fstab = fs_compiled( ctx );
+	
+	path.exists(root_folder, function (exists) {	
+  		if ( ! exists ) {
+			fs.mkdirSync( root_folder, "0777" );
+		}	
+	});
+	
+	
+	path.exists(folder, function (exists) {
+  		if ( ! exists ) {
+			fs.mkdirSync( folder, "0777" );
+		} else {
+			return;
+		}
 
-  	  output.addListener('data', function (c) {buffer += c; })
-      output.addListener('end', function () {
-		var path = folder + '/config';
-		
-		fs.writeFile(path, buffer, function(err) {
+		// Mount a specific code folder
+		var cfolder = get_code_folder(name);
+		path.exists(cfolder, function (exists) {
+	  		if ( ! exists ) fs.mkdirSync( cfolder, "0777" );
+		});
+
+		var tgt = path.join( folder, 'config')
+		fs.writeFile(tgt, cfg, function(err) {
 		    if(err) {
 		        sys.puts(err);
 		    } else {
+				console.log('Running lxc-create')
 				// call lxc-create -n name -f folder/config
-			 	//e = spawn(exe, args, { env: util.env_for_language(script.language, extra_path) });
-				/*
-				e.stdout.on('data', function (data) {
-					write_to_caller( http_res, data );
+			 	e = spawn('/usr/bin/lxc-create', ['-n', name, '-f', tgt]);
+				e.on('exit', function (code, signal) {
+					if ( code && code == 127 ) {
+						util.log.fatal('LXC-Create exited with code ' + code);											
+					} else {
+						util.log.info('LXC-Create exited with code ' + code);																	
+					}
 				});
-				e.stderr.on('data', function (data) {
-					write_to_caller( http_res, data );
-				});				
-				e.on('exit', function (code) {
-					delete scripts[script.run_id];
-					delete scripts_ip[ script.ip ];
-					
-					http_res.end();
-				});
-				*/
 		    }
-		}); // end writefile
-	  }); // addListener('end...
-	}); // end Mu.render(...
-	
-	// Render the fstab for our vm
-	Mu.render('./templates/fstab.tpl', ctx, {}, function (err, output) {
-	  if (err) {
-	  	throw err;
-	  }
-
-  	  var buffer = '';
-
-  	  output.addListener('data', function (c) {buffer += c; })
-      output.addListener('end', function () {
-		var path = folder + '/fstab';
-		
-		fs.writeFile(path, buffer, function(err) {
+		});
+					
+		tgt = path.join( folder, 'fstab')
+		console.log('Writing fstab to ' + tgt);	
+		fs.writeFile(tgt, fstab, function(err) {
 		    if(err) {
 		        sys.puts(err);
-		    } 
-		}); 	
-
-	  });
-	});	
+		    } else {
+		    }
+		});	
+	});
 	
 	return v;
 }
 
 
+
+/*****************************************************************************
+* Release the VM using the provided script. 
+*****************************************************************************/
+function release_vm ( script, name ) {
+	var k;
+	
+	for ( var key in vms ) {
+		var vm = vms[key];
+		k = key;
+		if ( ! vm.script.run_id == script.run_id ) {
+			v = vm;
+			break;
+		};
+	}
+
+	if ( ! v ) {
+		return;
+	};
+
+	// Remove it from the two lookup tables
+	delete vms_by_runid[ script.run_id ]
+	delete vms_by_ip[ script.ip ]
+	
+	v.running = false;
+	v.script = null;
+	vms[k] = v;
+}
+
 /*****************************************************************************
 * Allocate a vm to the calling script.  We will check to find one that isn't
 * running and either allocate it or return null if none are found.
+*
+* TODO: Fix this and use filter
 ******************************************************************************/
 function allocate_vm ( script ) {
-	var v;
+	var v, k;
 	for ( var key in vms ) {
-		vm = vms[key];
+		var vm = vms[key];
+		k = key;
 		if ( ! vm.running ) {
 			v = vm;
 			break;
@@ -168,5 +231,6 @@ function allocate_vm ( script ) {
 	
 	v.running = true;
 	v.script = script;
+	vms[k] = v;
 	return v
 }
