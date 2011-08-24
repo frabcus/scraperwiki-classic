@@ -23,6 +23,7 @@ import hashlib
 import OpenSSL
 import re
 import memcache
+from threading import Thread
 
 global config
 global cache_client
@@ -327,7 +328,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Handle GET and POST requests.
         """
-        print self.server.womble
+        self.allowed = self.server.allowed 
+        self.blocked = self.server.blocked
 
         #  If this is a transparent HTTP or HTTPS proxy then modify the path with the
         #  protocol and the host.
@@ -579,11 +581,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         return string.join (resp, '')
 
     def do_GET (self) :
-
         self.retrieve ("GET" )
 
     def do_POST (self) :
-
         self.retrieve ("POST")
 
 #   do_HEAD   = do_GET
@@ -604,9 +604,37 @@ class HTTPProxyServer \
         ) :
 
     def __init__(self, server_address, HandlerClass):
-        self.womble = 'ross'        
+        # Start a thread that will occassionally fetch the white/black list and make it available through
+        # the properties here
+        self.allowed = []
+        self.blocked = []
+        self.lock = threading.Lock()
+        
+#        self.current = WhitelistThread(url,self)
+#        self.current.start()    
+        
         BaseHTTPServer.HTTPServer.__init__(self,server_address,HandlerClass)
 
+   
+class WhitelistThread(Thread):
+    
+    def __init__ (self,url, server):
+      Thread.__init__(self)
+      self.url = url
+      self.server = server
+
+   def run(self):
+      while 1:
+          print 'Attempting lookup '
+          self.server.lock.acquire()
+          print 'Setting lists'          
+          self.server.allowed = []
+          self.server.blocked = []
+          self.server.lock.release()          
+          print 'Sleeping '          
+          time.sleep(30)
+          
+    
 
 class HTTPSProxyServer (HTTPProxyServer) :
 
