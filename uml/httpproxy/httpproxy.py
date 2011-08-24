@@ -610,8 +610,8 @@ class HTTPProxyServer \
         self.blocked = []
         self.lock = threading.Lock()
         
-#        self.current = WhitelistThread(url,self)
-#        self.current.start()    
+        self.current = WhitelistThread(url,self)
+        self.current.start()    
         
         BaseHTTPServer.HTTPServer.__init__(self,server_address,HandlerClass)
 
