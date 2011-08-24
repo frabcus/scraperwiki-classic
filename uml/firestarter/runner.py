@@ -108,22 +108,6 @@ def buildjdata(code, options, config):
     if jdata.get("draft"):
         jdata["runid"] = "draft|||%s" % jdata["runid"]
 
-    # set the white and blacklists
-    jdata["white"] = [ ]
-    jdata["black"] = [ ]
-    confurl = config.get('dispatcher', 'confurl')
-    conftxt = "white=.*"  # hard code the whitelist to avoid accessing it (better for local versions)
-    if confurl != "allwhite":
-        try:
-            conftxt = urllib2.urlopen(confurl).read().replace('\r', '')
-        except IOError:
-            if confurl[:26] != 'http://dev.scraperwiki.com':    # known problem
-                print json.dumps({ 'message_type':'console', 'content': "Failed to open: %s" % confurl })
-    for line in conftxt.split('\n'):
-        kv = line.split('=')
-        if len(kv) == 2 and kv[0] in ['white', 'black']:
-            jdata[kv[0]].append(kv[1])
-
     return jdata
 
 
