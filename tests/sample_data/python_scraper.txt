@@ -17,5 +17,5 @@ for td in tds:
     print td
     record = { "td" : td.text }
     # save records to the datastore
-    scraperwiki.datastore.save(["td"], record) 
+    scraperwiki.sqlite.save(["td"], record) 
     

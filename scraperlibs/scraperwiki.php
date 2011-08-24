@@ -176,6 +176,10 @@ class scraperwiki
       curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
       curl_setopt($curl, CURLOPT_MAXREDIRS, 10);
+      // disable SSL checking to match behaviour in Python/Ruby.
+      // ideally would be fixed by configuring curl to use a proper 
+      // reverse SSL proxy, and making our http proxy support that.
+      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
       $res = curl_exec($curl);
       curl_close($curl);
       return $res;

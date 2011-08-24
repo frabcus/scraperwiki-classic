@@ -48,7 +48,7 @@ and sorted.</p>
     if ($row[0]) {
         $record = array_combine($header, $row);
         $record['Amount'] = (float)$record['Amount'];
-        scraperwiki::save(array('Transaction Number'), $record);
+        scraperwiki::save(array('Transaction Number', 'Expense Type', 'Expense Area'), $record);
     }
 }
 </code>

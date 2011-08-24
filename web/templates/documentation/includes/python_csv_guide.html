@@ -43,7 +43,7 @@ so that it can then be added and sorted.</p>
 
 <code>for row in reader:
     row['Amount'] = float(row['Amount'])
-    scraperwiki.sqlite.save(['Transaction Number'], row)
+    scraperwiki.sqlite.save(['Transaction Number', 'Expense Type', 'Expense Area'], row)
 </code>
 
 
