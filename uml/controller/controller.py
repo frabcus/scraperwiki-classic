@@ -357,9 +357,9 @@ class ScraperController(BaseController):
         scrapername = self.m_scrapername
         self.idents.append('scrapername=%s' % scrapername)
         urlquery = request.get("urlquery", "")
-        for value in request['white']:
+        for value in request.get('white', []):
             self.idents.append('allow=%s' % value)
-        for value in request['black']:
+        for value in request.get('black', []):
             self.idents.append('block=%s' % value)
         self.idents.append('')   # to get an extra \n at the end
 
