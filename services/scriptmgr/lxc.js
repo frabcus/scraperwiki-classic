@@ -92,6 +92,11 @@ exports.code_folder = get_code_folder = function(name) {
 	return path.join(root_folder, name + '/code/');
 }
 
+exports.ip_for_vm = function(name) {
+	var num = parseInt( name.substring(2) );
+	return '10.0.1.' + (num + 1).toString();
+}
+
 /*****************************************************************************
 * Create a new VM based on newly created config files - if not already created
 ******************************************************************************/

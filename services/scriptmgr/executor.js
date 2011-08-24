@@ -292,6 +292,13 @@ function execute(http_req, http_res, raw_request_data) {
 			var cfgpath = '/mnt/' + res + '/config';
 						
 	 		e = spawn('/usr/bin/lxc-execute', ['-n', res, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, script.run_id ]);
+	
+			script.vm = res;
+			script.ip = lxc.ip_for_vm(res);
+				
+			scripts[ script.run_id ] = script;
+			scripts_ip[ script.ip ] = script;
+	
 			e.stdout.on('data', function (data) {
 				handle_process_output( http_res, data, true );
 			});
