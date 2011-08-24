@@ -166,7 +166,7 @@ class SQLiteDatabase(Database):
                 
     def datasummary(self, limit):
         if not self.establishconnection(False):
-            self.logger.warning('Failed to connecto sqlite database for summary %s' % (self.short_name or 'draft') )
+            self.logger.warning('Failed to connect to sqlite database for summary %s' % (self.short_name or 'draft') )
             return {"status":"No sqlite database"} # don't change this return string, is a structured one
         
         self.logger.debug('Performing datasummary for %s' % self.short_name )                
