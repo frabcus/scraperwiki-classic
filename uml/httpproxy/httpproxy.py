@@ -236,7 +236,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             try:
                 # If the connection comes form the lxc_server (that we know about form config)
                 # then use it.
-                if lxc_server and rem[0] == lxc_server:
+                if lxc_server and '10.0' in rem[0]:
                     ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)).read()
                 else:
                     ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
