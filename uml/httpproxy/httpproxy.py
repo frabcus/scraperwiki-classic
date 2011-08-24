@@ -636,7 +636,7 @@ class WhitelistThread(Thread):
             try:
                 data = urllib2.urlopen(self.url).read()
             except:
-                print 'Failed to fetch whitelist from server'          
+                print 'Failed to fetch whitelist from server', self.url          
             
             encoded = None
             
