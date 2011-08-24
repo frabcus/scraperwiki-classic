@@ -643,11 +643,9 @@ class WhitelistThread(Thread):
             if data:
                 print 'Data is ', data
                 try:
-                    encoded = json.encode(data)
-                    print encoded
+                    encoded = json.loads(data)
                 except Exception,e:
-                    print e,'Failed to encode data'
-                    pass
+                    print e
                     
             if encoded:
                 self.server.lock.acquire()
