@@ -79,7 +79,9 @@ exports.kill_script = function( run_id ) {
 	return false;
 }
 
-
+exports.known_ips = function() {
+	return scripts_ip;
+}
 
 /******************************************************************************
 * Iterates through the list of scripts that we know is running and outputs 
