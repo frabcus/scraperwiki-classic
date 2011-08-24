@@ -46,7 +46,7 @@ so that it can then be added and sorted.</p>
 <code>for row in fcsv
   row['Amount'] = row['Amount'].to_f
   if row['Transaction Number']
-    ScraperWiki.save_sqlite(unique_keys=['Transaction Number'], row.to_hash)
+    ScraperWiki.save_sqlite(unique_keys=['Transaction Number', 'Expense Type', 'Expense Area'], row.to_hash)
   end
 end
 </code>
