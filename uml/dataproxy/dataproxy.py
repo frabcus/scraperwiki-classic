@@ -74,9 +74,6 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
-        self.logger.info(rem[0])
-        if lxc:
-            self.logger.info( host[0:host.find(':')] )
         if lxc and rem[0] == host[0:host.find(':')]:
             lident = urllib.urlopen ('http://%s/Ident?%s:%s' % (host, rem[0], loc[1])).read()               
         else:
