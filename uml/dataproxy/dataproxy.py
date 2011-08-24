@@ -136,8 +136,8 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 firstmessage["dataauth"] = dataauth
 
                 # run verification of the names against what we identified
-                if runID != params.get('vrunid') or short_name != params.get("vscrapername", None):
-                    self.logger.error("Mismatching scrapername %s" % str([runID, short_name, params.get('vrunid'), params.get("vscrapername")]))
+                if runID != params.get('vrunid') or short_name != params.get("vscrapername", ''):
+                    self.logger.error("Mismatching scrapername %s" % str([runID, short_name, params.get('vrunid'), params.get("vscrapername", '')]))
                     firstmessage["error"] = "Mismatching scrapername from ident"
                     firstmessage["status"] = "bad: mismatching scrapername from ident"
             
