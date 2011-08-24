@@ -287,12 +287,9 @@ function execute(http_req, http_res, raw_request_data) {
 			var startTime = new Date();		
 
 			// Pass the data proxy and runid to the script that will trigger the exec.py
-			var cmd = "/home/startup/run" + extension + ".sh\ " + dataproxy + "\ " + script.run_id;
 			var cfgpath = '/mnt/' + res + '/config';
 						
-			util.log.debug('Command: ' + cmd);
-						
-	 		e = spawn('/usr/bin/lxc-execute', ['-n', res, '-f', cfgpath, cmd.replace(' ', '\ ')]);
+	 		e = spawn('/usr/bin/lxc-execute', ['-n', res, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, script.run_id ]);
 			e.stdout.on('data', function (data) {
 				handle_process_output( http_res, data, true );
 			});
@@ -305,9 +302,6 @@ function execute(http_req, http_res, raw_request_data) {
 					console.log('child process exited badly, we may have killed it');
 				else 
 					console.log('child process exited with code ' + code);					
-				if ( code == 255 ) {
-					console.log( ['-n', res, '-f', cfgpath, cmd] );
-				}
 				if ( script ) {
 					delete scripts[script.run_id];
 					delete scripts_ip[ script.ip ];
