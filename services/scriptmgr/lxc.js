@@ -212,7 +212,10 @@ function release_vm ( script, name ) {
 * Allocate a vm to the calling script.  We will check to find one that isn't
 * running and either allocate it or return null if none are found.
 *
-* TODO: Fix this and use filter
+* TODO: Fix this and use detect
+* i.e.
+* var even = _.detect([1, 2, 3, 4, 5, 6], function(num){ return num % 2 == 0; });
+* => 2
 ******************************************************************************/
 function allocate_vm ( script ) {
 	var v, k;

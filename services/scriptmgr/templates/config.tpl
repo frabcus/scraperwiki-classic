@@ -14,6 +14,8 @@ lxc.network.ipv4 = <%= ip %>
  
 lxc.cgroup.devices.deny = a
 
+lxc.cgroup.memory.limit_in_bytes = 256M
+
 # /dev/null and zero
 lxc.cgroup.devices.allow = c 1:3 rwm
 lxc.cgroup.devices.allow = c 1:5 rwm
