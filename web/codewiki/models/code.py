@@ -479,39 +479,3 @@ class UserCodeRole(models.Model):
 
 
 
-# DELETE THIS
-class UserCodeEditing(models.Model):
-    """
-    Updated by Twisted to state which scrapers/views are being editing at this moment
-    """
-    user    = models.ForeignKey(User, null=True)
-    code = models.ForeignKey(Code, null=True)
-    editingsince = models.DateTimeField(blank=True, null=True)
-    runningsince = models.DateTimeField(blank=True, null=True)
-    closedsince  = models.DateTimeField(blank=True, null=True)
-    twisterclientnumber = models.IntegerField(unique=True)
-    twisterscraperpriority = models.IntegerField(default=0)   # >0 another client has priority on this scraper
-
-    def __unicode__(self):
-        return "Editing: Scraper_id: %s -> User: %s (%d)" % (self.code, self.user, self.twisterclientnumber)
-
-    class Meta:
-        app_label = 'codewiki'
-        
-
-# DELETE THIS
-class CodeCommitEvent(models.Model):
-    revision = models.IntegerField()
-
-    def __unicode__(self):
-        return unicode(self.revision)
-
-    @models.permalink
-    def get_absolute_url(self):
-        return ('commit_event', [self.id])
-
-    def content_type(self):
-        return ContentType.objects.get(app_label="codewiki", model="CodeCommitEvent")
-
-    class Meta:
-        app_label = 'codewiki'
