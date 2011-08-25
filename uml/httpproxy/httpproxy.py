@@ -225,7 +225,7 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             print 'Looking for open addresses'
             open_addresses = config.get(varName, 'open_addresses')
             print 'Setting value is ', open_addresses, ' comparing ', rem[0]            
-            if open_addresses and rem[0] in open_addresses.split[',']:
+            if open_addresses and rem[0] in open_addresses.split(','):
                     return None,None,False
         except Exception, e:
             print e
