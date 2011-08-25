@@ -152,30 +152,6 @@ class Scraper (code.Code):
         app_label = 'codewiki'
 
         
-
-
-# DEPRECTATED. Needs removing, and migration to strip it
-class ScraperMetadata(models.Model):
-    """
-    Allows named metadata to be associated with a scraper
-    """
-    name = models.CharField(max_length=100, null=False, blank=False)
-    scraper = models.ForeignKey(Scraper, null=False)
-    run_id = models.CharField(max_length=100, null=False, blank=False)
-    value = models.TextField()
-
-    def __unicode__(self):
-        return u"%s['%s']" % (self.scraper, self.name)
-
-    @models.permalink
-    def get_absolute_url(self):
-        return ('metadata_api', [self.scraper.guid, self.name])
-
-    class Meta:
-        app_label = 'codewiki'
-        verbose_name_plural = 'scraper metadata'
-
-
 class ScraperRunEvent(models.Model):
     scraper           = models.ForeignKey(Scraper)
     
