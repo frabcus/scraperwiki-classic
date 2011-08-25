@@ -252,33 +252,6 @@
         }
     }, 
     {
-        "pk": 83, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_paypalipn", 
-            "name": "Can add PayPal IPN", 
-            "content_type": 28
-        }
-    }, 
-    {
-        "pk": 84, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_paypalipn", 
-            "name": "Can change PayPal IPN", 
-            "content_type": 28
-        }
-    }, 
-    {
-        "pk": 85, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_paypalipn", 
-            "name": "Can delete PayPal IPN", 
-            "content_type": 28
-        }
-    }, 
-    {
         "pk": 65, 
         "model": "auth.permission", 
         "fields": {

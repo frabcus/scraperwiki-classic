@@ -63,8 +63,6 @@ QUICKCACHE_DIR      = HOME_DIR + '/quickcache/'   # leave blank to disable cachi
 FIREBOX_PATH = '/var/www/scraperwiki/uml/firestarter/'
 sys.path.append(FIREBOX_PATH)
 
-#paypal
-PAYPAL_RECEIVER_EMAIL = "your_paypal_sandbox_email@example.com"
 EMAIL_FROM = 'noreply@localhost'
 TEAM_EMAIL = 'all@scraperwiki.com'
 
