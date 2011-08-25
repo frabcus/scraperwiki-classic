@@ -36,15 +36,6 @@
         }
     }, 
     {
-        "pk": 10, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_message", 
-            "name": "Can add message", 
-            "content_type": 4
-        }
-    }, 
-    {
         "pk": 1, 
         "model": "auth.permission", 
         "fields": {
@@ -72,15 +63,6 @@
         }
     }, 
     {
-        "pk": 11, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_message", 
-            "name": "Can change message", 
-            "content_type": 4
-        }
-    }, 
-    {
         "pk": 2, 
         "model": "auth.permission", 
         "fields": {
@@ -105,15 +87,6 @@
             "codename": "delete_group", 
             "name": "Can delete group", 
             "content_type": 2
-        }
-    }, 
-    {
-        "pk": 12, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_message", 
-            "name": "Can delete message", 
-            "content_type": 4
         }
     }, 
     {
@@ -306,24 +279,6 @@
         }
     }, 
     {
-        "pk": 89, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_dontsendentry", 
-            "name": "Can add don't send entry", 
-            "content_type": 30
-        }
-    }, 
-    {
-        "pk": 86, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_message", 
-            "name": "Can add message", 
-            "content_type": 29
-        }
-    }, 
-    {
         "pk": 92, 
         "model": "auth.permission", 
         "fields": {
@@ -333,48 +288,12 @@
         }
     }, 
     {
-        "pk": 90, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_dontsendentry", 
-            "name": "Can change don't send entry", 
-            "content_type": 30
-        }
-    }, 
-    {
-        "pk": 87, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_message", 
-            "name": "Can change message", 
-            "content_type": 29
-        }
-    }, 
-    {
         "pk": 93, 
         "model": "auth.permission", 
         "fields": {
             "codename": "change_messagelog", 
             "name": "Can change message log", 
             "content_type": 31
-        }
-    }, 
-    {
-        "pk": 91, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_dontsendentry", 
-            "name": "Can delete don't send entry", 
-            "content_type": 30
-        }
-    }, 
-    {
-        "pk": 88, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_message", 
-            "name": "Can delete message", 
-            "content_type": 29
         }
     }, 
     {
