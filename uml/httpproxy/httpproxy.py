@@ -23,6 +23,10 @@ import hashlib
 import OpenSSL
 import re
 import memcache
+from threading import Thread
+try    : import json
+except : import simplejson as json
+
 
 global config
 global cache_client
@@ -60,12 +64,13 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         Class constructor. All arguments (positional and keyed) are passed down to
         the base class constructor.
         """
-
-        self.m_allowed = []
-        self.m_blocked = []
-
-
         BaseHTTPServer.BaseHTTPRequestHandler.__init__ (self, *alist, **adict)
+        
+        self.server.lock.acquire()
+        self.m_allowed = self.server.allowed[:]
+        self.m_blocked = self.server.blocked[:]
+        self.server.lock.release()
+        
 
     def log_message (self, format, *args) :
 
@@ -97,13 +102,14 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
 
         import re
-
+        
         if allowAll :
             return True
 
         # XXX Workaround - if ident failed then allow by default
-        if not scraperID:
-            return True
+#        if not scraperID:
+#            print 'No scraperId'            
+#            return True
 
         allowed = False
         if re.match("http://127.0.0.1[/:]", path):
@@ -328,6 +334,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         """
         Handle GET and POST requests.
         """
+        self.server.lock.acquire()
+        self.m_allowed = self.server.allowed[:]
+        self.m_blocked = self.server.blocked[:]
+        self.server.lock.release()
 
         #  If this is a transparent HTTP or HTTPS proxy then modify the path with the
         #  protocol and the host.
@@ -368,9 +378,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if scheme not in [ 'http', 'https' ] or fragment or not netloc :
             self.send_error (400, "Malformed URL %s" % self.path)
             return
-#        if not self.hostAllowed (self.path, scraperID) :
-#            self.send_error (403, self.blockmessage(self.path))
-#            return
+        if not self.hostAllowed (self.path, scraperID) :
+            self.send_error (403, self.blockmessage(self.path))
+            return
 
         if runID is not None :
             statusLock.acquire ()
@@ -579,11 +589,9 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         return string.join (resp, '')
 
     def do_GET (self) :
-
         self.retrieve ("GET" )
 
     def do_POST (self) :
-
         self.retrieve ("POST")
 
 #   do_HEAD   = do_GET
@@ -596,13 +604,61 @@ class HTTPSProxyHandler (HTTPProxyHandler) :
         self.connection = self.request
         self.rfile = socket._fileobject(self.request, "rb", self.rbufsize)
         self.wfile = socket._fileobject(self.request, "wb", self.wbufsize)
+        
 
 class HTTPProxyServer \
         (   SocketServer.ThreadingMixIn,
             BaseHTTPServer.HTTPServer
         ) :
-    pass
 
+    def __init__(self, server_address, HandlerClass):
+        # Start a thread that will occassionally fetch the white/black list and make it available through
+        # the properties here
+        self.allowed = []
+        self.blocked = []
+        self.lock = threading.Lock()
+        
+        url = config.get (varName, 'whitelist_url')
+        self.current = WhitelistThread(url,self)
+        self.current.start()    
+        
+        BaseHTTPServer.HTTPServer.__init__(self,server_address,HandlerClass)
+
+   
+class WhitelistThread(Thread):
+    
+    def __init__ (self,url, server):
+        Thread.__init__(self)
+        self.url = url
+        self.server = server
+
+    def run(self):
+        while 1:
+            print 'Attempting lookup '
+            data = None
+            try:
+                data = urllib2.urlopen(self.url).read()
+            except:
+                print 'Failed to fetch whitelist from server', self.url          
+            
+            encoded = None
+            
+            if data:
+                print 'Whitelist data is ', data
+                try:
+                    encoded = json.loads(data)
+                except Exception,e:
+                    print e
+                    
+            if encoded:
+                self.server.lock.acquire()
+                self.server.allowed = encoded['white'][:]
+                self.server.blocked = encoded['black'][:]
+                self.server.lock.release()          
+                
+            # Sleep for 5 more minutes
+            time.sleep(300)
+    
 
 class HTTPSProxyServer (HTTPProxyServer) :
 

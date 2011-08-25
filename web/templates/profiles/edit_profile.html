@@ -23,48 +23,6 @@
     <div class="content">
     	<form method="post">
         {% csrf_token %}
-       <!--     <ul class="form">
-                <li>
-                  {{ form.name.label_tag }}
-                  {{ form.name }}
-                  {% field_errors form.name %}                      
-                </li>
-                <li>
-                  {{ form.email.label_tag }}
-                  {{ form.email }}
-                  {% field_errors form.email %}                      
-                </li>
-                <li> 
-                    <label>Profile picture</label> 
-                    {% load gravatar %}
-                    {% show_gravatar profile.user 'large' %}
-                    <a href="http://en.gravatar.com" target="_blank">Change profile image</a> (using Gravatar)
-                </li>
-                <li{% if form.bio.errors %} class="error"{% endif %}>
-                    {{ form.bio.label_tag }}
-                    {{ form.bio }}
-                    {% field_errors form.bio %}                      
-                </li>
-            </ul>
-            <h3 id="alerts">Email alerts</h3>
-            <p>
-            ScraperWiki can email you if your scrapers stop working or if someone else edits them.
-            </p>
-            <ul class="form"> 
-                <li{% if form.alert_frequency.errors %} class="error"{% endif %}>
-                    {{ form.alert_frequency.label_tag }}
-                    {{ form.alert_frequency }}
-                    {% field_errors form.alert_frequency %}            
-                </li>
-                <li class="checkboxes">
-                    {{form.alert_types}}
-                </li>
-            </ul>
-            <div class="buttons">
-                <input type="hidden" name="success_url" value="/" />
-                <input type="submit" class="button" value="Save changes" />
-            </div>  -->
-            
             <div class="profilesettings">
                 <input type="hidden" name="success_url" value="/" />
                 <p class="save"><input type="submit" class="button" value="Save changes" /><a href="#" class="submit_link"><img src="{{ MEDIA_URL }}images/icons/tick.png" width="16" height="16" alt="" /> Save Changes</a></p>

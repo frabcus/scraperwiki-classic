@@ -21,7 +21,6 @@ from tagging.models import Tag, TaggedItem
 from codewiki.models import Code, Scraper, View, scraper_search_query, HELP_LANGUAGES, LANGUAGES_DICT
 from django.db.models import Q
 from frontend.forms import CreateAccountForm
-from frontend.models import UserToUserRole
 from registration.backends import get_backend
 
 # find this in lib/python/site-packages/profiles

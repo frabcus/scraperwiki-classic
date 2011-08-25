@@ -1,6 +1,7 @@
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
+from django.utils import simplejson as json
 import re
 
 from whitelist import models
@@ -35,6 +36,14 @@ def whitelist_user(request):
             'blacklistunlisted':blacklistunlisted, 'blacklistunlistedrejected':blacklistunlistedrejected, 
             'url':url, 'urlinwhitelist':urlinwhitelist, 'urlinblacklist':urlinblacklist}
     return render_to_response('whitelist/index.html', data, context_instance=RequestContext(request))
+
+def whitelist_config_json(request):
+    whitelist = models.Whitelist.objects.filter(urlcolour="white")
+    blacklist = models.Whitelist.objects.filter(urlcolour="black")
+    results = {}
+    results['white'] = [obj.urlregex for obj in whitelist]
+    results['black'] = [obj.urlregex for obj in blacklist]    
+    return HttpResponse( json.dumps(results) , mimetype='application/json')
 
 def whitelist_config(request):
     whitelist = models.Whitelist.objects.filter(urlcolour="white")

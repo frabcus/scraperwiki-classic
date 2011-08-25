@@ -44,9 +44,6 @@ urlpatterns = patterns('',
     # allows direct viewing of the django tables
     url(r'^admin/', include(admin.site.urls)),
 
-    #paypal
-    (r'^paypal/notifications/56db6e2700d04e38a5d/', include('paypal.standard.ipn.urls')),
-    
     # favicon
     (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/media/images/favicon.ico'}),
 
