@@ -43,7 +43,6 @@ class UserProfileAdmin(admin.ModelAdmin):
       
       
 admin.site.register(UserProfile, UserProfileAdmin)
-admin.site.register(UserToUserRole)
 admin.site.register(Message, MessageAdmin)
 admin.site.register(DataEnquiry, DataEnquiryAdmin)
 
