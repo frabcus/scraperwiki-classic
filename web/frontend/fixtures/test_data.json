@@ -27,33 +27,6 @@
         }
     }, 
     {
-        "pk": 74, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_api_key", 
-            "name": "Can add api_key", 
-            "content_type": 25
-        }
-    }, 
-    {
-        "pk": 75, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_api_key", 
-            "name": "Can change api_key", 
-            "content_type": 25
-        }
-    }, 
-    {
-        "pk": 76, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_api_key", 
-            "name": "Can delete api_key", 
-            "content_type": 25
-        }
-    }, 
-    {
         "pk": 4, 
         "model": "auth.permission", 
         "fields": {
