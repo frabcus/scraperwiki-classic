@@ -207,15 +207,6 @@
         }
     }, 
     {
-        "pk": 47, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_usertouserrole", 
-            "name": "Can add user to user role", 
-            "content_type": 16
-        }
-    }, 
-    {
         "pk": 45, 
         "model": "auth.permission", 
         "fields": {
@@ -225,30 +216,12 @@
         }
     }, 
     {
-        "pk": 48, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_usertouserrole", 
-            "name": "Can change user to user role", 
-            "content_type": 16
-        }
-    }, 
-    {
         "pk": 46, 
         "model": "auth.permission", 
         "fields": {
             "codename": "delete_userprofile", 
             "name": "Can delete user profile", 
             "content_type": 15
-        }
-    }, 
-    {
-        "pk": 49, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_usertouserrole", 
-            "name": "Can delete user to user role", 
-            "content_type": 16
         }
     }, 
     {
