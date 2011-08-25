@@ -222,11 +222,13 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         # If the rem[0] IP address is in configuration as an open IP then we should just let it pass
         # and return None,None,False
         try:
+            print 'Looking for open addresses'
             open_addresses = config.get(varName, 'open_addresses')
+            print 'Setting value is ', open_addresses, ' comparing ', rem[0]            
             if open_addresses and rem[0] in open_addresses:
                     return None,None,False
-        except:
-            pass
+        except Exception, e:
+            print e
         
 
         #  If running as a transparent HTTP or HTTPS then the remote end is connecting
