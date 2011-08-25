@@ -279,33 +279,6 @@
         }
     }, 
     {
-        "pk": 92, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_messagelog", 
-            "name": "Can add message log", 
-            "content_type": 31
-        }
-    }, 
-    {
-        "pk": 93, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_messagelog", 
-            "name": "Can change message log", 
-            "content_type": 31
-        }
-    }, 
-    {
-        "pk": 94, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_messagelog", 
-            "name": "Can delete message log", 
-            "content_type": 31
-        }
-    }, 
-    {
         "pk": 65, 
         "model": "auth.permission", 
         "fields": {
