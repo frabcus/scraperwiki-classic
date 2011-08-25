@@ -252,24 +252,6 @@
         }
     }, 
     {
-        "pk": 41, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_alerts", 
-            "name": "Can add alerts", 
-            "content_type": 14
-        }
-    }, 
-    {
-        "pk": 38, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_alerttypes", 
-            "name": "Can add Alert Type", 
-            "content_type": 13
-        }
-    }, 
-    {
         "pk": 44, 
         "model": "auth.permission", 
         "fields": {
@@ -288,24 +270,6 @@
         }
     }, 
     {
-        "pk": 42, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_alerts", 
-            "name": "Can change alerts", 
-            "content_type": 14
-        }
-    }, 
-    {
-        "pk": 39, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_alerttypes", 
-            "name": "Can change Alert Type", 
-            "content_type": 13
-        }
-    }, 
-    {
         "pk": 45, 
         "model": "auth.permission", 
         "fields": {
@@ -321,24 +285,6 @@
             "codename": "change_usertouserrole", 
             "name": "Can change user to user role", 
             "content_type": 16
-        }
-    }, 
-    {
-        "pk": 43, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_alerts", 
-            "name": "Can delete alerts", 
-            "content_type": 14
-        }
-    }, 
-    {
-        "pk": 40, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_alerttypes", 
-            "name": "Can delete Alert Type", 
-            "content_type": 13
         }
     }, 
     {
@@ -465,87 +411,6 @@
             "codename": "delete_messagelog", 
             "name": "Can delete message log", 
             "content_type": 31
-        }
-    }, 
-    {
-        "pk": 62, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_alertinstance", 
-            "name": "Can add alert instance", 
-            "content_type": 21
-        }
-    }, 
-    {
-        "pk": 59, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_alertnotification", 
-            "name": "Can add alert notification", 
-            "content_type": 20
-        }
-    }, 
-    {
-        "pk": 56, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_alerttype", 
-            "name": "Can add alert type", 
-            "content_type": 19
-        }
-    }, 
-    {
-        "pk": 63, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_alertinstance", 
-            "name": "Can change alert instance", 
-            "content_type": 21
-        }
-    }, 
-    {
-        "pk": 60, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_alertnotification", 
-            "name": "Can change alert notification", 
-            "content_type": 20
-        }
-    }, 
-    {
-        "pk": 57, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_alerttype", 
-            "name": "Can change alert type", 
-            "content_type": 19
-        }
-    }, 
-    {
-        "pk": 64, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_alertinstance", 
-            "name": "Can delete alert instance", 
-            "content_type": 21
-        }
-    }, 
-    {
-        "pk": 61, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_alertnotification", 
-            "name": "Can delete alert notification", 
-            "content_type": 20
-        }
-    }, 
-    {
-        "pk": 58, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_alerttype", 
-            "name": "Can delete alert type", 
-            "content_type": 19
         }
     }, 
     {
