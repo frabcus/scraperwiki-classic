@@ -111,7 +111,7 @@ class TestScrapers(SeleniumTest):
             print s.get_body_text()
             self.fail('An error occurred deleting data')
         
-        self.assertEqual('/', urlparse(s.get_location()).path, 'Did not redirect to front page after deleting scraper')
+        self.assertEqual('/dashboard/', urlparse(s.get_location()).path, 'Did not redirect to dashboardafter deleting scraper')
 
 
     def _check_delete_view(self, name):
@@ -127,7 +127,7 @@ class TestScrapers(SeleniumTest):
             print s.get_body_text()
             self.fail('An error occurred deleting data')
         
-        self.assertEqual('/', urlparse(s.get_location()).path, 'Did not redirect to front page after deleting view')
+        self.assertEqual('/dashboard/', urlparse(s.get_location()).path, 'Did not redirect to dashboard after deleting view')
 
 
     def _wait_for_run(self):

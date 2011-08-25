@@ -101,7 +101,6 @@ SCRAPERWIKI_APPS = [
     # the following are scraperwiki apps
     'frontend',
     'codewiki',
-    'notification',
     'payment',  	
     'api',
     'whitelist',
