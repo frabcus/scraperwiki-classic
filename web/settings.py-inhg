@@ -64,7 +64,6 @@ FIREBOX_PATH = '/var/www/scraperwiki/uml/firestarter/'
 sys.path.append(FIREBOX_PATH)
 
 EMAIL_FROM = 'noreply@localhost'
-TEAM_EMAIL = 'all@scraperwiki.com'
 
 ORBITED_URL = 'http://localhost:8001'
 
