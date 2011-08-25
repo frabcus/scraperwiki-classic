@@ -54,39 +54,6 @@ class UserProfile(models.Model):
     get_absolute_url = models.permalink(get_absolute_url)        
         
 
-# models related to user roles
-class UserRoleManager(models.Manager):
-    """
-    This manager is used to decorate the collection objects on the user model
-    so as to fascilitate the easy managing of user to user relationships.
-    """
-    use_for_related_fields = True
-    
-    def following(self):
-        return [role.to_user for role in self.get_query_set().filter(role='follow')]
-        
-    def followed_by(self):
-        return [role.from_user for role in self.get_query_set().filter(role='follow')]
-    
-    def not_following_anyone(self):
-        return len(self.following()) == 0
-        
-    def not_followed_by_anyone(self):
-        return len(self.followed_by()) == 0
-    
-
-class UserToUserRole(models.Model):
-    """
-        PRM: I did not want to have many different ways of connecting one user to another, so
-        this class embodies any and all connections from one user to another. Following, etc.
-    """
-
-    objects = UserRoleManager()
-    
-    from_user = models.ForeignKey(User, related_name='to_user')
-    to_user   = models.ForeignKey(User, related_name='from_user')
-    role      = models.CharField(max_length = 100)
-
 # Signal Registrations
 # when a user is created, we want to generate a profile for them
 
