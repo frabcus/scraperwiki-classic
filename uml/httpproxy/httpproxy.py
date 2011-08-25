@@ -106,11 +106,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if allowAll :
             return True
 
-        # XXX Workaround - if ident failed then allow by default
-#        if not scraperID:
-#            print 'No scraperId'            
-#            return True
-
         allowed = False
         if re.match("http://127.0.0.1[/:]", path):
             allowed = True
@@ -224,6 +219,16 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
 
+        # If the rem[0] IP address is in configuration as an open IP then we should just let it pass
+        # and return None,None,False
+        try:
+            open_addresses = config.get(varName, 'open_addresses')
+            if open_addresses and rem[0] in open_addresses:
+                    return None,None,False
+        except:
+            pass
+        
+
         #  If running as a transparent HTTP or HTTPS then the remote end is connecting
         #  to port 80 or 443 irrespective of where we think it is connecting to; for a
         #  non-transparent proxy use the actual port.
@@ -305,7 +310,8 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
 
 
     def notify (self, host, **query) :
-
+        # We don't to do this for open access IPs but it won;t hurt
+        
         query['message_type'] = 'sources'
         try    : urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
         except : pass

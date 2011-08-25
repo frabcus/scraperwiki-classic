@@ -70,6 +70,12 @@ def setup():
 
     deploy()
 
+def runpuppet():
+    """
+    Runs the puppetd on the specific machine
+    """
+    sudo("puppetd --no-daemonize --onetime --debug")        
+    
 def virtualenv(command):
     temp = 'cd %s; source ' % env.path
     return run(temp + env.activate + '&&' + command)
