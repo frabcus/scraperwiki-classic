@@ -40,8 +40,8 @@ class UserProfileForm(forms.ModelForm):
         if self.emailer:
             self.fields['alert_frequency'].initial = self.emailer.run_interval
         else:
-            # Fallback on frequency in profile while not all users have an emailer
-            self.fields['alert_frequency'].initial = self.instance.alert_frequency
+            # fallback on once a day while not all users have an emailer
+            self.fields['alert_frequency'].initial = 86400
 
         self.fields['email'].initial = self.user.email
 

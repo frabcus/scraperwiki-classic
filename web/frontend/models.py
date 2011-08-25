@@ -18,10 +18,6 @@ class UserProfile(models.Model):
     This model holds the additional fields to be associated with a user in the
     system
     
-    The alerts_last_sent and alert_frequency field hold when a notification
-    email was last sent to this user and the frequency of these messages(in
-    seconds) as requested by the user.
-    
     Note, where any other model wishes to link to a user or reference a user,
     they should link to the user profile (this class), rather than directly to
     the user. this ensures that if we wish to change the definition of user,
@@ -33,8 +29,6 @@ class UserProfile(models.Model):
     name             = models.CharField(max_length=64)
     bio              = models.TextField(blank=True, null=True)
     created_at       = models.DateTimeField(auto_now_add=True)
-    alerts_last_sent = models.DateTimeField(auto_now_add=True)
-    alert_frequency  = models.IntegerField(null=True, blank=True)
     beta_user        = models.BooleanField( default=False )
     
     objects = models.Manager()
@@ -99,7 +93,7 @@ class UserToUserRole(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     if created and sender == User:
         try:
-            profile = UserProfile(user=instance, alert_frequency=60*60*24)
+            profile = UserProfile(user=instance)
             profile.save()
         except:
             # syncdb is saving the superuser
