@@ -101,7 +101,6 @@ SCRAPERWIKI_APPS = [
     # the following are scraperwiki apps
     'frontend',
     'codewiki',
-    'payment',  	
     'api',
     'whitelist',
     'cropper',
@@ -122,7 +121,6 @@ INSTALLED_APPS = [
     'south',
     'profiles',
     'django.contrib.humanize',
-    'paypal.standard.ipn',
     'django_notify',
     'tagging',
     'contact_form',
@@ -154,10 +152,6 @@ SCRAPER_LIBS_DIR = join(HOME_DIR, "scraperlibs")
 
 #send broken link emails
 SEND_BROKEN_LINK_EMAILS = DEBUG == False
-
-#paypal
-PAYPAL_IMAGE = "http://www.paypal.com/en_US/i/btn/btn_paynowCC_LG.gif"
-PAYPAL_SANDBOX_IMAGE = PAYPAL_IMAGE
 
 #pagingation
 SCRAPERS_PER_PAGE = 60

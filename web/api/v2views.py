@@ -340,18 +340,6 @@ def userinfo_handler(request):
                 info['coderoles'][ucrole.role] = [ ]
             info['coderoles'][ucrole.role].append(ucrole.code.short_name)
 
-        info['fromuserroles'] = { }
-        for fromuserrole in user.from_user.all():
-            if fromuserrole.role not in info['fromuserroles']:
-                info['fromuserroles'][fromuserrole.role] = [ ]
-            info['fromuserroles'][fromuserrole.role].append(fromuserrole.from_user.username)
-        
-        info['touserroles'] = { }
-        for touserrole in user.to_user.all():
-            if touserrole.role not in info['touserroles']:
-                info['touserroles'][touserrole.role] = [ ]
-            info['touserroles'][touserrole.role].append(touserrole.to_user.username)
-        
         result.append(info)
     
     res = json.dumps(result, indent=4)
