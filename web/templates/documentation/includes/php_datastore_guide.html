@@ -36,6 +36,18 @@ and verbose (which doesn't send messages to the data tab if set to 0</p>
 scraperwiki::save_sqlite(array("a"), $data); 
 </code>
 
+<h2>Saving data, variables</h2>
+
+<p>It's often useful to be able to quickly and easily save one metadata
+value. For example, to record which page the last run of the scraper managed to
+get up to. 
+
+<code>scraperwiki::save_var('last_page', 27);
+print scraperwiki::get_var('last_page');
+</code>
+
+<p>It's stored in a simple table called swvariables.</p>
+
 <h2>Finding out the schema</h2>
 
 <p>To see the dict of table_names mapping to schemas.</p>
