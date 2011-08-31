@@ -19,11 +19,16 @@ def docmain(request, language=None, path=None):
     language = language or request.session.get('language', 'python')
     request.session['language'] = language
     context = {'language': language }
-    
+   
+    # Which languages is this available for?
+    context["lang_ruby"] = True
+    context["lang_python"] = True
+    context["lang_php"] = True
     # not written by anyone yet
     if language == 'html':
         return HttpResponseRedirect(reverse('docsroot', kwargs={'language':'python'}) )
-        
+    if path in ['ruby_libraries', 'python_libraries', 'php_libraries', 'shared_libraries']:
+        context["lang_shared"] = True
     
     if path in page_titles:
         title, para = page_titles[path]

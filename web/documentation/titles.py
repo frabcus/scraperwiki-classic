@@ -33,6 +33,8 @@ page_titles = {
     "php_csv_guide" : ("CSV scraping guide","Getting data from comma-separated value files in PHP"),
     "php_excel_guide" : ("Excel scraping guide","Getting data from Excel files in PHP"),
     
+    "shared_libraries" : ("3rd party libraries","Binaries availabile inside ScraperWiki"),
+
     "technical_overview" : ("Technical overview","All the component parts of ScraperWiki and how they work together"),    
 }
 
