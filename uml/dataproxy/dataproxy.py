@@ -137,7 +137,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
                 self.logger.debug( '.%s.' % short_name)
                     # send back identification so we can compare against it (sometimes it doesn't quite work out)
-                firstmessage["short_name"] = short_name
+                firstmessage["short_name"] = short_name or ''
                 firstmessage["runID"] = runID
                 firstmessage["dataauth"] = dataauth
 
