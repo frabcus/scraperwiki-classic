@@ -208,9 +208,17 @@ function release_vm ( script, name ) {
 * => 2
 ******************************************************************************/
 function allocate_vm ( script ) {
-
-	var v = _.detect(vms, function(vm){ console.log('Checking ' + vm); return vm.running == false; });
-	if ( ! v ) { return null; };
+	var v;
+	
+	for ( var k in vms ) {
+		console.log('Looking up key ' + k )
+		v = vms[k];
+		if ( v.running == false ) {
+			break;
+		}
+	}
+	
+	if ( ! v ) return null;
 	
 	v.running = true;
 	v.script = script;
