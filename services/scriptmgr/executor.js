@@ -329,6 +329,8 @@ function execute(http_req, http_res, raw_request_data) {
 					script.response.end( JSON.stringify( res ) + "\n" );
 				}
 								
+				lxc.release_vm( script, res );
+								
 				util.log.debug('Finished writing responses');
 			});
 		});
