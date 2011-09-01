@@ -36,7 +36,7 @@ exports.init = function(count, lxc_root_folder) {
 	fstab_tpl = fs.readFileSync('./templates/fstab.tpl', "utf-8");
 
 	for ( var idx in _.range(1, count + 1) ) {
-		var name = 'vm' + idx;
+		var name = 'vm' + (idx + 1);
 	    vms[name] = create_vm(name);
 	}
 };
