@@ -449,6 +449,7 @@ class UMLScanner(threading.Thread) :
                 try:
                     stime = time.time()
                             # timeout of 2 secs is probably too severe (leave in for now to enable failure and testing)
+                    self.logger.info("Checking " + uml.status_url() )
                     res = urllib2.urlopen(uml.status_url(), timeout=4).read()
                     umltimes.append("%.3f" % (time.time() - stime))
                     if uml.livestatus == "unresponsive":  # don't overwrite closing
