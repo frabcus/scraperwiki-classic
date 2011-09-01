@@ -213,7 +213,6 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
             scraper = models.Scraper()
 
         startupcode = blankstartupcode[wiki_type][language]
-        print startupcode
         
         startuptemplate = request.GET.get('template') or request.GET.get('fork')
         if startuptemplate:

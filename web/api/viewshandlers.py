@@ -218,7 +218,6 @@ def scraper_search_handler(request):
     else:
         client_ip = "Not specified"
 
-    print 'Client IP is', client_ip
     if query == "*OVERDUE*"  and client_ip in settings.INTERNAL_IPS:                        
         scrapers = scrapers_overdue()  # should be handling hiding private scrapers from list unless authorized caller (eg twister)
     else:
