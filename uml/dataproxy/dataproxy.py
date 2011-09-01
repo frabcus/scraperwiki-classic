@@ -54,7 +54,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def ident(self, uml, port):
         runID      = None
-        short_name = None
+        short_name = ''
 
         # we will set host to either host of the uml or (if we have lxc_server set)
         # to the LXC server.
@@ -75,7 +75,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
-        if host and rem[0] == host[0:host.find(':')]:
+        if host and rem[0].startswith("10.0"):
             lident = urllib.urlopen ('http://%s/Ident?%s:%s' % (host, rem[0], loc[1])).read()               
         else:
             via    = config.get(uml, 'via' )
