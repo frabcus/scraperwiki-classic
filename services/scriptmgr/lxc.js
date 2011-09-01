@@ -35,8 +35,10 @@ exports.init = function(count, lxc_root_folder) {
 	config_tpl = fs.readFileSync( './templates/config.tpl', "utf-8");
 	fstab_tpl = fs.readFileSync('./templates/fstab.tpl', "utf-8");
 
-	vms = _.map( _.range(1, count + 1), function(num){ return 'vm' + num; } );	
-	_.map( vms, function(v) { create_vm(v); } );
+	for ( var idx in _.range(1, count + 1) ) {
+		var name = 'vm' + idx;
+	    vms[name] = create_vm(name);
+	}
 };
 
 
@@ -220,32 +222,14 @@ function release_vm ( script, name ) {
 var current = 0;
 function allocate_vm ( script ) {
 	
- 	var max = vms.length;
-	var v = { running: true }
-	var attempts = 0;
-	
-	while ( v.running ){
-		if ( current >= max ) current = 0;
-		
-		v = vms[current++];		
-		if ( !v.running) {
-			v.running = true;
-			vms[v.name] = v;
-			return v;
-		}
-		if ( attempts++ > max ) 
-			return null;
-	} 
-	
-	
-/*	var v, k;
+	var v, k;
 	for ( var key in vms ) {
 		var vm = vms[key];
 		k = key;
 		if ( vm.running == false ) {
 			v = vm;
 			break;
-		};
+		} 
 	}
 	
 	if ( ! v ) { return null; };
@@ -253,5 +237,5 @@ function allocate_vm ( script ) {
 	v.running = true;
 	v.script = script;
 	vms[k] = v;
-	return v;*/
+	return v;
 }
