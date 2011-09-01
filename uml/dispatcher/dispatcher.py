@@ -104,7 +104,12 @@ class UMLList(object):
         umls = self.UMLs.values()
         uml = None
         while umls:
-            uml = umls.pop(random.randint(0, len(umls)-1))
+            if len(umls) == 1:
+                uml = umls[0]
+                beta_flag = uml.beta_only # Force the single UML
+            else:
+                uml = umls.pop(random.randint(0, len(umls)-1))
+                
             if uml.is_available() and (beta_flag == uml.beta_only):
                 scraperstatus["uname"] = uml.uname
                 uml.add_runid(scraperstatus["runID"])
