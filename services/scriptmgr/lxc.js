@@ -186,28 +186,16 @@ function create_vm ( name ) {
 * Release the VM using the provided script. 
 *****************************************************************************/
 function release_vm ( script, name ) {
-	var k;
-	
-	for ( var key in vms ) {
-		var vm = vms[key];
-		k = key;
-		if ( ! vm.script.run_id == script.run_id ) {
-			v = vm;
-			break;
-		};
-	}
-
-	if ( ! v ) {
-		return;
-	};
+	var v = vms[name];
+	if ( ! v ) return;
 
 	// Remove it from the two lookup tables
-	delete vms_by_runid[ script.run_id ]
-	delete vms_by_ip[ script.ip ]
+	delete vms_by_runid[ v.script.run_id ]
+	delete vms_by_ip[ v.script.ip ]
 	
 	v.running = false;
 	v.script = null;
-	vms[k] = v;
+	vms[v.name] = v;
 }
 
 /*****************************************************************************
@@ -219,23 +207,13 @@ function release_vm ( script, name ) {
 * var even = _.detect([1, 2, 3, 4, 5, 6], function(num){ return num % 2 == 0; });
 * => 2
 ******************************************************************************/
-var current = 0;
 function allocate_vm ( script ) {
-	
-	var v, k;
-	for ( var key in vms ) {
-		var vm = vms[key];
-		k = key;
-		if ( vm.running == false ) {
-			v = vm;
-			break;
-		} 
-	}
-	
+
+	var v = _.detect(vms, function(vm){ return vm.running == false; });
 	if ( ! v ) { return null; };
 	
 	v.running = true;
 	v.script = script;
-	vms[k] = v;
+	vms[v.name] = v;
 	return v.name;
 }
