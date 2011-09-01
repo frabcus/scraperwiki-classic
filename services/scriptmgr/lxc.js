@@ -209,7 +209,7 @@ function release_vm ( script, name ) {
 ******************************************************************************/
 function allocate_vm ( script ) {
 
-	var v = _.detect(vms, function(vm){ return vm.running == false; });
+	var v = _.detect(vms, function(vm){ console.log('Checking ' + vm); return vm.running == false; });
 	if ( ! v ) { return null; };
 	
 	v.running = true;
