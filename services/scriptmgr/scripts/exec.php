@@ -1,4 +1,4 @@
-#!/usr/local/bin/php
+#!/usr/bin/env php
 <?php
 
 // set the include paths to scraperlibs from an environment variable (what can be done automatically for python and ruby)
