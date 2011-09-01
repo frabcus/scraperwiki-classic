@@ -187,9 +187,11 @@ function create_vm ( name ) {
 * Release the VM using the provided script. 
 *****************************************************************************/
 function release_vm ( script, name ) {
+	console.log('Attempting to release ' + name);
 	var v = vms[name];
 	if ( ! v ) return;
 
+	console.log('Releasing ' + v );
 	// Remove it from the two lookup tables
 	delete vms_by_runid[ v.script.run_id ]
 	delete vms_by_ip[ v.script.ip ]
@@ -224,5 +226,7 @@ function allocate_vm ( script ) {
 	v.running = true;
 	v.script = script;
 	vms[v.name] = v;
+	
+	console.log('Allocating ' + v.name );	
 	return v.name;
 }
