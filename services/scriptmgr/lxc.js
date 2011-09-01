@@ -237,5 +237,5 @@ function allocate_vm ( script ) {
 	v.running = true;
 	v.script = script;
 	vms[k] = v;
-	return v;
+	return v.name;
 }
