@@ -86,7 +86,7 @@ module ScraperWiki
             end
             raise SqliteException.new(res["error"])
         end
-        if verbose:
+        if verbose
             if data.kind_of?(Array) 
                 data.each do |value|
                     ldata = [ ]
