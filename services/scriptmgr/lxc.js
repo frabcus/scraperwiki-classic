@@ -187,6 +187,7 @@ function create_vm ( name ) {
 * Release the VM using the provided script. 
 *****************************************************************************/
 exports.release_vm = function( script, name ) {
+
 	console.log('Attempting to release ' + name);
 	var v = vms[name];
 	if ( ! v ) return;

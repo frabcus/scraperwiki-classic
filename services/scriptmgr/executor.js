@@ -322,11 +322,11 @@ function execute(http_req, http_res, raw_request_data) {
 				elapsed = (endTime - startTime) / 1000;
 
 				// 'CPU_seconds': 1, Temporarily removed
-	      		res =  { 'message_type':'executionstatus', 'content':'runcompleted', 
+	      		var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
 	               'elapsed_seconds' : elapsed, 'exit_status': 0 };
 				if ( script && script.response ) {
 					console.log('Done');
-					script.response.end( JSON.stringify( res ) + "\n" );
+					script.response.end( JSON.stringify( result ) + "\n" );
 				}
 								
 				lxc.release_vm( script, res );
