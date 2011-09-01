@@ -1,4 +1,4 @@
-#!/usr/local/bin/node 
+#!/usr/bin/env node
 
 var opts = require('opts');
 var options = [
