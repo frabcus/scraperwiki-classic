@@ -42,7 +42,7 @@ module ScraperWiki
         uri = URI.parse("http://scraperwikiviews.com/run/uk_postcode_lookup/?postcode="+URI.escape(postcode))
         sres = Net::HTTP.get(uri)
         jres = JSON.parse(sres)
-        if jres["lat"] and jres["lng"]:
+        if jres["lat"] and jres["lng"]
             return [jres["lat"], jres["lng"]]
         end
         return nil
@@ -107,12 +107,12 @@ module ScraperWiki
 
             # this ought to be a local function
     def ScraperWiki.convdata(unique_keys, scraper_data)
-        if unique_keys:
+        if unique_keys
             for key in unique_keys
                 if !scraper_data.include?(key)
                     return { "error" => 'unique_keys must be a subset of data', "bad_key" => key }
                 end
-                if scraper_data[key] == nil:
+                if scraper_data[key] == nil
                     return { "error" => 'unique_key value should not be None', "bad_key" => key }
                 end
             end
@@ -146,7 +146,7 @@ module ScraperWiki
             return
         end
 
-        if data.class == Hash:
+        if data.class == Hash
             rjdata = convdata(unique_keys, data)
             if rjdata.include?("error")
                 raise SqliteException.new(rjdata["error"])
@@ -280,7 +280,7 @@ module ScraperWiki
             end
             raise SqliteException.new(res["error"])
         end
-        if verbose:
+        if verbose
             ScraperWiki.dumpMessage({'message_type'=>'sqlitecall', 'command'=>"attach", 'val1'=>name, 'val2'=>asname})
         end
         return res
