@@ -2,7 +2,7 @@ from django.conf.urls.defaults import *
 
 # please use "import <something> as local_name" as this removes issues of name collision.
 import frontend.views as frontend_views
-from codewiki import viewsuml
+import codewiki.views, codewiki.viewsuml
 
 from django.contrib.syndication.views import feed as feed_view
 from django.views.generic import date_based, list_detail
@@ -28,6 +28,7 @@ feeds = {
     'code_object_comments': CommentsForCode,
 }
 
+
 urlpatterns = patterns('',
     url(r'^$', frontend_views.frontpage, name="frontpage"), 
     
@@ -40,6 +41,7 @@ urlpatterns = patterns('',
     url(r'^accounts/resend_activation_email/', frontend_views.resend_activation_email, name="resend_activation_email"),
     url(r'^comments/', include('django.contrib.comments.urls')),
     url(r'^captcha/', include('captcha.urls')),
+    url(r'^attachauth', codewiki.views.attachauth), 
     
     # allows direct viewing of the django tables
     url(r'^admin/', include(admin.site.urls)),
@@ -54,7 +56,7 @@ urlpatterns = patterns('',
     (r'^api/', include('api.urls', namespace='foo', app_name='api')),
 
     # Status
-    url(r'^running_scrapers/$', viewsuml.running_scrapers,    name='running_scrapers'),
+    url(r'^running_scrapers/$', codewiki.viewsuml.running_scrapers,    name='running_scrapers'),
 
     # Documentation
     (r'^docs/', include('documentation.urls')),

@@ -56,6 +56,7 @@ resourcedir = ../resourcedir
 max_api_distance = 10
 secure	= 127.0.0.1
 lxc_server = 127.0.0.1:9001
+attachauthurl = http://localhost:8000/attachauth
 
 ; Ross' machine
 [ross-work.local]

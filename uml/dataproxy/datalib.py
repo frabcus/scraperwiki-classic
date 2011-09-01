@@ -12,6 +12,8 @@ import shutil
 import re
 import sys
 import logging
+import urllib
+
 try:
     import json
 except:
@@ -46,12 +48,13 @@ class Database(object):
 
 class SQLiteDatabase(Database):
 
-    def __init__(self, ldataproxy, resourcedir, short_name, dataauth, runID):
+    def __init__(self, ldataproxy, resourcedir, short_name, dataauth, runID, attachables):
         self.dataproxy = ldataproxy  # this is just to give access to self.dataproxy.connection.send()
         self.m_resourcedir = resourcedir
         self.short_name = short_name
         self.dataauth = dataauth
         self.runID = runID
+        self.attachables = attachables
         
         self.m_sqlitedbconn = None
         self.m_sqlitedbcursor = None
@@ -272,6 +275,17 @@ class SQLiteDatabase(Database):
         self.establishconnection(True)
         if self.authorizer_func == authorizer_writemain:
             self.m_sqlitedbconn.commit()  # otherwise a commit will be invoked by the attaching function
+        self.logger.debug("attachables: "+str(self.attachables))
+        if name not in self.attachables:
+            self.logger.info("requesting permission to attach %s to %s" % (self.short_name, name))
+            aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
+            ares = urllib.urlopen("%s?%s" % (self.dataproxy.attachauthurl, urllib.urlencode(aquery))).read()
+            self.logger.info("permission to attach %s to %s response: %s" % (self.short_name, name, ares))
+            if ares == "Yes":
+                self.attachables.append(name)
+            else:
+                return {"error":"no permission to attach to %s" % name}
+
         self.authorizer_func = authorizer_attaching
         try:
             attachscrapersqlitefile = os.path.join(self.m_resourcedir, name, "defaultdb.sqlite")
@@ -280,6 +294,7 @@ class SQLiteDatabase(Database):
             self.logger.exception("attaching")
             return {"error":"sqlite3.Error: "+str(e)}
         return {"status":"attach succeeded"}
+
 
     def sqlitecommit(self):
         self.establishconnection(True)

@@ -292,7 +292,7 @@ if __name__ == '__main__' :
         if os.fork() == 0 :
             os .setsid()
             sys.stdin  = open ('/dev/null')
-            sys.stdout = open (varDir + '/log/ftpproxy', 'w', 0)
+            sys.stdout = open (varDir + '/log/scraperwiki/ftpproxy', 'w', 0)
             sys.stderr = sys.stdout
             if os.fork() == 0 :
                 ppid = os.getppid()

@@ -22,6 +22,12 @@ m_port = None
 m_scrapername = None
 m_runid = None
 
+# list of scrapers we have an automatic right to attach to (to demonstrate the interface)
+# may come in through the ident call or as some hashencoding
+# if it is not declared in this list, then a call to django to interrogate the access permissions between 
+# this scraper and/or user (esp in case of draft scrapers) and the attaching scraper
+attachables = [ "Douter_space_objects_parsecollector" ]
+
         # make everything global to the module for simplicity as opposed to half in and half out of a single class
 def create(host, port, scrapername, runid):
     global m_host
@@ -57,6 +63,7 @@ def ensure_connected():
         data = {"uml":socket.gethostname(), "port":m_socket.getsockname()[1]}
         data["vscrapername"] = m_scrapername
         data["vrunid"] = m_runid
+        data["attachables"] = " ".join(attachables)
         m_socket.sendall('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
         line = receiveoneline(m_socket)  # comes back with True, "Ok"
         res = json.loads(line)
@@ -113,7 +120,7 @@ def getUserInfo(username):
 datastoresave = [ ]
 def save(unique_keys, data, date=None, latlng=None, silent=False, table_name="swdata", verbose=2) :
     if not datastoresave:
-        print "*** instead of scraperwiki.datastore.save() please use scraperwiki.sqlite.save('%s')"
+        print "*** instead of scraperwiki.datastore.save() please use scraperwiki.sqlite.save()"
         datastoresave.append(True)
     if latlng:
         raise Exception("scraperwiki.datastore.save(latlng) has definitely been deprecated.  Put the values into the data")

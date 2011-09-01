@@ -187,7 +187,7 @@ def code_overview(request, wiki_type, short_name):
 
         
     # unfinished CKAN integration
-    if dataproxy and request.user.is_staff:
+    if False and dataproxy and request.user.is_staff:
         try:
             dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":"ckan_datastore", "asname":"src"})
             ckansqlite = "select src.records.ckan_url, src.records.notes from src.resources left join src.records on src.records.id=src.resources.records_id  where src.resources.scraperwiki=?"
@@ -493,3 +493,41 @@ def export_sqlite(request, short_name):
     response['Content-Disposition'] = 'attachment; filename=%s.sqlite' % (short_name)
     response["Content-Length"] = initsqlitedata["filesize"]
     return response
+
+def attachauth(request):
+    # aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
+    scrapername = request.GET.get("scrapername")
+    attachtoname = request.GET.get("attachtoname")
+
+    try:
+        attachtoscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=attachtoname)
+    except models.Code.DoesNotExist:
+        return HttpResponse("Scraper does not exist: %s" % str([attachtoname]))
+
+    if attachtoscraper.privacy_status != "private":
+        return HttpResponse("Yes")
+        
+    if not scrapername:
+        return HttpResponse("Draft scraper can't connect to private scraper: %s" % str([attachtoname]))
+
+    try:
+        scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=scrapername)
+    except models.Code.DoesNotExist:
+        return HttpResponse("Scraper does not exist: %s" % str([scrapername]))
+
+    if scraper.privacy_status == 'public':
+        return HttpResponse("No: because scraper connecting from is public")
+        
+
+    # we're going to use the set of editors of a private/protected scraper be the gateway for access to the 
+    # private attach to scraper (success if there is an overlap in the sets)
+    scraperuserroles = models.UserCodeRole.objects.filter(code=scraper)
+    attachtouserroles = models.UserCodeRole.objects.filter(code=attachtoscraper)
+    usersofattach = [ usercoderole.user  for usercoderole in attachtouserroles  if usercoderole.role in ['owner', 'editor'] ]
+    usersofscraper = [ usercoderole.user  for usercoderole in scraperuserroles  if usercoderole.role in ['owner', 'editor'] ]
+    commonusers = set(usersofattach).intersection(set(usersofscraper))
+    if not commonusers:
+        return HttpResponse("No: because no common owners or editors between the two scrapers")
+        
+    return HttpResponse("Yes")
+    
