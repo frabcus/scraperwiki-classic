@@ -220,7 +220,7 @@ function release_vm ( script, name ) {
 var current = 0;
 function allocate_vm ( script ) {
 	
-	var v = _.detect(vms, function(vm){ return vm.running == false; });
+	var v = _.detect(vms, function(vm){ return vms[vm].running == false; });
 	v.running = true;
 	vms[v.name] = v;
 	return v;
