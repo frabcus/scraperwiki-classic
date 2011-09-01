@@ -24,6 +24,8 @@ def docmain(request, language=None, path=None):
     context["lang_ruby"] = True
     context["lang_python"] = True
     context["lang_php"] = True
+    # context["lang_javascript"] = True
+    
     # not written by anyone yet
     if language == 'html':
         return HttpResponseRedirect(reverse('docsroot', kwargs={'language':'python'}) )
