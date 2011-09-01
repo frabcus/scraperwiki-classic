@@ -220,10 +220,23 @@ function release_vm ( script, name ) {
 var current = 0;
 function allocate_vm ( script ) {
 	
-	var v = _.detect(vms, function(vm){ return vms[vm].running == false; });
-	v.running = true;
-	vms[v.name] = v;
-	return v;
+ 	var max = vms.length;
+	var v = { running: true }
+	var attempts = 0;
+	
+	while ( v.running ){
+		if ( current >= max ) current = 0;
+		
+		v = vms[current++];		
+		if ( !v.running) {
+			v.running = true;
+			vms[v.name] = v;
+			return v;
+		}
+		if ( attempts++ > max ) 
+			return null;
+	} 
+	
 	
 /*	var v, k;
 	for ( var key in vms ) {
@@ -235,12 +248,10 @@ function allocate_vm ( script ) {
 		};
 	}
 	
-	if ( ! v ) {
-		return null;
-	};
+	if ( ! v ) { return null; };
 	
 	v.running = true;
 	v.script = script;
 	vms[k] = v;
-	return v*/
+	return v;*/
 }
