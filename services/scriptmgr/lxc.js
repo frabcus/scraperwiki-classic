@@ -217,12 +217,21 @@ function release_vm ( script, name ) {
 * var even = _.detect([1, 2, 3, 4, 5, 6], function(num){ return num % 2 == 0; });
 * => 2
 ******************************************************************************/
+var current = 1;
 function allocate_vm ( script ) {
-	var v, k;
+	
+	var max = vms.length;
+	if ( current >= max ) {
+		current = 1;
+	}
+	
+	return vms[current++];
+	
+/*	var v, k;
 	for ( var key in vms ) {
 		var vm = vms[key];
 		k = key;
-		if ( ! vm.running ) {
+		if ( vm.running == false ) {
 			v = vm;
 			break;
 		};
@@ -235,5 +244,5 @@ function allocate_vm ( script ) {
 	v.running = true;
 	v.script = script;
 	vms[k] = v;
-	return v
+	return v*/
 }
