@@ -220,12 +220,10 @@ function release_vm ( script, name ) {
 var current = 0;
 function allocate_vm ( script ) {
 	
-	var max = vms.length;
-	if ( current >= max ) {
-		current = 0;
-	}
-	
-	return vms[current++];
+	var v = _.detect(vms, function(vm){ return vm.running == false; });
+	v.running = true;
+	vms[v.name] = v;
+	return v;
 	
 /*	var v, k;
 	for ( var key in vms ) {
