@@ -194,8 +194,8 @@ exports.release_vm = function( script, name ) {
 
 	console.log('Releasing ' + v.name );
 	// Remove it from the two lookup tables
-	delete vms_by_runid[ script.run_id ]
-	delete vms_by_ip[ script.ip ]
+	delete vms_by_runid[ v.script.run_id ]
+	delete vms_by_ip[ v.script.ip ]
 	
 	v.running = false;
 	v.script = null;

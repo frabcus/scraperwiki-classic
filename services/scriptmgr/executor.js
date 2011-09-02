@@ -88,6 +88,7 @@ exports.known_ips = function() {
 * them in the old format of runID=&scrapername=
 ******************************************************************************/
 exports.get_status = function(response) {
+	util.log.debug("+ Get status data for " + scripts.length);	
     for(var runID in scripts) {
 		var script = scripts[runID];
 		response.write('runID=' + runID + "&scrapername=" + script.scraper_name + "\n");
@@ -315,12 +316,6 @@ function execute(http_req, http_res, raw_request_data) {
 					console.log('child process exited badly, we may have killed it');
 				else 
 					console.log('child process exited with code ' + code);					
-				if ( script ) {
-					delete scripts[script.run_id];
-					delete scripts_ip[ script.ip ];
-				}
-			
-				util.log.debug('child process removed from script list');					
 
 				var endTime = new Date();
 				elapsed = (endTime - startTime) / 1000;
@@ -334,6 +329,11 @@ function execute(http_req, http_res, raw_request_data) {
 				}
 								
 				lxc.release_vm( script, res );
+				if ( script ) {
+					delete scripts[script.run_id];
+					delete scripts_ip[ script.ip ];
+				}
+				util.log.debug('child process removed from script list');					
 								
 				util.log.debug('Finished writing responses');
 			});
