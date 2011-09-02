@@ -350,7 +350,7 @@ function execute(http_req, http_res, raw_request_data) {
 ******************************************************************************/
 function handle_process_output(http_res, data, stdout) {
 	if (stdout) {
-		util.write_to_caller( http_res, data, true );				
+		util.write_to_caller( http_res, data );				
 		return;
 	} 
 	
@@ -369,7 +369,7 @@ function handle_process_output(http_res, data, stdout) {
 		
 	}
 
-	util.write_to_caller( http_res, data, false);			
+	util.write_to_caller( http_res, data);			
 }
 
 
