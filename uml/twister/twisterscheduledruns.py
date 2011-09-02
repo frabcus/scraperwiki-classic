@@ -1,6 +1,8 @@
 from twisted.internet.defer import succeed, Deferred
-from twisted.internet.defer import Deferred, succeed
 from twisted.internet.error import ProcessDone, ConnectionRefusedError
+from twisted.internet import protocol
+from twisted.web.client import ResponseDone
+from twisted.web.http import PotentialDataLoss
 
 from zope.interface import implements
 from twisted.web.iweb import IBodyProducer
@@ -30,6 +32,22 @@ class StringProducer(object):
     def stopProducing(self):
         pass
 
+# this is only so we can see what errors (if any) are returning from django (which can be the annoying CRSF blocker)
+class updaterunobjectReceiver(protocol.Protocol):
+    def __init__(self, finished, logger):
+        self.finished = finished
+        self.logger = logger
+        self.rbuffer = [ ]
+        
+    def dataReceived(self, bytes):
+        self.rbuffer.append(bytes)
+        
+    def connectionLost(self, reason):
+        if reason.type in [ResponseDone, PotentialDataLoss]:
+            self.logger.debug("updaterunobject response: "+"".join(self.rbuffer)[:1000])
+        else:
+            self.logger.warning("nope "+str([reason.getErrorMessage(), reason.type, self.rbuffer]))
+        self.finished.callback(None)
 
 
 TAIL_LINES = 5
@@ -64,7 +82,9 @@ class ScheduledRunMessageLoopHandler:
         self.logger.info("requestoverduescrapers failure received "+str(failure))
     
     def updaterunobjectResponse(self, response):
-        pass
+        finished = Deferred()
+        response.deliverBody(updaterunobjectReceiver(finished, self.logger))
+        return finished
 
     def updaterunobject(self, bfinished):
         url = urlparse.urljoin(self.djangourl, 'scraper-admin/twistermakesrunevent/')
@@ -77,14 +97,7 @@ class ScheduledRunMessageLoopHandler:
         d.addCallbacks(self.updaterunobjectResponse, self.updaterunobjectFailure)
         
     def receiveline(self, line):
-        try:
-            data = json.loads(line)
-            if not instanceof(data, dict):
-                data = { 'message_type':'console', 'content': str(line) }
-        except:
-            # This might be a HTTP header ... is there any real point in forwarding to the client?
-            return
-            #data = { 'message_type':'console', 'content':"JSONERROR: "+line }
+        data = json.loads(line)
         
         message_type = data.get('message_type')
         content = data.get("content")
@@ -96,7 +109,7 @@ class ScheduledRunMessageLoopHandler:
                 self.completiondata = data
                 self.completionmessage = '';
                 if data.get('elapsed_seconds'):
-                    completionmessage += str(data.get("elapsed_seconds")) + " seconds elapsed, " 
+                    self.completionmessage += str(data.get("elapsed_seconds")) + " seconds elapsed, " 
                 if data.get("CPU_seconds"):
                     self.completionmessage += str(data.get("CPU_seconds")) + " CPU seconds used";
                 if "exit_status" in data and data.get("exit_status") != 0:

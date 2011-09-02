@@ -213,13 +213,15 @@ def scraper_search_handler(request):
         maxrows = 5
     result = [ ]  # list of dicts
 
-    if "HTTP_X_REAL_IP" in request.META:
-        client_ip = request.META["HTTP_X_REAL_IP"]        
-    else:
-        client_ip = "Not specified"
+    boverduescraperrequest = False
+    if query == "*OVERDUE*":
+        if request.META.get("HTTP_X_REAL_IP", "Not specified") in settings.INTERNAL_IPS:
+            boverduescraperrequest = True
+        if settings.INTERNAL_IPS == ["IGNORETHIS_IPS_CONSTRAINT"]:
+            boverduescraperrequest = True
 
-    if query == "*OVERDUE*"  and client_ip in settings.INTERNAL_IPS:                        
-        scrapers = scrapers_overdue()  # should be handling hiding private scrapers from list unless authorized caller (eg twister)
+    if boverduescraperrequest:
+        scrapers = scrapers_overdue()  
     else:
         scrapers = scraper_search_query(user=None, query=query)
         
@@ -230,7 +232,10 @@ def scraper_search_handler(request):
         if owners:
             owner = owners[0]
             try:
-                ownername = owner.get_profile().name
+                profile = owner.get_profile()
+                ownername = profile.name
+                if boverduescraperrequest:
+                    res['user'] = { "beta_user": profile.beta_user, "id": owner.id }   # to enable certain scrapers to go through the lxc process
             except frontend.models.UserProfile.DoesNotExist:
                 ownername = owner.username
             if not ownername:
@@ -242,16 +247,14 @@ def scraper_search_handler(request):
         res['privacy_status'] = scraper.privacy_status
         res['language'] = scraper.language
         
-
-        # Make sure that this request comes from a machine with an INTERNAL_IP
-        # This is probably not enough yet to keep information save, 
-        # TODO: Make this safer
-        if query == "*OVERDUE*" and client_ip in settings.INTERNAL_IPS:                        
+        # extra data added to the overdue request kind for direct use
+        if boverduescraperrequest:
             res['overdue_proportion'] = float(scraper.overdue_proportion)
             res['code'] = scraper.get_vcs_status(-1)["code"]
             res['guid'] = scraper.guid
             
             # Fetch the permissions
+            # poss these requests should be done through another avenue that is useful via runs from the editor
             permissions = []
             for perm in scraper.permissions.all():
                 permissions.append({'source':   perm.code, 
@@ -259,18 +262,6 @@ def scraper_search_handler(request):
                                     'can_read': perm.can_read, 
                                     'can_write':perm.can_write})
             res['permissions'] = permissions
-
-            
-            try:
-                profile = owner.get_profile()
-                res['user'] = { "beta_user": profile.beta_user, 
-                                 "id": owner.id }
-            except:
-                # TODO: Need to decide what to do with this. Implies that 
-                # an anonymous user is doing this and that security will
-                # already have been checked.
-                pass
-            
             
         result.append(res)
     

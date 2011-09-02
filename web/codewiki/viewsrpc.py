@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpRespons
 from django.template.loader import render_to_string
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from django.conf import settings
 
@@ -245,9 +246,13 @@ def testactiveumls(n):
         result.append('\n'.join(lns))
     return result
 
+
+# this form is protected by the django key known to twister, so does not need to be obstructed by the csrf machinery
+@csrf_exempt
 def twistermakesrunevent(request):
     try:
-        return Dtwistermakesrunevent(request)
+        response = Dtwistermakesrunevent(request)
+        return response
     except Exception, e:
         print e
     return HttpResponse("no done")
