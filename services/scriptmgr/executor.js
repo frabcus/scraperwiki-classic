@@ -95,8 +95,6 @@ exports.get_status = function(response) {
 		var script = scripts[runID];
 		response.write('runID=' + runID + "&scrapername=" + script.scraper_name + "\n");
 	}	
-	
-	util.log.debug("+ Get status returning data for " + _.size(scripts) + " running scripts");
 }
 
 /******************************************************************************
