@@ -628,7 +628,6 @@ class RunnerFactory(protocol.ServerFactory):
         self.notifiedmaxscheduledscrapers = self.maxscheduledscrapers
 
         # set the visible heartbeat going which is used to call back and look up the schedulers
-        #*** UNCOMMENT THIS to enable new type of scheduling
         self.lc = task.LoopingCall(self.requestoverduescrapers)
         self.lc.start(30)
         
@@ -639,6 +638,7 @@ class RunnerFactory(protocol.ServerFactory):
         logger.info("requestoverduescrapers")
         uget = {"format":"jsondict", "searchquery":"*OVERDUE*", "maxrows":self.maxscheduledscrapers+5}
         url = urlparse.urljoin(config.get("twister", "apiurl"), '/api/1.0/scraper/search')
+        logger.info("API URL: " + url + " with params " + urllib.urlencode(uget) )        
         d = agent.request('GET', "%s?%s" % (url, urllib.urlencode(uget)))
         d.addCallbacks(self.requestoverduescrapersResponse, self.requestoverduescrapersFailure)
 
