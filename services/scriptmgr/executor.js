@@ -353,18 +353,13 @@ function handle_process_output(http_res, data, stdout) {
 		util.write_to_caller( http_res, data, true );				
 		return;
 	} 
-	try 
-	{
-		s = JSON.parse(data);
-		if ( s ) {
-			http_res.write( data );
-			sent = true;
-		}
+	
+	if ( data.slice(0,4) == "::::") {
+		http_res.write( data.slice(4) );
+		return;
 	}
-	catch(err) 
-	{
-		util.write_to_caller( http_res, data, false);			
-	}		
+
+	util.write_to_caller( http_res, data, false);			
 }
 
 
