@@ -428,11 +428,11 @@ def convtounicode(text):
 def proxycached(request):
     from httplib import BadStatusLine
     
-    cacheid = request.POST.get('cacheid')
+    cacheid = request.POST.get('cacheid', None)
     
     # delete this later when no more need for debugging
-    if not cacheid:  
-        cacheid = request.GET.get('cacheid')
+    if not cacheid:   
+        cacheid = request.GET.get('cacheid', None)
     
     if not cacheid:
         return HttpResponse(json.dumps({'type':'error', 'content':"No cacheid found"}), mimetype="application/json")

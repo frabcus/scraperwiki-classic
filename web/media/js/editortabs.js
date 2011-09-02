@@ -125,6 +125,7 @@ function popupCached(cacheid, lmimetype)
         { 
             $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, timeout: 10000, success: function(sdata) 
             {
+			alert( sdata );
                 cachejson = lparsehighlightcode(sdata, lmimetype); 
                 if (cachejson["objcontent"].length < 15000)  // don't cache huge things
                     cachehidlookup[cacheid] = cachejson; 
