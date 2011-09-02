@@ -83,6 +83,7 @@ function lparsehighlightcode(sdata, lmimetype)
         res.push("<h2>mimetype: "+lmimetype+"</h2>"); 
         if (cachejson["encoding"] == "base64")
             res.push("<h2>Encoded as: "+cachejson["encoding"]+"</h2>"); 
+alert(cachejson["content"]);
         res.push('<pre>', cgiescape(cachejson["content"]), '</pre>'); 
         cachejson["objcontent"] = $(res.join("")); 
         return cachejson; 
@@ -125,7 +126,6 @@ function popupCached(cacheid, lmimetype)
         { 
             $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, timeout: 10000, success: function(sdata) 
             {
-			alert( sdata );
                 cachejson = lparsehighlightcode(sdata, lmimetype); 
                 if (cachejson["objcontent"].length < 15000)  // don't cache huge things
                     cachehidlookup[cacheid] = cachejson; 
