@@ -56,8 +56,6 @@ function setTabScrollPosition(sTab, command)
 
 function showTextPopup(sLongMessage) 
 {
-	alert( sLongMessage );
-	alert( typeof(sLongMessage));
     $.modal('<pre class="popupoutput">'+cgiescape(sLongMessage)+'</pre>', 
             {overlayClose: true, 
                 containerCss:{ borderColor:"#fff", height:"80%", padding:0, width:"90%", background:"#000", color:"#3cef3b" }, 
