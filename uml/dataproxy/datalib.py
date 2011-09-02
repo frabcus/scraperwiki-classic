@@ -283,12 +283,16 @@ class SQLiteDatabase(Database):
             self.logger.info("permission to attach %s to %s response: %s" % (self.short_name, name, ares))
             if ares == "Yes":
                 self.attachables.append(name)
+            elif ares == "DoesNotExist":
+                return {"error":"Does Not Exist %s" % name}
             else:
                 return {"error":"no permission to attach to %s" % name}
 
+        attachscrapersqlitefile = os.path.join(self.m_resourcedir, name, "defaultdb.sqlite")
+        
+
         self.authorizer_func = authorizer_attaching
         try:
-            attachscrapersqlitefile = os.path.join(self.m_resourcedir, name, "defaultdb.sqlite")
             self.m_sqlitedbcursor.execute('attach database ? as ?', (attachscrapersqlitefile, asname or name))
         except sqlite3.Error, e:
             self.logger.exception("attaching")
