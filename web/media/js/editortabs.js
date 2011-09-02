@@ -73,7 +73,8 @@ function lparsehighlightcode(sdata, lmimetype)
     } 
     catch (err) 
     {
-	alert( err );
+		alert( typeof(sdata) );
+		alert( typeof(sdata['content']) );
         return { "objcontent": $('<pre class="popupoutput">Malformed json: ' + cgiescape(sdata) + "</pre>") }; 
     }
 
