@@ -386,10 +386,14 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             msg = "%s (%s)" % (msg, reason)
         self.writeall(json.dumps({'message_type':'executionstatus', 'content':'killsignal', 'message':msg}))
         logger.debug(msg)
-        try:      # (should kill using the new dispatcher call)
-            os.kill(self.processrunning.pid, signal.SIGKILL)
-        except:
-            pass
+        if self.processrunning.pid == "NewSpawnRunner":
+            logger.debug("LosingConnectionNewWay "+self.processrunning.pid)
+            self.processrunning.controllerconnection.transport.loseConnection()
+        else:
+            try:      # (should kill using the new dispatcher call)
+                os.kill(self.processrunning.pid, signal.SIGKILL)
+            except:
+                pass
 
     
             # this more recently can be called from stimulate_run from django (many of these parameters could be in the client)
@@ -404,7 +408,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, logger, user=user)
         self.factory.notifyMonitoringClients(self)
         
-
+        
 class UserEditorsOnOneScraper:
     def __init__(self, client, lusersessionpriority):
         self.username = client.username 
