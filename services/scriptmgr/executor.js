@@ -305,11 +305,10 @@ function execute(http_req, http_res, raw_request_data) {
 				// Let's handle the user quitting early it might be a KILL
 				// command from the dispatcher
 				lxc.kill( script );
-				lxc.release_vm( script, res );
-				if ( script ) {
+/*				if ( script ) {
 					delete scripts[script.run_id];
 					delete scripts_ip[ script.ip ];
-				}
+				}*/
 	    	});
 
 
