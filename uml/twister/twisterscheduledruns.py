@@ -78,16 +78,11 @@ class ScheduledRunMessageLoopHandler:
         
     def receiveline(self, line):
         try:
-            x = int(line)
-            data = { 'message_type':'console', 'content': str(line) }
+            data = json.loads(line)
+            if not instanceof(data, dict):
+                data = { 'message_type':'console', 'content': str(line) }
         except:
-            data = None
-        
-        if data is None:
-            try:
-                data = json.loads(line)
-            except:
-                data = { 'message_type':'console', 'content':"JSONERROR: "+line }
+            data = { 'message_type':'console', 'content':"JSONERROR: "+line }
         
         message_type = data.get('message_type')
         content = data.get("content")
