@@ -442,7 +442,7 @@ def proxycached(request):
     
     try:
         fin = urllib2.urlopen(proxyurl)
-        result["mimetype"] = fin.headers.type
+        result["mimetype"] = fin.headers.type || "text/html"
         if fin.headers.maintype == 'text' or fin.headers.type == "application/json" or fin.headers.type[-4:] == "+xml":
             result['content'] = convtounicode(fin.read())
         else:
