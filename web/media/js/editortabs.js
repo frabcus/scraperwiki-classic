@@ -69,12 +69,11 @@ function lparsehighlightcode(sdata, lmimetype)
     var cachejson; 
     try 
     {
-	alert('about to eval');
         cachejson = $.evalJSON(sdata);
-alert('evalled');
     } 
     catch (err) 
     {
+	alert( err );
         return { "objcontent": $('<pre class="popupoutput">Malformed json: ' + cgiescape(sdata) + "</pre>") }; 
     }
 
