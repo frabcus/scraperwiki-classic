@@ -6,6 +6,7 @@ import  socket
 import  signal
 import  string
 import  time
+import  resource
 import  urllib2, urllib
 import  optparse
 import  scraperwiki
@@ -69,12 +70,7 @@ scraperwiki.datastore.create(host, port, options.scrapername or "", options.runi
 
 scraperwiki.logfd = sys.stderr
 
-#sys.stdout = ConsoleStream(sys.stdout)
-#sys.stderr = ConsoleStream(sys.stderr)
-#sys.stderr = ConsoleStream(os.fdopen(2, 'w', 0))
-
-# in the future can divert to webproxy
-#scraperwiki.utils.urllibSetup(http_proxy='http://127.0.0.1:9002')
+resource.setrlimit(resource.RLIMIT_CPU, (80, 82)
 
 #  Set up a CPU time limit handler which simply throws a python so it can be handled cleanly before the hard limit is reached
 def sigXCPU(signum, frame) :
