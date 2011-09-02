@@ -359,6 +359,16 @@ function handle_process_output(http_res, data, stdout) {
 		return;
 	}
 
+	try {
+		x = JSON.parse( data );
+		if ( typeof(x) == "object" ) {
+			http_res.write( data );
+			return;
+		}
+	} catch ( e ) {
+		
+	}
+
 	util.write_to_caller( http_res, data, false);			
 }
 
