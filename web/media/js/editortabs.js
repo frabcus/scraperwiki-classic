@@ -66,8 +66,8 @@ function showTextPopup(sLongMessage)
 
 function lparsehighlightcode(sdata, lmimetype)
 {
-    var cachejson; 
-    try 
+    var cachejson = sdata; 
+/*    try 
     {
         cachejson = $.evalJSON(sdata);
     } 
@@ -77,7 +77,7 @@ function lparsehighlightcode(sdata, lmimetype)
 		alert( typeof(sdata['content']) );
         return { "objcontent": $('<pre class="popupoutput">Malformed json: ' + cgiescape(sdata) + "</pre>") }; 
     }
-
+*/
     lmimetype = cachejson["mimetype"];  // the incoming value is incorrect because of failure to use closure and httpproxy.py isn't sending the value out properly (see line 489)
     if ((lmimetype != "text/html") || (cachejson["content"].length > 20000))
     {
