@@ -79,9 +79,6 @@ exports.kill = function( vmname ) {
 	util.log.debug('Killing ' + vmname );
 	try {
 		e = spawn('/usr/bin/lxc-stop', ['-n', vmname]);
-		// Clean up indices
-		delete vms_by_run_id[ script.run_id ];		
-		delete vms_by_ip[ script.ip ];
 	} catch(e) {
 		util.log.debug(e);
 	}
