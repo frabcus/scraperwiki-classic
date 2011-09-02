@@ -69,8 +69,8 @@ scraperwiki.datastore.create(host, port, options.scrapername or "", options.runi
 
 scraperwiki.logfd = sys.stderr
 
-sys.stdout = ConsoleStream(sys.stdout)
-sys.stderr = ConsoleStream(sys.stderr)
+#sys.stdout = ConsoleStream(sys.stdout)
+#sys.stderr = ConsoleStream(sys.stderr)
 #sys.stderr = ConsoleStream(os.fdopen(2, 'w', 0))
 
 # in the future can divert to webproxy
