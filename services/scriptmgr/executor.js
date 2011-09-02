@@ -91,6 +91,7 @@ exports.known_ips = function() {
 exports.get_status = function(response) {
 	util.log.debug("+ Get status data for " + scripts.length);	
     for(var runID in scripts) {
+		util.log.debug('Status: Run: ' + runID);
 		var script = scripts[runID];
 		response.write('runID=' + runID + "&scrapername=" + script.scraper_name + "\n");
 	}	
