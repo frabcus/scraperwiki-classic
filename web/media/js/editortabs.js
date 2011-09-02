@@ -79,7 +79,7 @@ function lparsehighlightcode(sdata, lmimetype)
     }
 */
     lmimetype = cachejson["mimetype"];  // the incoming value is incorrect because of failure to use closure and httpproxy.py isn't sending the value out properly (see line 489)
-    if ((lmimetype != "text/html") || (cachejson["content"].length > 20000))
+   /* if ((lmimetype != "text/html") || (cachejson["content"].length > 20000))
     {
         var res = [ ]; 
         res.push("<h2>mimetype: "+lmimetype+"</h2>"); 
@@ -88,7 +88,7 @@ function lparsehighlightcode(sdata, lmimetype)
         res.push('<pre>', cgiescape(cachejson["content"]), '</pre>'); 
         cachejson["objcontent"] = $(res.join("")); 
         return cachejson; 
-    }
+    }*/
     // could highlight text/javascript and text/css
 
     var lineNo = 1; 
