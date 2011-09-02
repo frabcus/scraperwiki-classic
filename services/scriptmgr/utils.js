@@ -28,7 +28,7 @@ exports.write_to_caller = function(http_res, output, isstdout) {
 				// Removing the need for the extra FD by checking if we can parse
 				// the JSON
 				s = JSON.parse(parts[i]);
-				if ( s ) {
+				if ( s && typeof(s) == 'object' ) {
 					http_res.write( parts[i] );
 				}
 				continue;
