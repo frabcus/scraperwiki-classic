@@ -4,6 +4,7 @@ $stdout.sync = true
 
 require 'rubygems'   # for nokigiri to work on all machines, and for JSON/Iconv on OSX
 require 'json'
+require 'date'
 require 'iconv'
 require 'optparse'
 require	'scraperwiki'
