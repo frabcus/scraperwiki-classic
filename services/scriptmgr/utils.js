@@ -25,10 +25,8 @@ exports.write_to_caller = function(http_res, output) {
 	for (var i=0; i < parts.length; i++) {
 		if ( parts[i].length > 0 ) {
 			try {
-				console.log( 'writing? ' + parts[i]);
 				s = JSON.parse(parts[i]);
 				if ( s && typeof(s) == 'object' ) {
-					console.log( 'writing ' + parts[i]);					
 					http_res.write( parts[i] );
 					continue;
 				} 
@@ -36,7 +34,6 @@ exports.write_to_caller = function(http_res, output) {
 				//
 			}
 			
-			console.log( 'writing normally ' + parts[i]);
 			http_res.write( JSON.stringify( { 'message_type':'console', 'content': parts[i]  } ) + "\n");
 		}
 	};
