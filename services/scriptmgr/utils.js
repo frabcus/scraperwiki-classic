@@ -30,8 +30,8 @@ exports.write_to_caller = function(http_res, output) {
 				if ( s && typeof(s) == 'object' ) {
 					console.log( 'writing ' + parts[i]);					
 					http_res.write( parts[i] );
-				}
-				continue;
+					continue;
+				} 
 			}catch(err) {
 				//
 			}
