@@ -126,12 +126,12 @@ function popupCached(cacheid, lmimetype)
             $.ajax({type : 'POST', url  : $('input#proxycachedurl').val(), data: { cacheid: cacheid }, timeout: 10000, success: function(sdata) 
             {
                 cachejson = lparsehighlightcode(sdata, lmimetype); 
-                if (cachejson["objcontent"].length < 15000)  // don't cache huge things
+                if (cachejson["content"].length < 15000)  // don't cache huge things
                     cachehidlookup[cacheid] = cachejson; 
 
                 var wrapheight = $('.simplemodal-wrap').height(); 
                 $('.simplemodal-wrap #loadingheader').remove(); 
-                $('.simplemodal-wrap').append(cachejson["objcontent"]); 
+                $('.simplemodal-wrap').append(cachejson["content"]); 
                 $('.simplemodal-wrap').css("height", wrapheight + "px").css("overflow", "auto"); 
             }})
         }
