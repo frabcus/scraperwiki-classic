@@ -19,8 +19,8 @@ class SW_DataStore
       @m_socket = nil
       @m_host = nil
       @m_port = nil
-      @m_scrapername = nil
-      @m_runid = nil
+      @m_scrapername = ''
+      @m_runid = ''
     end
 
 
