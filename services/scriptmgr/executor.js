@@ -102,11 +102,15 @@ exports.get_status = function(response) {
 ******************************************************************************/
 exports.get_details = function(details) {
 	if ( details.ip ) {
+		util.log.debug('Looking for ip ' + details.ip + ' in ' + scripts_ip);
 		return scripts_ip[details.ip];
 	} else if ( details.runid ) {
+		util.log.debug('Looking for ip ' + details.runid + ' in ' + scripts);		
 		return scripts[details.runid];
 	}
 	
+	util.log.debug('Failed to find a script: ' );
+	util.log.debug( details );
 	return null;
 }
 
