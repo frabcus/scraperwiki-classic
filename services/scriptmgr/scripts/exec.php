@@ -73,20 +73,6 @@ function errorHandler($errno, $errstr, $errfile, $errline)
 set_error_handler("errorHandler", E_ALL & ~E_NOTICE);  // this is for errors, not exceptions (eg 1/0)
 set_time_limit(80); 
 
-// should parse and populate $_GET from getenv("QUERY_STRING") here
-
-/*
-    Can't get this to work - the exception raised inside the signal handler
-    just makes the script fail silently. This isn't the end of the world,
-    as higher level code at least now says it was SIGXCPU that killed it.
-
-    Would be nice to get the stack trace though, like in Ruby/Python!
-
-function sigXCPU($signum) {
-    throw new Exception("ScraperWiki CPU time exceeded");
-}
-pcntl_signal(SIGXCPU, "sigXCPU"); */
-
 try
 {
     // works also as include or eval.  However no way to trap syntax errors
