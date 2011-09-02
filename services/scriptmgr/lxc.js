@@ -76,7 +76,7 @@ exports.exec = function(script, code) {
 * Kill the LXC instance that is currently running the provided script
 ******************************************************************************/
 exports.kill = function( script ) {
-		console.log('looking for ' + script.run_id );
+	console.log('looking (for kill) for ' + script.run_id );
 	var vm = vms_by_runid[ script.run_id ];
 	if ( vm ) {
 		// trigger an lxc-kill

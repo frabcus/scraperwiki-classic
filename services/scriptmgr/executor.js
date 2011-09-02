@@ -60,8 +60,8 @@ exports.init = function( settings ) {
 * it is an lxc instance (lxc-kill) or a local process (kill by pid)
 ******************************************************************************/
 exports.kill_script = function( run_id ) {
+	var s = scripts[run_id];	
 	if ( ! use_lxc ) {
-		var s = scripts[run_id];
 		if ( s ) {
 			pid = s.pid;
 			process.kill(pid, 'SIGKILL');
@@ -73,7 +73,8 @@ exports.kill_script = function( run_id ) {
 			return true;
 		};
 	} else {
-		
+		util.log.debug('Attempting to kill LXC ' + s.vm)
+		lxc.kill(s);
 	}
 	
 	return false;
@@ -129,12 +130,6 @@ exports.run_script = function( http_request, http_response ) {
 		http_response.end( JSON.stringify(r) );
 		return;
 	};
-
-	// Handle the request being closed by the client	
-	http_request.on("close", function() {
-		util.log.debug('Client killed the connection')
-		http_response.end();
-	});
 	
 	len = http_request.headers['content-length'] || -1
 	var body = '';
@@ -185,6 +180,7 @@ function execute(http_req, http_res, raw_request_data) {
 				black: request_data.black || '',
 				white: request_data.white || '',
 				permissions: request_data.permissions || []  };
+	
 	
 	if ( ! use_lxc ) {
 		// Execute the code locally using the relevant file (exec.whatever)
@@ -304,6 +300,19 @@ function execute(http_req, http_res, raw_request_data) {
 			scripts[ script.run_id ] = script;
 			scripts_ip[ script.ip ] = script;
 	
+	
+			http_req.connection.addListener('close', function () {
+				// Let's handle the user quitting early it might be a KILL
+				// command from the dispatcher
+				lxc.kill( script );
+				lxc.release_vm( script, res );
+				if ( script ) {
+					delete scripts[script.run_id];
+					delete scripts_ip[ script.ip ];
+				}
+	    	});
+
+
 			e.stdout.on('data', function (data) {
 				handle_process_output( http_res, data, true );
 			});
