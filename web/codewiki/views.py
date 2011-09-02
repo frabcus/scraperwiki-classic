@@ -454,6 +454,9 @@ def proxycached(request):
     except BadStatusLine, sl:
         result['type'] = 'exception'
         result['content'] = str(sl)
+    except Exception, exc:
+        result['type'] = 'exception'
+        result['content'] = str(exc)
     
     return HttpResponse(json.dumps(result), mimetype="application/json")
 
