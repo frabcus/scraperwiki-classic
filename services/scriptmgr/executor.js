@@ -304,11 +304,7 @@ function execute(http_req, http_res, raw_request_data) {
 			http_req.connection.addListener('close', function () {
 				// Let's handle the user quitting early it might be a KILL
 				// command from the dispatcher
-				lxc.kill( script );
-/*				if ( script ) {
-					delete scripts[script.run_id];
-					delete scripts_ip[ script.ip ];
-				}*/
+				lxc.kill( res );
 	    	});
 
 
