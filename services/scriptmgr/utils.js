@@ -9,13 +9,13 @@ var path  = require('path');
 * Write the response to the caller, or in this case write it back down the long
 * lived socket that connected to us.
 ******************************************************************************/
-exports.write_to_caller = function(http_res, output, isstdout) {
+exports.write_to_caller = function(http_res, output) {
 	var msg = output.toString();
 	var parts = msg.split("\n");	
 
-	// Hacky solution to making sure HTML is sent all on one line.
+	// Hacky solution to making sure HTML is sent all on one line for now.
 	sub = msg.substring(0,100);
-	if ( sub.indexOf('html') >= 0 && sub.indexOf('>') >= 0  && sub.indexOf('<') >= 0) {
+	if ( sub.indexOf('>') >= 0  && sub.indexOf('<') >= 0 && sub.toLowerCase().indexOf('html') >= 0) {
 		r = { 'message_type':'console', 'content': msg  };
 		http_res.write( JSON.stringify(r) + "\n");
 		return;
@@ -25,19 +25,16 @@ exports.write_to_caller = function(http_res, output, isstdout) {
 	for (var i=0; i < parts.length; i++) {
 		if ( parts[i].length > 0 ) {
 			try {
-				// Removing the need for the extra FD by checking if we can parse
-				// the JSON
 				s = JSON.parse(parts[i]);
-				if ( s ) {
+				if ( s && typeof(s) == 'object' ) {
 					http_res.write( parts[i] );
-				}
-				continue;
+					continue;
+				} 
 			}catch(err) {
 				//
 			}
 			
-			r = { 'message_type':'console', 'content': parts[i]  };
-			http_res.write( JSON.stringify(r) + "\n");
+			http_res.write( JSON.stringify( { 'message_type':'console', 'content': parts[i]  } ) + "\n");
 		}
 	};
 }

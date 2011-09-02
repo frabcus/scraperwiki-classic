@@ -10,8 +10,10 @@ class scraperwiki
    static function sw_dumpMessage($dict)
    {
       global $logfd ;
-      if ($logfd)
-          fwrite ($logfd, json_encode ($dict) . "\n") ;
+      if ($logfd) {
+		 $val = json_encode($dict);
+         fwrite ($logfd, "::::" . $val . "\n") ;
+	  }
    }
 
    static function httpresponseheader ($headerkey, $headervalue)

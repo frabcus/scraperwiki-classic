@@ -147,13 +147,11 @@ function handleIdent(req,res) {
 		res.write( 'runid=' + script.run_id  + "\n");		
 		res.write( 'scraperid=' + script.scraper_name + "\n");
 		res.write( 'urlquery=' + script.query + "\n");		
-		util.log.debug( script.white );
 		if ( script.white ) {
 			res.write( 'allow=' + script.white + "\n");		
 		} else {
 			res.write( "allow=.*\n");		
 		}
-		util.log.debug( script.black );		
 		if ( script.black ) {
 			res.write( 'block=' + script.black + "\n");				
 		}	
@@ -177,6 +175,7 @@ function handleNotify(req,res) {
 	if ( script ) {
 		delete urlObj.query.runid;
 		s = JSON.stringify( urlObj.query );
+		util.log.debug( 'Notify request sending ' + s);
 		script.response.write( s );
 	}
 	

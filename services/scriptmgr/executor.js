@@ -14,6 +14,7 @@
 *				ip: ''};
 * 
 ******************************************************************************/
+var _    = require('underscore')._;
 var lxc = require('./lxc')
 var util = require('./utils')
 var qs  = require('querystring');
@@ -60,8 +61,8 @@ exports.init = function( settings ) {
 * it is an lxc instance (lxc-kill) or a local process (kill by pid)
 ******************************************************************************/
 exports.kill_script = function( run_id ) {
+	var s = scripts[run_id];	
 	if ( ! use_lxc ) {
-		var s = scripts[run_id];
 		if ( s ) {
 			pid = s.pid;
 			process.kill(pid, 'SIGKILL');
@@ -73,7 +74,8 @@ exports.kill_script = function( run_id ) {
 			return true;
 		};
 	} else {
-		
+		util.log.debug('Attempting to kill LXC ' + s.vm)
+		lxc.kill(s);
 	}
 	
 	return false;
@@ -88,12 +90,11 @@ exports.known_ips = function() {
 * them in the old format of runID=&scrapername=
 ******************************************************************************/
 exports.get_status = function(response) {
+	util.log.debug("+ Get status data for " + _.size(scripts));	
     for(var runID in scripts) {
 		var script = scripts[runID];
 		response.write('runID=' + runID + "&scrapername=" + script.scraper_name + "\n");
 	}	
-	
-	util.log.debug("+ Get status returning data for " + scripts.length + " running scripts");
 }
 
 /******************************************************************************
@@ -128,12 +129,6 @@ exports.run_script = function( http_request, http_response ) {
 		http_response.end( JSON.stringify(r) );
 		return;
 	};
-
-	// Handle the request being closed by the client	
-	http_request.on("close", function() {
-		util.log.debug('Client killed the connection')
-		http_response.end();
-	});
 	
 	len = http_request.headers['content-length'] || -1
 	var body = '';
@@ -184,6 +179,7 @@ function execute(http_req, http_res, raw_request_data) {
 				black: request_data.black || '',
 				white: request_data.white || '',
 				permissions: request_data.permissions || []  };
+	
 	
 	if ( ! use_lxc ) {
 		// Execute the code locally using the relevant file (exec.whatever)
@@ -303,6 +299,14 @@ function execute(http_req, http_res, raw_request_data) {
 			scripts[ script.run_id ] = script;
 			scripts_ip[ script.ip ] = script;
 	
+	
+			http_req.connection.addListener('close', function () {
+				// Let's handle the user quitting early it might be a KILL
+				// command from the dispatcher
+				lxc.kill( res );
+	    	});
+
+
 			e.stdout.on('data', function (data) {
 				handle_process_output( http_res, data, true );
 			});
@@ -315,12 +319,6 @@ function execute(http_req, http_res, raw_request_data) {
 					console.log('child process exited badly, we may have killed it');
 				else 
 					console.log('child process exited with code ' + code);					
-				if ( script ) {
-					delete scripts[script.run_id];
-					delete scripts_ip[ script.ip ];
-				}
-			
-				util.log.debug('child process removed from script list');					
 
 				var endTime = new Date();
 				elapsed = (endTime - startTime) / 1000;
@@ -334,6 +332,11 @@ function execute(http_req, http_res, raw_request_data) {
 				}
 								
 				lxc.release_vm( script, res );
+				if ( script ) {
+					delete scripts[script.run_id];
+					delete scripts_ip[ script.ip ];
+				}
+				util.log.debug('child process removed from script list');					
 								
 				util.log.debug('Finished writing responses');
 			});
@@ -347,21 +350,26 @@ function execute(http_req, http_res, raw_request_data) {
 ******************************************************************************/
 function handle_process_output(http_res, data, stdout) {
 	if (stdout) {
-		util.write_to_caller( http_res, data, true );				
+		util.write_to_caller( http_res, data );				
 		return;
 	} 
-	try 
-	{
-		s = JSON.parse(data);
-		if ( s ) {
-			http_res.write( data );
-			sent = true;
-		}
+	
+	if ( data.slice(0,4) == "::::") {
+		http_res.write( data.slice(4) );
+		return;
 	}
-	catch(err) 
-	{
-		util.write_to_caller( http_res, data, false);			
-	}		
+
+	try {
+		x = JSON.parse( data );
+		if ( typeof(x) == "object" ) {
+			http_res.write( data );
+			return;
+		} 
+	} catch ( e ) {
+		
+	}
+
+	util.write_to_caller( http_res, data);			
 }
 
 

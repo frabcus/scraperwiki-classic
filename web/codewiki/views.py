@@ -428,11 +428,11 @@ def convtounicode(text):
 def proxycached(request):
     from httplib import BadStatusLine
     
-    cacheid = request.POST.get('cacheid')
+    cacheid = request.POST.get('cacheid', None)
     
     # delete this later when no more need for debugging
-    if not cacheid:  
-        cacheid = request.GET.get('cacheid')
+    if not cacheid:   
+        cacheid = request.GET.get('cacheid', None)
     
     if not cacheid:
         return HttpResponse(json.dumps({'type':'error', 'content':"No cacheid found"}), mimetype="application/json")
@@ -442,7 +442,7 @@ def proxycached(request):
     
     try:
         fin = urllib2.urlopen(proxyurl)
-        result["mimetype"] = fin.headers.type
+        result["mimetype"] = fin.headers.type or "text/html"
         if fin.headers.maintype == 'text' or fin.headers.type == "application/json" or fin.headers.type[-4:] == "+xml":
             result['content'] = convtounicode(fin.read())
         else:
@@ -454,6 +454,9 @@ def proxycached(request):
     except BadStatusLine, sl:
         result['type'] = 'exception'
         result['content'] = str(sl)
+    except Exception, exc:
+        result['type'] = 'exception'
+        result['content'] = str(exc)
     
     return HttpResponse(json.dumps(result), mimetype="application/json")
 

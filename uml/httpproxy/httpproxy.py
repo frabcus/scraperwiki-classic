@@ -313,8 +313,17 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
 
 
-    def notify (self, host, **query) :
+    def notify (self, sending_host, **query) :
         # We don't to do this for open access IPs but it won;t hurt
+        try:
+            lxc_server = config.get(varName, 'lxc_server')
+        except:
+            lxc_server = None
+        
+        if lxc_server and '10.0' in sending_host:
+            host = lxc_server
+        else:
+            host = sending_host
         
         query['message_type'] = 'sources'
         try    : urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()

@@ -75,19 +75,13 @@ exports.exec = function(script, code) {
 /******************************************************************************
 * Kill the LXC instance that is currently running the provided script
 ******************************************************************************/
-exports.kill = function( script ) {
-		console.log('looking for ' + script.run_id );
-	var vm = vms_by_runid[ script.run_id ];
-	if ( vm ) {
-		// trigger an lxc-kill
-		// lxc-stop -n 'vm'
-		e = spawn('/usr/bin/lxc-stop', ['-n', vm]);
-
-		// Clean up indices
-		delete vms_by_run_id[ script.run_id ];		
-		delete vms_by_ip[ script.ip ];
+exports.kill = function( vmname ) {
+	util.log.debug('Killing ' + vmname );
+	try {
+		e = spawn('/usr/bin/lxc-stop', ['-n', vmname]);
+	} catch(e) {
+		util.log.debug(e);
 	}
-	return false;
 };
 
 
@@ -194,8 +188,8 @@ exports.release_vm = function( script, name ) {
 
 	console.log('Releasing ' + v.name );
 	// Remove it from the two lookup tables
-	delete vms_by_runid[ script.run_id ]
-	delete vms_by_ip[ script.ip ]
+	delete vms_by_runid[ v.script.run_id ]
+	delete vms_by_ip[ v.script.ip ]
 	
 	v.running = false;
 	v.script = null;
