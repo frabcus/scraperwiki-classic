@@ -69,7 +69,9 @@ function lparsehighlightcode(sdata, lmimetype)
     var cachejson; 
     try 
     {
+	alert('about to eval');
         cachejson = $.evalJSON(sdata);
+alert('evalled');
     } 
     catch (err) 
     {
@@ -83,7 +85,6 @@ function lparsehighlightcode(sdata, lmimetype)
         res.push("<h2>mimetype: "+lmimetype+"</h2>"); 
         if (cachejson["encoding"] == "base64")
             res.push("<h2>Encoded as: "+cachejson["encoding"]+"</h2>"); 
-alert(cachejson["content"]);
         res.push('<pre>', cgiescape(cachejson["content"]), '</pre>'); 
         cachejson["objcontent"] = $(res.join("")); 
         return cachejson; 
