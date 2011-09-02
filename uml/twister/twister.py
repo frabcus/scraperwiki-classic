@@ -629,8 +629,8 @@ class RunnerFactory(protocol.ServerFactory):
 
         # set the visible heartbeat going which is used to call back and look up the schedulers
         #*** UNCOMMENT THIS to enable new type of scheduling
-        #self.lc = task.LoopingCall(self.requestoverduescrapers)
-        #self.lc.start(30)
+        self.lc = task.LoopingCall(self.requestoverduescrapers)
+        self.lc.start(30)
         
     #
     # system of functions for fetching the overdue scrapers and knocking them out
