@@ -15,7 +15,7 @@ exports.write_to_caller = function(http_res, output, isstdout) {
 
 	// Hacky solution to making sure HTML is sent all on one line.
 	sub = msg.substring(0,100);
-	if ( sub.indexOf('html') >= 0 && sub.indexOf('>') >= 0  && sub.indexOf('<') >= 0) {
+	if ( sub.indexOf('>') >= 0  && sub.indexOf('<') >= 0 && sub.toLowerCase().indexOf('html') >= 0) {
 		r = { 'message_type':'console', 'content': msg  };
 		http_res.write( JSON.stringify(r) + "\n");
 		return;
