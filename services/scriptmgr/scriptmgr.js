@@ -175,6 +175,7 @@ function handleNotify(req,res) {
 	if ( script ) {
 		delete urlObj.query.runid;
 		s = JSON.stringify( urlObj.query );
+		util.log.debug( 'Notify request sending ' + s);
 		script.response.write( s );
 	}
 	
