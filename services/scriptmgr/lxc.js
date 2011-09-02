@@ -79,13 +79,14 @@ exports.kill = function( script ) {
 	console.log('looking (for kill) for ' + script.run_id );
 	var vm = vms_by_runid[ script.run_id ];
 	if ( vm ) {
-		// trigger an lxc-kill
 		// lxc-stop -n 'vm'
-		e = spawn('/usr/bin/lxc-stop', ['-n', vm]);
-
-		// Clean up indices
-		delete vms_by_run_id[ script.run_id ];		
-		delete vms_by_ip[ script.ip ];
+		try {
+			e = spawn('/usr/bin/lxc-stop', ['-n', vm]);
+			// Clean up indices
+			delete vms_by_run_id[ script.run_id ];		
+			delete vms_by_ip[ script.ip ];
+		} catch(e) {
+		}
 	}
 	return false;
 };
