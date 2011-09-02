@@ -364,7 +364,7 @@ function handle_process_output(http_res, data, stdout) {
 		if ( typeof(x) == "object" ) {
 			http_res.write( data );
 			return;
-		}
+		} 
 	} catch ( e ) {
 		
 	}
