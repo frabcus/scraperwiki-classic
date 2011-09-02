@@ -2,7 +2,6 @@ require 'json'
 require	'uri'
 require	'net/http'
 require 'scraperwiki/datastore'
-require 'generator'
 require 'httpclient'
 
 class SqliteException < RuntimeError
@@ -314,7 +313,7 @@ module ScraperWiki
         end
 
         apilimit = 500
-        g = Generator.new do |g|
+        g = Enumerator.new do |g|
             count = 0
             while true
                 if limit == -1
