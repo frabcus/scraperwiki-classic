@@ -71,7 +71,7 @@ class SW_DataStore
     end
 
     # function used to both initialize the settings and get an instance
-    def SW_DataStore.create(host=nil, port = nil, scrapername = nil, runid = nil)
+    def SW_DataStore.create(host=nil, port = nil, scrapername = '', runid = nil)
         instance = SW_DataStore.instance
         # so, it might be intended that the host and port are
         # set once, never to be changed, but this is ruby so
