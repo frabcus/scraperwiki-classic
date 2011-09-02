@@ -14,6 +14,7 @@
 *				ip: ''};
 * 
 ******************************************************************************/
+var _    = require('underscore')._;
 var lxc = require('./lxc')
 var util = require('./utils')
 var qs  = require('querystring');
@@ -89,14 +90,13 @@ exports.known_ips = function() {
 * them in the old format of runID=&scrapername=
 ******************************************************************************/
 exports.get_status = function(response) {
-	util.log.debug("+ Get status data for " + scripts.length);	
+	util.log.debug("+ Get status data for " + _.size(scripts));	
     for(var runID in scripts) {
-		util.log.debug('Status: Run: ' + runID);
 		var script = scripts[runID];
 		response.write('runID=' + runID + "&scrapername=" + script.scraper_name + "\n");
 	}	
 	
-	util.log.debug("+ Get status returning data for " + scripts.length + " running scripts");
+	util.log.debug("+ Get status returning data for " + _.size(scripts) + " running scripts");
 }
 
 /******************************************************************************
