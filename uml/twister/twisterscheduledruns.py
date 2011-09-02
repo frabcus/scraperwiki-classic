@@ -82,7 +82,9 @@ class ScheduledRunMessageLoopHandler:
             if not instanceof(data, dict):
                 data = { 'message_type':'console', 'content': str(line) }
         except:
-            data = { 'message_type':'console', 'content':"JSONERROR: "+line }
+            # This might be a HTTP header ... is there any real point in forwarding to the client?
+            return
+            #data = { 'message_type':'console', 'content':"JSONERROR: "+line }
         
         message_type = data.get('message_type')
         content = data.get("content")
