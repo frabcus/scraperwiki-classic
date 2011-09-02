@@ -502,7 +502,7 @@ def attachauth(request):
     try:
         attachtoscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=attachtoname)
     except models.Code.DoesNotExist:
-        return HttpResponse("Scraper does not exist: %s" % str([attachtoname]))
+        return HttpResponse("DoesNotExist")
 
     if attachtoscraper.privacy_status != "private":
         return HttpResponse("Yes")
