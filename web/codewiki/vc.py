@@ -25,6 +25,8 @@ logger = logging
 # (although can't be done for repo.commit as this is in hgext.mq, which I can't find)
 # mercurial.commands module is mostly a wrapper on the functionality of the repo object
 
+validfilenames = ["code", "docs"]  # the only two files expected in each repo
+
 # this class only used in codewiki/models/code.py
 class MercurialInterface:
     def __init__(self, repo_path, cloned_from_path=None):
@@ -42,9 +44,10 @@ class MercurialInterface:
         self.repo = mercurial.hg.repository(self.ui, self.repopath, create=not os.path.exists(self.repopath))    
     
     
-    def savecode(self, code):
+    def savecode(self, code, filename):
         assert os.path.exists(self.repopath)
-        scraperpath = os.path.join(self.repopath, "code")   # 'code' is the default name for the only file in each repo (for now)
+        assert filename in validfilenames, filename
+        scraperpath = os.path.join(self.repopath, filename)
         fout = codecs.open(scraperpath, mode='w', encoding='utf-8')
         fout.write(code)
         fout.close()
@@ -53,8 +56,11 @@ class MercurialInterface:
     # need to dig into the commit command to find the rev
     def commit(self, message, user): 
         assert os.path.exists(os.path.join(self.repopath, "code"))
-        if "code" not in self.repo.dirstate:
-            self.repo.add(["code"])   
+        
+        for filename in validfilenames:
+            if filename not in self.repo.dirstate:
+                if os.path.exists(os.path.join(self.repopath, filename)):
+                    self.repo.add([filename])
         
         if message is None:
             message = "changed"
@@ -107,7 +113,7 @@ class MercurialInterface:
         try:
             for rev in self.repo:
                 ctx = self.repo[rev]
-                if "code" in ctx.files():   # could get both if changes in description
+                if "code" in ctx.files():   # could get both validfilenames for changes in description
                     result.append(self.getctxrevisionsummary(ctx))
         except mercurial.revlog.RevlogError, e:
             logger.error("RevlogError: %s %s" %  (self.repopath, str(e)))
@@ -115,9 +121,10 @@ class MercurialInterface:
         return result
         
     
-    def getfilestatus(self):
+    def getfilestatus(self, filename):
         status = { }
-        scraperpath = os.path.join(self.repopath, "code")
+        assert filename in validfilenames, filename
+        scraperpath = os.path.join(self.repopath, filename)
         
         lmtime = time.localtime(os.stat(scraperpath).st_mtime)
         status["filemodifieddate"] = datetime.datetime(*lmtime[:7])
@@ -128,8 +135,8 @@ class MercurialInterface:
             logger.error("RevlogError: %s %s" %  (self.repopath, str(e)))
             modified, added = [ ], [ ]
         
-        status["ismodified"] = ("code" in modified)
-        status["isadded"] = ("code" in added)  # false if actually committed (ie true means we're in an awkward state)
+        status["ismodified"] = (filename in modified)
+        status["isadded"] = (filename in added)  # false if actually committed (ie true means we're in an awkward state)
         return status
         
     
@@ -138,8 +145,6 @@ class MercurialInterface:
     # positive numbers revisions forward
     def getstatus(self, rev=None):
         status = { }
-        scraperfile = "code"
-        scraperpath = os.path.join(self.repopath, "code")
         
         # adjacent commit informations
         if rev != None:
@@ -161,19 +166,26 @@ class MercurialInterface:
                 if 0 <= irev + 1 < len(commitlog):
                     status["nextcommit"] = commitlog[irev + 1]
         
+        scraperfile = "code"
+        scraperpath = os.path.join(self.repopath, "code")
+
         # fetch code from reversion or the file
         if "currcommit" in status:
             reversion = self.getreversion(status["currcommit"]["rev"])
-            status["code"] = reversion["text"].get(scraperfile)
+            for filename in validfilenames:
+                if filename in reversion["text"]:
+                    status[filename] = reversion["text"].get(filename)
         
         # get information about the saved file (which we will if there's no current revision selected -- eg when rev in [-1, None]
         else:
-            fin = codecs.open(scraperpath, mode='rU', encoding='utf-8')
-            status["code"] = fin.read()
-            fin.close()
-            status.update(self.getfilestatus()) # keys: filemodifieddate, isadded, ismodified
+            for filename in validfilenames:
+                scraperpath = os.path.join(self.repopath, filename)
+                if os.path.exists(scraperpath):
+                    fin = codecs.open(scraperpath, mode='rU', encoding='utf-8')
+                    status[filename] = fin.read()
+                    fin.close()
+                    status.update(self.getfilestatus(filename)) # keys: filemodifieddate, isadded, ismodified
         
-        status['scraperfile'] = scraperfile
         return status
 
 

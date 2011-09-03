@@ -128,7 +128,7 @@ class Code(models.Model):
             return vc.MercurialInterface(self.get_repo_path())
 
     def commit_code(self, code_text, commit_message, user):
-        self.vcs.savecode(code_text)
+        self.vcs.savecode(code_text, "code")
         rev = self.vcs.commit(message=commit_message, user=user)
         return rev
 
@@ -136,7 +136,7 @@ class Code(models.Model):
         return self.vcs.getcommitlog()
 
     def get_file_status(self):
-        return self.vcs.getfilestatus()
+        return self.vcs.getfilestatus("code")
 
     def get_vcs_status(self, revision = None):
         return self.vcs.getstatus(revision)
