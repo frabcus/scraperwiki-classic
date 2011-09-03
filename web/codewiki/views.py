@@ -290,7 +290,7 @@ def view_admin(request, short_name):
     response_text = ''
     element_id = request.POST.get('id', None)
     if element_id == 'divAboutScraper':
-        view.description = request.POST.get('value', None)
+        view.set_docs(request.POST.get('value', None), request.user)
         response_text = textile.textile(view.description)
 
     if element_id == 'hCodeTitle':
@@ -310,7 +310,7 @@ def scraper_admin(request, short_name):
     response_text = ''
     element_id = request.POST.get('id', None)
     if element_id == 'divAboutScraper':
-        scraper.description = request.POST.get('value', None)
+        scraper.set_docs(request.POST.get('value', None), request.user)
         response_text = textile.textile(scraper.description)
         
     if element_id == 'hCodeTitle':

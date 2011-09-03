@@ -132,6 +132,12 @@ class Code(models.Model):
         rev = self.vcs.commit(message=commit_message, user=user)
         return rev
 
+    def set_docs(self, description, user):
+        self.description = description
+        self.vcs.savecode(description, "docs")
+        rev = self.vcs.commit(message="save docs", user=user)
+
+
     def get_commit_log(self):
         return self.vcs.getcommitlog()
 

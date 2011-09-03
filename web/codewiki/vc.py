@@ -166,10 +166,8 @@ class MercurialInterface:
                 if 0 <= irev + 1 < len(commitlog):
                     status["nextcommit"] = commitlog[irev + 1]
         
-        scraperfile = "code"
-        scraperpath = os.path.join(self.repopath, "code")
-
         # fetch code from reversion or the file
+        # (beware, this is only of the changed files, so will confound when docs are included)
         if "currcommit" in status:
             reversion = self.getreversion(status["currcommit"]["rev"])
             for filename in validfilenames:

@@ -40,12 +40,23 @@ def getscraperor404(request, short_name, action):
         raise Http404
     return scraper
 
-        
-def raw(request, short_name):  # this is used by swimport
+# this is used by swimport and history diffs
+def raw(request, short_name):  
     scraper = getscraperor404(request, short_name, "readcode")
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
-    code = scraper.get_vcs_status(rev)["code"]
+
+        # need to iterate back until we find the last change to the file
+    while True:
+        vcsstatus = scraper.get_vcs_status(rev)
+        if "code" in vcsstatus:
+            code = scraper.get_vcs_status(rev)["code"]
+            break
+        if "prevcommit" in vcsstatus:
+            rev = vcsstatus["prevcommit"]["rev"]
+        else:
+            code = "*no code*"
+            break
     return HttpResponse(code, mimetype="text/plain")
 
 

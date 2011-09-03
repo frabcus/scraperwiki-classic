@@ -1225,6 +1225,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         var sdata = {
                         title           : $('#id_title').val(),
                         commit_message  : "cccommit",   // could get some use out of this if we wanted to
+                                                        // though earliesteditor||| is prepended to this message
                         sourcescraper   : $('#sourcescraper').val(),
                         fork            : $('#fork').val(),
                         wiki_type       : wiki_type,
