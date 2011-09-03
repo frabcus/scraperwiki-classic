@@ -62,7 +62,9 @@ from twisted.internet.defer import succeed, Deferred
 from twisted.internet.error import ProcessDone
 
 from twisterscheduledruns import ScheduledRunMessageLoopHandler
-from twisterrunner import MakeRunner, jstime
+from twisterrunner import MakeRunner, jstime, SetControllerHost
+
+SetControllerHost(config)
 
 agent = Agent(reactor)
 

@@ -632,9 +632,8 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
                 writeToConsole("Finished: "+messageparts.join(", "));
               } else if (data.content == "killsignal")
                 writeToConsole(data.message); 
-              else if (data.content == "runfinished") {
-                endingrun(data.content); 
-			  }
+              else if (data.content == "runfinished") 
+                endingrun(data.content, data.contentextra); 
               else 
                 writeToConsole(data.content); 
 
@@ -981,16 +980,18 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
         });
     }
     
-    function endingrun(content) 
+    function endingrun(content, contentextra) 
     {
         $('.editor_controls #run').removeClass('running').val('run');
         $('.editor_controls #run').unbind('click.abort');
         $('.editor_controls #run').unbind('click.stopping');
         $('.editor_controls #run').bind('click.run', sendCode);
-        writeToConsole(content)
+        writeToConsole(content); 
+        if (contentextra)
+            writeToConsole("internalwarning: "+contentextra); 
 
         //change title
-        document.title = document.title.replace('*', '')
+        document.title = document.title.replace('*', '');
     
         //hide annimation
         $('#running_annimation').hide();

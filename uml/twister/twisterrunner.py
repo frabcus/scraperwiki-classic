@@ -17,6 +17,8 @@ except: import simplejson as json
 def jstime(dt):
     return str(1000*int(time.mktime(dt.timetuple()))+dt.microsecond/1000)
 
+
+
 class spawnRunner(protocol.ProcessProtocol):
     def __init__(self, client, code, logger):
         self.client = client
@@ -37,7 +39,7 @@ class spawnRunner(protocol.ProcessProtocol):
         controllerconnection.srunner = self
         self.controllerconnection = controllerconnection
 
-        json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': self.jdata["runid"], 'uml': "newmethod"})
+        json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': self.jdata["runid"], 'uml': "directcontroller"})
         self.outReceived(json_msg+'\n')
         
         sdata = json.dumps(self.jdata)
@@ -70,7 +72,17 @@ class spawnRunner(protocol.ProcessProtocol):
         # could move into a proper function in the client once slimmed down slightly
     def processEnded(self, reason):
         self.client.processrunning = None
-        self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished'}))
+
+        sreason = str([reason])
+        if sreason == "[<twisted.python.failure.Failure <class 'twisted.internet.error.ProcessDone'>>]":
+            sreason = ""  # seems difficult to find the actual class type to compare with, but get rid of this "error" that really isn't an error
+        elif sreason == "[<twisted.python.failure.Failure <class 'twisted.internet.error.ConnectionDone'>>]":
+            sreason = ""  # seems difficult to find the actual class type to compare with, but get rid of this "error" that really isn't an error
+
+        # other errors (eg connection lost) could put more useful errors into the client
+        self.logger.debug("run process %s ended client# %d %s" % (self.client.clienttype, self.client.clientnumber, sreason))
+    
+        self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished', 'contentextra':sreason}))
         
         if self.client.clienttype == "editing":
             self.client.factory.notifyMonitoringClients(self.client)
@@ -78,26 +90,34 @@ class spawnRunner(protocol.ProcessProtocol):
             self.client.scheduledrunmessageloophandler.schedulecompleted()
             self.client.factory.scheduledruncomplete(self.client, reason.type==ProcessDone)
 
-        sreason = str([reason])
-        if sreason == "[<twisted.python.failure.Failure <class 'twisted.internet.error.ProcessDone'>>]":
-            sreason = ""  # seems difficult to find the actual class type to compare with, but get rid of this "error" that really isn't an error
-
-        self.logger.debug("run process %s ended client# %d %s" % (self.client.clienttype, self.client.clientnumber, sreason))
 
 
 # simply ciphers through the two functions
 class ControllerConnectionProtocol(protocol.Protocol):
     def connectionLost(self, reason):
-        self.srunner.logger.debug("*** controller socket connection lost: "+str(reason))
+        #self.srunner.logger.debug("*** controller socket connection lost: "+str(reason))
         self.srunner.processEnded(reason)
         
     def dataReceived(self, data):
-        self.srunner.logger.debug("*** controller socket connection data: "+data)
+        #self.srunner.logger.debug("*** controller socket connection data: "+data)
         self.srunner.outReceived(data)
         
 clientcreator = protocol.ClientCreator(reactor, ControllerConnectionProtocol)
 
+# used for the process of direct connection to the controller through a socket
+controllerhost = None
+controllerport = None
+def SetControllerHost(config):
+    global controllerhost
+    global controllerport
+    umls = config.get('dispatcher', 'umllist').split(',')
+    uname = umls[0]
+    controllerhost = config.get(uname, 'host')
+    controllerport = config.getint(uname, 'via')
 
+
+# this is the new way that totally bypasses the dispatcher.  
+# we reuse the spawnRunner class only for its user defined functions, not its processprotocol functions!
 def MakeSocketRunner(scrapername, guid, language, urlquery, username, code, client, logger, user=None):
     srunner = spawnRunner(client, code, logger)  # reuse this class and its functions
     
@@ -108,7 +128,7 @@ def MakeSocketRunner(scrapername, guid, language, urlquery, username, code, clie
     jdata["language"] = language
     jdata["scraperid"] = guid
     jdata["urlquery"] = urlquery
-    jdata["scrapername"] = "EEEE"+scrapername
+    jdata["scrapername"] = scrapername
     jdata["beta_user"] = (user is not None and user.get('beta_user', False))
 
     # set the runid
@@ -120,9 +140,7 @@ def MakeSocketRunner(scrapername, guid, language, urlquery, username, code, clie
     srunner.style = "NewSpawnRunner"
     srunner.pid = "NewSpawnRunner"  # for the kill_run function
 
-
-# this needs the value of controller got from config!!!!
-    deferred = clientcreator.connectTCP("127.0.0.1", 9001)
+    deferred = clientcreator.connectTCP(controllerhost, controllerport)
     deferred.addCallback(srunner.gotcontrollerconnectionprotocol)
 
     return srunner
