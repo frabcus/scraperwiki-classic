@@ -60,7 +60,7 @@ class MercurialInterface:
         for filename in validfilenames:
             if filename not in self.repo.dirstate:
                 if os.path.exists(os.path.join(self.repopath, filename)):
-                    self.repo.add([filename])
+                    self.repo[None].add([filename])
         
         if message is None:
             message = "changed"
