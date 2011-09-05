@@ -51,25 +51,9 @@ exports.init = function(count, lxc_root_folder) {
 exports.exec = function(script, code) {
 	// execute lxc-execute on a vm, after we've been allocated on
 	var name = allocate_vm( script );
-	// clean up the files that may still be there.....
+
 	var cf = get_code_folder(name);
-	// delete the contents of cf
-
-	// TODO: Fix this and only unlink if exists
-	try {
-		fs.unlinkSync( path.join(cf, 'script.py') );
-	} catch(e){}
-
-	try {
-		fs.unlinkSync( path.join(cf, 'script.rb') );
-	} catch(e){}		
-	try {	
-		fs.unlinkSync( path.join(cf, 'script.php') );
-	} catch(e){}			
-	try {	
-		fs.unlinkSync( path.join(cf, 'script.js') );			
-	} catch(e){}			
-	
+	util.cleanup( cf );
 	return name;
 };
 

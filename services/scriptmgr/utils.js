@@ -4,6 +4,8 @@
 * Utility functions for working with the processes locally
 ******************************************************************************/
 var path  = require('path');
+var fs = require('fs'),
+_ = require('underscore');
 
 /******************************************************************************
 * Write the response to the caller, or in this case write it back down the long
@@ -103,4 +105,28 @@ exports.dumpError = function(err) {
   } else {
     console.log('dumpError :: argument is not an object');
   }
+}
+
+
+
+/******************************************************************************
+* Empty all files (and created folders) within a specific directory
+******************************************************************************/
+exports.cleanup = function(filep) {
+	removeDirForce(filep);
+	logger.debug('Cleanup up folder ' + filep);
+}
+
+function removeDirForce(filep) {
+	var files = fs.readdirSync(filep);
+    _.each(files, function(file) {
+    	var filePath = path.join(filep,file);
+		var stats = fs.statSync(filePath);
+		if (stats.isDirectory()) {
+			removeDirForce(filePath);
+		} 
+		if (stats.isFile()) {
+			fs.unlinkSync(filePath);
+		}
+	});
 }
