@@ -99,6 +99,8 @@ class ScheduledRunMessageLoopHandler:
     def receiveline(self, line):
         try:
             data = json.loads(line)
+            if not isinstance(data, dict):
+                raise TypeError('Incorrect type of JSON')
         except:
             self.logger.debug( "Failed to loads() " + line )
             return
