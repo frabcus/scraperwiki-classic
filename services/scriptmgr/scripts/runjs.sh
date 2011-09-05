@@ -5,7 +5,5 @@ if [ -Z $SN ]; then
 	SN=""
 else
 	SN="--scrapername ${SN}" 
-	echo "SN is now"
-	echo $SN		
 fi
 su scriptrunner -c "cd ~;ulimit -t 80;/home/startup/exec.js --script /home/scriptrunner/script.js --ds $1 --runid $2 $SN"
