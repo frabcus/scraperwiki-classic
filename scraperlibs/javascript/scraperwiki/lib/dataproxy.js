@@ -22,6 +22,7 @@ DataProxyClient.prototype.init = function(host, port,scrapername,runid) {
 
 DataProxyClient.prototype.ensureConnected = function() {
 	if ( this.connection != null ) return;
+	
 	console.log('Creating a new connection');
 	this.connection = net.createConnection(this.port, this.host);
 	this.connection.on('connect', function(){
