@@ -35,13 +35,16 @@ DataProxyClient.prototype.ensureConnected = function() {
         data["vrunid"] = me.runid
         data["attachables"] = me.attachables.join(" ")
 
+		me.connection.once('data', function (data) {
+	  		console.log(data);
+		});
+
 		// naughty semi-http request.... sigh
 		var msg = "GET /?" + qs.stringify(data) + "HTTP/1.1\r\n\r\n";
 		me.connection.write( msg, function(){
-			me.connection.once('data', function (data) {
-		  		console.log(data);
-			});
-		} );
+			console.log('Wrote data');
+			console.log('Now waiting to readdata');
+		});
 /*        
 #        line = receiveoneline(m_socket)  # comes back with True, "Ok"
 #        res = json.loads(line)
