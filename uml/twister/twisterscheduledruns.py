@@ -112,6 +112,7 @@ class ScheduledRunMessageLoopHandler:
                 self.upost["run_id"] = data.get("runID")
                 self.output = "%sEXECUTIONSTATUS: uml=%s runid=%s\n" % (self.output, data.get("uml"), data.get("runID"))
             elif content == "runcompleted":
+                self.logger.debug( "Got run completed : %s" % (line,)  )                
                 self.completiondata = data
                 self.completionmessage = '';
                 if data.get('elapsed_seconds'):
