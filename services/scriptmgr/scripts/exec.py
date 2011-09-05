@@ -48,8 +48,12 @@ class ConsoleStream:
         return self.m_fd.fileno()
 
 
+# Make sure we have unbuffered outputs
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
+
 scraperwiki.logfd = sys.stderr
-sys.stdout = ConsoleStream(scraperwiki.logfd)
+sys.stdout = ConsoleStream(sys.stdout)
 sys.stderr = ConsoleStream(scraperwiki.logfd)
 
 parser = optparse.OptionParser()
