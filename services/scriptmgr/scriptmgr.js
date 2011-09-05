@@ -21,12 +21,13 @@
 *			  tab in the editor)
 * 
 ******************************************************************************/
+var path  = require('path');
 var http = require('http');
 var url  = require('url');
 var _    = require('underscore')._;
 var qs   = require('querystring');
-var exec = require('./executor');
-var util = require('./utils')
+var exec = require( path.join(__dirname,'executor') );
+var util = require( path.join(__dirname,'utils'))
 
 _routemap = {
 	'/Execute'   : handleRun,

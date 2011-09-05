@@ -15,13 +15,13 @@
 * 
 ******************************************************************************/
 var _    = require('underscore')._;
-var lxc = require('./lxc')
-var util = require('./utils')
 var qs  = require('querystring');
 var fs  = require('fs');
 var sys = require('sys');
 var spawn = require('child_process').spawn;
 var path  = require('path');
+var lxc = require( path.join(__dirname,'lxc') )
+var util = require( path.join(__dirname,'utils') )
 
 var use_lxc = true;
 var extra_path;

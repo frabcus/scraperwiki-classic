@@ -9,8 +9,8 @@ var _    = require('underscore')._;
 var mu   = require('mu');
 var fs   = require('fs');
 var spawn = require('child_process').spawn;
-var util  = require('./utils.js');
 var path  = require('path');
+var util  = require( path.join(__dirname,'utils.js') );
 
 // All of our virtual machines
 var vms = [ ]; // vm name -> objects
