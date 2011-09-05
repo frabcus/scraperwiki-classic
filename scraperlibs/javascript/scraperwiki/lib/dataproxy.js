@@ -64,7 +64,7 @@ DataProxyClient.prototype.save = function(indices, data, verbose, callback) {
 	var self = this;
 	this.ensureConnected(function(ok){
 		if ( ok ) {
-			var result = internal_save(indices,data,verbose, function(result){
+			internal_save(indices,data,verbose, function(result){
 				callback( result );	
 			});
 			
@@ -72,7 +72,7 @@ DataProxyClient.prototype.save = function(indices, data, verbose, callback) {
 	});
 }
 
-function internal_save(callback) {
+function internal_save(indices,data,verbose, callback) {
 	console.log( 'internal save ');
 	callback( 'status' );
 	/*
