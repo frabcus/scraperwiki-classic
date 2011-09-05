@@ -16,7 +16,7 @@ DataProxyClient.prototype.init = function(host, port,scrapername,runid) {
 	this.scrapername = scrapername;
 	this.runid = runid;
 	this.attachables = [];
-	
+	this.connection = null;
 	this.ensureConnected();
 }
 
@@ -25,11 +25,12 @@ DataProxyClient.prototype.ensureConnected = function() {
 	
 	console.log('Creating a new connection');
 	this.connection = net.createConnection(this.port, this.host);
+	var me = this;
 	this.connection.on('connect', function(){
-        var data = {"uml": this.connection.address().address , "port": this.connection.address().port}
-        data["vscrapername"] = this.scrapername;
-        data["vrunid"] = this.runid
-        data["attachables"] = this.attachables.join(" ")
+        var data = {"uml": me.connection.address().address , "port": me.connection.address().port}
+        data["vscrapername"] = me.scrapername;
+        data["vrunid"] = me.runid
+        data["attachables"] = me.attachables.join(" ")
 		console.log('Is going to be ...');
 		console.log( data );
 /*        m_socket.sendall('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
