@@ -16,5 +16,5 @@ DataProxyClient.prototype.init = function(host, port,scrapername) {
 }
 
 DataProxyClient.prototype.toString = function() {
-	return "DataProxy (" + this.host + ":" + this.port + ")";
+	return "DataProxy (" + this.host + ":" + this.port + " - " +  this.scrapername +")";
 }
