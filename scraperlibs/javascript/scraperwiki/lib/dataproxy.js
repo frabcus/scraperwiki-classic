@@ -29,15 +29,15 @@ DataProxyClient.prototype.ensureConnected = function() {
 	this.connection.setEncoding( 'utf8');
 	
 	var me = this;
+	this.connection.once('data', function (data) {
+  		console.log("+" + data);
+	});
+	
 	this.connection.on('connect', function(){
         var data = {"uml": me.connection.address().address , "port": me.connection.address().port}
         data["vscrapername"] = me.scrapername;
         data["vrunid"] = me.runid
         data["attachables"] = me.attachables.join(" ")
-
-		me.connection.once('data', function (data) {
-	  		console.log(data);
-		});
 
 		// naughty semi-http request.... sigh
 		var msg = "GET /?" + qs.stringify(data) + "HTTP/1.1\r\n\r\n";
