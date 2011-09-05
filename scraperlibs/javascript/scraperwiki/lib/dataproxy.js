@@ -52,6 +52,13 @@ DataProxyClient.prototype.ensureConnected = function( callback ) {
 	});	
 }
 
+DataProxyClient.prototype.close = function() {
+	if ( this.connected ) {
+		this.connection.end();
+		this.connected = false;
+	}
+}
+	
 DataProxyClient.prototype.save = function(indices, data, verbose, callback) {
 	if ( verbose == null ) verbose = 2;
 	var self = this;
