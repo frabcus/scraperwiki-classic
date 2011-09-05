@@ -17,12 +17,12 @@ DataProxyClient.prototype.init = function(host, port,scrapername,runid) {
 	this.scrapername = scrapername;
 	this.runid = runid;
 	this.attachables = [];
-	this.connection = null;
+	this.connected = false;
 	this.ensureConnected();
 }
 
 DataProxyClient.prototype.ensureConnected = function() {
-	if ( this.connection != null ) return;
+	if ( this.connected ) return;
 	
 	console.log('Creating a new connection');
 	this.connection = net.createConnection(this.port, this.host);
@@ -30,7 +30,8 @@ DataProxyClient.prototype.ensureConnected = function() {
 	
 	var me = this;
 	this.connection.once('data', function (data) {
-  		console.log("+" + data);
+		var str = JSON.parse( data );
+		me.connected = str.status && str.status == 'good';
 	});
 	
 	this.connection.on('connect', function(){
@@ -45,11 +46,6 @@ DataProxyClient.prototype.ensureConnected = function() {
 			console.log('Wrote data');
 			console.log('Now waiting to readdata');
 		});
-/*        
-#        line = receiveoneline(m_socket)  # comes back with True, "Ok"
-#        res = json.loads(line)
-#        assert res.get("status") == "good", res*/
-		
 	});	
 }
 
