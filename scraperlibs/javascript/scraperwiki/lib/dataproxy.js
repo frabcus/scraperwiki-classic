@@ -38,7 +38,7 @@ DataProxyClient.prototype.ensureConnected = function( callback ) {
 		return;
 	});
 	
-	this.connection.on('connect', function(){
+	this.connection.once('connect', function(){
         var data = {"uml": me.connection.address().address , "port": me.connection.address().port}
         data["vscrapername"] = me.scrapername;
         data["vrunid"] = me.runid
