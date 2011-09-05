@@ -390,7 +390,8 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         logger.debug(msg)
         if self.processrunning.pid == "NewSpawnRunner":
             logger.debug("LosingConnectionNewWay "+self.processrunning.pid)
-            self.processrunning.controllerconnection.transport.loseConnection()
+            if hasattr(self.processrunning, 'controllerconnection'):
+                self.processrunning.controllerconnection.transport.loseConnection()
         else:
             try:      # (should kill using the new dispatcher call)
                 os.kill(self.processrunning.pid, signal.SIGKILL)
