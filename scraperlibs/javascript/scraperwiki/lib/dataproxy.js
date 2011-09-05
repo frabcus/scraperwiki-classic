@@ -36,18 +36,18 @@ DataProxyClient.prototype.ensureConnected = function() {
         data["attachables"] = me.attachables.join(" ")
 
 		// naughty semi-http request.... sigh
-		var msg = "GET /?" + qs.stringify(data) + "HTTP/1.1\n\n";
-		me.connection.write( msg )
+		var msg = "GET /?" + qs.stringify(data) + "HTTP/1.1\r\n\r\n";
+		me.connection.write( msg, function(){
+			me.connection.once('data', function (data) {
+		  		console.log(data);
+			});
+		} );
 /*        
 #        line = receiveoneline(m_socket)  # comes back with True, "Ok"
 #        res = json.loads(line)
 #        assert res.get("status") == "good", res*/
 		
 	});	
-	
-	this.connection.once('data', function (data) {
-  		console.log(data);
-	});
 }
 
 DataProxyClient.prototype.save = function(indices, data, verbose) {
