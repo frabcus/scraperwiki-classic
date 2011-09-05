@@ -97,7 +97,7 @@ def buildjdata(code, options, config):
     jdata["code"] = code.replace('\r', '')
     jdata["cpulimit"] = int(options.cpulimit)
     jdata["draft"] = options.draft
-    jdata["language"] = options.language
+    jdata["language"] = options.language.lower()
     jdata["scraperid"] = options.guid
     jdata["urlquery"] = options.urlquery
     jdata["scrapername"] = options.name
