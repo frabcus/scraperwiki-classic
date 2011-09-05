@@ -395,7 +395,25 @@ class TestScrapers(SeleniumTest):
         scraper_name = self._create_scraper("python")
         s.click('link=Scraper')
         self.wait_for_page()
+
+        # edit description
+        s.click('css=#aEditAboutScraper')
+        s.type('css=#divAboutScraper textarea', "This is a changed description")
+        s.click("//div[@id='divAboutScraper']//button[text()='Save']")
+        time.sleep(1) # XXX how to wait just until the JS has run?
+        self.failUnless(s.is_text_present("This is a changed description"))
+
+        # edit tags
+        s.click('css=#aEditTags')
+        s.type('css=#divEditTags input', "great,testy,rabbit")
+        s.click("//div[@id='divEditTags']//button[text()='Save tags']")
+        time.sleep(1) # XXX how to wait just until the JS has run?
+        self.failUnless(s.is_text_present("rabbit"))
+
+        # comments
         self._add_comment(scraper_name)
+
+        # privacy
         if SeleniumTest._adminuser:
             self._activate_users([owner['username'], editor['username']])
         self._user_login(owner['username'], owner['password'])
