@@ -18,11 +18,13 @@ DataProxyClient.prototype.init = function(host, port,scrapername,runid) {
 	this.runid = runid;
 	this.attachables = [];
 	this.connected = false;
-	this.ensureConnected();
 }
 
-DataProxyClient.prototype.ensureConnected = function() {
-	if ( this.connected ) return;
+DataProxyClient.prototype.ensureConnected = function( callback ) {
+	if ( this.connected ) { 
+		callback(this.connected);
+		return;
+	}
 	
 	console.log('Creating a new connection');
 	this.connection = net.createConnection(this.port, this.host);
@@ -32,6 +34,8 @@ DataProxyClient.prototype.ensureConnected = function() {
 	this.connection.once('data', function (data) {
 		var str = JSON.parse( data );
 		me.connected = str.status && str.status == 'good';
+		callback(me.connected);
+		return;
 	});
 	
 	this.connection.on('connect', function(){
@@ -44,16 +48,25 @@ DataProxyClient.prototype.ensureConnected = function() {
 		var msg = "GET /?" + qs.stringify(data) + "HTTP/1.1\r\n\r\n";
 		me.connection.write( msg, function(){
 			console.log('Wrote data');
-			console.log('Now waiting to readdata');
 		});
 	});	
 }
 
-DataProxyClient.prototype.save = function(indices, data, verbose) {
+DataProxyClient.prototype.save = function(indices, data, verbose, callback) {
 	if ( verbose == null ) verbose = 2;
-	
-	return "DataProxy (" + this.host + ":" + this.port + " - " +  this.scrapername +")";
+	var self = this;
+	this.ensureConnected(function(ok){
+		if ( ok ) {
+			internal_save(indices,data,verbose);
+			callback( "DataProxy (" + self.host + ":" + self.port + " - " +  self.scrapername +")" );
+		}
+	});
 }
+
+function internal_save(callback) {
+	console.log( 'internal save ')
+};
+
 
 DataProxyClient.prototype.toString = function() {
 	return "DataProxy (" + this.host + ":" + this.port + " - " +  this.scrapername +")";
