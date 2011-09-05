@@ -101,7 +101,8 @@ class ScheduledRunMessageLoopHandler:
             data = json.loads(line)
         except:
             self.logger.debug( "Failed to loads() " + line )
-        
+            return
+                    
         message_type = data.get('message_type')
         content = data.get("content")
         if message_type == 'executionstatus':

@@ -53,7 +53,7 @@ class spawnRunner(protocol.ProcessProtocol):
 
     # messages from the UML
     def outReceived(self, data):
-        self.logger.debug("runner to client# %d %s" % (self.client.clientnumber, data[:100]))
+        self.logger.debug("runner to client# %d %s" % (self.client.clientnumber, data[:180]))
             # although the client can parse the records itself, it is necessary to split them up here correctly so that this code can insert its own records into the stream.
         lines  = (self.buffer+data).split("\n")
         self.buffer = lines.pop(-1)  # usually an empty
