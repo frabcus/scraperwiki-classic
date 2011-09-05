@@ -52,8 +52,10 @@ exports.exec = function(script, code) {
 	// execute lxc-execute on a vm, after we've been allocated on
 	var name = allocate_vm( script );
 
+	// Make sure we have a clean environment before we run? 
 	var cf = get_code_folder(name);
 	util.cleanup( cf );
+	
 	return name;
 };
 
@@ -180,6 +182,12 @@ exports.release_vm = function( script, name ) {
 	v.running = false;
 	v.script = null;
 	vms[v.name] = v;
+	
+	// Make sure we have a clean environment after a release
+	try {
+		var cf = get_code_folder(name);
+		util.cleanup( cf );
+	} catch( err ) {}
 }
 
 /*****************************************************************************
