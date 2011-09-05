@@ -50,7 +50,9 @@ $_GET = array();
 for ($i = 0; $i < count($QUERY_STRING_a); $i++)
 {
     $QUERY_STRING_b = split('=', $QUERY_STRING_a[$i]);
-    $_GET[urldecode($QUERY_STRING_b[0])] = urldecode($QUERY_STRING_b[1]); 
+	if ( count( $QUERY_STRING_b ) > 1 ) {
+    	$_GET[urldecode($QUERY_STRING_b[0])] = urldecode($QUERY_STRING_b[1]); 
+	}
 }
 
 
