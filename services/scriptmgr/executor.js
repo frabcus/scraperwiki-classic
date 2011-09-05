@@ -290,8 +290,8 @@ function execute(http_req, http_res, raw_request_data) {
 
 			// Pass the data proxy and runid to the script that will trigger the exec.py
 			var cfgpath = '/mnt/' + res + '/config';
-						
-	 		e = spawn('/usr/bin/lxc-execute', ['-n', res, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, script.run_id.replace('|','\\|') ], script.scraper_name);
+
+	 		e = spawn('/usr/bin/lxc-execute', ['-n', res, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, script.run_id.replace('|','\\|') , script.scraper_name] );
 	
 			script.vm = res;
 			script.ip = lxc.ip_for_vm(res);
