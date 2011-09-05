@@ -1,10 +1,6 @@
 from django.test import TestCase
-from django.core.urlresolvers import reverse as reverse_url
-from datetime import datetime
-import os.path
-import unittest
 
-from scraper import models
+import codewiki
 
 class Test__unicode__(TestCase):
     '''
@@ -17,3 +13,9 @@ class Test__unicode__(TestCase):
             'Test Scraper',
             unicode(models.Scraper(title='Test Scraper'))
         )
+
+class TestUserUserRole(TestCase):
+    def test_mouse(self):
+        assert 1 == 2
+
+
