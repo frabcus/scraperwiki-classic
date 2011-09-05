@@ -44,6 +44,8 @@ urlpatterns = patterns('',
     
     # Example pages to scrape :)
     url(r'^examples/basic_table\.html$', direct_to_template, {'template': 'examples/basic_table.html'}, name='example_basic_table'),
+    # for testing error handling
+    url(r'^test_error/$',                  frontend_views.test_error, name='test_error'),    
     
     #searching and browsing
     url(r'^search/$', frontend_views.search, name='search'),

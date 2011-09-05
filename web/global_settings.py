@@ -64,6 +64,7 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = [
+    'middleware.exception_logging.ExceptionLoggingMiddleware',
     'middleware.improved_gzip.ImprovedGZipMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -207,3 +208,55 @@ SOUTH_TESTS_MIGRATE = True
 
 # To be overridden in actual settings files
 SESSION_COOKIE_SECURE = False
+
+# Enable logging of errors to text file, taken from:
+# http://stackoverflow.com/questions/238081/how-do-you-log-server-errors-on-django-sites
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'simple': {
+            'format' : '%(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s'
+        }
+    },
+    'handlers': {
+        # Include the default Django email handler for errors
+        # This is what you'd get without configuring logging at all.
+        'mail_admins': {
+            'class': 'django.utils.log.AdminEmailHandler',
+            'level': 'ERROR',
+             # But the emails are plain text by default - HTML is nicer
+            'include_html': True,
+        },
+        # Log to a text file that can be rotated by logrotate
+        'logfile': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/scraperwiki/django.log',
+            'mode': 'a',
+            'maxBytes': 100000,
+            'backupCount': 5,
+            'formatter': 'simple'
+        },
+    },
+    'loggers': {
+        # Again, default Django configuration to email unhandled exceptions
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        # Might as well log any errors anywhere else in Django
+        'django': {
+            'handlers': ['logfile'],
+            'level': DEBUG and 'DEBUG' or 'ERROR',
+            'propagate': False,
+        },
+        # Your own app - this assumes all your logger names start with "myapp."
+        #'myapp': {
+        #    'handlers': ['logfile'],
+        #    'level': 'WARNING', # Or maybe INFO or DEBUG
+        #    'propagate': False
+        #},
+    },
+}
+

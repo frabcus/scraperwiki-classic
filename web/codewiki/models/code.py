@@ -484,5 +484,19 @@ class UserCodeRole(models.Model):
         app_label = 'codewiki'
 
 
+class UserUserRole(models.Model):
+    user    = models.ForeignKey(User, related_name='useruserrole_set')
+    other   = models.ForeignKey(User, related_name='rev_useruserrole_set')
+    role    = models.CharField(max_length=100)   # ['on_team_of']
+
+    def __unicode__(self):
+        return "User: %s -> Other: %s (%s)" % (self.user, self.user, self.role)
+
+    class Meta:
+        app_label = 'codewiki'
+
+
+
+
 
 
