@@ -353,28 +353,32 @@ function execute(http_req, http_res, raw_request_data) {
 ******************************************************************************/
 function handle_process_output(http_res, data, stdout) {
 	util.log.debug(data);
-	if ( data.slice(0,4) == "::::") {
-		util.log.debug("Slicing");
-		http_res.write( data.slice(4) + "\n");
-		return;
-	}
 	
-	if (stdout) {
-		util.write_to_caller( http_res, data );				
-		return;
-	} 
+	lines = data.split('\n')
 	
-	try {
-		x = JSON.parse( data );
-		if ( typeof(x) == "object" ) {
-			http_res.write( data  + "\n");
+	for ( var line in lines ) {
+		if ( line.slice(0,4) == "::::") {
+			http_res.write( line.slice(4) + "\n");
+			return;
+		}
+	
+		if (stdout) {
+			util.write_to_caller( http_res, line );				
 			return;
 		} 
-	} catch ( e ) {
+	
+		try {
+			x = JSON.parse( line );
+			if ( typeof(x) == "object" ) {
+				http_res.write( line  + "\n");
+				return;
+			} 
+		} catch ( e ) {
 		
-	}
+		}
 
-	util.write_to_caller( http_res, data);			
+		util.write_to_caller( http_res, line);			
+	}
 }
 
 
