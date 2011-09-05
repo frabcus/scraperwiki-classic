@@ -531,6 +531,8 @@ class requestoverduescrapersReceiver(protocol.Protocol):
         if reason.type in [ResponseDone, PotentialDataLoss]:
             try:
                 jdata = json.loads("".join(self.rbuffer))
+                if "language" in jdata:
+                    jdata["language"] = jdata["language"].lower()
                 self.factory.requestoverduescrapersAction(jdata)
             except ValueError:
                 logger.warning("request overdue bad json: "+str(self.rbuffer)[:1000]+" "+str(reason.type))
