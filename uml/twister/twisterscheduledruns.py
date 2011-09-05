@@ -97,7 +97,10 @@ class ScheduledRunMessageLoopHandler:
         d.addCallbacks(self.updaterunobjectResponse, self.updaterunobjectFailure)
         
     def receiveline(self, line):
-        data = json.loads(line)
+        try:
+            data = json.loads(line)
+        except:
+            self.logger.debug( "Failed to loads() " + line )
         
         message_type = data.get('message_type')
         content = data.get("content")
@@ -118,7 +121,8 @@ class ScheduledRunMessageLoopHandler:
                     self.completionmessage += ", terminated by " + data.get("term_sig_text");
                 elif "term_sig" in data:
                     self.completionmessage += ", terminated by signal " + str(data.get("term_sig"));
-            
+                self.logger.debug( "Completion status : %s" % (line,)  )
+                
             self.updaterunobject(False)
             
         elif message_type == "sources":
