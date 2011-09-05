@@ -25,7 +25,7 @@ DataProxyClient.prototype.ensureConnected = function() {
 	console.log('Creating a new connection');
 	this.connection = net.createConnection(this.port, this.host);
 	this.connection.on('connect', function(){
-        var data = {"uml":socket.gethostname(), "port":m_socket.getsockname()[1]}
+        var data = {"uml": this.connection.address().address , "port": this.connection.address().port}
         data["vscrapername"] = this.scrapername;
         data["vrunid"] = this.runid
         data["attachables"] = this.attachables.join(" ")
