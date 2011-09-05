@@ -73,9 +73,8 @@ DataProxyClient.prototype.save = function(indices, data, verbose, callback) {
 }
 
 function internal_save(callback) {
-	console.log( 'internal save ')
-	callback( 'status' )
-	;
+	console.log( 'internal save ');
+	callback( 'status' );
 	/*
     if unique_keys != None and type(unique_keys) not in [ list, tuple ]:
         raise databaseexception({ "error":'unique_keys must a list or tuple', "unique_keys_type":str(type(unique_keys)) })
