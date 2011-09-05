@@ -60,7 +60,13 @@ class spawnRunner(protocol.ProcessProtocol):
         
         for line in lines:
             if not self.runID:  # intercept the first record to record its state and add in further data
-                parsed_data = json.loads(line.strip("\r"))
+                try:
+                    parsed_data = json.loads(line.strip("\r"))
+                except:
+                    # If this is X:Y then it may be a HTTP header and we should probably just ignore it
+                    # although we could do with a proper http request.
+                    continue
+                
                 if parsed_data.get('message_type') == 'executionstatus' and parsed_data.get('content') == 'startingrun':
                     self.runID = parsed_data.get('runID')
                     self.umlname = parsed_data.get('uml')
