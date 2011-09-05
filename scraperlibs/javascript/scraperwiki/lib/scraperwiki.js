@@ -1,14 +1,10 @@
 
+var dp = require('./dataproxy')
+
+
 exports.version = '1.0.0';
 
-
-exports.sqlite = new DataProxyClient();
-
+exports.sqlite = new dp.DataProxyClient();
 
 
-function DataProxyClient() {
-}
 
-DataProxyClient.prototype.toString = function() {
-	return "DataProxy";
-}
