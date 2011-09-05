@@ -146,7 +146,7 @@ function handleIdent(req,res) {
 	if ( script ){
 		res.write( 'scraperid=' + script.scraper_guid + "\n");
 		res.write( 'runid=' + script.run_id  + "\n");		
-		res.write( 'scraperid=' + script.scraper_name + "\n");
+		res.write( 'scrapername=' + script.scraper_name + "\n");
 		res.write( 'urlquery=' + script.query + "\n");		
 		if ( script.white ) {
 			res.write( 'allow=' + script.white + "\n");		
