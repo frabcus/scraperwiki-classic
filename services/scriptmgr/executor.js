@@ -256,8 +256,7 @@ function execute(http_req, http_res, raw_request_data) {
 					elapsed = (endTime - startTime) / 1000;
 
 					// 'CPU_seconds': 1, Temporarily removed
-        			res =  { 'message_type':'executionstatus', 'content':'runcompleted', 
-                 'elapsed_seconds' : elapsed, 'exit_status': 0 };
+        			res =  { 'message_type':'executionstatus', 'content':'runcompleted',  'elapsed_seconds' : elapsed, 'exit_status': 0 };
 					http_res.end( JSON.stringify( res ) + "\n" );
 										
 					util.log.debug('Finished writing responses');

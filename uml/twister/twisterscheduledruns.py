@@ -110,7 +110,7 @@ class ScheduledRunMessageLoopHandler:
                 self.completionmessage = '';
                 if data.get('elapsed_seconds'):
                     self.completionmessage += str(data.get("elapsed_seconds")) + " seconds elapsed, " 
-                if data.get("CPU_seconds"):
+                if data.get("CPU_seconds", False): # Until we can get CPU used
                     self.completionmessage += str(data.get("CPU_seconds")) + " CPU seconds used";
                 if "exit_status" in data and data.get("exit_status") != 0:
                     self.completionmessage += ", exit status " + str(data.get("exit_status"));
