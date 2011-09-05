@@ -29,7 +29,7 @@ exports.write_to_caller = function(http_res, output) {
 			try {
 				s = JSON.parse(parts[i]);
 				if ( s && typeof(s) == 'object' ) {
-					http_res.write( parts[i] );
+					http_res.write( parts[i] + "\n");
 					continue;
 				} 
 			}catch(err) {

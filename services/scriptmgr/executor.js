@@ -353,7 +353,7 @@ function execute(http_req, http_res, raw_request_data) {
 ******************************************************************************/
 function handle_process_output(http_res, data, stdout) {
 	if ( data.slice(0,4) == "::::") {
-		http_res.write( data.slice(4) );
+		http_res.write( data.slice(4) + "\n");
 		return;
 	}
 	
@@ -365,7 +365,7 @@ function handle_process_output(http_res, data, stdout) {
 	try {
 		x = JSON.parse( data );
 		if ( typeof(x) == "object" ) {
-			http_res.write( data );
+			http_res.write( data  + "\n");
 			return;
 		} 
 	} catch ( e ) {
