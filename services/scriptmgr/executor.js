@@ -352,7 +352,9 @@ function execute(http_req, http_res, raw_request_data) {
 * Makes sure the process output goes back to the client
 ******************************************************************************/
 function handle_process_output(http_res, data, stdout) {
+	util.log.debug(data);
 	if ( data.slice(0,4) == "::::") {
+		util.log.debug("Slicing");
 		http_res.write( data.slice(4) + "\n");
 		return;
 	}
