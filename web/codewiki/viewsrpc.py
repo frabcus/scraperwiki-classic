@@ -251,8 +251,7 @@ def testactiveumls(n):
 @csrf_exempt
 def twistermakesrunevent(request):
     try:
-        response = Dtwistermakesrunevent(request)
-        return response
+        return Dtwistermakesrunevent(request)
     except Exception, e:
         print e
     return HttpResponse("no done")
@@ -263,7 +262,8 @@ def Dtwistermakesrunevent(request):
         return HttpResponse("no access")
     run_id = request.POST.get("run_id")
     if not run_id:
-        return HttpResponse("bad run_id")
+        return HttpResponse("bad run_id - %s" % (request.POST,) )
+        
     matchingevents = models.ScraperRunEvent.objects.filter(run_id=run_id)
     if not matchingevents:
         event = models.ScraperRunEvent()
