@@ -1,2 +1,6 @@
-{ "name" : "scraperwiki",
-  "main" : "./lib/scraperwiki.js" }
+{ "name" : "scraperwiki"
+, "version" : "1.0.0"
+, "description" : "ScraperWiki client library"
+, "author" : "Ross Jones <ross@scraperwiki.com>"
+, "main" : "lib/scraperwiki"
+}
