@@ -123,6 +123,8 @@ def runmessageloop(runnerstream, event, approxlenoutputlimit):
         try:
             data = json.loads(line)
         except:
+            if len( data.split(':') ) == 2: // Http header?
+                continue
             data = { 'message_type':'console', 'content':"JSONERROR: "+line }
         
         message_type = data.get('message_type')
