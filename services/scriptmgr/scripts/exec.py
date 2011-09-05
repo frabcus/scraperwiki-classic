@@ -39,6 +39,7 @@ class ConsoleStream:
         if self.m_text:
             scraperwiki.dumpMessage({'message_type': 'console', 'content': self.m_text})
             self.m_text = ''
+            self.m_fd.flush()
             
     def close(self):
         self.m_fd.close()
