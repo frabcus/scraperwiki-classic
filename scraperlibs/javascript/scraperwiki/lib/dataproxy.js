@@ -1,5 +1,6 @@
 var EventEmitter = process.EventEmitter;
 var net = require('net');
+var qs = require('querystring');
 
 exports.DataProxyClient =  DataProxyClient = function() {
 	this.host = "";
@@ -25,20 +26,28 @@ DataProxyClient.prototype.ensureConnected = function() {
 	
 	console.log('Creating a new connection');
 	this.connection = net.createConnection(this.port, this.host);
+	this.connection.setEncoding( 'utf8');
+	
 	var me = this;
 	this.connection.on('connect', function(){
         var data = {"uml": me.connection.address().address , "port": me.connection.address().port}
         data["vscrapername"] = me.scrapername;
         data["vrunid"] = me.runid
         data["attachables"] = me.attachables.join(" ")
-		console.log('Is going to be ...');
-		console.log( data );
-/*        m_socket.sendall('GET /?%s HTTP/1.1\n\n' % urllib.urlencode(data))
+
+		// naughty semi-http request.... sigh
+		var msg = "GET /?" + qs.stringify(data) + "HTTP/1.1\n\n";
+		me.connection.write( msg )
+/*        
 #        line = receiveoneline(m_socket)  # comes back with True, "Ok"
 #        res = json.loads(line)
 #        assert res.get("status") == "good", res*/
 		
 	});	
+	
+	this.connection.once('data', function (data) {
+  		console.log('data');
+	});
 }
 
 DataProxyClient.prototype.save = function(indices, data, verbose) {
