@@ -57,6 +57,9 @@ def receiveoneline(socket):
 
 def ensure_connected():
     global m_socket
+    global m_scrapername
+    global m_runid
+    
     if not m_socket:
         m_socket = socket.socket()
         m_socket.connect((m_host, m_port))
