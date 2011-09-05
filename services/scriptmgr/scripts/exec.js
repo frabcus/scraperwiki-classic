@@ -10,11 +10,11 @@ var options = [
   {  long        : 'runid', value : true  },
   {  long        : 'path', value : true  }
 ];
-opts.parse(options);
+opts.parse(options, true);
 
 var sw = require('scraperwiki');
-var parts = opts.ds.split(':');
-sw.sqlite.init(parts[0], parts[1], opts.scrapername || "");
+var parts = opts.get('ds').split(':');
+sw.sqlite.init(parts[0], parts[1], opts.get("scrapername") || "");
 
 /*
 scraperwiki.logfd = sys.stderr
