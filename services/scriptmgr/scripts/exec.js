@@ -12,10 +12,11 @@ var options = [
 ];
 opts.parse(options);
 
-/*
+var sw = require('scraperwiki');
+var parts = opts.ds.split(':');
+sw.sqlite.init(parts[0], parts[1], opts.scrapername || "");
 
-host, port = string.split(options.ds, ':')
-scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid)
+/*
 scraperwiki.logfd = sys.stderr
 */
 
