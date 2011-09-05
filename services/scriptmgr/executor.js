@@ -352,16 +352,16 @@ function execute(http_req, http_res, raw_request_data) {
 * Makes sure the process output goes back to the client
 ******************************************************************************/
 function handle_process_output(http_res, data, stdout) {
+	if ( data.slice(0,4) == "::::") {
+		http_res.write( data.slice(4) );
+		return;
+	}
+	
 	if (stdout) {
 		util.write_to_caller( http_res, data );				
 		return;
 	} 
 	
-	if ( data.slice(0,4) == "::::") {
-		http_res.write( data.slice(4) );
-		return;
-	}
-
 	try {
 		x = JSON.parse( data );
 		if ( typeof(x) == "object" ) {
