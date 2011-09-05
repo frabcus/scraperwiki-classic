@@ -1,5 +1,5 @@
 
-var dp = require('./dataproxy.js')
+var dp = require('./lib/dataproxy.js')
 
 
 exports.version = '1.0.0';
