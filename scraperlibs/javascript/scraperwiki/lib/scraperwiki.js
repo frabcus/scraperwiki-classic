@@ -1,6 +1,14 @@
 
 exports.version = '1.0.0';
 
-exports.test = function() {
-	return "Hello";
+
+exports.sqlite = new DataProxyClient();
+
+
+
+function DataProxyClient() {
+}
+
+DataProxyClient.prototype.toString = function() {
+	return "DataProxy";
 }
