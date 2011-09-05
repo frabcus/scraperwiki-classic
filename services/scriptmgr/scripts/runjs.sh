@@ -1,7 +1,9 @@
 route add default gw 10.0.0.1 eth0 > /dev/null
 export NODE_PATH='/usr/local/lib/node_modules:/home/scraperwiki/javascript:/home/scriptrunner'
 SN=$3
-if [ -n $SN ]; then 
+if [ -Z $SN ]; then 
+	SN=""
+else
 	SN="--scrapername ${SN}" 
 	echo "SN is now"
 	echo $SN		
