@@ -14,7 +14,7 @@ opts.parse(options, true);
 
 var sw = require('scraperwiki');
 var parts = opts.get('ds').split(':');
-sw.sqlite.init(parts[0], parts[1], opts.get("scrapername") || "");
+sw.sqlite.init(parts[0], parts[1], opts.get("scrapername") || "", opts.get("runid") || "");
 
 /*
 scraperwiki.logfd = sys.stderr
