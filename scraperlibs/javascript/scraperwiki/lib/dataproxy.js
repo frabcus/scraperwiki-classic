@@ -46,7 +46,7 @@ DataProxyClient.prototype.ensureConnected = function() {
 	});	
 	
 	this.connection.once('data', function (data) {
-  		console.log('data');
+  		console.log(data);
 	});
 }
 
