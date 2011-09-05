@@ -39,13 +39,17 @@ class ConsoleStream:
         if self.m_text:
             scraperwiki.dumpMessage({'message_type': 'console', 'content': self.m_text})
             self.m_text = ''
-
+            
     def close(self):
         self.m_fd.close()
 
     def fileno(self):
         return self.m_fd.fileno()
 
+
+scraperwiki.logfd = sys.stderr
+sys.stdout = ConsoleStream(scraperwiki.logfd)
+sys.stderr = ConsoleStream(scraperwiki.logfd)
 
 parser = optparse.OptionParser()
 parser.add_option("--script", metavar="name")    # not the scraper name, this is tmp file name which we load and execute
@@ -68,7 +72,7 @@ if options.path:
 host, port = string.split(options.ds, ':')
 scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid)
 
-scraperwiki.logfd = sys.stderr
+
 
 resource.setrlimit(resource.RLIMIT_CPU, (80, 82,))
 
