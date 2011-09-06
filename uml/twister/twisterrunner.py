@@ -46,7 +46,7 @@ class spawnRunner(protocol.ProcessProtocol):
         
         sdata = json.dumps(self.jdata)
         self.logger.debug("sending: "+sdata)
-        controllerconnection.transport.write('POST /Execute HTTP/1.1\r\n')
+        controllerconnection.transport.write('POST /Execute HTTP/1.0\r\n')
         controllerconnection.transport.write('Content-Length: %s\r\n' % len(sdata))
         controllerconnection.transport.write('Content-Type: text/json\r\n')
         controllerconnection.transport.write('Connection: close\r\n')

@@ -117,10 +117,9 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.savecode_authorized = (parsed_data.get('savecode_authorized') == "yes")
         self.originalrev = parsed_data.get('originalrev', '')
         
+        logger.info("connection open %s: %s %s client# %d" % (self.clienttype, self.cchatname, self.scrapername, self.clientnumber)) 
             # this will cause a notifyEditorClients to be called for everyone on this scraper
         self.factory.clientConnectionRegistered(self)  
-        if self.clienttype == "editing":
-            logger.info("connection open: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber)) 
 
 
     def connectionLost(self, reason):
@@ -181,8 +180,6 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                     for lclient in usereditor.userclients:
                         if lclient.clientnumber == clientnumber:
                             client = lclient
-            if client:
-                logger.info("stimulate on : %s %s client# %d" % (client.cchatname, client.scrapername, client.clientnumber))
 
             if parsed_data.get('django_key') != config.get('twister', 'djangokey'):
                 logger.error("djangokey_mismatch")
@@ -215,6 +212,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             self.guid = parsed_data.get("guid", '')
             if parsed_data.get('django_key') == config.get('twister', 'djangokey'):
                 self.clienttype = "rpcrunning"
+                logger.info("connection open %s: %s %s client# %d" % (self.clienttype, self.username, self.scrapername, self.clientnumber)) 
                 self.factory.clientConnectionRegistered(self)  
                 self.runcode(parsed_data)
                     # termination is by the calling function when it receives an executionstatus runfinished message
