@@ -312,6 +312,12 @@ function execute(http_req, http_res, raw_request_data) {
 	    	});
 			
 			var resp = http_res;
+			
+//			e.stdout.on('data', function (data) {
+//				util.write_to_caller( resp, data);
+//			});				
+			
+			
 			e.stderr.on('data', function (data) {
 				util.write_to_caller( resp, data);
 			});				
