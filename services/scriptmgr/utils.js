@@ -29,6 +29,7 @@ exports.write_to_caller = function(http_res, output) {
 			try {
 				s = JSON.parse(parts[i]);
 				if ( s && typeof(s) == 'object' ) {
+					logger.debug('We have been given JSON and so will feed it back' + parts[i] );
 					http_res.write( parts[i] + "\n");
 					continue;
 				} 
