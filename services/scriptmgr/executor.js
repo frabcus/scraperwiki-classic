@@ -272,6 +272,7 @@ function execute(http_req, http_res, raw_request_data) {
 				
 		var extension = util.extension_for_language(script.language);
 		var tmpfile = path.join(lxc.code_folder(res), "script." + extension );
+		var rVM = res;
 		fs.writeFile(tmpfile, request_data.code, function(err) {
 	   		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
@@ -284,9 +285,9 @@ function execute(http_req, http_res, raw_request_data) {
 			var startTime = new Date();		
 
 			// Pass the data proxy and runid to the script that will trigger the exec.py
-			var cfgpath = '/mnt/' + res + '/config';
+			var cfgpath = '/mnt/' + rVM + '/config';
 
-			args = [ '-n', res, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, script.run_id.replace('|','\\|') ]
+			args = [ '-n', rVM, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, script.run_id.replace('|','\\|') ]
 			if ( script.scraper_name && script.scraper_name.length > 0 ) {
 				args.push( script.scraper_name);
 			}
@@ -295,22 +296,21 @@ function execute(http_req, http_res, raw_request_data) {
 			
 			// json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})
 			
-			script.vm = res;
-			script.ip = lxc.ip_for_vm(res);
+			script.vm = rVM;
+			script.ip = lxc.ip_for_vm(rVM);
 				
 			scripts[ script.run_id ] = script;
 			scripts_ip[ script.ip ] = script;
 	
-			var rVM = res;
 			http_req.connection.addListener('close', function () {
 				// Let's handle the user quitting early it might be a KILL
 				// command from the dispatcher
 				lxc.kill( rVM );
 	    	});
 			
-			var res = http_res;
+			var resp = http_res;
 			e.stderr.on('data', function (data) {
-				util.write_to_caller( res, data);
+				util.write_to_caller( resp, data);
 			});				
 		
 			var local_script = script;	
