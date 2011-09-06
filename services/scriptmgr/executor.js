@@ -122,7 +122,8 @@ exports.get_details = function(details) {
 ******************************************************************************/
 exports.run_script = function( http_request, http_response ) {
 	
-	http_request.setEncoding( 'ascii');
+	http_request.setEncoding( 'utf8');
+	http_response.setEncoding('utf8');
 	
 	if ( scripts.length > max_runs ) {
 		r = {"error":"Too busy", "headers": http_request.headers , "lengths":  -1 };
