@@ -6,7 +6,7 @@ logfd = None   # set to os.fdopen(3, 'w', 0) for consuming json objects
 
 def dumpMessage(d):
     val = json.dumps(d)
-    logfd.write( "%s" % (val,) )
+    logfd.write( "%s\n" % (val,) )
     logfd.flush()
 
 
