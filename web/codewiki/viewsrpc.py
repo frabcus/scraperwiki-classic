@@ -144,6 +144,9 @@ def rpcexecute(request, short_name, revision=None):
     panepresent = {"scraperwikipane":[], "firstfivelines":[]}
     contenttypesettings = { }
     for line in runnerstream:
+        if line == "":
+            continue
+            
         try:
             message = json.loads(line)
         except:
