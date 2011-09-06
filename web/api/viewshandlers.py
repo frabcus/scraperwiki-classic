@@ -15,6 +15,7 @@ from tagging.models import Tag
 import csv
 import datetime
 import re
+import PyRSS2Gen
 
 from django.utils.encoding import smart_str
 from django.core.serializers.json import DateTimeAwareJSONEncoder
@@ -104,7 +105,95 @@ def data_handler(request):
         qsdata["callback"] = request.GET.get("callback").encode('utf-8')
     return HttpResponseRedirect("%s?%s" % (reverse("api:method_sqlite"), urllib.urlencode(qsdata)))
 
+
+# formats that should be easy to stream because they are line based
+# may also work for jsondict if we close the bracket ourselves
+def out_csvhtml(dataproxy, short_name, format):
+    strea = stream_rows(dataproxy, format)
+    if format == "csv":
+        mimetype = 'text/csv'
+    else:
+        mimetype = 'text/html'
+        
+    response = HttpResponse(mimetype=mimetype)  # used to take strea
+    #response = HttpResponse(strea, mimetype='text/csv')  # when streamchunking was tried
     
+    if format == "csv":
+        response['Content-Disposition'] = 'attachment; filename=%s.csv' % (short_name)
+    for s in strea:
+        response.write(s)
+
+    dataproxy.close()
+    
+# unless you put in a content length, the middleware will measure the length of your data
+# (unhelpfully consuming everything in your generator) before then returning a zero length result 
+#response["Content-Length"] = 1000000000
+    return response
+    
+
+def out_json(dataproxy, callback, short_name, format):
+    # json is not chunked.  The output is of finite fixed bite sizes because it is generally used by browsers which aren't going to survive a huge download
+    # however could chunk the jsondict type stream_wise as above by manually creating the outer bracketing as with htmltable
+    result = dataproxy.receiveonelinenj()  # no streaming rows because streamchunking value was not set
+    if format == "jsondict":
+        try:
+            res = simplejson.loads(result)
+        except ValueError, e:
+            return HttpResponse("Error:%s" % (e.message,))
+        if "error" not in res:
+            dictlist = [ dict(zip(res["keys"], values))  for values in res["data"] ]
+            result = simplejson.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
+    else:
+        assert format == "jsonlist"
+    if callback:
+        result = "%s(%s)" % (callback, result)
+    response = HttpResponse(result, mimetype='application/json; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename=%s.json' % (short_name)
+    
+    dataproxy.close()
+    return response
+
+def out_rss2(dataproxy, scraper):
+    result = dataproxy.receiveonelinenj()  # no streaming rows because streamchunking value was not set
+    try:
+        res = simplejson.loads(result)
+    except ValueError, e:
+        return HttpResponse("Error:%s" % (e.message,))
+    if "error" in res:
+        return HttpResponse("Error2: %s" % res["error"])
+
+    keymatches = { }
+    if "guid" not in res["keys"] and "link" in res["keys"]:
+        keymatches["guid"] = "link"
+    if "pubDate" not in res["keys"] and "date" in res["keys"]:
+        keymatches["pubDate"] = "date"
+    rsskeys = ["title", "link", "description", "guid", "pubDate"]
+    missingkeys = [ key  for key in rsskeys  if key not in res["keys"] and key not in keymatches ]
+    if missingkeys:
+        return HttpResponse("Error3: You are missing the following keys in the table: %s" % str(missingkeys))
+        
+    items = [ ]
+    for value in res["data"]:
+        ddata = dict(zip(res["keys"], value))
+        
+        # usual datetime conversion mess!
+        spubDate = re.findall("\d+", ddata[keymatches.get("pubDate", "pubDate")])
+        try:
+            pubDate = datetime.datetime(*map(int, spubDate[:6]))
+        except Exception, e:
+            return HttpResponse("Date conversion error: %s\n%s" % (str(e), str(ddata)))
+            
+        guid = PyRSS2Gen.Guid(ddata[keymatches.get("guid", "guid")])
+        rssitem = PyRSS2Gen.RSSItem(title=ddata["title"], link=ddata["link"], description=ddata["description"], guid=guid, pubDate=pubDate)
+        items.append(rssitem)
+
+    link = reverse('code_overview', args=[scraper.wiki_type, scraper.short_name])
+    rss = PyRSS2Gen.RSS2(title=scraper.title, link=link, description=scraper.description, lastBuildDate=datetime.datetime.now(), items=items)
+
+    fout = StringIO()
+    rss.write_xml(fout)
+    return HttpResponse(fout.getvalue(), mimetype='application/rss+xml; charset=utf-8')
+
 
 # ***Streamchunking could all be working, but for not being able to set the Content-Length
 # inexact values give errors in apache, so it would be handy if it could have a setting where 
@@ -154,53 +243,15 @@ def sqlite_handler(request):
     
     dataproxy.m_socket.sendall(simplejson.dumps(req) + '\n')
     
-    if format not in ["jsondict", "jsonlist", "csv", "htmltable"]:
+    if format not in ["jsondict", "jsonlist", "csv", "htmltable", "rss2"]:
         dataproxy.close()
         return HttpResponse("Error: the format '%s' is not supported" % format)
-    
-    if format in ["csv", 'htmltable']:   # may also apply to jsondict
-        strea = stream_rows(dataproxy, format)
-        
-        if format == "csv":
-            mimetype = 'text/csv'
-        else:
-            mimetype = 'text/html'
-            
-        response = HttpResponse(mimetype=mimetype)  # used to take strea
-        #response = HttpResponse(st, mimetype='text/csv')  # when streamchunking was tried
-        
-        if format == "csv":
-            response['Content-Disposition'] = 'attachment; filename=%s.csv' % (scraper.short_name)
-        for s in strea:
-            response.write(s)
-    
-        dataproxy.close()
-        
-# unless you put in a content length, the middleware will measure the length of your data
-# (unhelpfully consuming everything in your generator) before then returning a zero length result 
-#response["Content-Length"] = 1000000000
-        return response
-    
-    
-    # json is not chunked.  The output is of finite fixed bite sizes because it is generally used by browsers which aren't going to survive a huge download
-    # however could chunk the jsondict type stream_wise as above by manually creating the outer bracketing as with htmltable
-    result = dataproxy.receiveonelinenj()
-    if format == "jsondict":
-        try:
-            res = simplejson.loads(result)
-        except ValueError, e:
-            return HttpResponse("Error:%s" % (e.message,))
-        if "error" not in res:
-            dictlist = [ dict(zip(res["keys"], values))  for values in res["data"] ]
-            result = simplejson.dumps(dictlist, cls=DateTimeAwareJSONEncoder, indent=4)
-    callback = request.GET.get("callback")
-    if callback:
-        result = "%s(%s)" % (callback, result)
-    response = HttpResponse(result, mimetype='application/json; charset=utf-8')
-    response['Content-Disposition'] = 'attachment; filename=%s.json' % (scraper.short_name)
-    
-    dataproxy.close()
-    return response
+
+    if format in ["csv", 'htmltable']:   
+        return out_csvhtml(dataproxy, scraper.short_name, format)
+    if format == "rss2":
+        return out_rss2(dataproxy, scraper)
+    return out_json(dataproxy, request.GET.get("callback"), scraper.short_name, format)
 
 
 def scraper_search_handler(request):

@@ -318,6 +318,9 @@ $(function()
                     <option value="jsonlist">jsonlist</option>
                     <option value="csv">csv</option>
                     <option value="htmltable">htmltable</option>
+                    {% if user.is_staff %}                
+                        <option class="staff" value="rss2">rss2</option>
+                    {% endif %}
                 </select>
         	</li> 
         	<li class="name">
