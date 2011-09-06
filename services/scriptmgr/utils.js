@@ -24,6 +24,8 @@ exports.write_to_caller = function(http_res, output) {
 	}
 	
 
+	logger.debug('Sending the following inside a JSON wrapper');
+	logger.debug(msg);	
 	http_res.write(  JSON.stringify( { 'message_type':'console', 'content': msg  } ) + "\n" );
 
 /*	for (var i=0; i < parts.length; i++) {
