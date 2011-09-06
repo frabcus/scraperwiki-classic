@@ -330,8 +330,10 @@ function execute(http_req, http_res, raw_request_data) {
 	      		var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
 	               'elapsed_seconds' : elapsed, 'exit_status': 0 };
 				if ( script && script.response ) {
-					console.log('Done');
 					script.response.end( JSON.stringify( result ) + "\n" );
+				} else { 
+					util.log.debug('Script is null?' + script);
+					util.log.debug('Script has been disconnected from caller?' + script.response );					
 				}
 								
 				lxc.release_vm( script, res );
