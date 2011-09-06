@@ -292,22 +292,25 @@ function execute(http_req, http_res, raw_request_data) {
 			}
 	 		e = spawn('/usr/bin/lxc-execute', args );
 			
-	
+			
+			// json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})
+			
 			script.vm = res;
 			script.ip = lxc.ip_for_vm(res);
 				
 			scripts[ script.run_id ] = script;
 			scripts_ip[ script.ip ] = script;
 	
-	
+			var rVM = res;
 			http_req.connection.addListener('close', function () {
 				// Let's handle the user quitting early it might be a KILL
 				// command from the dispatcher
-				lxc.kill( res );
+				lxc.kill( rVM );
 	    	});
-
+			
+			var res = http_res;
 			e.stderr.on('data', function (data) {
-				util.write_to_caller( http_res, data);
+				util.write_to_caller( res, data);
 			});				
 		
 			var local_script = script;	
@@ -332,7 +335,7 @@ function execute(http_req, http_res, raw_request_data) {
 					util.log.debug('Script has been disconnected from caller?' + local_script.response );					
 				}
 								
-				lxc.release_vm( local_script, res );
+				lxc.release_vm( local_script, rVM );
 				if ( local_script) {
 					delete scripts[local_script.run_id];
 					delete scripts_ip[ local_script.ip ];
