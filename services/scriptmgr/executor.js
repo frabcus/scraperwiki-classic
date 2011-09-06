@@ -366,6 +366,7 @@ function handle_process_output(http_res, data, stdout) {
 		return;
 	} 
 	
+	// stderr
 	try {
 		x = JSON.parse( data );
 		if ( typeof(x) == "object" ) {

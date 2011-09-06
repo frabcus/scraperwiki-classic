@@ -687,6 +687,7 @@ class HTTPSProxyServer (HTTPProxyServer) :
     def __init__(self, server_address, HandlerClass):
 
         HTTPProxyServer.__init__(self, server_address, HandlerClass)
+        
         ctx = OpenSSL.SSL.Context(OpenSSL.SSL.SSLv23_METHOD)
         fpem = '/var/www/scraperwiki/uml/httpproxy/server.pem'
         ctx.use_privatekey_file (fpem)
@@ -697,6 +698,7 @@ class HTTPSProxyServer (HTTPProxyServer) :
                             )
         self.server_bind    ()
         self.server_activate()
+        
 
 
 def execute () :
