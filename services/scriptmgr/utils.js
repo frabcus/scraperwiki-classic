@@ -16,13 +16,13 @@ exports.write_to_caller = function(http_res, output) {
 	var parts = msg.split("\n");	
 
 	// Hacky solution to making sure HTML is sent all on one line for now.
-	sub = msg.substring(0,100);
+/*	sub = msg.substring(0,100);
 	if ( sub.indexOf('>') >= 0  && sub.indexOf('<') >= 0 && sub.toLowerCase().indexOf('html') >= 0) {
 		r = { 'message_type':'console', 'content': msg  };
 		http_res.write( JSON.stringify(r) + "\n");
 		return;
 	}
-	
+*/	
 
 	for (var i=0; i < parts.length; i++) {
 		if ( parts[i].length > 0 ) {
