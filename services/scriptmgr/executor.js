@@ -362,8 +362,8 @@ function handle_process_output(http_res, data, stdout) {
 	}
 */	
 	if (stdout) {
-		logger.debug('Following data received on stdout');
-		logger.debug(data);	
+		util.log.debug('Following data received on stdout');
+		util.log.debug(data);	
 		util.write_to_caller( http_res, data );				
 		return;
 	} 
@@ -372,8 +372,8 @@ function handle_process_output(http_res, data, stdout) {
 	try {
 		x = JSON.parse( data );
 		if ( typeof(x) == "object" ) {
-			logger.debug('Following data received on stdout and is JSON so sending as is');
-			logger.debug(data);	
+			util.log.debug('Following data received on stdout and is JSON so sending as is');
+			util.log.debug(data);	
 			
 			http_res.write( data  + "\n");
 			return;
@@ -382,7 +382,7 @@ function handle_process_output(http_res, data, stdout) {
 		
 	}
 
-	logger.debug('Fallback to the default code path');
+	util.log.debug('Fallback to the default code path');
 
 	util.write_to_caller( http_res, data);			
 }
