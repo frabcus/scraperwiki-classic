@@ -232,12 +232,8 @@ function execute(http_req, http_res, raw_request_data) {
 			
 				util.log.debug( "Script " + script.run_id + " executed with " + script.pid );
 
-			/*	e.stdout.on('data', function (data) {
-					handle_process_output( http_res, data, true );
-				});
-			*/	
 				e.stderr.on('data', function (data) {
-					handle_process_output( http_res, data, false );					
+					util.write_to_caller( http_res, data);			
 				});				
 				
 				e.on('exit', function (code, signal) {
@@ -310,12 +306,8 @@ function execute(http_req, http_res, raw_request_data) {
 				lxc.kill( res );
 	    	});
 
-
-		/*	e.stdout.on('data', function (data) {
-				handle_process_output( http_res, data, true );
-			});*/
 			e.stderr.on('data', function (data) {
-				handle_process_output( http_res, data, false );					
+				util.write_to_caller( http_res, data);
 			});				
 		
 			var local_script = script;	
@@ -358,40 +350,5 @@ function execute(http_req, http_res, raw_request_data) {
 }
 
 
-/******************************************************************************
-* Makes sure the process output goes back to the client
-******************************************************************************/
-function handle_process_output(http_res, data, stdout) {
-	
-/*	if ( data.slice(0,4) == "::::") {
-		vars parts = data.split('\n');
-		for ( var p in parts ) {
-			http_res.write( p.slice(4) + "\n");
-		}
-		return;
-	}
-	if (stdout) {
-		util.log.debug('Following data received on stdout');
-		util.log.debug(data);	
-		util.write_to_caller( http_res, data );				
-		return;
-	} 
-	// stderr
-	try {
-		x = JSON.parse( data );
-		if ( typeof(x) == "object" ) {
-			util.log.debug('Sending JSON as is : ' + data );
-			
-			http_res.write( data  + "\n");
-			return;
-		} 
-	} catch ( e ) {
-		
-	}
-
-	util.log.debug('Fallback to the default code path');
-*/
-	util.write_to_caller( http_res, data);			
-}
 
 
