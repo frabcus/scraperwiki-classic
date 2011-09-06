@@ -24,7 +24,7 @@ exports.write_to_caller = function(http_res, output) {
 	}
 	
 
-	http_res.write(  JSON.stringify( { 'message_type':'console', 'content': msg  } ) + "\n") );
+	http_res.write(  JSON.stringify( { 'message_type':'console', 'content': msg  } ) + "\n" );
 
 /*	for (var i=0; i < parts.length; i++) {
 		if ( parts[i].length > 0 ) {
