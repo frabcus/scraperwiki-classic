@@ -64,7 +64,7 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = [
-    'middleware.exception_logging.ExceptionLoggingMiddleware',
+#    'middleware.exception_logging.ExceptionLoggingMiddleware',
     'middleware.improved_gzip.ImprovedGZipMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.common.CommonMiddleware',
