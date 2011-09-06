@@ -493,6 +493,10 @@ class UserUserRole(models.Model):
     def put_on_team(user, organisation):
         u, created = UserUserRole.objects.get_or_create(user=user, other=organisation, role="on_team_of") 
 
+    @staticmethod
+    def remove_from_team(user, organisation):
+        UserUserRole.objects.filter(user=user, other=organisation, role="on_team_of").delete()
+
     def __unicode__(self):
         return "User: %s -> Other: %s (%s)" % (self.user, self.user, self.role)
 
