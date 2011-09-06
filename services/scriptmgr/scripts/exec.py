@@ -37,7 +37,7 @@ class ConsoleStream:
 
     def flush(self) :
         if self.m_text:
-            scraperwiki.dumpMessage({'message_type': 'console', 'content': self.m_text})
+            scraperwiki.dumpMessage({'message_type': 'console', 'content': self.m_text, 'debug': 'flushed'})
             self.m_text = ''
             self.m_fd.flush()
             
@@ -49,11 +49,11 @@ class ConsoleStream:
 
 
 # Make sure we have unbuffered outputs
-sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
-sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+#sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
 
 scraperwiki.logfd = sys.stderr
-sys.stdout = ConsoleStream(sys.stdout)
+sys.stdout = ConsoleStream(scraperwiki.logfd)
 sys.stderr = ConsoleStream(scraperwiki.logfd)
 
 parser = optparse.OptionParser()
