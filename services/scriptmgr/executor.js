@@ -287,6 +287,7 @@ function execute(http_req, http_res, raw_request_data) {
 			// Pass the data proxy and runid to the script that will trigger the exec.py
 			var cfgpath = '/mnt/' + rVM + '/config';
 
+			util.log.debug('Setting runid to ' + script.run_id.replace('|','\\|') );
 			args = [ '-n', rVM, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, script.run_id.replace('|','\\|') ]
 			if ( script.scraper_name && script.scraper_name.length > 0 ) {
 				args.push( script.scraper_name);
