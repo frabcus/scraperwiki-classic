@@ -309,7 +309,7 @@ def Dtwistermakesrunevent(request):
 
         domainscrapes = json.loads(request.POST.get("domainscrapes"))
         for netloc, vals in domainscrapes.items():
-            domainscrape = DomainScrape(scraper_run_event=event, domain=netloc)
+            domainscrape = models.DomainScrape(scraper_run_event=event, domain=netloc)
             domainscrape.pages_scraped = vals["pages_scraped"]
             domainscrape.bytes_scraped = vals["bytes_scraped"]
             domainscrape.save()
@@ -320,7 +320,7 @@ def Dtwistermakesrunevent(request):
     emailers = event.scraper.users.filter(usercoderole__role='email')
     if emailers.count() > 0:
         subject, message = getemailtext(event)
-        if scraper.status == 'ok':
+        if event.scraper.status == 'ok':
             if message:  # no email if blank
                 for user in emailers:
                     send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[user.email], fail_silently=True)

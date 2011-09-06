@@ -1183,7 +1183,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             saveScraper(null,function() {
                 w = window.open(viewurl, "scraperwiki_preview_" + short_name);
             }, false); // false - do request synchronously so popup is allowed
-            sendCode(); // trigger the running once we're ready for the output
         }
     }
 

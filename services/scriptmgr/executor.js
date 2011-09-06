@@ -190,7 +190,7 @@ function execute(http_req, http_res, raw_request_data) {
 				http_res.end( JSON.stringify(r) );
 				return;				
 	   		} else {
-				if ( script.language == 'ruby') {
+				if ( script.language == 'ruby' || script.language == 'php' ) {
 					args = ['--script=' + tmpfile,'--ds=' + dataproxy, '--runid=' + script.run_id]
 					if ( script.scraper_name ) {
 						args.push('--scrapername=' + script.scraper_name )
@@ -232,12 +232,8 @@ function execute(http_req, http_res, raw_request_data) {
 			
 				util.log.debug( "Script " + script.run_id + " executed with " + script.pid );
 
-				e.stdout.on('data', function (data) {
-					handle_process_output( http_res, data, true );
-				});
-				
 				e.stderr.on('data', function (data) {
-					handle_process_output( http_res, data, false );					
+					util.write_to_caller( http_res, data);			
 				});				
 				
 				e.on('exit', function (code, signal) {
@@ -276,6 +272,7 @@ function execute(http_req, http_res, raw_request_data) {
 				
 		var extension = util.extension_for_language(script.language);
 		var tmpfile = path.join(lxc.code_folder(res), "script." + extension );
+		var rVM = res;
 		fs.writeFile(tmpfile, request_data.code, function(err) {
 	   		if(err) {
 				r = {"error":"Failed to write file to local disk", "headers": http_req.headers , "lengths":  -1 };
@@ -288,95 +285,82 @@ function execute(http_req, http_res, raw_request_data) {
 			var startTime = new Date();		
 
 			// Pass the data proxy and runid to the script that will trigger the exec.py
-			var cfgpath = '/mnt/' + res + '/config';
+			var cfgpath = '/mnt/' + rVM + '/config';
 
-			args = [ '-n', res, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, script.run_id.replace('|','\\|') ]
+			r = script.run_id.replace(/\|/g, "\\|");
+
+			util.log.debug('Setting runid to ' + r );
+			args = [ '-n', rVM, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, r ]
 			if ( script.scraper_name && script.scraper_name.length > 0 ) {
 				args.push( script.scraper_name);
 			}
 	 		e = spawn('/usr/bin/lxc-execute', args );
-	
-			script.vm = res;
-			script.ip = lxc.ip_for_vm(res);
+			
+			
+			// json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})
+			
+			script.vm = rVM;
+			script.ip = lxc.ip_for_vm(rVM);
 				
 			scripts[ script.run_id ] = script;
 			scripts_ip[ script.ip ] = script;
 	
-	
 			http_req.connection.addListener('close', function () {
 				// Let's handle the user quitting early it might be a KILL
 				// command from the dispatcher
-				lxc.kill( res );
+				lxc.kill( rVM );
 	    	});
-
-
-			e.stdout.on('data', function (data) {
-				handle_process_output( http_res, data, true );
-			});
-			e.stderr.on('data', function (data) {
-				handle_process_output( http_res, data, false );					
-			});				
 			
+			var resp = http_res;
+			
+//			e.stdout.on('data', function (data) {
+//				util.write_to_caller( resp, data);
+//			});				
+			
+			
+			e.stderr.on('data', function (data) {
+				util.write_to_caller( resp, data);
+			});				
+		
+			var local_script = script;	
 			e.on('exit', function (code, signal) {
 				if ( code == null )
-					console.log('child process exited badly, we may have killed it');
+				    util.log.debug('child process exited badly, we may have killed it');
 				else 
-					console.log('child process exited with code ' + code);					
+				    util.log.debug('child process exited with code ' + code);					
 
 				var endTime = new Date();
 				elapsed = (endTime - startTime) / 1000;
+				util.log.debug('Elapsed' + elapsed );
 
 				// 'CPU_seconds': 1, Temporarily removed
 	      		var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
 	               'elapsed_seconds' : elapsed, 'exit_status': 0 };
-				if ( script && script.response ) {
-					console.log('Done');
-					script.response.end( JSON.stringify( result ) + "\n" );
+				if ( local_script&& local_script.response ) {
+					local_script.response.end( JSON.stringify( result ) + "\n" );
+					util.log.debug('Have just written end message to the vm ' + local_script.vm );
+				} else { 
+					util.log.debug('Script is null?' + script);
+					util.log.debug('Script has been disconnected from caller?' + local_script.response );					
 				}
 								
-				lxc.release_vm( script, res );
-				if ( script ) {
-					delete scripts[script.run_id];
-					delete scripts_ip[ script.ip ];
+				lxc.release_vm( local_script, rVM );
+				if ( local_script) {
+					delete scripts[local_script.run_id];
+					delete scripts_ip[ local_script.ip ];
 				}
 				util.log.debug('child process removed from script list');					
 								
-				util.log.debug('Finished writing responses');
+				if ( local_script) { 
+					util.log.debug('Finished writing responses for ' + local_script.vm);
+				} else {
+					util.log.debug('Finished writing a response');
+				}
 			});
 		});
 	}
 }
 
 
-/******************************************************************************
-* Makes sure the process output goes back to the client
-******************************************************************************/
-function handle_process_output(http_res, data, stdout) {
-	
-/*	if ( data.slice(0,4) == "::::") {
-		vars parts = data.split('\n');
-		for ( var p in parts ) {
-			http_res.write( p.slice(4) + "\n");
-		}
-		return;
-	}
-*/	
-	if (stdout) {
-		util.write_to_caller( http_res, data );				
-		return;
-	} 
-	
-	try {
-		x = JSON.parse( data );
-		if ( typeof(x) == "object" ) {
-			http_res.write( data  + "\n");
-			return;
-		} 
-	} catch ( e ) {
-		
-	}
-
-	util.write_to_caller( http_res, data);			
-}
 
 

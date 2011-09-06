@@ -15,28 +15,21 @@ exports.write_to_caller = function(http_res, output) {
 	var msg = output.toString();
 	var parts = msg.split("\n");	
 
-	// Hacky solution to making sure HTML is sent all on one line for now.
-	sub = msg.substring(0,100);
-	if ( sub.indexOf('>') >= 0  && sub.indexOf('<') >= 0 && sub.toLowerCase().indexOf('html') >= 0) {
-		r = { 'message_type':'console', 'content': msg  };
-		http_res.write( JSON.stringify(r) + "\n");
-		return;
-	}
-	
-
 	for (var i=0; i < parts.length; i++) {
 		if ( parts[i].length > 0 ) {
 			try {
 				s = JSON.parse(parts[i]);
 				if ( s && typeof(s) == 'object' ) {
+					logger.debug('We have been given JSON and so will feed it back' + parts[i] );
 					http_res.write( parts[i] + "\n");
-					continue;
-				} 
+				       //continue;
+				} else {
+					logger.debug('Not JSON? ' + parts[i] );
+				}
 			}catch(err) {
-				//
+				logger.debug('Failed to parse ' + err );	
 			}
 			
-			http_res.write( JSON.stringify( { 'message_type':'console', 'content': parts[i]  } ) + "\n");
 		}
 	};
 }
@@ -85,7 +78,7 @@ exports.env_for_language = function( lang, extra_path ) {
 	if ( lang == 'python' ) {
 		return {PYTHONPATH: ep, PYTHONUNBUFFERED: 'true'};
 	} else if ( lang == 'ruby') {
-		return { RUBYLIB: ep };		
+		return { RUBYLIB: ep + ":" + process.env.RUBYLIB };		
 	} else if ( lang == 'php') {
 		return { PHPPATH: ep};		
 	} else if ( lang == 'javascript' ) {
