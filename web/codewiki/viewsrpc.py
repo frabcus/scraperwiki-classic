@@ -152,6 +152,10 @@ def rpcexecute(request, short_name, revision=None):
         except:
             pass
             
+        # Need to log the message here in debug mode so we can track down the
+        # 'no output for some unknown reason'
+        print "WOMBLE:%s" % (line,)
+        
         if message['message_type'] == "console":
             if not response:
                 response = HttpResponse()
