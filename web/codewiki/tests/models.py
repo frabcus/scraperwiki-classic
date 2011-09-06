@@ -1,22 +1,24 @@
 from django.test import TestCase
 
-import codewiki
+from codewiki.models import Scraper
+from django.contrib.auth.models import User
 
 class Test__unicode__(TestCase):
-    '''
-    Simple test to verify the __unicode__ method
-    of the various models doesn't work
-    '''
-    
-    def test_scraper_long_name(self):
+    def test_scraper_name(self):
         self.assertEqual(
             'test_scraper',
-            unicode(codewiki.models.Scraper(title='Test Scraper', short_name='test_scraper'))
+            unicode(Scraper(title='Test Scraper', short_name='test_scraper'))
         )
 
 class TestUserUserRole(TestCase):
+    fixtures = ['test_data.json']
+
     def test_mouse(self):
-        assert 1 == 2
+        s = Scraper.objects.get(short_name='test_scraper')
+        s = User.objects.get(username='test_user')
+        s = User.objects.get(username='test_admin')
+
+        self.assertEqual(len(s.useruserrole_set.all()), 0)
 
 
 
