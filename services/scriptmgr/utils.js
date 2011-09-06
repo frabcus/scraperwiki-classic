@@ -88,7 +88,7 @@ exports.env_for_language = function( lang, extra_path ) {
 	if ( lang == 'python' ) {
 		return {PYTHONPATH: ep, PYTHONUNBUFFERED: 'true'};
 	} else if ( lang == 'ruby') {
-		return { RUBYLIB: ep };		
+		return { RUBYLIB: ep + ":" + process.env.RUBYLIB };		
 	} else if ( lang == 'php') {
 		return { PHPPATH: ep};		
 	} else if ( lang == 'javascript' ) {
