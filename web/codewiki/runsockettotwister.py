@@ -113,6 +113,8 @@ class RunnerSocket:
         jdata = self.jsonoutputlist.pop(0)
         try:
             data = json.loads(jdata)
+            if not isinstance(data,dict):
+                raise TypeError("We only process dict json messages")
         except:
             # If the data is now json we should log it somewhere so that we can work out if it is just 
             return ""
