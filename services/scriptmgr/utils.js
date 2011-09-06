@@ -24,6 +24,7 @@ exports.write_to_caller = function(http_res, output) {
 	}
 */	
 
+	logger.debug("We have " + parts.length + " chunks to split and send " + parts );
 	for (var i=0; i < parts.length; i++) {
 		if ( parts[i].length > 0 ) {
 			try {
@@ -31,15 +32,14 @@ exports.write_to_caller = function(http_res, output) {
 				if ( s && typeof(s) == 'object' ) {
 					logger.debug('We have been given JSON and so will feed it back' + parts[i] );
 					http_res.write( parts[i] + "\n");
-					continue;
-				} 
+				       //continue;
+				} else {
+					logger.debug('Not JSON? ' + parts[i] );
+				}
 			}catch(err) {
-				//
+				logger.debug('Failed to parse ' + err );	
 			}
 			
-			logger.debug('Sending the following inside a JSON wrapper');
-			logger.debug(msg);	
-			http_res.write( JSON.stringify( { 'message_type':'console', 'content': parts[i]  } ) + "\n");
 		}
 	};
 }

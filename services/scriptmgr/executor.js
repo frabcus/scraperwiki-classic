@@ -232,10 +232,10 @@ function execute(http_req, http_res, raw_request_data) {
 			
 				util.log.debug( "Script " + script.run_id + " executed with " + script.pid );
 
-				e.stdout.on('data', function (data) {
+			/*	e.stdout.on('data', function (data) {
 					handle_process_output( http_res, data, true );
 				});
-				
+			*/	
 				e.stderr.on('data', function (data) {
 					handle_process_output( http_res, data, false );					
 				});				
@@ -295,6 +295,7 @@ function execute(http_req, http_res, raw_request_data) {
 				args.push( script.scraper_name);
 			}
 	 		e = spawn('/usr/bin/lxc-execute', args );
+			
 	
 			script.vm = res;
 			script.ip = lxc.ip_for_vm(res);
@@ -310,40 +311,47 @@ function execute(http_req, http_res, raw_request_data) {
 	    	});
 
 
-			e.stdout.on('data', function (data) {
+		/*	e.stdout.on('data', function (data) {
 				handle_process_output( http_res, data, true );
-			});
+			});*/
 			e.stderr.on('data', function (data) {
 				handle_process_output( http_res, data, false );					
 			});				
-			
+		
+			var local_script = script;	
 			e.on('exit', function (code, signal) {
 				if ( code == null )
-					console.log('child process exited badly, we may have killed it');
+				    util.log.debug('child process exited badly, we may have killed it');
 				else 
-					console.log('child process exited with code ' + code);					
+				    util.log.debug('child process exited with code ' + code);					
 
 				var endTime = new Date();
 				elapsed = (endTime - startTime) / 1000;
+				util.log.debug('Elapsed' + elapsed );
 
 				// 'CPU_seconds': 1, Temporarily removed
 	      		var result =  { 'message_type':'executionstatus', 'content':'runcompleted', 
 	               'elapsed_seconds' : elapsed, 'exit_status': 0 };
-				if ( script && script.response ) {
-					script.response.end( JSON.stringify( result ) + "\n" );
+				if ( local_script&& local_script.response ) {
+					local_script.response.end( JSON.stringify( result ) + "\n" );
+					util.log.debug('Have just written end message to the vm ' + local_script.vm );
 				} else { 
 					util.log.debug('Script is null?' + script);
-					util.log.debug('Script has been disconnected from caller?' + script.response );					
+					util.log.debug('Script has been disconnected from caller?' + local_script.response );					
 				}
 								
-				lxc.release_vm( script, res );
-				if ( script ) {
-					delete scripts[script.run_id];
-					delete scripts_ip[ script.ip ];
+				lxc.release_vm( local_script, res );
+				if ( local_script) {
+					delete scripts[local_script.run_id];
+					delete scripts_ip[ local_script.ip ];
 				}
 				util.log.debug('child process removed from script list');					
 								
-				util.log.debug('Finished writing responses');
+				if ( local_script) { 
+					util.log.debug('Finished writing responses for ' + local_script.vm);
+				} else {
+					util.log.debug('Finished writing a response');
+				}
 			});
 		});
 	}
@@ -362,20 +370,17 @@ function handle_process_output(http_res, data, stdout) {
 		}
 		return;
 	}
-*/	
 	if (stdout) {
 		util.log.debug('Following data received on stdout');
 		util.log.debug(data);	
 		util.write_to_caller( http_res, data );				
 		return;
 	} 
-	
 	// stderr
 	try {
 		x = JSON.parse( data );
 		if ( typeof(x) == "object" ) {
-			util.log.debug('Following data received on stdout and is JSON so sending as is');
-			util.log.debug(data);	
+			util.log.debug('Sending JSON as is : ' + data );
 			
 			http_res.write( data  + "\n");
 			return;
@@ -385,7 +390,7 @@ function handle_process_output(http_res, data, stdout) {
 	}
 
 	util.log.debug('Fallback to the default code path');
-
+*/
 	util.write_to_caller( http_res, data);			
 }
 
