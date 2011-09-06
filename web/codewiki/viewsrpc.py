@@ -201,7 +201,7 @@ def rpcexecute(request, short_name, revision=None):
             
                     
     if not response:
-        response = HttpResponse('no output for some unknown reason')
+        response = HttpResponse('No output received from view.')
         
     # now decide about inserting the powered by scraperwiki panel (avoid doing it on json)
     # print [response['Content-Type']]  default is DEFAULT_CONTENT_TYPE, comes out as 'text/html; charset=utf-8'
