@@ -190,7 +190,7 @@ function execute(http_req, http_res, raw_request_data) {
 				http_res.end( JSON.stringify(r) );
 				return;				
 	   		} else {
-				if ( script.language == 'ruby') {
+				if ( script.language == 'ruby' || script.language == 'php' ) {
 					args = ['--script=' + tmpfile,'--ds=' + dataproxy, '--runid=' + script.run_id]
 					if ( script.scraper_name ) {
 						args.push('--scrapername=' + script.scraper_name )
