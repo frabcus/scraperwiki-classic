@@ -19,7 +19,7 @@ module ScraperWiki
 
     def ScraperWiki.dumpMessage(hash)
         msg = JSON.generate(hash)
-        $logfd.write( "JSONRECORD(" + msg.length + "):" + msg + "\n")
+        $logfd.write( "JSONRECORD(" + msg.length.to_s() + "):" + msg + "\n")
         $logfd.flush()
     end
 
