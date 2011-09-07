@@ -12,6 +12,9 @@ _ = require('underscore');
 * lived socket that connected to us.
 ******************************************************************************/
 exports.write_to_caller = function(http_res, output) {
+	if ( ! http_res.jsonbuffer )
+		http_res.jsonbuffer = [];
+		
 	var msg = output.toString();
 	var parts = msg.split("\n");	
     http_res.jsonbuffer.push(parts.shift());
