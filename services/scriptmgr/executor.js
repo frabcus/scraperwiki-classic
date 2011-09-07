@@ -354,8 +354,7 @@ function execute(http_req, http_res, raw_request_data) {
 			e.stdout.on('data', function (data) {
 				//Everything we receive here is from PHP or from launched apps so we 
 				// should wrap whatever we have and send it 
-				//util.write_to_caller( resp, data );
-				util.write_to_caller( resp, "{'message_type': 'console', 'content': 'DEBUG'}" );
+				util.write_to_caller( resp, "{'message_type': 'console', 'content': '" + data + "'}" );
 			});				
 			
 			
