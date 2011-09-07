@@ -364,7 +364,8 @@ function execute(http_req, http_res, raw_request_data) {
 					throw "Invalid JSON"
 				}
 				catch(err) {
-					util.log.debug('Not JSON so encoding');					
+					util.log.debug( err );
+					util.log.debug('Not JSON so encoding:' + err);					
 					stringified = JSON.stringify( {'message_type': 'console', 'content': data.toString() } );											
 				}
 
