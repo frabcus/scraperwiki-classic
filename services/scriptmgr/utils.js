@@ -22,14 +22,13 @@ exports.write_to_caller = function(http_res, output) {
 				if ( s && typeof(s) == 'object' ) {
 					logger.debug('We have been given JSON and so will feed it back' + parts[i] );
 					http_res.write( parts[i] + "\n");
-				       //continue;
 				} else {
 					logger.debug('Not an object' + parts[i] );
 				}
 			}catch(err) {
-				logger.debug('Failed to parse ' + err + " with data ." + parts[i] + ".");	
+				logg.debug('Not JSON, so encoding in wrapper and returning')
+				http_res.write( JSON.stringify( {'message_type': 'console', 'content': data.toString() } ));											
 			}
-			
 		}
 	};
 }
