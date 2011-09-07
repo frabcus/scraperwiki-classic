@@ -27,7 +27,7 @@ exports.write_to_caller = function(http_res, output) {
 					logger.debug('Not JSON? ' + parts[i] );
 				}
 			}catch(err) {
-				logger.debug('Failed to parse ' + err );	
+				logger.debug('Failed to parse ' + err + " with data " + parts[i] );	
 			}
 			
 		}
