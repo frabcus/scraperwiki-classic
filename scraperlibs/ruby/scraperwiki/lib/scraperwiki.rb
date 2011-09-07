@@ -18,8 +18,8 @@ module ScraperWiki
     $attachlist = [ ]
 
     def ScraperWiki.dumpMessage(hash)
-        $msg = JSON.generate(hash)
-        $logfd.write( "JSONRECORD(" + $msg.length + "):" + $msg + "\n")
+        msg = JSON.generate(hash)
+        $logfd.write( "JSONRECORD(" + msg.length + "):" + msg + "\n")
         $logfd.flush()
     end
 
