@@ -81,10 +81,11 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             via    = config.get(uml, 'via' )
             lident = urllib.urlopen ('http://%s:%s/Ident?%s:%s' % (uml_host, via, port, loc[1])).read()   
 
-                # should be using cgi.parse_qs(query) technology here
+                # should be using cgi.parse_qs(query) technology here                
+        self.logger.debug("LIDENT: %s" % (lident,) )                                
         for line in lident.split('\n'):
             if line:
-                key, value = line.split('=')
+                key, value = line.split('=',1)
                 if key == 'runid':
                     runID = value
                 elif key == 'scrapername':

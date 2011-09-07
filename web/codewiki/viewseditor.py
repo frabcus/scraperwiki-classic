@@ -132,7 +132,7 @@ blankstartupcode = { 'scraper' : { 'python': "import scraperwiki\n\n# Blank Pyth
                                     'javascript': '// Blank Javascript scraper\n'
                                  }, 
                      'view'    : { 'python': "# Blank Python\nsourcescraper = ''\n", 
-                                   'php':    "<?php\n# Blank PHP\n$sourcescraper = ''\n?>\n", 
+                                   'php':    "<?php\n# Blank PHP\n$sourcescraper = '';\n?>\n", 
                                    'ruby':   "# Blank Ruby\nsourcescraper = ''\n",
                                    'html':   "<p>Blank HTML page</p>\n",
                                    'javascript':"// Blank javascript\n",
