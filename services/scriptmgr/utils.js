@@ -27,7 +27,7 @@ exports.write_to_caller = function(http_res, output) {
 				}
 			}catch(err) {
 				logger.debug('Not JSON, so encoding in wrapper and returning - ' + parts[i])
-				http_res.write( JSON.stringify( {'message_type': 'console', 'content': parts[i] } ));											
+				http_res.write( JSON.stringify( {'message_type': 'console', 'content': parts[i] }) + "\n");											
 			}
 		}
 	};
