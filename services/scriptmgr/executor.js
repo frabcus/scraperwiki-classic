@@ -316,18 +316,18 @@ function execute(http_req, http_res, raw_request_data) {
 
 			util.log.debug('Setting runid to ' + r );
 			args = [ '-n', rVM, '-f', cfgpath];
-			if (script.query)
-				args.push('QUERY_STRING=' + script.query);
 			args.push("/home/startup/run" + extension + ".sh");
 			args.push(dataproxy);
 			args.push( r );
-			
-			util.log.debug('Using args');
-			util.log.debug(args);
-			
+						
 			if ( script.scraper_name && script.scraper_name.length > 0 ) {
 				args.push( script.scraper_name);
 			}
+			
+			if (script.query) {
+				args.push(script.query);
+			}
+			
 	 		e = spawn('/usr/bin/lxc-execute', args );
 			
 			
