@@ -354,7 +354,9 @@ function execute(http_req, http_res, raw_request_data) {
 			e.stdout.on('data', function (data) {
 				//Everything we receive here is from PHP or from launched apps so we 
 				// should wrap whatever we have and send it 
-				util.write_to_caller( resp, "{'message_type': 'console', 'content': '" + data + "'}\n" );
+				var stringified = JSON.stringify( {'message_type': 'console', 'content': data} );
+				util.log.debug('Parsed output is ....');
+				util.write_to_caller( resp, stringified );
 			});				
 			
 			
