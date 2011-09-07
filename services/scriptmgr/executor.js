@@ -354,8 +354,20 @@ function execute(http_req, http_res, raw_request_data) {
 			e.stdout.on('data', function (data) {
 				//Everything we receive here is from PHP or from launched apps so we 
 				// should wrap whatever we have and send it 
-				var stringified = JSON.stringify( {'message_type': 'console', 'content': data.toString() } );
-				util.log.debug('Parsed output is ....');
+				var stringified = "";
+				try
+				{
+					var s = JSON.parse(data.toString());
+					if ( s && typeof(s) == 'object' ) {					
+						stringified = data.toString();
+					}
+					throw "Invalid JSON"
+				}
+				catch(err) {
+					util.log.debug('Not JSON so encoding');					
+					stringified = JSON.stringify( {'message_type': 'console', 'content': data.toString() } );											
+				}
+
 				util.write_to_caller( resp, stringified );
 			});				
 			
