@@ -19,11 +19,17 @@ exports.write_to_caller = function(http_res, output) {
 	var parts = msg.split("\n");	
     http_res.jsonbuffer.push(parts.shift());
 
+	logger.debug("WTC:1:" +  msg );
+	logger.debug("WTC:2:Buffer items count:" + http_res.jsonbuffer.length  );
+	
 	while (parts.length > 0) {
 	    var element = http_res.jsonbuffer.join(""); 
 
+		logger.debug("WTC:3:" +  element );
+	
 		var rp = element.match(/^JSONRECORD\((\d+)\)/);
 		if ( rp != null ) {
+			logger.debug("WTC:5:" + rp  );			
 			// rp is [ matched text, captured data, ... ]
 			var size = rp[1];
 			// if the text after JSONRECORD(x): is the length we expect, then write it
@@ -34,8 +40,9 @@ exports.write_to_caller = function(http_res, output) {
 			} else {
 				http_res.jsonbuffer.push( parts.shift() );		
 			}
-
-		} 
+		} else {
+			logger.debug("WTC:4:No match");			
+		}
 	}
 }
 
