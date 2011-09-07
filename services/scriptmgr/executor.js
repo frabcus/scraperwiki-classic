@@ -353,7 +353,12 @@ function execute(http_req, http_res, raw_request_data) {
 			
 			e.stdout.on('data', function (data) {
 				//Everything we receive here is from PHP or from launched apps so we 
-				util.write_to_caller( resp, data.toString() );
+				var m = data.toString().match(/^JSONRECORD\((\d+)\)/);
+				if ( m == null ) {
+					util.write_to_caller( resp, JSON.stringify( {'message_type': 'console', 'content': data.toString()} ) + "\n" );
+				} else {
+					util.write_to_caller( resp, data.toString() );
+				}
 			});				
 			
 			
