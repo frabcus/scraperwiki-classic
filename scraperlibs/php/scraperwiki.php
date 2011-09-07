@@ -12,7 +12,7 @@ class scraperwiki
       global $logfd ;
       if ($logfd) {
 		 $val = json_encode($dict);
-         fwrite ($logfd, "JSONRECORD:" . $val . "\n") ;
+         fwrite ($logfd, "JSONRECORD(" +  strlen($val) + "):" . $val . "\n");
 	  }
    }
 
