@@ -63,28 +63,11 @@ class RunnerSocket:
         data = { "command":'stimulate_run', "language":language, "code":code, "urlquery":urlquery, 
                  "username":user.username, "scrapername":scraper.short_name, "clientnumber":clientnumber, "guid":scraper.guid }
 
-        # Fetch the permissions
-        permissions = []
-        for perm in scraper.permissions.all():
-            permissions.append({'source':perm.code, 
-                                'target':perm.permitted_object,
-                                'can_read': perm.can_read, 
-                                'can_write':perm.can_write})
-        data['permissions'] = permissions
-
-        # Tack on useful user information to the request so that 
-        # we can eventually also add a security token to allow the 
-        # other services to check what this user is allowed to do 
-        # with this particular scraper.
         try:
             profile = user.get_profile()
-            data['user'] = { "beta_user": profile.beta_user, 
-                             "id": user.id                   }
-        except:
-            # TODO: Need to decide what to do with this. Implies that 
-            # an anonymous user is doing this and that security will
-            # already have been checked.
-            pass
+            data['beta_user'] = profile.beta_user
+        except frontend.models.UserProfile.DoesNotExist:
+            data['beta_user'] = False
             
         data["django_key"] = config.get('twister', 'djangokey')
 
