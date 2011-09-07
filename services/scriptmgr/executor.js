@@ -316,8 +316,8 @@ function execute(http_req, http_res, raw_request_data) {
 
 			util.log.debug('Setting runid to ' + r );
 			args = [ '-n', rVM, '-f', cfgpath];
-			if (scraper.query)
-				args.push('QUERY_STRING=' + scraper.query);
+			if (script.query)
+				args.push('QUERY_STRING=' + script.query);
 			args.push("/home/startup/run" + extension + ".sh");
 			args.push(dataproxy);
 			args.push( r );
