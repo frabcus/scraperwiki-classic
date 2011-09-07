@@ -25,8 +25,8 @@ for ($idx = 1; $idx < count($argv); $idx += 1)
    {
       $qs = substr($arg,  5);
 	  if ( strlen($qs) > 0 ) {
-		setenv("QUERY_STRING", $qs);
-		setenv("URLQUERY", $qs);
+		putenv("QUERY_STRING", $qs);
+		putenv("URLQUERY", $qs);
 	  }
    }
 
