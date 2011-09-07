@@ -73,6 +73,9 @@ if options.uid:
     os.setreuid(int(options.uid), int(options.uid))
 if options.path:
     sys.path.append( options.path )
+if options.qs:
+    os.environ['QUERY_STRING'] = options.qs
+    os.environ['URL_QUERY'] = options.qs    
 
 
 host, port = string.split(options.ds, ':')
