@@ -334,10 +334,11 @@ function execute(http_req, http_res, raw_request_data) {
 			
 			var resp = http_res;
 			
-//			e.stdout.on('data', function (data) {
-//				.....
-//				util.write_to_caller( resp, data);
-//			});				
+			e.stdout.on('data', function (data) {
+				//Everything we receive here is from PHP or from launched apps so we 
+				// should wrap whatever we have and send it 
+				util.write_to_caller( resp, JSON.stringify( {'message_type': 'console', 'content': data } ) + "\n");
+			});				
 			
 			
 			e.stderr.on('data', function (data) {
