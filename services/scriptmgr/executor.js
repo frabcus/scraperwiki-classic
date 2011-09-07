@@ -106,7 +106,15 @@ exports.script_info = function(response) {
 	util.log.debug("+ Returning script info");	
     for(var runID in scripts) {
 		var script = scripts[runID];
-		response.write( JSON.stringify(script) + "\n");
+		var cloned = {
+			run_id: script.run_id,
+			scraper_name : script.scraper_name,
+			scraper_guid : script.scraperid,
+			vm: script.vm || "",
+			language: script.language,
+			ip: script.ip
+		}
+		response.write( JSON.stringify(cloned) + "\n");
 	}	
 }
 
