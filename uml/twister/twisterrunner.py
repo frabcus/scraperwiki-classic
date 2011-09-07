@@ -28,6 +28,8 @@ class spawnRunner(protocol.ProcessProtocol):
         self.buffer = ''
         self.logger = logger
         self.style = "OldSpawnRunner"
+        self.httpheaders = [ ]
+        self.httpheadersdone = False
         
     def connectionMade(self):
         self.logger.debug("Starting run "+self.style)
@@ -44,7 +46,7 @@ class spawnRunner(protocol.ProcessProtocol):
         
         sdata = json.dumps(self.jdata)
         self.logger.debug("sending: "+sdata)
-        controllerconnection.transport.write('POST /Execute HTTP/1.1\r\n')
+        controllerconnection.transport.write('POST /Execute HTTP/1.0\r\n')
         controllerconnection.transport.write('Content-Length: %s\r\n' % len(sdata))
         controllerconnection.transport.write('Content-Type: text/json\r\n')
         controllerconnection.transport.write('Connection: close\r\n')
@@ -59,13 +61,28 @@ class spawnRunner(protocol.ProcessProtocol):
         self.buffer = lines.pop(-1)  # usually an empty
         
         for line in lines:
+            # the old system returned no httpheaders
+            # when the new system starts functioning it prob won't have headers either
+            if not self.httpheadersdone and not self.httpheaders and line and line[0] == "{":
+                self.httpheadersdone = True
+            if not self.httpheadersdone:
+                if line == "":
+                    self.httpheadersdone = True
+                    continue
+                mheader = re.match("(.*?):\s*(.*)", line)
+                if not mheader:
+                    self.logger.error("Bad header: "+str([line]))
+                self.httpheaders.append((mheader.group(1), mheader.group(2)))
+                continue
+
             if not self.runID:  # intercept the first record to record its state and add in further data
                 try:
                     parsed_data = json.loads(line.strip("\r"))
-                except:
-                    # If this is X:Y then it may be a HTTP header and we should probably just ignore it
-                    # although we could do with a proper http request.
-                    continue
+                except ValueError:
+                    self.logger.error("Bad JSON: "+str([line]))
+                    raise
+                if type(parsed_data) != dict:
+                    self.logger.error("JSON should be dict: "+str(parsed_data))
                 
                 if parsed_data.get('message_type') == 'executionstatus' and parsed_data.get('content') == 'startingrun':
                     self.runID = parsed_data.get('runID')

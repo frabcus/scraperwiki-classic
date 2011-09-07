@@ -1,4 +1,5 @@
 from frontend.models import *
+from codewiki.models import UserUserRole
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
@@ -15,12 +16,18 @@ class UserProfileStack(admin.StackedInline):
     fk_name = 'user'
     max_num = 1
     extra = 0
-    
+
+class UserUserRoleInlines(admin.TabularInline):
+    model = UserUserRole
+    fk_name = 'user'
+    extra = 0
+
+ 
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'date_joined', 'last_login')
     list_filter = ('is_active', 'is_staff', 'is_superuser')
 
-    inlines = [UserProfileStack, ]
+    inlines = [UserProfileStack, UserUserRoleInlines]
 
 class UserProfileAdmin(admin.ModelAdmin):
     """  

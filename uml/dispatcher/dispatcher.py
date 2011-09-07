@@ -355,7 +355,7 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return
 
         if soc:
-            soc.send('POST /Execute HTTP/1.1\r\n')
+            soc.send('POST /Execute HTTP/1.0\r\n')
             soc.send('Content-Length: %s\r\n' % len(sdata))
             soc.send('Content-Type: text/json\r\n')
             soc.send('Connection: close\r\n')
