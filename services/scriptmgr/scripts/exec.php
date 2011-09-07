@@ -21,6 +21,15 @@ for ($idx = 1; $idx < count($argv); $idx += 1)
 {
    $arg  = $argv[$idx] ;
 
+   if (substr($arg, 0, 5) == '--gi=')
+   {
+      $qs = substr($arg,  6);
+	  if ( strlen($qs) > 0 ) {
+		setenv("QUERY_STRING", $qs);
+		setenv("URLQUERY", $qs);
+	  }
+   }
+
    if (substr ($arg, 0,  9) == '--script=')
       $script = substr ($arg, 9);
    if (substr ($arg, 0, 5) == '--ds=')
