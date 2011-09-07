@@ -4,6 +4,7 @@ $stdout.sync = true
 
 require 'rubygems'   # for nokigiri to work on all machines, and for JSON/Iconv on OSX
 require 'json'
+require 'date'
 require 'iconv'
 require 'optparse'
 require	'scraperwiki'
@@ -46,8 +47,7 @@ class ConsoleStream
 
     def flush
       if @text != ''
-          message = { 'message_type' => 'console', 'content' => @text }
-          @fd.write(JSON.generate(message) + "\n")
+          ScraperWiki.dumpMessage( { 'message_type' => 'console', 'content' => @text }  )
           @fd.flush
           @text = ''
       end
@@ -61,6 +61,8 @@ end
 $stdout = ConsoleStream.new($logfd)
 $stderr = ConsoleStream.new($logfd)
 
+Process.setrlimit(Process::RLIMIT_CPU, 80, 82) 
+ 
 Signal.trap("XCPU") do
     raise Exception, "ScraperWiki CPU time exceeded"
 end

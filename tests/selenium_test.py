@@ -46,8 +46,6 @@ class SeleniumTest(unittest.TestCase):
         # DO NOT call anything else (even for debugging, e.g. self.selenium.get_location) at this point as:
         # "Running any other Selenium command after turns the flag to false."
         # http://release.seleniumhq.org/selenium-remote-control/0.9.2/doc/dotnet/Selenium.DefaultSelenium.WaitForPageToLoad.html
-        if self._verbosity > 1:
-            print "  SeleniumTest: waiting_for_page start"
         try:
             self.selenium.wait_for_page_to_load('30000')
             hit_limit = False
@@ -66,7 +64,7 @@ class SeleniumTest(unittest.TestCase):
                 self.fail(msg=msg)
 
         if self._verbosity > 1:
-            print "  SeleniumTest: waiting_for_page end, now at", self.selenium.get_location()
+            print "  waiting_for_page done, now at", self.selenium.get_location()
 
 
     def login(self, username, password):

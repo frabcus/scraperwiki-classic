@@ -4,7 +4,7 @@ DESC="FTPProxy"
 NAME=ftpproxy
 CONFIG=/var/www/scraperwiki/uml/uml.cfg.local
 DAEMON=/var/www/scraperwiki/uml/ftpproxy/ftpproxy.py
-DAEMON_ARGS="--daemon --subproc --varDir=./var --config=$CONFIG"
+DAEMON_ARGS="--daemon --subproc --varDir=/var --config=$CONFIG"
 PIDFILE=./var/run/$NAME.pid
 
 do_start()

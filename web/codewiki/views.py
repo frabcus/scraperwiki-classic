@@ -187,7 +187,7 @@ def code_overview(request, wiki_type, short_name):
 
         
     # unfinished CKAN integration
-    if dataproxy and request.user.is_staff:
+    if False and dataproxy and request.user.is_staff:
         try:
             dataproxy.request({"maincommand":"sqlitecommand", "command":"attach", "name":"ckan_datastore", "asname":"src"})
             ckansqlite = "select src.records.ckan_url, src.records.notes from src.resources left join src.records on src.records.id=src.resources.records_id  where src.resources.scraperwiki=?"
@@ -290,7 +290,7 @@ def view_admin(request, short_name):
     response_text = ''
     element_id = request.POST.get('id', None)
     if element_id == 'divAboutScraper':
-        view.description = request.POST.get('value', None)
+        view.set_docs(request.POST.get('value', None), request.user)
         response_text = textile.textile(view.description)
 
     if element_id == 'hCodeTitle':
@@ -310,7 +310,7 @@ def scraper_admin(request, short_name):
     response_text = ''
     element_id = request.POST.get('id', None)
     if element_id == 'divAboutScraper':
-        scraper.description = request.POST.get('value', None)
+        scraper.set_docs(request.POST.get('value', None), request.user)
         response_text = textile.textile(scraper.description)
         
     if element_id == 'hCodeTitle':
@@ -428,11 +428,11 @@ def convtounicode(text):
 def proxycached(request):
     from httplib import BadStatusLine
     
-    cacheid = request.POST.get('cacheid')
+    cacheid = request.POST.get('cacheid', None)
     
     # delete this later when no more need for debugging
-    if not cacheid:  
-        cacheid = request.GET.get('cacheid')
+    if not cacheid:   
+        cacheid = request.GET.get('cacheid', None)
     
     if not cacheid:
         return HttpResponse(json.dumps({'type':'error', 'content':"No cacheid found"}), mimetype="application/json")
@@ -442,7 +442,7 @@ def proxycached(request):
     
     try:
         fin = urllib2.urlopen(proxyurl)
-        result["mimetype"] = fin.headers.type
+        result["mimetype"] = fin.headers.type or "text/html"
         if fin.headers.maintype == 'text' or fin.headers.type == "application/json" or fin.headers.type[-4:] == "+xml":
             result['content'] = convtounicode(fin.read())
         else:
@@ -454,6 +454,9 @@ def proxycached(request):
     except BadStatusLine, sl:
         result['type'] = 'exception'
         result['content'] = str(sl)
+    except Exception, exc:
+        result['type'] = 'exception'
+        result['content'] = str(exc)
     
     return HttpResponse(json.dumps(result), mimetype="application/json")
 
@@ -493,3 +496,41 @@ def export_sqlite(request, short_name):
     response['Content-Disposition'] = 'attachment; filename=%s.sqlite' % (short_name)
     response["Content-Length"] = initsqlitedata["filesize"]
     return response
+
+def attachauth(request):
+    # aquery = {"command":"can_attach", "scrapername":self.short_name, "attachtoname":name, "username":"unknown"}
+    scrapername = request.GET.get("scrapername")
+    attachtoname = request.GET.get("attachtoname")
+
+    try:
+        attachtoscraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=attachtoname)
+    except models.Code.DoesNotExist:
+        return HttpResponse("DoesNotExist")
+
+    if attachtoscraper.privacy_status != "private":
+        return HttpResponse("Yes")
+        
+    if not scrapername:
+        return HttpResponse("Draft scraper can't connect to private scraper: %s" % str([attachtoname]))
+
+    try:
+        scraper = models.Code.objects.exclude(privacy_status="deleted").get(short_name=scrapername)
+    except models.Code.DoesNotExist:
+        return HttpResponse("Scraper does not exist: %s" % str([scrapername]))
+
+    if scraper.privacy_status == 'public':
+        return HttpResponse("No: because scraper connecting from is public")
+        
+
+    # we're going to use the set of editors of a private/protected scraper be the gateway for access to the 
+    # private attach to scraper (success if there is an overlap in the sets)
+    scraperuserroles = models.UserCodeRole.objects.filter(code=scraper)
+    attachtouserroles = models.UserCodeRole.objects.filter(code=attachtoscraper)
+    usersofattach = [ usercoderole.user  for usercoderole in attachtouserroles  if usercoderole.role in ['owner', 'editor'] ]
+    usersofscraper = [ usercoderole.user  for usercoderole in scraperuserroles  if usercoderole.role in ['owner', 'editor'] ]
+    commonusers = set(usersofattach).intersection(set(usersofscraper))
+    if not commonusers:
+        return HttpResponse("No: because no common owners or editors between the two scrapers")
+        
+    return HttpResponse("Yes")
+    

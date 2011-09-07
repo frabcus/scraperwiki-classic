@@ -21,17 +21,19 @@
 *			  tab in the editor)
 * 
 ******************************************************************************/
+var path  = require('path');
 var http = require('http');
 var url  = require('url');
 var _    = require('underscore')._;
 var qs   = require('querystring');
-var exec = require('./executor');
-var util = require('./utils')
+var exec = require( path.join(__dirname,'executor') );
+var util = require( path.join(__dirname,'utils'))
 
 _routemap = {
 	'/Execute'   : handleRun,
 	'/Kill'  : handleKill,
 	'/Status': handleStatus,
+	'/ScriptInfo': handleScriptInfo,	
 	'/Ident' : handleIdent,
 	'/Notify': handleNotify,
 	'/'      : handleUrlError,
@@ -69,7 +71,7 @@ if (settings.devmode) {
 // Handle uncaught exceptions and make sure they get logged
 process.on('uncaughtException', function (err) {
   util.log.fatal('Caught exception: ' + err);
-console.log( err.stack );
+  if ( settings.devmode ) console.log( err.stack );
 });
 
 
@@ -127,6 +129,14 @@ function handleStatus(req,res) {
 }
 
 /******************************************************************************
+* Returns information on all of the scrapers currently running
+******************************************************************************/
+function handleScriptInfo(req,res) {
+	exec.script_info(res);
+	res.end('');	
+}
+
+/******************************************************************************
 * Handle ident callback from http proxy
 *
 ******************************************************************************/
@@ -145,15 +155,13 @@ function handleIdent(req,res) {
 	if ( script ){
 		res.write( 'scraperid=' + script.scraper_guid + "\n");
 		res.write( 'runid=' + script.run_id  + "\n");		
-		res.write( 'scraperid=' + script.scraper_name + "\n");
+		res.write( 'scrapername=' + script.scraper_name + "\n");
 		res.write( 'urlquery=' + script.query + "\n");		
-		util.log.debug( script.white );
 		if ( script.white ) {
 			res.write( 'allow=' + script.white + "\n");		
 		} else {
 			res.write( "allow=.*\n");		
 		}
-		util.log.debug( script.black );		
 		if ( script.black ) {
 			res.write( 'block=' + script.black + "\n");				
 		}	
@@ -177,7 +185,8 @@ function handleNotify(req,res) {
 	if ( script ) {
 		delete urlObj.query.runid;
 		s = JSON.stringify( urlObj.query );
-		script.response.write( s );
+		util.log.debug( 'Notify request sending ' + s);
+		script.response.write( s + "\n");
 	}
 	
 	res.end('');	

@@ -9,8 +9,8 @@ var _    = require('underscore')._;
 var mu   = require('mu');
 var fs   = require('fs');
 var spawn = require('child_process').spawn;
-var util  = require('./utils.js');
 var path  = require('path');
+var util  = require( path.join(__dirname,'utils.js') );
 
 // All of our virtual machines
 var vms = [ ]; // vm name -> objects
@@ -32,11 +32,16 @@ var fstab_tpl  = '';
 exports.init = function(count, lxc_root_folder) {
 	root_folder = lxc_root_folder;
 	
-	config_tpl = fs.readFileSync( './templates/config.tpl', "utf-8");
-	fstab_tpl = fs.readFileSync('./templates/fstab.tpl', "utf-8");
+	
+	
+	config_tpl = fs.readFileSync( path.join(__dirname,'templates/config.tpl'), "utf-8");
+	fstab_tpl = fs.readFileSync( path.join(__dirname,'templates/fstab.tpl'), "utf-8");
 
-	vms = _.map( _.range(1, count + 1), function(num){ return 'vm' + num; } );	
-	_.map( vms, function(v) { create_vm(v); } );
+	for ( var idx in _.range(1, count + 1) ) {
+		var i = parseInt(idx) + 1;
+		var name = 'vm' + i;
+	    vms[name] = create_vm(name);
+	}
 };
 
 
@@ -46,24 +51,10 @@ exports.init = function(count, lxc_root_folder) {
 exports.exec = function(script, code) {
 	// execute lxc-execute on a vm, after we've been allocated on
 	var name = allocate_vm( script );
-	// clean up the files that may still be there.....
+
+	// Make sure we have a clean environment before we run? 
 	var cf = get_code_folder(name);
-	// delete the contents of cf
-
-	// TODO: Fix this and only unlink if exists
-	try {
-		fs.unlinkSync( path.join(cf, 'script.py') );
-	} catch(e){}
-
-	try {
-		fs.unlinkSync( path.join(cf, 'script.rb') );
-	} catch(e){}		
-	try {	
-		fs.unlinkSync( path.join(cf, 'script.php') );
-	} catch(e){}			
-	try {	
-		fs.unlinkSync( path.join(cf, 'script.js') );			
-	} catch(e){}			
+	util.cleanup( cf );
 	
 	return name;
 };
@@ -72,19 +63,13 @@ exports.exec = function(script, code) {
 /******************************************************************************
 * Kill the LXC instance that is currently running the provided script
 ******************************************************************************/
-exports.kill = function( script ) {
-		console.log('looking for ' + script.run_id );
-	var vm = vms_by_runid[ script.run_id ];
-	if ( vm ) {
-		// trigger an lxc-kill
-		// lxc-stop -n 'vm'
-		e = spawn('/usr/bin/lxc-stop', ['-n', vm]);
-
-		// Clean up indices
-		delete vms_by_run_id[ script.run_id ];		
-		delete vms_by_ip[ script.ip ];
+exports.kill = function( vmname ) {
+	util.log.debug('Killing ' + vmname );
+	try {
+		e = spawn('/usr/bin/lxc-stop', ['-n', vmname]);
+	} catch(e) {
+		util.log.debug(e);
 	}
-	return false;
 };
 
 
@@ -152,7 +137,6 @@ function create_vm ( name ) {
 		    if(err) {
 		        sys.puts(err);
 		    } else {
-				console.log('Running lxc-create')
 				// call lxc-create -n name -f folder/config
 			 	e = spawn('/usr/bin/lxc-create', ['-n', name, '-f', tgt]);
 				e.on('exit', function (code, signal) {
@@ -165,8 +149,7 @@ function create_vm ( name ) {
 		    }
 		});
 					
-		tgt = path.join( folder, 'fstab')
-		console.log('Writing fstab to ' + tgt);	
+		tgt = path.join( folder, 'fstab');
 		fs.writeFile(tgt, fstab, function(err) {
 		    if(err) {
 		        sys.puts(err);
@@ -183,29 +166,25 @@ function create_vm ( name ) {
 /*****************************************************************************
 * Release the VM using the provided script. 
 *****************************************************************************/
-function release_vm ( script, name ) {
-	var k;
-	
-	for ( var key in vms ) {
-		var vm = vms[key];
-		k = key;
-		if ( ! vm.script.run_id == script.run_id ) {
-			v = vm;
-			break;
-		};
-	}
+exports.release_vm = function( script, name ) {
 
-	if ( ! v ) {
-		return;
-	};
+	util.log.debug('Releasing ' + name);
+	var v = vms[name];
+	if ( ! v ) return;
 
 	// Remove it from the two lookup tables
-	delete vms_by_runid[ script.run_id ]
-	delete vms_by_ip[ script.ip ]
+	delete vms_by_runid[ v.script.run_id ]
+	delete vms_by_ip[ v.script.ip ]
 	
 	v.running = false;
 	v.script = null;
-	vms[k] = v;
+	vms[v.name] = v;
+	
+	// Make sure we have a clean environment after a release
+	try {
+		var cf = get_code_folder(name);
+		util.cleanup( cf );
+	} catch( err ) {}
 }
 
 /*****************************************************************************
@@ -218,22 +197,21 @@ function release_vm ( script, name ) {
 * => 2
 ******************************************************************************/
 function allocate_vm ( script ) {
-	var v, k;
-	for ( var key in vms ) {
-		var vm = vms[key];
-		k = key;
-		if ( ! vm.running ) {
-			v = vm;
+	var v;
+	
+	for ( var k in vms ) {
+		v = vms[k];
+		if ( v.running == false ) {
 			break;
-		};
+		}
 	}
 	
-	if ( ! v ) {
-		return null;
-	};
+	if ( ! v ) return null;
 	
 	v.running = true;
 	v.script = script;
-	vms[k] = v;
-	return v
+	vms[v.name] = v;
+	
+	util.log.debug('Allocating ' + v.name );	
+	return v.name;
 }

@@ -31,7 +31,8 @@ LANGUAGES_DICT = {
 LANGUAGES = [ (k,v) for k,v in LANGUAGES_DICT.iteritems() ]
 
 # used for new scraper/view dialogs
-SCRAPER_LANGUAGES = [ (k, LANGUAGES_DICT[k]) for  k in ["python", "ruby", "php"] ]
+# Add "javascript" to enable Javascript
+SCRAPER_LANGUAGES = [ (k, LANGUAGES_DICT[k]) for  k in ["python", "ruby", "php" ] ]
 VIEW_LANGUAGES = [ (k, LANGUAGES_DICT[k]) for  k in ["python", "ruby", "php", "html"] ]
 HELP_LANGUAGES = [ (k, LANGUAGES_DICT[k]) for  k in ["python", "ruby", "php"] ]
 
@@ -127,15 +128,21 @@ class Code(models.Model):
             return vc.MercurialInterface(self.get_repo_path())
 
     def commit_code(self, code_text, commit_message, user):
-        self.vcs.savecode(code_text)
+        self.vcs.savecode(code_text, "code")
         rev = self.vcs.commit(message=commit_message, user=user)
         return rev
+
+    def set_docs(self, description, user):
+        self.description = description
+        self.vcs.savecode(description, "docs")
+        rev = self.vcs.commit(message="save docs", user=user)
+
 
     def get_commit_log(self):
         return self.vcs.getcommitlog()
 
     def get_file_status(self):
-        return self.vcs.getfilestatus()
+        return self.vcs.getfilestatus("code")
 
     def get_vcs_status(self, revision = None):
         return self.vcs.getstatus(revision)
@@ -475,6 +482,28 @@ class UserCodeRole(models.Model):
 
     class Meta:
         app_label = 'codewiki'
+
+
+class UserUserRole(models.Model):
+    user    = models.ForeignKey(User, related_name='useruserrole_set')
+    other   = models.ForeignKey(User, related_name='rev_useruserrole_set')
+    role    = models.CharField(max_length=100)   # ['on_team_of']
+
+    @staticmethod
+    def put_on_team(user, organisation):
+        u, created = UserUserRole.objects.get_or_create(user=user, other=organisation, role="on_team_of") 
+
+    @staticmethod
+    def remove_from_team(user, organisation):
+        UserUserRole.objects.filter(user=user, other=organisation, role="on_team_of").delete()
+
+    def __unicode__(self):
+        return "User: %s -> Other: %s (%s)" % (self.user, self.user, self.role)
+
+    class Meta:
+        app_label = 'codewiki'
+
+
 
 
 

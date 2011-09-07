@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpRespons
 from django.template.loader import render_to_string
 from django.shortcuts import render_to_response
 from django.core.urlresolvers import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from django.conf import settings
 
@@ -143,11 +144,18 @@ def rpcexecute(request, short_name, revision=None):
     panepresent = {"scraperwikipane":[], "firstfivelines":[]}
     contenttypesettings = { }
     for line in runnerstream:
+        if line == "":
+            continue
+            
         try:
             message = json.loads(line)
         except:
             pass
             
+        # Need to log the message here in debug mode so we can track down the
+        # 'no output for some unknown reason'. Appears to be missing console 
+        # messages from the lxc/uml and has been happening for a while.
+        
         if message['message_type'] == "console":
             if not response:
                 response = HttpResponse()
@@ -193,7 +201,7 @@ def rpcexecute(request, short_name, revision=None):
             
                     
     if not response:
-        response = HttpResponse('no output for some unknown reason')
+        response = HttpResponse('No output received from view.')
         
     # now decide about inserting the powered by scraperwiki panel (avoid doing it on json)
     # print [response['Content-Type']]  default is DEFAULT_CONTENT_TYPE, comes out as 'text/html; charset=utf-8'
@@ -245,6 +253,9 @@ def testactiveumls(n):
         result.append('\n'.join(lns))
     return result
 
+
+# this form is protected by the django key known to twister, so does not need to be obstructed by the csrf machinery
+@csrf_exempt
 def twistermakesrunevent(request):
     try:
         return Dtwistermakesrunevent(request)
@@ -258,7 +269,8 @@ def Dtwistermakesrunevent(request):
         return HttpResponse("no access")
     run_id = request.POST.get("run_id")
     if not run_id:
-        return HttpResponse("bad run_id")
+        return HttpResponse("bad run_id - %s" % (request.POST,) )
+        
     matchingevents = models.ScraperRunEvent.objects.filter(run_id=run_id)
     if not matchingevents:
         event = models.ScraperRunEvent()
@@ -297,7 +309,7 @@ def Dtwistermakesrunevent(request):
 
         domainscrapes = json.loads(request.POST.get("domainscrapes"))
         for netloc, vals in domainscrapes.items():
-            domainscrape = DomainScrape(scraper_run_event=event, domain=netloc)
+            domainscrape = models.DomainScrape(scraper_run_event=event, domain=netloc)
             domainscrape.pages_scraped = vals["pages_scraped"]
             domainscrape.bytes_scraped = vals["bytes_scraped"]
             domainscrape.save()
@@ -308,7 +320,7 @@ def Dtwistermakesrunevent(request):
     emailers = event.scraper.users.filter(usercoderole__role='email')
     if emailers.count() > 0:
         subject, message = getemailtext(event)
-        if scraper.status == 'ok':
+        if event.scraper.status == 'ok':
             if message:  # no email if blank
                 for user in emailers:
                     send_mail(subject=subject, message=message, from_email=settings.EMAIL_FROM, recipient_list=[user.email], fail_silently=True)

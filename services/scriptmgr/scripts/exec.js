@@ -1,4 +1,4 @@
-#!/usr/local/bin/node 
+#!/usr/bin/env node
 
 var opts = require('opts');
 var options = [
@@ -10,25 +10,14 @@ var options = [
   {  long        : 'runid', value : true  },
   {  long        : 'path', value : true  }
 ];
-opts.parse(options);
+opts.parse(options, true);
+
+var sw = require('scraperwiki');
+var parts = opts.get('ds').split(':');
+sw.sqlite.init(parts[0], parts[1], opts.get("scrapername") || "", opts.get("runid") || "");
 
 /*
-if options.gid:
-    os.setregid(int(options.gid), int(options.gid))
-if options.uid:
-    os.setreuid(int(options.uid), int(options.uid))
-if options.path:
-    sys.path.append( options.path )
-*/
-
-
-/*host, port = string.split(options.ds, ':')
-scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid)
-
 scraperwiki.logfd = sys.stderr
-
-# in the future can divert to webproxy
-#scraperwiki.utils.urllibSetup(http_proxy='http://127.0.0.1:9002')
 */
 
 process.on('SIGXCPU', function () {
@@ -36,20 +25,14 @@ process.on('SIGXCPU', function () {
 });
 
 try {
-	var script = require( opts.get('script'));
-	script.main();
+	// Load and run the script provided to us
+	require( opts.get('script') );
 } catch( err ) {
 	console.log( err );
+	/*
+		Need to better handle the stacktrace
+	    etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
+	    assert etb.get('message_type') == 'exception'
+	    scraperwiki.dumpMessage(etb)
+	*/
 }
-/*
-code = open(options.script).read()
-try:
-    import imp
-    mod = imp.new_module('scraper')
-    exec code.rstrip() + "\n" in mod.__dict__
-
-except Exception, e:
-    etb = scraperwiki.stacktrace.getExceptionTraceback(code)  
-    assert etb.get('message_type') == 'exception'
-    scraperwiki.dumpMessage(etb)
-*/

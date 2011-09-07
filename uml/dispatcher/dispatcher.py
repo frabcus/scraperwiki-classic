@@ -104,7 +104,12 @@ class UMLList(object):
         umls = self.UMLs.values()
         uml = None
         while umls:
-            uml = umls.pop(random.randint(0, len(umls)-1))
+            if len(umls) == 1:
+                uml = umls[0]
+                beta_flag = uml.beta_only # Force the single UML
+            else:
+                uml = umls.pop(random.randint(0, len(umls)-1))
+                
             if uml.is_available() and (beta_flag == uml.beta_only):
                 scraperstatus["uname"] = uml.uname
                 uml.add_runid(scraperstatus["runID"])
@@ -350,7 +355,7 @@ class DispatcherHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return
 
         if soc:
-            soc.send('POST /Execute HTTP/1.1\r\n')
+            soc.send('POST /Execute HTTP/1.0\r\n')
             soc.send('Content-Length: %s\r\n' % len(sdata))
             soc.send('Content-Type: text/json\r\n')
             soc.send('Connection: close\r\n')
@@ -449,6 +454,7 @@ class UMLScanner(threading.Thread) :
                 try:
                     stime = time.time()
                             # timeout of 2 secs is probably too severe (leave in for now to enable failure and testing)
+                    self.logger.info("Checking " + uml.status_url() )
                     res = urllib2.urlopen(uml.status_url(), timeout=4).read()
                     umltimes.append("%.3f" % (time.time() - stime))
                     if uml.livestatus == "unresponsive":  # don't overwrite closing

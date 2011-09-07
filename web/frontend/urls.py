@@ -24,7 +24,7 @@ urlpatterns = patterns('',
     url(r'^example_data/$', direct_to_template, {'template': 'frontend/example_data.html'}, name='api'),
 
 
-    url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/(?P<language>python|php|ruby)/$','django.views.generic.simple.redirect_to', {'url': '/docs/%(language)s'},name='help'),
+    url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/(?P<language>python|php|ruby|javascript)/$','django.views.generic.simple.redirect_to', {'url': '/docs/%(language)s'},name='help'),
     url(r'^help/(?P<mode>intro|faq|tutorials|documentation|code_documentation|libraries)/$','django.views.generic.simple.redirect_to', {'url': '/docs/'}, name='help_default'),
     url(r'^help/$','django.views.generic.simple.redirect_to', {'url': '/docs/'}, name='help_default'),
     
@@ -44,6 +44,8 @@ urlpatterns = patterns('',
     
     # Example pages to scrape :)
     url(r'^examples/basic_table\.html$', direct_to_template, {'template': 'examples/basic_table.html'}, name='example_basic_table'),
+    # for testing error handling
+    url(r'^test_error/$',                  frontend_views.test_error, name='test_error'),    
     
     #searching and browsing
     url(r'^search/$', frontend_views.search, name='search'),

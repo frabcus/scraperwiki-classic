@@ -111,7 +111,14 @@ class RunnerSocket:
                 self.jsonsbuffer.append(ssrecjsons.pop(0))
             
         jdata = self.jsonoutputlist.pop(0)
-        data = json.loads(jdata)
+        try:
+            data = json.loads(jdata)
+            if not isinstance(data,dict):
+                raise TypeError("We only process dict json messages")
+        except:
+            # If the data is now json we should log it somewhere so that we can work out if it is just 
+            return ""
+            
         if data.get("message_type") == "executionstatus" and data.get("content") == "runfinished":
             self.soc.close()
             raise StopIteration 

@@ -1,11 +1,11 @@
-#!/usr/local/bin/php
+#!/usr/bin/env php
 <?php
 
 // set the include paths to scraperlibs from an environment variable (what can be done automatically for python and ruby)
 foreach (split(':', getenv('PHPPATH')) as $dir)
     ini_set('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
 
-$logfd = STDOUT; // fopen("php://fd/3", "w") ;
+$logfd = STDERR; // fopen("php://fd/3", "w") ;
 
 require_once 'scraperwiki.php';
 require_once 'scraperwiki/datastore.php';
@@ -50,7 +50,9 @@ $_GET = array();
 for ($i = 0; $i < count($QUERY_STRING_a); $i++)
 {
     $QUERY_STRING_b = split('=', $QUERY_STRING_a[$i]);
-    $_GET[urldecode($QUERY_STRING_b[0])] = urldecode($QUERY_STRING_b[1]); 
+	if ( count( $QUERY_STRING_b ) > 1 ) {
+    	$_GET[urldecode($QUERY_STRING_b[0])] = urldecode($QUERY_STRING_b[1]); 
+	}
 }
 
 
@@ -71,21 +73,7 @@ function errorHandler($errno, $errstr, $errfile, $errline)
 }
 
 set_error_handler("errorHandler", E_ALL & ~E_NOTICE);  // this is for errors, not exceptions (eg 1/0)
-
-
-// should parse and populate $_GET from getenv("QUERY_STRING") here
-
-/*
-    Can't get this to work - the exception raised inside the signal handler
-    just makes the script fail silently. This isn't the end of the world,
-    as higher level code at least now says it was SIGXCPU that killed it.
-
-    Would be nice to get the stack trace though, like in Ruby/Python!
-
-function sigXCPU($signum) {
-    throw new Exception("ScraperWiki CPU time exceeded");
-}
-pcntl_signal(SIGXCPU, "sigXCPU"); */
+set_time_limit(80); 
 
 try
 {

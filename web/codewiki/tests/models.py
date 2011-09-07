@@ -1,19 +1,37 @@
 from django.test import TestCase
-from django.core.urlresolvers import reverse as reverse_url
-from datetime import datetime
-import os.path
-import unittest
 
-from scraper import models
+from codewiki.models import Scraper, UserUserRole
+from django.contrib.auth.models import User
 
 class Test__unicode__(TestCase):
-    '''
-    Simple test to verify the __unicode__ method
-    of the various models doesn't work
-    '''
-    
-    def test_scraper_long_name(self):
+    def test_scraper_name(self):
         self.assertEqual(
-            'Test Scraper',
-            unicode(models.Scraper(title='Test Scraper'))
+            'test_scraper',
+            unicode(Scraper(title='Test Scraper', short_name='test_scraper'))
         )
+
+class TestUserUserRole(TestCase):
+    fixtures = ['test_data.json']
+
+    def test_no_link_by_default(self):
+        # s = Scraper.objects.get(short_name='test_scraper')
+        u1 = User.objects.get(username='test_user')
+        u2 = User.objects.get(username='test_admin')
+
+        self.assertEqual(len(u1.useruserrole_set.all()), 0)
+        self.assertEqual(len(u2.useruserrole_set.all()), 0)
+
+    def test_making_removing_team_link(self):
+        u1 = User.objects.get(username='test_user')
+        u2 = User.objects.get(username='test_admin')
+
+        UserUserRole.put_on_team(u1, u2)
+        self.assertEqual([ x.other for x in u1.useruserrole_set.all() ], [u2])
+        self.assertEqual([ x.user for x in u2.rev_useruserrole_set.all() ], [u1])
+
+        UserUserRole.remove_from_team(u1, u2)
+        self.assertEqual(len(u1.useruserrole_set.all()), 0)
+        self.assertEqual(len(u2.useruserrole_set.all()), 0)
+
+
+

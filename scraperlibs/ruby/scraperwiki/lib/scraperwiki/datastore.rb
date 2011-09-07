@@ -19,8 +19,8 @@ class SW_DataStore
       @m_socket = nil
       @m_host = nil
       @m_port = nil
-      @m_scrapername = nil
-      @m_runid = nil
+      @m_scrapername = ''
+      @m_runid = ''
     end
 
 
@@ -33,7 +33,18 @@ class SW_DataStore
         if @m_socket == nil
             @m_socket = TCPSocket.open(@m_host, @m_port)
             proto, port, name, ip = @m_socket.addr()
-            getmsg = "GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n" % [Socket.gethostname(), port, CGI::escape(@m_scrapername), CGI::escape(@m_runid)]
+            if @m_scrapername == '' or @m_scrapername.nil?
+              sname = ''
+            else
+              sname = CGI::escape(@m_scrapername)
+            end
+            if @m_runid == '' or @m_runid.nil?
+              rid = ''
+            else
+              rid = CGI::escape(@m_runid)
+            end
+            
+            getmsg = "GET /?uml=%s&port=%s&vscrapername=%s&vrunid=%s HTTP/1.1\n\n" % [Socket.gethostname(), port, sname, rid]
             @m_socket.send(getmsg, 0)
             @m_socket.flush()
             buffer = @m_socket.recv(1024)
@@ -71,7 +82,7 @@ class SW_DataStore
     end
 
     # function used to both initialize the settings and get an instance
-    def SW_DataStore.create(host=nil, port = nil, scrapername = nil, runid = nil)
+    def SW_DataStore.create(host=nil, port = nil, scrapername = '', runid = nil)
         instance = SW_DataStore.instance
         # so, it might be intended that the host and port are
         # set once, never to be changed, but this is ruby so

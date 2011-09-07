@@ -1,6 +1,8 @@
 from twisted.internet.defer import succeed, Deferred
-from twisted.internet.defer import Deferred, succeed
 from twisted.internet.error import ProcessDone, ConnectionRefusedError
+from twisted.internet import protocol
+from twisted.web.client import ResponseDone
+from twisted.web.http import PotentialDataLoss
 
 from zope.interface import implements
 from twisted.web.iweb import IBodyProducer
@@ -30,6 +32,22 @@ class StringProducer(object):
     def stopProducing(self):
         pass
 
+# this is only so we can see what errors (if any) are returning from django (which can be the annoying CRSF blocker)
+class updaterunobjectReceiver(protocol.Protocol):
+    def __init__(self, finished, logger):
+        self.finished = finished
+        self.logger = logger
+        self.rbuffer = [ ]
+        
+    def dataReceived(self, bytes):
+        self.rbuffer.append(bytes)
+        
+    def connectionLost(self, reason):
+        if reason.type in [ResponseDone, PotentialDataLoss]:
+            self.logger.debug("updaterunobject response: "+"".join(self.rbuffer)[:1000])
+        else:
+            self.logger.warning("nope "+str([reason.getErrorMessage(), reason.type, self.rbuffer]))
+        self.finished.callback(None)
 
 
 TAIL_LINES = 5
@@ -64,7 +82,9 @@ class ScheduledRunMessageLoopHandler:
         self.logger.info("requestoverduescrapers failure received "+str(failure))
     
     def updaterunobjectResponse(self, response):
-        pass
+        finished = Deferred()
+        response.deliverBody(updaterunobjectReceiver(finished, self.logger))
+        return finished
 
     def updaterunobject(self, bfinished):
         url = urlparse.urljoin(self.djangourl, 'scraper-admin/twistermakesrunevent/')
@@ -79,9 +99,12 @@ class ScheduledRunMessageLoopHandler:
     def receiveline(self, line):
         try:
             data = json.loads(line)
+            if not isinstance(data, dict):
+                raise TypeError('Incorrect type of JSON')
         except:
-            data = { 'message_type':'console', 'content':"JSONERROR: "+line }
-        
+            self.logger.debug( "Failed to loads() " + line )
+            return
+                    
         message_type = data.get('message_type')
         content = data.get("content")
         if message_type == 'executionstatus':
@@ -89,11 +112,12 @@ class ScheduledRunMessageLoopHandler:
                 self.upost["run_id"] = data.get("runID")
                 self.output = "%sEXECUTIONSTATUS: uml=%s runid=%s\n" % (self.output, data.get("uml"), data.get("runID"))
             elif content == "runcompleted":
+                self.logger.debug( "Got run completed : %s" % (line,)  )                
                 self.completiondata = data
                 self.completionmessage = '';
                 if data.get('elapsed_seconds'):
-                    completionmessage += str(data.get("elapsed_seconds")) + " seconds elapsed, " 
-                if data.get("CPU_seconds"):
+                    self.completionmessage += str(data.get("elapsed_seconds")) + " seconds elapsed, " 
+                if data.get("CPU_seconds", False): # Until we can get CPU used
                     self.completionmessage += str(data.get("CPU_seconds")) + " CPU seconds used";
                 if "exit_status" in data and data.get("exit_status") != 0:
                     self.completionmessage += ", exit status " + str(data.get("exit_status"));
@@ -101,7 +125,8 @@ class ScheduledRunMessageLoopHandler:
                     self.completionmessage += ", terminated by " + data.get("term_sig_text");
                 elif "term_sig" in data:
                     self.completionmessage += ", terminated by signal " + str(data.get("term_sig"));
-            
+                self.logger.debug( "Completion status : %s" % (line,)  )
+                
             self.updaterunobject(False)
             
         elif message_type == "sources":

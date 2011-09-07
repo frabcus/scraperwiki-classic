@@ -194,6 +194,9 @@
         {% ifequal scraper.wiki_type 'view' %}{% ifnotequal scraper.language 'javascript' %}
             <input type="button" class="button" value="Preview" name="preview" id="preview" title="Preview this view (Ctrl + P, Cmd + P)"/>
         {% endifnotequal %}{% endifequal %}
+        {% ifequal scraper.wiki_type 'scraper' %}{% ifequal scraper.language 'javascript' %}
+            <input type="button" class="execute button" value="Run" name="run" id="run" title="Run this {{ wiki_type }} (Ctrl + R, Cmd + R)" disabled />
+        {% endifequal %}{% endifequal %}
 
         {# used to be a dropdown select option #}
         <input type="hidden" id="automode" class="staff" value="{% if scraper.id %}autosave{% else %}draft{% endif %}"/>
@@ -226,18 +229,18 @@
     {# Consoles #}
     <div id="outputeditordiv" class="editor_output">
         <div class="tabs">
-            <ul>
-            {% ifnotequal scraper.language 'html' %}{% ifnotequal scraper.language 'javascript' %}
-                <li class="console">
-                    <a href="#" title="Console output from scraper">Console</a>
-                </li>
-                <li class="data">
-                    <a href="#" title="The data that this scraper generates">Data</a>
-                </li>
-                <li class="sources">
-                    <a href="#" title="Pages you are scraping">Sources</a>
-                </li>
-            {% endifnotequal %}{% endifnotequal %}
+            <ul>			
+	            {% ifnotequal scraper.language 'html' %}
+	                <li class="console">
+	                    <a href="#" title="Console output from scraper">Console</a>
+	                </li>
+	                <li class="data">
+	                    <a href="#" title="The data that this scraper generates">Data</a>
+	                </li>
+	                <li class="sources">
+	                    <a href="#" title="Pages you are scraping">Sources</a>
+	                </li>
+	            {% endifnotequal %}
                 <li class="chat">
                     <a href="#" title="Communicate to others">Chat</a>
                 </li>

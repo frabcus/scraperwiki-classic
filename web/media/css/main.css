@@ -2968,7 +2968,8 @@ body.php p.language_chooser a.php img {
 
 body.python p.language_chooser a.python,
 body.ruby p.language_chooser a.ruby,
-body.php p.language_chooser a.php {
+body.php p.language_chooser a.php,
+body.shared p.language_chooser a.shared {
 	background-color: #EBF5D3;
 	color: #571;
 }

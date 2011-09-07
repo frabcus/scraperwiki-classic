@@ -40,12 +40,23 @@ def getscraperor404(request, short_name, action):
         raise Http404
     return scraper
 
-        
-def raw(request, short_name):  # this is used by swimport
+# this is used by swimport and history diffs
+def raw(request, short_name):  
     scraper = getscraperor404(request, short_name, "readcode")
     try: rev = int(request.GET.get('rev', '-1'))
     except ValueError: rev = -1
-    code = scraper.get_vcs_status(rev)["code"]
+
+        # need to iterate back until we find the last change to the file
+    while True:
+        vcsstatus = scraper.get_vcs_status(rev)
+        if "code" in vcsstatus:
+            code = scraper.get_vcs_status(rev)["code"]
+            break
+        if "prevcommit" in vcsstatus:
+            rev = vcsstatus["prevcommit"]["rev"]
+        else:
+            code = "*no code*"
+            break
     return HttpResponse(code, mimetype="text/plain")
 
 
@@ -118,6 +129,7 @@ def reload(request, short_name):
 blankstartupcode = { 'scraper' : { 'python': "import scraperwiki\n\n# Blank Python\n\n", 
                                     'php':   "<?php\n\n# Blank PHP\n\n?>\n", 
                                     'ruby':  "# Blank Ruby\n\n",
+                                    'javascript': '// Blank Javascript scraper\n'
                                  }, 
                      'view'    : { 'python': "# Blank Python\nsourcescraper = ''\n", 
                                    'php':    "<?php\n# Blank PHP\n$sourcescraper = ''\n?>\n", 
@@ -147,11 +159,15 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
     draftscraper = request.session.get('ScraperDraft')
     if draftscraper and draftscraper.get('scraper') and (short_name == "__new__" or draftscraper.get('scraper').short_name == short_name):
         scraper = draftscraper.get('scraper')
+        
         context['code'] = draftscraper.get('code', ' missing')
         context['rev'] = 'draft'
         context['revdate'] = 'draft'
         context['revdateepoch'] = None
-    
+
+# Clear the session once we have loaded the data?
+#        del request.session['ScraperDraft'] 
+                
     # Load an existing scraper preference
     elif short_name != "__new__":
         try:
@@ -199,7 +215,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
             context['revuserrealname'] = revuser.username
         except AttributeError:
             context['revuserrealname'] = revuser.username
-        
+                
     # create a temporary scraper object
     else:
         if wiki_type == 'view':
@@ -208,7 +224,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
             scraper = models.Scraper()
 
         startupcode = blankstartupcode[wiki_type][language]
-
+        
         startuptemplate = request.GET.get('template') or request.GET.get('fork')
         if startuptemplate:
             try:
@@ -233,6 +249,7 @@ def edit(request, short_name='__new__', wiki_type='scraper', language='python'):
         
         scraper.language = language
         context['code'] = startupcode
+
 
     #if a source scraper has been set, then pass it to the page
     if scraper.wiki_type == 'view' and request.GET.get('sourcescraper'):

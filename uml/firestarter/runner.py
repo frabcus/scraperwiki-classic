@@ -43,7 +43,7 @@ config.readfp(open(configfile))
 def writereadstream(dhost, dport, jdata):
     soc_file = None
     
-    if jdata["language"] not in ["python", "php", "ruby"]:
+    if jdata["language"] not in ["python", "php", "ruby","javascript"]:
         sys.stdout.write(json.dumps({'message_type' : 'fail', 'content' : "no such language %s" % jdata["language"]}) + '\r\n')
         sys.stdout.flush()
         return 
@@ -97,7 +97,7 @@ def buildjdata(code, options, config):
     jdata["code"] = code.replace('\r', '')
     jdata["cpulimit"] = int(options.cpulimit)
     jdata["draft"] = options.draft
-    jdata["language"] = options.language
+    jdata["language"] = options.language.lower()
     jdata["scraperid"] = options.guid
     jdata["urlquery"] = options.urlquery
     jdata["scrapername"] = options.name

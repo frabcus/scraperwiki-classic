@@ -54,7 +54,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def ident(self, uml, port):
         runID      = None
-        short_name = None
+        short_name = ''
 
         # we will set host to either host of the uml or (if we have lxc_server set)
         # to the LXC server.
@@ -64,17 +64,18 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except:
             uml_host = None            
         
-        lxc = False
+        host = None
         try:
             host      = config.get("dataproxy", 'lxc_server')
-            lxc = True
+            uml_host = None
         except:
             host = None
-            uml_host = None
-            
+        self.logger.debug(str({"uml":uml, "uml_host":uml_host, "host":host}))
+        self.attachauthurl = config.get("dataproxy", 'attachauthurl')
+
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
-        if lxc and rem[0] == host[0:host.find(':')]:
+        if host and rem[0].startswith("10.0"):
             lident = urllib.urlopen ('http://%s/Ident?%s:%s' % (host, rem[0], loc[1])).read()               
         else:
             via    = config.get(uml, 'via' )
@@ -97,10 +98,10 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         sres = ''
         try:
             res = db.process(request)
+            sres = json.dumps(res)            
         except Exception, edb:
             self.logger.warning( str(edb) )
 
-        sres = json.dumps(res)            
         if sres:
             self.logger.debug(sres[:200])
         self.connection.sendall(sres+'\n')
@@ -116,6 +117,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             params = dict(cgi.parse_qsl(query))
 
             dataauth = None
+            attachables = params.get('attachables', '').split()
                     
             firstmessage = {"status":"good"}
             if 'short_name' in params:
@@ -135,7 +137,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 else:
                     dataauth = "writable"
 
-                self.logger.debug( '.%s.' % short_name)
+                self.logger.debug( '.%s.' % [short_name])
                     # send back identification so we can compare against it (sometimes it doesn't quite work out)
                 firstmessage["short_name"] = short_name
                 firstmessage["runID"] = runID
@@ -165,7 +167,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 return
             
             self.logger.debug("connection made to dataproxy for %s %s - %s" % (dataauth, short_name, runID))
-            db = datalib.SQLiteDatabase(self, config.get('dataproxy', 'resourcedir'), short_name, dataauth, runID)
+            db = datalib.SQLiteDatabase(self, config.get('dataproxy', 'resourcedir'), short_name, dataauth, runID, attachables)
 
                     # enter the loop that now waits for single requests (delimited by \n) 
                     # and sends back responses through a socket

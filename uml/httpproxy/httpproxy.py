@@ -106,11 +106,6 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         if allowAll :
             return True
 
-        # XXX Workaround - if ident failed then allow by default
-#        if not scraperID:
-#            print 'No scraperId'            
-#            return True
-
         allowed = False
         if re.match("http://127.0.0.1[/:]", path):
             allowed = True
@@ -224,6 +219,18 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         rem       = self.connection.getpeername()
         loc       = self.connection.getsockname()
 
+        # If the rem[0] IP address is in configuration as an open IP then we should just let it pass
+        # and return None,None,False
+        try:
+            print 'Looking for open addresses'
+            open_addresses = config.get(varName, 'open_addresses')
+            print 'Setting value is ', open_addresses, ' comparing ', rem[0]            
+            if open_addresses and rem[0] in open_addresses.split(','):
+                    return None,None,False
+        except Exception, e:
+            print e
+        
+
         #  If running as a transparent HTTP or HTTPS then the remote end is connecting
         #  to port 80 or 443 irrespective of where we think it is connecting to; for a
         #  non-transparent proxy use the actual port.
@@ -240,11 +247,13 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
         
         for attempt in range(5):
             try:
-                # If the connection comes form the lxc_server (that we know about form config)
+                # If the connection comes form the lxc_server (that we know about from config)
                 # then use it.
                 if lxc_server and '10.0' in rem[0]:
+                    print 'using LXC at ', lxc_server
                     ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s:%s' % (lxc_server, rem[0], rem[1], port)).read()
                 else:
+                    print 'Attempting old-style ident'
                     ident = urllib2.urlopen('http://%s:9001/Ident?%s:%s' % (rem[0], rem[1], port)).read()
                 if ident.strip() != "":
                     break
@@ -304,8 +313,18 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
             self.connection.close()
 
 
-    def notify (self, host, **query) :
-
+    def notify (self, sending_host, **query) :
+        # We don't to do this for open access IPs but it won;t hurt
+        try:
+            lxc_server = config.get(varName, 'lxc_server')
+        except:
+            lxc_server = None
+        
+        if lxc_server and '10.0' in sending_host:
+            host = lxc_server
+        else:
+            host = sending_host
+        
         query['message_type'] = 'sources'
         try    : urllib.urlopen ('http://%s:9001/Notify?%s'% (host, urllib.urlencode(query))).read()
         except : pass
@@ -594,7 +613,10 @@ class HTTPProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler) :
     def do_POST (self) :
         self.retrieve ("POST")
 
-#   do_HEAD   = do_GET
+    def do_HEAD(self):
+        self.retrieve ("HEAD")        
+
+    do_HEAD   = do_HEAD
     do_PUT    = do_POST
 #   do_DELETE = do_GET
 
@@ -665,6 +687,7 @@ class HTTPSProxyServer (HTTPProxyServer) :
     def __init__(self, server_address, HandlerClass):
 
         HTTPProxyServer.__init__(self, server_address, HandlerClass)
+        
         ctx = OpenSSL.SSL.Context(OpenSSL.SSL.SSLv23_METHOD)
         fpem = '/var/www/scraperwiki/uml/httpproxy/server.pem'
         ctx.use_privatekey_file (fpem)
@@ -675,6 +698,7 @@ class HTTPSProxyServer (HTTPProxyServer) :
                             )
         self.server_bind    ()
         self.server_activate()
+        
 
 
 def execute () :

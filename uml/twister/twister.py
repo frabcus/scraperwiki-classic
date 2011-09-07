@@ -55,88 +55,18 @@ from twisted.internet import protocol, utils, reactor, task
 
 # for calling back to the scrapers/twister/status
 from twisted.web.client import Agent, ResponseDone
+from twisted.web.http import PotentialDataLoss
 from twisted.web.http_headers import Headers
 from twisted.web.iweb import IBodyProducer
 from twisted.internet.defer import succeed, Deferred
-from twisted.internet.defer import Deferred
 from twisted.internet.error import ProcessDone
 
 from twisterscheduledruns import ScheduledRunMessageLoopHandler
+from twisterrunner import MakeRunner, jstime, SetControllerHost
+
+SetControllerHost(config)
 
 agent = Agent(reactor)
-
-def jstime(dt):
-    return str(1000*int(time.mktime(dt.timetuple()))+dt.microsecond/1000)
-
-class spawnRunner(protocol.ProcessProtocol):
-    
-    def __init__(self, client, code):
-        self.client = client
-        self.code = code
-        self.runID = None
-        self.umlname = ''
-        self.buffer = ''
-    
-    def connectionMade(self):
-        logger.debug("Starting run")
-        self.transport.write(self.code)
-        self.transport.closeStdin()
-    
-    # messages from the UML
-    def outReceived(self, data):
-        logger.debug("runner to client# %d %s" % (self.client.clientnumber, data[:100]))
-            # although the client can parse the records itself, it is necessary to split them up here correctly so that this code can insert its own records into the stream.
-        lines  = (self.buffer+data).split("\r\n")
-        self.buffer = lines.pop(-1)  # usually an empty
-        
-        for line in lines:
-            if not self.runID:  # intercept the first record to record its state and add in further data
-                parsed_data = json.loads(line)
-                if parsed_data.get('message_type') == 'executionstatus' and parsed_data.get('content') == 'startingrun':
-                    self.runID = parsed_data.get('runID')
-                    self.umlname = parsed_data.get('uml')
-                    parsed_data['chatname'] = self.client.chatname
-                    parsed_data['nowtime'] = jstime(datetime.datetime.now())
-                    line = json.dumps(parsed_data)  # inject values into the field
-            self.client.writeall(line)
-
-        # could move into a proper function in the client once slimmed down slightly
-    def processEnded(self, reason):
-        self.client.processrunning = None
-        self.client.writeall(json.dumps({'message_type':'executionstatus', 'content':'runfinished'}))
-        
-        if self.client.clienttype == "editing":
-            self.client.factory.notifyMonitoringClients(self.client)
-        elif self.client.clienttype == "scheduledrun":
-            self.client.scheduledrunmessageloophandler.schedulecompleted()
-            self.client.factory.scheduledruncomplete(self.client, reason.type==ProcessDone)
-
-        logger.debug("run process %s ended client# %d %s" % (self.client.clienttype, self.client.clientnumber, str([reason])))
-
-
-
-def MakeRunner(scrapername, guid, language, urlquery, username, code, client, user=None):
-    args = ['./firestarter/runner.py']
-    args.append('--guid=%s' % guid)
-    args.append('--language=%s' % language)
-    args.append('--name=%s' % scrapername)
-    args.append('--urlquery=%s' % urlquery)
-    try:
-        if user is not None and user.get('beta_user',False):
-            args.append('--beta_user')
-    except:
-        pas
-    if not username:
-        args.append('--draft')
-
-    code = code.encode('utf8')
-    args = [i.encode('utf8') for i in args]
-    logger.debug("./firestarter/runner.py: %s" % args)
-
-    # from here we should somehow get the runid
-    return reactor.spawnProcess(spawnRunner(client, code), './firestarter/runner.py', args, env={'PYTHON_EGG_CACHE' : '/tmp'})
-
-
 
 # There's one of these 'clients' per editor window open.  All connecting to same factory
 class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a LineReceiver?
@@ -187,10 +117,9 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         self.savecode_authorized = (parsed_data.get('savecode_authorized') == "yes")
         self.originalrev = parsed_data.get('originalrev', '')
         
+        logger.info("connection open %s: %s %s client# %d" % (self.clienttype, self.cchatname, self.scrapername, self.clientnumber)) 
             # this will cause a notifyEditorClients to be called for everyone on this scraper
         self.factory.clientConnectionRegistered(self)  
-        if self.clienttype == "editing":
-            logger.info("connection open: %s %s client# %d" % (self.cchatname, self.scrapername, self.clientnumber)) 
 
 
     def connectionLost(self, reason):
@@ -251,8 +180,6 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
                     for lclient in usereditor.userclients:
                         if lclient.clientnumber == clientnumber:
                             client = lclient
-            if client:
-                logger.info("stimulate on : %s %s client# %d" % (client.cchatname, client.scrapername, client.clientnumber))
 
             if parsed_data.get('django_key') != config.get('twister', 'djangokey'):
                 logger.error("djangokey_mismatch")
@@ -285,6 +212,7 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             self.guid = parsed_data.get("guid", '')
             if parsed_data.get('django_key') == config.get('twister', 'djangokey'):
                 self.clienttype = "rpcrunning"
+                logger.info("connection open %s: %s %s client# %d" % (self.clienttype, self.username, self.scrapername, self.clientnumber)) 
                 self.factory.clientConnectionRegistered(self)  
                 self.runcode(parsed_data)
                     # termination is by the calling function when it receives an executionstatus runfinished message
@@ -414,9 +342,9 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
 
         # this message helps kill it better and killing it from the browser end
         elif command == 'loseconnection':
-			# Suspect it is possible in some cases that the client sends this command, and before
-			# we have had a chance to close the connection from here, the client has already gone.
-			# To cover this case let's handle the exception here and log that loseConnection failed
+            # Suspect it is possible in some cases that the client sends this command, and before
+            # we have had a chance to close the connection from here, the client has already gone.
+            # To cover this case let's handle the exception here and log that loseConnection failed
             try:
                 self.transport.loseConnection()
             except: 
@@ -458,10 +386,15 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
             msg = "%s (%s)" % (msg, reason)
         self.writeall(json.dumps({'message_type':'executionstatus', 'content':'killsignal', 'message':msg}))
         logger.debug(msg)
-        try:      # (should kill using the new dispatcher call)
-            os.kill(self.processrunning.pid, signal.SIGKILL)
-        except:
-            pass
+        if self.processrunning.pid == "NewSpawnRunner":
+            logger.debug("LosingConnectionNewWay "+self.processrunning.pid)
+            if hasattr(self.processrunning, 'controllerconnection'):
+                self.processrunning.controllerconnection.transport.loseConnection()
+        else:
+            try:      # (should kill using the new dispatcher call)
+                os.kill(self.processrunning.pid, signal.SIGKILL)
+            except:
+                pass
 
     
             # this more recently can be called from stimulate_run from django (many of these parameters could be in the client)
@@ -473,10 +406,10 @@ class RunnerProtocol(protocol.Protocol):  # Question: should this actually be a 
         urlquery = parsed_data.get('urlquery', '')
         username = parsed_data.get('username', '')
         user = parsed_data.get('user', None)
-        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, user=user)
+        self.processrunning = MakeRunner(scrapername, guid, scraperlanguage, urlquery, username, code, self, logger, user=user)
         self.factory.notifyMonitoringClients(self)
         
-
+        
 class UserEditorsOnOneScraper:
     def __init__(self, client, lusersessionpriority):
         self.username = client.username 
@@ -583,7 +516,6 @@ class EditorsOnOneScraper:
         return len(self.anonymouseditors) + sum([len(usereditor.userclients)  for usereditor in self.usereditormap.values()])
 
 
-apiurl = "http://localhost:8010"  # should be in config
 class requestoverduescrapersReceiver(protocol.Protocol):
     def __init__(self, finished, factory):
         self.finished = finished
@@ -594,16 +526,17 @@ class requestoverduescrapersReceiver(protocol.Protocol):
         self.rbuffer.append(bytes)
         
     def connectionLost(self, reason):
-        if reason.type == ResponseDone:
+        if reason.type in [ResponseDone, PotentialDataLoss]:
             try:
                 jdata = json.loads("".join(self.rbuffer))
+                if "language" in jdata:
+                    jdata["language"] = jdata["language"].lower()
                 self.factory.requestoverduescrapersAction(jdata)
             except ValueError:
-                logger.warning("request overdue bad json: "+str(self.rbuffer))
+                logger.warning("request overdue bad json: "+str(self.rbuffer)[:1000]+" "+str(reason.type))
         else:
-            logger.warning("nope "+str([reason.getErrorMessage(), reason.type]))
+            logger.warning("nope "+str([reason.getErrorMessage(), reason.type, self.rbuffer]))
         self.finished.callback(None)
-
 
         
 
@@ -628,9 +561,8 @@ class RunnerFactory(protocol.ServerFactory):
         self.notifiedmaxscheduledscrapers = self.maxscheduledscrapers
 
         # set the visible heartbeat going which is used to call back and look up the schedulers
-        #*** UNCOMMENT THIS to enable new type of scheduling
-        #self.lc = task.LoopingCall(self.requestoverduescrapers)
-        #self.lc.start(30)
+        self.lc = task.LoopingCall(self.requestoverduescrapers)
+        self.lc.start(30)
         
     #
     # system of functions for fetching the overdue scrapers and knocking them out
@@ -639,6 +571,7 @@ class RunnerFactory(protocol.ServerFactory):
         logger.info("requestoverduescrapers")
         uget = {"format":"jsondict", "searchquery":"*OVERDUE*", "maxrows":self.maxscheduledscrapers+5}
         url = urlparse.urljoin(config.get("twister", "apiurl"), '/api/1.0/scraper/search')
+        logger.info("API URL: " + url + " with params " + urllib.urlencode(uget) )        
         d = agent.request('GET', "%s?%s" % (url, urllib.urlencode(uget)))
         d.addCallbacks(self.requestoverduescrapersResponse, self.requestoverduescrapersFailure)
 
@@ -680,11 +613,11 @@ class RunnerFactory(protocol.ServerFactory):
             self.scheduledrunners[scrapername] = sclient
             djangokey = config.get("twister", "djangokey")
             djangourl = config.get("twister", "djangourl")
-            sclient.scheduledrunmessageloophandler = ScheduledRunMessageLoopHandler(sclient, logging, djangokey, djangourl, agent)
+            sclient.scheduledrunmessageloophandler = ScheduledRunMessageLoopHandler(sclient, logger, djangokey, djangourl, agent)
             self.clientConnectionRegistered(sclient)  
 
             logger.info("starting off scheduled client: %s %s client# %d" % (sclient.cchatname, sclient.scrapername, sclient.clientnumber)) 
-            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient)
+            sclient.processrunning = MakeRunner(sclient.scrapername, sclient.guid, sclient.scraperlanguage, urlquery, sclient.username, code, sclient, logger)
             self.notifyMonitoringClients(sclient)
 
 

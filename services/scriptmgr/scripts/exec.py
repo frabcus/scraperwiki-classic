@@ -6,6 +6,7 @@ import  socket
 import  signal
 import  string
 import  time
+import  resource
 import  urllib2, urllib
 import  optparse
 import  scraperwiki
@@ -38,13 +39,22 @@ class ConsoleStream:
         if self.m_text:
             scraperwiki.dumpMessage({'message_type': 'console', 'content': self.m_text})
             self.m_text = ''
-
+            self.m_fd.flush()
+            
     def close(self):
         self.m_fd.close()
 
     def fileno(self):
         return self.m_fd.fileno()
 
+
+# Make sure we have unbuffered outputs
+#sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+#sys.stderr = os.fdopen(sys.stderr.fileno(), 'w', 0)
+
+scraperwiki.logfd = sys.stderr
+sys.stdout = ConsoleStream(scraperwiki.logfd)
+sys.stderr = ConsoleStream(scraperwiki.logfd)
 
 parser = optparse.OptionParser()
 parser.add_option("--script", metavar="name")    # not the scraper name, this is tmp file name which we load and execute
@@ -67,14 +77,9 @@ if options.path:
 host, port = string.split(options.ds, ':')
 scraperwiki.datastore.create(host, port, options.scrapername or "", options.runid)
 
-scraperwiki.logfd = sys.stderr
 
-#sys.stdout = ConsoleStream(sys.stdout)
-#sys.stderr = ConsoleStream(sys.stderr)
-#sys.stderr = ConsoleStream(os.fdopen(2, 'w', 0))
 
-# in the future can divert to webproxy
-#scraperwiki.utils.urllibSetup(http_proxy='http://127.0.0.1:9002')
+resource.setrlimit(resource.RLIMIT_CPU, (80, 82,))
 
 #  Set up a CPU time limit handler which simply throws a python so it can be handled cleanly before the hard limit is reached
 def sigXCPU(signum, frame) :
