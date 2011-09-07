@@ -21,9 +21,9 @@ for ($idx = 1; $idx < count($argv); $idx += 1)
 {
    $arg  = $argv[$idx] ;
 
-   if (substr($arg, 0, 5) == '--gi=')
+   if (substr($arg, 0, 5) == '--qs=')
    {
-      $qs = substr($arg,  6);
+      $qs = substr($arg,  5);
 	  if ( strlen($qs) > 0 ) {
 		setenv("QUERY_STRING", $qs);
 		setenv("URLQUERY", $qs);

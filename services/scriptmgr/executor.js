@@ -127,7 +127,7 @@ exports.get_details = function(details) {
 		util.log.debug('Looking for ip ' + details.ip + ' in ' + scripts_ip);
 		return scripts_ip[details.ip];
 	} else if ( details.runid ) {
-		util.log.debug('Looking for ip ' + details.runid + ' in ' + scripts);		
+		util.log.debug('Looking for runid ' + details.runid + ' in ' + scripts);		
 		return scripts[details.runid];
 	}
 	
