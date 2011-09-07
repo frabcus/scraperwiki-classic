@@ -321,15 +321,14 @@ function execute(http_req, http_res, raw_request_data) {
 				args.push( script.scraper_name);
 			}
 			
+			util.log.debug( 'QUERYSTRING is ' + script.query);
 			if (script.query) {
-//				args.push(script.query);
-				args.push('xxx');				
+				args.push(script.query);
 			}
 			
 			util.log.debug(args)
 			
 	 		e = spawn('/usr/bin/lxc-execute', args );
-			
 			
 			// json_msg = json.dumps({'message_type': 'executionstatus', 'content': 'startingrun', 'runID': runID, 'uml': scraperstatus["uname"]})
 			
