@@ -103,7 +103,7 @@ rescue Exception => e
     est = getExceptionTraceback(e, code)
     # for debugging:
     # File.open("/tmp/fairuby", 'a') {|f| f.write(JSON.generate(est)) }
-    $logfd.write(JSON.generate(est) + "\n")
+    ScraperWiki.dumpMessage(est)
 end
 
 $stdout.flush
