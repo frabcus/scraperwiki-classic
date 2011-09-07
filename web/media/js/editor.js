@@ -688,16 +688,16 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             // this is when running a draft scraper
         else
         {
-            sendjson(data); 
-// should autosave if we have changed the name!
+            sendjson(data);  // old way of running, directly into twister without stimulate_run
             autosavefunction(code, null); 
         }
     }
 
     function autosavefunction(code, stimulate_run)
     {
-        // do a save to the system every time we run (this would better be done via twisted at some point)
         var automode = $('input#automode').val(); 
+
+            // saves back to django which in turn can stimulate a run in twister
         if (automode == 'autosave')
         {
             if (pageIsDirty)
@@ -711,6 +711,15 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             else if (stimulate_run == "editorstimulaterun")
                 saveScraper("editorstimulaterun_nosave"); 
         }
+            
+            // save the scraper if draft mode and we have changed the title
+            // see ticket 564
+        /*else if (automode == 'draft')
+        {
+            if (shortNameIsSet())
+                saveScraper(false); 
+        }*/
+
         //else if (stimulate_run == "editorstimulaterun")
         //    saveScraper("editorstimulaterun_nosave"); 
     } 
