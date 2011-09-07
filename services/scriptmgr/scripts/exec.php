@@ -6,6 +6,7 @@ foreach (split(':', getenv('PHPPATH')) as $dir)
     ini_set('include_path',  ini_get('include_path') . PATH_SEPARATOR . $dir) ;
 
 $logfd = STDOUT; // fopen("php://fd/3", "w") ;
+$STDERR = STDOUT;
 
 require_once 'scraperwiki.php';
 require_once 'scraperwiki/datastore.php';

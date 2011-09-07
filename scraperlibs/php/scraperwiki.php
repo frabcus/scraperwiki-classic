@@ -3,12 +3,6 @@
 require_once   ('scraperwiki/datastore.php') ;
 require_once   ('scraperwiki/stacktrace.php' ) ;
 
-rename_function('print', 'new_print');
-override_function('print', '$string', 'return override_print($string);');
-function override_print($string){
-   new_print("X" . $string . "X");
-}
-
 class scraperwiki
 {
    private static $attachlist = array();
