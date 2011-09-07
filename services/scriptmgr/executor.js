@@ -229,7 +229,11 @@ function execute(http_req, http_res, raw_request_data) {
 				exe = './scripts/exec.' + util.extension_for_language(script.language);
 
 				var startTime = new Date();
-				var environ = util.env_for_language(script.language, extra_path) 
+				var environ = util.env_for_language(script.language, extra_path);
+				
+				if (scraper.query)
+					environ['QUERY_STRING'] = scraper.query;
+				
 				if (httpproxy) {
 					environ['http_proxy'] = 'http://' + httpproxy;
 				};
@@ -311,7 +315,16 @@ function execute(http_req, http_res, raw_request_data) {
 			r = script.run_id.replace(/\|/g, "\\|");
 
 			util.log.debug('Setting runid to ' + r );
-			args = [ '-n', rVM, '-f', cfgpath, "/home/startup/run" + extension + ".sh",dataproxy, r ]
+			args = [ '-n', rVM, '-f', cfgpath];
+			if (scraper.query)
+				args.push('QUERY_STRING=' + scraper.query);
+			args.push("/home/startup/run" + extension + ".sh");
+			args.push(dataproxy);
+			args.push( r );
+			
+			util.log.debug('Using args');
+			util.log.debug(args);
+			
 			if ( script.scraper_name && script.scraper_name.length > 0 ) {
 				args.push( script.scraper_name);
 			}
