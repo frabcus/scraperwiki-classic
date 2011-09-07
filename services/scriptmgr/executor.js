@@ -319,12 +319,15 @@ function execute(http_req, http_res, raw_request_data) {
 						
 			if ( script.scraper_name && script.scraper_name.length > 0 ) {
 				args.push( script.scraper_name);
+			} else {
+				args.push( ' ' );
 			}
 			
 			util.log.debug( 'QUERYSTRING is ' + script.query);
 			if (script.query) {
-				// ask julian about encoding to see if it is encoded anywhere?
-				args.push(script.query.replace('=','\\='));
+				args.push( script.query );
+			} else {
+				args.push( ' ' );
 			}
 			
 			util.log.debug(args)
