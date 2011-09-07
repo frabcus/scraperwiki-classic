@@ -75,7 +75,7 @@ if options.path:
     sys.path.append( options.path )
 if options.qs:
     os.environ['QUERY_STRING'] = options.qs
-    os.environ['URL_QUERY'] = options.qs    
+    os.environ['URLQUERY'] = options.qs    
 
 
 host, port = string.split(options.ds, ':')

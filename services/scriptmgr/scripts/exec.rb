@@ -84,6 +84,10 @@ OptionParser.new do|opts|
    opts.on( '--scrapername=[SCRAPERNAME]') do|scrapername|
      options[:scrapername] = scrapername
    end
+   opts.on( '--qs=[QSTRING]') do|qstring|
+     ENV['QUERY_STRING'] = qstring
+     ENV['URLQUERY'] = qstring
+   end   
    opts.on( '--runid=[RUNID]') do|runid|
      options[:runid] = runid
    end
