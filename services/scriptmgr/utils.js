@@ -16,7 +16,7 @@ exports.write_to_caller = function(http_res, output) {
 		http_res.jsonbuffer = [];
 		
 	var msg = output.toString();
-	var parts = msg.split("\n");	
+	var parts = msg.split("\n");		
     http_res.jsonbuffer.push(parts.shift());
 
 	logger.debug("WTC:1:" +  msg );

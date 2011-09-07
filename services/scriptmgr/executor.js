@@ -355,7 +355,9 @@ function execute(http_req, http_res, raw_request_data) {
 				//Everything we receive here is from PHP or from launched apps so we 
 				var m = data.toString().match(/^JSONRECORD\((\d+)\)/);
 				if ( m == null ) {
-					util.write_to_caller( resp, JSON.stringify( {'message_type': 'console', 'content': data.toString()} ) + "\n" );
+					var partial = JSON.stringify( {'message_type': 'console', 'content': data.toString()} );
+					partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";					
+					util.write_to_caller( resp, partial );
 				} else {
 					util.write_to_caller( resp, data.toString() );
 				}
