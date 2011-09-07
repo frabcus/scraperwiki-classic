@@ -37,7 +37,7 @@ class ConsoleStream:
 
     def flush(self) :
         if self.m_text:
-            scraperwiki.dumpMessage({'message_type': 'console', 'content': self.m_text, 'debug': 'flushed'})
+            scraperwiki.dumpMessage({'message_type': 'console', 'content': self.m_text})
             self.m_text = ''
             self.m_fd.flush()
             

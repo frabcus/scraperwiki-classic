@@ -47,8 +47,7 @@ class ConsoleStream
 
     def flush
       if @text != ''
-          message = { 'message_type' => 'console', 'content' => @text }
-          @fd.write(JSON.generate(message) + "\n")
+          ScraperWiki.dumpMessage( { 'message_type' => 'console', 'content' => @text }  )
           @fd.flush
           @text = ''
       end

@@ -106,7 +106,15 @@ exports.script_info = function(response) {
 	util.log.debug("+ Returning script info");	
     for(var runID in scripts) {
 		var script = scripts[runID];
-		response.write( JSON.stringify(script) + "\n");
+		var cloned = {
+			run_id: script.run_id,
+			scraper_name : script.scraper_name,
+			scraper_guid : script.scraperid,
+			vm: script.vm || "",
+			language: script.language,
+			ip: script.ip
+		}
+		response.write( JSON.stringify(cloned) + "\n");
 	}	
 }
 
@@ -326,10 +334,11 @@ function execute(http_req, http_res, raw_request_data) {
 			
 			var resp = http_res;
 			
-//			e.stdout.on('data', function (data) {
-//				.....
-//				util.write_to_caller( resp, data);
-//			});				
+			e.stdout.on('data', function (data) {
+				//Everything we receive here is from PHP or from launched apps so we 
+				// should wrap whatever we have and send it 
+				util.write_to_caller( resp, JSON.stringify( {'message_type': 'console', 'content': data } ) + "\n");
+			});				
 			
 			
 			e.stderr.on('data', function (data) {
