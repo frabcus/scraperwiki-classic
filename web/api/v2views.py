@@ -506,19 +506,20 @@ def scraperinfo(scraper, history_start_date, quietfields, rev):
         info['code'] = status["code"]
     
     for committag in ["currcommit", "prevcommit", "nextcommit"]:
-        if committag in status:
-            info[committag] = convert_history(status[committag])
+        if committag not in quietfields:
+            if committag in status:
+                info[committag] = convert_history(status[committag])
     
     if "currcommit" not in status and "prevcommit" in status and not status["ismodified"]:
         if 'filemodifieddate' in status:
             info["modifiedcommitdifference"] = str(status["filemodifieddate"] - status["prevcommit"]["date"])
             info['filemodifieddate'] = status['filemodifieddate'].isoformat()
 
-    if history_start_date:
+    if 'history' not in quietfields:
         history = [ ]
         commitentries = scraper.get_commit_log()
         for commitentry in commitentries:
-            if commitentry['date'] < history_start_date:
+            if history_start_date and commitentry['date'] < history_start_date:
                 continue
             history.append(convert_history(commitentry))
         history.reverse()
