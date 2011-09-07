@@ -33,6 +33,7 @@ _routemap = {
 	'/Execute'   : handleRun,
 	'/Kill'  : handleKill,
 	'/Status': handleStatus,
+	'/ScriptInfo': handleScriptInfo,	
 	'/Ident' : handleIdent,
 	'/Notify': handleNotify,
 	'/'      : handleUrlError,
@@ -70,7 +71,7 @@ if (settings.devmode) {
 // Handle uncaught exceptions and make sure they get logged
 process.on('uncaughtException', function (err) {
   util.log.fatal('Caught exception: ' + err);
-console.log( err.stack );
+  if ( settings.devmode ) console.log( err.stack );
 });
 
 
@@ -124,6 +125,14 @@ function handleKill(req,res) {
 function handleStatus(req,res) {
 	
 	exec.get_status(res);
+	res.end('');	
+}
+
+/******************************************************************************
+* Returns information on all of the scrapers currently running
+******************************************************************************/
+function handleScriptInfo(req,res) {
+	exec.script_info(res);
 	res.end('');	
 }
 

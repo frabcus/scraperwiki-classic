@@ -137,7 +137,6 @@ function create_vm ( name ) {
 		    if(err) {
 		        sys.puts(err);
 		    } else {
-				console.log('Running lxc-create')
 				// call lxc-create -n name -f folder/config
 			 	e = spawn('/usr/bin/lxc-create', ['-n', name, '-f', tgt]);
 				e.on('exit', function (code, signal) {
@@ -150,8 +149,7 @@ function create_vm ( name ) {
 		    }
 		});
 					
-		tgt = path.join( folder, 'fstab')
-		console.log('Writing fstab to ' + tgt);	
+		tgt = path.join( folder, 'fstab');
 		fs.writeFile(tgt, fstab, function(err) {
 		    if(err) {
 		        sys.puts(err);
@@ -170,11 +168,10 @@ function create_vm ( name ) {
 *****************************************************************************/
 exports.release_vm = function( script, name ) {
 
-	console.log('Attempting to release ' + name);
+	util.log.debug('Releasing ' + name);
 	var v = vms[name];
 	if ( ! v ) return;
 
-	console.log('Releasing ' + v.name );
 	// Remove it from the two lookup tables
 	delete vms_by_runid[ v.script.run_id ]
 	delete vms_by_ip[ v.script.ip ]
@@ -203,7 +200,6 @@ function allocate_vm ( script ) {
 	var v;
 	
 	for ( var k in vms ) {
-		console.log('Looking up key ' + k )
 		v = vms[k];
 		if ( v.running == false ) {
 			break;
@@ -216,6 +212,6 @@ function allocate_vm ( script ) {
 	v.script = script;
 	vms[v.name] = v;
 	
-	console.log('Allocating ' + v.name );	
+	util.log.debug('Allocating ' + v.name );	
 	return v.name;
 }

@@ -97,6 +97,19 @@ exports.get_status = function(response) {
 	}	
 }
 
+
+/******************************************************************************
+* Displays what we know about all of the current scripts that are running, 
+* if any as a HTML display
+******************************************************************************/
+exports.script_info = function(response) {
+	util.log.debug("+ Returning script info");	
+    for(var runID in scripts) {
+		var script = scripts[runID];
+		response.write( JSON.stringify(script) + "\n");
+	}	
+}
+
 /******************************************************************************
 * 
 * 
@@ -167,7 +180,7 @@ function execute(http_req, http_res, raw_request_data) {
 		util.dumpError( err );
 	}
 	
-	script = { run_id : request_data.runid, 
+	var script = { run_id : request_data.runid, 
 			 	scraper_name : request_data.scrapername || "",
 			    scraper_guid : request_data.scraperid,
 			 	query : request_data.urlquery, 
@@ -268,7 +281,7 @@ function execute(http_req, http_res, raw_request_data) {
 			http_res.end( JSON.stringify(r) );
 			return;				
 		}
-		console.log( 'Running on ' + res );		
+		util.log.debug( 'Running on ' + res );		
 				
 		var extension = util.extension_for_language(script.language);
 		var tmpfile = path.join(lxc.code_folder(res), "script." + extension );
@@ -314,6 +327,7 @@ function execute(http_req, http_res, raw_request_data) {
 			var resp = http_res;
 			
 //			e.stdout.on('data', function (data) {
+//				.....
 //				util.write_to_caller( resp, data);
 //			});				
 			
