@@ -361,11 +361,11 @@ function execute(http_req, http_res, raw_request_data) {
 					if ( s && typeof(s) == 'object' ) {					
 						stringified = data.toString();
 					}
-					throw "Invalid JSON"
+					throw "Invalid JSON : " + typeof(s);
 				}
 				catch(err) {
-					util.log.debug( err );
-					util.log.debug('Not JSON so encoding:' + err);					
+					util.log.debug( err + " + " + data.toString());
+					util.log.debug('Not JSON so encoding:' + data.toString());					
 					stringified = JSON.stringify( {'message_type': 'console', 'content': data.toString() } );											
 				}
 
