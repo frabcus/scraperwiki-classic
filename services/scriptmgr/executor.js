@@ -323,7 +323,8 @@ function execute(http_req, http_res, raw_request_data) {
 			
 			util.log.debug( 'QUERYSTRING is ' + script.query);
 			if (script.query) {
-				args.push(script.query);
+				// ask julian about encoding to see if it is encoded anywhere?
+				args.push(script.query.replace('=','\\='));
 			}
 			
 			util.log.debug(args)
