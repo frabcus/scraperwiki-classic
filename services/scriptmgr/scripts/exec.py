@@ -63,6 +63,7 @@ parser.add_option("--gid")    # nogroup
 parser.add_option("--uid")    # nobody
 parser.add_option("--scrapername")
 parser.add_option("--runid")
+parser.add_option("--qs")
 parser.add_option("--path")
 options, args = parser.parse_args()
 

@@ -7,6 +7,7 @@ var options = [
   {  long        : 'gid', value : true  },
   {  long        : 'uid', value : true  },
   {  long        : 'scrapername', value : true  },
+  {  long        : 'qs', value : true  },
   {  long        : 'runid', value : true  },
   {  long        : 'path', value : true  }
 ];
