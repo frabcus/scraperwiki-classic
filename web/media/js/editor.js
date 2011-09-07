@@ -18,6 +18,7 @@ $(document).ready(function() {
     var username = $('#username').val(); 
     var userrealname = $('#userrealname').val(); 
     var isstaff = $('#isstaff').val(); 
+    var beta_user = $('#beta_user').val(); 
     var scraperlanguage = $('#scraperlanguage').val(); 
     var run_type = $('#code_running_mode').val();
     var codemirror_url = $('#codemirror_url').val();
@@ -650,7 +651,6 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
     //send code request run
     function sendCode() 
-
     {
         if (!$('.editor_controls #run').length || $('.editor_controls #run').attr('disabled'))
             return; 
@@ -670,6 +670,7 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
             "guid"      : guid,
             "username"  : username, 
             "userrealname" : userrealname, 
+            "beta_user" : beta_user, 
             "language"  : scraperlanguage, 
             "scrapername":short_name,
             "code"      : code,
@@ -679,11 +680,16 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
         $('.editor_controls #run').val('Sending');
         $('.editor_controls #run').unbind('click.run'); // prevent a second call to it
+
+            // this is when running a named scraper, who's run is done back through django
         if (guid)
             autosavefunction(code, "editorstimulaterun"); 
+            
+            // this is when running a draft scraper
         else
         {
             sendjson(data); 
+// should autosave if we have changed the name!
             autosavefunction(code, null); 
         }
     }
@@ -786,6 +792,9 @@ writeToChat("<b>requestededitcontrol: "+data.username+ " has requested edit cont
 
         if (boutputstatus)  // first time
         {
+            if (beta_user)
+                writeToChat('<i>You are a beta_user</i>'); 
+                
             stext = [ ]; 
             stext.push("Editing began " + swtimeago(earliesteditor, servernowtime) + " ago, last touched " + swtimeago(lasttouchedtime, servernowtime) + " ago.  You are client#"+clientnumber); 
             $('.editor_controls #run').attr('disabled', false);  // enable now we have identity (this gets disabled lower down if we lack the permissions)
