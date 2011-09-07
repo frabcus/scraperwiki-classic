@@ -85,7 +85,7 @@ class ProxyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.logger.debug("LIDENT: %s" % (lident,) )                                
         for line in lident.split('\n'):
             if line:
-                key, value = line.split('=',2)
+                key, value = line.split('=',1)
                 if key == 'runid':
                     runID = value
                 elif key == 'scrapername':
