@@ -380,7 +380,7 @@ function execute(http_req, http_res, raw_request_data) {
 
 				// If we have something left in the buffer we really should flush it about
 				// now. Suspect this will only be PHP
-				if ( local_script.response.jsonbuffer.length > 0 ) {
+				if ( local_script.response.jsonbuffer && local_script.response.jsonbuffer.length > 0 ) {
 					util.log.debug('We still have something left in the buffer');
 					util.log.debug( local_script.response.jsonbuffer );
 				
