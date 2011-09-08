@@ -378,11 +378,21 @@ function execute(http_req, http_res, raw_request_data) {
 				elapsed = (endTime - startTime) / 1000;
 				util.log.debug('Elapsed' + elapsed );
 
-				// If we have something left in the buffer which doesn't looks like JSON
-				// then send it and encode it....
+				// If we have something left in the buffer we really should flush it about
+				// now. Suspect this will only be PHP
 				if ( local_script.response.jsonbuffer.length > 0 ) {
 					util.log.debug('We still have something left in the buffer');
 					util.log.debug( local_script.response.jsonbuffer );
+				
+					var left = local_script.response.jsonbuffer.join("");
+					var m = left.toString().match(/^JSONRECORD\((\d+)\)/);
+					if ( m == null ) {
+						var partial = JSON.stringify( {'message_type': 'console', 'content': data.toString()} );
+						partial = "JSONRECORD(" + partial.length.toString() + "):" + partial + "\n";					
+						util.write_to_caller( resp, partial );
+					} else {
+						util.write_to_caller( resp, data.toString() );
+					}					
 				}
 
 				// 'CPU_seconds': 1, Temporarily removed
