@@ -81,7 +81,7 @@ function errorHandler($errno, $errstr, $errfile, $errline)
 {
     global $script; 
     $etb = errorParser($errno, $errstr, $errfile, $errline, $script); 
-    print "ERROR:HANDLER;
+    print "ERROR:HANDLER";
     scraperwiki::sw_dumpMessage($etb); 
     return true; 
 }
