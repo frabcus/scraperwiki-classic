@@ -84,10 +84,10 @@ count   = 25
 
 
 [loggers]
-keys=root,dataproxy,controller,runner,dispatcher,twister,proxy,django
+keys=root,dataproxy,controller,runner,dispatcher,twister,proxy
 
 [handlers]
-keys=consoleHandler,logfileHandlerWarnings,logfileHandlerEmail,logfileHandlerDataproxyDebug,logfileHandlerControllerDebug,logfileHandlerDispatcherDebug,logfileHandlerRunnerDebug,logfileHandlerTwisterDebug,logfileHandlerProxyDebug,logfileHandlerDjangoDebug
+keys=consoleHandler,logfileHandlerWarnings,logfileHandlerEmail,logfileHandlerDataproxyDebug,logfileHandlerControllerDebug,logfileHandlerDispatcherDebug,logfileHandlerRunnerDebug,logfileHandlerTwisterDebug,logfileHandlerProxyDebug
 
 [formatters]
 keys=simpleFormatter
@@ -131,12 +131,6 @@ propagate=0
 level=DEBUG
 handlers=logfileHandlerProxyDebug,logfileHandlerWarnings
 qualname=proxy
-propagate=0
-
-[logger_django]
-level=DEBUG
-handlers=logfileHandlerDjangoDebug,logfileHandlerWarnings
-qualname=django
 propagate=0
 
 [handler_consoleHandler]
@@ -193,13 +187,6 @@ class=handlers.ConcurrentRotatingFileHandler
 level=DEBUG
 formatter=simpleFormatter
 args=('/var/log/scraperwiki/proxy.log', "a", 1000000000, 5)
-
-[handler_logfileHandlerDjangoDebug]
-class=handlers.ConcurrentRotatingFileHandler
-level=DEBUG
-formatter=simpleFormatter
-args=('/var/log/scraperwiki/django.log', "a", 1000000000, 5)
-
 
 [formatter_simpleFormatter]
 format=%(asctime)s %(filename)s:%(lineno)s %(levelname)s: %(message)s
