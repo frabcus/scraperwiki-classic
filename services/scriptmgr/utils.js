@@ -51,7 +51,7 @@ exports.write_to_caller = function(http_res, output) {
 			var m = element.toString().match(/^JSONRECORD\(\d+\)/);
 			if ( m == null ) {
 				var partial = JSON.stringify( {'message_type': 'console', 'content': element.toString()} ) + "\n";
-				http_res.write( resp, partial );
+				http_res.write( partial );
 				http_res.jsonbuffer = [parts.shift()]; // reset the buffer
 			} else {
 				http_res.jsonbuffer.push( parts.shift() );		
