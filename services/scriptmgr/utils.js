@@ -36,10 +36,11 @@ exports.write_to_caller = function(http_res, output) {
 			logger.debug("WTC:5:TAG:" + rp[0]  );	
 			
 			logger.debug("C: " + element.slice(rp[0].length + 1).length + " " + size);
-			
+
 			// if the text after JSONRECORD(x): is the length we expect, then write it
 			if ( element.slice(rp[0].length + 1).length == size ) {
 				// we have valid data to write to the client
+				util.log.debug('ABOUT TO WRITE:' + element.slice(rp[0].length + 1) + ":");
 				http_res.write( element.slice(rp[0].length + 1) + "\n");
 				http_res.jsonbuffer = [parts.shift()];			
 			} else {
