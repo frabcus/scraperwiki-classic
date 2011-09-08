@@ -93,7 +93,17 @@ class ScheduledRunMessageLoopHandler:
         if bfinished:
             self.upost["exitstatus"] = self.exceptionmessage and 'exceptionmessage' or 'done'
             self.upost["domainscrapes"] = json.dumps(self.domainscrapes)
-        d = self.agent.request('POST', url, Headers(), StringProducer(urllib.urlencode(self.upost)))
+
+        # urllib.urlencode applies str() to each value in the list, which is dumb.
+        # to get a proper error, print some chinese characters
+        # need to get an explanation for this design of urlencode
+        lupost = self.upost.copy()
+        for key in lupost:
+            if type(lupost[key]) == unicode:
+                lupost[key] = lupost[key].encode("utf8")
+        ulupost = urllib.urlencode(lupost)
+        
+        d = self.agent.request('POST', url, Headers(), StringProducer(ulupost))
         d.addCallbacks(self.updaterunobjectResponse, self.updaterunobjectFailure)
         
     def receiveline(self, line):
